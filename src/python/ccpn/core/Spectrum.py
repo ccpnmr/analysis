@@ -1224,11 +1224,8 @@ class Spectrum(AbstractWrapperObject):
             raise RuntimeError('Currently this method only works for 1D spectra')
 
         if self._intensities is None:
-            self.getSliceData()
-
-        if self._intensities is None:
-            getLogger().warning('Unable to get 1D slice data for %s' % self)
-
+            self._intensities = self.getSliceData()  # Assignment is Redundant as getSliceData does that;
+                                                     # Nevertheless for clarity
         # # store the unscaled value internally so need to multiply the return value again
         # if self.getSliceData() is  None:
         #     return np.array([0]*len(self.positions))
@@ -1421,253 +1418,11 @@ class Spectrum(AbstractWrapperObject):
 
         return axisOrder
 
-    def getHeight(self, ppmPositions):
-        """Returns the interpolated height at the ppm position
-        """
-        ref = self.mainSpectrumReferences
-
-        if len(ppmPositions) != self.dimensionCount:
-            raise ValueError("Length of %s does not match number of dimensions." % str(ppmPositions))
-        if not all(isinstance(dimVal, (int, float)) for dimVal in ppmPositions):
-            raise ValueError("ppmPositions values must be floats.")
-
-        pointPosition = tuple(ref[dim].valueToPoint(ppm) for dim, ppm in enumerate(ppmPositions))
-        return self.getPositionValue(pointPosition)
-
-    def getPositionValue(self, pointPosition):
-        """Return the value nearest to the position given in points.
-        """
-        if len(pointPosition) != self.dimensionCount:
-            raise ValueError("Length of %s does not match number of dimensions." % str(pointPosition))
-        if not all(isinstance(dimVal, (int, float)) for dimVal in pointPosition):
-            raise ValueError("position values must be floats.")
-
-        scale = self.scale if self.scale is not None else 1.0
-        if self.scale == 0.0:
-            getLogger().warning('Scaling "%s" by 0.0!' % self)
-
-        pointPosition = self._apiDataSource.getPositionValue(pointPosition)
-        return pointPosition * scale if pointPosition else None
-
-    @cached(_SLICE1DDATACACHE, maxItems=1, debug=False)
-    def _get1DSliceData(self, position, sliceDim: int):
-        """Internal routine to get 1D sliceData;
-        """
-        return self._apiDataSource.getSliceData(position=position, sliceDim=sliceDim)
-
-    @cached(_SLICEDATACACHE, maxItems=1024, debug=False)
-    def _getSliceDataFromPlane(self, position, xDim: int, yDim: int, sliceDim: int):
-        """Internal routine to get sliceData; optimised to use (buffered) getPlaneData
-        CCPNINTERNAL: used in CcpnOpenGL
-        """
-        if not (sliceDim == xDim or sliceDim == yDim):
-            raise RuntimeError('sliceDim (%s) not in plane (%s,%s)' % (sliceDim, xDim, yDim))
-        data = self.getPlaneData(position, xDim, yDim)
-        if sliceDim == xDim:
-            slice = position[yDim - 1] - 1  # position amd dimensions are 1-based
-            return data[slice, 0:]
-        elif sliceDim == yDim:
-            slice = position[xDim - 1] - 1  # position amd dimensions are 1-based
-            return data[0:, slice]
-
-    def getSliceData(self, position=None, sliceDim: int = 1):
-        """
-        Get a slice through position along sliceDim from the Spectrum
-        :param position: A list/tuple of positions (1-based)
-        :param sliceDim: Dimension of the slice (1-based)
-        :return: numpy data array
-        """
-        if position is None:
-            position = [1] * self.dimensionCount
-
-        if not isIterable(position) or len(position) < self.dimensionCount:
-            raise ValueError('sliceDim should be a iterable with length %d; got "%s"' %
-                             (self.dimensionCount, position)
-                             )
-
-        if isIterable(sliceDim) or sliceDim < 1 or sliceDim > self.dimensionCount :
-            raise ValueError('sliceDim should be a scalar in range [1-%d]; got "%s"' %
-                             (self.dimensionCount, sliceDim)
-                             )
-
-        result = None
-        scale = self.scale if self.scale is not None else 1.0
-        if self.scale == 0.0:
-            getLogger().warning('Scaling "%s" by 0.0!' % self)
-
-        if self.dimensionCount == 1:
-            # 1D data
-            result = self._get1DSliceData(position=position, sliceDim=sliceDim)
-            # Make a copy in order to preserve the original data and apply scaling
-            if result is not None:
-                result = result.copy(order='K') * scale
-        else:
-            # nD data; get slice via appropriate plane
-            position[sliceDim - 1] = 1  # To improve caching; position, dimensions are 1-based
-            if sliceDim > 1:
-                result = self._getSliceDataFromPlane(position=position, xDim=1, yDim=sliceDim,
-                                                     sliceDim=sliceDim)
-            else:
-                result = self._getSliceDataFromPlane(position=position, xDim=sliceDim, yDim=sliceDim + 1,
-                                                     sliceDim=sliceDim)
-
-            # Make a copy in order to preserve the original data; do not apply scaling, as this was already done
-            # by the _getSliceDataFromPlane routine which calls getPlaneData
-            if result is not None:
-                result = result.copy(order='K')
-
-        # check if we have something valid to return
-        if result is None:
-            raise RuntimeError('Failed to get slice data along dimension "%s" at position %s' %
-                               (sliceDim, position))
-
-        # For 1D, save as intensities attribute
-        self._intensities = result
-        return result
-
-    def getSlice(self, axisCode, position, exactMatch=True):
-        """Get 1D slice along axisCode through position
-        """
-        sliceDim = self.getByAxisCodes('dimensions', [axisCode], exactMatch=exactMatch)
-        return self.getSliceData(position=position, sliceDim=sliceDim[0])
-
-    @cached(_PLANEDATACACHE, maxItems=64, debug=False)
-    def _getPlaneData(self, position, xDim: int, yDim: int):
-        "Internal routine to improve caching: Calling routine set the positions of xDim, yDim to 1 "
-        return self._apiDataSource.getPlaneData(position=position, xDim=xDim, yDim=yDim)
-
-    def getPlaneData(self, position=None, xDim: int = 1, yDim: int = 2):
-        """Get a plane defined by by xDim and yDim, and a position vector ('1' based)
-        Dimensionality must be >= 2
-
-        :param position: A list/tuple of positions (1-based)
-        :param xDim: Dimension of the first dimension (1-based)
-        :param yDim: Dimension of the second dimension (1-based)
-        :return: 2D float32 NumPy array in order (yDim, xDim)
-
-        NB: use getPlane method for axisCode based access
-        """
-        if self.dimensionCount < 2:
-            raise ValueError('Spectrum.getPlaneData; dimensionCount must be >= 2')
-        if xDim == yDim:
-            raise ValueError('Spectrum.getPlaneData; must have xDim != yDim')
-        dims = self.dimensions
-        if xDim not in dims:
-            raise ValueError('Spectrum.getPlaneData; invalid xDim "%s"; must one of %s' %
-                             (xDim, dims))
-        if yDim not in dims:
-            raise ValueError('Spectrum.getPlaneData; invalid yDim "%s"; must one of %s' %
-                             (yDim, dims))
-        if position is None:
-            position = [1] * self.dimensionCount
-
-        for idx, p in enumerate(position):
-            if not (1 <= p <= self.pointCounts[idx]):
-                raise ValueError('Spectrum.getPlaneData; invalid position[%d] "%d"; should be in range (%d,%d)' %
-                                 (idx, p, 1, self.pointCounts[idx]))
-
-        position = list(position)  # assure we have a list so we can assign below
-        # set the points of xDim, yDim to 1 as these do not matter (to improve caching)
-        position[xDim - 1] = 1  # position is 1-based
-        position[yDim - 1] = 1
-
-        result = None
-        scale = self.scale if self.scale is not None else 1.0
-        if self.scale == 0.0:
-            getLogger().warning('Scaling "%s" by 0.0!' % self)
-
-        result = self._getPlaneData(position=position, xDim=xDim, yDim=yDim)
-        # Make a copy in order to preserve the original data and apply scaling
-        result = result.copy(order='K') * scale
-
-        # check if we have something valid to return
-        if result is None:
-            raise RuntimeError('Failed to get plane data along dimensions (%s,%s) at position %s' %
-                               (xDim, yDim, position))
-
-        return result
-
-    def getPlane(self, axisCodes: tuple, position=None, exactMatch=True):
-        """Get a plane defined by a tuple of two axisCodes, and a position vector ('1' based, defaults to first point)
-        Expand axisCodes if exactMatch=False
-        return data array
-        NB: use getPlaneData method for dimension based access
-        """
-        if len(axisCodes) != 2:
-            raise ValueError('Invalid axisCodes %s, len should be 2' % axisCodes)
-        xDim, yDim = self.getByAxisCodes('dimensions', axisCodes, exactMatch=exactMatch)
-        return self.getPlaneData(position=position, xDim=xDim, yDim=yDim)
-
-    def allPlanes(self, axisCodes: tuple, exactMatch=True):
-        """An iterator over all planes defined by axisCodes, yielding (position, data-array) tuples
-        Expand axisCodes if exactMatch=False
-        """
-
-        if len(axisCodes) != 2:
-            raise ValueError('Invalid axisCodes %s, len should be 2' % axisCodes)
-        axisCodes = self.getByAxisCodes('axisCodes', axisCodes, exactMatch=exactMatch)  # check and optionally expand axisCodes
-        if axisCodes[0] == axisCodes[1]:
-            raise ValueError('Invalid axisCodes %s; identical' % axisCodes)
-
-        # get axisCodes of dimensions to interate over
-        iterAxisCodes = list(set(self.axisCodes) - set(axisCodes))
-        # get relevant iteration parameters
-        points = self.getByAxisCodes('pointCounts', iterAxisCodes)
-        indices = [idx - 1 for idx in self.getByAxisCodes('dimensions', iterAxisCodes)]
-        iterData = list(zip(iterAxisCodes, points, indices))
-
-        def _nextPosition(currentPosition):
-            "Return a (done, position) tuple derived from currentPosition"
-            for axisCode, point, idx in iterData:
-                if currentPosition[idx] + 1 <= point:  # still an increment to make in this dimension
-                    currentPosition[idx] += 1
-                    return (False, currentPosition)
-                else:  # reset this dimension
-                    currentPosition[idx] = 1
-            return (True, None)  # reached the end
-
-        # loop over all planes
-        position = [1] * self.dimensionCount
-        done = False
-        xDim, yDim = self.getByAxisCodes('dimensions', axisCodes, exactMatch=True)
-        while not done:
-            # Using direct api getPlaneData call to reduce overhead; (all parameters have been checked)
-            # By-passes the caching
-            planeData = self._apiDataSource.getPlaneData(position=position, xDim=xDim, yDim=yDim)
-            yield (position, planeData)
-            done, position = _nextPosition(position)
-
-    def getProjection(self, axisCodes: tuple, method: str = 'max', threshold=None, path=None, format: str = Formats.NMRPIPE):
-        """Get projected plane defined by a tuple of two axisCodes, using method and an optional threshold
-        optionally save to path as format
-        return projected spectrum data array
-        """
-        if path is not None and format != Formats.NMRPIPE:
-            raise ValueError('Can only save spectrum projection to %s format currently' % Formats.NMRPIPE)
-
-        projectedData = _getProjection(self, axisCodes=axisCodes, method=method, threshold=threshold)
-
-        if path is not None:
-            from ccpnmodel.ccpncore.lib._ccp.nmr.Nmr.DataSource import _saveNmrPipe2DHeader
-
-            with open(path, 'wb') as fp:
-                #TODO: remove dependency on filestorage on apiLayer
-                xDim, yDim = self.getByAxisCodes('dimensions', axisCodes)[0:2]
-                _saveNmrPipe2DHeader(self._wrappedData, fp, xDim, yDim)
-                projectedData.tofile(fp)
-
-        return projectedData
-
     def automaticIntegration(self, spectralData):
         return self._apiDataSource.automaticIntegration(spectralData)
 
     def estimateNoise(self):
         return self._apiDataSource.estimateNoise()
-
-    def get1dSpectrumData(self):
-        """Get position,scaledData numpy array for 1D spectrum.
-        Yields first 1D slice for nD"""
-        return self._apiDataSource.get1dSpectrumData()
 
     def _mapAxisCodes(self, axisCodes: Sequence[str]):
         """Map axisCodes on self.axisCodes
@@ -1687,8 +1442,6 @@ class Spectrum(AbstractWrapperObject):
         newValues = []
         for axisCode in newAxisCodeOrder:
             if axisCode in mapping:
-                if values is None or mapping is None:
-                    print('>>')
                 newValues.append(values[mapping[axisCode]])
             else:
                 raise ValueError('Invalid axisCode "%s" in %s; should be one of %s' %
@@ -1925,32 +1678,6 @@ class Spectrum(AbstractWrapperObject):
         # for loop fails so return empty arrays in the first element
         return None
 
-    # def _getByValidAxisCodes(self, attributeName: str, axisCodes: Sequence[str] = None, exactMatch: bool = False):
-    #     """Return values defined by attributeName in order defined by axisCodes :
-    #        (default order if None)
-    #         perform a mapping if exactMatch=False (eg. 'H' to 'Hn')
-    #        NB: Use getByDimensions for dimensions (1..dimensionCount) based access
-    #     """
-    #     if not hasattr(self, attributeName):
-    #         raise AttributeError('Spectrum object does not have attribute "%s"' % attributeName)
-    #
-    #     mappings = []
-    #     for ind, axis in enumerate(axisCodes):
-    #         for specAxis in self.axisCodes:
-    #             mapAxis = axisCodeMapping([axis], [specAxis])
-    #             if mapAxis:
-    #                 mappings.append(mapAxis[axis])  #[self.axisCodes.index(mapAxis[axis])] = ind
-    #                 break
-    #         else:
-    #             # raise ValueError('Invalid axis: %s' % axis)
-    #             pass
-    #
-    #     values = getattr(self, attributeName)
-    #     if mappings is not None:
-    #         # change to order defined by axisCodes
-    #         values = self._reorderValues(values, mappings)
-    #     return values
-
     def getByAxisCodes(self, attributeName: str, axisCodes: Sequence[str] = None, exactMatch: bool = False):
         """Return values defined by attributeName in order defined by axisCodes:
         (default order if None).
@@ -2061,44 +1788,6 @@ class Spectrum(AbstractWrapperObject):
             else:
                 newValues.append(values[dim - 1])
         setattr(self, attributeName, newValues)
-
-    @logCommand(get='self')
-    def extractSliceFromNd(self, axisCode, position):
-        """Extract 1d slice from nD spectrum as new spectrum
-        :param axisCode: axiscode of slice to extract
-        :param position: position vector (1-based)
-        :return: Spectrum instance
-        """
-        if axisCode not in self.axisCodes:
-            raise ValueError('Invalid axisCode "%s"' % axisCode)
-        if len(position) != self.dimensionCount:
-            raise ValueError('Invalid position "%s"' % position)
-
-        slice = '_slice' + '_'.join((i for i in position))
-
-        newName = '%s_slice' % (self.name)
-        newSpectrum = self.project.createDummySpectrum(name=newName, axisCodes=[axisCode])
-        newSpectrum._intensities = self.getSlice(axisCode, position, exactMatch=True)
-        # copy relevant attributes
-        for attr in self._dimensionAttributes:
-            values = self.getByAxisCodes(attr, [axisCode], exactMatch=True)
-            if None in values:
-                getLogger().debug('Unable to copy "%s" from %s to %s' %
-                                     (attr, self, newSpectrum)
-                                 )
-            newSpectrum.setByAxisCodes(attr, values, [axisCode], exactMatch=True)
-
-        # save as hdf5 file
-        from ccpn.util.Hdf5 import convertDataToHdf5, HDF5_EXTENSION
-        _p = aPath(self.filePath)
-        newPath = '%s/%s_slice' % (_p.parent,_p.basename) + HDF5_EXTENSION
-        convertDataToHdf5(newSpectrum, newPath)
-
-        # create the api storage by destroying newSpectrum and re-loading the data
-        from ccpnmodel.ccpncore.lib.spectrum.formats.Hdf5 import FILE_TYPE as HDF5_TYPE
-        self.project.deleteObjects(newSpectrum)
-        newSpectrum = self.project.loadSpectrum(path=newPath, subType=HDF5_TYPE, name=newName)
-        return newSpectrum
 
     def _clone1D(self):
         'Clone 1D spectrum to a new spectrum.'
@@ -2243,6 +1932,303 @@ class Spectrum(AbstractWrapperObject):
                 return axisOrder[ii]
 
     #=========================================================================================
+    # data access functions
+    #=========================================================================================
+
+    def getHeight(self, ppmPositions):
+        """Returns the interpolated height at the ppm position
+        """
+        ref = self.mainSpectrumReferences
+
+        if len(ppmPositions) != self.dimensionCount:
+            raise ValueError("Length of %s does not match number of dimensions." % str(ppmPositions))
+        if not all(isinstance(dimVal, (int, float)) for dimVal in ppmPositions):
+            raise ValueError("ppmPositions values must be floats.")
+
+        pointPosition = tuple(ref[dim].valueToPoint(ppm) for dim, ppm in enumerate(ppmPositions))
+        return self.getPositionValue(pointPosition)
+
+    def getPositionValue(self, pointPosition):
+        """Return the value nearest to the position given in points.
+        """
+        if len(pointPosition) != self.dimensionCount:
+            raise ValueError("Length of %s does not match number of dimensions." % str(pointPosition))
+        if not all(isinstance(dimVal, (int, float)) for dimVal in pointPosition):
+            raise ValueError("position values must be floats.")
+
+        scale = self.scale if self.scale is not None else 1.0
+        if self.scale == 0.0:
+            getLogger().warning('Scaling "%s" by 0.0!' % self)
+
+        pointPosition = self._apiDataSource.getPositionValue(pointPosition)
+        return pointPosition * scale if pointPosition else None
+
+    @cached(_SLICE1DDATACACHE, maxItems=1, debug=False)
+    def _get1DSliceData(self, position, sliceDim: int):
+        """Internal routine to get 1D sliceData;
+        """
+        return self._apiDataSource.getSliceData(position=position, sliceDim=sliceDim)
+
+    @cached(_SLICEDATACACHE, maxItems=1024, debug=False)
+    def _getSliceDataFromPlane(self, position, xDim: int, yDim: int, sliceDim: int):
+        """Internal routine to get sliceData; optimised to use (buffered) getPlaneData
+        CCPNINTERNAL: used in CcpnOpenGL
+        """
+        if not (sliceDim == xDim or sliceDim == yDim):
+            raise RuntimeError('sliceDim (%s) not in plane (%s,%s)' % (sliceDim, xDim, yDim))
+        data = self.getPlaneData(position, xDim, yDim)
+        if sliceDim == xDim:
+            slice = position[yDim - 1] - 1  # position amd dimensions are 1-based
+            return data[slice, 0:]
+        elif sliceDim == yDim:
+            slice = position[xDim - 1] - 1  # position amd dimensions are 1-based
+            return data[0:, slice]
+
+    def getSliceData(self, position=None, sliceDim: int = 1):
+        """
+        Get a slice through position along sliceDim from the Spectrum
+        :param position: A list/tuple of positions (1-based)
+        :param sliceDim: Dimension of the slice (1-based)
+        :return: numpy data array
+        """
+        if position is None:
+            position = [1] * self.dimensionCount
+
+        if not isIterable(position) or len(position) < self.dimensionCount:
+            raise ValueError('sliceDim should be a iterable with length %d; got "%s"' %
+                             (self.dimensionCount, position)
+                             )
+
+        if isIterable(sliceDim) or sliceDim < 1 or sliceDim > self.dimensionCount :
+            raise ValueError('sliceDim should be a scalar in range [1-%d]; got "%s"' %
+                             (self.dimensionCount, sliceDim)
+                             )
+
+        result = None
+        scale = self.scale if self.scale is not None else 1.0
+        if self.scale == 0.0:
+            getLogger().warning('Scaling "%s" by 0.0!' % self)
+
+        if self.dimensionCount == 1:
+            # 1D data
+            result = self._get1DSliceData(position=position, sliceDim=sliceDim)
+            # Make a copy in order to preserve the original data and apply scaling
+            if result is not None:
+                result = result.copy(order='K') * scale
+        else:
+            # nD data; get slice via appropriate plane
+            position[sliceDim - 1] = 1  # To improve caching; position, dimensions are 1-based
+            if sliceDim > 1:
+                result = self._getSliceDataFromPlane(position=position, xDim=1, yDim=sliceDim,
+                                                     sliceDim=sliceDim)
+            else:
+                result = self._getSliceDataFromPlane(position=position, xDim=sliceDim, yDim=sliceDim + 1,
+                                                     sliceDim=sliceDim)
+
+            # Make a copy in order to preserve the original data; do not apply scaling, as this was already done
+            # by the _getSliceDataFromPlane routine which calls getPlaneData
+            if result is not None:
+                result = result.copy(order='K')
+
+        # check if we have something valid to return
+        if result is None:
+            getLogger().warning('Failed to get slice data along dimension "%s" at position %s' %
+                               (sliceDim, position))
+
+        # For 1D, save as intensities attribute
+        self._intensities = result
+        return result
+
+    def getSlice(self, axisCode, position, exactMatch=True):
+        """Get 1D slice along axisCode through position
+        """
+        sliceDim = self.getByAxisCodes('dimensions', [axisCode], exactMatch=exactMatch)
+        return self.getSliceData(position=position, sliceDim=sliceDim[0])
+
+    @cached(_PLANEDATACACHE, maxItems=64, debug=False)
+    def _getPlaneData(self, position, xDim: int, yDim: int):
+        "Internal routine to improve caching: Calling routine set the positions of xDim, yDim to 1 "
+        return self._apiDataSource.getPlaneData(position=position, xDim=xDim, yDim=yDim)
+
+    def getPlaneData(self, position=None, xDim: int = 1, yDim: int = 2):
+        """Get a plane defined by by xDim and yDim, and a position vector ('1' based)
+        Dimensionality must be >= 2
+
+        :param position: A list/tuple of positions (1-based)
+        :param xDim: Dimension of the first dimension (1-based)
+        :param yDim: Dimension of the second dimension (1-based)
+        :return: 2D float32 NumPy array in order (yDim, xDim)
+
+        NB: use getPlane method for axisCode based access
+        """
+        if self.dimensionCount < 2:
+            raise ValueError('Spectrum.getPlaneData; dimensionCount must be >= 2')
+        if xDim == yDim:
+            raise ValueError('Spectrum.getPlaneData; must have xDim != yDim')
+        dims = self.dimensions
+        if xDim not in dims:
+            raise ValueError('Spectrum.getPlaneData; invalid xDim "%s"; must one of %s' %
+                             (xDim, dims))
+        if yDim not in dims:
+            raise ValueError('Spectrum.getPlaneData; invalid yDim "%s"; must one of %s' %
+                             (yDim, dims))
+        if position is None:
+            position = [1] * self.dimensionCount
+
+        for idx, p in enumerate(position):
+            if not (1 <= p <= self.pointCounts[idx]):
+                raise ValueError('Spectrum.getPlaneData; invalid position[%d] "%d"; should be in range (%d,%d)' %
+                                 (idx, p, 1, self.pointCounts[idx]))
+
+        position = list(position)  # assure we have a list so we can assign below
+        # set the points of xDim, yDim to 1 as these do not matter (to improve caching)
+        position[xDim - 1] = 1  # position is 1-based
+        position[yDim - 1] = 1
+
+        result = None
+        scale = self.scale if self.scale is not None else 1.0
+        if self.scale == 0.0:
+            getLogger().warning('Scaling "%s" by 0.0!' % self)
+
+        result = self._getPlaneData(position=position, xDim=xDim, yDim=yDim)
+        # Make a copy in order to preserve the original data and apply scaling
+        result = result.copy(order='K') * scale
+
+        # check if we have something valid to return
+        if result is None:
+            raise RuntimeError('Failed to get plane data along dimensions (%s,%s) at position %s' %
+                               (xDim, yDim, position))
+
+        return result
+
+    def getPlane(self, axisCodes: tuple, position=None, exactMatch=True):
+        """Get a plane defined by a tuple of two axisCodes, and a position vector ('1' based, defaults to first point)
+        Expand axisCodes if exactMatch=False
+        returns np-data array
+        NB: use getPlaneData method for dimension based access
+        """
+        if len(axisCodes) != 2:
+            raise ValueError('Invalid axisCodes %s, len should be 2' % axisCodes)
+        xDim, yDim = self.getByAxisCodes('dimensions', axisCodes, exactMatch=exactMatch)
+        return self.getPlaneData(position=position, xDim=xDim, yDim=yDim)
+
+    def allPlanes(self, axisCodes: tuple, exactMatch=True):
+        """An iterator over all planes defined by axisCodes, yielding (position, data-array) tuples
+        Expand axisCodes if exactMatch=False
+        """
+
+        if len(axisCodes) != 2:
+            raise ValueError('Invalid axisCodes %s, len should be 2' % axisCodes)
+        axisCodes = self.getByAxisCodes('axisCodes', axisCodes, exactMatch=exactMatch)  # check and optionally expand axisCodes
+        if axisCodes[0] == axisCodes[1]:
+            raise ValueError('Invalid axisCodes %s; identical' % axisCodes)
+
+        # get axisCodes of dimensions to interate over
+        iterAxisCodes = list(set(self.axisCodes) - set(axisCodes))
+        # get relevant iteration parameters
+        points = self.getByAxisCodes('pointCounts', iterAxisCodes)
+        indices = [idx - 1 for idx in self.getByAxisCodes('dimensions', iterAxisCodes)]
+        iterData = list(zip(iterAxisCodes, points, indices))
+
+        def _nextPosition(currentPosition):
+            "Return a (done, position) tuple derived from currentPosition"
+            for axisCode, point, idx in iterData:
+                if currentPosition[idx] + 1 <= point:  # still an increment to make in this dimension
+                    currentPosition[idx] += 1
+                    return (False, currentPosition)
+                else:  # reset this dimension
+                    currentPosition[idx] = 1
+            return (True, None)  # reached the end
+
+        # loop over all planes
+        position = [1] * self.dimensionCount
+        done = False
+        xDim, yDim = self.getByAxisCodes('dimensions', axisCodes, exactMatch=True)
+        while not done:
+            # Using direct api getPlaneData call to reduce overhead; (all parameters have been checked)
+            # By-passes the caching
+            planeData = self._apiDataSource.getPlaneData(position=position, xDim=xDim, yDim=yDim)
+            yield (position, planeData)
+            done, position = _nextPosition(position)
+
+    def getProjection(self, axisCodes: tuple, method: str = 'max', threshold=None, path=None, format: str = Formats.NMRPIPE):
+        """Get projected plane defined by a tuple of two axisCodes, using method and an optional threshold
+        optionally save to path as format
+        return projected spectrum data array
+        """
+        if path is not None and format != Formats.NMRPIPE:
+            raise ValueError('Can only save spectrum projection to %s format currently' % Formats.NMRPIPE)
+
+        projectedData = _getProjection(self, axisCodes=axisCodes, method=method, threshold=threshold)
+
+        if path is not None:
+            from ccpnmodel.ccpncore.lib._ccp.nmr.Nmr.DataSource import _saveNmrPipe2DHeader
+
+            with open(path, 'wb') as fp:
+                #TODO: remove dependency on filestorage on apiLayer
+                xDim, yDim = self.getByAxisCodes('dimensions', axisCodes)[0:2]
+                _saveNmrPipe2DHeader(self._wrappedData, fp, xDim, yDim)
+                projectedData.tofile(fp)
+
+        return projectedData
+
+    @logCommand(get='self')
+    def extractSliceFromNd(self, axisCode, position, path=None):
+        """Extract 1d slice from nD spectrum as new spectrum
+        :param axisCode: axiscode of slice to extract
+        :param position: position vector (1-based)
+        :param path: optional path; constructed from current filePath and name of instance
+        :return: Spectrum instance
+        """
+
+        if axisCode not in self.axisCodes:
+            raise ValueError('Invalid axisCode "%s"' % axisCode)
+        if len(position) != self.dimensionCount:
+            raise ValueError('Invalid position "%s"' % position)
+
+        from ccpn.util.Hdf5 import convertDataToHdf5, HDF5_EXTENSION
+        slice = '_%s_slice_' % axisCode + '_'.join((str(p) for p in position))
+        if path is None:
+            _p = aPath(self.filePath)
+            newName = self.name + slice
+            newPath = '%s/%s' % (_p.parent,newName) + HDF5_EXTENSION
+        else:
+            _p = aPath(path)
+            newName = _p.basename + slice
+            newPath = '%s/%s' % (_p.parent,newName) + HDF5_EXTENSION
+
+        # Due to implementation limitations, we have to hack this:
+        # first create a dummy spectrum; read the data and store with dummy
+        # Save the data into hdf5 and reload to create a new Spectrum instance.
+        # To alleviate: we would need a newSpectrum() method, without the need for an actual
+        # spectrum, but with the option to set path, sizes etc in the model (which
+        # createDummy does not do
+        _dummy = self.project.createDummySpectrum(name=newName, axisCodes=[axisCode])
+        _dummy._intensities = self.getSlice(axisCode, position, exactMatch=True)
+        # copy relevant attributes
+        for attr in self._dimensionAttributes:
+            values = self.getByAxisCodes(attr, [axisCode], exactMatch=True)
+            if None in values:
+                getLogger().debug('Unable to copy "%s" from %s to %s' %
+                                     (attr, self, _dummy)
+                                 )
+            _dummy.setByAxisCodes(attr, values, [axisCode], exactMatch=True)
+
+        # save as hdf5 file
+        convertDataToHdf5(_dummy, newPath)
+
+        # create the api storage by destroying _dummy and re-loading the data
+        from ccpnmodel.ccpncore.lib.spectrum.formats.Hdf5 import FILE_TYPE as HDF5_TYPE
+        self.project.deleteObjects(_dummy)
+        newSpectrum = self.project.loadSpectrum(path=newPath, subType=HDF5_TYPE, name=newName)
+        return newSpectrum
+
+    def get1dSpectrumData(self):
+        """Get position,scaledData numpy array for 1D spectrum.
+        Yields first 1D slice for nD"""
+        return self._apiDataSource.get1dSpectrumData()
+
+    #=========================================================================================
     # Implementation functions
     #=========================================================================================
 
@@ -2283,10 +2269,6 @@ class Spectrum(AbstractWrapperObject):
         if action in ['create', 'delete']:
             for integralList in self.integralLists:
                 integralList._finaliseAction(action=action)
-
-    #=========================================================================================
-    # CCPN functions
-    #=========================================================================================
 
     #===========================================================================================
     # new'Object' and other methods

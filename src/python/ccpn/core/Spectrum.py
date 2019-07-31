@@ -2238,10 +2238,11 @@ class Spectrum(AbstractWrapperObject):
 
         return projectedData
 
-    def get1dSpectrumData(self):
-        """Get position,scaledData numpy array for 1D spectrum.
-        Yields first 1D slice for nD"""
-        return self._apiDataSource.get1dSpectrumData()
+    # GWV 20190731: not used
+    # def get1dSpectrumData(self):
+    #     """Get position,scaledData numpy array for 1D spectrum.
+    #     Yields first 1D slice for nD"""
+    #     return self._apiDataSource.get1dSpectrumData()
 
     #=========================================================================================
     # Implementation functions

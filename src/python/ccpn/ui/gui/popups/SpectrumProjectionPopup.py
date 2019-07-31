@@ -53,10 +53,10 @@ class SpectrumProjectionPopup(CcpnDialog):
         spectrumLabel = Label(self, 'Spectrum to project', grid=(0, 0))
         self.spectrumPulldown = PulldownList(self, grid=(0, 1), callback=self._setSpectrum, gridSpan=(1, 2))
         # Only select 3D's for now
-        self.spectrumPulldown.setData(
-                [spectrum.pid for spectrum in self.project.spectra if spectrum.dimensionCount == 3])
+        validSpectra = [s for s in self.project.spectra if s.dimensionCount ==3]
+        self.spectrumPulldown.setData([s.pid for s in validSpectra])
         # filepath
-        filePathLabel = Label(self, 'New Spectrum Path', grid=(1, 0))
+        filePathLabel = Label(self, 'Projection spectrum path', grid=(1, 0))
         self.filePathLineEdit = LineEdit(self, grid=(1, 1))
         self.pathButton = Button(self, grid=(1, 2), callback=self._getSpectrumFile, icon='icons/applications-system')
         # projection axis
@@ -80,12 +80,22 @@ class SpectrumProjectionPopup(CcpnDialog):
                                           callbacks=[self.reject, self.makeProjection],
                                           texts=['Close', 'Make Projection'])
 
-        # update all widgets to correct settings
-        if self.application.current.strip is not None:
+        if len(validSpectra) == 0:
+            from ccpn.ui.gui.widgets.MessageDialog import showWarning
+            showWarning('No valid spectra', 'No 3D spectra in current dataset')
+            self.reject()
+
+        # select a spectrum from current or validSpectra
+        if self.application.current.strip is not None and \
+            len(self.application.current.strip.spectra) > 0 and \
+            self.application.current.strip.spectra[0].dimensionCount == 3:
             spectrum = self.application.current.strip.spectra[0]
-            if spectrum.dimensionCount == 3:
-                self.spectrumPulldown.set(spectrum.pid)
-                self._setSpectrum(spectrum.pid)
+        else:
+            spectrum = validSpectra[0]
+
+        # update all widgets to correct settings
+        self.spectrumPulldown.set(spectrum.pid)
+        self._setSpectrum(spectrum.pid)
         self._setMethod(self.methodPulldown.currentText())
 
     def _setSpectrum(self, spectrumPid):
@@ -96,10 +106,10 @@ class SpectrumProjectionPopup(CcpnDialog):
         self.thresholdData.set(spectrum.positiveContourBase)
 
     def _setProjectionAxis(self, projectionAxis):
-        """Callback when setting projection axis"""
+        """Callback when setting projection axis
+        """
         spectrum = self.project.getByPid(self.spectrumPulldown.currentText())
-        path = '/'.join(spectrum.filePath.split('/')[:-1]) + '/' + spectrum.name + '-' + '-'.join(
-                self.axisCodes) + '.dat'
+        path = spectrum._getDefaultProjectionPath(self.axisCodes)
         self.filePathLineEdit.setText(path)
 
     def _setMethod(self, method):
@@ -129,13 +139,14 @@ class SpectrumProjectionPopup(CcpnDialog):
         threshold = self.thresholdData.get()
 
         with progressManager(self, 'Making %s projection from %s' % ('-'.join(axisCodes), spectrum.name)):
-            spectrum.getProjection(axisCodes, method=method, threshold=threshold, path=filePath)
-            objs = self.project.loadData(filePath)
-            #print('>>> obj', objs)
-            if len(objs) == 0:
-                raise RuntimeError('Error loading "%s"' % filePath)
+            # spectrum.getProjection(axisCodes, method=method, threshold=threshold, path=filePath)
+            # objs = self.project.loadData(filePath)
+            # #print('>>> obj', objs)
+            # if len(objs) == 0:
+            #     raise RuntimeError('Error loading "%s"' % filePath)
+            projectedSpectrum = spectrum.extractProjectionToFile(axisCodes, method=method, threshold=threshold, path=filePath)
             if self.contourCheckBox.get():
-                projectedSpectrum = objs[0]
+                # projectedSpectrum = objs[0]
                 projectedSpectrum.positiveContourColour = spectrum.positiveContourColour
                 projectedSpectrum.negativeContourColour = spectrum.negativeContourColour
         self.accept()  # close the popup

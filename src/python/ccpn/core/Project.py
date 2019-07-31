@@ -1180,7 +1180,7 @@ class Project(AbstractWrapperObject):
             raise ValueError("Project file type %s is not recognised" % subType)
 
     def loadSpectrum(self, path: str, subType: str, name=None) -> list:
-        """Load spectrum from file into application
+        """Load spectrum defined by path into application
         """
         from ccpn.core.lib.SpectrumLib import setContourLevelsFromNoise
 

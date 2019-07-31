@@ -1938,15 +1938,16 @@ class Spectrum(AbstractWrapperObject):
             try:
                 values = self.getByAxisCodes(attr, axisCodes, exactMatch=True)
                 target.setByAxisCodes(attr, values, axisCodes, exactMatch=True)
-            except:
-                getLogger().error('Copying "%s" from %s to %s for axisCodes "%s"' %
-                                  (attr, self, target, axisCodes)
+            except Exception as es:
+                getLogger().error('Copying "%s" from %s to %s for axisCodes %s: %s' %
+                                  (attr, self, target, axisCodes, es)
                 )
 
     #=========================================================================================
     # data access functions
     #=========================================================================================
 
+    @logCommand(get='self')
     def getHeight(self, ppmPositions):
         """Returns the interpolated height at the ppm position
         """
@@ -1960,6 +1961,7 @@ class Spectrum(AbstractWrapperObject):
         pointPosition = tuple(ref[dim].valueToPoint(ppm) for dim, ppm in enumerate(ppmPositions))
         return self.getPositionValue(pointPosition)
 
+    @logCommand(get='self')
     def getPositionValue(self, pointPosition):
         """Return the value nearest to the position given in points.
         """
@@ -1996,6 +1998,7 @@ class Spectrum(AbstractWrapperObject):
             slice = position[xDim - 1] - 1  # position amd dimensions are 1-based
             return data[0:, slice]
 
+    @logCommand(get='self')
     def getSliceData(self, position=None, sliceDim: int = 1):
         """
         Get a slice through position along sliceDim from the Spectrum
@@ -2052,6 +2055,7 @@ class Spectrum(AbstractWrapperObject):
         self._intensities = result
         return result
 
+    @logCommand(get='self')
     def getSlice(self, axisCode, position, exactMatch=True):
         """Get 1D slice along axisCode through position; sets the intensities attribute
         :return: 1D NumPy data array
@@ -2059,8 +2063,15 @@ class Spectrum(AbstractWrapperObject):
         sliceDim = self.getByAxisCodes('dimensions', [axisCode], exactMatch=exactMatch)
         return self.getSliceData(position=position, sliceDim=sliceDim[0])
 
+    def _getDefaultSlicePath(self, axisCode, position):
+        "Return a default path for slice"
+        from ccpn.util.Hdf5 import HDF5_EXTENSION
+        slice = self.name + '_slice_%s_' % axisCode + '_'.join((str(p) for p in position))
+        _p = aPath(self.filePath)
+        return str(_p.parent / slice + HDF5_EXTENSION)
+
     @logCommand(get='self')
-    def extractSlice(self, axisCode, position, path=None):
+    def extractSliceToFile(self, axisCode, position, path=None):
         """Extract 1d slice from self as new Spectrum; saved to path
         (auto-generated if not given)
         if 1D it effectively yields a copy of self
@@ -2079,16 +2090,8 @@ class Spectrum(AbstractWrapperObject):
         if len(position) != self.dimensionCount:
             raise ValueError('Invalid position "%s"' % position)
 
-        from ccpn.util.Hdf5 import convertDataToHdf5, HDF5_EXTENSION
-        slice = '_%s_slice_' % axisCode + '_'.join((str(p) for p in position))
         if path is None:
-            _p = aPath(self.filePath)
-            newName = self.name + slice
-            newPath = '%s/%s' % (_p.parent, newName) + HDF5_EXTENSION
-        else:
-            _p = aPath(path)
-            newName = _p.basename + slice
-            newPath = '%s/%s' % (_p.parent, newName) + HDF5_EXTENSION
+            path = self._getDefaultSlicePath(axisCode, position)
 
         # Due to implementation limitations, we have to hack this:
         # first create a dummy spectrum; read the data and store with dummy
@@ -2096,18 +2099,20 @@ class Spectrum(AbstractWrapperObject):
         # To alleviate: we would need a newSpectrum() method, without the need for an actual
         # spectrum, but with the option to set path, sizes etc in the model (which
         # createDummy does not do
-        _dummy = self.project.createDummySpectrum(axisCodes=[axisCode], name=newName)
+        _dummy = self.project.createDummySpectrum(axisCodes=[axisCode], name='_dummy')
         _dummy._intensities = self.getSlice(axisCode, position, exactMatch=True)
         # copy relevant attributes
         self._copyDimensionalParameters(axisCodes=[axisCode], target=_dummy)
 
         # save as hdf5 file
-        convertDataToHdf5(_dummy, newPath)
+        from ccpn.util.Hdf5 import convertDataToHdf5
+        convertDataToHdf5(_dummy, path)
 
         # create the api storage by destroying _dummy and re-loading the data
         from ccpnmodel.ccpncore.lib.spectrum.formats.Hdf5 import FILE_TYPE as HDF5_TYPE
         self.project.deleteObjects(_dummy)
-        newSpectrum = self.project.loadSpectrum(path=newPath, subType=HDF5_TYPE, name=newName)[0]  # load yiels a list
+        newSpectrum = self.project.loadSpectrum(path=path, subType=HDF5_TYPE)[0]  # load yields a list
+        newSpectrum.axisCodes = [axisCode] # to overRide the loadData
         # Copy relevant attributes again
         self._copyDimensionalParameters(axisCodes=[axisCode], target=newSpectrum)
         return newSpectrum
@@ -2117,6 +2122,7 @@ class Spectrum(AbstractWrapperObject):
         "Internal routine to improve caching: Calling routine set the positions of xDim, yDim to 1 "
         return self._apiDataSource.getPlaneData(position=position, xDim=xDim, yDim=yDim)
 
+    @logCommand(get='self')
     def getPlaneData(self, position=None, xDim: int = 1, yDim: int = 2):
         """Get a plane defined by by xDim and yDim, and a position vector ('1' based)
         Dimensionality must be >= 2
@@ -2168,6 +2174,7 @@ class Spectrum(AbstractWrapperObject):
 
         return result
 
+    @logCommand(get='self')
     def getPlane(self, axisCodes: tuple, position=None, exactMatch=True):
         """Get a plane defined by a tuple of two axisCodes, and a position vector ('1' based, defaults to first point)
         Expand axisCodes if exactMatch=False
@@ -2218,26 +2225,42 @@ class Spectrum(AbstractWrapperObject):
             yield (position, planeData)
             done, position = _nextPosition(position)
 
-    def getProjection(self, axisCodes: tuple, method: str = 'max', threshold=None, path=None, format: str = Formats.NMRPIPE):
+    @logCommand(get='self')
+    def getProjection(self, axisCodes: tuple, method: str = 'max', threshold=None):
         """Get projected plane defined by a tuple of two axisCodes, using method and an optional threshold
-        optionally save to path as format
-        return projected spectrum data array
+        return projected spectrum data as NumPy data array
         """
-        if path is not None and format != Formats.NMRPIPE:
-            raise ValueError('Can only save spectrum projection to %s format currently' % Formats.NMRPIPE)
-
         projectedData = _getProjection(self, axisCodes=axisCodes, method=method, threshold=threshold)
-
-        if path is not None:
-            from ccpnmodel.ccpncore.lib._ccp.nmr.Nmr.DataSource import _saveNmrPipe2DHeader
-
-            with open(path, 'wb') as fp:
-                #TODO: remove dependency on filestorage on apiLayer
-                xDim, yDim = self.getByAxisCodes('dimensions', axisCodes)[0:2]
-                _saveNmrPipe2DHeader(self._wrappedData, fp, xDim, yDim)
-                projectedData.tofile(fp)
-
         return projectedData
+
+    def _getDefaultProjectionPath(self, axisCodes):
+        "Construct a default path for projection"
+        planeStr = '_projection_' + '_'.join(axisCodes)
+        _p = aPath(self.filePath)
+        return os.path.join(str(_p.parent), _p.basename) + planeStr + '.dat'
+
+    @logCommand(get='self')
+    def extractProjectionToFile(self, axisCodes: tuple, method: str = 'max', threshold=None, path=None):
+        """Save projected plane defined by a tuple of two axisCodes, using method and an optional threshold
+        to file. Save to path (auto-generated if None) using format
+        return projected spectrum as Spectrum instance
+        """
+        if path is None:
+            path = self._getDefaultProjectionPath(axisCodes)
+
+        projectedData = self.getProjection(axisCodes=axisCodes, method=method, threshold=threshold)
+
+        from ccpnmodel.ccpncore.lib._ccp.nmr.Nmr.DataSource import _saveNmrPipe2DHeader
+        with open(path, 'wb') as fp:
+            #TODO: remove dependency on filestorage on apiLayer
+            xDim, yDim = self.getByAxisCodes('dimensions', axisCodes)[0:2]
+            _saveNmrPipe2DHeader(self._wrappedData, fp, xDim, yDim)
+            projectedData.tofile(fp)
+
+        newSpectrum = self.project.loadSpectrum(path, subType=Formats.NMRPIPE)[0]
+        newSpectrum.axisCodes = axisCodes  # to override the loadSpectrum routine
+        self._copyDimensionalParameters(axisCodes=axisCodes, target=newSpectrum)
+        return newSpectrum
 
     # GWV 20190731: not used
     # def get1dSpectrumData(self):

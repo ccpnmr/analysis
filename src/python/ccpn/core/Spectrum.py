@@ -1931,6 +1931,18 @@ class Spectrum(AbstractWrapperObject):
             if n and all(pCode[0] == cCode[0] for pCode, cCode in zip(perm[:n], checkCodes[:n])):
                 return axisOrder[ii]
 
+    def _copyDimensionalParameters(self, axisCodes, target):
+        """Copy dimensional parameters for axisCodes from self to target
+        """
+        for attr in self._dimensionAttributes:
+            try:
+                values = self.getByAxisCodes(attr, axisCodes, exactMatch=True)
+                target.setByAxisCodes(attr, values, axisCodes, exactMatch=True)
+            except:
+                getLogger().error('Copying "%s" from %s to %s for axisCodes "%s"' %
+                                  (attr, self, target, axisCodes)
+                )
+
     #=========================================================================================
     # data access functions
     #=========================================================================================
@@ -1987,7 +1999,8 @@ class Spectrum(AbstractWrapperObject):
     def getSliceData(self, position=None, sliceDim: int = 1):
         """
         Get a slice through position along sliceDim from the Spectrum
-        :param position: A list/tuple of positions (1-based)
+        :param position: An optional list/tuple of point positions (1-based);
+                         defaults to [1,1,1,1]
         :param sliceDim: Dimension of the slice (1-based)
         :return: numpy data array
         """
@@ -2040,10 +2053,63 @@ class Spectrum(AbstractWrapperObject):
         return result
 
     def getSlice(self, axisCode, position, exactMatch=True):
-        """Get 1D slice along axisCode through position
+        """Get 1D slice along axisCode through position; sets the intensities attribute
+        :return: 1D NumPy data array
         """
         sliceDim = self.getByAxisCodes('dimensions', [axisCode], exactMatch=exactMatch)
         return self.getSliceData(position=position, sliceDim=sliceDim[0])
+
+    @logCommand(get='self')
+    def extractSlice(self, axisCode, position, path=None):
+        """Extract 1d slice from self as new spectrum;
+        if 1D it effectively yields a copy of self
+
+        :param axisCode: axiscode of slice to extract
+        :param position: position vector (1-based)
+        :param path: optional path; constructed from current filePath and name of instance
+        :return: Spectrum instance
+        """
+
+        if self.dimensionCount == 1:
+            raise RuntimeError('Spectrum %s contains 1D data; cannot extract slice' % self)
+
+        if axisCode not in self.axisCodes:
+            raise ValueError('Invalid axisCode "%s"' % axisCode)
+        if len(position) != self.dimensionCount:
+            raise ValueError('Invalid position "%s"' % position)
+
+        from ccpn.util.Hdf5 import convertDataToHdf5, HDF5_EXTENSION
+        slice = '_%s_slice_' % axisCode + '_'.join((str(p) for p in position))
+        if path is None:
+            _p = aPath(self.filePath)
+            newName = self.name + slice
+            newPath = '%s/%s' % (_p.parent, newName) + HDF5_EXTENSION
+        else:
+            _p = aPath(path)
+            newName = _p.basename + slice
+            newPath = '%s/%s' % (_p.parent, newName) + HDF5_EXTENSION
+
+        # Due to implementation limitations, we have to hack this:
+        # first create a dummy spectrum; read the data and store with dummy
+        # Save the data into hdf5 and reload to create a new Spectrum instance.
+        # To alleviate: we would need a newSpectrum() method, without the need for an actual
+        # spectrum, but with the option to set path, sizes etc in the model (which
+        # createDummy does not do
+        _dummy = self.project.createDummySpectrum(axisCodes=[axisCode], name=newName)
+        _dummy._intensities = self.getSlice(axisCode, position, exactMatch=True)
+        # copy relevant attributes
+        self._copyDimensionalParameters(axisCodes=[axisCode], target=_dummy)
+
+        # save as hdf5 file
+        convertDataToHdf5(_dummy, newPath)
+
+        # create the api storage by destroying _dummy and re-loading the data
+        from ccpnmodel.ccpncore.lib.spectrum.formats.Hdf5 import FILE_TYPE as HDF5_TYPE
+        self.project.deleteObjects(_dummy)
+        newSpectrum = self.project.loadSpectrum(path=newPath, subType=HDF5_TYPE, name=newName)[0]  # load yiels a list
+        # Copy relevant attributes again
+        self._copyDimensionalParameters(axisCodes=[axisCode], target=newSpectrum)
+        return newSpectrum
 
     @cached(_PLANEDATACACHE, maxItems=64, debug=False)
     def _getPlaneData(self, position, xDim: int, yDim: int):
@@ -2171,57 +2237,6 @@ class Spectrum(AbstractWrapperObject):
                 projectedData.tofile(fp)
 
         return projectedData
-
-    @logCommand(get='self')
-    def extractSliceFromNd(self, axisCode, position, path=None):
-        """Extract 1d slice from nD spectrum as new spectrum
-        :param axisCode: axiscode of slice to extract
-        :param position: position vector (1-based)
-        :param path: optional path; constructed from current filePath and name of instance
-        :return: Spectrum instance
-        """
-
-        if axisCode not in self.axisCodes:
-            raise ValueError('Invalid axisCode "%s"' % axisCode)
-        if len(position) != self.dimensionCount:
-            raise ValueError('Invalid position "%s"' % position)
-
-        from ccpn.util.Hdf5 import convertDataToHdf5, HDF5_EXTENSION
-        slice = '_%s_slice_' % axisCode + '_'.join((str(p) for p in position))
-        if path is None:
-            _p = aPath(self.filePath)
-            newName = self.name + slice
-            newPath = '%s/%s' % (_p.parent,newName) + HDF5_EXTENSION
-        else:
-            _p = aPath(path)
-            newName = _p.basename + slice
-            newPath = '%s/%s' % (_p.parent,newName) + HDF5_EXTENSION
-
-        # Due to implementation limitations, we have to hack this:
-        # first create a dummy spectrum; read the data and store with dummy
-        # Save the data into hdf5 and reload to create a new Spectrum instance.
-        # To alleviate: we would need a newSpectrum() method, without the need for an actual
-        # spectrum, but with the option to set path, sizes etc in the model (which
-        # createDummy does not do
-        _dummy = self.project.createDummySpectrum(name=newName, axisCodes=[axisCode])
-        _dummy._intensities = self.getSlice(axisCode, position, exactMatch=True)
-        # copy relevant attributes
-        for attr in self._dimensionAttributes:
-            values = self.getByAxisCodes(attr, [axisCode], exactMatch=True)
-            if None in values:
-                getLogger().debug('Unable to copy "%s" from %s to %s' %
-                                     (attr, self, _dummy)
-                                 )
-            _dummy.setByAxisCodes(attr, values, [axisCode], exactMatch=True)
-
-        # save as hdf5 file
-        convertDataToHdf5(_dummy, newPath)
-
-        # create the api storage by destroying _dummy and re-loading the data
-        from ccpnmodel.ccpncore.lib.spectrum.formats.Hdf5 import FILE_TYPE as HDF5_TYPE
-        self.project.deleteObjects(_dummy)
-        newSpectrum = self.project.loadSpectrum(path=newPath, subType=HDF5_TYPE, name=newName)
-        return newSpectrum
 
     def get1dSpectrumData(self):
         """Get position,scaledData numpy array for 1D spectrum.

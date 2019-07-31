@@ -2061,7 +2061,8 @@ class Spectrum(AbstractWrapperObject):
 
     @logCommand(get='self')
     def extractSlice(self, axisCode, position, path=None):
-        """Extract 1d slice from self as new spectrum;
+        """Extract 1d slice from self as new Spectrum; saved to path
+        (auto-generated if not given)
         if 1D it effectively yields a copy of self
 
         :param axisCode: axiscode of slice to extract

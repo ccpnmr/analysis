@@ -165,6 +165,7 @@ class Spectrum(AbstractWrapperObject):
     _PLANEDATACACHE = '_planeDataCache'  # Attribute name for the planeData cache
     _SLICEDATACACHE = '_sliceDataCache'  # Attribute name for the slicedata cache
     _SLICE1DDATACACHE = '_slice1DDataCache'  # Attribute name for the 1D slicedata cache
+    _dataCaches = [_PLANEDATACACHE, _SLICEDATACACHE, _SLICE1DDATACACHE]
 
     def __init__(self, project: Project, wrappedData: Nmr.ShiftList):
 
@@ -175,6 +176,59 @@ class Spectrum(AbstractWrapperObject):
 
         self.doubleCrosshairOffsets = self.dimensionCount * [0]  # TBD: do we need this to be a property?
         self.showDoubleCrosshair = False
+
+    def _infoString(self, includeDimensions=False):
+        """Return info string about self, optionally including dimensional
+        parameters
+        """
+        string  = '================= %s =================\n' % self
+        string += 'path = %s\n' % self.filePath
+        for cache in self._dataCaches:
+            if hasattr(self, cache):
+                string += str(getattr(self,cache)) + '\n'
+        string += 'dimensions = %s\n' % self.dimensionCount
+        string += 'sizes = (%s)\n' % ' x '.join([str(d) for d in self.pointCounts])
+        for attr in """
+scale 
+noiseLevel 
+experimentName
+""".split():
+            value = getattr(self, attr)
+            string += '%s = %s\n' % (attr, value)
+
+        if includeDimensions:
+            string += '\n'
+            for attr in """
+dimensions
+axisCodes
+pointCounts
+isComplex
+dimensionTypes
+isotopeCodes
+measurementTypes
+spectralWidths
+spectralWidthsHz
+spectrometerFrequencies
+referencePoints
+referenceValues
+axisUnits
+foldingModes
+windowFunctions
+lorentzianBroadenings
+gaussianBroadenings
+phases0
+phases1
+assignmentTolerances
+""".split():
+                values = getattr(self,attr)
+                string += '%-25s: %s\n' % (attr,
+                                         ' '.join(['%-20s' % str(v) for v in values])
+                                         )
+        return string
+
+    def printInfoString(self, includeDimensions=False):
+        "Print the info string"
+        print(self._infoString(includeDimensions))
 
     # CCPN properties
     @property
@@ -502,6 +556,7 @@ class Spectrum(AbstractWrapperObject):
             dataUrl = self._project._wrappedData.root.fetchDataUrl(value)
             apiDataStore.repointToDataUrl(dataUrl)
             apiDataStore.path = value[len(dataUrl.url.path) + 1:]
+            self._clearCache()
 
     @property
     def isValidPath(self) -> bool:
@@ -560,6 +615,40 @@ class Spectrum(AbstractWrapperObject):
                                      (attributeName, ii + 1, value))
         else:
             raise ValueError("Value must have length %s, was %s" % (apiDataSource.numDim, value))
+
+    _dimensionAttributes.append('axisCodes')
+    @property
+    def axisCodes(self) -> Tuple[Optional[str], ...]:
+        """axisCode, per dimension - None if no main ExpDimRef
+        """
+
+        # See if axis codes are set
+        for expDim in self._wrappedData.experiment.expDims:
+            if expDim.findFirstExpDimRef(axisCode=None) is not None:
+                self._wrappedData.experiment.resetAxisCodes()
+                break
+
+        result = []
+        for dataDim in self._wrappedData.sortedDataDims():
+            expDimRef = dataDim.expDim.findFirstExpDimRef(serial=1)
+            if expDimRef is None:
+                result.append(None)
+            else:
+                axisCode = expDimRef.axisCode
+                result.append(axisCode)
+
+        return tuple(result)
+
+    @axisCodes.setter
+    def axisCodes(self, values):
+        check = {}
+        for i, v in enumerate(values):
+            if v in check:
+                raise ValueError('axisCodes should be an unique sequence of strings; got duplicate entry axisCodes[%s]="%s"'
+                                 % (i, v))
+            else:
+                check[v] = i
+        self._setExpDimRefAttribute('axisCode', values, mandatory=False)
 
     _dimensionAttributes.append('pointCounts')
     @property
@@ -911,40 +1000,6 @@ class Spectrum(AbstractWrapperObject):
             raise ValueError("Folding modes must be 'circular', 'mirror'")
 
         self._setExpDimRefAttribute('isFolded', [dd[x] for x in values])
-
-    _dimensionAttributes.append('axisCodes')
-    @property
-    def axisCodes(self) -> Tuple[Optional[str], ...]:
-        """axisCode, per dimension - None if no main ExpDimRef
-        """
-
-        # See if axis codes are set
-        for expDim in self._wrappedData.experiment.expDims:
-            if expDim.findFirstExpDimRef(axisCode=None) is not None:
-                self._wrappedData.experiment.resetAxisCodes()
-                break
-
-        result = []
-        for dataDim in self._wrappedData.sortedDataDims():
-            expDimRef = dataDim.expDim.findFirstExpDimRef(serial=1)
-            if expDimRef is None:
-                result.append(None)
-            else:
-                axisCode = expDimRef.axisCode
-                result.append(axisCode)
-
-        return tuple(result)
-
-    @axisCodes.setter
-    def axisCodes(self, values):
-        check = {}
-        for i, v in enumerate(values):
-            if v in check:
-                raise ValueError('axisCodes should be an unique sequence of strings; got duplicate entry axisCodes[%s]="%s"'
-                                 % (i, v))
-            else:
-                check[v] = i
-        self._setExpDimRefAttribute('axisCode', values, mandatory=False)
 
     @property
     def acquisitionAxisCode(self) -> Optional[str]:

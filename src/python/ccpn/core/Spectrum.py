@@ -2186,6 +2186,38 @@ class Spectrum(AbstractWrapperObject):
         xDim, yDim = self.getByAxisCodes('dimensions', axisCodes, exactMatch=exactMatch)
         return self.getPlaneData(position=position, xDim=xDim, yDim=yDim)
 
+    def _getDefaultPlanePath(self, axisCodes, position):
+        "Construct a default path for plane"
+        planeStr = '_plane_' + '_'.join(axisCodes) + '_' + '_'.join([str(p) for p in position])
+        _p = aPath(self.filePath)
+        return os.path.join(str(_p.parent), _p.basename) + planeStr + '.dat'
+
+    @logCommand(get='self')
+    def extractPlaneToFile(self, axisCodes: tuple, position=None, path=None):
+        """Save plane defined by a tuple of two axisCodes and position
+        to file. Save to path (auto-generated if None).
+
+        :returns plane as Spectrum instance
+        """
+        if position is None:
+            position = [1] * self.dimensionCount
+
+        if path is None:
+            path = self._getDefaultPlanePath(axisCodes, position)
+
+        planeData = self.getPlane(axisCodes=axisCodes, position=position)
+        from ccpnmodel.ccpncore.lib._ccp.nmr.Nmr.DataSource import _saveNmrPipe2DHeader
+        with open(path, 'wb') as fp:
+            #TODO: remove dependency on filestorage on apiLayer
+            xDim, yDim = self.getByAxisCodes('dimensions', axisCodes)[0:2]
+            _saveNmrPipe2DHeader(self._wrappedData, fp, xDim, yDim)
+            planeData.tofile(fp)
+
+        newSpectrum = self.project.loadSpectrum(path, subType=Formats.NMRPIPE)[0]
+        newSpectrum.axisCodes = axisCodes  # to override the loadSpectrum routine
+        self._copyDimensionalParameters(axisCodes=axisCodes, target=newSpectrum)
+        return newSpectrum
+
     def allPlanes(self, axisCodes: tuple, exactMatch=True):
         """An iterator over all planes defined by axisCodes, yielding (position, data-array) tuples
         Expand axisCodes if exactMatch=False

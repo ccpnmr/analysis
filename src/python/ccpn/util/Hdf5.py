@@ -32,6 +32,7 @@ from ccpn.core.Spectrum import Spectrum
 
 
 SPECTRUM_DATASET_NAME = 'spectrumData'
+HDF5_EXTENSION = '.hdf5'
 
 
 def _cumulativeArray(array):
@@ -59,11 +60,11 @@ def convertDataToHdf5(spectrum: Spectrum, outputPath: str):
     """ Convert binary data of spectrum into HDF5 and store at outputPath
         File suffix is made to end with .hdf5
     """
-    if not outputPath.endswith('.hdf5'):
+    if not outputPath.endswith(HDF5_EXTENSION):
         n = outputPath.rfind('.')
         if n >= 0:
             outputPath = outputPath[:n]
-        outputPath += '.hdf5'
+        outputPath += HDF5_EXTENSION
 
     pointCounts = spectrum.pointCounts
 

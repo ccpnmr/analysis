@@ -1181,13 +1181,16 @@ class Project(AbstractWrapperObject):
             raise ValueError("Project file type %s is not recognised" % subType)
 
     def loadSpectrum(self, path: str, subType: str, name=None) -> list:
-        """Load spectrum from file into application"""
+        """Load spectrum defined by path into application
+        """
         from ccpn.core.lib.SpectrumLib import setContourLevelsFromNoise
 
         # #TODO:RASMUS FIXME check for rename
 
         try:
-            apiDataSource = self._wrappedData.loadDataSource(path, subType, name)
+            apiDataSource = self._wrappedData.loadDataSource(
+                            filePath=path, dataFileFormat=subType, name=name
+            )
         except Exception as es:
             getLogger().warning(es)
             raise es

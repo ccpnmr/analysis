@@ -50,6 +50,8 @@ class PeakView(AbstractWrapperObject):
     #: List of child classes.
     _childClasses = []
 
+    _isGuiClass = True
+
     # CCPN properties
     @property
     def _apiPeakView(self) -> ApiPeakView:

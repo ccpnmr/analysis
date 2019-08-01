@@ -41,8 +41,6 @@ from ccpn.util.decorators import logCommand
 from ccpn.core.lib.ContextManagers import newObject, undoStackBlocking, undoBlock
 from ccpn.util.Logging import getLogger
 
-logger = getLogger()
-
 
 # _ccpnInternalData references
 # SV_TITLE = className  # may not be needed
@@ -62,6 +60,8 @@ class SpectrumDisplay(AbstractWrapperObject):
     _pluralLinkName = 'spectrumDisplays'
     #: List of child classes.
     _childClasses = []
+
+    _isGuiClass = True
 
     # Qualified name of matching API class
     _apiClassQualifiedName = ApiBoundDisplay._metaclass.qualifiedName()
@@ -466,7 +466,8 @@ def _newSpectrumDisplay(self: Project, axisCodes: (str,), stripDirection: str = 
         try:
             result.resetSerial(serial)
         except ValueError:
-            self.project._logger.warning("Could not reset serial of %s to %s - keeping original value"
+            logger = getLogger()
+            logger.warning("Could not reset serial of %s to %s - keeping original value"
                                          % (result, serial))
 
     return result

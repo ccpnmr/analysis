@@ -55,6 +55,8 @@ class IntegralListView(AbstractWrapperObject):
     #: List of child classes.
     _childClasses = []
 
+    _isGuiClass = True
+
     # Qualified name of matching API class
     _apiClassQualifiedName = ApiStripIntegralListView._metaclass.qualifiedName()
 

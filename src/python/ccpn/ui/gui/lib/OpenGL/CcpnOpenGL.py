@@ -395,6 +395,9 @@ class CcpnGLWidget(QOpenGLWidget):
         self._staticHTraces = []
         self._staticVTraces = []
         self._currentTraces = []
+        self._axisXLabelling = []
+        self._axisYLabelling = []
+        self._axisScaleLabelling = []
 
         self._stackingValue = 0.0
         self._stackingMode = False

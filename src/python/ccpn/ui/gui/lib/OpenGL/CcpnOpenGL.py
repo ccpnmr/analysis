@@ -2697,15 +2697,33 @@ class CcpnGLWidget(QOpenGLWidget):
     def _buildGL(self):
         """Separate the building of the display from the paint event; not sure that this is required
         """
+        self.buildGrid()
+        self.buildSpectra()
 
-        # build spectra
-        # build grid
-        # build peak/integral/multiplet lists
-        # build marks
-        # build regions traces
-        # build infinite lines and regions
+        self._GLPeaks._spectrumSettings = self._spectrumSettings
+        self._GLMultiplets._spectrumSettings = self._spectrumSettings
+        self._GLIntegrals._spectrumSettings = self._spectrumSettings
 
-        pass
+        if not self._stackingMode:
+            self._GLPeaks.buildSymbols()
+            self._GLMultiplets.buildSymbols()
+            self._GLIntegrals.buildSymbols()
+
+            if self.buildMarks:
+                self._marksList.renderMode = GLRENDERMODE_REBUILD
+                self.buildMarks = False
+            self.buildMarksRulers()
+
+            self.buildRegions()
+
+        if not self._stackingMode:
+            self._GLPeaks.buildLabels()
+            self._GLMultiplets.buildLabels()
+            self._GLIntegrals.buildLabels()
+
+        phasingFrame = self.spectrumDisplay.phasingFrame
+        if phasingFrame.isVisible():
+            self.buildStaticTraces()
 
     def paintGL(self):
         """Handle the GL painting
@@ -2726,6 +2744,7 @@ class CcpnGLWidget(QOpenGLWidget):
             return
 
         with self.glBlocking():
+            self._buildGL()
             self._paintGL()
 
     def _paintGL(self):
@@ -2946,7 +2965,7 @@ class CcpnGLWidget(QOpenGLWidget):
 
         currentShader = self.globalGL._shaderProgram1
 
-        self.buildSpectra()
+        # self.buildSpectra()
 
         # use the _devicePixelRatio for retina displays
         GL.glLineWidth(self.strip._contourThickness * self.viewports._devicePixelRatio)
@@ -3171,7 +3190,7 @@ class CcpnGLWidget(QOpenGLWidget):
 
     def drawGrid(self):
         # set to the mainView and draw the grid
-        self.buildGrid()
+        # self.buildGrid()
 
         GL.glEnable(GL.GL_BLEND)
         GL.glLineWidth(1.0 * self.viewports._devicePixelRatio)
@@ -3589,18 +3608,18 @@ class CcpnGLWidget(QOpenGLWidget):
         if self.strip.isDeleted:
             return
 
-        if self.buildMarks:
-            self._marksList.renderMode = GLRENDERMODE_REBUILD
-            self.buildMarks = False
-
-        self.buildMarksRulers()
+        # if self.buildMarks:
+        #     self._marksList.renderMode = GLRENDERMODE_REBUILD
+        #     self.buildMarks = False
+        #
+        # self.buildMarksRulers()
         self._marksList.drawIndexVBO(enableVBO=True)
 
     def drawRegions(self):
         if self.strip.isDeleted:
             return
 
-        self.buildRegions()
+        # self.buildRegions()
         self._externalRegions.drawIndexVBO(enableVBO=True)
 
     def drawMarksAxisCodes(self):
@@ -4780,7 +4799,7 @@ class CcpnGLWidget(QOpenGLWidget):
         phasingFrame = self.spectrumDisplay.phasingFrame
         if phasingFrame.isVisible():
 
-            self.buildStaticTraces()
+            # self.buildStaticTraces()
 
             for hTrace in self._staticHTraces:
                 if hTrace.spectrumView and not hTrace.spectrumView.isDeleted and hTrace.spectrumView.isVisible():

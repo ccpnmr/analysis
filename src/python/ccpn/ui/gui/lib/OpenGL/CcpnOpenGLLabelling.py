@@ -1766,8 +1766,8 @@ class GLLabelling():
         if self.strip.isDeleted:
             return
 
-        self._spectrumSettings = spectrumSettings
-        self.buildSymbols()
+        # self._spectrumSettings = spectrumSettings
+        # self.buildSymbols()
 
         lineThickness = self.strip.symbolThickness
         GL.glLineWidth(lineThickness * self._GLParent.viewports._devicePixelRatio)
@@ -1793,8 +1793,8 @@ class GLLabelling():
         if self.strip.isDeleted:
             return
 
-        self._spectrumSettings = spectrumSettings
-        self.buildLabels()
+        # self._spectrumSettings = spectrumSettings
+        # self.buildLabels()
 
         # # loop through the attached peakListViews to the strip
         # for spectrumView in self._GLParent._ordering:  #self._parent.spectrumViews:

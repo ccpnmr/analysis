@@ -68,6 +68,8 @@ import os
 import sys
 from typing import Sequence, Tuple, Optional, Union
 from functools import partial
+import decorator
+
 from ccpn.util import Constants
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core.Project import Project
@@ -77,6 +79,7 @@ from ccpn.core.lib import Pid
 from ccpn.core.lib.SpectrumLib import MagnetisationTransferTuple, _getProjection
 from ccpn.core.lib.Cache import cached
 from ccpn.util.decorators import logCommand
+from ccpn.framework.constants import CCPNMR_PREFIX
 from ccpn.core.lib.ContextManagers import newObject, deleteObject, \
     undoStackBlocking, renameObject, undoBlock
 from ccpn.util.Common import getAxisCodeMatchIndices
@@ -130,6 +133,48 @@ def _arrayOfIndex(index, cumul):
 
     return np.array(array)
 
+#=========================================================================================
+# Decorators to define the attributes to be copied
+#=========================================================================================
+from ccpn.util.decorators import singleton
+@singleton
+class _includeInCopyList(list):
+    """Singleton class to store the attributes to be included when making a copy of object.
+    Attributes can be modified and can be either non-dimensional or dimension dependent,
+    Dynamically filled by two decorators
+    Stored as list of (attributeName, isMultiDimensional) tuples
+    """
+    def getNoneDimensional(self):
+        "return a list of one-dimensional attributes"
+        return [attr for attr, isNd in self if isNd == False]
+
+    def getMultiDimensional(self):
+        "return a list of one-dimensional attributes"
+        return [attr for attr, isNd in self if isNd == True]
+
+    def append(self, attribute, isMultidimensional):
+        _t = (attribute, isMultidimensional)
+        if _t not in self:
+            super().append(_t)
+
+def _includeInCopy(func):
+    """Decorator to define that an non-dimensional attribute is to be included when making a copy of object
+    """
+    storage = _includeInCopyList()
+    storage.append(func.__name__, False)
+    return func
+
+def _includeInDimensionalCopy(func):
+    """Decorator to define that a dimensional attribute is to be included when making a copy of object
+    """
+    storage = _includeInCopyList()
+    storage.append(func.__name__, True)
+    return func
+
+
+#=========================================================================================
+# Spectrum class
+#=========================================================================================
 
 class Spectrum(AbstractWrapperObject):
     """A Spectrum object contains all the stored properties of an NMR spectrum, as well as the
@@ -158,9 +203,6 @@ class Spectrum(AbstractWrapperObject):
     _snr = None
 
     MAXDIM = 4  # Maximum dimensionality
-    _dimensionAttributes = []  # A list with attributes that are dimension dependent,
-                               # and can be modified. Dynamically filled at the
-                               # getter, setter definitions
 
     _PLANEDATACACHE = '_planeDataCache'  # Attribute name for the planeData cache
     _SLICEDATACACHE = '_sliceDataCache'  # Attribute name for the slicedata cache
@@ -293,6 +335,7 @@ assignmentTolerances
     #     self._wrappedData.details = value
 
     @property
+    @_includeInCopy
     def positiveContourCount(self) -> int:
         """number of positive contours to draw"""
         return self._wrappedData.positiveContourCount
@@ -302,6 +345,7 @@ assignmentTolerances
         self._wrappedData.positiveContourCount = value
 
     @property
+    @_includeInCopy
     def positiveContourBase(self) -> float:
         """base level of positive contours"""
         return self._wrappedData.positiveContourBase
@@ -311,6 +355,7 @@ assignmentTolerances
         self._wrappedData.positiveContourBase = value
 
     @property
+    @_includeInCopy
     def positiveContourFactor(self) -> float:
         """level multiplier for positive contours"""
         return self._wrappedData.positiveContourFactor
@@ -320,6 +365,7 @@ assignmentTolerances
         self._wrappedData.positiveContourFactor = value
 
     @property
+    @_includeInCopy
     def positiveContourColour(self) -> str:
         """colour of positive contours"""
         return self._wrappedData.positiveContourColour
@@ -329,6 +375,7 @@ assignmentTolerances
         self._wrappedData.positiveContourColour = value
 
     @property
+    @_includeInCopy
     def includePositiveContours(self):
         """Include flag for the positive contours
         """
@@ -352,6 +399,7 @@ assignmentTolerances
         self._ccpnInternalData = tempCcpn
 
     @property
+    @_includeInCopy
     def negativeContourCount(self) -> int:
         """number of negative contours to draw"""
         return self._wrappedData.negativeContourCount
@@ -361,6 +409,7 @@ assignmentTolerances
         self._wrappedData.negativeContourCount = value
 
     @property
+    @_includeInCopy
     def negativeContourBase(self) -> float:
         """base level of negative contours"""
         return self._wrappedData.negativeContourBase
@@ -370,6 +419,7 @@ assignmentTolerances
         self._wrappedData.negativeContourBase = value
 
     @property
+    @_includeInCopy
     def negativeContourFactor(self) -> float:
         """level multiplier for negative contours"""
         return self._wrappedData.negativeContourFactor
@@ -379,6 +429,7 @@ assignmentTolerances
         self._wrappedData.negativeContourFactor = value
 
     @property
+    @_includeInCopy
     def negativeContourColour(self) -> str:
         """colour of negative contours"""
         return self._wrappedData.negativeContourColour
@@ -388,6 +439,7 @@ assignmentTolerances
         self._wrappedData.negativeContourColour = value
 
     @property
+    @_includeInCopy
     def includeNegativeContours(self):
         """Include flag for the negative contours
         """
@@ -411,6 +463,7 @@ assignmentTolerances
         self._ccpnInternalData = tempCcpn
 
     @property
+    @_includeInCopy
     def sliceColour(self) -> str:
         """colour of 1D slices"""
         return self._wrappedData.sliceColour
@@ -422,6 +475,7 @@ assignmentTolerances
         #     spectrumView.setSliceColour()  # ejb - update colour here
 
     @property
+    @_includeInCopy
     def scale(self) -> float:
         """Scaling factor for intensities and volumes.
         Intensities and volumes should be *multiplied* by scale before comparison."""
@@ -438,6 +492,7 @@ assignmentTolerances
         #     spectrumView.refreshData()
 
     @property
+    @_includeInCopy
     def spinningRate(self) -> float:
         """NMR tube spinning rate (in Hz)."""
         return self._wrappedData.experiment.spinningRate
@@ -447,6 +502,7 @@ assignmentTolerances
         self._wrappedData.experiment.spinningRate = value
 
     @property
+    @_includeInCopy
     def noiseLevel(self) -> float:
         """Estimated noise level for the spectrum,
         defined as the estimated standard deviation of the points from the baseplane/baseline"""
@@ -457,6 +513,7 @@ assignmentTolerances
         self._wrappedData.noiseLevel = value
 
     @property
+    @_includeInCopy
     def negativeNoiseLevel(self) -> float:
         """ Negative noise level value. Stored in Internal"""
         propertyName = sys._getframe().f_code.co_name
@@ -479,6 +536,7 @@ assignmentTolerances
             return refExperiment.synonym
 
     @property
+    @_includeInCopy
     def experimentType(self) -> str:
         """Systematic experiment type descriptor (CCPN system)."""
         refExperiment = self._wrappedData.experiment.refExperiment
@@ -522,6 +580,7 @@ assignmentTolerances
         return self._wrappedData.experiment
 
     @property
+    @_includeInCopy
     def experimentName(self) -> str:
         """Common experiment type descriptor (May not be unique)."""
         return self._wrappedData.experiment.name
@@ -616,8 +675,8 @@ assignmentTolerances
         else:
             raise ValueError("Value must have length %s, was %s" % (apiDataSource.numDim, value))
 
-    _dimensionAttributes.append('axisCodes')
     @property
+    @_includeInDimensionalCopy
     def axisCodes(self) -> Tuple[Optional[str], ...]:
         """axisCode, per dimension - None if no main ExpDimRef
         """
@@ -650,8 +709,8 @@ assignmentTolerances
                 check[v] = i
         self._setExpDimRefAttribute('axisCode', values, mandatory=False)
 
-    _dimensionAttributes.append('pointCounts')
     @property
+    @_includeInDimensionalCopy
     def pointCounts(self) -> Tuple[int, ...]:
         """Number active of points per dimension
 
@@ -697,8 +756,8 @@ assignmentTolerances
             raise ValueError("pointCounts value must have length %s, was %s" %
                              (apiDataSource.numDim, value))
 
-    _dimensionAttributes.append('totalPointCounts')
     @property
+    @_includeInDimensionalCopy
     def totalPointCounts(self) -> Tuple[int, ...]:
         """Total number of points per dimension
 
@@ -728,8 +787,8 @@ assignmentTolerances
             raise ValueError("totalPointCount value must have length %s, was %s" %
                              (apiDataSource.numDim, value))
 
-    _dimensionAttributes.append('pointOffsets')
     @property
+    @_includeInDimensionalCopy
     def pointOffsets(self) -> Tuple[int, ...]:
         """index of first active point relative to total points, per dimension"""
         return tuple(x.pointOffset if x.className != 'SampledDataDim' else None
@@ -739,8 +798,8 @@ assignmentTolerances
     def pointOffsets(self, value: Sequence):
         self._setStdDataDimValue('pointOffset', value)
 
-    _dimensionAttributes.append('isComplex')
     @property
+    @_includeInDimensionalCopy
     def isComplex(self) -> Tuple[bool, ...]:
         """Is dimension complex? -  per dimension"""
         return tuple(x.isComplex for x in self._wrappedData.sortedDataDims())
@@ -754,7 +813,6 @@ assignmentTolerances
         else:
             raise ValueError("Value must have length %s, was %s" % (apiDataSource.numDim, value))
 
-    #_dimensionAttributes.append('dimensionTypes')
     #TODO: add setter for dimensionTypes
     @property
     def dimensionTypes(self) -> Tuple[str, ...]:
@@ -762,8 +820,8 @@ assignmentTolerances
         ll = [x.className[:-7] for x in self._wrappedData.sortedDataDims()]
         return tuple('Frequency' if x == 'Freq' else x for x in ll)
 
-    _dimensionAttributes.append('spectralWidthsHz')
     @property
+    @_includeInDimensionalCopy
     def spectralWidthsHz(self) -> Tuple[Optional[float], ...]:
         """spectral width (in Hz) before dividing by spectrometer frequency, per dimension"""
         return tuple(x.spectralWidth if hasattr(x, 'spectralWidth') else None
@@ -820,8 +878,8 @@ assignmentTolerances
         #
         return tuple(result)
 
-    _dimensionAttributes.append('phases0')
     @property
+    @_includeInDimensionalCopy
     def phases0(self) -> tuple:
         """zero order phase correction (or None), per dimension. Always None for sampled dimensions."""
         return tuple(x.phase0 if x.className != 'SampledDataDim' else None
@@ -831,8 +889,8 @@ assignmentTolerances
     def phases0(self, value: Sequence):
         self._setStdDataDimValue('phase0', value)
 
-    _dimensionAttributes.append('phases1')
     @property
+    @_includeInDimensionalCopy
     def phases1(self) -> Tuple[Optional[float], ...]:
         """first order phase correction (or None) per dimension. Always None for sampled dimensions."""
         return tuple(x.phase1 if x.className != 'SampledDataDim' else None
@@ -842,8 +900,8 @@ assignmentTolerances
     def phases1(self, value: Sequence):
         self._setStdDataDimValue('phase1', value)
 
-    _dimensionAttributes.append('windowFunctions')
     @property
+    @_includeInDimensionalCopy
     def windowFunctions(self) -> Tuple[Optional[str], ...]:
         """Window function name (or None) per dimension - e.g. 'EM', 'GM', 'SINE', 'QSINE', ....
         Always None for sampled dimensions."""
@@ -854,8 +912,8 @@ assignmentTolerances
     def windowFunctions(self, value: Sequence):
         self._setStdDataDimValue('windowFunction', value)
 
-    _dimensionAttributes.append('lorentzianBroadenings')
     @property
+    @_includeInDimensionalCopy
     def lorentzianBroadenings(self) -> Tuple[Optional[float], ...]:
         """Lorenzian broadening in Hz per dimension. Always None for sampled dimensions."""
         return tuple(x.lorentzianBroadening if x.className != 'SampledDataDim' else None
@@ -865,8 +923,8 @@ assignmentTolerances
     def lorentzianBroadenings(self, value: Sequence):
         self._setStdDataDimValue('lorentzianBroadening', value)
 
-    _dimensionAttributes.append('gaussianBroadenings')
     @property
+    @_includeInDimensionalCopy
     def gaussianBroadenings(self) -> Tuple[Optional[float], ...]:
         """Gaussian broadening per dimension. Always None for sampled dimensions."""
         return tuple(x.gaussianBroadening if x.className != 'SampledDataDim' else None
@@ -876,8 +934,8 @@ assignmentTolerances
     def gaussianBroadenings(self, value: Sequence):
         self._setStdDataDimValue('gaussianBroadening', value)
 
-    _dimensionAttributes.append('sineWindowShifts')
     @property
+    @_includeInDimensionalCopy
     def sineWindowShifts(self) -> Tuple[Optional[float], ...]:
         """Shift of sine/sine-square window function in degrees. Always None for sampled dimensions."""
         return tuple(x.sineWindowShift if x.className != 'SampledDataDim' else None
@@ -917,8 +975,8 @@ assignmentTolerances
                 else:
                     setattr(expDimRef, attributeName, val)
 
-    _dimensionAttributes.append('spectrometerFrequencies')
     @property
+    @_includeInDimensionalCopy
     def spectrometerFrequencies(self) -> Tuple[Optional[float], ...]:
         """Tuple of spectrometer frequency for main dimensions reference """
         return tuple(x and x.sf for x in self._mainExpDimRefs())
@@ -927,8 +985,8 @@ assignmentTolerances
     def spectrometerFrequencies(self, value):
         self._setExpDimRefAttribute('sf', value)
 
-    _dimensionAttributes.append('measurementTypes')
     @property
+    @_includeInDimensionalCopy
     def measurementTypes(self) -> Tuple[Optional[str], ...]:
         """Type of value being measured, per dimension.
 
@@ -941,8 +999,8 @@ assignmentTolerances
     def measurementTypes(self, value):
         self._setExpDimRefAttribute('measurementType', value)
 
-    _dimensionAttributes.append('isotopeCodes')
     @property
+    @_includeInDimensionalCopy
     def isotopeCodes(self) -> Tuple[Optional[str], ...]:
         """isotopeCode of isotope being measured, per dimension - None if no unique code"""
         result = []
@@ -979,8 +1037,8 @@ assignmentTolerances
         else:
             raise ValueError("Value must have length %s, was %s" % (apiDataSource.numDim, value))
 
-    _dimensionAttributes.append('foldingModes')
     @property
+    @_includeInDimensionalCopy
     def foldingModes(self) -> Tuple[Optional[str], ...]:
         """folding mode (values: 'circular', 'mirror', None), per dimension"""
         dd = {True: 'mirror', False: 'circular', None: None}
@@ -1002,6 +1060,7 @@ assignmentTolerances
         self._setExpDimRefAttribute('isFolded', [dd[x] for x in values])
 
     @property
+    @_includeInCopy
     def acquisitionAxisCode(self) -> Optional[str]:
         """Axis code of acquisition axis - None if not known"""
         for dataDim in self._wrappedData.sortedDataDims():
@@ -1026,8 +1085,8 @@ assignmentTolerances
         for ii, dataDim in enumerate(self._wrappedData.sortedDataDims()):
             dataDim.expDim.isAcquisition = (ii == index)
 
-    _dimensionAttributes.append('axisUnits')
     @property
+    @_includeInDimensionalCopy
     def axisUnits(self) -> Tuple[Optional[str], ...]:
         """Main axis unit (most commonly 'ppm'), per dimension - None if no unique code
 
@@ -1077,8 +1136,8 @@ assignmentTolerances
         else:
             raise ValueError("Value must have length %s, was %s" % (apiDataSource.numDim, value))
 
-    _dimensionAttributes.append('referencePoints')
     @property
+    @_includeInDimensionalCopy
     def referencePoints(self) -> Tuple[Optional[float], ...]:
         """point used for axis (chemical shift) referencing, per dimension."""
         return tuple(x and x.refPoint for x in self._mainDataDimRefs())
@@ -1087,8 +1146,8 @@ assignmentTolerances
     def referencePoints(self, value):
         self._setDataDimRefAttribute('refPoint', value)
 
-    _dimensionAttributes.append('referenceValues')
     @property
+    @_includeInDimensionalCopy
     def referenceValues(self) -> Tuple[Optional[float], ...]:
         """value used for axis (chemical shift) referencing, per dimension."""
         return tuple(x and x.refValue for x in self._mainDataDimRefs())
@@ -1097,8 +1156,8 @@ assignmentTolerances
     def referenceValues(self, value):
         self._setDataDimRefAttribute('refValue', value)
 
-    _dimensionAttributes.append('assignmentTolerances')
     @property
+    @_includeInDimensionalCopy
     def assignmentTolerances(self) -> Tuple[Optional[float], ...]:
         """Assignment tolerance in axis unit (ppm), per dimension."""
         return tuple(x and x.assignmentTolerance for x in self._mainDataDimRefs())
@@ -1122,8 +1181,8 @@ assignmentTolerances
         #
         return tolerances
 
-    _dimensionAttributes.append('spectralWidths')
     @property
+    @_includeInDimensionalCopy
     def spectralWidths(self) -> Tuple[Optional[float], ...]:
         """spectral width after processing in axis unit (ppm), per dimension """
         return tuple(x and x.spectralWidth for x in self._mainDataDimRefs())
@@ -1141,8 +1200,8 @@ assignmentTolerances
                 else:
                     dataDimRef.dataDim.valuePerPoint *= (sw / oldsw)
 
-    _dimensionAttributes.append('aliasingLimits')
     @property
+    @_includeInDimensionalCopy
     def aliasingLimits(self) -> Tuple[Tuple[Optional[float], Optional[float]], ...]:
         """\- (*(float,float)*)\*dimensionCount
 
@@ -1325,6 +1384,7 @@ assignmentTolerances
             spectrumView.refreshData()
 
     @property
+    @_includeInCopy
     def displayFoldedContours(self):
         """Return whether the folded spectrum contours are to be displayed
         """
@@ -1370,8 +1430,8 @@ assignmentTolerances
 
         self.setParameter(SPECTRUMALIASING, UPDATEALIASINGRANGE, value)
 
-    _dimensionAttributes.append('aliasingRange')
     @property
+    @_includeInDimensionalCopy
     def aliasingRange(self) -> Optional[Tuple[Tuple, ...]]:
         """Return a tuple of the aliasing range in each dimension, or None of not set
         """
@@ -1989,7 +2049,7 @@ assignmentTolerances
     def _copyDimensionalParameters(self, axisCodes, target):
         """Copy dimensional parameters for axisCodes from self to target
         """
-        for attr in self._dimensionAttributes:
+        for attr in _includeInCopyList().getMultiDimensional():
             try:
                 values = self.getByAxisCodes(attr, axisCodes, exactMatch=True)
                 target.setByAxisCodes(attr, values, axisCodes, exactMatch=True)
@@ -1997,6 +2057,24 @@ assignmentTolerances
                 getLogger().error('Copying "%s" from %s to %s for axisCodes %s: %s' %
                                   (attr, self, target, axisCodes, es)
                 )
+
+    def _copyNonDimensionalParameters(self, target):
+        """Copy non-dimensional parameters from self to target
+        """
+        for attr in _includeInCopyList().getNoneDimensional():
+            try:
+                value = getattr(self, attr)
+                setattr(target, attr, value)
+            except Exception as es:
+                getLogger().error('Copying "%s" from %s to %s: %s' %
+                                  (attr, self, target, es)
+                )
+
+    def copyParameters(self, axisCodes, target):
+        """Copy non-dimensional and dimensional parameters for axisCodes from self to target
+        """
+        self._copyNonDimensionalParameters(target)
+        self._copyDimensionalParameters(axisCodes, target)
 
     #=========================================================================================
     # data access functions
@@ -2137,9 +2215,6 @@ assignmentTolerances
         :return: Spectrum instance
         """
 
-        if self.dimensionCount == 1:
-            raise RuntimeError('Spectrum %s contains 1D data; cannot extract slice' % self)
-
         if axisCode not in self.axisCodes:
             raise ValueError('Invalid axisCode "%s"' % axisCode)
         if len(position) != self.dimensionCount:
@@ -2157,7 +2232,7 @@ assignmentTolerances
         _dummy = self.project.createDummySpectrum(axisCodes=[axisCode], name='_dummy')
         _dummy._intensities = self.getSlice(axisCode, position, exactMatch=True)
         # copy relevant attributes
-        self._copyDimensionalParameters(axisCodes=[axisCode], target=_dummy)
+        self.copyParameters(axisCodes=[axisCode], target=_dummy)
 
         # save as hdf5 file
         from ccpn.util.Hdf5 import convertDataToHdf5
@@ -2169,7 +2244,7 @@ assignmentTolerances
         newSpectrum = self.project.loadSpectrum(path=path, subType=HDF5_TYPE)[0]  # load yields a list
         newSpectrum.axisCodes = [axisCode] # to overRide the loadData
         # Copy relevant attributes again
-        self._copyDimensionalParameters(axisCodes=[axisCode], target=newSpectrum)
+        self.copyParameters(axisCodes=[axisCode], target=newSpectrum)
         return newSpectrum
 
     @cached(_PLANEDATACACHE, maxItems=64, debug=False)
@@ -2254,8 +2329,11 @@ assignmentTolerances
 
         :returns plane as Spectrum instance
         """
+        if self.dimensionCount < 2:
+            raise RuntimeError('Cannot extract plane from 1D data (%s)' % self)
+
         if position is None:
-            position = [1] * self.dimensionCount
+            position = [1] * 2
 
         if path is None:
             path = self._getDefaultPlanePath(axisCodes, position)
@@ -2270,7 +2348,7 @@ assignmentTolerances
 
         newSpectrum = self.project.loadSpectrum(path, subType=Formats.NMRPIPE)[0]
         newSpectrum.axisCodes = axisCodes  # to override the loadSpectrum routine
-        self._copyDimensionalParameters(axisCodes=axisCodes, target=newSpectrum)
+        self.copyParameters(axisCodes=axisCodes, target=newSpectrum)
         return newSpectrum
 
     def allPlanes(self, axisCodes: tuple, exactMatch=True):
@@ -2346,7 +2424,7 @@ assignmentTolerances
 
         newSpectrum = self.project.loadSpectrum(path, subType=Formats.NMRPIPE)[0]
         newSpectrum.axisCodes = axisCodes  # to override the loadSpectrum routine
-        self._copyDimensionalParameters(axisCodes=axisCodes, target=newSpectrum)
+        self.copyParameters(axisCodes=axisCodes, target=newSpectrum)
         return newSpectrum
 
     # GWV 20190731: not used

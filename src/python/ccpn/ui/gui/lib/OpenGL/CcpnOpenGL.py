@@ -74,6 +74,7 @@ import re
 import time
 import numpy as np
 from functools import partial
+from contextlib import contextmanager
 # from threading import Thread
 # from queue import Queue
 from PyQt5 import QtCore, QtGui, QtWidgets
@@ -2679,18 +2680,28 @@ class CcpnGLWidget(QOpenGLWidget):
     #     self._GLIntegrals.setListViews(self._ordering)
     #     self._GLMultiplets.setListViews(self._ordering)
 
-    # @profile
+    @contextmanager
+    def glNotifierBlocking(self):
+        try:
+            # stop notifiers and logging interfering with paint event
+            self.project.blankNotification()
+            self.application._increaseNotificationBlocking()
+
+            yield
+
+        finally:
+            # re-enable notifiers
+            self.application._decreaseNotificationBlocking()
+            self.project.unblankNotification()
+
+    def _buildGL(self):
+        """Separate the building of the display from the paint event
+        """
+        pass
+
     def paintGL(self):
-        w = self.w
-        h = self.h
-
-        if self._updateBackgroundColour:
-            self._updateBackgroundColour = False
-            self.setBackgroundColour(self.background, silent=True)
-
-        GL.glClear(GL.GL_COLOR_BUFFER_BIT)
-        currentShader = self.globalGL._shaderProgram1.makeCurrent()
-
+        """Handle the GL painting
+        """
         if self._blankDisplay:
             return
 
@@ -2706,14 +2717,19 @@ class CcpnGLWidget(QOpenGLWidget):
         if not self._ordering:
             return
 
-        # stop notifiers and logging interfering with paint event
-        self.project.blankNotification()
-        self.application._increaseNotificationBlocking()
+        with self.glNotifierBlocking():
+            self._paintGL()
 
-        # self._ordering = self.spectrumDisplay.orderedSpectrumViews(self._ordering:                             # strip.spectrumViews)
-        # self._GLPeaks.setListViews(self._ordering)
-        # self._GLIntegrals.setListViews(self._ordering)
-        # self._GLMultiplets.setListViews(self._ordering)
+    def _paintGL(self):
+        w = self.w
+        h = self.h
+
+        if self._updateBackgroundColour:
+            self._updateBackgroundColour = False
+            self.setBackgroundColour(self.background, silent=True)
+
+        GL.glClear(GL.GL_COLOR_BUFFER_BIT)
+        currentShader = self.globalGL._shaderProgram1.makeCurrent()
 
         # start with the grid mapped to (0..1, 0..1) to remove zoom errors here
         currentShader.setProjectionAxes(self._uPMatrix, 0.0, 1.0, 0.0, 1.0, -1.0, 1.0)
@@ -2831,10 +2847,6 @@ class CcpnGLWidget(QOpenGLWidget):
             GL.glVertex2d(w - self.AXIS_MARGINRIGHT, h - self.AXIS_MARGINBOTTOM)
 
         GL.glEnd()
-
-        # re-enable notifiers
-        self.application._decreaseNotificationBlocking()
-        self.project.unblankNotification()
 
     def enableTexture(self):
         GL.glEnable(GL.GL_BLEND)

@@ -2681,7 +2681,7 @@ class CcpnGLWidget(QOpenGLWidget):
     #     self._GLMultiplets.setListViews(self._ordering)
 
     @contextmanager
-    def glNotifierBlocking(self):
+    def glBlocking(self):
         try:
             # stop notifiers and logging interfering with paint event
             self.project.blankNotification()
@@ -2695,8 +2695,16 @@ class CcpnGLWidget(QOpenGLWidget):
             self.project.unblankNotification()
 
     def _buildGL(self):
-        """Separate the building of the display from the paint event
+        """Separate the building of the display from the paint event; not sure that this is required
         """
+
+        # build spectra
+        # build grid
+        # build peak/integral/multiplet lists
+        # build marks
+        # build regions traces
+        # build infinite lines and regions
+
         pass
 
     def paintGL(self):
@@ -2717,7 +2725,7 @@ class CcpnGLWidget(QOpenGLWidget):
         if not self._ordering:
             return
 
-        with self.glNotifierBlocking():
+        with self.glBlocking():
             self._paintGL()
 
     def _paintGL(self):

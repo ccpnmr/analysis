@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Working with Strips</title>
+    <style >.action {color: #803594; font-weight:bold;}</style>
+</head>
+<body>
+<h2>Working with Strips</h2>
+<h3>Basics</h3>
+<p>The simplest way to add or remove strips is to use the <span class="action">+</span> and <span class="action">-</span> buttons in the toolbar. Note that each strip has its own X and Z axis, but that by default the Y-axis is shared between the strips. You can type <span class="action">LA</span> or <span class="action">right-click</span> and go to <span class="action">Share Last Axis</span> to toggle between sharing the Y-axis and having separate Y-axes for each strip.</p>
+<p>In the top right-hand corner of each strip you will see the strip name, typically something like <span class="action">HNC.1</span>. One of the strips is always the 'current' or active strip and this is highlighted by having a highlighted strip name and set of axes. You can lock the aspect ratio as usual, which will automatically affect all the strips in your display.</p>
+<p>You can widen or narrow your strips using the buttons in the toolbar.</p>
+<h3>Dragging Strips</h3>
+<p>You can move strips around within a display by clicking on the strip name and dragging it to a new position. This will drag the strip to a new position.</p>
+<h3>Navigation</h3>
+<p>You can navigate to a particular strip from another strip or another spectrum display by <span class="action">right-clicking</span> and going to <span class="action">Navigate to:</span> and then selecting the display or strip of your choice.</p>
+<h3>Creating Strip Plots</h3>
+<p>You can create strip plots automatically from a set of peaks or NmrResidues by typing <span class="action">SP</span> or going to <span class="action">Spectrum / Make Strip Plot...</span>. Select the display in which you want the strips to be created, as well as the source for your strip selection: the currently selected peaks (which you might have selected either in a spectrum or in a peak table), the currently selected NmrResidues (which you can select in an NmrResidue table, opened with <span class="action">NT</span>) or an NmrChain (use the drop-down menu to select your NmrChain).</p>
+<p>Note the if you create strips using the <span class="action">Make Strip Plot...</span> function, the strips are given headers which indicate the peak or NmrResidue which they have been derived from. You can <span class="action">right-click</span> on a strip header to clear its contents or remove all strip headers from that (or all) displays.</p>
+<h3>Horizontal Strips</h3>
+<p>By default, strips are always arranged vertically, but it is also possible to display strips horizontally. Click on the gear symbol of your chosen display to switch to the alternative strip arrangement. All the other strip functions, such as adding, removing, changing the width (or in this case now the height), navigating, dragging or creating strip plots should work as usual.</p>
+<h3>Z-depth</h3>
+<p>Remember that when you are working with 3D (or higher dimensionality) spectra the Z-depth of your strips will adjust to the spectrum with the highest digital resolution. So if you are working with spectra with different digital resolutions, the lower resolved spectra won't change every time you click through a plane. In this situation it can be useful to view several planes at once. Set the number of planes to use in the box next to your Z axis position.</p>
+</body>
+</html>

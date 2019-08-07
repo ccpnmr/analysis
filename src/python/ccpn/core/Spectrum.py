@@ -618,14 +618,19 @@ assignmentTolerances
             self._clearCache()
 
     @property
+    def path(self):
+        """return a Path instance defining the absolute path of filePath
+        """
+        if self.filePath is None:
+            raise RuntimeError('filePath is not defined')
+        return aPath(self.filePath)
+
+    @property
     def isValidPath(self) -> bool:
         """Return true if the spectrum currently points to an existent file.
-        (contents of the file are not checked)"""
-        path = self.filePath
-        if path and os.path.exists(path):
-            return True
-        else:
-            return False
+        (contents of the file are not checked)
+        """
+        return self.path.exists()
 
     @property
     def headerSize(self) -> Optional[int]:

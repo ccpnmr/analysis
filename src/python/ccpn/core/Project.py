@@ -1180,6 +1180,7 @@ class Project(AbstractWrapperObject):
         else:
             raise ValueError("Project file type %s is not recognised" % subType)
 
+    @logCommand('project')
     def loadSpectrum(self, path: str, subType: str, name=None) -> list:
         """Load spectrum defined by path into application
         """

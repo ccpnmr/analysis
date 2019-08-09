@@ -66,6 +66,7 @@ class Cache(object):
 
     - Retains (item, value) pairs; item must be a hash-able object (e.g. tuple)
     - Retains either maxItem or unlimited number of objects.
+    - maxItem == 0 disables caching
     - Clearing cache is responsibility of the instantiating code; e.g. by decorating a cleanup function
       with cached.clear(attributeName); see above in description for example.
     """
@@ -86,18 +87,34 @@ class Cache(object):
     def add(self, item, value):
         """add item,value to the cache
         """
+        if self._maxItems == 0:
+            return  # cache is disabled
+
         if item in self._items:  # not using hasItem() to save another call
             return  # item is already cached
 
         if self._maxItems and len(self._items) == self._maxItems:
             # need to remove one item first
-            itm = self._items.pop(0)
-            if self._debug: sys.stderr.write('DEBUG> %s ... removing "%s"\n' % (self, itm))
-            del (self._cacheDict[itm])
+            self.pop()
 
         if self._debug: sys.stderr.write('DEBUG> %s ... Adding "%s"\n' % (self, item))
         self._cacheDict[item] = value
         self._items.append(item)
+
+    def pop(self):
+        """Remove oldest item from stack
+        """
+        if len(self._items) > 0:
+            itm = self._items.pop(0)
+            if self._debug: sys.stderr.write('DEBUG> %s ... removing "%s"\n' % (self, itm))
+            del (self._cacheDict[itm])
+
+    def resize(self, maxItems):
+        """Resize the cache to contain maxItems
+        """
+        while len(self._items) > max(0, maxItems):
+            self.pop()
+        self._maxItems = maxItems
 
     def get(self, item):
         """Get item from cache; return None if not present

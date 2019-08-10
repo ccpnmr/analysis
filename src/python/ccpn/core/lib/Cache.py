@@ -79,7 +79,7 @@ class Cache(object):
         :param debug: enable debug for this cache
         """
         self._maxItems = maxItems  # maximum number of cached items
-        self._name = name  # name of the cache (main for debugging)
+        self._name = name  # name of the cache (mainly for debugging)
         self._debug = DEBUG or debug  # debug flag for this cache instance
         self._items = []  # List (FIFO stack) of items in the cache
         self._cacheDict = {}  # cached (item, value) dict

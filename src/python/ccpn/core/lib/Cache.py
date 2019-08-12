@@ -55,6 +55,7 @@ __date__ = "$Date: 2018-05-14 10:28:41 +0000 (Fri, April 07, 2017) $"
 import decorator
 import inspect
 import sys
+from collections import deque
 
 
 DEBUG = False  # global debug
@@ -81,7 +82,7 @@ class Cache(object):
         self._maxItems = maxItems  # maximum number of cached items
         self._name = name  # name of the cache (mainly for debugging)
         self._debug = DEBUG or debug  # debug flag for this cache instance
-        self._items = []  # List (FIFO stack) of items in the cache
+        self._items = deque([])  # deque (FIFO stack) of items in the cache
         self._cacheDict = {}  # cached (item, value) dict
 
     def add(self, item, value):
@@ -90,10 +91,10 @@ class Cache(object):
         if self._maxItems == 0:
             return  # cache is disabled
 
-        if item in self._items:  # not using hasItem() to save another call
+        if item in self._cacheDict:  # not using hasItem() to save another call
             return  # item is already cached
 
-        if self._maxItems and len(self._items) == self._maxItems:
+        if len(self._items) == self._maxItems:
             # need to remove one item first
             self.pop()
 
@@ -105,7 +106,7 @@ class Cache(object):
         """Remove oldest item from stack
         """
         if len(self._items) > 0:
-            itm = self._items.pop(0)
+            itm = self._items.popleft()
             if self._debug: sys.stderr.write('DEBUG> %s ... removing "%s"\n' % (self, itm))
             del (self._cacheDict[itm])
 
@@ -119,22 +120,22 @@ class Cache(object):
     def get(self, item):
         """Get item from cache; return None if not present
         """
-        if not item in self._items:  # not using hasItem() to save another call
-            return None
-        if self._debug: sys.stderr.write('DEBUG> %s ... Getting cached "%s"\n' % (self, item))
-        return self._cacheDict[item]
+        result = self._cacheDict.get(item)
+        if self._debug and result is not None:
+            sys.stderr.write('DEBUG> %s ... Got cached item "%s"\n' % (self, item))
+        return result
 
     def hasItem(self, item):
         """Return True of item is in cache
         """
-        return item in self._items
+        return item in self._cacheDict
 
     def clear(self):
         """Clear all items from the cache
         """
         if self._debug: sys.stderr.write('DEBUG> %s ... clearing\n' % self)
         self._cacheDict = {}
-        self._items = []
+        self._items = deque([])
 
     def __str__(self):
         return '<Cache %s; items:(%d,max:%d)>' % (self._name, len(self._items), self._maxItems)
@@ -226,25 +227,26 @@ if __name__ == "__main__":
 
         @cached(CACHE, maxItems=2, debug=True)
         def add(self, values, test=True):
-            return [v.capitalize() for v in values]
+            result = str(tuple([v.upper() for v in values])) + '\n'
+            return result
 
         @cached.clear('cache')
         def doClear(self):
-            print('clearing')
+            sys.stderr.write('>>> clearing\n')
 
         def __str__(self):
             return '<myclass>'
 
 
     a = myclass()
-    print(a.add('aap noot mies'.split()))
-    print(a.add('aap noot mies'.split()))
-    print(a.add('kees hallo'.split()))
-    print(a.add('dag week'.split()))
+    sys.stderr.write(a.add('aap noot mies'.split()))
+    sys.stderr.write(a.add('aap noot mies'.split()))
+    sys.stderr.write(a.add('kees hallo'.split()))
+    sys.stderr.write(a.add('dag week'.split()))
 
     v = 'fijn zo'.split()
-    print(a.add(v))
-    print(a.add(v, False))
+    sys.stderr.write(a.add(v))
+    sys.stderr.write(a.add(v, False))
 
     a.doClear()
-    print(a.add(v, False))
+    sys.stderr.write(a.add(v, False))

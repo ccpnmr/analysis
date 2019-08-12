@@ -81,6 +81,8 @@ from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObjec
 
 
 STRIP_SPACING = 5
+STRIP_MINIMUMWIDTH = 100
+STRIP_MINIMUMHEIGHT = STRIP_MINIMUMWIDTH
 AXIS_WIDTH = 30
 AXISUNITS = ['ppm', 'Hz', 'points']
 SPECTRUMGROUPS = 'spectrumGroups'
@@ -1232,8 +1234,7 @@ class GuiSpectrumDisplay(CcpnModule):
         """Redraw the axes for the stripFrame, and set the new current strip,
         will default to the last strip if not selected.
         """
-        self.showAxes()
-        self.setColumnStretches(stretchValue=True)
+        self.showAxes(stretchValue=True)
         if self.strips:
             self.current.strip = self.strips[index]
 
@@ -1257,7 +1258,7 @@ class GuiSpectrumDisplay(CcpnModule):
     def setLastAxisOnly(self, lastAxisOnly: bool = True):
         self.lastAxisOnly = lastAxisOnly
 
-    def showAxes(self, strips=None, stretchValue=False, widths=True, minimumWidth=None):
+    def showAxes(self, strips=None, stretchValue=False, widths=True, minimumWidth=STRIP_MINIMUMWIDTH):
         # use the strips as they are ordered in the model
         currentStrips = self.orderedStrips
 
@@ -1341,70 +1342,66 @@ class GuiSpectrumDisplay(CcpnModule):
             self._decreaseStripHeight()
 
     def _increaseStripWidth(self):
-        strips = self.orderedStrips
-        currentWidth = strips[0].width() * (100.0 + self.application.preferences.general.stripWidthZoomPercent) / 100.0
-        AXIS_WIDTH = strips[0].getRightAxisWidth()
-
-        self.stripFrame.hide()
-        if len(strips) > 1:
-            for strip in strips[:-1]:
-                strip.setMinimumWidth(currentWidth)
-            strips[-1].setMinimumWidth(currentWidth + AXIS_WIDTH)
-            self.stripFrame.setMinimumWidth(currentWidth * len(strips) + AXIS_WIDTH)
-        else:
-            strips[0].setMinimumWidth(currentWidth)
-            self.stripFrame.setMinimumWidth(currentWidth)
-
-        self.stripFrame.show()
+        """Increase the widths of the strips
+        """
+        factor = (100.0 + self.application.preferences.general.stripWidthZoomPercent) / 100.0
+        self._setStripWidths(factor)
 
     def _decreaseStripWidth(self):
-        strips = self.orderedStrips
-        currentWidth = strips[0].width() * 100.0 / (100.0 + self.application.preferences.general.stripWidthZoomPercent)
-        AXIS_WIDTH = strips[0].getRightAxisWidth()
+        """decrease the widths of the strips
+        """
+        factor = 100.0 / (100.0 + self.application.preferences.general.stripWidthZoomPercent)
+        self._setStripWidths(factor)
 
+    def _setStripWidths(self, factor=1.0):
+        """set the widths for the strips
+        """
         self.stripFrame.hide()
+
+        strips = self.orderedStrips
+        newWidth = max(strips[0].width() * factor, STRIP_MINIMUMWIDTH)        # + (0 if self.lastAxisOnly else strips[0].getRightAxisWidth()))
+        axisWidth = strips[0].getRightAxisWidth() if self.lastAxisOnly else 0
+
         if len(strips) > 1:
             for strip in strips[:-1]:
-                strip.setMinimumWidth(currentWidth)
-            strips[-1].setMinimumWidth(currentWidth + AXIS_WIDTH)
-            self.stripFrame.setMinimumWidth(currentWidth * len(strips) + AXIS_WIDTH)
+                strip.setMinimumWidth(newWidth)
+            strips[-1].setMinimumWidth(newWidth + axisWidth)
+            self.stripFrame.setMinimumWidth((newWidth + STRIP_SPACING) * len(strips) + axisWidth - STRIP_SPACING)
         else:
-            strips[0].setMinimumWidth(currentWidth)
-            self.stripFrame.setMinimumWidth(currentWidth)
+            strips[0].setMinimumWidth(newWidth)
+            self.stripFrame.setMinimumWidth(newWidth)
 
         self.stripFrame.show()
 
     def _increaseStripHeight(self):
-        strips = self.orderedStrips
-        currentHeight = strips[0].height() * (100.0 + self.application.preferences.general.stripWidthZoomPercent) / 100.0
-        AXIS_HEIGHT = strips[0].getBottomAxisHeight()
-
-        self.stripFrame.hide()
-        if len(strips) > 1:
-            for strip in strips[:-1]:
-                strip.setMinimumHeight(currentHeight)
-            strips[-1].setMinimumHeight(currentHeight + AXIS_HEIGHT)
-            self.stripFrame.setMinimumHeight(currentHeight * len(strips) + AXIS_HEIGHT)
-        else:
-            strips[0].setMinimumHeight(currentHeight)
-            self.stripFrame.setMinimumHeight(currentHeight)
-
-        self.stripFrame.show()
+        """Increase the heights of the strips
+        """
+        factor = (100.0 + self.application.preferences.general.stripWidthZoomPercent) / 100.0
+        self._setStripHeights(factor)
 
     def _decreaseStripHeight(self):
-        strips = self.orderedStrips
-        currentHeight = strips[0].height() * 100.0 / (100.0 + self.application.preferences.general.stripWidthZoomPercent)
-        AXIS_HEIGHT = strips[0].getBottomAxisHeight()
+        """decrease the heights of the strips
+        """
+        factor = 100.0 / (100.0 + self.application.preferences.general.stripWidthZoomPercent)
+        self._setStripHeights(factor)
 
+    def _setStripHeights(self, factor=1.0):
+        """set the heights for the strips
+        """
         self.stripFrame.hide()
+
+        strips = self.orderedStrips
+        newHeight = max(strips[0].height() * factor, STRIP_MINIMUMHEIGHT)        # + (0 if self.lastAxisOnly else strips[0].getRightAxisWidth()))
+        axisHeight = strips[0].getBottomAxisHeight() if self.lastAxisOnly else 0
+
         if len(strips) > 1:
             for strip in strips[:-1]:
-                strip.setMinimumHeight(currentHeight)
-            strips[-1].setMinimumHeight(currentHeight + AXIS_HEIGHT)
-            self.stripFrame.setMinimumHeight(currentHeight * len(strips) + AXIS_HEIGHT)
+                strip.setMinimumHeight(newHeight)
+            strips[-1].setMinimumHeight(newHeight + axisHeight)
+            self.stripFrame.setMinimumHeight((newHeight + STRIP_SPACING) * len(strips) + axisHeight - STRIP_SPACING)
         else:
-            strips[0].setMinimumHeight(currentHeight)
-            self.stripFrame.setMinimumHeight(currentHeight)
+            strips[0].setMinimumHeight(newHeight)
+            self.stripFrame.setMinimumHeight(newHeight)
 
         self.stripFrame.show()
 
@@ -1502,7 +1499,7 @@ class GuiSpectrumDisplay(CcpnModule):
         else:
             getLogger().warning('Strip direction is not defined for spectrumDisplay: %s' % str(self))
 
-    def _setColumnStretches(self, stretchValue=False, scaleFactor=1.0, widths=True, minimumWidth=None):
+    def _setColumnStretches(self, stretchValue=False, scaleFactor=1.0, widths=True, minimumWidth=STRIP_MINIMUMWIDTH):
         """Set the column widths of the strips so that the last strip accommodates the axis bar
         if necessary."""
         widgets = self.stripFrame.children()
@@ -1529,8 +1526,8 @@ class GuiSpectrumDisplay(CcpnModule):
             AXIS_PADDING = STRIP_SPACING
 
             if self.strips:
-                firstStripWidth = thisLayoutWidth / self.stripCount
                 AXIS_WIDTH = self.orderedStrips[0].getRightAxisWidth()
+                firstStripWidth = (thisLayoutWidth - AXIS_WIDTH) / self.stripCount
             else:
                 firstStripWidth = thisLayoutWidth
 

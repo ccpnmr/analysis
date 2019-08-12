@@ -111,10 +111,11 @@ DISPLAYFOLDEDCONTOURS = 'displayFoldedContours'
 MAXALIASINGRANGE = 3
 
 
-DIMENSION_FID = 'Fid'
-DIMENSION_FREQUENCY = 'Frequency'
-DIMENSION_SAMPLED = 'Sampled'
-DIMENSION_TYPES = {DIMENSION_FID : ApiFidDataDim, DIMENSION_FREQUENCY : ApiFreqDataDim, DIMENSION_SAMPLED : ApiSampledDataDim}
+DIMENSIONFID = 'Fid'
+DIMENSIONFREQUENCY = 'Frequency'
+DIMENSIONFREQ = 'Freq'
+DIMENSIONSAMPLED = 'Sampled'
+DIMENSIONTYPES = {DIMENSIONFID : ApiFidDataDim, DIMENSIONFREQUENCY : ApiFreqDataDim, DIMENSIONSAMPLED : ApiSampledDataDim}
 
 
 def _cumulativeArray(array):
@@ -618,6 +619,15 @@ assignmentTolerances
 
         apiDataStore = self._wrappedData.dataStore
         if apiDataStore is None:
+
+            # # the spectrum does not have an attached file
+            # numPoints = [x.numPoints for x in self._wrappedData.sortedDataDims()]
+            # self._wrappedData.addDataStore(value, numPoints=numPoints)
+            #
+            # # need to save the file
+            # from ccpn.util.Hdf5 import convertDataToHdf5
+            # convertDataToHdf5(self, value)
+
             raise ValueError("Spectrum is not stored, cannot change file path")
 
         elif not value:
@@ -833,9 +843,10 @@ assignmentTolerances
     #TODO: add setter for dimensionTypes
     @property
     def dimensionTypes(self) -> Tuple[str, ...]:
-        """dimension types ('Fid' / 'Frequency' / 'Sampled'),  per dimension"""
+        """dimension types ('Fid' / 'Frequency' / 'Sampled'),  per dimension
+        """
         ll = [x.className[:-7] for x in self._wrappedData.sortedDataDims()]
-        return tuple(DIMENSION_FREQUENCY if x == 'Freq' else x for x in ll)
+        return tuple(DIMENSIONFREQUENCY if x == DIMENSIONFREQ else x for x in ll)
 
     # @dimensionTypes.setter
     # def dimensionTypes(self, value: Sequence):

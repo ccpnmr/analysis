@@ -303,6 +303,7 @@ class Framework(NotifierBase):
         self._getUserPrefs()
 
         # set the preferences if added from the commandline
+        # this causes errors when running the nose_tests
         if self.args.darkColourScheme:
             self.preferences.general.colourScheme = 'dark'
         elif self.args.lightColourScheme:

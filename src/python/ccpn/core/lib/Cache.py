@@ -140,11 +140,13 @@ class Cache(object):
         return '<Cache %s; items:(%d,max:%d)>' % (self._name, len(self._items), self._maxItems)
 
 
-def cached(attributeName, maxItems=0, debug=False):
+def cached(attributeName, maxItems=0, debug=False, doSignatureExpansion=True):
     """
     A decorator for initiating cached function call
     Works on functions that pass an object as the first argument; e.g. self
     attributeName defines the cache object
+    doSignatureExpansion: flag to do a full signature expansion of the arguments
+                          if False: use (repr(args), repr(kwds)) as hash
 
     cached.clear (defined below) is a decorator to clear the cache
     """
@@ -158,17 +160,20 @@ def cached(attributeName, maxItems=0, debug=False):
 
         obj = args[0]
 
-        # create an item hash from *args and **kwds, skipping the obj argument
-        ba = inspect.signature(func).bind(*args, **kwds)
-        ba.apply_defaults()
-        allArgs = ba.arguments  # ordered dict of (argument,value) pairs; first corresponds to object
+        if doSignatureExpansion:
+            # create an item hash from *args and **kwds, skipping the obj argument
+            ba = inspect.signature(func).bind(*args, **kwds)
+            ba.apply_defaults()
+            allArgs = ba.arguments  # ordered dict of (argument,value) pairs; first corresponds to object
 
-        argumentNames = [k for k in allArgs.keys()][1:]  # skip the first one which is the object
-        # sort to maintain a consistent tuple of tuples item to cache
-        argumentNames.sort()
-        item = tuple([(k, allArgs[k]) for k in argumentNames])
-        # convert to a string
-        item = repr(item)
+            argumentNames = [k for k in allArgs.keys()][1:]  # skip the first one which is the object
+            # sort to maintain a consistent tuple of tuples item to cache
+            argumentNames.sort()
+            item = tuple([(k, allArgs[k]) for k in argumentNames])
+            # convert to a string
+            item = repr(item)
+        else:
+            item = (repr(args), repr(kwds))
 
         if not hasattr(obj, attributeName):
             name = '%s.%s' % (obj, attributeName)

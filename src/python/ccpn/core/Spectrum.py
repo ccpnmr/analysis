@@ -93,6 +93,9 @@ from ccpn.util.Common import getAxisCodeMatch as axisCodeMapping
 from ccpn.util.Logging import getLogger
 
 from ccpnmodel.ccpncore.lib.Io import Formats
+from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import FidDataDim as ApiFidDataDim
+from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import FreqDataDim as ApiFreqDataDim
+from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import SampledDataDim as ApiSampledDataDim
 
 
 INCLUDEPOSITIVECONTOURS = 'includePositiveContours'
@@ -106,6 +109,12 @@ UPDATEALIASINGRANGEFLAG = '_updateAliasingRangeFlag'
 EXTENDALIASINGRANGEFLAG = 'extendAliasingRangeFlag'
 DISPLAYFOLDEDCONTOURS = 'displayFoldedContours'
 MAXALIASINGRANGE = 3
+
+
+DIMENSION_FID = 'Fid'
+DIMENSION_FREQUENCY = 'Frequency'
+DIMENSION_SAMPLED = 'Sampled'
+DIMENSION_TYPES = {DIMENSION_FID : ApiFidDataDim, DIMENSION_FREQUENCY : ApiFreqDataDim, DIMENSION_SAMPLED : ApiSampledDataDim}
 
 
 def _cumulativeArray(array):
@@ -138,6 +147,7 @@ def _arrayOfIndex(index, cumul):
 #=========================================================================================
 # Decorators to define the attributes to be copied
 #=========================================================================================
+
 from ccpn.util.decorators import singleton
 @singleton
 class _includeInCopyList(list):
@@ -825,7 +835,62 @@ assignmentTolerances
     def dimensionTypes(self) -> Tuple[str, ...]:
         """dimension types ('Fid' / 'Frequency' / 'Sampled'),  per dimension"""
         ll = [x.className[:-7] for x in self._wrappedData.sortedDataDims()]
-        return tuple('Frequency' if x == 'Freq' else x for x in ll)
+        return tuple(DIMENSION_FREQUENCY if x == 'Freq' else x for x in ll)
+
+    # @dimensionTypes.setter
+    # def dimensionTypes(self, value: Sequence):
+    #
+    #     apiDataSource = self._wrappedData
+    #     if len(value) == apiDataSource.numDim:
+    #
+    #         for dimValue in value:
+    #             if dimValue not in DIMENSION_TYPES:
+    #                 raise ValueError("DimensionType %s not recognised" % dimValue)
+    #
+    #         for n, dataDimVal in enumerate(self._wrappedData.sortedDataDims()):
+    #             pass
+    #
+    #         # from NMR.Experiment - createDataSource
+    #
+    #         # self: 'Experiment', name: str, numPoints: Sequence[int], sw: Sequence[float],
+    #         # refppm: Sequence[float], refpt: Sequence[float], dataStore: 'DataStore' = None,
+    #         # scale: float = 1.0, details:str = None, numPointsOrig:Sequence[int] = None,
+    #         # pointOffset: Sequence[int] = None, isComplex:Sequence[bool] = None,
+    #         # sampledValues: Sequence[Sequence[float]] = None,
+    #         # sampledErrors: Sequence[Sequence[float]] = None,
+    #         # ** additionalParameters) -> 'DataSource':
+    #
+    #         # if not numPointsOrig:
+    #         #     numPointsOrig = numPoints
+    #         #
+    #         # if not pointOffset:
+    #         #     pointOffset = (0,) * numDim
+    #         #
+    #         # if not isComplex:
+    #         #     isComplex = (False,) * numDim
+    #         #
+    #         # for n, expDim in enumerate(self.sortedExpDims()):
+    #         #
+    #         #     numPointsOrig = expDim.numPointsOrig
+    #         #     pointOffset = expDim
+    #         #     values = sampledValues[n] if sampledValues else None
+    #         #     if values:
+    #         #         errors = sampledErrors[n] if sampledErrors else None
+    #         #         sampledDataDim = spectrum.newSampledDataDim(dim=n + 1, numPoints=numPoints[n], expDim=expDim,
+    #         #                                                     isComplex=isComplex[n], pointValues=values, pointErrors=errors)
+    #         #     else:
+    #         #         freqDataDim = spectrum.newFreqDataDim(dim=n + 1, numPoints=numPoints[n],
+    #         #                                               isComplex=isComplex[n], numPointsOrig=numPointsOrig[n],
+    #         #                                               pointOffset=pointOffset[n],
+    #         #                                               valuePerPoint=sw[n] / float(numPoints[n]), expDim=expDim)
+    #         #         expDimRef = (expDim.findFirstExpDimRef(measurementType='Shift') or expDim.findFirstExpDimRef())
+    #         #         if expDimRef:
+    #         #             freqDataDim.newDataDimRef(refPoint=refpt[n], refValue=refppm[n], expDimRef=expDimRef)
+    #
+    #
+    #             # dataDim classnames are FidDataDim, FreqDataDim, SampledDataDim
+    #     else:
+    #         raise ValueError("DimensionTypes must have length %s, was %s" % (apiDataSource.numDim, value))
 
     @property
     @_includeInDimensionalCopy

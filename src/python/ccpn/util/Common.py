@@ -321,11 +321,11 @@ def checkIsotope(text):
     axisCodes or atom names, hence the difference to name2ElementSymbol.
     """
     defaultIsotope = '1H'
-    name = text.strip().upper()
 
-    if not name:
+    if not text:
         return defaultIsotope
 
+    name = text.strip().upper()
     if name in Constants.isotopeRecords:
         # Superfluous but should speed things up
         return name

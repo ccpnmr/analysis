@@ -485,7 +485,13 @@ class Strip1d(coreClass, _GuiStrip1d):
         Logging.getLogger().debug('Strip1d>> spectrumDisplay: %s' % self.spectrumDisplay)
         _GuiStrip1d.__init__(self, self.spectrumDisplay)
 
-        stripIndex = self.spectrumDisplay.orderedStrips.index(self)
+        # cannot add the Frame until fully done
+        strips = self.spectrumDisplay.orderedStrips
+        if self in strips:
+            stripIndex = strips.index(self)
+        else:
+            stripIndex = len(strips)
+            Logging.getLogger().warning('Strip ordering not defined for %s in %s' % (str(self.pid), str(self.spectrumDisplay.pid)))
 
         if self.spectrumDisplay.stripArrangement == 'Y':
 
@@ -513,7 +519,12 @@ class StripNd(coreClass, _GuiStripNd):
         _GuiStripNd.__init__(self, self.spectrumDisplay)
 
         # cannot add the Frame until fully done
-        stripIndex = self.spectrumDisplay.orderedStrips.index(self)
+        strips = self.spectrumDisplay.orderedStrips
+        if self in strips:
+            stripIndex = strips.index(self)
+        else:
+            stripIndex = len(strips)
+            Logging.getLogger().warning('Strip ordering not defined for %s in %s' % (str(self.pid), str(self.spectrumDisplay.pid)))
 
         if self.spectrumDisplay.stripArrangement == 'Y':
 

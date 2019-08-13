@@ -2245,6 +2245,10 @@ class CcpnGLWidget(QOpenGLWidget):
 
     def mouseReleaseEvent(self, ev):
 
+        # if no self.current then strip is not defined correctly
+        if not getattr(self.current, 'mouseMovedDict', None):
+            return
+
         self._mousePressed = False
         self._draggingLabel = False
 

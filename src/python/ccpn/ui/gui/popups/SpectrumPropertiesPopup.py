@@ -1218,12 +1218,12 @@ class ContoursTab(Widget):
         negativeBaseLevelLabel = Label(self, text="Negative Base Level", grid=(7, 0), vAlign='c', hAlign='l')
         self.negativeBaseLevelData = ScientificDoubleSpinBox(self, grid=(7, 1), vAlign='t')
 
-        # self.negativeBaseLevelData.setMaximum(-0.1)
-        # self.negativeBaseLevelData.setMinimum(-1e12)
-        # self.negativeBaseLevelData.setValue(self.spectrum.negativeContourBase)
-        self.negativeBaseLevelData.setMaximum(1e12)
-        self.negativeBaseLevelData.setMinimum(0.1)
-        self.negativeBaseLevelData.setValue(abs(self.spectrum.negativeContourBase))
+        self.negativeBaseLevelData.setMaximum(-0.1)
+        self.negativeBaseLevelData.setMinimum(-1e12)
+        self.negativeBaseLevelData.setValue(-abs(self.spectrum.negativeContourBase))
+        # self.negativeBaseLevelData.setMaximum(1e12)
+        # self.negativeBaseLevelData.setMinimum(0.1)
+        # self.negativeBaseLevelData.setValue(abs(self.spectrum.negativeContourBase))
 
         self.negativeBaseLevelData.valueChanged.connect(partial(self._queueChangeNegativeBaseLevel, self.spectrum))
         # self.negativeBaseLevelData.setSingleStep((self.negativeBaseLevelData.value()*-1)*self.negativeMultiplierData.value()-1)
@@ -1359,9 +1359,11 @@ class ContoursTab(Widget):
         self._changes['negativeContourBaseLevel'] = partial(self._changeNegativeBaseLevel, spectrum, value)
 
     def _changeNegativeBaseLevel(self, spectrum, value):
-        spectrum.negativeContourBase = float(-value)
-        self._writeLoggingMessage("spectrum.negativeContourBase = %f" % float(-value))
-        self.pythonConsole.writeConsoleCommand("spectrum.negativeContourBase = %f" % float(-value), spectrum=spectrum)
+        # force to be negative
+        value = -abs(value)
+        spectrum.negativeContourBase = float(value)
+        self._writeLoggingMessage("spectrum.negativeContourBase = %f" % float(value))
+        self.pythonConsole.writeConsoleCommand("spectrum.negativeContourBase = %f" % float(value), spectrum=spectrum)
 
     def _queueChangeNegativeContourMultiplier(self, spectrum, value):
         self._changes['negativeContourMultiplier'] = partial(self._changeNegativeContourMultiplier, spectrum, value)

@@ -167,6 +167,16 @@ class GuiWindow():
             #   except:
             #     getLogger().warning('Function cannot be found')
 
+    def deassignPeaks(self):
+        """Deassign all from selected peaks
+        """
+        if self.current.peaks:
+            with undoBlock():
+                for peak in self.current.peaks:
+                    assignedDims = list(peak.dimensionNmrAtoms)
+                    assignedDims = tuple([] for dd in assignedDims)
+                    peak.dimensionNmrAtoms = assignedDims
+
     def deleteSelectedItems(self, parent=None):
         """Delete peaks/integrals/multiplets from the project
         """

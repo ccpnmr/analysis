@@ -280,6 +280,11 @@ def _editPeakAssignmentItem(strip):
                     typeItem=ItemTypes.get(ITEM), toolTip='Edit current peak assignments', callback=strip.application.showPeakAssigner)
 
 
+def _deassignPeaksItem(strip):
+    return _SCMitem(name='Deassign Peak(s)',
+                    typeItem=ItemTypes.get(ITEM), toolTip='Deassign Peaks', callback=strip.mainWindow.deassignPeaks)
+
+
 def _setPeakAliasingItem(strip):
     return _SCMitem(name='Set Aliasing...',
                     typeItem=ItemTypes.get(ITEM), toolTip='Set aliasing for current peak(s)', callback=strip.mainWindow.setPeakAliasing)
@@ -528,6 +533,7 @@ def _get1dPeakMenu(guiStrip1d) -> Menu:
         _deletePeakItem(guiStrip1d),
         _copyPeakItem(guiStrip1d),
         _editPeakAssignmentItem(guiStrip1d),
+        _deassignPeaksItem(guiStrip1d),
         _setPeakAliasingItem(guiStrip1d),
         _calibrateFromPeaks(guiStrip1d),
         _separator(),
@@ -656,6 +662,7 @@ def _getNdPeakMenu(guiStripNd) -> Menu:
         _deletePeakItem(guiStripNd),
         _copyPeakItem(guiStripNd),
         _editPeakAssignmentItem(guiStripNd),
+        _deassignPeaksItem(guiStripNd),
         _setPeakAliasingItem(guiStripNd),
         _separator(),
         _refitPeakItem(guiStripNd),

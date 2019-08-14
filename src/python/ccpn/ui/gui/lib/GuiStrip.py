@@ -97,6 +97,13 @@ class GuiStrip(Frame):
 
         self._CcpnGLWidget = CcpnGLWidget(strip=self, mainWindow=self.mainWindow)
 
+        # viewportFormat = self._CcpnGLWidget.format()
+        # viewportFormat.setSwapInterval(0)  #disable VSync
+        # viewportFormat.setSwapBehavior(QtGui.QSurfaceFormat.TripleBuffer)
+        # QtGui.QSurfaceFormat().setDefaultFormat(viewportFormat)
+        # self._CcpnGLWidget.setFormat(viewportFormat)
+        # viewportFormat = self._CcpnGLWidget.format()
+
         self.getLayout().addWidget(self._CcpnGLWidget, 1, 0)
         self._CcpnGLWidget.setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding,
                                          QtWidgets.QSizePolicy.MinimumExpanding)

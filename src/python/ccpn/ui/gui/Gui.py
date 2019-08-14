@@ -68,11 +68,13 @@ class Gui(Ui):
         # it will come out as the executable you are running (e.g. "python3")
 
         # QtCore.QCoreApplication.setAttribute(QtCore.Qt.AA_EnableHighDpiScaling, True)
-        # QtCore.QCoreApplication.setAttribute(QtCore.Qt.AA_ShareOpenGLContexts, True)
+        # QtCore.QCoreApplication.setAttribute(QtCore.Qt.AA_ShareOpenGLContexts, False)
 
         self.qtApp = Application(self.application.applicationName,
                                  self.application.applicationVersion,
                                  organizationName='CCPN', organizationDomain='ccpn.ac.uk')
+        # self.qtApp.setAttribute(QtCore.Qt.AA_ShareOpenGLContexts, False)
+
         #self.qtApp.setStyleSheet(self.application.styleSheet)
 
         styles = QtWidgets.QStyleFactory()

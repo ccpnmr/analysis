@@ -26,12 +26,15 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 
 from PyQt5 import QtGui, QtWidgets, QtCore
-
+from PyQt5.QtCore import pyqtSignal
 from ccpn.ui.gui.widgets.Base import Base
 from ccpn.ui.gui.widgets.Label import Label
 
 
 class Spinbox(QtWidgets.QSpinBox, Base):
+
+    enterPressed = pyqtSignal(int)
+    wheelChanged = pyqtSignal(int)
 
     def __init__(self, parent, prefix=None, value=None, step=None, min=None, max=None, showButtons=True, **kwds):
 
@@ -51,12 +54,25 @@ class Spinbox(QtWidgets.QSpinBox, Base):
         if showButtons is False:
             self.setButtonSymbols(QtWidgets.QAbstractSpinBox.NoButtons)
 
+        lineEdit = self.lineEdit()
+        lineEdit.returnPressed.connect(self._keyPressed)
+
     def get(self):
         return self.value()
 
     def set(self, p_int):
         self.setValue(p_int)
 
+    def _keyPressed(self, *args):
+        """emit the value when return has been pressed
+        """
+        self.enterPressed.emit(self.value())
+
+    def wheelEvent(self, e: QtGui.QWheelEvent) -> None:
+        """emit the value when wheel event has occurred
+        """
+        super().wheelEvent(e)
+        self.wheelChanged.emit(self.value())
 
 if __name__ == '__main__':
     from ccpn.ui.gui.widgets.Application import TestApplication

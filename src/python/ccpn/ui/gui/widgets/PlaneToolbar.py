@@ -335,7 +335,7 @@ class PlaneToolbar(ToolBar):
             planeCount.setMaximum(1000)
             planeCount.setValue(1)
             planeCount.oldValue = 1
-            planeCount.enterPressed.connect(partial(callbacks[3], i))
+            planeCount.returnPressed.connect(partial(callbacks[3], i))
             planeCount.wheelChanged.connect(partial(callbacks[3], i))
 
             self.addWidget(self.prevPlaneButton)

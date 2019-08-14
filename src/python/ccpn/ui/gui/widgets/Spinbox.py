@@ -33,7 +33,7 @@ from ccpn.ui.gui.widgets.Label import Label
 
 class Spinbox(QtWidgets.QSpinBox, Base):
 
-    enterPressed = pyqtSignal(int)
+    returnPressed = pyqtSignal(int)
     wheelChanged = pyqtSignal(int)
 
     def __init__(self, parent, prefix=None, value=None, step=None, min=None, max=None, showButtons=True, **kwds):
@@ -66,7 +66,7 @@ class Spinbox(QtWidgets.QSpinBox, Base):
     def _keyPressed(self, *args):
         """emit the value when return has been pressed
         """
-        self.enterPressed.emit(self.value())
+        self.returnPressed.emit(self.value())
 
     def wheelEvent(self, e: QtGui.QWheelEvent) -> None:
         """emit the value when wheel event has occurred

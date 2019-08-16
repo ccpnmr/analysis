@@ -207,6 +207,7 @@ def checkServer(registrationDict, version='3'):
 
     try:
         found = Url.fetchUrl(url, values, timeout=2.0)
+        print('>>>>>>', found)
         return found.strip() == 'OK'
 
     except Exception as e:

@@ -87,6 +87,8 @@ class Ui(NotifierBase):
         # We want to give some feedback; sometimes this takes a while (e.g. poor internet)
         # sys.stderr.write('==> Checking registration ... \n')
         sys.stderr.flush()  # It seems to be necessary as without the output comes after the registration screen
+
+        # check local registration details
         if not self._isRegistered:
             # call the subclassed register method
             self._registerDetails()
@@ -106,8 +108,8 @@ class Ui(NotifierBase):
         #
         # else:
 
-        # check whether your registration details are on the server
-        check = Register.checkServer(self.application._registrationDict, self.application.applicationVersion)
+        # check whether your registration details are on the server (and match)
+        Register.checkServer(self.application._registrationDict, self.application.applicationVersion)
 
         return True
 

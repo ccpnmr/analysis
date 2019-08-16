@@ -34,9 +34,10 @@ import datetime
 from ccpn.util import Logging
 from ccpn.util import Url
 import json
+import platform
+import re, uuid
 
-from ccpn.framework.PathsAndUrls import ccpn2Url, userPreferencesDirectory
-
+from ccpn.framework.PathsAndUrls import ccpn2Url, userPreferencesDirectory, ccpnConfigPath
 
 userAttributes = ('name', 'organisation', 'email')
 
@@ -46,11 +47,11 @@ def _registrationPath():
 
 
 def _registrationServerScript():
-    return ccpn2Url + '/cgi-bin/register/registerV3'
+    return ccpn2Url + '/cgi-bin/register/updateRegistrationV3'
 
 
 def _checkRegistrationServerScript():
-    return ccpn2Url + '/cgi-bin/register/checkV3'
+    return ccpn2Url + '/cgi-bin/register/checkRegistrationV3'
 
 
 def loadDict():
@@ -121,6 +122,10 @@ def updateServer(registrationDict, version='3'):
         values[attr] = ''.join(value)
 
     values['version'] = str(version)
+    values['OSversion'] = platform.platform()
+    values['systemInfo'] = ';'.join(platform.uname())
+    values['ID'] = ':'.join(re.findall('..', '%012x' % uuid.getnode()))
+    values['build'] = _getBuild()
 
     try:
         return Url.fetchUrl(url, values, timeout=2.0)
@@ -129,7 +134,26 @@ def updateServer(registrationDict, version='3'):
         logger.warning('Could not update registration on server.')
 
 
+def _getBuild():
+    """Get the build information from the build file
+    """
+    BUILD_FILE = 'buildInformation.txt'
+
+    lfile = os.path.join(ccpnConfigPath, BUILD_FILE)
+    if not os.path.exists(lfile):
+        return 'noBuildInformation'
+
+    with open(lfile, 'r', encoding='UTF-8') as fp:
+        try:
+            # return the first line of the build information file - should be created by ./buildDistribution
+            return fp.readlines()[0]
+        except:
+            return 'badBuildInformation'
+
+
 def checkServer(registrationDict, version='3'):
+    """Check the registration status on the server
+    """
     url = _checkRegistrationServerScript()
 
     values = {}
@@ -140,6 +164,10 @@ def checkServer(registrationDict, version='3'):
         values[attr] = ''.join(value)
 
     values['version'] = str(version)
+    values['OSversion'] = platform.platform()
+    values['systemInfo'] = ';'.join(platform.uname())
+    values['ID'] = ':'.join(re.findall('..', '%012x' % uuid.getnode()))
+    values['build'] = _getBuild()
 
     try:
         found = Url.fetchUrl(url, values, timeout=2.0)

@@ -151,6 +151,42 @@ def _getBuild():
             return 'badBuildInformation'
 
 
+def _checkLicenceScript():
+    return ccpn2Url + '/cgi-bin/register/checkLicence'
+
+
+def _checkLicence(registrationDict, version='3'):
+    """Check the licence on the server
+    # pass all details - retrieve hash is correct licenceKey
+    #   check with current File using UpdateFile(...)
+    #   and isUpdateDifferent
+    """
+    url = _checkLicenceScript()
+
+    # hide name of licenceFile using 'message'
+
+    values = {}
+    for attr in userAttributes + ('hashcode',):
+        value = []
+        for c in registrationDict[attr]:
+            value.append(c if 32 <= ord(c) < 128 else '_')
+        values[attr] = ''.join(value)
+
+    values['version'] = str(version)
+    values['OSversion'] = platform.platform()
+    values['systemInfo'] = ';'.join(platform.uname())
+    values['ID'] = ':'.join(re.findall('..', '%012x' % uuid.getnode()))
+    values['build'] = _getBuild()
+
+    try:
+        found = Url.fetchUrl(url, values, timeout=2.0)
+        return found.strip() == 'OK'
+
+    except Exception as e:
+        logger = Logging.getLogger()
+        logger.warning('Could not check registration on server.')
+
+
 def checkServer(registrationDict, version='3'):
     """Check the registration status on the server
     """

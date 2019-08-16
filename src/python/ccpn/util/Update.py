@@ -370,6 +370,30 @@ class UpdateAgent(object):
 
         try:
             self.fetchUpdateDb()
+
+            # add checking for the new licence file here
+            # something like this
+
+            # (filePath, fileTime, fileStoredAs, fileHashCode) = line.split(FIELD_SEP)  # of the licenceFile
+
+            # or server routine verify Licence
+
+            # similar to registration checkServer
+
+            # pass registratin to server, returnb hashcode of licence
+            #       check against licence
+            #       if different, need to update as below
+
+            # put into registry.py
+            # should it update here?
+
+            # if self.serverUser or self.isUpdateDifferent(filePath, fileHashCode):
+            #     updateFile = UpdateFile(self.installLocation, self.serverDbRoot, filePath, fileTime,
+            #                             fileStoredAs, fileHashCode, serverDownloadScript=serverDownloadScript,
+            #                             serverUploadScript=serverUploadScript)
+
+
+
         except Exception as e:
             self.showError('Update error', 'Could not fetch updates: %s' % e)
 

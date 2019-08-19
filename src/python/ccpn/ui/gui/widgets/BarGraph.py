@@ -37,6 +37,7 @@ from ccpn.core.NmrResidue import NmrResidue
 from ccpn.ui.gui.widgets.CustomExportDialog import CustomExportDialog
 from ccpn.ui.gui.widgets.Menu import Menu
 from ccpn.util.Logging import getLogger
+from ccpn.util.Common import percentage
 
 
 current = []
@@ -46,7 +47,7 @@ current = []
 
 class BarGraph(pg.BarGraphItem):
     def __init__(self, application=None, viewBox=None, xValues=None, yValues=None,
-                 objects=None, brush=None, **kwds):
+                 objects=None, brush=None, labelDistanceRatio=0.1, **kwds):
         super().__init__(**kwds)
         '''
         This class allows top draw bars with or without objects.It Needs only xValues and yValues.
@@ -83,7 +84,7 @@ class BarGraph(pg.BarGraphItem):
         self.allValues = {}
         self.getValueDict()
         self.labels = []
-        self.drawLabels()
+        self.drawLabels(labelDistanceRatio)
         if self.objects:
             self.setObjects(self.objects)
 
@@ -152,7 +153,7 @@ class BarGraph(pg.BarGraphItem):
 
         event.accept()
 
-    def drawLabels(self):
+    def drawLabels(self, ratio=0.5):
         '''
 
         The label Text is the str of the x values and is used to find and set an object to it.
@@ -163,7 +164,7 @@ class BarGraph(pg.BarGraphItem):
         for key, value in self.allValues.items():
             label = CustomLabel(text=str(key))
             self.viewBox.addItem(label)
-            label.setPos(int(key), value)
+            label.setPos(int(key), value+ratio)
             self.labels.append(label)
             label.setBrush(QtGui.QColor(self.brush))
 

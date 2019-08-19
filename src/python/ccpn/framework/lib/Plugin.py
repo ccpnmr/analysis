@@ -68,6 +68,7 @@ class Plugin(ABC):
     settings = None  # Break out the settings into another variable so pipelines are portable
     widgetsState = None
     UiPlugin = False
+    version = ''
 
     @property
     @abstractmethod

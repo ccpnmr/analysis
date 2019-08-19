@@ -51,6 +51,10 @@ def _decode(key, string):
     return decoded_string
 
 
+def _codeMajorV(v1, v2):
+    return type(v1) == str and type(v2) == str and v1 is not None and v2 is not None and v1.split('.')[0] == v2.split('.')[0]
+
+
 def _check(key=None, doDecode=True):
     from ccpn.framework.Version import applicationVersion
 
@@ -103,7 +107,8 @@ def _check(key=None, doDecode=True):
         sys.stderr.write(message2 % (applicationVersion))
         sys.exit(1)
 
-    if applicationVersion != ldict['version']:
+    # if applicationVersion != ldict['version']:
+    if not _codeMajorV(applicationVersion, ldict['version']):
         sys.stderr.write(message2 % (applicationVersion))
         sys.exit(1)
 

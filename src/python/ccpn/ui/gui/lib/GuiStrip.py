@@ -1212,11 +1212,27 @@ class GuiStrip(Frame):
         except Exception as es:
             getLogger().debugGL('OpenGL widget not instantiated', strip=self, error=es)
 
-    def _restoreZoom(self):
+    @property
+    def zoomState(self):
+        if self._CcpnGLWidget is not None:
+            zoom = self._CcpnGLWidget.zoomState
+            return zoom
+        return []
+
+    def restoreZoomFromState(self, zoomState):
+        """
+        Restore zoom from a saved state
+        :param zoomState: list of Axis coordinate Left, Right, Bottom, Top
+        """
+        if zoomState is not None:
+            if len(zoomState)==4:
+                self._restoreZoom(zoomState=zoomState)
+
+    def _restoreZoom(self, zoomState=None):
         """Restores last saved region to the zoom stack for the strip.
         """
         try:
-            self._CcpnGLWidget.restoreZoom()
+            self._CcpnGLWidget.restoreZoom(zoomState)
         except Exception as es:
             getLogger().debugGL('OpenGL widget not instantiated', strip=self, error=es)
 

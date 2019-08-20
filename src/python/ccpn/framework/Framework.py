@@ -564,17 +564,19 @@ class Framework(NotifierBase):
 
     def saveLayout(self):
         Layout.updateSavedLayout(self.ui.mainWindow)
+        getLogger().info('Layout saved')
 
     def saveLayoutAs(self):
         fp = self.getSaveLayoutPath()
         try:
             Layout.saveLayoutToJson(self.ui.mainWindow, jsonFilePath=fp)
+            getLogger().info('Layout saved')
         except Exception as e:
             getLogger().warning('Impossible to save layout. %s' % e)
 
     def restoreLastSavedLayout(self):
         self.ui.mainWindow.moduleArea._closeAll()
-        Layout.restoreLayout(self.ui.mainWindow, self.layout)
+        Layout.restoreLayout(self.ui.mainWindow, self.layout, restoreSpectrumDisplay=True)
 
     def restoreLayoutFromFile(self, jsonFilePath=None):
         if jsonFilePath is None:
@@ -589,7 +591,7 @@ class Framework(NotifierBase):
         try:
             self.ui.mainWindow.moduleArea._closeAll()
             self._getUserLayout(jsonFilePath)
-            Layout.restoreLayout(self.ui.mainWindow, self.layout)
+            Layout.restoreLayout(self.ui.mainWindow, self.layout, restoreSpectrumDisplay=True)
         except Exception as e:
             getLogger().warning('Impossible to restore layout. %s' % e)
 
@@ -1148,10 +1150,11 @@ class Framework(NotifierBase):
                      )),
             (),
             (),
-            ("Layout", (("Save", self.saveLayout, [('enabled', False)]),
-                        ("Save as...", self.saveLayoutAs, [('enabled', False)]),
-                        ("Restore last", self.restoreLastSavedLayout, [('enabled', False)]),
-                        ("Restore from file...", self.restoreLayoutFromFile, [('enabled', False)]),
+            ("Layout", (("Save", self.saveLayout, [('enabled', True)]),
+                        ("Save as...", self.saveLayoutAs, [('enabled', True)]),
+                        (),
+                        ("Restore last", self.restoreLastSavedLayout, [('enabled', True)]),
+                        ("Restore from file...", self.restoreLayoutFromFile, [('enabled', True)]),
                         (),
                         ("Open pre-defined...", None, [('enabled', False)]),
 

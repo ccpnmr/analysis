@@ -1105,6 +1105,7 @@ class GuiSpectrumDisplay(CcpnModule):
         CCPN Internal
         """
         layout = spectrumDisplay.stripFrame.layout()
+        print(spectrumDisplay, strip, currentIndex)
 
         if layout:
             spectrumDisplay.stripFrame.setUpdatesEnabled(False)

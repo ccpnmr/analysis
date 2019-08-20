@@ -1166,7 +1166,7 @@ class AbstractWrapperObject(NotifierBase):
                 if not callable(att):
                     od[i] = att
             except Exception as e:
-                getLogger().warn('Error converting to dict the property: "%s" for object %s . Error: %s'  % (i, self, e))
+                getLogger().warn('Potential error for the property %s in creating dictionary from object: %s . Error: %s'  % (i, self, e))
         return od
 
     # def _startCommandEchoBlock(self, funcName, *params, values=None, defaults=None, parName=None, propertySetter=False,

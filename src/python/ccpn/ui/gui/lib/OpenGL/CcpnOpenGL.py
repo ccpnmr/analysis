@@ -1548,9 +1548,16 @@ class CcpnGLWidget(QOpenGLWidget):
         self.storedZooms = self.storedZooms[:self._currentZoom - 1]
         self.storedZooms.append((self.axisL, self.axisR, self.axisB, self.axisT))
 
-    def restoreZoom(self):
+    @property
+    def zoomState(self):
+        return (self.axisL, self.axisR, self.axisB, self.axisT)
+
+    def restoreZoom(self, zoomState=None):
         """Restore zoom to the last stored zoom
+        zoomState = (axisL, axisR, axisB, axisT)
         """
+        if zoomState and len(zoomState)==4:
+            self.storedZooms.append(zoomState)
         if self.storedZooms:
             # restoredZooms = self.storedZooms.pop()
 

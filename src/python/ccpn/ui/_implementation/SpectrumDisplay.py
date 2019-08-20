@@ -37,6 +37,7 @@ from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import ResonanceGroup as ApiResonanceGro
 from ccpnmodel.ccpncore.api.ccpnmr.gui.Window import Window as ApiWindow
 from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import BoundDisplay as ApiBoundDisplay
 from ccpn.core.lib.OrderedSpectrumViews import OrderedSpectrumViews
+from ccpn.util.OrderedSet import OrderedSet
 from ccpn.util.decorators import logCommand
 from ccpn.core.lib.ContextManagers import newObject, undoStackBlocking, undoBlock
 from ccpn.util.Logging import getLogger
@@ -232,6 +233,10 @@ class SpectrumDisplay(AbstractWrapperObject):
         """update parameters"""
         for key, val in value.items():
             self.setParameter(key, val)
+
+    def _getSpectra(self):
+        if len(self.strips)>0: # strips
+            return [x for x in self.orderedSpectrumViews(self.strips[-1].spectra)]
 
     # #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     # # ejb - orderedSpectrumViews, orderedSpectra

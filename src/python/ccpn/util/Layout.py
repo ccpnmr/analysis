@@ -29,6 +29,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 
 import ntpath
 import glob
+from collections import OrderedDict as od
 from ccpn.util.Logging import getLogger
 from ccpn.ui.gui.lib.GuiSpectrumDisplay import GuiSpectrumDisplay
 import json
@@ -42,6 +43,9 @@ WarningMessage = "Warning. Any changes in this file will be overwritten when sav
 General = "general"
 ApplicationName = "applicationName"  # type: str
 ApplicationVersion = "applicationVersion"
+LayoutVersionName = "LayoutVersion"
+LayoutVersion = 'b.6'
+SpectrumDisplays = "SpectrumDisplays"
 GuiModules = "guiModules"
 FileNames = 'fileNames'
 LayoutState = "layoutState"
@@ -50,8 +54,10 @@ DefaultLayoutFile = {
     Warning    : WarningMessage,
     General    : {
         ApplicationName   : "",
-        ApplicationVersion: ""
+        ApplicationVersion: "",
+        LayoutVersionName:"",
         },
+    SpectrumDisplays: [],
     GuiModules : [],
     FileNames  : [],
     LayoutState: {}
@@ -70,6 +76,8 @@ def _createLayoutFile(application):
                 DefaultLayoutFile[General][ApplicationName] = application.applicationName
             if ApplicationVersion in DefaultLayoutFile[General]:
                 DefaultLayoutFile[General][ApplicationVersion] = application.applicationVersion
+            if LayoutVersionName in DefaultLayoutFile[General]:
+                DefaultLayoutFile[General][LayoutVersionName] = LayoutVersion
 
         with open(path, "w") as file:
             json.dump(DefaultLayoutFile, file, sort_keys=False, indent=4, separators=(',', ': '))
@@ -153,6 +161,10 @@ def _updateLayoutState(mainWindow, layout):
         # setattr(layout, LayoutState, mainWindow.moduleArea.saveState())
         layout[LayoutState] = mainWindow.moduleArea.saveState()
 
+def _updateSpectrumDisplays(mainWindow, layout):
+    sds = _getSpectrumDisplaysState(mainWindow.project.spectrumDisplays)
+    layout[SpectrumDisplays] = sds
+
 
 def _updateWarning(mainWindow, layout):
     if Warning in layout:
@@ -187,6 +199,7 @@ def updateSavedLayout(mainWindow):
     layout = _checkLayoutFormat(mainWindow, layout)
 
     _updateGeneral(mainWindow, layout)
+    _updateSpectrumDisplays(mainWindow, layout)
     _updateFileNames(mainWindow, layout)
     _updateGuiModules(mainWindow, layout)
     _updateLayoutState(mainWindow, layout)
@@ -354,11 +367,40 @@ def _getModuleNamesFromState(layoutState):
     return names
 
 
-def restoreLayout(mainWindow, layout):
+
+def _openSpectrumDisplays(mainWindow, spectrumDisplaysState):
+    """
+
+    """
+    project = mainWindow.project
+    for dd in spectrumDisplaysState:
+        spectrumDisplayKeys = ["displayAxisCodes","axisOrder", "title", "positions", "widths", "units", "stripDirection","is1D"]
+        fd = {i: dd.get(i) for i in spectrumDisplayKeys}
+        spectraPids = dd.get("spectra")
+        spectra = [project.getByPid(p) for p in spectraPids if project.getByPid(p)]
+        stripsZoomStates = dd.get("stripsZoomStates")
+        if len(spectra)>0:
+            sd = mainWindow.createSpectrumDisplay(spectra[0], **fd)
+            for sp in spectra[1:]:
+                sd.displaySpectrum(sp)
+            if len(stripsZoomStates)>0:
+                if len(sd.strips)>0:
+                    sd.strips[0].restoreZoomFromState(stripsZoomStates[0])
+                    for stripState in stripsZoomStates[1:]:
+                        newStrip = sd.addStrip()
+                        newStrip.restoreZoomFromState(stripState)
+        else:
+            project.newSpectrumDisplay(axisCodes=fd.get('displayAxisCodes'), stripDirection = fd.get('stripDirection'))
+
+def restoreLayout(mainWindow, layout, restoreSpectrumDisplay=False):
     ## import all the ccpnModules classes specific for the application.
     # mainWindow.moduleArea._closeAll()
 
     layout = _checkLayoutFormat(mainWindow, layout)
+    if restoreSpectrumDisplay:
+        if SpectrumDisplays in layout:
+            _openSpectrumDisplays(mainWindow, layout[SpectrumDisplays])
+
 
     if FileNames in layout:
         neededModules = layout.get(FileNames)  # getattr(layout, FileNames)
@@ -407,3 +449,25 @@ def restoreLayout(mainWindow, layout):
                     getLogger().debug2("Layout error: %s" % e)
             else:
                 getLogger().debug2("Layout error: Some of the modules are missing. Geometries could not be restored")
+
+def _getSpectrumDisplaysState(spectrumDisplays):
+    """
+    :return: list of dict with serialisable attributes needed to restore the SpDisplay status
+    AbstractWrapperClasses will be converted as pid, EG spectrumDisplay.spectra
+    """
+    ll = []
+    for spectrumDisplay in spectrumDisplays:
+        dd = spectrumDisplay.getAsDict()
+        stripDirection = dd.get("stripArrangement")
+        axisCodes = dd.get("axisCodes")
+        spectrumDisplayKeys = ["longPid","axisOrder", "title", "positions", "widths", "units", "is1D"]
+        fd = {i: dd.get(i) for i in spectrumDisplayKeys}
+        fd.update({'stripDirection': stripDirection})
+        fd.update({'displayAxisCodes': axisCodes})
+        fd.update({'spectra':[sp.pid for sp in spectrumDisplay._getSpectra()]})
+        # strips informations
+        stripsZoomStates = [strip.zoomState for strip in spectrumDisplay.strips]
+        fd.update({"stripsZoomStates": stripsZoomStates})
+        ll.append(fd)
+    return ll
+

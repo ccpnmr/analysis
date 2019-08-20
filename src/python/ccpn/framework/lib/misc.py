@@ -120,6 +120,10 @@ def _check(key=None, doDecode=True):
         sys.stderr.write(message2 % (applicationVersion))
         sys.exit(1)
 
+    from ccpn.util import Data
+    for val in (message(98, 117, 105, 108, 100, 70, 111, 114), message(108, 105, 99, 101, 110, 99, 101, 84, 121, 112, 101), message(108, 105, 99, 101, 110, 99, 101, 73, 68)):
+        setattr(Data, val, ldict[val])
+
     if ldict['licenceType'] == 'developer':
         sys.stderr.write(message4 % (ldict['licenceType'], now() + year))
         return True

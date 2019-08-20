@@ -126,6 +126,10 @@ def updateServer(registrationDict, version='3'):
     values['systemInfo'] = ';'.join(platform.uname())
     values['ID'] = ':'.join(re.findall('..', '%012x' % uuid.getnode()))
     values['compileVersion'] = _getCompileVersion()
+    var0, var1, var2 = _getBuildID()
+    values['buildFor'] = var0
+    values['licenceType'] = var1
+    values['licenceID'] = var2
 
     try:
         return Url.fetchUrl(url, values, timeout=2.0)
@@ -155,41 +159,18 @@ def _checkLicenceScript():
     return ccpn2Url + '/cgi-bin/register/checkLicence'
 
 
-def _checkLicence(registrationDict, version='3'):
-    """Check the licence on the server
-    # pass all details - retrieve hash is correct licenceKey
-    #   check with current File using UpdateFile(...)
-    #   and isUpdateDifferent
-    """
-    url = _checkLicenceScript()
+def _getBuildID():
+    from ccpn.util import Data
 
-    # hide name of licenceFile using 'message'
+    def buildCode(*chars):
+        return ''.join([c for c in map(chr, chars)])
 
-    values = {}
-    for attr in userAttributes + ('hashcode',):
-        value = []
-        for c in registrationDict[attr]:
-            value.append(c if 32 <= ord(c) < 128 else '_')
-        values[attr] = ''.join(value)
+    vals = []
+    for val in (buildCode(98, 117, 105, 108, 100, 70, 111, 114), buildCode(108, 105, 99, 101, 110, 99, 101, 84, 121, 112, 101),
+                buildCode(108, 105, 99, 101, 110, 99, 101, 73, 68)):
+        vals.append(getattr(Data, val, ''))
 
-    values['version'] = str(version)
-    values['OSversion'] = platform.platform()
-    values['systemInfo'] = ';'.join(platform.uname())
-    values['ID'] = ':'.join(re.findall('..', '%012x' % uuid.getnode()))
-    values['compileVersion'] = _getCompileVersion()
-    buildFor, licenceID = _getBuildID()
-    values['buildFor'] = buildFor
-    values['licenceType'] = licenceType
-    values['licenceID'] = licenceID
-
-    try:
-        found = Url.fetchUrl(url, values, timeout=2.0)
-        return found.strip() == 'OK'
-
-    except Exception as e:
-        logger = Logging.getLogger()
-        logger.warning('Could not check registration on server.')
-
+    return vals[0], vals[1], vals[2]
 
 def checkServer(registrationDict, version='3'):
     """Check the registration status on the server
@@ -208,10 +189,13 @@ def checkServer(registrationDict, version='3'):
     values['systemInfo'] = ';'.join(platform.uname())
     values['ID'] = ':'.join(re.findall('..', '%012x' % uuid.getnode()))
     values['compileVersion'] = _getCompileVersion()
+    var0, var1, var2 = _getBuildID()
+    values['buildFor'] = var0
+    values['licenceType'] = var1
+    values['licenceID'] = var2
 
     try:
         found = Url.fetchUrl(url, values, timeout=2.0)
-        print('>>>>>>', found)
         return found.strip() == 'OK'
 
     except Exception as e:

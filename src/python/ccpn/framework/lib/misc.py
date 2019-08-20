@@ -32,9 +32,9 @@ import json
 from ccpn.util.Time import Time, now, day, week, year
 
 
-def _codeFunc(version, valid, licenceType):
+def _codeFunc(version, valid, licenceType, programList, buildFor, licenceID, numSeats):
     m = hashlib.sha256()
-    for value in version, valid, licenceType:
+    for value in version, valid, licenceType, programList, buildFor, licenceID, numSeats:
         m.update(bytes(str(value), 'utf-8'))
 
     return m.hexdigest()
@@ -103,7 +103,9 @@ def _check(key=None, doDecode=True):
 
     #print(ldict)
 
-    if 'code' not in ldict or 'version' not in ldict or 'valid' not in ldict or 'licenceType' not in ldict:
+    if 'code' not in ldict or 'version' not in ldict or 'valid' not in ldict or \
+            'licenceType' not in ldict or 'programList' not in ldict or \
+            'buildFor' not in ldict or 'licenceID' not in ldict or 'numSeats' not in ldict:
         sys.stderr.write(message2 % (applicationVersion))
         sys.exit(1)
 
@@ -112,7 +114,9 @@ def _check(key=None, doDecode=True):
         sys.stderr.write(message2 % (applicationVersion))
         sys.exit(1)
 
-    if ldict['code'] != _codeFunc(ldict['version'], ldict['valid'], ldict['licenceType']):
+    if ldict['code'] != _codeFunc(ldict['version'], ldict['valid'], ldict['licenceType'],
+                                  ldict['programList'], ldict['buildFor'],
+                                  ldict['licenceID'], ldict['numSeats']):
         sys.stderr.write(message2 % (applicationVersion))
         sys.exit(1)
 

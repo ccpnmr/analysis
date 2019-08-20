@@ -125,7 +125,7 @@ def updateServer(registrationDict, version='3'):
     values['OSversion'] = platform.platform()
     values['systemInfo'] = ';'.join(platform.uname())
     values['ID'] = ':'.join(re.findall('..', '%012x' % uuid.getnode()))
-    values['build'] = _getBuild()
+    values['compileVersion'] = _getCompileVersion()
 
     try:
         return Url.fetchUrl(url, values, timeout=2.0)
@@ -134,21 +134,21 @@ def updateServer(registrationDict, version='3'):
         logger.warning('Could not update registration on server.')
 
 
-def _getBuild():
-    """Get the build information from the build file
+def _getCompileVersion():
+    """Get the compileVersion information from the compileVersion file
     """
-    BUILD_FILE = 'buildInformation.txt'
+    COMPILEVERSIONFILE = 'compileVersion.txt'
 
-    lfile = os.path.join(ccpnConfigPath, BUILD_FILE)
+    lfile = os.path.join(ccpnConfigPath, COMPILEVERSIONFILE)
     if not os.path.exists(lfile):
-        return 'noBuildInformation'
+        return 'noCompileVersionInformation'
 
     with open(lfile, 'r', encoding='UTF-8') as fp:
         try:
-            # return the first line of the build information file - should be created by ./buildDistribution
+            # return the first line of the compileVersion information file - should be created by ./buildDistribution
             return fp.readlines()[0]
         except:
-            return 'badBuildInformation'
+            return 'badCompileVersionInformation'
 
 
 def _checkLicenceScript():
@@ -176,7 +176,11 @@ def _checkLicence(registrationDict, version='3'):
     values['OSversion'] = platform.platform()
     values['systemInfo'] = ';'.join(platform.uname())
     values['ID'] = ':'.join(re.findall('..', '%012x' % uuid.getnode()))
-    values['build'] = _getBuild()
+    values['compileVersion'] = _getCompileVersion()
+    buildFor, licenceID = _getBuildID()
+    values['buildFor'] = buildFor
+    values['licenceType'] = licenceType
+    values['licenceID'] = licenceID
 
     try:
         found = Url.fetchUrl(url, values, timeout=2.0)
@@ -203,7 +207,7 @@ def checkServer(registrationDict, version='3'):
     values['OSversion'] = platform.platform()
     values['systemInfo'] = ';'.join(platform.uname())
     values['ID'] = ':'.join(re.findall('..', '%012x' % uuid.getnode()))
-    values['build'] = _getBuild()
+    values['compileVersion'] = _getCompileVersion()
 
     try:
         found = Url.fetchUrl(url, values, timeout=2.0)

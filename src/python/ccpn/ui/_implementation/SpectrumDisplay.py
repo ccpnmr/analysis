@@ -98,7 +98,8 @@ class SpectrumDisplay(AbstractWrapperObject):
     @property
     def stripDirection(self) -> str:
         """Strip axis direction ('X', 'Y', None) - None only for non-strip plots"""
-        raise RuntimeError('deprecated: use stripArrangement')
+        getLogger().warn('StripDirection is deprecated. Used stripDirection instead')
+        return self.stripArrangement
 
         # return self._wrappedData.stripDirection
 
@@ -106,7 +107,9 @@ class SpectrumDisplay(AbstractWrapperObject):
     def stripDirection(self, value):
         """Set the new strip direction ('X', 'Y', None) - None only for non-strip plots
         """
-        raise RuntimeError('deprecated: use stripArrangement')
+        self.stripArrangement(value)
+        getLogger().warn('StripDirection is deprecated. Used stripDirection instead')
+        # raise RuntimeError('deprecated: use stripArrangement') no need of raising an error!
 
         # if not isinstance(value, str):
         #     raise TypeError('stripDirection must be a string')

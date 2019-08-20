@@ -1155,6 +1155,20 @@ class AbstractWrapperObject(NotifierBase):
         commonUtil.resetSerial(self._wrappedData, newSerial)
         self._resetIds()
 
+    def getAsDict(self) -> OrderedDict:
+        """
+        :return: Ordered dictionary of all class properties and their values. Key= str of property Value=any
+        """
+        od = OrderedDict()
+        for i in dir(self):
+            try: # deals with badly set property which will raise an error instead of returning an attribute.
+                att = getattr(self, i)
+                if not callable(att):
+                    od[i] = att
+            except Exception as e:
+                getLogger().warn('Error converting to dict the property: "%s" for object %s . Error: %s'  % (i, self, e))
+        return od
+
     # def _startCommandEchoBlock(self, funcName, *params, values=None, defaults=None, parName=None, propertySetter=False,
     #                            quiet=False):
     #     """Start block for command echoing, set undo waypoint, and echo command to ui and logger

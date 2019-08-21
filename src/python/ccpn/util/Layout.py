@@ -498,7 +498,6 @@ def isLayoutFile(filePath):
     with open(filePath) as fp:
         layout = json.load(fp, object_hook=AttrDict)
         if layout.get(LayoutState):
-            print('Is a layout')
             return True
     return False
 

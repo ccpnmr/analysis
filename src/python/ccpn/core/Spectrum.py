@@ -1403,18 +1403,17 @@ assignmentTolerances
                   Use axisCodes to set magnetisation transfers instead.""")
 
     @property
-    def intensities(self):
+    def intensities(self) -> np.ndarray:
         """ spectral intensities as NumPy array for 1D spectra
         """
         if self.dimensionCount != 1:
-            getLogger().warning('Currently this method only works for 1D spectra')
-            return
+            raise RuntimeError('Currently this method only works for 1D spectra')
 
         if self._intensities is None:
             self._intensities = self.getSliceData()  # Assignment is Redundant as getSliceData does that;
+            # Nevertheless for clarity
             if self._intensities is None:
                 getLogger().warning('Unable to get 1D slice data for %s' % self)
-            return self._intensities                                         # Nevertheless for clarity
 
         # # store the unscaled value internally so need to multiply the return value again
         # if self.getSliceData() is  None:
@@ -1427,7 +1426,7 @@ assignmentTolerances
         # # if self._intensities is not None:
         # #   self._intensities *= self.scale
 
-
+        return self._intensities
 
     @intensities.setter
     def intensities(self, value: np.ndarray):

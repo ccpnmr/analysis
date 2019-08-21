@@ -369,6 +369,7 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
         self._menuBar.setNativeMenuBar(False)
 
         self._fillRecentProjectsMenu()
+        self._fillPredifinedLayoutMenu()
         self._fillRecentMacrosMenu()
         #TODO:ED needs fixing
         self._fillPluginsMenu()  # ejb - nothing to show, and crash anyway
@@ -547,6 +548,29 @@ Use menu Spectrum-->Validate paths.. or "VP" shortcut to correct''' % '\n\t'.joi
         recentFileMenu.addSeparator()
         recentFileMenu.addAction(Action(recentFileMenu, text='Clear',
                                         callback=self.application.clearRecentProjects))
+
+    def _fillPredifinedLayoutMenu(self):
+        """
+        Populates predifined Layouts
+        """
+        from ccpn.util import Layout
+        from ccpn.framework.PathsAndUrls import predefinedLayouts
+        userDefinedLayoutDirPath = self.application.preferences.general.get('userLayoutsPath')
+        prelayouts = Layout._dictLayoutsNamePath(Layout._getPredifinedLayouts(predefinedLayouts))
+        prelayoutMenu = self.getMenuAction('Project->Layout->Open pre-defined')
+        prelayoutMenu.clear()
+        for name, path in prelayouts.items():
+            action = Action(self, text=name, translate=False,
+                            callback=partial(self.application.restoreLayoutFromFile, path))
+            prelayoutMenu.addAction(action)
+        prelayoutMenu.addSeparator()
+        userLayouts = Layout._dictLayoutsNamePath(Layout._getPredifinedLayouts(userDefinedLayoutDirPath))
+        print('userLayouts')
+        for name, path in userLayouts.items():
+            action = Action(self, text=name, translate=False,
+                            callback=partial(self.application.restoreLayoutFromFile, path))
+            prelayoutMenu.addAction(action)
+
 
     def _fillMacrosMenu(self):
         """

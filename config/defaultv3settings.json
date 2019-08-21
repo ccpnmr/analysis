@@ -6,6 +6,7 @@
         "userMacroPath": "~/.ccpn/macros/",
         "userPluginPath": "~/.ccpn/plugins/",
         "userExtensionPath": "~/.ccpn/extensions/",
+        "userLayoutsPath": "",
         "language": "English-UK",
         "editor": "default",
         "colourScheme": "dark",

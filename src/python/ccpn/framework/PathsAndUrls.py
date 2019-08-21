@@ -66,5 +66,8 @@ licensePath                     = os.path.join(ccpnCodePath, 'LICENSE.txt')
 userPreferencesDirectory        = os.path.expanduser('~/.ccpn')
 userPreferencesPath             = os.path.join(userPreferencesDirectory,'v3settings.json')
 
+# Predefined layouts
+predefinedLayouts               = os.path.join(ccpnCodePath, 'layouts')
+
 # others
 CCPN_EXTENSION = '.ccpn'

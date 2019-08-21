@@ -34,6 +34,7 @@ from ccpn.util.Logging import getLogger
 from ccpn.ui.gui.lib.GuiSpectrumDisplay import GuiSpectrumDisplay
 import json
 import sys, os
+from ccpn.util import Path
 
 
 StateDirName = 'state'
@@ -471,3 +472,20 @@ def _getSpectrumDisplaysState(spectrumDisplays):
         ll.append(fd)
     return ll
 
+def _getFileNameFromPath(path, extToSplit= 'json'):
+    file = ntpath.basename(path)
+    name = file.split("."+extToSplit)[0]
+    return name
+
+def _getPredifinedLayouts(dirPath):
+    # path has to finish with /
+    sp = os.path.join(dirPath, '*.json')
+    layoutsFiles = glob.glob(sp)
+    return layoutsFiles
+
+def _dictLayoutsNamePath(paths):
+    dd = od()
+    for path in paths:
+        name = _getFileNameFromPath(path)
+        dd[name] = path
+    return dd

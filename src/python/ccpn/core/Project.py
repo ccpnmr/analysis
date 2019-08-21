@@ -1226,11 +1226,8 @@ class Project(AbstractWrapperObject):
             return [spectrum]
 
     def _loadLayout(self, path: str, subType: str):
-        # this is a GUI oly function. Please move to the appropriate  location
-        from ccpn.util import Layout
-        self.application._getUserLayout(path)
-        self.application.ui.mainWindow.moduleArea._closeAll()
-        Layout.restoreLayout(self.application.ui.mainWindow, self.application.layout, restoreSpectrumDisplay=True)
+        # this is a GUI only function call. Please move to the appropriate  location
+        self.application.restoreLayoutFromFile(path)
 
     def _loadLookupFile(self, path: str, subType: str, ):
         """Load data from a look-up file, csv or xls ."""

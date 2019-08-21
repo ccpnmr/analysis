@@ -1,0 +1,269 @@
+{
+    "SpectrumDisplays": [
+        {
+            "stripDirection": "Y",
+            "axisOrder": [
+                "H",
+                "C",
+                "N"
+            ],
+            "spectra": [
+                "SP:cbcaconh",
+                "SP:hnca",
+                "SP:hncacb",
+                "SP:hncoca"
+            ],
+            "stripsZoomStates": [
+                [
+                    9.389334484136604,
+                    5.754862945322792,
+                    89.33660362035359,
+                    18.49046345197186
+                ]
+            ],
+            "displayAxisCodes": [
+                "H",
+                "C",
+                "N"
+            ],
+            "longPid": "SpectrumDisplay:HCN",
+            "widths": [
+                3.6344715388138127,
+                70.84614016838172,
+                0.25694506899225883
+            ],
+            "units": [
+                "ppm",
+                "ppm",
+                "ppm"
+            ],
+            "positions": [
+                7.572098714729698,
+                53.913533536162724,
+                118.34747253449613
+            ],
+            "is1D": false,
+            "title": "HCN"
+        },
+        {
+            "stripDirection": "Y",
+            "axisOrder": [
+                "H",
+                "N"
+            ],
+            "spectra": [
+                "SP:hsqc"
+            ],
+            "stripsZoomStates": [
+                [
+                    10.518191035082493,
+                    4.845069522024291,
+                    137.44760365756264,
+                    101.92751732007287
+                ]
+            ],
+            "displayAxisCodes": [
+                "H",
+                "N"
+            ],
+            "longPid": "SpectrumDisplay:HN",
+            "widths": [
+                5.673121513058203,
+                35.52008633748977
+            ],
+            "units": [
+                "ppm",
+                "ppm"
+            ],
+            "positions": [
+                7.681630278553392,
+                119.68756048881775
+            ],
+            "is1D": false,
+            "title": "HN"
+        }
+    ],
+    "guiModules": [
+        [
+            "NmrAtomAssigner:1",
+            "NmrAtomAssignerModule"
+        ],
+        [
+            "Pick and Assign:1",
+            "PickAndAssignModule"
+        ],
+        [
+            "SpectrumDisplay:HN",
+            "SpectrumDisplay"
+        ],
+        [
+            "SpectrumDisplay:HCN",
+            "SpectrumDisplay"
+        ]
+    ],
+    "general": {
+        "applicationVersion": "3.0.b6",
+        "applicationName": "AnalysisAssign"
+    },
+    "warning": "Warning. Any changes in this file will be overwritten when saving a new layout.",
+    "layoutState": {
+        "main": [
+            "horizontal",
+            [
+                [
+                    "vertical",
+                    [
+                        [
+                            "vertical",
+                            [
+                                [
+                                    "dock",
+                                    "SpectrumDisplay:HN",
+                                    {
+                                        "__DoubleSpinbox0": 0.0,
+                                        "__DoubleSpinbox1": 0.0,
+                                        "__DoubleSpinbox2": 0.0,
+                                        "__Hz_x_SDS": false,
+                                        "__Hz_y_SDS": false,
+                                        "__PulldownList0": "horizontal",
+                                        "__RadioButtons0": "ppm",
+                                        "__RadioButtons1": "Cross",
+                                        "__RadioButtons2": "    ",
+                                        "__RadioButtons3": "ppm",
+                                        "__RadioButtons4": "Short",
+                                        "__SDS_lockAspect": false,
+                                        "__SDS_symbolSize": 9,
+                                        "__SDS_symbolThickness": 2,
+                                        "__SDS_useFixedAspect": false,
+                                        "__Slider0": 0,
+                                        "__Slider1": 0,
+                                        "__annSDS_Full": false,
+                                        "__annSDS_Id": false,
+                                        "__annSDS_Minimal": false,
+                                        "__annSDS_Pid": false,
+                                        "__annSDS_Short": true,
+                                        "__points_x_SDS": false,
+                                        "__points_y_SDS": false,
+                                        "__ppm_x_SDS": true,
+                                        "__ppm_y_SDS": true,
+                                        "__stripSDS_Column": false,
+                                        "__stripSDS_Row": true,
+                                        "__symSDS_Cross": true,
+                                        "__symSDS_Filled lineWidths": false,
+                                        "__symSDS_Plus": false,
+                                        "__symSDS_lineWidths": false
+                                    }
+                                ],
+                                [
+                                    "vertical",
+                                    [
+                                        [
+                                            "dock",
+                                            "NmrAtomAssigner:1",
+                                            {
+                                                "__Filter:": "> Select <",
+                                                "__NmrResidue:": "<Undefined>",
+                                                "_nmrChain": "> Select <",
+                                                "_nmrResidue": "<Undefined>",
+                                                "atomTypeOptions": "C",
+                                                "axisCodeOptions": "C",
+                                                "modeRadioButtons": "Backbone",
+                                                "molTypePulldown": "protein",
+                                                "offsetSelector": "0",
+                                                "radioButton1": true,
+                                                "radioButton2": false,
+                                                "selectAtomType": false,
+                                                "selectAxisCode": true,
+                                                "selectionRadioButtons": "Axis"
+                                            }
+                                        ],
+                                        [
+                                            "dock",
+                                            "Pick and Assign:1",
+                                            {
+                                                "__Auto clear marks:": true,
+                                                "__Display(s):": "> select-to-add <",
+                                                "__Mark positions:": true,
+                                                "__NmrChain:": "> Select <",
+                                                "__Pick Peaks in Display:": "> Select <",
+                                                "__Show sequential strips:": false
+                                            }
+                                        ]
+                                    ],
+                                    {
+                                        "sizes": [
+                                            263,
+                                            263
+                                        ]
+                                    }
+                                ]
+                            ],
+                            {
+                                "sizes": [
+                                    311,
+                                    530
+                                ]
+                            }
+                        ]
+                    ],
+                    {
+                        "sizes": [
+                            845
+                        ]
+                    }
+                ],
+                [
+                    "dock",
+                    "SpectrumDisplay:HCN",
+                    {
+                        "__DoubleSpinbox0": 0.0,
+                        "__DoubleSpinbox2": 0.0,
+                        "__DoubleSpinbox3": 0.0,
+                        "__Hz_x_SDS": false,
+                        "__Hz_y_SDS": false,
+                        "__PlaneToolbar_planeLabel0": 118.35,
+                        "__PulldownList0": "horizontal",
+                        "__RadioButtons0": "ppm",
+                        "__RadioButtons1": "Short",
+                        "__RadioButtons2": "Cross",
+                        "__RadioButtons3": "    ",
+                        "__RadioButtons4": "ppm",
+                        "__SDS_lockAspect": false,
+                        "__SDS_symbolSize": 9,
+                        "__SDS_symbolThickness": 2,
+                        "__SDS_useFixedAspect": false,
+                        "__Slider0": 0,
+                        "__Slider1": 0,
+                        "__Spinbox0": 1,
+                        "__annSDS_Full": false,
+                        "__annSDS_Id": false,
+                        "__annSDS_Minimal": false,
+                        "__annSDS_Pid": false,
+                        "__annSDS_Short": true,
+                        "__points_x_SDS": false,
+                        "__points_y_SDS": false,
+                        "__ppm_x_SDS": true,
+                        "__ppm_y_SDS": true,
+                        "__stripSDS_Column": false,
+                        "__stripSDS_Row": true,
+                        "__symSDS_Cross": true,
+                        "__symSDS_Filled lineWidths": false,
+                        "__symSDS_Plus": false,
+                        "__symSDS_lineWidths": false
+                    }
+                ]
+            ],
+            {
+                "sizes": [
+                    391,
+                    693
+                ]
+            }
+        ],
+        "float": []
+    },
+    "fileNames": [
+        "NmrAtomAssigner",
+        "PickAndAssignModule"
+    ]
+}

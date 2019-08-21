@@ -29,6 +29,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 
 import ntpath
 import glob
+from ccpn.util.AttrDict import AttrDict
 from collections import OrderedDict as od
 from ccpn.util.Logging import getLogger
 from ccpn.ui.gui.lib.GuiSpectrumDisplay import GuiSpectrumDisplay
@@ -50,8 +51,11 @@ SpectrumDisplays = "SpectrumDisplays"
 GuiModules = "guiModules"
 FileNames = 'fileNames'
 LayoutState = "layoutState"
+TitleText = 'LayoutFile'
+Title = "Title"
 
 DefaultLayoutFile = {
+    Title      : TitleText,
     Warning    : WarningMessage,
     General    : {
         ApplicationName   : "",
@@ -489,3 +493,12 @@ def _dictLayoutsNamePath(paths):
         name = _getFileNameFromPath(path)
         dd[name] = path
     return dd
+
+def isLayoutFile(filePath):
+    with open(filePath) as fp:
+        layout = json.load(fp, object_hook=AttrDict)
+        if layout.get(LayoutState):
+            print('Is a layout')
+            return True
+    return False
+

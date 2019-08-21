@@ -114,7 +114,7 @@ class PreferencesPopup(CcpnDialog):
         if self.preferences.general.colourScheme != self._oldColourScheme:
             setColourScheme(self.preferences.general.colourScheme)
             self.application.correctColours()
-
+        self.application._savePreferences()
         self._accept()
 
     def _accept(self):
@@ -248,6 +248,15 @@ class PreferencesPopup(CcpnDialog):
         # self.dataPathText.editingFinished.connect(self._setDataPath)
         # self.dataPathText.setText(self.preferences.general.dataPath)
         # self.dataPathButton = Button(parent, grid=(row, 2), callback=self._getDataPath, icon='icons/directory', hPolicy='fixed')
+
+        row += 1
+        userLayouts = Label(parent, text="User Predefined Layouts ", grid=(row, 0))
+        self.userLayoutsLe = LineEdit(parent, grid=(row, 1), hAlign='l')
+        self.userLayoutsLe.setMinimumWidth(LineEditsMinimumWidth)
+        self.userLayoutsLeButton = Button(parent, grid=(row, 2), callback=self._getUserLayoutsPath,
+                                               icon='icons/directory', hPolicy='fixed')
+        self.userLayoutsLe.setText(self.preferences.general.get('userLayoutsPath'))
+        self.userLayoutsLe.editingFinished.connect(self._setuserLayoutsPath)
 
         row += 1
         self.auxiliaryFilesLabel = Label(parent, text="Auxiliary Files Path ", grid=(row, 0))
@@ -721,6 +730,23 @@ class PreferencesPopup(CcpnDialog):
         if len(directory) > 0:
             self.auxiliaryFilesData.setText(directory[0])
             self.preferences.general.auxiliaryFilesPath = directory[0]
+
+    def _getUserLayoutsPath(self):
+        if os.path.exists(os.path.expanduser(self.userLayoutsLe.text())):
+            currentDataPath = os.path.expanduser(self.userLayoutsLe.text())
+        else:
+            currentDataPath = os.path.expanduser('~')
+        dialog = FileDialog(self, text='Select Data File', directory=currentDataPath, fileMode=2, acceptMode=0,
+                            preferences=self.preferences.general)
+        directory = dialog.selectedFiles()
+        if len(directory) > 0:
+            self.userLayoutsLe.setText(directory[0])
+            self.preferences.general.userLayoutsPath = directory[0]
+
+    def _setuserLayoutsPath(self):
+        newPath = self.userLayoutsLe.text()
+        self.preferences.general.userLayoutsPath = newPath
+
 
     def _setAuxiliaryFilesPath(self):
         newPath = self.auxiliaryFilesData.text()

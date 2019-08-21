@@ -1156,7 +1156,7 @@ class Framework(NotifierBase):
                         ("Restore last", self.restoreLastSavedLayout, [('enabled', True)]),
                         ("Restore from file...", self.restoreLayoutFromFile, [('enabled', True)]),
                         (),
-                        ("Open pre-defined", ()),
+                        ("Open pre-defined",  ()),
 
                         )),
             (),

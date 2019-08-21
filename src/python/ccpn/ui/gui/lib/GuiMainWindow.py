@@ -565,11 +565,15 @@ Use menu Spectrum-->Validate paths.. or "VP" shortcut to correct''' % '\n\t'.joi
             prelayoutMenu.addAction(action)
         prelayoutMenu.addSeparator()
         userLayouts = Layout._dictLayoutsNamePath(Layout._getPredifinedLayouts(userDefinedLayoutDirPath))
-        print('userLayouts')
         for name, path in userLayouts.items():
             action = Action(self, text=name, translate=False,
                             callback=partial(self.application.restoreLayoutFromFile, path))
             prelayoutMenu.addAction(action)
+        prelayoutMenu.addSeparator()
+        action = Action(self, text='Update', translate=False,
+                        callback=self._fillPredifinedLayoutMenu)
+        prelayoutMenu.addAction(action)
+
 
 
     def _fillMacrosMenu(self):

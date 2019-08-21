@@ -1226,7 +1226,7 @@ class Project(AbstractWrapperObject):
             return [spectrum]
 
     def _loadLayout(self, path: str, subType: str):
-        # this is a GUI only function call. Please move to the appropriate  location
+        # this is a GUI only function call. Please move to the appropriate location on 3.1
         self.application.restoreLayoutFromFile(path)
 
     def _loadLookupFile(self, path: str, subType: str, ):

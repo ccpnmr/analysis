@@ -1,59 +1,3 @@
-"""
-BMRB Chemical Shift List Importer from NMR-STAR v3.1.
-This is not a full BMRB importer to Analysis V3.
-Please, read warnings and info message
-
-Usage:
-    UI
-    - Menu Menus > Macro > Run... > Select this file.py
-    - select BMRB file  of interest
-    - select entries
-    - Create
-    Non-UI:
-    - scroll down to "Init the macro section"
-    - replace filename path
-    - run the macro within V3
-
-1) Menu Menus > Macro > Run... > Select this file.py
-2) Menu Menus > View PythonConsole (space-space)
-                %run -i your/path/to/this/file.py (without quotes)
-
-"""
-#=========================================================================================
-# Licence, Reference and Credits
-#=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019"
-__credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
-__licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
-__reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
-                 "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
-                 "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
-#=========================================================================================
-# Last code modification
-#=========================================================================================
-__modifiedBy__ = "$modifiedBy: CCPN $"
-__dateModified__ = "$dateModified: 2017-07-07 16:32:21 +0100 (Fri, July 07, 2017) $"
-__version__ = "$Revision: 3.0.b5 $"
-#=========================================================================================
-# Created
-#=========================================================================================
-__author__ = "$Author: Luca M $"
-__date__ = "$Date: 2019-06-12 10:28:40 +0000 (Wed, Jun 12, 2019) $"
-#=========================================================================================
-# Start of code
-#=========================================================================================
-
-_UI = True  # Default opens a popup for selecting the input and run the macro
-
-Warnings = "Warning: This is only a Pre-alpha BMRB Importer. It might not work or work partially. Always inspect the results!"
-
-InfoMessage = """
-        This popup will create a new chemical shift list from the NMR-STAR v3.1 file selected.
-            
-    """
-
-## Start of Macro
-
 import pandas as pd
 import os
 import glob
@@ -77,13 +21,6 @@ Details = "Details"
 STOP = "stop_"
 Atom_chem_shift = _Atom_chem_shift+ID
 
-# NOT IN USE, just to map BMRB nomenclature to V3
-# V3_BMRB_map = {
-#                 "residueType"  : Comp_ID,  # nmrResidue, e.g. ALA
-#                 "sequenceCode" : Seq_ID,   # nmrResidue, e.g. 1
-#                 "name"         : Atom_ID,  # nmrAtom,    e.g. HA
-#                 "position"     : Val,      # peak,       always ppm value !?
-#                }
 
 def _openBmrb(filePath):
     # HardCoded bit to find just the Chemical Shifts, Replace with NEF Style
@@ -113,7 +50,7 @@ def makeDataFrame(bmrbLines):
     shortColumns = [c.replace(_Atom_chem_shift,'') for c in columns]
     return pd.DataFrame(table, columns=shortColumns)
 
-def makeCSLfromDF(project ,df, chemicalShiftListName=None):
+def makeCSLfromDF(project, df, chemicalShiftListName=None):
     """
 
     :param df: Pandas dataFrame
@@ -134,56 +71,68 @@ def makeCSLfromDF(project ,df, chemicalShiftListName=None):
                     cs.valueError = float(row[Val_err])
     return chemicalShiftList
 
-def _importAndCreateV3Objs(project, file):
+
+def _simulatedSpectrumFromCSL(project, csl, axesCodesMap):
+    """
+
+    key= NmrAtom name as appears in the CSL ; value = AxisCode name to Assign to the Spectrum AxisCode
+    E.G. use NmrAtom Ca from CSL (imported from BMRB) and assign to a peak with axisCode named C
+
+    :param csl: chemicalShiftList Object
+    :param axesCodesMap: Ordered Dict containing Atoms of interest and parallel Spectrum Axes Codes
+    :return:
+    """
+    if csl is None:
+        print("Provide a Chemical Shift List")
+        return
+    if axesCodesMap is None:
+        print("Select NmrAtom to use and axis codes")
+        return
+
+    nmrAtomNames = list(axesCodesMap.keys())
+    targetSpectrumAxCodes = list(axesCodesMap.values())
+    targetSpectrum = project.createDummySpectrum(axisCodes=targetSpectrumAxCodes, name=None)#, chemicalShiftList=csl)
+    peakList = targetSpectrum.peakLists[-1]
+
+    # filter by NmrAtom of interest
+    nmrResiduesOD = od()
+    for chemicalShift in csl.chemicalShifts:
+        na = chemicalShift.nmrAtom
+        if na.name in nmrAtomNames:
+            try:
+                nmrResiduesOD[na.nmrResidue].append([na, chemicalShift.value])
+            except KeyError:
+                nmrResiduesOD[na.nmrResidue] = [(na, chemicalShift.value)]
+
+    for nmrResidue in nmrResiduesOD:
+        shifts = []
+        atoms = []
+        for v in nmrResiduesOD[nmrResidue]:
+            atoms.append(v[0])
+            shifts.append(v[1])
+
+        targetSpectrumAxCodes = targetSpectrum.axisCodes
+        axisCodes = [n.name for n in atoms]
+        i = getAxisCodeMatchIndices(axisCodes,targetSpectrumAxCodes) # get the correct order.
+        if len(i) != len(nmrAtomNames): #if not all the NmrAtoms are found for a specific CSL cannot make the peak, incomplete assignment/shifts
+            print('Skipping, not enough information to create and assign peak for NmrResidue: %s' %nmrResidue)
+            continue
+
+        i = np.array(i)
+        shifts = np.array(shifts)
+        atoms = np.array(atoms)
+        try: # trap unknown issues
+            peak = peakList.newPeak(list(shifts[i]))
+            for na, sa in zip(atoms[i],targetSpectrumAxCodes) :
+                peak.assignDimension(sa, [na])
+        except Exception as e:
+            print('Error assigning NmrResidue %s , NmrAtoms: %s, Spectrum Axes: %s, Shifts: %s . Error: %s'
+                  %(nmrResidue,atoms,targetSpectrumAxCodes,shifts, e))
+
+def _importAndCreateV3Objs(project, file, acMap):
    lines = _openBmrb(file)
    df = makeDataFrame(lines)
    with undoBlock():
-       makeCSLfromDF(project, df)
-
-
-
-#######################################
-##############  GUI POPUP #############
-#######################################
-
-from ccpn.ui.gui.widgets.ButtonList import ButtonList
-from ccpn.ui.gui.widgets.Label import Label
-from ccpn.ui.gui.popups.Dialog import CcpnDialog
-from ccpn.ui.gui.widgets.MessageDialog import showWarning, showInfo
-from ccpn.ui.gui.widgets.FileDialog import LineEditButtonDialog
-
-
-class BMRBcslToV3(CcpnDialog):
-
-    def __init__(self, parent=None, bmrbFilePath = None, directory=None, project=None,
-                 title='Import CSL from BMRB (Pre-Alpha)', **kw):
-        CcpnDialog.__init__(self, parent, setLayout=True, windowTitle=title, **kw)
-        self.bmrbFilePath = bmrbFilePath or ''
-        self.directory = directory or ''
-        self.project = project
-
-        row = 0
-        bmrbFileLabel = Label(self, text="BMRB File", grid=(row, 0))
-        self.inputDialog = LineEditButtonDialog(self,textLineEdit=self.bmrbFilePath, directory=self.directory, grid=(row, 1))
-        row += 1
-        self.buttonList = ButtonList(self, ['Info','Cancel', 'Import'], [self._showInfo, self.reject, self._okButton], grid=(row, 1))
-
-    def _showInfo(self):
-        showWarning(Warnings, InfoMessage)
-
-    def _okButton(self):
-        bmrbFile = self.inputDialog.get()
-        _importAndCreateV3Objs(self.project, bmrbFile)
-        self.accept()
-
-
-def _importNmrStarMetaData(nmrStarPath, application):
-    application.dataBlock = application.nefReader.getNMRStarData(nmrStarPath)
-    relativePath = os.path.dirname(os.path.realpath(nmrStarPath))
-    popup = BMRBcslToV3(bmrbFilePath=nmrStarPath, directory=relativePath, project=application.project)
-    popup.show()
-    popup.raise_()
-
-
-
+       csl = makeCSLfromDF(project, df)
+       _simulatedSpectrumFromCSL(project, csl, axesCodesMap=acMap)
 

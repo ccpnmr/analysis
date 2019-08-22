@@ -1469,8 +1469,11 @@ class Framework(NotifierBase):
         return self.project
 
     def _loadNMRStarFile(self, path: str):
-        from ccpn.core.lib.CcpnStarIo import _importNmrStarMetaData
-        _importNmrStarMetaData(path, application=self)
+        from ccpn.ui.gui.popups.ImportStarPopup import StarImporterPopup
+        relativePath = os.path.dirname(os.path.realpath(path))
+        popup = StarImporterPopup(project=self.project, bmrbFilePath=path, directory=relativePath)
+        popup.show()
+        popup.raise_()
 
     #     # FIXME Below is broken. This does not create a project! Looks like a copy-paste from NEF code.
         # """Load Project from NEF file at path, and do necessary setup"""

@@ -1407,10 +1407,10 @@ class Framework(NotifierBase):
                 project = self._loadNefFile(path, makeNewProject=True)  # RHF - new by default
                 project._resetUndo(debug=self.level <= Logging.DEBUG2, application=self)
 
-            elif subType == ioFormats.NMRSTAR:
-                sys.stderr.write('==> Loading %s NMRStar project "%s"\n' % (subType, path))
-                project = self._loadNMRStarFile(path, makeNewProject=True)  # RHF - new by default
-                project._resetUndo(debug=self.level <= Logging.DEBUG2, application=self)
+            # elif subType == ioFormats.NMRSTAR: This is all Broken!
+            #     sys.stderr.write('==> Loading %s NMRStar project "%s"\n' % (subType, path))
+            #     project = self._loadNMRStarFile(path, makeNewProject=True)  # RHF - new by default
+            #     project._resetUndo(debug=self.level <= Logging.DEBUG2, application=self)
 
             elif subType == ioFormats.SPARKY:
                 sys.stderr.write('==> Loading %s Sparky project "%s"\n' % (subType, path))
@@ -1468,25 +1468,29 @@ class Framework(NotifierBase):
         getLogger().info('==> Loaded NEF file: "%s"' % (path,))
         return self.project
 
-    def _loadNMRStarFile(self, path: str, makeNewProject=True) -> Project:
-        """Load Project from NEF file at path, and do necessary setup"""
+    def _loadNMRStarFile(self, path: str):
+        from ccpn.core.lib.CcpnStarIo import _importNmrStarMetaData
+        _importNmrStarMetaData(path, application=self)
 
-        from ccpn.core.lib.ContextManagers import undoBlock, notificationEchoBlocking
+    #     # FIXME Below is broken. This does not create a project! Looks like a copy-paste from NEF code.
+        # """Load Project from NEF file at path, and do necessary setup"""
+        #
+        # from ccpn.core.lib.ContextManagers import undoBlock, notificationEchoBlocking
+        #
+        # dataBlock = self.nefReader.getNMRStarData(path)
 
-        dataBlock = self.nefReader.getNMRStarData(path)
-
-        if makeNewProject:
-            if self.project is not None:
-                self._closeProject()
-            self.project = self.newProject(dataBlock.name)
-
-        self.project._wrappedData.shiftAveraging = False
-
-        # with suspendSideBarNotifications(project=self.project):
-        with undoBlock():
-            with notificationEchoBlocking():
-                with catchExceptions(application=self, errorStringTemplate='Error loading NMRStar file: %s'):
-                    self.nefReader.importNewProject(self.project, dataBlock)
+        # if makeNewProject:
+        #     if self.project is not None:
+        #         self._closeProject()
+        #     self.project = self.newProject(dataBlock.name)
+        #
+        # self.project._wrappedData.shiftAveraging = False
+        #
+        # # with suspendSideBarNotifications(project=self.project):
+        # with undoBlock():
+        #     with notificationEchoBlocking():
+        #         # with catchExceptions(application=self, errorStringTemplate='Error loading NMRStar file: %s'):
+        #             self.nefReader.importNewProject(self.project, dataBlock)
 
         # with undoBlock():
         #     try:
@@ -1494,10 +1498,10 @@ class Framework(NotifierBase):
         #     except Exception as es:
         #         getLogger().warning('Error loading NMRStar file: %s' % str(es))
 
-        self.project._wrappedData.shiftAveraging = True
+        # self.project._wrappedData.shiftAveraging = True
 
-        getLogger().info('==> Loaded NmrStar file: "%s"' % (path,))
-        return self.project
+        # getLogger().info('==> Loaded NmrStar file: "%s"' % (path,))
+        # return self.project
 
     def _loadSparkyProject(self, path: str, makeNewProject=True) -> Project:
         """Load Project from Sparky file at path, and do necessary setup"""

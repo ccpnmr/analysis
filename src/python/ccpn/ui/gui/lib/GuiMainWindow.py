@@ -1045,7 +1045,6 @@ Use menu Spectrum-->Validate paths.. or "VP" shortcut to correct''' % '\n\t'.joi
             dataType, subType, usePath = ioFormats.analyseUrl(url)
             if dataType == 'Project' and subType in (ioFormats.CCPN,
                                                      ioFormats.NEF,
-                                                     ioFormats.NMRSTAR,
                                                      ioFormats.SPARKY):
 
                 okToContinue = self._queryCloseProject(title='Load %s project' % subType,
@@ -1054,6 +1053,8 @@ Use menu Spectrum-->Validate paths.. or "VP" shortcut to correct''' % '\n\t'.joi
                     with progressManager(self, 'Loading project... ' + url):
                         obj = None
                         obj = self._loadProjectLastValid(url)
+            if subType == ioFormats.NMRSTAR: # NMRStar file is available only as import of metadata not as stand alone project
+                self.application._loadNMRStarFile(url)
 
             else:
                 # with progressManager(self.mainWindow, 'Loading data... ' + url):

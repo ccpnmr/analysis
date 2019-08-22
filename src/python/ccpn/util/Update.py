@@ -52,6 +52,7 @@ SERVER_DB_FILE = '__UpdateData.db'
 # (and not a 404 or whatever)
 SERVER_DOWNLOAD_SCRIPT = 'cgi-bin/update/downloadFile'
 SERVER_UPLOAD_SCRIPT = 'cgi-bin/updateadmin/uploadFile'
+SERVER_DOWNLOADCHECK_SCRIPT = 'cgi-bin/register/downloadFileCheck'
 
 FIELD_SEP = '\t'
 PATH_SEP = '__sep_'
@@ -159,6 +160,42 @@ def isBinaryData(data):
 #
 #     except Exception as es:
 #         return None
+
+
+def fetchUrl(url, data=None, headers=None, timeout=None):
+    """Fetch url request from the server
+    """
+    import ssl
+    import certifi
+    import urllib3.contrib.pyopenssl
+    # from urllib.parse import urlencode, quote
+    # import logging
+
+    # urllib3_logger = logging.getLogger('urllib3')
+    # urllib3_logger.setLevel(logging.CRITICAL)
+
+    context = ssl.create_default_context()
+    context.check_hostname = False
+    context.verify_mode = ssl.CERT_NONE
+
+    if not headers:
+        headers = {'Content-type': 'application/x-www-form-urlencoded;charset=UTF-8'}
+    body = urlencode(data, quote_via=quote).encode('utf-8') if data else None
+
+    urllib3.contrib.pyopenssl.inject_into_urllib3()
+    http = urllib3.PoolManager(cert_reqs='CERT_REQUIRED',
+                               ca_certs=certifi.where(),
+                               timeout=urllib3.Timeout(connect=3.0, read=3.0),
+                               retries=urllib3.Retry(1, redirect=False))
+
+    try:
+        response = http.request('POST', url,
+                                headers=headers,
+                                body=body,
+                                preload_content=False)
+        return response.read().decode('utf-8')
+    except:
+        print('Checksum error')
 
 def downloadFile(serverScript, serverDbRoot, fileName):
     """Download a file from the server
@@ -303,6 +340,7 @@ class UpdateAgent(object):
         self.serverDbRoot = '%s%s' % (serverDbRoot, version)
         self.serverDbFile = serverDbFile
         self.serverDownloadScript = serverDownloadScript
+        self._serverDownloadCheckScript = SERVER_DOWNLOADCHECK_SCRIPT
         self.serverUploadScript = serverUploadScript
         # self.serverDownloadScript = '%s%s' % (server, serverDownloadScript)
         # self.serverUploadScript = '%s%s' % (server, serverUploadScript)
@@ -366,10 +404,47 @@ class UpdateAgent(object):
 
         return isDifferent
 
+    # def _checkMd5(self):
+    #     """Check the md5 for download
+    #     """
+    #     serverDownloadScript = '%s%s' % (self.server, self._serverDownloadCheckScript)
+    #
+    #     def ords(*chars):
+    #         return ''.join([c for c in map(chr, chars)])
+    #     m0 = ords(99, 104, 101, 99, 107, 83, 117, 109)
+    #     m1 = ords(108, 105, 99, 101, 110, 99, 101, 73, 68)
+    #     m2 = ords(110, 111, 116, 70, 111, 117, 110, 100)
+    #
+    #     from ccpn.util import Data
+    #     val0 = getattr(Data, ''.join([c for c in m0]), m2)
+    #     val1 = getattr(Data, ''.join([c for c in m1]), m2)
+    #     data = fetchUrl(serverDownloadScript, {m0:val0, m1:val1})
+    #     print('>>>>>>', data)
+
+    def _checkMd5(self, registrationDict):
+        """Check the checkSum status on the server
+        """
+        serverDownloadScript = '%s%s' % (self.server, self._serverDownloadCheckScript)
+
+        values = {}
+        for attr in userAttributes + ('hashcode',):
+            value = []
+            for c in registrationDict[attr]:
+                value.append(c if 32 <= ord(c) < 128 else '_')
+            values[attr] = ''.join(value)
+
+        try:
+            found = fetchUrl(serverDownloadScript, values, timeout=2.0)
+            return found.strip() == 'OK'
+
+        except:
+            print('Could not check details on server.')
+
     def resetFromServer(self):
 
         try:
             self.fetchUpdateDb()
+            # self._checkMd5()
 
             # add checking for the new licence file here
             # something like this

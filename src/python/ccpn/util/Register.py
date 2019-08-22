@@ -180,9 +180,10 @@ def checkServer(registrationDict, version='3'):
     values = {}
     for attr in userAttributes + ('hashcode',):
         value = []
-        for c in registrationDict[attr]:
-            value.append(c if 32 <= ord(c) < 128 else '_')
-        values[attr] = ''.join(value)
+        if attr in registrationDict:
+            for c in registrationDict[attr]:
+                value.append(c if 32 <= ord(c) < 128 else '_')
+            values[attr] = ''.join(value)
 
     values['version'] = str(version)
     values['OSversion'] = platform.platform()

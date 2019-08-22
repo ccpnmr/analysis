@@ -89,14 +89,20 @@ def _check(key=None, doDecode=True):
         if not os.path.exists(lfile):
             sys.stderr.write(message1)
             sys.exit(1)
+        # with open(lfile, 'rb') as fp:
         with open(lfile, 'r', encoding='UTF-8') as fp:
             key = fp.readlines()[0]
             fp.close()
 
     try:
+        keysum = ''
         if doDecode:
+            h = hashlib.md5()
+            h.update(key.encode('utf-8'))
+            keysum = h.hexdigest()
             key = _decode('ccpnVersion3', key)
         ldict = json.loads(key)
+        ldict[message(99, 104, 101, 99, 107, 83, 117, 109)] = keysum
     except:
         sys.stderr.write(message2 % (applicationVersion))
         sys.exit(1)
@@ -121,7 +127,7 @@ def _check(key=None, doDecode=True):
         sys.exit(1)
 
     from ccpn.util import Data
-    for val in (message(98, 117, 105, 108, 100, 70, 111, 114), message(108, 105, 99, 101, 110, 99, 101, 84, 121, 112, 101), message(108, 105, 99, 101, 110, 99, 101, 73, 68)):
+    for val in (message(98, 117, 105, 108, 100, 70, 111, 114), message(108, 105, 99, 101, 110, 99, 101, 84, 121, 112, 101), message(108, 105, 99, 101, 110, 99, 101, 73, 68), message(99, 104, 101, 99, 107, 83, 117, 109)):
         setattr(Data, val, ldict[val])
 
     if ldict['licenceType'] == 'developer':

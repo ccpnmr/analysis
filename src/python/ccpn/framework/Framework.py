@@ -1145,10 +1145,11 @@ class Framework(NotifierBase):
             ("Save", self.saveProject, [('shortcut', '⌃s')]),  # Unicode U+2303, NOT the carrot on your keyboard.
             ("Save As...", self.saveProjectAs, [('shortcut', 'sa')]),
             (),
-            ("NEF", (("Import Nef File", self._importNef, [('shortcut', 'in'), ('enabled', True)]),
-                     ("Export Nef File", self._exportNEF, [('shortcut', 'ex')])
-                     )),
-            (),
+            ("Import", (("Nef File", self._importNef, [('shortcut', 'in'), ('enabled', True)]),
+                        ("NmrStar File", self._loadNMRStarFile, [('shortcut', 'bi')]),
+                        )),
+            ("Export", (("Nef File", self._exportNEF, [('shortcut', 'ex'), ('enabled', True)]),
+                        )),
             (),
             ("Layout", (("Save", self.saveLayout, [('enabled', True)]),
                         ("Save as...", self.saveLayoutAs, [('enabled', True)]),
@@ -1468,8 +1469,14 @@ class Framework(NotifierBase):
         getLogger().info('==> Loaded NEF file: "%s"' % (path,))
         return self.project
 
-    def _loadNMRStarFile(self, path: str):
-        from ccpn.util.nef import StarIo
+    def _loadNMRStarFile(self, path=None):
+        if not path:
+            text = 'Import NMR-Star File into Project'
+            dialog = FileDialog(parent=self.ui.mainWindow, fileMode=FileDialog.AnyFile, text=text,
+                                acceptMode=FileDialog.AcceptOpen, preferences=self.preferences.general)
+            path = dialog.selectedFile()
+            if not path:
+                return
         from ccpn.ui.gui.popups.ImportStarPopup import StarImporterPopup
         relativePath = os.path.dirname(os.path.realpath(path))
         dataBlock = self.nefReader.getNMRStarData(path)

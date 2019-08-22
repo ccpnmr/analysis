@@ -132,6 +132,10 @@ class FileDialog(QtWidgets.QFileDialog):
 
             self.result = self.exec_()
 
+    def reject(self):
+        self.selectedFiles = lambda : None # needs to clear the selection when closing
+        super(FileDialog, self).reject()
+
     def _predir(self, file: str):
         if file.endswith(self._restrictedType):
             self.fileSelected = None
@@ -169,7 +173,7 @@ class FileDialog(QtWidgets.QFileDialog):
                 return []
         else:
             # use our ccpn dialog
-            files = QtWidgets.QFileDialog.selectedFiles(self)
+            files = super(FileDialog, self).selectedFiles()
             return files
 
     def selectedFile(self):
@@ -360,7 +364,9 @@ if __name__ == '__main__':
 
     app = TestApplication()
     popup = CcpnDialog(windowTitle='Test LineEditButtonDialog')
-    slider = LineEditButtonDialog(parent=popup, fileMode=None, filter=('ccpn (*.ccpn)'))
+    slider = FileDialog(parent=popup)
+    print(slider.selectedFile())
+
     popup.show()
     popup.raise_()
     app.start()

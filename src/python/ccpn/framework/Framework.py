@@ -1387,7 +1387,7 @@ class Framework(NotifierBase):
         dataType, subType, usePath = ioFormats.analyseUrl(path)
         if dataType == 'Project' and subType in (ioFormats.CCPN,
                                                  ioFormats.NEF,
-                                                 ioFormats.NMRSTAR,
+                                                 # ioFormats.NMRSTAR,
                                                  ioFormats.SPARKY):
 
             # if subType != ioFormats.NEF:    # ejb - only reset project for CCPN files

@@ -1155,7 +1155,7 @@ class AbstractWrapperObject(NotifierBase):
         commonUtil.resetSerial(self._wrappedData, newSerial)
         self._resetIds()
 
-    def getAsDict(self) -> OrderedDict:
+    def getAsDict(self, _includePrivate=False) -> OrderedDict:
         """
         :return: Ordered dictionary of all class properties and their values. Key= str of property Value=any
         """
@@ -1164,7 +1164,11 @@ class AbstractWrapperObject(NotifierBase):
             try: # deals with badly set property which will raise an error instead of returning an attribute.
                 att = getattr(self, i)
                 if not callable(att):
-                    od[i] = att
+                    if _includePrivate:
+                            od[i] = att
+                    else:
+                        if not i.startswith('_'):
+                            od[i] = att
             except Exception as e:
                 getLogger().warn('Potential error for the property %s in creating dictionary from object: %s . Error: %s'  % (i, self, e))
         return od

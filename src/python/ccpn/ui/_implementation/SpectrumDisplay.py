@@ -98,17 +98,17 @@ class SpectrumDisplay(AbstractWrapperObject):
     @property
     def stripDirection(self) -> str:
         """Strip axis direction ('X', 'Y', None) - None only for non-strip plots"""
-        getLogger().warn('StripDirection is deprecated. Used stripDirection instead')
+        getLogger().warn('StripDirection is deprecated. Used stripArrangement instead')
         return self.stripArrangement
 
         # return self._wrappedData.stripDirection
 
     @stripDirection.setter
-    def stripDirection(self, value):
+    def stripDirection(self, value:str='Y'):
         """Set the new strip direction ('X', 'Y', None) - None only for non-strip plots
         """
         self.stripArrangement(value)
-        getLogger().warn('StripDirection is deprecated. Used stripDirection instead')
+        getLogger().warn('StripDirection is deprecated. Used stripArrangement instead')
         # raise RuntimeError('deprecated: use stripArrangement') no need of raising an error!
 
         # if not isinstance(value, str):
@@ -239,7 +239,7 @@ class SpectrumDisplay(AbstractWrapperObject):
 
     def _getSpectra(self):
         if len(self.strips)>0: # strips
-            return [x for x in self.orderedSpectrumViews(self.strips[-1].spectra)]
+            return [x.spectrum for x in self.orderedSpectrumViews(self.strips[-1].spectrumViews)]
 
     # #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     # # ejb - orderedSpectrumViews, orderedSpectra

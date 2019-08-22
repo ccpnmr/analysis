@@ -1406,26 +1406,19 @@ assignmentTolerances
     def intensities(self) -> np.ndarray:
         """ spectral intensities as NumPy array for 1D spectra
         """
+
+
         if self.dimensionCount != 1:
-            raise RuntimeError('Currently this method only works for 1D spectra')
+            getLogger().warn('Currently this method only works for 1D spectra')
+            return np.array([])
 
         if self._intensities is None:
             self._intensities = self.getSliceData()  # Assignment is Redundant as getSliceData does that;
+
             # Nevertheless for clarity
             if self._intensities is None:
                 getLogger().warning('Unable to get 1D slice data for %s' % self)
-
-        # # store the unscaled value internally so need to multiply the return value again
-        # if self.getSliceData() is  None:
-        #     return np.array([0]*len(self.positions))
-        # else:
-        #     self._intensities = self.getSliceData() / self.scale
-        #
-        #
-        # # OLD - below not needed any more since now scaled in getSliceData()
-        # # if self._intensities is not None:
-        # #   self._intensities *= self.scale
-
+                return np.array([])
         return self._intensities
 
     @intensities.setter
@@ -1436,11 +1429,12 @@ assignmentTolerances
             spectrumView.refreshData()
 
     @property
-    def positions(self) -> np.ndarray:
+    def positions(self) -> np.array:
         """ spectral region in ppm as NumPy array for 1D spectra """
 
         if self.dimensionCount != 1:
-            raise Exception('Currently this method only works for 1D spectra')
+            getLogger().warn('Currently this method only works for 1D spectra')
+            return np.array([])
 
         if self._positions is None:
             spectrumLimits = self.spectrumLimits[0]

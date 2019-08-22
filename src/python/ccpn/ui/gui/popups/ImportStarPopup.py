@@ -45,7 +45,7 @@ __date__ = "$Date: 2019-06-12 10:28:40 +0000 (Wed, Jun 12, 2019) $"
 
 _UI = True  # Default opens a popup for selecting the input and run the macro
 
-Warnings = "Warning: This is only a Pre-alpha BMRB Importer. It might not work or work partially. Always inspect the results!"
+Warnings = "Warning: This is a beta version of the NMR-Star (BMRB) Importer. It might not work or work partially. Always inspect the results!"
 
 InfoMessage = """
         This popup will create a new chemical shift list from the NMR-STAR v3.1 file selected.
@@ -81,13 +81,15 @@ InfoMessage = """
 #######################################
 ##############  GUI POPUP #############
 #######################################
-
+from PyQt5 import QtGui, QtWidgets, QtCore
 from ccpn.ui.gui.widgets.ButtonList import ButtonList
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.popups.Dialog import CcpnDialog
 from ccpn.ui.gui.widgets.MessageDialog import showWarning, showInfo
 from ccpn.ui.gui.widgets.LineEdit import LineEdit
 from ccpn.ui.gui.widgets.FileDialog import LineEditButtonDialog
+from ccpn.ui.gui.widgets.Base import Base
+from ccpn.ui.gui.widgets.CheckBox import CheckBox
 import pandas as pd
 import os
 import glob
@@ -97,6 +99,11 @@ from ccpn.util.Common import getAxisCodeMatchIndices
 from ccpn.framework.PathsAndUrls import macroPath as mp
 from ccpn.core.lib.ContextManagers import undoBlock
 
+
+assigned_chem_shift_list = 'assigned_chem_shift_list'
+shift_set = 'shift_set'
+recognisedValues = [assigned_chem_shift_list, shift_set]
+
 defaultAxesCodesMap = od([                           #                   replace with the atom and axes of interest
                             ("N", "N"),
                             ("H", "H"),
@@ -104,26 +111,150 @@ defaultAxesCodesMap = od([                           #                   replace
                             ])
 
 
+class TreeCheckBoxes(QtWidgets.QTreeWidget, Base):
+    def __init__(self, parent=None, orderedDataDict=None,checkList=None,selectableItems=None, maxSize=(250, 300), **kwds):
+        """Initialise the widget
+        """
+        super().__init__(parent)
+        Base._init(self, setLayout=False, **kwds)
+
+        # self.setMaximumSize(*maxSize)
+        self.checkList = checkList or []
+        self.selectableItems = selectableItems or []
+        self.headerItem = QtWidgets.QTreeWidgetItem()
+        self.item = QtWidgets.QTreeWidgetItem()
+        self.orderedDataDict = orderedDataDict or {}
+        self.header().hide()
+        if self.orderedDataDict is not None:
+            for name in self.checkList:
+                if name in self.orderedDataDict:
+                    item = QtWidgets.QTreeWidgetItem(self)
+                    item.setText(0, name)
+                    item.setFlags(item.flags() | QtCore.Qt.ItemIsTristate | QtCore.Qt.ItemIsUserCheckable)
+                    if isinstance(self.orderedDataDict.get(name), (list,tuple)):
+                        for obj in self.orderedDataDict.get(name):
+                            child = QtWidgets.QTreeWidgetItem(item)
+                            child.setFlags(child.flags() | QtCore.Qt.ItemIsUserCheckable)
+                            child.setData(1, 0, obj)
+                            child.setText(0, obj.pid)
+                            child.setCheckState(0, QtCore.Qt.Unchecked)
+
+                    item.setCheckState(0, QtCore.Qt.Checked)
+                    item.setExpanded(False)
+                    item.setDisabled(name not in self.selectableItems)
+
+        self.itemClicked.connect(self._clicked)
+
+    def getSelectedObjects(self):
+        """Get selected objects from the check boxes
+        """
+        selectedObjects = []
+        for item in self.findItems('', QtCore.Qt.MatchContains | QtCore.Qt.MatchRecursive):
+            if item.checkState(0) == QtCore.Qt.Checked:
+                obj = item.data(1, 0)
+                selectedObjects += [obj]
+        return selectedObjects
+
+    def getSelectedItems(self):
+        """Get selected objects from the check boxes
+        """
+        selectedItems = []
+        for item in self.findItems('', QtCore.Qt.MatchContains | QtCore.Qt.MatchRecursive):
+            if item.checkState(0) == QtCore.Qt.Checked:
+                obj = item.data(1, 0)
+                selectedItems += [item.text(0)]
+        return selectedItems
+
+    def getItems(self):
+        """Get checked state of objects
+        """
+        selectedItems = {}
+        for item in self.findItems('', QtCore.Qt.MatchContains | QtCore.Qt.MatchRecursive):
+            obj = item.data(1, 0)
+            selectedItems[item.text(0)] = item.checkState(0)
+        return selectedItems
+
+    def getSelectedObjectsPids(self):
+        """Get the pids of the selected objects
+        """
+        pids = []
+        for item in self.getSelectedObjects():
+            pids += [item.pid]
+        return pids
+
+    def selectObjects(self, texts):
+        """handle changing the state of checkboxes
+        """
+        items = self.findItems('', QtCore.Qt.MatchContains | QtCore.Qt.MatchRecursive)
+        for item in items:
+            if item.text(0) in texts:
+                item.setCheckState(0, QtCore.Qt.Checked)
+
+    def _clicked(self, *args):
+        pass
+
+    def _uncheckAll(self):
+        """Clear all selection
+        """
+        for itemTree in self.findItems('', QtCore.Qt.MatchContains | QtCore.Qt.MatchRecursive):
+            itemTree.setCheckState(0, QtCore.Qt.Unchecked)
+            for i in range(itemTree.childCount()):
+                itemTree.child(i).setCheckState(0, QtCore.Qt.Unchecked)
+
 class StarImporterPopup(CcpnDialog):
 
     def __init__(self, parent=None, axesCodesMap=None, bmrbFilePath = None, project=None, directory=None,
-                 title='Import CSL from BMRB (Pre-Alpha)', **kw):
+                 dataBlock=None, title='Import From NMRSTAR', **kw):
         CcpnDialog.__init__(self, parent, setLayout=True, windowTitle=title, **kw)
         self.bmrbFilePath = bmrbFilePath or ''
         self._axesCodesMap  = axesCodesMap or defaultAxesCodesMap # Ordered dict as od([("HA","H")]) see info for more
         self.directory = directory or ''
         self.project = project
+        self.dataBlock = dataBlock or {}
         row = 0
         bmrbFileLabel = Label(self, text="BMRB File", grid=(row, 0))
-        self.inputDialog = LineEditButtonDialog(self,textLineEdit=self.bmrbFilePath, directory=self.directory, grid=(row, 1))
+        self.fileName = LineEdit(self, text=os.path.basename(self.bmrbFilePath), grid=(row, 1))
+        self.fileName.setEnabled(False)
+        # self.inputDialog = LineEditButtonDialog(self,textLineEdit=self.bmrbFilePath, directory=self.directory, grid=(row, 1))
+        row += 1
+        tree = Label(self, text="Frames", grid=(row, 0))
+        self.treeView = TreeCheckBoxes(self,orderedDataDict=dataBlock, checkList=list(dataBlock.keys()),  grid=(row, 1))
+        self._limititedFunctionalities()
+
+        row += 1
+        self.dynamicsWidgets = []
+        createSimulatedPeakList = Label(self, text="Simulate PeakList", grid=(row, 0))
+        self.simulatePLCheckBox = CheckBox(self, checked=False, callback=self._showMapLabel, grid=(row, 1))
+
         row +=1
-        bmrbCodes = Label(self, text="BMRB Atom_ID", grid=(row,0))
+        self.bmrbCodes = Label(self, text="BMRB Atom_ID", grid=(row,0))
         self.bmrbCodesEntry = LineEdit(self, text=','.join(self._axesCodesMap.keys()), grid=(row, 1))
         row += 1
-        assignToSpectumCodes = Label(self, text="Assign To Axis", grid=(row,0))
+        self.assignToSpectumCodesLabel = Label(self, text="Assign To Axis", grid=(row,0))
         self.assignToSpectumCodes = LineEdit(self, text=','.join(self._axesCodesMap.values()), grid=(row, 1))
+        self.dynamicsWidgets.extend([self.bmrbCodes, self.bmrbCodesEntry,
+                                      self.assignToSpectumCodesLabel, self.assignToSpectumCodes])
         row += 1
-        self.buttonList = ButtonList(self, ['Info','Cancel', 'Create'], [self._showInfo, self.reject, self._okButton], grid=(row, 1))
+        self.buttonList = ButtonList(self, ['Info','Cancel', 'Import'], [self._showInfo, self.reject, self._okButton], grid=(row, 1))
+
+        self._showMapLabel(False)
+
+    def _limititedFunctionalities(self):
+        self.treeView._uncheckAll()
+        chemicalShiftListOnly = []
+        for i in list(self.dataBlock.keys()):
+            if assigned_chem_shift_list in i:
+                chemicalShiftListOnly.append(i)
+            if shift_set in i:
+                chemicalShiftListOnly.append(i)
+        self.treeView.selectObjects(chemicalShiftListOnly)
+
+    def _showMapLabel(self, value):
+        self._togleVisibility(self.dynamicsWidgets, value)
+
+    def _togleVisibility(self, ll:list=[], value:bool=True):
+        for l in ll:
+            l.setVisible(value)
 
     def _showInfo(self):
         showWarning(Warnings, InfoMessage)
@@ -131,31 +262,30 @@ class StarImporterPopup(CcpnDialog):
     def _okButton(self):
         from ccpn.core.lib.CcpnStarIo import _importAndCreateV3Objs
         self._axesCodesMap.clear()
-        bmrbFile = self.inputDialog.get()
+        bmrbFile = self.bmrbFilePath
+        simulateSpectra = self.simulatePLCheckBox.get()
         bmrbCodes = self.bmrbCodesEntry.get().replace(" ","").split(',')
         assignToSpectumCodes = self.assignToSpectumCodes.get().replace(" ","").split(',')
         for bmrbCode, sac in zip(bmrbCodes,assignToSpectumCodes):
           self._axesCodesMap[bmrbCode]=sac
-        _importAndCreateV3Objs(self.project, bmrbFile, self._axesCodesMap)
+        _importAndCreateV3Objs(self.project, bmrbFile, self._axesCodesMap, simulateSpectra=simulateSpectra)
         self.accept()
-
-
 
 ############################################
 ##############  INIT the Macro  ############
 ############################################
 
 
-
-
 if __name__ == "__main__":
     from ccpn.ui.gui.widgets.Application import TestApplication
     from ccpn.ui.gui.popups.Dialog import CcpnDialog
+    from ccpn.util.nef import StarIo
 
     app = TestApplication()
 
     relativePath = os.path.join(mp, 'nmrStar3_1Examples')
-    fileName = 'bmr5493.str'
+    fileName = 'bmr17285.str'
+
 
     mybmrb = os.path.join(relativePath, fileName) # if not using UI:  replace with the full bmrb file path  of interest
     axesCodesMap = od([                           #                   replace with the atom and axes of interest
@@ -163,8 +293,12 @@ if __name__ == "__main__":
                             ("H", "H"),
                             ("CA", "C"),
                             ])
+    nmrDataExtent = StarIo.parseNmrStarFile(mybmrb)
+    dataBlocks = list(nmrDataExtent.values())
+    dataBlock = dataBlocks[0]
+
     if _UI:
-        popup = StarImporterPopup(axesCodesMap=axesCodesMap, bmrbFilePath=mybmrb, directory=relativePath)
+        popup = StarImporterPopup(axesCodesMap=axesCodesMap, bmrbFilePath=mybmrb,dataBlock=dataBlock, directory=relativePath)
         popup.show()
         popup.raise_()
         app.start()

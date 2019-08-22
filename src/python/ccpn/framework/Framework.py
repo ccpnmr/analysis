@@ -1469,9 +1469,13 @@ class Framework(NotifierBase):
         return self.project
 
     def _loadNMRStarFile(self, path: str):
+        from ccpn.util.nef import StarIo
         from ccpn.ui.gui.popups.ImportStarPopup import StarImporterPopup
         relativePath = os.path.dirname(os.path.realpath(path))
-        popup = StarImporterPopup(project=self.project, bmrbFilePath=path, directory=relativePath)
+        dataBlock = self.nefReader.getNMRStarData(path)
+        self._importedStarDataBlock = dataBlock
+
+        popup = StarImporterPopup(project=self.project, bmrbFilePath=path, directory=relativePath, dataBlock=dataBlock)
         popup.show()
         popup.raise_()
 

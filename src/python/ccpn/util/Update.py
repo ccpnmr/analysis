@@ -406,30 +406,14 @@ class UpdateAgent(object):
 
         return isDifferent
 
-    # def _checkMd5(self):
-    #     """Check the md5 for download
-    #     """
-    #     serverDownloadScript = '%s%s' % (self.server, self._serverDownloadCheckScript)
-    #
-    #     def ords(*chars):
-    #         return ''.join([c for c in map(chr, chars)])
-    #     m0 = ords(99, 104, 101, 99, 107, 83, 117, 109)
-    #     m1 = ords(108, 105, 99, 101, 110, 99, 101, 73, 68)
-    #     m2 = ords(110, 111, 116, 70, 111, 117, 110, 100)
-    #
-    #     from ccpn.util import Data
-    #     val0 = getattr(Data, ''.join([c for c in m0]), m2)
-    #     val1 = getattr(Data, ''.join([c for c in m1]), m2)
-    #     data = fetchUrl(serverDownloadScript, {m0:val0, m1:val1})
-    #     print('>>>>>>', data)
-
     def _checkMd5(self):
         """Check the checkSum status on the server
         """
         serverDownloadScript = '%s%s' % (self.server, self._serverDownloadCheckScript)
 
         try:
-            self._numAdditionalUpdates = self._found = 0
+            self._numAdditionalUpdates = 0
+            self._found = 'invalid'
             from ccpn.util.Register import userAttributes, loadDict, _otherAttributes, _insertRegistration
 
             registrationDict = loadDict()
@@ -444,8 +428,9 @@ class UpdateAgent(object):
             values['version'] = self.version
 
             self._found = fetchUrl(serverDownloadScript, values, timeout=2.0)
-            self._found = self._found.rstrip('\r\n')
-            self._numAdditionalUpdates = (1 if 'valid' not in self._found else 0)
+            if isinstance(self._found, str):
+                self._found = self._found.rstrip('\r\n')
+                self._numAdditionalUpdates = (1 if 'valid' not in self._found else 0)
 
         except:
             print('Could not check details on server.')

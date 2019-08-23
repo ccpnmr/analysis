@@ -702,7 +702,7 @@ class ChemicalShiftsMapping(CcpnModule):
         if obj._colour:
           pen = pg.functions.mkPen(hexToRgb(obj._colour), width=1)
           brush = pg.functions.mkBrush(hexToRgb(obj._colour), width=1)
-          plot = self.bindingPlot.plot(lineXs, lineYs, pen=pen, name=obj.pid) #name used for legend and retireve the obj
+          plot = self.bindingPlot.plot(lineXs, lineYs, pen=pen, symbolBrush=brush, name=obj.pid) #name used for legend and retireve the obj
           plot.scatter.addPoints(points)
 
         else:
@@ -721,11 +721,14 @@ class ChemicalShiftsMapping(CcpnModule):
         if isinstance(p.data(), (Spectrum, Peak)):
           print('Spectrum', p.data(), p.pos())
 
-    self._bindingItemClicked = obj
+          self._bindingItemClicked = p.data()
 
   def _bindingPlotDoubleClick(self, event):
     if self._bindingItemClicked is not  None:
-      self._navigateToNmrItems(self._bindingItemClicked)
+      if isinstance(self._bindingItemClicked, Peak):
+        self._navigateToPeakPosition(self._bindingItemClicked)
+      if isinstance(self._bindingItemClicked, NmrResidue):
+        self._navigateToNmrItems(self._bindingItemClicked)
 
   def _getBindingCurves(self, nmrResidues, singleColumn=False):
     """
@@ -1004,6 +1007,14 @@ class ChemicalShiftsMapping(CcpnModule):
   #############################################################
   ############   Settings widgets callbacks    ################
   #############################################################
+
+  def _navigateToPeakPosition(self, peak):
+    from ccpn.ui.gui.lib.Strip import navigateToPositionInStrip, _getCurrentZoomRatio
+
+    if self.current is not None:
+      if self.current.strip is not None:
+        widths = _getCurrentZoomRatio(self.current.strip.viewRange())
+        navigateToPositionInStrip(strip=self.current.strip, positions=peak.position, widths=widths)
 
   def _navigateToNmrItems(self, nmrResidue = None, *args):
     """

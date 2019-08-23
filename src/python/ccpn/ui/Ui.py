@@ -96,7 +96,7 @@ class Ui(NotifierBase):
                 days = Register._graceCounter(Register._fetchGraceFile(self.application))
                 if days > 0:
                     sys.stderr.write('\n### Please register within %s day(s)\n' %days)
-                    # return True
+                    return True
                 else:
                     sys.stderr.write('\n### INVALID REGISTRATION, terminating\n')
                     return False

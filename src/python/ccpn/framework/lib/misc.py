@@ -45,8 +45,7 @@ def _decode(key, string):
     decoded_chars = []
     for i in range(len(string)):
         key_c = key[i % len(key)]
-        print(i, ord(string[i]), ord(string[i]) - ord(key_c) % 256, ord(string[i]), ord(key_c))
-        decoded_c = chr((ord(string[i]) - ord(key_c)) % 256)
+        decoded_c = chr(ord(string[i]) - ord(key_c) % 256)
         decoded_chars.append(decoded_c)
     decoded_string = "".join(decoded_chars)
     return decoded_string
@@ -113,8 +112,6 @@ def _check(key=None, doDecode=True):
         sys.stderr.write(message2 % (applicationVersion))
         sys.exit(1)
 
-    #print(ldict)
-
     if 'code' not in ldict or 'version' not in ldict or 'valid' not in ldict or \
             _l1 not in ldict or 'programList' not in ldict or \
             _l0 not in ldict or _l2 not in ldict or 'numSeats' not in ldict:
@@ -133,6 +130,7 @@ def _check(key=None, doDecode=True):
         sys.exit(1)
 
     from ccpn.util import Data
+
     for val in (_l0, _l1, _l2, _l3):
         setattr(Data, val, ldict[val])
 

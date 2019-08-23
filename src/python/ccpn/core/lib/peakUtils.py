@@ -377,6 +377,17 @@ def getRawDataFrame(nmrResidues, nmrAtomsNames, spectra, theProperty):
     data = pd.concat(dfs)
     return data
 
+def _getPeaksForNmrResidue(nmrResidue, nmrAtomsNames, spectra):
+    if len(spectra) <= 1:
+        return
+    _peaks = __filterPeaksBySelectedNmrAtomOption(nmrResidue, nmrAtomsNames, spectra)
+    usepeaks = []
+    if len(_peaks) > 0:
+        for peak in _peaks:
+            if peak.peakList.spectrum in spectra:
+                usepeaks.append(peak)
+    return usepeaks
+
 def getNmrResidueDeltas(nmrResidue, nmrAtomsNames, spectra, mode=POSITIONS, atomWeights=None):
     '''
 

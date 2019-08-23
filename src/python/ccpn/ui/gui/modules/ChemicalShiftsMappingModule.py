@@ -130,7 +130,8 @@ from ccpn.util.Colour import spectrumColours, hexToRgb, rgbaRatioToHex, _getRand
 from ccpn.core.lib.Notifiers import Notifier
 from ccpn.core.lib.CallBack import CallBack
 from ccpn.core.lib.peakUtils import getNmrResidueDeltas,_getKd, oneSiteBindingCurve, _fit1SiteBindCurve, _fitExpDecayCurve,\
-                                    MODES, LINEWIDTHS, HEIGHT, POSITIONS, VOLUME, DefaultAtomWeights, H, N, OTHER, C, DISPLAYDATA, getRawDataFrame, ROW, getNmrResiduePeakProperty
+                                    MODES, LINEWIDTHS, HEIGHT, POSITIONS, VOLUME, DefaultAtomWeights, H, N, OTHER, C, DISPLAYDATA, \
+                                    getRawDataFrame, ROW, getNmrResiduePeakProperty, _getPeaksForNmrResidue
 from ccpn.core.lib import CcpnSorting
 from ccpn.core.lib.DataFrameObject import  DATAFRAME_OBJECT
 from ccpn.core.NmrChain import NmrChain
@@ -666,52 +667,52 @@ class ChemicalShiftsMapping(CcpnModule):
     self._clearLegend(self.bindingPlot.legend)
     # self.bindingPlot.setLimits(xMin=0, xMax=None, yMin=0, yMax=None)
 
+    if self.current.nmrResidues is not None:
+      plotData = self._getBindingCurves(self.current.nmrResidues)
+      if self.scaleBindingCCb.isChecked():
+        plotData = self._getScaledBindingCurves(plotData)
 
-    plotData = self._getBindingCurves(self.current.nmrResidues)
-    if self.scaleBindingCCb.isChecked():
-      plotData = self._getScaledBindingCurves(plotData)
+      if plotData is not None:
+        plotData = plotData.replace(np.nan, 0)
 
-    if plotData is not None:
-      plotData = plotData.replace(np.nan, 0)
-
-      for obj, row, in plotData.iterrows():
-        row = row.to_frame()
-        pids = []
-        lineXs = []
-        lineYs = []
-        points = []
-        for i,k  in row.iterrows():
-          peakPid = i[0]
-          xVal = i[1]
-          yVal = k.values[-1]
-          lineXs.append(xVal)
-          lineYs.append(yVal)
-          pids.append(peakPid)
-          peak = self.project.getByPid(peakPid)
-          if isinstance(peak, Peak):
-            spectrum = peak.peakList.spectrum
-            dd = {'pos': [0, 0], 'data': 'obj', 'brush': pg.mkBrush(255, 0, 0), 'symbol': 'o', 'size': 10,
-                  'pen': None}  # red default
-            dd['pos'] = (xVal,yVal)
-            dd['data'] = peak
-            if hasattr(spectrum, 'positiveContourColour'):  # colour from the spectrum. The only CCPN obj implemeted so far
-              dd['brush'] = pg.functions.mkBrush(hexToRgb(spectrum.positiveContourColour))
-            points.append(dd)
+        for obj, row, in plotData.iterrows():
+          row = row.to_frame()
+          pids = []
+          lineXs = []
+          lineYs = []
+          points = []
+          for i,k  in row.iterrows():
+            peakPid = i[0]
+            xVal = i[1]
+            yVal = k.values[-1]
+            lineXs.append(xVal)
+            lineYs.append(yVal)
+            pids.append(peakPid)
+            peak = self.project.getByPid(peakPid)
+            if isinstance(peak, Peak):
+              spectrum = peak.peakList.spectrum
+              dd = {'pos': [0, 0], 'data': 'obj', 'brush': pg.mkBrush(255, 0, 0), 'symbol': 'o', 'size': 10,
+                    'pen': None}  # red default
+              dd['pos'] = (xVal,yVal)
+              dd['data'] = peak
+              if hasattr(spectrum, 'positiveContourColour'):  # colour from the spectrum. The only CCPN obj implemeted so far
+                dd['brush'] = pg.functions.mkBrush(hexToRgb(spectrum.positiveContourColour))
+              points.append(dd)
 
 
-        if obj._colour:
-          pen = pg.functions.mkPen(hexToRgb(obj._colour), width=1)
-          brush = pg.functions.mkBrush(hexToRgb(obj._colour), width=1)
-          plot = self.bindingPlot.plot(lineXs, lineYs, pen=pen, symbolBrush=brush, name=obj.pid) #name used for legend and retireve the obj
-          plot.scatter.addPoints(points)
+          if obj._colour:
+            pen = pg.functions.mkPen(hexToRgb(obj._colour), width=1)
+            brush = pg.functions.mkBrush(hexToRgb(obj._colour), width=1)
+            plot = self.bindingPlot.plot(lineXs, lineYs, pen=pen, symbolBrush=brush, name=obj.pid) #name used for legend and retireve the obj
+            plot.scatter.addPoints(points)
 
-        else:
-          plot = self.bindingPlot.plot(lineXs, lineYs, symbol='o', name=obj.pid)
-        plot.sigPointsClicked.connect(self._bindingPlotSingleClick)
+          else:
+            plot = self.bindingPlot.plot(lineXs, lineYs, symbol='o', name=obj.pid)
+          plot.sigPointsClicked.connect(self._bindingPlotSingleClick)
 
-    self.bindingPlot.autoRange()
-    self.bindingPlot.setLabel('left', DELTA+Delta)
-    self.bindingPlot.setLabel('bottom', self._kDunit)
+      self.bindingPlot.autoRange()
+      self.bindingPlot.setLabel('left', DELTA+Delta)
+      self.bindingPlot.setLabel('bottom', self._kDunit)
 
   def _bindingPlotSingleClick(self, item, points):
     """sig callback from the binding plot. Gets the obj from the curve name."""
@@ -719,7 +720,7 @@ class ChemicalShiftsMapping(CcpnModule):
 
     for p in points:
         if isinstance(p.data(), (Spectrum, Peak)):
-          print('Spectrum', p.data(), p.pos())
+          print('CLicked', p.data(), p.pos())
 
           self._bindingItemClicked = p.data()
 
@@ -764,18 +765,24 @@ class ChemicalShiftsMapping(CcpnModule):
           else:
             zeroSpectrum, otherSpectra = spectra[0], spectra[1:]
             deltas = []
+            peaks = _getPeaksForNmrResidue(nmrResidue, selectedAtomNames, spectra)
+            deltas.append(0)
             for i, spectrum in enumerate(otherSpectra,1):
               if nmrResidue._includeInDeltaShift:
                   delta = getNmrResidueDeltas(nmrResidue, selectedAtomNames, mode=mode, spectra=[zeroSpectrum, spectrum],
                                               atomWeights=weights)
                   deltas.append(delta)
-
-              concentrations, units =  self._getConcentrationsFromSpectra([spectrum])
-              if len(concentrations)>0:
-                concentration = concentrations[0]
-                if concentration is None:
-                  concentration = i
-                concentrationsValues.append((spectrum.pid, concentration))
+            if len(spectra) != len(peaks):
+              continue
+            else:
+              for i,p in enumerate(peaks):
+                spectrum = p.peakList.spectrum
+                concentrations, units =  self._getConcentrationsFromSpectra([spectrum])
+                if len(concentrations)>0:
+                  concentration = concentrations[0]
+                  if concentration is None:
+                    concentration = i
+                  concentrationsValues.append((p.pid, concentration))
           df = pd.DataFrame([deltas], index=[nmrResidue], columns=concentrationsValues)
           df.columns = pd.MultiIndex.from_tuples(df.columns, names=['Pids', 'values'])  #double columns
           df = df.replace(np.nan, 0)

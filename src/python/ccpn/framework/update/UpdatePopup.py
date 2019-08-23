@@ -121,7 +121,7 @@ class UpdatePopup(CcpnDialog, UpdateAgent):
         """Get current number of updates from the server
         """
         UpdateAgent.resetFromServer(self)
-        self.updatesLabel.set('%d' % len(self.updateFiles))
+        self.updatesLabel.set('%d' % int(len(self.updateFiles)+self._numAdditionalUpdates))
 
 
 if __name__ == '__main__':

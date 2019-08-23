@@ -52,7 +52,7 @@ SERVER_DB_FILE = '__UpdateData.db'
 # (and not a 404 or whatever)
 SERVER_DOWNLOAD_SCRIPT = 'cgi-bin/update/downloadFile'
 SERVER_UPLOAD_SCRIPT = 'cgi-bin/updateadmin/uploadFile'
-SERVER_DOWNLOADCHECK_SCRIPT = 'cgi-bin/register/downloadFileCheck'
+SERVER_DOWNLOADCHECK_SCRIPT = 'cgi-bin/register/downloadFileCheckV3'
 
 FIELD_SEP = '\t'
 PATH_SEP = '__sep_'
@@ -351,7 +351,7 @@ class UpdateAgent(object):
 
     def checkNumberUpdates(self):
         self.fetchUpdateDb()
-        return len(self.updateFiles)
+        return len(self.updateFiles) + self._numAdditionalUpdates
 
     def fetchUpdateDb(self):
         """Fetch list of updates from server."""
@@ -388,6 +388,8 @@ class UpdateAgent(object):
                         updateFiles.append(updateFile)
                         updateFileDict[filePath] = updateFile
 
+        self._checkMd5()
+
     def isUpdateDifferent(self, filePath, fileHashCode):
         """See if local file is different from server file."""
 
@@ -421,53 +423,47 @@ class UpdateAgent(object):
     #     data = fetchUrl(serverDownloadScript, {m0:val0, m1:val1})
     #     print('>>>>>>', data)
 
-    def _checkMd5(self, registrationDict):
+    def _checkMd5(self):
         """Check the checkSum status on the server
         """
         serverDownloadScript = '%s%s' % (self.server, self._serverDownloadCheckScript)
 
-        values = {}
-        for attr in userAttributes + ('hashcode',):
-            value = []
-            for c in registrationDict[attr]:
-                value.append(c if 32 <= ord(c) < 128 else '_')
-            values[attr] = ''.join(value)
-
         try:
-            found = fetchUrl(serverDownloadScript, values, timeout=2.0)
-            return found.strip() == 'OK'
+            self._numAdditionalUpdates = self._found = 0
+            from ccpn.util.Register import userAttributes, loadDict, _otherAttributes, _insertRegistration
+
+            registrationDict = loadDict()
+            val2 = _insertRegistration(registrationDict)
+            values = {}
+            for attr in userAttributes + _otherAttributes:
+                value = []
+                for c in registrationDict[attr]:
+                    value.append(c if 32 <= ord(c) < 128 else '_')
+                values[attr] = ''.join(value)
+            values.update(val2)
+            values['version'] = self.version
+
+            self._found = fetchUrl(serverDownloadScript, values, timeout=2.0)
+            self._found = self._found.rstrip('\r\n')
+            self._numAdditionalUpdates = (1 if 'valid' not in self._found else 0)
 
         except:
             print('Could not check details on server.')
+
+    def _resetMd5(self):
+        from ccpn.framework.PathsAndUrls import userPreferencesDirectory, ccpnConfigPath
+
+        fname = ''.join([c for c in map(chr, (108, 105, 99, 101, 110, 99, 101, 75, 101, 121, 46, 116, 120, 116))])
+        lfile = os.path.join(userPreferencesDirectory, fname)
+        if not os.path.exists(lfile):
+            lfile = os.path.join(ccpnConfigPath, fname)
+        with open(lfile, 'w', encoding='UTF-8') as fp:
+            fp.write(self._found)
 
     def resetFromServer(self):
 
         try:
             self.fetchUpdateDb()
-            # self._checkMd5()
-
-            # add checking for the new licence file here
-            # something like this
-
-            # (filePath, fileTime, fileStoredAs, fileHashCode) = line.split(FIELD_SEP)  # of the licenceFile
-
-            # or server routine verify Licence
-
-            # similar to registration checkServer
-
-            # pass registratin to server, returnb hashcode of licence
-            #       check against licence
-            #       if different, need to update as below
-
-            # put into registry.py
-            # should it update here?
-
-            # if self.serverUser or self.isUpdateDifferent(filePath, fileHashCode):
-            #     updateFile = UpdateFile(self.installLocation, self.serverDbRoot, filePath, fileTime,
-            #                             fileStoredAs, fileHashCode, serverDownloadScript=serverDownloadScript,
-            #                             serverUploadScript=serverUploadScript)
-
-
 
         except Exception as e:
             self.showError('Update error', 'Could not fetch updates: %s' % e)
@@ -522,10 +518,11 @@ class UpdateAgent(object):
         """Download chosen server files to local installation."""
 
         updateFiles = [updateFile for updateFile in self.updateFiles if updateFile.shouldInstall]
-        if not updateFiles:
+        if not updateFiles and 'valid' in self._found:
             self.showError('No updates', 'No updates for installation')
             return
 
+        self._resetMd5()
         n = 0
         updateFilesInstalled = []
 

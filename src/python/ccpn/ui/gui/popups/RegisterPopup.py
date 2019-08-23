@@ -77,7 +77,7 @@ This needs to be done once on every computer you use the programme on.
         self.entries = []
         self.validateEntries = []
         registrationDict = Register.loadDict()
-        for attr in Register.userAttributes:
+        for attr in Register.openUserAttributes:
             label = Label(frame, metaUtil.upperFirst(attr), grid=(row, 0))
             text = registrationDict.get(attr, '')
             entry = Entry(frame, text=text, grid=(row, 1), maxLength=60)
@@ -148,7 +148,7 @@ This needs to be done once on every computer you use the programme on.
 
         if allValid:
             registrationDict = {}
-            for n, attr in enumerate(Register.userAttributes):
+            for n, attr in enumerate(Register.openUserAttributes):
                 entry = self.entries[n]
                 registrationDict[attr] = entry.get() or ''
 

@@ -45,7 +45,8 @@ def _decode(key, string):
     decoded_chars = []
     for i in range(len(string)):
         key_c = key[i % len(key)]
-        decoded_c = chr(ord(string[i]) - ord(key_c) % 256)
+        print(i, ord(string[i]), ord(string[i]) - ord(key_c) % 256, ord(string[i]), ord(key_c))
+        decoded_c = chr((ord(string[i]) - ord(key_c)) % 256)
         decoded_chars.append(decoded_c)
     decoded_string = "".join(decoded_chars)
     return decoded_string
@@ -78,6 +79,11 @@ def _check(key=None, doDecode=True):
                        101, 32, 40, 37, 115, 41, 32, 118, 97, 108, 105, 100, 32, 117, 110, 116, 105, 108,
                        32, 37, 115, 10)
 
+    _l0 = message(98, 117, 105, 108, 100, 70, 111, 114)
+    _l1 = message(108, 105, 99, 101, 110, 99, 101, 84, 121, 112, 101)
+    _l2 = message(108, 105, 99, 101, 110, 99, 101, 73, 68)
+    _l3 = message(99, 104, 101, 99, 107, 83, 117, 109)
+
     if key is None:
         from ccpn.framework.PathsAndUrls import userPreferencesDirectory, ccpnConfigPath
 
@@ -102,16 +108,16 @@ def _check(key=None, doDecode=True):
             keysum = h.hexdigest()
             key = _decode('ccpnVersion3', key)
         ldict = json.loads(key)
-        ldict[message(99, 104, 101, 99, 107, 83, 117, 109)] = keysum
-    except:
+        ldict[_l3] = keysum
+    except Exception as es:
         sys.stderr.write(message2 % (applicationVersion))
         sys.exit(1)
 
     #print(ldict)
 
     if 'code' not in ldict or 'version' not in ldict or 'valid' not in ldict or \
-            'licenceType' not in ldict or 'programList' not in ldict or \
-            'buildFor' not in ldict or 'licenceID' not in ldict or 'numSeats' not in ldict:
+            _l1 not in ldict or 'programList' not in ldict or \
+            _l0 not in ldict or _l2 not in ldict or 'numSeats' not in ldict:
         sys.stderr.write(message2 % (applicationVersion))
         sys.exit(1)
 
@@ -120,18 +126,18 @@ def _check(key=None, doDecode=True):
         sys.stderr.write(message2 % (applicationVersion))
         sys.exit(1)
 
-    if ldict['code'] != _codeFunc(ldict['version'], ldict['valid'], ldict['licenceType'],
-                                  ldict['programList'], ldict['buildFor'],
-                                  ldict['licenceID'], ldict['numSeats']):
+    if ldict['code'] != _codeFunc(ldict['version'], ldict['valid'], ldict[_l1],
+                                  ldict['programList'], ldict[_l0],
+                                  ldict[_l2], ldict['numSeats']):
         sys.stderr.write(message2 % (applicationVersion))
         sys.exit(1)
 
     from ccpn.util import Data
-    for val in (message(98, 117, 105, 108, 100, 70, 111, 114), message(108, 105, 99, 101, 110, 99, 101, 84, 121, 112, 101), message(108, 105, 99, 101, 110, 99, 101, 73, 68), message(99, 104, 101, 99, 107, 83, 117, 109)):
+    for val in (_l0, _l1, _l2, _l3):
         setattr(Data, val, ldict[val])
 
-    if ldict['licenceType'] == 'developer':
-        sys.stderr.write(message4 % (ldict['licenceType'], now() + year))
+    if ldict[_l1] == 'developer':
+        sys.stderr.write(message4 % (ldict[_l1], now() + year))
         return True
 
     valid = Time(ldict['valid'])
@@ -139,7 +145,7 @@ def _check(key=None, doDecode=True):
         sys.stderr.write(message3 % (applicationVersion, valid))
         sys.exit(1)
     else:
-        sys.stderr.write(message4 % (ldict['licenceType'], valid))
+        sys.stderr.write(message4 % (ldict[_l1], valid))
 
     return True
 

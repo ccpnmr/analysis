@@ -84,8 +84,6 @@ def saveDict(registrationDict):
 
 
 def getHashCode(registrationDict):
-    macAddress = uuid.getnode()
-
     m = hashlib.md5()
     for attrib in userAttributes:
         value = registrationDict.get(attrib, '')
@@ -98,24 +96,38 @@ def setHashCode(registrationDict):
     registrationDict['hashcode'] = getHashCode(registrationDict)
 
 
+def _build(*chars):
+    return ''.join([c for c in map(chr, chars)])
+_bF = _build(98, 117, 105, 108, 100, 70, 111, 114)
+_hc = _build(104, 97, 115, 104, 99, 111, 100, 101)
+_cS = _build(99, 104, 101, 99, 107, 83, 117, 109)
+_nP = _build(110, 111, 110, 45, 112, 114, 111, 102, 105, 116)
+_otherAttributes = (_hc, )
+
+
+def _insertRegistration(registrationDict):
+    val0, _, _, val1 = _getBuildID()
+    return {_bF: val0, _cS: val1}
+
+
 def isNewRegistration(registrationDict):
     for attrib in userAttributes:
         if not registrationDict.get(attrib):
             return True
 
-    if 'hashcode' not in registrationDict:
+    if _hc not in registrationDict:
         return True
 
     hashcode = getHashCode(registrationDict)
 
-    return hashcode != registrationDict['hashcode']
+    return hashcode != registrationDict[_hc]
 
 
 def updateServer(registrationDict, version='3'):
     url = _registrationServerScript()
 
     values = {}
-    for attr in userAttributes + ('hashcode',):
+    for attr in userAttributes + (_hc, ):
         value = []
         for c in registrationDict[attr]:
             value.append(c if 32 <= ord(c) < 128 else '_')
@@ -126,10 +138,10 @@ def updateServer(registrationDict, version='3'):
     values['systemInfo'] = ';'.join(platform.uname())
     values['ID'] = ':'.join(re.findall('..', '%012x' % uuid.getnode()))
     values['compileVersion'] = _getCompileVersion()
-    var0, var1, var2 = _getBuildID()
-    values['buildFor'] = var0
-    values['licenceType'] = var1
-    values['licenceID'] = var2
+    var0, var1, var2, _ = _getBuildID()
+    values[_build(98, 117, 105, 108, 100, 70, 111, 114)] = var0
+    values[_build(108, 105, 99, 101, 110, 99, 101, 84, 121, 112, 101)] = var1
+    values[_build(108, 105, 99, 101, 110, 99, 101, 73, 68)] = var2
 
     try:
         return Url.fetchUrl(url, values, timeout=2.0)
@@ -162,15 +174,12 @@ def _checkLicenceScript():
 def _getBuildID():
     from ccpn.util import Data
 
-    def buildCode(*chars):
-        return ''.join([c for c in map(chr, chars)])
-
     vals = []
-    for val in (buildCode(98, 117, 105, 108, 100, 70, 111, 114), buildCode(108, 105, 99, 101, 110, 99, 101, 84, 121, 112, 101),
-                buildCode(108, 105, 99, 101, 110, 99, 101, 73, 68)):
+    for val in (_build(98, 117, 105, 108, 100, 70, 111, 114), _build(108, 105, 99, 101, 110, 99, 101, 84, 121, 112, 101),
+                _build(108, 105, 99, 101, 110, 99, 101, 73, 68), _build(99, 104, 101, 99, 107, 83, 117, 109)):
         vals.append(getattr(Data, val, ''))
 
-    return vals[0], vals[1], vals[2]
+    return vals[0], vals[1], vals[2], vals[3]
 
 def checkServer(registrationDict, version='3'):
     """Check the registration status on the server
@@ -178,7 +187,7 @@ def checkServer(registrationDict, version='3'):
     url = _checkRegistrationServerScript()
 
     values = {}
-    for attr in userAttributes + ('hashcode',):
+    for attr in userAttributes + (_hc, ):
         value = []
         if attr in registrationDict:
             for c in registrationDict[attr]:
@@ -190,10 +199,10 @@ def checkServer(registrationDict, version='3'):
     values['systemInfo'] = ';'.join(platform.uname())
     values['ID'] = ':'.join(re.findall('..', '%012x' % uuid.getnode()))
     values['compileVersion'] = _getCompileVersion()
-    var0, var1, var2 = _getBuildID()
-    values['buildFor'] = var0
-    values['licenceType'] = var1
-    values['licenceID'] = var2
+    var0, var1, var2, _ = _getBuildID()
+    values[_build(98, 117, 105, 108, 100, 70, 111, 114)] = var0
+    values[_build(108, 105, 99, 101, 110, 99, 101, 84, 121, 112, 101)] = var1
+    values[_build(108, 105, 99, 101, 110, 99, 101, 73, 68)] = var2
 
     try:
         found = Url.fetchUrl(url, values, timeout=2.0)

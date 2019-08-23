@@ -185,7 +185,7 @@ class NoUi(Ui):
 
             # ('name', 'organisation', 'email')
 
-            for n, attr in enumerate(Register.userAttributes):
+            for n, attr in enumerate(Register.openUserAttributes):
                 if 'email' in attr:
                     validEmail = False
                     while validEmail is False:

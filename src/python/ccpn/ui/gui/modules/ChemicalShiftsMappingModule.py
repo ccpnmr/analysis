@@ -130,10 +130,12 @@ from ccpn.util.Colour import spectrumColours, hexToRgb, rgbaRatioToHex, _getRand
 from ccpn.core.lib.Notifiers import Notifier
 from ccpn.core.lib.CallBack import CallBack
 from ccpn.core.lib.peakUtils import getNmrResidueDeltas,_getKd, oneSiteBindingCurve, _fit1SiteBindCurve, _fitExpDecayCurve,\
-                                    MODES, LINEWIDTHS, HEIGHT, POSITIONS, VOLUME, DefaultAtomWeights, H, N, OTHER, C
+                                    MODES, LINEWIDTHS, HEIGHT, POSITIONS, VOLUME, DefaultAtomWeights, H, N, OTHER, C, DISPLAYDATA, getRawDataFrame, ROW, getNmrResiduePeakProperty
 from ccpn.core.lib import CcpnSorting
 from ccpn.core.lib.DataFrameObject import  DATAFRAME_OBJECT
 from ccpn.core.NmrChain import NmrChain
+from ccpn.core.Spectrum import Spectrum
+from ccpn.core.Peak import Peak
 from ccpn.core.NmrResidue import NmrResidue
 from ccpn.core.Project import Project
 from ccpn.core.lib.ContextManagers import undoBlock, undoBlockWithoutSideBar
@@ -402,6 +404,14 @@ class ChemicalShiftsMapping(CcpnModule):
     self.modeLabel = Label(self.scrollAreaWidgetContents, text='Calculation mode ', grid=(i, 0))
     self.modeButtons = RadioButtons(self.scrollAreaWidgetContents, selectedInd=0, texts=MODES,
                                     callback=self._toggleRelativeContribuitions, grid=(i, 1))
+
+    i += 1
+
+    self.displayDataLabel = Label(self.scrollAreaWidgetContents, text='Display data ', grid=(i, 0))
+    self.displayDataButton = RadioButtons(self.scrollAreaWidgetContents, selectedInd=0, texts=DISPLAYDATA,
+                                     grid=(i, 1))
+    self.displayDataButton.hide()
+    self.displayDataLabel.hide()
     i += 1
     self.atomsLabel = Label(self.scrollAreaWidgetContents, text='Select NmrAtoms', grid=(i, 0))
     self.nmrAtomsFrame = Frame(self.scrollAreaWidgetContents, setLayout=True, grid=(i, 1))
@@ -419,6 +429,20 @@ class ChemicalShiftsMapping(CcpnModule):
                                   tipText='Default: STD of deltas',
                                   grid=(0, 1))
     self.thresholdButton.setMaximumWidth(50)
+
+    i += 1
+    self.scaleBindingC = Label(self.scrollAreaWidgetContents, text='Scale binding curves', grid=(i, 0))
+    self.scaleBindingCCb = CheckBox(self.scrollAreaWidgetContents, checked=True,
+                                    callback=self._plotBindingCFromCurrent, grid=(i, 1))
+    i += 1
+    self.fittingModeL = Label(self.scrollAreaWidgetContents, text='Fitting mode', grid=(i, 0))
+    self.fittingModeRB = RadioButtons(self.scrollAreaWidgetContents, texts=FittingAvailable, grid=(i, 1))
+    #
+    # i += 1 ####  # Text editor to allow user curve fitting. N.B. Not implemented yet the mechanism to do this
+    # self.fittingModeTextL = Label(self.scrollAreaWidgetContents, text='', grid=(i, 0))
+    # self.fittingModeEditor = TextEditor(self.scrollAreaWidgetContents,    grid=(i, 1))
+    # self.fittingModeEditor.hide()
+
     i += 1
     self.aboveThresholdColourLabel = Label(self.scrollAreaWidgetContents, text='Above threshold colour', grid=(i, 0))
     self.aboveThresholdColourBox = PulldownList(self.scrollAreaWidgetContents, grid=(i, 1))
@@ -480,21 +504,8 @@ class ChemicalShiftsMapping(CcpnModule):
     self.pathPDB = LineEditButtonDialog(self.mvWidgetContents, textDialog='Select PDB File',
                                         filter="PDB files (*.pdb)", directory=scriptPath, grid=(0, 1))
     i += 1
-    self.scaleBindingC = Label(self.scrollAreaWidgetContents, text='Scale binding curves', grid=(i, 0))
-    self.scaleBindingCCb = CheckBox(self.scrollAreaWidgetContents, checked=True,
-                                    callback=self._plotBindingCFromCurrent, grid=(i, 1))
-    i += 1
-    self.fittingModeL = Label(self.scrollAreaWidgetContents, text='Fitting mode', grid=(i, 0))
-    self.fittingModeRB = RadioButtons(self.scrollAreaWidgetContents, texts=FittingAvailable, grid=(i, 1))
-    #
-    # i += 1 ####  # Text editor to allow user curve fitting. N.B. Not implemented yet the mechanism to do this
-    # self.fittingModeTextL = Label(self.scrollAreaWidgetContents, text='', grid=(i, 0))
-    # self.fittingModeEditor = TextEditor(self.scrollAreaWidgetContents,    grid=(i, 1))
-    # self.fittingModeEditor.hide()
-    i += 1
     self.updateButton = Button(self.scrollAreaWidgetContents, text='Update All', callback=self._updateModule,
                                grid=(i, 1))
-    i += 1
 
 
 
@@ -662,15 +673,40 @@ class ChemicalShiftsMapping(CcpnModule):
 
     if plotData is not None:
       plotData = plotData.replace(np.nan, 0)
+
       for obj, row, in plotData.iterrows():
-        ys = list(row.values)
-        xs = list(plotData.columns)
+        row = row.to_frame()
+        pids = []
+        lineXs = []
+        lineYs = []
+        points = []
+        for i,k  in row.iterrows():
+          peakPid = i[0]
+          xVal = i[1]
+          yVal = k.values[-1]
+          lineXs.append(xVal)
+          lineYs.append(yVal)
+          pids.append(peakPid)
+          peak = self.project.getByPid(peakPid)
+          if isinstance(peak, Peak):
+            spectrum = peak.peakList.spectrum
+            dd = {'pos': [0, 0], 'data': 'obj', 'brush': pg.mkBrush(255, 0, 0), 'symbol': 'o', 'size': 10,
+                  'pen': None}  # red default
+            dd['pos'] = (xVal,yVal)
+            dd['data'] = peak
+            if hasattr(spectrum, 'positiveContourColour'):  # colour from the spectrum. The only CCPN obj implemeted so far
+              dd['brush'] = pg.functions.mkBrush(hexToRgb(spectrum.positiveContourColour))
+            points.append(dd)
+
+
         if obj._colour:
           pen = pg.functions.mkPen(hexToRgb(obj._colour), width=1)
           brush = pg.functions.mkBrush(hexToRgb(obj._colour), width=1)
-          plot = self.bindingPlot.plot(xs, ys, symbol='o', pen=pen, symbolBrush=brush, name=obj.pid) #name used for legend and retireve the obj
+          plot = self.bindingPlot.plot(lineXs, lineYs, pen=pen, name=obj.pid) #name used for legend and retireve the obj
+          plot.scatter.addPoints(points)
+
         else:
-          plot = self.bindingPlot.plot(xs, ys, symbol='o', name=obj.pid)
+          plot = self.bindingPlot.plot(lineXs, lineYs, symbol='o', name=obj.pid)
         plot.sigPointsClicked.connect(self._bindingPlotSingleClick)
 
     self.bindingPlot.autoRange()
@@ -680,13 +716,18 @@ class ChemicalShiftsMapping(CcpnModule):
   def _bindingPlotSingleClick(self, item, points):
     """sig callback from the binding plot. Gets the obj from the curve name."""
     obj = self.project.getByPid(item.name())
+
+    for p in points:
+        if isinstance(p.data(), (Spectrum, Peak)):
+          print('Spectrum', p.data(), p.pos())
+
     self._bindingItemClicked = obj
 
   def _bindingPlotDoubleClick(self, event):
     if self._bindingItemClicked is not  None:
       self._navigateToNmrItems(self._bindingItemClicked)
 
-  def _getBindingCurves(self, nmrResidues):
+  def _getBindingCurves(self, nmrResidues, singleColumn=False):
     """
 
     :param nmrResidues:
@@ -704,28 +745,43 @@ class ChemicalShiftsMapping(CcpnModule):
     for nmrResidue in nmrResidues:
       if self._isInt(nmrResidue.sequenceCode):
         spectra = self.spectraSelectionWidget.getSelections()
+        concentrationsValues = []
+
         if len(spectra)>1:
-          deltas = []
-          concentrationsValues = []
-          zeroSpectrum, otherSpectra = spectra[0], spectra[1:]
-          for i, spectrum in enumerate(otherSpectra,1):
-            if nmrResidue._includeInDeltaShift:
-              delta = getNmrResidueDeltas(nmrResidue, selectedAtomNames, mode=mode, spectra=[zeroSpectrum, spectrum],
-                                          atomWeights=weights)
-              deltas.append(delta)
+          if self.displayDataButton.get() == ROW and mode in [HEIGHT, VOLUME] :
+            deltas, peaks = getNmrResiduePeakProperty(nmrResidue, selectedAtomNames, spectra, mode)
+            for i, p in enumerate(peaks):
+              spectrum = p.peakList.spectrum
+              concentrations, units = self._getConcentrationsFromSpectra([spectrum])
+              if len(concentrations) > 0:
+                concentration = concentrations[0]
+                if concentration is None:
+                  concentration = i
+                concentrationsValues.append((p.pid, concentration)) #double columns
+          else:
+            zeroSpectrum, otherSpectra = spectra[0], spectra[1:]
+            deltas = []
+            for i, spectrum in enumerate(otherSpectra,1):
+              if nmrResidue._includeInDeltaShift:
+                  delta = getNmrResidueDeltas(nmrResidue, selectedAtomNames, mode=mode, spectra=[zeroSpectrum, spectrum],
+                                              atomWeights=weights)
+                  deltas.append(delta)
 
               concentrations, units =  self._getConcentrationsFromSpectra([spectrum])
               if len(concentrations)>0:
                 concentration = concentrations[0]
                 if concentration is None:
                   concentration = i
-                concentrationsValues.append(concentration)
-
+                concentrationsValues.append((spectrum.pid, concentration))
           df = pd.DataFrame([deltas], index=[nmrResidue], columns=concentrationsValues)
+          df.columns = pd.MultiIndex.from_tuples(df.columns, names=['Pids', 'values'])  #double columns
           df = df.replace(np.nan, 0)
           values.append(df)
     if len(values)>0:
-      return pd.concat(values)
+      df = pd.concat(values)
+      if singleColumn:
+        df.columns =  [float(i) for i in df.columns.levels[-1]]
+      return df
 
   def _getScaledBindingCurves(self, bindingCurves):
     if isinstance(bindingCurves, pd.DataFrame):
@@ -1088,11 +1144,15 @@ class ChemicalShiftsMapping(CcpnModule):
         i.hide()
       for i in self.nmrAtomsLabels:
         i.hide()
+      self.displayDataButton.show()
+      self.displayDataLabel.show()
     else:
       for i in self.atomWeightSpinBoxes:
         i.show()
       for i in self.nmrAtomsLabels:
         i.show()
+      self.displayDataButton.hide()
+      self.displayDataLabel.hide()
 
 
   def _setDefaultThreshold(self):
@@ -1226,8 +1286,10 @@ class ChemicalShiftsMapping(CcpnModule):
               bindingCurves = self._getScaledBindingCurves(df)
               if bindingCurves is not None:
                 plotData = bindingCurves.replace(np.nan, 0)
+                columns = plotData.columns.levels[-1]
+                columns = [float(i) for i in columns if i is not None]
                 y = plotData.values.flatten(order='F')
-                xss = np.array([plotData.columns] * plotData.shape[0])
+                xss = np.array([columns] * plotData.shape[0])
                 x = xss.flatten(order='F')
                 kd = _getKd(oneSiteBindingCurve, x, y)
                 if not kd:
@@ -1329,7 +1391,7 @@ class ChemicalShiftsMapping(CcpnModule):
     self.fittingPlot.clear()
     self._clearLegend(self.fittingPlot.legend)
 
-    plotData = self._getBindingCurves(self.current.nmrResidues)
+    plotData = self._getBindingCurves(self.current.nmrResidues, True)
     plotData = self._getScaledBindingCurves(plotData)
 
     if plotData is not None:

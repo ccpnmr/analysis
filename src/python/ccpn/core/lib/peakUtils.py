@@ -30,15 +30,17 @@ from scipy.optimize import curve_fit
 from collections import OrderedDict
 from ccpn.core.PeakList import GAUSSIANMETHOD, PARABOLICMETHOD
 from ccpn.util.Common import makeIterableList
-
+import pandas as pd
 
 POSITIONS = 'positions'
 HEIGHT = 'height'
 VOLUME = 'volume'
 LINEWIDTHS = 'lineWidths'
+ROW = 'row'
+DELTAS = 'deltas'
 
 MODES = [POSITIONS, HEIGHT, VOLUME, LINEWIDTHS]
-
+DISPLAYDATA = [DELTAS, ROW]
 OTHER = 'Other'
 H = 'H'
 N = 'N'
@@ -326,26 +328,54 @@ def __filterPeaksBySelectedNmrAtomOption(nmrResidue, nmrAtomsNames, spectra):
     return list(OrderedDict.fromkeys(peaks))
 
 
-def getNmrResiduePeakHeight(nmrResidue, nmrAtomsNames, spectra):
+
+
+def getNmrResiduePeakProperty(nmrResidue, nmrAtomsNames, spectra, theProperty='height'):
     '''
 
     :param nmrResidue:
     :param nmrAtomsNames: nmr Atoms to compare. str 'H', 'N', 'CA' etc
     :param spectra: compare peaks only from given spectra
+    :param theProperty: 'height' or 'volume'
     :return:
     '''
 
-    heights = []
+    ll = []
 
     if len(spectra) <= 1:
+        return
+    if not theProperty in ['height','volume']:
+        getLogger().warn('Property not currently available %s' %theProperty)
         return
     peaks = __filterPeaksBySelectedNmrAtomOption(nmrResidue, nmrAtomsNames, spectra)
     if len(peaks) > 0:
         for peak in peaks:
             if peak.peakList.spectrum in spectra:
-                heights.append(peak.height)
-    return heights
+                p = getattr(peak, theProperty)
+                ll.append(p)
+    return ll, peaks
 
+def getNmrResiduePeakHeight(nmrResidue, nmrAtomsNames, spectra):
+    '''
+    :param nmrResidue:
+    :param nmrAtomsNames: nmr Atoms to compare. str 'H', 'N', 'CA' etc
+    :param spectra: compare peaks only from given spectra
+    :return:
+    '''
+    getLogger().warn('Deprecated. Used getNmrResiduePeakProperty with theProperty = "height"')
+    return getNmrResiduePeakProperty(nmrResidue, nmrAtomsNames, spectra, theProperty='height')
+
+def getRawDataFrame(nmrResidues, nmrAtomsNames, spectra, theProperty):
+    dfs = []
+    names = [sp.name for sp in spectra]
+    for nmrResidue in nmrResidues:
+        if not '-' in nmrResidue.sequenceCode.replace('+', '-'): # not consider the +1 and -1 residues
+            ll =  getNmrResiduePeakProperty(nmrResidue, nmrAtomsNames, spectra, theProperty)
+            if len(ll)>0:
+                df = pd.DataFrame([ll], index=[nmrResidue.pid], columns=names)
+                dfs.append(df)
+    data = pd.concat(dfs)
+    return data
 
 def getNmrResidueDeltas(nmrResidue, nmrAtomsNames, spectra, mode=POSITIONS, atomWeights=None):
     '''

@@ -103,6 +103,7 @@ from ccpn.ui.gui.widgets.RadioButtons import RadioButtons
 from ccpn.ui.gui.widgets.GuiTable import exportTableDialog
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.TextEditor import TextEditor
+from ccpn.ui.gui.widgets.LegendItem import LegendItem
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
 from ccpn.ui.gui.widgets.ScrollArea import ScrollArea
 from ccpn.ui.gui.widgets.FileDialog import LineEditButtonDialog
@@ -377,13 +378,15 @@ class ChemicalShiftsMapping(CcpnModule):
     self.scrollArea.setWidgetResizable(True)
     self.scrollAreaWidgetContents = Frame(self, setLayout=True, )
     self.scrollArea.setWidget(self.scrollAreaWidgetContents)
-    # self.scrollAreaWidgetContents.getLayout().setAlignment(QtCore.Qt.AlignTop)
+    self.scrollAreaWidgetContents.getLayout().setAlignment(QtCore.Qt.AlignLeft)
     self.settingsWidget.getLayout().addWidget(self.scrollArea)
     self.scrollArea.setContentsMargins(10, 10, 10, 15)  #l,t,r,b
     self.scrollAreaWidgetContents.setContentsMargins(10, 10, 10, 15)  #l,t,r,b
     # self.scrollAreaWidgetContents.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
     self.scrollAreaWidgetContents.getLayout().setSpacing(10)
-    self._splitter.setStretchFactor(1, 0)  #makes the setting space fully visible when opening
+    # self._splitter.setStretchFactor(1, 0)  #makes the setting space fully visible when opening
+    self.settingsWidget.setMinimumWidth(300)
+    self.settingsWidget.getLayout().setAlignment(QtCore.Qt.AlignTop)
 
     i = 0
     self.inputLabel = Label(self.scrollAreaWidgetContents, text='Select input data', grid=(i, 0), vAlign='t')
@@ -410,7 +413,7 @@ class ChemicalShiftsMapping(CcpnModule):
 
     self.displayDataLabel = Label(self.scrollAreaWidgetContents, text='Display data ', grid=(i, 0))
     self.displayDataButton = RadioButtons(self.scrollAreaWidgetContents, selectedInd=0, texts=DISPLAYDATA,
-                                     grid=(i, 1))
+                                     grid=(i, 1), hAlign='l')
     self.displayDataButton.hide()
     self.displayDataLabel.hide()
     i += 1
@@ -703,7 +706,7 @@ class ChemicalShiftsMapping(CcpnModule):
           if obj._colour:
             pen = pg.functions.mkPen(hexToRgb(obj._colour), width=1)
             brush = pg.functions.mkBrush(hexToRgb(obj._colour), width=1)
-            plot = self.bindingPlot.plot(lineXs, lineYs, pen=pen, symbolBrush=brush, name=obj.pid) #name used for legend and retireve the obj
+            plot = self.bindingPlot.plot(lineXs, lineYs, pen=pen, symbolBrush=brush, symbol='star', symbolSize=5, name=obj.pid) #name used for legend and retireve the obj
             plot.scatter.addPoints(points)
 
           else:
@@ -766,8 +769,8 @@ class ChemicalShiftsMapping(CcpnModule):
             zeroSpectrum, otherSpectra = spectra[0], spectra[1:]
             deltas = []
             peaks = _getPeaksForNmrResidue(nmrResidue, selectedAtomNames, spectra)
-            deltas.append(0)
-            for i, spectrum in enumerate(otherSpectra,1):
+            # deltas.append(0)
+            for i, spectrum in enumerate(spectra):
               if nmrResidue._includeInDeltaShift:
                   delta = getNmrResidueDeltas(nmrResidue, selectedAtomNames, mode=mode, spectra=[zeroSpectrum, spectrum],
                                               atomWeights=weights)

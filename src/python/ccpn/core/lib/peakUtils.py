@@ -38,9 +38,10 @@ VOLUME = 'volume'
 LINEWIDTHS = 'lineWidths'
 ROW = 'row'
 DELTAS = 'deltas'
-
+DELTA = '\u0394'
+Delta = '\u03B4'
 MODES = [POSITIONS, HEIGHT, VOLUME, LINEWIDTHS]
-DISPLAYDATA = [DELTAS, ROW]
+DISPLAYDATA = [DELTA+Delta, ROW]
 OTHER = 'Other'
 H = 'H'
 N = 'N'

@@ -248,14 +248,15 @@ class ChemicalShiftsMapping(CcpnModule):
     BarGraph.mouseDoubleClickEvent = self._navigateToNmrItems
 
     self.mainWindow = mainWindow
+    self.relativeContribuitions = DefaultAtomWeights
     self.OtherAtoms = set()
     self.Natoms = set()
     self.Hatoms = set()
     self.Catoms = set()
     self.atomWeightSpinBoxes = []
+    self.selectedNmrAtomNames = []
     self.nmrAtomsCheckBoxes = []
     self.nmrAtomsLabels = []
-    self.atomNames = []
     self.project = self.mainWindow.project
     self.application = self.mainWindow.application
     self.current = self.application.current
@@ -293,6 +294,10 @@ class ChemicalShiftsMapping(CcpnModule):
           self.nmrResidueTable.ncWidget.select(self.project.nmrChains[-1].pid)
           self._setThresholdLineBySTD()
           self._setKdUnit()
+          if len(self.selectedNmrAtomNames) == 0:
+            spectra = self.spectraSelectionWidget.getSelections()
+            if len(spectra) > 0:
+              self.selectedNmrAtomNames = spectra[0].axisCodes
           # self._updateModule()
 
   #####################################################
@@ -418,9 +423,8 @@ class ChemicalShiftsMapping(CcpnModule):
     self.displayDataLabel.hide()
     i += 1
     self.atomsLabel = Label(self.scrollAreaWidgetContents, text='Select NmrAtoms', grid=(i, 0))
-    self.nmrAtomsFrame = Frame(self.scrollAreaWidgetContents, setLayout=True, grid=(i, 1))
-    self._updateNmrAtomsOption()
-    self._hideNonNecessaryNmrAtomsOption()
+    self.showNmrAtoms  = Button(self.scrollAreaWidgetContents, text='NmrAtoms settings',
+                                callback=self.showNmrAtomsSettings, grid=(i, 1))
     i += 1
     self.thresholdLAbel = Label(self.scrollAreaWidgetContents, text='Threshold value', grid=(i, 0))
     self.thresholdFrame = Frame(self.scrollAreaWidgetContents, setLayout=True, grid=(i, 1))
@@ -704,7 +708,7 @@ class ChemicalShiftsMapping(CcpnModule):
 
 
           if obj._colour:
-            pen = pg.functions.mkPen(hexToRgb(obj._colour), width=1)
+            pen = pg.functions.mkPen(hexToRgb(obj._colour), width=5)
             brush = pg.functions.mkBrush(hexToRgb(obj._colour), width=1)
             plot = self.bindingPlot.plot(lineXs, lineYs, pen=pen, symbolBrush=brush, symbol='star', symbolSize=5, name=obj.pid) #name used for legend and retireve the obj
             plot.scatter.addPoints(points)
@@ -741,13 +745,11 @@ class ChemicalShiftsMapping(CcpnModule):
     :return: dataframe
     """
 
-    selectedAtomNames = [cb.text() for cb in self.nmrAtomsCheckBoxes if cb.isChecked()]
     mode = self.modeButtons.getSelectedText()
     if not mode in MODES:
       return
-    weights = {}
-    for atomWSB in self.atomWeightSpinBoxes:
-      weights.update({atomWSB.objectName(): atomWSB.value()})
+    weights = self.relativeContribuitions
+    selectedAtomNames = self.selectedNmrAtomNames
     values = []
     for nmrResidue in nmrResidues:
       if self._isInt(nmrResidue.sequenceCode):
@@ -1018,6 +1020,19 @@ class ChemicalShiftsMapping(CcpnModule):
   ############   Settings widgets callbacks    ################
   #############################################################
 
+  def showNmrAtomsSettings(self):
+    from ccpn.ui.gui.widgets.NmrAtomsSelections import _NmrAtomsSelection
+    if self.project:
+      nmrAtoms = list(set([n.name for n in self.project.nmrAtoms]))
+
+      popup = _NmrAtomsSelection(self,
+                                 nmrAtoms=nmrAtoms,
+                                 checked=self.selectedNmrAtomNames,
+                                 size=[500, 450],
+                                 grid=(0, 0))
+      popup.show()
+      popup.raise_()
+
   def _navigateToPeakPosition(self, peak):
     from ccpn.ui.gui.lib.Strip import navigateToPositionInStrip, _getCurrentZoomRatio
 
@@ -1287,11 +1302,8 @@ class ChemicalShiftsMapping(CcpnModule):
     mode = self.modeButtons.getSelectedText()
     if not mode in MODES:
       return
-    weights = {}
-    for atomWSB in self.atomWeightSpinBoxes:
-      weights.update({atomWSB.objectName():atomWSB.value()})
-
-    selectedAtomNames = [cb.text() for cb in self.nmrAtomsCheckBoxes if cb.isChecked()]
+    weights = self.relativeContribuitions
+    selectedAtomNames = self.selectedNmrAtomNames
     spectra = self.spectraSelectionWidget.getSelections()
     if self.nmrResidueTable:
       if self.nmrResidueTable._nmrChain is not None:

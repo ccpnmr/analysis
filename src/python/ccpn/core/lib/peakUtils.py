@@ -27,7 +27,6 @@ import numpy as np
 from ccpn.util.Logging import getLogger
 from collections import OrderedDict
 from scipy.optimize import curve_fit
-from collections import OrderedDict
 from ccpn.core.PeakList import GAUSSIANMETHOD, PARABOLICMETHOD
 from ccpn.util.Common import makeIterableList
 import pandas as pd

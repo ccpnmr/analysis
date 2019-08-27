@@ -132,7 +132,7 @@ from ccpn.core.lib.Notifiers import Notifier
 from ccpn.core.lib.CallBack import CallBack
 from ccpn.core.lib.peakUtils import getNmrResidueDeltas,_getKd, oneSiteBindingCurve, _fit1SiteBindCurve, _fitExpDecayCurve,\
                                     MODES, LINEWIDTHS, HEIGHT, POSITIONS, VOLUME, DefaultAtomWeights, H, N, OTHER, C, DISPLAYDATA, \
-                                    getRawDataFrame, ROW, getNmrResiduePeakProperty, _getPeaksForNmrResidue
+                                    getRawDataFrame, RAW, getNmrResiduePeakProperty, _getPeaksForNmrResidue
 from ccpn.core.lib import CcpnSorting
 from ccpn.core.lib.DataFrameObject import  DATAFRAME_OBJECT
 from ccpn.core.NmrChain import NmrChain
@@ -753,7 +753,7 @@ class ChemicalShiftsMapping(CcpnModule):
         peaksPids = []
 
         if len(spectra)>1:
-          if self.displayDataButton.get() == ROW and mode in [HEIGHT, VOLUME] :
+          if self.displayDataButton.get() == RAW and mode in [HEIGHT, VOLUME] :
             deltas, peaks = getNmrResiduePeakProperty(nmrResidue, selectedAtomNames, spectra, mode)
             for i, p in enumerate(peaks):
               spectrum = p.peakList.spectrum

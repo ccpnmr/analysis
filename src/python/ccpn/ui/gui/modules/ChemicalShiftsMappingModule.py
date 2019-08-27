@@ -298,7 +298,7 @@ class ChemicalShiftsMapping(CcpnModule):
             spectra = self.spectraSelectionWidget.getSelections()
             if len(spectra) > 0:
               self.selectedNmrAtomNames = spectra[0].axisCodes
-          # self._updateModule()
+              self._updateModule()
 
   #####################################################
   #############   Main widgets creation    ############
@@ -692,12 +692,12 @@ class ChemicalShiftsMapping(CcpnModule):
 
             if isinstance(peak, Peak):
               spectrum = peak.peakList.spectrum
-              dd = {'pos': [0, 0], 'data': 'obj', 'brush': pg.mkBrush(255, 0, 0), 'symbol': 'o', 'size': 1,
+              dd = {'pos': [0, 0], 'data': 'obj', 'brush': pg.mkBrush(255, 0, 0), 'symbol': 'o', 'size': 10,
                     'pen': None}  # red default
               dd['pos'] = pair
               dd['data'] = peak
               if hasattr(spectrum, 'positiveContourColour'):  # colour from the spectrum. The only CCPN obj implemeted so far
-                brush = pg.functions.mkBrush(hexToRgb(spectrum.positiveContourColour), width=1)
+                brush = pg.functions.mkBrush(hexToRgb(spectrum.positiveContourColour), width=10)
                 dd['brush'] = brush
               points.append(dd)
 
@@ -796,6 +796,7 @@ class ChemicalShiftsMapping(CcpnModule):
       df = pd.concat(values)
       dfPeaks = pd.concat(peaksDFs)
       return df, dfPeaks
+    return pd.DataFrame(), pd.DataFrame()
 
   def _getScaledBindingCurves(self, bindingCurves):
     if isinstance(bindingCurves, pd.DataFrame):
@@ -1307,7 +1308,6 @@ class ChemicalShiftsMapping(CcpnModule):
     if self.nmrResidueTable:
       if self.nmrResidueTable._nmrChain is not None:
         for nmrResidue in self.nmrResidueTable._nmrChain.nmrResidues:
-          print('RESID',nmrResidue)
           if self._isInt(nmrResidue.sequenceCode):
             self._updatedPeakCount(nmrResidue, spectra)
             if nmrResidue._includeInDeltaShift:
@@ -1315,6 +1315,7 @@ class ChemicalShiftsMapping(CcpnModule):
               nmrResidueAtoms = [atom.name for atom in nmrResidue.nmrAtoms]
               nmrResidue.selectedNmrAtomNames =  [atom for atom in nmrResidueAtoms if atom in selectedAtomNames]
               nmrResidue._delta = getNmrResidueDeltas(nmrResidue, selectedAtomNames, mode=mode, spectra=spectra, atomWeights=weights)
+
               df,peaksdf = self._getBindingCurves([nmrResidue])
               bindingCurves = self._getScaledBindingCurves(df)
               if bindingCurves is not None:

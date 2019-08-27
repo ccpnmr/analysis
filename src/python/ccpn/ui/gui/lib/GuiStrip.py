@@ -1226,7 +1226,11 @@ class GuiStrip(Frame):
         """
         if zoomState is not None:
             if len(zoomState)==4:
-                self._restoreZoom(zoomState=zoomState)
+                # self._restoreZoom(zoomState=zoomState)
+                axisL, axisR, axisB, axisT = zoomState[0], zoomState[1], zoomState[2], zoomState[3]
+
+                self._CcpnGLWidget._setRegion(self._CcpnGLWidget._orderedAxes[0], (axisL, axisR))
+                self._CcpnGLWidget._setRegion(self._CcpnGLWidget._orderedAxes[1], (axisT, axisB))
 
     def _restoreZoom(self, zoomState=None):
         """Restores last saved region to the zoom stack for the strip.

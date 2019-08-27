@@ -760,7 +760,7 @@ class DimensionsTab(Widget):
         Label(self, text="Spectral Width (Hz) ", grid=(row, 0), vAlign='t', hAlign='l')
 
         row += 1
-        Label(self, text="Spectrometer Frequency (Hz) ", grid=(row, 0), vAlign='t', hAlign='l')
+        Label(self, text="Spectrometer Frequency (MHz) ", grid=(row, 0), vAlign='t', hAlign='l')
 
         row += 1
         Label(self, text="Referencing (ppm) ", grid=(row, 0), vAlign='t', hAlign='l')

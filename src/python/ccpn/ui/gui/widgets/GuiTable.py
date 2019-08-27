@@ -293,6 +293,7 @@ GuiTable::item::selected {
             self.doubleClicked.connect(self._doubleClickCallback)
         else:
             self.doubleClicked.connect(self._defaultDoubleClick)
+        # self.itemClicked.connect(self._cellClicked)
 
         # set the delegate for editing
         delegate = GuiTableDelegate(self)
@@ -505,6 +506,8 @@ GuiTable::item::selected {
     def setSelectionCallback(self, selectionCallback):
         # enable callbacks
         self._selectionCallback = selectionCallback
+        # if self._selectionCallback:
+        #     self.itemClicked.connect(self._cellClicked)
 
     def _handleDroppedItems(self, pids, objType, pulldown):
         """
@@ -536,6 +539,19 @@ GuiTable::item::selected {
                 openNew = showYesNo(title, msg)
                 if openNew:
                     _openItemObject(self.mainWindow, others)
+
+    def _cellClicked(self, item):
+        if item:
+            if isinstance(item.value, bool):
+                self._checkBoxTableCallback(item)
+            try:
+                if self._selectionCallback:
+                    self._currentRow = item.row()
+                    self._currentCol = item.column()
+            except:
+                # Fixme
+                # item has been deleted error
+                pass
 
     def _checkBoxCallback(self, data):
         getLogger().info('>>> %s _checkBoxCallback' % _moduleId(self.moduleParent))
@@ -711,32 +727,46 @@ GuiTable::item::selected {
         if not state == value:
             # if not self._silenceCallback:
 
-            selectionModel = self.selectionModel()
-            selectionModel.clearSelection()
-            selectionModel.select(self.model().index(itemSelection.row(), 0),
-                                  selectionModel.Select | selectionModel.Rows)
-            objList = self.getSelectedObjects()
+            # selectionModel = self.selectionModel()
+            # selectionModel.clearSelection()
+            # selectionModel.select(self.model().index(itemSelection.row(), 0),
+            #                       selectionModel.Select | selectionModel.Rows)
+            # objList = self.getSelectedObjects()
 
-            if objList:
+            # item = self.currentItem()
+            # row = item.row()
+
+            # get the row data corresponding to the row clicked
+            # model = self.selectionModel()
+
+            # selection = [itemSelection]     # [iSelect for iSelect in model.() if iSelect.row() == row]
+
+            # selection = [self.itemFromIndex(self.model().index(itemSelection.row(), cc)) for cc in range(self.columnCount())]
+            selection = [self.model().index(itemSelection.row(), cc) for cc in range(self.columnCount())]
+
+            obj = self.getSelectedObjects(selection)
+            obj = obj[0] if obj else None
+
+            if obj:
                 data = CallBack(theObject=self._dataFrameObject,
-                                object=objList,
+                                object=obj,
                                 index=0,
-                                targetName=objList[0].className,
-                                trigger=CallBack.DOUBLECLICK,
+                                targetName=obj.className,
+                                trigger=CallBack.CLICK,
                                 row=itemSelection.row(),
                                 col=itemSelection.column(),
                                 rowItem=itemSelection,
                                 checked=state)
                 textHeader = self.horizontalHeaderItem(itemSelection.column()).text()
                 if textHeader:
-                    self._dataFrameObject.setObjAttr(textHeader, objList[0], state)
+                    self._dataFrameObject.setObjAttr(textHeader, obj, state)
                     # setattr(objList[0], textHeader, state)
             else:
                 data = CallBack(theObject=self._dataFrameObject,
                                 object=None,
                                 index=0,
                                 targetName=None,
-                                trigger=CallBack.DOUBLECLICK,
+                                trigger=CallBack.CLICK,
                                 row=itemSelection.row(),
                                 col=itemSelection.column(),
                                 rowItem=itemSelection,
@@ -899,6 +929,9 @@ GuiTable::item::selected {
             if item:
                 self._currentRow = item.row()
                 self._currentCol = item.column()
+
+                if isinstance(item.value, bool):
+                    self._checkBoxTableCallback(item)
             else:
                 self._currentRow = None
                 self._currentCol = None

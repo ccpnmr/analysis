@@ -52,7 +52,7 @@ class Button(QtWidgets.QPushButton, Base):
         if icon:  # filename or pixmap
             self.setIcon(Icon(icon))
             # this causes the button to reset its stylesheet
-            # self.setIconSize(QtCore.QSize(24, 24))
+            self.setIconSize(QtCore.QSize(22, 22))
 
         if toggle is not None:
             self.setCheckable(True)

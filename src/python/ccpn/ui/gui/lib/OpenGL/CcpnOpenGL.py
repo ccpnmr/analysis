@@ -1511,6 +1511,15 @@ class CcpnGLWidget(QOpenGLWidget):
                 # reset the timer so you have to wait another 5 seconds
                 self._zoomTimerLast = currentTime
 
+    # def _restoreZoomHistoryFromState(self, zoomState):
+    #     # increment the head of the zoom history
+    #     self._zoomHistoryHead = (self._zoomHistoryHead + 1) % len(self._zoomHistory)
+    #     self._zoomHistory[self._zoomHistoryHead] = zoomState
+    #     self._zoomHistoryCurrent = self._zoomHistoryHead
+    #
+    #     # reset the timer so you have to wait another 5 seconds
+    #     self._zoomTimerLast = time.time()
+
     def previousZoom(self):
         """Move to the previous stored zoom
         """
@@ -1557,7 +1566,14 @@ class CcpnGLWidget(QOpenGLWidget):
         zoomState = (axisL, axisR, axisB, axisT)
         """
         if zoomState and len(zoomState)==4:
+
+            # store the zoom state from when layouts are restored
+            # self._restoreZoomHistoryFromState(zoomState)
+            # if self._currentZoom < ZOOMMAXSTORE:
+            #     self._currentZoom += 1
+            # self.storedZooms = self.storedZooms[:self._currentZoom - 1]
             self.storedZooms.append(zoomState)
+
         if self.storedZooms:
             # restoredZooms = self.storedZooms.pop()
 

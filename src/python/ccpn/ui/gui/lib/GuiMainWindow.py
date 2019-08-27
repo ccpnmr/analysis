@@ -369,7 +369,7 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
         self._menuBar.setNativeMenuBar(False)
 
         self._fillRecentProjectsMenu()
-        self._fillPredifinedLayoutMenu()
+        self._fillPredefinedLayoutMenu()
         self._fillRecentMacrosMenu()
         #TODO:ED needs fixing
         self._fillPluginsMenu()  # ejb - nothing to show, and crash anyway
@@ -549,14 +549,14 @@ Use menu Spectrum-->Validate paths.. or "VP" shortcut to correct''' % '\n\t'.joi
         recentFileMenu.addAction(Action(recentFileMenu, text='Clear',
                                         callback=self.application.clearRecentProjects))
 
-    def _fillPredifinedLayoutMenu(self):
+    def _fillPredefinedLayoutMenu(self):
         """
-        Populates predifined Layouts
+        Populates predefined Layouts
         """
         from ccpn.util import Layout
         from ccpn.framework.PathsAndUrls import predefinedLayouts
         userDefinedLayoutDirPath = self.application.preferences.general.get('userLayoutsPath')
-        prelayouts = Layout._dictLayoutsNamePath(Layout._getPredifinedLayouts(predefinedLayouts))
+        prelayouts = Layout._dictLayoutsNamePath(Layout._getPredefinedLayouts(predefinedLayouts))
         prelayoutMenu = self.getMenuAction('Project->Layout->Open pre-defined')
         prelayoutMenu.clear()
         for name, path in prelayouts.items():
@@ -564,14 +564,14 @@ Use menu Spectrum-->Validate paths.. or "VP" shortcut to correct''' % '\n\t'.joi
                             callback=partial(self.application.restoreLayoutFromFile, path))
             prelayoutMenu.addAction(action)
         prelayoutMenu.addSeparator()
-        userLayouts = Layout._dictLayoutsNamePath(Layout._getPredifinedLayouts(userDefinedLayoutDirPath))
+        userLayouts = Layout._dictLayoutsNamePath(Layout._getPredefinedLayouts(userDefinedLayoutDirPath))
         for name, path in userLayouts.items():
             action = Action(self, text=name, translate=False,
                             callback=partial(self.application.restoreLayoutFromFile, path))
             prelayoutMenu.addAction(action)
         prelayoutMenu.addSeparator()
         action = Action(self, text='Update', translate=False,
-                        callback=self._fillPredifinedLayoutMenu)
+                        callback=self._fillPredefinedLayoutMenu)
         prelayoutMenu.addAction(action)
 
 

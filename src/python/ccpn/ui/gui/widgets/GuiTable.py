@@ -293,7 +293,6 @@ GuiTable::item::selected {
             self.doubleClicked.connect(self._doubleClickCallback)
         else:
             self.doubleClicked.connect(self._defaultDoubleClick)
-        # self.itemClicked.connect(self._cellClicked)
 
         # set the delegate for editing
         delegate = GuiTableDelegate(self)
@@ -506,8 +505,6 @@ GuiTable::item::selected {
     def setSelectionCallback(self, selectionCallback):
         # enable callbacks
         self._selectionCallback = selectionCallback
-        # if self._selectionCallback:
-        #     self.itemClicked.connect(self._cellClicked)
 
     def _handleDroppedItems(self, pids, objType, pulldown):
         """
@@ -539,19 +536,6 @@ GuiTable::item::selected {
                 openNew = showYesNo(title, msg)
                 if openNew:
                     _openItemObject(self.mainWindow, others)
-
-    def _cellClicked(self, item):
-        if item:
-            if isinstance(item.value, bool):
-                self._checkBoxTableCallback(item)
-            try:
-                if self._selectionCallback:
-                    self._currentRow = item.row()
-                    self._currentCol = item.column()
-            except:
-                # Fixme
-                # item has been deleted error
-                pass
 
     def _checkBoxCallback(self, data):
         getLogger().info('>>> %s _checkBoxCallback' % _moduleId(self.moduleParent))
@@ -725,23 +709,9 @@ GuiTable::item::selected {
         state = True if itemSelection.checkState() == 2 else False
         value = itemSelection.value
         if not state == value:
-            # if not self._silenceCallback:
 
-            # selectionModel = self.selectionModel()
-            # selectionModel.clearSelection()
-            # selectionModel.select(self.model().index(itemSelection.row(), 0),
-            #                       selectionModel.Select | selectionModel.Rows)
-            # objList = self.getSelectedObjects()
-
-            # item = self.currentItem()
-            # row = item.row()
-
-            # get the row data corresponding to the row clicked
-            # model = self.selectionModel()
-
-            # selection = [itemSelection]     # [iSelect for iSelect in model.() if iSelect.row() == row]
-
-            # selection = [self.itemFromIndex(self.model().index(itemSelection.row(), cc)) for cc in range(self.columnCount())]
+            # TODO:ED check with Luca on when this should fire
+            # get the row for the checkbox item
             selection = [self.model().index(itemSelection.row(), cc) for cc in range(self.columnCount())]
 
             obj = self.getSelectedObjects(selection)

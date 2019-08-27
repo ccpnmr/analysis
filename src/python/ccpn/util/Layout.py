@@ -481,7 +481,7 @@ def _getFileNameFromPath(path, extToSplit= 'json'):
     name = file.split("."+extToSplit)[0]
     return name
 
-def _getPredifinedLayouts(dirPath):
+def _getPredefinedLayouts(dirPath):
     # path has to finish with /
     sp = os.path.join(dirPath, '*.json')
     layoutsFiles = glob.glob(sp)

@@ -675,51 +675,45 @@ class ChemicalShiftsMapping(CcpnModule):
     # self.bindingPlot.setLimits(xMin=0, xMax=None, yMin=0, yMax=None)
 
     if self.current.nmrResidues is not None:
-      plotData = self._getBindingCurves(self.current.nmrResidues)
+      plotData, peaksDF = self._getBindingCurves(self.current.nmrResidues)
       if self.scaleBindingCCb.isChecked():
         plotData = self._getScaledBindingCurves(plotData)
 
       if plotData is not None:
         plotData = plotData.replace(np.nan, 0)
-
         for obj, row, in plotData.iterrows():
-          row = row.to_frame()
-          pids = []
-          lineXs = []
-          lineYs = []
+          ys = list(row.values)
+          xs = list(plotData.columns)
+          pksPids = list(peaksDF.loc[obj].values)
           points = []
-          for i,k  in row.iterrows():
-            peakPid = i[0]
-            xVal = i[1]
-            yVal = k.values[-1]
-            lineXs.append(xVal)
-            lineYs.append(yVal)
-            pids.append(peakPid)
+          pairs = list([i,j] for i,j in zip(xs,ys))
+          for pair, peakPid in zip(pairs,pksPids):
             peak = self.project.getByPid(peakPid)
+
             if isinstance(peak, Peak):
               spectrum = peak.peakList.spectrum
-              dd = {'pos': [0, 0], 'data': 'obj', 'brush': pg.mkBrush(255, 0, 0), 'symbol': 'o', 'size': 10,
+              dd = {'pos': [0, 0], 'data': 'obj', 'brush': pg.mkBrush(255, 0, 0), 'symbol': 'o', 'size': 1,
                     'pen': None}  # red default
-              dd['pos'] = (xVal,yVal)
+              dd['pos'] = pair
               dd['data'] = peak
               if hasattr(spectrum, 'positiveContourColour'):  # colour from the spectrum. The only CCPN obj implemeted so far
-                dd['brush'] = pg.functions.mkBrush(hexToRgb(spectrum.positiveContourColour))
+                brush = pg.functions.mkBrush(hexToRgb(spectrum.positiveContourColour), width=1)
+                dd['brush'] = brush
               points.append(dd)
-
 
           if obj._colour:
             pen = pg.functions.mkPen(hexToRgb(obj._colour), width=5)
             brush = pg.functions.mkBrush(hexToRgb(obj._colour), width=1)
-            plot = self.bindingPlot.plot(lineXs, lineYs, pen=pen, symbolBrush=brush, symbol='star', symbolSize=5, name=obj.pid) #name used for legend and retireve the obj
+            plot = self.bindingPlot.plot(xs, ys, pen=pen, symbolBrush=brush, symbol='o', symbolSize=1,
+                                         name=obj.pid)  # name used for legend and retireve the obj
+
             plot.scatter.addPoints(points)
-
           else:
-            plot = self.bindingPlot.plot(lineXs, lineYs, symbol='o', name=obj.pid)
+            plot = self.bindingPlot.plot(xs, ys, symbol='o', name=obj.pid)
           plot.sigPointsClicked.connect(self._bindingPlotSingleClick)
-
-      self.bindingPlot.autoRange()
-      self.bindingPlot.setLabel('left', DELTA+Delta)
-      self.bindingPlot.setLabel('bottom', self._kDunit)
+          self.bindingPlot.autoRange()
+          self.bindingPlot.setLabel('left','Y')# DELTA+Delta)
+          self.bindingPlot.setLabel('bottom', self._kDunit)
 
   def _bindingPlotSingleClick(self, item, points):
     """sig callback from the binding plot. Gets the obj from the curve name."""
@@ -751,10 +745,12 @@ class ChemicalShiftsMapping(CcpnModule):
     weights = self.relativeContribuitions
     selectedAtomNames = self.selectedNmrAtomNames
     values = []
+    peaksDFs = []
     for nmrResidue in nmrResidues:
       if self._isInt(nmrResidue.sequenceCode):
         spectra = self.spectraSelectionWidget.getSelections()
         concentrationsValues = []
+        peaksPids = []
 
         if len(spectra)>1:
           if self.displayDataButton.get() == ROW and mode in [HEIGHT, VOLUME] :
@@ -766,7 +762,9 @@ class ChemicalShiftsMapping(CcpnModule):
                 concentration = concentrations[0]
                 if concentration is None:
                   concentration = i
-                concentrationsValues.append((p.pid, concentration)) #double columns
+                concentrationsValues.append(concentration)
+                peaksPids.append(p.pid)
+
           else:
             zeroSpectrum, otherSpectra = spectra[0], spectra[1:]
             deltas = []
@@ -787,16 +785,17 @@ class ChemicalShiftsMapping(CcpnModule):
                   concentration = concentrations[0]
                   if concentration is None:
                     concentration = i
-                  concentrationsValues.append((p.pid, concentration))
+                  concentrationsValues.append( concentration)
+                  peaksPids.append(p.pid)
           df = pd.DataFrame([deltas], index=[nmrResidue], columns=concentrationsValues)
-          df.columns = pd.MultiIndex.from_tuples(df.columns, names=['Pids', 'values'])  #double columns
+          dfPeaks = pd.DataFrame([peaksPids], index=[nmrResidue], columns=concentrationsValues)
           df = df.replace(np.nan, 0)
           values.append(df)
+          peaksDFs.append(dfPeaks)
     if len(values)>0:
       df = pd.concat(values)
-      if singleColumn:
-        df.columns =  [float(i) for i in df.columns.levels[-1]]
-      return df
+      dfPeaks = pd.concat(peaksDFs)
+      return df, dfPeaks
 
   def _getScaledBindingCurves(self, bindingCurves):
     if isinstance(bindingCurves, pd.DataFrame):
@@ -1308,6 +1307,7 @@ class ChemicalShiftsMapping(CcpnModule):
     if self.nmrResidueTable:
       if self.nmrResidueTable._nmrChain is not None:
         for nmrResidue in self.nmrResidueTable._nmrChain.nmrResidues:
+          print('RESID',nmrResidue)
           if self._isInt(nmrResidue.sequenceCode):
             self._updatedPeakCount(nmrResidue, spectra)
             if nmrResidue._includeInDeltaShift:
@@ -1315,12 +1315,11 @@ class ChemicalShiftsMapping(CcpnModule):
               nmrResidueAtoms = [atom.name for atom in nmrResidue.nmrAtoms]
               nmrResidue.selectedNmrAtomNames =  [atom for atom in nmrResidueAtoms if atom in selectedAtomNames]
               nmrResidue._delta = getNmrResidueDeltas(nmrResidue, selectedAtomNames, mode=mode, spectra=spectra, atomWeights=weights)
-              df = self._getBindingCurves([nmrResidue])
+              df,peaksdf = self._getBindingCurves([nmrResidue])
               bindingCurves = self._getScaledBindingCurves(df)
               if bindingCurves is not None:
                 plotData = bindingCurves.replace(np.nan, 0)
-                columns = plotData.columns.levels[-1]
-                columns = [float(i) for i in columns if i is not None]
+                columns = df.columns
                 y = plotData.values.flatten(order='F')
                 xss = np.array([columns] * plotData.shape[0])
                 x = xss.flatten(order='F')
@@ -1417,14 +1416,14 @@ class ChemicalShiftsMapping(CcpnModule):
     nmrChainTxt = self.nmrResidueTable.ncWidget.getText()
     nmrChain = self.project.getByPid(nmrChainTxt)
     if nmrChain is not None:
-      dataFrame = self._getBindingCurves(nmrChain.nmrResidues)
+      dataFrame,pkDf = self._getBindingCurves(nmrChain.nmrResidues)
       return dataFrame
 
   def _plotFittedCallback(self):
     self.fittingPlot.clear()
     self._clearLegend(self.fittingPlot.legend)
 
-    plotData = self._getBindingCurves(self.current.nmrResidues, True)
+    plotData, pksdf = self._getBindingCurves(self.current.nmrResidues, True)
     plotData = self._getScaledBindingCurves(plotData)
 
     if plotData is not None:
@@ -1588,6 +1587,7 @@ class ChemicalShiftsMapping(CcpnModule):
     self.belowBrush = 'r'
     self.disappearedPeakBrush = 'b'
     # check if all values are none:
+    if self.nmrResidueTable._dataFrameObject is None: return
     shifts = [nmrResidue._delta for nmrResidue in self.nmrResidueTable._dataFrameObject.objects]
     if not any(shifts):
       self.barGraphWidget.clear()

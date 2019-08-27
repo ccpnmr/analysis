@@ -1035,8 +1035,10 @@ class Project(AbstractWrapperObject):
             # special case - usePath is a list of paths from a top dir with enumerate subDirs and paths.
             paths = usePath
             #TODO:RASMUS: Undefined return type
+            _loadedData = []
             for path in paths:
-                self.loadData(path)
+                _loadedData += self.loadData(path)
+            return _loadedData
 
         elif not os.path.exists(usePath):
             # print("Skipping: no file found at %s" % usePath)

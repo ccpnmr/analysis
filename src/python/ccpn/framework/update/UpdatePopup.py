@@ -73,12 +73,13 @@ class UpdatePopup(CcpnDialog, UpdateAgent):
         label = Label(self, 'Installing updates will require a restart of the program.', grid=(row, 0))
         row += 1
 
-        texts = ('Refresh Updates Information', 'Download and Install Updates', 'Close')
-        callbacks = (self.resetFromServer, self._install, self._accept)
+        texts = ('Refresh Updates Information', 'Download and Install Updates', 'Update Licence', 'Close')
+        callbacks = (self.resetFromServer, self._install, self._doUpdate, self._accept)
         tipTexts = ('Refresh the updates information by querying server and comparing with what is installed locally',
                     'Install the updates from the server',
+                    'Update Licence from the server',
                     'Close update dialog')
-        icons = ('icons/null.png', 'icons/dialog-apply.png', 'icons/window-close.png')
+        icons = ('icons/null.png', 'icons/dialog-apply.png', 'icons/dialog-apply.png', 'icons/window-close.png')
         self.buttonList = ButtonList(self, texts=texts, tipTexts=tipTexts, callbacks=callbacks, icons=icons, grid=(row, 0), gridSpan=(1, 2))
         row += 1
 
@@ -87,6 +88,7 @@ class UpdatePopup(CcpnDialog, UpdateAgent):
         # initialise the popup
         self.resetFromServer()
         self._numUpdatesInstalled = 0
+        self.buttonList.getButton('Update Licence').setEnabled(self._check())
 
     def _install(self):
         """The update button has been clicked. Install updates and flag that files have been changed
@@ -109,6 +111,10 @@ class UpdatePopup(CcpnDialog, UpdateAgent):
         else:
             self.accept()
 
+    def _doUpdate(self):
+        self._resetMd5()
+        self.buttonList.getButton('Update Licence').setEnabled(False)
+
     def reject(self):
         """Dialog-frame close button has been clicked, close if files have been updated or close dialog
         """
@@ -121,7 +127,7 @@ class UpdatePopup(CcpnDialog, UpdateAgent):
         """Get current number of updates from the server
         """
         UpdateAgent.resetFromServer(self)
-        self.updatesLabel.set('%d' % int(len(self.updateFiles)+self._numAdditionalUpdates))
+        self.updatesLabel.set('%d' % len(self.updateFiles))
 
 
 if __name__ == '__main__':

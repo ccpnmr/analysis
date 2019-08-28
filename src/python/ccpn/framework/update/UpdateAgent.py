@@ -273,7 +273,7 @@ class UpdateAgent(object):
 
     def checkNumberUpdates(self):
         self.fetchUpdateDb()
-        return len(self.updateFiles)+self._numAdditionalUpdates
+        return len(self.updateFiles)
 
     def fetchUpdateDb(self):
         """Fetch list of updates from server."""

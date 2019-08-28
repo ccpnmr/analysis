@@ -351,7 +351,7 @@ class UpdateAgent(object):
 
     def checkNumberUpdates(self):
         self.fetchUpdateDb()
-        return len(self.updateFiles) + self._numAdditionalUpdates
+        return len(self.updateFiles)
 
     def fetchUpdateDb(self):
         """Fetch list of updates from server."""
@@ -388,8 +388,6 @@ class UpdateAgent(object):
                         updateFiles.append(updateFile)
                         updateFileDict[filePath] = updateFile
 
-        self._checkMd5()
-
     def isUpdateDifferent(self, filePath, fileHashCode):
         """See if local file is different from server file."""
 
@@ -405,6 +403,16 @@ class UpdateAgent(object):
             isDifferent = False
 
         return isDifferent
+
+    def _check(self):
+        """Check the checkSum from the gui
+        """
+        try:
+            self._checkMd5()
+        except:
+            pass
+        finally:
+            return 'valid' not in self._found
 
     def _checkMd5(self):
         """Check the checkSum status on the server
@@ -429,8 +437,8 @@ class UpdateAgent(object):
 
             self._found = fetchUrl(serverDownloadScript, values, timeout=2.0)
             if isinstance(self._found, str):
+                # file returns with EOF chars on the end
                 self._found = self._found.rstrip('\r\n')
-                self._numAdditionalUpdates = (1 if 'valid' not in self._found else 0)
 
         except:
             print('Could not check details on server.')
@@ -503,11 +511,10 @@ class UpdateAgent(object):
         """Download chosen server files to local installation."""
 
         updateFiles = [updateFile for updateFile in self.updateFiles if updateFile.shouldInstall]
-        if not updateFiles and 'valid' in self._found:
+        if not updateFiles:
             self.showError('No updates', 'No updates for installation')
             return
 
-        self._resetMd5()
         n = 0
         updateFilesInstalled = []
 

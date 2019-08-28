@@ -707,41 +707,42 @@ GuiTable::item::selected {
     def _checkBoxTableCallback(self, itemSelection):
 
         state = True if itemSelection.checkState() == 2 else False
+        state = not state # as to be opposite before catches the event before you clicked
         value = itemSelection.value
-        if not state == value:
+        # if not state == value:
 
-            # TODO:ED check with Luca on when this should fire
-            # get the row for the checkbox item
-            selection = [self.model().index(itemSelection.row(), cc) for cc in range(self.columnCount())]
+        # TODO:ED check with Luca on when this should fire
+        # get the row for the checkbox item
+        selection = [self.model().index(itemSelection.row(), cc) for cc in range(self.columnCount())]
 
-            obj = self.getSelectedObjects(selection)
-            obj = obj[0] if obj else None
+        obj = self.getSelectedObjects(selection)
+        obj = obj[0] if obj else None
 
-            if obj:
-                data = CallBack(theObject=self._dataFrameObject,
-                                object=obj,
-                                index=0,
-                                targetName=obj.className,
-                                trigger=CallBack.CLICK,
-                                row=itemSelection.row(),
-                                col=itemSelection.column(),
-                                rowItem=itemSelection,
-                                checked=state)
-                textHeader = self.horizontalHeaderItem(itemSelection.column()).text()
-                if textHeader:
-                    self._dataFrameObject.setObjAttr(textHeader, obj, state)
-                    # setattr(objList[0], textHeader, state)
-            else:
-                data = CallBack(theObject=self._dataFrameObject,
-                                object=None,
-                                index=0,
-                                targetName=None,
-                                trigger=CallBack.CLICK,
-                                row=itemSelection.row(),
-                                col=itemSelection.column(),
-                                rowItem=itemSelection,
-                                checked=state)
-            self._checkBoxCallback(data)
+        if obj:
+            data = CallBack(theObject=self._dataFrameObject,
+                            object=obj,
+                            index=0,
+                            targetName=obj.className,
+                            trigger=CallBack.CLICK,
+                            row=itemSelection.row(),
+                            col=itemSelection.column(),
+                            rowItem=itemSelection,
+                            checked=state)
+            textHeader = self.horizontalHeaderItem(itemSelection.column()).text()
+            if textHeader:
+                self._dataFrameObject.setObjAttr(textHeader, obj, state)
+                # setattr(objList[0], textHeader, state)
+        else:
+            data = CallBack(theObject=self._dataFrameObject,
+                            object=None,
+                            index=0,
+                            targetName=None,
+                            trigger=CallBack.CLICK,
+                            row=itemSelection.row(),
+                            col=itemSelection.column(),
+                            rowItem=itemSelection,
+                            checked=state)
+        self._checkBoxCallback(data)
 
     def hideDefaultColumns(self):
         """If the table is empty then check visible headers against the last header hidden list
@@ -2333,7 +2334,8 @@ if __name__ == '__main__':
 
 
     def _checkBoxCallBack(data):
-        print(data['checked'])
+        s = data['checked']
+        print('called value =', s)
 
 
     popup = CcpnDialog(windowTitle='Test Table', setLayout=True)
@@ -2379,7 +2381,7 @@ if __name__ == '__main__':
     # table.item(0,0).setFormat(float(table.item(0,0).format))
     # print(table.item(0,0)._format)
     table.horizontalHeaderItem(1).setFlags(QtCore.Qt.ItemIsUserCheckable | QtCore.Qt.ItemIsEnabled)
-    table.horizontalHeaderItem(1).setCheckState(QtCore.Qt.Checked)
+    table.horizontalHeaderItem(1).setCheckState(QtCore.Qt.Unchecked)
 
     popup.show()
     popup.raise_()

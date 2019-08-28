@@ -763,6 +763,8 @@ class ChemicalShiftsMapping(CcpnModule):
                   delta = getNmrResidueDeltas(nmrResidue, selectedAtomNames, mode=mode, spectra=[zeroSpectrum, spectrum],
                                               atomWeights=weights)
                   deltas.append(delta)
+              else:
+                deltas.append(None)
             if len(spectra) != len(peaks):
               continue
             else:
@@ -1140,20 +1142,17 @@ class ChemicalShiftsMapping(CcpnModule):
     '''
     Callback from checkboxes inside a table
     '''
-    # objs = data[Notifier.OBJECT]
+    objs = data[Notifier.OBJECT]
 
-    # itemSelection = data['rowItem']
+    itemSelection = data['rowItem']
     # att = self.nmrResidueTable.horizontalHeaderItem(itemSelection.column()).text()
     # if att == 'Included':
-    # objs = data[Notifier.OBJECT]
-    # print(objs)
-    # if objs:
-    #   obj = objs[0]
-    # #     print(obj)
-    # #   obj._includeInDeltaShift = data['checked']
-    #   obj._finaliseAction('change')
-    # self._updateModule()
-    pass
+    obj = data[Notifier.OBJECT]
+    if obj:
+      obj._includeInDeltaShift = data['checked']
+      # obj._finaliseAction('change')
+      self._updateModule()
+    # pass
     # print(data)
 
   def _nmrTableSelectionCallback(self, data):

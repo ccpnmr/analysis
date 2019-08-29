@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: CCPN $"
 __dateModified__ = "$dateModified: 2017-07-07 16:32:47 +0100 (Fri, July 07, 2017) $"
-__version__ = "$Revision: 3.0.b6 $"
+__version__ = "$Revision: 3.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -587,5 +587,6 @@ class UpdateAgent(object):
 
 
 if __name__ == '__main__':
-    applicationVersion = __version__.split()[1]  # ejb - read from the header
+    from ccpn.framework.Version import applicationVersion
+    # applicationVersion = __version__.split()[1]  # ejb - read from the header
     installUpdates(applicationVersion)

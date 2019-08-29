@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: CCPN $"
 __dateModified__ = "$dateModified: 2017-07-07 16:32:40 +0100 (Fri, July 07, 2017) $"
-__version__ = "$Revision: 3.0.b5 $"
+__version__ = "$Revision: 3.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -130,7 +130,8 @@ class Ui(NotifierBase):
         raise ('ERROR: ..to be subclassed by ui types')
 
     def _checkUpdates(self):
-        applicationVersion = __version__.split()[1]  # ejb - read from the header
+        from ccpn.framework.Version import applicationVersion
+        # applicationVersion = __version__.split()[1]  # ejb - read from the header
 
         updateAgent = UpdateAgent(applicationVersion)
         numUpdates = updateAgent.checkNumberUpdates()
@@ -159,7 +160,8 @@ class NoUi(Ui):
             sys.stderr.write('Could not connect to the registration server, please check your internet connection.')
             sys.exit(0)
 
-        applicationVersion = __version__.split()[1]
+        from ccpn.framework.Version import applicationVersion
+        # applicationVersion = __version__.split()[1]
 
         # sys.stderr.write('\n### Please register, using another application, or in Gui Mode\n')
 
@@ -216,7 +218,8 @@ class NoUi(Ui):
     def _execUpdates(self):
         sys.stderr.write('==> NoUi update\n')
 
-        applicationVersion = __version__.split()[1]  # ejb - read from the header
+        from ccpn.framework.Version import applicationVersion
+        # applicationVersion = __version__.split()[1]  # ejb - read from the header
         installUpdates(applicationVersion)
 
         sys.stderr.write('Please restart the program to apply the updates\n')

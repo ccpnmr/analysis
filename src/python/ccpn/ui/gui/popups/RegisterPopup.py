@@ -77,7 +77,7 @@ This needs to be done once on every computer you use the programme on.
         self.entries = []
         self.validateEntries = []
         registrationDict = Register.loadDict()
-        for attr in Register.openUserAttributes:
+        for attr in Register.userAttributes:
             label = Label(frame, metaUtil.upperFirst(attr), grid=(row, 0))
             text = registrationDict.get(attr, '')
             entry = Entry(frame, text=text, grid=(row, 1), maxLength=60)
@@ -88,6 +88,13 @@ This needs to be done once on every computer you use the programme on.
                 entry.textChanged.connect(partial(self._checkEmailValid, entry, currentBaseColour))
                 self.validateEntries.append(entry)
             row += 1
+
+        from ccpn.util import Data
+        label = Label(frame, 'Build For:', grid=(row, 0))
+        text = getattr(Data, ''.join([c for c in map(chr, (98, 117, 105, 108, 100, 70, 111, 114))]), '')
+        entry = Entry(frame, text=text, grid=(row, 1), maxLength=60)
+        entry.setEnabled(False)
+        row += 1
 
         licenseFrame = Frame(frame, setLayout=True, grid=(row, 0), gridSpan=(1, 2))
         row += 1
@@ -148,7 +155,7 @@ This needs to be done once on every computer you use the programme on.
 
         if allValid:
             registrationDict = {}
-            for n, attr in enumerate(Register.openUserAttributes):
+            for n, attr in enumerate(Register.userAttributes):
                 entry = self.entries[n]
                 registrationDict[attr] = entry.get() or ''
 

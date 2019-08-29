@@ -109,9 +109,12 @@ class Ui(NotifierBase):
         # else:
 
         # check whether your registration details are on the server (and match)
-        Register.checkServer(self.application._registrationDict, self.application.applicationVersion)
+        check = Register.checkServer(self.application._registrationDict, self.application.applicationVersion)
+        if check is False:
+            self._registerDetails()
 
-        return True
+        check = Register.checkServer(self.application._registrationDict, self.application.applicationVersion)
+        return check if check is not None else True
 
     def echoCommands(self, commands: typing.List[str]):
         """Echo commands strings, one by one, to logger.
@@ -185,7 +188,7 @@ class NoUi(Ui):
 
             # ('name', 'organisation', 'email')
 
-            for n, attr in enumerate(Register.openUserAttributes):
+            for n, attr in enumerate(Register.userAttributes):
                 if 'email' in attr:
                     validEmail = False
                     while validEmail is False:

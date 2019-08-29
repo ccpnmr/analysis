@@ -110,9 +110,11 @@ class Ui(NotifierBase):
 
         # check whether your registration details are on the server (and match)
         check = Register.checkServer(self.application._registrationDict, self.application.applicationVersion)
+        if check is None:
+            return True
+
         if check is False:
             self._registerDetails()
-
         check = Register.checkServer(self.application._registrationDict, self.application.applicationVersion)
         return check if check is not None else True
 

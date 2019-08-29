@@ -79,7 +79,7 @@ class UpdatePopup(CcpnDialog, UpdateAgent):
                     'Install the updates from the server',
                     'Update Licence from the server',
                     'Close update dialog')
-        icons = ('icons/null.png', 'icons/dialog-apply.png', 'icons/dialog-apply.png', 'icons/window-close.png')
+        icons = ('icons/null.png', 'icons/dialog-apply.png', 'icons/Filetype-Docs-icon.png', 'icons/window-close.png')
         self.buttonList = ButtonList(self, texts=texts, tipTexts=tipTexts, callbacks=callbacks, icons=icons, grid=(row, 0), gridSpan=(1, 2))
         row += 1
 

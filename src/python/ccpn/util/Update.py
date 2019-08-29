@@ -246,7 +246,7 @@ def installUpdates(version):
     updateAgent = UpdateAgent(version)
     updateAgent.resetFromServer()
     updateAgent.installUpdates()
-    if updateAgent._checkMd5():
+    if updateAgent._check():
         updateAgent._resetMd5()
 
 

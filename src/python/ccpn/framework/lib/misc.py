@@ -134,10 +134,6 @@ def _check(key=None, doDecode=True):
     for val in (_l0, _l1, _l2, _l3):
         setattr(Data, val, ldict[val])
 
-    print('>>>>>>')
-    for k, v in ldict.items():
-        print('>>>', k, v)
-
     if ldict[_l1] == 'developer':
         sys.stderr.write(message4 % (ldict[_l1], now() + year))
         return True

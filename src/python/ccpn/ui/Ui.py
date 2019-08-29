@@ -112,10 +112,10 @@ class Ui(NotifierBase):
         check = Register.checkServer(self.application._registrationDict, self.application.applicationVersion)
         if check is None:
             return True
-
         if check is False:
             self._registerDetails()
-        check = Register.checkServer(self.application._registrationDict, self.application.applicationVersion)
+            check = Register.checkServer(self.application._registrationDict, self.application.applicationVersion)
+
         return check if check is not None else True
 
     def echoCommands(self, commands: typing.List[str]):

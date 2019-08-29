@@ -246,6 +246,8 @@ def installUpdates(version):
     updateAgent = UpdateAgent(version)
     updateAgent.resetFromServer()
     updateAgent.installUpdates()
+    if updateAgent._checkMd5():
+        updateAgent._resetMd5()
 
 
 class UpdateFile:
@@ -441,7 +443,7 @@ class UpdateAgent(object):
                 self._found = self._found.rstrip('\r\n')
 
         except:
-            print('Could not check details on server.')
+            self.showError('Update error', 'Could not check details on server.')
 
     def _resetMd5(self):
         from ccpn.framework.PathsAndUrls import userPreferencesDirectory, ccpnConfigPath
@@ -474,7 +476,8 @@ class UpdateAgent(object):
                 if filePath in self.updateFileDict:
                     updateFile = self.updateFileDict[filePath]
                     updateFile.shouldCommit = True
-                    print('File %s already in updates' % filePath)
+
+                    self.showInfo('Add Files', 'File %s already in updates' % filePath)
                     existsErrorCount += 1
                 else:
                     updateFile = UpdateFile(self.installLocation, self.serverDbRoot, filePath, shouldCommit=True,
@@ -483,7 +486,7 @@ class UpdateAgent(object):
                     self.updateFiles.append(updateFile)
                     self.updateFileDict[filePath] = updateFile
             else:
-                print('Ignoring "%s", not on installation path "%s"' % (filePath, installLocation))
+                self.showInfo('Ignoring Files', 'Ignoring "%s", not on installation path "%s"' % (filePath, installLocation))
                 installErrorCount += 1
 
         if installErrorCount > 0:
@@ -521,13 +524,13 @@ class UpdateAgent(object):
         if self.haveWriteAccess():
             for updateFile in updateFiles:
                 try:
-                    print('Installing %s' % (updateFile.fullFilePath))
+                    self.showInfo('Install Updates', 'Installing %s' % (updateFile.fullFilePath))
                     updateFile.installUpdate()
 
                     n += 1
                     updateFilesInstalled.append(updateFile)
                 except Exception as e:
-                    print('Could not install %s: %s' % (updateFile.fullFilePath, e))
+                    self.showError('Install Error', 'Could not install %s: %s' % (updateFile.fullFilePath, e))
 
             ss = n != 1 and 's' or ''
             if n != len(updateFiles):

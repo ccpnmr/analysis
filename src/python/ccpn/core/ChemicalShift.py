@@ -126,7 +126,10 @@ class ChemicalShift(AbstractWrapperObject):
     @property
     def nmrAtom(self) -> NmrAtom:
         """NmrAtom that the shift belongs to"""
-        return self._project._data2Obj.get(self._wrappedData.resonance)
+        try:
+            return self._project._data2Obj.get(self._wrappedData.resonance)
+        except Exception as es:
+            pass
 
     #=========================================================================================
     # Implementation functions

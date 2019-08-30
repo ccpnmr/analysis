@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: CCPN $"
 __dateModified__ = "$dateModified: 2017-07-07 16:32:49 +0100 (Fri, July 07, 2017) $"
-__version__ = "$Revision: 3.0.b5 $"
+__version__ = "$Revision: 3.0.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -188,7 +188,6 @@ class PreferencesPopup(CcpnDialog):
         self.languageBox.setCurrentIndex(self.languageBox.findText(self.preferences.general.language))
         self.languageBox.currentIndexChanged.connect(self._changeLanguage)
 
-        # disabled for 3.0.b5
         row += 1
         self.colourSchemeLabel = Label(parent, text="Colour Scheme ", grid=(row, 0))
         self.colourSchemeBox = PulldownList(parent, grid=(row, 1), hAlign='l')

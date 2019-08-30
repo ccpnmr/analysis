@@ -95,29 +95,29 @@ class SpectrumDisplay(AbstractWrapperObject):
 
     project = _parent
 
-    @property
-    def stripDirection(self) -> str:
-        """Strip axis direction ('X', 'Y', None) - None only for non-strip plots"""
-        getLogger().warn('StripDirection is deprecated. Used stripArrangement instead')
-        return self.stripArrangement
-
-        # return self._wrappedData.stripDirection
-
-    @stripDirection.setter
-    def stripDirection(self, value:str='Y'):
-        """Set the new strip direction ('X', 'Y', None) - None only for non-strip plots
-        """
-        self.stripArrangement(value)
-        getLogger().warn('StripDirection is deprecated. Used stripArrangement instead')
-        # raise RuntimeError('deprecated: use stripArrangement') no need of raising an error!
-
-        # if not isinstance(value, str):
-        #     raise TypeError('stripDirection must be a string')
-        # elif value not in ['X', 'Y']:
-        #     raise ValueError("stripDirection must be either 'X' or 'Y'")
-        #
-        # # override 'frozen' set
-        # self._wrappedData.__dict__['stripDirection'] = value
+    # @property
+    # def stripDirection(self) -> str:
+    #     """Strip axis direction ('X', 'Y', None) - None only for non-strip plots"""
+    #     getLogger().warn('StripDirection is deprecated. Used stripArrangement instead')
+    #     return self.stripArrangement
+    #
+    #     # return self._wrappedData.stripDirection
+    #
+    # @stripDirection.setter
+    # def stripDirection(self, value:str='Y'):
+    #     """Set the new strip direction ('X', 'Y', None) - None only for non-strip plots
+    #     """
+    #     self.stripArrangement(value)
+    #     getLogger().warn('StripDirection is deprecated. Used stripArrangement instead')
+    #     # raise RuntimeError('deprecated: use stripArrangement') no need of raising an error!
+    #
+    #     # if not isinstance(value, str):
+    #     #     raise TypeError('stripDirection must be a string')
+    #     # elif value not in ['X', 'Y']:
+    #     #     raise ValueError("stripDirection must be either 'X' or 'Y'")
+    #     #
+    #     # # override 'frozen' set
+    #     # self._wrappedData.__dict__['stripDirection'] = value
 
     @property
     def stripCount(self) -> str:

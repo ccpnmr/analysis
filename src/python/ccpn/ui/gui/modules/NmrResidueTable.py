@@ -58,6 +58,9 @@ ALL = '<all>'
 _getNmrIndex = Clibrary.getNmrResidueIndex
 
 
+LINKTOPULLDOWNCLASS = 'linkToPulldownClass'
+
+
 class NmrResidueTableModule(CcpnModule):
     """
     This class implements the module by wrapping a NmrResidueTable instance
@@ -70,6 +73,7 @@ class NmrResidueTableModule(CcpnModule):
     includePeakLists = False
     includeNmrChains = False
     includeSpectrumTable = False
+    activePulldownClass = NmrChain
 
     className = 'NmrResidueTableModule'
 
@@ -97,6 +101,7 @@ class NmrResidueTableModule(CcpnModule):
                                                  includePeakLists=self.includePeakLists,
                                                  includeNmrChains=self.includeNmrChains,
                                                  includeSpectrumTable=self.includeSpectrumTable,
+                                                 activePulldownClass=self.activePulldownClass,
                                                  grid=(0, 0))
 
         # initialise the table
@@ -116,11 +121,28 @@ class NmrResidueTableModule(CcpnModule):
         # install the event filter to handle maximising from floated dock
         self.installMaximiseEventHandler(self._maximise, self._closeModule)
 
+        if self.activePulldownClass:
+            self._setCurrentPulldown = Notifier(self.current,
+                                                [Notifier.CURRENT],
+                                                targetName=self.activePulldownClass._pluralLinkName,
+                                                callback=self._selectCurrentPulldownClass)
+
+        # put these in a smaller additional class
+        if self.activePulldownClass:
+            self.nmrResidueTable._activePulldownClass = self.activePulldownClass
+            self.nmrResidueTable._activeCheckbox = getattr(self.nmrResidueTableSettings, LINKTOPULLDOWNCLASS, None)
+
     def _maximise(self):
         """
         Maximise the attached table
         """
         self.nmrResidueTable._maximise()
+
+    def _selectCurrentPulldownClass(self, data):
+        """Respond to change in current activePulldownClass
+        """
+        if self.activePulldownClass and self.nmrResidueTable._activeCheckbox and self.nmrResidueTable._activeCheckbox.isChecked():
+            self.selectNmrChain(self.current.nmrChain)
 
     def selectNmrChain(self, nmrChain=None):
         """
@@ -381,6 +403,10 @@ class NmrResidueTable(GuiTable):
                                            [GuiNotifier.DROPEVENT], [DropBase.PIDS],
                                            self._processDroppedItems)
 
+        # put into subclass
+        self._activePulldownClass = None
+        self._activeCheckbox = None
+
     def _processDroppedItems(self, data):
         """
         CallBack for Drop events
@@ -425,7 +451,7 @@ class NmrResidueTable(GuiTable):
                 raise TypeError('select: Object is not of type NmrChain')
             else:
                 for widgetObj in self.ncWidget.textList:
-                    if nmrChain.pid == widgetObj:
+                    if nmrChain.pid == widgetObj and self._nmrChain != nmrChain:
                         self._nmrChain = nmrChain
                         self.ncWidget.select(self._nmrChain.pid)
 
@@ -607,6 +633,10 @@ class NmrResidueTable(GuiTable):
         logger.debug('>selectionPulldownCallback>', item, type(item), self._nmrChain)
         if self._nmrChain is not None:
             self.displayTableForNmrChain(self._nmrChain)
+
+            if self._activePulldownClass and self._activeCheckbox and \
+                    self._nmrChain != self.current.nmrChain and self._activeCheckbox.isChecked():
+                self.current.nmrChain = self._nmrChain
         else:
             self.clearTable()
 

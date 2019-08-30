@@ -531,7 +531,7 @@ class GuiSpectrumDisplay(CcpnModule):
             # self.spectrumToolBar._toolbarChange(self.strips[0].orderedSpectrumViews())
 
             if data[Notifier.OBJECT] == self:
-                specViews = data[Notifier.OBJECT].spectrumViews
+                specViews = data[Notifier.OBJECT].strips[0].spectrumViews
                 self.spectrumToolBar._toolbarChange(self.orderedSpectrumViews(specViews))
 
                 # flag that the listViews need to be updated

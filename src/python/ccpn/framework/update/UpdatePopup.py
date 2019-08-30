@@ -137,7 +137,7 @@ if __name__ == '__main__':
     qtApp = QtWidgets.QApplication(['Update'])
 
     QtCore.QCoreApplication.setApplicationName('Update')
-    QtCore.QCoreApplication.setApplicationVersion('3.0')
+    QtCore.QCoreApplication.setApplicationVersion('3.0.0')
 
     popup = UpdatePopup()
     popup.raise_()

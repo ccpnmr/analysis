@@ -146,11 +146,11 @@ for <code class="xref py py-func docutils literal"><span class="pre">mkPen</span
 <p>Module Documentation Here</p>
 <dl class="class">
 <dt id="ccpn.ui.gui.widgets.BarGraph.BarGraph">
-<em class="property">class </em><code class="descclassname">ccpn.ui.gui.widgets.BarGraph.</code><code class="descname">BarGraph</code><span class="sig-paren">(</span><em>application=None</em>, <em>viewBox=None</em>, <em>xValues=None</em>, <em>yValues=None</em>, <em>objects=None</em>, <em>brush=None</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/BarGraph.html#BarGraph"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.BarGraph.BarGraph" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">ccpn.ui.gui.widgets.BarGraph.</code><code class="descname">BarGraph</code><span class="sig-paren">(</span><em>application=None</em>, <em>viewBox=None</em>, <em>xValues=None</em>, <em>yValues=None</em>, <em>objects=None</em>, <em>brush=None</em>, <em>labelDistanceRatio=0.1</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/BarGraph.html#BarGraph"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.BarGraph.BarGraph" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">pyqtgraph.graphicsItems.BarGraphItem.BarGraphItem</span></code></p>
 <dl class="method">
 <dt id="ccpn.ui.gui.widgets.BarGraph.BarGraph.drawLabels">
-<code class="descname">drawLabels</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/BarGraph.html#BarGraph.drawLabels"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.BarGraph.BarGraph.drawLabels" title="Permalink to this definition">¶</a></dt>
+<code class="descname">drawLabels</code><span class="sig-paren">(</span><em>ratio=0.5</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/BarGraph.html#BarGraph.drawLabels"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.BarGraph.BarGraph.drawLabels" title="Permalink to this definition">¶</a></dt>
 <dd><p>The label Text is the str of the x values and is used to find and set an object to it.
 NB, changing the text to any other str may not set the objects correctly!</p>
 </dd></dl>
@@ -367,8 +367,8 @@ widget.getLayout().addWidget(row, col, [rowspan, [colspan])</p>
 <dd><p>Bases: <a class="reference internal" href="#ccpn.ui.gui.widgets.DropBase.DropBase" title="ccpn.ui.gui.widgets.DropBase.DropBase"><code class="xref py py-class docutils literal"><span class="pre">ccpn.ui.gui.widgets.DropBase.DropBase</span></code></a></p>
 <dl class="method">
 <dt id="ccpn.ui.gui.widgets.Base.Base.addSpacer">
-<code class="descname">addSpacer</code><span class="sig-paren">(</span><em>width</em>, <em>height</em>, <em>grid</em>, <em>gridSpan=(1</em>, <em>1)</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/Base.html#Base.addSpacer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.Base.Base.addSpacer" title="Permalink to this definition">¶</a></dt>
-<dd><p>Convience to insert spacer
+<code class="descname">addSpacer</code><span class="sig-paren">(</span><em>width</em>, <em>height</em>, <em>grid</em>, <em>gridSpan=(1</em>, <em>1)</em>, <em>expandX=False</em>, <em>expandY=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/Base.html#Base.addSpacer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.Base.Base.addSpacer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convenience to insert spacer
 width, height: in pixels
 grid=(row,col): tuple or list defining row, column
 gridSpan: tuple or list defining grid-span along row, column</p>
@@ -494,6 +494,13 @@ gridSpan: tuple or list defining grid-span along row, column</p>
 <dd></dd></dl>
 
 <dl class="method">
+<dt id="ccpn.ui.gui.widgets.ButtonList.ButtonList.getButton">
+<code class="descname">getButton</code><span class="sig-paren">(</span><em>buttonName: str</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/ButtonList.html#ButtonList.getButton"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.ButtonList.ButtonList.getButton" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the button with the given name or return None
+:param buttonName(str) - name of the button:</p>
+</dd></dl>
+
+<dl class="method">
 <dt id="ccpn.ui.gui.widgets.ButtonList.ButtonList.setButtonEnabled">
 <code class="descname">setButtonEnabled</code><span class="sig-paren">(</span><em>buttonName: str</em>, <em>enable: bool = True</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/ButtonList.html#ButtonList.setButtonEnabled"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.ButtonList.ButtonList.setButtonEnabled" title="Permalink to this definition">¶</a></dt>
 <dd><p>Enable/Disable a button by name
@@ -541,12 +548,6 @@ gridSpan: tuple or list defining grid-span along row, column</p>
 <em class="property">class </em><code class="descclassname">ccpn.ui.gui.widgets.CalibrateXSpectrum1DWidget.</code><code class="descname">CalibrateX1DWidgets</code><span class="sig-paren">(</span><em>parent=None</em>, <em>mainWindow=None</em>, <em>strip=None</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/CalibrateXSpectrum1DWidget.html#CalibrateX1DWidgets"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.CalibrateXSpectrum1DWidget.CalibrateX1DWidgets" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#ccpn.ui.gui.widgets.Frame.Frame" title="ccpn.ui.gui.widgets.Frame.Frame"><code class="xref py py-class docutils literal"><span class="pre">ccpn.ui.gui.widgets.Frame.Frame</span></code></a></p>
 <dl class="method">
-<dt id="ccpn.ui.gui.widgets.CalibrateXSpectrum1DWidget.CalibrateX1DWidgets.resetUndos">
-<code class="descname">resetUndos</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/CalibrateXSpectrum1DWidget.html#CalibrateX1DWidgets.resetUndos"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.CalibrateXSpectrum1DWidget.CalibrateX1DWidgets.resetUndos" title="Permalink to this definition">¶</a></dt>
-<dd><p>Set the number of undos to enable cancelling</p>
-</dd></dl>
-
-<dl class="method">
 <dt id="ccpn.ui.gui.widgets.CalibrateXSpectrum1DWidget.CalibrateX1DWidgets.setOriginalPos">
 <code class="descname">setOriginalPos</code><span class="sig-paren">(</span><em>value</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/CalibrateXSpectrum1DWidget.html#CalibrateX1DWidgets.setOriginalPos"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.CalibrateXSpectrum1DWidget.CalibrateX1DWidgets.setOriginalPos" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
@@ -571,12 +572,6 @@ gridSpan: tuple or list defining grid-span along row, column</p>
 <dt id="ccpn.ui.gui.widgets.CalibrateYSpectrum1DWidget.CalibrateY1DWidgets">
 <em class="property">class </em><code class="descclassname">ccpn.ui.gui.widgets.CalibrateYSpectrum1DWidget.</code><code class="descname">CalibrateY1DWidgets</code><span class="sig-paren">(</span><em>parent=None</em>, <em>mainWindow=None</em>, <em>strip=None</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/CalibrateYSpectrum1DWidget.html#CalibrateY1DWidgets"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.CalibrateYSpectrum1DWidget.CalibrateY1DWidgets" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#ccpn.ui.gui.widgets.Frame.Frame" title="ccpn.ui.gui.widgets.Frame.Frame"><code class="xref py py-class docutils literal"><span class="pre">ccpn.ui.gui.widgets.Frame.Frame</span></code></a></p>
-<dl class="method">
-<dt id="ccpn.ui.gui.widgets.CalibrateYSpectrum1DWidget.CalibrateY1DWidgets.resetUndos">
-<code class="descname">resetUndos</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/CalibrateYSpectrum1DWidget.html#CalibrateY1DWidgets.resetUndos"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.CalibrateYSpectrum1DWidget.CalibrateY1DWidgets.resetUndos" title="Permalink to this definition">¶</a></dt>
-<dd><p>Set the number of undos to enable cancelling</p>
-</dd></dl>
-
 <dl class="method">
 <dt id="ccpn.ui.gui.widgets.CalibrateYSpectrum1DWidget.CalibrateY1DWidgets.setOriginalPos">
 <code class="descname">setOriginalPos</code><span class="sig-paren">(</span><em>value</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/CalibrateYSpectrum1DWidget.html#CalibrateY1DWidgets.setOriginalPos"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.CalibrateYSpectrum1DWidget.CalibrateY1DWidgets.setOriginalPos" title="Permalink to this definition">¶</a></dt>
@@ -1099,6 +1094,12 @@ Implements the addNotifier and deleteNotifiers methods</p>
 </dd></dl>
 
 <dl class="method">
+<dt id="ccpn.ui.gui.widgets.CompoundBaseWidget.CompoundBaseWidget.eventFilter">
+<code class="descname">eventFilter</code><span class="sig-paren">(</span><em>target</em>, <em>event</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/CompoundBaseWidget.html#CompoundBaseWidget.eventFilter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.CompoundBaseWidget.CompoundBaseWidget.eventFilter" title="Permalink to this definition">¶</a></dt>
+<dd><p>call the user callback when the pulldown has been clicked</p>
+</dd></dl>
+
+<dl class="method">
 <dt id="ccpn.ui.gui.widgets.CompoundBaseWidget.CompoundBaseWidget.setFixedHeights">
 <code class="descname">setFixedHeights</code><span class="sig-paren">(</span><em>fixedHeights</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/CompoundBaseWidget.html#CompoundBaseWidget.setFixedHeights"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.CompoundBaseWidget.CompoundBaseWidget.setFixedHeights" title="Permalink to this definition">¶</a></dt>
 <dd><p>Set fixed heights of widgets</p>
@@ -1120,6 +1121,14 @@ Implements the addNotifier and deleteNotifiers methods</p>
 <dt id="ccpn.ui.gui.widgets.CompoundBaseWidget.CompoundBaseWidget.setMinimumWidths">
 <code class="descname">setMinimumWidths</code><span class="sig-paren">(</span><em>minimumWidths</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/CompoundBaseWidget.html#CompoundBaseWidget.setMinimumWidths"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.CompoundBaseWidget.CompoundBaseWidget.setMinimumWidths" title="Permalink to this definition">¶</a></dt>
 <dd><p>Set minimumwidths of widgets</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.widgets.CompoundBaseWidget.CompoundBaseWidget.setPreSelect">
+<code class="descname">setPreSelect</code><span class="sig-paren">(</span><em>callBack=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/CompoundBaseWidget.html#CompoundBaseWidget.setPreSelect"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.CompoundBaseWidget.CompoundBaseWidget.setPreSelect" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add a user callback to the pulldown that fires on a mouse click.
+facilitates populating the pulldown list just before it opens
+:param callBack = method to call on click:</p>
 </dd></dl>
 
 </dd></dl>
@@ -2073,7 +2082,7 @@ left:             Label       CheckBox</p>
 
 <dl class="attribute">
 <dt id="ccpn.ui.gui.widgets.CompoundWidgets.CheckBoxCompoundWidget.layoutDict">
-<code class="descname">layoutDict</code><em class="property"> = {'bottom': [(1, 0), (0, 0)], 'right': [(0, 1), (0, 0)], 'left': [(0, 0), (0, 1)], 'top': [(0, 0), (1, 0)]}</em><a class="headerlink" href="#ccpn.ui.gui.widgets.CompoundWidgets.CheckBoxCompoundWidget.layoutDict" title="Permalink to this definition">¶</a></dt>
+<code class="descname">layoutDict</code><em class="property"> = {'right': [(0, 1), (0, 0)], 'bottom': [(1, 0), (0, 0)], 'top': [(0, 0), (1, 0)], 'left': [(0, 0), (0, 1)]}</em><a class="headerlink" href="#ccpn.ui.gui.widgets.CompoundWidgets.CheckBoxCompoundWidget.layoutDict" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -2129,8 +2138,14 @@ left:             Label          DoubleSpinBox</p>
 
 <dl class="attribute">
 <dt id="ccpn.ui.gui.widgets.CompoundWidgets.DoubleSpinBoxCompoundWidget.layoutDict">
-<code class="descname">layoutDict</code><em class="property"> = {'bottom': [(1, 0), (0, 0)], 'right': [(0, 1), (0, 0)], 'left': [(0, 0), (0, 1)], 'top': [(0, 0), (1, 0)]}</em><a class="headerlink" href="#ccpn.ui.gui.widgets.CompoundWidgets.DoubleSpinBoxCompoundWidget.layoutDict" title="Permalink to this definition">¶</a></dt>
+<code class="descname">layoutDict</code><em class="property"> = {'right': [(0, 1), (0, 0)], 'bottom': [(1, 0), (0, 0)], 'top': [(0, 0), (1, 0)], 'left': [(0, 0), (0, 1)]}</em><a class="headerlink" href="#ccpn.ui.gui.widgets.CompoundWidgets.DoubleSpinBoxCompoundWidget.layoutDict" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.widgets.CompoundWidgets.DoubleSpinBoxCompoundWidget.setCallback">
+<code class="descname">setCallback</code><span class="sig-paren">(</span><em>callback</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/CompoundWidgets.html#DoubleSpinBoxCompoundWidget.setCallback"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.CompoundWidgets.DoubleSpinBoxCompoundWidget.setCallback" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the callback for the doubleSpinBox</p>
+</dd></dl>
 
 <dl class="method">
 <dt id="ccpn.ui.gui.widgets.CompoundWidgets.DoubleSpinBoxCompoundWidget.setValue">
@@ -2165,7 +2180,7 @@ left:             Label       Entry</p>
 
 <dl class="attribute">
 <dt id="ccpn.ui.gui.widgets.CompoundWidgets.EntryCompoundWidget.layoutDict">
-<code class="descname">layoutDict</code><em class="property"> = {'bottom': [(1, 0), (0, 0)], 'right': [(0, 1), (0, 0)], 'left': [(0, 0), (0, 1)], 'top': [(0, 0), (1, 0)]}</em><a class="headerlink" href="#ccpn.ui.gui.widgets.CompoundWidgets.EntryCompoundWidget.layoutDict" title="Permalink to this definition">¶</a></dt>
+<code class="descname">layoutDict</code><em class="property"> = {'right': [(0, 1), (0, 0)], 'bottom': [(1, 0), (0, 0)], 'top': [(0, 0), (1, 0)], 'left': [(0, 0), (0, 1)]}</em><a class="headerlink" href="#ccpn.ui.gui.widgets.CompoundWidgets.EntryCompoundWidget.layoutDict" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -2253,12 +2268,6 @@ Label</dd>
 </dd></dl>
 
 <dl class="method">
-<dt id="ccpn.ui.gui.widgets.CompoundWidgets.ListCompoundWidget.eventFilter">
-<code class="descname">eventFilter</code><span class="sig-paren">(</span><em>target</em>, <em>event</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/CompoundWidgets.html#ListCompoundWidget.eventFilter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.CompoundWidgets.ListCompoundWidget.eventFilter" title="Permalink to this definition">¶</a></dt>
-<dd><p>call the user callback when the pulldown has been clicked</p>
-</dd></dl>
-
-<dl class="method">
 <dt id="ccpn.ui.gui.widgets.CompoundWidgets.ListCompoundWidget.getTexts">
 <code class="descname">getTexts</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/CompoundWidgets.html#ListCompoundWidget.getTexts"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.CompoundWidgets.ListCompoundWidget.getTexts" title="Permalink to this definition">¶</a></dt>
 <dd><p>Convenience: Return list of texts in listWidget</p>
@@ -2266,7 +2275,7 @@ Label</dd>
 
 <dl class="attribute">
 <dt id="ccpn.ui.gui.widgets.CompoundWidgets.ListCompoundWidget.layoutDict">
-<code class="descname">layoutDict</code><em class="property"> = {'bottom': [(2, 0), (0, 0), (1, 0)], 'top': [(0, 0), (1, 0), (2, 0)], 'horizontal': [(0, 0), (0, 1), (0, 2)], 'right': [(0, 1), (0, 0), (1, 0)], 'centreRight': [(1, 1), (0, 0), (1, 0)], 'left': [(0, 0), (0, 1), (1, 1)], 'centreLeft': [(1, 0), (0, 1), (1, 1)]}</em><a class="headerlink" href="#ccpn.ui.gui.widgets.CompoundWidgets.ListCompoundWidget.layoutDict" title="Permalink to this definition">¶</a></dt>
+<code class="descname">layoutDict</code><em class="property"> = {'right': [(0, 1), (0, 0), (1, 0)], 'bottom': [(2, 0), (0, 0), (1, 0)], 'centreLeft': [(1, 0), (0, 1), (1, 1)], 'left': [(0, 0), (0, 1), (1, 1)], 'top': [(0, 0), (1, 0), (2, 0)], 'centreRight': [(1, 1), (0, 0), (1, 0)], 'horizontal': [(0, 0), (0, 1), (0, 2)]}</em><a class="headerlink" href="#ccpn.ui.gui.widgets.CompoundWidgets.ListCompoundWidget.layoutDict" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -2276,11 +2285,9 @@ Label</dd>
 </dd></dl>
 
 <dl class="method">
-<dt id="ccpn.ui.gui.widgets.CompoundWidgets.ListCompoundWidget.setPreSelect">
-<code class="descname">setPreSelect</code><span class="sig-paren">(</span><em>callBack=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/CompoundWidgets.html#ListCompoundWidget.setPreSelect"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.CompoundWidgets.ListCompoundWidget.setPreSelect" title="Permalink to this definition">¶</a></dt>
-<dd><p>Add a user callback to the pulldown that fires on a mouse click.
-facilitates populating the pulldown list just before it opens
-:param callBack = method to call on click:</p>
+<dt id="ccpn.ui.gui.widgets.CompoundWidgets.ListCompoundWidget.setLabelText">
+<code class="descname">setLabelText</code><span class="sig-paren">(</span><em>label</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/CompoundWidgets.html#ListCompoundWidget.setLabelText"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.CompoundWidgets.ListCompoundWidget.setLabelText" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the text for the list widget label</p>
 </dd></dl>
 
 <dl class="method">
@@ -2326,7 +2333,7 @@ left:             Label       PullDown</p>
 
 <dl class="attribute">
 <dt id="ccpn.ui.gui.widgets.CompoundWidgets.PulldownListCompoundWidget.layoutDict">
-<code class="descname">layoutDict</code><em class="property"> = {'bottom': [(1, 0), (0, 0)], 'right': [(0, 1), (0, 0)], 'left': [(0, 0), (0, 1)], 'top': [(0, 0), (1, 0)]}</em><a class="headerlink" href="#ccpn.ui.gui.widgets.CompoundWidgets.PulldownListCompoundWidget.layoutDict" title="Permalink to this definition">¶</a></dt>
+<code class="descname">layoutDict</code><em class="property"> = {'right': [(0, 1), (0, 0)], 'bottom': [(1, 0), (0, 0)], 'top': [(0, 0), (1, 0)], 'left': [(0, 0), (0, 1)]}</em><a class="headerlink" href="#ccpn.ui.gui.widgets.CompoundWidgets.PulldownListCompoundWidget.layoutDict" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -2916,17 +2923,24 @@ return a dict with</p>
 <p>Module Documentation here</p>
 <dl class="class">
 <dt id="ccpn.ui.gui.widgets.FileDialog.FileDialog">
-<em class="property">class </em><code class="descclassname">ccpn.ui.gui.widgets.FileDialog.</code><code class="descname">FileDialog</code><span class="sig-paren">(</span><em>parent=None</em>, <em>fileMode=0</em>, <em>text=None</em>, <em>acceptMode=0</em>, <em>preferences=None</em>, <em>selectFile=None</em>, <em>filter=None</em>, <em>directory=None</em>, <em>restrictDirToFilter=False</em>, <em>multiSelection=False</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/FileDialog.html#FileDialog"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.FileDialog.FileDialog" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">ccpn.ui.gui.widgets.FileDialog.</code><code class="descname">FileDialog</code><span class="sig-paren">(</span><em>parent=None</em>, <em>fileMode=0</em>, <em>text=None</em>, <em>acceptMode=0</em>, <em>preferences=None</em>, <em>selectFile=None</em>, <em>filter=None</em>, <em>directory=None</em>, <em>restrictDirToFilter=False</em>, <em>multiSelection=False</em>, <em>useNative=False</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/FileDialog.html#FileDialog"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.FileDialog.FileDialog" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">PyQt5.QtWidgets.QFileDialog</span></code></p>
+<dl class="method">
+<dt id="ccpn.ui.gui.widgets.FileDialog.FileDialog.reject">
+<code class="descname">reject</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/FileDialog.html#FileDialog.reject"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.FileDialog.FileDialog.reject" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
 <dl class="method">
 <dt id="ccpn.ui.gui.widgets.FileDialog.FileDialog.selectedFile">
 <code class="descname">selectedFile</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/FileDialog.html#FileDialog.selectedFile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.FileDialog.FileDialog.selectedFile" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Get the first selected file</p>
+</dd></dl>
 
 <dl class="method">
 <dt id="ccpn.ui.gui.widgets.FileDialog.FileDialog.selectedFiles">
 <code class="descname">selectedFiles</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/FileDialog.html#FileDialog.selectedFiles"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.FileDialog.FileDialog.selectedFiles" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Get the list of selected files</p>
+</dd></dl>
 
 </dd></dl>
 
@@ -3057,7 +3071,7 @@ QSize sizeHint (self)</p>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">PyQt5.QtWidgets.QFrame</span></code>, <a class="reference internal" href="#ccpn.ui.gui.widgets.Base.Base" title="ccpn.ui.gui.widgets.Base.Base"><code class="xref py py-class docutils literal"><span class="pre">ccpn.ui.gui.widgets.Base.Base</span></code></a></p>
 <dl class="attribute">
 <dt id="ccpn.ui.gui.widgets.Frame.Frame.FRAME_DICT">
-<code class="descname">FRAME_DICT</code><em class="property"> = {'raised': 32, 'noFrame': 0, 'vLine': 5, 'box': 1, 'plain': 16, 'sunken': 48, 'panel': 2, 'hLine': 4, 'styledPanel': 6}</em><a class="headerlink" href="#ccpn.ui.gui.widgets.Frame.Frame.FRAME_DICT" title="Permalink to this definition">¶</a></dt>
+<code class="descname">FRAME_DICT</code><em class="property"> = {'styledPanel': 6, 'plain': 16, 'box': 1, 'hLine': 4, 'raised': 32, 'sunken': 48, 'panel': 2, 'noFrame': 0, 'vLine': 5}</em><a class="headerlink" href="#ccpn.ui.gui.widgets.Frame.Frame.FRAME_DICT" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -3215,6 +3229,12 @@ QSize sizeHint (self)</p>
 <dd><p>set the GL flags to build spectrum contour lists</p>
 </dd></dl>
 
+<dl class="method">
+<dt id="ccpn.ui.gui.widgets.GLWidgets.Gui1dWidget.getPeakPositionFromMouse">
+<code class="descname">getPeakPositionFromMouse</code><span class="sig-paren">(</span><em>peak</em>, <em>lastStartCoordinate</em>, <em>cursorPosition=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/GLWidgets.html#Gui1dWidget.getPeakPositionFromMouse"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.GLWidgets.Gui1dWidget.getPeakPositionFromMouse" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the centre position of the clicked 1d peak</p>
+</dd></dl>
+
 <dl class="attribute">
 <dt id="ccpn.ui.gui.widgets.GLWidgets.Gui1dWidget.is1D">
 <code class="descname">is1D</code><em class="property"> = True</em><a class="headerlink" href="#ccpn.ui.gui.widgets.GLWidgets.Gui1dWidget.is1D" title="Permalink to this definition">¶</a></dt>
@@ -3263,6 +3283,12 @@ QSize sizeHint (self)</p>
 <code class="descname">SPECTRUMPOSCOLOUR</code><em class="property"> = 'positiveContourColour'</em><a class="headerlink" href="#ccpn.ui.gui.widgets.GLWidgets.GuiNdWidget.SPECTRUMPOSCOLOUR" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
+<dl class="method">
+<dt id="ccpn.ui.gui.widgets.GLWidgets.GuiNdWidget.getPeakPositionFromMouse">
+<code class="descname">getPeakPositionFromMouse</code><span class="sig-paren">(</span><em>peak</em>, <em>lastStartCoordinate</em>, <em>cursorPosition=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/GLWidgets.html#GuiNdWidget.getPeakPositionFromMouse"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.GLWidgets.GuiNdWidget.getPeakPositionFromMouse" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the centre position of the clicked peak</p>
+</dd></dl>
+
 <dl class="attribute">
 <dt id="ccpn.ui.gui.widgets.GLWidgets.GuiNdWidget.is1D">
 <code class="descname">is1D</code><em class="property"> = False</em><a class="headerlink" href="#ccpn.ui.gui.widgets.GLWidgets.GuiNdWidget.is1D" title="Permalink to this definition">¶</a></dt>
@@ -3297,7 +3323,7 @@ QSize sizeHint (self)</p>
 <p>Module Documentation here</p>
 <dl class="class">
 <dt id="ccpn.ui.gui.widgets.GuiTable.GuiTable">
-<em class="property">class </em><code class="descclassname">ccpn.ui.gui.widgets.GuiTable.</code><code class="descname">GuiTable</code><span class="sig-paren">(</span><em>parent=None</em>, <em>mainWindow=None</em>, <em>dataFrameObject=None</em>, <em>actionCallback=None</em>, <em>selectionCallback=None</em>, <em>checkBoxCallback=None</em>, <em>multiSelect=False</em>, <em>selectRows=True</em>, <em>numberRows=False</em>, <em>autoResize=False</em>, <em>enableExport=True</em>, <em>enableDelete=True</em>, <em>enableSearch=True</em>, <em>hideIndex=True</em>, <em>stretchLastSection=True</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/GuiTable.html#GuiTable"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.GuiTable.GuiTable" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">ccpn.ui.gui.widgets.GuiTable.</code><code class="descname">GuiTable</code><span class="sig-paren">(</span><em>parent=None</em>, <em>mainWindow=None</em>, <em>dataFrameObject=None</em>, <em>actionCallback=None</em>, <em>selectionCallback=None</em>, <em>checkBoxCallback=None</em>, <em>multiSelect=False</em>, <em>selectRows=True</em>, <em>numberRows=False</em>, <em>autoResize=False</em>, <em>enableExport=True</em>, <em>enableDelete=True</em>, <em>enableSearch=True</em>, <em>hideIndex=True</em>, <em>stretchLastSection=True</em>, <em>_applyPostSort=True</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/GuiTable.html#GuiTable"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.GuiTable.GuiTable" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">pyqtgraph.widgets.TableWidget.TableWidget</span></code>, <a class="reference internal" href="#ccpn.ui.gui.widgets.Base.Base" title="ccpn.ui.gui.widgets.Base.Base"><code class="xref py py-class docutils literal"><span class="pre">ccpn.ui.gui.widgets.Base.Base</span></code></a></p>
 <dl class="attribute">
 <dt id="ccpn.ui.gui.widgets.GuiTable.GuiTable.ICON_FILE">
@@ -3328,9 +3354,25 @@ and remove objects from the current list</p>
 <dd></dd></dl>
 
 <dl class="method">
-<dt id="ccpn.ui.gui.widgets.GuiTable.GuiTable.exportTableDialog">
-<code class="descname">exportTableDialog</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/GuiTable.html#GuiTable.exportTableDialog"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.GuiTable.GuiTable.exportTableDialog" title="Permalink to this definition">¶</a></dt>
+<dt id="ccpn.ui.gui.widgets.GuiTable.GuiTable.enterEvent">
+<code class="descname">enterEvent</code><span class="sig-paren">(</span><em>event</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/GuiTable.html#GuiTable.enterEvent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.GuiTable.GuiTable.enterEvent" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.widgets.GuiTable.GuiTable.exportTableDialog">
+<code class="descname">exportTableDialog</code><span class="sig-paren">(</span><em>exportAll=True</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/GuiTable.html#GuiTable.exportTableDialog"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.GuiTable.GuiTable.exportTableDialog" title="Permalink to this definition">¶</a></dt>
+<dd><p>export the contents of the table to a file
+The actual data values are exported, not the visible items which may be rounded due to the table settings</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>exportAll</strong> &#8211; True/False - True implies export whole table - but in visible order
+False, export only the visible table</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
 
 <dl class="method">
 <dt id="ccpn.ui.gui.widgets.GuiTable.GuiTable.getDataFrameFromList">
@@ -3377,8 +3419,14 @@ The columns are based on the &#8216;func&#8217; functions in the columnDefinitio
 </dd></dl>
 
 <dl class="method">
+<dt id="ccpn.ui.gui.widgets.GuiTable.GuiTable.getIndexList">
+<code class="descname">getIndexList</code><span class="sig-paren">(</span><em>classItems</em>, <em>attribute</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/GuiTable.html#GuiTable.getIndexList"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.GuiTable.GuiTable.getIndexList" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the list of objects on which to before the indexing</p>
+</dd></dl>
+
+<dl class="method">
 <dt id="ccpn.ui.gui.widgets.GuiTable.GuiTable.getSelectedObjects">
-<code class="descname">getSelectedObjects</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/GuiTable.html#GuiTable.getSelectedObjects"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.GuiTable.GuiTable.getSelectedObjects" title="Permalink to this definition">¶</a></dt>
+<code class="descname">getSelectedObjects</code><span class="sig-paren">(</span><em>fromSelection=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/GuiTable.html#GuiTable.getSelectedObjects"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.GuiTable.GuiTable.getSelectedObjects" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -3387,10 +3435,27 @@ The columns are based on the &#8216;func&#8217; functions in the columnDefinitio
 <dd></dd></dl>
 
 <dl class="method">
-<dt id="ccpn.ui.gui.widgets.GuiTable.GuiTable.mouseDoubleClickEvent">
-<code class="descname">mouseDoubleClickEvent</code><span class="sig-paren">(</span><em>event</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/GuiTable.html#GuiTable.mouseDoubleClickEvent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.GuiTable.GuiTable.mouseDoubleClickEvent" title="Permalink to this definition">¶</a></dt>
-<dd><p>set the doubleClick flag</p>
+<dt id="ccpn.ui.gui.widgets.GuiTable.GuiTable.hideDefaultColumns">
+<code class="descname">hideDefaultColumns</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/GuiTable.html#GuiTable.hideDefaultColumns"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.GuiTable.GuiTable.hideDefaultColumns" title="Permalink to this definition">¶</a></dt>
+<dd><p>If the table is empty then check visible headers against the last header hidden list</p>
 </dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.widgets.GuiTable.GuiTable.highlightObjects">
+<code class="descname">highlightObjects</code><span class="sig-paren">(</span><em>objectList</em>, <em>scrollToSelection=True</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/GuiTable.html#GuiTable.highlightObjects"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.GuiTable.GuiTable.highlightObjects" title="Permalink to this definition">¶</a></dt>
+<dd><p>Highlight a list of objects in the table</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.widgets.GuiTable.GuiTable.keyPressEvent">
+<code class="descname">keyPressEvent</code><span class="sig-paren">(</span><em>event</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/GuiTable.html#GuiTable.keyPressEvent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.GuiTable.GuiTable.keyPressEvent" title="Permalink to this definition">¶</a></dt>
+<dd><p>Handle keyPress events on the table</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.widgets.GuiTable.GuiTable.mouseMoveEvent">
+<code class="descname">mouseMoveEvent</code><span class="sig-paren">(</span><em>event</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/GuiTable.html#GuiTable.mouseMoveEvent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.GuiTable.GuiTable.mouseMoveEvent" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 <dl class="method">
 <dt id="ccpn.ui.gui.widgets.GuiTable.GuiTable.mousePressEvent">
@@ -3405,6 +3470,33 @@ Clicking is handled on the mouse release</p>
 <dd></dd></dl>
 
 <dl class="method">
+<dt id="ccpn.ui.gui.widgets.GuiTable.GuiTable.populateTable">
+<code class="descname">populateTable</code><span class="sig-paren">(</span><em>rowObjects=None</em>, <em>columnDefs=None</em>, <em>selectedObjects=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/GuiTable.html#GuiTable.populateTable"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.GuiTable.GuiTable.populateTable" title="Permalink to this definition">¶</a></dt>
+<dd><p>Populate the table with a set of objects to highlight, or keep current selection highlighted
+with the first item visible.</p>
+<p>Use selectedObjects = [] to clear the selected items</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>rowObjects</strong> &#8211; list of objects to set each row</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.widgets.GuiTable.GuiTable.pressingModifiers">
+<code class="descname">pressingModifiers</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/GuiTable.html#GuiTable.pressingModifiers"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.GuiTable.GuiTable.pressingModifiers" title="Permalink to this definition">¶</a></dt>
+<dd><p>Is the user clicking while holding a modifier</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.widgets.GuiTable.GuiTable.rawDataToDF">
+<code class="descname">rawDataToDF</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/GuiTable.html#GuiTable.rawDataToDF"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.GuiTable.GuiTable.rawDataToDF" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
 <dt id="ccpn.ui.gui.widgets.GuiTable.GuiTable.refreshHeaders">
 <code class="descname">refreshHeaders</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/GuiTable.html#GuiTable.refreshHeaders"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.GuiTable.GuiTable.refreshHeaders" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
@@ -3412,11 +3504,6 @@ Clicking is handled on the mouse release</p>
 <dl class="method">
 <dt id="ccpn.ui.gui.widgets.GuiTable.GuiTable.refreshTable">
 <code class="descname">refreshTable</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/GuiTable.html#GuiTable.refreshTable"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.GuiTable.GuiTable.refreshTable" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="ccpn.ui.gui.widgets.GuiTable.GuiTable.reindexTableObjects">
-<code class="descname">reindexTableObjects</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/GuiTable.html#GuiTable.reindexTableObjects"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.GuiTable.GuiTable.reindexTableObjects" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -3470,7 +3557,8 @@ Allowed formats are:</p>
 <dl class="method">
 <dt id="ccpn.ui.gui.widgets.GuiTable.GuiTable.setTableFromDataFrameObject">
 <code class="descname">setTableFromDataFrameObject</code><span class="sig-paren">(</span><em>dataFrameObject</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/GuiTable.html#GuiTable.setTableFromDataFrameObject"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.GuiTable.GuiTable.setTableFromDataFrameObject" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Populate the table from a Pandas dataFrame</p>
+</dd></dl>
 
 <dl class="method">
 <dt id="ccpn.ui.gui.widgets.GuiTable.GuiTable.setTableNotifiers">
@@ -3525,6 +3613,17 @@ change calls on any other attribute</p>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">PyQt5.QtWidgets.QStyledItemDelegate</span></code></p>
 <p>handle the setting of data when editing the table</p>
 <dl class="method">
+<dt id="ccpn.ui.gui.widgets.GuiTable.GuiTableDelegate.createEditor">
+<code class="descname">createEditor</code><span class="sig-paren">(</span><em>parent: PyQt5.QtWidgets.QWidget</em>, <em>option: PyQt5.QtWidgets.QStyleOptionViewItem</em>, <em>index: PyQt5.QtCore.QModelIndex</em><span class="sig-paren">)</span> &rarr; PyQt5.QtWidgets.QWidget<a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/GuiTable.html#GuiTableDelegate.createEditor"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.GuiTable.GuiTableDelegate.createEditor" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.widgets.GuiTable.GuiTableDelegate.setEditorData">
+<code class="descname">setEditorData</code><span class="sig-paren">(</span><em>widget</em>, <em>index</em><span class="sig-paren">)</span> &rarr; None<a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/GuiTable.html#GuiTableDelegate.setEditorData"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.GuiTable.GuiTableDelegate.setEditorData" title="Permalink to this definition">¶</a></dt>
+<dd><p>populate the editor widget when the cell is edited</p>
+</dd></dl>
+
+<dl class="method">
 <dt id="ccpn.ui.gui.widgets.GuiTable.GuiTableDelegate.setModelData">
 <code class="descname">setModelData</code><span class="sig-paren">(</span><em>widget</em>, <em>mode</em>, <em>index</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/GuiTable.html#GuiTableDelegate.setModelData"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.GuiTable.GuiTableDelegate.setModelData" title="Permalink to this definition">¶</a></dt>
 <dd><p>Set the object to the new value
@@ -3543,7 +3642,7 @@ change calls on any other attribute</p>
 
 <dl class="function">
 <dt id="ccpn.ui.gui.widgets.GuiTable.dataFrameToCsv">
-<code class="descclassname">ccpn.ui.gui.widgets.GuiTable.</code><code class="descname">dataFrameToCsv</code><span class="sig-paren">(</span><em>dataFrameObject</em>, <em>path</em>, <em>*args</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/GuiTable.html#dataFrameToCsv"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.GuiTable.dataFrameToCsv" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">ccpn.ui.gui.widgets.GuiTable.</code><code class="descname">dataFrameToCsv</code><span class="sig-paren">(</span><em>dataFrame</em>, <em>path</em>, <em>*args</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/GuiTable.html#dataFrameToCsv"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.GuiTable.dataFrameToCsv" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="function">
@@ -3553,12 +3652,12 @@ change calls on any other attribute</p>
 
 <dl class="function">
 <dt id="ccpn.ui.gui.widgets.GuiTable.dataFrameToJson">
-<code class="descclassname">ccpn.ui.gui.widgets.GuiTable.</code><code class="descname">dataFrameToJson</code><span class="sig-paren">(</span><em>self</em>, <em>dataFrameObject</em>, <em>path</em>, <em>*args</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/GuiTable.html#dataFrameToJson"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.GuiTable.dataFrameToJson" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">ccpn.ui.gui.widgets.GuiTable.</code><code class="descname">dataFrameToJson</code><span class="sig-paren">(</span><em>dataFrame</em>, <em>path</em>, <em>*args</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/GuiTable.html#dataFrameToJson"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.GuiTable.dataFrameToJson" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="function">
 <dt id="ccpn.ui.gui.widgets.GuiTable.dataFrameToTsv">
-<code class="descclassname">ccpn.ui.gui.widgets.GuiTable.</code><code class="descname">dataFrameToTsv</code><span class="sig-paren">(</span><em>dataFrameObject</em>, <em>path</em>, <em>*args</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/GuiTable.html#dataFrameToTsv"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.GuiTable.dataFrameToTsv" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">ccpn.ui.gui.widgets.GuiTable.</code><code class="descname">dataFrameToTsv</code><span class="sig-paren">(</span><em>dataFrame</em>, <em>path</em>, <em>*args</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/GuiTable.html#dataFrameToTsv"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.GuiTable.dataFrameToTsv" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="function">
@@ -3677,6 +3776,66 @@ peak=peakOrPid)</dd>
 <code class="descname">set</code><span class="sig-paren">(</span><em>text=''</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/Label.html#Label.set"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.Label.Label.set" title="Permalink to this definition">¶</a></dt>
 <dd><p>set label text, applying translator</p>
 </dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="ccpn.ui.gui.widgets.Label.VerticalLabel">
+<em class="property">class </em><code class="descclassname">ccpn.ui.gui.widgets.Label.</code><code class="descname">VerticalLabel</code><span class="sig-paren">(</span><em>parent=None, text='', textColour=None, textSize=12, bold=False, margins=[2, 1, 2, 1], orientation='horizontal', **kwds</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/Label.html#VerticalLabel"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.Label.VerticalLabel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">pyqtgraph.widgets.VerticalLabel.VerticalLabel</span></code>, <a class="reference internal" href="#ccpn.ui.gui.widgets.Base.Base" title="ccpn.ui.gui.widgets.Base.Base"><code class="xref py py-class docutils literal"><span class="pre">ccpn.ui.gui.widgets.Base.Base</span></code></a></p>
+<dl class="method">
+<dt id="ccpn.ui.gui.widgets.Label.VerticalLabel.get">
+<code class="descname">get</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/Label.html#VerticalLabel.get"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.Label.VerticalLabel.get" title="Permalink to this definition">¶</a></dt>
+<dd><p>get the label text</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.widgets.Label.VerticalLabel.set">
+<code class="descname">set</code><span class="sig-paren">(</span><em>text=''</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/Label.html#VerticalLabel.set"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.Label.VerticalLabel.set" title="Permalink to this definition">¶</a></dt>
+<dd><p>set label text, applying translator</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-ccpn.ui.gui.widgets.LegendItem">
+<span id="ccpn-ui-gui-widgets-legenditem-module"></span><h2>ccpn.ui.gui.widgets.LegendItem module<a class="headerlink" href="#module-ccpn.ui.gui.widgets.LegendItem" title="Permalink to this headline">¶</a></h2>
+<p>Module Documentation Here</p>
+<dl class="class">
+<dt id="ccpn.ui.gui.widgets.LegendItem.CustomItemSample">
+<em class="property">class </em><code class="descclassname">ccpn.ui.gui.widgets.LegendItem.</code><code class="descname">CustomItemSample</code><span class="sig-paren">(</span><em>item</em>, <em>showLine</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/LegendItem.html#CustomItemSample"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.LegendItem.CustomItemSample" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">pyqtgraph.graphicsItems.LegendItem.ItemSample</span></code></p>
+<dl class="method">
+<dt id="ccpn.ui.gui.widgets.LegendItem.CustomItemSample.paint">
+<code class="descname">paint</code><span class="sig-paren">(</span><em>p</em>, <em>*args</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/LegendItem.html#CustomItemSample.paint"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.LegendItem.CustomItemSample.paint" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="ccpn.ui.gui.widgets.LegendItem.LegendItem">
+<em class="property">class </em><code class="descclassname">ccpn.ui.gui.widgets.LegendItem.</code><code class="descname">LegendItem</code><span class="sig-paren">(</span><em>plot</em>, <em>size=None</em>, <em>offset=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/LegendItem.html#LegendItem"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.LegendItem.LegendItem" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">pyqtgraph.graphicsItems.LegendItem.LegendItem</span></code></p>
+<dl class="method">
+<dt id="ccpn.ui.gui.widgets.LegendItem.LegendItem.addItem">
+<code class="descname">addItem</code><span class="sig-paren">(</span><em>item</em>, <em>name</em>, <em>showLine=True</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/LegendItem.html#LegendItem.addItem"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.LegendItem.LegendItem.addItem" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.widgets.LegendItem.LegendItem.clearLegend">
+<code class="descname">clearLegend</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/LegendItem.html#LegendItem.clearLegend"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.LegendItem.LegendItem.clearLegend" title="Permalink to this definition">¶</a></dt>
+<dd><p>Removes all items from the legend</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.widgets.LegendItem.LegendItem.paint">
+<code class="descname">paint</code><span class="sig-paren">(</span><em>p</em>, <em>*args</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/LegendItem.html#LegendItem.paint"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.LegendItem.LegendItem.paint" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.widgets.LegendItem.LegendItem.updateSize">
+<code class="descname">updateSize</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/LegendItem.html#LegendItem.updateSize"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.LegendItem.LegendItem.updateSize" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 </dd></dl>
 
@@ -3981,10 +4140,10 @@ to the other and vise-versa</p>
 <dl class="class">
 <dt id="ccpn.ui.gui.widgets.MainWindow.DockWidget">
 <em class="property">class </em><code class="descclassname">ccpn.ui.gui.widgets.MainWindow.</code><code class="descname">DockWidget</code><span class="sig-paren">(</span><em>parent=None</em>, <em>title=''</em>, <em>widget=None</em>, <em>floating=False</em>, <em>allowedAreas=None</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/MainWindow.html#DockWidget"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.MainWindow.DockWidget" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">PyQt5.QtWidgets.QDockWidget</span></code></p>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">PyQt5.QtWidgets.QDockWidget</span></code>, <a class="reference internal" href="#ccpn.ui.gui.widgets.Base.Base" title="ccpn.ui.gui.widgets.Base.Base"><code class="xref py py-class docutils literal"><span class="pre">ccpn.ui.gui.widgets.Base.Base</span></code></a></p>
 <dl class="attribute">
 <dt id="ccpn.ui.gui.widgets.MainWindow.DockWidget.AREA_DICT">
-<code class="descname">AREA_DICT</code><em class="property"> = {'bottom': 1, 'right': 2, 'left': 1, 'top': 4}</em><a class="headerlink" href="#ccpn.ui.gui.widgets.MainWindow.DockWidget.AREA_DICT" title="Permalink to this definition">¶</a></dt>
+<code class="descname">AREA_DICT</code><em class="property"> = {'right': 2, 'bottom': 1, 'top': 4, 'left': 1}</em><a class="headerlink" href="#ccpn.ui.gui.widgets.MainWindow.DockWidget.AREA_DICT" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -4149,6 +4308,10 @@ Using the &#8216;multiline&#8217; to emulate the windowTitle, as on Mac the wind
 <code class="descclassname">ccpn.ui.gui.widgets.MessageDialog.</code><code class="descname">showYesNoWarning</code><span class="sig-paren">(</span><em>title</em>, <em>message</em>, <em>parent=None</em>, <em>iconPath=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/MessageDialog.html#showYesNoWarning"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.MessageDialog.showYesNoWarning" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
+</div>
+<div class="section" id="module-ccpn.ui.gui.widgets.NmrAtomsSelections">
+<span id="ccpn-ui-gui-widgets-nmratomsselections-module"></span><h2>ccpn.ui.gui.widgets.NmrAtomsSelections module<a class="headerlink" href="#module-ccpn.ui.gui.widgets.NmrAtomsSelections" title="Permalink to this headline">¶</a></h2>
+<p>A widget to get     concentration Values and  concentrationUnits</p>
 </div>
 <div class="section" id="module-ccpn.ui.gui.widgets.PhasingFrame">
 <span id="ccpn-ui-gui-widgets-phasingframe-module"></span><h2>ccpn.ui.gui.widgets.PhasingFrame module<a class="headerlink" href="#module-ccpn.ui.gui.widgets.PhasingFrame" title="Permalink to this headline">¶</a></h2>
@@ -4717,7 +4880,7 @@ The NmrResidueLabel allows drag and drop of the ids displayed in them</p>
 <p>PulldownList widget</p>
 <dl class="class">
 <dt id="ccpn.ui.gui.widgets.PulldownList.PulldownList">
-<em class="property">class </em><code class="descclassname">ccpn.ui.gui.widgets.PulldownList.</code><code class="descname">PulldownList</code><span class="sig-paren">(</span><em>parent</em>, <em>texts=None</em>, <em>objects=None</em>, <em>icons=None</em>, <em>callback=None</em>, <em>index=0</em>, <em>backgroundText=None</em>, <em>headerText=None</em>, <em>headerEnabled=False</em>, <em>headerIcon=None</em>, <em>editable=False</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/PulldownList.html#PulldownList"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.PulldownList.PulldownList" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">ccpn.ui.gui.widgets.PulldownList.</code><code class="descname">PulldownList</code><span class="sig-paren">(</span><em>parent</em>, <em>texts=None</em>, <em>objects=None</em>, <em>icons=None</em>, <em>callback=None</em>, <em>index=0</em>, <em>backgroundText=None</em>, <em>headerText=None</em>, <em>headerEnabled=False</em>, <em>headerIcon=None</em>, <em>editable=False</em>, <em>maxVisibleItems=16</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/PulldownList.html#PulldownList"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.PulldownList.PulldownList" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">PyQt5.QtWidgets.QComboBox</span></code>, <a class="reference internal" href="#ccpn.ui.gui.widgets.Base.Base" title="ccpn.ui.gui.widgets.Base.Base"><code class="xref py py-class docutils literal"><span class="pre">ccpn.ui.gui.widgets.Base.Base</span></code></a></p>
 <dl class="method">
 <dt id="ccpn.ui.gui.widgets.PulldownList.PulldownList.addItem">
@@ -4817,7 +4980,7 @@ The NmrResidueLabel allows drag and drop of the ids displayed in them</p>
 
 <dl class="method">
 <dt id="ccpn.ui.gui.widgets.PulldownList.PulldownList.setMaxVisibleItems">
-<code class="descname">setMaxVisibleItems</code><span class="sig-paren">(</span><em>maxItems: int</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/PulldownList.html#PulldownList.setMaxVisibleItems"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.PulldownList.PulldownList.setMaxVisibleItems" title="Permalink to this definition">¶</a></dt>
+<code class="descname">setMaxVisibleItems</code><span class="sig-paren">(</span><em>maxItems: int = 16</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/PulldownList.html#PulldownList.setMaxVisibleItems"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.PulldownList.PulldownList.setMaxVisibleItems" title="Permalink to this definition">¶</a></dt>
 <dd><p>Set the maximum height of the combobox when opened</p>
 </dd></dl>
 
@@ -4847,7 +5010,7 @@ set callback&#8217;s on creation, deletion and rename</p>
 <dt id="ccpn.ui.gui.widgets.PulldownListsForObjects.AtomPulldown">
 <em class="property">class </em><code class="descclassname">ccpn.ui.gui.widgets.PulldownListsForObjects.</code><code class="descname">AtomPulldown</code><span class="sig-paren">(</span><em>parent</em>, <em>project</em>, <em>showBorder=False</em>, <em>orientation='left'</em>, <em>minimumWidths=(100</em>, <em>150)</em>, <em>maximumWidths=None</em>, <em>fixedWidths=None</em>, <em>labelText=None</em>, <em>showSelectName=False</em>, <em>callback=None</em>, <em>default=None</em>, <em>sizeAdjustPolicy=None</em>, <em>editable=False</em>, <em>filterFunction=None</em>, <em>useIds=False</em>, <em>setCurrent=False</em>, <em>followCurrent=False</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/PulldownListsForObjects.html#AtomPulldown"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.PulldownListsForObjects.AtomPulldown" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">ccpn.ui.gui.widgets.PulldownListsForObjects._PulldownABC</span></code></p>
-<p>&#8220;A PulldownListCompoundWidget class for Atom&#8217;s</p>
+<p>&#8220;A PulldownListCompoundWidget class for Atoms</p>
 <dl class="class">
 <dt id="ccpn.ui.gui.widgets.PulldownListsForObjects.AtomPulldown.Atom">
 <em class="property">class </em><code class="descname">Atom</code><a class="headerlink" href="#ccpn.ui.gui.widgets.PulldownListsForObjects.AtomPulldown.Atom" title="Permalink to this definition">¶</a></dt>
@@ -4963,7 +5126,7 @@ Residue containing Atom.</p>
 <dt id="ccpn.ui.gui.widgets.PulldownListsForObjects.CalculationStepPulldown">
 <em class="property">class </em><code class="descclassname">ccpn.ui.gui.widgets.PulldownListsForObjects.</code><code class="descname">CalculationStepPulldown</code><span class="sig-paren">(</span><em>parent</em>, <em>project</em>, <em>showBorder=False</em>, <em>orientation='left'</em>, <em>minimumWidths=(100</em>, <em>150)</em>, <em>maximumWidths=None</em>, <em>fixedWidths=None</em>, <em>labelText=None</em>, <em>showSelectName=False</em>, <em>callback=None</em>, <em>default=None</em>, <em>sizeAdjustPolicy=None</em>, <em>editable=False</em>, <em>filterFunction=None</em>, <em>useIds=False</em>, <em>setCurrent=False</em>, <em>followCurrent=False</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/PulldownListsForObjects.html#CalculationStepPulldown"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.PulldownListsForObjects.CalculationStepPulldown" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">ccpn.ui.gui.widgets.PulldownListsForObjects._PulldownABC</span></code></p>
-<p>A PulldownListCompoundWidget class for CalculationStep&#8217;s</p>
+<p>A PulldownListCompoundWidget class for CalculationSteps</p>
 <dl class="class">
 <dt id="ccpn.ui.gui.widgets.PulldownListsForObjects.CalculationStepPulldown.CalculationStep">
 <em class="property">class </em><code class="descname">CalculationStep</code><a class="headerlink" href="#ccpn.ui.gui.widgets.PulldownListsForObjects.CalculationStepPulldown.CalculationStep" title="Permalink to this definition">¶</a></dt>
@@ -5058,7 +5221,7 @@ serial number of CalculationStep, used in Pid and to identify the CalculationSte
 <dt id="ccpn.ui.gui.widgets.PulldownListsForObjects.ChainPulldown">
 <em class="property">class </em><code class="descclassname">ccpn.ui.gui.widgets.PulldownListsForObjects.</code><code class="descname">ChainPulldown</code><span class="sig-paren">(</span><em>parent</em>, <em>project</em>, <em>showBorder=False</em>, <em>orientation='left'</em>, <em>minimumWidths=(100</em>, <em>150)</em>, <em>maximumWidths=None</em>, <em>fixedWidths=None</em>, <em>labelText=None</em>, <em>showSelectName=False</em>, <em>callback=None</em>, <em>default=None</em>, <em>sizeAdjustPolicy=None</em>, <em>editable=False</em>, <em>filterFunction=None</em>, <em>useIds=False</em>, <em>setCurrent=False</em>, <em>followCurrent=False</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/PulldownListsForObjects.html#ChainPulldown"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.PulldownListsForObjects.ChainPulldown" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">ccpn.ui.gui.widgets.PulldownListsForObjects._PulldownABC</span></code></p>
-<p>A PulldownListCompoundWidget class for Chain&#8217;s</p>
+<p>A PulldownListCompoundWidget class for Chains</p>
 <dl class="class">
 <dt id="ccpn.ui.gui.widgets.PulldownListsForObjects.ChainPulldown.Chain">
 <em class="property">class </em><code class="descname">Chain</code><a class="headerlink" href="#ccpn.ui.gui.widgets.PulldownListsForObjects.ChainPulldown.Chain" title="Permalink to this definition">¶</a></dt>
@@ -5206,7 +5369,7 @@ Substances matching to Chain (based on chain.compoundName)</p>
 <dt id="ccpn.ui.gui.widgets.PulldownListsForObjects.ChemicalShiftListPulldown">
 <em class="property">class </em><code class="descclassname">ccpn.ui.gui.widgets.PulldownListsForObjects.</code><code class="descname">ChemicalShiftListPulldown</code><span class="sig-paren">(</span><em>parent</em>, <em>project</em>, <em>showBorder=False</em>, <em>orientation='left'</em>, <em>minimumWidths=(100</em>, <em>150)</em>, <em>maximumWidths=None</em>, <em>fixedWidths=None</em>, <em>labelText=None</em>, <em>showSelectName=False</em>, <em>callback=None</em>, <em>default=None</em>, <em>sizeAdjustPolicy=None</em>, <em>editable=False</em>, <em>filterFunction=None</em>, <em>useIds=False</em>, <em>setCurrent=False</em>, <em>followCurrent=False</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/PulldownListsForObjects.html#ChemicalShiftListPulldown"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.PulldownListsForObjects.ChemicalShiftListPulldown" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">ccpn.ui.gui.widgets.PulldownListsForObjects._PulldownABC</span></code></p>
-<p>A PulldownListCompoundWidget class for ChemicalShiftList&#8217;s</p>
+<p>A PulldownListCompoundWidget class for ChemicalShiftLists</p>
 <dl class="class">
 <dt id="ccpn.ui.gui.widgets.PulldownListsForObjects.ChemicalShiftListPulldown.ChemicalShiftList">
 <em class="property">class </em><code class="descname">ChemicalShiftList</code><span class="sig-paren">(</span><em>project: ccpn.core.Project.Project</em>, <em>wrappedData: ccpnmodel.ccpncore.api.ccp.nmr.Nmr.ShiftList</em><span class="sig-paren">)</span><a class="headerlink" href="#ccpn.ui.gui.widgets.PulldownListsForObjects.ChemicalShiftListPulldown.ChemicalShiftList" title="Permalink to this definition">¶</a></dt>
@@ -5319,7 +5482,7 @@ Measurement unit of ChemicalShiftList. Should always be &#8216;ppm&#8217;</p>
 <dt id="ccpn.ui.gui.widgets.PulldownListsForObjects.ChemicalShiftPulldown">
 <em class="property">class </em><code class="descclassname">ccpn.ui.gui.widgets.PulldownListsForObjects.</code><code class="descname">ChemicalShiftPulldown</code><span class="sig-paren">(</span><em>parent</em>, <em>project</em>, <em>showBorder=False</em>, <em>orientation='left'</em>, <em>minimumWidths=(100</em>, <em>150)</em>, <em>maximumWidths=None</em>, <em>fixedWidths=None</em>, <em>labelText=None</em>, <em>showSelectName=False</em>, <em>callback=None</em>, <em>default=None</em>, <em>sizeAdjustPolicy=None</em>, <em>editable=False</em>, <em>filterFunction=None</em>, <em>useIds=False</em>, <em>setCurrent=False</em>, <em>followCurrent=False</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/PulldownListsForObjects.html#ChemicalShiftPulldown"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.PulldownListsForObjects.ChemicalShiftPulldown" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">ccpn.ui.gui.widgets.PulldownListsForObjects._PulldownABC</span></code></p>
-<p>A PulldownListCompoundWidget class for ChemicalShift&#8217;s</p>
+<p>A PulldownListCompoundWidget class for ChemicalShifts</p>
 <dl class="class">
 <dt id="ccpn.ui.gui.widgets.PulldownListsForObjects.ChemicalShiftPulldown.ChemicalShift">
 <em class="property">class </em><code class="descname">ChemicalShift</code><a class="headerlink" href="#ccpn.ui.gui.widgets.PulldownListsForObjects.ChemicalShiftPulldown.ChemicalShift" title="Permalink to this definition">¶</a></dt>
@@ -5382,7 +5545,7 @@ shift valueError of ChemicalShift, in unit as defined in the ChemicalShiftList</
 <dt id="ccpn.ui.gui.widgets.PulldownListsForObjects.ComplexPulldown">
 <em class="property">class </em><code class="descclassname">ccpn.ui.gui.widgets.PulldownListsForObjects.</code><code class="descname">ComplexPulldown</code><span class="sig-paren">(</span><em>parent</em>, <em>project</em>, <em>showBorder=False</em>, <em>orientation='left'</em>, <em>minimumWidths=(100</em>, <em>150)</em>, <em>maximumWidths=None</em>, <em>fixedWidths=None</em>, <em>labelText=None</em>, <em>showSelectName=False</em>, <em>callback=None</em>, <em>default=None</em>, <em>sizeAdjustPolicy=None</em>, <em>editable=False</em>, <em>filterFunction=None</em>, <em>useIds=False</em>, <em>setCurrent=False</em>, <em>followCurrent=False</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/PulldownListsForObjects.html#ComplexPulldown"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.PulldownListsForObjects.ComplexPulldown" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">ccpn.ui.gui.widgets.PulldownListsForObjects._PulldownABC</span></code></p>
-<p>A PulldownListCompoundWidget class for Complex&#8217;s</p>
+<p>A PulldownListCompoundWidget class for Complexs</p>
 <dl class="class">
 <dt id="ccpn.ui.gui.widgets.PulldownListsForObjects.ComplexPulldown.Complex">
 <em class="property">class </em><code class="descname">Complex</code><a class="headerlink" href="#ccpn.ui.gui.widgets.PulldownListsForObjects.ComplexPulldown.Complex" title="Permalink to this definition">¶</a></dt>
@@ -5434,7 +5597,7 @@ Serial number of Complex, used for sorting</p>
 <dt id="ccpn.ui.gui.widgets.PulldownListsForObjects.DataPulldown">
 <em class="property">class </em><code class="descclassname">ccpn.ui.gui.widgets.PulldownListsForObjects.</code><code class="descname">DataPulldown</code><span class="sig-paren">(</span><em>parent</em>, <em>project</em>, <em>showBorder=False</em>, <em>orientation='left'</em>, <em>minimumWidths=(100</em>, <em>150)</em>, <em>maximumWidths=None</em>, <em>fixedWidths=None</em>, <em>labelText=None</em>, <em>showSelectName=False</em>, <em>callback=None</em>, <em>default=None</em>, <em>sizeAdjustPolicy=None</em>, <em>editable=False</em>, <em>filterFunction=None</em>, <em>useIds=False</em>, <em>setCurrent=False</em>, <em>followCurrent=False</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/PulldownListsForObjects.html#DataPulldown"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.PulldownListsForObjects.DataPulldown" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">ccpn.ui.gui.widgets.PulldownListsForObjects._PulldownABC</span></code></p>
-<p>A PulldownListCompoundWidget class for Data&#8217;s</p>
+<p>A PulldownListCompoundWidget class for Datas</p>
 <dl class="class">
 <dt id="ccpn.ui.gui.widgets.PulldownListsForObjects.DataPulldown.Data">
 <em class="property">class </em><code class="descname">Data</code><a class="headerlink" href="#ccpn.ui.gui.widgets.PulldownListsForObjects.DataPulldown.Data" title="Permalink to this definition">¶</a></dt>
@@ -5536,7 +5699,7 @@ Calls self.setParameter(key, value) for each key,value pair in the input.</p>
 <dt id="ccpn.ui.gui.widgets.PulldownListsForObjects.DataSetPulldown">
 <em class="property">class </em><code class="descclassname">ccpn.ui.gui.widgets.PulldownListsForObjects.</code><code class="descname">DataSetPulldown</code><span class="sig-paren">(</span><em>parent</em>, <em>project</em>, <em>showBorder=False</em>, <em>orientation='left'</em>, <em>minimumWidths=(100</em>, <em>150)</em>, <em>maximumWidths=None</em>, <em>fixedWidths=None</em>, <em>labelText=None</em>, <em>showSelectName=False</em>, <em>callback=None</em>, <em>default=None</em>, <em>sizeAdjustPolicy=None</em>, <em>editable=False</em>, <em>filterFunction=None</em>, <em>useIds=False</em>, <em>setCurrent=False</em>, <em>followCurrent=False</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/PulldownListsForObjects.html#DataSetPulldown"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.PulldownListsForObjects.DataSetPulldown" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">ccpn.ui.gui.widgets.PulldownListsForObjects._PulldownABC</span></code></p>
-<p>A PulldownListCompoundWidget class for DataSet&#8217;s</p>
+<p>A PulldownListCompoundWidget class for DataSets</p>
 <dl class="class">
 <dt id="ccpn.ui.gui.widgets.PulldownListsForObjects.DataSetPulldown.DataSet">
 <em class="property">class </em><code class="descname">DataSet</code><a class="headerlink" href="#ccpn.ui.gui.widgets.PulldownListsForObjects.DataSetPulldown.DataSet" title="Permalink to this definition">¶</a></dt>
@@ -5788,7 +5951,7 @@ Universal identifier for dataSet</p>
 <dt id="ccpn.ui.gui.widgets.PulldownListsForObjects.IntegralListPulldown">
 <em class="property">class </em><code class="descclassname">ccpn.ui.gui.widgets.PulldownListsForObjects.</code><code class="descname">IntegralListPulldown</code><span class="sig-paren">(</span><em>parent</em>, <em>project</em>, <em>showBorder=False</em>, <em>orientation='left'</em>, <em>minimumWidths=(100</em>, <em>150)</em>, <em>maximumWidths=None</em>, <em>fixedWidths=None</em>, <em>labelText=None</em>, <em>showSelectName=False</em>, <em>callback=None</em>, <em>default=None</em>, <em>sizeAdjustPolicy=None</em>, <em>editable=False</em>, <em>filterFunction=None</em>, <em>useIds=False</em>, <em>setCurrent=False</em>, <em>followCurrent=False</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/PulldownListsForObjects.html#IntegralListPulldown"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.PulldownListsForObjects.IntegralListPulldown" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">ccpn.ui.gui.widgets.PulldownListsForObjects._PulldownABC</span></code></p>
-<p>A PulldownListCompoundWidget class for IntegralList&#8217;s</p>
+<p>A PulldownListCompoundWidget class for IntegralLists</p>
 <dl class="class">
 <dt id="ccpn.ui.gui.widgets.PulldownListsForObjects.IntegralListPulldown.IntegralList">
 <em class="property">class </em><code class="descname">IntegralList</code><a class="headerlink" href="#ccpn.ui.gui.widgets.PulldownListsForObjects.IntegralListPulldown.IntegralList" title="Permalink to this definition">¶</a></dt>
@@ -5897,7 +6060,7 @@ title of IntegralList (not used in PID).</p>
 <dt id="ccpn.ui.gui.widgets.PulldownListsForObjects.IntegralPulldown">
 <em class="property">class </em><code class="descclassname">ccpn.ui.gui.widgets.PulldownListsForObjects.</code><code class="descname">IntegralPulldown</code><span class="sig-paren">(</span><em>parent</em>, <em>project</em>, <em>showBorder=False</em>, <em>orientation='left'</em>, <em>minimumWidths=(100</em>, <em>150)</em>, <em>maximumWidths=None</em>, <em>fixedWidths=None</em>, <em>labelText=None</em>, <em>showSelectName=False</em>, <em>callback=None</em>, <em>default=None</em>, <em>sizeAdjustPolicy=None</em>, <em>editable=False</em>, <em>filterFunction=None</em>, <em>useIds=False</em>, <em>setCurrent=False</em>, <em>followCurrent=False</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/PulldownListsForObjects.html#IntegralPulldown"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.PulldownListsForObjects.IntegralPulldown" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">ccpn.ui.gui.widgets.PulldownListsForObjects._PulldownABC</span></code></p>
-<p>A PulldownListCompoundWidget class for Integral&#8217;s</p>
+<p>A PulldownListCompoundWidget class for Integrals</p>
 <dl class="class">
 <dt id="ccpn.ui.gui.widgets.PulldownListsForObjects.IntegralPulldown.Integral">
 <em class="property">class </em><code class="descname">Integral</code><a class="headerlink" href="#ccpn.ui.gui.widgets.PulldownListsForObjects.IntegralPulldown.Integral" title="Permalink to this definition">¶</a></dt>
@@ -6019,7 +6182,7 @@ value error of Integral</p>
 <dt id="ccpn.ui.gui.widgets.PulldownListsForObjects.ModelPulldown">
 <em class="property">class </em><code class="descclassname">ccpn.ui.gui.widgets.PulldownListsForObjects.</code><code class="descname">ModelPulldown</code><span class="sig-paren">(</span><em>parent</em>, <em>project</em>, <em>showBorder=False</em>, <em>orientation='left'</em>, <em>minimumWidths=(100</em>, <em>150)</em>, <em>maximumWidths=None</em>, <em>fixedWidths=None</em>, <em>labelText=None</em>, <em>showSelectName=False</em>, <em>callback=None</em>, <em>default=None</em>, <em>sizeAdjustPolicy=None</em>, <em>editable=False</em>, <em>filterFunction=None</em>, <em>useIds=False</em>, <em>setCurrent=False</em>, <em>followCurrent=False</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/PulldownListsForObjects.html#ModelPulldown"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.PulldownListsForObjects.ModelPulldown" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">ccpn.ui.gui.widgets.PulldownListsForObjects._PulldownABC</span></code></p>
-<p>A PulldownListCompoundWidget class for Model&#8217;s</p>
+<p>A PulldownListCompoundWidget class for Models</p>
 <dl class="class">
 <dt id="ccpn.ui.gui.widgets.PulldownListsForObjects.ModelPulldown.Model">
 <em class="property">class </em><code class="descname">Model</code><a class="headerlink" href="#ccpn.ui.gui.widgets.PulldownListsForObjects.ModelPulldown.Model" title="Permalink to this definition">¶</a></dt>
@@ -6083,7 +6246,7 @@ StructureEnsemble containing Model.</p>
 <dt id="ccpn.ui.gui.widgets.PulldownListsForObjects.MultipletListPulldown">
 <em class="property">class </em><code class="descclassname">ccpn.ui.gui.widgets.PulldownListsForObjects.</code><code class="descname">MultipletListPulldown</code><span class="sig-paren">(</span><em>parent</em>, <em>project</em>, <em>showBorder=False</em>, <em>orientation='left'</em>, <em>minimumWidths=(100</em>, <em>150)</em>, <em>maximumWidths=None</em>, <em>fixedWidths=None</em>, <em>labelText=None</em>, <em>showSelectName=False</em>, <em>callback=None</em>, <em>default=None</em>, <em>sizeAdjustPolicy=None</em>, <em>editable=False</em>, <em>filterFunction=None</em>, <em>useIds=False</em>, <em>setCurrent=False</em>, <em>followCurrent=False</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/PulldownListsForObjects.html#MultipletListPulldown"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.PulldownListsForObjects.MultipletListPulldown" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">ccpn.ui.gui.widgets.PulldownListsForObjects._PulldownABC</span></code></p>
-<p>A PulldownListCompoundWidget class for MultipletList&#8217;s</p>
+<p>A PulldownListCompoundWidget class for MultipletLists</p>
 <dl class="class">
 <dt id="ccpn.ui.gui.widgets.PulldownListsForObjects.MultipletListPulldown.MultipletList">
 <em class="property">class </em><code class="descname">MultipletList</code><a class="headerlink" href="#ccpn.ui.gui.widgets.PulldownListsForObjects.MultipletListPulldown.MultipletList" title="Permalink to this definition">¶</a></dt>
@@ -6210,7 +6373,7 @@ title of multiplet (not used in PID).</p>
 <dt id="ccpn.ui.gui.widgets.PulldownListsForObjects.MultipletPulldown">
 <em class="property">class </em><code class="descclassname">ccpn.ui.gui.widgets.PulldownListsForObjects.</code><code class="descname">MultipletPulldown</code><span class="sig-paren">(</span><em>parent</em>, <em>project</em>, <em>showBorder=False</em>, <em>orientation='left'</em>, <em>minimumWidths=(100</em>, <em>150)</em>, <em>maximumWidths=None</em>, <em>fixedWidths=None</em>, <em>labelText=None</em>, <em>showSelectName=False</em>, <em>callback=None</em>, <em>default=None</em>, <em>sizeAdjustPolicy=None</em>, <em>editable=False</em>, <em>filterFunction=None</em>, <em>useIds=False</em>, <em>setCurrent=False</em>, <em>followCurrent=False</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/PulldownListsForObjects.html#MultipletPulldown"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.PulldownListsForObjects.MultipletPulldown" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">ccpn.ui.gui.widgets.PulldownListsForObjects._PulldownABC</span></code></p>
-<p>A PulldownListCompoundWidget class for Multiplet&#8217;s</p>
+<p>A PulldownListCompoundWidget class for Multiplets</p>
 <dl class="class">
 <dt id="ccpn.ui.gui.widgets.PulldownListsForObjects.MultipletPulldown.Multiplet">
 <em class="property">class </em><code class="descname">Multiplet</code><a class="headerlink" href="#ccpn.ui.gui.widgets.PulldownListsForObjects.MultipletPulldown.Multiplet" title="Permalink to this definition">¶</a></dt>
@@ -6417,7 +6580,7 @@ volume error of Multiplet.</p>
 <dt id="ccpn.ui.gui.widgets.PulldownListsForObjects.NmrAtomPulldown">
 <em class="property">class </em><code class="descclassname">ccpn.ui.gui.widgets.PulldownListsForObjects.</code><code class="descname">NmrAtomPulldown</code><span class="sig-paren">(</span><em>parent</em>, <em>project</em>, <em>showBorder=False</em>, <em>orientation='left'</em>, <em>minimumWidths=(100</em>, <em>150)</em>, <em>maximumWidths=None</em>, <em>fixedWidths=None</em>, <em>labelText=None</em>, <em>showSelectName=False</em>, <em>callback=None</em>, <em>default=None</em>, <em>sizeAdjustPolicy=None</em>, <em>editable=False</em>, <em>filterFunction=None</em>, <em>useIds=False</em>, <em>setCurrent=False</em>, <em>followCurrent=False</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/PulldownListsForObjects.html#NmrAtomPulldown"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.PulldownListsForObjects.NmrAtomPulldown" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">ccpn.ui.gui.widgets.PulldownListsForObjects._PulldownABC</span></code></p>
-<p>A PulldownListCompoundWidget class for NmrAtom&#8217;s</p>
+<p>A PulldownListCompoundWidget class for NmrAtoms</p>
 <dl class="class">
 <dt id="ccpn.ui.gui.widgets.PulldownListsForObjects.NmrAtomPulldown.NmrAtom">
 <em class="property">class </em><code class="descname">NmrAtom</code><a class="headerlink" href="#ccpn.ui.gui.widgets.PulldownListsForObjects.NmrAtomPulldown.NmrAtom" title="Permalink to this definition">¶</a></dt>
@@ -6536,7 +6699,7 @@ NmrAtom serial number - set at creation and unchangeable</p>
 <dt id="ccpn.ui.gui.widgets.PulldownListsForObjects.NmrChainPulldown">
 <em class="property">class </em><code class="descclassname">ccpn.ui.gui.widgets.PulldownListsForObjects.</code><code class="descname">NmrChainPulldown</code><span class="sig-paren">(</span><em>parent</em>, <em>project</em>, <em>showBorder=False</em>, <em>orientation='left'</em>, <em>minimumWidths=(100</em>, <em>150)</em>, <em>maximumWidths=None</em>, <em>fixedWidths=None</em>, <em>labelText=None</em>, <em>showSelectName=False</em>, <em>callback=None</em>, <em>default=None</em>, <em>sizeAdjustPolicy=None</em>, <em>editable=False</em>, <em>filterFunction=None</em>, <em>useIds=False</em>, <em>setCurrent=False</em>, <em>followCurrent=False</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/PulldownListsForObjects.html#NmrChainPulldown"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.PulldownListsForObjects.NmrChainPulldown" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">ccpn.ui.gui.widgets.PulldownListsForObjects._PulldownABC</span></code></p>
-<p>A PulldownListCompoundWidget class for NmrChain&#8217;s</p>
+<p>A PulldownListCompoundWidget class for NmrChains</p>
 <dl class="class">
 <dt id="ccpn.ui.gui.widgets.PulldownListsForObjects.NmrChainPulldown.NmrChain">
 <em class="property">class </em><code class="descname">NmrChain</code><a class="headerlink" href="#ccpn.ui.gui.widgets.PulldownListsForObjects.NmrChainPulldown.NmrChain" title="Permalink to this definition">¶</a></dt>
@@ -6639,7 +6802,7 @@ Identifying label of NmrChain. Defaults to &#8216;?&#8217;</p>
 <dl class="attribute">
 <dt id="ccpn.ui.gui.widgets.PulldownListsForObjects.NmrChainPulldown.NmrChain.mainNmrResidues">
 <code class="descname">mainNmrResidues</code><a class="headerlink" href="#ccpn.ui.gui.widgets.PulldownListsForObjects.NmrChainPulldown.NmrChain.mainNmrResidues" title="Permalink to this definition">¶</a></dt>
-<dd><p>- <em>Tuple[ccpn.core.NmrResidue.NmrResidue]</em>, <em>mutable</em> - 
+<dd><p>- <em>Tuple[NmrResidue]</em>, <em>mutable</em> - 
 NmrResidues belonging to NmrChain that are NOT defined relative to another NmrResidue
 (sequenceCode ending in &#8216;-1&#8217;, &#8216;+1&#8217;, etc.) For connected NmrChains in sequential order, otherwise sorted by assignment</p>
 </dd></dl>
@@ -6745,7 +6908,7 @@ Connected NmrChains (isConnected == True) always have canonical names of the for
 <dt id="ccpn.ui.gui.widgets.PulldownListsForObjects.NmrResiduePulldown">
 <em class="property">class </em><code class="descclassname">ccpn.ui.gui.widgets.PulldownListsForObjects.</code><code class="descname">NmrResiduePulldown</code><span class="sig-paren">(</span><em>parent</em>, <em>project</em>, <em>showBorder=False</em>, <em>orientation='left'</em>, <em>minimumWidths=(100</em>, <em>150)</em>, <em>maximumWidths=None</em>, <em>fixedWidths=None</em>, <em>labelText=None</em>, <em>showSelectName=False</em>, <em>callback=None</em>, <em>default=None</em>, <em>sizeAdjustPolicy=None</em>, <em>editable=False</em>, <em>filterFunction=None</em>, <em>useIds=False</em>, <em>setCurrent=False</em>, <em>followCurrent=False</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/PulldownListsForObjects.html#NmrResiduePulldown"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.PulldownListsForObjects.NmrResiduePulldown" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">ccpn.ui.gui.widgets.PulldownListsForObjects._PulldownABC</span></code></p>
-<p>A PulldownListCompoundWidget class for NmrResidue&#8217;s</p>
+<p>A PulldownListCompoundWidget class for NmrResidues</p>
 <dl class="class">
 <dt id="ccpn.ui.gui.widgets.PulldownListsForObjects.NmrResiduePulldown.NmrResidue">
 <em class="property">class </em><code class="descname">NmrResidue</code><a class="headerlink" href="#ccpn.ui.gui.widgets.PulldownListsForObjects.NmrResiduePulldown.NmrResidue" title="Permalink to this definition">¶</a></dt>
@@ -7054,7 +7217,7 @@ NmrResidue serial number - set at creation and unchangeable</p>
 <dt id="ccpn.ui.gui.widgets.PulldownListsForObjects.NotePulldown">
 <em class="property">class </em><code class="descclassname">ccpn.ui.gui.widgets.PulldownListsForObjects.</code><code class="descname">NotePulldown</code><span class="sig-paren">(</span><em>parent</em>, <em>project</em>, <em>showBorder=False</em>, <em>orientation='left'</em>, <em>minimumWidths=(100</em>, <em>150)</em>, <em>maximumWidths=None</em>, <em>fixedWidths=None</em>, <em>labelText=None</em>, <em>showSelectName=False</em>, <em>callback=None</em>, <em>default=None</em>, <em>sizeAdjustPolicy=None</em>, <em>editable=False</em>, <em>filterFunction=None</em>, <em>useIds=False</em>, <em>setCurrent=False</em>, <em>followCurrent=False</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/PulldownListsForObjects.html#NotePulldown"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.PulldownListsForObjects.NotePulldown" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">ccpn.ui.gui.widgets.PulldownListsForObjects._PulldownABC</span></code></p>
-<p>A PulldownListCompoundWidget class for Note&#8217;s</p>
+<p>A PulldownListCompoundWidget class for Notes</p>
 <dl class="class">
 <dt id="ccpn.ui.gui.widgets.PulldownListsForObjects.NotePulldown.Note">
 <em class="property">class </em><code class="descname">Note</code><a class="headerlink" href="#ccpn.ui.gui.widgets.PulldownListsForObjects.NotePulldown.Note" title="Permalink to this definition">¶</a></dt>
@@ -7127,7 +7290,7 @@ Free-form text comment</p>
 <dt id="ccpn.ui.gui.widgets.PulldownListsForObjects.PeakClusterPulldown">
 <em class="property">class </em><code class="descclassname">ccpn.ui.gui.widgets.PulldownListsForObjects.</code><code class="descname">PeakClusterPulldown</code><span class="sig-paren">(</span><em>parent</em>, <em>project</em>, <em>showBorder=False</em>, <em>orientation='left'</em>, <em>minimumWidths=(100</em>, <em>150)</em>, <em>maximumWidths=None</em>, <em>fixedWidths=None</em>, <em>labelText=None</em>, <em>showSelectName=False</em>, <em>callback=None</em>, <em>default=None</em>, <em>sizeAdjustPolicy=None</em>, <em>editable=False</em>, <em>filterFunction=None</em>, <em>useIds=False</em>, <em>setCurrent=False</em>, <em>followCurrent=False</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/PulldownListsForObjects.html#PeakClusterPulldown"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.PulldownListsForObjects.PeakClusterPulldown" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">ccpn.ui.gui.widgets.PulldownListsForObjects._PulldownABC</span></code></p>
-<p>A PulldownListCompoundWidget class for PeakCluster&#8217;s</p>
+<p>A PulldownListCompoundWidget class for PeakClusters</p>
 <dl class="class">
 <dt id="ccpn.ui.gui.widgets.PulldownListsForObjects.PeakClusterPulldown.PeakCluster">
 <em class="property">class </em><code class="descname">PeakCluster</code><a class="headerlink" href="#ccpn.ui.gui.widgets.PulldownListsForObjects.PeakClusterPulldown.PeakCluster" title="Permalink to this definition">¶</a></dt>
@@ -7221,7 +7384,7 @@ serial number of PeakCluster, used in Pid and to identify the PeakCluster.</p>
 <dt id="ccpn.ui.gui.widgets.PulldownListsForObjects.PeakListPulldown">
 <em class="property">class </em><code class="descclassname">ccpn.ui.gui.widgets.PulldownListsForObjects.</code><code class="descname">PeakListPulldown</code><span class="sig-paren">(</span><em>parent</em>, <em>project</em>, <em>showBorder=False</em>, <em>orientation='left'</em>, <em>minimumWidths=(100</em>, <em>150)</em>, <em>maximumWidths=None</em>, <em>fixedWidths=None</em>, <em>labelText=None</em>, <em>showSelectName=False</em>, <em>callback=None</em>, <em>default=None</em>, <em>sizeAdjustPolicy=None</em>, <em>editable=False</em>, <em>filterFunction=None</em>, <em>useIds=False</em>, <em>setCurrent=False</em>, <em>followCurrent=False</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/PulldownListsForObjects.html#PeakListPulldown"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.PulldownListsForObjects.PeakListPulldown" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">ccpn.ui.gui.widgets.PulldownListsForObjects._PulldownABC</span></code></p>
-<p>A PulldownListCompoundWidget class for PeakList&#8217;s</p>
+<p>A PulldownListCompoundWidget class for PeakLists</p>
 <dl class="class">
 <dt id="ccpn.ui.gui.widgets.PulldownListsForObjects.PeakListPulldown.PeakList">
 <em class="property">class </em><code class="descname">PeakList</code><a class="headerlink" href="#ccpn.ui.gui.widgets.PulldownListsForObjects.PeakListPulldown.PeakList" title="Permalink to this definition">¶</a></dt>
@@ -7248,10 +7411,19 @@ ChemicalShiftList associated with PeakList.</p>
 </dd></dl>
 
 <dl class="method">
+<dt id="ccpn.ui.gui.widgets.PulldownListsForObjects.PeakListPulldown.PeakList.estimateVolumes">
+<code class="descname">estimateVolumes</code><span class="sig-paren">(</span><em>volumeIntegralLimit=2.0</em><span class="sig-paren">)</span><a class="headerlink" href="#ccpn.ui.gui.widgets.PulldownListsForObjects.PeakListPulldown.PeakList.estimateVolumes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Estimate the volumes for the peaks in this peakList
+The width of the volume integral in each dimension is the lineWidth * volumeIntegralLimit,
+the default is 2.0 * FWHM of the peak.
+:param volumeIntegralLimit: integral width as a multiple of lineWidth (FWHM)</p>
+</dd></dl>
+
+<dl class="method">
 <dt id="ccpn.ui.gui.widgets.PulldownListsForObjects.PeakListPulldown.PeakList.fitExistingPeaks">
 <code class="descname">fitExistingPeaks</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ccpn.ui.gui.widgets.PulldownListsForObjects.PeakListPulldown.PeakList.fitExistingPeaks" title="Permalink to this definition">¶</a></dt>
 <dd><p>Refit the current selected peaks.
-Must be called with opeaks that belong to this peakList</p>
+Must be called with peaks that belong to this peakList</p>
 </dd></dl>
 
 <dl class="method">
@@ -7357,7 +7529,7 @@ PeakListViews showing Spectrum</p>
 
 <dl class="method">
 <dt id="ccpn.ui.gui.widgets.PulldownListsForObjects.PeakListPulldown.PeakList.pickPeaksRegion">
-<code class="descname">pickPeaksRegion</code><span class="sig-paren">(</span><em>regionToPick: dict = {}</em>, <em>doPos: bool = True</em>, <em>doNeg: bool = True</em>, <em>minLinewidth=None</em>, <em>exclusionBuffer=None</em>, <em>minDropFactor: float = 0.1</em>, <em>checkAllAdjacent: bool = True</em>, <em>fitMethod: str = 'parabolic'</em>, <em>excludedRegions=None</em>, <em>excludedDiagonalDims=None</em>, <em>excludedDiagonalTransform=None</em><span class="sig-paren">)</span><a class="headerlink" href="#ccpn.ui.gui.widgets.PulldownListsForObjects.PeakListPulldown.PeakList.pickPeaksRegion" title="Permalink to this definition">¶</a></dt>
+<code class="descname">pickPeaksRegion</code><span class="sig-paren">(</span><em>regionToPick: dict = {}</em>, <em>doPos: bool = True</em>, <em>doNeg: bool = True</em>, <em>minLinewidth=None</em>, <em>exclusionBuffer=None</em>, <em>minDropFactor: float = 0.1</em>, <em>checkAllAdjacent: bool = True</em>, <em>fitMethod: str = 'parabolic'</em>, <em>excludedRegions=None</em>, <em>excludedDiagonalDims=None</em>, <em>excludedDiagonalTransform=None</em>, <em>estimateLineWidths=True</em><span class="sig-paren">)</span><a class="headerlink" href="#ccpn.ui.gui.widgets.PulldownListsForObjects.PeakListPulldown.PeakList.pickPeaksRegion" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -7434,7 +7606,7 @@ title of PeakList (not used in PID).</p>
 <dt id="ccpn.ui.gui.widgets.PulldownListsForObjects.PeakPulldown">
 <em class="property">class </em><code class="descclassname">ccpn.ui.gui.widgets.PulldownListsForObjects.</code><code class="descname">PeakPulldown</code><span class="sig-paren">(</span><em>parent</em>, <em>project</em>, <em>showBorder=False</em>, <em>orientation='left'</em>, <em>minimumWidths=(100</em>, <em>150)</em>, <em>maximumWidths=None</em>, <em>fixedWidths=None</em>, <em>labelText=None</em>, <em>showSelectName=False</em>, <em>callback=None</em>, <em>default=None</em>, <em>sizeAdjustPolicy=None</em>, <em>editable=False</em>, <em>filterFunction=None</em>, <em>useIds=False</em>, <em>setCurrent=False</em>, <em>followCurrent=False</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/PulldownListsForObjects.html#PeakPulldown"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.PulldownListsForObjects.PeakPulldown" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">ccpn.ui.gui.widgets.PulldownListsForObjects._PulldownABC</span></code></p>
-<p>A PulldownListCompoundWidget class for Peak&#8217;s</p>
+<p>A PulldownListCompoundWidget class for Peaks</p>
 <dl class="class">
 <dt id="ccpn.ui.gui.widgets.PulldownListsForObjects.PeakPulldown.Peak">
 <em class="property">class </em><code class="descname">Peak</code><a class="headerlink" href="#ccpn.ui.gui.widgets.PulldownListsForObjects.PeakPulldown.Peak" title="Permalink to this definition">¶</a></dt>
@@ -7447,7 +7619,7 @@ either as a list of assignments for each dimension (dimensionNmrAtoms) or as a
 list of all possible assignment combinations (assignedNmrAtoms)</p>
 <dl class="method">
 <dt id="ccpn.ui.gui.widgets.PulldownListsForObjects.PeakPulldown.Peak.addAssignment">
-<code class="descname">addAssignment</code><span class="sig-paren">(</span><em>value: Sequence[]</em><span class="sig-paren">)</span><a class="headerlink" href="#ccpn.ui.gui.widgets.PulldownListsForObjects.PeakPulldown.Peak.addAssignment" title="Permalink to this definition">¶</a></dt>
+<code class="descname">addAssignment</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ccpn.ui.gui.widgets.PulldownListsForObjects.PeakPulldown.Peak.addAssignment" title="Permalink to this definition">¶</a></dt>
 <dd><p>Add a peak assignment - a list of one NmrAtom or Pid for each dimension</p>
 </dd></dl>
 
@@ -7578,17 +7750,20 @@ possible - in the example that all four protons could be bound to either of the 
 <p>To (re)set the assignment for a single dimension, use the Peak.assignDimension method.</p>
 </dd></dl>
 
+<dl class="method">
+<dt id="ccpn.ui.gui.widgets.PulldownListsForObjects.PeakPulldown.Peak.estimateVolume">
+<code class="descname">estimateVolume</code><span class="sig-paren">(</span><em>volumeIntegralLimit=2.0</em><span class="sig-paren">)</span><a class="headerlink" href="#ccpn.ui.gui.widgets.PulldownListsForObjects.PeakPulldown.Peak.estimateVolume" title="Permalink to this definition">¶</a></dt>
+<dd><p>Estimate the volume of the peak from a gaussian distribution.
+The width of the volume integral in each dimension is the lineWidth (FWHM) * volumeIntegralLimit,
+the default is 2.0 * FWHM of the peak.
+:param volumeIntegralLimit: integral width as a multiple of lineWidth (FWHM)</p>
+</dd></dl>
+
 <dl class="attribute">
 <dt id="ccpn.ui.gui.widgets.PulldownListsForObjects.PeakPulldown.Peak.figureOfMerit">
 <code class="descname">figureOfMerit</code><a class="headerlink" href="#ccpn.ui.gui.widgets.PulldownListsForObjects.PeakPulldown.Peak.figureOfMerit" title="Permalink to this definition">¶</a></dt>
 <dd><p>- <em>float=None</em>, <em>mutable</em> - 
 figureOfMerit of Peak, between 0.0 and 1.0 inclusive.</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="ccpn.ui.gui.widgets.PulldownListsForObjects.PeakPulldown.Peak.fitPositionHeightLineWidths">
-<code class="descname">fitPositionHeightLineWidths</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ccpn.ui.gui.widgets.PulldownListsForObjects.PeakPulldown.Peak.fitPositionHeightLineWidths" title="Permalink to this definition">¶</a></dt>
-<dd><p>Set the position, height and lineWidth of the Peak.</p>
 </dd></dl>
 
 <dl class="method">
@@ -7715,7 +7890,7 @@ serial number of Peak, used in Pid and to identify the Peak.</p>
 
 <dl class="method">
 <dt id="ccpn.ui.gui.widgets.PulldownListsForObjects.PeakPulldown.Peak.snapToExtremum">
-<code class="descname">snapToExtremum</code><span class="sig-paren">(</span><em>halfBoxSearchWidth: int = 4</em>, <em>halfBoxFitWidth: int = 2</em><span class="sig-paren">)</span><a class="headerlink" href="#ccpn.ui.gui.widgets.PulldownListsForObjects.PeakPulldown.Peak.snapToExtremum" title="Permalink to this definition">¶</a></dt>
+<code class="descname">snapToExtremum</code><span class="sig-paren">(</span><em>halfBoxSearchWidth: int = 4</em>, <em>halfBoxFitWidth: int = 4</em>, <em>minDropFactor: float = 0.1</em>, <em>fitMethod: str = 'parabolic'</em><span class="sig-paren">)</span><a class="headerlink" href="#ccpn.ui.gui.widgets.PulldownListsForObjects.PeakPulldown.Peak.snapToExtremum" title="Permalink to this definition">¶</a></dt>
 <dd><p>Snap the Peak to the closest local extrema, if within range.</p>
 </dd></dl>
 
@@ -7741,7 +7916,7 @@ volume error of Peak.</p>
 <dt id="ccpn.ui.gui.widgets.PulldownListsForObjects.PseudoDimensionPulldown">
 <em class="property">class </em><code class="descclassname">ccpn.ui.gui.widgets.PulldownListsForObjects.</code><code class="descname">PseudoDimensionPulldown</code><span class="sig-paren">(</span><em>parent</em>, <em>project</em>, <em>showBorder=False</em>, <em>orientation='left'</em>, <em>minimumWidths=(100</em>, <em>150)</em>, <em>maximumWidths=None</em>, <em>fixedWidths=None</em>, <em>labelText=None</em>, <em>showSelectName=False</em>, <em>callback=None</em>, <em>default=None</em>, <em>sizeAdjustPolicy=None</em>, <em>editable=False</em>, <em>filterFunction=None</em>, <em>useIds=False</em>, <em>setCurrent=False</em>, <em>followCurrent=False</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/PulldownListsForObjects.html#PseudoDimensionPulldown"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.PulldownListsForObjects.PseudoDimensionPulldown" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">ccpn.ui.gui.widgets.PulldownListsForObjects._PulldownABC</span></code></p>
-<p>A PulldownListCompoundWidget class for PseudoDimension&#8217;s</p>
+<p>A PulldownListCompoundWidget class for PseudoDimensions</p>
 <dl class="class">
 <dt id="ccpn.ui.gui.widgets.PulldownListsForObjects.PseudoDimensionPulldown.PseudoDimension">
 <em class="property">class </em><code class="descname">PseudoDimension</code><a class="headerlink" href="#ccpn.ui.gui.widgets.PulldownListsForObjects.PseudoDimensionPulldown.PseudoDimension" title="Permalink to this definition">¶</a></dt>
@@ -7843,7 +8018,7 @@ SpectrumHits (for screening/metabolomics) that refer to individual points in the
 <dt id="ccpn.ui.gui.widgets.PulldownListsForObjects.ResiduePulldown">
 <em class="property">class </em><code class="descclassname">ccpn.ui.gui.widgets.PulldownListsForObjects.</code><code class="descname">ResiduePulldown</code><span class="sig-paren">(</span><em>parent</em>, <em>project</em>, <em>showBorder=False</em>, <em>orientation='left'</em>, <em>minimumWidths=(100</em>, <em>150)</em>, <em>maximumWidths=None</em>, <em>fixedWidths=None</em>, <em>labelText=None</em>, <em>showSelectName=False</em>, <em>callback=None</em>, <em>default=None</em>, <em>sizeAdjustPolicy=None</em>, <em>editable=False</em>, <em>filterFunction=None</em>, <em>useIds=False</em>, <em>setCurrent=False</em>, <em>followCurrent=False</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/PulldownListsForObjects.html#ResiduePulldown"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.PulldownListsForObjects.ResiduePulldown" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">ccpn.ui.gui.widgets.PulldownListsForObjects._PulldownABC</span></code></p>
-<p>A PulldownListCompoundWidget class for Residue&#8217;s</p>
+<p>A PulldownListCompoundWidget class for Residues</p>
 <dl class="class">
 <dt id="ccpn.ui.gui.widgets.PulldownListsForObjects.ResiduePulldown.Residue">
 <em class="property">class </em><code class="descname">Residue</code><a class="headerlink" href="#ccpn.ui.gui.widgets.PulldownListsForObjects.ResiduePulldown.Residue" title="Permalink to this definition">¶</a></dt>
@@ -8027,7 +8202,7 @@ Residue sequence code and id (e.g. &#8216;1&#8217;, &#8216;127B&#8217;)</p>
 <dt id="ccpn.ui.gui.widgets.PulldownListsForObjects.RestraintContributionPulldown">
 <em class="property">class </em><code class="descclassname">ccpn.ui.gui.widgets.PulldownListsForObjects.</code><code class="descname">RestraintContributionPulldown</code><span class="sig-paren">(</span><em>parent</em>, <em>project</em>, <em>showBorder=False</em>, <em>orientation='left'</em>, <em>minimumWidths=(100</em>, <em>150)</em>, <em>maximumWidths=None</em>, <em>fixedWidths=None</em>, <em>labelText=None</em>, <em>showSelectName=False</em>, <em>callback=None</em>, <em>default=None</em>, <em>sizeAdjustPolicy=None</em>, <em>editable=False</em>, <em>filterFunction=None</em>, <em>useIds=False</em>, <em>setCurrent=False</em>, <em>followCurrent=False</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/PulldownListsForObjects.html#RestraintContributionPulldown"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.PulldownListsForObjects.RestraintContributionPulldown" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">ccpn.ui.gui.widgets.PulldownListsForObjects._PulldownABC</span></code></p>
-<p>A PulldownListCompoundWidget class for RestraintContribution&#8217;s</p>
+<p>A PulldownListCompoundWidget class for RestraintContributions</p>
 <dl class="class">
 <dt id="ccpn.ui.gui.widgets.PulldownListsForObjects.RestraintContributionPulldown.RestraintContribution">
 <em class="property">class </em><code class="descname">RestraintContribution</code><a class="headerlink" href="#ccpn.ui.gui.widgets.PulldownListsForObjects.RestraintContributionPulldown.RestraintContribution" title="Permalink to this definition">¶</a></dt>
@@ -8170,7 +8345,7 @@ weight of contribution</p>
 <dt id="ccpn.ui.gui.widgets.PulldownListsForObjects.RestraintListPulldown">
 <em class="property">class </em><code class="descclassname">ccpn.ui.gui.widgets.PulldownListsForObjects.</code><code class="descname">RestraintListPulldown</code><span class="sig-paren">(</span><em>parent</em>, <em>project</em>, <em>showBorder=False</em>, <em>orientation='left'</em>, <em>minimumWidths=(100</em>, <em>150)</em>, <em>maximumWidths=None</em>, <em>fixedWidths=None</em>, <em>labelText=None</em>, <em>showSelectName=False</em>, <em>callback=None</em>, <em>default=None</em>, <em>sizeAdjustPolicy=None</em>, <em>editable=False</em>, <em>filterFunction=None</em>, <em>useIds=False</em>, <em>setCurrent=False</em>, <em>followCurrent=False</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/PulldownListsForObjects.html#RestraintListPulldown"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.PulldownListsForObjects.RestraintListPulldown" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">ccpn.ui.gui.widgets.PulldownListsForObjects._PulldownABC</span></code></p>
-<p>A PulldownListCompoundWidget class for RestraintList&#8217;s</p>
+<p>A PulldownListCompoundWidget class for RestraintLists</p>
 <dl class="class">
 <dt id="ccpn.ui.gui.widgets.PulldownListsForObjects.RestraintListPulldown.RestraintList">
 <em class="property">class </em><code class="descname">RestraintList</code><span class="sig-paren">(</span><em>project</em>, <em>wrappedData</em><span class="sig-paren">)</span><a class="headerlink" href="#ccpn.ui.gui.widgets.PulldownListsForObjects.RestraintListPulldown.RestraintList" title="Permalink to this definition">¶</a></dt>
@@ -8417,7 +8592,7 @@ Unit for restraints</p>
 <dt id="ccpn.ui.gui.widgets.PulldownListsForObjects.RestraintPulldown">
 <em class="property">class </em><code class="descclassname">ccpn.ui.gui.widgets.PulldownListsForObjects.</code><code class="descname">RestraintPulldown</code><span class="sig-paren">(</span><em>parent</em>, <em>project</em>, <em>showBorder=False</em>, <em>orientation='left'</em>, <em>minimumWidths=(100</em>, <em>150)</em>, <em>maximumWidths=None</em>, <em>fixedWidths=None</em>, <em>labelText=None</em>, <em>showSelectName=False</em>, <em>callback=None</em>, <em>default=None</em>, <em>sizeAdjustPolicy=None</em>, <em>editable=False</em>, <em>filterFunction=None</em>, <em>useIds=False</em>, <em>setCurrent=False</em>, <em>followCurrent=False</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/PulldownListsForObjects.html#RestraintPulldown"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.PulldownListsForObjects.RestraintPulldown" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">ccpn.ui.gui.widgets.PulldownListsForObjects._PulldownABC</span></code></p>
-<p>A PulldownListCompoundWidget class for Restraint&#8217;s</p>
+<p>A PulldownListCompoundWidget class for Restraints</p>
 <dl class="class">
 <dt id="ccpn.ui.gui.widgets.PulldownListsForObjects.RestraintPulldown.Restraint">
 <em class="property">class </em><code class="descname">Restraint</code><a class="headerlink" href="#ccpn.ui.gui.widgets.PulldownListsForObjects.RestraintPulldown.Restraint" title="Permalink to this definition">¶</a></dt>
@@ -8580,7 +8755,7 @@ weight of restraint - consensus of all contributions or None</p>
 <dt id="ccpn.ui.gui.widgets.PulldownListsForObjects.SampleComponentPulldown">
 <em class="property">class </em><code class="descclassname">ccpn.ui.gui.widgets.PulldownListsForObjects.</code><code class="descname">SampleComponentPulldown</code><span class="sig-paren">(</span><em>parent</em>, <em>project</em>, <em>showBorder=False</em>, <em>orientation='left'</em>, <em>minimumWidths=(100</em>, <em>150)</em>, <em>maximumWidths=None</em>, <em>fixedWidths=None</em>, <em>labelText=None</em>, <em>showSelectName=False</em>, <em>callback=None</em>, <em>default=None</em>, <em>sizeAdjustPolicy=None</em>, <em>editable=False</em>, <em>filterFunction=None</em>, <em>useIds=False</em>, <em>setCurrent=False</em>, <em>followCurrent=False</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/PulldownListsForObjects.html#SampleComponentPulldown"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.PulldownListsForObjects.SampleComponentPulldown" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">ccpn.ui.gui.widgets.PulldownListsForObjects._PulldownABC</span></code></p>
-<p>A PulldownListCompoundWidget class for SampleComponent&#8217;s</p>
+<p>A PulldownListCompoundWidget class for SampleComponents</p>
 <dl class="class">
 <dt id="ccpn.ui.gui.widgets.PulldownListsForObjects.SampleComponentPulldown.SampleComponent">
 <em class="property">class </em><code class="descname">SampleComponent</code><a class="headerlink" href="#ccpn.ui.gui.widgets.PulldownListsForObjects.SampleComponentPulldown.SampleComponent" title="Permalink to this definition">¶</a></dt>
@@ -8695,7 +8870,7 @@ Substance corresponding to SampleComponent</p>
 <dt id="ccpn.ui.gui.widgets.PulldownListsForObjects.SamplePulldown">
 <em class="property">class </em><code class="descclassname">ccpn.ui.gui.widgets.PulldownListsForObjects.</code><code class="descname">SamplePulldown</code><span class="sig-paren">(</span><em>parent</em>, <em>project</em>, <em>showBorder=False</em>, <em>orientation='left'</em>, <em>minimumWidths=(100</em>, <em>150)</em>, <em>maximumWidths=None</em>, <em>fixedWidths=None</em>, <em>labelText=None</em>, <em>showSelectName=False</em>, <em>callback=None</em>, <em>default=None</em>, <em>sizeAdjustPolicy=None</em>, <em>editable=False</em>, <em>filterFunction=None</em>, <em>useIds=False</em>, <em>setCurrent=False</em>, <em>followCurrent=False</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/PulldownListsForObjects.html#SamplePulldown"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.PulldownListsForObjects.SamplePulldown" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">ccpn.ui.gui.widgets.PulldownListsForObjects._PulldownABC</span></code></p>
-<p>A PulldownListCompoundWidget class for Sample&#8217;s</p>
+<p>A PulldownListCompoundWidget class for Samples</p>
 <dl class="class">
 <dt id="ccpn.ui.gui.widgets.PulldownListsForObjects.SamplePulldown.Sample">
 <em class="property">class </em><code class="descname">Sample</code><a class="headerlink" href="#ccpn.ui.gui.widgets.PulldownListsForObjects.SamplePulldown.Sample" title="Permalink to this definition">¶</a></dt>
@@ -8875,10 +9050,263 @@ SpectrumHits that were found using Sample</p>
 </dd></dl>
 
 <dl class="class">
+<dt id="ccpn.ui.gui.widgets.PulldownListsForObjects.SpectrumDisplayPulldown">
+<em class="property">class </em><code class="descclassname">ccpn.ui.gui.widgets.PulldownListsForObjects.</code><code class="descname">SpectrumDisplayPulldown</code><span class="sig-paren">(</span><em>parent</em>, <em>project</em>, <em>showBorder=False</em>, <em>orientation='left'</em>, <em>minimumWidths=(100</em>, <em>150)</em>, <em>maximumWidths=None</em>, <em>fixedWidths=None</em>, <em>labelText=None</em>, <em>showSelectName=False</em>, <em>callback=None</em>, <em>default=None</em>, <em>sizeAdjustPolicy=None</em>, <em>editable=False</em>, <em>filterFunction=None</em>, <em>useIds=False</em>, <em>setCurrent=False</em>, <em>followCurrent=False</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/PulldownListsForObjects.html#SpectrumDisplayPulldown"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.PulldownListsForObjects.SpectrumDisplayPulldown" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">ccpn.ui.gui.widgets.PulldownListsForObjects._PulldownABC</span></code></p>
+<p>A PulldownListCompoundWidget class for SpectrumDisplays</p>
+<dl class="class">
+<dt id="ccpn.ui.gui.widgets.PulldownListsForObjects.SpectrumDisplayPulldown.SpectrumDisplay">
+<em class="property">class </em><code class="descname">SpectrumDisplay</code><a class="headerlink" href="#ccpn.ui.gui.widgets.PulldownListsForObjects.SpectrumDisplayPulldown.SpectrumDisplay" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">ccpn.core._implementation.AbstractWrapperObject.AbstractWrapperObject</span></code></p>
+<p>Spectrum display for 1D or nD spectrum</p>
+<dl class="attribute">
+<dt id="ccpn.ui.gui.widgets.PulldownListsForObjects.SpectrumDisplayPulldown.SpectrumDisplay.axes">
+<code class="descname">axes</code><a class="headerlink" href="#ccpn.ui.gui.widgets.PulldownListsForObjects.SpectrumDisplayPulldown.SpectrumDisplay.axes" title="Permalink to this definition">¶</a></dt>
+<dd><p>- <em>(&#8216;ccpn.ui._implementation.Axis.Axis,)</em>  - contained Axis objects in order of underlying key. This may differ from the standard sorting order</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ccpn.ui.gui.widgets.PulldownListsForObjects.SpectrumDisplayPulldown.SpectrumDisplay.axisCodes">
+<code class="descname">axisCodes</code><a class="headerlink" href="#ccpn.ui.gui.widgets.PulldownListsForObjects.SpectrumDisplayPulldown.SpectrumDisplay.axisCodes" title="Permalink to this definition">¶</a></dt>
+<dd><p>- <em>Tuple[str, ...]</em>, <em>immutable</em> - 
+Fixed string Axis codes in original display order (X, Y, Z1, Z2, ...)</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ccpn.ui.gui.widgets.PulldownListsForObjects.SpectrumDisplayPulldown.SpectrumDisplay.axisOrder">
+<code class="descname">axisOrder</code><a class="headerlink" href="#ccpn.ui.gui.widgets.PulldownListsForObjects.SpectrumDisplayPulldown.SpectrumDisplay.axisOrder" title="Permalink to this definition">¶</a></dt>
+<dd><p>- <em>Tuple[str, ...]</em>, <em>mutable</em> - 
+String Axis codes in display order (X, Y, Z1, Z2, ...), determine axis display order</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ccpn.ui.gui.widgets.PulldownListsForObjects.SpectrumDisplayPulldown.SpectrumDisplay.className">
+<code class="descname">className</code><em class="property"> = 'SpectrumDisplay'</em><a class="headerlink" href="#ccpn.ui.gui.widgets.PulldownListsForObjects.SpectrumDisplayPulldown.SpectrumDisplay.className" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.widgets.PulldownListsForObjects.SpectrumDisplayPulldown.SpectrumDisplay.clearParameters">
+<code class="descname">clearParameters</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ccpn.ui.gui.widgets.PulldownListsForObjects.SpectrumDisplayPulldown.SpectrumDisplay.clearParameters" title="Permalink to this definition">¶</a></dt>
+<dd><p>Delete all parameters</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.widgets.PulldownListsForObjects.SpectrumDisplayPulldown.SpectrumDisplay.copyStrip">
+<code class="descname">copyStrip</code><span class="sig-paren">(</span><em>strip: ccpn.ui._implementation.Strip.Strip</em>, <em>newIndex=None</em><span class="sig-paren">)</span> &rarr; ccpn.ui._implementation.Strip.Strip<a class="headerlink" href="#ccpn.ui.gui.widgets.PulldownListsForObjects.SpectrumDisplayPulldown.SpectrumDisplay.copyStrip" title="Permalink to this definition">¶</a></dt>
+<dd><p>Make copy of strip in self, at position newIndex - or rightmost.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.widgets.PulldownListsForObjects.SpectrumDisplayPulldown.SpectrumDisplay.deleteParameter">
+<code class="descname">deleteParameter</code><span class="sig-paren">(</span><em>name: str</em><span class="sig-paren">)</span><a class="headerlink" href="#ccpn.ui.gui.widgets.PulldownListsForObjects.SpectrumDisplayPulldown.SpectrumDisplay.deleteParameter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Delete parameter named &#8216;name&#8217;</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.widgets.PulldownListsForObjects.SpectrumDisplayPulldown.SpectrumDisplay.findAxis">
+<code class="descname">findAxis</code><span class="sig-paren">(</span><em>axisCode</em><span class="sig-paren">)</span><a class="headerlink" href="#ccpn.ui.gui.widgets.PulldownListsForObjects.SpectrumDisplayPulldown.SpectrumDisplay.findAxis" title="Permalink to this definition">¶</a></dt>
+<dd><p>Find axis</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.widgets.PulldownListsForObjects.SpectrumDisplayPulldown.SpectrumDisplay.getAxis">
+<code class="descname">getAxis</code><span class="sig-paren">(</span><em>relativeId: str</em><span class="sig-paren">)</span> &rarr; ccpn.ui._implementation.Axis.Axis<a class="headerlink" href="#ccpn.ui.gui.widgets.PulldownListsForObjects.SpectrumDisplayPulldown.SpectrumDisplay.getAxis" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get contained &#8216;ccpn.ui._implementation.Axis.Axis object by relative ID</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.widgets.PulldownListsForObjects.SpectrumDisplayPulldown.SpectrumDisplay.getIntegralListView">
+<code class="descname">getIntegralListView</code><span class="sig-paren">(</span><em>relativeId: str</em><span class="sig-paren">)</span> &rarr; ccpn.ui._implementation.IntegralListView.IntegralListView<a class="headerlink" href="#ccpn.ui.gui.widgets.PulldownListsForObjects.SpectrumDisplayPulldown.SpectrumDisplay.getIntegralListView" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get contained &#8216;ccpn.ui._implementation.IntegralListView.IntegralListView object by relative ID</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.widgets.PulldownListsForObjects.SpectrumDisplayPulldown.SpectrumDisplay.getMultipletListView">
+<code class="descname">getMultipletListView</code><span class="sig-paren">(</span><em>relativeId: str</em><span class="sig-paren">)</span> &rarr; ccpn.ui._implementation.MultipletListView.MultipletListView<a class="headerlink" href="#ccpn.ui.gui.widgets.PulldownListsForObjects.SpectrumDisplayPulldown.SpectrumDisplay.getMultipletListView" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get contained &#8216;ccpn.ui._implementation.MultipletListView.MultipletListView object by relative ID</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.widgets.PulldownListsForObjects.SpectrumDisplayPulldown.SpectrumDisplay.getOrderedSpectrumViewsIndex">
+<code class="descname">getOrderedSpectrumViewsIndex</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ccpn.ui.gui.widgets.PulldownListsForObjects.SpectrumDisplayPulldown.SpectrumDisplay.getOrderedSpectrumViewsIndex" title="Permalink to this definition">¶</a></dt>
+<dd><p>The indexing of the current spectrumViews
+:return tuple of ints:</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.widgets.PulldownListsForObjects.SpectrumDisplayPulldown.SpectrumDisplay.getPeakListView">
+<code class="descname">getPeakListView</code><span class="sig-paren">(</span><em>relativeId: str</em><span class="sig-paren">)</span> &rarr; ccpn.ui._implementation.PeakListView.PeakListView<a class="headerlink" href="#ccpn.ui.gui.widgets.PulldownListsForObjects.SpectrumDisplayPulldown.SpectrumDisplay.getPeakListView" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get contained &#8216;ccpn.ui._implementation.PeakListView.PeakListView object by relative ID</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.widgets.PulldownListsForObjects.SpectrumDisplayPulldown.SpectrumDisplay.getSpectrumView">
+<code class="descname">getSpectrumView</code><span class="sig-paren">(</span><em>relativeId: str</em><span class="sig-paren">)</span> &rarr; ccpn.ui._implementation.SpectrumView.SpectrumView<a class="headerlink" href="#ccpn.ui.gui.widgets.PulldownListsForObjects.SpectrumDisplayPulldown.SpectrumDisplay.getSpectrumView" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get contained &#8216;ccpn.ui._implementation.SpectrumView.SpectrumView object by relative ID</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.widgets.PulldownListsForObjects.SpectrumDisplayPulldown.SpectrumDisplay.getStrip">
+<code class="descname">getStrip</code><span class="sig-paren">(</span><em>relativeId: str</em><span class="sig-paren">)</span> &rarr; ccpn.ui._implementation.Strip.Strip<a class="headerlink" href="#ccpn.ui.gui.widgets.PulldownListsForObjects.SpectrumDisplayPulldown.SpectrumDisplay.getStrip" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get contained &#8216;ccpn.ui._implementation.Strip.Strip object by relative ID</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ccpn.ui.gui.widgets.PulldownListsForObjects.SpectrumDisplayPulldown.SpectrumDisplay.integralListViews">
+<code class="descname">integralListViews</code><a class="headerlink" href="#ccpn.ui.gui.widgets.PulldownListsForObjects.SpectrumDisplayPulldown.SpectrumDisplay.integralListViews" title="Permalink to this definition">¶</a></dt>
+<dd><p>- <em>(&#8216;ccpn.ui._implementation.IntegralListView.IntegralListView,)</em>  - contained IntegralListView objects in order of underlying key. This may differ from the standard sorting order</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ccpn.ui.gui.widgets.PulldownListsForObjects.SpectrumDisplayPulldown.SpectrumDisplay.is1D">
+<code class="descname">is1D</code><a class="headerlink" href="#ccpn.ui.gui.widgets.PulldownListsForObjects.SpectrumDisplayPulldown.SpectrumDisplay.is1D" title="Permalink to this definition">¶</a></dt>
+<dd><p>- <em>bool</em>, <em>immutable</em> - 
+True if this is a 1D display.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ccpn.ui.gui.widgets.PulldownListsForObjects.SpectrumDisplayPulldown.SpectrumDisplay.multipletListViews">
+<code class="descname">multipletListViews</code><a class="headerlink" href="#ccpn.ui.gui.widgets.PulldownListsForObjects.SpectrumDisplayPulldown.SpectrumDisplay.multipletListViews" title="Permalink to this definition">¶</a></dt>
+<dd><p>- <em>(&#8216;ccpn.ui._implementation.MultipletListView.MultipletListView,)</em>  - contained MultipletListView objects in order of underlying key. This may differ from the standard sorting order</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ccpn.ui.gui.widgets.PulldownListsForObjects.SpectrumDisplayPulldown.SpectrumDisplay.nmrResidue">
+<code class="descname">nmrResidue</code><a class="headerlink" href="#ccpn.ui.gui.widgets.PulldownListsForObjects.SpectrumDisplayPulldown.SpectrumDisplay.nmrResidue" title="Permalink to this definition">¶</a></dt>
+<dd><p>- <em>ccpn.core.NmrResidue.NmrResidue</em>, <em>mutable</em> - 
+NmrResidue attached to SpectrumDisplay</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.widgets.PulldownListsForObjects.SpectrumDisplayPulldown.SpectrumDisplay.orderedSpectrumViews">
+<code class="descname">orderedSpectrumViews</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ccpn.ui.gui.widgets.PulldownListsForObjects.SpectrumDisplayPulldown.SpectrumDisplay.orderedSpectrumViews" title="Permalink to this definition">¶</a></dt>
+<dd><p>The spectrumViews attached to the strip (ordered)
+:return tuple of SpectrumViews:</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ccpn.ui.gui.widgets.PulldownListsForObjects.SpectrumDisplayPulldown.SpectrumDisplay.orderedStrips">
+<code class="descname">orderedStrips</code><a class="headerlink" href="#ccpn.ui.gui.widgets.PulldownListsForObjects.SpectrumDisplayPulldown.SpectrumDisplay.orderedStrips" title="Permalink to this definition">¶</a></dt>
+<dd><p>- <em>None</em>, <em>immutable</em> - 
+Return the ccpn.Strips in displayed order</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ccpn.ui.gui.widgets.PulldownListsForObjects.SpectrumDisplayPulldown.SpectrumDisplay.parameters">
+<code class="descname">parameters</code><a class="headerlink" href="#ccpn.ui.gui.widgets.PulldownListsForObjects.SpectrumDisplayPulldown.SpectrumDisplay.parameters" title="Permalink to this definition">¶</a></dt>
+<dd><p>- <em>dict</em>, <em>immutable</em> - 
+Keyword-value dictionary of parameters.
+NB the value is a copy - modifying it will not modify the actual data.</p>
+<p>Values can be anything that can be exported to JSON,
+including OrderedDict, numpy.ndarray, ccpn.util.Tensor,
+or pandas DataFrame, Series, or Panel</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ccpn.ui.gui.widgets.PulldownListsForObjects.SpectrumDisplayPulldown.SpectrumDisplay.peakListViews">
+<code class="descname">peakListViews</code><a class="headerlink" href="#ccpn.ui.gui.widgets.PulldownListsForObjects.SpectrumDisplayPulldown.SpectrumDisplay.peakListViews" title="Permalink to this definition">¶</a></dt>
+<dd><p>- <em>(&#8216;ccpn.ui._implementation.PeakListView.PeakListView,)</em>  - contained PeakListView objects in order of underlying key. This may differ from the standard sorting order</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ccpn.ui.gui.widgets.PulldownListsForObjects.SpectrumDisplayPulldown.SpectrumDisplay.positions">
+<code class="descname">positions</code><a class="headerlink" href="#ccpn.ui.gui.widgets.PulldownListsForObjects.SpectrumDisplayPulldown.SpectrumDisplay.positions" title="Permalink to this definition">¶</a></dt>
+<dd><p>- <em>Tuple[float, ...]</em>, <em>mutable</em> - 
+Axis centre positions, in display order</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ccpn.ui.gui.widgets.PulldownListsForObjects.SpectrumDisplayPulldown.SpectrumDisplay.project">
+<code class="descname">project</code><a class="headerlink" href="#ccpn.ui.gui.widgets.PulldownListsForObjects.SpectrumDisplayPulldown.SpectrumDisplay.project" title="Permalink to this definition">¶</a></dt>
+<dd><p>- <em>ccpn.core.Project.Project</em>, <em>immutable</em> - 
+Project containing spectrumDisplay.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.widgets.PulldownListsForObjects.SpectrumDisplayPulldown.SpectrumDisplay.removeOrderedSpectrumView">
+<code class="descname">removeOrderedSpectrumView</code><span class="sig-paren">(</span><em>ind</em><span class="sig-paren">)</span><a class="headerlink" href="#ccpn.ui.gui.widgets.PulldownListsForObjects.SpectrumDisplayPulldown.SpectrumDisplay.removeOrderedSpectrumView" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.widgets.PulldownListsForObjects.SpectrumDisplayPulldown.SpectrumDisplay.resetAxisOrder">
+<code class="descname">resetAxisOrder</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ccpn.ui.gui.widgets.PulldownListsForObjects.SpectrumDisplayPulldown.SpectrumDisplay.resetAxisOrder" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reset display to original axis order</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.widgets.PulldownListsForObjects.SpectrumDisplayPulldown.SpectrumDisplay.setOrderedSpectrumViewsIndex">
+<code class="descname">setOrderedSpectrumViewsIndex</code><span class="sig-paren">(</span><em>spectrumIndex: Tuple[]</em><span class="sig-paren">)</span><a class="headerlink" href="#ccpn.ui.gui.widgets.PulldownListsForObjects.SpectrumDisplayPulldown.SpectrumDisplay.setOrderedSpectrumViewsIndex" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the new indexing of the spectrumViews attached to the strip/spectrumDisplay
+:param newIndex - tuple of int:</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.widgets.PulldownListsForObjects.SpectrumDisplayPulldown.SpectrumDisplay.setParameter">
+<code class="descname">setParameter</code><span class="sig-paren">(</span><em>name: str</em>, <em>value</em><span class="sig-paren">)</span><a class="headerlink" href="#ccpn.ui.gui.widgets.PulldownListsForObjects.SpectrumDisplayPulldown.SpectrumDisplay.setParameter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add name:value to parameters, overwriting existing entries</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ccpn.ui.gui.widgets.PulldownListsForObjects.SpectrumDisplayPulldown.SpectrumDisplay.shortClassName">
+<code class="descname">shortClassName</code><em class="property"> = 'GD'</em><a class="headerlink" href="#ccpn.ui.gui.widgets.PulldownListsForObjects.SpectrumDisplayPulldown.SpectrumDisplay.shortClassName" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ccpn.ui.gui.widgets.PulldownListsForObjects.SpectrumDisplayPulldown.SpectrumDisplay.spectrumViews">
+<code class="descname">spectrumViews</code><a class="headerlink" href="#ccpn.ui.gui.widgets.PulldownListsForObjects.SpectrumDisplayPulldown.SpectrumDisplay.spectrumViews" title="Permalink to this definition">¶</a></dt>
+<dd><p>- <em>(&#8216;ccpn.ui._implementation.SpectrumView.SpectrumView,)</em>  - contained SpectrumView objects in order of underlying key. This may differ from the standard sorting order</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ccpn.ui.gui.widgets.PulldownListsForObjects.SpectrumDisplayPulldown.SpectrumDisplay.stripCount">
+<code class="descname">stripCount</code><a class="headerlink" href="#ccpn.ui.gui.widgets.PulldownListsForObjects.SpectrumDisplayPulldown.SpectrumDisplay.stripCount" title="Permalink to this definition">¶</a></dt>
+<dd><p>- <em>str</em>, <em>immutable</em> - 
+Number of strips</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ccpn.ui.gui.widgets.PulldownListsForObjects.SpectrumDisplayPulldown.SpectrumDisplay.strips">
+<code class="descname">strips</code><a class="headerlink" href="#ccpn.ui.gui.widgets.PulldownListsForObjects.SpectrumDisplayPulldown.SpectrumDisplay.strips" title="Permalink to this definition">¶</a></dt>
+<dd><p>- <em>(&#8216;ccpn.ui._implementation.Strip.Strip,)</em>  - contained Strip objects in creation order. This may differ from the standard sorting order</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ccpn.ui.gui.widgets.PulldownListsForObjects.SpectrumDisplayPulldown.SpectrumDisplay.title">
+<code class="descname">title</code><a class="headerlink" href="#ccpn.ui.gui.widgets.PulldownListsForObjects.SpectrumDisplayPulldown.SpectrumDisplay.title" title="Permalink to this definition">¶</a></dt>
+<dd><p>- <em>str</em>, <em>immutable</em> - 
+SpectrumDisplay title</p>
+<p>(corresponds to its name, but the name &#8216;name&#8217; is taken by PyQt</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ccpn.ui.gui.widgets.PulldownListsForObjects.SpectrumDisplayPulldown.SpectrumDisplay.units">
+<code class="descname">units</code><a class="headerlink" href="#ccpn.ui.gui.widgets.PulldownListsForObjects.SpectrumDisplayPulldown.SpectrumDisplay.units" title="Permalink to this definition">¶</a></dt>
+<dd><p>- <em>Tuple[str, ...]</em>, <em>immutable</em> - 
+Axis units, in display order</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.widgets.PulldownListsForObjects.SpectrumDisplayPulldown.SpectrumDisplay.updateParameters">
+<code class="descname">updateParameters</code><span class="sig-paren">(</span><em>value: dict</em><span class="sig-paren">)</span><a class="headerlink" href="#ccpn.ui.gui.widgets.PulldownListsForObjects.SpectrumDisplayPulldown.SpectrumDisplay.updateParameters" title="Permalink to this definition">¶</a></dt>
+<dd><p>update parameters</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ccpn.ui.gui.widgets.PulldownListsForObjects.SpectrumDisplayPulldown.SpectrumDisplay.widths">
+<code class="descname">widths</code><a class="headerlink" href="#ccpn.ui.gui.widgets.PulldownListsForObjects.SpectrumDisplayPulldown.SpectrumDisplay.widths" title="Permalink to this definition">¶</a></dt>
+<dd><p>- <em>Tuple[float, ...]</em>, <em>mutable</em> - 
+Axis display widths, in display order</p>
+</dd></dl>
+
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
 <dt id="ccpn.ui.gui.widgets.PulldownListsForObjects.SpectrumGroupPulldown">
 <em class="property">class </em><code class="descclassname">ccpn.ui.gui.widgets.PulldownListsForObjects.</code><code class="descname">SpectrumGroupPulldown</code><span class="sig-paren">(</span><em>parent</em>, <em>project</em>, <em>showBorder=False</em>, <em>orientation='left'</em>, <em>minimumWidths=(100</em>, <em>150)</em>, <em>maximumWidths=None</em>, <em>fixedWidths=None</em>, <em>labelText=None</em>, <em>showSelectName=False</em>, <em>callback=None</em>, <em>default=None</em>, <em>sizeAdjustPolicy=None</em>, <em>editable=False</em>, <em>filterFunction=None</em>, <em>useIds=False</em>, <em>setCurrent=False</em>, <em>followCurrent=False</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/PulldownListsForObjects.html#SpectrumGroupPulldown"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.PulldownListsForObjects.SpectrumGroupPulldown" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">ccpn.ui.gui.widgets.PulldownListsForObjects._PulldownABC</span></code></p>
-<p>A PulldownListCompoundWidget class for SpectrumGroup&#8217;s</p>
+<p>A PulldownListCompoundWidget class for SpectrumGroups</p>
 <dl class="class">
 <dt id="ccpn.ui.gui.widgets.PulldownListsForObjects.SpectrumGroupPulldown.SpectrumGroup">
 <em class="property">class </em><code class="descname">SpectrumGroup</code><span class="sig-paren">(</span><em>project</em>, <em>wrappedData</em><span class="sig-paren">)</span><a class="headerlink" href="#ccpn.ui.gui.widgets.PulldownListsForObjects.SpectrumGroupPulldown.SpectrumGroup" title="Permalink to this definition">¶</a></dt>
@@ -8934,7 +9362,7 @@ Spectra that make up SpectrumGroup.</p>
 <dt id="ccpn.ui.gui.widgets.PulldownListsForObjects.SpectrumHitPulldown">
 <em class="property">class </em><code class="descclassname">ccpn.ui.gui.widgets.PulldownListsForObjects.</code><code class="descname">SpectrumHitPulldown</code><span class="sig-paren">(</span><em>parent</em>, <em>project</em>, <em>showBorder=False</em>, <em>orientation='left'</em>, <em>minimumWidths=(100</em>, <em>150)</em>, <em>maximumWidths=None</em>, <em>fixedWidths=None</em>, <em>labelText=None</em>, <em>showSelectName=False</em>, <em>callback=None</em>, <em>default=None</em>, <em>sizeAdjustPolicy=None</em>, <em>editable=False</em>, <em>filterFunction=None</em>, <em>useIds=False</em>, <em>setCurrent=False</em>, <em>followCurrent=False</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/PulldownListsForObjects.html#SpectrumHitPulldown"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.PulldownListsForObjects.SpectrumHitPulldown" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">ccpn.ui.gui.widgets.PulldownListsForObjects._PulldownABC</span></code></p>
-<p>A PulldownListCompoundWidget class for SpectrumHit&#8217;s</p>
+<p>A PulldownListCompoundWidget class for SpectrumHits</p>
 <dl class="class">
 <dt id="ccpn.ui.gui.widgets.PulldownListsForObjects.SpectrumHitPulldown.SpectrumHit">
 <em class="property">class </em><code class="descname">SpectrumHit</code><a class="headerlink" href="#ccpn.ui.gui.widgets.PulldownListsForObjects.SpectrumHitPulldown.SpectrumHit" title="Permalink to this definition">¶</a></dt>
@@ -9067,7 +9495,7 @@ Name of hit substance</p>
 <dt id="ccpn.ui.gui.widgets.PulldownListsForObjects.SpectrumPulldown">
 <em class="property">class </em><code class="descclassname">ccpn.ui.gui.widgets.PulldownListsForObjects.</code><code class="descname">SpectrumPulldown</code><span class="sig-paren">(</span><em>parent</em>, <em>project</em>, <em>showBorder=False</em>, <em>orientation='left'</em>, <em>minimumWidths=(100</em>, <em>150)</em>, <em>maximumWidths=None</em>, <em>fixedWidths=None</em>, <em>labelText=None</em>, <em>showSelectName=False</em>, <em>callback=None</em>, <em>default=None</em>, <em>sizeAdjustPolicy=None</em>, <em>editable=False</em>, <em>filterFunction=None</em>, <em>useIds=False</em>, <em>setCurrent=False</em>, <em>followCurrent=False</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/PulldownListsForObjects.html#SpectrumPulldown"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.PulldownListsForObjects.SpectrumPulldown" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">ccpn.ui.gui.widgets.PulldownListsForObjects._PulldownABC</span></code></p>
-<p>A PulldownListCompoundWidget class for Spectrum&#8217;s</p>
+<p>A PulldownListCompoundWidget class for Spectrums</p>
 <dl class="class">
 <dt id="ccpn.ui.gui.widgets.PulldownListsForObjects.SpectrumPulldown.Spectrum">
 <em class="property">class </em><code class="descname">Spectrum</code><span class="sig-paren">(</span><em>project: ccpn.core.Project.Project</em>, <em>wrappedData: ccpnmodel.ccpncore.api.ccp.nmr.Nmr.ShiftList</em><span class="sig-paren">)</span><a class="headerlink" href="#ccpn.ui.gui.widgets.PulldownListsForObjects.SpectrumPulldown.Spectrum" title="Permalink to this definition">¶</a></dt>
@@ -9092,6 +9520,15 @@ Axis code of acquisition axis - None if not known</p>
 <dd><p>- <em>Tuple[Tuple[float, None], float=None] | ...</em>, <em>mutable</em> - 
 - (<em>(float,float)</em>)*dimensionCount</p>
 <p>tuple of tuples of (lowerAliasingLimit, higherAliasingLimit) for spectrum</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ccpn.ui.gui.widgets.PulldownListsForObjects.SpectrumPulldown.Spectrum.aliasingRange">
+<code class="descname">aliasingRange</code><a class="headerlink" href="#ccpn.ui.gui.widgets.PulldownListsForObjects.SpectrumPulldown.Spectrum.aliasingRange" title="Permalink to this definition">¶</a></dt>
+<dd><p>- <em>Tuple[Tuple, ...]=None</em>, <em>mutable</em> - 
+Return a tuple of the aliasing range in each dimension, or None of not set
+Note, this is an attribute, not a property;
+to get the property use spectrum._getAliasingRange, or peakList._getAliasingRange</p>
 </dd></dl>
 
 <dl class="method">
@@ -9147,6 +9584,12 @@ ccpn.ChemicalShiftList used for ccpn.Spectrum</p>
 Hypercomplex numbers are stored by (&#8216;timepoint&#8217;, &#8216;quadrant&#8217;, or &#8216;dimension&#8217;).</p>
 </dd></dl>
 
+<dl class="method">
+<dt id="ccpn.ui.gui.widgets.PulldownListsForObjects.SpectrumPulldown.Spectrum.copyParameters">
+<code class="descname">copyParameters</code><span class="sig-paren">(</span><em>axisCodes</em>, <em>target</em><span class="sig-paren">)</span><a class="headerlink" href="#ccpn.ui.gui.widgets.PulldownListsForObjects.SpectrumPulldown.Spectrum.copyParameters" title="Permalink to this definition">¶</a></dt>
+<dd><p>Copy non-dimensional and dimensional parameters for axisCodes from self to target</p>
+</dd></dl>
+
 <dl class="attribute">
 <dt id="ccpn.ui.gui.widgets.PulldownListsForObjects.SpectrumPulldown.Spectrum.defaultAssignmentTolerances">
 <code class="descname">defaultAssignmentTolerances</code><a class="headerlink" href="#ccpn.ui.gui.widgets.PulldownListsForObjects.SpectrumPulldown.Spectrum.defaultAssignmentTolerances" title="Permalink to this definition">¶</a></dt>
@@ -9183,6 +9626,13 @@ tuple of length dimensionCount with dimesnion integers; ie. (1,2,3,..).
 Useful for mapping axisCodes: eg: self.getByAxisCodes(&#8216;dimensions&#8217;, [&#8216;N&#8217;,&#8217;C&#8217;,&#8217;H&#8217;]</p>
 </dd></dl>
 
+<dl class="attribute">
+<dt id="ccpn.ui.gui.widgets.PulldownListsForObjects.SpectrumPulldown.Spectrum.displayFoldedContours">
+<code class="descname">displayFoldedContours</code><a class="headerlink" href="#ccpn.ui.gui.widgets.PulldownListsForObjects.SpectrumPulldown.Spectrum.displayFoldedContours" title="Permalink to this definition">¶</a></dt>
+<dd><p>- <em>None</em>, <em>mutable</em> - 
+Return whether the folded spectrum contours are to be displayed</p>
+</dd></dl>
+
 <dl class="method">
 <dt id="ccpn.ui.gui.widgets.PulldownListsForObjects.SpectrumPulldown.Spectrum.estimateNoise">
 <code class="descname">estimateNoise</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ccpn.ui.gui.widgets.PulldownListsForObjects.SpectrumPulldown.Spectrum.estimateNoise" title="Permalink to this definition">¶</a></dt>
@@ -9210,6 +9660,54 @@ Systematic experiment type descriptor (CCPN system).</p>
 </dd></dl>
 
 <dl class="attribute">
+<dt id="ccpn.ui.gui.widgets.PulldownListsForObjects.SpectrumPulldown.Spectrum.extendAliasingRangeFlag">
+<code class="descname">extendAliasingRangeFlag</code><a class="headerlink" href="#ccpn.ui.gui.widgets.PulldownListsForObjects.SpectrumPulldown.Spectrum.extendAliasingRangeFlag" title="Permalink to this definition">¶</a></dt>
+<dd><p>- <em>None</em>, <em>mutable</em> - 
+Return whether the aliasingRange needs to be extended when aliasing
+of peaks has changed - from spectrumProperties popup</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.widgets.PulldownListsForObjects.SpectrumPulldown.Spectrum.extractPlaneToFile">
+<code class="descname">extractPlaneToFile</code><span class="sig-paren">(</span><em>axisCodes: tuple</em>, <em>position=None</em>, <em>path=None</em><span class="sig-paren">)</span><a class="headerlink" href="#ccpn.ui.gui.widgets.PulldownListsForObjects.SpectrumPulldown.Spectrum.extractPlaneToFile" title="Permalink to this definition">¶</a></dt>
+<dd><p>Save plane defined by a tuple of two axisCodes and position
+to file. Save to path (auto-generated if None).</p>
+<p>:returns plane as Spectrum instance</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.widgets.PulldownListsForObjects.SpectrumPulldown.Spectrum.extractProjectionToFile">
+<code class="descname">extractProjectionToFile</code><span class="sig-paren">(</span><em>axisCodes: tuple</em>, <em>method: str = 'max'</em>, <em>threshold=None</em>, <em>path=None</em><span class="sig-paren">)</span><a class="headerlink" href="#ccpn.ui.gui.widgets.PulldownListsForObjects.SpectrumPulldown.Spectrum.extractProjectionToFile" title="Permalink to this definition">¶</a></dt>
+<dd><p>Save projected plane defined by a tuple of two axisCodes, using method and an optional threshold
+to file. Save to path (auto-generated if None) using format
+return projected spectrum as Spectrum instance</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.widgets.PulldownListsForObjects.SpectrumPulldown.Spectrum.extractSliceToFile">
+<code class="descname">extractSliceToFile</code><span class="sig-paren">(</span><em>axisCode</em>, <em>position</em>, <em>path=None</em><span class="sig-paren">)</span><a class="headerlink" href="#ccpn.ui.gui.widgets.PulldownListsForObjects.SpectrumPulldown.Spectrum.extractSliceToFile" title="Permalink to this definition">¶</a></dt>
+<dd><p>Extract 1d slice from self as new Spectrum; saved to path
+(auto-generated if not given)
+if 1D it effectively yields a copy of self</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>axisCode</strong> &#8211; axiscode of slice to extract</li>
+<li><strong>position</strong> &#8211; position vector (1-based)</li>
+<li><strong>path</strong> &#8211; optional path; constructed from current filePath and name of instance</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">Spectrum instance</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
 <dt id="ccpn.ui.gui.widgets.PulldownListsForObjects.SpectrumPulldown.Spectrum.filePath">
 <code class="descname">filePath</code><a class="headerlink" href="#ccpn.ui.gui.widgets.PulldownListsForObjects.SpectrumPulldown.Spectrum.filePath" title="Permalink to this definition">¶</a></dt>
 <dd><p>- <em>str=None</em>, <em>mutable</em> - 
@@ -9231,13 +9729,6 @@ Gaussian broadening per dimension. Always None for sampled dimensions.</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="ccpn.ui.gui.widgets.PulldownListsForObjects.SpectrumPulldown.Spectrum.get1dSpectrumData">
-<code class="descname">get1dSpectrumData</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ccpn.ui.gui.widgets.PulldownListsForObjects.SpectrumPulldown.Spectrum.get1dSpectrumData" title="Permalink to this definition">¶</a></dt>
-<dd><p>Get position,scaledData numpy array for 1D spectrum.
-Yields first 1D slice for nD</p>
-</dd></dl>
-
-<dl class="method">
 <dt id="ccpn.ui.gui.widgets.PulldownListsForObjects.SpectrumPulldown.Spectrum.getByAxisCodes">
 <code class="descname">getByAxisCodes</code><span class="sig-paren">(</span><em>attributeName: str</em>, <em>axisCodes: Sequence[] = None</em>, <em>exactMatch: bool = False</em><span class="sig-paren">)</span><a class="headerlink" href="#ccpn.ui.gui.widgets.PulldownListsForObjects.SpectrumPulldown.Spectrum.getByAxisCodes" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return values defined by attributeName in order defined by axisCodes:
@@ -9253,6 +9744,11 @@ Yields first 1D slice for nD</p>
 (default order if None)
 NB: Use getByAxisCodes for axisCode based access</p>
 </dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.widgets.PulldownListsForObjects.SpectrumPulldown.Spectrum.getDefaultOrdering">
+<code class="descname">getDefaultOrdering</code><span class="sig-paren">(</span><em>axisOrder</em><span class="sig-paren">)</span><a class="headerlink" href="#ccpn.ui.gui.widgets.PulldownListsForObjects.SpectrumPulldown.Spectrum.getDefaultOrdering" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 <dl class="method">
 <dt id="ccpn.ui.gui.widgets.PulldownListsForObjects.SpectrumPulldown.Spectrum.getHeight">
@@ -9301,7 +9797,7 @@ NB: Use getByAxisCodes for axisCode based access</p>
 <code class="descname">getPlane</code><span class="sig-paren">(</span><em>axisCodes: tuple</em>, <em>position=None</em>, <em>exactMatch=True</em><span class="sig-paren">)</span><a class="headerlink" href="#ccpn.ui.gui.widgets.PulldownListsForObjects.SpectrumPulldown.Spectrum.getPlane" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get a plane defined by a tuple of two axisCodes, and a position vector (&#8216;1&#8217; based, defaults to first point)
 Expand axisCodes if exactMatch=False
-return data array
+returns np-data array
 NB: use getPlaneData method for dimension based access</p>
 </dd></dl>
 
@@ -9337,10 +9833,9 @@ Dimensionality must be &gt;= 2</p>
 
 <dl class="method">
 <dt id="ccpn.ui.gui.widgets.PulldownListsForObjects.SpectrumPulldown.Spectrum.getProjection">
-<code class="descname">getProjection</code><span class="sig-paren">(</span><em>axisCodes: tuple</em>, <em>method: str = 'max'</em>, <em>threshold=None</em>, <em>path=None</em>, <em>format: str = 'NmrPipe'</em><span class="sig-paren">)</span><a class="headerlink" href="#ccpn.ui.gui.widgets.PulldownListsForObjects.SpectrumPulldown.Spectrum.getProjection" title="Permalink to this definition">¶</a></dt>
+<code class="descname">getProjection</code><span class="sig-paren">(</span><em>axisCodes: tuple</em>, <em>method: str = 'max'</em>, <em>threshold=None</em><span class="sig-paren">)</span><a class="headerlink" href="#ccpn.ui.gui.widgets.PulldownListsForObjects.SpectrumPulldown.Spectrum.getProjection" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get projected plane defined by a tuple of two axisCodes, using method and an optional threshold
-optionally save to path as format
-return projected spectrum data array</p>
+return projected spectrum data as NumPy data array</p>
 </dd></dl>
 
 <dl class="method">
@@ -9351,7 +9846,7 @@ return projected spectrum data array</p>
 
 <dl class="method">
 <dt id="ccpn.ui.gui.widgets.PulldownListsForObjects.SpectrumPulldown.Spectrum.getRegionData">
-<code class="descname">getRegionData</code><span class="sig-paren">(</span><em>exclusionBuffer=None</em>, <em>**axisDict</em><span class="sig-paren">)</span><a class="headerlink" href="#ccpn.ui.gui.widgets.PulldownListsForObjects.SpectrumPulldown.Spectrum.getRegionData" title="Permalink to this definition">¶</a></dt>
+<code class="descname">getRegionData</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ccpn.ui.gui.widgets.PulldownListsForObjects.SpectrumPulldown.Spectrum.getRegionData" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return the region of the spectrum data defined by the axis limits.</p>
 <p>Axis limits are passed in as a dict containing the axis codes and the required limits.
 Each limit is defined as a key, value pair: (str, tuple),
@@ -9365,26 +9860,52 @@ with the tuple supplied as (min,max) axis limits in ppm.</p>
 </pre></div>
 </div>
 <p>Example calling function:</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">regionData</span> <span class="o">=</span> <span class="n">spectrum</span><span class="o">.</span><span class="n">getRegionData</span><span class="p">(</span><span class="o">**</span><span class="n">limitsDict</span><span class="p">)</span>
-<span class="n">regionData</span> <span class="o">=</span> <span class="n">spectrum</span><span class="o">.</span><span class="n">getRegionData</span><span class="p">(</span><span class="n">Hn</span><span class="o">=</span><span class="p">(</span><span class="mf">7.0</span><span class="p">,</span> <span class="mf">9.0</span><span class="p">),</span> <span class="n">Nh</span><span class="o">=</span><span class="p">(</span><span class="mi">110</span><span class="p">,</span> <span class="mi">130</span><span class="p">))</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span>regionData = spectrum.getRegionData(**limitsDict)
+regionData = spectrum.getRegionData(Hn=(7.0, 9.0), Nh=(110, 130))
+
+and
+
+regionData = spectrum.getRegionData()           to get all the data, this may be very large!
 </pre></div>
 </div>
 <dl class="docutils">
-<dt>exclusionBuffer: defines the size to extend the region by in index units, e.g. [1, 1, 1]</dt>
+<dt>exclusionBuffer: defines the size to extend the region by in index units, e.g. [1, 1, 1] for a 3d array,</dt>
 <dd>extends the region by 1 index point in all axes.
-Default is 1 in all axis directions.</dd>
+Default is 1 in all axis directions.
+Must be the correct length for the number of dimensions</dd>
+<dt>minimumDimensionSize:   defines the minimum number of elements in each dimension that are needed</dt>
+<dd><p class="first">for the region to be valid.</p>
+<p class="last">default is 3, as mostly used for parabolic curve fitting which
+requires 3 points in any given dimension</p>
+</dd>
 </dl>
+<p>The returned regionData is a tuple of regions, each of the form:</p>
+<blockquote>
+<div><dl class="docutils">
+<dt>single region = (dataArray,                 numpy array containing the data</dt>
+<dd>intRegion,
+startPoints,
+endPoints,
+startPointBufferActual,
+endPointBufferActual,
+startPointIntActual,
+numPointInt,
+startPointBuffer,
+endPointBuffer)</dd>
+</dl>
+</div></blockquote>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
 <li><strong>exclusionBuffer</strong> &#8211; array of int</li>
+<li><strong>minimumDimensionSize</strong> &#8211; int</li>
 <li><strong>axisDict</strong> &#8211; dict of axis limits</li>
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">numpy data array</p>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">tuple of regions</p>
 </td>
 </tr>
 </tbody>
@@ -9392,12 +9913,29 @@ Default is 1 in all axis directions.</dd>
 </dd></dl>
 
 <dl class="method">
+<dt id="ccpn.ui.gui.widgets.PulldownListsForObjects.SpectrumPulldown.Spectrum.getSlice">
+<code class="descname">getSlice</code><span class="sig-paren">(</span><em>axisCode</em>, <em>position</em>, <em>exactMatch=True</em><span class="sig-paren">)</span><a class="headerlink" href="#ccpn.ui.gui.widgets.PulldownListsForObjects.SpectrumPulldown.Spectrum.getSlice" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get 1D slice along axisCode through position; sets the intensities attribute
+:return: 1D NumPy data array</p>
+</dd></dl>
+
+<dl class="method">
 <dt id="ccpn.ui.gui.widgets.PulldownListsForObjects.SpectrumPulldown.Spectrum.getSliceData">
 <code class="descname">getSliceData</code><span class="sig-paren">(</span><em>position=None</em>, <em>sliceDim: int = 1</em><span class="sig-paren">)</span><a class="headerlink" href="#ccpn.ui.gui.widgets.PulldownListsForObjects.SpectrumPulldown.Spectrum.getSliceData" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get a slice through position along sliceDim from the Spectrum
-:param position: A list/tuple of positions (1-based)
-:param sliceDim: Dimension of the slice (1-based)
-:return: numpy data array</p>
+:param position: An optional list/tuple of point positions (1-based);</p>
+<blockquote>
+<div>defaults to [1,1,1,1]</div></blockquote>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>sliceDim</strong> &#8211; Dimension of the slice (1-based)</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">numpy data array</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
@@ -9740,6 +10278,13 @@ Data type of numbers stored in data matrix (&#8216;int&#8217; or &#8216;float&#8
 </dd></dl>
 
 <dl class="attribute">
+<dt id="ccpn.ui.gui.widgets.PulldownListsForObjects.SpectrumPulldown.Spectrum.path">
+<code class="descname">path</code><a class="headerlink" href="#ccpn.ui.gui.widgets.PulldownListsForObjects.SpectrumPulldown.Spectrum.path" title="Permalink to this definition">¶</a></dt>
+<dd><p>- <em>None</em>, <em>immutable</em> - 
+return a Path instance defining the absolute path of filePath</p>
+</dd></dl>
+
+<dl class="attribute">
 <dt id="ccpn.ui.gui.widgets.PulldownListsForObjects.SpectrumPulldown.Spectrum.peakLists">
 <code class="descname">peakLists</code><a class="headerlink" href="#ccpn.ui.gui.widgets.PulldownListsForObjects.SpectrumPulldown.Spectrum.peakLists" title="Permalink to this definition">¶</a></dt>
 <dd><p>- <em>(&#8216;ccpn.core.PeakList.PeakList,)</em>  - contained PeakList objects in creation order. This may differ from the standard sorting order</p>
@@ -9785,7 +10330,7 @@ index of first active point relative to total points, per dimension</p>
 <dl class="attribute">
 <dt id="ccpn.ui.gui.widgets.PulldownListsForObjects.SpectrumPulldown.Spectrum.positions">
 <code class="descname">positions</code><a class="headerlink" href="#ccpn.ui.gui.widgets.PulldownListsForObjects.SpectrumPulldown.Spectrum.positions" title="Permalink to this definition">¶</a></dt>
-<dd><p>- <em>numpy.ndarray</em>, <em>mutable</em> - 
+<dd><p>- <em>&lt;built-in function array&gt;</em>, <em>mutable</em> - 
 spectral region in ppm as NumPy array for 1D spectra</p>
 </dd></dl>
 
@@ -9815,6 +10360,19 @@ number of positive contours to draw</p>
 <code class="descname">positiveContourFactor</code><a class="headerlink" href="#ccpn.ui.gui.widgets.PulldownListsForObjects.SpectrumPulldown.Spectrum.positiveContourFactor" title="Permalink to this definition">¶</a></dt>
 <dd><p>- <em>float</em>, <em>mutable</em> - 
 level multiplier for positive contours</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ccpn.ui.gui.widgets.PulldownListsForObjects.SpectrumPulldown.Spectrum.preferredAxisOrdering">
+<code class="descname">preferredAxisOrdering</code><a class="headerlink" href="#ccpn.ui.gui.widgets.PulldownListsForObjects.SpectrumPulldown.Spectrum.preferredAxisOrdering" title="Permalink to this definition">¶</a></dt>
+<dd><p>- <em>None</em>, <em>mutable</em> - 
+Return the preferred ordering for the axis codes when opening a new spectrumDisplay</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.widgets.PulldownListsForObjects.SpectrumPulldown.Spectrum.printInfoString">
+<code class="descname">printInfoString</code><span class="sig-paren">(</span><em>includeDimensions=False</em><span class="sig-paren">)</span><a class="headerlink" href="#ccpn.ui.gui.widgets.PulldownListsForObjects.SpectrumPulldown.Spectrum.printInfoString" title="Permalink to this definition">¶</a></dt>
+<dd><p>Print the info string</p>
 </dd></dl>
 
 <dl class="attribute">
@@ -9863,6 +10421,12 @@ ccpn.Sample used to acquire ccpn.Spectrum</p>
 <dd><p>- <em>float</em>, <em>mutable</em> - 
 Scaling factor for intensities and volumes.
 Intensities and volumes should be <em>multiplied</em> by scale before comparison.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.widgets.PulldownListsForObjects.SpectrumPulldown.Spectrum.searchAxisCodePermutations">
+<code class="descname">searchAxisCodePermutations</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ccpn.ui.gui.widgets.PulldownListsForObjects.SpectrumPulldown.Spectrum.searchAxisCodePermutations" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate the permutations of the current axisCodes</p>
 </dd></dl>
 
 <dl class="method">
@@ -9989,6 +10553,24 @@ so the implied total width will change.</p>
 </dd></dl>
 
 <dl class="attribute">
+<dt id="ccpn.ui.gui.widgets.PulldownListsForObjects.SpectrumPulldown.Spectrum.valuesPerPoint">
+<code class="descname">valuesPerPoint</code><a class="headerlink" href="#ccpn.ui.gui.widgets.PulldownListsForObjects.SpectrumPulldown.Spectrum.valuesPerPoint" title="Permalink to this definition">¶</a></dt>
+<dd><p>- <em>Tuple[float=None, ...]</em>, <em>immutable</em> - 
+valuePerPoint for each dimension</p>
+<p>in ppm for Frequency dimensions with a single, well-defined reference</p>
+<p>None for Frequency dimensions without a single, well-defined reference</p>
+<p>in time units (seconds) for FId dimensions</p>
+<p>None for sampled dimensions</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ccpn.ui.gui.widgets.PulldownListsForObjects.SpectrumPulldown.Spectrum.visibleAliasingRange">
+<code class="descname">visibleAliasingRange</code><a class="headerlink" href="#ccpn.ui.gui.widgets.PulldownListsForObjects.SpectrumPulldown.Spectrum.visibleAliasingRange" title="Permalink to this definition">¶</a></dt>
+<dd><p>- <em>Tuple[Tuple, ...]=None</em>, <em>mutable</em> - 
+Return a tuple of the aliasing range in each dimension, or None of not set</p>
+</dd></dl>
+
+<dl class="attribute">
 <dt id="ccpn.ui.gui.widgets.PulldownListsForObjects.SpectrumPulldown.Spectrum.windowFunctions">
 <code class="descname">windowFunctions</code><a class="headerlink" href="#ccpn.ui.gui.widgets.PulldownListsForObjects.SpectrumPulldown.Spectrum.windowFunctions" title="Permalink to this definition">¶</a></dt>
 <dd><p>- <em>Tuple[str=None, ...]</em>, <em>mutable</em> - 
@@ -10004,7 +10586,7 @@ Always None for sampled dimensions.</p>
 <dt id="ccpn.ui.gui.widgets.PulldownListsForObjects.SpectrumReferencePulldown">
 <em class="property">class </em><code class="descclassname">ccpn.ui.gui.widgets.PulldownListsForObjects.</code><code class="descname">SpectrumReferencePulldown</code><span class="sig-paren">(</span><em>parent</em>, <em>project</em>, <em>showBorder=False</em>, <em>orientation='left'</em>, <em>minimumWidths=(100</em>, <em>150)</em>, <em>maximumWidths=None</em>, <em>fixedWidths=None</em>, <em>labelText=None</em>, <em>showSelectName=False</em>, <em>callback=None</em>, <em>default=None</em>, <em>sizeAdjustPolicy=None</em>, <em>editable=False</em>, <em>filterFunction=None</em>, <em>useIds=False</em>, <em>setCurrent=False</em>, <em>followCurrent=False</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/PulldownListsForObjects.html#SpectrumReferencePulldown"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.PulldownListsForObjects.SpectrumReferencePulldown" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">ccpn.ui.gui.widgets.PulldownListsForObjects._PulldownABC</span></code></p>
-<p>A PulldownListCompoundWidget class for SpectrumReference&#8217;s</p>
+<p>A PulldownListCompoundWidget class for SpectrumReferences</p>
 <dl class="class">
 <dt id="ccpn.ui.gui.widgets.PulldownListsForObjects.SpectrumReferencePulldown.SpectrumReference">
 <em class="property">class </em><code class="descname">SpectrumReference</code><a class="headerlink" href="#ccpn.ui.gui.widgets.PulldownListsForObjects.SpectrumReferencePulldown.SpectrumReference" title="Permalink to this definition">¶</a></dt>
@@ -10091,6 +10673,12 @@ Type of NMR measurement referred to by this reference. Legal values are:
 minimum possible peak frequency (in ppm) for this reference</p>
 </dd></dl>
 
+<dl class="attribute">
+<dt id="ccpn.ui.gui.widgets.PulldownListsForObjects.SpectrumReferencePulldown.SpectrumReference.numPointsOrig">
+<code class="descname">numPointsOrig</code><a class="headerlink" href="#ccpn.ui.gui.widgets.PulldownListsForObjects.SpectrumReferencePulldown.SpectrumReference.numPointsOrig" title="Permalink to this definition">¶</a></dt>
+<dd><p>- <em>bool</em>, <em>immutable</em> -</p>
+</dd></dl>
+
 <dl class="method">
 <dt id="ccpn.ui.gui.widgets.PulldownListsForObjects.SpectrumReferencePulldown.SpectrumReference.pointToValue">
 <code class="descname">pointToValue</code><span class="sig-paren">(</span><em>point: float</em><span class="sig-paren">)</span> &rarr; float<a class="headerlink" href="#ccpn.ui.gui.widgets.PulldownListsForObjects.SpectrumReferencePulldown.SpectrumReference.pointToValue" title="Permalink to this definition">¶</a></dt>
@@ -10158,7 +10746,7 @@ Spectrum containing spectrumReference.</p>
 <dt id="ccpn.ui.gui.widgets.PulldownListsForObjects.StructureEnsemblePulldown">
 <em class="property">class </em><code class="descclassname">ccpn.ui.gui.widgets.PulldownListsForObjects.</code><code class="descname">StructureEnsemblePulldown</code><span class="sig-paren">(</span><em>parent</em>, <em>project</em>, <em>showBorder=False</em>, <em>orientation='left'</em>, <em>minimumWidths=(100</em>, <em>150)</em>, <em>maximumWidths=None</em>, <em>fixedWidths=None</em>, <em>labelText=None</em>, <em>showSelectName=False</em>, <em>callback=None</em>, <em>default=None</em>, <em>sizeAdjustPolicy=None</em>, <em>editable=False</em>, <em>filterFunction=None</em>, <em>useIds=False</em>, <em>setCurrent=False</em>, <em>followCurrent=False</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/PulldownListsForObjects.html#StructureEnsemblePulldown"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.PulldownListsForObjects.StructureEnsemblePulldown" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">ccpn.ui.gui.widgets.PulldownListsForObjects._PulldownABC</span></code></p>
-<p>A PulldownListCompoundWidget class for StructureEnsemble&#8217;s</p>
+<p>A PulldownListCompoundWidget class for StructureEnsembles</p>
 <dl class="class">
 <dt id="ccpn.ui.gui.widgets.PulldownListsForObjects.StructureEnsemblePulldown.StructureEnsemble">
 <em class="property">class </em><code class="descname">StructureEnsemble</code><a class="headerlink" href="#ccpn.ui.gui.widgets.PulldownListsForObjects.StructureEnsemblePulldown.StructureEnsemble" title="Permalink to this definition">¶</a></dt>
@@ -10254,7 +10842,7 @@ ID number of StructureEnsemble, used in Pid and to identify the StructureEnsembl
 <dt id="ccpn.ui.gui.widgets.PulldownListsForObjects.SubstancePulldown">
 <em class="property">class </em><code class="descclassname">ccpn.ui.gui.widgets.PulldownListsForObjects.</code><code class="descname">SubstancePulldown</code><span class="sig-paren">(</span><em>parent</em>, <em>project</em>, <em>showBorder=False</em>, <em>orientation='left'</em>, <em>minimumWidths=(100</em>, <em>150)</em>, <em>maximumWidths=None</em>, <em>fixedWidths=None</em>, <em>labelText=None</em>, <em>showSelectName=False</em>, <em>callback=None</em>, <em>default=None</em>, <em>sizeAdjustPolicy=None</em>, <em>editable=False</em>, <em>filterFunction=None</em>, <em>useIds=False</em>, <em>setCurrent=False</em>, <em>followCurrent=False</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/PulldownListsForObjects.html#SubstancePulldown"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.PulldownListsForObjects.SubstancePulldown" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">ccpn.ui.gui.widgets.PulldownListsForObjects._PulldownABC</span></code></p>
-<p>A PulldownListCompoundWidget class for Substance&#8217;s</p>
+<p>A PulldownListCompoundWidget class for Substances</p>
 <dl class="class">
 <dt id="ccpn.ui.gui.widgets.PulldownListsForObjects.SubstancePulldown.Substance">
 <em class="property">class </em><code class="descname">Substance</code><a class="headerlink" href="#ccpn.ui.gui.widgets.PulldownListsForObjects.SubstancePulldown.Substance" title="Permalink to this definition">¶</a></dt>
@@ -10830,7 +11418,7 @@ inside a multi-line string when this function is finished.</p>
 <span id="ccpn-ui-gui-widgets-radiobuttons-module"></span><h2>ccpn.ui.gui.widgets.RadioButtons module<a class="headerlink" href="#module-ccpn.ui.gui.widgets.RadioButtons" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
 <dt id="ccpn.ui.gui.widgets.RadioButtons.RadioButtons">
-<em class="property">class </em><code class="descclassname">ccpn.ui.gui.widgets.RadioButtons.</code><code class="descname">RadioButtons</code><span class="sig-paren">(</span><em>parent</em>, <em>texts=None</em>, <em>selectedInd=None</em>, <em>exclusive=True</em>, <em>callback=None</em>, <em>direction='h'</em>, <em>tipTexts=None</em>, <em>objectNames=None</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/RadioButtons.html#RadioButtons"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.RadioButtons.RadioButtons" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">ccpn.ui.gui.widgets.RadioButtons.</code><code class="descname">RadioButtons</code><span class="sig-paren">(</span><em>parent</em>, <em>texts=None</em>, <em>selectedInd=None</em>, <em>exclusive=True</em>, <em>callback=None</em>, <em>direction='h'</em>, <em>tipTexts=None</em>, <em>objectNames=None</em>, <em>icons=None</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/RadioButtons.html#RadioButtons"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.RadioButtons.RadioButtons" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">PyQt5.QtWidgets.QWidget</span></code>, <a class="reference internal" href="#ccpn.ui.gui.widgets.Base.Base" title="ccpn.ui.gui.widgets.Base.Base"><code class="xref py py-class docutils literal"><span class="pre">ccpn.ui.gui.widgets.Base.Base</span></code></a></p>
 <dl class="method">
 <dt id="ccpn.ui.gui.widgets.RadioButtons.RadioButtons.deselectAll">
@@ -10870,7 +11458,7 @@ inside a multi-line string when this function is finished.</p>
 
 <dl class="method">
 <dt id="ccpn.ui.gui.widgets.RadioButtons.RadioButtons.setButtons">
-<code class="descname">setButtons</code><span class="sig-paren">(</span><em>texts=None</em>, <em>selectedInd=None</em>, <em>direction='h'</em>, <em>tipTexts=None</em>, <em>objectNames=None</em>, <em>silent=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/RadioButtons.html#RadioButtons.setButtons"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.RadioButtons.RadioButtons.setButtons" title="Permalink to this definition">¶</a></dt>
+<code class="descname">setButtons</code><span class="sig-paren">(</span><em>texts=None</em>, <em>selectedInd=None</em>, <em>direction='h'</em>, <em>tipTexts=None</em>, <em>objectNames=None</em>, <em>silent=False</em>, <em>icons=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/RadioButtons.html#RadioButtons.setButtons"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.RadioButtons.RadioButtons.setButtons" title="Permalink to this definition">¶</a></dt>
 <dd><p>Change the buttons in the button group</p>
 </dd></dl>
 
@@ -10915,7 +11503,7 @@ inside a multi-line string when this function is finished.</p>
 <dl class="class">
 <dt id="ccpn.ui.gui.widgets.SearchWidget.GuiTableFilter">
 <em class="property">class </em><code class="descclassname">ccpn.ui.gui.widgets.SearchWidget.</code><code class="descname">GuiTableFilter</code><span class="sig-paren">(</span><em>table</em>, <em>parent=None</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/SearchWidget.html#GuiTableFilter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.SearchWidget.GuiTableFilter" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#ccpn.ui.gui.widgets.Frame.Frame" title="ccpn.ui.gui.widgets.Frame.Frame"><code class="xref py py-class docutils literal"><span class="pre">ccpn.ui.gui.widgets.Frame.Frame</span></code></a></p>
+<dd><p>Bases: <a class="reference internal" href="#ccpn.ui.gui.widgets.ScrollArea.ScrollArea" title="ccpn.ui.gui.widgets.ScrollArea.ScrollArea"><code class="xref py py-class docutils literal"><span class="pre">ccpn.ui.gui.widgets.ScrollArea.ScrollArea</span></code></a></p>
 <dl class="method">
 <dt id="ccpn.ui.gui.widgets.SearchWidget.GuiTableFilter.findOnTable">
 <code class="descname">findOnTable</code><span class="sig-paren">(</span><em>table</em>, <em>matchExactly=False</em>, <em>ignoreNotFound=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/SearchWidget.html#GuiTableFilter.findOnTable"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.SearchWidget.GuiTableFilter.findOnTable" title="Permalink to this definition">¶</a></dt>
@@ -10978,7 +11566,7 @@ inside a multi-line string when this function is finished.</p>
 
 <dl class="class">
 <dt id="ccpn.ui.gui.widgets.SettingsWidgets.SpectrumDisplaySettings">
-<em class="property">class </em><code class="descclassname">ccpn.ui.gui.widgets.SettingsWidgets.</code><code class="descname">SpectrumDisplaySettings</code><span class="sig-paren">(</span><em>parent=None</em>, <em>mainWindow=None</em>, <em>spectrumDisplay=None</em>, <em>callback=None</em>, <em>returnCallback=None</em>, <em>applyCallback=None</em>, <em>xAxisUnits=0</em>, <em>xTexts=[]</em>, <em>showXAxis=True</em>, <em>yAxisUnits=0</em>, <em>yTexts=[]</em>, <em>showYAxis=True</em>, <em>lockAspect=False</em>, <em>symbolType=0</em>, <em>annotationType=0</em>, <em>symbolSize=9</em>, <em>symbolThickness=2</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/SettingsWidgets.html#SpectrumDisplaySettings"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.SettingsWidgets.SpectrumDisplaySettings" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">ccpn.ui.gui.widgets.SettingsWidgets.</code><code class="descname">SpectrumDisplaySettings</code><span class="sig-paren">(</span><em>parent=None</em>, <em>mainWindow=None</em>, <em>spectrumDisplay=None</em>, <em>callback=None</em>, <em>returnCallback=None</em>, <em>applyCallback=None</em>, <em>xAxisUnits=0</em>, <em>xTexts=[]</em>, <em>showXAxis=True</em>, <em>yAxisUnits=0</em>, <em>yTexts=[]</em>, <em>showYAxis=True</em>, <em>lockAspectRatio=False</em>, <em>useFixedAspectRatio=False</em>, <em>symbolType=0</em>, <em>annotationType=0</em>, <em>symbolSize=9</em>, <em>symbolThickness=2</em>, <em>stripArrangement=0</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/SettingsWidgets.html#SpectrumDisplaySettings"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.SettingsWidgets.SpectrumDisplaySettings" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#ccpn.ui.gui.widgets.Widget.Widget" title="ccpn.ui.gui.widgets.Widget.Widget"><code class="xref py py-class docutils literal"><span class="pre">ccpn.ui.gui.widgets.Widget.Widget</span></code></a></p>
 <dl class="method">
 <dt id="ccpn.ui.gui.widgets.SettingsWidgets.SpectrumDisplaySettings.doCallback">
@@ -10998,6 +11586,11 @@ inside a multi-line string when this function is finished.</p>
 <dd></dd></dl>
 
 <dl class="attribute">
+<dt id="ccpn.ui.gui.widgets.SettingsWidgets.SpectrumDisplaySettings.stripArrangementChanged">
+<code class="descname">stripArrangementChanged</code><a class="headerlink" href="#ccpn.ui.gui.widgets.SettingsWidgets.SpectrumDisplaySettings.stripArrangementChanged" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
 <dt id="ccpn.ui.gui.widgets.SettingsWidgets.SpectrumDisplaySettings.symbolsChanged">
 <code class="descname">symbolsChanged</code><a class="headerlink" href="#ccpn.ui.gui.widgets.SettingsWidgets.SpectrumDisplaySettings.symbolsChanged" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
@@ -11006,12 +11599,18 @@ inside a multi-line string when this function is finished.</p>
 
 <dl class="class">
 <dt id="ccpn.ui.gui.widgets.SettingsWidgets.StripPlot">
-<em class="property">class </em><code class="descclassname">ccpn.ui.gui.widgets.SettingsWidgets.</code><code class="descname">StripPlot</code><span class="sig-paren">(</span><em>parent=None</em>, <em>mainWindow=None</em>, <em>callback=None</em>, <em>returnCallback=None</em>, <em>applyCallback=None</em>, <em>includePeakLists=True</em>, <em>includeNmrChains=True</em>, <em>includeNmrChainPullSelection=False</em>, <em>includeSpectrumTable=True</em>, <em>defaultSpectrum=None</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/SettingsWidgets.html#StripPlot"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.SettingsWidgets.StripPlot" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#ccpn.ui.gui.widgets.Widget.Widget" title="ccpn.ui.gui.widgets.Widget.Widget"><code class="xref py py-class docutils literal"><span class="pre">ccpn.ui.gui.widgets.Widget.Widget</span></code></a></p>
+<em class="property">class </em><code class="descclassname">ccpn.ui.gui.widgets.SettingsWidgets.</code><code class="descname">StripPlot</code><span class="sig-paren">(</span><em>parent=None</em>, <em>mainWindow=None</em>, <em>callback=None</em>, <em>returnCallback=None</em>, <em>applyCallback=None</em>, <em>includeDisplaySettings=True</em>, <em>includePeakLists=True</em>, <em>includeNmrChains=True</em>, <em>includeNmrChainPullSelection=False</em>, <em>includeSpectrumTable=True</em>, <em>defaultSpectrum=None</em>, <em>activePulldownClass=None</em>, <em>labelText='Display(s):'</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/SettingsWidgets.html#StripPlot"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.SettingsWidgets.StripPlot" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#ccpn.ui.gui.widgets.Widget.Widget" title="ccpn.ui.gui.widgets.Widget.Widget"><code class="xref py py-class docutils literal"><span class="pre">ccpn.ui.gui.widgets.Widget.Widget</span></code></a>, <code class="xref py py-class docutils literal"><span class="pre">ccpn.ui.gui.widgets.SettingsWidgets._commonSettings</span></code></p>
 <dl class="method">
 <dt id="ccpn.ui.gui.widgets.SettingsWidgets.StripPlot.doCallback">
 <code class="descname">doCallback</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/SettingsWidgets.html#StripPlot.doCallback"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.SettingsWidgets.StripPlot.doCallback" title="Permalink to this definition">¶</a></dt>
 <dd><p>Handle the user callback</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.widgets.SettingsWidgets.StripPlot.setLabelText">
+<code class="descname">setLabelText</code><span class="sig-paren">(</span><em>label</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/SettingsWidgets.html#StripPlot.setLabelText"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.SettingsWidgets.StripPlot.setLabelText" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the text for the label attached to the list widget</p>
 </dd></dl>
 
 </dd></dl>
@@ -11506,6 +12105,12 @@ Similar to Tree above, but different label</p>
 </dd></dl>
 
 <dl class="method">
+<dt id="ccpn.ui.gui.widgets.SpectrumToolBar.SpectrumToolBar.event">
+<code class="descname">event</code><span class="sig-paren">(</span><em>event: PyQt5.QtCore.QEvent</em><span class="sig-paren">)</span> &rarr; bool<a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/SpectrumToolBar.html#SpectrumToolBar.event"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.SpectrumToolBar.SpectrumToolBar.event" title="Permalink to this definition">¶</a></dt>
+<dd><p>Use the event handler to process events</p>
+</dd></dl>
+
+<dl class="method">
 <dt id="ccpn.ui.gui.widgets.SpectrumToolBar.SpectrumToolBar.increaseSpectrumToolBarBlocking">
 <code class="descname">increaseSpectrumToolBarBlocking</code><span class="sig-paren">(</span><em>node=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/SpectrumToolBar.html#SpectrumToolBar.increaseSpectrumToolBarBlocking"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.SpectrumToolBar.SpectrumToolBar.increaseSpectrumToolBarBlocking" title="Permalink to this definition">¶</a></dt>
 <dd><p>increase level of blocking</p>
@@ -11564,10 +12169,26 @@ True if spectrumToolBar is blocked</p>
 <code class="descname">get</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/Spinbox.html#Spinbox.get"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.Spinbox.Spinbox.get" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
+<dl class="attribute">
+<dt id="ccpn.ui.gui.widgets.Spinbox.Spinbox.returnPressed">
+<code class="descname">returnPressed</code><a class="headerlink" href="#ccpn.ui.gui.widgets.Spinbox.Spinbox.returnPressed" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
 <dl class="method">
 <dt id="ccpn.ui.gui.widgets.Spinbox.Spinbox.set">
 <code class="descname">set</code><span class="sig-paren">(</span><em>p_int</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/Spinbox.html#Spinbox.set"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.Spinbox.Spinbox.set" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ccpn.ui.gui.widgets.Spinbox.Spinbox.wheelChanged">
+<code class="descname">wheelChanged</code><a class="headerlink" href="#ccpn.ui.gui.widgets.Spinbox.Spinbox.wheelChanged" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.widgets.Spinbox.Spinbox.wheelEvent">
+<code class="descname">wheelEvent</code><span class="sig-paren">(</span><em>e: PyQt5.QtGui.QWheelEvent</em><span class="sig-paren">)</span> &rarr; None<a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/Spinbox.html#Spinbox.wheelEvent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.Spinbox.Spinbox.wheelEvent" title="Permalink to this definition">¶</a></dt>
+<dd><p>emit the value when wheel event has occurred</p>
+</dd></dl>
 
 </dd></dl>
 
@@ -11592,7 +12213,7 @@ True if spectrumToolBar is blocked</p>
 <p>Module Documentation here</p>
 <dl class="class">
 <dt id="ccpn.ui.gui.widgets.Splitter.Splitter">
-<em class="property">class </em><code class="descclassname">ccpn.ui.gui.widgets.Splitter.</code><code class="descname">Splitter</code><span class="sig-paren">(</span><em>parent=None</em>, <em>horizontal=True</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/Splitter.html#Splitter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.Splitter.Splitter" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">ccpn.ui.gui.widgets.Splitter.</code><code class="descname">Splitter</code><span class="sig-paren">(</span><em>parent=None</em>, <em>horizontal=True</em>, <em>collapsible=False</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/Splitter.html#Splitter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.Splitter.Splitter" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">PyQt5.QtWidgets.QSplitter</span></code>, <a class="reference internal" href="#ccpn.ui.gui.widgets.Base.Base" title="ccpn.ui.gui.widgets.Base.Base"><code class="xref py py-class docutils literal"><span class="pre">ccpn.ui.gui.widgets.Base.Base</span></code></a></p>
 <p>CcpNmr widgets: Splitter class</p>
 <dl class="method">
@@ -12888,12 +13509,14 @@ it will inherit the same parent as PlotWidget</p>
 <li><a class="reference internal" href="#module-ccpn.ui.gui.widgets.InputDialog">ccpn.ui.gui.widgets.InputDialog module</a></li>
 <li><a class="reference internal" href="#module-ccpn.ui.gui.widgets.IpythonConsole">ccpn.ui.gui.widgets.IpythonConsole module</a></li>
 <li><a class="reference internal" href="#module-ccpn.ui.gui.widgets.Label">ccpn.ui.gui.widgets.Label module</a></li>
+<li><a class="reference internal" href="#module-ccpn.ui.gui.widgets.LegendItem">ccpn.ui.gui.widgets.LegendItem module</a></li>
 <li><a class="reference internal" href="#module-ccpn.ui.gui.widgets.LineEdit">ccpn.ui.gui.widgets.LineEdit module</a></li>
 <li><a class="reference internal" href="#module-ccpn.ui.gui.widgets.LinearRegionsPlot">ccpn.ui.gui.widgets.LinearRegionsPlot module</a></li>
 <li><a class="reference internal" href="#module-ccpn.ui.gui.widgets.ListWidget">ccpn.ui.gui.widgets.ListWidget module</a></li>
 <li><a class="reference internal" href="#module-ccpn.ui.gui.widgets.MainWindow">ccpn.ui.gui.widgets.MainWindow module</a></li>
 <li><a class="reference internal" href="#module-ccpn.ui.gui.widgets.Menu">ccpn.ui.gui.widgets.Menu module</a></li>
 <li><a class="reference internal" href="#module-ccpn.ui.gui.widgets.MessageDialog">ccpn.ui.gui.widgets.MessageDialog module</a></li>
+<li><a class="reference internal" href="#module-ccpn.ui.gui.widgets.NmrAtomsSelections">ccpn.ui.gui.widgets.NmrAtomsSelections module</a></li>
 <li><a class="reference internal" href="#module-ccpn.ui.gui.widgets.PhasingFrame">ccpn.ui.gui.widgets.PhasingFrame module</a></li>
 <li><a class="reference internal" href="#module-ccpn.ui.gui.widgets.PipelineWidgets">ccpn.ui.gui.widgets.PipelineWidgets module</a></li>
 <li><a class="reference internal" href="#module-ccpn.ui.gui.widgets.PlaneToolbar">ccpn.ui.gui.widgets.PlaneToolbar module</a></li>

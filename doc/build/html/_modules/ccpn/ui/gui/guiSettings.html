@@ -65,7 +65,7 @@
 <span class="c1">#=========================================================================================</span>
 <span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: CCPN $&quot;</span>
 <span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2017-07-07 16:32:41 +0100 (Fri, July 07, 2017) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b5 $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.0 $&quot;</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Created</span>
 <span class="c1">#=========================================================================================</span>
@@ -79,7 +79,9 @@
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Font</span> <span class="kn">import</span> <span class="n">Font</span>
 <span class="kn">from</span> <span class="nn">ccpn.util.decorators</span> <span class="kn">import</span> <span class="n">singleton</span>
 <span class="kn">from</span> <span class="nn">ccpn.util.Logging</span> <span class="kn">import</span> <span class="n">getLogger</span>
-<span class="kn">from</span> <span class="nn">ccpn.util.Colour</span> <span class="kn">import</span> <span class="n">allColours</span><span class="p">,</span> <span class="n">hexToRgbRatio</span><span class="p">,</span> <span class="n">autoCorrectHexColour</span><span class="p">,</span> <span class="n">spectrumHexDarkColours</span><span class="p">,</span> <span class="n">spectrumHexLightColours</span>
+<span class="kn">from</span> <span class="nn">ccpn.util.Colour</span> <span class="kn">import</span> <span class="n">allColours</span><span class="p">,</span> <span class="n">hexToRgbRatio</span><span class="p">,</span> <span class="n">autoCorrectHexColour</span><span class="p">,</span> \
+    <span class="n">spectrumHexDarkColours</span><span class="p">,</span> <span class="n">spectrumHexLightColours</span><span class="p">,</span> <span class="n">spectrumHexMediumColours</span><span class="p">,</span> \
+    <span class="n">spectrumHexDefaultLightColours</span><span class="p">,</span> <span class="n">spectrumHexDefaultDarkColours</span>
 
 
 <span class="c1"># fonts</span>
@@ -145,6 +147,9 @@
 <span class="n">COLOUR_SCHEMES</span> <span class="o">=</span> <span class="p">(</span><span class="n">LIGHT</span><span class="p">,</span> <span class="n">DARK</span><span class="p">,</span> <span class="n">DEFAULT</span><span class="p">)</span>
 
 <span class="n">SPECTRUM_HEXCOLOURS</span> <span class="o">=</span> <span class="s1">&#39;spectrumHexColours&#39;</span>
+<span class="n">SPECTRUM_HEXDEFAULTCOLOURS</span> <span class="o">=</span> <span class="s1">&#39;spectrumHexDefaultColours&#39;</span>
+<span class="n">SPECTRUM_HEXMEDIUMCOLOURS</span> <span class="o">=</span> <span class="s1">&#39;spectrumHexMediumColours&#39;</span>
+<span class="n">SPECTRUMCOLOURS</span> <span class="o">=</span> <span class="s1">&#39;spectrumColours&#39;</span>
 
 <span class="n">MARK_LINE_COLOUR_DICT</span> <span class="o">=</span> <span class="p">{</span>
     <span class="s1">&#39;CA&#39;</span>   <span class="p">:</span> <span class="s1">&#39;#0080FF&#39;</span><span class="p">,</span>  <span class="c1"># aqua</span>
@@ -177,6 +182,10 @@
 <span class="c1"># Widget definitions</span>
 <span class="n">CCPNMODULELABEL_FOREGROUND</span> <span class="o">=</span> <span class="s1">&#39;CCPNMODULELABEL_FOREGROUND&#39;</span>
 <span class="n">CCPNMODULELABEL_BACKGROUND</span> <span class="o">=</span> <span class="s1">&#39;CCPNMODULELABEL_BACKGROUND&#39;</span>
+<span class="n">CCPNMODULELABEL_BORDER</span> <span class="o">=</span> <span class="s1">&#39;CCPNMODULELABEL_BORDER&#39;</span>
+<span class="n">CCPNMODULELABEL_FOREGROUND_ACTIVE</span> <span class="o">=</span> <span class="s1">&#39;CCPNMODULELABEL_FOREGROUND_ACTIVE&#39;</span>
+<span class="n">CCPNMODULELABEL_BACKGROUND_ACTIVE</span> <span class="o">=</span> <span class="s1">&#39;CCPNMODULELABEL_BACKGROUND_ACTIVE&#39;</span>
+<span class="n">CCPNMODULELABEL_BORDER_ACTIVE</span> <span class="o">=</span> <span class="s1">&#39;CCPNMODULELABEL_BORDER_ACTIVE&#39;</span>
 
 <span class="c1"># Spectrum GL base class</span>
 <span class="n">CCPNGLWIDGET_HEXBACKGROUND</span> <span class="o">=</span> <span class="s1">&#39;CCPNGLWIDGET_HEXBACKGROUND&#39;</span>
@@ -213,7 +222,12 @@
 <span class="n">GUISTRIP_PIVOT</span> <span class="o">=</span> <span class="s1">&#39;GUISTRIP_PIVOT&#39;</span>
 
 <span class="n">LABEL_FOREGROUND</span> <span class="o">=</span> <span class="s1">&#39;LABEL_FOREGROUND&#39;</span>
+<span class="n">LABEL_BACKGROUND</span> <span class="o">=</span> <span class="s1">&#39;LABEL_BACKGROUND&#39;</span>
+<span class="n">LABEL_SELECTEDBACKGROUND</span> <span class="o">=</span> <span class="s1">&#39;LABEL_SELECTEDBACKGROUND&#39;</span>
+<span class="n">LABEL_SELECTEDFOREGROUND</span> <span class="o">=</span> <span class="s1">&#39;LABEL_SELECTEDFOREGROUND&#39;</span>
+<span class="n">LABEL_HIGHLIGHT</span> <span class="o">=</span> <span class="s1">&#39;LABEL_HIGHLIGHT&#39;</span>
 <span class="n">DIVIDER</span> <span class="o">=</span> <span class="s1">&#39;DIVIDER&#39;</span>
+<span class="n">SOFTDIVIDER</span> <span class="o">=</span> <span class="s1">&#39;SOFTDIVIDER&#39;</span>
 
 <span class="n">SEQUENCEGRAPHMODULE_LINE</span> <span class="o">=</span> <span class="s1">&#39;SEQUENCEGRAPHMODULE_LINE&#39;</span>
 <span class="n">SEQUENCEGRAPHMODULE_TEXT</span> <span class="o">=</span> <span class="s1">&#39;SEQUENCEGRAPHMODULE_TEXT&#39;</span>
@@ -234,6 +248,7 @@
 
 <span class="c1"># Colours</span>
 <span class="n">TEXT_COLOUR</span> <span class="o">=</span> <span class="s1">&#39;#555D85&#39;</span>
+<span class="n">SOFT_DIVIDER_COLOUR</span> <span class="o">=</span> <span class="s1">&#39;#888DA5&#39;</span>
 <span class="n">LIGHT_GREY</span> <span class="o">=</span> <span class="s1">&#39;rgb(250,250,250)&#39;</span>
 <span class="n">STEEL</span> <span class="o">=</span> <span class="s1">&#39;rgb(102,102,102)&#39;</span>  <span class="c1"># from apple</span>
 <span class="n">MARISHINO</span> <span class="o">=</span> <span class="s1">&#39;#004D81&#39;</span>  <span class="c1"># rgb(0,77,129) ; red colour (from apple)</span>
@@ -252,61 +267,71 @@
     <span class="c1"># all colours defined here</span>
     <span class="n">DEFAULT</span><span class="p">:</span> <span class="p">{</span>
 
-        <span class="n">CCPNGLWIDGET_HEXBACKGROUND</span>    <span class="p">:</span> <span class="s1">&#39;#FFFFFF&#39;</span><span class="p">,</span>
-        <span class="n">CCPNGLWIDGET_BACKGROUND</span>       <span class="p">:</span> <span class="p">(</span><span class="mf">0.99</span><span class="p">,</span> <span class="mf">0.99</span><span class="p">,</span> <span class="mf">0.99</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">),</span>
-        <span class="n">CCPNGLWIDGET_FOREGROUND</span>       <span class="p">:</span> <span class="p">(</span><span class="mf">0.05</span><span class="p">,</span> <span class="mf">0.05</span><span class="p">,</span> <span class="mf">0.05</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">),</span>  <span class="c1">#&#39;#080000&#39;</span>
-        <span class="n">CCPNGLWIDGET_PICKCOLOUR</span>       <span class="p">:</span> <span class="p">(</span><span class="mf">0.2</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.9</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">),</span>
-        <span class="n">CCPNGLWIDGET_GRID</span>             <span class="p">:</span> <span class="p">(</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">),</span>  <span class="c1">#&#39;#080000&#39;</span>
-        <span class="n">CCPNGLWIDGET_HIGHLIGHT</span>        <span class="p">:</span> <span class="p">(</span><span class="mf">0.23</span><span class="p">,</span> <span class="mf">0.23</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">),</span>  <span class="c1">#&#39;#3333ff&#39;</span>
-        <span class="n">CCPNGLWIDGET_LABELLING</span>        <span class="p">:</span> <span class="p">(</span><span class="mf">0.05</span><span class="p">,</span> <span class="mf">0.05</span><span class="p">,</span> <span class="mf">0.05</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">),</span>
-        <span class="n">CCPNGLWIDGET_PHASETRACE</span>       <span class="p">:</span> <span class="p">(</span><span class="mf">0.2</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">),</span>
-        <span class="n">CCPNGLWIDGET_ZOOMAREA</span>         <span class="p">:</span> <span class="p">(</span><span class="mf">0.8</span><span class="p">,</span> <span class="mf">0.9</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">),</span>
-        <span class="n">CCPNGLWIDGET_PICKAREA</span>         <span class="p">:</span> <span class="p">(</span><span class="mf">0.2</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.9</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">),</span>
-        <span class="n">CCPNGLWIDGET_SELECTAREA</span>       <span class="p">:</span> <span class="p">(</span><span class="mf">0.8</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">,</span> <span class="mf">0.9</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">),</span>
-        <span class="n">CCPNGLWIDGET_ZOOMLINE</span>         <span class="p">:</span> <span class="p">(</span><span class="mf">0.6</span><span class="p">,</span> <span class="mf">0.7</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">),</span>
-        <span class="n">CCPNGLWIDGET_MOUSEMOVELINE</span>    <span class="p">:</span> <span class="p">(</span><span class="mf">0.8</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">,</span> <span class="mf">0.9</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">),</span>
+        <span class="n">CCPNGLWIDGET_HEXBACKGROUND</span>       <span class="p">:</span> <span class="s1">&#39;#FFFFFF&#39;</span><span class="p">,</span>
+        <span class="n">CCPNGLWIDGET_BACKGROUND</span>          <span class="p">:</span> <span class="p">(</span><span class="mf">0.99</span><span class="p">,</span> <span class="mf">0.99</span><span class="p">,</span> <span class="mf">0.99</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">),</span>
+        <span class="n">CCPNGLWIDGET_FOREGROUND</span>          <span class="p">:</span> <span class="p">(</span><span class="mf">0.05</span><span class="p">,</span> <span class="mf">0.05</span><span class="p">,</span> <span class="mf">0.05</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">),</span>  <span class="c1">#&#39;#080000&#39;</span>
+        <span class="n">CCPNGLWIDGET_PICKCOLOUR</span>          <span class="p">:</span> <span class="p">(</span><span class="mf">0.2</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.9</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">),</span>
+        <span class="n">CCPNGLWIDGET_GRID</span>                <span class="p">:</span> <span class="p">(</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">),</span>  <span class="c1">#&#39;#080000&#39;</span>
+        <span class="n">CCPNGLWIDGET_HIGHLIGHT</span>           <span class="p">:</span> <span class="p">(</span><span class="mf">0.23</span><span class="p">,</span> <span class="mf">0.23</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">),</span>  <span class="c1">#&#39;#3333ff&#39;</span>
+        <span class="n">CCPNGLWIDGET_LABELLING</span>           <span class="p">:</span> <span class="p">(</span><span class="mf">0.05</span><span class="p">,</span> <span class="mf">0.05</span><span class="p">,</span> <span class="mf">0.05</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">),</span>
+        <span class="n">CCPNGLWIDGET_PHASETRACE</span>          <span class="p">:</span> <span class="p">(</span><span class="mf">0.2</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">),</span>
+        <span class="n">CCPNGLWIDGET_ZOOMAREA</span>            <span class="p">:</span> <span class="p">(</span><span class="mf">0.8</span><span class="p">,</span> <span class="mf">0.9</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">),</span>
+        <span class="n">CCPNGLWIDGET_PICKAREA</span>            <span class="p">:</span> <span class="p">(</span><span class="mf">0.2</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.9</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">),</span>
+        <span class="n">CCPNGLWIDGET_SELECTAREA</span>          <span class="p">:</span> <span class="p">(</span><span class="mf">0.8</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">,</span> <span class="mf">0.9</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">),</span>
+        <span class="n">CCPNGLWIDGET_ZOOMLINE</span>            <span class="p">:</span> <span class="p">(</span><span class="mf">0.6</span><span class="p">,</span> <span class="mf">0.7</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">),</span>
+        <span class="n">CCPNGLWIDGET_MOUSEMOVELINE</span>       <span class="p">:</span> <span class="p">(</span><span class="mf">0.8</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">,</span> <span class="mf">0.9</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">),</span>
 
-        <span class="n">CCPNGLWIDGET_MULTIPLETLINK</span>    <span class="p">:</span> <span class="n">FIREBRICK</span><span class="p">,</span>
+        <span class="n">CCPNGLWIDGET_MULTIPLETLINK</span>       <span class="p">:</span> <span class="n">FIREBRICK</span><span class="p">,</span>
 
-        <span class="n">CCPNMODULELABEL_BACKGROUND</span>    <span class="p">:</span> <span class="s1">&#39;#FFFFFF&#39;</span><span class="p">,</span>
-        <span class="n">CCPNMODULELABEL_FOREGROUND</span>    <span class="p">:</span> <span class="n">TEXT_COLOUR</span><span class="p">,</span>
+        <span class="n">CCPNMODULELABEL_BACKGROUND</span>       <span class="p">:</span> <span class="s1">&#39;#5858C0&#39;</span><span class="p">,</span>
+        <span class="n">CCPNMODULELABEL_FOREGROUND</span>       <span class="p">:</span> <span class="s1">&#39;#E0E0E0&#39;</span><span class="p">,</span>
+        <span class="n">CCPNMODULELABEL_BORDER</span>           <span class="p">:</span> <span class="s1">&#39;#5858C0&#39;</span><span class="p">,</span>
+        <span class="n">CCPNMODULELABEL_BACKGROUND_ACTIVE</span><span class="p">:</span> <span class="s1">&#39;#7080EE&#39;</span><span class="p">,</span>
+        <span class="n">CCPNMODULELABEL_FOREGROUND_ACTIVE</span><span class="p">:</span> <span class="s1">&#39;#FFFFFF&#39;</span><span class="p">,</span>
+        <span class="n">CCPNMODULELABEL_BORDER_ACTIVE</span>    <span class="p">:</span> <span class="s1">&#39;#7080EE&#39;</span><span class="p">,</span>
 
-        <span class="n">GUICHAINLABEL_TEXT</span>            <span class="p">:</span> <span class="n">TEXT_COLOUR</span><span class="p">,</span>
+        <span class="n">GUICHAINLABEL_TEXT</span>               <span class="p">:</span> <span class="n">TEXT_COLOUR</span><span class="p">,</span>
 
-        <span class="n">GUICHAINRESIDUE_UNASSIGNED</span>    <span class="p">:</span> <span class="s1">&#39;black&#39;</span><span class="p">,</span>
-        <span class="n">GUICHAINRESIDUE_ASSIGNED</span>      <span class="p">:</span> <span class="n">GREEN1</span><span class="p">,</span>
-        <span class="n">GUICHAINRESIDUE_POSSIBLE</span>      <span class="p">:</span> <span class="s1">&#39;orange&#39;</span><span class="p">,</span>
-        <span class="n">GUICHAINRESIDUE_WARNING</span>       <span class="p">:</span> <span class="n">WARNING_RED</span><span class="p">,</span>
-        <span class="n">GUICHAINRESIDUE_DRAGENTER</span>     <span class="p">:</span> <span class="n">MARISHINO</span><span class="p">,</span>
-        <span class="n">GUICHAINRESIDUE_DRAGLEAVE</span>     <span class="p">:</span> <span class="s1">&#39;black&#39;</span><span class="p">,</span>  <span class="c1"># &#39;#666e98&#39;,</span>
+        <span class="n">GUICHAINRESIDUE_UNASSIGNED</span>       <span class="p">:</span> <span class="s1">&#39;black&#39;</span><span class="p">,</span>
+        <span class="n">GUICHAINRESIDUE_ASSIGNED</span>         <span class="p">:</span> <span class="n">GREEN1</span><span class="p">,</span>
+        <span class="n">GUICHAINRESIDUE_POSSIBLE</span>         <span class="p">:</span> <span class="s1">&#39;orange&#39;</span><span class="p">,</span>
+        <span class="n">GUICHAINRESIDUE_WARNING</span>          <span class="p">:</span> <span class="n">WARNING_RED</span><span class="p">,</span>
+        <span class="n">GUICHAINRESIDUE_DRAGENTER</span>        <span class="p">:</span> <span class="n">MARISHINO</span><span class="p">,</span>
+        <span class="n">GUICHAINRESIDUE_DRAGLEAVE</span>        <span class="p">:</span> <span class="s1">&#39;black&#39;</span><span class="p">,</span>  <span class="c1"># &#39;#666e98&#39;,</span>
 
-        <span class="n">GUINMRATOM_SELECTED</span>           <span class="p">:</span> <span class="n">TEXT_COLOUR</span><span class="p">,</span>
-        <span class="n">GUINMRATOM_NOTSELECTED</span>        <span class="p">:</span> <span class="s1">&#39;#FDFDFC&#39;</span><span class="p">,</span>
+        <span class="n">GUINMRATOM_SELECTED</span>              <span class="p">:</span> <span class="n">TEXT_COLOUR</span><span class="p">,</span>
+        <span class="n">GUINMRATOM_NOTSELECTED</span>           <span class="p">:</span> <span class="s1">&#39;#FDFDFC&#39;</span><span class="p">,</span>
 
-        <span class="n">GUINMRRESIDUE</span>                 <span class="p">:</span> <span class="n">TEXT_COLOUR</span><span class="p">,</span>
+        <span class="n">GUINMRRESIDUE</span>                    <span class="p">:</span> <span class="n">TEXT_COLOUR</span><span class="p">,</span>
 
-        <span class="n">GUISTRIP_PIVOT</span>                <span class="p">:</span> <span class="n">MARISHINO</span><span class="p">,</span>
+        <span class="n">GUISTRIP_PIVOT</span>                   <span class="p">:</span> <span class="n">MARISHINO</span><span class="p">,</span>
 
-        <span class="n">LABEL_FOREGROUND</span>              <span class="p">:</span> <span class="n">TEXT_COLOUR</span><span class="p">,</span>
-        <span class="n">DIVIDER</span>                       <span class="p">:</span> <span class="n">TEXT_COLOUR</span><span class="p">,</span>
+        <span class="n">LABEL_FOREGROUND</span>                 <span class="p">:</span> <span class="n">TEXT_COLOUR</span><span class="p">,</span>
+        <span class="n">DIVIDER</span>                          <span class="p">:</span> <span class="n">TEXT_COLOUR</span><span class="p">,</span>
+        <span class="n">SOFTDIVIDER</span>                      <span class="p">:</span> <span class="n">SOFT_DIVIDER_COLOUR</span><span class="p">,</span>
+        <span class="n">LABEL_SELECTEDBACKGROUND</span>         <span class="p">:</span> <span class="s1">&#39;mediumseagreen&#39;</span><span class="p">,</span>
+        <span class="n">LABEL_SELECTEDFOREGROUND</span>         <span class="p">:</span> <span class="s1">&#39;black&#39;</span><span class="p">,</span>
+        <span class="n">LABEL_HIGHLIGHT</span>                  <span class="p">:</span> <span class="s1">&#39;palegreen&#39;</span><span class="p">,</span>
 
-        <span class="n">SEQUENCEGRAPHMODULE_LINE</span>      <span class="p">:</span> <span class="s1">&#39;black&#39;</span><span class="p">,</span>
-        <span class="n">SEQUENCEGRAPHMODULE_TEXT</span>      <span class="p">:</span> <span class="n">TEXT_COLOUR</span><span class="p">,</span>
+        <span class="n">SEQUENCEGRAPHMODULE_LINE</span>         <span class="p">:</span> <span class="s1">&#39;black&#39;</span><span class="p">,</span>
+        <span class="n">SEQUENCEGRAPHMODULE_TEXT</span>         <span class="p">:</span> <span class="n">TEXT_COLOUR</span><span class="p">,</span>
 
-        <span class="n">SEQUENCEMODULE_DRAGMOVE</span>       <span class="p">:</span> <span class="n">MEDIUM_BLUE</span><span class="p">,</span>
-        <span class="n">SEQUENCEMODULE_TEXT</span>           <span class="p">:</span> <span class="n">TEXT_COLOUR</span><span class="p">,</span>
+        <span class="n">SEQUENCEMODULE_DRAGMOVE</span>          <span class="p">:</span> <span class="n">MEDIUM_BLUE</span><span class="p">,</span>
+        <span class="n">SEQUENCEMODULE_TEXT</span>              <span class="p">:</span> <span class="n">TEXT_COLOUR</span><span class="p">,</span>
 
-        <span class="n">GUITABLE_BACKGROUND</span>         <span class="p">:</span> <span class="s1">&#39;white&#39;</span><span class="p">,</span>
-        <span class="n">GUITABLE_ALT_BACKGROUND</span>     <span class="p">:</span> <span class="n">LIGHT_GREY</span><span class="p">,</span>
-        <span class="n">GUITABLE_ITEM_FOREGROUND</span>    <span class="p">:</span> <span class="n">TEXT_COLOUR</span><span class="p">,</span>
-        <span class="n">GUITABLE_SELECTED_FOREGROUND</span><span class="p">:</span> <span class="s1">&#39;black&#39;</span><span class="p">,</span>
-        <span class="n">GUITABLE_SELECTED_BACKGROUND</span><span class="p">:</span> <span class="s1">&#39;#FFFCBA&#39;</span><span class="p">,</span>
+        <span class="n">GUITABLE_BACKGROUND</span>              <span class="p">:</span> <span class="s1">&#39;white&#39;</span><span class="p">,</span>
+        <span class="n">GUITABLE_ALT_BACKGROUND</span>          <span class="p">:</span> <span class="n">LIGHT_GREY</span><span class="p">,</span>
+        <span class="n">GUITABLE_ITEM_FOREGROUND</span>         <span class="p">:</span> <span class="n">TEXT_COLOUR</span><span class="p">,</span>
+        <span class="n">GUITABLE_SELECTED_FOREGROUND</span>     <span class="p">:</span> <span class="s1">&#39;black&#39;</span><span class="p">,</span>
+        <span class="n">GUITABLE_SELECTED_BACKGROUND</span>     <span class="p">:</span> <span class="s1">&#39;#FFFCBA&#39;</span><span class="p">,</span>
 
-        <span class="n">STRIPHEADER_FOREGROUND</span>        <span class="p">:</span> <span class="n">TEXT_COLOUR</span><span class="p">,</span>
-        <span class="n">STRIPHEADER_BACKGROUND</span>        <span class="p">:</span> <span class="s1">&#39;#ebebeb&#39;</span><span class="p">,</span>
+        <span class="n">STRIPHEADER_FOREGROUND</span>           <span class="p">:</span> <span class="n">TEXT_COLOUR</span><span class="p">,</span>
+        <span class="n">STRIPHEADER_BACKGROUND</span>           <span class="p">:</span> <span class="s1">&#39;#ebebeb&#39;</span><span class="p">,</span>
 
-        <span class="n">MARKS_COLOURS</span>                 <span class="p">:</span> <span class="n">MARK_LINE_COLOUR_DICT</span><span class="p">,</span>
-        <span class="n">SPECTRUM_HEXCOLOURS</span>           <span class="p">:</span> <span class="n">spectrumHexDarkColours</span>
+        <span class="n">MARKS_COLOURS</span>                    <span class="p">:</span> <span class="n">MARK_LINE_COLOUR_DICT</span><span class="p">,</span>
+        <span class="n">SPECTRUM_HEXCOLOURS</span>              <span class="p">:</span> <span class="n">spectrumHexDarkColours</span><span class="p">,</span>
+        <span class="n">SPECTRUM_HEXMEDIUMCOLOURS</span>        <span class="p">:</span> <span class="n">spectrumHexMediumColours</span><span class="p">,</span>
+        <span class="n">SPECTRUM_HEXDEFAULTCOLOURS</span>       <span class="p">:</span> <span class="n">spectrumHexDefaultDarkColours</span><span class="p">,</span>
         <span class="p">},</span>
 
     <span class="c1"># Overridden for dark colour scheme</span>
@@ -323,7 +348,13 @@
         <span class="n">CCPNGLWIDGET_ZOOMLINE</span>     <span class="p">:</span> <span class="p">(</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.9</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">),</span>
         <span class="n">CCPNGLWIDGET_MULTIPLETLINK</span><span class="p">:</span> <span class="n">LIGHTCORAL</span><span class="p">,</span>
 
-        <span class="n">SPECTRUM_HEXCOLOURS</span>       <span class="p">:</span> <span class="n">spectrumHexLightColours</span>
+        <span class="n">SPECTRUM_HEXCOLOURS</span>       <span class="p">:</span> <span class="n">spectrumHexLightColours</span><span class="p">,</span>
+        <span class="n">SPECTRUM_HEXMEDIUMCOLOURS</span> <span class="p">:</span> <span class="n">spectrumHexMediumColours</span><span class="p">,</span>
+        <span class="n">SPECTRUM_HEXDEFAULTCOLOURS</span><span class="p">:</span> <span class="n">spectrumHexDefaultLightColours</span><span class="p">,</span>
+
+        <span class="n">LABEL_SELECTEDBACKGROUND</span>         <span class="p">:</span> <span class="s1">&#39;mediumseagreen&#39;</span><span class="p">,</span>
+        <span class="n">LABEL_SELECTEDFOREGROUND</span>         <span class="p">:</span> <span class="s1">&#39;black&#39;</span><span class="p">,</span>
+        <span class="n">LABEL_HIGHLIGHT</span>                  <span class="p">:</span> <span class="s1">&#39;palegreen&#39;</span><span class="p">,</span>
         <span class="p">},</span>
 
     <span class="c1"># Overridden for light colour scheme</span>

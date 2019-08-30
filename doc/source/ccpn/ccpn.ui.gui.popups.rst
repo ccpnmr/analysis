@@ -17,6 +17,22 @@ ccpn.ui.gui.popups.AboutPopup module
     :undoc-members:
     :show-inheritance:
 
+ccpn.ui.gui.popups.AxisOrderingPopup module
+-------------------------------------------
+
+.. automodule:: ccpn.ui.gui.popups.AxisOrderingPopup
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+ccpn.ui.gui.popups.CalibrateSpectraFromPeaksPopup module
+--------------------------------------------------------
+
+.. automodule:: ccpn.ui.gui.popups.CalibrateSpectraFromPeaksPopup
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 ccpn.ui.gui.popups.ChainPopup module
 ------------------------------------
 
@@ -53,6 +69,14 @@ ccpn.ui.gui.popups.CopyPeaksPopup module
 ----------------------------------------
 
 .. automodule:: ccpn.ui.gui.popups.CopyPeaksPopup
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+ccpn.ui.gui.popups.CopyStripFlippedAxesPopup module
+---------------------------------------------------
+
+.. automodule:: ccpn.ui.gui.popups.CopyStripFlippedAxesPopup
     :members:
     :undoc-members:
     :show-inheritance:
@@ -113,6 +137,14 @@ ccpn.ui.gui.popups.EstimateNoisePopup module
     :undoc-members:
     :show-inheritance:
 
+ccpn.ui.gui.popups.EstimateVolumes module
+-----------------------------------------
+
+.. automodule:: ccpn.ui.gui.popups.EstimateVolumes
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 ccpn.ui.gui.popups.ExperimentFilterPopup module
 -----------------------------------------------
 
@@ -157,6 +189,14 @@ ccpn.ui.gui.popups.FeedbackPopup module
 ---------------------------------------
 
 .. automodule:: ccpn.ui.gui.popups.FeedbackPopup
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+ccpn.ui.gui.popups.ImportStarPopup module
+-----------------------------------------
+
+.. automodule:: ccpn.ui.gui.popups.ImportStarPopup
     :members:
     :undoc-members:
     :show-inheritance:
@@ -309,6 +349,14 @@ ccpn.ui.gui.popups.SelectObjectsPopup module
 --------------------------------------------
 
 .. automodule:: ccpn.ui.gui.popups.SelectObjectsPopup
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+ccpn.ui.gui.popups.SetPeakAliasing module
+-----------------------------------------
+
+.. automodule:: ccpn.ui.gui.popups.SetPeakAliasing
     :members:
     :undoc-members:
     :show-inheritance:

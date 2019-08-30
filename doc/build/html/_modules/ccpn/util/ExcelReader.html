@@ -61,7 +61,7 @@
 <span class="c1">#=========================================================================================</span>
 <span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: Luca Mureddu $&quot;</span>
 <span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2017-07-07 16:32:58 +0100 (Fri, July 07, 2017) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b5 $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.0 $&quot;</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Created</span>
 <span class="c1">#=========================================================================================</span>
@@ -77,7 +77,7 @@
 <span class="kn">import</span> <span class="nn">pathlib</span>
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="kn">as</span> <span class="nn">pd</span>
 <span class="kn">from</span> <span class="nn">ccpn.util.Logging</span> <span class="kn">import</span> <span class="n">getLogger</span><span class="p">,</span> <span class="n">_debug3</span>
-<span class="kn">from</span> <span class="nn">ccpn.core.lib.ContextManagers</span> <span class="kn">import</span> <span class="n">undoBlock</span><span class="p">,</span> <span class="n">undoBlockWithoutSideBar</span><span class="p">,</span> <span class="n">notificationEchoBlocking</span>
+<span class="kn">from</span> <span class="nn">ccpnmodel.ccpncore.lib.Io</span> <span class="kn">import</span> <span class="n">Formats</span> <span class="k">as</span> <span class="n">ioFormats</span>
 
 
 <span class="c1">################################       Excel Headers Warning      ######################################################</span>
@@ -94,6 +94,10 @@
 <span class="n">EXP_TYPE</span> <span class="o">=</span> <span class="s1">&#39;experimentType&#39;</span>
 <span class="n">SPECTRUM_PATH</span> <span class="o">=</span> <span class="s1">&#39;spectrumPath&#39;</span>
 <span class="n">SUBSTANCE_NAME</span> <span class="o">=</span> <span class="s1">&#39;substanceName&#39;</span>
+<span class="c1"># added from beta6</span>
+<span class="n">SPECTRUM_NAME</span> <span class="o">=</span> <span class="s1">&#39;spectrumName&#39;</span>
+<span class="n">SPECTRUMGROUP</span> <span class="o">=</span> <span class="s1">&#39;SpectrumGroup&#39;</span>
+
 
 <span class="c1">### Substance properties: # do not change these names</span>
 <span class="n">comment</span> <span class="o">=</span> <span class="s1">&#39;comment&#39;</span>
@@ -135,8 +139,72 @@
                         <span class="n">hBondAcceptorCount</span><span class="p">,</span> <span class="n">hBondDonorCount</span><span class="p">,</span> <span class="n">bondCount</span><span class="p">,</span> <span class="n">ringCount</span><span class="p">,</span> <span class="n">polarSurfaceArea</span><span class="p">,</span>
                         <span class="n">logPartitionCoefficient</span><span class="p">,</span> <span class="n">userCode</span><span class="p">,</span> <span class="p">]</span>
 
+<span class="n">SUBSTANCES_SHEET_COLUMNS</span> <span class="o">=</span>  <span class="p">[</span><span class="n">SUBSTANCE_NAME</span><span class="p">,</span><span class="n">SPECTRUM_PATH</span><span class="p">,</span><span class="n">SPECTRUM_GROUP_NAME</span><span class="p">,</span><span class="n">EXP_TYPE</span><span class="p">]</span><span class="o">+</span><span class="n">SUBSTANCE_PROPERTIES</span>
+<span class="n">SAMPLE_SHEET_COLUMNS</span> <span class="o">=</span> <span class="p">[</span><span class="n">SAMPLE_NAME</span><span class="p">,</span> <span class="n">SPECTRUM_GROUP_NAME</span><span class="p">,</span> <span class="n">SPECTRUM_PATH</span><span class="p">,</span> <span class="n">SPECTRUM_NAME</span><span class="p">]</span>
+
+
+<div class="viewcode-block" id="makeTemplate"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.ExcelReader.makeTemplate">[docs]</a><span class="k">def</span> <span class="nf">makeTemplate</span><span class="p">(</span><span class="n">path</span><span class="p">,</span><span class="n">fileName</span><span class="o">=</span><span class="s1">&#39;lookupTemplate.xlsx&#39;</span><span class="p">,):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    :param path: path where to save the template</span>
+<span class="sd">    :param fileName: name of template</span>
+<span class="sd">    :return:  the file path where is saved</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">path</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">path</span> <span class="o">=</span> <span class="n">path</span><span class="o">+</span> <span class="s1">&#39;/&#39;</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">path</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">)</span> <span class="k">else</span> <span class="n">path</span>
+    <span class="nb">file</span> <span class="o">=</span> <span class="n">path</span><span class="o">+</span><span class="n">fileName</span>
+    <span class="n">substanceDf</span> <span class="o">=</span> <span class="n">getDefaultSubstancesDF</span><span class="p">()</span>
+    <span class="n">sampleDF</span> <span class="o">=</span> <span class="n">getDefaultSampleDF</span><span class="p">()</span>
+    <span class="n">writer</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">ExcelWriter</span><span class="p">(</span><span class="nb">file</span><span class="p">,</span> <span class="n">engine</span><span class="o">=</span><span class="s1">&#39;xlsxwriter&#39;</span><span class="p">)</span>
+    <span class="n">substanceDf</span><span class="o">.</span><span class="n">to_excel</span><span class="p">(</span><span class="n">writer</span><span class="p">,</span> <span class="n">sheet_name</span><span class="o">=</span><span class="n">SUBSTANCE</span><span class="p">)</span>
+    <span class="n">sampleDF</span><span class="o">.</span><span class="n">to_excel</span><span class="p">(</span><span class="n">writer</span><span class="p">,</span> <span class="n">sheet_name</span><span class="o">=</span><span class="n">SAMPLE</span><span class="p">)</span>
+    <span class="n">writer</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">writer</span></div>
+
+<div class="viewcode-block" id="getDefaultSubstancesDF"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.ExcelReader.getDefaultSubstancesDF">[docs]</a><span class="k">def</span> <span class="nf">getDefaultSubstancesDF</span><span class="p">():</span>
+    <span class="k">return</span>  <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="n">SUBSTANCES_SHEET_COLUMNS</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="getDefaultSampleDF"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.ExcelReader.getDefaultSampleDF">[docs]</a><span class="k">def</span> <span class="nf">getDefaultSampleDF</span><span class="p">():</span>
+    <span class="k">return</span>  <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="n">SAMPLE_SHEET_COLUMNS</span><span class="p">)</span></div>
+
+
+<span class="k">def</span> <span class="nf">_filterBrukerExperiments</span><span class="p">(</span><span class="n">brukerFilePaths</span><span class="p">,</span> <span class="n">fileType</span> <span class="o">=</span> <span class="s1">&#39;1r&#39;</span><span class="p">,</span> <span class="n">multipleExp</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">expDirName</span><span class="o">=</span><span class="s1">&#39;1&#39;</span><span class="p">,</span> <span class="n">procDirName</span><span class="o">=</span><span class="s1">&#39;1&#39;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">    :param brukerFilePaths:</span>
+<span class="sd">    :param fileType:</span>
+<span class="sd">    :param multipleExp: whether or not there are subdirectories after the spectrum top dir before the  acqu files and pdata dir (even one).</span>
+<span class="sd">                        eg.a)  SpectumDir &gt; pdata &gt; 1 &gt; 1r     ====  multipleExp=False</span>
+<span class="sd">                        eg.b)  SpectumDir &gt; 1 &gt; pdata &gt; 1 &gt; 1r ====  multipleExp=True</span>
+
+<span class="sd">    :param expDirName: if there are: str of folder name. e.g. &#39;1&#39;,&#39;2&#39;... &#39;700&#39;</span>
+<span class="sd">                        eg)  SpectumDir &gt; |1|   &gt; pdata &gt; 1 &gt; 1r</span>
+<span class="sd">                                        &gt; |2|   &gt; pdata &gt; 1 &gt; 1r</span>
+<span class="sd">                                        &gt; |700| &gt; pdata &gt; 1 &gt; 1r</span>
+<span class="sd">                            Default: 1</span>
+<span class="sd">    :param procDirName: dir name straight</span>
+<span class="sd">                         eg)  SpectumDir &gt; 1  &gt; pdata &gt; |1| &gt; 1r</span>
+<span class="sd">                                                      &gt; |2| &gt; 1r</span>
+<span class="sd">                        default: 1</span>
+<span class="sd">    :return: list of filtered global path</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">filteredPaths</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">path</span> <span class="ow">in</span> <span class="n">brukerFilePaths</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">path</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="n">fileType</span><span class="p">):</span>
+           <span class="n">d</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>  <span class="c1">## directory of  1r file has to be as defaultProcsNumber</span>
+           <span class="k">if</span> <span class="n">d</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="n">procDirName</span><span class="p">):</span>
+               <span class="k">if</span> <span class="n">multipleExp</span><span class="p">:</span> <span class="c1"># search for other expeiments and take only the one of interest.</span>
+                   <span class="n">pdata</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">d</span><span class="p">)</span>
+                   <span class="n">expP</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">pdata</span><span class="p">)</span>
+                   <span class="k">if</span> <span class="n">expP</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="n">expDirName</span><span class="p">):</span>
+                       <span class="n">filteredPaths</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+               <span class="k">else</span><span class="p">:</span>
+                <span class="n">filteredPaths</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">filteredPaths</span>
 
 <div class="viewcode-block" id="ExcelReader"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.ExcelReader.ExcelReader">[docs]</a><span class="k">class</span> <span class="nc">ExcelReader</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+
+    <span class="c1"># from ccpn.util.decorators import profile</span>
+    <span class="c1"># @profile</span>
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">project</span><span class="p">,</span> <span class="n">excelPath</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        :param project: the ccpnmr Project object</span>
@@ -165,7 +233,7 @@
 
 
 <span class="sd">        &quot;&quot;&quot;</span>
-
+        <span class="kn">from</span> <span class="nn">ccpn.core.lib.ContextManagers</span> <span class="kn">import</span> <span class="n">undoBlock</span><span class="p">,</span> <span class="n">undoBlockWithoutSideBar</span><span class="p">,</span> <span class="n">notificationEchoBlocking</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_project</span> <span class="o">=</span> <span class="n">project</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">excelPath</span> <span class="o">=</span> <span class="n">excelPath</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">pandasFile</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">ExcelFile</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">excelPath</span><span class="p">)</span>
@@ -356,7 +424,13 @@
 <span class="sd">        :param dct:  dict with information for the spectrum. eg EXP type</span>
 <span class="sd">        :obj: obj to link the spectrum to. E.g. Sample or Substance,</span>
 <span class="sd">        &#39;&#39;&#39;</span>
-        <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">loadData</span><span class="p">(</span><span class="n">filePath</span><span class="p">)</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="n">dct</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">SPECTRUM_NAME</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">name</span><span class="p">:</span>
+            <span class="n">name</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">name</span>
+        <span class="k">if</span> <span class="n">filePath</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;1r&#39;</span><span class="p">):</span> <span class="c1"># a try to make a loader faster down the model, skipping the loops</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">loadSpectrum</span><span class="p">(</span><span class="n">filePath</span><span class="p">,</span> <span class="s1">&#39;Bruker&#39;</span><span class="p">,</span><span class="n">name</span> <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">loadData</span><span class="p">(</span><span class="n">filePath</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">data</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_linkSpectrumToObj</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">dct</span><span class="p">)</span>

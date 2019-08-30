@@ -393,6 +393,14 @@ ccpn.ui.gui.widgets.Label module
     :undoc-members:
     :show-inheritance:
 
+ccpn.ui.gui.widgets.LegendItem module
+-------------------------------------
+
+.. automodule:: ccpn.ui.gui.widgets.LegendItem
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 ccpn.ui.gui.widgets.LineEdit module
 -----------------------------------
 
@@ -437,6 +445,14 @@ ccpn.ui.gui.widgets.MessageDialog module
 ----------------------------------------
 
 .. automodule:: ccpn.ui.gui.widgets.MessageDialog
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+ccpn.ui.gui.widgets.NmrAtomsSelections module
+---------------------------------------------
+
+.. automodule:: ccpn.ui.gui.widgets.NmrAtomsSelections
     :members:
     :undoc-members:
     :show-inheritance:

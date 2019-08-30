@@ -63,7 +63,7 @@
 <span class="c1">#=========================================================================================</span>
 <span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: Ed Brooksbank $&quot;</span>
 <span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2017-09-20 17:23:41 +0100 (Wed, September 20, 2017) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b5 $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.0 $&quot;</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Created</span>
 <span class="c1">#=========================================================================================</span>
@@ -88,7 +88,7 @@
 <span class="kn">from</span> <span class="nn">ccpn.core.lib.ContextManagers</span> <span class="kn">import</span> <span class="n">newObject</span><span class="p">,</span> <span class="n">undoStackBlocking</span><span class="p">,</span> <span class="n">renameObject</span><span class="p">,</span> <span class="n">undoBlock</span>
 
 
-<div class="viewcode-block" id="NmrChain"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.NmrChain.NmrChain">[docs]</a><span class="k">class</span> <span class="nc">NmrChain</span><span class="p">(</span><span class="n">AbstractWrapperObject</span><span class="p">):</span>
+<div class="viewcode-block" id="NmrChain"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.AnalysisAssign.modules.BackboneAssignmentModule.NmrChain">[docs]</a><span class="k">class</span> <span class="nc">NmrChain</span><span class="p">(</span><span class="n">AbstractWrapperObject</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;NmrChains are used for NMR assignment. An NmrChain is by definition assigned to the</span>
 <span class="sd">    Chain with the same shortName (if any).</span>
 
@@ -194,6 +194,23 @@
         <span class="sd">&quot;&quot;&quot;Chain to which NmrChain is assigned&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">getChain</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_id</span><span class="p">)</span>
 
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">mainNmrResidues</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">Tuple</span><span class="p">[</span><span class="s1">&#39;NmrResidue&#39;</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;NmrResidues belonging to NmrChain that are NOT defined relative to another NmrResidue</span>
+<span class="sd">        (sequenceCode ending in &#39;-1&#39;, &#39;+1&#39;, etc.) For connected NmrChains in sequential order, otherwise sorted by assignment</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">()</span>
+
+        <span class="n">result</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_data2Obj</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">mainResonanceGroups</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">isConnected</span><span class="p">:</span>
+            <span class="n">result</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
+        <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+
+    <span class="nd">@mainNmrResidues.setter</span>
+    <span class="k">def</span> <span class="nf">mainNmrResidues</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">mainResonanceGroups</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span><span class="o">.</span><span class="n">_wrappedData</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">value</span><span class="p">]</span>
+
     <span class="c1"># @chain.setter</span>
     <span class="c1"># def chain(self, value:Chain):</span>
     <span class="c1">#   if value is None:</span>
@@ -206,13 +223,13 @@
     <span class="c1">#     self.rename(value._wrappedData.code)</span>
 
     <span class="nd">@logCommand</span><span class="p">(</span><span class="n">get</span><span class="o">=</span><span class="s1">&#39;self&#39;</span><span class="p">)</span>
-<div class="viewcode-block" id="NmrChain.deassign"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.NmrChain.NmrChain.deassign">[docs]</a>    <span class="k">def</span> <span class="nf">deassign</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="NmrChain.deassign"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.AnalysisAssign.modules.BackboneAssignmentModule.NmrChain.deassign">[docs]</a>    <span class="k">def</span> <span class="nf">deassign</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Reset NmrChain back to its originalName, cutting all assignment links&quot;&quot;&quot;</span>
         <span class="k">with</span> <span class="n">undoBlock</span><span class="p">():</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">code</span> <span class="o">=</span> <span class="bp">None</span></div>
 
     <span class="nd">@logCommand</span><span class="p">(</span><span class="n">get</span><span class="o">=</span><span class="s1">&#39;self&#39;</span><span class="p">)</span>
-<div class="viewcode-block" id="NmrChain.assignSingleResidue"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.NmrChain.NmrChain.assignSingleResidue">[docs]</a>    <span class="k">def</span> <span class="nf">assignSingleResidue</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">thisNmrResidue</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="s1">&#39;NmrResidue&#39;</span><span class="p">],</span> <span class="n">firstResidue</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="s1">&#39;Residue&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">]):</span>
+<div class="viewcode-block" id="NmrChain.assignSingleResidue"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.AnalysisAssign.modules.BackboneAssignmentModule.NmrChain.assignSingleResidue">[docs]</a>    <span class="k">def</span> <span class="nf">assignSingleResidue</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">thisNmrResidue</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="s1">&#39;NmrResidue&#39;</span><span class="p">],</span> <span class="n">firstResidue</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="s1">&#39;Residue&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">]):</span>
         <span class="sd">&quot;&quot;&quot;Assign a single unconnected residue from the default &#39;@-&#39; chain&quot;&quot;&quot;</span>
 
         <span class="n">project</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span>
@@ -238,7 +255,7 @@
             <span class="n">thisNmrResidue</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">assignedResidue</span> <span class="o">=</span> <span class="n">firstResidue</span><span class="o">.</span><span class="n">_wrappedData</span></div>
 
     <span class="nd">@logCommand</span><span class="p">(</span><span class="n">get</span><span class="o">=</span><span class="s1">&#39;self&#39;</span><span class="p">)</span>
-<div class="viewcode-block" id="NmrChain.assignConnectedResidues"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.NmrChain.NmrChain.assignConnectedResidues">[docs]</a>    <span class="k">def</span> <span class="nf">assignConnectedResidues</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">firstResidue</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="s1">&#39;Residue&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">]):</span>
+<div class="viewcode-block" id="NmrChain.assignConnectedResidues"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.AnalysisAssign.modules.BackboneAssignmentModule.NmrChain.assignConnectedResidues">[docs]</a>    <span class="k">def</span> <span class="nf">assignConnectedResidues</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">firstResidue</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="s1">&#39;Residue&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">]):</span>
         <span class="sd">&quot;&quot;&quot;Assign all NmrResidues in connected NmrChain sequentially,</span>
 <span class="sd">        with the first NmrResidue assigned to firstResidue.</span>
 
@@ -296,7 +313,7 @@
                 <span class="n">V3nmrChain</span><span class="o">.</span><span class="n">delete</span><span class="p">()</span></div>
 
     <span class="nd">@logCommand</span><span class="p">(</span><span class="n">get</span><span class="o">=</span><span class="s1">&#39;self&#39;</span><span class="p">)</span>
-<div class="viewcode-block" id="NmrChain.reverse"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.NmrChain.NmrChain.reverse">[docs]</a>    <span class="k">def</span> <span class="nf">reverse</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">_force</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+<div class="viewcode-block" id="NmrChain.reverse"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.AnalysisAssign.modules.BackboneAssignmentModule.NmrChain.reverse">[docs]</a>    <span class="k">def</span> <span class="nf">reverse</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">_force</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Reverse order of NmrResidues within NmrChain</span>
 
 <span class="sd">        Illegal for assigned NmrChains, and only relevant for connected NmrChains.</span>
@@ -313,7 +330,7 @@
                 <span class="n">addUndoItem</span><span class="p">(</span><span class="n">undo</span><span class="o">=</span><span class="n">partial</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">reverse</span><span class="p">),</span> <span class="n">redo</span><span class="o">=</span><span class="n">partial</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">reverse</span><span class="p">))</span></div>
 
     <span class="nd">@logCommand</span><span class="p">(</span><span class="n">get</span><span class="o">=</span><span class="s1">&#39;self&#39;</span><span class="p">)</span>
-<div class="viewcode-block" id="NmrChain.renumberNmrResidues"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.NmrChain.NmrChain.renumberNmrResidues">[docs]</a>    <span class="k">def</span> <span class="nf">renumberNmrResidues</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">offset</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">start</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="n">stop</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="bp">None</span><span class="p">):</span>
+<div class="viewcode-block" id="NmrChain.renumberNmrResidues"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.AnalysisAssign.modules.BackboneAssignmentModule.NmrChain.renumberNmrResidues">[docs]</a>    <span class="k">def</span> <span class="nf">renumberNmrResidues</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">offset</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">start</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="n">stop</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="bp">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Renumber nmrResidues in range start-stop (inclusive) by adding offset</span>
 
 <span class="sd">        The nmrResidue number is the integer starting part of the sequenceCode,</span>
@@ -362,7 +379,7 @@
         <span class="k">return</span> <span class="n">parent</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">sortedNmrChains</span><span class="p">()</span>
 
     <span class="nd">@logCommand</span><span class="p">(</span><span class="n">get</span><span class="o">=</span><span class="s1">&#39;self&#39;</span><span class="p">)</span>
-<div class="viewcode-block" id="NmrChain.rename"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.NmrChain.NmrChain.rename">[docs]</a>    <span class="k">def</span> <span class="nf">rename</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+<div class="viewcode-block" id="NmrChain.rename"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.AnalysisAssign.modules.BackboneAssignmentModule.NmrChain.rename">[docs]</a>    <span class="k">def</span> <span class="nf">rename</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Rename NmrChain, changing its shortName and Pid.</span>
 <span class="sd">        Use the &#39;deassign&#39; function if you want to revert to the canonical name&quot;&quot;&quot;</span>
 
@@ -385,6 +402,13 @@
             <span class="n">addUndoItem</span><span class="p">(</span><span class="n">undo</span><span class="o">=</span><span class="n">partial</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rename</span><span class="p">,</span> <span class="n">oldName</span><span class="p">),</span>
                         <span class="n">redo</span><span class="o">=</span><span class="n">partial</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rename</span><span class="p">,</span> <span class="n">value</span><span class="p">))</span></div>
 
+    <span class="k">def</span> <span class="nf">_finaliseAction</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">action</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">action</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;delete&#39;</span><span class="p">]:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">implCode</span> <span class="o">==</span> <span class="s1">&#39;@-&#39;</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">nmrProject</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;NmrChain &#39;@-&#39; cannot be deleted&quot;</span><span class="p">)</span>
+
+        <span class="nb">super</span><span class="p">(</span><span class="n">NmrChain</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">_finaliseAction</span><span class="p">(</span><span class="n">action</span><span class="p">)</span>
+
     <span class="c1">#=========================================================================================</span>
     <span class="c1"># CCPN functions</span>
     <span class="c1">#=========================================================================================</span>
@@ -395,7 +419,7 @@
     <span class="c1">#===========================================================================================</span>
 
     <span class="nd">@logCommand</span><span class="p">(</span><span class="n">get</span><span class="o">=</span><span class="s1">&#39;self&#39;</span><span class="p">)</span>
-<div class="viewcode-block" id="NmrChain.newNmrResidue"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.NmrChain.NmrChain.newNmrResidue">[docs]</a>    <span class="k">def</span> <span class="nf">newNmrResidue</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sequenceCode</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="n">residueType</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span>
+<div class="viewcode-block" id="NmrChain.newNmrResidue"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.AnalysisAssign.modules.BackboneAssignmentModule.NmrChain.newNmrResidue">[docs]</a>    <span class="k">def</span> <span class="nf">newNmrResidue</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sequenceCode</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="n">residueType</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span>
                       <span class="n">comment</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="bp">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Create new NmrResidue within NmrChain.</span>
 
@@ -412,7 +436,7 @@
                               <span class="n">comment</span><span class="o">=</span><span class="n">comment</span><span class="p">)</span></div>
 
     <span class="nd">@logCommand</span><span class="p">(</span><span class="n">get</span><span class="o">=</span><span class="s1">&#39;self&#39;</span><span class="p">)</span>
-<div class="viewcode-block" id="NmrChain.fetchNmrResidue"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.NmrChain.NmrChain.fetchNmrResidue">[docs]</a>    <span class="k">def</span> <span class="nf">fetchNmrResidue</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sequenceCode</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span>
+<div class="viewcode-block" id="NmrChain.fetchNmrResidue"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.AnalysisAssign.modules.BackboneAssignmentModule.NmrChain.fetchNmrResidue">[docs]</a>    <span class="k">def</span> <span class="nf">fetchNmrResidue</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sequenceCode</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span>
                         <span class="n">residueType</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="bp">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Fetch NmrResidue with sequenceCode=sequenceCode and residueType=residueType,</span>
 <span class="sd">        creating it if necessary.</span>

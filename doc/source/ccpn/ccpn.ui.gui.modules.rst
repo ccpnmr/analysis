@@ -65,6 +65,14 @@ ccpn.ui.gui.modules.MultipletListTable module
     :undoc-members:
     :show-inheritance:
 
+ccpn.ui.gui.modules.MultipletPeakTable module
+---------------------------------------------
+
+.. automodule:: ccpn.ui.gui.modules.MultipletPeakTable
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 ccpn.ui.gui.modules.NmrResidueTable module
 ------------------------------------------
 

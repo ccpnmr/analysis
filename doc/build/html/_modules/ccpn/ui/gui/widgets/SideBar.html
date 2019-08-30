@@ -76,7 +76,7 @@
 <span class="c1">#=========================================================================================</span>
 <span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: CCPN $&quot;</span>
 <span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2017-07-07 16:32:55 +0100 (Fri, July 07, 2017) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b5 $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.0 $&quot;</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Created</span>
 <span class="c1">#=========================================================================================</span>
@@ -1210,7 +1210,8 @@
 
     <span class="k">def</span> <span class="nf">_keyPressEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;This functionality is under testing. Used for quickly display spectra via key press on</span>
-<span class="sd">        sidebar on large datasets &quot;&quot;&quot;</span>
+<span class="sd">        sidebar on large datasets on the current strip. Only work if spectra are of the same type</span>
+<span class="sd">        (previous/next same as currently displayed) Usefull for screening &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">event</span><span class="o">.</span><span class="n">key</span><span class="p">()</span> <span class="o">==</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">Key_Up</span><span class="p">:</span>
             <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">keyPressEvent</span><span class="p">(</span><span class="n">event</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_displaySelectedSpectrum</span><span class="p">()</span>
@@ -1275,7 +1276,7 @@
     <span class="k">def</span> <span class="nf">_blockSideBarEvents</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Block all updates/signals/notifiers on the sidebar</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">setUpdatesEnabled</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
+        <span class="c1"># self.setUpdatesEnabled(False)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">blockSignals</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
         <span class="c1"># self.setBlankingAllNotifiers(True)</span>
 
@@ -1284,7 +1285,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># self.setBlankingAllNotifiers(False)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">blockSignals</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">setUpdatesEnabled</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+        <span class="c1"># self.setUpdatesEnabled(True)</span>
 
 <div class="viewcode-block" id="SideBar.selectPid"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.SideBar.SideBar.selectPid">[docs]</a>    <span class="k">def</span> <span class="nf">selectPid</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pid</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Select the item in the sideBar with the given pid.</span>

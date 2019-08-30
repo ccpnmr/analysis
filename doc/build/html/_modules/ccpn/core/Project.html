@@ -63,7 +63,7 @@
 <span class="c1">#=========================================================================================</span>
 <span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: CCPN $&quot;</span>
 <span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2017-07-07 16:32:29 +0100 (Fri, July 07, 2017) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b5 $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.0 $&quot;</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Created</span>
 <span class="c1">#=========================================================================================</span>
@@ -76,8 +76,10 @@
 <span class="kn">import</span> <span class="nn">functools</span>
 <span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">typing</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Sequence</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">Optional</span>
 <span class="kn">import</span> <span class="nn">operator</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">tqdm</span> <span class="kn">import</span> <span class="n">tqdm</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Sequence</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">Optional</span>
 <span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">OrderedDict</span>
 <span class="kn">from</span> <span class="nn">time</span> <span class="kn">import</span> <span class="n">time</span>
 <span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span>
@@ -249,6 +251,10 @@
         <span class="c1"># initialise, creating the wrapped objects</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_initializeAll</span><span class="p">()</span>
 
+        <span class="c1"># 20190520:ED routines that use core objects, not sure whether the correct place</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_setContourColours</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_setNoiseLevels</span><span class="p">()</span>
+
     <span class="k">def</span> <span class="nf">_close</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
 
@@ -394,7 +400,8 @@
         <span class="sd">&quot;&quot;&quot;undo stack for Project. Implementation attribute&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">_undo</span>
 
-    <span class="k">def</span> <span class="nf">_resetUndo</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">maxWaypoints</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">20</span><span class="p">,</span> <span class="n">maxOperations</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10000</span><span class="p">,</span>
+    <span class="k">def</span> <span class="nf">_resetUndo</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">maxWaypoints</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">Undo</span><span class="o">.</span><span class="n">MAXUNDOWAYPOINTS</span><span class="p">,</span>
+                   <span class="n">maxOperations</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">Undo</span><span class="o">.</span><span class="n">MAXUNDOOPERATIONS</span><span class="p">,</span>
                    <span class="n">debug</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="bp">False</span><span class="p">,</span> <span class="n">application</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Reset undo stack, using passed-in parameters.</span>
 <span class="sd">        NB setting either parameter to 0 removes the undo stack.&quot;&quot;&quot;</span>
@@ -479,14 +486,13 @@
         <span class="c1">#</span>
         <span class="k">return</span> <span class="n">result</span>
 
-
-  <span class="c1">#===========================================================================================</span>
+    <span class="c1">#===========================================================================================</span>
     <span class="c1">#  Notifiers system</span>
     <span class="c1">#</span>
 
     <span class="c1"># Old, API-level functions:</span>
-  <span class="c1">#</span>
-  <span class="c1">#===========================================================================================</span>
+    <span class="c1">#</span>
+    <span class="c1">#===========================================================================================</span>
 
     <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">_setupApiNotifier</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">func</span><span class="p">,</span> <span class="n">apiClassOrName</span><span class="p">,</span> <span class="n">apiFuncName</span><span class="p">,</span> <span class="n">parameterDict</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
@@ -565,12 +571,12 @@
             <span class="n">tt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_activeNotifiers</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
             <span class="n">Notifiers</span><span class="o">.</span><span class="n">unregisterNotify</span><span class="p">(</span><span class="o">*</span><span class="n">tt</span><span class="p">)</span>
 
-  <span class="c1">#===========================================================================================</span>
-  <span class="c1">#  Notifiers system</span>
-  <span class="c1">#</span>
+    <span class="c1">#===========================================================================================</span>
+    <span class="c1">#  Notifiers system</span>
+    <span class="c1">#</span>
     <span class="c1"># New notifier system (Free for use in application code):</span>
-  <span class="c1">#</span>
-  <span class="c1">#===========================================================================================</span>
+    <span class="c1">#</span>
+    <span class="c1">#===========================================================================================</span>
 
 <div class="viewcode-block" id="Project.registerNotifier"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.Project.Project.registerNotifier">[docs]</a>    <span class="k">def</span> <span class="nf">registerNotifier</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">className</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">target</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">func</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="bp">None</span><span class="p">],</span>
                          <span class="n">parameterDict</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="p">{},</span> <span class="n">onceOnly</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="bp">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="bp">None</span><span class="p">]:</span>
@@ -768,7 +774,6 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">undo</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_undo</span>
         <span class="k">if</span> <span class="n">undo</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
-
             <span class="c1"># self.resumeNotification()</span>
             <span class="n">undo</span><span class="o">.</span><span class="n">decreaseWaypointBlocking</span><span class="p">()</span>
 
@@ -1079,8 +1084,10 @@
             <span class="c1"># special case - usePath is a list of paths from a top dir with enumerate subDirs and paths.</span>
             <span class="n">paths</span> <span class="o">=</span> <span class="n">usePath</span>
             <span class="c1">#TODO:RASMUS: Undefined return type</span>
+            <span class="n">_loadedData</span> <span class="o">=</span> <span class="p">[]</span>
             <span class="k">for</span> <span class="n">path</span> <span class="ow">in</span> <span class="n">paths</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">loadData</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+                <span class="n">_loadedData</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">loadData</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">_loadedData</span>
 
         <span class="k">elif</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">usePath</span><span class="p">):</span>
             <span class="c1"># print(&quot;Skipping: no file found at %s&quot; % usePath)</span>
@@ -1128,7 +1135,8 @@
                 <span class="k">return</span> <span class="n">thisSpec</span>
 
             <span class="k">elif</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">funcname</span><span class="p">):</span>
-                <span class="n">pids</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">funcname</span><span class="p">)(</span><span class="n">usePath</span><span class="p">,</span> <span class="n">subType</span><span class="p">)</span>
+                <span class="k">with</span> <span class="n">undoBlock</span><span class="p">():</span>
+                    <span class="n">pids</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">funcname</span><span class="p">)(</span><span class="n">usePath</span><span class="p">,</span> <span class="n">subType</span><span class="p">)</span>
                 <span class="k">return</span> <span class="n">pids</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="c1"># print(&quot;Skipping: project has no function %s&quot; % funcname)</span>
@@ -1223,42 +1231,54 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Project file type </span><span class="si">%s</span><span class="s2"> is not recognised&quot;</span> <span class="o">%</span> <span class="n">subType</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Project.loadSpectrum"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.Project.Project.loadSpectrum">[docs]</a>    <span class="k">def</span> <span class="nf">loadSpectrum</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">subType</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Load spectrum from file into application&quot;&quot;&quot;</span>
+    <span class="nd">@logCommand</span><span class="p">(</span><span class="s1">&#39;project&#39;</span><span class="p">)</span>
+<div class="viewcode-block" id="Project.loadSpectrum"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.Project.Project.loadSpectrum">[docs]</a>    <span class="k">def</span> <span class="nf">loadSpectrum</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">subType</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="bp">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Load spectrum defined by path into application</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="kn">from</span> <span class="nn">ccpn.core.lib.SpectrumLib</span> <span class="kn">import</span> <span class="n">setContourLevelsFromNoise</span>
 
         <span class="c1"># #TODO:RASMUS FIXME check for rename</span>
 
-        <span class="n">apiDataSource</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">loadDataSource</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">subType</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">apiDataSource</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">loadDataSource</span><span class="p">(</span>
+                            <span class="n">filePath</span><span class="o">=</span><span class="n">path</span><span class="p">,</span> <span class="n">dataFileFormat</span><span class="o">=</span><span class="n">subType</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span>
+            <span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">es</span><span class="p">:</span>
+            <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="n">es</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">es</span>
+
         <span class="k">if</span> <span class="n">apiDataSource</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
             <span class="k">return</span> <span class="p">[]</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">spectrum</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data2Obj</span><span class="p">[</span><span class="n">apiDataSource</span><span class="p">]</span>
             <span class="n">spectrum</span><span class="o">.</span><span class="n">assignmentTolerances</span> <span class="o">=</span> <span class="n">spectrum</span><span class="o">.</span><span class="n">defaultAssignmentTolerances</span>
 
-            <span class="c1"># make sure the colour brightness is not too close to the colourScheme background</span>
-            <span class="c1"># TODO:ED another nasty _appBase</span>
+            <span class="c1"># estimate new base contour levels</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">preferences</span><span class="o">.</span><span class="n">general</span><span class="o">.</span><span class="n">automaticNoiseContoursOnLoadSpectrum</span><span class="p">:</span>
+                <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;estimating noise level for spectrum </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">spectrum</span><span class="o">.</span><span class="n">pid</span><span class="p">))</span>
 
-            <span class="c1"># if there is a gui then check the colours</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_appBase</span><span class="o">.</span><span class="n">ui</span><span class="p">:</span>
-                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_appBase</span><span class="o">.</span><span class="n">preferences</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_appBase</span><span class="o">.</span><span class="n">preferences</span><span class="o">.</span><span class="n">general</span><span class="o">.</span><span class="n">autoCorrectColours</span><span class="p">:</span>
-                    <span class="kn">from</span> <span class="nn">ccpn.ui.gui.guiSettings</span> <span class="kn">import</span> <span class="n">autoCorrectHexColour</span><span class="p">,</span> <span class="n">getColours</span><span class="p">,</span> <span class="n">CCPNGLWIDGET_HEXBACKGROUND</span>
-                    <span class="kn">from</span> <span class="nn">ccpn.core.lib.SpectrumLib</span> <span class="kn">import</span> <span class="n">getDefaultSpectrumColours</span>
+                <span class="n">setContourLevelsFromNoise</span><span class="p">(</span><span class="n">spectrum</span><span class="p">,</span> <span class="n">setNoiseLevel</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+                                          <span class="n">setPositiveContours</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">setNegativeContours</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+                                          <span class="n">useSameMultiplier</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
 
-                    <span class="p">(</span><span class="n">spectrum</span><span class="o">.</span><span class="n">positiveContourColour</span><span class="p">,</span> <span class="n">spectrum</span><span class="o">.</span><span class="n">negativeContourColour</span><span class="p">)</span> <span class="o">=</span> <span class="n">getDefaultSpectrumColours</span><span class="p">(</span><span class="n">spectrum</span><span class="p">)</span>
-                    <span class="n">spectrum</span><span class="o">.</span><span class="n">sliceColour</span> <span class="o">=</span> <span class="n">spectrum</span><span class="o">.</span><span class="n">positiveContourColour</span>
+            <span class="c1"># set the positive/negative/slice colours</span>
+            <span class="kn">from</span> <span class="nn">ccpn.core.lib.SpectrumLib</span> <span class="kn">import</span> <span class="n">getDefaultSpectrumColours</span>
 
-                    <span class="c1"># spectrum.positiveContourColour = autoCorrectHexColour(spectrum.positiveContourColour,</span>
-                    <span class="c1">#                                                       getColours()[CCPNGLWIDGET_HEXBACKGROUND])</span>
-                    <span class="c1"># spectrum.negativeContourColour = autoCorrectHexColour(spectrum.negativeContourColour,</span>
-                    <span class="c1">#                                                       getColours()[CCPNGLWIDGET_HEXBACKGROUND])</span>
-                    <span class="c1"># spectrum.sliceColour = autoCorrectHexColour(spectrum.sliceColour,</span>
-                    <span class="c1">#                                                       getColours()[CCPNGLWIDGET_HEXBACKGROUND])</span>
+            <span class="p">(</span><span class="n">spectrum</span><span class="o">.</span><span class="n">positiveContourColour</span><span class="p">,</span> <span class="n">spectrum</span><span class="o">.</span><span class="n">negativeContourColour</span><span class="p">)</span> <span class="o">=</span> <span class="n">getDefaultSpectrumColours</span><span class="p">(</span><span class="n">spectrum</span><span class="p">)</span>
+            <span class="n">spectrum</span><span class="o">.</span><span class="n">sliceColour</span> <span class="o">=</span> <span class="n">spectrum</span><span class="o">.</span><span class="n">positiveContourColour</span>
+
+            <span class="c1"># set the initial axis ordering</span>
+            <span class="n">spectrum</span><span class="o">.</span><span class="n">getDefaultOrdering</span><span class="p">(</span><span class="bp">None</span><span class="p">)</span>
 
             <span class="c1"># if there are no peakLists then create a new one - taken from Spectrum _spectrumMakeFirstPeakList notifier</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="n">spectrum</span><span class="o">.</span><span class="n">peakLists</span><span class="p">:</span>
                 <span class="n">spectrum</span><span class="o">.</span><span class="n">newPeakList</span><span class="p">()</span>
 
             <span class="k">return</span> <span class="p">[</span><span class="n">spectrum</span><span class="p">]</span></div>
+
+    <span class="k">def</span> <span class="nf">_loadLayout</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">subType</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="c1"># this is a GUI only function call. Please move to the appropriate location on 3.1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">restoreLayoutFromFile</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_loadLookupFile</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">subType</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Load data from a look-up file, csv or xls .&quot;&quot;&quot;</span>
@@ -1332,6 +1352,32 @@
         <span class="c1">#</span>
         <span class="k">return</span> <span class="n">result</span></div>
 
+    <span class="k">def</span> <span class="nf">_setContourColours</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Set new contour colours for spectra that have not been defined</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># 20190520:ED new code to set colours and update contour levels</span>
+        <span class="kn">from</span> <span class="nn">ccpn.core.lib.SpectrumLib</span> <span class="kn">import</span> <span class="n">getDefaultSpectrumColours</span>
+
+        <span class="k">for</span> <span class="n">spectrum</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">spectrum</span><span class="o">.</span><span class="n">positiveContourColour</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">spectrum</span><span class="o">.</span><span class="n">negativeContourColour</span><span class="p">:</span>
+                <span class="c1"># set contour colours for every spectrum</span>
+                <span class="p">(</span><span class="n">spectrum</span><span class="o">.</span><span class="n">positiveContourColour</span><span class="p">,</span>
+                 <span class="n">spectrum</span><span class="o">.</span><span class="n">negativeContourColour</span><span class="p">)</span> <span class="o">=</span> <span class="n">getDefaultSpectrumColours</span><span class="p">(</span><span class="n">spectrum</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">spectrum</span><span class="o">.</span><span class="n">sliceColour</span><span class="p">:</span>
+                <span class="n">spectrum</span><span class="o">.</span><span class="n">sliceColour</span> <span class="o">=</span> <span class="n">spectrum</span><span class="o">.</span><span class="n">positiveContourColour</span>
+
+    <span class="k">def</span> <span class="nf">_setNoiseLevels</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Set noise levels for spectra that have not been defined</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># 20190520:ED new code to set colours and update contour levels</span>
+        <span class="kn">from</span> <span class="nn">ccpn.core.lib.SpectrumLib</span> <span class="kn">import</span> <span class="n">setContourLevelsFromNoise</span>
+
+        <span class="k">for</span> <span class="n">spectrum</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">spectrum</span><span class="o">.</span><span class="n">noiseLevel</span><span class="p">:</span>
+                <span class="n">setContourLevelsFromNoise</span><span class="p">(</span><span class="n">spectrum</span><span class="p">,</span> <span class="n">setNoiseLevel</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+                                          <span class="n">setPositiveContours</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">setNegativeContours</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+                                          <span class="n">useSameMultiplier</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+
     <span class="c1">#===========================================================================================</span>
     <span class="c1"># new&#39;Object&#39; and other methods</span>
     <span class="c1"># Call appropriate routines in their respective locations</span>
@@ -1359,9 +1405,7 @@
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">findMark</span><span class="p">(</span><span class="n">colour</span><span class="o">=</span><span class="n">colour</span><span class="p">,</span> <span class="n">positions</span><span class="o">=</span><span class="n">positions</span><span class="p">,</span> <span class="n">axisCodes</span><span class="o">=</span><span class="n">axisCodes</span><span class="p">,</span> <span class="n">labels</span><span class="o">=</span><span class="n">labels</span><span class="p">):</span>
             <span class="k">return</span> <span class="n">_newMark</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">colour</span><span class="o">=</span><span class="n">colour</span><span class="p">,</span> <span class="n">positions</span><span class="o">=</span><span class="n">positions</span><span class="p">,</span> <span class="n">axisCodes</span><span class="o">=</span><span class="n">axisCodes</span><span class="p">,</span>
                             <span class="n">style</span><span class="o">=</span><span class="n">style</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="n">units</span><span class="p">,</span> <span class="n">labels</span><span class="o">=</span><span class="n">labels</span>
-                            <span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;Mark already exists&#39;</span><span class="p">)</span></div>
+                            <span class="p">)</span></div>
 
     <span class="nd">@logCommand</span><span class="p">(</span><span class="s1">&#39;project.&#39;</span><span class="p">)</span>
 <div class="viewcode-block" id="Project.findMark"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.Project.Project.findMark">[docs]</a>    <span class="k">def</span> <span class="nf">findMark</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">colour</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">positions</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span> <span class="n">axisCodes</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">labels</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">()):</span>

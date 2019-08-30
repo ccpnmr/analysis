@@ -135,6 +135,20 @@ super(&lt;YourModule&gt;, self)._closeModule()</dd>
 <code class="descname">dropEvent</code><span class="sig-paren">(</span><em>event</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/CcpnModule.html#CcpnModule.dropEvent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.CcpnModule.CcpnModule.dropEvent" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
+<dl class="method">
+<dt id="ccpn.ui.gui.modules.CcpnModule.CcpnModule.enterEvent">
+<code class="descname">enterEvent</code><span class="sig-paren">(</span><em>event</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/CcpnModule.html#CcpnModule.enterEvent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.CcpnModule.CcpnModule.enterEvent" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.modules.CcpnModule.CcpnModule.event">
+<code class="descname">event</code><span class="sig-paren">(</span><em>event</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/CcpnModule.html#CcpnModule.event"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.CcpnModule.CcpnModule.event" title="Permalink to this definition">¶</a></dt>
+<dd><p>CCPNInternal
+Handle events for switching transparency of modules
+Modules become transparent when dragging to another module.
+Ensure that the dropAreas become active</p>
+</dd></dl>
+
 <dl class="attribute">
 <dt id="ccpn.ui.gui.modules.CcpnModule.CcpnModule.includeSettingsWidget">
 <code class="descname">includeSettingsWidget</code><em class="property"> = False</em><a class="headerlink" href="#ccpn.ui.gui.modules.CcpnModule.CcpnModule.includeSettingsWidget" title="Permalink to this definition">¶</a></dt>
@@ -158,6 +172,11 @@ This is called when the WindowStateChanges to maximises</p>
 <dl class="attribute">
 <dt id="ccpn.ui.gui.modules.CcpnModule.CcpnModule.labelOrientation">
 <code class="descname">labelOrientation</code><em class="property"> = 'horizontal'</em><a class="headerlink" href="#ccpn.ui.gui.modules.CcpnModule.CcpnModule.labelOrientation" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.modules.CcpnModule.CcpnModule.leaveEvent">
+<code class="descname">leaveEvent</code><span class="sig-paren">(</span><em>event</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/CcpnModule.html#CcpnModule.leaveEvent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.CcpnModule.CcpnModule.leaveEvent" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
@@ -259,9 +278,16 @@ return  {&#8220;variableName&#8221;:&#8221;value&#8221;}  of all gui Variables</
 <dd></dd></dl>
 
 <dl class="method">
+<dt id="ccpn.ui.gui.modules.CcpnModule.CcpnModuleLabel.mouseDoubleClickEvent">
+<code class="descname">mouseDoubleClickEvent</code><span class="sig-paren">(</span><em>ev</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/CcpnModule.html#CcpnModuleLabel.mouseDoubleClickEvent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.CcpnModule.CcpnModuleLabel.mouseDoubleClickEvent" title="Permalink to this definition">¶</a></dt>
+<dd><p>Handle the double click event</p>
+</dd></dl>
+
+<dl class="method">
 <dt id="ccpn.ui.gui.modules.CcpnModule.CcpnModuleLabel.mouseMoveEvent">
 <code class="descname">mouseMoveEvent</code><span class="sig-paren">(</span><em>ev</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/CcpnModule.html#CcpnModuleLabel.mouseMoveEvent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.CcpnModule.CcpnModuleLabel.mouseMoveEvent" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Handle the mouse move event to spawn a drag event</p>
+</dd></dl>
 
 <dl class="method">
 <dt id="ccpn.ui.gui.modules.CcpnModule.CcpnModuleLabel.mousePressEvent">
@@ -275,9 +301,19 @@ return  {&#8220;variableName&#8221;:&#8221;value&#8221;}  of all gui Variables</
 <dd><p>Copied from the parent VerticalLabel class to allow for modification in StyleSheet</p>
 </dd></dl>
 
+<dl class="method">
+<dt id="ccpn.ui.gui.modules.CcpnModule.CcpnModuleLabel.setModuleHighlight">
+<code class="descname">setModuleHighlight</code><span class="sig-paren">(</span><em>hightlighted=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/CcpnModule.html#CcpnModuleLabel.setModuleHighlight"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.CcpnModule.CcpnModuleLabel.setModuleHighlight" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
 <dl class="attribute">
 <dt id="ccpn.ui.gui.modules.CcpnModule.CcpnModuleLabel.sigDragEntered">
 <code class="descname">sigDragEntered</code><a class="headerlink" href="#ccpn.ui.gui.modules.CcpnModule.CcpnModuleLabel.sigDragEntered" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.modules.CcpnModule.CcpnModuleLabel.updateStyle">
+<code class="descname">updateStyle</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/CcpnModule.html#CcpnModuleLabel.updateStyle"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.CcpnModule.CcpnModuleLabel.updateStyle" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -309,7 +345,7 @@ return  {&#8220;variableName&#8221;:&#8221;value&#8221;}  of all gui Variables</
 tertiary version by Ejb 9/5/17</p>
 <dl class="class">
 <dt id="ccpn.ui.gui.modules.ChemicalShiftTable.ChemicalShiftTable">
-<em class="property">class </em><code class="descclassname">ccpn.ui.gui.modules.ChemicalShiftTable.</code><code class="descname">ChemicalShiftTable</code><span class="sig-paren">(</span><em>parent=None, mainWindow=None, moduleParent=None, actionCallback=None, selectionCallback=None, chemicalShiftList=None, hiddenColumns=['Pid'], **kwds</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/ChemicalShiftTable.html#ChemicalShiftTable"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.ChemicalShiftTable.ChemicalShiftTable" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">ccpn.ui.gui.modules.ChemicalShiftTable.</code><code class="descname">ChemicalShiftTable</code><span class="sig-paren">(</span><em>parent=None, mainWindow=None, moduleParent=None, actionCallback=None, selectionCallback=None, chemicalShiftList=None, hiddenColumns=['Pid', 'NmrChain', 'Sequence', 'Type'], **kwds</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/ChemicalShiftTable.html#ChemicalShiftTable"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.ChemicalShiftTable.ChemicalShiftTable" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.GuiTable.GuiTable" title="ccpn.ui.gui.widgets.GuiTable.GuiTable"><code class="xref py py-class docutils literal"><span class="pre">ccpn.ui.gui.widgets.GuiTable.GuiTable</span></code></a></p>
 <p>Class to present a NmrResidue Table and a NmrChain pulldown list, wrapped in a Widget</p>
 <dl class="method">
@@ -332,12 +368,6 @@ tertiary version by Ejb 9/5/17</p>
 <dt id="ccpn.ui.gui.modules.ChemicalShiftTable.ChemicalShiftTable.displayTableForChemicalShift">
 <code class="descname">displayTableForChemicalShift</code><span class="sig-paren">(</span><em>chemicalShiftList</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/ChemicalShiftTable.html#ChemicalShiftTable.displayTableForChemicalShift"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.ChemicalShiftTable.ChemicalShiftTable.displayTableForChemicalShift" title="Permalink to this definition">¶</a></dt>
 <dd><p>Display the table for all chemicalShift</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="ccpn.ui.gui.modules.ChemicalShiftTable.ChemicalShiftTable.setUpdateSilence">
-<code class="descname">setUpdateSilence</code><span class="sig-paren">(</span><em>silence</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/ChemicalShiftTable.html#ChemicalShiftTable.setUpdateSilence"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.ChemicalShiftTable.ChemicalShiftTable.setUpdateSilence" title="Permalink to this definition">¶</a></dt>
-<dd><p>Silences/unsilences the update of the table until switched again</p>
 </dd></dl>
 
 </dd></dl>
@@ -417,26 +447,20 @@ are displayed.</p>
 <dd><p>Close the table from the commandline</p>
 </dd></dl>
 
-<dl class="class">
-<dt id="ccpn.ui.gui.modules.ChemicalShiftTableWithAssignment.ChemicalShiftTableWithAssignment.emptyObject">
-<em class="property">class </em><code class="descname">emptyObject</code><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/ChemicalShiftTableWithAssignment.html#ChemicalShiftTableWithAssignment.emptyObject"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.ChemicalShiftTableWithAssignment.ChemicalShiftTableWithAssignment.emptyObject" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
-</dd></dl>
-
 <dl class="method">
 <dt id="ccpn.ui.gui.modules.ChemicalShiftTableWithAssignment.ChemicalShiftTableWithAssignment.getColumns">
-<code class="descclassname">ChemicalShiftTableWithAssignment.</code><code class="descname">getColumns</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/ChemicalShiftTableWithAssignment.html#ChemicalShiftTableWithAssignment.getColumns"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.ChemicalShiftTableWithAssignment.ChemicalShiftTableWithAssignment.getColumns" title="Permalink to this definition">¶</a></dt>
+<code class="descname">getColumns</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/ChemicalShiftTableWithAssignment.html#ChemicalShiftTableWithAssignment.getColumns"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.ChemicalShiftTableWithAssignment.ChemicalShiftTableWithAssignment.getColumns" title="Permalink to this definition">¶</a></dt>
 <dd><p>get columns for initialisation of table</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="ccpn.ui.gui.modules.ChemicalShiftTableWithAssignment.ChemicalShiftTableWithAssignment.includeSettingsWidget">
-<code class="descclassname">ChemicalShiftTableWithAssignment.</code><code class="descname">includeSettingsWidget</code><em class="property"> = True</em><a class="headerlink" href="#ccpn.ui.gui.modules.ChemicalShiftTableWithAssignment.ChemicalShiftTableWithAssignment.includeSettingsWidget" title="Permalink to this definition">¶</a></dt>
+<code class="descname">includeSettingsWidget</code><em class="property"> = True</em><a class="headerlink" href="#ccpn.ui.gui.modules.ChemicalShiftTableWithAssignment.ChemicalShiftTableWithAssignment.includeSettingsWidget" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
 <dt id="ccpn.ui.gui.modules.ChemicalShiftTableWithAssignment.ChemicalShiftTableWithAssignment.maxSettingsState">
-<code class="descclassname">ChemicalShiftTableWithAssignment.</code><code class="descname">maxSettingsState</code><em class="property"> = 2</em><a class="headerlink" href="#ccpn.ui.gui.modules.ChemicalShiftTableWithAssignment.ChemicalShiftTableWithAssignment.maxSettingsState" title="Permalink to this definition">¶</a></dt>
+<code class="descname">maxSettingsState</code><em class="property"> = 2</em><a class="headerlink" href="#ccpn.ui.gui.modules.ChemicalShiftTableWithAssignment.ChemicalShiftTableWithAssignment.maxSettingsState" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -554,11 +578,6 @@ Returns a DataFrame as: Index -&gt; nmrResidue Object, columns: int or float, ra
 <dd></dd></dl>
 
 <dl class="method">
-<dt id="ccpn.ui.gui.modules.ChemicalShiftsMappingModule.ChemicalShiftsMapping.profile">
-<code class="descname">profile</code><span class="sig-paren">(</span><em>func</em><span class="sig-paren">)</span><a class="headerlink" href="#ccpn.ui.gui.modules.ChemicalShiftsMappingModule.ChemicalShiftsMapping.profile" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
 <dt id="ccpn.ui.gui.modules.ChemicalShiftsMappingModule.ChemicalShiftsMapping.refresh">
 <code class="descname">refresh</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/ChemicalShiftsMappingModule.html#ChemicalShiftsMapping.refresh"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.ChemicalShiftsMappingModule.ChemicalShiftsMapping.refresh" title="Permalink to this definition">¶</a></dt>
 <dd><p>Updates all widgets and data in the CSM module</p>
@@ -573,6 +592,11 @@ Returns a DataFrame as: Index -&gt; nmrResidue Object, columns: int or float, ra
 <dl class="attribute">
 <dt id="ccpn.ui.gui.modules.ChemicalShiftsMappingModule.ChemicalShiftsMapping.settingsPosition">
 <code class="descname">settingsPosition</code><em class="property"> = 'left'</em><a class="headerlink" href="#ccpn.ui.gui.modules.ChemicalShiftsMappingModule.ChemicalShiftsMapping.settingsPosition" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.modules.ChemicalShiftsMappingModule.ChemicalShiftsMapping.showNmrAtomsSettings">
+<code class="descname">showNmrAtomsSettings</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/ChemicalShiftsMappingModule.html#ChemicalShiftsMapping.showNmrAtomsSettings"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.ChemicalShiftsMappingModule.ChemicalShiftsMapping.showNmrAtomsSettings" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
@@ -721,7 +745,7 @@ NB. If you open an existing file.py and modify it, the changes are not automatic
 <p>Module Documentation here</p>
 <dl class="class">
 <dt id="ccpn.ui.gui.modules.MultipletListTable.MultipletListTableWidget">
-<em class="property">class </em><code class="descclassname">ccpn.ui.gui.modules.MultipletListTable.</code><code class="descname">MultipletListTableWidget</code><span class="sig-paren">(</span><em>parent=None</em>, <em>mainWindow=None</em>, <em>moduleParent=None</em>, <em>multipletList=None</em>, <em>actionCallback=None</em>, <em>selectionCallback=None</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/MultipletListTable.html#MultipletListTableWidget"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.MultipletListTable.MultipletListTableWidget" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">ccpn.ui.gui.modules.MultipletListTable.</code><code class="descname">MultipletListTableWidget</code><span class="sig-paren">(</span><em>parent=None</em>, <em>mainWindow=None</em>, <em>moduleParent=None</em>, <em>multipletList=None</em>, <em>multiSelect=True</em>, <em>actionCallback=None</em>, <em>selectionCallback=None</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/MultipletListTable.html#MultipletListTableWidget"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.MultipletListTable.MultipletListTableWidget" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.GuiTable.GuiTable" title="ccpn.ui.gui.widgets.GuiTable.GuiTable"><code class="xref py py-class docutils literal"><span class="pre">ccpn.ui.gui.widgets.GuiTable.GuiTable</span></code></a></p>
 <p>Class to present a multipletList Table</p>
 <dl class="attribute">
@@ -733,12 +757,6 @@ NB. If you open an existing file.py and modify it, the changes are not automatic
 <dt id="ccpn.ui.gui.modules.MultipletListTable.MultipletListTableWidget.className">
 <code class="descname">className</code><em class="property"> = 'MultipletListTable'</em><a class="headerlink" href="#ccpn.ui.gui.modules.MultipletListTable.MultipletListTableWidget.className" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
-
-<dl class="method">
-<dt id="ccpn.ui.gui.modules.MultipletListTable.MultipletListTableWidget.displayTableForMultipletList">
-<code class="descname">displayTableForMultipletList</code><span class="sig-paren">(</span><em>multipletList</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/MultipletListTable.html#MultipletListTableWidget.displayTableForMultipletList"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.MultipletListTable.MultipletListTableWidget.displayTableForMultipletList" title="Permalink to this definition">¶</a></dt>
-<dd><p>Display the table for all NmrResidue&#8217;s of nmrChain</p>
-</dd></dl>
 
 <dl class="attribute">
 <dt id="ccpn.ui.gui.modules.MultipletListTable.MultipletListTableWidget.positionsUnit">
@@ -783,6 +801,33 @@ NB. If you open an existing file.py and modify it, the changes are not automatic
 <dt id="ccpn.ui.gui.modules.MultipletListTable.MultipletTableModule.settingsPosition">
 <code class="descname">settingsPosition</code><em class="property"> = 'top'</em><a class="headerlink" href="#ccpn.ui.gui.modules.MultipletListTable.MultipletTableModule.settingsPosition" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-ccpn.ui.gui.modules.MultipletPeakTable">
+<span id="ccpn-ui-gui-modules-multipletpeaktable-module"></span><h2>ccpn.ui.gui.modules.MultipletPeakTable module<a class="headerlink" href="#module-ccpn.ui.gui.modules.MultipletPeakTable" title="Permalink to this headline">¶</a></h2>
+<p>Module Documentation here</p>
+<dl class="class">
+<dt id="ccpn.ui.gui.modules.MultipletPeakTable.MultipletPeakListTableWidget">
+<em class="property">class </em><code class="descclassname">ccpn.ui.gui.modules.MultipletPeakTable.</code><code class="descname">MultipletPeakListTableWidget</code><span class="sig-paren">(</span><em>parent=None</em>, <em>mainWindow=None</em>, <em>moduleParent=None</em>, <em>peakList=None</em>, <em>multiSelect=False</em>, <em>actionCallback=None</em>, <em>selectionCallback=None</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/MultipletPeakTable.html#MultipletPeakListTableWidget"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.MultipletPeakTable.MultipletPeakListTableWidget" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#ccpn.ui.gui.modules.PeakTable.PeakListTableWidget" title="ccpn.ui.gui.modules.PeakTable.PeakListTableWidget"><code class="xref py py-class docutils literal"><span class="pre">ccpn.ui.gui.modules.PeakTable.PeakListTableWidget</span></code></a></p>
+<p>Class to present a peakList Table linked to a multipletTable</p>
+<dl class="attribute">
+<dt id="ccpn.ui.gui.modules.MultipletPeakTable.MultipletPeakListTableWidget.attributeName">
+<code class="descname">attributeName</code><em class="property"> = 'peakLists'</em><a class="headerlink" href="#ccpn.ui.gui.modules.MultipletPeakTable.MultipletPeakListTableWidget.attributeName" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ccpn.ui.gui.modules.MultipletPeakTable.MultipletPeakListTableWidget.className">
+<code class="descname">className</code><em class="property"> = 'MultipletPeakListTable'</em><a class="headerlink" href="#ccpn.ui.gui.modules.MultipletPeakTable.MultipletPeakListTableWidget.className" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.modules.MultipletPeakTable.MultipletPeakListTableWidget.getIndexList">
+<code class="descname">getIndexList</code><span class="sig-paren">(</span><em>classItems</em>, <em>attribute</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/MultipletPeakTable.html#MultipletPeakListTableWidget.getIndexList"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.MultipletPeakTable.MultipletPeakListTableWidget.getIndexList" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the list of objects on which to before the indexing</p>
+</dd></dl>
 
 </dd></dl>
 
@@ -858,6 +903,12 @@ If current strip contains the double clicked nmrResidue will navigateToPositionI
 <dd><p>Bases: <a class="reference internal" href="#ccpn.ui.gui.modules.CcpnModule.CcpnModule" title="ccpn.ui.gui.modules.CcpnModule.CcpnModule"><code class="xref py py-class docutils literal"><span class="pre">ccpn.ui.gui.modules.CcpnModule.CcpnModule</span></code></a></p>
 <p>This class implements the module by wrapping a NmrResidueTable instance</p>
 <dl class="attribute">
+<dt id="ccpn.ui.gui.modules.NmrResidueTable.NmrResidueTableModule.activePulldownClass">
+<code class="descname">activePulldownClass</code><a class="headerlink" href="#ccpn.ui.gui.modules.NmrResidueTable.NmrResidueTableModule.activePulldownClass" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <code class="xref py py-class docutils literal"><span class="pre">NmrChain</span></code></p>
+</dd></dl>
+
+<dl class="attribute">
 <dt id="ccpn.ui.gui.modules.NmrResidueTable.NmrResidueTableModule.className">
 <code class="descname">className</code><em class="property"> = 'NmrResidueTableModule'</em><a class="headerlink" href="#ccpn.ui.gui.modules.NmrResidueTable.NmrResidueTableModule.className" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
@@ -867,6 +918,11 @@ If current strip contains the double clicked nmrResidue will navigateToPositionI
 <code class="descname">close</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/NmrResidueTable.html#NmrResidueTableModule.close"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.NmrResidueTable.NmrResidueTableModule.close" title="Permalink to this definition">¶</a></dt>
 <dd><p>Close the table from the commandline</p>
 </dd></dl>
+
+<dl class="attribute">
+<dt id="ccpn.ui.gui.modules.NmrResidueTable.NmrResidueTableModule.includeDisplaySettings">
+<code class="descname">includeDisplaySettings</code><em class="property"> = False</em><a class="headerlink" href="#ccpn.ui.gui.modules.NmrResidueTable.NmrResidueTableModule.includeDisplaySettings" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 <dl class="attribute">
 <dt id="ccpn.ui.gui.modules.NmrResidueTable.NmrResidueTableModule.includeNmrChains">
@@ -1073,7 +1129,7 @@ the content.</p>
 <p>Module Documentation here</p>
 <dl class="class">
 <dt id="ccpn.ui.gui.modules.PeakTable.PeakListTableWidget">
-<em class="property">class </em><code class="descclassname">ccpn.ui.gui.modules.PeakTable.</code><code class="descname">PeakListTableWidget</code><span class="sig-paren">(</span><em>parent=None</em>, <em>mainWindow=None</em>, <em>moduleParent=None</em>, <em>peakList=None</em>, <em>actionCallback=None</em>, <em>selectionCallback=None</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/PeakTable.html#PeakListTableWidget"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.PeakTable.PeakListTableWidget" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">ccpn.ui.gui.modules.PeakTable.</code><code class="descname">PeakListTableWidget</code><span class="sig-paren">(</span><em>parent=None</em>, <em>mainWindow=None</em>, <em>moduleParent=None</em>, <em>peakList=None</em>, <em>multiSelect=True</em>, <em>actionCallback=None</em>, <em>selectionCallback=None</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/PeakTable.html#PeakListTableWidget"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.PeakTable.PeakListTableWidget" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.GuiTable.GuiTable" title="ccpn.ui.gui.widgets.GuiTable.GuiTable"><code class="xref py py-class docutils literal"><span class="pre">ccpn.ui.gui.widgets.GuiTable.GuiTable</span></code></a></p>
 <p>Class to present a peakList Table</p>
 <dl class="attribute">
@@ -1085,12 +1141,6 @@ the content.</p>
 <dt id="ccpn.ui.gui.modules.PeakTable.PeakListTableWidget.className">
 <code class="descname">className</code><em class="property"> = 'PeakListTable'</em><a class="headerlink" href="#ccpn.ui.gui.modules.PeakTable.PeakListTableWidget.className" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
-
-<dl class="method">
-<dt id="ccpn.ui.gui.modules.PeakTable.PeakListTableWidget.displayTableForPeakList">
-<code class="descname">displayTableForPeakList</code><span class="sig-paren">(</span><em>peakList</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/PeakTable.html#PeakListTableWidget.displayTableForPeakList"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.PeakTable.PeakListTableWidget.displayTableForPeakList" title="Permalink to this definition">¶</a></dt>
-<dd><p>Display the table for all NmrResidue&#8217;s of nmrChain</p>
-</dd></dl>
 
 <dl class="attribute">
 <dt id="ccpn.ui.gui.modules.PeakTable.PeakListTableWidget.positionsUnit">
@@ -1332,6 +1382,11 @@ The guiPipeline has its own mechanism for restoring</p>
 <code class="descname">className</code><em class="property"> = 'PluginModule'</em><a class="headerlink" href="#ccpn.ui.gui.modules.PluginModule.PluginModule.className" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
+<dl class="method">
+<dt id="ccpn.ui.gui.modules.PluginModule.PluginModule.closePlugin">
+<code class="descname">closePlugin</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/PluginModule.html#PluginModule.closePlugin"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.PluginModule.PluginModule.closePlugin" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
 <dl class="attribute">
 <dt id="ccpn.ui.gui.modules.PluginModule.PluginModule.includeSettingsWidget">
 <code class="descname">includeSettingsWidget</code><em class="property"> = True</em><a class="headerlink" href="#ccpn.ui.gui.modules.PluginModule.PluginModule.includeSettingsWidget" title="Permalink to this definition">¶</a></dt>
@@ -1389,7 +1444,7 @@ return  {&#8220;variableName&#8221;:&#8221;value&#8221;}  of all gui Variables</
 <dt id="ccpn.ui.gui.modules.PythonConsoleModule.PythonConsoleModule">
 <em class="property">class </em><code class="descclassname">ccpn.ui.gui.modules.PythonConsoleModule.</code><code class="descname">PythonConsoleModule</code><span class="sig-paren">(</span><em>mainWindow</em>, <em>name='Python Console'</em>, <em>closeFunc=None</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/PythonConsoleModule.html#PythonConsoleModule"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.PythonConsoleModule.PythonConsoleModule" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#ccpn.ui.gui.modules.CcpnModule.CcpnModule" title="ccpn.ui.gui.modules.CcpnModule.CcpnModule"><code class="xref py py-class docutils literal"><span class="pre">ccpn.ui.gui.modules.CcpnModule.CcpnModule</span></code></a></p>
-<p>This class implements the module by wrapping a PeakListTable instance</p>
+<p>Gui module to display the Ipyhton console within the program</p>
 <dl class="attribute">
 <dt id="ccpn.ui.gui.modules.PythonConsoleModule.PythonConsoleModule.className">
 <code class="descname">className</code><em class="property"> = 'PythonConsoleModule'</em><a class="headerlink" href="#ccpn.ui.gui.modules.PythonConsoleModule.PythonConsoleModule.className" title="Permalink to this definition">¶</a></dt>
@@ -1513,7 +1568,7 @@ return  {&#8220;variableName&#8221;:&#8221;value&#8221;}  of all gui Variables</
 
 <dl class="method">
 <dt id="ccpn.ui.gui.modules.ResidueTable.ResidueTable.defaultActionCallback">
-<code class="descname">defaultActionCallback</code><span class="sig-paren">(</span><em>residue</em>, <em>*args</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/ResidueTable.html#ResidueTable.defaultActionCallback"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.ResidueTable.ResidueTable.defaultActionCallback" title="Permalink to this definition">¶</a></dt>
+<code class="descname">defaultActionCallback</code><span class="sig-paren">(</span><em>data</em>, <em>*args</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/ResidueTable.html#ResidueTable.defaultActionCallback"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.ResidueTable.ResidueTable.defaultActionCallback" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -1970,6 +2025,7 @@ QGraphicsView instances provide the canvas on to which the amino acids represent
 <li><a class="reference internal" href="#module-ccpn.ui.gui.modules.IntegralTable">ccpn.ui.gui.modules.IntegralTable module</a></li>
 <li><a class="reference internal" href="#module-ccpn.ui.gui.modules.MacroEditor">ccpn.ui.gui.modules.MacroEditor module</a></li>
 <li><a class="reference internal" href="#module-ccpn.ui.gui.modules.MultipletListTable">ccpn.ui.gui.modules.MultipletListTable module</a></li>
+<li><a class="reference internal" href="#module-ccpn.ui.gui.modules.MultipletPeakTable">ccpn.ui.gui.modules.MultipletPeakTable module</a></li>
 <li><a class="reference internal" href="#module-ccpn.ui.gui.modules.NmrResidueTable">ccpn.ui.gui.modules.NmrResidueTable module</a></li>
 <li><a class="reference internal" href="#module-ccpn.ui.gui.modules.NotesEditor">ccpn.ui.gui.modules.NotesEditor module</a></li>
 <li><a class="reference internal" href="#module-ccpn.ui.gui.modules.ObjectAssigner">ccpn.ui.gui.modules.ObjectAssigner module</a></li>

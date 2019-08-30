@@ -78,6 +78,48 @@
 </dd></dl>
 
 </div>
+<div class="section" id="module-ccpn.ui.gui.popups.AxisOrderingPopup">
+<span id="ccpn-ui-gui-popups-axisorderingpopup-module"></span><h2>ccpn.ui.gui.popups.AxisOrderingPopup module<a class="headerlink" href="#module-ccpn.ui.gui.popups.AxisOrderingPopup" title="Permalink to this headline">¶</a></h2>
+<p>Module Documentation here</p>
+<dl class="class">
+<dt id="ccpn.ui.gui.popups.AxisOrderingPopup.AxisOrderingPopup">
+<em class="property">class </em><code class="descclassname">ccpn.ui.gui.popups.AxisOrderingPopup.</code><code class="descname">AxisOrderingPopup</code><span class="sig-paren">(</span><em>parent=None</em>, <em>mainWindow=None</em>, <em>spectrum=None</em>, <em>title='Set Spectrum Axis Ordering'</em>, <em>label=''</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/popups/AxisOrderingPopup.html#AxisOrderingPopup"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.popups.AxisOrderingPopup.AxisOrderingPopup" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#ccpn.ui.gui.popups.Dialog.CcpnDialog" title="ccpn.ui.gui.popups.Dialog.CcpnDialog"><code class="xref py py-class docutils literal"><span class="pre">ccpn.ui.gui.popups.Dialog.CcpnDialog</span></code></a></p>
+<p>Set the axis ordering for the new spectrumDisplay from a popup</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ccpn.ui.gui.popups.AxisOrderingPopup.checkSpectraToOpen">
+<code class="descclassname">ccpn.ui.gui.popups.AxisOrderingPopup.</code><code class="descname">checkSpectraToOpen</code><span class="sig-paren">(</span><em>mainWindow</em>, <em>spectra</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/popups/AxisOrderingPopup.html#checkSpectraToOpen"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.popups.AxisOrderingPopup.checkSpectraToOpen" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-ccpn.ui.gui.popups.CalibrateSpectraFromPeaksPopup">
+<span id="ccpn-ui-gui-popups-calibratespectrafrompeakspopup-module"></span><h2>ccpn.ui.gui.popups.CalibrateSpectraFromPeaksPopup module<a class="headerlink" href="#module-ccpn.ui.gui.popups.CalibrateSpectraFromPeaksPopup" title="Permalink to this headline">¶</a></h2>
+<p>Module Documentation here</p>
+<dl class="class">
+<dt id="ccpn.ui.gui.popups.CalibrateSpectraFromPeaksPopup.CalibrateSpectraFromPeaksPopup1d">
+<em class="property">class </em><code class="descclassname">ccpn.ui.gui.popups.CalibrateSpectraFromPeaksPopup.</code><code class="descname">CalibrateSpectraFromPeaksPopup1d</code><span class="sig-paren">(</span><em>parent=None</em>, <em>mainWindow=None</em>, <em>strip=None</em>, <em>spectrumCount=None</em>, <em>title: str = 'Calibrate Spectra from Peaks'</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/popups/CalibrateSpectraFromPeaksPopup.html#CalibrateSpectraFromPeaksPopup1d"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.popups.CalibrateSpectraFromPeaksPopup.CalibrateSpectraFromPeaksPopup1d" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#ccpn.ui.gui.popups.CalibrateSpectraFromPeaksPopup.CalibrateSpectraFromPeaksPopupNd" title="ccpn.ui.gui.popups.CalibrateSpectraFromPeaksPopup.CalibrateSpectraFromPeaksPopupNd"><code class="xref py py-class docutils literal"><span class="pre">ccpn.ui.gui.popups.CalibrateSpectraFromPeaksPopup.CalibrateSpectraFromPeaksPopupNd</span></code></a></p>
+<p>Popup to allow calibrating of spectra from a selection of peaks in the same spectrumDisplay
+Specifically for a 1d spectrumDisplay</p>
+<p>Calibration is applied to the current selection of peaks</p>
+<p>A single peak is selected as the primary peak from the pullDown,
+all other spectra are updated to align peaks with the primary peak</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="ccpn.ui.gui.popups.CalibrateSpectraFromPeaksPopup.CalibrateSpectraFromPeaksPopupNd">
+<em class="property">class </em><code class="descclassname">ccpn.ui.gui.popups.CalibrateSpectraFromPeaksPopup.</code><code class="descname">CalibrateSpectraFromPeaksPopupNd</code><span class="sig-paren">(</span><em>parent=None</em>, <em>mainWindow=None</em>, <em>strip=None</em>, <em>spectrumCount=None</em>, <em>title: str = 'Calibrate Spectra from Peaks'</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/popups/CalibrateSpectraFromPeaksPopup.html#CalibrateSpectraFromPeaksPopupNd"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.popups.CalibrateSpectraFromPeaksPopup.CalibrateSpectraFromPeaksPopupNd" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#ccpn.ui.gui.popups.Dialog.CcpnDialog" title="ccpn.ui.gui.popups.Dialog.CcpnDialog"><code class="xref py py-class docutils literal"><span class="pre">ccpn.ui.gui.popups.Dialog.CcpnDialog</span></code></a></p>
+<p>Popup to allow calibrating of spectra from a selection of peaks in the same spectrumDisplay
+Specifically for an Nd spectrumDisplay</p>
+<p>Calibration is applied to the current selection of peaks</p>
+<p>A single peak is selected as the primary peak from the pullDown,
+all other spectra are updated to align peaks with the primary peak</p>
+</dd></dl>
+
+</div>
 <div class="section" id="module-ccpn.ui.gui.popups.ChainPopup">
 <span id="ccpn-ui-gui-popups-chainpopup-module"></span><h2>ccpn.ui.gui.popups.ChainPopup module<a class="headerlink" href="#module-ccpn.ui.gui.popups.ChainPopup" title="Permalink to this headline">¶</a></h2>
 <p>Module Documentation here</p>
@@ -182,6 +224,17 @@
 </dd></dl>
 
 </div>
+<div class="section" id="module-ccpn.ui.gui.popups.CopyStripFlippedAxesPopup">
+<span id="ccpn-ui-gui-popups-copystripflippedaxespopup-module"></span><h2>ccpn.ui.gui.popups.CopyStripFlippedAxesPopup module<a class="headerlink" href="#module-ccpn.ui.gui.popups.CopyStripFlippedAxesPopup" title="Permalink to this headline">¶</a></h2>
+<p>Module Documentation here</p>
+<dl class="class">
+<dt id="ccpn.ui.gui.popups.CopyStripFlippedAxesPopup.CopyStripFlippedSpectraPopup">
+<em class="property">class </em><code class="descclassname">ccpn.ui.gui.popups.CopyStripFlippedAxesPopup.</code><code class="descname">CopyStripFlippedSpectraPopup</code><span class="sig-paren">(</span><em>parent=None</em>, <em>mainWindow=None</em>, <em>strip=None</em>, <em>title='Copy Strip with Axes Flipped'</em>, <em>label=''</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/popups/CopyStripFlippedAxesPopup.html#CopyStripFlippedSpectraPopup"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.popups.CopyStripFlippedAxesPopup.CopyStripFlippedSpectraPopup" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#ccpn.ui.gui.popups.AxisOrderingPopup.AxisOrderingPopup" title="ccpn.ui.gui.popups.AxisOrderingPopup.AxisOrderingPopup"><code class="xref py py-class docutils literal"><span class="pre">ccpn.ui.gui.popups.AxisOrderingPopup.AxisOrderingPopup</span></code></a></p>
+<p>Set the axis ordering for the new spectrumDisplay from a popup</p>
+</dd></dl>
+
+</div>
 <div class="section" id="module-ccpn.ui.gui.popups.CreateChainPopup">
 <span id="ccpn-ui-gui-popups-createchainpopup-module"></span><h2>ccpn.ui.gui.popups.CreateChainPopup module<a class="headerlink" href="#module-ccpn.ui.gui.popups.CreateChainPopup" title="Permalink to this headline">¶</a></h2>
 <p>Module Documentation here</p>
@@ -249,6 +302,34 @@ i.e. ((&#8216;Peaks&#8217;, peakList), (&#8216;Multiplets&#8217;,multipletList))
 <code class="descname">fixedSize</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/popups/Dialog.html#CcpnDialog.fixedSize"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.popups.Dialog.CcpnDialog.fixedSize" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
+<dl class="method">
+<dt id="ccpn.ui.gui.popups.Dialog.CcpnDialog.setDefaultButton">
+<code class="descname">setDefaultButton</code><span class="sig-paren">(</span><em>button</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/popups/Dialog.html#CcpnDialog.setDefaultButton"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.popups.Dialog.CcpnDialog.setDefaultButton" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="ccpn.ui.gui.popups.Dialog.dialogErrorReport">
+<code class="descclassname">ccpn.ui.gui.popups.Dialog.</code><code class="descname">dialogErrorReport</code><span class="sig-paren">(</span><em>self</em>, <em>undo</em>, <em>es</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/popups/Dialog.html#dialogErrorReport"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.popups.Dialog.dialogErrorReport" title="Permalink to this definition">¶</a></dt>
+<dd><p>Show warning popup and check the undo stack for items that need to be culled</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ccpn.ui.gui.popups.Dialog.handleDialogApply">
+<code class="descclassname">ccpn.ui.gui.popups.Dialog.</code><code class="descname">handleDialogApply</code><span class="sig-paren">(</span><em>self</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/popups/Dialog.html#handleDialogApply"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.popups.Dialog.handleDialogApply" title="Permalink to this definition">¶</a></dt>
+<dd><p>Context manager to wrap the apply button for dialogs
+Error trapping is contained inside the undoBlock, any error raised is placed in
+the errorValue of the yielded object and a warning popup is raised</p>
+<p>e.g.</p>
+<blockquote>
+<div><dl class="docutils">
+<dt>with handleDialogApply(self) as error:</dt>
+<dd>...  code block here ...</dd>
+<dt>if error.errorValue:</dt>
+<dd># an error occurred in the code block</dd>
+</dl>
+</div></blockquote>
 </dd></dl>
 
 </div>
@@ -271,8 +352,13 @@ i.e. ((&#8216;Peaks&#8217;, peakList), (&#8216;Multiplets&#8217;,multipletList))
 <p>Module Documentation here</p>
 <dl class="class">
 <dt id="ccpn.ui.gui.popups.EstimateNoisePopup.EstimateNoisePopup">
-<em class="property">class </em><code class="descclassname">ccpn.ui.gui.popups.EstimateNoisePopup.</code><code class="descname">EstimateNoisePopup</code><span class="sig-paren">(</span><em>parent=None</em>, <em>mainWindow=None</em>, <em>title='EstimateNoise'</em>, <em>strip=None</em>, <em>orderedSpectrumViews=None</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/popups/EstimateNoisePopup.html#EstimateNoisePopup"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.popups.EstimateNoisePopup.EstimateNoisePopup" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">ccpn.ui.gui.popups.EstimateNoisePopup.</code><code class="descname">EstimateNoisePopup</code><span class="sig-paren">(</span><em>parent=None</em>, <em>mainWindow=None</em>, <em>title='Estimate Noise'</em>, <em>strip=None</em>, <em>orderedSpectrumViews=None</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/popups/EstimateNoisePopup.html#EstimateNoisePopup"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.popups.EstimateNoisePopup.EstimateNoisePopup" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#ccpn.ui.gui.popups.Dialog.CcpnDialog" title="ccpn.ui.gui.popups.Dialog.CcpnDialog"><code class="xref py py-class docutils literal"><span class="pre">ccpn.ui.gui.popups.Dialog.CcpnDialog</span></code></a></p>
+<dl class="attribute">
+<dt id="ccpn.ui.gui.popups.EstimateNoisePopup.EstimateNoisePopup.MAXIMUM_WIDTH">
+<code class="descname">MAXIMUM_WIDTH</code><em class="property"> = 700</em><a class="headerlink" href="#ccpn.ui.gui.popups.EstimateNoisePopup.EstimateNoisePopup.MAXIMUM_WIDTH" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
 <dl class="attribute">
 <dt id="ccpn.ui.gui.popups.EstimateNoisePopup.EstimateNoisePopup.MINIMUM_WIDTH">
 <code class="descname">MINIMUM_WIDTH</code><em class="property"> = 400</em><a class="headerlink" href="#ccpn.ui.gui.popups.EstimateNoisePopup.EstimateNoisePopup.MINIMUM_WIDTH" title="Permalink to this definition">¶</a></dt>
@@ -280,7 +366,7 @@ i.e. ((&#8216;Peaks&#8217;, peakList), (&#8216;Multiplets&#8217;,multipletList))
 
 <dl class="attribute">
 <dt id="ccpn.ui.gui.popups.EstimateNoisePopup.EstimateNoisePopup.MINIMUM_WIDTH_PER_TAB">
-<code class="descname">MINIMUM_WIDTH_PER_TAB</code><em class="property"> = 120</em><a class="headerlink" href="#ccpn.ui.gui.popups.EstimateNoisePopup.EstimateNoisePopup.MINIMUM_WIDTH_PER_TAB" title="Permalink to this definition">¶</a></dt>
+<code class="descname">MINIMUM_WIDTH_PER_TAB</code><em class="property"> = 100</em><a class="headerlink" href="#ccpn.ui.gui.popups.EstimateNoisePopup.EstimateNoisePopup.MINIMUM_WIDTH_PER_TAB" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -289,6 +375,29 @@ i.e. ((&#8216;Peaks&#8217;, peakList), (&#8216;Multiplets&#8217;,multipletList))
 <dt id="ccpn.ui.gui.popups.EstimateNoisePopup.NoiseTab">
 <em class="property">class </em><code class="descclassname">ccpn.ui.gui.popups.EstimateNoisePopup.</code><code class="descname">NoiseTab</code><span class="sig-paren">(</span><em>parent=None</em>, <em>mainWindow=None</em>, <em>spectrum=None</em>, <em>strip=None</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/popups/EstimateNoisePopup.html#NoiseTab"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.popups.EstimateNoisePopup.NoiseTab" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.Widget.Widget" title="ccpn.ui.gui.widgets.Widget.Widget"><code class="xref py py-class docutils literal"><span class="pre">ccpn.ui.gui.widgets.Widget.Widget</span></code></a></p>
+<p>Class to contain the information for a single pectrum in the spectrum display
+Holds the common values for 1d and Nd spectra</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="ccpn.ui.gui.popups.EstimateNoisePopup.NoiseTabNd">
+<em class="property">class </em><code class="descclassname">ccpn.ui.gui.popups.EstimateNoisePopup.</code><code class="descname">NoiseTabNd</code><span class="sig-paren">(</span><em>parent=None</em>, <em>mainWindow=None</em>, <em>spectrum=None</em>, <em>strip=None</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/popups/EstimateNoisePopup.html#NoiseTabNd"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.popups.EstimateNoisePopup.NoiseTabNd" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#ccpn.ui.gui.popups.EstimateNoisePopup.NoiseTab" title="ccpn.ui.gui.popups.EstimateNoisePopup.NoiseTab"><code class="xref py py-class docutils literal"><span class="pre">ccpn.ui.gui.popups.EstimateNoisePopup.NoiseTab</span></code></a></p>
+<p>Class to contain the information for a single spectrum in the spectrum display
+Holds the extra widgets for changing Nd contour settings</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-ccpn.ui.gui.popups.EstimateVolumes">
+<span id="ccpn-ui-gui-popups-estimatevolumes-module"></span><h2>ccpn.ui.gui.popups.EstimateVolumes module<a class="headerlink" href="#module-ccpn.ui.gui.popups.EstimateVolumes" title="Permalink to this headline">¶</a></h2>
+<p>Module Documentation here</p>
+<dl class="class">
+<dt id="ccpn.ui.gui.popups.EstimateVolumes.EstimateVolumes">
+<em class="property">class </em><code class="descclassname">ccpn.ui.gui.popups.EstimateVolumes.</code><code class="descname">EstimateVolumes</code><span class="sig-paren">(</span><em>parent=None</em>, <em>mainWindow=None</em>, <em>title='Estimate Volumes'</em>, <em>spectra=None</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/popups/EstimateVolumes.html#EstimateVolumes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.popups.EstimateVolumes.EstimateVolumes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#ccpn.ui.gui.popups.Dialog.CcpnDialog" title="ccpn.ui.gui.popups.Dialog.CcpnDialog"><code class="xref py py-class docutils literal"><span class="pre">ccpn.ui.gui.popups.Dialog.CcpnDialog</span></code></a></p>
+<p>Popup to estimate volumes of peaks in peakList from selected spectrum.
+Spectra are all those in the project.
+A spectrum is selected from the spectra in the current.strip if current.strip exists.</p>
 </dd></dl>
 
 </div>
@@ -505,6 +614,76 @@ To be overridden when sub-classed by user</p>
 </dd></dl>
 
 </div>
+<div class="section" id="module-ccpn.ui.gui.popups.ImportStarPopup">
+<span id="ccpn-ui-gui-popups-importstarpopup-module"></span><h2>ccpn.ui.gui.popups.ImportStarPopup module<a class="headerlink" href="#module-ccpn.ui.gui.popups.ImportStarPopup" title="Permalink to this headline">¶</a></h2>
+<p>A Pre-alpha BMRB Chemical Shift List Importer from NMR-STAR v3.1.
+This is not a full BMRB importer to Analysis V3.
+Please, read warnings and info message</p>
+<dl class="docutils">
+<dt>Usage:</dt>
+<dd>UI
+- Menu Menus &gt; Macro &gt; Run... &gt; Select this file.py
+- select BMRB file  of interest
+- select entries
+- Create
+Non-UI:
+- scroll down to &#8220;Init the macro section&#8221;
+- replace filename path and axesCodesMap accordingly
+- run the macro within V3</dd>
+</dl>
+<ol class="arabic">
+<li><p class="first">Menu Menus &gt; Macro &gt; Run... &gt; Select this file.py</p>
+</li>
+<li><dl class="first docutils">
+<dt>Menu Menus &gt; View PythonConsole (space-space)</dt>
+<dd><p class="first last">%run -i your/path/to/this/file.py (without quotes)</p>
+</dd>
+</dl>
+</li>
+</ol>
+<dl class="class">
+<dt id="ccpn.ui.gui.popups.ImportStarPopup.StarImporterPopup">
+<em class="property">class </em><code class="descclassname">ccpn.ui.gui.popups.ImportStarPopup.</code><code class="descname">StarImporterPopup</code><span class="sig-paren">(</span><em>parent=None</em>, <em>axesCodesMap=None</em>, <em>bmrbFilePath=None</em>, <em>project=None</em>, <em>directory=None</em>, <em>dataBlock=None</em>, <em>title='Import From NMRSTAR'</em>, <em>**kw</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/popups/ImportStarPopup.html#StarImporterPopup"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.popups.ImportStarPopup.StarImporterPopup" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#ccpn.ui.gui.popups.Dialog.CcpnDialog" title="ccpn.ui.gui.popups.Dialog.CcpnDialog"><code class="xref py py-class docutils literal"><span class="pre">ccpn.ui.gui.popups.Dialog.CcpnDialog</span></code></a></p>
+</dd></dl>
+
+<dl class="class">
+<dt id="ccpn.ui.gui.popups.ImportStarPopup.TreeCheckBoxes">
+<em class="property">class </em><code class="descclassname">ccpn.ui.gui.popups.ImportStarPopup.</code><code class="descname">TreeCheckBoxes</code><span class="sig-paren">(</span><em>parent=None</em>, <em>orderedDataDict=None</em>, <em>checkList=None</em>, <em>selectableItems=None</em>, <em>maxSize=(250</em>, <em>300)</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/popups/ImportStarPopup.html#TreeCheckBoxes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.popups.ImportStarPopup.TreeCheckBoxes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">PyQt5.QtWidgets.QTreeWidget</span></code>, <a class="reference internal" href="ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.Base.Base" title="ccpn.ui.gui.widgets.Base.Base"><code class="xref py py-class docutils literal"><span class="pre">ccpn.ui.gui.widgets.Base.Base</span></code></a></p>
+<dl class="method">
+<dt id="ccpn.ui.gui.popups.ImportStarPopup.TreeCheckBoxes.getItems">
+<code class="descname">getItems</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/popups/ImportStarPopup.html#TreeCheckBoxes.getItems"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.popups.ImportStarPopup.TreeCheckBoxes.getItems" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get checked state of objects</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.popups.ImportStarPopup.TreeCheckBoxes.getSelectedItems">
+<code class="descname">getSelectedItems</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/popups/ImportStarPopup.html#TreeCheckBoxes.getSelectedItems"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.popups.ImportStarPopup.TreeCheckBoxes.getSelectedItems" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get selected objects from the check boxes</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.popups.ImportStarPopup.TreeCheckBoxes.getSelectedObjects">
+<code class="descname">getSelectedObjects</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/popups/ImportStarPopup.html#TreeCheckBoxes.getSelectedObjects"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.popups.ImportStarPopup.TreeCheckBoxes.getSelectedObjects" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get selected objects from the check boxes</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.popups.ImportStarPopup.TreeCheckBoxes.getSelectedObjectsPids">
+<code class="descname">getSelectedObjectsPids</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/popups/ImportStarPopup.html#TreeCheckBoxes.getSelectedObjectsPids"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.popups.ImportStarPopup.TreeCheckBoxes.getSelectedObjectsPids" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the pids of the selected objects</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.popups.ImportStarPopup.TreeCheckBoxes.selectObjects">
+<code class="descname">selectObjects</code><span class="sig-paren">(</span><em>texts</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/popups/ImportStarPopup.html#TreeCheckBoxes.selectObjects"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.popups.ImportStarPopup.TreeCheckBoxes.selectObjects" title="Permalink to this definition">¶</a></dt>
+<dd><p>handle changing the state of checkboxes</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
 <div class="section" id="module-ccpn.ui.gui.popups.IntegralListPopup">
 <span id="ccpn-ui-gui-popups-integrallistpopup-module"></span><h2>ccpn.ui.gui.popups.IntegralListPopup module<a class="headerlink" href="#module-ccpn.ui.gui.popups.IntegralListPopup" title="Permalink to this headline">¶</a></h2>
 <p>Module Documentation here</p>
@@ -661,14 +840,14 @@ This popup works only for nDs. (Should be renamed?)</p>
 
 <dl class="attribute">
 <dt id="ccpn.ui.gui.popups.PickPeaks1DPopup.ExcludeRegions.solvents">
-<code class="descname">solvents</code><em class="property"> = {'Ethanol-d6 &amp; water': [0, 0, 1.21, 1.11, 3.66, 3.56, 5.4, 5.29], 'Chloroform-d': [0, 0, 1.6, 1.5, 7.35, 7.25], 'New regions': [0, 0, 0.2, 0.1], 'Carbon Tetrachloride &amp; water ': [0, 0, 1.2, 1.1], 'Tetrahydrofuran-d8 &amp; water': [0, 0, 3.68, 3.58, 2.6, 2.5, 1.83, 1.73], 'Dimethylformamide-d7 &amp; water': [0, 0, 8.11, 8.01, 2.99, 2.91, 2.83, 2.73, 3.6, 3.5], 'Acetone-d6 &amp; Water': [0, 0, 2.15, 2.0, 2.9, 2.8], 'p-Dioxane-d8 &amp; water': [0, 0, 2.6, 2.5, 3.63, 3.5], 'Deuterium Oxide': [0, 0, 4.75, 4.65], 'Water': [0, 0, 5, 4.5], 'Toulene-d8 &amp; water': [0, 0, 7.18, 6.98, 2.19, 2.09, 2.5, 2.4, 5.1, 5.0], 'Trifluoroethanol-d3 &amp; water': [0, 0, 5.12, 5.02, 3.98, 3.88], 'Methanol-d4': [0, 0, 3.4, 3.3, 4.9, 4.8], 'Acetic Acid-d4': [0, 0, 2.14, 2.0, 11.75, 11.65], 'Pyridine-d5 &amp; water': [0, 0, 8.74, 8.84, 7.68, 7.58, 7.32, 7.22, 5.1, 5.0], 'Dichloromethane-d2 &amp; water': [0, 0, 1.6, 1.5, 5.42, 5.32], 'Acetonitrile-d3 &amp; water': [0, 0, 2.2, 1.94], 'Benzene-d6 &amp; water': [0, 0, 0.6, 0.5, 7.25, 7.15], 'Dimethyl Sulfoxide-d6': [0, 0, 2.6, 2.5, 3.4, 3.3], 'Tetrachloromethane-d2 &amp; water': [0, 0, 1.7, 1.6, 6.1, 6.0], 'Trifluoroacetic acid-d': [0, 0, 11.6, 11.5]}</em><a class="headerlink" href="#ccpn.ui.gui.popups.PickPeaks1DPopup.ExcludeRegions.solvents" title="Permalink to this definition">¶</a></dt>
+<code class="descname">solvents</code><em class="property"> = {'Tetrachloromethane-d2 &amp; water': [0, 0, 1.7, 1.6, 6.1, 6.0], 'Toulene-d8 &amp; water': [0, 0, 7.18, 6.98, 2.19, 2.09, 2.5, 2.4, 5.1, 5.0], 'Benzene-d6 &amp; water': [0, 0, 0.6, 0.5, 7.25, 7.15], 'Water': [0, 0, 5, 4.5], 'Methanol-d4': [0, 0, 3.4, 3.3, 4.9, 4.8], 'Carbon Tetrachloride &amp; water ': [0, 0, 1.2, 1.1], 'Chloroform-d': [0, 0, 1.6, 1.5, 7.35, 7.25], 'Acetic Acid-d4': [0, 0, 2.14, 2.0, 11.75, 11.65], 'Dichloromethane-d2 &amp; water': [0, 0, 1.6, 1.5, 5.42, 5.32], 'Deuterium Oxide': [0, 0, 4.75, 4.65], 'New regions': [0, 0, 0.2, 0.1], 'Tetrahydrofuran-d8 &amp; water': [0, 0, 3.68, 3.58, 2.6, 2.5, 1.83, 1.73], 'p-Dioxane-d8 &amp; water': [0, 0, 2.6, 2.5, 3.63, 3.5], 'Dimethylformamide-d7 &amp; water': [0, 0, 8.11, 8.01, 2.99, 2.91, 2.83, 2.73, 3.6, 3.5], 'Acetone-d6 &amp; Water': [0, 0, 2.15, 2.0, 2.9, 2.8], 'Pyridine-d5 &amp; water': [0, 0, 8.74, 8.84, 7.68, 7.58, 7.32, 7.22, 5.1, 5.0], 'Ethanol-d6 &amp; water': [0, 0, 1.21, 1.11, 3.66, 3.56, 5.4, 5.29], 'Dimethyl Sulfoxide-d6': [0, 0, 2.6, 2.5, 3.4, 3.3], 'Trifluoroacetic acid-d': [0, 0, 11.6, 11.5], 'Acetonitrile-d3 &amp; water': [0, 0, 2.2, 1.94], 'Trifluoroethanol-d3 &amp; water': [0, 0, 5.12, 5.02, 3.98, 3.88]}</em><a class="headerlink" href="#ccpn.ui.gui.popups.PickPeaks1DPopup.ExcludeRegions.solvents" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
 
 <dl class="class">
 <dt id="ccpn.ui.gui.popups.PickPeaks1DPopup.PickPeak1DPopup">
-<em class="property">class </em><code class="descclassname">ccpn.ui.gui.popups.PickPeaks1DPopup.</code><code class="descname">PickPeak1DPopup</code><span class="sig-paren">(</span><em>parent=None</em>, <em>mainWindow=None</em>, <em>title='Pick 1D Peak'</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/popups/PickPeaks1DPopup.html#PickPeak1DPopup"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.popups.PickPeaks1DPopup.PickPeak1DPopup" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">ccpn.ui.gui.popups.PickPeaks1DPopup.</code><code class="descname">PickPeak1DPopup</code><span class="sig-paren">(</span><em>parent=None</em>, <em>mainWindow=None</em>, <em>title='Pick 1D Peaks'</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/popups/PickPeaks1DPopup.html#PickPeak1DPopup"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.popups.PickPeaks1DPopup.PickPeak1DPopup" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#ccpn.ui.gui.popups.Dialog.CcpnDialog" title="ccpn.ui.gui.popups.Dialog.CcpnDialog"><code class="xref py py-class docutils literal"><span class="pre">ccpn.ui.gui.popups.Dialog.CcpnDialog</span></code></a></p>
 </dd></dl>
 
@@ -808,12 +987,23 @@ This popup works only for nDs. (Should be renamed?)</p>
 </dd></dl>
 
 </div>
+<div class="section" id="module-ccpn.ui.gui.popups.SetPeakAliasing">
+<span id="ccpn-ui-gui-popups-setpeakaliasing-module"></span><h2>ccpn.ui.gui.popups.SetPeakAliasing module<a class="headerlink" href="#module-ccpn.ui.gui.popups.SetPeakAliasing" title="Permalink to this headline">¶</a></h2>
+<p>Module Documentation here</p>
+<dl class="class">
+<dt id="ccpn.ui.gui.popups.SetPeakAliasing.SetPeakAliasingPopup">
+<em class="property">class </em><code class="descclassname">ccpn.ui.gui.popups.SetPeakAliasing.</code><code class="descname">SetPeakAliasingPopup</code><span class="sig-paren">(</span><em>parent=None</em>, <em>mainWindow=None</em>, <em>title='Set Aliasing'</em>, <em>items=None</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/popups/SetPeakAliasing.html#SetPeakAliasingPopup"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.popups.SetPeakAliasing.SetPeakAliasingPopup" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#ccpn.ui.gui.popups.Dialog.CcpnDialog" title="ccpn.ui.gui.popups.Dialog.CcpnDialog"><code class="xref py py-class docutils literal"><span class="pre">ccpn.ui.gui.popups.Dialog.CcpnDialog</span></code></a></p>
+<p>Open a small popup to allow setting aliasing value of selected &#8216;current&#8217; items</p>
+</dd></dl>
+
+</div>
 <div class="section" id="module-ccpn.ui.gui.popups.SetupNmrResiduesPopup">
 <span id="ccpn-ui-gui-popups-setupnmrresiduespopup-module"></span><h2>ccpn.ui.gui.popups.SetupNmrResiduesPopup module<a class="headerlink" href="#module-ccpn.ui.gui.popups.SetupNmrResiduesPopup" title="Permalink to this headline">¶</a></h2>
 <p>Module Documentation here</p>
 <dl class="class">
 <dt id="ccpn.ui.gui.popups.SetupNmrResiduesPopup.SetupNmrResiduesPopup">
-<em class="property">class </em><code class="descclassname">ccpn.ui.gui.popups.SetupNmrResiduesPopup.</code><code class="descname">SetupNmrResiduesPopup</code><span class="sig-paren">(</span><em>parent=None</em>, <em>mainWindow=None</em>, <em>title='Setup nmrResidues'</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/popups/SetupNmrResiduesPopup.html#SetupNmrResiduesPopup"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.popups.SetupNmrResiduesPopup.SetupNmrResiduesPopup" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">ccpn.ui.gui.popups.SetupNmrResiduesPopup.</code><code class="descname">SetupNmrResiduesPopup</code><span class="sig-paren">(</span><em>parent=None</em>, <em>mainWindow=None</em>, <em>title='Set up nmrResidues'</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/popups/SetupNmrResiduesPopup.html#SetupNmrResiduesPopup"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.popups.SetupNmrResiduesPopup.SetupNmrResiduesPopup" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#ccpn.ui.gui.popups.Dialog.CcpnDialog" title="ccpn.ui.gui.popups.Dialog.CcpnDialog"><code class="xref py py-class docutils literal"><span class="pre">ccpn.ui.gui.popups.Dialog.CcpnDialog</span></code></a></p>
 </dd></dl>
 
@@ -1148,6 +1338,11 @@ in order to set the parameters.</p>
 <em class="property">class </em><code class="descclassname">ccpn.ui.gui.popups.ValidateSpectraPopup.</code><code class="descname">ValidateSpectraPopup</code><span class="sig-paren">(</span><em>parent=None</em>, <em>mainWindow=None</em>, <em>spectra=None</em>, <em>title='Validate Spectra'</em>, <em>defaultSelected='all'</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/popups/ValidateSpectraPopup.html#ValidateSpectraPopup"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.popups.ValidateSpectraPopup.ValidateSpectraPopup" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#ccpn.ui.gui.popups.Dialog.CcpnDialog" title="ccpn.ui.gui.popups.Dialog.CcpnDialog"><code class="xref py py-class docutils literal"><span class="pre">ccpn.ui.gui.popups.Dialog.CcpnDialog</span></code></a></p>
 <p>Class to validate the paths of the selected spectra.</p>
+<dl class="method">
+<dt id="ccpn.ui.gui.popups.ValidateSpectraPopup.ValidateSpectraPopup.closeEvent">
+<code class="descname">closeEvent</code><span class="sig-paren">(</span><em>event</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/popups/ValidateSpectraPopup.html#ValidateSpectraPopup.closeEvent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.popups.ValidateSpectraPopup.ValidateSpectraPopup.closeEvent" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
 </dd></dl>
 
 </div>
@@ -1203,11 +1398,14 @@ in order to set the parameters.</p>
 <li><a class="reference internal" href="#">ccpn.ui.gui.popups package</a><ul>
 <li><a class="reference internal" href="#submodules">Submodules</a></li>
 <li><a class="reference internal" href="#module-ccpn.ui.gui.popups.AboutPopup">ccpn.ui.gui.popups.AboutPopup module</a></li>
+<li><a class="reference internal" href="#module-ccpn.ui.gui.popups.AxisOrderingPopup">ccpn.ui.gui.popups.AxisOrderingPopup module</a></li>
+<li><a class="reference internal" href="#module-ccpn.ui.gui.popups.CalibrateSpectraFromPeaksPopup">ccpn.ui.gui.popups.CalibrateSpectraFromPeaksPopup module</a></li>
 <li><a class="reference internal" href="#module-ccpn.ui.gui.popups.ChainPopup">ccpn.ui.gui.popups.ChainPopup module</a></li>
 <li><a class="reference internal" href="#module-ccpn.ui.gui.popups.ChemicalShiftListPopup">ccpn.ui.gui.popups.ChemicalShiftListPopup module</a></li>
 <li><a class="reference internal" href="#module-ccpn.ui.gui.popups.ComplexEditorPopup">ccpn.ui.gui.popups.ComplexEditorPopup module</a></li>
 <li><a class="reference internal" href="#module-ccpn.ui.gui.popups.CopyPeakListPopup">ccpn.ui.gui.popups.CopyPeakListPopup module</a></li>
 <li><a class="reference internal" href="#module-ccpn.ui.gui.popups.CopyPeaksPopup">ccpn.ui.gui.popups.CopyPeaksPopup module</a></li>
+<li><a class="reference internal" href="#module-ccpn.ui.gui.popups.CopyStripFlippedAxesPopup">ccpn.ui.gui.popups.CopyStripFlippedAxesPopup module</a></li>
 <li><a class="reference internal" href="#module-ccpn.ui.gui.popups.CreateChainPopup">ccpn.ui.gui.popups.CreateChainPopup module</a></li>
 <li><a class="reference internal" href="#module-ccpn.ui.gui.popups.CreateNmrChainPopup">ccpn.ui.gui.popups.CreateNmrChainPopup module</a></li>
 <li><a class="reference internal" href="#module-ccpn.ui.gui.popups.DataSetPopup">ccpn.ui.gui.popups.DataSetPopup module</a></li>
@@ -1215,12 +1413,14 @@ in order to set the parameters.</p>
 <li><a class="reference internal" href="#module-ccpn.ui.gui.popups.Dialog">ccpn.ui.gui.popups.Dialog module</a></li>
 <li><a class="reference internal" href="#module-ccpn.ui.gui.popups.EditMultipletPopup">ccpn.ui.gui.popups.EditMultipletPopup module</a></li>
 <li><a class="reference internal" href="#module-ccpn.ui.gui.popups.EstimateNoisePopup">ccpn.ui.gui.popups.EstimateNoisePopup module</a></li>
+<li><a class="reference internal" href="#module-ccpn.ui.gui.popups.EstimateVolumes">ccpn.ui.gui.popups.EstimateVolumes module</a></li>
 <li><a class="reference internal" href="#module-ccpn.ui.gui.popups.ExperimentFilterPopup">ccpn.ui.gui.popups.ExperimentFilterPopup module</a></li>
 <li><a class="reference internal" href="#module-ccpn.ui.gui.popups.ExperimentTypePopup">ccpn.ui.gui.popups.ExperimentTypePopup module</a></li>
 <li><a class="reference internal" href="#module-ccpn.ui.gui.popups.ExportDialog">ccpn.ui.gui.popups.ExportDialog module</a></li>
 <li><a class="reference internal" href="#module-ccpn.ui.gui.popups.ExportNefPopup">ccpn.ui.gui.popups.ExportNefPopup module</a></li>
 <li><a class="reference internal" href="#module-ccpn.ui.gui.popups.ExportStripToFile">ccpn.ui.gui.popups.ExportStripToFile module</a></li>
 <li><a class="reference internal" href="#module-ccpn.ui.gui.popups.FeedbackPopup">ccpn.ui.gui.popups.FeedbackPopup module</a></li>
+<li><a class="reference internal" href="#module-ccpn.ui.gui.popups.ImportStarPopup">ccpn.ui.gui.popups.ImportStarPopup module</a></li>
 <li><a class="reference internal" href="#module-ccpn.ui.gui.popups.IntegralListPopup">ccpn.ui.gui.popups.IntegralListPopup module</a></li>
 <li><a class="reference internal" href="#module-ccpn.ui.gui.popups.IntegralListPropertiesPopup">ccpn.ui.gui.popups.IntegralListPropertiesPopup module</a></li>
 <li><a class="reference internal" href="#module-ccpn.ui.gui.popups.MultipletListPropertiesPopup">ccpn.ui.gui.popups.MultipletListPropertiesPopup module</a></li>
@@ -1240,6 +1440,7 @@ in order to set the parameters.</p>
 <li><a class="reference internal" href="#module-ccpn.ui.gui.popups.SampleComponentPropertiesPopup">ccpn.ui.gui.popups.SampleComponentPropertiesPopup module</a></li>
 <li><a class="reference internal" href="#module-ccpn.ui.gui.popups.SamplePropertiesPopup">ccpn.ui.gui.popups.SamplePropertiesPopup module</a></li>
 <li><a class="reference internal" href="#module-ccpn.ui.gui.popups.SelectObjectsPopup">ccpn.ui.gui.popups.SelectObjectsPopup module</a></li>
+<li><a class="reference internal" href="#module-ccpn.ui.gui.popups.SetPeakAliasing">ccpn.ui.gui.popups.SetPeakAliasing module</a></li>
 <li><a class="reference internal" href="#module-ccpn.ui.gui.popups.SetupNmrResiduesPopup">ccpn.ui.gui.popups.SetupNmrResiduesPopup module</a></li>
 <li><a class="reference internal" href="#module-ccpn.ui.gui.popups.ShortcutsPopup">ccpn.ui.gui.popups.ShortcutsPopup module</a></li>
 <li><a class="reference internal" href="#module-ccpn.ui.gui.popups.SimpleAttributeEditorPopupABC">ccpn.ui.gui.popups.SimpleAttributeEditorPopupABC module</a></li>

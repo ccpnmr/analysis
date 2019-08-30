@@ -64,7 +64,7 @@
 <span class="c1">#=========================================================================================</span>
 <span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: Wayne Boucher $&quot;</span>
 <span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2017-07-07 16:32:41 +0100 (Fri, July 07, 2017) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b5 $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.0 $&quot;</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Created</span>
 <span class="c1">#=========================================================================================</span>
@@ -117,11 +117,13 @@
         <span class="c1"># it will come out as the executable you are running (e.g. &quot;python3&quot;)</span>
 
         <span class="c1"># QtCore.QCoreApplication.setAttribute(QtCore.Qt.AA_EnableHighDpiScaling, True)</span>
-        <span class="c1"># QtCore.QCoreApplication.setAttribute(QtCore.Qt.AA_ShareOpenGLContexts, True)</span>
+        <span class="c1"># QtCore.QCoreApplication.setAttribute(QtCore.Qt.AA_ShareOpenGLContexts, False)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">qtApp</span> <span class="o">=</span> <span class="n">Application</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">applicationName</span><span class="p">,</span>
                                  <span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">applicationVersion</span><span class="p">,</span>
                                  <span class="n">organizationName</span><span class="o">=</span><span class="s1">&#39;CCPN&#39;</span><span class="p">,</span> <span class="n">organizationDomain</span><span class="o">=</span><span class="s1">&#39;ccpn.ac.uk&#39;</span><span class="p">)</span>
+        <span class="c1"># self.qtApp.setAttribute(QtCore.Qt.AA_ShareOpenGLContexts, False)</span>
+
         <span class="c1">#self.qtApp.setStyleSheet(self.application.styleSheet)</span>
 
         <span class="n">styles</span> <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QStyleFactory</span><span class="p">()</span>
@@ -500,6 +502,8 @@
             <span class="c1"># where is created. E.g. and not hardcoded on the &quot;right&quot; and coupled with api calls!</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">moduleArea</span><span class="o">.</span><span class="n">addModule</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">position</span><span class="o">=</span><span class="s1">&#39;right&#39;</span><span class="p">,</span>
                                                                 <span class="n">relativeTo</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">moduleArea</span><span class="p">)</span></div>
+        <span class="c1"># else:</span>
+        <span class="c1">#     print(&#39;NOT OPENING SPECTRUMDISPLAY&#39;)</span>
 
 
 <span class="c1">#old name</span>
@@ -532,8 +536,23 @@
         <span class="n">Logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Strip1d&gt;&gt; spectrumDisplay: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectrumDisplay</span><span class="p">)</span>
         <span class="n">_GuiStrip1d</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectrumDisplay</span><span class="p">)</span>
 
-        <span class="n">stripIndex</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectrumDisplay</span><span class="o">.</span><span class="n">orderedStrips</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">spectrumDisplay</span><span class="o">.</span><span class="n">stripFrame</span><span class="o">.</span><span class="n">layout</span><span class="p">()</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">stripIndex</span><span class="p">)</span></div>
+        <span class="c1"># cannot add the Frame until fully done</span>
+        <span class="n">strips</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectrumDisplay</span><span class="o">.</span><span class="n">orderedStrips</span>
+        <span class="k">if</span> <span class="bp">self</span> <span class="ow">in</span> <span class="n">strips</span><span class="p">:</span>
+            <span class="n">stripIndex</span> <span class="o">=</span> <span class="n">strips</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">stripIndex</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">strips</span><span class="p">)</span>
+            <span class="n">Logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;Strip ordering not defined for </span><span class="si">%s</span><span class="s1"> in </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pid</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">spectrumDisplay</span><span class="o">.</span><span class="n">pid</span><span class="p">)))</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectrumDisplay</span><span class="o">.</span><span class="n">stripArrangement</span> <span class="o">==</span> <span class="s1">&#39;Y&#39;</span><span class="p">:</span>
+
+            <span class="c1"># strips are arranged in a row</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">spectrumDisplay</span><span class="o">.</span><span class="n">stripFrame</span><span class="o">.</span><span class="n">layout</span><span class="p">()</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">stripIndex</span><span class="p">)</span>
+
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectrumDisplay</span><span class="o">.</span><span class="n">stripArrangement</span> <span class="o">==</span> <span class="s1">&#39;X&#39;</span><span class="p">:</span>
+
+            <span class="c1"># strips are arranged in a column</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">spectrumDisplay</span><span class="o">.</span><span class="n">stripFrame</span><span class="o">.</span><span class="n">layout</span><span class="p">()</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">stripIndex</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span></div>
 
 
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.lib.GuiStripNd</span> <span class="kn">import</span> <span class="n">GuiStripNd</span> <span class="k">as</span> <span class="n">_GuiStripNd</span>
@@ -551,8 +570,22 @@
         <span class="n">_GuiStripNd</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectrumDisplay</span><span class="p">)</span>
 
         <span class="c1"># cannot add the Frame until fully done</span>
-        <span class="n">stripIndex</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectrumDisplay</span><span class="o">.</span><span class="n">orderedStrips</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">spectrumDisplay</span><span class="o">.</span><span class="n">stripFrame</span><span class="o">.</span><span class="n">layout</span><span class="p">()</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">stripIndex</span><span class="p">)</span></div>
+        <span class="n">strips</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectrumDisplay</span><span class="o">.</span><span class="n">orderedStrips</span>
+        <span class="k">if</span> <span class="bp">self</span> <span class="ow">in</span> <span class="n">strips</span><span class="p">:</span>
+            <span class="n">stripIndex</span> <span class="o">=</span> <span class="n">strips</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">stripIndex</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">strips</span><span class="p">)</span>
+            <span class="n">Logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;Strip ordering not defined for </span><span class="si">%s</span><span class="s1"> in </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pid</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">spectrumDisplay</span><span class="o">.</span><span class="n">pid</span><span class="p">)))</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectrumDisplay</span><span class="o">.</span><span class="n">stripArrangement</span> <span class="o">==</span> <span class="s1">&#39;Y&#39;</span><span class="p">:</span>
+
+            <span class="c1"># strips are arranged in a row</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">spectrumDisplay</span><span class="o">.</span><span class="n">stripFrame</span><span class="o">.</span><span class="n">layout</span><span class="p">()</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">stripIndex</span><span class="p">)</span>
+
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectrumDisplay</span><span class="o">.</span><span class="n">stripArrangement</span> <span class="o">==</span> <span class="s1">&#39;X&#39;</span><span class="p">:</span>
+
+            <span class="c1"># strips are arranged in a column</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">spectrumDisplay</span><span class="o">.</span><span class="n">stripFrame</span><span class="o">.</span><span class="n">layout</span><span class="p">()</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">stripIndex</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span></div>
 
 
 <span class="k">def</span> <span class="nf">_factoryFunction</span><span class="p">(</span><span class="n">project</span><span class="p">:</span> <span class="n">Project</span><span class="p">,</span> <span class="n">wrappedData</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">coreClass</span><span class="p">:</span>

@@ -129,7 +129,7 @@ location of the repository.</p>
 <dd>Assumes that r, g, b values are 8-bit so between 0 and 255 and have optional a.</dd>
 </dl>
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">c</span> <span class="o">=</span> <span class="n">Colour</span><span class="p">(</span><span class="s1">&#39;magenta&#39;</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">c</span> <span class="o">=</span> <span class="n">Colour</span><span class="p">(</span><span class="s1">&#39;#ff00ff&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">c</span> <span class="o">=</span> <span class="n">Colour</span><span class="p">(</span><span class="s1">&#39;#FF00FF&#39;</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">c</span> <span class="o">=</span> <span class="n">Colour</span><span class="p">((</span><span class="mi">255</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">255</span><span class="p">))</span>
 </pre></div>
 </div>
@@ -171,8 +171,25 @@ New colour has the name &#8216;Colour &lt;n&gt;&#8217; where n is the next free 
 </dd></dl>
 
 <dl class="function">
+<dt id="ccpn.util.Colour.colourNameNoSpace">
+<code class="descclassname">ccpn.util.Colour.</code><code class="descname">colourNameNoSpace</code><span class="sig-paren">(</span><em>name</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/Colour.html#colourNameNoSpace"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.Colour.colourNameNoSpace" title="Permalink to this definition">¶</a></dt>
+<dd><p>remove spaces from the colourname</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ccpn.util.Colour.colourNameWithSpace">
+<code class="descclassname">ccpn.util.Colour.</code><code class="descname">colourNameWithSpace</code><span class="sig-paren">(</span><em>name</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/Colour.html#colourNameWithSpace"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.Colour.colourNameWithSpace" title="Permalink to this definition">¶</a></dt>
+<dd><p>insert spaces into the colourname</p>
+</dd></dl>
+
+<dl class="function">
 <dt id="ccpn.util.Colour.fillColourPulldown">
 <code class="descclassname">ccpn.util.Colour.</code><code class="descname">fillColourPulldown</code><span class="sig-paren">(</span><em>pulldown</em>, <em>allowAuto=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/Colour.html#fillColourPulldown"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.Colour.fillColourPulldown" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="ccpn.util.Colour.findNearestHex">
+<code class="descclassname">ccpn.util.Colour.</code><code class="descname">findNearestHex</code><span class="sig-paren">(</span><em>hexCol</em>, <em>colourHexList</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/Colour.html#findNearestHex"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.Colour.findNearestHex" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="function">
@@ -193,7 +210,7 @@ New colour has the name &#8216;Colour &lt;n&gt;&#8217; where n is the next free 
 
 <dl class="function">
 <dt id="ccpn.util.Colour.gray">
-<code class="descclassname">ccpn.util.Colour.</code><code class="descname">gray</code><span class="sig-paren">(</span><em>r</em>, <em>g</em>, <em>b</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/Colour.html#gray"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.Colour.gray" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">ccpn.util.Colour.</code><code class="descname">gray</code><span class="sig-paren">(</span><em>r</em>, <em>g</em>, <em>b</em>, <em>a=1.0</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/Colour.html#gray"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.Colour.gray" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="function">
@@ -217,8 +234,15 @@ New colour has the name &#8216;Colour &lt;n&gt;&#8217; where n is the next free 
 <dd></dd></dl>
 
 <dl class="function">
-<dt id="ccpn.util.Colour.invertRGB">
-<code class="descclassname">ccpn.util.Colour.</code><code class="descname">invertRGB</code><span class="sig-paren">(</span><em>r</em>, <em>g</em>, <em>b</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/Colour.html#invertRGB"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.Colour.invertRGB" title="Permalink to this definition">¶</a></dt>
+<dt id="ccpn.util.Colour.invertRGBHue">
+<code class="descclassname">ccpn.util.Colour.</code><code class="descname">invertRGBHue</code><span class="sig-paren">(</span><em>r</em>, <em>g</em>, <em>b</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/Colour.html#invertRGBHue"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.Colour.invertRGBHue" title="Permalink to this definition">¶</a></dt>
+<dd><p>Invert the rgb colour using the ycbcr method by finding the opposite hue
+rgb input r, g, b in range 0-255</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ccpn.util.Colour.invertRGBLuma">
+<code class="descclassname">ccpn.util.Colour.</code><code class="descname">invertRGBLuma</code><span class="sig-paren">(</span><em>r</em>, <em>g</em>, <em>b</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/Colour.html#invertRGBLuma"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.Colour.invertRGBLuma" title="Permalink to this definition">¶</a></dt>
 <dd><p>Invert the rgb colour using the ycbcr method by inverting the luma
 rgb input r, g, b in range 0-255</p>
 </dd></dl>
@@ -325,6 +349,73 @@ axisCodes or atom names, hence the difference to name2ElementSymbol.</p>
 </dd></dl>
 
 <dl class="function">
+<dt id="ccpn.util.Common.getAxisCodeMatch">
+<code class="descclassname">ccpn.util.Common.</code><code class="descname">getAxisCodeMatch</code><span class="sig-paren">(</span><em>axisCodes</em>, <em>refAxisCodes</em>, <em>allMatches=False</em>, <em>exactMatch=False</em><span class="sig-paren">)</span> &rarr; collections.OrderedDict<a class="reference internal" href="../_modules/ccpn/util/Common.html#getAxisCodeMatch"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.Common.getAxisCodeMatch" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return an OrderedDict containing the mapping from the refAxisCodes to axisCodes</p>
+<p>There may be multiple matches, or None for each axis code.</p>
+<p>Set allMatches to True to return all, or False for only the best match in each case</p>
+<p>e.g. for unique axis codes:</p>
+<blockquote>
+<div><p>getAxisCodeMatch((&#8216;Hn&#8217;, &#8216;Nh&#8217;, &#8216;C&#8217;), (&#8216;Nh&#8217;, &#8216;Hn&#8217;), allMatches=False)</p>
+<dl class="docutils">
+<dt>-&gt;  { &#8216;Hn&#8217;:   &#8216;Hn&#8217;</dt>
+<dd><blockquote class="first">
+<div>&#8216;Nh&#8217;:   &#8216;Nh&#8217;
+&#8216;C&#8217; :   None</div></blockquote>
+<p class="last">}</p>
+</dd>
+</dl>
+<p>getAxisCodeMatch((&#8216;Hn&#8217;, &#8216;Nh&#8217;, &#8216;C&#8217;), (&#8216;Nh&#8217;, &#8216;Hn&#8217;), allMatches=True)</p>
+<dl class="docutils">
+<dt>-&gt;  { &#8216;Hn&#8217;:   (&#8216;Hn&#8217;,)</dt>
+<dd><blockquote class="first">
+<div>&#8216;Nh&#8217;:   (&#8216;Nh&#8217;,)
+&#8216;C&#8217; :   ()</div></blockquote>
+<p class="last">}</p>
+</dd>
+</dl>
+</div></blockquote>
+<p>for similar repeated axis codes, possibly from matching isotopeCodes:</p>
+<blockquote>
+<div><p>getAxisCodeMatch((&#8216;Nh&#8217;, &#8216;H&#8217;), (&#8216;H&#8217;, &#8216;H1&#8217;, &#8216;N&#8217;), allMatches=True)</p>
+<dl class="docutils">
+<dt>-&gt;  { &#8216;Nh&#8217;:   &#8216;N&#8217;</dt>
+<dd><blockquote class="first">
+<div>&#8216;H&#8217; :   &#8216;H&#8217;</div></blockquote>
+<p class="last">}</p>
+</dd>
+</dl>
+<p>getAxisCodeMatch((&#8216;Nh&#8217;, &#8216;H&#8217;), (&#8216;H&#8217;, &#8216;H1&#8217;, &#8216;N&#8217;), allMatches=True)</p>
+<dl class="docutils">
+<dt>-&gt;  { &#8216;Nh&#8217;:   (&#8216;N&#8217;,)</dt>
+<dd><blockquote class="first">
+<div>&#8216;H&#8217; :   (&#8216;H&#8217;, &#8216;H1&#8217;)       &lt;- in this case the first match is always the highest</div></blockquote>
+<p class="last">}</p>
+</dd>
+</dl>
+</div></blockquote>
+</dd></dl>
+
+<dl class="function">
+<dt id="ccpn.util.Common.getAxisCodeMatchIndices">
+<code class="descclassname">ccpn.util.Common.</code><code class="descname">getAxisCodeMatchIndices</code><span class="sig-paren">(</span><em>axisCodes</em>, <em>refAxisCodes</em>, <em>exactMatch=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/Common.html#getAxisCodeMatchIndices"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.Common.getAxisCodeMatchIndices" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a tuple containing the indices for mapping axisCodes into refAxisCodes</p>
+<p>Only the best match is returned for each code</p>
+<p>e.g. for unique axis codes:</p>
+<blockquote>
+<div><p>indices = getAxisCodeMatchIndices((&#8216;Hn&#8217;, &#8216;Nh&#8217;, &#8216;C&#8217;), (&#8216;Nh&#8217;, &#8216;Hn&#8217;))</p>
+<p>-&gt;  (1, 0, None)</p>
+<blockquote>
+<div>i.e axisCodes[0] = &#8216;Hn&#8217; which maps to refAxisCodes[indices[0]] = &#8216;Hn&#8217;</div></blockquote>
+</div></blockquote>
+<p>for similar repeated axis codes, possibly from matching isotopeCodes:</p>
+<blockquote>
+<div><p>getAxisCodeMatchIndices((&#8216;Nh&#8217;, &#8216;H&#8217;), (&#8216;H&#8217;, &#8216;H1&#8217;, &#8216;N&#8217;))</p>
+<p>-&gt;  (2, 0)</p>
+</div></blockquote>
+</dd></dl>
+
+<dl class="function">
 <dt id="ccpn.util.Common.getCcpFileString">
 <code class="descclassname">ccpn.util.Common.</code><code class="descname">getCcpFileString</code><span class="sig-paren">(</span><em>fileNameString</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/Common.html#getCcpFileString"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.Common.getCcpFileString" title="Permalink to this definition">¶</a></dt>
 <dd><p>Changes an input string to the one used for a component of file names.</p>
@@ -376,7 +467,7 @@ Uses sum of relative (relTolerance) and absolute (absTolerance) difference</p>
 <dt id="ccpn.util.Common.makeIterableList">
 <code class="descclassname">ccpn.util.Common.</code><code class="descname">makeIterableList</code><span class="sig-paren">(</span><em>inList=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/Common.html#makeIterableList"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.Common.makeIterableList" title="Permalink to this definition">¶</a></dt>
 <dd><p>Take a list of lists and concatenate into a single list.
-Remove any None&#8217;s from the list
+Remove any Nones from the list
 :param inList:
 :return single list:</p>
 </dd></dl>
@@ -557,12 +648,46 @@ into an (integer,string) tuple</p>
 </dd></dl>
 
 </div>
+<div class="section" id="module-ccpn.util.Data">
+<span id="ccpn-util-data-module"></span><h2>ccpn.util.Data module<a class="headerlink" href="#module-ccpn.util.Data" title="Permalink to this headline">¶</a></h2>
+<p>Module Documentation here</p>
+</div>
 <div class="section" id="module-ccpn.util.ExcelReader">
 <span id="ccpn-util-excelreader-module"></span><h2>ccpn.util.ExcelReader module<a class="headerlink" href="#module-ccpn.util.ExcelReader" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
 <dt id="ccpn.util.ExcelReader.ExcelReader">
 <em class="property">class </em><code class="descclassname">ccpn.util.ExcelReader.</code><code class="descname">ExcelReader</code><span class="sig-paren">(</span><em>project</em>, <em>excelPath</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/ExcelReader.html#ExcelReader"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.ExcelReader.ExcelReader" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ccpn.util.ExcelReader.getDefaultSampleDF">
+<code class="descclassname">ccpn.util.ExcelReader.</code><code class="descname">getDefaultSampleDF</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/ExcelReader.html#getDefaultSampleDF"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.ExcelReader.getDefaultSampleDF" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="ccpn.util.ExcelReader.getDefaultSubstancesDF">
+<code class="descclassname">ccpn.util.ExcelReader.</code><code class="descname">getDefaultSubstancesDF</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/ExcelReader.html#getDefaultSubstancesDF"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.ExcelReader.getDefaultSubstancesDF" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="ccpn.util.ExcelReader.makeTemplate">
+<code class="descclassname">ccpn.util.ExcelReader.</code><code class="descname">makeTemplate</code><span class="sig-paren">(</span><em>path</em>, <em>fileName='lookupTemplate.xlsx'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/ExcelReader.html#makeTemplate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.ExcelReader.makeTemplate" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>path</strong> &#8211; path where to save the template</li>
+<li><strong>fileName</strong> &#8211; name of template</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">the file path where is saved</p>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 </div>
@@ -636,8 +761,13 @@ The state is saved in a Json file. The default file is autogenerated when firing
 <dd></dd></dl>
 
 <dl class="function">
+<dt id="ccpn.util.Layout.isLayoutFile">
+<code class="descclassname">ccpn.util.Layout.</code><code class="descname">isLayoutFile</code><span class="sig-paren">(</span><em>filePath</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/Layout.html#isLayoutFile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.Layout.isLayoutFile" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
 <dt id="ccpn.util.Layout.restoreLayout">
-<code class="descclassname">ccpn.util.Layout.</code><code class="descname">restoreLayout</code><span class="sig-paren">(</span><em>mainWindow</em>, <em>layout</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/Layout.html#restoreLayout"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.Layout.restoreLayout" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">ccpn.util.Layout.</code><code class="descname">restoreLayout</code><span class="sig-paren">(</span><em>mainWindow</em>, <em>layout</em>, <em>restoreSpectrumDisplay=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/Layout.html#restoreLayout"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.Layout.restoreLayout" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="function">
@@ -1044,7 +1174,8 @@ specified by one of the following strings: &#8220;acme&#8221;, &#8220;peak_minim
 <dl class="function">
 <dt id="ccpn.util.Register.checkServer">
 <code class="descclassname">ccpn.util.Register.</code><code class="descname">checkServer</code><span class="sig-paren">(</span><em>registrationDict</em>, <em>version='3'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/Register.html#checkServer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.Register.checkServer" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Check the registration status on the server</p>
+</dd></dl>
 
 <dl class="function">
 <dt id="ccpn.util.Register.getHashCode">
@@ -1111,6 +1242,27 @@ specified by one of the following strings: &#8220;acme&#8221;, &#8220;peak_minim
 <span id="ccpn-util-safefilename-module"></span><h2>ccpn.util.SafeFilename module<a class="headerlink" href="#module-ccpn.util.SafeFilename" title="Permalink to this headline">¶</a></h2>
 <p>Functions to append a number to the end of a filename if it already exists</p>
 <dl class="function">
+<dt id="ccpn.util.SafeFilename.getSafeFilename">
+<code class="descclassname">ccpn.util.SafeFilename.</code><code class="descname">getSafeFilename</code><span class="sig-paren">(</span><em>path</em>, <em>mode='w'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/SafeFilename.html#getSafeFilename"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.SafeFilename.getSafeFilename" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the first safe filename from the given path</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>path</strong> &#8211; filepath and filename.</li>
+<li><strong>mode</strong> &#8211; open flags</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">Open file handle and new fileName</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
 <dt id="ccpn.util.SafeFilename.safeOpen">
 <code class="descclassname">ccpn.util.SafeFilename.</code><code class="descname">safeOpen</code><span class="sig-paren">(</span><em>path</em>, <em>mode</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/SafeFilename.html#safeOpen"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.SafeFilename.safeOpen" title="Permalink to this definition">¶</a></dt>
 <dd><p>Open path, but if it already exists, add &#8216;(n)&#8217; before the extension,
@@ -1129,9 +1281,14 @@ safeFileName is the new safe filename.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>path</strong> &#8211; filepath and filename.</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>path</strong> &#8211; filepath and filename.</li>
+<li><strong>mode</strong> &#8211; open flags</li>
+</ul>
+</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Open file handle and new fileName</td>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">Open file handle and new fileName</p>
+</td>
 </tr>
 </tbody>
 </table>
@@ -1814,11 +1971,6 @@ zz component of tensor</p>
 <em class="property">class </em><code class="descclassname">ccpn.util.Update.</code><code class="descname">UpdateFile</code><span class="sig-paren">(</span><em>installLocation</em>, <em>serverDbRoot</em>, <em>filePath</em>, <em>fileServerTime=None</em>, <em>fileStoredAs=None</em>, <em>fileHashCode=None</em>, <em>shouldInstall=True</em>, <em>shouldCommit=False</em>, <em>isNew=False</em>, <em>serverDownloadScript=None</em>, <em>serverUploadScript=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/Update.html#UpdateFile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.Update.UpdateFile" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
 <dl class="method">
-<dt id="ccpn.util.Update.UpdateFile.commitUpdate">
-<code class="descname">commitUpdate</code><span class="sig-paren">(</span><em>serverUser</em>, <em>serverPassword</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/Update.html#UpdateFile.commitUpdate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.Update.UpdateFile.commitUpdate" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
 <dt id="ccpn.util.Update.UpdateFile.installUpdate">
 <code class="descname">installUpdate</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/Update.html#UpdateFile.installUpdate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.Update.UpdateFile.installUpdate" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
@@ -1833,7 +1985,14 @@ zz component of tensor</p>
 <dl class="function">
 <dt id="ccpn.util.Update.downloadFile">
 <code class="descclassname">ccpn.util.Update.</code><code class="descname">downloadFile</code><span class="sig-paren">(</span><em>serverScript</em>, <em>serverDbRoot</em>, <em>fileName</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/Update.html#downloadFile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.Update.downloadFile" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Download a file from the server</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ccpn.util.Update.fetchUrl">
+<code class="descclassname">ccpn.util.Update.</code><code class="descname">fetchUrl</code><span class="sig-paren">(</span><em>url</em>, <em>data=None</em>, <em>headers=None</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/Update.html#fetchUrl"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.Update.fetchUrl" title="Permalink to this definition">¶</a></dt>
+<dd><p>Fetch url request from the server</p>
+</dd></dl>
 
 <dl class="function">
 <dt id="ccpn.util.Update.installUpdates">
@@ -1929,6 +2088,24 @@ Use isProperty to get &#8216; = &#8216;args[1]</p>
 <code class="descclassname">ccpn.util.decorators.</code><code class="descname">propertyUndo</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/decorators.html#propertyUndo"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.decorators.propertyUndo" title="Permalink to this definition">¶</a></dt>
 <dd><p>A decorator to wrap a method in an undo block
 Requires that the &#8216;self&#8217; has &#8216;project&#8217; as an attribute</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ccpn.util.decorators.pstatToText">
+<code class="descclassname">ccpn.util.decorators.</code><code class="descname">pstatToText</code><span class="sig-paren">(</span><em>pstatPath</em>, <em>outPath=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/decorators.html#pstatToText"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.decorators.pstatToText" title="Permalink to this definition">¶</a></dt>
+<dd><p>Converts a profile file of type .pstat into a plain text file.
+:param pstatPath: path of the pstat file. (The output of the decorator &#8220;profile&#8221;)
+:param outPath: output pat. Including the file name and extension &#8221;.txt&#8221;.</p>
+<blockquote>
+<div>If None, saves in the same location of pstat with same original name</div></blockquote>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">the stats object for the file</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="function">
@@ -2094,6 +2271,7 @@ topDirectory must be (intended to be) on the Python path</p>
 <li><a class="reference internal" href="#module-ccpn.util.Colour">ccpn.util.Colour module</a></li>
 <li><a class="reference internal" href="#module-ccpn.util.Common">ccpn.util.Common module</a></li>
 <li><a class="reference internal" href="#module-ccpn.util.Constants">ccpn.util.Constants module</a></li>
+<li><a class="reference internal" href="#module-ccpn.util.Data">ccpn.util.Data module</a></li>
 <li><a class="reference internal" href="#module-ccpn.util.ExcelReader">ccpn.util.ExcelReader module</a></li>
 <li><a class="reference internal" href="#ccpn-util-gittools-module">ccpn.util.GitTools module</a></li>
 <li><a class="reference internal" href="#module-ccpn.util.Graph">ccpn.util.Graph module</a></li>

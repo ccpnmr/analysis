@@ -63,7 +63,7 @@
 <span class="c1">#=========================================================================================</span>
 <span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: CCPN $&quot;</span>
 <span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2017-07-07 16:32:29 +0100 (Fri, July 07, 2017) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b5 $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.0 $&quot;</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Created</span>
 <span class="c1">#=========================================================================================</span>
@@ -74,23 +74,22 @@
 <span class="c1">#=========================================================================================</span>
 
 <span class="kn">import</span> <span class="nn">itertools</span>
-<span class="kn">import</span> <span class="nn">collections</span>
 <span class="kn">import</span> <span class="nn">operator</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">,</span> <span class="n">TypeVar</span><span class="p">,</span> <span class="n">Any</span>
-
-<span class="kn">from</span> <span class="nn">ccpn.core.lib</span> <span class="kn">import</span> <span class="n">Undo</span>
 <span class="kn">from</span> <span class="nn">ccpn.util</span> <span class="kn">import</span> <span class="n">Common</span> <span class="k">as</span> <span class="n">commonUtil</span>
 <span class="kn">from</span> <span class="nn">ccpn.core._implementation.AbstractWrapperObject</span> <span class="kn">import</span> <span class="n">AbstractWrapperObject</span>
 <span class="kn">from</span> <span class="nn">ccpn.core.Project</span> <span class="kn">import</span> <span class="n">Project</span>
-<span class="kn">from</span> <span class="nn">ccpn.core.SpectrumReference</span> <span class="kn">import</span> <span class="n">SpectrumReference</span>
-<span class="kn">from</span> <span class="nn">ccpn.core.PeakList</span> <span class="kn">import</span> <span class="n">PeakList</span>
+<span class="kn">from</span> <span class="nn">ccpn.core.PeakList</span> <span class="kn">import</span> <span class="n">PeakList</span><span class="p">,</span> <span class="n">PARABOLICMETHOD</span>
 <span class="kn">from</span> <span class="nn">ccpn.core.NmrAtom</span> <span class="kn">import</span> <span class="n">NmrAtom</span>
 <span class="kn">from</span> <span class="nn">ccpnmodel.ccpncore.api.ccp.nmr</span> <span class="kn">import</span> <span class="n">Nmr</span>
-<span class="c1">#from ccpnmodel.ccpncore.lib import Util as modelUtil</span>
-<span class="kn">from</span> <span class="nn">ccpnmodel.ccpncore.lib._ccp.nmr.Nmr</span> <span class="kn">import</span> <span class="n">Peak</span> <span class="k">as</span> <span class="n">LibPeak</span>
+<span class="kn">from</span> <span class="nn">ccpn.core.lib.peakUtils</span> <span class="kn">import</span> <span class="n">snapToExtremum</span> <span class="k">as</span> <span class="n">peakUtilsSnapToExtremum</span>
 <span class="kn">from</span> <span class="nn">ccpn.util.decorators</span> <span class="kn">import</span> <span class="n">logCommand</span>
 <span class="kn">from</span> <span class="nn">ccpn.core.lib.ContextManagers</span> <span class="kn">import</span> <span class="n">newObject</span><span class="p">,</span> <span class="n">deleteObject</span><span class="p">,</span> <span class="n">ccpNmrV3CoreSetter</span><span class="p">,</span> <span class="n">undoBlock</span>
 <span class="kn">from</span> <span class="nn">ccpn.util.Logging</span> <span class="kn">import</span> <span class="n">getLogger</span>
+
+
+<span class="n">ALIASINGCHANGED</span> <span class="o">=</span> <span class="s1">&#39;_aliasingChanged&#39;</span>
 
 
 <div class="viewcode-block" id="Peak"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.Peak.Peak">[docs]</a><span class="k">class</span> <span class="nc">Peak</span><span class="p">(</span><span class="n">AbstractWrapperObject</span><span class="p">):</span>
@@ -226,9 +225,18 @@
     <span class="nd">@ccpNmrV3CoreSetter</span><span class="p">()</span>
     <span class="k">def</span> <span class="nf">position</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">):</span>
         <span class="c1"># call api changes</span>
+        <span class="n">currentAlias</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">newAlias</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">ii</span><span class="p">,</span> <span class="n">peakDim</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">sortedPeakDims</span><span class="p">()):</span>
+            <span class="n">currentAlias</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">peakDim</span><span class="o">.</span><span class="n">numAliasing</span><span class="p">)</span>
             <span class="n">peakDim</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">value</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span>
             <span class="n">peakDim</span><span class="o">.</span><span class="n">realValue</span> <span class="o">=</span> <span class="bp">None</span>
+            <span class="n">newAlias</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">peakDim</span><span class="o">.</span><span class="n">numAliasing</span><span class="p">)</span>
+
+        <span class="c1"># aliasing may have changed here</span>
+        <span class="k">if</span> <span class="n">currentAlias</span> <span class="o">!=</span> <span class="n">newAlias</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_checkAliasing</span><span class="p">()</span>
+            <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ALIASINGCHANGED</span><span class="p">,</span> <span class="bp">True</span><span class="p">)</span>
 
     <span class="n">ppmPositions</span> <span class="o">=</span> <span class="n">position</span>
 
@@ -245,7 +253,6 @@
     <span class="c1">#     for ii, peakDim in enumerate(self._wrappedData.sortedPeakDims()):</span>
     <span class="c1">#         peakDim.value = value[ii]</span>
     <span class="c1">#         peakDim.realValue = None</span>
-
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">positionError</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span> <span class="o">...</span><span class="p">]:</span>
@@ -268,8 +275,17 @@
     <span class="nd">@logCommand</span><span class="p">(</span><span class="n">get</span><span class="o">=</span><span class="s1">&#39;self&#39;</span><span class="p">,</span> <span class="n">isProperty</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
     <span class="nd">@ccpNmrV3CoreSetter</span><span class="p">()</span>
     <span class="k">def</span> <span class="nf">pointPosition</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">):</span>
+        <span class="n">currentAlias</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">newAlias</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">ii</span><span class="p">,</span> <span class="n">peakDim</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">sortedPeakDims</span><span class="p">()):</span>
+            <span class="n">currentAlias</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">peakDim</span><span class="o">.</span><span class="n">numAliasing</span><span class="p">)</span>
             <span class="n">peakDim</span><span class="o">.</span><span class="n">position</span> <span class="o">=</span> <span class="n">value</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span>
+            <span class="n">newAlias</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">peakDim</span><span class="o">.</span><span class="n">numAliasing</span><span class="p">)</span>
+
+        <span class="c1"># aliasing may have changed here</span>
+        <span class="k">if</span> <span class="n">currentAlias</span> <span class="o">!=</span> <span class="n">newAlias</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_checkAliasing</span><span class="p">()</span>
+            <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ALIASINGCHANGED</span><span class="p">,</span> <span class="bp">True</span><span class="p">)</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">boxWidths</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span> <span class="o">...</span><span class="p">]:</span>
@@ -301,7 +317,7 @@
         <span class="sd">&quot;&quot;&quot;Aliasing for the peak in each dimension.</span>
 <span class="sd">        Defined as integer number of spectralWidths added or subtracted along each dimension</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="o">*</span> <span class="n">x</span><span class="o">.</span><span class="n">numAliasing</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">sortedPeakDims</span><span class="p">())</span>
+        <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span> <span class="o">*</span> <span class="n">x</span><span class="o">.</span><span class="n">numAliasing</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">sortedPeakDims</span><span class="p">())</span>
 
     <span class="nd">@aliasing.setter</span>
     <span class="nd">@logCommand</span><span class="p">(</span><span class="n">get</span><span class="o">=</span><span class="s1">&#39;self&#39;</span><span class="p">,</span> <span class="n">isProperty</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
@@ -312,8 +328,17 @@
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">all</span><span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">dimVal</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> <span class="k">for</span> <span class="n">dimVal</span> <span class="ow">in</span> <span class="n">value</span><span class="p">):</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Aliasing values must be integer.&quot;</span><span class="p">)</span>
 
+        <span class="n">currentAlias</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">newAlias</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">ii</span><span class="p">,</span> <span class="n">peakDim</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">sortedPeakDims</span><span class="p">()):</span>
-            <span class="n">peakDim</span><span class="o">.</span><span class="n">numAliasing</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="o">*</span> <span class="n">value</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span>
+            <span class="n">currentAlias</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">peakDim</span><span class="o">.</span><span class="n">numAliasing</span><span class="p">)</span>
+            <span class="n">peakDim</span><span class="o">.</span><span class="n">numAliasing</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span> <span class="o">*</span> <span class="n">value</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span>
+            <span class="n">newAlias</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">peakDim</span><span class="o">.</span><span class="n">numAliasing</span><span class="p">)</span>
+
+        <span class="c1"># aliasing may/may not have changed here</span>
+        <span class="k">if</span> <span class="n">currentAlias</span> <span class="o">!=</span> <span class="n">newAlias</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_checkAliasing</span><span class="p">()</span>
+            <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ALIASINGCHANGED</span><span class="p">,</span> <span class="bp">True</span><span class="p">)</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">dimensionNmrAtoms</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="s1">&#39;NmrAtom&#39;</span><span class="p">,</span> <span class="o">...</span><span class="p">],</span> <span class="o">...</span><span class="p">]:</span>
@@ -454,7 +479,7 @@
                     <span class="n">ll</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span> <span class="o">=</span> <span class="n">resonance</span>
 
                 <span class="k">elif</span> <span class="n">atom</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
-                    <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;Error assigning NmrAtom </span><span class="si">%s</span><span class="s1"> to dimension </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">atom</span><span class="p">),</span> <span class="n">ii</span><span class="o">+</span><span class="mi">1</span><span class="p">))</span>
+                    <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;Error assigning NmrAtom </span><span class="si">%s</span><span class="s1"> to dimension </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">atom</span><span class="p">),</span> <span class="n">ii</span> <span class="o">+</span> <span class="mi">1</span><span class="p">))</span>
 
         <span class="c1"># set assignments</span>
         <span class="n">apiPeak</span><span class="o">.</span><span class="n">assignByContributions</span><span class="p">(</span><span class="n">resonances</span><span class="p">)</span>
@@ -469,6 +494,7 @@
         <span class="k">return</span> <span class="nb">tuple</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_data2Obj</span><span class="p">[</span><span class="n">mt</span><span class="p">]</span> <span class="k">for</span> <span class="n">mt</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">sortedMultiplets</span><span class="p">()</span>
                       <span class="k">if</span> <span class="n">mt</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_data2Obj</span><span class="p">])</span>
 
+    <span class="nd">@logCommand</span><span class="p">(</span><span class="n">get</span><span class="o">=</span><span class="s1">&#39;self&#39;</span><span class="p">)</span>
 <div class="viewcode-block" id="Peak.addAssignment"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.Peak.Peak.addAssignment">[docs]</a>    <span class="k">def</span> <span class="nf">addAssignment</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="s1">&#39;NmrAtom&#39;</span><span class="p">]]):</span>
         <span class="sd">&quot;&quot;&quot;Add a peak assignment - a list of one NmrAtom or Pid for each dimension&quot;&quot;&quot;</span>
 
@@ -497,6 +523,7 @@
             <span class="n">assignedNmrAtoms</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">assignedNmrAtoms</span> <span class="o">=</span> <span class="n">assignedNmrAtoms</span></div>
 
+    <span class="nd">@logCommand</span><span class="p">(</span><span class="n">get</span><span class="o">=</span><span class="s1">&#39;self&#39;</span><span class="p">)</span>
 <div class="viewcode-block" id="Peak.assignDimension"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.Peak.Peak.assignDimension">[docs]</a>    <span class="k">def</span> <span class="nf">assignDimension</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">axisCode</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="s1">&#39;NmrAtom&#39;</span><span class="p">],</span>
                                                           <span class="n">Sequence</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="s1">&#39;NmrAtom&#39;</span><span class="p">]]]</span> <span class="o">=</span> <span class="bp">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Assign dimension with axisCode to value (NmrAtom, or Pid or sequence of either, or None).&quot;&quot;&quot;</span>
@@ -533,9 +560,18 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_finaliseAction</span><span class="p">(</span><span class="n">action</span><span class="o">=</span><span class="n">action</span><span class="p">)</span>
 
+        <span class="c1"># if this peak is changed or deleted then it&#39;s multiplets/integral need to CHANGE</span>
+        <span class="c1"># create required as undo may return peak to a multiplet list</span>
         <span class="k">if</span> <span class="n">action</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;change&#39;</span><span class="p">,</span> <span class="s1">&#39;create&#39;</span><span class="p">,</span> <span class="s1">&#39;delete&#39;</span><span class="p">]:</span>
             <span class="k">for</span> <span class="n">mt</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">multiplets</span><span class="p">:</span>
-                <span class="n">mt</span><span class="o">.</span><span class="n">_finaliseAction</span><span class="p">(</span><span class="n">action</span><span class="o">=</span><span class="n">action</span><span class="p">)</span>
+                <span class="n">mt</span><span class="o">.</span><span class="n">_finaliseAction</span><span class="p">(</span><span class="n">action</span><span class="o">=</span><span class="s1">&#39;change&#39;</span><span class="p">)</span>
+            <span class="c1"># NOTE:ED does integral need to be notified? - and reverse notifiers in multiplet/integral</span>
+
+        <span class="k">if</span> <span class="n">action</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;change&#39;</span><span class="p">]:</span>
+            <span class="c1"># check whether the peak aliasing has changed and notify containing spectrum</span>
+            <span class="k">if</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ALIASINGCHANGED</span><span class="p">,</span> <span class="bp">None</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_aliasingChanged</span> <span class="o">=</span> <span class="bp">False</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">peakList</span><span class="o">.</span><span class="n">spectrum</span><span class="o">.</span><span class="n">_finaliseAction</span><span class="p">(</span><span class="n">action</span><span class="o">=</span><span class="n">action</span><span class="p">)</span>
 
     <span class="c1">#=========================================================================================</span>
     <span class="c1"># CCPN functions</span>
@@ -615,13 +651,15 @@
             <span class="n">values</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">reorderValues</span><span class="p">(</span><span class="n">values</span><span class="p">,</span> <span class="n">axisCodes</span><span class="p">)</span>
         <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attributeName</span><span class="p">,</span> <span class="n">values</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Peak.snapToExtremum"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.Peak.Peak.snapToExtremum">[docs]</a>    <span class="k">def</span> <span class="nf">snapToExtremum</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">halfBoxSearchWidth</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">4</span><span class="p">,</span> <span class="n">halfBoxFitWidth</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">2</span><span class="p">):</span>
+<div class="viewcode-block" id="Peak.snapToExtremum"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.Peak.Peak.snapToExtremum">[docs]</a>    <span class="k">def</span> <span class="nf">snapToExtremum</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">halfBoxSearchWidth</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">4</span><span class="p">,</span> <span class="n">halfBoxFitWidth</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">4</span><span class="p">,</span>
+                       <span class="n">minDropFactor</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.1</span><span class="p">,</span> <span class="n">fitMethod</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">PARABOLICMETHOD</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Snap the Peak to the closest local extrema, if within range.&quot;&quot;&quot;</span>
-        <span class="n">LibPeak</span><span class="o">.</span><span class="n">snapToExtremum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_apiPeak</span><span class="p">,</span> <span class="n">halfBoxSearchWidth</span><span class="o">=</span><span class="n">halfBoxSearchWidth</span><span class="p">,</span> <span class="n">halfBoxFitWidth</span><span class="o">=</span><span class="n">halfBoxFitWidth</span><span class="p">)</span></div>
+        <span class="n">peakUtilsSnapToExtremum</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">halfBoxSearchWidth</span><span class="o">=</span><span class="n">halfBoxSearchWidth</span><span class="p">,</span> <span class="n">halfBoxFitWidth</span><span class="o">=</span><span class="n">halfBoxFitWidth</span><span class="p">,</span>
+                                <span class="n">minDropFactor</span><span class="o">=</span><span class="n">minDropFactor</span><span class="p">,</span> <span class="n">fitMethod</span><span class="o">=</span><span class="n">fitMethod</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Peak.fitPositionHeightLineWidths"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.Peak.Peak.fitPositionHeightLineWidths">[docs]</a>    <span class="k">def</span> <span class="nf">fitPositionHeightLineWidths</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Set the position, height and lineWidth of the Peak.&quot;&quot;&quot;</span>
-        <span class="n">LibPeak</span><span class="o">.</span><span class="n">fitPositionHeightLineWidths</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_apiPeak</span><span class="p">)</span></div>
+    <span class="c1"># def fitPositionHeightLineWidths(self):</span>
+    <span class="c1">#     &quot;&quot;&quot;Set the position, height and lineWidth of the Peak.&quot;&quot;&quot;</span>
+    <span class="c1">#     LibPeak.fitPositionHeightLineWidths(self._apiPeak)</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">integral</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -675,18 +713,83 @@
         <span class="k">return</span> <span class="n">peaks</span>
 
     <span class="k">def</span> <span class="nf">_getSNRatio</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ratio</span><span class="o">=</span><span class="mf">2.5</span><span class="p">):</span>
-        <span class="kn">from</span> <span class="nn">ccpn.core.PeakList</span> <span class="kn">import</span>  <span class="n">estimateSNR_1D</span>
+        <span class="kn">from</span> <span class="nn">ccpn.core.PeakList</span> <span class="kn">import</span> <span class="n">estimateSNR_1D</span>
+
         <span class="n">spectrum</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parent</span><span class="o">.</span><span class="n">spectrum</span>
         <span class="n">noiseLevel</span> <span class="o">=</span> <span class="n">spectrum</span><span class="o">.</span><span class="n">noiseLevel</span>
         <span class="n">negativeNoiseLevel</span> <span class="o">=</span> <span class="n">spectrum</span><span class="o">.</span><span class="n">negativeNoiseLevel</span>
         <span class="k">if</span> <span class="n">noiseLevel</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
-            <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;Spectrum noise level not defined for </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span><span class="n">spectrum</span><span class="o">.</span><span class="n">pid</span><span class="p">)</span>
+            <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;Spectrum noise level not defined for </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">spectrum</span><span class="o">.</span><span class="n">pid</span><span class="p">)</span>
             <span class="k">return</span> <span class="bp">None</span>
         <span class="k">if</span> <span class="n">negativeNoiseLevel</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
-            <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;Spectrum negative noise level not defined </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span><span class="n">spectrum</span><span class="o">.</span><span class="n">pid</span><span class="p">)</span>
+            <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;Spectrum negative noise level not defined </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">spectrum</span><span class="o">.</span><span class="n">pid</span><span class="p">)</span>
             <span class="k">return</span> <span class="bp">None</span>
-        <span class="n">snr</span> <span class="o">=</span> <span class="n">estimateSNR_1D</span><span class="p">(</span><span class="n">noiseLevels</span><span class="o">=</span><span class="p">[</span><span class="n">noiseLevel</span><span class="p">,</span><span class="n">negativeNoiseLevel</span><span class="p">],</span> <span class="n">signalPoints</span><span class="o">=</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">height</span><span class="p">],</span> <span class="n">ratio</span><span class="o">=</span><span class="n">ratio</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">snr</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span></div>
+        <span class="n">snr</span> <span class="o">=</span> <span class="n">estimateSNR_1D</span><span class="p">(</span><span class="n">noiseLevels</span><span class="o">=</span><span class="p">[</span><span class="n">noiseLevel</span><span class="p">,</span> <span class="n">negativeNoiseLevel</span><span class="p">],</span> <span class="n">signalPoints</span><span class="o">=</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">height</span><span class="p">],</span> <span class="n">ratio</span><span class="o">=</span><span class="n">ratio</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">snr</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="nd">@logCommand</span><span class="p">(</span><span class="n">get</span><span class="o">=</span><span class="s1">&#39;self&#39;</span><span class="p">)</span>
+<div class="viewcode-block" id="Peak.estimateVolume"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.Peak.Peak.estimateVolume">[docs]</a>    <span class="k">def</span> <span class="nf">estimateVolume</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">volumeIntegralLimit</span><span class="o">=</span><span class="mf">2.0</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Estimate the volume of the peak from a gaussian distribution.</span>
+<span class="sd">        The width of the volume integral in each dimension is the lineWidth (FWHM) * volumeIntegralLimit,</span>
+<span class="sd">        the default is 2.0 * FWHM of the peak.</span>
+<span class="sd">        :param volumeIntegralLimit: integral width as a multiple of lineWidth (FWHM)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">def</span> <span class="nf">sigma2fwhm</span><span class="p">(</span><span class="n">sigma</span><span class="p">):</span>
+            <span class="sd">&quot;&quot;&quot;Convert sigma to FWHM for gaussian distribution</span>
+<span class="sd">            &quot;&quot;&quot;</span>
+            <span class="k">return</span> <span class="n">sigma</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">8</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="mi">2</span><span class="p">))</span>
+
+        <span class="k">def</span> <span class="nf">fwhm2sigma</span><span class="p">(</span><span class="n">fwhm</span><span class="p">):</span>
+            <span class="sd">&quot;&quot;&quot;Convert FWHM to sigma for gaussian distribution</span>
+<span class="sd">            &quot;&quot;&quot;</span>
+            <span class="k">return</span> <span class="n">fwhm</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">8</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="mi">2</span><span class="p">))</span>
+
+        <span class="k">def</span> <span class="nf">make_gauss</span><span class="p">(</span><span class="n">N</span><span class="p">,</span> <span class="n">sigma</span><span class="p">,</span> <span class="n">mu</span><span class="p">,</span> <span class="n">height</span><span class="p">):</span>
+            <span class="sd">&quot;&quot;&quot;Generate a gaussian distribution from given parameters</span>
+<span class="sd">            &quot;&quot;&quot;</span>
+            <span class="n">k</span> <span class="o">=</span> <span class="n">height</span>  <span class="c1"># 1.0 / (sigma * np.sqrt(2 * np.pi)) - to give unit area at infinite bounds</span>
+            <span class="n">s</span> <span class="o">=</span> <span class="o">-</span><span class="mf">1.0</span> <span class="o">/</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">sigma</span> <span class="o">*</span> <span class="n">sigma</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">k</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">s</span> <span class="o">*</span> <span class="p">(</span><span class="n">N</span> <span class="o">-</span> <span class="n">mu</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">N</span> <span class="o">-</span> <span class="n">mu</span><span class="p">))</span>
+
+        <span class="n">lineWidths</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lineWidths</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">lineWidths</span> <span class="ow">or</span> <span class="bp">None</span> <span class="ow">in</span> <span class="n">lineWidths</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;cannot estimate volume, lineWidths not defined or contain None.&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">height</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;cannot estimate volume, height not defined.&#39;</span><span class="p">)</span>
+
+        <span class="c1"># parameters for a unit height/sigma gaussian</span>
+        <span class="n">sigmaX</span> <span class="o">=</span> <span class="mf">1.0</span>
+        <span class="n">mu</span> <span class="o">=</span> <span class="mf">0.0</span>
+        <span class="n">height</span> <span class="o">=</span> <span class="mf">1.0</span>
+        <span class="n">numPoints</span> <span class="o">=</span> <span class="mi">39</span>  <span class="c1"># area estimate area &lt; 1e-8 for this number of points</span>
+
+        <span class="c1"># calculate integral limit from FWHM - only need positive half</span>
+        <span class="n">FWHM</span> <span class="o">=</span> <span class="n">sigma2fwhm</span><span class="p">(</span><span class="n">sigmaX</span><span class="p">)</span>
+        <span class="n">lim</span> <span class="o">=</span> <span class="n">volumeIntegralLimit</span> <span class="o">*</span> <span class="n">FWHM</span> <span class="o">/</span> <span class="mf">2.0</span>
+        <span class="n">xxSig</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">lim</span><span class="p">,</span> <span class="n">numPoints</span><span class="p">)</span>
+        <span class="n">vals</span> <span class="o">=</span> <span class="n">make_gauss</span><span class="p">(</span><span class="n">xxSig</span><span class="p">,</span> <span class="n">sigmaX</span><span class="p">,</span> <span class="n">mu</span><span class="p">,</span> <span class="n">height</span><span class="p">)</span>
+        <span class="n">area</span> <span class="o">=</span> <span class="mf">2.0</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">trapz</span><span class="p">(</span><span class="n">vals</span><span class="p">,</span> <span class="n">xxSig</span><span class="p">)</span>
+
+        <span class="c1"># note that negative height will give negative volume</span>
+        <span class="n">vol</span> <span class="o">=</span> <span class="mf">1.0</span>
+        <span class="k">for</span> <span class="n">lw</span> <span class="ow">in</span> <span class="n">lineWidths</span><span class="p">:</span>
+            <span class="c1"># multiply the values for the gaussian in each dimension</span>
+            <span class="n">vol</span> <span class="o">*=</span> <span class="p">(</span><span class="n">area</span> <span class="o">*</span> <span class="p">(</span><span class="n">lw</span> <span class="o">/</span> <span class="n">FWHM</span><span class="p">))</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">volume</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">height</span> <span class="o">*</span> <span class="nb">abs</span><span class="p">(</span><span class="n">vol</span><span class="p">)</span></div>
+
+        <span class="c1"># do I need to set the volume error?</span>
+        <span class="c1"># self.volumeError = 1e-8</span>
+
+    <span class="k">def</span> <span class="nf">_checkAliasing</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Recalculate the aliasing range for all peaks in the parent spectrum</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">spectrum</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">peakList</span><span class="o">.</span><span class="n">spectrum</span>
+        <span class="n">alias</span> <span class="o">=</span> <span class="n">spectrum</span><span class="o">.</span><span class="n">_getAliasingRange</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">alias</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">spectrum</span><span class="o">.</span><span class="n">aliasingRange</span> <span class="o">=</span> <span class="n">alias</span></div>
+
     <span class="c1">#===========================================================================================</span>
     <span class="c1"># new&#39;Object&#39; and other methods</span>
     <span class="c1"># Call appropriate routines in their respective locations</span>
@@ -766,9 +869,10 @@
 
     <span class="k">return</span> <span class="n">result</span>
 
+
 <span class="nd">@newObject</span><span class="p">(</span><span class="n">Peak</span><span class="p">)</span>
 <span class="k">def</span> <span class="nf">_newPickedPeak</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">PeakList</span><span class="p">,</span> <span class="n">pointPositions</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="n">height</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span>
-             <span class="n">lineWidths</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="p">(),</span> <span class="n">fitMethod</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;gaussian&#39;</span><span class="p">,</span> <span class="n">serial</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="bp">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Peak</span><span class="p">:</span>
+                   <span class="n">lineWidths</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="p">(),</span> <span class="n">fitMethod</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;gaussian&#39;</span><span class="p">,</span> <span class="n">serial</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="bp">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Peak</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;Create a new Peak within a peakList from a picked peak</span>
 
 <span class="sd">    See the Peak class for details.</span>
@@ -813,12 +917,13 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="n">peakDim</span><span class="o">.</span><span class="n">position</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">pointPositions</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="n">fitMethod</span> <span class="ow">and</span> <span class="n">lineWidths</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">fitMethod</span> <span class="ow">and</span> <span class="n">lineWidths</span> <span class="ow">and</span> <span class="n">lineWidths</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
             <span class="n">peakDim</span><span class="o">.</span><span class="n">lineWidth</span> <span class="o">=</span> <span class="n">dataDim</span><span class="o">.</span><span class="n">valuePerPoint</span> <span class="o">*</span> <span class="n">lineWidths</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>  <span class="c1"># conversion from points to Hz</span>
 
     <span class="n">apiPeak</span><span class="o">.</span><span class="n">height</span> <span class="o">=</span> <span class="n">apiDataSource</span><span class="o">.</span><span class="n">scale</span> <span class="o">*</span> <span class="n">height</span>
 
     <span class="k">return</span> <span class="n">result</span>
+
 
 <span class="c1"># Additional Notifiers:</span>
 <span class="c1">#</span>

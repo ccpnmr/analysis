@@ -72,7 +72,7 @@
 <span class="c1">#=========================================================================================</span>
 <span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: CCPN $&quot;</span>
 <span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2017-07-07 16:32:21 +0100 (Fri, July 07, 2017) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b5 $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.0 $&quot;</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Created</span>
 <span class="c1">#=========================================================================================</span>
@@ -121,6 +121,8 @@
     <span class="n">includeNmrChains</span> <span class="o">=</span> <span class="bp">False</span>
     <span class="n">includeSpectrumTable</span> <span class="o">=</span> <span class="bp">True</span>
 
+    <span class="n">includeDisplaySettings</span> <span class="o">=</span> <span class="bp">True</span>
+
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mainWindow</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;Pick and Assign&#39;</span><span class="p">):</span>
 
         <span class="nb">super</span><span class="p">(</span><span class="n">PickAndAssignModule</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">mainWindow</span><span class="o">=</span><span class="n">mainWindow</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>  <span class="c1"># ejb =&#39;Pick And Assign&#39;)</span>
@@ -144,15 +146,18 @@
                                                     <span class="n">setLayout</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">spacing</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
                                                     <span class="n">callback</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">restrictedPickAndAssign</span><span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">restrictedPickButton</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">assignSelectedButton</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">restrictedPickAndAssignButton</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">restrictedPickButton</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assignSelectedButton</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">restrictedPickAndAssignButton</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">nmrResidueTable</span><span class="o">.</span><span class="n">addWidgetToPos</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">restrictedPickAndAssignButton</span><span class="p">,</span> <span class="n">row</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">col</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
 
         <span class="c1"># change some of the defaults setting inherited from NmrResidueTableModule</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">nmrResidueTableSettings</span><span class="o">.</span><span class="n">sequentialStripsWidget</span><span class="o">.</span><span class="n">checkBox</span><span class="o">.</span><span class="n">setChecked</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">nmrResidueTableSettings</span><span class="o">.</span><span class="n">displaysWidget</span><span class="o">.</span><span class="n">addPulldownItem</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>  <span class="c1"># select the &lt;all&gt; option</span>
 
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">nmrResidueTableSettings</span><span class="o">.</span><span class="n">displaysWidget</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">nmrResidueTableSettings</span><span class="o">.</span><span class="n">displaysWidget</span><span class="o">.</span><span class="n">addPulldownItem</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>  <span class="c1"># select the &lt;all&gt; option</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">nmrResidueTableSettings</span><span class="o">.</span><span class="n">setLabelText</span><span class="p">(</span><span class="s1">&#39;Navigate to</span><span class="se">\n</span><span class="s1">Display(s):&#39;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">nmrResidueTable</span><span class="o">.</span><span class="n">_setWidgetHeight</span><span class="p">(</span><span class="mi">45</span><span class="p">)</span>
 
         <span class="c1"># need to feedback to current.nmrResidueTable</span>
@@ -161,13 +166,13 @@
 
         <span class="c1"># # these need to change whenever different spectrumDisplays are selected</span>
         <span class="c1"># self._setAxisCodes()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">nmrResidueTableSettings</span><span class="o">.</span><span class="n">axisCodeOptions</span><span class="o">.</span><span class="n">selectAll</span><span class="p">()</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">nmrResidueTableSettings</span><span class="o">.</span><span class="n">axisCodeOptions</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">nmrResidueTableSettings</span><span class="o">.</span><span class="n">axisCodeOptions</span><span class="o">.</span><span class="n">selectAll</span><span class="p">()</span>
 
-        <span class="c1"># just clear the first &#39;C&#39; - assume that this is generally the second checkBox</span>
-        <span class="k">for</span> <span class="n">ii</span><span class="p">,</span> <span class="n">box</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nmrResidueTableSettings</span><span class="o">.</span><span class="n">axisCodeOptions</span><span class="o">.</span><span class="n">checkBoxes</span><span class="p">):</span>
-            <span class="k">if</span> <span class="n">box</span><span class="o">.</span><span class="n">text</span><span class="p">()</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;C&#39;</span><span class="p">):</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">nmrResidueTableSettings</span><span class="o">.</span><span class="n">axisCodeOptions</span><span class="o">.</span><span class="n">clearIndex</span><span class="p">(</span><span class="n">ii</span><span class="p">)</span>
-                <span class="k">break</span>
+            <span class="c1"># just clear the &#39;C&#39; axes - this is the usual configuration</span>
+            <span class="k">for</span> <span class="n">ii</span><span class="p">,</span> <span class="n">box</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nmrResidueTableSettings</span><span class="o">.</span><span class="n">axisCodeOptions</span><span class="o">.</span><span class="n">checkBoxes</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">box</span><span class="o">.</span><span class="n">text</span><span class="p">()</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;C&#39;</span><span class="p">):</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">nmrResidueTableSettings</span><span class="o">.</span><span class="n">axisCodeOptions</span><span class="o">.</span><span class="n">clearIndex</span><span class="p">(</span><span class="n">ii</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_registerNotifiers</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -280,11 +285,20 @@
         <span class="k">with</span> <span class="n">undoBlock</span><span class="p">():</span>
 
             <span class="n">peaks</span> <span class="o">=</span> <span class="p">[]</span>
-            <span class="n">displays</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getDisplays</span><span class="p">()</span>
+            <span class="c1"># displays = self._getDisplays()</span>
+
+            <span class="n">gid</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">nmrResidueTableSettings</span><span class="o">.</span><span class="n">spectrumDisplayPulldown</span><span class="o">.</span><span class="n">getText</span><span class="p">()</span>
+            <span class="n">displays</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">getByGid</span><span class="p">(</span><span class="n">gid</span><span class="p">)]</span>
+
             <span class="n">validPeakListViews</span> <span class="o">=</span> <span class="p">{}</span>
 
             <span class="c1"># loop through all the selected displays/spectrumViews/peakListViews that are visible</span>
             <span class="k">for</span> <span class="n">dp</span> <span class="ow">in</span> <span class="n">displays</span><span class="p">:</span>
+
+                <span class="c1"># ignore undefined displays</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">dp</span><span class="p">:</span>
+                    <span class="k">continue</span>
+
                 <span class="k">if</span> <span class="n">dp</span><span class="o">.</span><span class="n">strips</span><span class="p">:</span>
                     <span class="k">for</span> <span class="n">sv</span> <span class="ow">in</span> <span class="n">dp</span><span class="o">.</span><span class="n">strips</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">spectrumViews</span><span class="p">:</span>
                         <span class="k">for</span> <span class="n">plv</span> <span class="ow">in</span> <span class="n">sv</span><span class="o">.</span><span class="n">peakListViews</span><span class="p">:</span>
@@ -331,6 +345,8 @@
             <span class="c1"># update the NmrResidue table</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">nmrResidueTable</span><span class="o">.</span><span class="n">_update</span><span class="p">(</span><span class="n">nmrResidue</span><span class="o">.</span><span class="n">nmrChain</span><span class="p">)</span></div>
 
+    <span class="c1"># from ccpn.util.decorators import profile</span>
+    <span class="c1"># @profile</span>
 <div class="viewcode-block" id="PickAndAssignModule.restrictedPickAndAssign"><a class="viewcode-back" href="../../../../ccpn/ccpn.AnalysisAssign.modules.html#ccpn.AnalysisAssign.modules.PickAndAssignModule.PickAndAssignModule.restrictedPickAndAssign">[docs]</a>    <span class="k">def</span> <span class="nf">restrictedPickAndAssign</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nmrResidue</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Functionality for beta2 to include the Assign part</span>
@@ -387,110 +403,6 @@
                                                     <span class="n">markPositions</span><span class="o">=</span><span class="p">(</span><span class="n">n</span> <span class="o">==</span> <span class="mi">2</span><span class="p">))</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">nmrResidue</span> <span class="o">=</span> <span class="n">nmrResidue</span></div></div>
 
-    <span class="c1"># def _changeAxisCode(self):</span>
-    <span class="c1">#     pass</span>
-
-    <span class="c1"># def _setAxisCodes(self):</span>
-    <span class="c1">#</span>
-    <span class="c1">#     from ccpn.util.Common import _axisCodeMapIndices, axisCodeMapping</span>
-    <span class="c1">#</span>
-    <span class="c1">#     spectra = self.application.project.spectra</span>
-    <span class="c1">#</span>
-    <span class="c1">#     if spectra:</span>
-    <span class="c1">#</span>
-    <span class="c1">#         maxLen = 0</span>
-    <span class="c1">#         refAxisCodes = None</span>
-    <span class="c1">#         for spectrum in spectra:</span>
-    <span class="c1">#             if len(spectrum.axisCodes) &gt; maxLen:</span>
-    <span class="c1">#                 maxLen = len(spectrum.axisCodes)</span>
-    <span class="c1">#                 refAxisCodes = list(spectrum.axisCodes)</span>
-    <span class="c1">#</span>
-    <span class="c1">#         if not maxLen:</span>
-    <span class="c1">#             return</span>
-    <span class="c1">#</span>
-    <span class="c1">#         axisCodes = [[] for ii in range(maxLen)]</span>
-    <span class="c1">#         axisLabels = [set() for ii in range(maxLen)]</span>
-    <span class="c1">#</span>
-    <span class="c1">#         mappings = {}</span>
-    <span class="c1">#         for spectrum in spectra:</span>
-    <span class="c1">#             matchAxisCodes = spectrum.axisCodes</span>
-    <span class="c1">#</span>
-    <span class="c1">#             mapping = axisCodeMapping(refAxisCodes, matchAxisCodes)</span>
-    <span class="c1">#             for k, v in mapping.items():</span>
-    <span class="c1">#                 if v not in mappings:</span>
-    <span class="c1">#                     mappings[v] = set([k])</span>
-    <span class="c1">#                 else:</span>
-    <span class="c1">#                     mappings[v].add(k)</span>
-    <span class="c1">#</span>
-    <span class="c1">#             mapping = axisCodeMapping(matchAxisCodes, refAxisCodes)</span>
-    <span class="c1">#             for k, v in mapping.items():</span>
-    <span class="c1">#                 if v not in mappings:</span>
-    <span class="c1">#                     mappings[v] = set([k])</span>
-    <span class="c1">#                 else:</span>
-    <span class="c1">#                     mappings[v].add(k)</span>
-    <span class="c1">#</span>
-    <span class="c1">#         # example of mappings dict</span>
-    <span class="c1">#         # (&#39;Hn&#39;, &#39;C&#39;, &#39;Nh&#39;)</span>
-    <span class="c1">#         # {&#39;Hn&#39;: {&#39;Hn&#39;}, &#39;Nh&#39;: {&#39;Nh&#39;}, &#39;C&#39;: {&#39;C&#39;}}</span>
-    <span class="c1">#         # {&#39;Hn&#39;: {&#39;H&#39;, &#39;Hn&#39;}, &#39;Nh&#39;: {&#39;Nh&#39;}, &#39;C&#39;: {&#39;C&#39;}}</span>
-    <span class="c1">#         # {&#39;CA&#39;: {&#39;C&#39;}, &#39;Hn&#39;: {&#39;H&#39;, &#39;Hn&#39;}, &#39;Nh&#39;: {&#39;Nh&#39;}, &#39;C&#39;: {&#39;CA&#39;, &#39;C&#39;}}</span>
-    <span class="c1">#         # {&#39;CA&#39;: {&#39;C&#39;}, &#39;Hn&#39;: {&#39;H&#39;, &#39;Hn&#39;}, &#39;Nh&#39;: {&#39;Nh&#39;}, &#39;C&#39;: {&#39;CA&#39;, &#39;C&#39;}}</span>
-    <span class="c1">#</span>
-    <span class="c1">#         self.spectrumIndex = {}</span>
-    <span class="c1">#         # go through the spectra again</span>
-    <span class="c1">#         for spectrum in spectra:</span>
-    <span class="c1">#             self.spectrumIndex[spectrum] = [0 for ii in range(len(spectrum.axisCodes))]</span>
-    <span class="c1">#</span>
-    <span class="c1">#             # get the spectrum dimension axisCode, nd see if is already there</span>
-    <span class="c1">#             for spectrumDim, spectrumAxis in enumerate(spectrum.axisCodes):</span>
-    <span class="c1">#</span>
-    <span class="c1">#                 if spectrumAxis in refAxisCodes:</span>
-    <span class="c1">#                     self.spectrumIndex[spectrum][spectrumDim] = refAxisCodes.index(spectrumAxis)</span>
-    <span class="c1">#                     axisLabels[self.spectrumIndex[spectrum][spectrumDim]].add(spectrumAxis)</span>
-    <span class="c1">#</span>
-    <span class="c1">#                 else:</span>
-    <span class="c1">#                     # if the axisCode is not in the reference list then find the mapping from the dict</span>
-    <span class="c1">#                     for k, v in mappings.items():</span>
-    <span class="c1">#                         if spectrumAxis in v:</span>
-    <span class="c1">#                             # refAxisCodes[dim] = k</span>
-    <span class="c1">#                             self.spectrumIndex[spectrum][spectrumDim] = refAxisCodes.index(k)</span>
-    <span class="c1">#                             axisLabels[refAxisCodes.index(k)].add(spectrumAxis)</span>
-    <span class="c1">#</span>
-    <span class="c1">#         axisLabels = [&#39;, &#39;.join(ax) for ax in axisLabels]</span>
-    <span class="c1">#         self.axisCodeOptions.setCheckBoxes(texts=axisLabels, tipTexts=axisLabels)</span>
-
-    <span class="c1"># def _getValidAxisCode(self, numChars=1):</span>
-    <span class="c1">#     &quot;&quot;&quot;Get the valid axis code from the buttons, numChars is included as this may be needed for DNA/RNA</span>
-    <span class="c1">#     &quot;&quot;&quot;</span>
-    <span class="c1">#     code = self.axisCodeOptions.getSelectedText()</span>
-    <span class="c1">#     return code[0:numChars]</span>
-
-
-<span class="c1"># class _SpectrumRow(Frame):</span>
-<span class="c1">#     &quot;Class to make a spectrum row&quot;</span>
-<span class="c1">#</span>
-<span class="c1">#     def __init__(self, parent, spectrum, row=0, col=0, **kwds):</span>
-<span class="c1">#         super().__init__(parent, **kwds)</span>
-<span class="c1">#</span>
-<span class="c1">#         # col = 0</span>
-<span class="c1">#         # self.checkbox = CheckBoxCompoundWidget(self, grid=(0, col), gridSpan=(1, 1), hAlign=&#39;left&#39;,</span>
-<span class="c1">#         #                                        checked=True, labelText=spectrum.pid,</span>
-<span class="c1">#         #                                        fixedWidths=[100, 50])</span>
-<span class="c1">#</span>
-<span class="c1">#         self.checkbox = Label(parent, spectrum.pid, grid=(row, col), gridSpan=(1, 1), hAlign=&#39;left&#39;)</span>
-<span class="c1">#</span>
-<span class="c1">#         self.spinBoxes = []</span>
-<span class="c1">#         for ii, axisCode in enumerate(spectrum.axisCodes):</span>
-<span class="c1">#             decimals, step = (2, 0.01) if axisCode[0:1] == &#39;H&#39; else (1, 0.1)</span>
-<span class="c1">#             col += 1</span>
-<span class="c1">#             ds = DoubleSpinBoxCompoundWidget(</span>
-<span class="c1">#                     parent, grid=(row, col), gridSpan=(1, 1), hAlign=&#39;left&#39;,</span>
-<span class="c1">#                     fixedWidths=(30, 50),</span>
-<span class="c1">#                     labelText=axisCode,</span>
-<span class="c1">#                     value=spectrum.assignmentTolerances[ii],</span>
-<span class="c1">#                     decimals=decimals, step=step, range=(0, None))</span>
-<span class="c1">#             ds.setObjectName(str(spectrum.pid + axisCode))</span>
-<span class="c1">#             self.spinBoxes.append(ds)</span>
 </pre></div>
 
           </div>

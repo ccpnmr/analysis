@@ -64,7 +64,7 @@
 <span class="c1">#=========================================================================================</span>
 <span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: CCPN $&quot;</span>
 <span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2017-07-07 16:32:49 +0100 (Fri, July 07, 2017) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b5 $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.0 $&quot;</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Created</span>
 <span class="c1">#=========================================================================================</span>
@@ -74,18 +74,18 @@
 <span class="c1"># Start of code</span>
 <span class="c1">#=========================================================================================</span>
 
-<span class="kn">import</span> <span class="nn">time</span>
 <span class="kn">from</span> <span class="nn">PyQt5</span> <span class="kn">import</span> <span class="n">QtGui</span><span class="p">,</span> <span class="n">QtWidgets</span><span class="p">,</span> <span class="n">QtCore</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.ButtonList</span> <span class="kn">import</span> <span class="n">ButtonList</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Label</span> <span class="kn">import</span> <span class="n">Label</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.LineEdit</span> <span class="kn">import</span> <span class="n">LineEdit</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.PulldownList</span> <span class="kn">import</span> <span class="n">PulldownList</span>
-<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.MessageDialog</span> <span class="kn">import</span> <span class="n">showInfo</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.RadioButtons</span> <span class="kn">import</span> <span class="n">RadioButtons</span>
-<span class="kn">from</span> <span class="nn">ccpn.ui.gui.popups.Dialog</span> <span class="kn">import</span> <span class="n">CcpnDialog</span>  <span class="c1"># ejb</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.MessageDialog</span> <span class="kn">import</span> <span class="n">showWarning</span>
 <span class="kn">from</span> <span class="nn">ccpn.util.Logging</span> <span class="kn">import</span> <span class="n">getLogger</span>
 <span class="kn">from</span> <span class="nn">ccpn.util.Constants</span> <span class="kn">import</span> <span class="n">concentrationUnits</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.popups.Dialog</span> <span class="kn">import</span> <span class="n">CcpnDialog</span><span class="p">,</span> <span class="n">handleDialogApply</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.lib.OpenGL.CcpnOpenGL</span> <span class="kn">import</span> <span class="n">GLNotifier</span>
+<span class="kn">from</span> <span class="nn">ccpn.core.lib.ContextManagers</span> <span class="kn">import</span> <span class="n">undoStackBlocking</span>
 
 <span class="n">SELECT</span> <span class="o">=</span> <span class="s1">&#39;&gt; Select &lt;&#39;</span>
 
@@ -419,56 +419,31 @@
 <span class="sd">          If anything has been added to the undo queue then remove it with application.undo()</span>
 <span class="sd">          repopulate the popup widgets</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">applyAccept</span> <span class="o">=</span> <span class="bp">False</span>
-        <span class="n">oldUndo</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">_undo</span><span class="o">.</span><span class="n">numItems</span><span class="p">()</span>
 
-        <span class="kn">from</span> <span class="nn">ccpn.core.lib.ContextManagers</span> <span class="kn">import</span> <span class="n">undoBlock</span>
+        <span class="k">with</span> <span class="n">handleDialogApply</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="k">as</span> <span class="n">error</span><span class="p">:</span>
 
-        <span class="k">with</span> <span class="n">undoBlock</span><span class="p">():</span>
-            <span class="k">try</span><span class="p">:</span>
-                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">newSampleComponentToCreate</span><span class="p">:</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">sampleComponent</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sample</span><span class="o">.</span><span class="n">newSampleComponent</span><span class="p">(</span>
-                            <span class="n">name</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nameComponentLineEdit</span><span class="o">.</span><span class="n">text</span><span class="p">()),</span>
-                            <span class="n">labelling</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">labellingPulldownList</span><span class="o">.</span><span class="n">currentText</span><span class="p">()),</span>
-                            <span class="n">role</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">typePulldownList</span><span class="o">.</span><span class="n">get</span><span class="p">()),</span>
-                            <span class="n">concentration</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">concentrationLineEdit</span><span class="o">.</span><span class="n">text</span><span class="p">()),</span>
-                            <span class="n">concentrationUnit</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">concentrationUnitPulldownList</span><span class="o">.</span><span class="n">get</span><span class="p">()),</span>
-                            <span class="n">comment</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">commentLineEdit</span><span class="o">.</span><span class="n">text</span><span class="p">()))</span>
-                <span class="k">else</span><span class="p">:</span>
-                    <span class="k">for</span> <span class="nb">property</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getCallBacksDict</span><span class="p">()</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-                        <span class="c1"># if value or type(value) is str and value is not &#39;None&#39;:</span>
-                        <span class="nb">property</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
-
-                <span class="bp">self</span><span class="o">.</span><span class="n">nameComponentLineEdit</span><span class="o">.</span><span class="n">setReadOnly</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">labellingPulldownList</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
-
-                <span class="n">applyAccept</span> <span class="o">=</span> <span class="bp">True</span>
-
-            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">es</span><span class="p">:</span>
-                <span class="k">if</span> <span class="s1">&#39;pre-existing object&#39;</span> <span class="ow">in</span> <span class="nb">str</span><span class="p">(</span><span class="n">es</span><span class="p">):</span>
-                    <span class="c1"># this catches api trying to duplicate object</span>
-                    <span class="n">applyAccept</span> <span class="o">=</span> <span class="bp">True</span>
-                <span class="k">else</span><span class="p">:</span>
-                    <span class="n">showWarning</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">windowTitle</span><span class="p">()),</span> <span class="nb">str</span><span class="p">(</span><span class="n">es</span><span class="p">))</span>
-                    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">_isInDebugMode</span><span class="p">:</span>
-                        <span class="k">raise</span> <span class="n">es</span>
-
-        <span class="k">if</span> <span class="n">applyAccept</span> <span class="ow">is</span> <span class="bp">False</span><span class="p">:</span>
-            <span class="c1"># should only undo if something new has been added to the undo deque</span>
-            <span class="c1"># may cause a problem as some things may be set with the same values</span>
-            <span class="c1"># and still be added to the change list, so only undo if length has changed</span>
-            <span class="n">errorName</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">oldUndo</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">_undo</span><span class="o">.</span><span class="n">numItems</span><span class="p">():</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">_undo</span><span class="o">.</span><span class="n">undo</span><span class="p">()</span>
-                <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;&gt;&gt;&gt;Undo.</span><span class="si">%s</span><span class="s1">._applychanges&#39;</span> <span class="o">%</span> <span class="n">errorName</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">newSampleComponentToCreate</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">sampleComponent</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sample</span><span class="o">.</span><span class="n">newSampleComponent</span><span class="p">(</span>
+                        <span class="n">name</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nameComponentLineEdit</span><span class="o">.</span><span class="n">text</span><span class="p">()),</span>
+                        <span class="n">labelling</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">labellingPulldownList</span><span class="o">.</span><span class="n">currentText</span><span class="p">()),</span>
+                        <span class="n">role</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">typePulldownList</span><span class="o">.</span><span class="n">get</span><span class="p">()),</span>
+                        <span class="n">concentration</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">concentrationLineEdit</span><span class="o">.</span><span class="n">text</span><span class="p">()),</span>
+                        <span class="n">concentrationUnit</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">concentrationUnitPulldownList</span><span class="o">.</span><span class="n">get</span><span class="p">()),</span>
+                        <span class="n">comment</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">commentLineEdit</span><span class="o">.</span><span class="n">text</span><span class="p">()))</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;&gt;&gt;&gt;Undo.</span><span class="si">%s</span><span class="s1">._applychanges nothing to remove&#39;</span> <span class="o">%</span> <span class="n">errorName</span><span class="p">)</span>
+                <span class="k">for</span> <span class="nb">property</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getCallBacksDict</span><span class="p">()</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                    <span class="c1"># if value or type(value) is str and value is not &#39;None&#39;:</span>
+                    <span class="nb">property</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
 
-            <span class="c1"># repopulate popup</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">nameComponentLineEdit</span><span class="o">.</span><span class="n">setReadOnly</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">labellingPulldownList</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">error</span><span class="o">.</span><span class="n">errorValue</span><span class="p">:</span>
+            <span class="c1"># repopulate popup on an error</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_repopulate</span><span class="p">()</span>
             <span class="k">return</span> <span class="bp">False</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">return</span> <span class="bp">True</span>
+
+        <span class="k">return</span> <span class="bp">True</span>
 
     <span class="k">def</span> <span class="nf">_okButton</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_applyChanges</span><span class="p">()</span> <span class="ow">is</span> <span class="bp">True</span><span class="p">:</span>

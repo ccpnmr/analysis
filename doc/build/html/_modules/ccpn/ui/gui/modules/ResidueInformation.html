@@ -61,7 +61,7 @@
 <span class="c1">#=========================================================================================</span>
 <span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: CCPN $&quot;</span>
 <span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2017-07-07 16:32:46 +0100 (Fri, July 07, 2017) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b5 $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.0 $&quot;</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Created</span>
 <span class="c1">#=========================================================================================</span>
@@ -75,12 +75,13 @@
 
 <span class="kn">from</span> <span class="nn">ccpn.core.lib.AssignmentLib</span> <span class="kn">import</span> <span class="n">CCP_CODES</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.modules.CcpnModule</span> <span class="kn">import</span> <span class="n">CcpnModule</span>
-<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Base</span> <span class="kn">import</span> <span class="n">Base</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Label</span> <span class="kn">import</span> <span class="n">Label</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Spacer</span> <span class="kn">import</span> <span class="n">Spacer</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Widget</span> <span class="kn">import</span> <span class="n">Widget</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.PulldownList</span> <span class="kn">import</span> <span class="n">PulldownList</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.ScrollArea</span> <span class="kn">import</span> <span class="n">ScrollArea</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.guiSettings</span> <span class="kn">import</span> <span class="n">getColours</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.guiSettings</span> <span class="kn">import</span> <span class="n">LABEL_SELECTEDBACKGROUND</span><span class="p">,</span> <span class="n">LABEL_SELECTEDFOREGROUND</span><span class="p">,</span> <span class="n">LABEL_HIGHLIGHT</span>
 
 
 <div class="viewcode-block" id="ResidueInformation"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.modules.ResidueInformation.ResidueInformation">[docs]</a><span class="k">class</span> <span class="nc">ResidueInformation</span><span class="p">(</span><span class="n">CcpnModule</span><span class="p">):</span>
@@ -149,16 +150,42 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">selectedResidueType</span> <span class="o">=</span> <span class="n">value</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_getResidues</span><span class="p">()</span>
 
+    <span class="k">def</span> <span class="nf">_setWidgetColour</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">widget</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Set the colour for the label</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">palette</span> <span class="o">=</span> <span class="n">widget</span><span class="o">.</span><span class="n">palette</span><span class="p">()</span>
+        <span class="n">palette</span><span class="o">.</span><span class="n">setColor</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QPalette</span><span class="o">.</span><span class="n">Foreground</span><span class="p">,</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QColor</span><span class="p">(</span><span class="n">LABEL_SELECTEDFOREGROUND</span><span class="p">))</span>
+        <span class="n">palette</span><span class="o">.</span><span class="n">setColor</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QPalette</span><span class="o">.</span><span class="n">Background</span><span class="p">,</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QColor</span><span class="p">(</span><span class="n">LABEL_SELECTEDBACKGROUND</span><span class="p">))</span>
+        <span class="n">widget</span><span class="o">.</span><span class="n">setPalette</span><span class="p">(</span><span class="n">palette</span><span class="p">)</span>
+
     <span class="k">def</span> <span class="nf">_getResidues</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Finds all residues of the selected type along with one flanking residue either side and displays</span>
 <span class="sd">        this information in the module.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">colourScheme</span> <span class="o">==</span> <span class="s1">&#39;dark&#39;</span><span class="p">:</span>
-            <span class="n">stylesheet</span> <span class="o">=</span> <span class="s1">&#39;Label {background-color: #f7ffff; color: #2a3358;}&#39;</span>
-        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">colourScheme</span> <span class="o">==</span> <span class="s1">&#39;light&#39;</span><span class="p">:</span>
-            <span class="n">stylesheet</span> <span class="o">=</span> <span class="s1">&#39;Label {background-color: #bd8413; color: #fdfdfc;}&#39;</span>
+        <span class="n">colours</span> <span class="o">=</span> <span class="n">getColours</span><span class="p">()</span>
+        <span class="n">stylesheet</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;Label { background-color: </span><span class="si">%s</span><span class="s2">; color: </span><span class="si">%s</span><span class="s2">;}</span>
+<span class="s2">                     Label::hover { background-color: </span><span class="si">%s</span><span class="s2">}&quot;&quot;&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">colours</span><span class="p">[</span><span class="n">LABEL_SELECTEDBACKGROUND</span><span class="p">],</span>
+                                                                <span class="n">colours</span><span class="p">[</span><span class="n">LABEL_SELECTEDFOREGROUND</span><span class="p">],</span>
+                                                                <span class="n">colours</span><span class="p">[</span><span class="n">LABEL_HIGHLIGHT</span><span class="p">])</span>
+
+        <span class="c1"># # self.setDefaultTextColor(QtGui.QColor(self.colours[GUINMRRESIDUE]))</span>
+        <span class="c1">#</span>
+        <span class="c1"># if self.colourScheme == &#39;dark&#39;:</span>
+        <span class="c1">#     # stylesheet = &#39;Label {background-color: #f7ffff; color: #2a3358;}&#39;</span>
+        <span class="c1">#     stylesheet = &quot;&quot;&quot;Label { background-color: %s; color: %s;}</span>
+        <span class="c1">#                  Label::hover { background-color: %s}&quot;&quot;&quot; % (colours[LABEL_SELECTEDBACKGROUND],</span>
+        <span class="c1">#                                                                colours[LABEL_SELECTEDFOREGROUND],</span>
+        <span class="c1">#                                                                colours[LABEL_SELECTEDFOREGROUND])</span>
+        <span class="c1"># elif self.colourScheme == &#39;light&#39;:</span>
+        <span class="c1">#     # stylesheet = &#39;Label {background-color: #bd8413; color: #fdfdfc;}&#39;</span>
+        <span class="c1">#     stylesheet = &quot;&quot;&quot;Label { background-color: %s; color: %s;}</span>
+        <span class="c1">#                  Label::hover { background-color: %s}&quot;&quot;&quot; % (colours[LABEL_SELECTEDBACKGROUND],</span>
+        <span class="c1">#                                                                colours[LABEL_SELECTEDFOREGROUND],</span>
+        <span class="c1">#                                                                colours[LABEL_SELECTEDFOREGROUND])</span>
+
         <span class="n">foundResidues</span> <span class="o">=</span> <span class="p">[]</span>
+
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">selectedChain</span> <span class="o">==</span> <span class="s1">&#39;All&#39;</span><span class="p">:</span>
             <span class="n">residues</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">residues</span>
         <span class="k">else</span><span class="p">:</span>
@@ -189,6 +216,7 @@
                     <span class="n">label1</span><span class="o">.</span><span class="n">setMaximumHeight</span><span class="p">(</span><span class="mi">30</span><span class="p">)</span>
                     <span class="k">if</span> <span class="n">checkResidues</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">nmrResidue</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
                         <span class="n">label1</span><span class="o">.</span><span class="n">setStyleSheet</span><span class="p">(</span><span class="n">stylesheet</span><span class="p">)</span>
+                        <span class="c1"># self._setWidgetColour(label1)</span>
 
                     <span class="bp">self</span><span class="o">.</span><span class="n">residueWidget</span><span class="o">.</span><span class="n">layout</span><span class="p">()</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">label1</span><span class="p">,</span> <span class="n">j</span> <span class="o">+</span> <span class="n">i</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
                     
@@ -197,6 +225,8 @@
                                    <span class="n">hAlign</span><span class="o">=</span><span class="s1">&#39;c&#39;</span><span class="p">)</span>
                     <span class="k">if</span> <span class="n">checkResidues</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">nmrResidue</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
                         <span class="n">label2</span><span class="o">.</span><span class="n">setStyleSheet</span><span class="p">(</span><span class="n">stylesheet</span><span class="p">)</span>
+                        <span class="c1"># self._setWidgetColour(label2)</span>
+
                     <span class="n">label2</span><span class="o">.</span><span class="n">setMaximumHeight</span><span class="p">(</span><span class="mi">30</span><span class="p">)</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">residueWidget</span><span class="o">.</span><span class="n">layout</span><span class="p">()</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">label2</span><span class="p">,</span> <span class="n">j</span> <span class="o">+</span> <span class="n">i</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
                     
@@ -205,6 +235,8 @@
                                    <span class="n">hAlign</span><span class="o">=</span><span class="s1">&#39;c&#39;</span><span class="p">)</span>
                     <span class="k">if</span> <span class="n">checkResidues</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">nmrResidue</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
                         <span class="n">label3</span><span class="o">.</span><span class="n">setStyleSheet</span><span class="p">(</span><span class="n">stylesheet</span><span class="p">)</span>
+                        <span class="c1"># self._setWidgetColour(label3)</span>
+
                     <span class="bp">self</span><span class="o">.</span><span class="n">residueWidget</span><span class="o">.</span><span class="n">layout</span><span class="p">()</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">label3</span><span class="p">,</span> <span class="n">j</span> <span class="o">+</span> <span class="n">i</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
                     <span class="n">label3</span><span class="o">.</span><span class="n">setMaximumHeight</span><span class="p">(</span><span class="mi">30</span><span class="p">)</span></div>
 </pre></div>

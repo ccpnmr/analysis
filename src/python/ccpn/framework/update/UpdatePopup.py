@@ -25,17 +25,18 @@ __date__ = "$Date: 2017-04-07 10:28:40 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
-import os
-from PyQt5 import QtCore, QtGui, QtWidgets
-
+from PyQt5 import QtCore, QtWidgets
+from ccpn.ui.gui.widgets.Button import Button
 from ccpn.ui.gui.widgets.ButtonList import ButtonList
-from ccpn.ui.gui.widgets.Frame import Frame
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.popups.Dialog import CcpnDialog
-#from ccpn.ui.gui.widgets.Table import ObjectTable, Column
-
-# from ccpn.framework.update.UpdateAgent import UpdateAgent
 from ccpn.util.Update import UpdateAgent
+
+REFRESHBUTTONTEXT = 'Refresh Updates Information'
+DOWNLOADBUTTONTEXT = 'Download and Install Updates'
+UPDATELICENCEKEYTEXT = 'Update LicenceKey'
+CLOSEBUTTONTEXT = 'Close'
+CLOSEEXITBUTTONTEXT = 'Close and Exit'
 
 
 class UpdatePopup(CcpnDialog, UpdateAgent):
@@ -58,29 +59,32 @@ class UpdatePopup(CcpnDialog, UpdateAgent):
         #label = Label(self, self.server, grid=(row, 1))
         #row += 1
 
-        label = Label(self, 'Installation location:', grid=(row, 0))
-        label = Label(self, text=self.installLocation, grid=(row, 1))
+        label = Label(self, 'Installation location:', grid=(row, 0), gridSpan=(1,2))
+        label = Label(self, text=self.installLocation, grid=(row, 2))
         row += 1
 
-        label = Label(self, 'Version:', grid=(row, 0))
-        label = Label(self, text=version, grid=(row, 1))
+        label = Label(self, 'Version:', grid=(row, 0), gridSpan=(1,2))
+        label = Label(self, text=version, grid=(row, 2))
         row += 1
 
-        label = Label(self, 'Number of updates:', grid=(row, 0))
-        self.updatesLabel = Label(self, text='TBD', grid=(row, 1))
+        label = Label(self, 'Number of updates:', grid=(row, 0), gridSpan=(1,2))
+        self.updatesLabel = Label(self, text='TBD', grid=(row, 2))
         row += 1
 
-        label = Label(self, 'Installing updates will require a restart of the program.', grid=(row, 0))
+        label = Label(self, 'Installing updates will require a restart of the program.', grid=(row, 0), gridSpan=(1,3))
         row += 1
 
-        texts = ('Refresh Updates Information', 'Download and Install Updates', 'Update Licence', 'Close')
-        callbacks = (self.resetFromServer, self._install, self._doUpdate, self._accept)
+        self._updateButton = Button(self, text=UPDATELICENCEKEYTEXT, tipText='Update LicenceKey from the server',
+                                        callback=self._doUpdate, icon='icons/Filetype-Docs-icon.png', grid=(row, 0))
+
+        row += 1
+        texts = (REFRESHBUTTONTEXT, DOWNLOADBUTTONTEXT, CLOSEBUTTONTEXT)
+        callbacks = (self.resetFromServer, self._install, self._accept)
         tipTexts = ('Refresh the updates information by querying server and comparing with what is installed locally',
                     'Install the updates from the server',
-                    'Update Licence from the server',
                     'Close update dialog')
-        icons = ('icons/null.png', 'icons/dialog-apply.png', 'icons/Filetype-Docs-icon.png', 'icons/window-close.png')
-        self.buttonList = ButtonList(self, texts=texts, tipTexts=tipTexts, callbacks=callbacks, icons=icons, grid=(row, 0), gridSpan=(1, 2))
+        icons = ('icons/redo.png', 'icons/dialog-apply.png', 'icons/window-close.png')
+        self.buttonList = ButtonList(self, texts=texts, tipTexts=tipTexts, callbacks=callbacks, icons=icons, grid=(row, 0), gridSpan=(1, 3))
         row += 1
 
         self.setFixedSize(750, 150)
@@ -88,7 +92,7 @@ class UpdatePopup(CcpnDialog, UpdateAgent):
         # initialise the popup
         self.resetFromServer()
         self._numUpdatesInstalled = 0
-        self.buttonList.getButton('Update Licence').setEnabled(self._check())
+        self._updateButton.setEnabled(self._check())
 
     def _install(self):
         """The update button has been clicked. Install updates and flag that files have been changed
@@ -96,7 +100,7 @@ class UpdatePopup(CcpnDialog, UpdateAgent):
         updateFilesInstalled = self.installUpdates()
         if updateFilesInstalled:
             self._numUpdatesInstalled += len(updateFilesInstalled)
-            self.buttonList.buttons[2].setText('Close and Exit')
+            self.buttonList.getButton(CLOSEBUTTONTEXT).setText(CLOSEEXITBUTTONTEXT)
 
     def _closeProgram(self):
         """Call the mainWindow close function giving user option to save, then close program
@@ -113,7 +117,7 @@ class UpdatePopup(CcpnDialog, UpdateAgent):
 
     def _doUpdate(self):
         self._resetMd5()
-        self.buttonList.getButton('Update Licence').setEnabled(False)
+        self._updateButton.setEnabled(False)
 
     def reject(self):
         """Dialog-frame close button has been clicked, close if files have been updated or close dialog

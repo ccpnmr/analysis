@@ -3,8 +3,7 @@ CcpNmr Analysis version 3 - Terms and conditions
 1. Preamble
 This agreement version 1.0 (hereafter: Agreement) governs the relationship between the user of CcpNmr Analysis
 version-3, (hereinafter: Licensee) and Collaborative Computational Project for NMR (CCPN), a organisation hosted
-by the University of Leicester and whose principal place of business is Henry Wellcome Building, Lancaster Road,
-Leicester, LE1 9HN (hereinafter: Licensor).
+by the University of Leicester and whose principal place of business is Fielding Johnson building, University Road, Leicester LE17 RH (hereinafter: Licensor).
 
 This Agreement sets the terms, rights, restrictions and obligations (hereafter: Terms and Conditions) on using
 CcpNmr Analysis version 3, in any form, including source or binary code, programs or program fragments, updates,
@@ -17,28 +16,28 @@ In downloading or using The Software, Licensee implicitly accepts the Terms and 
 document.
 
 For the purpose of this document, the following terms shall be defined:
-Workplace: The laboratory, group, or work unit where The Software is used by Licensee (hereafter: Workplace);
-Organisation: The legal entity that includes the Workplace (hereafter: Organisation); CCPN member: A person that
-has signed up for CCPN membership and that currently fulfills the conditions for membership (hereafter: Member);
-Premium member: A Member that has signed up for premium membership (hereafter: Premium Member); CCPN developer:
+Workplace: The laboratory, group, or work unit where the Licensee is based (hereafter: Workplace);
+Organisation: The legal entity that includes the Workplace (hereafter: Organisation); CCPN User: A person that
+has bought a licence to use CcpNmr Analysis version 3 and in effect signed up for CCPN membership and that currently fulfills the conditions for membership (hereafter: Member);
+CCPN Premium user: A Member that has signed up for premium membership (hereafter: Premium Member); CCPN developer:
 a Member given access to The Software’s full code repository (hereafter: Developer).
 
-All references to the male gender shall include female or gender-neutral Licensee’s as well.
+All references to the male gender shall include female or gender-neutral Licensees as well.
 
 2. License and usage
-Licensor hereby grants Licensee a personal, non-assignable & non-transferable, non-commercial, including the
-rights to create but not distribute derivative works, non-exclusive license, all with accordance with the terms
+Licensor hereby grants Licensee a revocable, personal, non-assignable & non-transferable,including the
+rights to create but not distribute derivative works, non-exclusive license to the Software, all with accordance with the terms
 set forth and other legal restrictions set forth in 3rd party software used while running The Software.
 
 2.1. Acceptable Usage
 Licensee may use The Software for the purpose of:
 •	Running The Software on Licensee’s computer[s] and server[s];
 •	Allowing 3rd Parties to run The Software on Licensee’s computer[s] and server[s], including for training purposes;
-•	Sharing with other members of Licensee’s Workplace;
 •	Publishing The Software’s output to Licensee and 3rd parties;
 •	Distribute verbatim copies of The Software’s output;
 •	Modify The Software to suit Licensee’s needs and specifications compliant with clause 2.5.
 This license is granted as long as Licensee does not materially breach it.
+The Licensee understands and agrees that the License is for a single User only. In the event that Licensee requires more of its employees to use the Licence they agree to pay additional User fees, as appropriate for their Membership level.
 
 2.2. Binary Restricted
 Licensee may not sub-license The Software, neither as a part of a larger work containing more than The Software,
@@ -47,26 +46,20 @@ nor distributed solely in object or binary form.
 2.3. Non Assignable & Non-Transferable
 Licensee may not assign or transfer his rights and duties under this license.
 
-2.4. Non-Commercial usage
-Licensee may not use The Software for commercial purposes. For the purpose of this license, commercial purposes
-shall be deemed to include all, but not restricted to, activities for which a 3rd party has to pay in order to
-access The Software or activities supported by The Software with the aim to develop or leading to the development
-of other commercial products.
-
-2.5. Derivative Works
-2.5.1. With exception of code relating to The Software’s credits, copyright, authors, registration and licensing,
+2.4. Derivative Works
+2.4.1. With exception of code relating to The Software’s credits, copyright, authors, registration and licensing,
 Licensee may create derivative works based on The Software, including amending The Software’s source code, modifying
 it, or integrating it into a larger work, as long as no distribution of the derivative works is made, other than to
 the Licensee’s Workplace or Licensor.
-2.5.2. Any derivative works returned to the Licensor shall be free of charge and with transfer of all copyrights to
+2.4.2. Any derivative works returned to the Licensor shall be free of charge and with transfer of all copyrights to
 the Licensor and without the obligation to amend or augment The Software with such works.
-2.5.3. A Developer cannot claim any right, ownership, copyright or intellectual property right, for any contribution
+2.4.3. A Developer cannot claim any right, ownership, copyright or intellectual property right, for any contribution
 made by him to the repository of The Software.
 
-2.6. Registration and Attribution Requirements
-2.6.1. Licensee shall register The Software upon first usage using the popup box generated automatically by The
+2.5. Registration and Attribution Requirements
+2.5.1. Licensee shall register The Software upon first usage using the popup box generated automatically by The
 Software, providing valid and accurate information regarding name, Email, Workplace and Organisation.
-2.6.2. Whereever and whenever appropriate, The Software shall be referenced as “obtained from http://www.ccpn.ac.uk,
+2.5.2. Wherever and whenever appropriate, The Software shall be referenced as “obtained from http://www.ccpn.ac.uk,
 CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis, Skinner et al. J Biomol NMR 66 (2016) 111-124”.
 
 3. Terms & Termination
@@ -77,7 +70,7 @@ Licensee may terminate this Agreement, including Licensee’s license, by remova
 any derived work from Licensee’s Computer[s] and Server[s].
 
 3.2 Termination by Licensor
-This license shall be deemed terminated in case:
+This license shall be deemed immediately terminated in case:
 •	The Software is exported to any jurisdiction where Licensor may not enforce his rights under this agreements; or
 •	Licensee was in breach of any of this license's terms and conditions and such breach was not cured, immediately
     upon notification; or
@@ -88,14 +81,14 @@ This license shall be deemed terminated in case:
 4. CCPN membership and Fees
 
 4.1. Membership
-By registration of the Software, as outlined in clause 2.6.1, Licensee is automatically entered as a Member.
+By purchase of the Software, as outlined in clause 2.6.1, Licensee is automatically entered as a Member.Members are allowed to use the Software for non-commercial purposes only. 
 
 4.2. Premium membership
 Premium Members are given higher priority with respect to assistance, problem solving, and attention to feature
-requests. Premium members are charged a fee, negotiated for each individual case.
+requests. Premium members are charged a fee, negotiated for each individual case. Premium Members will be able to use the Software for non-commercial as well as for commercial  purposes. For the purpose of this License, commercial purposes shall be deemed to include all, but not restricted to, activities for which a 3rd party  has to pay in order to access The Software or activities supported by The Software with the aim to develop or leading to the development of other commercial products.
 
 4.3. Membership fee
-Membership is free of charge if Licensee’s belongs to a non-profit or academic Institution, and does not use The
+Membership is free of charge if Licensee belongs to a non-profit or academic Institution, and does not use The
 Software for commercial activities. In all other cases, a membership fee shall be charged according to the fee
 schedule outlined on http://www.ccpn.ac.uk. Failure to perform payment of the fee shall construe as material breach
 of this Agreement.
@@ -139,7 +132,7 @@ using The Software’s source code.
 7. Warranty
 
 7.1 Intellectual Property
-Licensor hereby warrants that The Software does not violate or infringe any 3rd party claims in regards to intellectual
+Licensor hereby warrants, to the best of its knowledge and belief, that The Software does not violate or infringe any 3rd party claims in regards to intellectual
 property, patents and/or trademarks and that to the best of its knowledge no legal action has been taken against it
 for any infringement or violation of any 3rd party intellectual property rights.
 
@@ -153,7 +146,7 @@ any claims regarding The Software's incompatibility, performance, results and fe
 8. General
 
 8.1
-This Agreement may not be amended.
+This Agreement may not be amended or modified in any way.
 
 8.2
 The failure or delay of either Party to exercise or enforce any right under this Agreement shall not operate as a

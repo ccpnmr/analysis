@@ -102,7 +102,11 @@ _bF = _build(98, 117, 105, 108, 100, 70, 111, 114)
 _hc = _build(104, 97, 115, 104, 99, 111, 100, 101)
 _cS = _build(99, 104, 101, 99, 107, 83, 117, 109)
 _nP = _build(110, 111, 110, 45, 112, 114, 111, 102, 105, 116)
+_r0 = _build(79, 75)
+_r1 = _build(78, 111, 116, 32, 70, 111, 117, 110, 100)
+_r2 = _build(68, 105, 102, 102, 101, 114, 101, 110, 116, 32, 76, 105, 99, 101, 110, 99, 101)
 _otherAttributes = (_hc, )
+_serverResponses = (_r0, _r1, _r2)
 
 
 def _insertRegistration(registrationDict):
@@ -206,8 +210,8 @@ def checkServer(registrationDict, version='3'):
 
     try:
         found = Url.fetchUrl(url, values, timeout=2.0)
-        # print('>>>>>>', found)
-        return found.strip() == 'OK'
+        if found.strip() in _serverResponses:
+            return found.strip() == 'OK'
 
     except Exception as e:
         logger = Logging.getLogger()

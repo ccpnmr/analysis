@@ -38,6 +38,7 @@ __date__ = "$Date: 2017-03-23 16:50:22 +0000 (Thu, March 23, 2017) $"
 #=========================================================================================
 
 import json
+import fnmatch
 from contextlib import contextmanager
 from PyQt5 import QtGui, QtWidgets, QtCore
 from typing import Callable
@@ -71,9 +72,16 @@ from ccpn.ui.gui.widgets.DropBase import DropBase
 from ccpn.ui.gui.widgets.MessageDialog import showInfo, showWarning
 from ccpn.ui.gui.widgets.Menu import Menu
 from ccpn.ui.gui.widgets.LineEdit import LineEdit
+from ccpn.ui.gui.widgets.Label import Label
+from ccpn.ui.gui.widgets.Frame import Frame
+from ccpn.ui.gui.widgets.Spacer import Spacer as CCPNSpacer
 from ccpn.util.Constants import ccpnmrJsonData
 from ccpn.core.lib.Notifiers import Notifier, NotifierBase
 from ccpn.ui.gui.lib.GuiNotifier import GuiNotifier
+
+
+from PyQt5.QtCore import QStringListModel
+from PyQt5.QtGui import QListView, QAbstractItemView
 
 from ccpn.ui.gui.lib.MenuActions import _createNewDataSet, _createNewPeakList, _createNewChemicalShiftList, _createNewMultipletList, _createNewNmrResidue, \
     _createNewNmrAtom, \
@@ -89,6 +97,8 @@ from ccpn.ui.gui.lib.MenuActions import _openItemNoteTable, _openItemChemicalShi
     _openItemSpectrumDisplay, _openItemSampleDisplay, _openItemComplexTable, _openItemResidueTable, \
     _openItemSubstanceTable, _openItemSampleComponentTable, _openItemNmrResidueItem, _openItemNmrAtomItem, \
     _openItemSpectrumInGroupDisplay
+
+from ccpn.util.OrderedSet import OrderedSet
 
 ALL_NOTIFIERS = [Notifier.DELETE, Notifier.CREATE, Notifier.RENAME, Notifier.CHANGE]
 DEFAULT_NOTIFIERS = [Notifier.DELETE, Notifier.CREATE, Notifier.RENAME]
@@ -1051,9 +1061,69 @@ class SideBar(QtWidgets.QTreeWidget, SideBarStructure, Base, NotifierBase):
                             self.mainWindow._processDroppedItems)
 
         self.itemDoubleClicked.connect(self._raiseObjectProperties)
-        txt = 'Search Pid e.g. SP:1010'
-        self._searchWidget = LineEdit(self.getParent(), backgroundText=txt, grid=(1, 0))
-        self._searchWidget.returnPressed.connect(self._searchWidgetCallback)
+
+        txt = 'Search Pid/String e.g Sp:H*qC'
+        self._searchWidget = LineEdit(self.parent().parent(),backgroundText=txt)
+        self.getParent().parent().getLayout().addWidget(self._searchWidget,2,0)
+        self._searchWidget.textChanged.connect(self._searchWidgetCallback)
+
+        self._resultsFrame = Frame(self.parent())
+        self._resultsFrame.setContentsMargins(0,0,0,0)
+
+        QtWidgets.QGridLayout(self._resultsFrame)
+        self.parent().insertWidget(1,self._resultsFrame)
+
+        self._resultsLabel = Label(self._resultsFrame,text='Search Results',grid=(0,0))
+        self._resultsLabel.setAlignment(QtCore.Qt.AlignCenter)
+        self._resultsLabel.setContentsMargins(0,0,0,0)
+        self._resultsLabel.setStyleSheet("font-size:14px;")
+
+        self._resultsList = QListView(self._resultsFrame)
+        self._resultsList.setEditTriggers(QAbstractItemView.NoEditTriggers)
+
+        self._resultsFrame.getLayout().setSpacing(6)
+        self._resultsFrame.getLayout().addWidget(self._resultsList,2,0)
+        self._resultsFrame.setVisible(False)
+        self._resultsFrame.setContentsMargins(2,2,0,2)
+        self._resultsFrame.getLayout().setMargin(0)
+
+        self._results_model = QStringListModel()
+        self._results_list = []
+        self._results_model.setStringList(self._results_list)
+
+        self._resultsList.setModel(self._results_model)
+        self._resultsList.selectionModel().selectionChanged.connect(self._resultsListSelection)
+        self._resultsList.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
+        self._resultsList.customContextMenuRequested.connect(self._resultsListMenuRequested)
+
+        self._searchSelection = []
+        self._searchNotifiers = []
+
+    def _resultsListMenuRequested(self,position):
+
+
+        dataPid = self._searchSelection[0]
+        objs = [self.project.getByPid(dataPid)]
+
+
+        sideBarObject = self._sidebarData.findChildNode(dataPid)
+
+
+        menuAction = sideBarObject.menuAction
+        if menuAction:
+            globalPosition = self._resultsList.mapToGlobal(QtCore.QPoint(position.x(), position.y() + 10))
+
+            # can't do menu action on anything other than main window as it looks for sub fields of main window...
+            menuAction(self.mainWindow, dataPid, sideBarObject,globalPosition, objs)
+
+
+    def _resultsListSelection(self,rowSelection,columnSelection):
+
+        row = rowSelection.indexes()[0].row()
+        pid = self._results_list[row]
+        self._searchSelection.clear()
+        self._searchSelection.append(pid)
+
 
     def _clearQTreeWidget(self, tree):
         """Clear contents of the sidebar.
@@ -1249,12 +1319,98 @@ class SideBar(QtWidgets.QTreeWidget, SideBarStructure, Base, NotifierBase):
 
     def _searchWidgetCallback(self):
         """Private callback from search widget"""
+
+        LOWER_TO_UPPER = 'lower_to_upper'
+        SEARCH_LIST = 'search_list'
+
         text = self._searchWidget.get()
-        obj = self.project.getByPid(text)
-        if obj:
-            self.selectPid(obj.pid)
+
+        self._results_list.clear()
+        if len(text) == 0:
+            self._searchWidget.setClearButtonEnabled(False)
+            self._results_model.setStringList(self._results_list)
+            self._resultsFrame.setVisible(False)
+            return
         else:
-            showWarning('Search', 'Not found')
+            self._searchWidget.setClearButtonEnabled(True)
+
+        if len(text) > 0 and text[-1] == ' ':
+            new_text = text[:-1] + '␣'
+            self._searchWidget.setText(new_text)
+            return
+
+        # seems to look at more objects than expected
+        def _buildNameMapAndSearchList(wrapper,result):
+            result[LOWER_TO_UPPER][wrapper.klass.shortClassName.lower()] = wrapper.klass.shortClassName
+            result[LOWER_TO_UPPER][wrapper.klass.className.lower()] = wrapper.klass.className
+
+            result[SEARCH_LIST].add(wrapper.klass.shortClassName.lower())
+            result[SEARCH_LIST].add(wrapper.klass.className.lower())
+
+        result = {SEARCH_LIST : OrderedSet(), LOWER_TO_UPPER : {}}
+
+        self._sidebarData._traverseKlassTree(sidebar=self, func=_buildNameMapAndSearchList, data=result)
+
+        searchables = OrderedSet()
+
+        lower_text = text.lower()
+        lower_text = lower_text.lstrip('*')
+
+        if ':' in lower_text:
+            fields = lower_text.split(':')
+            lower_category = fields[0]
+        else:
+            cutoff = min(len(lower_text),3)
+            lower_category = '%s*' % lower_text[:cutoff]
+
+        for key in result[SEARCH_LIST]:
+            if fnmatch.fnmatch(key,lower_category):
+                searchables.add(key)
+
+        if len(searchables) == 0:
+            searchables = result[SEARCH_LIST]
+
+        lower_to_upper =  result[LOWER_TO_UPPER]
+
+        seen = set()
+
+        if (len(lower_text) > 0) and (lower_text[-1] == '␣'):
+            lower_text = '*%s' % lower_text.rstrip('␣')
+        else:
+            lower_text = '*%s*' % lower_text
+
+        for key in searchables:
+            pid_key = lower_to_upper[key]
+
+            if pid_key in self.project._project._pid2Obj:
+                for elem in self.project._project._pid2Obj[pid_key]:
+                    elem_key = "%s:%s" % (key,str(elem))
+
+                    wrapper = self.project._project._pid2Obj[pid_key][elem]
+                    wrapper_has_flagged_for_delete = hasattr(wrapper,'_flaggedForDelete')
+                    flagged_for_delete = False
+                    if wrapper_has_flagged_for_delete:
+                        flagged_for_delete = self.project._project._pid2Obj[pid_key][elem]._flaggedForDelete
+                    if not flagged_for_delete:
+                        if fnmatch.fnmatch(elem_key.lower(),lower_text):
+                            if elem not in seen:
+                                self._results_list.append('%s:%s' % (pid_key,str(elem)))
+                                seen.add(elem)
+
+        self._results_model.setStringList(self._results_list)
+        if len(self._results_list) > 0:
+            self._resultsFrame.setVisible(True)
+        else:
+            self._resultsFrame.setVisible(False)
+
+        if len(self._searchNotifiers) == 0:
+            for action in ('create', 'delete', 'rename'):
+                notifier =  self._project.registerNotifier('AbstractWrapperObject', action, self._notify_pids_changed,onceOnly=True)
+                self._searchNotifiers.append(notifier)
+
+    def _notify_pids_changed(self,*args,**kwargs):
+        self._searchWidgetCallback()
+
 #------------------------------------------------------------------------------------------------------------------
 # Emulate V3 objects
 #------------------------------------------------------------------------------------------------------------------

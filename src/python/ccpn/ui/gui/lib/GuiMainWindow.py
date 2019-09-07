@@ -332,10 +332,20 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
 
         # create the sidebar
         self._sideBarFrame = Frame(self, setLayout=True)  # in this frame is inserted the search widget
-        self.sideBar = SideBar(self._sideBarFrame, mainWindow=self, grid=(0, 0))
+        self._sideBarFrame.setContentsMargins(4,2,0,0)
+
+        self._sidebarSplitter = Splitter(self._sideBarFrame,horizontal=False)
+        self._sidebarSplitter.setContentsMargins(0,0,0,0)
+
+        self._sideBarFrame.getLayout().addWidget(self._sidebarSplitter,1,0)
+
+        self.sideBar = SideBar(parent=self._sidebarSplitter,mainWindow=self, grid=(0,0))
+        self._sidebarSplitter.insertWidget(0,self.sideBar)
+
 
         # create a splitter to put the sidebar on the left
         self._horizontalSplitter = Splitter(horizontal=True)
+
         self._horizontalSplitter.addWidget(self._sideBarFrame)
         self._horizontalSplitter.addWidget(self.moduleArea)
         self.setCentralWidget(self._horizontalSplitter)

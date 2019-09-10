@@ -556,7 +556,7 @@ static struct PyModuleDef moduledef =
     NULL
 };
 
-PyMODINIT_FUNC *PyInit_Clibrary(void)
+PyMODINIT_FUNC PyInit_Clibrary(void)
 {
     PyObject *module;
 

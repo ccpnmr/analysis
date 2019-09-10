@@ -48,7 +48,7 @@ LINK_LIBRARIES = sh linkSharedObjs
 COPY_LIBRARIES = sh copySharedObjs
 
 # math
-MATH_LIB = -lm
+MATH_LIB =
 
 # rest of Python
 PYTHON_VERSION = 3.5

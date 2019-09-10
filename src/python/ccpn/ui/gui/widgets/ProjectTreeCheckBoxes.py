@@ -86,21 +86,30 @@ class ProjectTreeCheckBoxes(QtWidgets.QTreeWidget, Base):
         PeakCluster._pluralLinkName,
         ]
 
-    def __init__(self, parent=None, project=None, maxSize=(250, 300), **kwds):
+    def __init__(self, parent=None, project=None, maxSize=(250, 300), includeProject=False, **kwds):
         """Initialise the widget
         """
         super().__init__(parent)
         Base._init(self, setLayout=False, **kwds)
 
         # self.setMaximumSize(*maxSize)
-        self.headerItem = QtWidgets.QTreeWidgetItem()
-        self.item = QtWidgets.QTreeWidgetItem()
+        self.headerItem = self.invisibleRootItem()      # QtWidgets.QTreeWidgetItem()
+        self.projectItem = None
         self.project = project
         self.header().hide()
         if self.project is not None:
+
+            if includeProject:
+                # add the project as the top of the tree - allows to un/select all
+                self.projectItem = QtWidgets.QTreeWidgetItem(self.invisibleRootItem())
+                self.projectItem.setText(0, project.name)
+                self.projectItem.setFlags(self.projectItem.flags() | QtCore.Qt.ItemIsTristate | QtCore.Qt.ItemIsUserCheckable)
+                self.projectItem.setExpanded(True)
+                self.headerItem = self.projectItem
+
             for name in self.checkList:
                 if hasattr(self.project, name):  # just to be safe
-                    item = QtWidgets.QTreeWidgetItem(self)
+                    item = QtWidgets.QTreeWidgetItem(self.headerItem)
                     item.setText(0, name)
                     item.setFlags(item.flags() | QtCore.Qt.ItemIsTristate | QtCore.Qt.ItemIsUserCheckable)
 
@@ -117,43 +126,64 @@ class ProjectTreeCheckBoxes(QtWidgets.QTreeWidget, Base):
 
         self.itemClicked.connect(self._clicked)
 
-    def getSelectedObjects(self):
+    def getSelectedObjects(self, includeRoot=False):
         """Get selected objects from the check boxes
         """
+        root = self.projectItem if self.projectItem else self.headerItem
         selectedObjects = []
+
         for item in self.findItems('', QtCore.Qt.MatchContains | QtCore.Qt.MatchRecursive):
             if item.checkState(0) == QtCore.Qt.Checked:
                 obj = item.data(1, 0)
+
+                # return items in the tree that have a pid
                 if hasattr(obj, 'pid'):
+                    if self.projectItem and item == self.projectItem and not includeRoot:
+                        continue
+
                     selectedObjects += [obj]
+
         return selectedObjects
 
-    def getSelectedItems(self):
+    def getSelectedItems(self, includeRoot=False):
         """Get selected objects from the check boxes
         """
         selectedItems = []
+
         for item in self.findItems('', QtCore.Qt.MatchContains | QtCore.Qt.MatchRecursive):
             if item.checkState(0) == QtCore.Qt.Checked:
                 obj = item.data(1, 0)
+
+                # return items in the tree that are group labels (bottom level should be objects with pids)
                 if not hasattr(obj, 'pid'):
+                    if self.projectItem and item == self.projectItem and not includeRoot:
+                        continue
                     selectedItems += [item.text(0)]
+
         return selectedItems
 
-    def getItems(self):
+    def getItems(self, includeRoot=False):
         """Get checked state of objects
         """
+        root = self.projectItem if self.projectItem else self.headerItem
         selectedItems = {}
         for item in self.findItems('', QtCore.Qt.MatchContains | QtCore.Qt.MatchRecursive):
             obj = item.data(1, 0)
+
+            # return checkstate of items in the tree that are group labels (bottom level should be objects with pids)
             if not hasattr(obj, 'pid'):
+                if self.projectItem and item == self.projectItem and not includeRoot:
+                    continue
+
                 selectedItems[item.text(0)] = item.checkState(0)
+
         return selectedItems
 
-    def getSelectedObjectsPids(self):
+    def getSelectedObjectsPids(self, includeRoot=False):
         """Get the pids of the selected objects
         """
         pids = []
-        for item in self.getSelectedObjects():
+        for item in self.getSelectedObjects(includeRoot=includeRoot):
             pids += [item.pid]
         return pids
 
@@ -168,7 +198,7 @@ class ProjectTreeCheckBoxes(QtWidgets.QTreeWidget, Base):
     def _clicked(self, *args):
         pass
 
-    def _uncheckAll(self):
+    def _uncheckAll(self, includeRoot=False):
         """Clear all selection
         """
         for itemTree in self.findItems('', QtCore.Qt.MatchContains | QtCore.Qt.MatchRecursive):

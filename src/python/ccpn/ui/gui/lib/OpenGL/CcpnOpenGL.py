@@ -2576,7 +2576,7 @@ class CcpnGLWidget(QOpenGLWidget):
                 self._drawMouseMoveLine = True
                 self._drawDeltaOffset = True
 
-        self.GLSignals._emitMouseMoved(source=self, coords=self.cursorCoordinate, mouseMovedDict=mouseMovedDict)
+        self.GLSignals._emitMouseMoved(source=self, coords=self.cursorCoordinate, mouseMovedDict=mouseMovedDict, mainWindow=self.mainWindow)
 
         # spawn rebuild/paint of traces
         if self._updateHTrace or self._updateVTrace:
@@ -2777,6 +2777,8 @@ class CcpnGLWidget(QOpenGLWidget):
     def _paintGL(self):
         w = self.w
         h = self.h
+
+        # print('>>>>>> _paintGL', self.strip, time.time())
 
         if self._updateBackgroundColour:
             self._updateBackgroundColour = False
@@ -5579,6 +5581,8 @@ class CcpnGLWidget(QOpenGLWidget):
 
             if self._crosshairVisible:  # or self._updateVTrace or self._updateHTrace:
 
+                # print('>>>>>>', self.strip, time.time())
+
                 exactMatch = (self._preferences.matchAxisCode == AXIS_FULLATOMNAME)
                 indices = getAxisCodeMatchIndices(self._axisCodes[:2], mouseMovedDict[AXIS_ACTIVEAXES], exactMatch=exactMatch)
 
@@ -5600,7 +5604,9 @@ class CcpnGLWidget(QOpenGLWidget):
                 # only need to redraw if we can see the cursor
                 # if self._updateVTrace or self._updateHTrace:
                 #   self.updateTraces()
+                # self.makeCurrent()
                 self.update()
+                # self.doneCurrent()
 
     @pyqtSlot(dict)
     def _glKeyEvent(self, aDict):

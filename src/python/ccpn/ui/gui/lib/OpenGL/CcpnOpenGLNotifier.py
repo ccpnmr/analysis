@@ -44,6 +44,7 @@ class GLNotifier(QtWidgets.QWidget):
     GLMOUSEMOVEDDICT = 'mouseMovedict'
     GLSPECTRUMDISPLAY = 'spectrumDisplay'
     GLSTRIP = 'strip'
+    GLMAINWINDOW = 'mainWindow'
     GLKEY = 'key'
     GLMODIFIER = 'modifier'
     GLBOTTOMAXISVALUE = 'bottomAxis'
@@ -152,11 +153,18 @@ class GLNotifier(QtWidgets.QWidget):
                  }
         self.glXAxisChanged.emit(aDict)
 
-    def _emitMouseMoved(self, source=None, coords=None, mouseMovedDict=None):
+    def _emitMouseMoved(self, source=None, coords=None, mouseMovedDict=None, mainWindow=None):
         aDict = {GLNotifier.GLSOURCE        : source,
                  GLNotifier.GLMOUSECOORDS   : coords,
-                 GLNotifier.GLMOUSEMOVEDDICT: mouseMovedDict}
+                 GLNotifier.GLMOUSEMOVEDDICT: mouseMovedDict,
+                 GLNotifier.GLMAINWINDOW    : mainWindow}
         self.glMouseMoved.emit(aDict)
+
+        # for specDisplay in mainWindow.spectrumDisplays:
+        #     for strip in specDisplay.strips:
+        #         if strip._CcpnGLWidget != source:
+        #             strip._CcpnGLWidget._glMouseMoved(aDict)
+        #     # specDisplay.stripFrame.update()
 
     def _emitYAxisChanged(self, source=None, strip=None,
                           axisB=None, axisT=None, axisL=None, axisR=None):

@@ -28,7 +28,7 @@ __date__ = "$Date: 2017-03-16 18:20:01 +0000 (Thu, March 16, 2017) $"
 import sys
 import typing
 
-from PyQt5 import QtWidgets, QtCore
+from PyQt5 import QtWidgets, QtCore, QtGui
 
 from ccpn.core import _coreClassMap
 from ccpn.core.Project import Project
@@ -67,13 +67,18 @@ class Gui(Ui):
         # On the Mac (at least) it does not matter what you set the applicationName to be,
         # it will come out as the executable you are running (e.g. "python3")
 
-        # QtCore.QCoreApplication.setAttribute(QtCore.Qt.AA_EnableHighDpiScaling, True)
-        # QtCore.QCoreApplication.setAttribute(QtCore.Qt.AA_ShareOpenGLContexts, False)
+        # # QtCore.QCoreApplication.setAttribute(QtCore.Qt.AA_EnableHighDpiScaling, True)
+        # QtCore.QCoreApplication.setAttribute(QtCore.Qt.AA_ShareOpenGLContexts, True)
+        # viewportFormat = QtGui.QSurfaceFormat()
+        # viewportFormat.setSwapInterval(0)  #disable VSync
+        # viewportFormat.setSwapBehavior(QtGui.QSurfaceFormat.SingleBuffer)
+        # QtGui.QSurfaceFormat().setDefaultFormat(viewportFormat)
+        # # self._CcpnGLWidget.setFormat(viewportFormat)
+        # # viewportFormat = self._CcpnGLWidget.format()
 
         self.qtApp = Application(self.application.applicationName,
                                  self.application.applicationVersion,
                                  organizationName='CCPN', organizationDomain='ccpn.ac.uk')
-        # self.qtApp.setAttribute(QtCore.Qt.AA_ShareOpenGLContexts, False)
 
         #self.qtApp.setStyleSheet(self.application.styleSheet)
 

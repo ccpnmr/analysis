@@ -80,7 +80,7 @@ class ExportNefPopup(ExportDialog):
         self.flags[EXPANDSELECTION] = self.buttonExpand.isChecked()
 
         # new bit to read all the checked pids (contain ':') from the checkboxtreewidget - don't include project name
-        self.newList = self.treeView.getSelectedItems(includeRoot=False)
+        self.newList = self.treeView.getSelectedPids(includeRoot=False)
 
         # return the parameters
         params = {'filename': self.exitFilename,

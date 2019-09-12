@@ -644,7 +644,7 @@ GuiTable::item::selected {
             format = self._formats.get(col, self._formats[None])
             item.setFormat(format)
             self.items.append(item)
-            self.setItem(row, col, item)
+
 
             # item.setValue(val)  # Required--the text-change callback is invoked
             # when we call setItem.
@@ -655,6 +655,7 @@ GuiTable::item::selected {
 
             if isinstance(val, list or tuple):
                 pulldown = PulldownList(None, callback=self._pulldownCallback)
+                pulldown.setMaximumWidth(300)
                 pulldown.setData(*val)
 
                 pulldown.setObjectName(str((row, col)))
@@ -665,6 +666,7 @@ GuiTable::item::selected {
                 self.setCellWidget(row, col, pulldown)
 
             else:
+                self.setItem(row, col, item)
                 item.setValue(val)
 
     def _pulldownCallback(self, value):
@@ -2379,7 +2381,6 @@ if __name__ == '__main__':
             mockObj.exampleFloat = value
 
         def editPulldown(self, value):
-            print("VA",value)
             mockObj.exampleList = value
 
         def editFlags(self, value):

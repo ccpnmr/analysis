@@ -455,15 +455,17 @@ class NmrResidueTable(GuiTable):
                         self._nmrChain = nmrChain
                         self.ncWidget.select(self._nmrChain.pid)
 
-    def defaultActionCallback(self, nmrResidue, *args):
+    def defaultActionCallback(self, data):
         """
         default Action Callback if not defined in the parent Module
         If current strip contains the double clicked nmrResidue will navigateToPositionInStrip
         """
         from ccpn.ui.gui.lib.Strip import navigateToPositionInStrip, _getCurrentZoomRatio
 
-        self.application.ui.mainWindow.clearMarks()
+        nmrResidue = data[Notifier.OBJECT]
+
         if self.current.strip is not None:
+            self.application.ui.mainWindow.clearMarks()
             strip = self.current.strip
             newWidths = _getCurrentZoomRatio(strip.viewRange())
             navigateToNmrResidueInDisplay(nmrResidue, strip.spectrumDisplay, stripIndex=0,
@@ -471,7 +473,7 @@ class NmrResidueTable(GuiTable):
             # widths=['default'] * len(strip.axisCodes))
 
         else:
-            logger.warning('Impossible to navigate to peak position. Set a current strip first')
+            logger.warning('Impossible to navigate to position. Set a current strip first')
 
     def displayTableForNmrChain(self, nmrChain):
         """

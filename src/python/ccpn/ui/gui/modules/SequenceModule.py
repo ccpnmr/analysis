@@ -421,6 +421,11 @@ class SequenceModule():
                                              [Notifier.DELETE],
                                              'Chain',
                                              self._refreshChainLabels)
+        self._nmrResidueNotifier = Notifier(self.project,
+                                         [Notifier.CHANGE],
+                                         'NmrResidue',
+                                         self._refreshChainLabels,
+                                         onceOnly=True)
 
     def _unRegisterNotifiers(self):
         """unregister notifiers
@@ -437,6 +442,9 @@ class SequenceModule():
         if self._chainDeleteNotifier:
             self._chainDeleteNotifier.unRegister()
             self._chainDeleteNotifier = None
+        if self._nmrResidueNotifier:
+            self._nmrResidueNotifier.unRegister()
+            self._nmrResidueNotifier = None
 
     def _closeModule(self):
         """
@@ -464,7 +472,8 @@ class SequenceModule():
             self._addChainLabel(chain=None, placeholder=True)
         else:
             for chain in self.project.chains:
-                self._addChainLabel(chain, tryToUseSequenceCodes=True)
+                if not (chain._flaggedForDelete or chain.isDeleted):
+                    self._addChainLabel(chain, tryToUseSequenceCodes=True)
 
         if self._highlight:
             self.scrollArea.scene.removeItem(self._highlight)

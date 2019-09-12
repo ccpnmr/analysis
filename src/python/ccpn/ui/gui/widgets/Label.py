@@ -73,11 +73,13 @@ class Label(QtWidgets.QLabel, Base):
         self._setStyleSheet()
 
     def get(self):
-        "get the label text"
+        """get the label text
+        """
         return self.text()
 
     def set(self, text=''):
-        "set label text, applying translator"
+        """set label text, applying translator
+        """
         text = translator.translate(text)
         self.setText(text)
 
@@ -91,6 +93,41 @@ class Label(QtWidgets.QLabel, Base):
                                                self._margins[3],
                                                )
                            )
+
+
+class ActiveLabel(Label):
+
+    def __init__(self, parent=None, text='', textColour=None, textSize=12, bold=False,
+                 margins=[2, 1, 2, 1], selectionCallback=None, actionCallback=None, **kwds):
+        super().__init__(parent=parent, text=text, textColour=textColour, textSize=textSize, bold=bold,
+                         margins=margins, **kwds)
+
+        self._selectionCallback = selectionCallback
+        self._actionCallback = actionCallback
+
+    def setSelectionCallback(self, callback=None):
+        """Sets callback on mouse click
+        """
+        self._selectionCallback = callback
+
+    def setActionCallback(self, callback=None):
+        """Sets callback on mouse double click
+        """
+        self._actionCallback = callback
+
+    def mouseReleaseEvent(self, ev):
+        """Handle double click and call _selectionCallback if set
+        """
+        if self._selectionCallback:
+            self._selectionCallback()
+        super().mouseReleaseEvent(ev)
+
+    def mouseDoubleClickEvent(self, ev):
+        """Handle double click and call _actionCallback if set
+        """
+        if self._actionCallback:
+            self._actionCallback()
+        super().mouseDoubleClickEvent(ev)
 
 
 class VerticalLabel(pyqtVerticalLabel, Base):

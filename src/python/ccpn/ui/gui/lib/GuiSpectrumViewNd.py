@@ -963,8 +963,9 @@ class GuiSpectrumViewNd(GuiSpectrumView):
                             neededIndices = getAxisCodeMatchIndices(self.spectrum.axisCodes, self.strip.axisCodes)
 
                             dataArray = dataArray.transpose(*neededIndices)
-                            newDataArrays = tuple(arr.squeeze() for arr in np.split(dataArray, dataArray.shape[0], axis=0))
+                            # newDataArrays = tuple(arr.squeeze() for arr in np.split(dataArray, dataArray.shape[0], axis=0))
 
+                            newDataArrays = (np.max(dataArray, axis=0)+np.min(dataArray, axis=0),)
                             contourList = Contourer2d.contourerGLList(newDataArrays,
                                                                       posLevelsArray,
                                                                       negLevelsArray,

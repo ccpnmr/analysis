@@ -631,6 +631,14 @@ class PreferencesPopup(CcpnDialog):
                                                tipTexts=None,
                                                )
 
+        row += 1
+        HLine(parent, grid=(row, 0), gridSpan=(1, 3), colour=getColours()[DIVIDER], height=15)
+
+        row += 1
+        self.singleContoursLabel = Label(parent, text="Generate Single Contours\n   per Plane: ", grid=(row, 0))
+        self.singleContoursBox = CheckBox(parent, grid=(row, 1), checked=self.preferences.general.generateSinglePlaneContours)
+        self.singleContoursBox.toggled.connect(partial(self._toggleGeneralOptions, 'generateSinglePlaneContours'))
+
         # add spacer to stop columns changing width
         row += 1
         Spacer(parent, 2, 2,

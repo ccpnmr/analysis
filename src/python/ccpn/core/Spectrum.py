@@ -221,7 +221,8 @@ class Spectrum(AbstractWrapperObject):
     _PLANEDATACACHE = '_planeDataCache'  # Attribute name for the planeData cache
     _SLICEDATACACHE = '_sliceDataCache'  # Attribute name for the slicedata cache
     _SLICE1DDATACACHE = '_slice1DDataCache'  # Attribute name for the 1D slicedata cache
-    _dataCaches = [_PLANEDATACACHE, _SLICEDATACACHE, _SLICE1DDATACACHE]
+    _REGIONDATACACHE = '_regionDataCache'  # Attribute name for the regionData cache
+    _dataCaches = [_PLANEDATACACHE, _SLICEDATACACHE, _SLICE1DDATACACHE, _REGIONDATACACHE]
 
     def __init__(self, project: Project, wrappedData: Nmr.ShiftList):
 
@@ -1722,6 +1723,7 @@ assignmentTolerances
                                  (axisCode, newAxisCodeOrder, self.axisCodes))
         return newValues
 
+    @cached(_REGIONDATACACHE, maxItems=16, debug=False)
     def getRegionData(self, exclusionBuffer: Optional[Sequence] = None, minimumDimensionSize: int = 3, **axisDict):
         """Return the region of the spectrum data defined by the axis limits.
 
@@ -2096,6 +2098,7 @@ assignmentTolerances
     @cached.clear(_PLANEDATACACHE)  # Check if there was a planedata cache, and if so, clear it
     @cached.clear(_SLICEDATACACHE)  # Check if there was a slicedata cache, and if so, clear it
     @cached.clear(_SLICE1DDATACACHE)  # Check if there was a slice1ddata cache, and if so, clear it
+    @cached.clear(_REGIONDATACACHE)  # Check if there was a regiondata cache, and if so, clear it
     def _clearCache(self):
         """Convenience to clear the cache; all action done by the decorators
         """

@@ -55,7 +55,8 @@
         "automaticNoiseContoursOnLoadSpectrum" : false,
         "automaticNoiseContoursOnFirstShow" : true,
         "volumeIntegralLimit" : 2.0,
-        "autoUpdateAliasing" : false
+        "autoUpdateAliasing" : false,
+        "generateSinglePlaneContours" : true
     },
 
     "externalPrograms": {

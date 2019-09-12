@@ -933,7 +933,7 @@ class GuiSpectrumViewNd(GuiSpectrumView):
             # new code for the recompiled glList
             # test = None
 
-            if self.spectrum.dimensionCount < 3:
+            if self.spectrum.dimensionCount < 3 or self._application.preferences.general.generateSinglePlaneContours:
                 dataArrays = tuple()
                 for position, dataArray in self._getPlaneData():
                     dataArrays += (dataArray,)
@@ -947,9 +947,10 @@ class GuiSpectrumViewNd(GuiSpectrumView):
                 from ccpn.util.Common import getAxisCodeMatchIndices
 
                 axisLimits = dict([(axis.code, tuple(axis.region)) for axis in self.strip.orderedAxes[2:]])
-                exclusionBuffer = [1, 1]
-                for ii in range(self.spectrum.dimensionCount-2):
-                    exclusionBuffer.append(0)
+                # exclusionBuffer = [1, 1]
+                # for ii in range(self.spectrum.dimensionCount-2):
+                #     exclusionBuffer.append(0)
+                exclusionBuffer = None
 
                 foundRegions = self.spectrum.getRegionData(exclusionBuffer=exclusionBuffer, minimumDimensionSize=1, **axisLimits)
 
@@ -960,12 +961,20 @@ class GuiSpectrumViewNd(GuiSpectrumView):
                         dataArray, intRegion, *rest = region
 
                         if dataArray.size:
-                            neededIndices = getAxisCodeMatchIndices(self.spectrum.axisCodes, self.strip.axisCodes)
+                            # neededIndices = getAxisCodeMatchIndices(self.spectrum.axisCodes, self.strip.axisCodes)
+                            neededIndices = self._displayOrderSpectrumDimensionIndices
+                            print('>>>>>>spectrumView', self, neededIndices)
 
-                            dataArray = dataArray.transpose(*neededIndices)
+                            xDim = 2 - neededIndices[0]
+                            yDim = 2 - neededIndices[1]
+                            zDim = 2 - neededIndices[2]
+
+                            # neededIndices = [len(neededIndices) - nn -1 for nn in neededIndices]
+                            tempDataArray = dataArray.transpose((zDim, yDim, xDim))
+
                             # newDataArrays = tuple(arr.squeeze() for arr in np.split(dataArray, dataArray.shape[0], axis=0))
 
-                            newDataArrays = (np.max(dataArray, axis=0)+np.min(dataArray, axis=0),)
+                            newDataArrays = (np.max(tempDataArray, axis=0) + np.min(tempDataArray, axis=0),)
                             contourList = Contourer2d.contourerGLList(newDataArrays,
                                                                       posLevelsArray,
                                                                       negLevelsArray,

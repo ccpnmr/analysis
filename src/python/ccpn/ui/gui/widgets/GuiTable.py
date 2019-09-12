@@ -187,6 +187,7 @@ GuiTable::item::selected {
                  mainWindow=None,
                  dataFrameObject=None,  # collate into a single object that can be changed quickly
                  actionCallback=None, selectionCallback=None, checkBoxCallback=None,
+                 pulldownCallback = None,
                  multiSelect=False, selectRows=True, numberRows=False, autoResize=False,
                  enableExport=True, enableDelete=True, enableSearch=True,
                  hideIndex=True, stretchLastSection=True, _applyPostSort=True,
@@ -254,6 +255,7 @@ GuiTable::item::selected {
 
         self._checkBoxCallback = checkBoxCallback
         # set all the elements to the same size
+        self.pulldownCallback = pulldownCallback
         self.hideIndex = hideIndex
         self._setDefaultRowHeight()
 
@@ -652,12 +654,63 @@ GuiTable::item::selected {
                 item.setCheckState(state)
 
             if isinstance(val, list or tuple):
-                pulldown = PulldownList(None, )
+                pulldown = PulldownList(None, callback=self._pulldownCallback)
                 pulldown.setData(*val)
+
+                pulldown.setObjectName(str((row, col)))
+                model = self.selectionModel()
+                # selects all the items in the row
+                selection =  model.selectedIndexes()
+
                 self.setCellWidget(row, col, pulldown)
 
             else:
                 item.setValue(val)
+
+    def _pulldownCallback(self, value):
+        if self.pulldownCallback:
+            self.pulldownCallback(value)
+
+
+    def _pulldownCallback_(self, itemSelection):
+
+        state = True if itemSelection.checkState() == 2 else False
+        state = not state # as to be opposite before catches the event before you clicked
+        value = itemSelection.value
+        # if not state == value:
+
+        # TODO:ED check with Luca on when this should fire
+        # get the row for the checkbox item
+        selection = [self.model().index(itemSelection.row(), cc) for cc in range(self.columnCount())]
+
+        obj = self.getSelectedObjects(selection)
+        obj = obj[0] if obj else None
+
+        if obj:
+            data = CallBack(theObject=self._dataFrameObject,
+                            object=obj,
+                            index=0,
+                            targetName=obj.className,
+                            trigger=CallBack.CLICK,
+                            row=itemSelection.row(),
+                            col=itemSelection.column(),
+                            rowItem=itemSelection,
+                            checked=state)
+            textHeader = self.horizontalHeaderItem(itemSelection.column()).text()
+            if textHeader:
+                self._dataFrameObject.setObjAttr(textHeader, obj, state)
+                # setattr(objList[0], textHeader, state)
+        else:
+            data = CallBack(theObject=self._dataFrameObject,
+                            object=None,
+                            index=0,
+                            targetName=None,
+                            trigger=CallBack.CLICK,
+                            row=itemSelection.row(),
+                            col=itemSelection.column(),
+                            rowItem=itemSelection,
+                            checked=state)
+        self._checkBoxCallback(data)
 
     def _selectionTableCallback(self, itemSelection, mouseDrag=True):
         """Handler when selection has changed on the table
@@ -873,7 +926,6 @@ GuiTable::item::selected {
     def mouseMoveEvent(self, event):
         event.ignore()
         super(GuiTable, self).mouseMoveEvent(event)
-
         if self._mousePressedPos is not None:
             # if the mouse has been pressed, then re-enable selection if started a mouse drag, and override double-click
             if self._selectOverride and (event.pos() - self._mousePressedPos).manhattanLength() > QtWidgets.QApplication.startDragDistance():
@@ -2307,7 +2359,7 @@ if __name__ == '__main__':
         exampleFloat = 3.1  # This will create a double spin box
         exampleBool = True  # This will create a check box
         string = 'white'  # This will create a line Edit
-        exampleList = [('Mock', 'Test'), ]  # This will create a pulldown
+        exampleList = [(' ', 'Mock','Test'), ]  # This will create a pulldown
         color = QtGui.QColor('Red')
         icon = Icon('icons/warning')
         r = Colour.colourNameToHexDict['red']
@@ -2327,15 +2379,22 @@ if __name__ == '__main__':
             mockObj.exampleFloat = value
 
         def editPulldown(self, value):
+            print("VA",value)
             mockObj.exampleList = value
 
         def editFlags(self, value):
             print(value)
 
+    def _comboboxCallBack(value):
+
+        print('called value =',value)
 
     def _checkBoxCallBack(data):
         s = data['checked']
         print('called value =', s)
+
+    def table_pulldownCallback(value):
+        print('NEW', value)
 
 
     popup = CcpnDialog(windowTitle='Test Table', setLayout=True)
@@ -2369,13 +2428,15 @@ if __name__ == '__main__':
             lambda mockObj, value: mockObj.editFlags(mockObj, value),
             )
         ])
-    table = GuiTable(parent=popup, dataFrameObject=None, checkBoxCallback=_checkBoxCallBack, grid=(0, 0))
+    table = GuiTable(parent=popup, dataFrameObject=None, pulldownCallback=table_pulldownCallback, checkBoxCallback=_checkBoxCallBack, grid=(0, 0))
     df = table.getDataFrameFromList(table, [mockObj] * 5, colDefs=columns)
 
     table.setTableFromDataFrameObject(dataFrameObject=df)
     table.item(0, 0).setBackground(QtGui.QColor(100, 100, 150))  #color the first item
-    combo = QtGui.QComboBox()
-    table.setCellWidget(0, 0, combo)
+    # combo = PulldownList(table, callback=_comboboxCallBack)
+    # table.setCellWidget(0, 0, combo)
+    # combo.addItem('DDD')
+    # combo.addItem('TTTT')
     # table.item(0, 0).setFlags(QtCore.Qt.ItemIsUserCheckable | QtCore.Qt.ItemIsEnabled)
     # table.item(0, 0).setCheckState(QtCore.Qt.Unchecked)
     # table.item(0,0).setFormat(float(table.item(0,0).format))

@@ -295,7 +295,7 @@ class NmrResidueTable(GuiTable):
             return None
 
     def __init__(self, parent=None, mainWindow=None, moduleParent=None, actionCallback=None, selectionCallback=None,
-                 checkBoxCallback=None, nmrChain=None, multiSelect=False,
+                 checkBoxCallback=None, pulldownCallback=None, nmrChain=None, multiSelect=False,
                  **kwds):
         """
         Initialise the widgets for the module. kwds passed to the scrollArea widget
@@ -375,6 +375,7 @@ class NmrResidueTable(GuiTable):
                          actionCallback=actionCallback,
                          selectionCallback=selectionCallback,
                          checkBoxCallback=checkBoxCallback,
+                         pulldownCallback=pulldownCallback,
                          grid=(3, 0), gridSpan=(1, 6),
                          enableDelete=True
                          )
@@ -455,13 +456,13 @@ class NmrResidueTable(GuiTable):
                         self._nmrChain = nmrChain
                         self.ncWidget.select(self._nmrChain.pid)
 
-    def defaultActionCallback(self, nmrResidue, *args):
+    def defaultActionCallback(self, *args):
         """
         default Action Callback if not defined in the parent Module
         If current strip contains the double clicked nmrResidue will navigateToPositionInStrip
         """
         from ccpn.ui.gui.lib.Strip import navigateToPositionInStrip, _getCurrentZoomRatio
-
+        nmrResidue = args[-1]['object'][-1]
         self.application.ui.mainWindow.clearMarks()
         if self.current.strip is not None:
             strip = self.current.strip

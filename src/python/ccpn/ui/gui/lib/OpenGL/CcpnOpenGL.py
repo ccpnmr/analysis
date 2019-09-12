@@ -2932,6 +2932,9 @@ class CcpnGLWidget(QOpenGLWidget):
         if self.strip.isDeleted:
             return
 
+        # printTime = False
+        # startTime = time.time()
+
         # self._spectrumSettings = {}
         rebuildFlag = False
         for spectrumView in self._ordering:  # strip.spectrumViews:
@@ -2939,6 +2942,8 @@ class CcpnGLWidget(QOpenGLWidget):
                 continue
 
             if spectrumView.buildContours or spectrumView.buildContoursOnly:
+
+                # printTime = True
 
                 # flag the peaks for rebuilding
                 if not spectrumView.buildContoursOnly:
@@ -2975,6 +2980,9 @@ class CcpnGLWidget(QOpenGLWidget):
         # rebuild the traces as the spectrum/plane may have changed
         if rebuildFlag:
             self.rebuildTraces()
+
+        # if printTime:
+        #     print('>>>>>>buildingContours', time.time()-startTime)
 
     def enableTextClientState(self):
         GL.glEnableClientState(GL.GL_VERTEX_ARRAY)

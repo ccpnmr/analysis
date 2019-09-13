@@ -334,24 +334,11 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
         self._sideBarFrame = Frame(self, setLayout=True)  # in this frame is inserted the search widget
         self.sideBar = SideBar(self._sideBarFrame, mainWindow=self, grid=(0, 0))
 
-        # self.sideBar = SideBar(parent=self)
-        #
-        # # create temporary new sidebar for testing
-        # self._sidebarSplitter = Splitter(horizontal=False)
-        # self._sidebarSplitter.addWidget(self.sideBar)
-        # self._sidebarSplitter.addWidget(self.sideBar)
-
         # create a splitter to put the sidebar on the left
         self._horizontalSplitter = Splitter(horizontal=True)
-        # self._horizontalSplitter.addWidget(self._sidebarSplitter)
-
         self._horizontalSplitter.addWidget(self._sideBarFrame)
         self._horizontalSplitter.addWidget(self.moduleArea)
         self.setCentralWidget(self._horizontalSplitter)
-
-        # create a hidden widget to temporarily store strips after deletion
-        self._UndoWidgetStorage = Frame(setLayout=False)
-        self._UndoWidgetStorage.setLayout(QtWidgets.QVBoxLayout())
 
     def _setupMenus(self):
         """

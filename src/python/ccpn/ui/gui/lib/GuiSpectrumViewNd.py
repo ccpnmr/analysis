@@ -929,11 +929,14 @@ class GuiSpectrumViewNd(GuiSpectrumView):
         #for position, dataArray in self.getPlaneData(guiStrip):
         posContoursAll = negContoursAll = None
 
+        numDims = self.spectrum.dimensionCount
+
         if _NEWCOMPILEDCONTOURS:
             # new code for the recompiled glList
             # test = None
 
-            if self.spectrum.dimensionCount < 3 or self._application.preferences.general.generateSinglePlaneContours:
+            contourList = None
+            if numDims < 3 or self._application.preferences.general.generateSinglePlaneContours:
                 dataArrays = tuple()
                 for position, dataArray in self._getPlaneData():
                     dataArrays += (dataArray,)
@@ -944,38 +947,35 @@ class GuiSpectrumViewNd(GuiSpectrumView):
                                                           np.array(self.posColour * len(posLevels), dtype=np.float32),
                                                           np.array(self.negColour * len(negLevels), dtype=np.float32))
             else:
-                from ccpn.util.Common import getAxisCodeMatchIndices
 
-                axisLimits = dict([(axis.code, tuple(axis.region)) for axis in self.strip.orderedAxes[2:]])
-                # exclusionBuffer = [1, 1]
-                # for ii in range(self.spectrum.dimensionCount-2):
-                #     exclusionBuffer.append(0)
-                exclusionBuffer = None
+                specIndices = self._displayOrderSpectrumDimensionIndices
+                stripIndices = tuple(specIndices.index(ii) for ii in range(numDims))
+                regionLimits = tuple(axis.region for axis in self.strip.orderedAxes)
+
+                axisLimits = dict([ (self.spectrum.axisCodes[ii], regionLimits[stripIndices[ii]])
+                                    for ii in range(numDims) if stripIndices[ii] is not None and stripIndices[ii] > 1])
+
+                # this isn't fully tested and still has an offset of -1
+                # cheat to move the spectrum by 1 point by adding buffer to visible XY axes
+                exclusionBuffer = [0 if stripIndices[ii] > 1 else 1 for ii in range(numDims)]
 
                 foundRegions = self.spectrum.getRegionData(exclusionBuffer=exclusionBuffer, minimumDimensionSize=1, **axisLimits)
 
                 if foundRegions:
-
                     # just use the first region
                     for region in foundRegions[:1]:
                         dataArray, intRegion, *rest = region
 
                         if dataArray.size:
-                            # neededIndices = getAxisCodeMatchIndices(self.spectrum.axisCodes, self.strip.axisCodes)
-                            neededIndices = self._displayOrderSpectrumDimensionIndices
-                            print('>>>>>>spectrumView', self, neededIndices)
+                            xyzDims = tuple((numDims - ind - 1) for ind in specIndices)
+                            xyzDims = tuple(reversed(xyzDims))
+                            tempDataArray = dataArray.transpose(*xyzDims)
 
-                            xDim = 2 - neededIndices[0]
-                            yDim = 2 - neededIndices[1]
-                            zDim = 2 - neededIndices[2]
+                            # flatten multidimensional arrays into single array
+                            for maxCount in range(numDims-2):
+                                tempDataArray = np.max(tempDataArray.clip(0.0, 1e15), axis=0) + np.min(tempDataArray.clip(-1e12, 0.0), axis=0)
 
-                            # neededIndices = [len(neededIndices) - nn -1 for nn in neededIndices]
-                            tempDataArray = dataArray.transpose((zDim, yDim, xDim))
-
-                            # newDataArrays = tuple(arr.squeeze() for arr in np.split(dataArray, dataArray.shape[0], axis=0))
-
-                            newDataArrays = (np.max(tempDataArray, axis=0) + np.min(tempDataArray, axis=0),)
-                            contourList = Contourer2d.contourerGLList(newDataArrays,
+                            contourList = Contourer2d.contourerGLList((tempDataArray,),
                                                                       posLevelsArray,
                                                                       negLevelsArray,
                                                                       np.array(self.posColour * len(posLevels), dtype=np.float32),

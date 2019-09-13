@@ -1797,9 +1797,14 @@ assignmentTolerances
 
         # map from input codes to self, done this way as MAY (but shouldn't) contain any Nones
         indices = getAxisCodeMatchIndices(self.axisCodes, codes)
+        # for n, ind in enumerate(indices):
+        #     if ind is not None:
+        #         regionToPick[n] = limits[ind]
+
+        indices = getAxisCodeMatchIndices(codes, self.axisCodes)
         for n, ind in enumerate(indices):
             if ind is not None:
-                regionToPick[n] = limits[ind]
+                regionToPick[ind] = limits[n]
 
         # convert the region limits to point coordinates with the dataSource
         dataDims = self._apiDataSource.sortedDataDims()

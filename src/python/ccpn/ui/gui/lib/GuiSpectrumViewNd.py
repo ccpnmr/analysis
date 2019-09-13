@@ -878,9 +878,8 @@ class GuiSpectrumViewNd(GuiSpectrumView):
                 GL.glCallList(displayLists[n])
         # GL.glPopMatrix()
 
-    from ccpn.util.decorators import profile
-
-    @profile
+    # from ccpn.util.decorators import profile
+    # @profile
     def _constructContours(self, posLevels, negLevels, doRefresh=False, glList=None):
         """ Construct the contours for this spectrum using an OpenGL display list
             The way this is done here, any change in contour level needs to call this function.

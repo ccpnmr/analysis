@@ -141,44 +141,44 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
         setCurrentMouseMode(SELECT)
         self.show()
 
-    #   QtWidgets.QShortcut.installEventFilter(self)
-    #   # for action in self.actions():
-    #   #   print (action)
-    #   # QtWidgets.QShortcut.activated.connect(self._activatedkeySequence)
-    #     # action.activatedAmbiguously.connect(self._ambiguouskeySequence)
-    #
-    # def eventFilter(self, obj, event):
-    #   # if event.type() == QtGui.QKeySequence.ExactMatch or event.type() == QtGui.QKeySequence.PartialMatch:
-    #   #   try:
-    #   #     print ('>>>key')
-    #   #     self.statusBar().showMessage('key: %s' % str(event.key()))
-    #   #     QtGui.QKeySequence.count = 0
-    #   #
-    #   #   except Exception as es:
-    #   #     print (str(es))
-    #
-    #   if event.type() == QtCore.QEvent.KeyPress:
-    #     print ('key: %s' % str(event.key()))
-    #     return True
-    #
-    #   return False
+        #   QtWidgets.QShortcut.installEventFilter(self)
+        #   # for action in self.actions():
+        #   #   print (action)
+        #   # QtWidgets.QShortcut.activated.connect(self._activatedkeySequence)
+        #     # action.activatedAmbiguously.connect(self._ambiguouskeySequence)
+        #
+        # def eventFilter(self, obj, event):
+        #   # if event.type() == QtGui.QKeySequence.ExactMatch or event.type() == QtGui.QKeySequence.PartialMatch:
+        #   #   try:
+        #   #     print ('>>>key')
+        #   #     self.statusBar().showMessage('key: %s' % str(event.key()))
+        #   #     QtGui.QKeySequence.count = 0
+        #   #
+        #   #   except Exception as es:
+        #   #     print (str(es))
+        #
+        #   if event.type() == QtCore.QEvent.KeyPress:
+        #     print ('key: %s' % str(event.key()))
+        #     return True
+        #
+        #   return False
 
-    #     self.installEventFilter(self)
-    #
-    # def eventFilter(self, obj, event):
-    #     if event.type() == QtCore.QEvent.ShortcutOverride:
-    #         # Stop obj from treating the event itself
-    #         print('>>>', chr(event.key()))
-    #
-    #     elif event.type() == QtCore.QEvent.KeyPress:
-    #         # Stop obj from treating the event itself
-    #         print('>>>key', chr(event.key()))
-    #
-    #     elif event.type() == QtCore.QEvent.Shortcut:
-    #         # Stop obj from treating the event itself
-    #         print('>>>shortcut')
-    #
-    #     return False
+        #     self.installEventFilter(self)
+        #
+        # def eventFilter(self, obj, event):
+        #     if event.type() == QtCore.QEvent.ShortcutOverride:
+        #         # Stop obj from treating the event itself
+        #         print('>>>', chr(event.key()))
+        #
+        #     elif event.type() == QtCore.QEvent.KeyPress:
+        #         # Stop obj from treating the event itself
+        #         print('>>>key', chr(event.key()))
+        #
+        #     elif event.type() == QtCore.QEvent.Shortcut:
+        #         # Stop obj from treating the event itself
+        #         print('>>>shortcut')
+        #
+        #     return False
 
         # install handler to resize when moving between displays
         self.window().windowHandle().screenChanged.connect(self._screenChangedEvent)
@@ -332,16 +332,25 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
 
         # create the sidebar
         self._sideBarFrame = Frame(self, setLayout=True)  # in this frame is inserted the search widget
-        self._sideBarFrame.setContentsMargins(4,2,0,0)
+        self._sideBarFrame.setContentsMargins(4, 2, 0, 0)
 
-        self._sidebarSplitter = Splitter(self._sideBarFrame,horizontal=False)
-        self._sidebarSplitter.setContentsMargins(0,0,0,0)
+        # create a splitter for the sidebar
+        self._sidebarSplitter = Splitter(self._sideBarFrame, horizontal=False)
+        self._sidebarSplitter.setContentsMargins(0, 0, 0, 0)
+        self._sideBarFrame.getLayout().addWidget(self._sidebarSplitter, 0, 0)   # must be inserted this way
 
-        self._sideBarFrame.getLayout().addWidget(self._sidebarSplitter,1,0)
+        # create 2 more containers for the search bar and the results
+        self.searchWidgetContainer = Frame(self._sideBarFrame, setLayout=True, grid=(1, 0))  # in this frame is inserted the search widget
+        self.searchResultsContainer = Frame(self, setLayout=True)  # in this frame is inserted the search widget
 
-        self.sideBar = SideBar(parent=self._sidebarSplitter,mainWindow=self, grid=(0,0))
-        self._sidebarSplitter.insertWidget(0,self.sideBar)
+        # create a SideBar pointing to the required containers
+        self.sideBar = SideBar(parent=self, mainWindow=self,
+                               searchWidgetContainer=self.searchWidgetContainer,
+                               searchResultsContainer=self.searchResultsContainer)
 
+        # insert into the splitter
+        self._sidebarSplitter.insertWidget(0, self.sideBar)
+        self._sidebarSplitter.insertWidget(1, self.searchResultsContainer)
 
         # create a splitter to put the sidebar on the left
         self._horizontalSplitter = Splitter(horizontal=True)
@@ -445,13 +454,14 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
             badSpectra = [str(spectrum) for spectrum in project.spectra if not spectrum.isValidPath]
             if badSpectra:
                 from ccpn.ui.gui.widgets.MessageDialog import showWarning
+
                 showWarning('Spectrum file paths',
-'''Detected invalid Spectrum file path(s) for: 
-
-\t%s
-
-Use menu Spectrum-->Validate paths.. or "VP" shortcut to correct''' % '\n\t'.join(badSpectra)
-                )
+                            '''Detected invalid Spectrum file path(s) for: 
+                            
+                            \t%s
+                            
+                            Use menu Spectrum-->Validate paths.. or "VP" shortcut to correct''' % '\n\t'.join(badSpectra)
+                            )
                 # project.application.showValidateSpectraPopup(defaultSelected='invalid')
                 # project.save(createFallback=False, overwriteExisting=True)
 
@@ -552,6 +562,7 @@ Use menu Spectrum-->Validate paths.. or "VP" shortcut to correct''' % '\n\t'.joi
         """
         from ccpn.util import Layout
         from ccpn.framework.PathsAndUrls import predefinedLayouts
+
         userDefinedLayoutDirPath = self.application.preferences.general.get('userLayoutsPath')
         prelayouts = Layout._dictLayoutsNamePath(Layout._getPredefinedLayouts(predefinedLayouts))
         prelayoutMenu = self.getMenuAction('Project->Layout->Open pre-defined')
@@ -570,8 +581,6 @@ Use menu Spectrum-->Validate paths.. or "VP" shortcut to correct''' % '\n\t'.joi
         action = Action(self, text='Update', translate=False,
                         callback=self._fillPredefinedLayoutMenu)
         prelayoutMenu.addAction(action)
-
-
 
     def _fillMacrosMenu(self):
         """
@@ -652,7 +661,8 @@ Use menu Spectrum-->Validate paths.. or "VP" shortcut to correct''' % '\n\t'.joi
         visible = moduleSize.width() != 0 and moduleSize.height() != 0 and self.sideBar.isVisible()
         modulesMenu.addAction(Action(modulesMenu, text='Sidebar',
                                      checkable=True, checked=visible,
-                                     callback=partial(self._showSideBarModule, self._sideBarFrame, self, visible)))
+                                     # callback=partial(self._showSideBarModule, self._sideBarFrame, self, visible)))
+                                     callback=partial(self._showSideBarModule, self.sideBar, self, visible)))
 
         for module in self.moduleArea.ccpnModules:
             moduleSize = module.size()
@@ -705,9 +715,11 @@ Use menu Spectrum-->Validate paths.. or "VP" shortcut to correct''' % '\n\t'.joi
         pluginsMenu.addSeparator()
         pluginsMenu.addAction(Action(pluginsMenu, text='Reload',
                                      callback=self._reloadPlugins))
+
     def _reloadPlugins(self):
         from ccpn import plugins
         from importlib import reload
+
         reload(plugins)
         self._fillPluginsMenu()
 
@@ -1008,10 +1020,10 @@ Use menu Spectrum-->Validate paths.. or "VP" shortcut to correct''' % '\n\t'.joi
             # check whether a new spectrumDisplay is needed, check axisOrdering
             # add show popup for ordering if required
             from ccpn.ui.gui.popups.AxisOrderingPopup import checkSpectraToOpen
+
             checkSpectraToOpen(self, objs)
 
             _openItemObject(self, objs, position=position, relativeTo=relativeTo)
-
 
     def _checkUrlsForProject(self, urls):
         """Check whether there is a project in the dropped url list,
@@ -1025,7 +1037,6 @@ Use menu Spectrum-->Validate paths.. or "VP" shortcut to correct''' % '\n\t'.joi
                                                      ioFormats.NEF,
                                                      ioFormats.NMRSTAR,
                                                      ioFormats.SPARKY):
-
                 return url
 
     def _processUrls(self, urls):
@@ -1059,10 +1070,10 @@ Use menu Spectrum-->Validate paths.. or "VP" shortcut to correct''' % '\n\t'.joi
                 # with progressManager(self.mainWindow, 'Loading data... ' + url):
                 try:  #  Why do we need this try?
                     spectraPathsCount = len(ioFormats._searchSpectraPathsInSubDir(url))
-                    askBeforeOpen_lenght = 20 # Ask user if want to open all (spectra) before start loading the full set.
+                    askBeforeOpen_lenght = 20  # Ask user if want to open all (spectra) before start loading the full set.
                     if spectraPathsCount > askBeforeOpen_lenght:
                         okToOpenAll = MessageDialog.showYesNo('Load data', 'The directory contains multiple items (~%s).'
-                                                                           ' Do you want to open all?' %str(spectraPathsCount))
+                                                                           ' Do you want to open all?' % str(spectraPathsCount))
                         if not okToOpenAll:
                             continue
                     with notificationEchoBlocking():

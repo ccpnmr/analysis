@@ -79,9 +79,8 @@ from ccpn.util.Constants import ccpnmrJsonData
 from ccpn.core.lib.Notifiers import Notifier, NotifierBase
 from ccpn.ui.gui.lib.GuiNotifier import GuiNotifier
 
-
-from PyQt5.QtCore import QStringListModel
-from PyQt5.QtGui import QListView, QAbstractItemView
+# from PyQt5.QtCore import QStringListModel
+# from PyQt5.QtGui import QListView, QAbstractItemView
 
 from ccpn.ui.gui.lib.MenuActions import _createNewDataSet, _createNewPeakList, _createNewChemicalShiftList, _createNewMultipletList, _createNewNmrResidue, \
     _createNewNmrAtom, \
@@ -100,8 +99,10 @@ from ccpn.ui.gui.lib.MenuActions import _openItemNoteTable, _openItemChemicalShi
 
 from ccpn.util.OrderedSet import OrderedSet
 
+
 ALL_NOTIFIERS = [Notifier.DELETE, Notifier.CREATE, Notifier.RENAME, Notifier.CHANGE]
 DEFAULT_NOTIFIERS = [Notifier.DELETE, Notifier.CREATE, Notifier.RENAME]
+
 
 #===========================================================================================================
 # SideBar handling class for handling tree structure
@@ -1030,15 +1031,22 @@ class SideBarStructure(object):
 #===========================================================================================================
 
 
+from ccpn.ui.gui.widgets.ListView import ListView
+SIDEBARROW = 0
+RESULTSWIDGETROW = 1
+SEARCHWIDGETROW = 2
+
+
 class SideBar(QtWidgets.QTreeWidget, SideBarStructure, Base, NotifierBase):
     """
     New sideBar class with new sidebar tree handling
     """
 
-    def __init__(self, parent=None, mainWindow=None, multiSelect=True,  **kwds):
+    def __init__(self, parent=None, mainWindow=None, multiSelect=True,
+                 searchWidgetContainer=None, searchResultsContainer=None, **kwds):
 
         super().__init__(parent)
-        Base._init(self, acceptDrops=True,  **kwds)
+        Base._init(self, acceptDrops=True, **kwds)
         SideBarStructure._init(self)
 
         self.multiSelect = multiSelect
@@ -1047,6 +1055,12 @@ class SideBar(QtWidgets.QTreeWidget, SideBarStructure, Base, NotifierBase):
 
         self.mainWindow = mainWindow
         self.application = self.mainWindow.application
+
+        self._parent = parent
+
+        # link to the frame containing ONLY the sideBar, assume at position (0,0)
+        self._searchWidgetContainer = searchWidgetContainer
+        self._searchResultsContainer = searchResultsContainer
 
         self.setFont(sidebarFont)
         self.header().hide()
@@ -1062,32 +1076,32 @@ class SideBar(QtWidgets.QTreeWidget, SideBarStructure, Base, NotifierBase):
 
         self.itemDoubleClicked.connect(self._raiseObjectProperties)
 
+        # create a search box at the bottom of the sidebar frame container
         txt = 'Search Pid/String e.g Sp:H*qC'
-        self._searchWidget = LineEdit(self.parent().parent(),backgroundText=txt)
-        self.getParent().parent().getLayout().addWidget(self._searchWidget,2,0)
+        self._searchWidget = LineEdit(self._searchWidgetContainer, backgroundText=txt, grid=(SEARCHWIDGETROW, 0))
         self._searchWidget.textChanged.connect(self._searchWidgetCallback)
 
-        self._resultsFrame = Frame(self.parent())
-        self._resultsFrame.setContentsMargins(0,0,0,0)
+        # create a results box
+        self._resultsFrame = self._searchResultsContainer
 
-        QtWidgets.QGridLayout(self._resultsFrame)
-        self.parent().insertWidget(1,self._resultsFrame)
-
-        self._resultsLabel = Label(self._resultsFrame,text='Search Results',grid=(0,0))
+        self._resultsLabel = Label(self._resultsFrame, text='Search Results', grid=(0, 0))
         self._resultsLabel.setAlignment(QtCore.Qt.AlignCenter)
-        self._resultsLabel.setContentsMargins(0,0,0,0)
+        self._resultsLabel.setContentsMargins(0, 0, 0, 0)
         self._resultsLabel.setStyleSheet("font-size:14px;")
 
-        self._resultsList = QListView(self._resultsFrame)
-        self._resultsList.setEditTriggers(QAbstractItemView.NoEditTriggers)
+        self._resultsList = ListView(self._resultsFrame, grid = (0, 0))
+
+        # frame can collapse to nothing
+        self._resultsFrame.setSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Ignored)
+        self._resultsList.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
 
         self._resultsFrame.getLayout().setSpacing(6)
-        self._resultsFrame.getLayout().addWidget(self._resultsList,2,0)
+        self._resultsFrame.getLayout().addWidget(self._resultsList, 2, 0)
         self._resultsFrame.setVisible(False)
-        self._resultsFrame.setContentsMargins(2,2,0,2)
+        self._resultsFrame.setContentsMargins(2, 2, 0, 2)
         self._resultsFrame.getLayout().setMargin(0)
 
-        self._results_model = QStringListModel()
+        self._results_model = QtCore.QStringListModel()
         self._results_list = []
         self._results_model.setStringList(self._results_list)
 
@@ -1099,31 +1113,26 @@ class SideBar(QtWidgets.QTreeWidget, SideBarStructure, Base, NotifierBase):
         self._searchSelection = []
         self._searchNotifiers = []
 
-    def _resultsListMenuRequested(self,position):
-
+    def _resultsListMenuRequested(self, position):
 
         dataPid = self._searchSelection[0]
         objs = [self.project.getByPid(dataPid)]
 
-
         sideBarObject = self._sidebarData.findChildNode(dataPid)
-
 
         menuAction = sideBarObject.menuAction
         if menuAction:
             globalPosition = self._resultsList.mapToGlobal(QtCore.QPoint(position.x(), position.y() + 10))
 
             # can't do menu action on anything other than main window as it looks for sub fields of main window...
-            menuAction(self.mainWindow, dataPid, sideBarObject,globalPosition, objs)
+            menuAction(self.mainWindow, dataPid, sideBarObject, globalPosition, objs)
 
-
-    def _resultsListSelection(self,rowSelection,columnSelection):
+    def _resultsListSelection(self, rowSelection, columnSelection):
 
         row = rowSelection.indexes()[0].row()
         pid = self._results_list[row]
         self._searchSelection.clear()
         self._searchSelection.append(pid)
-
 
     def _clearQTreeWidget(self, tree):
         """Clear contents of the sidebar.
@@ -1221,7 +1230,7 @@ class SideBar(QtWidgets.QTreeWidget, SideBarStructure, Base, NotifierBase):
                 strip = self.application.current.strip
                 if strip:
                     strip._clear()
-                    if isinstance(objFromPid,Spectrum):
+                    if isinstance(objFromPid, Spectrum):
                         strip.spectrumDisplay.displaySpectrum(objFromPid)
                     if isinstance(objFromPid, Sample):
                         strip.setStackingMode(False)
@@ -1340,14 +1349,14 @@ class SideBar(QtWidgets.QTreeWidget, SideBarStructure, Base, NotifierBase):
             return
 
         # seems to look at more objects than expected
-        def _buildNameMapAndSearchList(wrapper,result):
+        def _buildNameMapAndSearchList(wrapper, result):
             result[LOWER_TO_UPPER][wrapper.klass.shortClassName.lower()] = wrapper.klass.shortClassName
             result[LOWER_TO_UPPER][wrapper.klass.className.lower()] = wrapper.klass.className
 
             result[SEARCH_LIST].add(wrapper.klass.shortClassName.lower())
             result[SEARCH_LIST].add(wrapper.klass.className.lower())
 
-        result = {SEARCH_LIST : OrderedSet(), LOWER_TO_UPPER : {}}
+        result = {SEARCH_LIST: OrderedSet(), LOWER_TO_UPPER: {}}
 
         self._sidebarData._traverseKlassTree(sidebar=self, func=_buildNameMapAndSearchList, data=result)
 
@@ -1360,17 +1369,17 @@ class SideBar(QtWidgets.QTreeWidget, SideBarStructure, Base, NotifierBase):
             fields = lower_text.split(':')
             lower_category = fields[0]
         else:
-            cutoff = min(len(lower_text),3)
+            cutoff = min(len(lower_text), 3)
             lower_category = '%s*' % lower_text[:cutoff]
 
         for key in result[SEARCH_LIST]:
-            if fnmatch.fnmatch(key,lower_category):
+            if fnmatch.fnmatch(key, lower_category):
                 searchables.add(key)
 
         if len(searchables) == 0:
             searchables = result[SEARCH_LIST]
 
-        lower_to_upper =  result[LOWER_TO_UPPER]
+        lower_to_upper = result[LOWER_TO_UPPER]
 
         seen = set()
 
@@ -1384,17 +1393,17 @@ class SideBar(QtWidgets.QTreeWidget, SideBarStructure, Base, NotifierBase):
 
             if pid_key in self.project._project._pid2Obj:
                 for elem in self.project._project._pid2Obj[pid_key]:
-                    elem_key = "%s:%s" % (key,str(elem))
+                    elem_key = "%s:%s" % (key, str(elem))
 
                     wrapper = self.project._project._pid2Obj[pid_key][elem]
-                    wrapper_has_flagged_for_delete = hasattr(wrapper,'_flaggedForDelete')
+                    wrapper_has_flagged_for_delete = hasattr(wrapper, '_flaggedForDelete')
                     flagged_for_delete = False
                     if wrapper_has_flagged_for_delete:
                         flagged_for_delete = self.project._project._pid2Obj[pid_key][elem]._flaggedForDelete
                     if not flagged_for_delete:
-                        if fnmatch.fnmatch(elem_key.lower(),lower_text):
+                        if fnmatch.fnmatch(elem_key.lower(), lower_text):
                             if elem not in seen:
-                                self._results_list.append('%s:%s' % (pid_key,str(elem)))
+                                self._results_list.append('%s:%s' % (pid_key, str(elem)))
                                 seen.add(elem)
 
         self._results_model.setStringList(self._results_list)
@@ -1405,11 +1414,16 @@ class SideBar(QtWidgets.QTreeWidget, SideBarStructure, Base, NotifierBase):
 
         if len(self._searchNotifiers) == 0:
             for action in ('create', 'delete', 'rename'):
-                notifier =  self._project.registerNotifier('AbstractWrapperObject', action, self._notify_pids_changed,onceOnly=True)
+                notifier = self._project.registerNotifier('AbstractWrapperObject', action, self._notify_pids_changed, onceOnly=True)
                 self._searchNotifiers.append(notifier)
 
-    def _notify_pids_changed(self,*args,**kwargs):
+    def _notify_pids_changed(self, *args, **kwargs):
         self._searchWidgetCallback()
+
+
+class sideBarSearchWidget(Frame):
+    pass
+
 
 #------------------------------------------------------------------------------------------------------------------
 # Emulate V3 objects

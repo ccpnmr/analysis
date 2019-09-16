@@ -1678,14 +1678,6 @@ assignmentTolerances
                     seriesValues = {sg.pid: value}
             self.setParameter(SPECTRUMSERIES, SPECTRUMSERIESVALUES, seriesValues)
 
-                # if not isinstance(sg, str):
-                #     raise ValueError('SpectrumGroup key %s must be a string.' % str(sg))
-                # if not self.project.getByPid(sg):
-                #     raise ValueError('SpectrumGroup %s does not exist.' % str(sg))
-                # obj = self.project.getByPid(sg)
-                # if self not in obj.spectra:
-                #     raise ValueError('Spectrum %s does not belong to spectrumGroup %s' % (str(self), str(obj)))
-                # self.setParameter(SPECTRUMSERIES, SPECTRUMSERIESVALUES, series)
         else:
             self.setParameter(SPECTRUMSERIES, SPECTRUMSERIESVALUES, None)
 

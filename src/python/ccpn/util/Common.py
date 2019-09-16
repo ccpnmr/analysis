@@ -31,8 +31,6 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 # Start of code
 #=========================================================================================
-"""Common utilities
-"""
 
 import datetime
 import os
@@ -41,9 +39,10 @@ import sys
 import string
 import itertools
 from collections import Iterable
-from . import Constants
 from collections import OrderedDict
 
+from ccpn.util import Constants
+from ccpn.util.isotopes import isotopeRecords
 
 # Max value used for random integer. Set to be expressible as a signed 32-bit integer.
 maxRandomInt = 2000000000
@@ -261,7 +260,7 @@ def name2IsotopeCode(name=None):
     if result is None:
         if name[0].isdigit():
             ss = name.title()
-            for key in Constants.isotopeRecords:
+            for key in isotopeRecords:
                 if ss.startswith(key):
                     if name[:len(key)].isupper():
                         result = key
@@ -276,7 +275,7 @@ def isotopeCode2Nucleus(isotopeCode=None):
     if not isotopeCode:
         return None
 
-    record = Constants.isotopeRecords.get(isotopeCode)
+    record = isotopeRecords.get(isotopeCode)
     if record is None:
         return None
     else:
@@ -305,7 +304,7 @@ def name2ElementSymbol(name):
         return name[:2]
     elif name[0].isdigit():
         ss = name.title()
-        for key, record in Constants.isotopeRecords.items():
+        for key, record in isotopeRecords.items():
             if ss.startswith(key):
                 if name[:len(key)].isupper():
                     return record.symbol.upper()
@@ -326,11 +325,11 @@ def checkIsotope(text):
         return defaultIsotope
 
     name = text.strip().upper()
-    if name in Constants.isotopeRecords:
+    if name in isotopeRecords:
         # Superfluous but should speed things up
         return name
 
-    for isotopeCode in Constants.isotopeRecords:
+    for isotopeCode in isotopeRecords:
         # NB checking this first means that e.g. 'H13C' returns '13C' rather than '1H'
         if isotopeCode.upper() in name:
             return isotopeCode

@@ -47,7 +47,7 @@ from ccpn.util.Colour import spectrumColours, addNewColour, fillColourPulldown, 
 from ccpn.ui.gui.widgets.MessageDialog import showWarning
 from ccpn.ui.gui.widgets.Tabs import Tabs
 from ccpn.util.Logging import getLogger
-from ccpn.util.Constants import DEFAULT_ISOTOPE_DICT
+from ccpn.util.isotopes import isotopeRecords
 from ccpn.util.OrderedSet import OrderedSet
 from ccpn.core.lib.ContextManagers import undoStackBlocking, undoBlock
 from ccpn.ui.gui.popups.ValidateSpectraPopup import SpectrumValidator
@@ -787,6 +787,7 @@ class DimensionsTab(Widget):
         row += 1
         Label(self, text="Minimum displayed aliasing ", grid=(row, 0), hAlign='l')
 
+        isotopeList = [r.isotopeCode for r in isotopeRecords.values() if r.spin > 0]  # All isotopes with a spin
         for i in range(dimensions):
             row = 2
             # Label(self, text=str(spectrum.axisCodes[i]), grid=(row, i+1),  hAlign='l', vAlign='t',)
@@ -802,7 +803,6 @@ class DimensionsTab(Widget):
             # Label(self, text=str(spectrum.isotopeCodes[i]), grid=(row, i + 1), hAlign='l', vAlign='t', )
 
             self.isotopeCodePullDowns[i] = PulldownList(self, grid=(row, i + 1), vAlign='t')
-            isotopeList = [code for code in DEFAULT_ISOTOPE_DICT.values() if code]
             self.isotopeCodePullDowns[i].setData(isotopeList)
             # self.isotopeCodePullDowns[i].setMaxVisibleItems(10)
 

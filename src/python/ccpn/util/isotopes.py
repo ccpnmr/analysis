@@ -1,5 +1,5 @@
 """
-This file contains NMR isptope related functionalities
+This file contains NMR isotope related functionalities
 """
 #=========================================================================================
 # Licence, Reference and Credits
@@ -28,7 +28,7 @@ __date__ = "$Date: 2017-04-07 10:28:48 +0000 (Fri, April 07, 2017) $"
 import math
 import json
 from collections import OrderedDict, Counter
-from sandbox.Geerten.Refactored.traits.CcpNmrJson import CcpNmrJson
+from sandbox.Geerten.Refactored.traits.CcpNmrJson import CcpNmrJson, CcpnJsonDirectoryABC
 from sandbox.Geerten.Refactored.traits.CcpNmrTraits import Unicode, Int, Float, Bool
 
 from ccpn.framework.PathsAndUrls import ccpnConfigPath
@@ -58,14 +58,21 @@ class IsotopeRecord(CcpNmrJson):
 
     isotopeCode =      Unicode(allow_none=False, default_value='??').tag(info='The isotope code identifier, e.g. 1H, 13C, etc')
     elementNumber =    Int(allow_none=False, default_value=0).tag(info='The element number')
-    massNumber =       Int(allow_none=True, default_value=None).tag(info='The mass (in dalton)')
+    massNumber =       Int(allow_none=False, default_value=0).tag(info='The mass number')
     isRadioactive =    Bool(allow_none=True, default_value=None).tag(info='Flag identifying if isotope is radioactive')
     symbol =           Unicode(allow_none=False, default_value='?').tag(info='The symbol identifying the isotope; eg. H for 1H, C for 13C, etc')
     name =             Unicode(allow_none=True, default_value=None).tag(info='The name of the isotop; e.g. hydrogen')
     spin =             Float(allow_none=False, default_value=0.0).tag(info='The spin of the isotope')
-    gFactor =          Float(allow_none=False, default_value=1.0).tag(info='The g-factor of the isotope')
+    gFactor =          Float(allow_none=False, default_value=0.0).tag(info='The g-factor of the isotope')
     abundance =        Float(allow_none=True, default_value=None).tag(info='The abundance of the isotope')
     quadrupoleMoment = Float(allow_none=True, default_value=None).tag(info='The quadrupoleMoment of the isotope')
+
+    # to allow them to be sorted
+    def __le__(self, other):
+        return self.massNumber <= other.massNumber
+
+    def __lt__(self, other):
+        return self.massNumber < other.massNumber
 
     def __str__(self):
         return '<IsotopeRecord %s>' % self.isotopeCode
@@ -73,11 +80,30 @@ class IsotopeRecord(CcpNmrJson):
     def __repr__(self):
         return 'IsotopeRecord(%s)' % ', '.join(['%s=%r'%(k,v) for k,v in self.items()])
 #end class
+# register the class for restoring
 IsotopeRecord.register()
 
 
 @singleton
-class IsotopeRecords(OrderedDict):
+class IsotopeRecords(CcpnJsonDirectoryABC):
+    """Singleton class to contain all isotopeRecords as (isotopeCode, IsotopeRecord) key,value pairs
+    """
+    keyName = 'isotopeCode'
+    directory = aPath(ccpnConfigPath) / 'isotopeRecords'
+    sorted = True
+
+    def isotopesWithSpin(self, minValue=0.5, maxValue=None):
+        "Return list of all isotopeRecords that have spin between minValue and maxValue (inclusive)"
+        if maxValue is None: maxValue = 1000.0  # Some rediculus high number
+        result = []
+        for record in self.values():
+            if minValue <= record.spin <= maxValue:
+                result.append(record)
+        return result
+#end class
+
+@singleton
+class IsotopeRecords2(OrderedDict):
     """Singleton class to contain all isotopeRecords as (isotopeCode, IsotopeRecord) key,value pairs
     """
     CONFIG_PATH = aPath(ccpnConfigPath) / 'isotopeRecords'
@@ -86,10 +112,22 @@ class IsotopeRecords(OrderedDict):
         super().__init__()
         self.restoreFromJson()
 
+    def isotopesWithSpin(self, minValue=0.5, maxValue=None):
+        "Return list of all isotopeRecords that have spin between minValue and maxValue (inclusive)"
+        if maxValue is None: maxValue = 1000.0  # Some rediculus high number
+        result = []
+        for record in self.values():
+            if minValue <= record.spin <= maxValue:
+                result.append(record)
+        return result
+
     def restoreFromJson(self):
-        "restore all records from CONFIG_PATH"
+        "restore all records from CONFIG_PATH; populate the ordered-dict on massNumber sorting"
+        records = []
         for path in self.CONFIG_PATH.glob('*.json'):
-            record = IsotopeRecord().restore(path)
+            records.append(IsotopeRecord().restore(path))
+        records.sort()
+        for record in records:
             self[record.isotopeCode] = record
 
     def saveToJson(self):

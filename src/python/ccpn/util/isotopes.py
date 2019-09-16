@@ -67,22 +67,6 @@ class IsotopeRecord(CcpNmrJson):
     abundance =        Float(allow_none=True, default_value=None).tag(info='The abundance of the isotope')
     quadrupoleMoment = Float(allow_none=True, default_value=None).tag(info='The quadrupoleMoment of the isotope')
 
-    def __init__(self, isotopeCode=None, elementNumber=None, massNumber=None,
-                       isRadioactive=None, symbol=None, name=None, spin=None,
-                       gFactor=None, abundance=None, quadrupoleMoment=None
-                ):
-        super().__init__()
-        if isotopeCode is not None: self.isotopeCode=isotopeCode
-        if elementNumber is not None: self.elementNumber=elementNumber
-        if massNumber is not None: self.massNumber=massNumber
-        if isRadioactive is not None: self.isRadioactive=isRadioactive
-        if symbol is not None: self.symbol=symbol
-        if name is not None: self.name=name
-        if spin is not None: self.spin=spin
-        if gFactor is not None: self.gFactor=gFactor
-        if abundance is not None: self.abundance=abundance
-        if quadrupoleMoment is not None: self.quadrupoleMoment=quadrupoleMoment
-
     def __str__(self):
         return '<IsotopeRecord %s>' % self.isotopeCode
 
@@ -113,18 +97,6 @@ class IsotopeRecords(OrderedDict):
         for code, record in self.items():
             path = self.CONFIG_PATH / code + '.json'
             record.save(path)
-
-    # def _fixMassNumber(self):
-    #
-    #     digits = [str(i) for i in range(0,10)]
-    #     for code, record in self.items():
-    #         i=0
-    #         while i<len(code) and code[i] in digits:
-    #             i += 1
-    #         if i<len(code):
-    #             record.massNumber = int(code[:i])
-    #
-    #
 #end class
 
 # create an instance
@@ -218,17 +190,17 @@ class Field(dict):
                 return nucleus
         return None
 
-    def __str__(self):
-        return '<Field %.4fT>' % self.field
-
-    def __repr__(self):
-        return 'Field(%f)' % self.field
-
     def __le__(self, other):
         return self.field <= other.field
 
     def __lt__(self, other):
         return self.field < other.field
+
+    def __str__(self):
+        return '<Field %.4fT>' % self.field
+
+    def __repr__(self):
+        return 'Field(%f)' % self.field
 
 
 def findMostLikelyFieldFromSpectrometerFrequencies(spectrometerFrequencies):

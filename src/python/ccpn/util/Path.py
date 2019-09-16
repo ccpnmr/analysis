@@ -110,11 +110,11 @@ class Path(_Path_):
             fp = super().open(*args, **kwds)
         except FileNotFoundError:
             if len(self.asString()) > 256:
-                raise FileNotFoundError('file "%s" not found; potentially path length (%d) is too large. Consider moving the file'
+                raise FileNotFoundError('Error opening file "%s"; potentially path length (%d) is too large. Consider moving the file'
                                         % (self, len(self.asString()))
                                         )
             else:
-                raise FileNotFoundError('file "%s" not found' % self)
+                raise FileNotFoundError('Error opening file "%s"' % self)
         return fp
 
     def removeDir(self):

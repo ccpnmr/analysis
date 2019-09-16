@@ -39,12 +39,9 @@ from ccpn.util.decorators import singleton
 # Definitions for findMostLikelyFieldFromSpectrometerFrequencies
 # The default isotopes checked:
 defaultIsotopes = '1H 13C 15N 19F 31P'.split()
-# The default fields checked (within Field.validRange):
-field500 = 11.7433073413584267  # 500.0 MHz reference; tweaked in 14+ th digit to minimize rounding
-fields = [freq / 500.0 * field500 for freq in
-                            (300.0, 360.0, 400.0, 500.0, 600.0, 700.0, 750.0, 800.0, 850.0,
-                             900.0, 950.0, 1000.0, 1100.0, 1200.0)
-          ]
+# The default fields (defined in MHz; checked in range Field.validRange):
+fieldsInMHz = (300.0, 360.0, 400.0, 500.0, 600.0, 700.0, 750.0, 800.0, 850.0, 900.0, 950.0,
+               1000.0, 1100.0, 1200.0)
 #=========================================================================================
 
 VERSION = 1.0
@@ -88,7 +85,7 @@ IsotopeRecord.register()
 class IsotopeRecords(CcpnJsonDirectoryABC):
     """Singleton class to contain all isotopeRecords as (isotopeCode, IsotopeRecord) key,value pairs
     """
-    keyName = 'isotopeCode'
+    attributeName = 'isotopeCode'
     directory = aPath(ccpnConfigPath) / 'isotopeRecords'
     sorted = True
 
@@ -100,46 +97,13 @@ class IsotopeRecords(CcpnJsonDirectoryABC):
             if minValue <= record.spin <= maxValue:
                 result.append(record)
         return result
-#end class
 
-@singleton
-class IsotopeRecords2(OrderedDict):
-    """Singleton class to contain all isotopeRecords as (isotopeCode, IsotopeRecord) key,value pairs
-    """
-    CONFIG_PATH = aPath(ccpnConfigPath) / 'isotopeRecords'
-
-    def __init__(self):
-        super().__init__()
-        self.restoreFromJson()
-
-    def isotopesWithSpin(self, minValue=0.5, maxValue=None):
-        "Return list of all isotopeRecords that have spin between minValue and maxValue (inclusive)"
-        if maxValue is None: maxValue = 1000.0  # Some rediculus high number
-        result = []
-        for record in self.values():
-            if minValue <= record.spin <= maxValue:
-                result.append(record)
-        return result
-
-    def restoreFromJson(self):
-        "restore all records from CONFIG_PATH; populate the ordered-dict on massNumber sorting"
-        records = []
-        for path in self.CONFIG_PATH.glob('*.json'):
-            records.append(IsotopeRecord().restore(path))
-        records.sort()
-        for record in records:
-            self[record.isotopeCode] = record
-
-    def saveToJson(self):
-        "Save all isotopRecords to json"
-        for code, record in self.items():
-            path = self.CONFIG_PATH / code + '.json'
-            record.save(path)
+    def isotopesWithSpinHalf(self):
+        return self.isotopesWithSpin(minValue=0.5, maxValue=0.5)
 #end class
 
 # create an instance
 isotopeRecords = IsotopeRecords()
-defaultIsotopeRecords = [isotopeRecords.get(isotope) for isotope in defaultIsotopes]
 
 
 class Nucleus(str):
@@ -199,9 +163,15 @@ class Field(dict):
         super().__init__()
         self.field = field
         # add the default nuclei and their frequencies that will be tried
-        for record in defaultIsotopeRecords:
-            nuc = Nucleus(record.isotopeCode)
-            self[nuc] = nuc.frequencyAtField(field)
+        for isotope in defaultIsotopes:
+            self.addNucleus(isotope)
+
+    def addNucleus(self, isotopeCode):
+        "Add a Nucleus instance defined by isotopeCode"
+        if isotopeCode not in isotopeRecords:
+            raise ValueError('Undefined isotope "%s"' % isotopeCode)
+        nuc = Nucleus(isotopeCode)
+        self[nuc] = nuc.frequencyAtField(self.field)
 
     @property
     def nuclei(self):
@@ -245,7 +215,8 @@ def findMostLikelyFieldFromSpectrometerFrequencies(spectrometerFrequencies):
     """Return the most likely field corresponding to spectrometerFrequencies, or None if it cannot be determined
     """
     # list of fields to check
-    fieldList = [Field(field) for field in fields]
+    field500 = 11.7433073413584267  # 500.0 MHz reference; tweaked in 14+ th digit to minimize rounding
+    fieldList = [Field(freq / 500.0 * field500) for freq in fieldsInMHz]  # list of Field instances
 
     fieldsFound = Counter()
     for sf in spectrometerFrequencies:

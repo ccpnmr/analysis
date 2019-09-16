@@ -1088,11 +1088,13 @@ class SideBar(QtWidgets.QTreeWidget, SideBarStructure, Base, NotifierBase):
         self._resultsLabel.setAlignment(QtCore.Qt.AlignCenter)
         self._resultsLabel.setContentsMargins(0, 0, 0, 0)
         self._resultsLabel.setStyleSheet("font-size:14px;")
+        self._resultsLabel.setFixedHeight(self._resultsLabel.sizeHint().height())
 
-        self._resultsList = ListView(self._resultsFrame, grid = (0, 0))
+        self._resultsList = ListView(self._resultsFrame, mainWindow=self.mainWindow, grid = (0, 0), fitToContents=True,
+                                     listViewContainer=self._resultsFrame)
 
         # frame can collapse to nothing
-        self._resultsFrame.setSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Ignored)
+        self._resultsFrame.setSizePolicy(QtWidgets.QSizePolicy.Ignored, QtWidgets.QSizePolicy.Ignored)
         self._resultsList.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
 
         self._resultsFrame.getLayout().setSpacing(6)
@@ -1133,6 +1135,9 @@ class SideBar(QtWidgets.QTreeWidget, SideBarStructure, Base, NotifierBase):
         pid = self._results_list[row]
         self._searchSelection.clear()
         self._searchSelection.append(pid)
+
+        # call the original search selection
+        self._searchWidgetSideBarCallback(pid)
 
     def _clearQTreeWidget(self, tree):
         """Clear contents of the sidebar.
@@ -1325,6 +1330,16 @@ class SideBar(QtWidgets.QTreeWidget, SideBarStructure, Base, NotifierBase):
             self.setCurrentItem(item.widget)
             self.setFocus()
             self.expandItem(item.widget.parent())
+
+    def _searchWidgetSideBarCallback(self, pid):
+        """Private callback from search widget
+        """
+        # text = self._searchWidget.get()
+        obj = self.project.getByPid(pid)
+        if obj:
+            self.selectPid(obj.pid)
+        # else:
+        #     showWarning('Search', 'Not found')
 
     def _searchWidgetCallback(self):
         """Private callback from search widget"""

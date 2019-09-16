@@ -1427,6 +1427,7 @@ class SideBar(QtWidgets.QTreeWidget, SideBarStructure, Base, NotifierBase):
         else:
             self._resultsFrame.setVisible(False)
 
+        # add notifiers to update the listview on create/change/delete notification
         if len(self._searchNotifiers) == 0:
             for action in ('create', 'delete', 'rename'):
                 notifier = self._project.registerNotifier('AbstractWrapperObject', action, self._notify_pids_changed, onceOnly=True)

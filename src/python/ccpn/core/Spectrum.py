@@ -81,7 +81,7 @@ from ccpn.core.lib.Cache import cached
 from ccpn.util.decorators import logCommand
 from ccpn.framework.constants import CCPNMR_PREFIX
 from ccpn.core.lib.ContextManagers import newObject, deleteObject, \
-    undoStackBlocking, renameObject, undoBlock, notificationBlanking
+    undoStackBlocking, renameObject, undoBlock, notificationBlanking, ccpNmrV3CoreSetter
 from ccpn.util.Common import getAxisCodeMatchIndices
 from ccpn.util.Path import Path, aPath
 from ccpn.util.Common import isIterable
@@ -109,14 +109,15 @@ UPDATEALIASINGRANGEFLAG = '_updateAliasingRangeFlag'
 EXTENDALIASINGRANGEFLAG = 'extendAliasingRangeFlag'
 DISPLAYFOLDEDCONTOURS = 'displayFoldedContours'
 MAXALIASINGRANGE = 3
-
+SPECTRUMSERIES = 'spectrumSeries'
+SPECTRUMSERIESVALUES = 'spectrumSeriesValues'
 
 DIMENSIONFID = 'Fid'
 DIMENSIONFREQUENCY = 'Frequency'
 DIMENSIONFREQ = 'Freq'
 DIMENSIONSAMPLED = 'Sampled'
 DIMENSIONTYPES = [DIMENSIONFID, DIMENSIONFREQUENCY, DIMENSIONSAMPLED]
-_DIMENSIONCLASSES = {DIMENSIONFID : ApiFidDataDim, DIMENSIONFREQUENCY : ApiFreqDataDim, DIMENSIONSAMPLED : ApiSampledDataDim}
+_DIMENSIONCLASSES = {DIMENSIONFID: ApiFidDataDim, DIMENSIONFREQUENCY: ApiFreqDataDim, DIMENSIONSAMPLED: ApiSampledDataDim}
 
 
 def _cumulativeArray(array):
@@ -146,11 +147,14 @@ def _arrayOfIndex(index, cumul):
 
     return np.array(array)
 
+
 #=========================================================================================
 # Decorators to define the attributes to be copied
 #=========================================================================================
 
 from ccpn.util.decorators import singleton
+
+
 @singleton
 class _includeInCopyList(list):
     """Singleton class to store the attributes to be included when making a copy of object.
@@ -158,6 +162,7 @@ class _includeInCopyList(list):
     Dynamically filled by two decorators
     Stored as list of (attributeName, isMultiDimensional) tuples
     """
+
     def getNoneDimensional(self):
         "return a list of one-dimensional attributes"
         return [attr for attr, isNd in self if isNd == False]
@@ -171,12 +176,14 @@ class _includeInCopyList(list):
         if _t not in self:
             super().append(_t)
 
+
 def _includeInCopy(func):
     """Decorator to define that an non-dimensional attribute is to be included when making a copy of object
     """
     storage = _includeInCopyList()
     storage.append(func.__name__, False)
     return func
+
 
 def _includeInDimensionalCopy(func):
     """Decorator to define that a dimensional attribute is to be included when making a copy of object
@@ -238,11 +245,11 @@ class Spectrum(AbstractWrapperObject):
         """Return info string about self, optionally including dimensional
         parameters
         """
-        string  = '================= %s =================\n' % self
+        string = '================= %s =================\n' % self
         string += 'path = %s\n' % self.filePath
         for cache in self._dataCaches:
             if hasattr(self, cache):
-                string += str(getattr(self,cache)) + '\n'
+                string += str(getattr(self, cache)) + '\n'
         string += 'dimensions = %s\n' % self.dimensionCount
         string += 'sizes = (%s)\n' % ' x '.join([str(d) for d in self.pointCounts])
         for attr in """
@@ -277,10 +284,10 @@ phases0
 phases1
 assignmentTolerances
 """.split():
-                values = getattr(self,attr)
+                values = getattr(self, attr)
                 string += '%-25s: %s\n' % (attr,
-                                         ' '.join(['%-20s' % str(v) for v in values])
-                                         )
+                                           ' '.join(['%-20s' % str(v) for v in values])
+                                           )
         return string
 
     def printInfoString(self, includeDimensions=False):
@@ -1420,7 +1427,6 @@ assignmentTolerances
         """ spectral intensities as NumPy array for 1D spectra
         """
 
-
         if self.dimensionCount != 1:
             getLogger().warn('Currently this method only works for 1D spectra')
             return np.array([])
@@ -1628,6 +1634,104 @@ assignmentTolerances
 
         self.setParameter(SPECTRUMALIASING, ALIASINGRANGE, values)
 
+    @property
+    def _seriesValues(self):
+        """Return a tuple of the series values for the spectrumGroups
+        """
+        values = self.getParameter(SPECTRUMSERIES, SPECTRUMSERIESVALUES)
+        if values is not None:
+            series = ()
+            for sg in self.spectrumGroups:
+                if sg.pid in values:
+                    series += (values[sg.pid],)
+                else:
+                    series += (None, )
+            return series
+
+    @_seriesValues.setter
+    @ccpNmrV3CoreSetter()
+    def _seriesValues(self, values):
+        """Set the series values for all spectrumGroups that spectrum is attached to.
+        Must be of the form ( <values1>,
+                              <values2>,
+                              ...
+                              <valuesN>
+                            )
+            where SGN are spectrumGroups and <valuesN> is a dict
+        """
+        if not values:
+            raise ValueError('values is not defined')
+        if not isinstance(values, (tuple, type(None))):
+            raise TypeError('values is not of type tuple/None')
+        if len(values) != len(self.spectrumGroups):
+            raise ValueError('Number of values does not match number of spectrumGroups')
+        for ll in values:
+            if not isinstance(ll, (dict, type(None))):
+                raise ValueError('Values must be of type dict/None: %s' % ll)
+
+        if isinstance(values, tuple):
+            seriesValues = self.getParameter(SPECTRUMSERIES, SPECTRUMSERIESVALUES)
+            for sg, value in zip(self.spectrumGroups, values):
+                if seriesValues:
+                    seriesValues[sg.pid] = value
+                else:
+                    seriesValues = {sg.pid: value}
+            self.setParameter(SPECTRUMSERIES, SPECTRUMSERIESVALUES, seriesValues)
+
+                # if not isinstance(sg, str):
+                #     raise ValueError('SpectrumGroup key %s must be a string.' % str(sg))
+                # if not self.project.getByPid(sg):
+                #     raise ValueError('SpectrumGroup %s does not exist.' % str(sg))
+                # obj = self.project.getByPid(sg)
+                # if self not in obj.spectra:
+                #     raise ValueError('Spectrum %s does not belong to spectrumGroup %s' % (str(self), str(obj)))
+                # self.setParameter(SPECTRUMSERIES, SPECTRUMSERIESVALUES, series)
+        else:
+            self.setParameter(SPECTRUMSERIES, SPECTRUMSERIESVALUES, None)
+
+    def _getSeriesValues(self, spectrumGroup):
+        """Return the series values for the current spectrum for the selected spectrumGroup
+        """
+        from ccpn.core.SpectrumGroup import SpectrumGroup
+
+        spectrumGroup = self.project.getByPid(spectrumGroup) if isinstance(spectrumGroup, str) else spectrumGroup
+        if not isinstance(spectrumGroup, SpectrumGroup):
+            raise TypeError('%s is not a spectrumGroup' % str(spectrumGroup))
+        if self not in spectrumGroup.spectra:
+            raise ValueError('Spectrum %s does not belong to spectrumGroup %s' % (str(self), str(spectrumGroup)))
+
+        seriesValues = self.getParameter(SPECTRUMSERIES, SPECTRUMSERIESVALUES)
+        if seriesValues and spectrumGroup.pid in seriesValues:
+            return seriesValues[spectrumGroup.pid]
+
+    def _setSeriesValues(self, spectrumGroup, values):
+        """Set the preferred ordering for the axis codes when opening a new spectrumDisplay
+        """
+        from ccpn.core.SpectrumGroup import SpectrumGroup
+
+        spectrumGroup = self.project.getByPid(spectrumGroup) if isinstance(spectrumGroup, str) else spectrumGroup
+        if not isinstance(spectrumGroup, SpectrumGroup):
+            raise TypeError('%s is not a spectrumGroup', spectrumGroup)
+        if self not in spectrumGroup.spectra:
+            raise ValueError('Spectrum %s does not belong to spectrumGroup %s' % (str(self), str(spectrumGroup)))
+
+        seriesValues = self.getParameter(SPECTRUMSERIES, SPECTRUMSERIESVALUES)
+        if seriesValues:
+            seriesValues[spectrumGroup.pid] = values
+        else:
+            seriesValues = {spectrumGroup.pid: values}
+        self.setParameter(SPECTRUMSERIES, SPECTRUMSERIESVALUES, seriesValues)
+
+    def _renameSeriesValues(self, spectrumGroup, oldPid, value):
+        """rename the keys in the seriesValues top reflect the updated spectrumGroup name
+        """
+        seriesValues = self.getParameter(SPECTRUMSERIES, SPECTRUMSERIESVALUES)
+        if oldPid in seriesValues:
+            oldValues = seriesValues[oldPid]
+            del seriesValues[oldPid]
+            seriesValues[spectrumGroup.pid] = oldValues
+            self.setParameter(SPECTRUMSERIES, SPECTRUMSERIESVALUES, seriesValues)
+
     # @property
     # def folding(self) -> Tuple:
     #     """return a tuple of folding values for dimensions
@@ -1830,7 +1934,6 @@ assignmentTolerances
 
                 # OR find aliasing offsets and change values to inside aliasing limits
 
-
             value0 = max(value0, aliasingLimit0)
             value1 = min(value1, aliasingLimit1)
 
@@ -1976,7 +2079,7 @@ assignmentTolerances
         if not isIterable(axisCodes):
             raise ValueError('axisCodes is not iterable "%s"; expected list or tuple' %
                              axisCodes
-            )
+                             )
 
         if axisCodes is not None and not exactMatch:
             axisCodes = self._mapAxisCodes(axisCodes)
@@ -1986,11 +2089,11 @@ assignmentTolerances
         except AttributeError:
             raise AttributeError('Error getting attribute "%s" from object %s' %
                                  (attributeName, self)
-            )
+                                 )
         if not isIterable(values):
             raise ValueError('Attribute "%s" of object %s is not iterable; "%s"' %
                              (attributeName, self, values)
-            )
+                             )
         if axisCodes is not None:
             # change to order defined by axisCodes
             values = self._reorderValues(values, axisCodes)
@@ -2007,7 +2110,7 @@ assignmentTolerances
         if not hasattr(self, attributeName):
             raise AttributeError('Object %s does not have attribute "%s"' %
                                  (self, attributeName)
-            )
+                                 )
 
         if not isIterable(values):
             raise ValueError('Values "%s" is not iterable' % (values)
@@ -2016,7 +2119,7 @@ assignmentTolerances
         if not isIterable(axisCodes):
             raise ValueError('axisCodes is not iterable "%s"; expected list or tuple' %
                              axisCodes
-            )
+                             )
 
         if axisCodes is not None and not exactMatch:
             axisCodes = self._mapAxisCodes(axisCodes)
@@ -2206,7 +2309,7 @@ assignmentTolerances
             except Exception as es:
                 getLogger().error('Copying "%s" from %s to %s for axisCodes %s: %s' %
                                   (attr, self, target, axisCodes, es)
-                )
+                                  )
 
     def _copyNonDimensionalParameters(self, target):
         """Copy non-dimensional parameters from self to target
@@ -2218,7 +2321,7 @@ assignmentTolerances
             except Exception as es:
                 getLogger().error('Copying "%s" from %s to %s: %s' %
                                   (attr, self, target, es)
-                )
+                                  )
 
     def copyParameters(self, axisCodes, target):
         """Copy non-dimensional and dimensional parameters for axisCodes from self to target
@@ -2298,7 +2401,7 @@ assignmentTolerances
                              (self.dimensionCount, position)
                              )
 
-        if isIterable(sliceDim) or sliceDim < 1 or sliceDim > self.dimensionCount :
+        if isIterable(sliceDim) or sliceDim < 1 or sliceDim > self.dimensionCount:
             raise ValueError('sliceDim should be a scalar in range [1-%d]; got "%s"' %
                              (self.dimensionCount, sliceDim)
                              )
@@ -2332,7 +2435,7 @@ assignmentTolerances
         # check if we have something valid to return
         if result is None:
             getLogger().warning('Failed to get slice data along dimension "%s" at position %s' %
-                               (sliceDim, position))
+                                (sliceDim, position))
 
         # For 1D, save as intensities attribute
         self._intensities = result
@@ -2349,6 +2452,7 @@ assignmentTolerances
     def _getDefaultSlicePath(self, axisCode, position):
         "Return a default path for slice"
         from ccpn.util.Hdf5 import HDF5_EXTENSION
+
         slice = self.name + '_slice_%s_' % axisCode + '_'.join((str(p) for p in position))
         _p = aPath(self.filePath)
         return str(_p.parent / slice + HDF5_EXTENSION)
@@ -2386,13 +2490,15 @@ assignmentTolerances
 
         # save as hdf5 file
         from ccpn.util.Hdf5 import convertDataToHdf5
+
         convertDataToHdf5(_dummy, path)
 
         # create the api storage by destroying _dummy and re-loading the data
         from ccpnmodel.ccpncore.lib.spectrum.formats.Hdf5 import FILE_TYPE as HDF5_TYPE
+
         self.project.deleteObjects(_dummy)
         newSpectrum = self.project.loadSpectrum(path=path, subType=HDF5_TYPE)[0]  # load yields a list
-        newSpectrum.axisCodes = [axisCode] # to overRide the loadData
+        newSpectrum.axisCodes = [axisCode]  # to overRide the loadData
         # Copy relevant attributes again
         self.copyParameters(axisCodes=[axisCode], target=newSpectrum)
         return newSpectrum
@@ -2490,6 +2596,7 @@ assignmentTolerances
 
         planeData = self.getPlane(axisCodes=axisCodes, position=position)
         from ccpnmodel.ccpncore.lib._ccp.nmr.Nmr.DataSource import _saveNmrPipe2DHeader
+
         with open(path, 'wb') as fp:
             #TODO: remove dependency on filestorage on apiLayer
             xDim, yDim = self.getByAxisCodes('dimensions', axisCodes)[0:2]
@@ -2566,6 +2673,7 @@ assignmentTolerances
         projectedData = self.getProjection(axisCodes=axisCodes, method=method, threshold=threshold)
 
         from ccpnmodel.ccpncore.lib._ccp.nmr.Nmr.DataSource import _saveNmrPipe2DHeader
+
         with open(path, 'wb') as fp:
             #TODO: remove dependency on filestorage on apiLayer
             xDim, yDim = self.getByAxisCodes('dimensions', axisCodes)[0:2]

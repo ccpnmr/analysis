@@ -645,7 +645,6 @@ GuiTable::item::selected {
             item.setFormat(format)
             self.items.append(item)
 
-
             # item.setValue(val)  # Required--the text-change callback is invoked
             # when we call setItem.
             if isinstance(val, bool):  # this will create a check box if the value is a bool
@@ -664,6 +663,8 @@ GuiTable::item::selected {
                 selection =  model.selectedIndexes()
 
                 self.setCellWidget(row, col, pulldown)
+                self.setItem(row, col, item)
+                item.setValue('') # values are in the pulldown. Otherwise they are inserted inside the cell as str in a long list
 
             else:
                 self.setItem(row, col, item)

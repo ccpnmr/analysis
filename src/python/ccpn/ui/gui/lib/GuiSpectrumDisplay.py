@@ -531,18 +531,20 @@ class GuiSpectrumDisplay(CcpnModule):
             # self.spectrumToolBar._toolbarChange(self.strips[0].orderedSpectrumViews())
 
             if data[Notifier.OBJECT] == self:
-                specViews = data[Notifier.OBJECT].strips[0].spectrumViews
-                self.spectrumToolBar._toolbarChange(self.orderedSpectrumViews(specViews))
+                strips = data[Notifier.OBJECT].strips
+                if len(strips)>0:
+                    specViews = strips.strips[0].spectrumViews
+                    self.spectrumToolBar._toolbarChange(self.orderedSpectrumViews(specViews))
 
-                # flag that the listViews need to be updated
-                for strip in self.strips:
-                    strip._updateVisibility()
+                    # flag that the listViews need to be updated
+                    for strip in self.strips:
+                        strip._updateVisibility()
 
-                # spawn a redraw of the GL windows
-                from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
+                    # spawn a redraw of the GL windows
+                    from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
 
-                GLSignals = GLNotifier(parent=None)
-                GLSignals.emitPaintEvent()
+                    GLSignals = GLNotifier(parent=None)
+                    GLSignals.emitPaintEvent()
 
     def _hoverEvent(self, event):
         event.accept()

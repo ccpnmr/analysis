@@ -360,6 +360,7 @@ def _markPeakPosItem(strip):
                     callback=None)
 
 
+# axis items for the main view
 def _copyXAxisRangeFromStripItem(strip):
     return _SCMitem(name='Copy X Axis Range From:',
                     typeItem=ItemTypes.get(MENU), toolTip='Copy X axis range from selected strip',
@@ -381,6 +382,21 @@ def _copyAllAxisRangeFromStripItem(strip):
                     callback=None)
 
 
+def _copyXAxisCodeRangeFromStripItem(strip):
+    return _SCMitem(name='Match %s Axis Range to:' % strip.axisCodes[0],
+                    typeItem=ItemTypes.get(MENU), toolTip='Match %s axis range to selected strip' % strip.axisCodes[0],
+                    stripMethodName='matchXAxisCodeToMenu',
+                    callback=None)
+
+
+def _copyYAxisCodeRangeFromStripItem(strip):
+    return _SCMitem(name='Match %s Axis Range to:' % strip.axisCodes[1],
+                    typeItem=ItemTypes.get(MENU), toolTip='Match %s axis range to selected strip' % strip.axisCodes[1],
+                    stripMethodName='matchYAxisCodeToMenu',
+                    callback=None)
+
+
+# axis items for the axis and corner menues
 def _copyXAxisRangeFromStripItem2(strip):
     """Separate item needed for the new axis menu
     """
@@ -403,6 +419,20 @@ def _copyAllAxisRangeFromStripItem2(strip):
     return _SCMitem(name='Copy X/Y Axis Ranges From:',
                     typeItem=ItemTypes.get(MENU), toolTip='Copy X and Y axis range from selected strip',
                     stripMethodName='copyAllAxisFromMenu2',
+                    callback=None)
+
+
+def _copyXAxisCodeRangeFromStripItem2(strip):
+    return _SCMitem(name='Match %s Axis Range to:' % strip.axisCodes[0],
+                    typeItem=ItemTypes.get(MENU), toolTip='Match %s axis range to selected strip' % strip.axisCodes[0],
+                    stripMethodName='matchXAxisCodeToMenu2',
+                    callback=None)
+
+
+def _copyYAxisCodeRangeFromStripItem2(strip):
+    return _SCMitem(name='Match %s Axis Range to:' % strip.axisCodes[1],
+                    typeItem=ItemTypes.get(MENU), toolTip='Match %s axis range to selected strip' % strip.axisCodes[1],
+                    stripMethodName='matchYAxisCodeToMenu2',
                     callback=None)
 
 
@@ -543,6 +573,7 @@ def _get1dDefaultMenu(guiStrip1d) -> Menu:
         _separator(),
         _navigateToCursorPosItem(guiStrip1d),
         _markCursorPosItem(guiStrip1d),
+        _separator(),
         _copyAllAxisRangeFromStripItem(guiStrip1d),
         _copyXAxisRangeFromStripItem(guiStrip1d),
         _copyYAxisRangeFromStripItem(guiStrip1d),
@@ -672,9 +703,12 @@ def _getNdDefaultMenu(guiStripNd) -> Menu:
         _separator(),
         _navigateToCursorPosItem(guiStripNd),
         _markCursorPosItem(guiStripNd),
+        _separator(),
         _copyAllAxisRangeFromStripItem(guiStripNd),
         _copyXAxisRangeFromStripItem(guiStripNd),
         _copyYAxisRangeFromStripItem(guiStripNd),
+        _copyXAxisCodeRangeFromStripItem(guiStripNd),
+        _copyYAxisCodeRangeFromStripItem(guiStripNd),
         _separator(),
         _estimateNoise(guiStripNd),
         _makeStripPlot(guiStripNd),
@@ -764,6 +798,8 @@ def _getAxisMenu(guiStrip) -> Menu:
         _copyAllAxisRangeFromStripItem2(guiStrip),
         _copyXAxisRangeFromStripItem2(guiStrip),
         _copyYAxisRangeFromStripItem2(guiStrip),
+        _copyXAxisCodeRangeFromStripItem2(guiStrip),
+        _copyYAxisCodeRangeFromStripItem2(guiStrip),
         ]
     items = [itm for itm in items if itm is not None]
     return _createMenu(guiStrip, items)

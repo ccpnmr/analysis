@@ -631,14 +631,74 @@ class GuiStrip(Frame):
 
                 axisName.setEnabled(True if count else False)
 
+    def _addItemsToMatchAxisCodesFromMenuesMainView(self):
+        """Setup the menu for the main view
+        """
+        self._addItemsToCopyAxisCodesFromMenues(0, [self.matchXAxisCodeToMenu, self.matchYAxisCodeToMenu])
+        self._addItemsToCopyAxisCodesFromMenues(1, [self.matchXAxisCodeToMenu, self.matchYAxisCodeToMenu])
+
+    def _addItemsToMatchAxisCodesFromMenuesAxes(self):
+        """Setup the menu for the axis views
+        """
+        self._addItemsToCopyAxisCodesFromMenues(0, [self.matchXAxisCodeToMenu2, self.matchYAxisCodeToMenu2])
+        self._addItemsToCopyAxisCodesFromMenues(1, [self.matchXAxisCodeToMenu2, self.matchYAxisCodeToMenu2])
+
+    def _addItemsToCopyAxisCodesFromMenues(self, axisIndex, axisList):
+        """Copied from old viewbox. This function apparently take the current cursorPosition
+         and uses to pan a selected display from the list of spectrumViews or the current cursor position.
+        """
+        # TODO needs clear documentation
+        from functools import partial
+        from ccpn.util.Common import getAxisCodeMatchIndices
+
+        # axisList = (self.matchXAxisCodeToMenu2, self.matchYAxisCodeToMenu2)
+
+        if axisIndex not in range(len(axisList)):
+            return
+
+        axisName = axisList[axisIndex]
+        axisCode = self.axisCodes[axisIndex]
+
+        if axisName:
+            axisName.clear()
+            currentStrip = self.current.strip
+            position = self.current.cursorPosition
+
+            count = 0
+            if currentStrip:
+                for spectrumDisplay in self.current.project.spectrumDisplays:
+                    addSeparator = False
+                    for strip in spectrumDisplay.strips:
+                        if strip != currentStrip:
+
+                            indices = getAxisCodeMatchIndices(strip.axisCodes, (axisCode,))
+
+                            for ii, ind in enumerate(indices):
+                                if ind is not None:
+
+                                    toolTip = 'Copy %s axis range from strip %s' % (str(strip.axisCodes[ii]), str(strip.id))
+                                    if len(list(set(strip.axisCodes) & set(currentStrip.axisCodes))) <= 4:
+                                        axisName.addItem(text='%s from %s' % (str(strip.axisCodes[ii]), str(strip.pid)),
+                                                         callback=partial(self._copyAxisCodeFromStrip,
+                                                                          axisIndex=axisIndex, fromStrip=strip, fromAxisId=ii),
+                                                         toolTip=toolTip)
+                                        count += 1
+                                        addSeparator = True
+
+                    if addSeparator:
+                        axisName.addSeparator()
+
+            axisName.setEnabled(True if count else False)
+
     def _enableAxisMenuItems(self, axisName):
 
         from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs import BOTTOMAXIS, RIGHTAXIS, AXISCORNER
 
-        axisMenuItems = (self.copyAllAxisFromMenu2, self.copyXAxisFromMenu2, self.copyYAxisFromMenu2)
-        enabledList = {BOTTOMAXIS: (False, True, False),
-                       RIGHTAXIS : (False, False, True),
-                       AXISCORNER: (True, True, True)
+        axisMenuItems = (self.copyAllAxisFromMenu2, self.copyXAxisFromMenu2, self.copyYAxisFromMenu2,
+                         self.matchXAxisCodeToMenu2, self.matchYAxisCodeToMenu2)
+        enabledList = {BOTTOMAXIS: (False, True, False, True, False),
+                       RIGHTAXIS : (False, False, True, False, True),
+                       AXISCORNER: (True, True, True, True, True)
                        }
         if axisName in enabledList:
             axisSelect = enabledList[axisName]
@@ -1120,6 +1180,21 @@ class GuiStrip(Frame):
 
         except Exception as es:
             getLogger().warning('Error copying axis %s from strip %s' % (str(axisId), str(fromStrip)))
+            raise (es)
+
+    def _copyAxisCodeFromStrip(self, axisIndex, fromStrip, fromAxisId):
+        try:
+            axisRange = fromStrip.orderedAxes[fromAxisId].region
+            if axisIndex == 0:
+                # copy X axis from strip
+                self.zoomX(*axisRange)
+
+            elif axisIndex == 1:
+                # copy Y axis from strip
+                self.zoomY(*axisRange)
+
+        except Exception as es:
+            getLogger().warning('Error copying axis %s from strip %s' % (str(fromStrip.axisCodes[fromAxisId]), str(fromStrip)))
             raise (es)
 
     def _createMarkAtCursorPosition(self):

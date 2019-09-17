@@ -54,7 +54,7 @@ from ccpn.util.decorators import logCommand
 from ccpn.core.lib.ContextManagers import undoBlock
 from ccpn.ui.gui.lib.GuiStrip import GuiStrip, DefaultMenu, PeakMenu, IntegralMenu, MultipletMenu, PhasingMenu, AxisMenu
 from ccpn.ui.gui.lib.GuiStripContextMenus import _getNdPhasingMenu, _getNdDefaultMenu, _getNdPeakMenu, \
-    _getNdIntegralMenu, _getNdMultipletMenu, _getAxisMenu
+    _getNdIntegralMenu, _getNdMultipletMenu, _getNdAxisMenu
 from ccpn.ui.gui.lib.Strip import copyStripPosition
 from ccpn.util.Common import getAxisCodeMatchIndices
 
@@ -140,7 +140,7 @@ class GuiStripNd(GuiStrip):
         self._peakMenu = _getNdPeakMenu(self)
         self._integralMenu = _getNdIntegralMenu(self)
         self._multipletMenu = _getNdMultipletMenu(self)
-        self._axisMenu = _getAxisMenu(self)
+        self._axisMenu = _getNdAxisMenu(self)
 
         self._contextMenus.update({DefaultMenu  : self._defaultMenu,
                                    PhasingMenu  : self._phasingMenu,

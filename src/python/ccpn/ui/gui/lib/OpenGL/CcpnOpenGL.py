@@ -5971,15 +5971,19 @@ class CcpnGLWidget(QOpenGLWidget):
                 strip._addItemsToNavigateToCursorPosMenu()
                 strip._addItemsToMarkInCursorPosMenu()
                 strip._addItemsToCopyAxisFromMenuesMainView()
-                strip._addItemsToMatchAxisCodesFromMenuesMainView()
+                if not self.is1D:
+                    strip._addItemsToMatchAxisCodesFromMenuesMainView()
                 strip._checkMenuItems()
 
             elif mouseInAxis in [GLDefs.BOTTOMAXIS, GLDefs.RIGHTAXIS, GLDefs.AXISCORNER]:
                 strip.contextMenuMode = AxisMenu
                 menu = strip._contextMenus.get(strip.contextMenuMode)
                 strip._addItemsToCopyAxisFromMenuesAxes()
-                strip._addItemsToMatchAxisCodesFromMenuesAxes()
-                strip._enableAxisMenuItems(mouseInAxis)
+                if not self.is1D:
+                    strip._addItemsToMatchAxisCodesFromMenuesAxes()
+                    strip._enableNdAxisMenuItems(mouseInAxis)
+                else:
+                    strip._enable1dAxisMenuItems(mouseInAxis)
 
             if menu is not None:
                 strip.viewStripMenu = menu

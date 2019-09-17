@@ -649,6 +649,19 @@ def _get1dMultipletMenu(guiStrip1d) -> Menu:
     return _createMenu(guiStrip1d, items)
 
 
+def _get1dAxisMenu(guiStrip) -> Menu:
+    """
+    Creates and returns the current Axis context menu. Opened when right clicked on axis
+    """
+    items = [
+        _copyAllAxisRangeFromStripItem2(guiStrip),
+        _copyXAxisRangeFromStripItem2(guiStrip),
+        _copyYAxisRangeFromStripItem2(guiStrip),
+        ]
+    items = [itm for itm in items if itm is not None]
+    return _createMenu(guiStrip, items)
+
+
 ########################################################################################################################
 #########################################      Nd Menus     ############################################################
 ########################################################################################################################
@@ -790,7 +803,7 @@ def _getNdMultipletMenu(guiStripNd) -> Menu:
     return _createMenu(guiStripNd, items)
 
 
-def _getAxisMenu(guiStrip) -> Menu:
+def _getNdAxisMenu(guiStrip) -> Menu:
     """
     Creates and returns the current Axis context menu. Opened when right clicked on axis
     """

@@ -37,7 +37,7 @@ from ccpn.ui.gui.widgets.Menu import Menu
 import numpy as np
 from ccpn.util.Logging import getLogger
 from ccpn.ui.gui.lib.GuiStripContextMenus import _get1dPhasingMenu, _get1dDefaultMenu, \
-    _get1dPeakMenu, _get1dIntegralMenu, _get1dMultipletMenu, _getAxisMenu
+    _get1dPeakMenu, _get1dIntegralMenu, _get1dMultipletMenu, _get1dAxisMenu
 
 
 class GuiStrip1d(GuiStrip):
@@ -120,7 +120,7 @@ class GuiStrip1d(GuiStrip):
         self._peakMenu = _get1dPeakMenu(self)
         self._integralMenu = _get1dIntegralMenu(self)
         self._multipletMenu = _get1dMultipletMenu(self)
-        self._axisMenu = _getAxisMenu(self)
+        self._axisMenu = _get1dAxisMenu(self)
 
         self._contextMenus.update({DefaultMenu  : self._defaultMenu,
                                    PhasingMenu  : self._phasingMenu,

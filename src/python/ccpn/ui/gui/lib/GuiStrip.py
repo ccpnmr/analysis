@@ -690,7 +690,7 @@ class GuiStrip(Frame):
 
             axisName.setEnabled(True if count else False)
 
-    def _enableAxisMenuItems(self, axisName):
+    def _enableNdAxisMenuItems(self, axisName):
 
         from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs import BOTTOMAXIS, RIGHTAXIS, AXISCORNER
 
@@ -699,6 +699,24 @@ class GuiStrip(Frame):
         enabledList = {BOTTOMAXIS: (False, True, False, True, False),
                        RIGHTAXIS : (False, False, True, False, True),
                        AXISCORNER: (True, True, True, True, True)
+                       }
+        if axisName in enabledList:
+            axisSelect = enabledList[axisName]
+            for menuItem, select in zip(axisMenuItems, axisSelect):
+                # only disable if already enabled
+                if menuItem.isEnabled():
+                    menuItem.setEnabled(select)
+        else:
+            getLogger().warning('Error selecting menu item')
+
+    def _enable1dAxisMenuItems(self, axisName):
+
+        from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs import BOTTOMAXIS, RIGHTAXIS, AXISCORNER
+
+        axisMenuItems = (self.copyAllAxisFromMenu2, self.copyXAxisFromMenu2, self.copyYAxisFromMenu2)
+        enabledList = {BOTTOMAXIS: (False, True, False),
+                       RIGHTAXIS : (False, False, True),
+                       AXISCORNER: (True, True, True)
                        }
         if axisName in enabledList:
             axisSelect = enabledList[axisName]

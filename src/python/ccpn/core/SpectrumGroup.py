@@ -195,7 +195,6 @@ class SpectrumGroup(AbstractWrapperObject):
         # propagate the rename to associated seriesValues
         if action in ['rename']:
             # rename the items in _seriesValues as they are referenced by pid
-            print('>>>rename pids in series')
             for spectrum in self.spectra:
                 spectrum._renameSeriesValues(self, oldPid, self.pid)
 

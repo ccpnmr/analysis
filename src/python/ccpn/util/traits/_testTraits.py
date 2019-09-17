@@ -5,16 +5,19 @@
 """
 
 from ccpn.util.traits.CcpNmrTraits import Dict, Odict, Int, List, CPath, Adict
-from ccpn.util.traits.CcpNmrJson import CcpNmrJson, RecursiveDictHandler, RecursiveListHandler
+from ccpn.util.traits.CcpNmrJson import CcpNmrJson
+from ccpn.util.traits.CcpNmrTraits import RecursiveDict, RecursiveList
 
 class TestObj(CcpNmrJson):
 
     saveAllTraitsToJson = True
-    odict = Odict()
+    version = 0.1
+
+    odict = Odict().tag(recursion=True)  # True is default
     adict = Adict()
 
-    theDict = Dict().tag(jsonHandler=RecursiveDictHandler)
-    theList = List().tag(jsonHandler=RecursiveListHandler)
+    theDict = RecursiveDict()
+    theList = RecursiveList()
     thePath = CPath(default_value='bla.dat')
 
 TestObj.register()
@@ -39,13 +42,14 @@ TestObj2.register()
 def test():
     "Test it; returns two objects"
 
-    obj1 = TestObj()
+    obj1 = TestObj(id='obj1')
 
     for v in [10, 11, 12]:
         obj2 = TestObj2(v)
         obj1.theDict[str(v)] = obj2
     obj1.theDict['aap'] = 'noot'
 
+    obj1.odict['test'] = TestObj2(0)
     for v in [20, 21, 22]:
         obj1.odict[str(v)] = v
 
@@ -60,6 +64,7 @@ def test():
     js = obj1.toJson(ident=None)
     print(js)
     obj2 = TestObj().fromJson(js)
+    obj2.setMetadata(id='copy from obj1')
     print(obj2)
 
     return (obj1, obj2)

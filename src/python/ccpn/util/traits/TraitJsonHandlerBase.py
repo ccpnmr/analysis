@@ -55,3 +55,99 @@ class TraitJsonHandlerBase():
     def decode(self, obj, trait, value):
         "uses value to generate and set the new (or modified) obj"
         setattr(obj, trait, value)
+
+
+class RecursiveDictHandlerABC(TraitJsonHandlerBase):
+    """Abstract base class to handle recursion of dict-like traits
+    Each value of the (key,value) pairs must of CcpNmrJson (sub-)type
+    """
+    # This needs to be subclassed
+    klass = None
+
+    def encode(self, obj, trait):
+        # convert dict into list of (key, value) pairs, recursing
+        # for each value of (sub-)type CcpNmrJson
+
+        # local imports to avoid circular dependencies
+        from ccpn.util.traits.CcpNmrJson import constants, CcpNmrJson
+
+        theDict = getattr(obj, trait)
+        if not isinstance(theDict, self.klass):
+            raise RuntimeError('trait: "%s", expected instance class "%s", got "%s"' %
+                               (trait, type(self.klass), type(theDict))
+                               )
+        theList = []
+        recursion = obj.trait_metadata(trait, constants.RECURSION, True)
+        for key, value in theDict.items():
+            if recursion and isinstance(value, CcpNmrJson):
+                value = value._encode()
+            theList.append((key, value))
+        return theList
+
+    def decode(self, obj, trait, theList):
+        # needs conversion from list into klass; recursing for each (key, value) pair
+        # converting this to the relevant object
+
+        # local imports to avoid circular dependencies
+        from ccpn.util.traits.CcpNmrJson import constants, CcpNmrJson
+
+        result = []
+        recursion = obj.trait_metadata(trait, constants.RECURSION, True)
+        for key, value in theList:
+            # check if this encoded a CcpNmrJson type object
+            if recursion and CcpNmrJson.isEncodedObject(value):
+                theDict = dict(value)
+                value = CcpNmrJson._newObjectFromDict(theDict)
+            result.append((key, value))
+        # convert to class
+        theDict = self.klass(result)
+        setattr(obj, trait, theDict)
+# end class
+
+
+class RecursiveListHandlerABC(TraitJsonHandlerBase):
+    """Abstract base class to handle recursion of list-like traits
+    Each value of the (list must of CcpNmrJson (sub-)type
+    """
+    # --------------------------------------------------------------------------------------------
+    klass = None
+    # --------------------------------------------------------------------------------------------
+
+    def encode(self, obj, trait):
+        # convert list, recursing for each item, which must of (sub-)type CcpNmrJson
+
+        # local imports to avoid circular dependencies
+        from ccpn.util.traits.CcpNmrJson import constants, CcpNmrJson
+
+        theList = getattr(obj, trait)
+        if not isinstance(theList, self.klass):
+            raise RuntimeError('trait: "%s", expected instance class "%s", got "%s"' %
+                               (trait, type(self.klass), type(theList))
+                               )
+        result = []
+        recursion = obj.trait_metadata(trait, constants.RECURSION, True)
+        for i, item in enumerate(theList):
+            if recursion and isinstance(item, CcpNmrJson):
+                item = item._encode()
+            result.append(item)
+        return result
+
+    def decode(self, obj, trait, theList):
+        # needs recursing for each item in theList
+        # converting this to the relevant klass
+
+        # local imports to avoid circular dependencies
+        from ccpn.util.traits.CcpNmrJson import constants, CcpNmrJson
+
+        result = []
+        recursion = obj.trait_metadata(trait, constants.RECURSION, True)
+        for item in theList:
+            # check if this encoded a CcpNmrJson type object
+            if recursion and CcpNmrJson.isEncodedObject(item):
+                theDict = dict(item)
+                item = CcpNmrJson._newObjectFromDict(theDict)
+            result.append(item)
+        # convert to klass
+        result = self.klass(result)
+        setattr(obj, trait, result)
+# end class

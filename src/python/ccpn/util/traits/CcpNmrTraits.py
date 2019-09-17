@@ -36,7 +36,8 @@ from traitlets import \
     Enum, Bool, CBool, CaselessStrEnum, TCPAddress, CRegExp, Any, \
     TraitType, default, validate, observe, Undefined, HasTraits
 
-from ccpn.util.traits.TraitJsonHandlerBase import TraitJsonHandlerBase
+from ccpn.util.traits.TraitJsonHandlerBase import TraitJsonHandlerBase, RecursiveDictHandlerABC, \
+    RecursiveListHandlerABC
 from ccpn.util.AttributeDict import AttributeDict
 from ccpn.util.Path import aPath, Path
 
@@ -61,9 +62,19 @@ class Immutable(Any):
 #end class
 
 
+class RecursiveDict(Dict):
+    """A dict trait that implements recursion of any of the values that are a CcpNmrJson (sub)type
+    Recursion is active by default, unless tagged with .tag(recursion=False)
+    """
+    # trait-specific json handler
+    class jsonHandler(RecursiveDictHandlerABC):
+        klass = dict
+
+
 class Adict(TraitType):
     """A trait that defines a json serialisable AttributeDict; 
-    dicts are automatically cast into AttributeDict
+    dicts or (key,value) iterables are automatically cast into AttributeDict
+    Recursion is active by default, unless tagged with .tag(recursion=False)
     """
     default_value = AttributeDict()
     info_text = "'an AttributeDict'"
@@ -75,26 +86,21 @@ class Adict(TraitType):
             return value
         elif isinstance(value, dict):
             return AttributeDict(**value)
+        elif isinstance(value, list) or isinstance(value, tuple):
+            return AttributeDict(value)
         else:
             self.error(obj, value)
 
     # trait-specific json handler
-    class jsonHandler(TraitJsonHandlerBase):
-        """Serialise AttributeDict to be json compatible.
-        """
-        # def encode(self, obj, trait): # inherits from base class; behaves as a dict for json
-        #     return getattr(obj, trait)
-
-        def decode(self, obj, trait, value):
-            # needs conversion from dict into AttributeDict
-            setattr(obj, trait, AttributeDict(**value))
-    # end class
+    class jsonHandler(RecursiveDictHandlerABC):
+        klass = AttributeDict
 # end class
 
 
 class Odict(TraitType):
     """A trait that defines a json serialisable OrderedDict;
     dicts are automatically cast into OrderedDict
+    Recursion is active by default, unless tagged with .tag(recursion=False)
     """
     default_value = OrderedDict()
     info_text = "'an OrderedDict'"
@@ -110,19 +116,27 @@ class Odict(TraitType):
             self.error(obj, value)
 
     # trait-specific json handler
-    class jsonHandler(TraitJsonHandlerBase):
-        """Serialise OrderedDict to be json compatible.
-        """
-        def encode(self, obj, trait):
-            # convert OrderedDict into list of (key, value) pairs
-            theDict = getattr(obj, trait)
-            return list(theDict.items())
-
-        def decode(self, obj, trait, value):
-            # needs conversion from list into OrderedDict
-            setattr(obj, trait, OrderedDict(value))
-    # end class
+    class jsonHandler(RecursiveDictHandlerABC):
+        klass = OrderedDict
 # end class
+
+
+class RecursiveList(List):
+    """A list trait that implements recursion of any of the values that are a CcpNmrJson (sub)type
+    Recursion is active by default, unless tagged with .tag(recursion=False)
+    """
+    # trait-specific json handler
+    class jsonHandler(RecursiveListHandlerABC):
+        klass = list
+
+
+class RecursiveTuple(Tuple):
+    """A tuple trait that implements recursion of any of the values that are a CcpNmrJson (sub)type
+    Recursion is active by default, unless tagged with .tag(recursion=False)
+    """
+    # trait-specific json handler
+    class jsonHandler(RecursiveListHandlerABC):
+        klass = tuple
 
 
 class CPath(TraitType):

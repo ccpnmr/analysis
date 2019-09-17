@@ -42,6 +42,7 @@ from sandbox.Geerten.Refactored.decorators import debug2Enter, debug3Enter, debu
 class Constants(TraitBase):
     # jsonHandlers
     JSONHANDLER = 'jsonHandler'
+    RECURSION = 'recursion'
 
     # used for file handler routines
     SAVE = '_save'
@@ -263,15 +264,18 @@ class CcpNmrJson(TraitBase):
     Abstract base class to handle objects to and from json
 
     --------------------------------------------------------------------------------------------
-     Define attributes (traits) as traitlets instances.
+     Define attributes (traits) as traitlets instances (Import from util/traits/CcpNmrTraits).
 
      Traits to be saved to json are tagged saveToJson=True.
          Example:  myint = Int().tag(saveToJson=True)
+
+     All traits can be saved by default setting the class attribute saveAllTraitsToJson to True
+        Example:   saveAllTraitsToJson = True
          
          
-     handlers are defined by hiarachy:
+     Trait handlers are defined by hiarachy:
      
-     1) Traits can use jsonHandler tag key to define a specific jonHandler class (typically defined
+     1) Traits can use jsonHandler tag key to define a specific jsonHandler class (typically defined
      outside the class) or use the jsonHandler(trait) decorator (typically inside a class definition).
          Example:  
                    myint = Int().tag(saveToJson=True, jsonHandler=myHandler)  # myHandler defined elsewhere
@@ -312,30 +316,48 @@ class CcpNmrJson(TraitBase):
                    newValue =  --- some action using value ---
                    setattr(obj, trait, newValue)
 
+     Any CcpNmrJson-derived class maintains metadata. Use the setMetadata() method to add data
+
+     NB: Need to register the class for proper restoring from the json data
+     Example:
+
+         class MyClass(CcpNmrJson):
+
+            .. actions
+
+         #end class
+         MyClass.register()
     --------------------------------------------------------------------------------------------
     """
 
-    jsonVersion = 3.0
+    #--------------------------------------------------------------------------------------------
+    # to be subclassed
+    #--------------------------------------------------------------------------------------------
 
     saveAllTraitsToJson = False  # This flag effectively sets saveToJson to True/False for all traits
+    version = None  # The version idetifier for the specific class (usefull when upgrading is required)
 
-    # --------------------------------------------------------------------------------------------
+    #--------------------------------------------------------------------------------------------
+    # end to be subclassed
+    #--------------------------------------------------------------------------------------------
+
+    jsonVersion = 3.0
 
     _registeredClasses = {}  # A dict that contains the (className, class) mappings for restoring
                              # CcpNmrJson (sub-)classes from json files
+
+    @staticmethod
+    def isRegistered(className):
+        """Return True if className is registered"""
+        return className in CcpNmrJson._registeredClasses
 
     @classmethod
     def register(cls):
         """Register the class"""
         className = cls.__name__
-        if cls.isRegistered():
+        if cls.isRegistered(className):
             raise RuntimeError('className "%s" is already registered' % className)
         CcpNmrJson._registeredClasses[className] = cls
-
-    @classmethod
-    def isRegistered(cls):
-        """Return True if cls is registered"""
-        return cls.__name__ in CcpNmrJson._registeredClasses
 
     @staticmethod
     def _getClassFromDict(theDict):
@@ -359,8 +381,8 @@ class CcpNmrJson(TraitBase):
         """Return True if theList defines an encoded CcpNmr object
         """
         if isinstance(theList, list) and len(theList) > 0 and \
-           isinstance(theList[0], list) and theList[0][0] == constants.METADATA and \
-           constants.JSONVERSION in theList[0][1]:
+           isinstance(theList[0], list) and len(theList[0]) > 0 and theList[0][0] == constants.METADATA and \
+           isinstance(theList[0][1], dict) and constants.JSONVERSION in theList[0][1]:
             return True
         return False
 
@@ -389,7 +411,7 @@ class CcpNmrJson(TraitBase):
 
         return CcpNmrJson._newObjectFromDict(theDict)
 
-    # --------------------------------------------------------------------------------------------
+    #--------------------------------------------------------------------------------------------
 
     # _metadata(should be in-sinc with constants.METADATA)
     _metadata = Dict().tag(saveToJson=True)
@@ -399,7 +421,7 @@ class CcpNmrJson(TraitBase):
         defaults = {}
         defaults[constants.JSONVERSION] = self.jsonVersion
         defaults[constants.CLASSNAME] = self.__class__.__name__
-        defaults[constants.CLASSVERSION] = self.version if hasattr(self.__class__, 'version') else None
+        defaults[constants.CLASSVERSION] = self.version
         defaults[constants.USER] = getpass.getuser()
         return defaults
 
@@ -408,14 +430,14 @@ class CcpNmrJson(TraitBase):
     class _metadataJsonHandler(TraitJsonHandlerBase):
         """Handle json metadata
         """
-        def encode(self, obj, trait):
-            return getattr(obj, trait)
+        # def encode(self, obj, trait):  # Handled by base class
+        #     return getattr(obj, trait)
 
         def decode(self, obj, trait, value):
-            # retain current metadata; just update the ones from value we don't have
+            # retain current metadata; just update the ones from value
             currentMetaData = getattr(obj, constants.METADATA)
-            value.update(currentMetaData)
-            setattr(obj, trait, value)
+            currentMetaData.update(value)
+            setattr(obj, trait, currentMetaData)
     # end class
 
     @property
@@ -427,6 +449,8 @@ class CcpNmrJson(TraitBase):
         "Update metadata with kwds (key,value) pairs"
         self.metadata.update(**kwds)
 
+    #--------------------------------------------------------------------------------------------
+
     def keys(self, **metadata):
         """Return the keys; excluding the json.METADATA trait;
         optionally filter for trait metadata; NB these are different from the json METADATA. The latter
@@ -437,7 +461,15 @@ class CcpNmrJson(TraitBase):
         result.pop(result.index(constants.METADATA))
         return result
 
-    # --------------------------------------------------------------------------------------------
+    def _getTraitObject(self, trait):
+        """Return the trait object
+        """
+        traitObj = self.traits().get(trait)
+        if traitObj is None:
+            raise ValueError('trait "%s" is not defined for object %s' % (trait, self))
+        return traitObj
+
+    #--------------------------------------------------------------------------------------------
 
     def __init__(self, **metadata):
         super().__init__()
@@ -464,7 +496,7 @@ class CcpNmrJson(TraitBase):
                 setattr(duplicate, trait, value)
         return duplicate
 
-    # --------------------------------------------------------------------------------------------
+    #--------------------------------------------------------------------------------------------
 
     @debug3Enter()
     @debug3Leave()
@@ -479,16 +511,20 @@ class CcpNmrJson(TraitBase):
         if handler is not None:
             return handler
         # check for traitlet class specific handler
-        if hasattr(self.traits()[trait], constants.JSONHANDLER):
-            return getattr(self.traits()[trait], constants.JSONHANDLER)
+        # if hasattr(self.traits()[trait], constants.JSONHANDLER):
+        traitObj = self._getTraitObject(trait)
+        if hasattr(traitObj, constants.JSONHANDLER):
+            return getattr(traitObj, constants.JSONHANDLER)
+        # check for TraitBase class specific handler
         if hasattr(self, constants.JSONHANDLER):
             return getattr(self, constants.JSONHANDLER)
+
         return None
 
     def toJson(self, **kwds):
         """Return self as list of (trait, value) tuples represented in a json string
         """
-        indent = kwds.setdefault('indent', 4)
+        indent = kwds.setdefault('indent', 2)
         dataList = self._encode()
         return json.dumps(dataList, indent=indent)
 
@@ -554,7 +590,7 @@ class CcpNmrJson(TraitBase):
                     setattr(self, trait, value)
         return self
 
-    # --------------------------------------------------------------------------------------------
+    #--------------------------------------------------------------------------------------------
 
     def save(self, path, **kwds):
         """Save using appropriate handlers depending on extension.
@@ -581,113 +617,22 @@ class CcpNmrJson(TraitBase):
 # end class
 
 
-class RecursiveDictHandlerABC(TraitJsonHandlerBase):
-    """Abstract base class to handle recursion of dict-like traits
-    Each value of the (key,value) pairs must of CcpNmrJson (sub-)type
-    """
-    # This needs to be subclassed
-    klass = None
-
-    def encode(self, obj, trait):
-        # convert dict into list of (key, value) pairs, recursing
-        # for each value of (sub-)type CcpNmrJson
-        theDict = getattr(obj, trait)
-        if not isinstance(theDict, self.klass):
-            raise RuntimeError('trait: "%s", expected instance class "%s", got "%s"' %
-                               (trait, type(self.klass), type(theDict))
-                               )
-        theList = []
-        for key, value in theDict.items():
-            if isinstance(value, CcpNmrJson):
-                value = value._encode()
-            theList.append((key, value))
-        return theList
-
-    def decode(self, obj, trait, theList):
-        # needs conversion from list into klass; recursing for each (key, value) pair
-        # converting this to the relevant object
-        result = []
-        for key, value in theList:
-            # check if this encoded a CcpNmrJson type object
-            if CcpNmrJson.isEncodedObject(value):
-                theDict = dict(value)
-                value = CcpNmrJson._newObjectFromDict(theDict)
-            result.append((key, value))
-        # convert to class
-        theDict = self.klass(result)
-        setattr(obj, trait, theDict)
-# end class
-
-class RecursiveDictHandler(RecursiveDictHandlerABC):
-    klass = dict
-
-class RecursiveODictHandler(RecursiveDictHandlerABC):
-    klass = OrderedDict
-
-class RecursiveADictHandler(RecursiveDictHandlerABC):
-    klass = AttributeDict
-
-
-class RecursiveListHandlerABC(TraitJsonHandlerBase):
-    """Abstract base class to handle recursion of list-like traits
-    Each value of the (list must of CcpNmrJson (sub-)type
-    """
-    # --------------------------------------------------------------------------------------------
-    klass = None
-    # --------------------------------------------------------------------------------------------
-
-    def encode(self, obj, trait):
-        # convert list, recursing for each item, which must of (sub-)type CcpNmrJson
-        theList = getattr(obj, trait)
-        if not isinstance(theList, self.klass):
-            raise RuntimeError('trait: "%s", expected instance class "%s", got "%s"' %
-                               (trait, type(self.klass), type(theList))
-                               )
-        result = []
-        for i, item in enumerate(theList):
-            if isinstance(item, CcpNmrJson):
-                item = item._encode()
-            result.append(item)
-        return result
-
-    def decode(self, obj, trait, theList):
-        # needs recursing for each item in theList
-        # converting this to the relevant klass
-        result = []
-        for item in theList:
-            # check if this encoded a CcpNmrJson type object
-            if CcpNmrJson.isEncodedObject(item):
-                theDict = dict(item)
-                item = CcpNmrJson._newObjectFromDict(theDict)
-            result.append(item)
-        # convert to klass
-        result = self.klass(result)
-        setattr(obj, trait, result)
-# end class
-
-class RecursiveListHandler(RecursiveListHandlerABC):
-    klass = list
-
-class RecursiveTupleHandler(RecursiveListHandlerABC):
-    klass = tuple
-
-
 class CcpnJsonDirectoryABC(OrderedDict):
     """An Abstract base class that restores objects from the json files in a directory
     as (key, object) pairs
     """
 
-    # --------------------------------------------------------------------------------------------
+    #--------------------------------------------------------------------------------------------
     # to be subclassed
-    # --------------------------------------------------------------------------------------------
+    #--------------------------------------------------------------------------------------------
     attributeName = None # attribute of object whose value functions as the key to store the object
     directory = None  # directory containing the json files
     sorted = False  # defines if objects needs sorting; if True, the objects generated from the json
                     # files require the __le__ and __lt__ methods
     extension = '.json'
-    # --------------------------------------------------------------------------------------------
+    #--------------------------------------------------------------------------------------------
     # end to be subclassed
-    # --------------------------------------------------------------------------------------------
+    #--------------------------------------------------------------------------------------------
 
     def __init__(self):
         super().__init__()

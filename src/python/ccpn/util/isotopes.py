@@ -26,10 +26,9 @@ __date__ = "$Date: 2017-04-07 10:28:48 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 
 import math
-import json
-from collections import OrderedDict, Counter
-from sandbox.Geerten.Refactored.traits.CcpNmrJson import CcpNmrJson, CcpnJsonDirectoryABC
-from sandbox.Geerten.Refactored.traits.CcpNmrTraits import Unicode, Int, Float, Bool
+from collections import Counter
+from ccpn.util.traits.CcpNmrJson import CcpNmrJson, CcpnJsonDirectoryABC
+from ccpn.util.traits.CcpNmrTraits import Unicode, Int, Float, Bool
 
 from ccpn.framework.PathsAndUrls import ccpnConfigPath
 from ccpn.util.Path import aPath

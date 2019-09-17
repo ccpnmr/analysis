@@ -846,7 +846,7 @@ GuiTable::item::selected {
         # set a minimum height to the rows based on the fontmetrics of a generic character
         self.fontMetric = QtGui.QFontMetricsF(self.font())
         self.bbox = self.fontMetric.boundingRect
-        rowHeight = self.bbox('A').height() + 4
+        rowHeight = self.bbox('A').height() + 8
 
         # pyqt4
         # headers = self.verticalHeader()

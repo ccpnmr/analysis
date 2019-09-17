@@ -114,7 +114,7 @@ class RecursiveListHandlerABC(TraitJsonHandlerBase):
     # --------------------------------------------------------------------------------------------
 
     def encode(self, obj, trait):
-        # convert list, recursing for each item, which must of (sub-)type CcpNmrJson
+        # convert list, recursing for each item of (sub-)type CcpNmrJson
 
         # local imports to avoid circular dependencies
         from ccpn.util.traits.CcpNmrJson import constants, CcpNmrJson

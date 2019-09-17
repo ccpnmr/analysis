@@ -378,10 +378,12 @@ class CcpNmrJson(TraitBase):
 
     @staticmethod
     def isEncodedObject(theList):
-        """Return True if theList defines an encoded CcpNmr object
+        """Return True if theList defines an encoded CcpNmr object. To establish this, we look at the structure
+        which must be a list of (key,value) items, encoded as a list, with the first (key,value) pair encoding the
+        metadata dict.
         """
         if isinstance(theList, list) and len(theList) > 0 and \
-           isinstance(theList[0], list) and len(theList[0]) > 0 and theList[0][0] == constants.METADATA and \
+           isinstance(theList[0], (list,tuple)) and len(theList[0]) == 2 and theList[0][0] == constants.METADATA and \
            isinstance(theList[0][1], dict) and constants.JSONVERSION in theList[0][1]:
             return True
         return False

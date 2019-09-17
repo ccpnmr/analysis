@@ -89,7 +89,7 @@ from ccpn.core.Multiplet import Multiplet
 # from ccpn.core.IntegralList import IntegralList
 from ccpn.ui.gui.lib.mouseEvents import getCurrentMouseMode
 from ccpn.ui.gui.lib.GuiStrip import DefaultMenu, PeakMenu, IntegralMenu, \
-    MultipletMenu, PhasingMenu
+    MultipletMenu, PhasingMenu, AxisMenu
 
 from ccpn.core.lib.Cache import cached
 
@@ -5932,93 +5932,52 @@ class CcpnGLWidget(QOpenGLWidget):
             event.accept()
             self._resetBoxes()
 
-            # # Search if the event is in a range of a selected peak.
-            # peaks = list(self.current.peaks)
-            # strip._addItemsToNavigateToCursorPosMenu()
-            # strip._addItemsToMarkInCursorPosMenu()
-            #
-            # from ccpn.ui.gui.lib.GuiStripContextMenus import _hidePeaksSingleActionItems, _enableAllItems
-            #
-            # ii = strip._contextMenus.get(PeakMenu)
-            # if len(peaks) > 1:
-            #     _hidePeaksSingleActionItems(strip, ii)
-            # else:
-            #     _enableAllItems(ii)
-            #
-            # # will only work for self.current.peak
-            # strip._addItemsToNavigateToPeakMenu()
-            # strip._addItemsToMarkInPeakMenu()
+            mouseInAxis = self._mouseInAxis(event.pos())
 
-            # # check other menu items before raising menues
-            # strip._checkMenuItems()
+            if mouseInAxis == GLDefs.MAINVIEW:
+                selectedDict = self.getObjectsUnderMouse()
+                if PEAKSELECT in selectedDict:
 
-            # # set the correct rightMouseMenu for the clicked object (must be selected?)
-            # objs = self._mouseInPeak(xPosition, yPosition, firstOnly=False)
-            # strip._lastClickedObjects = None
-            #
-            # if (set(objs or []) & set(self.current.peaks or [])):
-            #     strip.contextMenuMode = PeakMenu
-            #     menu = strip._contextMenus.get(strip.contextMenuMode)
-            #     strip._lastClickedObjects = objs
-            #
-            # else:
-            #     objs = self._mouseInIntegral(xPosition, yPosition, firstOnly=False)
-            #
-            #     if (set(objs or []) & set(self.current.integrals or [])):
-            #         strip.contextMenuMode = IntegralMenu
-            #         menu = strip._contextMenus.get(strip.contextMenuMode)
-            #         strip._lastClickedObjects = objs
-            #
-            #     else:
-            #         objs = self._mouseInMultiplet(xPosition, yPosition, firstOnly=False)
-            #
-            #         if (set(objs or []) & set(self.current.multiplets or [])):
-            #             strip.contextMenuMode = MultipletMenu
-            #             menu = strip._contextMenus.get(strip.contextMenuMode)
-            #             strip._lastClickedObjects = objs
+                    # Search if the event is in a range of a selected peak.
+                    peaks = list(self.current.peaks)
 
+                    from ccpn.ui.gui.lib.GuiStripContextMenus import _hidePeaksSingleActionItems, _enableAllItems
 
-            #~~~~~~~
+                    ii = strip._contextMenus.get(PeakMenu)
+                    if len(peaks) > 1:
+                        _hidePeaksSingleActionItems(strip, ii)
+                    else:
+                        _enableAllItems(ii)
 
-            # strip._addItemsToNavigateToCursorPosMenu()
-            # strip._addItemsToMarkInCursorPosMenu()
+                    # will only work for self.current.peak
+                    strip._addItemsToNavigateToPeakMenu(selectedDict[PEAKSELECT])
+                    strip._addItemsToMarkInPeakMenu(selectedDict[PEAKSELECT])
 
-            selectedDict = self.getObjectsUnderMouse()
-            if PEAKSELECT in selectedDict:
+                    strip.contextMenuMode = PeakMenu
+                    menu = strip._contextMenus.get(strip.contextMenuMode)
+                    strip._lastClickedObjects = selectedDict[PEAKSELECT]
 
-                # Search if the event is in a range of a selected peak.
-                peaks = list(self.current.peaks)
+                elif INTEGRALSELECT in selectedDict:
+                    strip.contextMenuMode = IntegralMenu
+                    menu = strip._contextMenus.get(strip.contextMenuMode)
+                    strip._lastClickedObjects = selectedDict[INTEGRALSELECT]
 
-                from ccpn.ui.gui.lib.GuiStripContextMenus import _hidePeaksSingleActionItems, _enableAllItems
+                elif MULTIPLETSELECT in selectedDict:
+                    strip.contextMenuMode = MultipletMenu
+                    menu = strip._contextMenus.get(strip.contextMenuMode)
+                    strip._lastClickedObjects = selectedDict[MULTIPLETSELECT]
 
-                ii = strip._contextMenus.get(PeakMenu)
-                if len(peaks) > 1:
-                    _hidePeaksSingleActionItems(strip, ii)
-                else:
-                    _enableAllItems(ii)
+                # check other menu items before raising menues
+                strip._addItemsToNavigateToCursorPosMenu()
+                strip._addItemsToMarkInCursorPosMenu()
+                strip._addItemsToCopyAxisFromMenuesMainView()
+                strip._checkMenuItems()
 
-                # will only work for self.current.peak
-                strip._addItemsToNavigateToPeakMenu(selectedDict[PEAKSELECT])
-                strip._addItemsToMarkInPeakMenu(selectedDict[PEAKSELECT])
-
-                strip.contextMenuMode = PeakMenu
+            elif mouseInAxis in [GLDefs.BOTTOMAXIS, GLDefs.RIGHTAXIS, GLDefs.AXISCORNER]:
+                strip.contextMenuMode = AxisMenu
                 menu = strip._contextMenus.get(strip.contextMenuMode)
-                strip._lastClickedObjects = selectedDict[PEAKSELECT]
-
-            elif INTEGRALSELECT in selectedDict:
-                strip.contextMenuMode = IntegralMenu
-                menu = strip._contextMenus.get(strip.contextMenuMode)
-                strip._lastClickedObjects = selectedDict[INTEGRALSELECT]
-
-            elif MULTIPLETSELECT in selectedDict:
-                strip.contextMenuMode = MultipletMenu
-                menu = strip._contextMenus.get(strip.contextMenuMode)
-                strip._lastClickedObjects = selectedDict[MULTIPLETSELECT]
-
-            # check other menu items before raising menues
-            strip._addItemsToNavigateToCursorPosMenu()
-            strip._addItemsToMarkInCursorPosMenu()
-            strip._checkMenuItems()
+                strip._addItemsToCopyAxisFromMenuesAxes()
+                strip._enableAxisMenuItems(mouseInAxis)
 
             if menu is not None:
                 strip.viewStripMenu = menu
@@ -6039,6 +5998,54 @@ class CcpnGLWidget(QOpenGLWidget):
             event.ignore()
 
         self.update()
+
+    def _mouseInAxis(self, mousePos):
+        h = self.h
+        w = self.w
+
+        # find the correct viewport
+        if (self._drawRightAxis and self._drawBottomAxis):
+            mw = [0, self.AXIS_MARGINBOTTOM, w - self.AXIS_MARGINRIGHT, h - 1]
+            ba = [0, 0, w - self.AXIS_MARGINRIGHT, self.AXIS_MARGINBOTTOM - 1]
+            ra = [w - self.AXIS_MARGINRIGHT, self.AXIS_MARGINBOTTOM, w, h]
+
+        elif (self._drawBottomAxis):
+            mw = [0, self.AXIS_MARGINBOTTOM, w, h - 1]
+            ba = [0, 0, w, self.AXIS_MARGINBOTTOM - 1]
+            ra = [w, self.AXIS_MARGINBOTTOM, w, h]
+
+        elif (self._drawRightAxis):
+            mw = [0, 0, w - self.AXIS_MARGINRIGHT, h - 1]
+            ba = [0, 0, w - self.AXIS_MARGINRIGHT, 0]
+            ra = [w - self.AXIS_MARGINRIGHT, 0, w, h]
+
+        else:  # no axes visible
+            mw = [0, 0, w, h]
+            ba = [0, 0, w, 0]
+            ra = [w, 0, w, h]
+
+        mx = mousePos.x()
+        my = self.height() - mousePos.y()
+
+        if self.between(mx, mw[0], mw[2]) and self.between(my, mw[1], mw[3]):
+
+            # if in the mainView
+            return GLDefs.MAINVIEW
+
+        elif self.between(mx, ba[0], ba[2]) and self.between(my, ba[1], ba[3]):
+
+            # in the bottomAxisBar, so zoom in the X axis
+            return GLDefs.BOTTOMAXIS
+
+        elif self.between(mx, ra[0], ra[2]) and self.between(my, ra[1], ra[3]):
+
+            # in the rightAxisBar, so zoom in the Y axis
+            return GLDefs.RIGHTAXIS
+
+        else:
+
+            # must be in the corner
+            return GLDefs.AXISCORNER
 
     def _getCanvasContextMenu(self):
         """Give a needed menu based on strip mode

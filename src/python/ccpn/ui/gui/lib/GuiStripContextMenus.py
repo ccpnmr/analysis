@@ -360,6 +360,52 @@ def _markPeakPosItem(strip):
                     callback=None)
 
 
+def _copyXAxisRangeFromStripItem(strip):
+    return _SCMitem(name='Copy X Axis Range From:',
+                    typeItem=ItemTypes.get(MENU), toolTip='Copy X axis range from selected strip',
+                    stripMethodName='copyXAxisFromMenu',
+                    callback=None)
+
+
+def _copyYAxisRangeFromStripItem(strip):
+    return _SCMitem(name='Copy Y Axis Range From:',
+                    typeItem=ItemTypes.get(MENU), toolTip='Copy Y axis range from selected strip',
+                    stripMethodName='copyYAxisFromMenu',
+                    callback=None)
+
+
+def _copyAllAxisRangeFromStripItem(strip):
+    return _SCMitem(name='Copy X/Y Axis Ranges From:',
+                    typeItem=ItemTypes.get(MENU), toolTip='Copy X and Y axis range from selected strip',
+                    stripMethodName='copyAllAxisFromMenu',
+                    callback=None)
+
+
+def _copyXAxisRangeFromStripItem2(strip):
+    """Separate item needed for the new axis menu
+    """
+    return _SCMitem(name='Copy X Axis Range From:',
+                    typeItem=ItemTypes.get(MENU), toolTip='Copy X axis range from selected strip',
+                    stripMethodName='copyXAxisFromMenu2',
+                    callback=None)
+
+
+def _copyYAxisRangeFromStripItem2(strip):
+    """Separate item needed for the new axis menu
+    """
+    return _SCMitem(name='Copy Y Axis Range From:',
+                    typeItem=ItemTypes.get(MENU), toolTip='Copy Y axis range from selected strip',
+                    stripMethodName='copyYAxisFromMenu2',
+                    callback=None)
+
+
+def _copyAllAxisRangeFromStripItem2(strip):
+    return _SCMitem(name='Copy X/Y Axis Ranges From:',
+                    typeItem=ItemTypes.get(MENU), toolTip='Copy X and Y axis range from selected strip',
+                    stripMethodName='copyAllAxisFromMenu2',
+                    callback=None)
+
+
 def _showSpectraOnPhasingItem(strip):
     return _SCMitem(name='Show Spectra on Phasing',
                     typeItem=ItemTypes.get(ITEM), toolTip='Show Spectra while phasing traces are visible',
@@ -497,6 +543,9 @@ def _get1dDefaultMenu(guiStrip1d) -> Menu:
         _separator(),
         _navigateToCursorPosItem(guiStrip1d),
         _markCursorPosItem(guiStrip1d),
+        _copyAllAxisRangeFromStripItem(guiStrip1d),
+        _copyXAxisRangeFromStripItem(guiStrip1d),
+        _copyYAxisRangeFromStripItem(guiStrip1d),
         _separator(),
         _estimateNoise(guiStrip1d),
         _separator(),
@@ -623,6 +672,9 @@ def _getNdDefaultMenu(guiStripNd) -> Menu:
         _separator(),
         _navigateToCursorPosItem(guiStripNd),
         _markCursorPosItem(guiStripNd),
+        _copyAllAxisRangeFromStripItem(guiStripNd),
+        _copyXAxisRangeFromStripItem(guiStripNd),
+        _copyYAxisRangeFromStripItem(guiStripNd),
         _separator(),
         _estimateNoise(guiStripNd),
         _makeStripPlot(guiStripNd),
@@ -702,3 +754,16 @@ def _getNdMultipletMenu(guiStripNd) -> Menu:
         ]
     items = [itm for itm in items if itm is not None]
     return _createMenu(guiStripNd, items)
+
+
+def _getAxisMenu(guiStrip) -> Menu:
+    """
+    Creates and returns the current Axis context menu. Opened when right clicked on axis
+    """
+    items = [
+        _copyAllAxisRangeFromStripItem2(guiStrip),
+        _copyXAxisRangeFromStripItem2(guiStrip),
+        _copyYAxisRangeFromStripItem2(guiStrip),
+        ]
+    items = [itm for itm in items if itm is not None]
+    return _createMenu(guiStrip, items)

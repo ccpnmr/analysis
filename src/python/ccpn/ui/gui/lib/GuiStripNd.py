@@ -52,9 +52,9 @@ from ccpn.ui.gui.widgets.PlaneToolbar import PlaneToolbar  #, PlaneSelectorWidge
 from ccpn.util.Logging import getLogger
 from ccpn.util.decorators import logCommand
 from ccpn.core.lib.ContextManagers import undoBlock
-from ccpn.ui.gui.lib.GuiStrip import GuiStrip, DefaultMenu, PeakMenu, IntegralMenu, MultipletMenu, PhasingMenu
+from ccpn.ui.gui.lib.GuiStrip import GuiStrip, DefaultMenu, PeakMenu, IntegralMenu, MultipletMenu, PhasingMenu, AxisMenu
 from ccpn.ui.gui.lib.GuiStripContextMenus import _getNdPhasingMenu, _getNdDefaultMenu, _getNdPeakMenu, \
-    _getNdIntegralMenu, _getNdMultipletMenu
+    _getNdIntegralMenu, _getNdMultipletMenu, _getAxisMenu
 from ccpn.ui.gui.lib.Strip import copyStripPosition
 from ccpn.util.Common import getAxisCodeMatchIndices
 
@@ -140,12 +140,15 @@ class GuiStripNd(GuiStrip):
         self._peakMenu = _getNdPeakMenu(self)
         self._integralMenu = _getNdIntegralMenu(self)
         self._multipletMenu = _getNdMultipletMenu(self)
+        self._axisMenu = _getAxisMenu(self)
 
         self._contextMenus.update({DefaultMenu  : self._defaultMenu,
                                    PhasingMenu  : self._phasingMenu,
                                    PeakMenu     : self._peakMenu,
                                    IntegralMenu : self._integralMenu,
-                                   MultipletMenu: self._multipletMenu})
+                                   MultipletMenu: self._multipletMenu,
+                                   AxisMenu     : self._axisMenu
+                                   })
 
         # self.viewBox.invertX()
         # self.viewBox.invertY()

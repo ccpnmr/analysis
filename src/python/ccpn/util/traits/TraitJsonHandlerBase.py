@@ -61,8 +61,13 @@ class RecursiveDictHandlerABC(TraitJsonHandlerBase):
     """Abstract base class to handle recursion of dict-like traits
     Each value of the (key,value) pairs must of CcpNmrJson (sub-)type
     """
-    # This needs to be subclassed
+    #--------------------------------------------------------------------------------------------
+    # to be subclassed
+    #--------------------------------------------------------------------------------------------
     klass = None
+    #--------------------------------------------------------------------------------------------
+    # end to be subclassed
+    #--------------------------------------------------------------------------------------------
 
     def encode(self, obj, trait):
         # convert dict into list of (key, value) pairs, recursing
@@ -109,9 +114,13 @@ class RecursiveListHandlerABC(TraitJsonHandlerBase):
     """Abstract base class to handle recursion of list-like traits
     Each value of the (list must of CcpNmrJson (sub-)type
     """
-    # --------------------------------------------------------------------------------------------
+    #--------------------------------------------------------------------------------------------
+    # to be subclassed
+    #--------------------------------------------------------------------------------------------
     klass = None
-    # --------------------------------------------------------------------------------------------
+    #--------------------------------------------------------------------------------------------
+    # end to be subclassed
+    #--------------------------------------------------------------------------------------------
 
     def encode(self, obj, trait):
         # convert list, recursing for each item of (sub-)type CcpNmrJson

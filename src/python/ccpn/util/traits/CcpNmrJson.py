@@ -355,21 +355,21 @@ class CcpNmrJson(TraitBase):
         return cls
 
     @staticmethod
+    def isEncodedObject(theList):
+        """Return True if theList defines an encoded CcpNmr object
+        """
+        if isinstance(theList, list) and len(theList) > 0 and \
+           isinstance(theList[0], list) and theList[0][0] == constants.METADATA and \
+           constants.JSONVERSION in theList[0][1]:
+            return True
+        return False
+
+    @staticmethod
     def _newObjectFromDict(theDict):
         """Return new object as defined by theDict;
         requires presence of metadata and registered classname
         CCPNMRINTERNAL: used in recursive handler classes (see below)
         """
-        # metadata = theDict.get(constants.METADATA)
-        # if metadata is None:
-        #     raise ValueError('theDict is not a valid representation of the CcpNmrJson (sub-)type "%s"' \
-        #                      % cls.__name__)
-        # className = metadata.get(constants.CLASSNAME)
-        # if className is None:
-        #     raise ValueError('metadata does not contain the classname of a CcpNmrJson (sub-)type"%s"' \
-        #                      % cls.__name__)
-        # if not className in CcpNmrJson._registeredClasses:
-        #     raise RuntimeError('Cannot decode class "%s"' % className)
         cls = CcpNmrJson._getClassFromDict(theDict)
         obj = cls()
         obj._decode(theDict)
@@ -590,7 +590,7 @@ class RecursiveDictHandlerABC(TraitJsonHandlerBase):
 
     def encode(self, obj, trait):
         # convert dict into list of (key, value) pairs, recursing
-        # for each value, which must of (sub-)type CcpNmrJson
+        # for each value of (sub-)type CcpNmrJson
         theDict = getattr(obj, trait)
         if not isinstance(theDict, self.klass):
             raise RuntimeError('trait: "%s", expected instance class "%s", got "%s"' %
@@ -598,20 +598,23 @@ class RecursiveDictHandlerABC(TraitJsonHandlerBase):
                                )
         theList = []
         for key, value in theDict.items():
-            if not isinstance(value, CcpNmrJson):
-                raise RuntimeError('key: %s: expected (sub-)type "CcpnmrJson"; got "%s"' %
-                                   (key, type(value)))
-            value = value._encode()
+            if isinstance(value, CcpNmrJson):
+                value = value._encode()
             theList.append((key, value))
         return theList
 
     def decode(self, obj, trait, theList):
         # needs conversion from list into klass; recursing for each (key, value) pair
         # converting this to the relevant object
-        theDict = self.klass(theList)
-        for key, value in theDict.items():
-            value = dict(value)  # value is list of (key, value) pairs
-            theDict[key] = CcpNmrJson._newObjectFromDict(value)
+        result = []
+        for key, value in theList:
+            # check if this encoded a CcpNmrJson type object
+            if CcpNmrJson.isEncodedObject(value):
+                theDict = dict(value)
+                value = CcpNmrJson._newObjectFromDict(theDict)
+            result.append((key, value))
+        # convert to class
+        theDict = self.klass(result)
         setattr(obj, trait, theDict)
 # end class
 
@@ -642,12 +645,9 @@ class RecursiveListHandlerABC(TraitJsonHandlerBase):
                                )
         result = []
         for i, item in enumerate(theList):
-            if not isinstance(item, CcpNmrJson):
-                raise RuntimeError('item: %s: expected (sub-)type "CcpnmrJson"; got "%s"' %
-                                   (i, type(item)))
-            item = item._encode()
+            if isinstance(item, CcpNmrJson):
+                item = item._encode()
             result.append(item)
-
         return result
 
     def decode(self, obj, trait, theList):
@@ -655,8 +655,12 @@ class RecursiveListHandlerABC(TraitJsonHandlerBase):
         # converting this to the relevant klass
         result = []
         for item in theList:
-            item = dict(item) # item is list of (key, value) pairs
-            result.append(CcpNmrJson._newObjectFromDict(item))
+            # check if this encoded a CcpNmrJson type object
+            if CcpNmrJson.isEncodedObject(item):
+                theDict = dict(item)
+                item = CcpNmrJson._newObjectFromDict(theDict)
+            result.append(item)
+        # convert to klass
         result = self.klass(result)
         setattr(obj, trait, result)
 # end class

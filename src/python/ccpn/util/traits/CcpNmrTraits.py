@@ -51,8 +51,8 @@ class Immutable(Any):
     class jsonHandler(TraitJsonHandlerBase):
         """Serialise Immutable to be json compatible.
         """
-        def encode(self, obj, trait):
-            return getattr(obj, trait)
+        # def encode(self, obj, trait): # inherits from base class
+        #     return getattr(obj, trait)
 
         def decode(self, obj, trait, value):
             # force set value
@@ -82,9 +82,8 @@ class Adict(TraitType):
     class jsonHandler(TraitJsonHandlerBase):
         """Serialise AttributeDict to be json compatible.
         """
-        def encode(self, obj, trait):
-            # behaves as a dict for json
-            return getattr(obj, trait)
+        # def encode(self, obj, trait): # inherits from base class; behaves as a dict for json
+        #     return getattr(obj, trait)
 
         def decode(self, obj, trait, value):
             # needs conversion from dict into AttributeDict
@@ -160,39 +159,3 @@ class CPath(TraitType):
     # end class
 # end class
 
-
-
-#=========================================================================================
-# Testing
-#=========================================================================================
-
-if __name__ == '__main__':
-
-    from ccpn.util.traits.CcpNmrJson import CcpNmrJson
-
-
-    class Test(CcpNmrJson):
-        "class to test"
-
-        saveAllTraitsToJson = True
-
-        path = CPath(default_value='bla')
-        adict = Adict()
-        odict = Odict
-
-        def testIt(self):
-
-            self.path = 'aap/noot'
-
-            for i in range(3):
-                key = 'key%d' % i
-                self.adict[key] = i * 10
-
-            for i in range(3):
-                key = 'key%d' % i
-                self.odict[key] = i * 100
-
-            return self.duplicate()
-
-    test = Test()
-    test.testIt()

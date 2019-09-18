@@ -34,14 +34,19 @@ class TraitBase(HasTraits):
     """Class to give HasTraits dict-like methods keys, values, update, items and iteration 
     """
 
-    def getTrait(self, trait):
+    def getTraitValue(self, trait):
         """return value of trait
         """
+        if not self.hasTrait(trait):
+            raise ValueError('Trait "%s" does not exist for object %s' % (trait,self))
         return self._trait_values[trait]
 
-    def setTrait(self, trait, value, force=False):
+    def setTraitValue(self, trait, value, force=False):
         """set value of trait, overwriting immutable ones
         """
+        if not self.hasTrait(trait):
+            raise ValueError('Trait "%s" does not exist for object %s' % (trait,self))
+
         if self.isMutableTrait(trait) or force:
             self.set_trait(trait, value)
         else:
@@ -50,11 +55,20 @@ class TraitBase(HasTraits):
     def hasTrait(self, trait):
         """Return True if self has trait
         """
-        return (trait in self.keys())
+        return self.getTraitObject(trait) is not None
+
+    def getTraitObject(self, trait):
+        """get the trait object or None if trait does not exist
+        """
+        traits = self.traits()
+        return traits.get(trait)
 
     def isMutableTrait(self, trait):
         "Return True is trait is mutable"
-        return self.traits()[trait].read_only is not False
+        traitObj = self.getTraitObject(trait)
+        if traitObj is None:
+            raise ValueError('Trait "%s" does not exist for object %s' % (trait,self))
+        return not traitObj.read_only
 
     def getMetadata(self, trait, key, default=None):
         "convenience for trait_metadata"

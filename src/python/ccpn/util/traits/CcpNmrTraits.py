@@ -57,7 +57,7 @@ class Immutable(Any):
 
         def decode(self, obj, trait, value):
             # force set value
-            obj.setTrait(trait, value, force=True)
+            obj.setTraitValue(trait, value, force=True)
     # end class
 #end class
 

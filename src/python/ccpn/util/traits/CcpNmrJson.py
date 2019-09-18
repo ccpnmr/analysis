@@ -464,14 +464,6 @@ class CcpNmrJson(TraitBase):
         result.pop(result.index(constants.METADATA))
         return result
 
-    def _getTraitObject(self, trait):
-        """Return the trait object
-        """
-        traitObj = self.traits().get(trait)
-        if traitObj is None:
-            raise ValueError('trait "%s" is not defined for object %s' % (trait, self))
-        return traitObj
-
     #--------------------------------------------------------------------------------------------
 
     def __init__(self, **metadata):
@@ -515,7 +507,7 @@ class CcpNmrJson(TraitBase):
             return handler
         # check for traitlet class specific handler
         # if hasattr(self.traits()[trait], constants.JSONHANDLER):
-        traitObj = self._getTraitObject(trait)
+        traitObj = self.getTraitObject(trait)
         if hasattr(traitObj, constants.JSONHANDLER):
             return getattr(traitObj, constants.JSONHANDLER)
         # check for TraitBase class specific handler

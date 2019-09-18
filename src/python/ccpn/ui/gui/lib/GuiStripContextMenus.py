@@ -360,6 +360,82 @@ def _markPeakPosItem(strip):
                     callback=None)
 
 
+# axis items for the main view
+def _copyXAxisRangeFromStripItem(strip):
+    return _SCMitem(name='Copy X Axis Range From:',
+                    typeItem=ItemTypes.get(MENU), toolTip='Copy X axis range from selected strip',
+                    stripMethodName='copyXAxisFromMenu',
+                    callback=None)
+
+
+def _copyYAxisRangeFromStripItem(strip):
+    return _SCMitem(name='Copy Y Axis Range From:',
+                    typeItem=ItemTypes.get(MENU), toolTip='Copy Y axis range from selected strip',
+                    stripMethodName='copyYAxisFromMenu',
+                    callback=None)
+
+
+def _copyAllAxisRangeFromStripItem(strip):
+    return _SCMitem(name='Copy X/Y Axis Ranges From:',
+                    typeItem=ItemTypes.get(MENU), toolTip='Copy X and Y axis range from selected strip',
+                    stripMethodName='copyAllAxisFromMenu',
+                    callback=None)
+
+
+def _copyXAxisCodeRangeFromStripItem(strip):
+    return _SCMitem(name='Match %s Axis Range to:' % strip.axisCodes[0],
+                    typeItem=ItemTypes.get(MENU), toolTip='Match %s axis range to selected strip' % strip.axisCodes[0],
+                    stripMethodName='matchXAxisCodeToMenu',
+                    callback=None)
+
+
+def _copyYAxisCodeRangeFromStripItem(strip):
+    return _SCMitem(name='Match %s Axis Range to:' % strip.axisCodes[1],
+                    typeItem=ItemTypes.get(MENU), toolTip='Match %s axis range to selected strip' % strip.axisCodes[1],
+                    stripMethodName='matchYAxisCodeToMenu',
+                    callback=None)
+
+
+# axis items for the axis and corner menues
+def _copyXAxisRangeFromStripItem2(strip):
+    """Separate item needed for the new axis menu
+    """
+    return _SCMitem(name='Copy X Axis Range From:',
+                    typeItem=ItemTypes.get(MENU), toolTip='Copy X axis range from selected strip',
+                    stripMethodName='copyXAxisFromMenu2',
+                    callback=None)
+
+
+def _copyYAxisRangeFromStripItem2(strip):
+    """Separate item needed for the new axis menu
+    """
+    return _SCMitem(name='Copy Y Axis Range From:',
+                    typeItem=ItemTypes.get(MENU), toolTip='Copy Y axis range from selected strip',
+                    stripMethodName='copyYAxisFromMenu2',
+                    callback=None)
+
+
+def _copyAllAxisRangeFromStripItem2(strip):
+    return _SCMitem(name='Copy X/Y Axis Ranges From:',
+                    typeItem=ItemTypes.get(MENU), toolTip='Copy X and Y axis range from selected strip',
+                    stripMethodName='copyAllAxisFromMenu2',
+                    callback=None)
+
+
+def _copyXAxisCodeRangeFromStripItem2(strip):
+    return _SCMitem(name='Match %s Axis Range to:' % strip.axisCodes[0],
+                    typeItem=ItemTypes.get(MENU), toolTip='Match %s axis range to selected strip' % strip.axisCodes[0],
+                    stripMethodName='matchXAxisCodeToMenu2',
+                    callback=None)
+
+
+def _copyYAxisCodeRangeFromStripItem2(strip):
+    return _SCMitem(name='Match %s Axis Range to:' % strip.axisCodes[1],
+                    typeItem=ItemTypes.get(MENU), toolTip='Match %s axis range to selected strip' % strip.axisCodes[1],
+                    stripMethodName='matchYAxisCodeToMenu2',
+                    callback=None)
+
+
 def _showSpectraOnPhasingItem(strip):
     return _SCMitem(name='Show Spectra on Phasing',
                     typeItem=ItemTypes.get(ITEM), toolTip='Show Spectra while phasing traces are visible',
@@ -498,6 +574,10 @@ def _get1dDefaultMenu(guiStrip1d) -> Menu:
         _navigateToCursorPosItem(guiStrip1d),
         _markCursorPosItem(guiStrip1d),
         _separator(),
+        _copyAllAxisRangeFromStripItem(guiStrip1d),
+        _copyXAxisRangeFromStripItem(guiStrip1d),
+        _copyYAxisRangeFromStripItem(guiStrip1d),
+        _separator(),
         _estimateNoise(guiStrip1d),
         _separator(),
         _printItem(guiStrip1d),
@@ -569,6 +649,19 @@ def _get1dMultipletMenu(guiStrip1d) -> Menu:
     return _createMenu(guiStrip1d, items)
 
 
+def _get1dAxisMenu(guiStrip) -> Menu:
+    """
+    Creates and returns the current Axis context menu. Opened when right clicked on axis
+    """
+    items = [
+        _copyAllAxisRangeFromStripItem2(guiStrip),
+        _copyXAxisRangeFromStripItem2(guiStrip),
+        _copyYAxisRangeFromStripItem2(guiStrip),
+        ]
+    items = [itm for itm in items if itm is not None]
+    return _createMenu(guiStrip, items)
+
+
 ########################################################################################################################
 #########################################      Nd Menus     ############################################################
 ########################################################################################################################
@@ -623,6 +716,12 @@ def _getNdDefaultMenu(guiStripNd) -> Menu:
         _separator(),
         _navigateToCursorPosItem(guiStripNd),
         _markCursorPosItem(guiStripNd),
+        _separator(),
+        _copyAllAxisRangeFromStripItem(guiStripNd),
+        _copyXAxisRangeFromStripItem(guiStripNd),
+        _copyYAxisRangeFromStripItem(guiStripNd),
+        _copyXAxisCodeRangeFromStripItem(guiStripNd),
+        _copyYAxisCodeRangeFromStripItem(guiStripNd),
         _separator(),
         _estimateNoise(guiStripNd),
         _makeStripPlot(guiStripNd),
@@ -702,3 +801,18 @@ def _getNdMultipletMenu(guiStripNd) -> Menu:
         ]
     items = [itm for itm in items if itm is not None]
     return _createMenu(guiStripNd, items)
+
+
+def _getNdAxisMenu(guiStrip) -> Menu:
+    """
+    Creates and returns the current Axis context menu. Opened when right clicked on axis
+    """
+    items = [
+        _copyAllAxisRangeFromStripItem2(guiStrip),
+        _copyXAxisRangeFromStripItem2(guiStrip),
+        _copyYAxisRangeFromStripItem2(guiStrip),
+        _copyXAxisCodeRangeFromStripItem2(guiStrip),
+        _copyYAxisCodeRangeFromStripItem2(guiStrip),
+        ]
+    items = [itm for itm in items if itm is not None]
+    return _createMenu(guiStrip, items)

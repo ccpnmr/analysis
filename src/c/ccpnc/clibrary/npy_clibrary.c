@@ -355,7 +355,7 @@ static PyObject *getNmrResidueIndex(PyObject *self, PyObject *args)
     PyObject *nmrResidue;
     PyObject *returnValue;
     char error_msg[1000];
-    long index = -1, numRes = 0, numOffsets = 0, found = -1, rgSize;
+    long index = -1, numOffsets = 0, found = -1, rgSize;
     long ii, jj;
     PyObject *listRes;
     PyObject *apiNmrResidue;
@@ -408,8 +408,10 @@ static PyObject *getNmrResidueIndex(PyObject *self, PyObject *args)
         isConnected = CCPN_FALSE;
 
     // put the resonanceGroups into a list
-    numRes = PyTuple_GET_SIZE(apiNmrResidues);
-    PyObject *mainResGroups[numRes];
+    long numRes = PyTuple_GET_SIZE(apiNmrResidues);
+    // PyObject *mainResGroups[numRes];
+    PyObject **mainResGroups;
+    MALLOC_NEW(mainResGroups, PyObject *, numRes);
     for (ii = 0; ii < numRes; ii++)
     {
         mainResGroups[ii] = (PyObject *) PyTuple_GET_ITEM(apiNmrResidues, ii);
@@ -444,8 +446,12 @@ static PyObject *getNmrResidueIndex(PyObject *self, PyObject *args)
     // search all resonanceGroups in the project,
     // to find all attached offsetResonanceGroups
     rgSize = PyList_GET_SIZE(resonanceGroups);
-    PyObject *offsetResonanceGroups[rgSize];            //  just make it full size, but only need some of it
-    PyObject *offSetMainResonances[rgSize];
+//    PyObject *offsetResonanceGroups[rgSize];            //  just make it full size, but only need some of it
+//    PyObject *offSetMainResonances[rgSize];
+    PyObject **offsetResonanceGroups;            //  just make it full size, but only need some of it
+    PyObject **offSetMainResonances;
+    MALLOC_NEW(offsetResonanceGroups, PyObject *, rgSize);
+    MALLOC_NEW(offSetMainResonances, PyObject *, rgSize);
 
     for (ii = 0; ii < rgSize; ii++)
     {
@@ -497,6 +503,10 @@ static PyObject *getNmrResidueIndex(PyObject *self, PyObject *args)
     if (resonanceList)
         free(resonanceList);
 
+    FREE(offsetResonanceGroups, PyObject *);
+    FREE(offSetMainResonances, PyObject *);
+    FREE(mainResGroups, PyObject *);
+
     // return index
     returnValue = PyLong_FromLong(found);
     return returnValue;
@@ -546,7 +556,7 @@ static struct PyModuleDef moduledef =
     NULL
 };
 
-PyObject *PyInit_Clibrary(void)
+PyMODINIT_FUNC PyInit_Clibrary(void)
 {
     PyObject *module;
 

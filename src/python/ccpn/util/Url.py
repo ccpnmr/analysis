@@ -48,16 +48,39 @@ def fetchUrl(url, data=None, headers=None, timeout=None):
     body = urlencode(data, quote_via=quote).encode('utf-8') if data else None
 
     urllib3.contrib.pyopenssl.inject_into_urllib3()
-    http = urllib3.PoolManager(cert_reqs='CERT_REQUIRED',
-                               ca_certs=certifi.where(),
-                               timeout=urllib3.Timeout(connect=3.0, read=3.0),
-                               retries=urllib3.Retry(1, redirect=False))
 
+    # create the options list for creating an http connection
+    options = {'cert_reqs': 'CERT_REQUIRED',
+               'ca_certs' : certifi.where(),
+               'timeout'  : urllib3.Timeout(connect=3.0, read=3.0),
+               'retries'  : urllib3.Retry(1, redirect=False)
+               }
+
+    # temporary settings
+    useProxy = False
+    useProxyPassword = False
+    proxyUsername = 'username'
+    proxyPassword = 'password'
+
+    # check whether a proxy is required
+    if useProxy:
+        # need to get the username/password if required
+        if useProxyPassword:
+            options.update({'headers': urllib3.make_headers(proxy_basic_auth='%s:%s' % (proxyUsername, proxyPassword))})
+
+        http = urllib3.ProxyManager("http://XX.XX.XX.XX:8080/", **options)
+
+    else:
+        http = urllib3.PoolManager(**options)
+
+    # read the response from the server
     response = http.request('POST', url,
                             headers=headers,
                             body=body,
                             preload_content=False)
+    # print('>>>>>>response', response.read())
     return response.read().decode('utf-8')
+
 
 def uploadFile(url, fileName, data=None):
     import os
@@ -75,6 +98,7 @@ def uploadFile(url, fileName, data=None):
         return fetchUrl(url, data)
     except:
         return None
+
 
 def checkInternetConnection():
     from ccpn.framework.PathsAndUrls import ccpnUrl

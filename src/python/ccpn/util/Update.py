@@ -587,6 +587,8 @@ class UpdateAgent(object):
 
 
 if __name__ == '__main__':
-    from ccpn.framework.Version import applicationVersion
-    # applicationVersion = __version__.split()[1]  # ejb - read from the header
+
+    # from ccpn.framework.Version import applicationVersion
+    # Remember to update the Version in this file!
+    applicationVersion = __version__.split()[1]  # ejb - read from the header
     installUpdates(applicationVersion)

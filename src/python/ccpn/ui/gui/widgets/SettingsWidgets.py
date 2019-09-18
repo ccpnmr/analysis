@@ -538,7 +538,7 @@ class _commonSettings():
 
 
 LINKTOPULLDOWNCLASS = 'linkToPulldownClass'
-
+LINKTOACTIVESTATE = True
 
 class StripPlot(Widget, _commonSettings):
 
@@ -548,6 +548,7 @@ class StripPlot(Widget, _commonSettings):
                  returnCallback=None,
                  applyCallback=None,
                  includeDisplaySettings=True,
+                 includeSequentialStrips=True,
                  includePeakLists=True, includeNmrChains=True, includeNmrChainPullSelection=False,
                  includeSpectrumTable=True,
                  defaultSpectrum=None,
@@ -594,16 +595,19 @@ class StripPlot(Widget, _commonSettings):
         else:
             self.displaysWidget = None
 
-        row += 1
-        self.sequentialStripsWidget = CheckBoxCompoundWidget(
-                self,
-                grid=(row, 0), vAlign='top', stretch=(0, 0), hAlign='left',
-                #minimumWidths=(colwidth, 0),
-                fixedWidths=(colwidth, 30),
-                orientation='left',
-                labelText='Show sequential strips:',
-                checked=False
-                )
+        if includeSequentialStrips:
+            row += 1
+            self.sequentialStripsWidget = CheckBoxCompoundWidget(
+                    self,
+                    grid=(row, 0), vAlign='top', stretch=(0, 0), hAlign='left',
+                    #minimumWidths=(colwidth, 0),
+                    fixedWidths=(colwidth, 30),
+                    orientation='left',
+                    labelText='Show sequential strips:',
+                    checked=False
+                    )
+        else:
+            self.sequentialStripsWidget = None
 
         row += 1
         self.markPositionsWidget = CheckBoxCompoundWidget(
@@ -637,7 +641,7 @@ class StripPlot(Widget, _commonSettings):
                     orientation='left',
                     labelText='Link to current %s:' % self.activePulldownClass.className,
                     tipText='Set/update current %s when selecting from pulldown' % self.activePulldownClass.className,
-                    checked=False
+                    checked=LINKTOACTIVESTATE
                     ))
 
         row += 1

@@ -65,7 +65,7 @@ class ExportNefPopup(ExportDialog):
         self.spacer = Spacer(userFrame, 3, 3,
                              QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed,
                              grid=(2, 0), gridSpan=(1, 1))
-        self.treeView = ProjectTreeCheckBoxes(userFrame, project=self.project, grid=(3, 0))
+        self.treeView = ProjectTreeCheckBoxes(userFrame, project=self.project, grid=(3, 0), includeProject=True)
 
     def buildParameters(self):
         """build parameters dict from the user widgets, to be passed to the export method.
@@ -79,11 +79,8 @@ class ExportNefPopup(ExportDialog):
             self.flags[SKIPPREFIXES].append(CCPNTAG)
         self.flags[EXPANDSELECTION] = self.buttonExpand.isChecked()
 
-        # new bit to read all the checked pids (contain ':') from the checkboxtreewidget
-        self.newList = []
-        for item in self.treeView.findItems(':', QtCore.Qt.MatchContains | QtCore.Qt.MatchRecursive):
-            if item.checkState(0) == QtCore.Qt.Checked:
-                self.newList.append(item.text(0))
+        # new bit to read all the checked pids (contain ':') from the checkboxtreewidget - don't include project name
+        self.newList = self.treeView.getSelectedPids(includeRoot=False)
 
         # return the parameters
         params = {'filename': self.exitFilename,

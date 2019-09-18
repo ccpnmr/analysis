@@ -1,0 +1,103 @@
+=====================================================================================================================
+CcpNmr Analysis version-3:
+Subject to CCPN End User Licence Agreement (EULA) (http://www.ccpn.ac.uk/license)
+=====================================================================================================================
+
+1. Preamble
+The software in this package is provided by the copyright holders, i.e. the Collaborative Computational Project for
+NMR (CCPN), a organisation hosted by the University of Leicester and whose principal place of business is Henry
+Wellcome Building, Lancaster Road, Leicester, LE1 9HN (hereinafter: Licensor).
+
+This EULA sets the terms, rights, restrictions and obligations (hereafter: Terms and Conditions) on using
+CcpNmr Analysis version-3, in any form, including source or binary code, programs or program fragments, updates,
+patches, bug fixes, documentation, tutorials, data and other additions (hereinafter: the Software) created and
+owned by Licensor, as detailed herein. Any elements such as code or data, contained within the Software but
+distributed by Licensor on behalf of third parties, will be subject to the appropriate license decided by the
+owner of said elements. Such elements will be clearly marked.
+
+The user of the Software will be referred to hereinafter as the Licensee.
+
+
+2. Permission for Non-commercial Usage
+With exception of those parts of the Software covered by other terms and conditions (detailed below),
+the Licensor grants permission to the Licensee for usage of the Software for non-commercial purposes under the
+terms of the Non-Profit Open Software License version 3.0 (NPOSL-3.0; https://opensource.org/licenses/NPOSL-3.0),
+augmented with the clauses set forth in this EULA.
+
+For the purpose of this EULA, commercial purposes shall be deemed to include all, but not restricted to, activities
+for which a 3rd party has to pay in order to access the Software or activities supported by the Software with the
+aim to develop or leading to the development of other commercial products.
+
+2.1
+In downloading or using the Software, Licensee implicitly accepts the Terms and Conditions set forth in this
+document.
+
+2.2 This EULA shall be retained with all copies, whether orginal or modified, of the Software.
+
+
+3. Registration
+Licensee shall register The Software upon first usage using the popup box generated automatically by the
+Software, providing valid and accurate information regarding name, Email, Workplace and Organisation and other
+relevan information (hereafter: the Information)
+
+3.1. Whereever and whenever appropriate, the Software shall be referenced as “obtained from http://www.ccpn.ac.uk,
+CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis, Skinner et al. J Biomol NMR 66 (2016) 111-124”.
+
+3.2 Licensee grants permission to Licensor to store the Information on its server for the duration of usage of
+the Software by the Licensee. The licensee can request removal of the Information with the Licensor; consequently,
+usage of the Software will be invalidated.
+
+
+4. Performance, Warranty, Support, Upgrades and Fixes
+The Software is provided by the CCPN “AS-IS” and any express or implied warranties, including but not limited to,
+the implied warranties of merchantability, fitness for a particular purpose, are disclaimed. CCPN, the authors,
+the Department of Molecular and Cell Biology, and the University of Leicester shall never, and without any limit,
+be liable for any direct, indirect, incidental, special or consequential damages, cost, expense or any other
+payment incurred by Licensee, loss of use, data, profits, or business, as a result of the Software’s actions,
+failure, bugs and/or any other interaction between the Software and Licensee’s end-equipment, computers, data,
+other software or any 3rd party, end-equipment, computer or services or however otherwise caused.  Moreover,
+CCPN, the authors, the Department of Molecular and Cell Biology, and the University of Leicester shall never be
+liable for any defect in code written by Licensee when relying on the Software or using the Software’s source code.
+
+4.1. Support, Upgrades, Updates, and Fixes
+Software is provided under an AS-IS basis and without any implicit or explicit requirement for the Licensor to
+provide support, updates, fixes, maintenance or new features, irrespective of any bug, failure, mis-performance
+or other defect in the Software.
+Licensor may provide Licensee, from time to time, with upgrades, updates or fixes, as detailed herein and according
+to his sole discretion. Licensee hereby warrants to keep the Software up-to-date and install all relevant updates
+and fixes.
+
+4.2. Bug Notification
+Licensee may provide Licensor of details regarding any bug, defect or failure in the Software promptly and with no
+delay from such event; Licensee shall comply with Licensor's request for information regarding bugs, defects or
+failures and furnish him with information, screenshots and try to reproduce such bugs, defects or failures.
+
+4.3. Feature Requests
+Licensee may request additional features in Software, provided, however, that (i) Licensee shall waive any claim
+or right in such feature should feature be developed by Licensor; (ii) Licensee warrants that feature does not
+infringe any 3rd party patent, trademark, trade-secret or any other intellectual property right; and (iii) Licensee
+developed, envisioned or created the feature solely by himself.
+
+
+
+=====================================================================================================================
+minicoda distribution:
+Subject to Anaconda End User Licence Agreement (https://docs.continuum.io/anaconda/eula)
+=====================================================================================================================
+Copyright 2016, Continuum Analytics, Inc.
+All rights reserved under the 3-clause BSD License:
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS “AS IS” AND ANY EXPRESS OR IMPLIED WARRANTIES,
+INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL CONTINUUM ANALYTICS, INC. BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+
+
+
+
+
+

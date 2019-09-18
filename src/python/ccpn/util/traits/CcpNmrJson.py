@@ -425,6 +425,7 @@ class CcpNmrJson(TraitBase):
         defaults[constants.CLASSNAME] = self.__class__.__name__
         defaults[constants.CLASSVERSION] = self.version
         defaults[constants.USER] = getpass.getuser()
+        defaults[constants.LASTPATH] = 'undefined'
         return defaults
 
     # _metadata-specific json handler; note the invocation with the attribute, not a string!

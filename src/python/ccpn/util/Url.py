@@ -41,7 +41,7 @@ def fetchUrl(url, data=None, headers=None, timeout=None):
 
     context = ssl.create_default_context()
     context.check_hostname = False
-    context.verify_mode = ssl.CERT_REQUIRED
+    context.verify_mode = ssl.CERT_NONE
 
     if not headers:
         headers = {'Content-type': 'application/x-www-form-urlencoded;charset=UTF-8'}
@@ -68,8 +68,7 @@ def fetchUrl(url, data=None, headers=None, timeout=None):
         if useProxyPassword:
             options.update({'headers': urllib3.make_headers(proxy_basic_auth='%s:%s' % (proxyUsername, proxyPassword))})
 
-        # this is a temporary UK free proxy, from https://free-proxy-list.net/uk-proxy.html - who-knows-where!
-        http = urllib3.ProxyManager("http://51.38.69.114:8080/", **options)
+        http = urllib3.ProxyManager("http://XX.XX.XX.XX:8080/", **options)
 
     else:
         http = urllib3.PoolManager(**options)

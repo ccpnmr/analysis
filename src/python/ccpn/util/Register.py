@@ -37,8 +37,6 @@ import json
 import platform
 import re, uuid
 
-from ccpn.framework.PathsAndUrls import ccpn2Url, userPreferencesDirectory, ccpnConfigPath
-
 userAttributes = ('name', 'organisation', 'email')
 
 
@@ -47,10 +45,14 @@ def _registrationPath():
 
 
 def _registrationServerScript():
+    from ccpn.framework.PathsAndUrls import ccpn2Url
+
     return ccpn2Url + '/cgi-bin/register/updateRegistrationV3'
 
 
 def _checkRegistrationServerScript():
+    from ccpn.framework.PathsAndUrls import ccpn2Url
+
     return ccpn2Url + '/cgi-bin/register/checkRegistrationV3'
 
 
@@ -98,6 +100,8 @@ def setHashCode(registrationDict):
 
 def _build(*chars):
     return ''.join([c for c in map(chr, chars)])
+
+
 _bF = _build(98, 117, 105, 108, 100, 70, 111, 114)
 _hc = _build(104, 97, 115, 104, 99, 111, 100, 101)
 _cS = _build(99, 104, 101, 99, 107, 83, 117, 109)
@@ -105,7 +109,7 @@ _nP = _build(110, 111, 110, 45, 112, 114, 111, 102, 105, 116)
 _r0 = _build(79, 75)
 _r1 = _build(78, 111, 116, 32, 70, 111, 117, 110, 100)
 _r2 = _build(68, 105, 102, 102, 101, 114, 101, 110, 116, 32, 76, 105, 99, 101, 110, 99, 101)
-_otherAttributes = (_hc, )
+_otherAttributes = (_hc,)
 _serverResponses = (_r0, _r1, _r2)
 
 
@@ -131,7 +135,7 @@ def updateServer(registrationDict, version='3'):
     url = _registrationServerScript()
 
     values = {}
-    for attr in userAttributes + (_hc, ):
+    for attr in userAttributes + (_hc,):
         value = []
         for c in registrationDict[attr]:
             value.append(c if 32 <= ord(c) < 128 else '_')
@@ -157,6 +161,8 @@ def updateServer(registrationDict, version='3'):
 def _getCompileVersion():
     """Get the compileVersion information from the compileVersion file
     """
+    from ccpn.framework.PathsAndUrls import ccpnConfigPath
+
     COMPILEVERSIONFILE = 'compileVersion.txt'
 
     lfile = os.path.join(ccpnConfigPath, COMPILEVERSIONFILE)
@@ -172,6 +178,8 @@ def _getCompileVersion():
 
 
 def _checkLicenceScript():
+    from ccpn.framework.PathsAndUrls import ccpn2Url
+
     return ccpn2Url + '/cgi-bin/register/checkLicence'
 
 
@@ -185,13 +193,14 @@ def _getBuildID():
 
     return vals[0], vals[1], vals[2], vals[3]
 
+
 def checkServer(registrationDict, version='3'):
     """Check the registration status on the server
     """
     url = _checkRegistrationServerScript()
 
     values = {}
-    for attr in userAttributes + (_hc, ):
+    for attr in userAttributes + (_hc,):
         value = []
         if attr in registrationDict:
             for c in registrationDict[attr]:
@@ -225,14 +234,17 @@ def checkInternetConnection():
     except:
         return False
 
+
 def _fetchGraceFile(application):
     """
     :return: grace filepath used as time stamp
     """
+    from ccpn.framework.PathsAndUrls import userPreferencesDirectory
+
     msg = 'If you are modifying this file it means you are a computer savvy! Please register and contribute to the project.'
     v = application.applicationVersion
     f = 'grace.json'
-    path = os.path.join(userPreferencesDirectory,v+f)
+    path = os.path.join(userPreferencesDirectory, v + f)
     if not os.path.exists(path):
 
         with open(path, "w") as file:
@@ -241,7 +253,6 @@ def _fetchGraceFile(application):
         return path
     else:
         return path
-
 
 
 def _graceCounter(apath, d=5):

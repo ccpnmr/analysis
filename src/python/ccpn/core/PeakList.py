@@ -681,27 +681,42 @@ class PeakList(AbstractWrapperObject):
     #     self._endCommandEchoBlock()
     #
     #   return peaks
-
+    from ccpn.util.decorators import profile
+    @profile
     def peakFinder1D(self, maxNoiseLevel=None, minNoiseLevel=None, ignoredRegions=[[20, 19]], negativePeaks=True):
         from ccpn.core.lib.peakUtils import peakdet, _getIntersectionPoints, _pairIntersectionPoints
         from scipy import signal
-        from ccpn.core.lib.ContextManagers import undoBlock, undoBlockWithoutSideBar
+        # from ccpn.core.lib.ContextManagers import undoBlock, undoBlockWithoutSideBar, notificationEchoBlocking
+        # import time
+        # t1 = time.time()
 
-        with undoBlockWithoutSideBar():
-            spectrum = self.spectrum
-            # integralList = self.spectrum.newIntegralList()
 
-            x, y = spectrum.positions, spectrum.intensities
-            masked = _filtered1DArray(np.array([x, y]), ignoredRegions)
-            filteredX, filteredY = masked[0], masked[1]
-            if maxNoiseLevel is None or minNoiseLevel is None:
-                maxNoiseLevel, minNoiseLevel = estimateNoiseLevel1D(filteredY)
+        # with undoBlockWithoutSideBar():
+        #     with notificationEchoBlocking():
+        spectrum = self.spectrum
+        # integralList = self.spectrum.newIntegralList()
 
-            maxValues, minValues = peakdet(y=filteredY, x=filteredX, delta=maxNoiseLevel)
-            for position, height in maxValues:
-                peak = self.newPeak(ppmPositions=[position], height=height)
-            spectrum.noiseLevel = float(maxNoiseLevel)
+        x, y = spectrum.positions, spectrum.intensities
+        masked = _filtered1DArray(np.array([x, y]), ignoredRegions)
+        filteredX, filteredY = masked[0], masked[1]
+        if maxNoiseLevel is None or minNoiseLevel is None:
+            maxNoiseLevel, minNoiseLevel = estimateNoiseLevel1D(filteredY)
+        # t1 = time.time()
+        maxValues, minValues = peakdet(y=filteredY, x=filteredX, delta=maxNoiseLevel)
+        # t2 = time.time()
+        # print(' DETECT',t2 - t1)
 
+        # t1 = time.time()
+        # maxValues, minValues = peakdet(y=filteredY, x=filteredX, delta=maxNoiseLevel)
+        # t2 = time.time()
+        # print(' DETECT After', t2 - t1)
+
+        for position, height in maxValues:
+            peak = self.newPeak(ppmPositions=[position], height=height)
+        # t3 = time.time()
+        spectrum.noiseLevel = float(maxNoiseLevel)
+        # t2 = time.time()
+        # print(' ££££ ', t2 - t1)
             # const = round(len(y) * 0.0039, 1)
             # correlatedSignal1 = signal.correlate(y, np.ones(int(const)), mode='same') / const
             # intersectionPoints = _getIntersectionPoints(x, y, correlatedSignal1)

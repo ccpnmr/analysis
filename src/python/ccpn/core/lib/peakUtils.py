@@ -160,7 +160,8 @@ def _get1DPeaksPosAndHeightAsArray(peakList):
 import sys
 from numpy import NaN, Inf, arange, isscalar, asarray, array
 
-
+from numba import jit, prange
+@jit(nopython=True, nogil=True)
 def peakdet(y, x, delta, negative=False):
     """
     Converted from MATLAB script at http://billauer.co.il/peakdet.html
@@ -177,7 +178,7 @@ def peakdet(y, x, delta, negative=False):
     mnpos, mxpos = NaN, NaN
     lookformax = True
 
-    for i in arange(len(y)):
+    for i in prange(len(y)):
         this = y[i]
         if this > mx:
             mx = this

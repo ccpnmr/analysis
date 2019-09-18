@@ -30,7 +30,7 @@ from ccpn.ui.gui.widgets.Spinbox import Spinbox
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.DoubleSpinbox import DoubleSpinbox
-
+from ccpn.core.lib.peakUtils import peakdet
 #### NON GUI IMPORTS
 from ccpn.framework.lib.Pipe import SpectraPipe
 from ccpn.pipes.lib._getNoiseLevel import _getNoiseLevelForPipe
@@ -99,15 +99,18 @@ class PeakPicker1DPipe(SpectraPipe):
         else:
             self._kwargs.update({ExcludeRegions: DefaultExcludeRegions})
             excludeRegions = self._kwargs[ExcludeRegions]
-
-        for spectrum in tqdm(self.inputData):
-            if len(spectrum.peakLists) > 0:
-                spectrum.peakLists[DefaultPeakListIndex].peakFinder1D(maxNoiseLevel=spectrum.noiseLevel,
-                                                                      minNoiseLevel=spectrum.negativeNoiseLevel,
-                                                                      ignoredRegions=excludeRegions,
-                                                                      )
-            else:
-                getLogger().warning('Error: PeakList not found for Spectrum: %s. Add a new PeakList first' % spectrum.pid)
+        peakdet([1],[1],1)# just compile
+        from ccpn.core.lib.ContextManagers import  undoBlockWithoutSideBar, notificationEchoBlocking
+        with undoBlockWithoutSideBar():
+            with notificationEchoBlocking():
+                for spectrum in tqdm(self.inputData):
+                    if len(spectrum.peakLists) > 0:
+                        spectrum.peakLists[DefaultPeakListIndex].peakFinder1D(maxNoiseLevel=spectrum.noiseLevel,
+                                                                              minNoiseLevel=spectrum.negativeNoiseLevel,
+                                                                              ignoredRegions=excludeRegions,
+                                                                              )
+                    else:
+                        getLogger().warning('Error: PeakList not found for Spectrum: %s. Add a new PeakList first' % spectrum.pid)
         getLogger().info(self._finishedInfo)
         return spectra
 

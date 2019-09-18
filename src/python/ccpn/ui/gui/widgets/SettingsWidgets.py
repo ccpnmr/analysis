@@ -538,7 +538,7 @@ class _commonSettings():
 
 
 LINKTOPULLDOWNCLASS = 'linkToPulldownClass'
-
+LINKTOACTIVESTATE = True
 
 class StripPlot(Widget, _commonSettings):
 
@@ -641,7 +641,7 @@ class StripPlot(Widget, _commonSettings):
                     orientation='left',
                     labelText='Link to current %s:' % self.activePulldownClass.className,
                     tipText='Set/update current %s when selecting from pulldown' % self.activePulldownClass.className,
-                    checked=False
+                    checked=LINKTOACTIVESTATE
                     ))
 
         row += 1

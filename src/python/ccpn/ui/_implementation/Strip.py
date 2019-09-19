@@ -148,6 +148,12 @@ class Strip(AbstractWrapperObject):
         """The spectra attached to the strip (whether display is currently turned on  or not)"""
         return tuple(x.spectrum for x in self.spectrumViews)
 
+    @property
+    def spectrumGroups(self) -> Tuple[Spectrum, ...]:
+        """The spectra attached to the strip (whether display is currently turned on  or not)"""
+        pids = self.spectrumDisplay._getSpectrumGroups()
+        return tuple(self.project.getByPid(x) for x in pids)
+
     # def _retrieveOrderedSpectrumViews(self, pid):
     #   for dd in self.project.dataSets:
     #     if dd.title == SV_TITLE:

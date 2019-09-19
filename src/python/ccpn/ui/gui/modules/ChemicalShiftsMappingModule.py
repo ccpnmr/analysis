@@ -390,6 +390,7 @@ class ChemicalShiftsMapping(CcpnModule):
     self.inputLabel = Label(self.scrollAreaWidgetContents, text='Select input data', grid=(i, 0), vAlign='t')
     self.spectraSelectionWidget = SpectraSelectionWidget(self.scrollAreaWidgetContents, mainWindow=self.mainWindow,
                                                          grid=(i, 1), gridSpan=(1, 2))
+    self.spectraSelectionWidget.setMinimumHeight(500)
     if len(self.project.spectra) > 0:
       self._addSettingsWAttr(self.spectraSelectionWidget.selectSpectraOption.radioButtons)
       self._addSettingsWAttr(self.spectraSelectionWidget.allSpectraCheckBoxes)

@@ -53,19 +53,25 @@ def fetchHttpResponse(method, url, data=None, headers=None, proxySettings=None):
                }
 
     # check whether a proxy is required
-    if proxySettings and proxySettings.useProxy:
+    if proxySettings and proxySettings.get('useProxy'):
 
-        if proxySettings.useProxyPassword:
+        useProxyPassword = proxySettings.get('useProxyPassword')
+        proxyAddress = proxySettings.get('proxyAddress')
+        proxyPort = proxySettings.get('proxyPort')
+        proxyUsername = proxySettings.get('proxyUsername')
+        proxyPassword = proxySettings.get('proxyPassword')
+
+        if useProxyPassword:
 
             # grab the decode from the userPreferences
             from ccpn.util.UserPreferences import UserPreferences
             _userPreferences = UserPreferences(readPreferences=False)
 
             options.update({'headers': urllib3.make_headers(proxy_basic_auth='%s:%s' %
-                                                                             (proxySettings.proxyUsername,
-                                                                              _userPreferences.decodeValue(proxySettings.proxyPassword)))})
+                                                                             (proxyUsername,
+                                                                              _userPreferences.decodeValue(proxyPassword)))})
 
-        http = urllib3.ProxyManager("http://%s:%s/" % (str(proxySettings.proxyAddress), str(proxySettings.proxyPort)),
+        http = urllib3.ProxyManager("http://%s:%s/" % (str(proxyAddress), str(proxyPort)),
                                     **options)
 
     else:
@@ -94,8 +100,8 @@ def fetchUrl(url, data=None, headers=None, timeout=None, proxySettings=None):
 
     response = fetchHttpResponse('POST', url, data=data, headers=None, proxySettings=proxySettings)
 
-    print('>>>>>>response', proxySettings, response.read().decode('utf-8'))
-    return response.read().decode('utf-8')
+    print('>>>>>>response', proxySettings, response.data.decode('utf-8'))
+    return response.data.decode('utf-8')
 
 
 def uploadFile(url, fileName, data=None):

@@ -169,9 +169,9 @@ def fetchUrl(url, data=None, headers=None, timeout=None):
     # import certifi
     # import urllib3.contrib.pyopenssl
     from ccpn.util.Url import fetchHttpResponse
-    # from ccpn.util.UserPreferences import UserPreferences
+    from ccpn.util.UserPreferences import UserPreferences
     #
-    # print('>>>>>FETCHURL in Update')
+    print('>>>>>FETCHURL in Update')
     #
     # # from urllib.parse import urlencode, quote
     # # import logging
@@ -199,10 +199,15 @@ def fetchUrl(url, data=None, headers=None, timeout=None):
         #                         body=body,
         #                         preload_content=False)
 
-        proxyDict=None
+        proxyNames = ['useProxy', 'proxyAddress', 'proxyPort', 'useProxyPassword',
+                      'proxyUsername', 'proxyPassword']
+        _userPreferences = UserPreferences(readPreferences=True)
+        proxyDict={}
+        for name in proxyNames:
+            proxyDict[name] = _userPreferences._getPreferencesParameter(name)
         response = fetchHttpResponse('POST', url, data, headers=headers, proxySettings=proxyDict)
 
-        return response.read().decode('utf-8')
+        return response.data.decode('utf-8')
     except:
         print('Checksum error')
 
@@ -457,14 +462,16 @@ class UpdateAgent(object):
             self.showError('Update error', 'Could not check details on server.')
 
     def _resetMd5(self):
-        from ccpn.framework.PathsAndUrls import userPreferencesDirectory, ccpnConfigPath
+        # only write the file if it is non-empty
+        if self._found:
+            from ccpn.util.UserPreferences import userPreferencesDirectory, ccpnConfigPath
 
-        fname = ''.join([c for c in map(chr, (108, 105, 99, 101, 110, 99, 101, 75, 101, 121, 46, 116, 120, 116))])
-        lfile = os.path.join(userPreferencesDirectory, fname)
-        if not os.path.exists(lfile):
-            lfile = os.path.join(ccpnConfigPath, fname)
-        with open(lfile, 'w', encoding='UTF-8') as fp:
-            fp.write(self._found)
+            fname = ''.join([c for c in map(chr, (108, 105, 99, 101, 110, 99, 101, 75, 101, 121, 46, 116, 120, 116))])
+            lfile = os.path.join(userPreferencesDirectory, fname)
+            if not os.path.exists(lfile):
+                lfile = os.path.join(ccpnConfigPath, fname)
+            with open(lfile, 'w', encoding='UTF-8') as fp:
+                fp.write(self._found)
 
     def resetFromServer(self):
 
@@ -537,8 +544,8 @@ class UpdateAgent(object):
                 try:
                     self.showInfo('Install Updates', 'Installing %s' % (updateFile.fullFilePath))
 
-                    if not self._dryRun:
-                        updateFile.installUpdate()
+                    # if not self._dryRun:
+                    #     updateFile.installUpdate()
 
                     n += 1
                     updateFilesInstalled.append(updateFile)

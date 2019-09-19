@@ -223,7 +223,6 @@ def checkServer(registrationDict, version='3'):
             return found.strip() == 'OK'
 
     except Exception as e:
-        print('>>>>>>', str(e))
         logger = Logging.getLogger()
         logger.warning('Could not check registration on server.')
 

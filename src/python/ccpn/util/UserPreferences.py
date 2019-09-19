@@ -97,9 +97,9 @@ class UserPreferences():
     def _getPreferencesParameter(self, name):
         """Return a paramter from the preferences file
         """
-        value = getattr(self._preferences, name, None)
-        if value and name in ENCRYPTEDLIST:
-            return self._decode(USERKEY, value)
+        value = getattr(self._preferences.general, name, None)
+        # if value and name in ENCRYPTEDLIST:
+        #     return self._decode(USERKEY, value)
 
         return value
 

@@ -390,7 +390,7 @@ class UpdateAgent(object):
             for updateFile in updateFiles:
                 try:
                     print('Installing %s' % (updateFile.fullFilePath))
-                    updateFile.installUpdate()
+                    # updateFile.installUpdate()
                     n += 1
                 except Exception as e:
                     print('Could not install %s: %s' % (updateFile.fullFilePath, e))

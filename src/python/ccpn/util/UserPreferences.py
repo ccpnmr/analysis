@@ -38,6 +38,13 @@ defaultPreferencesPath          = os.path.join(ccpnConfigPath, 'defaultv3setting
 userPreferencesDirectory        = os.path.expanduser('~/.ccpn')
 userPreferencesPath             = os.path.join(userPreferencesDirectory,'v3settings.json')
 
+USEPROXY = 'useProxy'
+USEPROXYPASSWORD = 'useProxyPassword'
+PROXYADDRESS = 'proxyAddress'
+PROXYPORT = 'proxyPort'
+PROXYUSERNAME = 'proxyUsername'
+PROXYPASSWORD = 'proxyPassword'
+
 
 def getPreferences(skipUserPreferences=False, defaultPath=None, userPath=None):
     """Read the preferences file and merge with user specific preferences

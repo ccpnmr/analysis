@@ -53,18 +53,19 @@ def fetchHttpResponse(method, url, data=None, headers=None, proxySettings=None):
                }
 
     # check whether a proxy is required
-    if proxySettings and proxySettings.get('useProxy'):
+    from ccpn.util.UserPreferences import UserPreferences, USEPROXY, USEPROXYPASSWORD, PROXYADDRESS, \
+        PROXYPORT, PROXYUSERNAME, PROXYPASSWORD
 
-        useProxyPassword = proxySettings.get('useProxyPassword')
-        proxyAddress = proxySettings.get('proxyAddress')
-        proxyPort = proxySettings.get('proxyPort')
-        proxyUsername = proxySettings.get('proxyUsername')
-        proxyPassword = proxySettings.get('proxyPassword')
+    if proxySettings and proxySettings.get(USEPROXY):
+
+        useProxyPassword = proxySettings.get(USEPROXYPASSWORD)
+        proxyAddress = proxySettings.get(PROXYADDRESS)
+        proxyPort = proxySettings.get(PROXYPORT)
+        proxyUsername = proxySettings.get(PROXYUSERNAME)
+        proxyPassword = proxySettings.get(PROXYPASSWORD)
 
         if useProxyPassword:
-
             # grab the decode from the userPreferences
-            from ccpn.util.UserPreferences import UserPreferences
             _userPreferences = UserPreferences(readPreferences=False)
 
             options.update({'headers': urllib3.make_headers(proxy_basic_auth='%s:%s' %

@@ -33,6 +33,7 @@ class TestObj2(CcpNmrJson):
 
     # hash and eq determine uniqueness for set and dict 'keys'; see https://hynek.me/articles/hashes-and-equality/
     # hash need to be based upon some inmutable attributes
+    # for dict's and set's: if two objects compare equal, their hash must be equal
     def __eq__(self, other):
         return self.value == other.value
 

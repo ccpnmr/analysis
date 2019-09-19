@@ -986,7 +986,7 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
         # CCPN INTERNAL. Called also from module area and GuiStrip. They should have same behaviour
         # use an undoBlock, and ignore logging if 5 or more items
         # to stop overloading of the log
-
+        objs = []
         urls = data.get('urls', [])
         if urls and len(urls) > 0:
 

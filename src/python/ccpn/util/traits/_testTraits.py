@@ -6,19 +6,20 @@
 
 from ccpn.util.traits.CcpNmrTraits import Dict, Odict, Int, List, CPath, Adict
 from ccpn.util.traits.CcpNmrJson import CcpNmrJson
-from ccpn.util.traits.CcpNmrTraits import RecursiveDict, RecursiveList
+from ccpn.util.traits.CcpNmrTraits import RecursiveDict, RecursiveList, RecursiveOdict, RecursiveSet
 
 class TestObj(CcpNmrJson):
 
     saveAllTraitsToJson = True
     version = 0.1
 
-    odict = Odict().tag(recursion=True)  # True is default
+    odict = RecursiveOdict()
     adict = Adict()
 
     theDict = RecursiveDict()
     theList = RecursiveList()
     thePath = CPath(default_value='bla.dat')
+    theSet = RecursiveSet()
 
 TestObj.register()
 
@@ -30,6 +31,19 @@ class TestObj2(CcpNmrJson):
     def __init__(self, value=0):
         self.value = value
 
+    # hash and eq determine uniqueness for set and dict 'keys'; see https://hynek.me/articles/hashes-and-equality/
+    # hash need to be based upon some inmutable attributes
+    def __eq__(self, other):
+        return self.value == other.value
+
+    def __le__(self, other):
+        return self.value <= other.value
+
+    def __lt__(self, other):
+        return self.value < other.value
+
+    def __hash__(self):
+        return self.value
     def __str__(self):
         return '<TestObj2: value=%s>' % self.value
 
@@ -44,6 +58,9 @@ def test():
 
     obj1 = TestObj(id='obj1')
 
+    print('>> hasTrait(odict):', obj1.hasTrait('odict'))
+    print('>> isMutableTrait(odict):', obj1.isMutableTrait('odict'))
+
     for v in [10, 11, 12]:
         obj2 = TestObj2(v)
         obj1.theDict[str(v)] = obj2
@@ -57,9 +74,11 @@ def test():
         obj1.adict[str(v)] = v*10
 
     obj1.theList.append('mies')
-    for v in [40, 41, 42]:
+    for v in [40, 41, 42, 42]:
         obj2 = TestObj2(v)
         obj1.theList.append(obj2)
+
+    obj1.theSet = obj1.theList
 
     js = obj1.toJson(ident=None)
     print(js)

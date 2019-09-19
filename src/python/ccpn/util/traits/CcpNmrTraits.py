@@ -74,7 +74,7 @@ class RecursiveDict(Dict):
 class Adict(TraitType):
     """A trait that defines a json serialisable AttributeDict; 
     dicts or (key,value) iterables are automatically cast into AttributeDict
-    Recursion is active by default, unless tagged with .tag(recursion=False)
+    Recursion is not active
     """
     default_value = AttributeDict()
     info_text = "'an AttributeDict'"
@@ -94,13 +94,41 @@ class Adict(TraitType):
     # trait-specific json handler
     class jsonHandler(RecursiveDictHandlerABC):
         klass = AttributeDict
+        recursion = False
+# end class
+
+
+class RecursiveAdict(TraitType):
+    """A trait that defines a json serialisable AttributeDict;
+    dicts or (key,value) iterables are automatically cast into AttributeDict
+    Recursion is active
+    """
+    default_value = AttributeDict()
+    info_text = "'an AttributeDict'"
+
+    def validate(self, obj, value):
+        """Assure a AttributeDict instance
+        """
+        if isinstance(value, AttributeDict):
+            return value
+        elif isinstance(value, dict):
+            return AttributeDict(**value)
+        elif isinstance(value, list) or isinstance(value, tuple):
+            return AttributeDict(value)
+        else:
+            self.error(obj, value)
+
+    # trait-specific json handler
+    class jsonHandler(RecursiveDictHandlerABC):
+        klass = AttributeDict
+        recursion = True
 # end class
 
 
 class Odict(TraitType):
     """A trait that defines a json serialisable OrderedDict;
     dicts are automatically cast into OrderedDict
-    Recursion is active by default, unless tagged with .tag(recursion=False)
+    Recursion is not active
     """
     default_value = OrderedDict()
     info_text = "'an OrderedDict'"
@@ -118,25 +146,59 @@ class Odict(TraitType):
     # trait-specific json handler
     class jsonHandler(RecursiveDictHandlerABC):
         klass = OrderedDict
+        recursion = False
+# end class
+
+
+class RecursiveOdict(TraitType):
+    """A trait that defines a json serialisable OrderedDict;
+    dicts are automatically cast into OrderedDict
+    Recursion is active
+    """
+    default_value = OrderedDict()
+    info_text = "'an OrderedDict'"
+
+    def validate(self, obj, value):
+        """Assure a OrderedDict instance
+        """
+        if isinstance(value, OrderedDict):
+            return value
+        elif isinstance(value, dict):
+            return OrderedDict(list(value.items()))
+        else:
+            self.error(obj, value)
+
+    # trait-specific json handler
+    class jsonHandler(RecursiveDictHandlerABC):
+        klass = OrderedDict
+        recursion = True
 # end class
 
 
 class RecursiveList(List):
     """A list trait that implements recursion of any of the values that are a CcpNmrJson (sub)type
-    Recursion is active by default, unless tagged with .tag(recursion=False)
     """
     # trait-specific json handler
     class jsonHandler(RecursiveListHandlerABC):
         klass = list
+        recursion = True
 
 
 class RecursiveTuple(Tuple):
     """A tuple trait that implements recursion of any of the values that are a CcpNmrJson (sub)type
-    Recursion is active by default, unless tagged with .tag(recursion=False)
     """
     # trait-specific json handler
     class jsonHandler(RecursiveListHandlerABC):
         klass = tuple
+        recursion = True
+
+class RecursiveSet(Set):
+    """A Set trait that implements recursion of any of the values that are a CcpNmrJson (sub)type
+    """
+    # trait-specific json handler
+    class jsonHandler(RecursiveListHandlerABC):
+        klass = set
+        recursion = True
 
 
 class CPath(TraitType):

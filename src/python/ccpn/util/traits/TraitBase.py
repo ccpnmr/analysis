@@ -35,14 +35,14 @@ class TraitBase(HasTraits):
     """
 
     def getTraitValue(self, trait):
-        """return value of trait
+        """convenience (to complement setTraitValue): return value of trait
         """
         if not self.hasTrait(trait):
             raise ValueError('Trait "%s" does not exist for object %s' % (trait,self))
         return self._trait_values[trait]
 
     def setTraitValue(self, trait, value, force=False):
-        """set value of trait, overwriting immutable ones
+        """Convenience: set value of trait, optionally overwriting immutable ones
         """
         if not self.hasTrait(trait):
             raise ValueError('Trait "%s" does not exist for object %s' % (trait,self))
@@ -53,9 +53,20 @@ class TraitBase(HasTraits):
             raise ValueError('Trait "%s" is immutable' % trait)
 
     def hasTrait(self, trait):
-        """Return True if self has trait
+        """Convenience, Return True if self has trait
         """
-        return self.getTraitObject(trait) is not None
+        return self.has_trait(trait)
+
+    def getAllTraitObjects(self, objectOnly=True, **metadata) -> dict :
+        """Return a dict of (traitName,  trait object) key,value pairs, optionally filtering
+        for metadata.
+        If objectOnly is True, only traits defined for this object are included;
+        if False, also include any inherited traits.
+        """
+        if objectOnly:
+            return self.class_own_traits(**metadata)
+        else:
+            return self.class_traits(**metadata)
 
     def getTraitObject(self, trait):
         """get the trait object or None if trait does not exist
@@ -65,9 +76,9 @@ class TraitBase(HasTraits):
 
     def isMutableTrait(self, trait):
         "Return True is trait is mutable"
-        traitObj = self.getTraitObject(trait)
-        if traitObj is None:
+        if not self.hasTrait(trait):
             raise ValueError('Trait "%s" does not exist for object %s' % (trait,self))
+        traitObj = self.getTraitObject(trait)
         return not traitObj.read_only
 
     def getMetadata(self, trait, key, default=None):
@@ -75,8 +86,8 @@ class TraitBase(HasTraits):
         return self.trait_metadata(trait, key, default)
 
     def keys(self, **metadata):
-        """get keys, optionally filtering for metadata"""
-        keys = list(self.trait_names(**metadata))
+        """get keys (object only), optionally filtering for metadata"""
+        keys = list(self.class_own_traits(**metadata).keys())
         keys.sort()
         return keys
 

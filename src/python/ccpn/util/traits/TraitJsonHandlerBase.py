@@ -58,13 +58,14 @@ class TraitJsonHandlerBase():
 
 
 class RecursiveDictHandlerABC(TraitJsonHandlerBase):
-    """Abstract base class to handle recursion of dict-like traits
+    """Abstract base class to handle (optionally) recursion of dict-like traits
     Each value of the (key,value) pairs must of CcpNmrJson (sub-)type
     """
     #--------------------------------------------------------------------------------------------
     # to be subclassed
     #--------------------------------------------------------------------------------------------
     klass = None
+    recursion = True
     #--------------------------------------------------------------------------------------------
     # end to be subclassed
     #--------------------------------------------------------------------------------------------
@@ -82,9 +83,8 @@ class RecursiveDictHandlerABC(TraitJsonHandlerBase):
                                (trait, type(self.klass), type(theDict))
                                )
         theList = []
-        recursion = obj.trait_metadata(trait, constants.RECURSION, True)
         for key, value in theDict.items():
-            if recursion and isinstance(value, CcpNmrJson):
+            if self.recursion and isinstance(value, CcpNmrJson):
                 value = value._encode()
             theList.append((key, value))
         return theList
@@ -118,6 +118,7 @@ class RecursiveListHandlerABC(TraitJsonHandlerBase):
     # to be subclassed
     #--------------------------------------------------------------------------------------------
     klass = None
+    recursion = True
     #--------------------------------------------------------------------------------------------
     # end to be subclassed
     #--------------------------------------------------------------------------------------------
@@ -149,10 +150,9 @@ class RecursiveListHandlerABC(TraitJsonHandlerBase):
         from ccpn.util.traits.CcpNmrJson import constants, CcpNmrJson
 
         result = []
-        recursion = obj.trait_metadata(trait, constants.RECURSION, True)
         for item in theList:
             # check if this encoded a CcpNmrJson type object
-            if recursion and CcpNmrJson.isEncodedObject(item):
+            if self.recursion and CcpNmrJson.isEncodedObject(item):
                 theDict = dict(item)
                 item = CcpNmrJson._newObjectFromDict(theDict)
             result.append(item)

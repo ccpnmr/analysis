@@ -101,3 +101,19 @@ class FloatLineEdit(LineEdit):
     def set(self, text=''):
 
         LineEdit.set(str(text))
+
+
+class PasswordEdit(LineEdit):
+    """Subclass of LineEdit to handle passwords to be shown as **
+    """
+    def __init__(self, parent, text='', textAlignment='c', backgroundText=None,
+                 minimumWidth=100, textColor=None, readOnly=False, **kwds):
+        """
+        Initialise the lineEdit to password mode
+        """
+        super().__init__(parent, text=text, textAlignment=textAlignment, backgroundText=backgroundText,
+                         minimumWidth=minimumWidth, textColor=textColor, readOnly=readOnly, **kwds)
+        Base._init(self, **kwds)
+
+        # set password mode
+        self.setEchoMode(QtWidgets.QLineEdit.Password)

@@ -165,34 +165,43 @@ def isBinaryData(data):
 def fetchUrl(url, data=None, headers=None, timeout=None):
     """Fetch url request from the server
     """
-    import ssl
-    import certifi
-    import urllib3.contrib.pyopenssl
-    # from urllib.parse import urlencode, quote
-    # import logging
-
-    # urllib3_logger = logging.getLogger('urllib3')
-    # urllib3_logger.setLevel(logging.CRITICAL)
-
-    context = ssl.create_default_context()
-    context.check_hostname = False
-    context.verify_mode = ssl.CERT_NONE
-
-    if not headers:
-        headers = {'Content-type': 'application/x-www-form-urlencoded;charset=UTF-8'}
-    body = urlencode(data, quote_via=quote).encode('utf-8') if data else None
-
-    urllib3.contrib.pyopenssl.inject_into_urllib3()
-    http = urllib3.PoolManager(cert_reqs='CERT_REQUIRED',
-                               ca_certs=certifi.where(),
-                               timeout=urllib3.Timeout(connect=3.0, read=3.0),
-                               retries=urllib3.Retry(1, redirect=False))
+    # import ssl
+    # import certifi
+    # import urllib3.contrib.pyopenssl
+    from ccpn.util.Url import fetchHttpResponse
+    # from ccpn.util.UserPreferences import UserPreferences
+    #
+    # print('>>>>>FETCHURL in Update')
+    #
+    # # from urllib.parse import urlencode, quote
+    # # import logging
+    #
+    # # urllib3_logger = logging.getLogger('urllib3')
+    # # urllib3_logger.setLevel(logging.CRITICAL)
+    #
+    # context = ssl.create_default_context()
+    # context.check_hostname = False
+    # context.verify_mode = ssl.CERT_NONE
+    #
+    # if not headers:
+    #     headers = {'Content-type': 'application/x-www-form-urlencoded;charset=UTF-8'}
+    # body = urlencode(data, quote_via=quote).encode('utf-8') if data else None
+    #
+    # urllib3.contrib.pyopenssl.inject_into_urllib3()
+    # http = urllib3.PoolManager(cert_reqs='CERT_REQUIRED',
+    #                            ca_certs=certifi.where(),
+    #                            timeout=urllib3.Timeout(connect=3.0, read=3.0),
+    #                            retries=urllib3.Retry(1, redirect=False))
 
     try:
-        response = http.request('POST', url,
-                                headers=headers,
-                                body=body,
-                                preload_content=False)
+        # response = http.request('POST', url,
+        #                         headers=headers,
+        #                         body=body,
+        #                         preload_content=False)
+
+        proxyDict=None
+        response = fetchHttpResponse('POST', url, data, headers=headers, proxySettings=proxyDict)
+
         return response.read().decode('utf-8')
     except:
         print('Checksum error')
@@ -242,8 +251,8 @@ def downloadFile(serverScript, serverDbRoot, fileName):
         print(str(es))
 
 
-def installUpdates(version):
-    updateAgent = UpdateAgent(version)
+def installUpdates(version, dryRun=True):
+    updateAgent = UpdateAgent(version, dryRun=dryRun)
     updateAgent.resetFromServer()
     updateAgent.installUpdates()
     if updateAgent._check():
@@ -320,7 +329,8 @@ class UpdateAgent(object):
 
     def __init__(self, version, showError=None, showInfo=None, askPassword=None,
                  serverUser=None, server=SERVER, serverDbRoot=SERVER_DB_ROOT, serverDbFile=SERVER_DB_FILE,
-                 serverDownloadScript=SERVER_DOWNLOAD_SCRIPT, serverUploadScript=SERVER_UPLOAD_SCRIPT):
+                 serverDownloadScript=SERVER_DOWNLOAD_SCRIPT, serverUploadScript=SERVER_UPLOAD_SCRIPT,
+                 dryRun=True):
 
         if not showError:
             # showError = MessageDialog.showError
@@ -350,6 +360,7 @@ class UpdateAgent(object):
         self.installLocation = Path.getTopDirectory()
         self.updateFiles = []
         self.updateFileDict = {}
+        self._dryRun = dryRun
 
     def checkNumberUpdates(self):
         self.fetchUpdateDb()
@@ -525,7 +536,9 @@ class UpdateAgent(object):
             for updateFile in updateFiles:
                 try:
                     self.showInfo('Install Updates', 'Installing %s' % (updateFile.fullFilePath))
-                    updateFile.installUpdate()
+
+                    if not self._dryRun:
+                        updateFile.installUpdate()
 
                     n += 1
                     updateFilesInstalled.append(updateFile)
@@ -591,4 +604,4 @@ if __name__ == '__main__':
     # from ccpn.framework.Version import applicationVersion
     # Remember to update the Version in this file!
     applicationVersion = __version__.split()[1]  # ejb - read from the header
-    installUpdates(applicationVersion)
+    installUpdates(applicationVersion, dryRun=True)

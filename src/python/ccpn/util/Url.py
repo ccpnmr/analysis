@@ -27,17 +27,13 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 BAD_DOWNLOAD = 'Exception: '
 
 
-def fetchUrl(url, data=None, headers=None, timeout=None):
-    """Fetch url request from the server
+def fetchHttpResponse(method, url, data=None, headers=None, proxySettings=None):
+    """Generate an http, and return the response
     """
+    import ssl
+    import certifi
     import urllib3.contrib.pyopenssl
     from urllib.parse import urlencode, quote
-    import certifi
-    import ssl
-    import logging
-
-    urllib3_logger = logging.getLogger('urllib3')
-    urllib3_logger.setLevel(logging.CRITICAL)
 
     context = ssl.create_default_context()
     context.check_hostname = False
@@ -56,29 +52,49 @@ def fetchUrl(url, data=None, headers=None, timeout=None):
                'retries'  : urllib3.Retry(1, redirect=False)
                }
 
-    # temporary settings
-    useProxy = False
-    useProxyPassword = False
-    proxyUsername = 'username'
-    proxyPassword = 'password'
-
     # check whether a proxy is required
-    if useProxy:
-        # need to get the username/password if required
-        if useProxyPassword:
-            options.update({'headers': urllib3.make_headers(proxy_basic_auth='%s:%s' % (proxyUsername, proxyPassword))})
+    if proxySettings and proxySettings.useProxy:
 
-        http = urllib3.ProxyManager("http://XX.XX.XX.XX:8080/", **options)
+        if proxySettings.useProxyPassword:
+
+            # grab the decode from the userPreferences
+            from ccpn.util.UserPreferences import UserPreferences
+            _userPreferences = UserPreferences(readPreferences=False)
+
+            options.update({'headers': urllib3.make_headers(proxy_basic_auth='%s:%s' %
+                                                                             (proxySettings.proxyUsername,
+                                                                              _userPreferences.decodeValue(proxySettings.proxyPassword)))})
+
+        http = urllib3.ProxyManager("http://%s:%s/" % (str(proxySettings.proxyAddress), str(proxySettings.proxyPort)),
+                                    **options)
 
     else:
         http = urllib3.PoolManager(**options)
 
-    # read the response from the server
-    response = http.request('POST', url,
+    # generate an http request
+    response = http.request(method, url,
                             headers=headers,
                             body=body,
                             preload_content=False)
-    # print('>>>>>>response', response.read())
+
+    return response
+
+
+def fetchUrl(url, data=None, headers=None, timeout=None, proxySettings=None):
+    """Fetch url request from the server
+    """
+    # import urllib3.contrib.pyopenssl
+    # from urllib.parse import urlencode, quote
+    # import certifi
+    # import ssl
+    import logging
+
+    urllib3_logger = logging.getLogger('urllib3')
+    urllib3_logger.setLevel(logging.CRITICAL)
+
+    response = fetchHttpResponse('POST', url, data=data, headers=None, proxySettings=proxySettings)
+
+    print('>>>>>>response', proxySettings, response.read().decode('utf-8'))
     return response.read().decode('utf-8')
 
 
@@ -102,9 +118,10 @@ def uploadFile(url, fileName, data=None):
 
 def checkInternetConnection():
     from ccpn.framework.PathsAndUrls import ccpnUrl
+    import os.path
 
     try:
-        fetchUrl(ccpnUrl)
+        fetchUrl(os.path.join(ccpnUrl, 'cgi-bin/checkInternet'))
         return True
 
     except Exception as es:

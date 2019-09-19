@@ -243,7 +243,8 @@ class UpdateAgent(object):
 
     def _init(self, version, showError=None, showInfo=None, askPassword=None,
               serverUser=None, server=SERVER, serverDbRoot=SERVER_DB_ROOT, serverDbFile=SERVER_DB_FILE,
-              serverDownloadScript=SERVER_DOWNLOAD_SCRIPT, serverUploadScript=SERVER_UPLOAD_SCRIPT):
+              serverDownloadScript=SERVER_DOWNLOAD_SCRIPT, serverUploadScript=SERVER_UPLOAD_SCRIPT,
+              dryRun=True):
 
         if not showError:
             showError = MessageDialog.showError
@@ -270,6 +271,7 @@ class UpdateAgent(object):
         self.installLocation = Path.getTopDirectory()
         self.updateFiles = []
         self.updateFileDict = {}
+        self._dryRun = dryRun
 
     def checkNumberUpdates(self):
         self.fetchUpdateDb()

@@ -133,7 +133,7 @@ class Ui(NotifierBase):
         from ccpn.framework.Version import applicationVersion
         # applicationVersion = __version__.split()[1]  # ejb - read from the header
 
-        updateAgent = UpdateAgent(applicationVersion)
+        updateAgent = UpdateAgent(applicationVersion, dryRun=False)
         numUpdates = updateAgent.checkNumberUpdates()
         # sys.stderr.write('==> Updates available: %s\n' % str(numUpdates))
 
@@ -220,7 +220,7 @@ class NoUi(Ui):
 
         from ccpn.framework.Version import applicationVersion
         # applicationVersion = __version__.split()[1]  # ejb - read from the header
-        installUpdates(applicationVersion)
+        installUpdates(applicationVersion, dryRun=False)
 
         sys.stderr.write('Please restart the program to apply the updates\n')
         sys.exit(1)

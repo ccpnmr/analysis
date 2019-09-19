@@ -120,7 +120,7 @@ except ImportError:
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLNotifier import GLNotifier
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLGlobal import GLGlobalData
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLFonts import GLString
-from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLSimpleLabels import GLSimpleStrings
+from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLSimpleLabels import GLSimpleStrings, GLSimpleLegend
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLArrays import GLRENDERMODE_IGNORE, GLRENDERMODE_DRAW, \
     GLRENDERMODE_RESCALE, GLRENDERMODE_REBUILD, \
     GLREFRESHMODE_NEVER, GLREFRESHMODE_ALWAYS, \
@@ -463,7 +463,8 @@ class CcpnGLWidget(QOpenGLWidget):
     def rescale(self, rescaleOverlayText=True, rescaleMarksRulers=True,
                 rescaleIntegralLists=True, rescaleRegions=True,
                 rescaleSpectra=True, rescaleStaticHTraces=True,
-                rescaleStaticVTraces=True, rescaleSpectrumLabels=True):
+                rescaleStaticVTraces=True, rescaleSpectrumLabels=True,
+                rescaleLegend=True):
         """Change to axes of the view, axis visibility, scale and rebuild matrices when necessary
         to improve display speed
         """
@@ -585,6 +586,9 @@ class CcpnGLWidget(QOpenGLWidget):
         if rescaleSpectrumLabels:
             self._spectrumLabelling.rescale()
 
+        # if rescaleLegend:
+        #     self._legend.rescale()
+
         if rescaleStaticHTraces:
             self.rescaleStaticHTraces()
 
@@ -599,6 +603,11 @@ class CcpnGLWidget(QOpenGLWidget):
         self.rescaleSpectra()
         self._spectrumLabelling.rescale()
         self.update()
+
+    # def setLegendMode(self, value):
+    #     self._legendMode = value
+    #     self._legend.rescale()
+    #     self.update()
 
     def resetRangeLimits(self, allLimits=True):
         # reset zoom limits for the display
@@ -1746,11 +1755,12 @@ class CcpnGLWidget(QOpenGLWidget):
                                            GLContext=self)
 
         self._spectrumLabelling = GLSimpleStrings(parent=self, strip=self.strip, name='spectrumLabelling')
+
+        # self._legend = GLSimpleLegend(parent=self, strip=self.strip, name='legend')
         # for ii, spectrum in enumerate(self.project.spectra):
         #     # add some test strings
-        #     self._spectrumLabelling.addString(spectrum, (ii*15,ii*15),
-        #                                       colour="#FE64C6", alpha=0.75,
-        #                                       lock=GLDefs.LOCKNONE)
+        #     self._legend.addString(spectrum, (ii*15,ii*15),
+        #                                       colour="#FE64C6", alpha=0.75)
 
         self.viewports = GLViewports()
 
@@ -2835,6 +2845,9 @@ class CcpnGLWidget(QOpenGLWidget):
             # make the overlay/axis solid
             currentShader.setBlendEnabled(0)
             self._spectrumLabelling.drawStrings()
+
+            # not fully implemented yet
+            # self._legend.drawStrings()
             currentShader.setBlendEnabled(1)
 
         self.disableTextClientState()

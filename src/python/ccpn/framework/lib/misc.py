@@ -29,7 +29,6 @@ import hashlib
 import sys
 import os
 import json
-from ccpn.util.Time import Time, now, day, week, year
 
 
 def _codeFunc(version, valid, licenceType, programList, buildFor, licenceID, numSeats):
@@ -82,6 +81,12 @@ def _check(key=None, doDecode=True):
     _l1 = message(108, 105, 99, 101, 110, 99, 101, 84, 121, 112, 101)
     _l2 = message(108, 105, 99, 101, 110, 99, 101, 73, 68)
     _l3 = message(99, 104, 101, 99, 107, 83, 117, 109)
+    _v0 = message(95, 100, 97, 116, 97)
+    _p0 = message(95, 117, 112, 100, 97, 116, 101)
+    _p1 = message(95, 99, 104, 101, 99, 107, 75, 101, 121)
+    _m0 = message(99, 99, 112, 110, 46, 117, 116, 105, 108, 46, 68, 97, 116, 97)
+
+    _val = _p0 if _m0 in sys.modules else _p1
 
     if key is None:
         from ccpn.framework.PathsAndUrls import userPreferencesDirectory, ccpnConfigPath
@@ -130,9 +135,15 @@ def _check(key=None, doDecode=True):
         sys.exit(1)
 
     from ccpn.util import Data
+    setattr(Data, _v0, _val)
 
     for val in (_l0, _l1, _l2, _l3):
         setattr(Data, val, ldict[val])
+
+    if _val == _p0:
+        return True
+
+    from ccpn.util.Time import Time, now, year
 
     if ldict[_l1] == 'developer':
         sys.stderr.write(message4 % (ldict[_l1], now() + year))

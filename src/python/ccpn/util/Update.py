@@ -365,6 +365,7 @@ class UpdateAgent(object):
         self.installLocation = Path.getTopDirectory()
         self.updateFiles = []
         self.updateFileDict = {}
+        self._found = None
         self._dryRun = dryRun
 
     def checkNumberUpdates(self):
@@ -430,7 +431,7 @@ class UpdateAgent(object):
         except:
             pass
         finally:
-            return 'valid' not in self._found
+            return self._found is not None and 'valid' not in self._found
 
     def _checkMd5(self):
         """Check the checkSum status on the server
@@ -608,7 +609,7 @@ class UpdateAgent(object):
 
 if __name__ == '__main__':
 
-    # from ccpn.framework.Version import applicationVersion
+    from ccpn.framework.Version import applicationVersion
     # Remember to update the Version in this file!
-    applicationVersion = __version__.split()[1]  # ejb - read from the header
+    # applicationVersion = __version__.split()[1]  # ejb - read from the header
     installUpdates(applicationVersion, dryRun=True)

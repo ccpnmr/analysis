@@ -100,7 +100,7 @@ def fetchUrl(url, data=None, headers=None, timeout=None, proxySettings=None):
 
     response = fetchHttpResponse('POST', url, data=data, headers=None, proxySettings=proxySettings)
 
-    print('>>>>>>response', proxySettings, response.data.decode('utf-8'))
+    # print('>>>>>>response', proxySettings, response.data.decode('utf-8'))
     return response.data.decode('utf-8')
 
 

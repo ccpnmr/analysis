@@ -149,7 +149,7 @@ def fetchUrl(url, data=None, headers=None, timeout=2.0, decodeResponse=True):
 
         return response.data.decode('utf-8') if decodeResponse else response
     except:
-        print('Checksum error')
+        print('Error fetching Url.')
 
 
 def downloadFile(serverScript, serverDbRoot, fileName):
@@ -176,7 +176,7 @@ def downloadFile(serverScript, serverDbRoot, fileName):
         return result
 
     except Exception as es:
-        print(str(es))
+        print('Error downloading file from server.')
 
 
 def installUpdates(version, dryRun=True):

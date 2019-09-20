@@ -2144,7 +2144,7 @@ class Framework(NotifierBase):
             # ui/gui cleanup
             self._closeMainWindows()
             self._closeExtraWindows()
-            self.ui.mainWindow.sideBar.clearSideBar()
+            self.ui.mainWindow.sideBar.deleteLater()
             self.ui.mainWindow.deleteLater()
             self.ui.mainWindow = None
 

@@ -25,18 +25,9 @@ __date__ = "$Date$"
 
 import os
 import json
-# from ccpn.util import Path
 from ccpn.util.AttrDict import AttrDict
 from ccpn.framework.PathsAndUrls import defaultPreferencesPath, userPreferencesPath
 
-# # CCPN code
-# ccpnCodePath                    = Path.getTopDirectory()
-# ccpnConfigPath                  = os.path.join(ccpnCodePath, 'config')
-# defaultPreferencesPath          = os.path.join(ccpnConfigPath, 'defaultv3settings.json')
-
-# # User settings
-# userPreferencesDirectory        = os.path.expanduser('~/.ccpn')
-# userPreferencesPath             = os.path.join(userPreferencesDirectory,'v3settings.json')
 
 USEPROXY = 'useProxy'
 USEPROXYPASSWORD = 'useProxyPassword'
@@ -89,6 +80,8 @@ def getPreferences(skipUserPreferences=False, defaultPath=None, userPath=None):
 
 def _message(*chars):
     return ''.join([c for c in map(chr, chars)])
+
+
 ENCRYPTEDLIST = (_message(112, 114, 111, 120, 121, 80, 97, 115, 115, 119, 111, 114, 100),)
 USERKEY = _message(117, 115, 101, 114, 75, 101, 121)
 
@@ -97,6 +90,7 @@ class UserPreferences():
     """
     Class to handle reading user information from the preferences file
     """
+
     def __init__(self, readPreferences=True):
         self._readPreferences = readPreferences
         self._preferences = getPreferences(False) if readPreferences else None

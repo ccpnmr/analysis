@@ -85,6 +85,8 @@ def fetchHttpResponse(method, url, data=None, headers=None, proxySettings=None):
 
             proxyUrl = "http://%s:%s/" % (str(proxyAddress), str(proxyPort)) if proxyAddress else None
 
+    print('>>>>>>httpUrl', proxyUrl)
+
     # proxy may not be defined
     if proxyUrl:
         http = urllib3.ProxyManager(proxyUrl, **options)

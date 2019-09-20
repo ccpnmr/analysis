@@ -61,7 +61,7 @@
 
     "proxySettings": {
         "useProxy" : false,
-        "useSystemProxy" : true,
+        "useSystemProxy" : false,
         "proxyAddress" : "",
         "proxyPort" : "",
         "useProxyPassword" : false,

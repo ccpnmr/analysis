@@ -57,6 +57,7 @@ def fetchHttpResponse(method, url, data=None, headers=None, proxySettings=None):
     from ccpn.util.UserPreferences import UserPreferences, USEPROXY, USEPROXYPASSWORD, PROXYADDRESS, \
         PROXYPORT, PROXYUSERNAME, PROXYPASSWORD, USESYSTEMPROXY
 
+    proxyUrl = None
     # check whether any proxy settings are required
     if proxySettings and proxySettings.get(USEPROXY):
 
@@ -82,10 +83,11 @@ def fetchHttpResponse(method, url, data=None, headers=None, proxySettings=None):
                                                                                  (proxyUsername,
                                                                                   _userPreferences.decodeValue(proxyPassword)))})
 
-            proxyUrl = "http://%s:%s/" % (str(proxyAddress), str(proxyPort))
+            proxyUrl = "http://%s:%s/" % (str(proxyAddress), str(proxyPort)) if proxyAddress else None
 
+    # proxy may not be defined
+    if proxyUrl:
         http = urllib3.ProxyManager(proxyUrl, **options)
-
     else:
         http = urllib3.PoolManager(**options)
 

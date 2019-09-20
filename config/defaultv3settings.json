@@ -56,7 +56,10 @@
         "automaticNoiseContoursOnFirstShow" : true,
         "volumeIntegralLimit" : 2.0,
         "autoUpdateAliasing" : false,
-        "generateSinglePlaneContours" : true,
+        "generateSinglePlaneContours" : true
+    },
+
+    "proxySettings": {
         "useProxy" : false,
         "proxyAddress" : "",
         "proxyPort" : "",

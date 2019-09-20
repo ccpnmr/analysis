@@ -362,10 +362,11 @@ class UpdateAgent(object):
             n = 0
             for updateFile in updateFiles:
                 try:
-                    print('Installing %s' % (updateFile.fullFilePath))
-
                     if not self._dryRun:
+                        print('Installing %s' % (updateFile.fullFilePath))
                         updateFile.installUpdate()
+                    else:
+                        print('dry-run %s' % (updateFile.fullFilePath))
 
                     n += 1
 

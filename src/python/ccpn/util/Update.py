@@ -467,10 +467,11 @@ class UpdateAgent(object):
         if self.haveWriteAccess():
             for updateFile in updateFiles:
                 try:
-                    self.showInfo('Install Updates', 'Installing %s' % (updateFile.fullFilePath))
-
                     if not self._dryRun:
+                        self.showInfo('Install Updates', 'Installing %s' % (updateFile.fullFilePath))
                         updateFile.installUpdate()
+                    else:
+                        self.showInfo('Install Updates', 'dry-run %s' % (updateFile.fullFilePath))
 
                     n += 1
                     updateFilesInstalled.append(updateFile)

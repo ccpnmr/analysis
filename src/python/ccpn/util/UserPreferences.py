@@ -25,18 +25,18 @@ __date__ = "$Date$"
 
 import os
 import json
-from ccpn.util import Path
+# from ccpn.util import Path
 from ccpn.util.AttrDict import AttrDict
+from ccpn.framework.PathsAndUrls import defaultPreferencesPath, userPreferencesPath
 
+# # CCPN code
+# ccpnCodePath                    = Path.getTopDirectory()
+# ccpnConfigPath                  = os.path.join(ccpnCodePath, 'config')
+# defaultPreferencesPath          = os.path.join(ccpnConfigPath, 'defaultv3settings.json')
 
-# CCPN code
-ccpnCodePath                    = Path.getTopDirectory()
-ccpnConfigPath                  = os.path.join(ccpnCodePath, 'config')
-defaultPreferencesPath          = os.path.join(ccpnConfigPath, 'defaultv3settings.json')
-
-# User settings
-userPreferencesDirectory        = os.path.expanduser('~/.ccpn')
-userPreferencesPath             = os.path.join(userPreferencesDirectory,'v3settings.json')
+# # User settings
+# userPreferencesDirectory        = os.path.expanduser('~/.ccpn')
+# userPreferencesPath             = os.path.join(userPreferencesDirectory,'v3settings.json')
 
 USEPROXY = 'useProxy'
 USEPROXYPASSWORD = 'useProxyPassword'
@@ -101,14 +101,18 @@ class UserPreferences():
         self._readPreferences = readPreferences
         self._preferences = getPreferences(False) if readPreferences else None
 
-    def _getPreferencesParameter(self, name):
-        """Return a paramter from the preferences file
+    @property
+    def proxyDefined(self):
+        """Return True if the settings contains the USEPROXY attribute
         """
-        value = getattr(self._preferences.general, name, None)
-        # if value and name in ENCRYPTEDLIST:
-        #     return self._decode(USERKEY, value)
+        if self._preferences and self._preferences.general:
+            return hasattr(self._preferences.general, USEPROXY)
 
-        return value
+    def _getPreferencesParameter(self, name):
+        """Return a parameter from the preferences file
+        """
+        if self._preferences and self._preferences.general:
+            return getattr(self._preferences.general, name, None)
 
     def _setPreferencesParameter(self, name, value):
         """Set a parameter in the preferences file

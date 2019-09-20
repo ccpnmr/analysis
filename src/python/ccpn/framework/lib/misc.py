@@ -40,7 +40,6 @@ def _codeFunc(version, valid, licenceType, programList, buildFor, licenceID, num
 
 
 def _decode(key, string):
-    #string = string.decode()
     decoded_chars = []
     for i in range(len(string)):
         key_c = key[i % len(key)]
@@ -95,11 +94,11 @@ def _check(key=None, doDecode=True):
         lfile = os.path.join(userPreferencesDirectory, fname)
         if not os.path.exists(lfile):
             lfile = os.path.join(ccpnConfigPath, fname)
-        #print(fname)
+
         if not os.path.exists(lfile):
             sys.stderr.write(message1)
             sys.exit(1)
-        # with open(lfile, 'rb') as fp:
+
         with open(lfile, 'r', encoding='UTF-8') as fp:
             key = fp.readlines()[0]
             fp.close()
@@ -123,7 +122,6 @@ def _check(key=None, doDecode=True):
         sys.stderr.write(message2 % (applicationVersion))
         sys.exit(1)
 
-    # if applicationVersion != ldict['version']:
     if not _codeMajorV(applicationVersion, ldict['version']):
         sys.stderr.write(message2 % (applicationVersion))
         sys.exit(1)
@@ -160,4 +158,3 @@ def _check(key=None, doDecode=True):
 
 
 _checked = _check(None, doDecode=True)
-# _checked = True

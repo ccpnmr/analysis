@@ -87,22 +87,34 @@ def fetchHttpResponse(method, url, data=None, headers=None, proxySettings=None):
     return response
 
 
-def fetchUrl(url, data=None, headers=None, timeout=None, proxySettings=None):
+def fetchUrl(url, data=None, headers=None, timeout=2.0, proxySettings=None, decodeResponse=True):
     """Fetch url request from the server
     """
-    # import urllib3.contrib.pyopenssl
-    # from urllib.parse import urlencode, quote
-    # import certifi
-    # import ssl
     import logging
 
     urllib3_logger = logging.getLogger('urllib3')
     urllib3_logger.setLevel(logging.CRITICAL)
 
-    response = fetchHttpResponse('POST', url, data=data, headers=None, proxySettings=proxySettings)
+    if not proxySettings:
 
-    # print('>>>>>>response', proxySettings, response.data.decode('utf-8'))
-    return response.data.decode('utf-8')
+        # read the proxySettings from the preferences
+        from ccpn.util.UserPreferences import UserPreferences
+
+        _userPreferences = UserPreferences(readPreferences=True)
+        if _userPreferences.proxyDefined:
+            proxyNames = ['useProxy', 'proxyAddress', 'proxyPort', 'useProxyPassword',
+                          'proxyUsername', 'proxyPassword']
+            proxySettings = {}
+            for name in proxyNames:
+                proxySettings[name] = _userPreferences._getPreferencesParameter(name)
+
+    response = fetchHttpResponse('POST', url, data=data, headers=headers, proxySettings=proxySettings)
+
+    # if response:
+    #     ll = len(response.data)
+    #     print('>>>>>>responseUrl', proxySettings, response.data[0:min(ll, 20)])
+
+    return response.data.decode('utf-8') if decodeResponse else response
 
 
 def uploadFile(url, fileName, data=None):

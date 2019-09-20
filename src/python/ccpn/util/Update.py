@@ -25,17 +25,11 @@ __date__ = "$Date: 2017-07-04 15:21:16 +0000 (Tue, July 04, 2017) $"
 # Start of code
 #=========================================================================================
 
-import base64
 import difflib
 import hashlib
 import os
-import re
 import shutil
 import sys
-import time
-import urllib
-from urllib.parse import urlencode, quote
-from urllib.request import urlopen
 from datetime import datetime
 
 
@@ -131,84 +125,43 @@ def isBinaryData(data):
         return isBinary
 
 
-# def downloadFile(serverScript, serverDbRoot, fileName):
-#     import ssl
-#
-#     context = ssl._create_unverified_context()
-#
-#     fileName = os.path.join(serverDbRoot, fileName)
-#
-#     addr = '%s?fileName=%s' % (serverScript, fileName)
-#     try:
-#         response = urlopen(addr, context=context)
-#
-#         data = response.read()  # just split for testing
-#
-#         try:
-#             data = data.decode('utf-8')
-#             if data.startswith(BAD_DOWNLOAD):
-#                 raise Exception(data[len(BAD_DOWNLOAD):])
-#
-#         except Exception as es:
-#             # may be a binary file
-#             if not isBinaryData(data):
-#                 raise es
-#
-#         finally:
-#             response.close()
-#             return data
-#
-#     except Exception as es:
-#         return None
-
-
-def fetchUrl(url, data=None, headers=None, timeout=None):
+def fetchUrl(url, data=None, headers=None, timeout=2.0, decodeResponse=True):
     """Fetch url request from the server
     """
     from ccpn.util.Url import fetchHttpResponse
     from ccpn.util.UserPreferences import UserPreferences
 
     try:
-        proxyNames = ['useProxy', 'proxyAddress', 'proxyPort', 'useProxyPassword',
-                      'proxyUsername', 'proxyPassword']
         _userPreferences = UserPreferences(readPreferences=True)
-        proxyDict={}
-        for name in proxyNames:
-            proxyDict[name] = _userPreferences._getPreferencesParameter(name)
-        response = fetchHttpResponse('POST', url, data, headers=headers, proxySettings=proxyDict)
+        proxySettings = None
+        if _userPreferences.proxyDefined:
+            proxyNames = ['useProxy', 'proxyAddress', 'proxyPort', 'useProxyPassword',
+                          'proxyUsername', 'proxyPassword']
+            proxySettings = {}
+            for name in proxyNames:
+                proxySettings[name] = _userPreferences._getPreferencesParameter(name)
 
-        return response.data.decode('utf-8')
+        response = fetchHttpResponse('POST', url, data, headers=headers, proxySettings=proxySettings)
+
+        # if response:
+        #     ll = len(response.data)
+        #     print('>>>>>>responseUpdate', proxySettings, response.data[0:min(ll, 20)])
+
+        return response.data.decode('utf-8') if decodeResponse else response
     except:
         print('Checksum error')
+
 
 def downloadFile(serverScript, serverDbRoot, fileName):
     """Download a file from the server
     """
-    import ssl
-    import certifi
-    import urllib3.contrib.pyopenssl
-
     fileName = os.path.join(serverDbRoot, fileName)
 
-    context = ssl.create_default_context()
-    context.check_hostname = False
-    context.verify_mode = ssl.CERT_NONE
-
-    headers = {'Content-type': 'application/x-www-form-urlencoded;charset=UTF-8'}
-    body = urlencode({'fileName': fileName}, quote_via=quote).encode('utf-8')
-
-    urllib3.contrib.pyopenssl.inject_into_urllib3()
-    http = urllib3.PoolManager(cert_reqs='CERT_REQUIRED',
-                               ca_certs=certifi.where(),
-                               timeout=urllib3.Timeout(connect=5.0, read=5.0),
-                               retries=urllib3.Retry(1, redirect=False))
-
     try:
-        response = http.request('POST', serverScript,
-                                headers=headers,
-                                body=body,
-                                preload_content=False)
-        data = response.read()
+        values = {'fileName': fileName}
+        response = fetchUrl(serverScript, values, decodeResponse=False)
+        data = response.data
+
         if isBinaryData(data):
             result = data
         else:
@@ -424,7 +377,7 @@ class UpdateAgent(object):
             values.update(val2)
             values['version'] = self.version
 
-            self._found = fetchUrl(serverDownloadScript, values, timeout=2.0)
+            self._found = fetchUrl(serverDownloadScript, values, timeout=2.0, decodeResponse=True)
             if isinstance(self._found, str):
                 # file returns with EOF chars on the end
                 self._found = self._found.rstrip('\r\n')
@@ -435,7 +388,8 @@ class UpdateAgent(object):
     def _resetMd5(self):
         # only write the file if it is non-empty
         if self._found:
-            from ccpn.util.UserPreferences import userPreferencesDirectory, ccpnConfigPath
+            # from ccpn.util.UserPreferences import userPreferencesDirectory, ccpnConfigPath
+            from ccpn.framework.PathsAndUrls import userPreferencesDirectory, ccpnConfigPath
 
             fname = ''.join([c for c in map(chr, (108, 105, 99, 101, 110, 99, 101, 75, 101, 121, 46, 116, 120, 116))])
             lfile = os.path.join(userPreferencesDirectory, fname)
@@ -515,8 +469,8 @@ class UpdateAgent(object):
                 try:
                     self.showInfo('Install Updates', 'Installing %s' % (updateFile.fullFilePath))
 
-                    # if not self._dryRun:
-                    #     updateFile.installUpdate()
+                    if not self._dryRun:
+                        updateFile.installUpdate()
 
                     n += 1
                     updateFilesInstalled.append(updateFile)

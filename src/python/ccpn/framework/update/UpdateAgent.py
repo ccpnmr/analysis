@@ -59,7 +59,6 @@ def calcHashCode(filePath):
     if not os.access(filePath, os.R_OK):
         return 0
 
-    # fp = open(filePath, 'rU', encoding='utf-8')
     try:
         with open(filePath, 'rb') as fp:
             data = fp.read()
@@ -68,7 +67,6 @@ def calcHashCode(filePath):
         data = ''
 
     h = hashlib.md5()
-    # h.update(data.encode('utf-8'))
     h.update(data)
 
     return h.hexdigest()
@@ -77,27 +75,14 @@ def calcHashCode(filePath):
 def downloadFile(serverScript, serverDbRoot, fileName):
     """Download a file from the server
     """
+    from ccpn.util.Url import fetchHttpResponse
     fileName = os.path.join(serverDbRoot, fileName)
 
-    context = ssl.create_default_context()
-    context.check_hostname = False
-    context.verify_mode = ssl.CERT_NONE
-
-    headers = {'Content-type': 'application/x-www-form-urlencoded;charset=UTF-8'}
-    body = urlencode({'fileName': fileName}, quote_via=quote).encode('utf-8')
-
-    urllib3.contrib.pyopenssl.inject_into_urllib3()
-    http = urllib3.PoolManager(cert_reqs='CERT_REQUIRED',
-                               ca_certs=certifi.where(),
-                               timeout=urllib3.Timeout(connect=5.0, read=5.0),
-                               retries=urllib3.Retry(1, redirect=False))
-
     try:
-        response = http.request('POST', serverScript,
-                                headers=headers,
-                                body=body,
-                                preload_content=False)
-        data = response.read()
+        values = {'fileName': fileName}
+        response = fetchHttpResponse('POST', serverScript, values, headers=None, proxySettings=None)
+        data = response.data
+
         if isBinaryData(data):
             result = data
         else:
@@ -118,39 +103,27 @@ def downloadFile(serverScript, serverDbRoot, fileName):
 def uploadData(serverUser, serverPassword, serverScript, fileData, serverDbRoot, fileStoredAs):
     """Upload a file to the server
     """
+    from ccpn.util.Url import fetchHttpResponse
     SERVER_PASSWORD_MD5 = b'c Wo\xfc\x1e\x08\xfc\xd1C\xcb~(\x14\x8e\xdc'
 
     # early check on password
     m = hashlib.md5()
     m.update(serverPassword.encode('utf-8'))
     if m.digest() != SERVER_PASSWORD_MD5:
-        raise Exception('incorrect password')
+        print('>>>>>>Incorrect Password')
+        return
 
     ss = serverUser + ":" + serverPassword
     auth = base64.encodebytes(ss.encode('utf-8'))[:-1]
     authheader = 'Basic %s' % auth
 
-    context = ssl.create_default_context()
-    context.check_hostname = False
-    context.verify_mode = ssl.CERT_NONE
-
     headers = {'Content-type' : 'application/x-www-form-urlencoded;charset=UTF-8',
                'Authorization': authheader}
-    body = urlencode({'fileData': fileData, 'fileName': fileStoredAs, 'serverDbRoot': serverDbRoot},
-                     quote_via=quote).encode('utf-8')
-
-    urllib3.contrib.pyopenssl.inject_into_urllib3()
-    http = urllib3.PoolManager(cert_reqs='CERT_REQUIRED',
-                               ca_certs=certifi.where(),
-                               timeout=urllib3.Timeout(connect=5.0, read=5.0),
-                               retries=urllib3.Retry(1, redirect=False))
+    values = {'fileData': fileData, 'fileName': fileStoredAs, 'serverDbRoot': serverDbRoot}
 
     try:
-        response = http.request('POST', serverScript,
-                                headers=headers,
-                                body=body,
-                                preload_content=False)
-        result = response.read().decode('utf-8')
+        response = fetchHttpResponse('POST', serverScript, values, headers=headers, proxySettings=None)
+        result = response.data.decode('utf-8')
 
         if result.startswith(BAD_DOWNLOAD) or not result.startswith('Ok'):
             ll = len(result)
@@ -390,8 +363,12 @@ class UpdateAgent(object):
             for updateFile in updateFiles:
                 try:
                     print('Installing %s' % (updateFile.fullFilePath))
-                    # updateFile.installUpdate()
+
+                    if not self._dryRun:
+                        updateFile.installUpdate()
+
                     n += 1
+
                 except Exception as e:
                     print('Could not install %s: %s' % (updateFile.fullFilePath, e))
 

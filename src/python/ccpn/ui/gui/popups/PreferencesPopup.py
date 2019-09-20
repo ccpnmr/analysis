@@ -320,43 +320,43 @@ class PreferencesPopup(CcpnDialog):
         HLine(parent, grid=(row, 0), gridSpan=(1, 3), colour=getColours()[DIVIDER], height=15)
 
         row += 1
-        self.useProxyLabel = Label(parent, text="Use Proxy for Network: ", grid=(row, 0))
+        self.useProxyLabel = Label(parent, text="Use Proxy Settings: ", grid=(row, 0))
         self.useProxyBox = CheckBox(parent, grid=(row, 1), checked=self.preferences.proxySettings.useProxy)
         self.useProxyBox.toggled.connect(self._setUseProxy)
 
-        row += 1
-        self.useSystemProxyLabel = Label(parent, text="   Use System Proxy for Network: ", grid=(row, 0))
-        self.useSystemProxyBox = CheckBox(parent, grid=(row, 1), checked=self.preferences.proxySettings.useSystemProxy)
-        self.useSystemProxyBox.toggled.connect(self._setUseSystemProxy)
+        # row += 1
+        # self.useSystemProxyLabel = Label(parent, text="   Use System Proxy for Network: ", grid=(row, 0))
+        # self.useSystemProxyBox = CheckBox(parent, grid=(row, 1), checked=self.preferences.proxySettings.useSystemProxy)
+        # self.useSystemProxyBox.toggled.connect(self._setUseSystemProxy)
 
         row += 1
-        self.proxyAddressLabel = Label(parent, text="   Proxy Address", grid=(row, 0))
+        self.proxyAddressLabel = Label(parent, text="   Web Proxy Server: ", grid=(row, 0), hAlign='l')
         self.proxyAddressData = LineEdit(parent, grid=(row, 1), hAlign='l')
         self.proxyAddressData.setMinimumWidth(LineEditsMinimumWidth)
         self.proxyAddressData.setText(str(self.preferences.proxySettings.proxyAddress))
         self.proxyAddressData.editingFinished.connect(self._setProxyAddress)
 
         row += 1
-        self.proxyPortLabel = Label(parent, text="   Proxy Port", grid=(row, 0))
+        self.proxyPortLabel = Label(parent, text="   Port: ", grid=(row, 0), hAlign='l')
         self.proxyPortData = LineEdit(parent, grid=(row, 1), hAlign='l')
         self.proxyPortData.setMinimumWidth(LineEditsMinimumWidth)
         self.proxyPortData.setText(str(self.preferences.proxySettings.proxyPort))
         self.proxyPortData.editingFinished.connect(self._setProxyPort)
 
         row += 1
-        self.useProxyPasswordLabel = Label(parent, text="   Use Proxy Password: ", grid=(row, 0))
+        self.useProxyPasswordLabel = Label(parent, text="   Proxy Server Requires Password: ", grid=(row, 0))
         self.useProxyPasswordBox = CheckBox(parent, grid=(row, 1), checked=self.preferences.proxySettings.useProxyPassword)
         self.useProxyPasswordBox.toggled.connect(self._setUseProxyPassword)
 
         row += 1
-        self.proxyUsernameLabel = Label(parent, text="      Username", grid=(row, 0))
+        self.proxyUsernameLabel = Label(parent, text="        Username: ", grid=(row, 0), hAlign='l')
         self.proxyUsernameData = LineEdit(parent, grid=(row, 1), hAlign='l')
         self.proxyUsernameData.setMinimumWidth(LineEditsMinimumWidth)
         self.proxyUsernameData.setText(str(self.preferences.proxySettings.proxyUsername))
         self.proxyUsernameData.editingFinished.connect(self._setProxyUsername)
 
         row += 1
-        self.proxyPasswordLabel = Label(parent, text="      Password", grid=(row, 0))
+        self.proxyPasswordLabel = Label(parent, text="        Password: ", grid=(row, 0), hAlign='l')
         self.proxyPasswordData = PasswordEdit(parent, grid=(row, 1), hAlign='l')
         self.proxyPasswordData.setMinimumWidth(LineEditsMinimumWidth)
         self.proxyPasswordData.setText(self._userPreferences.decodeValue(str(self.preferences.proxySettings.proxyPassword)))
@@ -1123,9 +1123,9 @@ class PreferencesPopup(CcpnDialog):
 
     def _setProxyButtons(self):
         useP = self.preferences.proxySettings.useProxy
-        useSP = self.preferences.proxySettings.useSystemProxy
+        useSP = False        #self.preferences.proxySettings.useSystemProxy
         usePEnabled = useP and not useSP
-        self.useSystemProxyBox.setEnabled(useP)
+        # self.useSystemProxyBox.setEnabled(useP)
         self.proxyAddressData.setEnabled(usePEnabled)
         self.proxyPortData.setEnabled(usePEnabled)
         self.useProxyPasswordBox.setEnabled(usePEnabled)

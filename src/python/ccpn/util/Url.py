@@ -57,35 +57,27 @@ def fetchHttpResponse(method, url, data=None, headers=None, proxySettings=None):
     from ccpn.util.UserPreferences import UserPreferences, USEPROXY, USEPROXYPASSWORD, PROXYADDRESS, \
         PROXYPORT, PROXYUSERNAME, PROXYPASSWORD, USESYSTEMPROXY
 
-    proxyUrl = None
-    # check whether any proxy settings are required
+    # read the system proxy if it exists
+    proxyUrl = os.environ.get('HTTPS_PROXY', os.environ.get('HTTP_PROXY'))
+
     if proxySettings and proxySettings.get(USEPROXY):
 
-        if proxySettings.get(USESYSTEMPROXY):
+        # Use the user settings if set
+        useProxyPassword = proxySettings.get(USEPROXYPASSWORD)
+        proxyAddress = proxySettings.get(PROXYADDRESS)
+        proxyPort = proxySettings.get(PROXYPORT)
+        proxyUsername = proxySettings.get(PROXYUSERNAME)
+        proxyPassword = proxySettings.get(PROXYPASSWORD)
 
-            # read the os.environment proxy
-            proxyUrl = os.environ.get('HTTPS_PROXY', os.environ.get('HTTP_PROXY'))
+        if useProxyPassword:
+            # grab the decode from the userPreferences
+            _userPreferences = UserPreferences(readPreferences=False)
 
-        else:
+            options.update({'headers': urllib3.make_headers(proxy_basic_auth='%s:%s' %
+                                                                             (proxyUsername,
+                                                                              _userPreferences.decodeValue(proxyPassword)))})
 
-            # read from the settings - may be different?
-            useProxyPassword = proxySettings.get(USEPROXYPASSWORD)
-            proxyAddress = proxySettings.get(PROXYADDRESS)
-            proxyPort = proxySettings.get(PROXYPORT)
-            proxyUsername = proxySettings.get(PROXYUSERNAME)
-            proxyPassword = proxySettings.get(PROXYPASSWORD)
-
-            if useProxyPassword:
-                # grab the decode from the userPreferences
-                _userPreferences = UserPreferences(readPreferences=False)
-
-                options.update({'headers': urllib3.make_headers(proxy_basic_auth='%s:%s' %
-                                                                                 (proxyUsername,
-                                                                                  _userPreferences.decodeValue(proxyPassword)))})
-
-            proxyUrl = "http://%s:%s/" % (str(proxyAddress), str(proxyPort)) if proxyAddress else None
-
-    print('>>>>>>httpUrl', proxyUrl)
+        proxyUrl = "http://%s:%s/" % (str(proxyAddress), str(proxyPort)) if proxyAddress else None
 
     # proxy may not be defined
     if proxyUrl:

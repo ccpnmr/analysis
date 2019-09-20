@@ -377,7 +377,9 @@ class SpectrumToolBar(ToolBar):
         self._addSpectrumViewToolButtons(spectrum.spectrumViews)
 
     def _addSpectrumViewToolButtons(self, spectrumView):
-
+        spectrumDisplay = spectrumView.strip.spectrumDisplay
+        if spectrumDisplay.isGrouped:
+            return
         with self.spectrumToolBarBlocking():
             spectrumDisplay = spectrumView.strip.spectrumDisplay
             spectrum = spectrumView.spectrum

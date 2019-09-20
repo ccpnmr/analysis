@@ -99,14 +99,14 @@ class UserPreferences():
     def proxyDefined(self):
         """Return True if the settings contains the USEPROXY attribute
         """
-        if self._preferences and self._preferences.general:
-            return hasattr(self._preferences.general, USEPROXY)
+        if self._preferences and self._preferences.proxySettings:
+            return hasattr(self._preferences.proxySettings, USEPROXY)
 
     def _getPreferencesParameter(self, name):
         """Return a parameter from the preferences file
         """
-        if self._preferences and self._preferences.general:
-            return getattr(self._preferences.general, name, None)
+        if self._preferences and self._preferences.proxySettings:
+            return getattr(self._preferences.proxySettings, name, None)
 
     def _setPreferencesParameter(self, name, value):
         """Set a parameter in the preferences file

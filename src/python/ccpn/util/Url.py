@@ -30,6 +30,7 @@ BAD_DOWNLOAD = 'Exception: '
 def fetchHttpResponse(method, url, data=None, headers=None, proxySettings=None):
     """Generate an http, and return the response
     """
+    import os
     import ssl
     import certifi
     import urllib3.contrib.pyopenssl
@@ -54,26 +55,36 @@ def fetchHttpResponse(method, url, data=None, headers=None, proxySettings=None):
 
     # check whether a proxy is required
     from ccpn.util.UserPreferences import UserPreferences, USEPROXY, USEPROXYPASSWORD, PROXYADDRESS, \
-        PROXYPORT, PROXYUSERNAME, PROXYPASSWORD
+        PROXYPORT, PROXYUSERNAME, PROXYPASSWORD, USESYSTEMPROXY
 
+    # check whether any proxy settings are required
     if proxySettings and proxySettings.get(USEPROXY):
 
-        useProxyPassword = proxySettings.get(USEPROXYPASSWORD)
-        proxyAddress = proxySettings.get(PROXYADDRESS)
-        proxyPort = proxySettings.get(PROXYPORT)
-        proxyUsername = proxySettings.get(PROXYUSERNAME)
-        proxyPassword = proxySettings.get(PROXYPASSWORD)
+        if proxySettings.get(USESYSTEMPROXY):
 
-        if useProxyPassword:
-            # grab the decode from the userPreferences
-            _userPreferences = UserPreferences(readPreferences=False)
+            # read the os.environment proxy
+            proxyUrl = os.environ.get('HTTPS_PROXY', os.environ.get('HTTP_PROXY'))
 
-            options.update({'headers': urllib3.make_headers(proxy_basic_auth='%s:%s' %
-                                                                             (proxyUsername,
-                                                                              _userPreferences.decodeValue(proxyPassword)))})
+        else:
 
-        http = urllib3.ProxyManager("http://%s:%s/" % (str(proxyAddress), str(proxyPort)),
-                                    **options)
+            # read from the settings - may be different?
+            useProxyPassword = proxySettings.get(USEPROXYPASSWORD)
+            proxyAddress = proxySettings.get(PROXYADDRESS)
+            proxyPort = proxySettings.get(PROXYPORT)
+            proxyUsername = proxySettings.get(PROXYUSERNAME)
+            proxyPassword = proxySettings.get(PROXYPASSWORD)
+
+            if useProxyPassword:
+                # grab the decode from the userPreferences
+                _userPreferences = UserPreferences(readPreferences=False)
+
+                options.update({'headers': urllib3.make_headers(proxy_basic_auth='%s:%s' %
+                                                                                 (proxyUsername,
+                                                                                  _userPreferences.decodeValue(proxyPassword)))})
+
+            proxyUrl = "http://%s:%s/" % (str(proxyAddress), str(proxyPort))
+
+        http = urllib3.ProxyManager(proxyUrl, **options)
 
     else:
         http = urllib3.PoolManager(**options)

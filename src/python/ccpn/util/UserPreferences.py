@@ -30,6 +30,7 @@ from ccpn.framework.PathsAndUrls import defaultPreferencesPath, userPreferencesP
 
 
 USEPROXY = 'useProxy'
+USESYSTEMPROXY = 'useSystemProxy'
 USEPROXYPASSWORD = 'useProxyPassword'
 PROXYADDRESS = 'proxyAddress'
 PROXYPORT = 'proxyPort'

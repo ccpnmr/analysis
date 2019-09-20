@@ -1426,12 +1426,12 @@ class SideBar(QtWidgets.QTreeWidget, SideBarStructure, Base, NotifierBase):
             self._resultsFrame.setVisible(True)
         else:
             self._resultsFrame.setVisible(False)
-
-        # add notifiers to update the listview on create/change/delete notification
-        if len(self._searchNotifiers) == 0:
-            for action in ('create', 'delete', 'rename'):
-                notifier = self._project.registerNotifier('AbstractWrapperObject', action, self._notify_pids_changed, onceOnly=True)
-                self._searchNotifiers.append(notifier)
+        # TODO FIXME.  Speed issues when sidebar has more then 100 items. Also needs to deregister!
+        # # add notifiers to update the listview on create/change/delete notification
+        # if len(self._searchNotifiers) == 0:
+        #     for action in ('create', 'delete', 'rename'):
+        #         notifier = self._project.registerNotifier('AbstractWrapperObject', action, self._notify_pids_changed, onceOnly=True)
+        #         self._searchNotifiers.append(notifier)
 
     def _notify_pids_changed(self, *args, **kwargs):
         self._searchWidgetCallback()

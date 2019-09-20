@@ -104,6 +104,8 @@ class GLRegion(QtWidgets.QWidget):
 
     @values.setter
     def values(self, values):
+        from ccpn.core.lib.ContextManagers import undoBlock, notificationEchoBlocking, undoBlockWithoutSideBar,notificationBlanking
+        # with notificationBlanking():
         self._values = tuple(values)
         try:
             self._glList.renderMode = GLRENDERMODE_REBUILD
@@ -114,8 +116,10 @@ class GLRegion(QtWidgets.QWidget):
             self.valuesChanged.emit(list(values))
 
         # change the limits in the integral object
-        if self._object and not self._object.isDeleted:
-            self._object.limits = [(min(values), max(values))]
+        # with notificationBlanking():
+        with notificationEchoBlocking():
+            if self._object and not self._object.isDeleted:
+                self._object.limits = [(min(values), max(values))]
 
         # emit notifiers to repaint the GL windows
         self.GLSignals.emitPaintEvent()

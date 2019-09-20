@@ -929,11 +929,12 @@ class SideBarStructure(object):
         """
         self._sidebarData.reset()
 
-    def buildTree(self, project):
+    def buildTree(self, project, clear=True):
         """Builds the tree from project; returns self
         """
         self._project = project
-        self.reset()
+        if clear:
+            self.reset()
         self._sidebarData.buildTree(parent=None, parentWidget=self._sidebar, sidebar=self._sidebar, obj=self._project)  # This is the root
 
         # set the tree name to the id (not pid)
@@ -1151,11 +1152,12 @@ class SideBar(QtWidgets.QTreeWidget, SideBarStructure, Base, NotifierBase):
             tree.takeTopLevelItem(i)
             i -= 1
 
-    def buildTree(self, project):
+    def buildTree(self, project, clear=True):
         """Build the new tree structure from the project.
         """
         # self._clearQTreeWidget(self)
-        self.clearSideBar()
+        if clear:
+            self.clearSideBar()
         self.project = project
         self.setSidebar(sidebar=self)
         super().buildTree(project)

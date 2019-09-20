@@ -63,7 +63,7 @@ from ccpn.ui.gui.popups.StructureEnsemblePopup import StructureEnsemblePopup
 from ccpn.ui.gui.popups.SubstancePropertiesPopup import SubstancePropertiesPopup
 from ccpn.core.lib.ContextManagers import undoBlock, notificationEchoBlocking, undoBlockWithoutSideBar
 
-MAXITEMLOGGING = 4
+MAXITEMLOGGING = 2
 
 
 class CreateNewObjectABC():
@@ -584,14 +584,15 @@ class _openItemSpectrumGroupDisplay(OpenItemABC):
             spectrumDisplay = mainWindow.createSpectrumDisplay(spectrumGroup.spectra[0])
             mainWindow.moduleArea.addModule(spectrumDisplay, position=position, relativeTo=relativeTo)
 
-            with undoBlock():
-                for spectrum in spectrumGroup.spectra:  # Add the other spectra
-                    spectrumDisplay.displaySpectrum(spectrum)
+            with undoBlockWithoutSideBar():
+                with notificationEchoBlocking:
+                    for spectrum in spectrumGroup.spectra:  # Add the other spectra
+                        spectrumDisplay.displaySpectrum(spectrum)
 
-                spectrumDisplay.isGrouped = True
-                spectrumDisplay.spectrumToolBar.hide()
-                spectrumDisplay.spectrumGroupToolBar.show()
-                spectrumDisplay.spectrumGroupToolBar._addAction(spectrumGroup)
+                    spectrumDisplay.isGrouped = True
+                    spectrumDisplay.spectrumToolBar.hide()
+                    spectrumDisplay.spectrumGroupToolBar.show()
+                    spectrumDisplay.spectrumGroupToolBar._addAction(spectrumGroup)
 
             mainWindow.application.current.strip = spectrumDisplay.strips[0]
             # if any([sp.dimensionCount for sp in spectrumGroup.spectra]) == 1:

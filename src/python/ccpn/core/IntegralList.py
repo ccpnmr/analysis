@@ -32,6 +32,7 @@ from ccpn.util.decorators import logCommand
 from ccpn.core.lib.ContextManagers import newObject
 from ccpn.util.Logging import getLogger
 from ccpn.core.lib.SpectrumLib import _oldEstimateNoiseLevel1D
+from scipy import signal
 from ccpn.core.PMIListABC import PMIListABC
 from scipy import signal
 from ccpn.util.Common import percentage
@@ -179,6 +180,7 @@ class IntegralList(PMIListABC):
             yy = y-y2
             # if noiseThreshold is None:
             maxNL, minNL = estimateNoiseLevel1D(yy, f=20, stdFactor=0.001)
+            maxNL, minNL = estimateNoiseLevel1D(yy, f=20, stdFactor=0.1)
             intersectingLine = [maxNL] * len(x)
             # else:
             #     intersectingLine = [noiseThreshold] * len(x)

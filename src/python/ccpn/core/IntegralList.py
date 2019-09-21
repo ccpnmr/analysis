@@ -33,6 +33,7 @@ from ccpn.core.lib.ContextManagers import newObject
 from ccpn.util.Logging import getLogger
 from ccpn.core.lib.SpectrumLib import _oldEstimateNoiseLevel1D
 from ccpn.core.PMIListABC import PMIListABC
+from scipy import signal
 
 
 # moved on peakUtil ####################################################################
@@ -150,22 +151,29 @@ class IntegralList(PMIListABC):
         # TODO: add excludeRegions option. Calculate Negative peak integral.
         # self._project.suspendNotification()
         from ccpn.core.lib.peakUtils import peakdet
+        from ccpn.core.PeakList import _filterROI1Darray, estimateNoiseLevel1D
 
         try:
             spectrum = self.spectrum
-            peakList = spectrum.newPeakList()
+            if findPeak:
+                peakList = spectrum.newPeakList()
             x, y = np.array(spectrum.positions), np.array(spectrum.intensities)
-            if noiseThreshold is None:
-                intersectingLine = None
-            else:
-                intersectingLine = [noiseThreshold] * len(x)
-            limitsPairs = _getPeaksLimits(x, y, intersectingLine)
+
+            const = int(len(y) * 0.0039)
+            y2 = signal.correlate(y, np.ones(const), mode='same') / const
+            yy = y-y2
+            # if noiseThreshold is None:
+            maxNL, minNL = estimateNoiseLevel1D(yy, f=20, stdFactor=0.1)
+            intersectingLine = [maxNL] * len(x)
+            # else:
+            #     intersectingLine = [noiseThreshold] * len(x)
+            limitsPairs = _getPeaksLimits(x, yy, intersectingLine)
 
             integrals = []
 
             for i in limitsPairs:
                 lineWidth = abs(i[0] - i[1])
-                if lineWidth > minimalLineWidth:
+                if lineWidth:
                     newIntegral = self.newIntegral(value=None, limits=[[min(i), max(i)], ])
                     filteredX = np.where((x <= i[0]) & (x >= i[1]))
                     filteredY = spectrum.intensities[filteredX]

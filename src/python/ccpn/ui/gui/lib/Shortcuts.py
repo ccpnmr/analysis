@@ -47,11 +47,16 @@ def addShortCut(keys=None, obj=None, func=None, context=None):
     :param func - function to attach:
     :param context - context; e.g., WidgetShortcut|ApplicationShortcut:
     """
+    from ccpn.ui.gui.lib.GuiMainWindow import GuiMainWindow
     if isinstance(keys, str):
+        # print(keys, func)
         keys = QtGui.QKeySequence(keys)
 
     shortcut = QtWidgets.QShortcut(keys, obj, func, context=context)
     storeShortcut(keys, obj, func, context, shortcut)
+    tl =  keys.toString()
+    if isinstance(obj, GuiMainWindow):
+        obj._storeShortcut(tl,func)
     return shortcut
 
 
@@ -78,6 +83,7 @@ def storeShortcut(keys=None, obj=None, func=None, context=None, shortcut=None):
                         SHORTCUT_CONTEXT  : context,
                         SHORTCUT_SHORTCUT : shortcut}
         _shortcutList[obj][keyString] = shortcutItem
+
 
 
 def clearShortcuts(widget=None):

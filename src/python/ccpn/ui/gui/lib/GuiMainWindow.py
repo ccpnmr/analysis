@@ -121,7 +121,7 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
         logger.debug('GuiMainWindow.moduleArea: layout: %s' % self.moduleArea.layout)  ## pyqtgraph object
         self.moduleArea.setGeometry(0, 0, 1000, 800)
         self.setCentralWidget(self.moduleArea)
-
+        self._shortcutsDict = {}
         self.recordingMacro = False
         self._setupWindow()
         self._setupMenus()
@@ -402,7 +402,26 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
             menu = targetMenu.addMenu(menuTitle)
         return menu
 
+    def _storeShortcut(self, twoLetters, thecallable):
+        if twoLetters is not None:
+            twoLetters = twoLetters.replace(', ','')
+            if twoLetters not in self._shortcutsDict:
+                self._shortcutsDict[twoLetters] = thecallable
+            else:
+                alreadyUsed = self._shortcutsDict.get(twoLetters)
+                getLogger().warning(" Ambiguous shortcut overload: %s. \n Assigning to: %s. \nAlready in use for: \n %s." %
+                                    (twoLetters, thecallable, alreadyUsed))
+
+    def _storeMainMenuShortcuts(self, actions):
+        for action in actions:
+            if len(action) == 3:
+                name, thecallable, shortCutDefs = action
+                kwDict = dict(shortCutDefs)
+                twoLetters = kwDict.get('shortcut')
+                self._storeShortcut(twoLetters, thecallable)
+
     def _addMenuActions(self, menu, actions):
+        self._storeMainMenuShortcuts(actions)
         for action in actions:
             if len(action) == 0:
                 menu.addSeparator()

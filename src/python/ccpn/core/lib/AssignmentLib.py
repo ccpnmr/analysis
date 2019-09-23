@@ -33,7 +33,8 @@ CCP_CODES = ('Ala', 'Cys', 'Asp', 'Glu', 'Phe', 'Gly', 'His', 'Ile', 'Lys', 'Leu
 CCP_CODES_SORTED = ('Ala', 'Arg', 'Asn', 'Asp', 'Cys', 'Gln', 'Glu', 'Gly', 'His', 'Ile', 'Leu',
                     'Lys', 'Met', 'Phe', 'Pro', 'Ser', 'Thr', 'Trp', 'Tyr', 'Val')
 
-ATOM_NAMES = {'13C': ['C', 'CA', 'CB', 'CD', 'CD*', 'CD1', 'CD2', 'CE', 'CE*', 'CE1', 'CE2', 'CE3',
+ATOM_NAMES = {'13C': ['C', 'CA', 'HB3', 'HD*', 'HD1', 'HD1*', 'HD2', 'HD2*', 'HD3', 'HE', 'HE*', 'HE1',
+                      'HE22', 'HE3', 'HG', 'CD1', 'CD2', 'CE', 'CE*', 'CE1', 'CE2', 'CE3',
                       'CG', 'CG1', 'CG2', 'CH2', 'CZ', 'CZ2', 'CZ3'
                       ],
 

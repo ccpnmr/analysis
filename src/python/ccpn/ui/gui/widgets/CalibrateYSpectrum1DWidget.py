@@ -87,14 +87,6 @@ class CalibrateY1DWidgets(Frame):
         i += 1
         self.okButtons = ButtonList(self, ['Apply', 'Close'], callbacks=[self._apply, self._close],
                                     grid=(0, i))
-        # self.okButtons = ButtonList(self, ['Apply'], callbacks=[self._apply],
-        #                             grid=(0, i))
-
-        # self.infiniteLine = pg.InfiniteLine(movable=True, angle=0)
-        # self.originalPosInfiniteLine = pg.InfiniteLine(movable=False, angle=0, pen='g')
-        #
-        # # self.infiniteLine.sigPositionChangeFinished.connect(self._calibrateSpectra)
-        # self.infiniteLine.sigPositionChanged.connect(self._newPositionLineCallback)
 
         self.labelOriginalPosition.setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.Minimum)
         self.boxOriginalPosition.setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.Minimum)
@@ -121,13 +113,6 @@ class CalibrateY1DWidgets(Frame):
 
     def _initLines(self):
         if self.mainWindow is not None:
-            # if self.strip is not None:
-            #   self.strip.plotWidget.addItem(self.infiniteLine)
-            #   self.strip.plotWidget.addItem(self.originalPosInfiniteLine)
-            # if self.strip.plotWidget.viewBox.contextMenuPosition is not None:
-
-            # self.originalPosition = self.strip.plotWidget.viewBox.contextMenuPosition[1]
-
             self.originalPosition = float(self.strip._CcpnGLWidget.cursorCoordinate[1])
 
             self.infiniteLine.setValue(self.originalPosition)
@@ -176,14 +161,9 @@ class CalibrateY1DWidgets(Frame):
             self.infiniteLine.setValue(val)
 
     def _removeLines(self):
-        if self.mainWindow is not None:
-            # if self.strip is not None:
-            #   self.strip.plotWidget.removeItem(self.infiniteLine)
-            #   self.strip.plotWidget.removeItem(self.originalPosInfiniteLine)
-
-            if self.GLWidget:
-                self.infiniteLine.visible = False
-                self.originalPosInfiniteLine.visible = False
+        if self.mainWindow is not None and self.GLWidget:
+            self.infiniteLine.visible = False
+            self.originalPosInfiniteLine.visible = False
 
     def _toggleLines(self):
         if self.isVisible():
@@ -229,9 +209,6 @@ class CalibrateY1DWidgets(Frame):
 
     def _close(self):
         self.strip._closeCalibrateY()
-        # self.setVisible(False)
-        # self.strip.calibrateYAction.setChecked(False)
-        # self._toggleLines()
 
 
 if __name__ == '__main__':

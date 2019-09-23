@@ -89,11 +89,6 @@ class CalibrateX1DWidgets(Frame):
         i += 1
         self.okButtons = ButtonList(self, ['Apply', 'Close'], callbacks=[self._apply, self._close],
                                     grid=(0, i))
-        # self.okButtons = ButtonList(self, ['Apply'], callbacks=[self._apply],
-        #                             grid=(0, i))
-
-        # self.infiniteLine = pg.InfiniteLine(movable=True)
-        # self.originalPosInfiniteLine = pg.InfiniteLine(movable=False, pen='g')
 
         self.labelOriginalPosition.setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.Minimum)
         self.boxOriginalPosition.setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.Minimum)
@@ -109,9 +104,6 @@ class CalibrateX1DWidgets(Frame):
             self.infiniteLine.valuesChanged.connect(self._newPositionLineCallback)
             self.originalPosInfiniteLine.valuesChanged.connect(self._originalPositionLineCallback)
 
-        # self.infiniteLine.sigPositionChangeFinished.connect(self._calibrateSpectra)
-        # self.infiniteLine.sigPositionChanged.connect(self._newPositionLineCallback)
-
         self.boxOriginalPosition.valueChanged.connect(self._originalPositionBoxCallback)
         self.boxNewPosition.valueChanged.connect(self._newPositionBoxCallback)
         self.boxDelta.valueChanged.connect(self._deltaBoxCallback)
@@ -122,15 +114,7 @@ class CalibrateX1DWidgets(Frame):
         self.GLSignals = GLNotifier(parent=None)
 
     def _initLines(self):
-
         if self.mainWindow is not None:
-            # if self.strip is not None:
-            #   self.strip.plotWidget.addItem(self.infiniteLine)
-            #   self.strip.plotWidget.addItem(self.originalPosInfiniteLine)
-            ## NB Current.cursorPosition is extremely unreliable.
-            # if self.strip.plotWidget.viewBox.contextMenuPosition is not None:
-            # self.originalPosition = self.strip.plotWidget.viewBox.contextMenuPosition[0]
-
             self.originalPosition = float(self.strip._CcpnGLWidget.cursorCoordinate[0])
 
             self.infiniteLine.setValue(self.originalPosition)
@@ -139,12 +123,6 @@ class CalibrateX1DWidgets(Frame):
 
             self.infiniteLine.visible = True and self.targetLineVisible
             self.originalPosInfiniteLine.visible = True
-
-    # def _newBoxCallback(self):
-    #     spinboxValue = self.sender().value()
-    #     self.infiniteLine.setValue(spinboxValue)
-    #     print('>>>_newBoxCallback - setDeltaBox')
-    #     self.boxDelta.setValue(round(spinboxValue-self.originalPosition, 3))
 
     def _newPositionLineCallback(self):
         self.newPosition = self.infiniteLine.values                             # [0]
@@ -181,14 +159,9 @@ class CalibrateX1DWidgets(Frame):
             self.infiniteLine.setValue(val)
 
     def _removeLines(self):
-        if self.mainWindow is not None:
-            # if self.strip is not None:
-            #   self.strip.plotWidget.removeItem(self.infiniteLine)
-            #   self.strip.plotWidget.removeItem(self.originalPosInfiniteLine)
-
-            if self.GLWidget:
-                self.infiniteLine.visible = False
-                self.originalPosInfiniteLine.visible = False
+        if self.mainWindow is not None and self.GLWidget:
+            self.infiniteLine.visible = False
+            self.originalPosInfiniteLine.visible = False
 
     def _toggleLines(self):
         if self.isVisible():
@@ -233,9 +206,6 @@ class CalibrateX1DWidgets(Frame):
 
     def _close(self):
         self.strip._closeCalibrateX()
-        # self.setVisible(False)
-        # self.strip.calibrateXAction.setChecked(False)
-        # self._toggleLines()
 
 
 if __name__ == '__main__':

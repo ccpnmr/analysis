@@ -675,7 +675,7 @@ assignmentTolerances
     # NBNB TBD Should this be made modifiable? Would be a bit of work ...
 
     @property
-    def numberType(self) -> str:
+    def numberType(self) -> Optional[str]:
         """Data type of numbers stored in data matrix ('int' or 'float')."""
         xx = self._wrappedData.dataStore
         if xx:
@@ -2030,6 +2030,10 @@ assignmentTolerances
                 endPointBuffer = np.array([endPointBufferActual[i] - tile[i] * npts[i] for i in range(numDim)])
 
                 dataArray, intRegion = dataSource.getRegionData(startPointBuffer, endPointBuffer)
+
+                # both None implies that the dataSource is not defined
+                if dataArray is None and intRegion is None:
+                    continue
 
                 # include extra exclusion buffer information
                 startPointInt, endPointInt = intRegion

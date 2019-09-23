@@ -38,7 +38,7 @@ from ccpn.ui.gui.lib.GuiNotifier import GuiNotifier
 from ccpn.ui.gui.widgets.DropBase import DropBase
 from ccpn.ui.gui.widgets import MessageDialog
 from ccpn.util.Logging import getLogger
-from ccpn.util.Constants import AXIS_MATCHATOMTYPE, AXIS_FULLATOMNAME, AXIS_ACTIVEAXES
+from ccpn.util.Constants import AXIS_MATCHATOMTYPE, AXIS_FULLATOMNAME, AXIS_ACTIVEAXES, DOUBLEAXIS_FULLATOMNAME
 from functools import partial
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs import AXISXUNITS, AXISYUNITS, AXISLOCKASPECTRATIO, \
     SYMBOLTYPES, ANNOTATIONTYPES, SYMBOLSIZE, SYMBOLTHICKNESS, AXISUSEFIXEDASPECTRATIO
@@ -97,13 +97,6 @@ class GuiStrip(Frame):
             from ccpn.ui.gui.widgets.GLWidgets import GuiNdWidget as CcpnGLWidget
 
         self._CcpnGLWidget = CcpnGLWidget(strip=self, mainWindow=self.mainWindow)
-
-        # viewportFormat = self._CcpnGLWidget.format()
-        # viewportFormat.setSwapInterval(0)  #disable VSync
-        # viewportFormat.setSwapBehavior(QtGui.QSurfaceFormat.TripleBuffer)
-        # QtGui.QSurfaceFormat().setDefaultFormat(viewportFormat)
-        # self._CcpnGLWidget.setFormat(viewportFormat)
-        # viewportFormat = self._CcpnGLWidget.format()
 
         self.getLayout().addWidget(self._CcpnGLWidget, 1, 0)
         self._CcpnGLWidget.setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding,
@@ -1219,9 +1212,16 @@ class GuiStrip(Frame):
         try:
             # colourDict = guiSettings.MARK_LINE_COLOUR_DICT  # maps atomName --> colour
 
-            positions = [self.current.mouseMovedDict[AXIS_FULLATOMNAME][ax] for ax in self.axisCodes]
             defaultColour = self._preferences.defaultMarksColour
+            positions = [self.current.mouseMovedDict[AXIS_FULLATOMNAME][ax] for ax in self.axisCodes]
             self._project.newMark(defaultColour, positions, self.axisCodes)
+
+            # add the marks for the double cursor - needs to be enabled in preferences
+            if self._preferences.showDoubleCrosshair:
+                positions = [self.current.mouseMovedDict[DOUBLEAXIS_FULLATOMNAME][ax] for ax in self.axisCodes[:2]]
+                self._project.newMark(defaultColour, positions, self.axisCodes)
+
+            # need new mark method of the form newMark(colour=colour, axisCode=position)
 
         except Exception as es:
             getLogger().warning('Error setting mark at current cursor position')

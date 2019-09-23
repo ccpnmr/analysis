@@ -192,6 +192,7 @@ class CcpnGLWidget(QOpenGLWidget):
 
         # flag to display paintGL but keep an empty screen
         self._blankDisplay = False
+        self.setAutoFillBackground(False)
 
         if not strip:  # don't initialise if nothing there
             return
@@ -2780,9 +2781,13 @@ class CcpnGLWidget(QOpenGLWidget):
         if not self._ordering:
             return
 
+        # tt = time.time()
+
         with self.glBlocking():
             self._buildGL()
             self._paintGL()
+
+        # print('>>>>>> _paintGL', self.strip, time.time()-tt)
 
     def _paintGL(self):
         w = self.w

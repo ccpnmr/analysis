@@ -33,6 +33,7 @@ def fetchHttpResponse(method, url, data=None, headers=None, proxySettings=None):
     import os
     import ssl
     import certifi
+    import urllib
     import urllib3.contrib.pyopenssl
     from urllib.parse import urlencode, quote
 
@@ -57,8 +58,15 @@ def fetchHttpResponse(method, url, data=None, headers=None, proxySettings=None):
     from ccpn.util.UserPreferences import UserPreferences, USEPROXY, USEPROXYPASSWORD, PROXYADDRESS, \
         PROXYPORT, PROXYUSERNAME, PROXYPASSWORD, USESYSTEMPROXY
 
-    # read the system proxy if it exists
-    proxyUrl = os.environ.get('HTTPS_PROXY', os.environ.get('HTTP_PROXY'))
+    def _getProxyIn(proxyDict):
+        """Get the first occurrence of a proxy type in the supplied dict
+        """
+        # define a list of proxy identifiers
+        proxyCheckList = ['HTTPS_PROXY', 'https', 'HTTP_PROXY', 'http']
+        for pCheck in proxyCheckList:
+            proxyUrl = proxyDict.get(pCheck, None)
+            if proxyUrl:
+                return proxyUrl
 
     if proxySettings and proxySettings.get(USEPROXY):
 
@@ -79,7 +87,14 @@ def fetchHttpResponse(method, url, data=None, headers=None, proxySettings=None):
 
         proxyUrl = "http://%s:%s/" % (str(proxyAddress), str(proxyPort)) if proxyAddress else None
 
-    # proxy may not be defined
+    else:
+        # read the environment/system proxies if exist
+        proxyUrl = _getProxyIn(os.environ) or _getProxyIn(urllib.request.getproxies())
+
+        # ED: issues - @"HTTPProxyAuthenticated" key on system?. If it exists, the value is a boolean (NSNumber) indicating whether or not the proxy is authentified,
+        # get the username if the proxy is authenticated: check @"HTTPProxyUsername"
+
+    # proxy may still not be defined
     if proxyUrl:
         http = urllib3.ProxyManager(proxyUrl, **options)
     else:
@@ -91,6 +106,7 @@ def fetchHttpResponse(method, url, data=None, headers=None, proxySettings=None):
                             body=body,
                             preload_content=False)
 
+    # return the http response
     return response
 
 

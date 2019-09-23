@@ -95,6 +95,11 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
         # super(GuiMainWindow, self).__init__(parent=None)
         GuiWindow.__init__(self, application)
         QtWidgets.QMainWindow.__init__(self)
+
+        # format = QtGui.QSurfaceFormat()
+        # format.setSwapInterval(0)
+        # QtGui.QSurfaceFormat.setDefaultFormat(format)
+
         self.setAttribute(QtCore.Qt.WA_DeleteOnClose, True)
         # Layout
         layout = self.layout()

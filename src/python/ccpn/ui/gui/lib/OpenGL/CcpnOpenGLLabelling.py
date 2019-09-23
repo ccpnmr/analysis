@@ -85,6 +85,8 @@ class GLLabelling():
         self._GLLabels = {}
         self._ordering = ()
         self._visibleOrdering = ()
+        self._listViews = ()
+        self._visibleListViews = ()
 
         self.autoColour = self._GLParent.SPECTRUMPOSCOLOUR
 

@@ -156,7 +156,7 @@ class ResidueInformation(CcpnModule):
         self._residueWidthData.setData(texts=self.textOptions)
         self._residueWidthData.set(self._residueWidth)
 
-        self.residuePulldown.setData(CCP_CODES)
+        self.residuePulldown.setData(sorted(CCP_CODES))
         self.selectedResidueType = self.residuePulldown.currentText()
 
         # set the callback after populating

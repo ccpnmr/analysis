@@ -730,3 +730,11 @@ class GuiStripNd(GuiStrip):
             self.calibrateXNDWidgets._toggleLines()
             self.calibrateYNDWidgets.setVisible(False)
             self.calibrateYNDWidgets._toggleLines()
+
+    def _closeCalibrateX(self):
+        self.calibrateXYAction.setChecked(False)
+        self.toggleCalibrateXY()
+
+    def _closeCalibrateY(self):
+        self.calibrateXYAction.setChecked(False)
+        self.toggleCalibrateXY()

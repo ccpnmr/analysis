@@ -337,6 +337,14 @@ class GuiStrip1d(GuiStrip):
             self.calibrateY1DWidgets.setVisible(False)
             self.calibrateY1DWidgets._toggleLines()
 
+    def _closeCalibrateX(self):
+        self.calibrateXAction.setChecked(False)
+        self.toggleCalibrateX()
+
+    def _closeCalibrateY(self):
+        self.calibrateYAction.setChecked(False)
+        self.toggleCalibrateY()
+
     def _getInitialOffset(self):
         offSets = []
         offSet = 0  # Default

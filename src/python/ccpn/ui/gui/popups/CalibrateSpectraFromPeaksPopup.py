@@ -29,6 +29,7 @@ from ccpn.ui.gui.widgets.ButtonList import ButtonList
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.ScrollArea import ScrollArea
 from ccpn.ui.gui.widgets.Frame import Frame
+from ccpn.ui.gui.widgets.PulldownList import PulldownList
 from ccpn.ui.gui.guiSettings import getColours, SOFTDIVIDER, DIVIDER
 from ccpn.ui.gui.popups.Dialog import CcpnDialog
 from ccpn.ui.gui.widgets.Spacer import Spacer
@@ -146,30 +147,34 @@ class CalibrateSpectraFromPeaksPopupNd(CcpnDialog):
             wid.setParent(None)
             wid.setVisible(False)
 
+        FIELDS = 7
+
         self._spectraCheckBoxes = {}
+        self._matchToAxisPulldowns = {}
         specRow = 0
-        HLine(spectrumFrame, grid=(specRow, 0), gridSpan=(1, 6), colour=getColours()[DIVIDER], height=15)
+        HLine(spectrumFrame, grid=(specRow, 0), gridSpan=(1, FIELDS), colour=getColours()[DIVIDER], height=15)
 
         specRow += 1
         incudeAxisLabel = Label(spectrumFrame, text="Include\nAxis", grid=(specRow, 0), hAlign='c')
         axisLabel = Label(spectrumFrame, text="AxisCode", grid=(specRow, 1), hAlign='c')
-        isoLabel = Label(spectrumFrame, text="Isotope\nCode", grid=(specRow, 2), hAlign='c')
-        oldPpmLabel = Label(spectrumFrame, text="Original\nppmPosition", grid=(specRow, 3), hAlign='c')
-        newPpmLabel = Label(spectrumFrame, text="New\nppmPosition", grid=(specRow, 4), hAlign='c')
-        deltaLabel = Label(spectrumFrame, text="Delta", grid=(specRow, 5), hAlign='c')
+        matchAxisLabel = Label(spectrumFrame, text="Match to\nAxisCode\n(in Fixed Peak)", grid=(specRow, 2), hAlign='c')
+        isoLabel = Label(spectrumFrame, text="Isotope\nCode", grid=(specRow, 3), hAlign='c')
+        oldPpmLabel = Label(spectrumFrame, text="Original\nppmPosition", grid=(specRow, 4), hAlign='c')
+        newPpmLabel = Label(spectrumFrame, text="New\nppmPosition", grid=(specRow, 5), hAlign='c')
+        deltaLabel = Label(spectrumFrame, text="Delta", grid=(specRow, 6), hAlign='c')
 
         specRow += 1
-        HLine(spectrumFrame, grid=(specRow, 0), gridSpan=(1, 6), colour=getColours()[SOFTDIVIDER], height=10)
+        HLine(spectrumFrame, grid=(specRow, 0), gridSpan=(1, FIELDS), colour=getColours()[SOFTDIVIDER], height=10)
 
         specRow += 1
         for peak in self.peaks:
 
             if specRow > 3:
                 # add softdivider
-                HLine(spectrumFrame, grid=(specRow, 0), gridSpan=(1, 6), colour=getColours()[SOFTDIVIDER], height=10)
+                HLine(spectrumFrame, grid=(specRow, 0), gridSpan=(1, FIELDS), colour=getColours()[SOFTDIVIDER], height=10)
 
             specRow += 1
-            Label(spectrumFrame, text='Peak: %s' % str(peak.id), grid=(specRow, 0), gridSpan=(1, 6), bold=True)
+            Label(spectrumFrame, text='Peak: %s' % str(peak.id), grid=(specRow, 0), gridSpan=(1, FIELDS), bold=True)
             numDim = peak.peakList.spectrum.dimensionCount
 
             thisSpec = peak.peakList.spectrum
@@ -179,15 +184,28 @@ class CalibrateSpectraFromPeaksPopupNd(CcpnDialog):
             for ind in range(len(thisSpec.axisCodes)):
 
                 dim = indices[ind]
+                primaryIndices = getAxisCodeMatchIndices(primarySpec.axisCodes, thisSpec.axisCodes[ind])
 
                 specRow += 1
                 axisLabel = Label(spectrumFrame, text=thisSpec.axisCodes[ind], grid=(specRow, 1))
-                isoLabel = Label(spectrumFrame, text=thisSpec.isotopeCodes[ind], grid=(specRow, 2))
-                ppmLabel = Label(spectrumFrame, text='%.3f' % peak.ppmPositions[ind], grid=(specRow, 3))
+                isoLabel = Label(spectrumFrame, text=thisSpec.isotopeCodes[ind], grid=(specRow, 3))
+                ppmLabel = Label(spectrumFrame, text='%.3f' % peak.ppmPositions[ind], grid=(specRow, 4))
 
                 if (peak != self.primaryPeak) and dim is not None:
-                    Label(spectrumFrame, text='%.3f' % self.primaryPeak.ppmPositions[dim], grid=(specRow, 4))
-                    Label(spectrumFrame, text='%.3f' % (self.primaryPeak.ppmPositions[dim] - peak.ppmPositions[ind]), grid=(specRow, 5))
+
+                    matchCodes = tuple(primarySpec.axisCodes[ii] for ii, ind in enumerate(primaryIndices) if ind is not None)
+                    if len(matchCodes) > 1:
+                        matchToAxis = PulldownList(spectrumFrame, grid=(specRow, 2))
+                        matchToAxis.setData(matchCodes)
+                        matchToAxis.select(thisSpec.axisCodes[ind])
+                        matchToAxis.setCallback(partial(self._changeAxisOption, str(peak.id) + str(ind)))
+                    else:
+                        matchToAxis = Label(spectrumFrame, text=primarySpec.axisCodes[dim], grid=(specRow, 2))
+
+                    ppmLabel = Label(spectrumFrame, text='%.3f' % self.primaryPeak.ppmPositions[dim], grid=(specRow, 5))
+                    ppmDelta = Label(spectrumFrame, text='%.3f' % (self.primaryPeak.ppmPositions[dim] - peak.ppmPositions[ind]), grid=(specRow, 6))
+
+                    self._matchToAxisPulldowns[str(peak.id) + str(ind)] = (matchToAxis, ppmLabel, ppmDelta, dim, peak, ind)
 
                     self._spectraCheckBoxes[str(peak.id) + str(ind)] = CheckBox(spectrumFrame, grid=(specRow, 0), vAlign='t', hAlign='c', checked=True)
 
@@ -212,7 +230,9 @@ class CalibrateSpectraFromPeaksPopupNd(CcpnDialog):
                         for ii in range(len(peak.axisCodes)):
                             idStr = str(peak.id) + str(ii)
                             if idStr in self._spectraCheckBoxes:
-                                peakFromPos[ii] = peakFromPos[ii] if self._spectraCheckBoxes[idStr].isChecked() else None
+                                # peakFromPos[ii] = peakFromPos[ii] if self._spectraCheckBoxes[idStr].isChecked() else None
+                                _, _, _, dim, _, _ = self._matchToAxisPulldowns[idStr]
+                                peakFromPos[ii] = self.primaryPeak.ppmPositions[dim] if self._spectraCheckBoxes[idStr].isChecked() else None
                             else:
                                 peakFromPos[ii] = None
 
@@ -232,6 +252,21 @@ class CalibrateSpectraFromPeaksPopupNd(CcpnDialog):
 
         # clear the last selected items
         self.strip._lastClickedObjects = None
+
+    def _changeAxisOption(self, matchKey, axisCode):
+        try:
+            # update the values for the new axisCode in the dict
+            matchToAxis, ppmLabel, ppmDelta, dim, peak, ind = self._matchToAxisPulldowns[matchKey]
+            dim = self.primaryPeak.axisCodes.index(axisCode)
+            self._matchToAxisPulldowns[matchKey] = (matchToAxis, ppmLabel, ppmDelta, dim, peak, ind)
+
+            # update the labels
+            ppmLabel.setText('%.3f' % self.primaryPeak.ppmPositions[dim])
+            ppmDelta.setText('%.3f' % (self.primaryPeak.ppmPositions[dim] - peak.ppmPositions[ind]))
+
+        except Exception as es:
+            print('>>>>>>', str(es))
+            pass
 
     def _calibrateSpectra(self, spectra, strip, direction=1.0):
 

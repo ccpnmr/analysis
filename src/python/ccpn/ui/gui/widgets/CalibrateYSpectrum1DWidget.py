@@ -122,10 +122,6 @@ class CalibrateY1DWidgets(Frame):
             self.infiniteLine.visible = True and self.targetLineVisible
             self.originalPosInfiniteLine.visible = True
 
-    def _newBoxCallback(self):
-        spinboxValue = self.sender().value()
-        self.infiniteLine.setValue(spinboxValue)
-
     def _newPositionLineCallback(self):
         self.newPosition = self.infiniteLine.values  # [0]
         self.boxNewPosition.setValue(round(self.newPosition, 3))

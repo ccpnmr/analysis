@@ -580,22 +580,19 @@ class ExportStripToFilePopup(ExportDialog):
 
         if self.pathEdited is False:
             # user has not changed the path so we can accept()
-            with progressManager(self, 'Saving to file:\n%s' % self.exitFilename):
-                self._exportToFile()
+            self._exportToFile()
         else:
             # have edited the path so check the new file
             if os.path.isfile(self.exitFilename):
                 yes = showYesNoWarning('%s already exists.' % os.path.basename(self.exitFilename),
                                        'Do you want to replace it?')
                 if yes:
-                    with progressManager(self, 'Saving to file:\n%s' % self.exitFilename):
-                        self._exportToFile()
+                    self._exportToFile()
             else:
                 if not self.exitFilename:
                     showWarning('FileName Error:', 'Filename is empty.')
                 else:
-                    with progressManager(self, 'Saving to file:\n%s' % self.exitFilename):
-                        self._exportToFile()
+                    self._exportToFile()
 
 
 if __name__ == '__main__':

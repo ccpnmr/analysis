@@ -1213,13 +1213,17 @@ class GuiStrip(Frame):
             # colourDict = guiSettings.MARK_LINE_COLOUR_DICT  # maps atomName --> colour
 
             defaultColour = self._preferences.defaultMarksColour
-            positions = [self.current.mouseMovedDict[AXIS_FULLATOMNAME][ax] for ax in self.axisCodes]
-            self._project.newMark(defaultColour, positions, self.axisCodes)
+            mouseDict = self.current.mouseMovedDict[AXIS_FULLATOMNAME]
+            positions = [mouseDict[ax] for ax in self.axisCodes if ax in mouseDict]
+            axisCodes = [ax for ax in self.axisCodes if ax in mouseDict]
+            self._project.newMark(defaultColour, positions, axisCodes)
 
             # add the marks for the double cursor - needs to be enabled in preferences
-            if self._preferences.showDoubleCrosshair:
-                positions = [self.current.mouseMovedDict[DOUBLEAXIS_FULLATOMNAME][ax] for ax in self.axisCodes[:2]]
-                self._project.newMark(defaultColour, positions, self.axisCodes)
+            if self._preferences.showDoubleCrosshair and self._CcpnGLWidget._matchingIsotopeCodes:
+                mouseDict = self.current.mouseMovedDict[DOUBLEAXIS_FULLATOMNAME]
+                positions = [mouseDict[ax] for ax in self.axisCodes[:2] if ax in mouseDict]
+                axisCodes = [ax for ax in self.axisCodes[:2] if ax in mouseDict]
+                self._project.newMark(defaultColour, positions, axisCodes)
 
             # need new mark method of the form newMark(colour=colour, axisCode=position)
 

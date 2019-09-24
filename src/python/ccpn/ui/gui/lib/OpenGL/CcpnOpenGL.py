@@ -3736,7 +3736,7 @@ class CcpnGLWidget(QOpenGLWidget):
                     index += 2
 
                     # add the double cursor
-                    if _drawDouble:
+                    if _drawDouble and self._matchingIsotopeCodes:
                         vertices.extend([doubleCoords[0], 1.0, doubleCoords[0], 0.0])
                         indices.extend([index, index + 1])
                         index += 2
@@ -3747,7 +3747,7 @@ class CcpnGLWidget(QOpenGLWidget):
                     index += 2
 
                     # add the double cursor
-                    if _drawDouble:
+                    if _drawDouble and self._matchingIsotopeCodes:
                         vertices.extend([0.0, doubleCoords[1], 1.0, doubleCoords[1]])
                         indices.extend([index, index + 1])
                         index += 2
@@ -5619,11 +5619,12 @@ class CcpnGLWidget(QOpenGLWidget):
                         self.cursorCoordinate[n] = mouseMovedDict[AXIS_FULLATOMNAME][axis]
 
                         # coordinates have already been flipped
-                        self.doubleCursorCoordinate[n] = mouseMovedDict[DOUBLEAXIS_FULLATOMNAME][axis]
+                        # self.doubleCursorCoordinate[n] = mouseMovedDict[DOUBLEAXIS_FULLATOMNAME][axis]
+                        self.doubleCursorCoordinate[1-n] = self.cursorCoordinate[n]
 
                     else:
                         self.cursorCoordinate[n] = None
-                        self.doubleCursorCoordinate[n] = None
+                        self.doubleCursorCoordinate[1-n] = None
 
                 self.current.cursorPosition = (self.cursorCoordinate[0], self.cursorCoordinate[1])
 

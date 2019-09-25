@@ -1674,6 +1674,7 @@ GuiTable::item::selected {
 
     def getIndexList(self, classItems, attribute):
         """Get the list of objects on which to before the indexing
+        To be subclassed as required
         """
         # classItem is usually a type such as PeakList, MultipletList
         # with an attribute such as peaks/peaks
@@ -1930,6 +1931,16 @@ GuiTable::item::selected {
 
         return _update
 
+    def getCellToRows(self, cellItem, attribute):
+        """Get the list of objects which cellItem maps to for this table
+        To be subclassed as required
+        """
+        # classItem is usually a type such as PeakList, MultipletList
+        # with an attribute such as peaks/peaks
+
+        # this is a step towards making guiTableABC and subclass for each table
+        return getattr(cellItem, attribute, [])
+
     def _updateCellCallback(self, attr, data):
         """
         Notifier callback for updating the table
@@ -1955,7 +1966,8 @@ GuiTable::item::selected {
 
                         # check if row is the correct type of class
                         if isinstance(cell, cBack[OBJECT_CLASS]):
-                            rowObj = getattr(cell, cBack[OBJECT_PARENT])
+                            # rowObj = getattr(cell, cBack[OBJECT_PARENT])
+                            rowObj = self.getCellToRows(cell, cBack[OBJECT_PARENT])
                             rowCallback = cBack[OBJECT_PARENT]
                             break
                 else:

@@ -882,7 +882,7 @@ class DimensionsTab(Widget):
             self.foldingModesCheckBox[i] = CheckBox(self, grid=(row, i + 1), vAlign='t')
             self.foldingModesCheckBox[i].setChecked(dd[fModes[i]])
             self.foldingModesCheckBox[i].clicked.connect(partial(self._queueSetFoldingModes, self.foldingModesCheckBox[i].isChecked, i))
-            # self.foldingModesCheckBox[i].setEnabled(False)
+            self.foldingModesCheckBox[i].setEnabled(False)
 
             # pullDown for min/max aliasing
             aliasLim = spectrum.visibleAliasingRange

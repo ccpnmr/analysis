@@ -451,6 +451,11 @@ def _newSpectrumDisplay(self: Project, axisCodes: (str,), stripDirection: str = 
         else:
             stripSerial = 1
 
+        # NOTE: ED setting to 1 notifies api to create a full axis set for each additional spectrum
+        #       required for dynamic switching of strip arrangement
+        #       stripDirection is no longer used in the api
+        stripSerial = 1
+
         if code[0].isupper():
             apiSpectrumDisplay.newFrequencyAxis(code=code, stripSerial=stripSerial)
         elif code == 'intensity':

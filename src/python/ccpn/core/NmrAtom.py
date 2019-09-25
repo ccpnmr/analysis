@@ -326,7 +326,7 @@ class NmrAtom(AbstractWrapperObject):
         """
         super()._finaliseAction(action=action)
         # propagate the rename to associated ChemicalShift instances
-        if action == 'rename':
+        if action in ['rename', 'change']:
             for cs in self.chemicalShifts:
                 cs._finaliseAction(action=action)
 

@@ -114,6 +114,12 @@ class Strip(AbstractWrapperObject):
         ff = self._project._data2Obj.get
         return tuple(ff(apiStrip.findFirstStripAxis(axis=x)) for x in apiStrip.orderedAxes)
 
+        # # NOTE: ED new code to read axes ignoring stripDirection
+        # # All strips will return their own axes
+        # stripSerial = apiStrip.stripSerial
+        # apiSpectrumDisplay = apiStrip.spectrumDisplay
+        # return tuple(ff(apiSpectrumDisplay.findFirstAxis(code=x, stripSerial=stripSerial)) for x in apiSpectrumDisplay.axisOrder)
+
     @orderedAxes.setter
     def orderedAxes(self, value: Sequence):
         value = [self.getByPid(x) if isinstance(x, str) else x for x in value]

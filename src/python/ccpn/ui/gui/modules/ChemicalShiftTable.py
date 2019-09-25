@@ -40,6 +40,8 @@ from ccpn.ui.gui.widgets.Spacer import Spacer
 from ccpn.core.ChemicalShiftList import ChemicalShiftList
 from ccpn.core.ChemicalShift import ChemicalShift
 from ccpn.core.NmrResidue import NmrResidue
+from ccpn.core.NmrAtom import NmrAtom
+from ccpn.core.Peak import Peak
 from ccpn.core.lib.CallBack import CallBack
 from PyQt5 import QtGui, QtWidgets
 from ccpn.util.Logging import getLogger
@@ -287,7 +289,7 @@ class ChemicalShiftTable(GuiTable):
                                className=self.attributeName,
                                tableSelection='chemicalShiftList',
                                rowClass=ChemicalShift,
-                               cellClassNames=None,
+                               cellClassNames=None,     # handled by the _finaliseAction notifier system
                                tableName='chemicalShiftList', rowName='chemicalShift',
                                changeFunc=self.displayTableForChemicalShift,
                                updateFunc=self._update,
@@ -429,6 +431,19 @@ class ChemicalShiftTable(GuiTable):
         return (len(set(x for x in peaks
                         if x.peakList.chemicalShiftList is chemicalShiftList)))
 
+    # this is now deprecated and replaced by notifers in _finaliseAction - may do this for all tables
+    # def getCellToRows(self, cellItem, attribute):
+    #     """Get the list of objects which cellItem maps to for this table
+    #     """
+    #     # this is a step towards making guiTableABC and subclass for each table
+    #     chemicalShifts = ()
+    #     if self.chemicalShiftList:
+    #         # chemicalShifts = tuple(set([cs for cs in self.chemicalShiftList.chemicalShifts if cs.nmrAtom and cellItem in cs.nmrAtom.assignedPeaks]))
+    #         chemicalShifts = tuple(set([cs for cs in self.chemicalShiftList.chemicalShifts if cs.nmrAtom is cellItem]))
+    #
+    #     print('>>>>>>chemicalShift on nmrAtom', cellItem, chemicalShifts)
+    #     return chemicalShifts
+
     @staticmethod
     def _stLamFloat(row, name):
         """
@@ -486,3 +501,4 @@ class ChemicalShiftTable(GuiTable):
         # self.clearTableNotifiers()
         self._chemicalShiftListPulldown.unRegister()
         super()._close()
+

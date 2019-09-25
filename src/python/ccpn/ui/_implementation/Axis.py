@@ -149,6 +149,7 @@ class Axis(AbstractWrapperObject):
         apiStrip = parent._wrappedData
         dd = {x.axis.code: x for x in apiStrip.stripAxes}
         return [dd[x] for x in apiStrip.axisCodes]
+        # return [dd[x] if x in dd else None for x in apiStrip.axisCodes]
 
     def delete(self):
         """Overrides normal delete"""

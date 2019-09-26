@@ -35,13 +35,13 @@ BG_COLOR = QtGui.QColor('#E0E0E0')
 
 # TODO:ED add some documentation here
 class ColumnClass:
-    def __init__(self, columnList=[None] * 4):
-        self._columns = [Column(colName, func, tipText=tipText, setEditValue=editValue) for
-                         colName, func, tipText, editValue in columnList]  # FIXME . this mechanism is very fragile
+    def __init__(self, columnList=[None] * 5):
+        self._columns = [Column(colName, func, tipText=tipText, setEditValue=editValue, format=columnFormat) for
+                         colName, func, tipText, editValue, columnFormat in columnList]  # FIXME . this mechanism is very fragile
 
     def addColumn(self, newColumn):
-        columnToAdd = [Column(colName, func, tipText=tipText, setEditValue=editValue) for
-                       colName, func, tipText, editValue in newColumn]
+        columnToAdd = [Column(colName, func, tipText=tipText, setEditValue=editValue, format=columnFormat) for
+                       colName, func, tipText, editValue, columnFormat in newColumn]
 
         if self._columns:
             self._columns.append(columnToAdd)
@@ -78,6 +78,10 @@ class ColumnClass:
     @property
     def setEditValues(self):
         return [heading.setEditValue for heading in self._columns]
+
+    @property
+    def formats(self):
+        return [heading.format for heading in self._columns]
 
 
 # TODO:ED add some documentation here

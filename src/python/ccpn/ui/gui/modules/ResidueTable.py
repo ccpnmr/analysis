@@ -177,16 +177,16 @@ class ResidueTable(GuiTable):
 
         # create the column objects
         self.NMRcolumns = ColumnClass([
-            # ('#', lambda residue: residue.serial, 'Residue serial number', None),
-            ('Index', lambda residue: ResidueTable._nmrIndex(residue), 'Index of Residue in the Chain', None),
-            ('Pid', lambda residue: residue.pid, 'Pid of Residue', None),
-            ('_object', lambda residue: residue, 'Object', None),
-            ('Chain', lambda residue: residue.chain.id, 'Chain containing the Residue', None),
-            ('Sequence', lambda residue: residue.sequenceCode, 'Sequence code of Residue', None),
-            ('Type', lambda residue: residue.residueType, 'Residue type', None),
-            ('Atoms', lambda residue: ResidueTable._getAtomNames(residue), 'Atoms in Residue', None),
+            # ('#', lambda residue: residue.serial, 'Residue serial number', None, None),
+            ('Index', lambda residue: ResidueTable._nmrIndex(residue), 'Index of Residue in the Chain', None, None),
+            ('Pid', lambda residue: residue.pid, 'Pid of Residue', None, None),
+            ('_object', lambda residue: residue, 'Object', None, None),
+            ('Chain', lambda residue: residue.chain.id, 'Chain containing the Residue', None, None),
+            ('Sequence', lambda residue: residue.sequenceCode, 'Sequence code of Residue', None, None),
+            ('Type', lambda residue: residue.residueType, 'Residue type', None, None),
+            ('Atoms', lambda residue: ResidueTable._getAtomNames(residue), 'Atoms in Residue', None, None),
             ('Comment', lambda nmr: ResidueTable._getCommentText(nmr), 'Notes',
-             lambda nmr, value: ResidueTable._setComment(nmr, value))
+             lambda nmr, value: ResidueTable._setComment(nmr, value), None)
             ])
 
         selectionCallback = self._selectionCallback if selectionCallback is None else selectionCallback

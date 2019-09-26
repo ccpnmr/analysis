@@ -686,7 +686,7 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
         modulesMenu.addAction(Action(modulesMenu, text='Sidebar',
                                      checkable=True, checked=visible,
                                      # callback=partial(self._showSideBarModule, self._sideBarFrame, self, visible)))
-                                     callback=partial(self._showSideBarModule, self.sideBar, self, visible)))
+                                     callback=partial(self._showSideBarModule, self._sideBarFrame, self, visible)))
 
         for module in self.moduleArea.ccpnModules:
             moduleSize = module.size()

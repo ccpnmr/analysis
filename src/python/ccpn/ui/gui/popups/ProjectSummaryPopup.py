@@ -77,14 +77,14 @@ class ProjectSummaryPopup(CcpnDialog):
         row += 1
 
         columnsSpectrum = ColumnClass([
-            ('#', lambda spectrum: self.spectrumNumberDict[spectrum], 'Number', None),
-            ('Pid', lambda spectrum: spectrum.pid, 'Pid of NmrResidue', None),
-            ('_object', lambda spectrum: spectrum, 'Object', None),
-            ('Id', lambda spectrum: spectrum.id, 'Spectrum id', None),
-            ('Dimension count', lambda spectrum: spectrum.dimensionCount, 'Spectrum dimension count', None),
+            ('#', lambda spectrum: self.spectrumNumberDict[spectrum], 'Number', None, None),
+            ('Pid', lambda spectrum: spectrum.pid, 'Pid of NmrResidue', None, None),
+            ('_object', lambda spectrum: spectrum, 'Object', None, None),
+            ('Id', lambda spectrum: spectrum.id, 'Spectrum id', None, None),
+            ('Dimension count', lambda spectrum: spectrum.dimensionCount, 'Spectrum dimension count', None, None),
             ('Chemical shiftList',
-             lambda spectrum: spectrum.chemicalShiftList.id, 'Spectrum chemical shiftList', None),
-            ('File path', lambda spectrum: spectrum.filePath, 'Spectrum data file path', None),
+             lambda spectrum: spectrum.chemicalShiftList.id, 'Spectrum chemical shiftList', None, None),
+            ('File path', lambda spectrum: spectrum.filePath, 'Spectrum data file path', None, None),
             ])
         self._hiddenColumnsSpectrum = ['Pid']
         self.dataFrameSpectrum = None
@@ -109,19 +109,19 @@ class ProjectSummaryPopup(CcpnDialog):
         row += 1
 
         columnsPeakList = ColumnClass([
-            ('#', lambda peakList: self.peakListNumberDict[peakList], 'Number', None),
-            ('Pid', lambda peakList: peakList.pid, 'Pid of NmrResidue', None),
-            ('_object', lambda peakList: peakList, 'Object', None),
-            ('Id', lambda peakList: peakList.id, 'PeakList id', None),
-            ('Peak count', lambda peakList: len(peakList.peaks), 'Number of peaks in peakList', None),
+            ('#', lambda peakList: self.peakListNumberDict[peakList], 'Number', None, None),
+            ('Pid', lambda peakList: peakList.pid, 'Pid of NmrResidue', None, None),
+            ('_object', lambda peakList: peakList, 'Object', None, None),
+            ('Id', lambda peakList: peakList.id, 'PeakList id', None, None),
+            ('Peak count', lambda peakList: len(peakList.peaks), 'Number of peaks in peakList', None, None),
             ('Partly assigned count', Summary.partlyAssignedPeakCount,
-             'Number of peaks in peakList at least partially assigned', None),
+             'Number of peaks in peakList at least partially assigned', None, None),
             ('Partly assigned %', Summary.partlyAssignedPeakPercentage,
-             'Percentage of peaks in peakList at least partially assigned', None),
+             'Percentage of peaks in peakList at least partially assigned', None, None),
             ('Fully assigned count', Summary.fullyAssignedPeakCount,
-             'Number of peaks in peakList fully assigned', None),
+             'Number of peaks in peakList fully assigned', None, None),
             ('Fully assigned %', Summary.fullyAssignedPeakPercentage,
-             'Percentage of peaks in peakList fully assigned', None),
+             'Percentage of peaks in peakList fully assigned', None, None),
             ])
         self._hiddenColumnsPeakList = ['Pid']
         self.dataFramePeakList = None
@@ -146,17 +146,17 @@ class ProjectSummaryPopup(CcpnDialog):
         row += 1
 
         columnsChain = ColumnClass([
-            ('#', lambda chain: self.chainNumberDict[chain], 'Number', None),
-            ('Pid', lambda chain: chain.pid, 'Pid of NmrResidue', None),
-            ('_object', lambda chain: chain, 'Object', None),
-            ('Id', lambda chain: chain.id, 'Chain id', None),
-            ('Residue count', lambda chain: len(chain.residues), 'Number of residues in chain', None),
+            ('#', lambda chain: self.chainNumberDict[chain], 'Number', None, None),
+            ('Pid', lambda chain: chain.pid, 'Pid of NmrResidue', None, None),
+            ('_object', lambda chain: chain, 'Object', None, None),
+            ('Id', lambda chain: chain.id, 'Chain id', None, None),
+            ('Residue count', lambda chain: len(chain.residues), 'Number of residues in chain', None, None),
             ('Assignable atom count', Summary.assignableAtomCount,
-             'Number of atoms in chain which are assignable to', None),
+             'Number of atoms in chain which are assignable to', None, None),
             ('Assigned atom count', Summary.assignedAtomCount,
-             'Number of atoms in chain which are assigned to', None),
+             'Number of atoms in chain which are assigned to', None, None),
             ('Assigned atom %', Summary.assignedAtomPercentage,
-             'Percentage of atoms in chain which are assigned to', None),
+             'Percentage of atoms in chain which are assigned to', None, None),
             ])
         self._hiddenColumnsChains = ['Pid']
         self.dataFrameChains = None

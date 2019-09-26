@@ -244,6 +244,23 @@ class ScrollableFrame2(Widget):
         return self._frame
 
 
+class OpenGLOverlayFrame(Frame):
+
+    def __init__(self, parent=None, showBorder=False, fShape=None, fShadow=None,
+                 setLayout=False, backgroundColour=(0, 0, 0, 0), **kwds):
+        super(OpenGLOverlayFrame, self).__init__(parent=parent, showBorder=showBorder, fShape=fShape, fShadow=fShadow,
+                                                 setLayout=setLayout, **kwds)
+
+        self._backgroundColour = backgroundColour
+
+    def paintEvent(self, ev):
+        painter = QtGui.QPainter(self)
+        painter.setCompositionMode(painter.CompositionMode_SourceOver)
+        painter.fillRect(self.rect(), QtGui.QColor(*self._backgroundColour))
+        painter.end()
+        super(OpenGLOverlayFrame, self).paintEvent(ev)
+
+
 if __name__ == '__main__':
     from ccpn.ui.gui.widgets.Application import TestApplication
     from ccpn.ui.gui.widgets.BasePopup import BasePopup

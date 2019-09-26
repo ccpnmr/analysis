@@ -79,6 +79,8 @@ class LineEdit(QtWidgets.QLineEdit, Base):
             self.setEnabled(False)
             self.setFont(helveticaItalic12)
 
+        # self.orientation = QtCore.Qt.Vertical
+
     def get(self):
         return self.text()
 
@@ -87,6 +89,49 @@ class LineEdit(QtWidgets.QLineEdit, Base):
         #text = translator.translate(text)
         self.setText(text)
 
+    # def paintEvent(self, ev):
+    #     #p.setBrush(QtGui.QBrush(QtGui.QColor(100, 100, 200)))
+    #     #p.setPen(QtGui.QPen(QtGui.QColor(50, 50, 100)))
+    #     #p.drawRect(self.rect().adjusted(0, 0, -1, -1))
+    #
+    #     #p.setPen(QtGui.QPen(QtGui.QColor(255, 255, 255)))
+    #     self._text = self.text()
+    #     self.setText('')
+    #     super(LineEdit, self).paintEvent(ev)
+    #
+    #     p = QtGui.QPainter(self)
+    #     if self.orientation == QtCore.Qt.Vertical:
+    #         p.rotate(-90)
+    #         rgn = QtCore.QRect(-self.height(), 0, self.height(), self.width())
+    #     else:
+    #         rgn = self.contentsRect()
+    #     align = self.alignment()
+    #     #align  = QtCore.Qt.AlignTop|QtCore.Qt.AlignHCenter
+    #
+    #     self.hint = p.drawText(rgn, align, self._text)
+    #     self.setText(self._text)
+    #     p.end()
+    #
+    #     if self.orientation == QtCore.Qt.Vertical:
+    #         self.setMaximumWidth(self.hint.height())
+    #         self.setMinimumWidth(0)
+    #         self.setMaximumHeight(16777215)
+    #     else:
+    #         self.setMaximumHeight(self.hint.height())
+    #         self.setMinimumHeight(0)
+    #         self.setMaximumWidth(16777215)
+    #
+    # def sizeHint(self):
+    #     if self.orientation == QtCore.Qt.Vertical:
+    #         if hasattr(self, 'hint'):
+    #             return QtCore.QSize(self.hint.height(), self.hint.width())
+    #         else:
+    #             return QtCore.QSize(19, 50)
+    #     else:
+    #         if hasattr(self, 'hint'):
+    #             return QtCore.QSize(self.hint.width(), self.hint.height())
+    #         else:
+    #             return QtCore.QSize(50, 19)
 
 class FloatLineEdit(LineEdit):
 

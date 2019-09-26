@@ -86,7 +86,8 @@ def getMultipletPosition(multiplet, dim, unit='ppm'):
             return
 
         if isinstance(value, (int, float, np.float32, np.float64)):
-            return '{0:.2f}'.format(value)
+            return float(value)                                         # '{0:.2f}'.format(value)
+
     except Exception as e:
         getLogger().warning('Error on setting Position. %s' % e)
 
@@ -123,7 +124,7 @@ def getPeakPosition(peak, dim, unit='ppm'):
                              % unit)
 
         if isinstance(value, (int, float, np.float32, np.float64)):
-            return '{0:.2f}'.format(value)
+            return float(value)                                         # '{0:.4f}'.format(value)
 
         return None
 

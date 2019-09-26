@@ -149,24 +149,25 @@ class IntegralTable(GuiTable):
 
         # create the column objects
         self.ITcolumns = ColumnClass([
-            ('#', lambda integral: integral.serial, '', None),
-            ('Pid', lambda integral: integral.pid, 'Pid of integral', None),
-            ('_object', lambda integral: integral, 'Object', None),
+            ('#', lambda integral: integral.serial, '', None, None),
+            ('Pid', lambda integral: integral.pid, 'Pid of integral', None, None),
+            ('_object', lambda integral: integral, 'Object', None, None),
 
-            ('Spectrum', lambda integral: integral.integralList.spectrum.id, 'Spectrum containing the Integral', None),
-            ('IntegralList', lambda integral: integral.integralList.serial, 'IntegralList containing the Integral', None),
-            ('Id', lambda integral: integral.serial, 'Integral serial', None),
+            ('Spectrum', lambda integral: integral.integralList.spectrum.id, 'Spectrum containing the Integral', None, None),
+            ('IntegralList', lambda integral: integral.integralList.serial, 'IntegralList containing the Integral', None, None),
+            ('Id', lambda integral: integral.serial, 'Integral serial', None, None),
 
-            ('Value', lambda integral: integral.value, '', None),
-            ('Lower Limit', lambda integral: IntegralTable._getLowerLimit(integral), '', None),
-            ('Higher Limit', lambda integral: IntegralTable._getHigherLimit(integral), '', None),
-            ('ValueError', lambda integral: integral.valueError, '', None),
-            ('Bias', lambda integral: integral.bias, '', None),
-            ('FigureOfMerit', lambda integral: integral.figureOfMerit, '', None),
-            ('Slopes', lambda integral: integral.slopes, '', None),
-            ('Annotation', lambda integral: integral.annotation, '', None),
-            ('Comment', lambda integral: integral.annotation, '', None), ]
-                )  #      [Column(colName, func, tipText=tipText, setEditValue=editValue) for colName, func, tipText, editValue in self.columnDefs]
+            ('Value', lambda integral: integral.value, '', None, None),
+            ('Lower Limit', lambda integral: IntegralTable._getLowerLimit(integral), '', None, None),
+            ('Higher Limit', lambda integral: IntegralTable._getHigherLimit(integral), '', None, None),
+            ('ValueError', lambda integral: integral.valueError, '', None, None),
+            ('Bias', lambda integral: integral.bias, '', None, None),
+            ('FigureOfMerit', lambda integral: integral.figureOfMerit, '', None, None),
+            ('Slopes', lambda integral: integral.slopes, '', None, None),
+            ('Annotation', lambda integral: integral.annotation, '', None, None),
+            ('Comment', lambda integral: integral.annotation, '', None, None), ]
+                )  #      [Column(colName, func, tipText=tipText, setEditValue=editValue, format=columnFormat)
+                    # for colName, func, tipText, editValue, columnFormat in self.columnDefs]
 
         # create the table; objects are added later via the displayTableForIntegrals method
         self.spacer = Spacer(self._widget, 5, 5,

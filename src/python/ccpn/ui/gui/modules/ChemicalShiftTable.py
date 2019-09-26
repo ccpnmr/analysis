@@ -215,29 +215,30 @@ class ChemicalShiftTable(GuiTable):
 
         # create the column objects
         self.CScolumns = ColumnClass(
-                [('#', lambda cs: cs.nmrAtom.serial, 'NmrAtom serial number', None),
-                 ('Pid', lambda cs: cs.pid, 'Pid of chemicalShift', None),
-                 ('_object', lambda cs: cs, 'Object', None),
-                 ('NmrResidue', lambda cs: cs._key.rsplit('.', 1)[0], 'NmrResidue Id', None),
+                [('#', lambda cs: cs.nmrAtom.serial, 'NmrAtom serial number', None, None),
+                 ('Pid', lambda cs: cs.pid, 'Pid of chemicalShift', None, None),
+                 ('_object', lambda cs: cs, 'Object', None, None),
+                 ('NmrResidue', lambda cs: cs._key.rsplit('.', 1)[0], 'NmrResidue Id', None, None),
 
-                 # ('testResidue', lambda cs: ChemicalShiftTable._getNmrResidue(cs), 'NmrResidue: nmrChain', None),  # should be the same as above
-                 ('NmrChain', lambda cs: ChemicalShiftTable._getNmrChain(cs), 'NmrChain containing the nmrResidue linked to this chemicalShift', None),
-                 ('Sequence', lambda cs: ChemicalShiftTable._getSequenceCode(cs), 'NmrResidue sequence code', None),
-                 ('Type', lambda cs: ChemicalShiftTable._getResidueType(cs), 'NmrResidue residue type', None),
+                 # ('testResidue', lambda cs: ChemicalShiftTable._getNmrResidue(cs), 'NmrResidue: nmrChain', None, None),  # should be the same as above
+                 ('NmrChain', lambda cs: ChemicalShiftTable._getNmrChain(cs), 'NmrChain containing the nmrResidue linked to this chemicalShift', None, None),
+                 ('Sequence', lambda cs: ChemicalShiftTable._getSequenceCode(cs), 'NmrResidue sequence code', None, None),
+                 ('Type', lambda cs: ChemicalShiftTable._getResidueType(cs), 'NmrResidue residue type', None, None),
 
-                 ('Name', lambda cs: cs._key.rsplit('.', 1)[-1], 'NmrAtom name', None),
-                 ('Shift', lambda cs: '%8.3f' % ChemicalShiftTable._stLamFloat(cs, 'value'), 'Value of chemical shift, in selected ChemicalShiftList', None),
-                 ('Std. Dev.', lambda cs: '%6.3f' % ChemicalShiftTable._stLamFloat(cs, 'valueError'),
-                  'Standard deviation of chemical shift, in selected ChemicalShiftList', None),
+                 ('Name', lambda cs: cs._key.rsplit('.', 1)[-1], 'NmrAtom name', None, None),
+                 ('Shift', lambda cs: ChemicalShiftTable._stLamFloat(cs, 'value'), 'Value of chemical shift, in selected ChemicalShiftList', None, '%8.3f'),
+                 ('Std. Dev.', lambda cs: ChemicalShiftTable._stLamFloat(cs, 'valueError'),
+                  'Standard deviation of chemical shift, in selected ChemicalShiftList', None, '%6.3f'),
                  ('Shift list peaks',
-                  lambda cs: '%3d ' % ChemicalShiftTable._getShiftPeakCount(cs), 'Number of peaks assigned to this NmrAtom in PeakLists associated with this'
-                                                                                 'ChemicalShiftList', None),
+                  lambda cs: ChemicalShiftTable._getShiftPeakCount(cs), 'Number of peaks assigned to this NmrAtom in PeakLists associated with this'
+                                                                                 'ChemicalShiftList', None, '%3d'),
                  ('All peaks',
-                  lambda cs: '%3d ' % len(set(x for x in cs.nmrAtom.assignedPeaks)), 'Number of peaks assigned to this NmrAtom across all PeakLists', None),
+                  lambda cs: len(set(x for x in cs.nmrAtom.assignedPeaks)), 'Number of peaks assigned to this NmrAtom across all PeakLists', None, '%3d'),
                  ('Comment', lambda cs: ChemicalShiftTable._getCommentText(cs), 'Notes',
-                  lambda cs, value: ChemicalShiftTable._setComment(cs, value))
+                  lambda cs, value: ChemicalShiftTable._setComment(cs, value), None)
                  ])
-        #[Column(colName, func, tipText=tipText, setEditValue=editValue) for colName, func, tipText, editValue in self.columnDefs]
+        #[Column(colName, func, tipText=tipText, setEditValue=editValue, format=columnFormat)
+        # for colName, func, tipText, editValue, columnFormat in self.columnDefs]
 
         # create the table; objects are added later via the displayTableForNmrChain method
         # initialise the table

@@ -37,7 +37,7 @@ from ccpn.ui.gui.widgets.Spinbox import Spinbox
 from ccpn.ui.gui.widgets.ToolBar import ToolBar
 from ccpn.ui.gui.widgets.Widget import Widget
 from ccpn.ui.gui.guiSettings import textFont, getColours, STRIPHEADER_BACKGROUND, \
-    STRIPHEADER_FOREGROUND, GUINMRRESIDUE
+    STRIPHEADER_FOREGROUND, GUINMRRESIDUE, CCPNGLWIDGET_BACKGROUND, textFontLarge
 from ccpn.ui.gui.widgets.DropBase import DropBase
 from ccpn.ui.gui.lib.mouseEvents import getMouseEventDict
 from PyQt5 import QtGui, QtWidgets, QtCore
@@ -46,6 +46,7 @@ from ccpn.core.NmrResidue import NmrResidue
 from ccpn.core.lib.Notifiers import Notifier
 from ccpn.ui.gui.lib.GuiNotifier import GuiNotifier
 from ccpn.ui.gui.widgets.Menu import Menu
+from ccpn.ui.gui.widgets.Spacer import Spacer
 
 
 STRIPLABEL_CONNECTDIR = '_connectDir'
@@ -54,7 +55,7 @@ SINGLECLICK = 'click'
 DOUBLECLICK = 'doubleClick'
 
 
-class _StripLabel(Label):           #  VerticalLabel): could use Vertical label so that the strips can flip
+class _StripLabel(VerticalLabel):           #  VerticalLabel): could use Vertical label so that the strips can flip
     """
     Specific Label to be used in Strip displays
     """
@@ -63,7 +64,7 @@ class _StripLabel(Label):           #  VerticalLabel): could use Vertical label 
     # without any clashes between events, and creating a dragged item
     DOUBLECLICKENABLED = False
 
-    def __init__(self, parent, mainWindow, strip, text, dragKey=DropBase.PIDS, **kwds):
+    def __init__(self, parent, mainWindow, strip, text, dragKey=DropBase.PIDS, stripArrangement=None, **kwds):
 
         super().__init__(parent, text, **kwds)
         # The text of the label can be dragged; it will be passed on in the dict under key dragKey
@@ -81,6 +82,8 @@ class _StripLabel(Label):           #  VerticalLabel): could use Vertical label 
 
         self._lastClick = None
         self._mousePressed = False
+        self.stripArrangement = stripArrangement
+        self.setOrientation('vertical' if stripArrangement == 'X' else 'horizontal')
 
         # disable any drop event callback's until explicitly defined later
         self.setDropEventCallback(None)
@@ -294,22 +297,29 @@ class PlaneSelectorWidget(Widget):
                                                )
         self.planeCountSpinBox.setFixedHeight(height)
 
+from ccpn.ui.gui.widgets.Frame import Frame
 
-class PlaneToolbar(ToolBar):
+class PlaneToolbar(Frame):
     #TODO: undocumented and needs refactoring ;
     # GWV: Does not work as a Widget!?
-    def __init__(self, qtParent, strip, callbacks, **kwds):
+    def __init__(self, qtParent, strip, callbacks, stripArrangement=None, **kwds):
 
-        ToolBar.__init__(self, parent=qtParent, **kwds)
+        super(PlaneToolbar, self).__init__(parent=qtParent, setLayout=True, **kwds)
+        # ToolBar.__init__(self, parent=qtParent, **kwds)
+
+        # self.setOrientation(QtCore.Qt.Vertical if stripArrangement == 'X' else QtCore.Qt.Horizontal)
 
         self.strip = strip
         self.planeLabels = []
         self.planeCounts = []
+        row=0
         for i in range(len(strip.orderedAxes) - 2):
-            self.prevPlaneButton = Button(self, '<', callback=partial(callbacks[0], i))
+            _toolbar = ToolBar(self, grid=(0, row))
+
+            self.prevPlaneButton = Button(_toolbar, '<', callback=partial(callbacks[0], i))
             self.prevPlaneButton.setFixedWidth(19)
             self.prevPlaneButton.setFixedHeight(19)
-            planeLabel = DoubleSpinbox(self, showButtons=False, objectName="PlaneToolbar_planeLabel" + str(i),
+            planeLabel = DoubleSpinbox(_toolbar, showButtons=False, objectName="PlaneToolbar_planeLabel" + str(i),
                                        )
             planeLabel.setToolTip(str(strip.axisCodes[i+2]))
 
@@ -327,10 +337,10 @@ class PlaneToolbar(ToolBar):
                 planeLabel.wheelEvent = partial(self._wheelEvent, i)
                 self.prevPlaneCallback = callbacks[0]
                 self.nextPlaneCallback = callbacks[1]
-            self.nextPlaneButton = Button(self, '>', callback=partial(callbacks[1], i))
+            self.nextPlaneButton = Button(_toolbar, '>', callback=partial(callbacks[1], i))
             self.nextPlaneButton.setFixedWidth(19)
             self.nextPlaneButton.setFixedHeight(19)
-            planeCount = Spinbox(self, showButtons=False, hAlign='c')
+            planeCount = Spinbox(_toolbar, showButtons=False, hAlign='c')
             planeCount.setMinimum(1)
             planeCount.setMaximum(1000)
             planeCount.setValue(1)
@@ -338,12 +348,13 @@ class PlaneToolbar(ToolBar):
             planeCount.returnPressed.connect(partial(callbacks[3], i))
             planeCount.wheelChanged.connect(partial(callbacks[3], i))
 
-            self.addWidget(self.prevPlaneButton)
-            self.addWidget(planeLabel)
-            self.addWidget(self.nextPlaneButton)
-            self.addWidget(planeCount)
+            _toolbar.addWidget(self.prevPlaneButton)
+            _toolbar.addWidget(planeLabel)
+            _toolbar.addWidget(self.nextPlaneButton)
+            _toolbar.addWidget(planeCount)
             self.planeLabels.append(planeLabel)
             self.planeCounts.append(planeCount)
+            row += 1
 
     def _wheelEvent(self, n, event):
         if event.angleDelta().y() > 0:  # note that in Qt5 this becomes angleDelta().y()
@@ -380,12 +391,13 @@ STRIPHANDLE = 'stripHandle'
 
 
 class StripHeader(Widget):
-    def __init__(self, parent, mainWindow, strip, **kwds):
+    def __init__(self, parent, mainWindow, strip, stripArrangement=None, **kwds):
         super().__init__(parent=parent, **kwds)
 
         self._parent = parent
         self.mainWindow = mainWindow
         self.strip = strip
+        self.setAutoFillBackground(False)
 
         self._labels = {}
 
@@ -399,9 +411,12 @@ class StripHeader(Widget):
             headerVisible = self._getPositionParameter(stripPos, STRIPVISIBLE, False)
             headerEnabled = self._getPositionParameter(stripPos, STRIPENABLED, True)
 
+            # gridPos = (STRIPPOSITIONS.index(stripPos), 0) if stripArrangement == 'X' else (0, STRIPPOSITIONS.index(stripPos))
+            gridPos = (0, STRIPPOSITIONS.index(stripPos) * 2)
+
             self._labels[stripPos] = _StripLabel(parent=self, mainWindow=mainWindow, strip=strip,
                                                  text=headerText, spacing=(0, 0),
-                                                 grid=(0, STRIPPOSITIONS.index(stripPos)))
+                                                 grid=gridPos, stripArrangement=stripArrangement)
 
             # ED: the only way I could find to cure the mis-aligned header
             self._labels[stripPos].setStyleSheet('QLabel {'
@@ -420,12 +435,17 @@ class StripHeader(Widget):
 
             self._labels[stripPos].obj = headerObject
             self._labels[stripPos]._connectDir = headerConnect
-            self._labels[stripPos].setFixedHeight(16)
+            self._labels[stripPos].setFixedHeight(24)
             self._labels[stripPos].setAlignment(QtCore.Qt.AlignAbsolute)
 
             self._labels[stripPos].setVisible(headerVisible)
             labelsVisible = labelsVisible or headerVisible
             self._labels[stripPos].setEnabled(headerEnabled)
+
+        Spacer(self, 2, 2, QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.Minimum,
+               grid=(0, 1), gridSpan=(1, 1))
+        Spacer(self, 2, 2, QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.Minimum,
+               grid=(0, 3), gridSpan=(1, 1))
 
         # get the visible state of the header
         headerVisible = self.strip.getParameter(STRIPDICT, STRIPHEADERVISIBLE)
@@ -443,6 +463,15 @@ class StripHeader(Widget):
         # self.installEventFilter(self)
 
         # self.reset()          # reset if backboneAssignment controls all headers
+
+    # def enterEvent(self, a0: QtCore.QEvent) -> None:
+    #     print('>>>enter')
+    #     super(StripHeader, self).enterEvent(a0)
+    #     TestPopup()
+    #
+    # def leaveEvent(self, a0: QtCore.QEvent) -> None:
+    #     print('>>>leave')
+    #     super(StripHeader, self).leaveEvent(a0)
 
     def _setPositionParameter(self, stripPos, subParameterName, value):
         """Set the item in the position dict
@@ -640,3 +669,25 @@ class StripHeader(Widget):
     @handle.setter
     def handle(self, handle):
         self.strip.setParameter(STRIPDICT, STRIPHANDLE, handle)
+
+
+class TestPopup(Frame):
+    def __init__(self):
+        super().__init__()
+        self.setWindowFlags(QtCore.Qt.CustomizeWindowHint)
+        self.setLayout( QtWidgets.QHBoxLayout())
+        Button_close = QtWidgets.QPushButton('close')
+        self.layout().addWidget( QtWidgets.QLabel("HI"))
+        self.layout().addWidget( Button_close)
+        Button_close.clicked.connect( self.close )
+        self.exec_()
+        print("clicked")
+
+    def mousePressEvent(self, event):
+        self.oldPos = event.globalPos()
+
+    def mouseMoveEvent(self, event):
+        delta = QtCore.QPoint (event.globalPos() - self.oldPos)
+        #print(delta)
+        self.move(self.x() + delta.x(), self.y() + delta.y())
+        self.oldPos = event.globalPos()

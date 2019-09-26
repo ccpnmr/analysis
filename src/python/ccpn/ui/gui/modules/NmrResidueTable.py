@@ -327,22 +327,22 @@ class NmrResidueTable(GuiTable):
 
         # create the column objects
         self.NMRcolumns = ColumnClass([
-            ('#', lambda nmrResidue: nmrResidue.serial, 'NmrResidue serial number', None),
-            ('Index', lambda nmrResidue: NmrResidueTable._nmrIndex(nmrResidue), 'Index of NmrResidue in the NmrChain', None),
-            # ('Index', lambda nmrResidue: NmrResidueTable._nmrLamInt(nmrResidue, 'Index'), 'Index of NmrResidue in the NmrChain', None),
+            ('#', lambda nmrResidue: nmrResidue.serial, 'NmrResidue serial number', None, None),
+            ('Index', lambda nmrResidue: NmrResidueTable._nmrIndex(nmrResidue), 'Index of NmrResidue in the NmrChain', None, None),
+            # ('Index', lambda nmrResidue: NmrResidueTable._nmrLamInt(nmrResidue, 'Index'), 'Index of NmrResidue in the NmrChain', None, None),
 
-            # ('Index',      lambda nmrResidue: nmrResidue.nmrChain.nmrResidues.index(nmrResidue), 'Index of NmrResidue in the NmrChain', None),
-            # ('NmrChain',   lambda nmrResidue: nmrResidue.nmrChain.id, 'NmrChain id', None),
-            ('Pid', lambda nmrResidue: nmrResidue.pid, 'Pid of NmrResidue', None),
-            ('_object', lambda nmrResidue: nmrResidue, 'Object', None),
-            ('NmrChain', lambda nmrResidue: nmrResidue.nmrChain.id, 'NmrChain containing the nmrResidue', None),        # just add the nmrChain for clarity
-            ('Sequence', lambda nmrResidue: nmrResidue.sequenceCode, 'Sequence code of NmrResidue', None),
-            ('Type', lambda nmrResidue: nmrResidue.residueType, 'NmrResidue type', None),
-            ('NmrAtoms', lambda nmrResidue: NmrResidueTable._getNmrAtomNames(nmrResidue), 'NmrAtoms in NmrResidue', None),
+            # ('Index',      lambda nmrResidue: nmrResidue.nmrChain.nmrResidues.index(nmrResidue), 'Index of NmrResidue in the NmrChain', None, None),
+            # ('NmrChain',   lambda nmrResidue: nmrResidue.nmrChain.id, 'NmrChain id', None, None),
+            ('Pid', lambda nmrResidue: nmrResidue.pid, 'Pid of NmrResidue', None, None),
+            ('_object', lambda nmrResidue: nmrResidue, 'Object', None, None),
+            ('NmrChain', lambda nmrResidue: nmrResidue.nmrChain.id, 'NmrChain containing the nmrResidue', None, None),        # just add the nmrChain for clarity
+            ('Sequence', lambda nmrResidue: nmrResidue.sequenceCode, 'Sequence code of NmrResidue', None, None),
+            ('Type', lambda nmrResidue: nmrResidue.residueType, 'NmrResidue type', None, None),
+            ('NmrAtoms', lambda nmrResidue: NmrResidueTable._getNmrAtomNames(nmrResidue), 'NmrAtoms in NmrResidue', None, None),
             ('Peak count', lambda nmrResidue: '%3d ' % NmrResidueTable._getNmrResiduePeakCount(nmrResidue),
-             'Number of peaks assigned to NmrResidue', None),
+             'Number of peaks assigned to NmrResidue', None, None),
             ('Comment', lambda nmr: NmrResidueTable._getCommentText(nmr), 'Notes',
-             lambda nmr, value: NmrResidueTable._setComment(nmr, value))
+             lambda nmr, value: NmrResidueTable._setComment(nmr, value), None)
             ])
 
         selectionCallback = self._selectionCallback if selectionCallback is None else selectionCallback
@@ -792,21 +792,22 @@ class _CSMNmrResidueTable(NmrResidueTable):
                              **kwds)
 
     self.NMRcolumns = ColumnClass([
-        ('#', lambda nmrResidue: nmrResidue.serial, 'NmrResidue serial number', None),
-        ('Pid', lambda nmrResidue:nmrResidue.pid, 'Pid of NmrResidue', None),
-        ('_object', lambda nmrResidue:nmrResidue, 'Object', None),
-        ('Index', lambda nmrResidue: NmrResidueTable._nmrIndex(nmrResidue), 'Index of NmrResidue in the NmrChain', None),
-        ('Sequence', lambda nmrResidue: nmrResidue.sequenceCode, 'Sequence code of NmrResidue', None),
-        ('Type', lambda nmrResidue: nmrResidue.residueType, 'NmrResidue type', None),
-        ('Selected', lambda nmrResidue: _CSMNmrResidueTable._getSelectedNmrAtomNames(nmrResidue), 'NmrAtoms selected in NmrResidue', None),
+        ('#', lambda nmrResidue: nmrResidue.serial, 'NmrResidue serial number', None, None),
+        ('Pid', lambda nmrResidue:nmrResidue.pid, 'Pid of NmrResidue', None, None),
+        ('_object', lambda nmrResidue:nmrResidue, 'Object', None, None),
+        ('Index', lambda nmrResidue: NmrResidueTable._nmrIndex(nmrResidue), 'Index of NmrResidue in the NmrChain', None, None),
+        ('Sequence', lambda nmrResidue: nmrResidue.sequenceCode, 'Sequence code of NmrResidue', None, None),
+        ('Type', lambda nmrResidue: nmrResidue.residueType, 'NmrResidue type', None, None),
+        ('Selected', lambda nmrResidue: _CSMNmrResidueTable._getSelectedNmrAtomNames(nmrResidue), 'NmrAtoms selected in NmrResidue', None, None),
         ('Spectra', lambda nmrResidue: _CSMNmrResidueTable._getNmrResidueSpectraCount(nmrResidue)
-         , 'Number of spectra selected for calculating the deltas', None),
-        (Deltas, lambda nmrResidue: nmrResidue._delta, '', None),
-        (KD, lambda nmrResidue: nmrResidue._estimatedKd, '', None),
-        ('Include', lambda nmrResidue: nmrResidue._includeInDeltaShift, 'Include this residue in the Mapping calculation', lambda nmr, value: _CSMNmrResidueTable._setChecked(nmr, value)),
-        # ('Flag', lambda nmrResidue: nmrResidue._flag,  '',  None),
-        ('Comment', lambda nmr: NmrResidueTable._getCommentText(nmr), 'Notes', lambda nmr, value: NmrResidueTable._setComment(nmr, value))
-      ])        #[Column(colName, func, tipText=tipText, setEditValue=editValue) for colName, func, tipText, editValue in self.columnDefs]
+         , 'Number of spectra selected for calculating the deltas', None, None),
+        (Deltas, lambda nmrResidue: nmrResidue._delta, '', None, None),
+        (KD, lambda nmrResidue: nmrResidue._estimatedKd, '', None, None),
+        ('Include', lambda nmrResidue: nmrResidue._includeInDeltaShift, 'Include this residue in the Mapping calculation', lambda nmr, value: _CSMNmrResidueTable._setChecked(nmr, value), None),
+        # ('Flag', lambda nmrResidue: nmrResidue._flag,  '',  None, None),
+        ('Comment', lambda nmr: NmrResidueTable._getCommentText(nmr), 'Notes', lambda nmr, value: NmrResidueTable._setComment(nmr, value), None)
+      ])        #[Column(colName, func, tipText=tipText, setEditValue=editValue, format=columnFormat)
+                # for colName, func, tipText, editValue, columnFormat in self.columnDefs]
 
     self._widget.setFixedHeight(45)
     self.chemicalShiftsMappingModule = None

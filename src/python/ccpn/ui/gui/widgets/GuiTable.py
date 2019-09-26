@@ -331,6 +331,8 @@ GuiTable::item::selected {
         # self.horizontalHeader().sortIndicatorChanged.connect(self._sortChanged)
         # self.horizontalHeader().sectionPressed.connect(self._preSort)
 
+        # self.setFormat('%0.3f')
+
         if _applyPostSort:
             self.horizontalHeader().sectionClicked.connect(self._postSort)
         else:
@@ -1295,7 +1297,7 @@ GuiTable::item::selected {
                                                          hiddenColumns=self._hiddenColumns)
 
             # populate from the Pandas dataFrame inside the dataFrameObject
-            self.setTableFromDataFrameObject(dataFrameObject=_dataFrameObject)
+            self.setTableFromDataFrameObject(dataFrameObject=_dataFrameObject, columnDefs=columnDefs)
 
         except Exception as es:
             getLogger().warning('Error populating table', str(es))
@@ -1304,7 +1306,7 @@ GuiTable::item::selected {
             self._highLightObjs(objs)
             self.project.unblankNotification()
 
-    def setTableFromDataFrameObject(self, dataFrameObject):
+    def setTableFromDataFrameObject(self, dataFrameObject, columnDefs=None):
         """Populate the table from a Pandas dataFrame
         """
 
@@ -1325,6 +1327,11 @@ GuiTable::item::selected {
                 # store the current headings, in case table is cleared, to stop table jumping
                 self._defaultHeadings = dataFrameObject.headings
                 self._defaultHiddenColumns = dataFrameObject.hiddenColumns
+
+                if columnDefs:
+                    for col, colFormat in enumerate(columnDefs.formats):
+                        if colFormat is not None:
+                            self.setFormat(colFormat, column=col)
 
             # highlight them back again
             self._highLightObjs(objs)
@@ -2418,7 +2425,8 @@ if __name__ == '__main__':
             'Float',
             lambda i: mockObj.exampleFloat,
             'TipText: Float',
-            lambda mockObj, value: mockObj.editFloat(mockObj, value)
+            lambda mockObj, value: mockObj.editFloat(mockObj, value),
+            None,
             ),
 
         (
@@ -2426,6 +2434,7 @@ if __name__ == '__main__':
             lambda i: mockObj.exampleBool,
             'TipText: Bool',
             lambda mockObj, value: mockObj.editBool(mockObj, value),
+            None,
             ),
 
         (
@@ -2433,6 +2442,7 @@ if __name__ == '__main__':
             lambda i: mockObj.exampleList,
             'TipText: Pulldown',
             lambda mockObj, value: mockObj.editPulldown(mockObj, value),
+            None,
             ),
 
         (
@@ -2440,6 +2450,7 @@ if __name__ == '__main__':
             lambda i: mockObj.flagsList,
             'TipText: Flags',
             lambda mockObj, value: mockObj.editFlags(mockObj, value),
+            None,
             )
         ])
     table = GuiTable(parent=popup, dataFrameObject=None, pulldownCallback=table_pulldownCallback, checkBoxCallback=_checkBoxCallBack, grid=(0, 0))

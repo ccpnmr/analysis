@@ -32,8 +32,10 @@ from ccpn.core.Peak import Peak
 from ccpn.core.lib.Notifiers import Notifier
 from ccpn.ui.gui.guiSettings import getColours, GUISTRIP_PIVOT
 from ccpn.ui.gui.widgets.PlaneToolbar import StripHeader
-from ccpn.ui.gui.widgets.Frame import Frame
+from ccpn.ui.gui.widgets.Frame import Frame, OpenGLOverlayFrame
 from ccpn.ui.gui.widgets.Widget import Widget
+from ccpn.ui.gui.widgets.Label import Label
+from ccpn.ui.gui.widgets.LineEdit import LineEdit
 from ccpn.ui.gui.lib.GuiNotifier import GuiNotifier
 from ccpn.ui.gui.widgets.DropBase import DropBase
 from ccpn.ui.gui.widgets import MessageDialog
@@ -44,6 +46,8 @@ from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs import AXISXUNITS, AXISYUNITS, AXISLO
     SYMBOLTYPES, ANNOTATIONTYPES, SYMBOLSIZE, SYMBOLTHICKNESS, AXISUSEFIXEDASPECTRATIO
 from ccpn.core.lib.ContextManagers import undoStackBlocking, undoBlock, notificationBlanking
 from ccpn.util.decorators import logCommand
+from ccpn.ui.gui.guiSettings import textFont, getColours, STRIPHEADER_BACKGROUND, \
+    STRIPHEADER_FOREGROUND, GUINMRRESIDUE, CCPNGLWIDGET_BACKGROUND, textFontLarge
 
 
 STRIPLABEL_ISPLUS = 'stripLabel_isPlus'
@@ -88,8 +92,19 @@ class GuiStrip(Frame):
         self.setMinimumWidth(150)
         self.setMinimumHeight(150)
 
-        self.header = StripHeader(parent=self, mainWindow=self.mainWindow, strip=self,
-                                  grid=(0, 0), gridSpan=(1, 2), setLayout=True, spacing=(0, 0))
+        # stripArrangement = getattr(self.spectrumDisplay, 'stripArrangement', None)
+        # if stripArrangement == 'X':
+        #     headerGrid = (0, 0)
+        #     openGLGrid = (0, 1)
+        #     stripToolBarGrid = (0, 2)
+        # else:
+        #     headerGrid = (0, 0)
+        #     openGLGrid = (1, 0)
+        #     stripToolBarGrid = (2, 0)
+
+        headerGrid = (0, 0); headerSpan=(1, 3)
+        openGLGrid = (1, 0); openGlSpan = (1, 3)
+        stripToolBarGrid = (2, 0); stripToolBarSpan = (1, 3)
 
         if spectrumDisplay.is1D:
             from ccpn.ui.gui.widgets.GLWidgets import Gui1dWidget as CcpnGLWidget
@@ -98,9 +113,47 @@ class GuiStrip(Frame):
 
         self._CcpnGLWidget = CcpnGLWidget(strip=self, mainWindow=self.mainWindow)
 
-        self.getLayout().addWidget(self._CcpnGLWidget, 1, 0)
+        self.getLayout().addWidget(self._CcpnGLWidget, *openGLGrid, *openGlSpan)
         self._CcpnGLWidget.setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding,
                                          QtWidgets.QSizePolicy.MinimumExpanding)
+
+        # from ccpn.ui.gui.widgets.PlaneToolbar import _StripLabel
+        #
+        # # self._testTopFrame = OpenGLOverlayFrame(self, setLayout=True, grid=(0, 0), gridSpan=(1, 5), backgroundColour=(123, 123, 123, 255))
+        #
+        # self._testTopFrame1 = Frame(self, setLayout=True, grid=(1, 1))
+        # self._testTopFrame2 = Frame(self, setLayout=True, grid=(2, 1))
+        #
+        # self._testLabel1 = _StripLabel(self._testTopFrame1, self.mainWindow, self, text='HELP', grid=(0, 0))
+        # self._testLabel2 = _StripLabel(self._testTopFrame2, self.mainWindow, self, text='HELPAGAIN', grid=(0, 0))
+        #
+        # # ED: the only way I could find to cure the mis-aligned header
+        # for tl in [self._testLabel1, self._testLabel2]:
+        #     tl.setStyleSheet('QLabel {'
+        #                      'padding: 0; '
+        #                      'margin: 0px 0px 0px 0px;'
+        #                      'color:  %s;'
+        #                      'background-color: %s;'
+        #                      'border: 0 px;'
+        #                      'font-family: %s;'
+        #                      'font-size: %dpx;'
+        #                      'qproperty-alignment: AlignCenter;'
+        #                      '}' % ('white',
+        #                             'black',
+        #                             textFontLarge.fontName,
+        #                             textFontLarge.pointSize()))
+        #     tl.setSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum)
+
+        # self._testTopFrame1.setSizePolicy(QtWidgets.QSizePolicy.Ignored, QtWidgets.QSizePolicy.Ignored)
+        # self._testTopFrame2.setSizePolicy(QtWidgets.QSizePolicy.Ignored, QtWidgets.QSizePolicy.Ignored)
+
+        # self._testLine = LineEdit(self._testFrame, text='ENTER SOMETHING', grid=(1,0))
+        # self._testFrame.setSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum)
+
+        self.header = StripHeader(parent=self, mainWindow=self.mainWindow, strip=self,
+                                  grid=headerGrid, gridSpan=headerSpan, setLayout=True, spacing=(0, 0))
+
+        # self._testTopFrame.setFixedHeight(24)
 
         # # test to see if a single axis widget can be added
         # from ccpn.ui.gui.widgets.GLWidgets import GuiNdWidgetAxis
@@ -108,13 +161,14 @@ class GuiStrip(Frame):
         # self.getLayout().addWidget(self._CcpnGLWidgetAxis, 1, 1)
 
         # set the ID label in the new widget
+
         self._CcpnGLWidget.setStripID('.'.join(self.id.split('.')))
 
         # Widgets for toolbar; items will be added by GuiStripNd (eg. the Z/A-plane boxes)
         # and GuiStrip1d; will be hidden for 2D's by GuiSpectrumView
         self._stripToolBarWidget = Widget(parent=self, setLayout=True,
                                           hPolicy='expanding',
-                                          grid=(2, 0), spacing=(5, 5))
+                                          grid=stripToolBarGrid, spacing=stripToolBarSpan)
 
         self.viewStripMenu = None
         # self._showCrosshair()

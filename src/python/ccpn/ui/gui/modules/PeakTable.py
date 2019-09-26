@@ -253,28 +253,28 @@ class PeakListTableWidget(GuiTable):
         columnDefs = []
 
         # Serial column
-        columnDefs.append(('#', 'serial', 'Peak serial number', None))
-        columnDefs.append(('Pid', lambda pk: pk.pid, 'Pid of the Peak', None))
-        columnDefs.append(('_object', lambda pk: pk, 'Object', None))
+        columnDefs.append(('#', 'serial', 'Peak serial number', None, None))
+        columnDefs.append(('Pid', lambda pk: pk.pid, 'Pid of the Peak', None, None))
+        columnDefs.append(('_object', lambda pk: pk, 'Object', None, None))
 
-        columnDefs.append(('Spectrum', lambda pk: pk.peakList.spectrum.id, 'Spectrum containing the Peak', None))
-        columnDefs.append(('PeakList', lambda pk: pk.peakList.serial, 'PeakList containing the Peak', None))
-        columnDefs.append(('Id', lambda pk: pk.serial, 'Peak serial', None))
+        columnDefs.append(('Spectrum', lambda pk: pk.peakList.spectrum.id, 'Spectrum containing the Peak', None, None))
+        columnDefs.append(('PeakList', lambda pk: pk.peakList.serial, 'PeakList containing the Peak', None, None))
+        columnDefs.append(('Id', lambda pk: pk.serial, 'Peak serial', None, None))
 
         # Assignment column
         for i in range(peakList.spectrum.dimensionCount):
             assignTipText = 'NmrAtom assignments of peak in dimension %s' % str(i + 1)
             columnDefs.append(
-                    ('Assign F%s' % str(i + 1), lambda pk, dim=i: getPeakAnnotation(pk, dim), assignTipText, None)
+                    ('Assign F%s' % str(i + 1), lambda pk, dim=i: getPeakAnnotation(pk, dim), assignTipText, None, None)
             )
 
         # # Expanded Assignment columns
         # for i in range(peakList.spectrum.dimensionCount):
         #     assignTipText = 'NmrAtom assignments of peak in dimension %s' % str(i + 1)
-        #     columnDefs.append(('Assign F%s' % str(i + 1), lambda pk, dim=i: self._getNmrChain(pk, dim), assignTipText, None))
-        #     columnDefs.append(('Assign F%s' % str(i + 1), lambda pk, dim=i: self._getSequenceCode(pk, dim), assignTipText, None))
-        #     columnDefs.append(('Assign F%s' % str(i + 1), lambda pk, dim=i: self._getResidueType(pk, dim), assignTipText, None))
-        #     columnDefs.append(('Assign F%s' % str(i + 1), lambda pk, dim=i: self._getAtomType(pk, dim), assignTipText, None))
+        #     columnDefs.append(('Assign F%s' % str(i + 1), lambda pk, dim=i: self._getNmrChain(pk, dim), assignTipText, None, None))
+        #     columnDefs.append(('Assign F%s' % str(i + 1), lambda pk, dim=i: self._getSequenceCode(pk, dim), assignTipText, None, None))
+        #     columnDefs.append(('Assign F%s' % str(i + 1), lambda pk, dim=i: self._getResidueType(pk, dim), assignTipText, None, None))
+        #     columnDefs.append(('Assign F%s' % str(i + 1), lambda pk, dim=i: self._getAtomType(pk, dim), assignTipText, None, None))
 
         # Peak positions column
         for i in range(peakList.spectrum.dimensionCount):
@@ -282,36 +282,37 @@ class PeakListTableWidget(GuiTable):
             columnDefs.append(
                     ('Pos F%s' % str(i + 1),
                                lambda pk, dim=i, unit=self.positionsUnit: getPeakPosition(pk, dim, unit),
-                               positionTipText, None)
+                               positionTipText, None, '%0.3f')
             )
 
         # linewidth column TODO remove hardcoded Hz unit
         for i in range(peakList.spectrum.dimensionCount):
             linewidthTipTexts = 'Peak line width %s' % str(i + 1)
             columnDefs.append(
-                    ('LW F%s (Hz)' % str(i + 1), lambda pk, dim=i: getPeakLinewidth(pk, dim), linewidthTipTexts, None)
+                    ('LW F%s (Hz)' % str(i + 1), lambda pk, dim=i: getPeakLinewidth(pk, dim), linewidthTipTexts,
+                     None, '%0.3f')
             )
 
         # height column
         heightTipText = 'Magnitude of spectrum intensity at peak center (interpolated), unless user edited'
-        columnDefs.append(('Height', lambda pk: pk.height if pk.height else 'None', heightTipText, None))
-        columnDefs.append(('HeightError', lambda pk: pk.heightError, 'Error of the height', None))
+        columnDefs.append(('Height', lambda pk: pk.height if pk.height else 'None', heightTipText, None, None))
+        columnDefs.append(('HeightError', lambda pk: pk.heightError, 'Error of the height', None, None))
 
         # volume column
         volumeTipText = 'Integral of spectrum intensity around peak location, according to chosen volume method'
-        columnDefs.append(('Volume', lambda pk: pk.volume if pk.volume else 'None', volumeTipText, None))
-        columnDefs.append(('VolumeError', lambda pk: pk.volumeError, 'Error of the volume', None))
+        columnDefs.append(('Volume', lambda pk: pk.volume if pk.volume else 'None', volumeTipText, None, None))
+        columnDefs.append(('VolumeError', lambda pk: pk.volumeError, 'Error of the volume', None, None))
 
         # figureOfMerit column
         figureOfMeritTipText = 'Figure of merit'
         columnDefs.append(('Merit', lambda pk: pk.figureOfMerit, figureOfMeritTipText,
-                           lambda pk, value: self._setFigureOfMerit(pk, value))
+                           lambda pk, value: self._setFigureOfMerit(pk, value), None)
         )
 
         # comment column
         commentsTipText = 'Textual notes about the peak'
         columnDefs.append(('Comment', lambda pk: self._getCommentText(pk), commentsTipText,
-                           lambda pk, value: self._setComment(pk, value))
+                           lambda pk, value: self._setComment(pk, value), None)
         )
 
         return ColumnClass(columnDefs)

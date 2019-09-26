@@ -359,10 +359,10 @@ class ChemicalShiftTableWithAssignment(CcpnModule):
 
     def getColumns(self):
         "get columns for initialisation of table"
-        columns = ColumnClass([('Peak', lambda pk: pk.serial, '', None),
-                               ('Pid', lambda pk: pk.pid, 'Pid of peak', None),
-                               ('_object', lambda pk: pk, 'Object', None),
-                               ('id', lambda pk: pk.serial, '', None)])
+        columns = ColumnClass([('Peak', lambda pk: pk.serial, '', None, None),
+                               ('Pid', lambda pk: pk.pid, 'Pid of peak', None, None),
+                               ('_object', lambda pk: pk, 'Object', None, None),
+                               ('id', lambda pk: pk.serial, '', None, None)])
         tipTexts = []
         # get the maxmimum number of dimensions from all spectra in the project
         numDim = max([sp.dimensionCount for sp in self.application.project.spectra] + [1])
@@ -372,6 +372,7 @@ class ChemicalShiftTableWithAssignment(CcpnModule):
             c = Column('Assign F%d' % j,
                        lambda pk, dim=i: getPeakAnnotation(pk, dim),
                        'NmrAtom assignments of peak in dimension %d' % j,
+                       None,
                        None)
             columns._columns.append(c)
 
@@ -392,7 +393,8 @@ class ChemicalShiftTableWithAssignment(CcpnModule):
             c = Column(text,
                        lambda pk, dim=i, unit=unit: getPeakPosition(pk, dim, unit),
                        tipText,
-                       None)
+                       None,
+                       '%0.3f')
             columns._columns.append(c)
 
             # columns.append(c)

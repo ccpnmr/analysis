@@ -97,10 +97,9 @@ class RecursiveDictHandlerABC(TraitJsonHandlerBase):
         from ccpn.util.traits.CcpNmrJson import constants, CcpNmrJson
 
         result = []
-        recursion = obj.trait_metadata(trait, constants.RECURSION, True)
         for key, value in theList:
             # check if this encoded a CcpNmrJson type object
-            if recursion and CcpNmrJson.isEncodedObject(value):
+            if self.recursion and CcpNmrJson.isEncodedObject(value):
                 theDict = dict(value)
                 value = CcpNmrJson._newObjectFromDict(theDict)
             result.append((key, value))

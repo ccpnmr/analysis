@@ -452,17 +452,20 @@ class CcpNmrJson(TraitBase):
         "Update metadata with kwds (key,value) pairs"
         self.metadata.update(**kwds)
 
-    # #--------------------------------------------------------------------------------------------
-    #
-    # def keys(self, **metadata):
-    #     """Return the keys; excluding the json.METADATA trait;
-    #     optionally filter for trait metadata; NB these are different from the json METADATA. The latter
-    #     store information regarding the class, version, user, path, etc of the json representation of the
-    #     object.
-    #     """
-    #     result = super().keys(**metadata)
-    #     result.pop(result.index(constants.METADATA))
-    #     return result
+    #--------------------------------------------------------------------------------------------
+
+    def keys(self, **metadata):
+        """Return the keys; excluding the json.METADATA trait;
+        optionally filter for trait metadata; NB these are different from the json METADATA. The latter
+        store information regarding the class, version, user, path, etc of the json representation of the
+        object.
+        """
+        keys = super().keys(**metadata)
+        # check if we have to remove the _metadata key
+        if constants.METADATA in keys:
+            idx = keys.index(constants.METADATA)
+            keys.pop(idx)
+        return keys
 
     #--------------------------------------------------------------------------------------------
 

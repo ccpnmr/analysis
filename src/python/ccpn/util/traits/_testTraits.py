@@ -4,7 +4,7 @@
 --------------------------------------------------------------------------------------------
 """
 
-from ccpn.util.traits.CcpNmrTraits import Dict, Odict, Int, List, CPath, Adict
+from ccpn.util.traits.CcpNmrTraits import Dict, Odict, Int, List, CPath, Adict, Set
 from ccpn.util.traits.CcpNmrJson import CcpNmrJson
 from ccpn.util.traits.CcpNmrTraits import RecursiveDict, RecursiveList, RecursiveOdict, RecursiveSet
 
@@ -17,7 +17,11 @@ class TestObj(CcpNmrJson):
     adict = Adict()
 
     theDict = RecursiveDict()
+    theDict2 = Dict(default_value=dict(app=1,noot=2, mies=3))
+
     theList = RecursiveList()
+    theList2 = List(default_value=[1,2,3])
+
     thePath = CPath(default_value='bla.dat')
     theSet = RecursiveSet()
 

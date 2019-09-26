@@ -34,12 +34,22 @@ class TraitBase(HasTraits):
     """Class to give HasTraits dict-like methods keys, values, update, items and iteration 
     """
 
+    keysInOrder = False  # If True, return key in order defined by _traitOrder attribute
+                         # of the keys
+
     def getTraitValue(self, trait):
         """convenience (to complement setTraitValue): return value of trait
         """
         if not self.hasTrait(trait):
             raise ValueError('Trait "%s" does not exist for object %s' % (trait,self))
         return self._trait_values[trait]
+
+    def getTraitDefaultValue(self, trait):
+        """convenience (to complement setTraitValue): return default value of trait
+        """
+        if not self.hasTrait(trait):
+            raise ValueError('Trait "%s" does not exist for object %s' % (trait,self))
+        return self.getTraitObject(trait).default_value
 
     def setTraitValue(self, trait, value, force=False):
         """Convenience: set value of trait, optionally overwriting immutable ones
@@ -57,7 +67,7 @@ class TraitBase(HasTraits):
         """
         return self.has_trait(trait)
 
-    def getAllTraitObjects(self, objectOnly=True, **metadata) -> dict :
+    def getAllTraitObjects(self, objectOnly=False, **metadata) -> dict :
         """Return a dict of (traitName,  trait object) key,value pairs, optionally filtering
         for metadata.
         If objectOnly is True, only traits defined for this object are included;
@@ -86,9 +96,15 @@ class TraitBase(HasTraits):
         return self.trait_metadata(trait, key, default)
 
     def keys(self, **metadata):
-        """get keys (object only), optionally filtering for metadata"""
-        keys = list(self.class_own_traits(**metadata).keys())
-        keys.sort()
+        """get keys (object only), optionally filtering for metadata
+        """
+        if self.keysInOrder:
+            items = [(val._traitOrder, key) for key,val in self.class_traits(**metadata).items()]
+            items.sort()
+            keys = [key for val,key in items]
+        else:
+            keys = [key for key in self.class_traits(**metadata).keys()]
+            keys.sort()
         return keys
 
     # the ones below are derived from keys() method

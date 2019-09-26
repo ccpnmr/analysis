@@ -68,7 +68,8 @@ class Path(_Path_):
 
     @property
     def basename(self):
-        """the name of self without any suffixes"""
+        """the name of self without any suffixes
+        """
         return self.name.split('.')[0]
 
     def addTimeStamp(self):
@@ -116,6 +117,11 @@ class Path(_Path_):
             else:
                 raise FileNotFoundError('Error opening file "%s"' % self)
         return fp
+
+    def globList(self, pattern='*'):
+        """Return a list rather then a generator
+        """
+        return [p for p in self.glob(pattern=pattern)]
 
     def removeDir(self):
         """Recursively remove content of self and sub-directories

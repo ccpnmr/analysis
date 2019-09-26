@@ -27,7 +27,7 @@ __date__ = "$Date: 2018-05-14 10:28:41 +0000 (Fri, April 07, 2017) $"
 
 import sys
 import os
-from traitlets import HasTraits
+from traitlets import HasTraits, Undefined
 
 
 class TraitBase(HasTraits):
@@ -41,26 +41,36 @@ class TraitBase(HasTraits):
         """convenience (to complement setTraitValue): return value of trait
         """
         if not self.hasTrait(trait):
-            raise ValueError('Trait "%s" does not exist for object %s' % (trait,self))
+            raise ValueError('Trait "%s" does not exist for object %s' % (trait, self))
         return self._trait_values[trait]
-
-    def getTraitDefaultValue(self, trait):
-        """convenience (to complement setTraitValue): return default value of trait
-        """
-        if not self.hasTrait(trait):
-            raise ValueError('Trait "%s" does not exist for object %s' % (trait,self))
-        return self.getTraitObject(trait).default_value
 
     def setTraitValue(self, trait, value, force=False):
         """Convenience: set value of trait, optionally overwriting immutable ones
         """
         if not self.hasTrait(trait):
-            raise ValueError('Trait "%s" does not exist for object %s' % (trait,self))
+            raise ValueError('Trait "%s" does not exist for object %s' % (trait, self))
 
         if self.isMutableTrait(trait) or force:
             self.set_trait(trait, value)
         else:
             raise ValueError('Trait "%s" is immutable' % trait)
+
+    def getTraitDefaultValue(self, trait):
+        """convenience: return default value of trait
+        """
+        if not self.hasTrait(trait):
+            raise ValueError('Trait "%s" does not exist for object %s' % (trait, self))
+        return self.getTraitObject(trait).default_value
+
+    def setTraitDefaultValue(self, trait):
+        """convenience: set trait to default value
+        """
+        if not self.hasTrait(trait):
+            raise ValueError('Trait "%s" does not exist for object %s' % (trait, self))
+        defaultValue =  self.getTraitObject(trait).default_value
+        if defaultValue == Undefined:
+            raise RuntimeError('Trait "%s" of object %s does not have a default value defined' % (trait, self))
+        self.setTraitValue(trait, defaultValue, force=True)
 
     def hasTrait(self, trait):
         """Convenience, Return True if self has trait

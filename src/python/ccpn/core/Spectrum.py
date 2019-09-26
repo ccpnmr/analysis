@@ -37,7 +37,6 @@ HNCO                       Hn, Nh, CO     *(CO is treated as a separate type)*
 HCACO                      Hca, CAh, CO    *(CA is treated as a separate type)*
 
 """
-# TODO double check axis codes for HCACO, HNCO, and use of Hcn axiscodes
 
 #=========================================================================================
 # Licence, Reference and Credits
@@ -290,7 +289,7 @@ assignmentTolerances
                                            )
         return string
 
-    def printInfoString(self, includeDimensions=False):
+    def printIt(self, includeDimensions=True):
         "Print the info string"
         print(self._infoString(includeDimensions))
 

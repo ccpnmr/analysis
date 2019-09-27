@@ -283,16 +283,16 @@ class GuiStrip(Frame):
             fr._setMaskToChildren()
 
     def _selectCallback(self, widget1, widget2):
-        print('>>>select', widget1, widget2)
+        # print('>>>select', widget1, widget2)
         widget1.hide()
         widget2.show()
 
     def _enterCallback(self, widget1, widget2):
-        print('>>>_enterCallback', widget1, widget2)
+        # print('>>>_enterCallback', widget1, widget2)
         pass
 
     def _leaveCallback(self, widget1, widget2):
-        print('>>>_leaveCallback', widget1, widget2)
+        # print('>>>_leaveCallback', widget1, widget2)
         widget2.hide()
         widget1.show()
 

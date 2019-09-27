@@ -90,11 +90,11 @@ class CalibrateSpectraFromPeaksPopupNd(CcpnDialog):
         self.scrollArea.setStyleSheet("""ScrollArea { border: 0px; }""")
 
         row = 0
-        Label(self.scrollAreaWidgetContents, text=title, bold=True, grid=(row, 0), gridSpan=(1, 3))
-
-        row += 1
+        # Label(self.scrollAreaWidgetContents, text=title, bold=True, grid=(row, 0), gridSpan=(1, 3))
+        #
+        # row += 1
         self.primaryPeakPulldown = PulldownListCompoundWidget(self.scrollAreaWidgetContents, labelText="Fixed Peak",
-                                                              grid=(row, 0), gridSpan=(1, 3), hAlign='r',
+                                                              grid=(row, 0), gridSpan=(1, 3), hAlign='l',
                                                               callback=self._setPrimaryPeak)
         # self.primaryPeakPulldown.setPreSelect(self._fillPreferredWidget)
         self._fillPreferredWidget()

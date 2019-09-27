@@ -55,7 +55,7 @@ SINGLECLICK = 'click'
 DOUBLECLICK = 'doubleClick'
 
 
-class _StripLabel(VerticalLabel):           #  VerticalLabel): could use Vertical label so that the strips can flip
+class _StripLabel(Label):
     """
     Specific Label to be used in Strip displays
     """
@@ -83,7 +83,7 @@ class _StripLabel(VerticalLabel):           #  VerticalLabel): could use Vertica
         self._lastClick = None
         self._mousePressed = False
         self.stripArrangement = stripArrangement
-        self.setOrientation('vertical' if stripArrangement == 'X' else 'horizontal')
+        # self.setOrientation('vertical' if stripArrangement == 'X' else 'horizontal')
 
         # disable any drop event callback's until explicitly defined later
         self.setDropEventCallback(None)

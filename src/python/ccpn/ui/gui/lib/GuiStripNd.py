@@ -163,7 +163,7 @@ class GuiStripNd(GuiStrip):
         # Adds the plane toolbar to the strip.
         callbacks = [self.prevZPlane, self.nextZPlane, self._setZPlanePosition, self._changePlaneCount]
         self.planeToolbar = PlaneToolbar(self._stripToolBarWidget, strip=self, callbacks=callbacks,
-                                         grid=(0, 0), hPolicy='minimum', hAlign='left', vAlign='center',
+                                         grid=(0, 0), hPolicy='minimum', hAlign='center', vAlign='center',
                                          stripArrangement=getattr(self.spectrumDisplay, 'stripArrangement', None))
 
         #self._stripToolBarWidget.addWidget(self.planeToolbar)

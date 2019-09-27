@@ -36,6 +36,7 @@ from ccpn.ui.gui.widgets.Frame import Frame, OpenGLOverlayFrame
 from ccpn.ui.gui.widgets.Widget import Widget
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.LineEdit import LineEdit
+from ccpn.ui.gui.widgets.Spacer import Spacer
 from ccpn.ui.gui.lib.GuiNotifier import GuiNotifier
 from ccpn.ui.gui.widgets.DropBase import DropBase
 from ccpn.ui.gui.widgets import MessageDialog
@@ -102,9 +103,12 @@ class GuiStrip(Frame):
         #     openGLGrid = (1, 0)
         #     stripToolBarGrid = (2, 0)
 
-        headerGrid = (0, 0); headerSpan=(1, 3)
-        openGLGrid = (1, 0); openGlSpan = (1, 3)
-        stripToolBarGrid = (2, 0); stripToolBarSpan = (1, 3)
+        headerGrid = (0, 0)
+        headerSpan = (1, 5)
+        openGLGrid = (1, 0)
+        openGlSpan = (10, 5)
+        stripToolBarGrid = (11, 0)
+        stripToolBarSpan = (1, 5)
 
         if spectrumDisplay.is1D:
             from ccpn.ui.gui.widgets.GLWidgets import Gui1dWidget as CcpnGLWidget
@@ -114,22 +118,40 @@ class GuiStrip(Frame):
         self._CcpnGLWidget = CcpnGLWidget(strip=self, mainWindow=self.mainWindow)
 
         self.getLayout().addWidget(self._CcpnGLWidget, *openGLGrid, *openGlSpan)
-        self._CcpnGLWidget.setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding,
-                                         QtWidgets.QSizePolicy.MinimumExpanding)
+        self._CcpnGLWidget.setSizePolicy(QtWidgets.QSizePolicy.Expanding,
+                                         QtWidgets.QSizePolicy.Expanding)
 
-        # from ccpn.ui.gui.widgets.PlaneToolbar import _StripLabel
-        #
         # # self._testTopFrame = OpenGLOverlayFrame(self, setLayout=True, grid=(0, 0), gridSpan=(1, 5), backgroundColour=(123, 123, 123, 255))
         #
         # self._testTopFrame1 = Frame(self, setLayout=True, grid=(1, 1))
         # self._testTopFrame2 = Frame(self, setLayout=True, grid=(2, 1))
         #
-        # self._testLabel1 = _StripLabel(self._testTopFrame1, self.mainWindow, self, text='HELP', grid=(0, 0))
-        # self._testLabel2 = _StripLabel(self._testTopFrame2, self.mainWindow, self, text='HELPAGAIN', grid=(0, 0))
+        # self._ts = [_StripLabel(self, self.mainWindow, self, text='HELP'),
+        #        _StripLabel(self, self.mainWindow, self, text='HELP AGAIN WHEN I HAVE LOTS'),
+        #        _StripLabel(self, self.mainWindow, self, text='Some more text'),
+        #        _StripLabel(self, self.mainWindow, self, text='And another bit of text')]
+
+        self._fr = []
+
+
+        # sp = Spacer(self, 1, 1, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding,
+        #             grid=(10, 4), gridSpan=(1, 1))
+        #
+        # from ccpn.ui.gui.widgets.PlaneToolbar import _StripLabel
+        #
+        # self._ts = ['HELP', 'HELP AGAIN WHEN I HAVE LOTS', 'Some more text', 'And another bit of text']
         #
         # # ED: the only way I could find to cure the mis-aligned header
-        # for tl in [self._testLabel1, self._testLabel2]:
-        #     tl.setStyleSheet('QLabel {'
+        # for ii, tl in enumerate(self._ts):
+        #     fr = OpenGLOverlayFrame(self, setLayout=True, showBorder=False, grid=(ii + 2, 0), backgroundColour=None)
+        #     fr.setSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum)
+        #
+        #     sl = _StripLabel(fr, self.mainWindow, self, text=tl, grid=(0, 0))
+        #     sl.setSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum)
+        #     sp = Spacer(fr, 1, 1, QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.Minimum,
+        #                 grid=(0, 1), gridSpan=(1, 1))
+        #
+        #     sl.setStyleSheet('QLabel {'
         #                      'padding: 0; '
         #                      'margin: 0px 0px 0px 0px;'
         #                      'color:  %s;'
@@ -137,12 +159,20 @@ class GuiStrip(Frame):
         #                      'border: 0 px;'
         #                      'font-family: %s;'
         #                      'font-size: %dpx;'
-        #                      'qproperty-alignment: AlignCenter;'
+        #                      'qproperty-alignment: AlignLeft;'
         #                      '}' % ('white',
         #                             'black',
         #                             textFontLarge.fontName,
         #                             textFontLarge.pointSize()))
-        #     tl.setSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum)
+        #
+        #     self._fr.append(fr)
+
+            # ff = QtGui.QFontMetrics(textFontLarge)
+            # # bounds = ff.boundingRect(QtCore.QRect(0, 0, 500, 24), QtCore.Qt.AlignLeft, tl.text())
+            # bounds = ff.tightBoundingRect(tl.text())
+            # tl.setFixedSize(bounds.width(), bounds.height())
+            # # tl.setFixedSize(bounds.width() - bounds.left(), bounds.height())
+            # tl.move(20, 20 + ii * 25)
 
         # self._testTopFrame1.setSizePolicy(QtWidgets.QSizePolicy.Ignored, QtWidgets.QSizePolicy.Ignored)
         # self._testTopFrame2.setSizePolicy(QtWidgets.QSizePolicy.Ignored, QtWidgets.QSizePolicy.Ignored)
@@ -168,7 +198,7 @@ class GuiStrip(Frame):
         # and GuiStrip1d; will be hidden for 2D's by GuiSpectrumView
         self._stripToolBarWidget = Widget(parent=self, setLayout=True,
                                           hPolicy='expanding',
-                                          grid=stripToolBarGrid, spacing=stripToolBarSpan)
+                                          grid=stripToolBarGrid, gridSpan=stripToolBarSpan, spacing=(5, 5))
 
         self.viewStripMenu = None
         # self._showCrosshair()
@@ -244,6 +274,12 @@ class GuiStrip(Frame):
 
         # respond to values changed in the containing spectrumDisplay settings widget
         self.spectrumDisplay._spectrumDisplaySettings.symbolsChanged.connect(self._symbolsChangedInSettings)
+
+    def _resize(self):
+        """Resize event to handle resizing of frames that overlay the OpenGL frame
+        """
+        for fr in self._fr:
+            fr._setMaskToChildren()
 
     def setStripNotifiers(self):
         """Set the notifiers for the strip.

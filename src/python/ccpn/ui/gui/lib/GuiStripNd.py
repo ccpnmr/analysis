@@ -166,6 +166,7 @@ class GuiStripNd(GuiStrip):
         self.planeToolbar = PlaneToolbar(self._stripToolBarWidget, strip=self, callbacks=callbacks,
                                          grid=(0, 0), hPolicy='minimum', hAlign='left', vAlign='center',
                                          stripArrangement=getattr(self.spectrumDisplay, 'stripArrangement', None))
+
         #self._stripToolBarWidget.addWidget(self.planeToolbar)
         #self.planeToolBar.hide()
         # test
@@ -661,6 +662,8 @@ class GuiStripNd(GuiStrip):
 
     def resizeEvent(self, event):
         super(GuiStripNd, self).resizeEvent(event)
+        # call subclass _resize event
+        self._resize()
 
         # if hasattr(self, 'spectrumViews'):
         #     for spectrumView in self.spectrumViews:

@@ -34,7 +34,7 @@ from ccpn.ui.gui.guiSettings import getColours, GUISTRIP_PIVOT
 from ccpn.ui.gui.widgets.PlaneToolbar import StripHeader
 from ccpn.ui.gui.widgets.Frame import Frame, OpenGLOverlayFrame
 from ccpn.ui.gui.widgets.Widget import Widget
-from ccpn.ui.gui.widgets.Label import Label
+from ccpn.ui.gui.widgets.Label import Label, ActiveLabel
 from ccpn.ui.gui.widgets.LineEdit import LineEdit
 from ccpn.ui.gui.widgets.Spacer import Spacer
 from ccpn.ui.gui.lib.GuiNotifier import GuiNotifier
@@ -121,32 +121,25 @@ class GuiStrip(Frame):
         self._CcpnGLWidget.setSizePolicy(QtWidgets.QSizePolicy.Expanding,
                                          QtWidgets.QSizePolicy.Expanding)
 
-        # # self._testTopFrame = OpenGLOverlayFrame(self, setLayout=True, grid=(0, 0), gridSpan=(1, 5), backgroundColour=(123, 123, 123, 255))
-        #
-        # self._testTopFrame1 = Frame(self, setLayout=True, grid=(1, 1))
-        # self._testTopFrame2 = Frame(self, setLayout=True, grid=(2, 1))
-        #
-        # self._ts = [_StripLabel(self, self.mainWindow, self, text='HELP'),
-        #        _StripLabel(self, self.mainWindow, self, text='HELP AGAIN WHEN I HAVE LOTS'),
-        #        _StripLabel(self, self.mainWindow, self, text='Some more text'),
-        #        _StripLabel(self, self.mainWindow, self, text='And another bit of text')]
-
         self._fr = []
-
-
         # sp = Spacer(self, 1, 1, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding,
         #             grid=(10, 4), gridSpan=(1, 1))
         #
         # from ccpn.ui.gui.widgets.PlaneToolbar import _StripLabel
         #
-        # self._ts = ['HELP', 'HELP AGAIN WHEN I HAVE LOTS', 'Some more text', 'And another bit of text']
+        # self._ts = ['HELP', 'HELP AGAIN WHEN I HAVE LOTS', 'Some more text', 'And another bit of text',
+        #             'Labelling1', 'Labelling3', 'Labelling2', 'Labelling4']
         #
         # # ED: the only way I could find to cure the mis-aligned header
         # for ii, tl in enumerate(self._ts):
         #     fr = OpenGLOverlayFrame(self, setLayout=True, showBorder=False, grid=(ii + 2, 0), backgroundColour=None)
         #     fr.setSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum)
         #
-        #     sl = _StripLabel(fr, self.mainWindow, self, text=tl, grid=(0, 0))
+        #     if ii < 4:
+        #         sl = _StripLabel(fr, self.mainWindow, self, text=tl, grid=(0, 0))
+        #     else:
+        #         sl = ActiveLabel(fr, text=tl, grid=(0, 0))
+        #
         #     sl.setSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum)
         #     sp = Spacer(fr, 1, 1, QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.Minimum,
         #                 grid=(0, 1), gridSpan=(1, 1))
@@ -167,31 +160,10 @@ class GuiStrip(Frame):
         #
         #     self._fr.append(fr)
 
-            # ff = QtGui.QFontMetrics(textFontLarge)
-            # # bounds = ff.boundingRect(QtCore.QRect(0, 0, 500, 24), QtCore.Qt.AlignLeft, tl.text())
-            # bounds = ff.tightBoundingRect(tl.text())
-            # tl.setFixedSize(bounds.width(), bounds.height())
-            # # tl.setFixedSize(bounds.width() - bounds.left(), bounds.height())
-            # tl.move(20, 20 + ii * 25)
-
-        # self._testTopFrame1.setSizePolicy(QtWidgets.QSizePolicy.Ignored, QtWidgets.QSizePolicy.Ignored)
-        # self._testTopFrame2.setSizePolicy(QtWidgets.QSizePolicy.Ignored, QtWidgets.QSizePolicy.Ignored)
-
-        # self._testLine = LineEdit(self._testFrame, text='ENTER SOMETHING', grid=(1,0))
-        # self._testFrame.setSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum)
-
         self.header = StripHeader(parent=self, mainWindow=self.mainWindow, strip=self,
                                   grid=headerGrid, gridSpan=headerSpan, setLayout=True, spacing=(0, 0))
 
-        # self._testTopFrame.setFixedHeight(24)
-
-        # # test to see if a single axis widget can be added
-        # from ccpn.ui.gui.widgets.GLWidgets import GuiNdWidgetAxis
-        # self._CcpnGLWidgetAxis = GuiNdWidgetAxis(strip=self, mainWindow=self.mainWindow)
-        # self.getLayout().addWidget(self._CcpnGLWidgetAxis, 1, 1)
-
         # set the ID label in the new widget
-
         self._CcpnGLWidget.setStripID('.'.join(self.id.split('.')))
 
         # Widgets for toolbar; items will be added by GuiStripNd (eg. the Z/A-plane boxes)
@@ -201,7 +173,6 @@ class GuiStrip(Frame):
                                           grid=stripToolBarGrid, gridSpan=stripToolBarSpan, spacing=(5, 5))
 
         self.viewStripMenu = None
-        # self._showCrosshair()
         self.storedZooms = []
         self.beingUpdated = False
 

@@ -104,6 +104,8 @@ class ActiveLabel(Label):
 
         self._selectionCallback = selectionCallback
         self._actionCallback = actionCallback
+        self._enterCallback = None
+        self._leaveCallback = None
 
     def setSelectionCallback(self, callback=None):
         """Sets callback on mouse click
@@ -128,6 +130,20 @@ class ActiveLabel(Label):
         if self._actionCallback:
             self._actionCallback()
         super().mouseDoubleClickEvent(ev)
+
+    def setEnterLeaveCallback(self, enterCallback, leaveCallback):
+        self._enterCallback = enterCallback
+        self._leaveCallback = leaveCallback
+
+    def enterEvent(self, ev) -> None:
+        super().enterEvent(ev)
+        if self._enterCallback:
+            self._enterCallback()
+
+    def leaveEvent(self, ev) -> None:
+        super().leaveEvent(ev)
+        if self._leaveCallback:
+            self._leaveCallback()
 
 
 class VerticalLabel(pyqtVerticalLabel, Base):

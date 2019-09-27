@@ -26,6 +26,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 
 import typing
+from collections import OrderedDict
 from PyQt5 import QtWidgets, QtCore, QtGui
 from ccpn.core.Project import Project
 from ccpn.core.Peak import Peak
@@ -122,43 +123,72 @@ class GuiStrip(Frame):
                                          QtWidgets.QSizePolicy.Expanding)
 
         self._fr = []
-        # sp = Spacer(self, 1, 1, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding,
-        #             grid=(10, 4), gridSpan=(1, 1))
-        #
-        # from ccpn.ui.gui.widgets.PlaneToolbar import _StripLabel
-        #
-        # self._ts = ['HELP', 'HELP AGAIN WHEN I HAVE LOTS', 'Some more text', 'And another bit of text',
-        #             'Labelling1', 'Labelling3', 'Labelling2', 'Labelling4']
-        #
-        # # ED: the only way I could find to cure the mis-aligned header
-        # for ii, tl in enumerate(self._ts):
-        #     fr = OpenGLOverlayFrame(self, setLayout=True, showBorder=False, grid=(ii + 2, 0), backgroundColour=None)
-        #     fr.setSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum)
-        #
-        #     if ii < 4:
-        #         sl = _StripLabel(fr, self.mainWindow, self, text=tl, grid=(0, 0))
-        #     else:
-        #         sl = ActiveLabel(fr, text=tl, grid=(0, 0))
-        #
-        #     sl.setSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum)
-        #     sp = Spacer(fr, 1, 1, QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.Minimum,
-        #                 grid=(0, 1), gridSpan=(1, 1))
-        #
-        #     sl.setStyleSheet('QLabel {'
-        #                      'padding: 0; '
-        #                      'margin: 0px 0px 0px 0px;'
-        #                      'color:  %s;'
-        #                      'background-color: %s;'
-        #                      'border: 0 px;'
-        #                      'font-family: %s;'
-        #                      'font-size: %dpx;'
-        #                      'qproperty-alignment: AlignLeft;'
-        #                      '}' % ('white',
-        #                             'black',
-        #                             textFontLarge.fontName,
-        #                             textFontLarge.pointSize()))
-        #
-        #     self._fr.append(fr)
+        self._sl = []
+        sp = Spacer(self, 1, 1, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding,
+                    grid=(10, 4), gridSpan=(1, 1))
+
+        from ccpn.ui.gui.widgets.PlaneToolbar import _StripLabel
+
+        self._ts = ['HELP', 'HELP AGAIN WHEN I HAVE LOTS', 'Some more text', 'And another bit of text',
+                    'Labelling1', 'HIDDENWIDGETWITHOPTIONS1', 'Labelling2', 'HIDDENWIDGETWITHOPTIONS2']
+
+        self._ts = OrderedDict([('HELP', (_StripLabel, (2, 0))),
+                                ('HELP AGAIN WHEN I HAVE LOTS', (_StripLabel, (3, 0))),
+                                ('Some more text', (_StripLabel, (4, 0))),
+                                ('And another bit of text', (_StripLabel, (5, 0))),
+                                ('Labelling1', (ActiveLabel, (6, 0))),
+                                ('HIDDENWIDGETWITHOPTIONS1', (ActiveLabel, (7, 0))),
+                                ('Labelling2', (ActiveLabel, (8, 0))),
+                                ('HIDDENWIDGETWITHOPTIONS2', (ActiveLabel, (9, 0)))
+                                ])
+
+        # ED: the only way I could find to cure the mis-aligned header
+        for ii, (tl, (labelType, gridPos)) in enumerate(self._ts.items()):
+
+            fr = OpenGLOverlayFrame(self, setLayout=True, showBorder=False, grid=gridPos, backgroundColour=None)
+            fr.setSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum)
+
+            if labelType is _StripLabel:
+                sl = _StripLabel(fr, self.mainWindow, self, text=tl, grid=(0, 0))
+            else:
+                sl = ActiveLabel(fr, text=tl, grid=(0, 0))
+
+            sl.setSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum)
+            sp = Spacer(fr, 1, 1, QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.Minimum, grid=(0, 1))
+
+            sl.setStyleSheet('QLabel {'
+                             'padding: 0; '
+                             'margin: 0px 0px 0px 0px;'
+                             'color:  %s;'
+                             'background-color: %s;'
+                             'border: 0 px;'
+                             'font-family: %s;'
+                             'font-size: %dpx;'
+                             'qproperty-alignment: AlignLeft;'
+                             '}' % ('white',
+                                    'black',
+                                    textFontLarge.fontName,
+                                    textFontLarge.pointSize()))
+
+            self._fr.append(fr)
+            self._sl.append(sl)
+
+        keys = list(self._ts.keys())
+        self.w1 = self._sl[keys.index('Labelling1')]
+        self.w2 = self._sl[keys.index('HIDDENWIDGETWITHOPTIONS1')]
+        self.w1.setSelectionCallback(partial(self._selectCallback, self.w1, self.w2))
+
+        self.w2.hide()
+        self.w2.setEnterLeaveCallback(partial(self._enterCallback, self.w1, self.w2),
+                                      partial(self._leaveCallback, self.w1, self.w2))
+
+        self.w3 = self._sl[keys.index('Labelling2')]
+        self.w4 = self._sl[keys.index('HIDDENWIDGETWITHOPTIONS2')]
+        self.w3.setSelectionCallback(partial(self._selectCallback, self.w3, self.w4))
+
+        self.w4.hide()
+        self.w4.setEnterLeaveCallback(partial(self._enterCallback, self.w3, self.w4),
+                                      partial(self._leaveCallback, self.w3, self.w4))
 
         self.header = StripHeader(parent=self, mainWindow=self.mainWindow, strip=self,
                                   grid=headerGrid, gridSpan=headerSpan, setLayout=True, spacing=(0, 0))
@@ -251,6 +281,20 @@ class GuiStrip(Frame):
         """
         for fr in self._fr:
             fr._setMaskToChildren()
+
+    def _selectCallback(self, widget1, widget2):
+        print('>>>select', widget1, widget2)
+        widget1.hide()
+        widget2.show()
+
+    def _enterCallback(self, widget1, widget2):
+        print('>>>_enterCallback', widget1, widget2)
+        pass
+
+    def _leaveCallback(self, widget1, widget2):
+        print('>>>_leaveCallback', widget1, widget2)
+        widget2.hide()
+        widget1.show()
 
     def setStripNotifiers(self):
         """Set the notifiers for the strip.

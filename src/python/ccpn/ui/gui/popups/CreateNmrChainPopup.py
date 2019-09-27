@@ -138,8 +138,10 @@ class CreateNmrChainPopup(CcpnDialog):
         vGrid += 1
 
         self._resetObjectSelections()
-        self._setCreateButtonEnabled(False)
-        self._activateCloneOptions()
+        self._setCreateButtonEnabled(True)
+        self.createNewWidget.setChecked(True)
+        # self._activateCloneOptions()
+        self._selectCreateEmpty()
 
     def _resetObjectSelections(self):
         # used to create a new nmrChain from a selected object.
@@ -155,13 +157,31 @@ class CreateNmrChainPopup(CcpnDialog):
         if not self.createNewWidget.isChecked():
             self.buttonBox.setButtonEnabled(Create, False)
         else:
-            self._setCreateButtonEnabled(True)
+            self._setCreateButtonEnabled(False)
         for h in self.pulldownsOptions:
             self.pulldownsOptions[h].hide()
+
+        # if self.nameLineEdit.receivers(self.nameLineEdit.textEdited):     # may be other slots?
+        try:
+            self.nameLineEdit.textEdited.disconnect(self._cloneChainEdit)
+        except:
+            pass
+        finally:
+            self.nameLineEdit.textEdited.connect(self._newChainEdit)
 
         # FIXME Not an elegant solution
         self._resetObjectSelections()
         self._createEmpty = True
+
+    def _newChainEdit(self):
+        self._setCreateButtonEnabled(True if self.nameLineEdit.text() else False)
+
+    def _cloneChainEdit(self):
+        for cl, pulldown in self.pulldownsOptions.items():
+            rButton = self.cloneOptionsWidget.getRadioButton(cl)
+            if rButton.isChecked():
+                self._setCreateButtonEnabled(True if self.nameLineEdit.text() and pulldown.getText() != SELECT else False)
+                break
 
     def _createEmptyNmrChain(self, name):
         if not self.project.getByPid(NmrChain.shortClassName + ':' + name):
@@ -402,6 +422,14 @@ class CreateNmrChainPopup(CcpnDialog):
         hs = [x for x in self.pulldownsOptions if x != selected]
         for h in hs:
             self.pulldownsOptions[h].hide()
+
+        # if self.nameLineEdit.receivers(self.nameLineEdit.textEdited):
+        try:
+            self.nameLineEdit.textEdited.disconnect()
+        except:
+            pass
+        finally:
+            self.nameLineEdit.textEdited.connect(self._cloneChainEdit)
 
 
 if __name__ == '__main__':

@@ -24,7 +24,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
-from typing import Tuple, Dict
+from typing import Tuple, Any
 from functools import partial
 from ccpn.core.Project import Project
 from ccpn.core.Spectrum import Spectrum
@@ -125,8 +125,8 @@ class SpectrumGroup(AbstractWrapperObject):
         self._wrappedData.dataSources = [x._wrappedData for x in data]
 
     @property
-    def series(self) -> Tuple[Dict, ...]:
-        """Returns a tuple of series values for the attached spectra
+    def series(self) -> Tuple[Any, ...]:
+        """Returns a tuple of series items for the attached spectra
 
         series = ({ attrib1: val1,
                     ...
@@ -136,31 +136,32 @@ class SpectrumGroup(AbstractWrapperObject):
                     ...
                     attribN : valN }
                   )
-        where each dict corresponds to the series values in the attached spectra associated with this group
-        For a spectrum with no values, returns None in place of a dict
+        where each val1-valN corresponds to the series values in the attached spectra associated with this group
+        For a spectrum with no values, returns None in place of Item
         """
         series = ()
         for spectrum in self.spectra:
-            series += (spectrum._getSeriesValues(self),)
+            series += (spectrum._getSeriesItem(self),)
 
         return series
 
     @series.setter
     @ccpNmrV3CoreSetter()
-    def series(self, values):
+    def series(self, items):
         """Setter for series
-        series must be a tuple of dicts or Nones, the contents of the dicts are not checked
+        series must be a tuple of items or Nones, the contents of the items are not checked
+        Items can be anything but must all be the same type or None
         """
-        if not isinstance(values, (tuple, list)):
+        if not isinstance(items, (tuple, list)):
             raise ValueError('Expected a tuple or list')
-        for ll in values:
-            if not isinstance(ll, (dict, type(None))):
-                raise ValueError('Values must be of type dict/None: %s' % ll)
-        if len(self.spectra) != len(values):
-            raise ValueError('Number of values does not match number of spectra in group')
+        diffItems = set(type(item) for item in items)
+        if len(diffItems) > 2 or (len(diffItems) == 2 and type(None) not in diffItems):
+            raise ValueError('Items must be of the same type (or None)')
+        if len(self.spectra) != len(items):
+            raise ValueError('Number of items does not match number of spectra in group')
 
-        for spectrum, value in zip(self.spectra, values):
-            spectrum._setSeriesValues(self, value)
+        for spectrum, item in zip(self.spectra, items):
+            spectrum._setSeriesItem(self, item)
 
     #=========================================================================================
     # Implementation functions
@@ -196,7 +197,7 @@ class SpectrumGroup(AbstractWrapperObject):
         if action in ['rename']:
             # rename the items in _seriesValues as they are referenced by pid
             for spectrum in self.spectra:
-                spectrum._renameSeriesValues(self, oldPid, self.pid)
+                spectrum._renameSeriesItems(self, oldPid, self.pid)
 
     #=========================================================================================
     # CCPN functions

@@ -110,7 +110,7 @@ EXTENDALIASINGRANGEFLAG = 'extendAliasingRangeFlag'
 DISPLAYFOLDEDCONTOURS = 'displayFoldedContours'
 MAXALIASINGRANGE = 3
 SPECTRUMSERIES = 'spectrumSeries'
-SPECTRUMSERIESVALUES = 'spectrumSeriesValues'
+SPECTRUMSERIESITEMS = 'spectrumSeriesItems'
 
 DIMENSIONFID = 'Fid'
 DIMENSIONFREQUENCY = 'Frequency'
@@ -1635,54 +1635,55 @@ assignmentTolerances
         self.setParameter(SPECTRUMALIASING, ALIASINGRANGE, values)
 
     @property
-    def _seriesValues(self):
-        """Return a tuple of the series values for the spectrumGroups
+    def _seriesItems(self):
+        """Return a tuple of the series items for the spectrumGroups
         """
-        values = self.getParameter(SPECTRUMSERIES, SPECTRUMSERIESVALUES)
-        if values is not None:
+        items = self.getParameter(SPECTRUMSERIES, SPECTRUMSERIESITEMS)
+        if items is not None:
             series = ()
             for sg in self.spectrumGroups:
-                if sg.pid in values:
-                    series += (values[sg.pid],)
+                if sg.pid in items:
+                    series += (items[sg.pid],)
                 else:
                     series += (None, )
             return series
 
-    @_seriesValues.setter
+    @_seriesItems.setter
     @ccpNmrV3CoreSetter()
-    def _seriesValues(self, values):
-        """Set the series values for all spectrumGroups that spectrum is attached to.
-        Must be of the form ( <values1>,
-                              <values2>,
+    def _seriesItems(self, items):
+        """Set the series items for all spectrumGroups that spectrum is attached to.
+        Must be of the form ( <item1>,
+                              <item2>,
                               ...
-                              <valuesN>
+                              <itemN>
                             )
-            where SGN are spectrumGroups and <valuesN> is a dict
+            where <itemsN> are of the same type (or None)
         """
-        if not values:
-            raise ValueError('values is not defined')
-        if not isinstance(values, (tuple, type(None))):
-            raise TypeError('values is not of type tuple/None')
-        if len(values) != len(self.spectrumGroups):
-            raise ValueError('Number of values does not match number of spectrumGroups')
-        for ll in values:
-            if not isinstance(ll, (dict, type(None))):
-                raise ValueError('Values must be of type dict/None: %s' % ll)
+        if not items:
+            raise ValueError('items is not defined')
+        if not isinstance(items, (tuple, list, type(None))):
+            raise TypeError('items is not of type tuple/None')
+        if len(items) != len(self.spectrumGroups):
+            raise ValueError('Number of items does not match number of spectrumGroups')
 
-        if isinstance(values, tuple):
-            seriesValues = self.getParameter(SPECTRUMSERIES, SPECTRUMSERIESVALUES)
-            for sg, value in zip(self.spectrumGroups, values):
-                if seriesValues:
-                    seriesValues[sg.pid] = value
+        if isinstance(items, tuple):
+            diffItems = set(type(item) for item in items)
+            if len(diffItems) > 2 or (len(diffItems) == 2 and type(None) not in diffItems):
+                raise ValueError('Items must be of the same type (or None)')
+
+            seriesItems = self.getParameter(SPECTRUMSERIES, SPECTRUMSERIESITEMS)
+            for sg, item in zip(self.spectrumGroups, items):
+                if seriesItems:
+                    seriesItems[sg.pid] = item
                 else:
-                    seriesValues = {sg.pid: value}
-            self.setParameter(SPECTRUMSERIES, SPECTRUMSERIESVALUES, seriesValues)
+                    seriesItems = {sg.pid: item}
+            self.setParameter(SPECTRUMSERIES, SPECTRUMSERIESITEMS, seriesItems)
 
         else:
-            self.setParameter(SPECTRUMSERIES, SPECTRUMSERIESVALUES, None)
+            self.setParameter(SPECTRUMSERIES, SPECTRUMSERIESITEMS, None)
 
-    def _getSeriesValues(self, spectrumGroup):
-        """Return the series values for the current spectrum for the selected spectrumGroup
+    def _getSeriesItem(self, spectrumGroup):
+        """Return the series item for the current spectrum for the selected spectrumGroup
         """
         from ccpn.core.SpectrumGroup import SpectrumGroup
 
@@ -1692,37 +1693,46 @@ assignmentTolerances
         if self not in spectrumGroup.spectra:
             raise ValueError('Spectrum %s does not belong to spectrumGroup %s' % (str(self), str(spectrumGroup)))
 
-        seriesValues = self.getParameter(SPECTRUMSERIES, SPECTRUMSERIESVALUES)
-        if seriesValues and spectrumGroup.pid in seriesValues:
-            return seriesValues[spectrumGroup.pid]
+        seriesItems = self.getParameter(SPECTRUMSERIES, SPECTRUMSERIESITEMS)
+        if seriesItems and spectrumGroup.pid in seriesItems:
+            return seriesItems[spectrumGroup.pid]
 
-    def _setSeriesValues(self, spectrumGroup, values):
-        """Set the preferred ordering for the axis codes when opening a new spectrumDisplay
+    def _setSeriesItem(self, spectrumGroup, item):
+        """Set the series item for the current spectrum for the selected spectrumGroup
         """
         from ccpn.core.SpectrumGroup import SpectrumGroup
 
+        # check that the spectrumGroup and spectrum are valid
         spectrumGroup = self.project.getByPid(spectrumGroup) if isinstance(spectrumGroup, str) else spectrumGroup
         if not isinstance(spectrumGroup, SpectrumGroup):
             raise TypeError('%s is not a spectrumGroup', spectrumGroup)
         if self not in spectrumGroup.spectra:
             raise ValueError('Spectrum %s does not belong to spectrumGroup %s' % (str(self), str(spectrumGroup)))
 
-        seriesValues = self.getParameter(SPECTRUMSERIES, SPECTRUMSERIESVALUES)
-        if seriesValues:
-            seriesValues[spectrumGroup.pid] = values
-        else:
-            seriesValues = {spectrumGroup.pid: values}
-        self.setParameter(SPECTRUMSERIES, SPECTRUMSERIESVALUES, seriesValues)
+        seriesItems = self.getParameter(SPECTRUMSERIES, SPECTRUMSERIESITEMS)
+        if seriesItems:
 
-    def _renameSeriesValues(self, spectrumGroup, oldPid, value):
-        """rename the keys in the seriesValues top reflect the updated spectrumGroup name
+            # check that item type matches items already in set
+            diffItems = set(type(si) for si in seriesItems) | set(type(item))
+            if len(diffItems) > 2 or (len(diffItems) == 2 and type(None) not in diffItems):
+                raise ValueError('Items must be of the same type (or None)')
+
+            seriesItems[spectrumGroup.pid] = item
+        else:
+            seriesItems = {spectrumGroup.pid: item}
+        self.setParameter(SPECTRUMSERIES, SPECTRUMSERIESITEMS, seriesItems)
+
+    def _renameSeriesItems(self, spectrumGroup, oldPid):
+        """rename the keys in the seriesItems to reflect the updated spectrumGroup name
         """
-        seriesValues = self.getParameter(SPECTRUMSERIES, SPECTRUMSERIESVALUES)
-        if oldPid in seriesValues:
-            oldValues = seriesValues[oldPid]
-            del seriesValues[oldPid]
-            seriesValues[spectrumGroup.pid] = oldValues
-            self.setParameter(SPECTRUMSERIES, SPECTRUMSERIESVALUES, seriesValues)
+        seriesItems = self.getParameter(SPECTRUMSERIES, SPECTRUMSERIESITEMS)
+        if oldPid in seriesItems:
+
+            # insert new items with the new pid
+            oldItems = seriesItems[oldPid]
+            del seriesItems[oldPid]
+            seriesItems[spectrumGroup.pid] = oldItems
+            self.setParameter(SPECTRUMSERIES, SPECTRUMSERIESITEMS, seriesItems)
 
     # @property
     # def folding(self) -> Tuple:

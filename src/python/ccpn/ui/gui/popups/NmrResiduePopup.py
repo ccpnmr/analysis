@@ -23,9 +23,10 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 
 from PyQt5 import QtGui, QtWidgets
+import re
 
 from ccpn.core.Chain import Chain
-from ccpn.core.lib.AssignmentLib import CCP_CODES, getNmrResiduePrediction
+from ccpn.core.lib.AssignmentLib import CCP_CODES_SORTED, getNmrResiduePrediction
 from ccpn.ui.gui.widgets.Base import Base
 from ccpn.ui.gui.widgets.Button import Button
 from ccpn.ui.gui.widgets.ButtonList import ButtonList
@@ -79,7 +80,8 @@ class NmrResiduePopup(CcpnDialog):
 
         row += 1
         self.residueType = PulldownListCompoundWidget(self, labelText="residueType", editable=True,
-                                                      fixedWidths=(hWidth, hWidth), grid=(row, 0), gridSpan=(1, hspan))
+                                                      fixedWidths=(hWidth, hWidth), grid=(row, 0), gridSpan=(1, hspan),
+                                                      callback=self._checkNmrResidue)
         row += 1
         self.comment = EntryCompoundWidget(self, labelText="comment",
                                            fixedWidths=(hWidth, hWidth), grid=(row, 0), gridSpan=(1, hspan))
@@ -108,13 +110,20 @@ class NmrResiduePopup(CcpnDialog):
 
         if self.project.chemicalShiftLists and len(self.project.chemicalShiftLists) > 0:
             predictions = getNmrResiduePrediction(currentNmrResidue, self.project.chemicalShiftLists[0])
-            preds1 = [' '.join([x[0], x[1]]) for x in predictions if not currentNmrResidue.residueType]
+            preds1 = [' '.join([x[0].upper(), x[1]]) for x in predictions if not currentNmrResidue.residueType]
             predictedTypes = [x[0] for x in predictions]
-            remainingResidues = [x for x in CCP_CODES if x not in predictedTypes and not currentNmrResidue.residueType]
+            remainingResidues = [x for x in CCP_CODES_SORTED if x not in predictedTypes and not currentNmrResidue.residueType]
             possibilities = [currentNmrResidue.residueType] + preds1 + remainingResidues
         else:
-            possibilities = ('',) + CCP_CODES
+            possibilities = ('',) + CCP_CODES_SORTED
         self.residueType.modifyTexts(possibilities)
+
+    def _checkNmrResidue(self, value):
+        """Check the new pulldown item and strip bad characters
+        """
+        # Check the correct characters for residueType - need to remove spaceNumberPercent
+        value = re.sub('[^a-zA-Z_]+', '', value)
+        self.residueType.pulldownList.set(value)
 
     def _applyChanges(self):
         """
@@ -127,7 +136,7 @@ class NmrResiduePopup(CcpnDialog):
             self.nmrResidue.moveToNmrChain(
                     self.chainPulldown.getText(),
                     self.sequenceCode.getText(),
-                    self.residueType.getText()
+                    re.sub('[^a-zA-Z_]+', '', self.residueType.getText())
             )
 
         except Exception as es:

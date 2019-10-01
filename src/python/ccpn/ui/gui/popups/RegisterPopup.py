@@ -107,12 +107,11 @@ This needs to be done once on every computer you use the programme on.
 
         buttonFrame = Frame(frame, setLayout=True, grid=(row, 0), gridSpan=(1, 2))
         ##self.licenseButton = Button(buttonFrame, 'Show License', callback=self.toggleLicense, grid=(0,0))
-        txt = 'Later (%s day(s) left)'%self.trial
+        txt = 'Later (%s day(s) left)' % self.trial
         self.laterButton = Button(buttonFrame, txt, callback=self.reject, grid=(0,0))
         self.registerButton = Button(buttonFrame, 'Register', callback=self._register, grid=(0, 1))
         self.registerButton.setEnabled(False)
-        if self.trial < 1:
-            self.laterButton.setEnabled(False)
+        self.laterButton.setEnabled(False)
         row += 1
 
         ##self.licensePanel = WebViewPanel(frame, url=licenseUrl, grid=(row,0), gridSpan=(1,2))
@@ -133,6 +132,7 @@ This needs to be done once on every computer you use the programme on.
 
     def _toggledCheckBox(self):
         self.registerButton.setEnabled(self.licenseCheckBox.isChecked())
+        self.laterButton.setEnabled(False if self.trial < 1 else self.licenseCheckBox.isChecked())
 
     def _showLicense(self):
         self.getParent().application.showLicense()
@@ -234,9 +234,11 @@ Please read and accept to continue using the software.
         self.laterButton = Button(buttonFrame, txt, callback=self.reject, grid=(0,0))
         self.registerButton = Button(buttonFrame, 'Accept Amendments', callback=self._register, grid=(0, 1))
         self.registerButton.setEnabled(False)
-        if self.trial < 1:
-            self.laterButton.setEnabled(False)
+        self.laterButton.setEnabled(False)
         row += 1
+
+    def _toggledCheckBox(self):
+        self.registerButton.setEnabled(self.licenseCheckBox.isChecked())
 
     def _register(self):
 

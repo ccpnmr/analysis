@@ -57,6 +57,7 @@ WHITESPACE_AND_NULL = {'\x00', '\t', '\n', '\r', '\x0b', '\x0c'}
 ###VERSION_RE = re.compile('^[.\d]+$')
 
 BAD_DOWNLOAD = 'Exception: '
+TERMSANDCONDITIONS = 'termsConditions'
 
 
 def lastModifiedTime(filePath):

@@ -100,10 +100,10 @@ This needs to be done once on every computer you use the programme on.
         row += 1
 
         self.licenseCheckBox = CheckBox(licenseFrame,
-                                        text='I have read and agree to the terms and conditions of the license',
+                                        text='I have read and agree to the terms and conditions of the licence',
                                         callback=self._toggledCheckBox, grid=(0, 0))
         self.licenseCheckBox.setChecked(False)
-        button = Button(licenseFrame, text='Show License', callback=self._showLicense, grid=(0, 1))
+        button = Button(licenseFrame, text='Show Licence', callback=self._showLicense, grid=(0, 1))
 
         buttonFrame = Frame(frame, setLayout=True, grid=(row, 0), gridSpan=(1, 2))
         ##self.licenseButton = Button(buttonFrame, 'Show License', callback=self.toggleLicense, grid=(0,0))
@@ -154,10 +154,16 @@ This needs to be done once on every computer you use the programme on.
         allValid = all([True if validEmailRegex.match(entry.text()) else False for entry in self.validateEntries])
 
         if allValid:
+            from ccpn.framework.PathsAndUrls import licensePath
+            from ccpn.util.Update import calcHashCode, TERMSANDCONDITIONS
+
             registrationDict = {}
             for n, attr in enumerate(Register.userAttributes):
                 entry = self.entries[n]
                 registrationDict[attr] = entry.get() or ''
+
+            currentHashCode = calcHashCode(licensePath)
+            registrationDict[TERMSANDCONDITIONS] = currentHashCode
 
             Register.setHashCode(registrationDict)
             Register.saveDict(registrationDict)
@@ -169,9 +175,92 @@ This needs to be done once on every computer you use the programme on.
             showWarning('', 'Please check all entries are valid')
 
 
+class NewTermsConditionsPopup(RegisterPopup):
+    def __init__(self, parent=None, trial:int=0,  version='3', title='Agree to Terms and Conditions', modal=False, **kwds):
+        CcpnDialog.__init__(self, parent, setLayout=True, windowTitle=title, **kwds)
+
+        self.version = version
+        self.trial = trial
+
+        if modal:  # Set before visible
+            modality = QtCore.Qt.ApplicationModal
+            self.setWindowModality(modality)
+        self.setWindowTitle(title)
+        self.setMinimumSize(700, 350)
+
+        frame = Frame(self, setLayout=True, grid=(0, 0))
+
+        message = '''The terms and conditions of the licence have been amended.
+Please read and accept to continue using the software.
+'''
+        label = Label(frame, message, grid=(0, 0), gridSpan=(1, 2))
+
+        row = 1
+        self.entries = []
+        self.validateEntries = []
+        registrationDict = Register.loadDict()
+        for attr in Register.userAttributes:
+            label = Label(frame, metaUtil.upperFirst(attr), grid=(row, 0))
+            text = registrationDict.get(attr, '')
+            entry = Entry(frame, text=text, grid=(row, 1), maxLength=60)
+            self.entries.append(entry)
+
+            if 'email' in attr:
+                currentBaseColour = entry.palette().color(QtGui.QPalette.Base)
+                entry.textChanged.connect(partial(self._checkEmailValid, entry, currentBaseColour))
+                self.validateEntries.append(entry)
+            row += 1
+            entry.setEnabled(False)
+
+        from ccpn.util import Data
+        label = Label(frame, 'Build For:', grid=(row, 0))
+        text = getattr(Data, ''.join([c for c in map(chr, (98, 117, 105, 108, 100, 70, 111, 114))]), '')
+        entry = Entry(frame, text=text, grid=(row, 1), maxLength=60)
+        entry.setEnabled(False)
+        row += 1
+
+        licenseFrame = Frame(frame, setLayout=True, grid=(row, 0), gridSpan=(1, 2))
+        row += 1
+
+        self.licenseCheckBox = CheckBox(licenseFrame,
+                                        text='I have read and agree to the terms and conditions of the licence',
+                                        callback=self._toggledCheckBox, grid=(0, 0))
+        self.licenseCheckBox.setChecked(False)
+        button = Button(licenseFrame, text='Show Licence', callback=self._showLicense, grid=(0, 1))
+
+        buttonFrame = Frame(frame, setLayout=True, grid=(row, 0), gridSpan=(1, 2))
+        ##self.licenseButton = Button(buttonFrame, 'Show License', callback=self.toggleLicense, grid=(0,0))
+        txt = 'Later (%s day(s) left)'%self.trial
+        self.laterButton = Button(buttonFrame, txt, callback=self.reject, grid=(0,0))
+        self.registerButton = Button(buttonFrame, 'Accept Amendments', callback=self._register, grid=(0, 1))
+        self.registerButton.setEnabled(False)
+        if self.trial < 1:
+            self.laterButton.setEnabled(False)
+        row += 1
+
+    def _register(self):
+
+        allValid = all([True if validEmailRegex.match(entry.text()) else False for entry in self.validateEntries])
+
+        if allValid:
+            from ccpn.framework.PathsAndUrls import licensePath
+            from ccpn.util.Update import calcHashCode, TERMSANDCONDITIONS
+
+            regDict = Register.loadDict()
+
+            # write the updated md5
+            currentHashCode = calcHashCode(licensePath)
+            regDict[TERMSANDCONDITIONS] = currentHashCode
+            Register.saveDict(regDict)
+
+            if self.isModal():
+                self.close()
+        else:
+            showWarning('', 'Please check all entries are valid')
+
+
 if __name__ == '__main__':
     import sys
-
 
     qtApp = QtWidgets.QApplication(['Test Register'])
 

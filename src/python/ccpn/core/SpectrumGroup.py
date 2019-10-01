@@ -128,15 +128,9 @@ class SpectrumGroup(AbstractWrapperObject):
     def series(self) -> Tuple[Any, ...]:
         """Returns a tuple of series items for the attached spectra
 
-        series = ({ attrib1: val1,
-                    ...
-                    attribN : valN },
-                    ...
-                  { attrib1: val1,
-                    ...
-                    attribN : valN }
-                  )
-        where each val1-valN corresponds to the series values in the attached spectra associated with this group
+        series = (val1, val2, ..., valN)
+
+        where val1-valN correspond to the series items in the attached spectra associated with this group
         For a spectrum with no values, returns None in place of Item
         """
         series = ()
@@ -154,11 +148,11 @@ class SpectrumGroup(AbstractWrapperObject):
         """
         if not isinstance(items, (tuple, list)):
             raise ValueError('Expected a tuple or list')
+        if len(self.spectra) != len(items):
+            raise ValueError('Number of items does not match number of spectra in group')
         diffItems = set(type(item) for item in items)
         if len(diffItems) > 2 or (len(diffItems) == 2 and type(None) not in diffItems):
             raise ValueError('Items must be of the same type (or None)')
-        if len(self.spectra) != len(items):
-            raise ValueError('Number of items does not match number of spectra in group')
 
         for spectrum, item in zip(self.spectra, items):
             spectrum._setSeriesItem(self, item)
@@ -197,7 +191,7 @@ class SpectrumGroup(AbstractWrapperObject):
         if action in ['rename']:
             # rename the items in _seriesValues as they are referenced by pid
             for spectrum in self.spectra:
-                spectrum._renameSeriesItems(self, oldPid, self.pid)
+                spectrum._renameSeriesItems(self, oldPid)
 
     #=========================================================================================
     # CCPN functions

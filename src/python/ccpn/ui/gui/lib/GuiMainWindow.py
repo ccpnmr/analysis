@@ -410,6 +410,7 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
     def _storeShortcut(self, twoLetters, thecallable):
         if twoLetters is not None:
             twoLetters = twoLetters.replace(', ','')
+            twoLetters = twoLetters.lower()
             if twoLetters not in self._shortcutsDict:
                 self._shortcutsDict[twoLetters] = thecallable
             else:

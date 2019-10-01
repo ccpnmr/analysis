@@ -28,8 +28,8 @@ __date__ = "$Date: 2017-03-22 13:00:57 +0000 (Wed, March 22, 2017) $"
 import sys
 import typing
 import re
+import os
 
-from ccpn.core.Project import Project
 from ccpn.ui._implementation import _uiImportOrder
 from ccpn.core import _coreClassMap
 from ccpn.core.lib.Notifiers import NotifierBase
@@ -89,31 +89,32 @@ class Ui(NotifierBase):
         sys.stderr.flush()  # It seems to be necessary as without the output comes after the registration screen
 
         # check local registration details
-        if not self._isRegistered:
+        if not (self._isRegistered and self._termsConditions):
             # call the subclassed register method
-            self._registerDetails()
-            if not self._isRegistered:
-                days = Register._graceCounter(Register._fetchGraceFile(self.application))
-                if days > 0:
-                    sys.stderr.write('\n### Please register within %s day(s)\n' %days)
-                    return True
-                else:
-                    sys.stderr.write('\n### INVALID REGISTRATION, terminating\n')
-                    return False
+            self._registerDetails(self._isRegistered, self._termsConditions)
+            if not (self._isRegistered and self._termsConditions):
 
-        #     # sys.stderr.write('==> Registered to: %s (%s)\n' %
-        #     #                  (self.application._registrationDict.get('name'),
-        #     #                   self.application._registrationDict.get('organisation')))
-        #       return Register.updateServer(self.application._registrationDict, self.application.applicationVersion)
-        #
-        # else:
+                if not self._isRegistered:
+                    days = Register._graceCounter(Register._fetchGraceFile(self.application))
+                    if days > 0:
+                        sys.stderr.write('\n### Please register within %s day(s)\n' %days)
+                        return True
+                    else:
+                        sys.stderr.write('\n### INVALID REGISTRATION, terminating\n')
+                        return False
+                else:
+                    if not self._termsConditions:
+                        sys.stderr.write('\n### Please accept the terms and conditions, terminating\n')
+                        return False
 
         # check whether your registration details are on the server (and match)
         check = Register.checkServer(self.application._registrationDict, self.application.applicationVersion)
         if check is None:
+            # possibly an error trying to locate the server
             return True
         if check is False:
-            self._registerDetails()
+            # invalid registration details, either wrong licenceKey or wrong version, etc.
+            self._registerDetails(self._isRegistered, self._termsConditions)
             check = Register.checkServer(self.application._registrationDict, self.application.applicationVersion)
 
         return check if check is not None else True
@@ -148,10 +149,44 @@ class Ui(NotifierBase):
         self.application._registrationDict = Register.loadDict()
         return not Register.isNewRegistration(self.application._registrationDict)
 
+    @property
+    def _termsConditions(self):
+        """return True if latest terms and conditions have been accepted
+        """
+        regDict = Register.loadDict()
+        self.application._registrationDict = regDict
+
+        from ccpn.framework.PathsAndUrls import licensePath
+        from ccpn.util.Update import calcHashCode, TERMSANDCONDITIONS
+
+        md5 = regDict.get(TERMSANDCONDITIONS)
+        if os.path.exists(licensePath):
+            currentHashCode = calcHashCode(licensePath)
+            latestTerms = (currentHashCode == md5)
+            return latestTerms
+
+    def _checkUpdateTermsConditions(self, registered, acceptedTerms):
+        """Update the registration file if fully registered and accepted
+        """
+        from ccpn.framework.PathsAndUrls import licensePath
+        from ccpn.util.Update import calcHashCode, TERMSANDCONDITIONS
+
+        regDict = Register.loadDict()
+
+        md5 = regDict.get(TERMSANDCONDITIONS)
+        if registered and acceptedTerms and os.path.exists(licensePath):
+            currentHashCode = calcHashCode(licensePath)
+            latestTerms = (currentHashCode == md5)
+            if not latestTerms:
+                # write the updated md5
+                regDict[TERMSANDCONDITIONS] = md5
+                Register.saveDict(regDict)
+
+
 
 class NoUi(Ui):
 
-    def _registerDetails(self):
+    def _registerDetails(self, registered=False, acceptedTerms=False):
         """Display registration information
         """
 
@@ -186,8 +221,13 @@ class NoUi(Ui):
                 sys.stderr.write("Enter 'yes' or 'no'\n")
 
         if agree:
-            registrationDict = {}
+            from ccpn.framework.PathsAndUrls import licensePath
+            from ccpn.util.Update import calcHashCode, TERMSANDCONDITIONS
 
+            # read teh existing registration details
+            registrationDict = Register.loadDict()
+
+            sys.stderr.flush()
             sys.stderr.write("Please enter registration details:\n")
 
             # ('name', 'organisation', 'email')
@@ -196,16 +236,32 @@ class NoUi(Ui):
                 if 'email' in attr:
                     validEmail = False
                     while validEmail is False:
-                        regIn = input(attr + ' >')
-                        registrationDict[attr] = regIn or ''
+                        oldVal = registrationDict.get(attr)
+                        sys.stderr.flush()
+                        if oldVal:
+                            regIn = input('%s [%s] >' % (str(attr), oldVal))
+                            registrationDict[attr] = regIn or oldVal
+                        else:
+                            regIn = input(attr + ' >')
+                            registrationDict[attr] = regIn or ''
 
-                        validEmail = True if validEmailRegex.match(regIn) else False
+                        validEmail = True if validEmailRegex.match(registrationDict.get(attr)) else False
                         if not validEmail:
                             sys.stderr.write(attr + ' is invalid, please try again\n')
 
                 else:
-                    regIn = input(attr + ' >')
-                    registrationDict[attr] = regIn or ''
+                    sys.stderr.flush()
+                    oldVal = registrationDict.get(attr)
+                    if oldVal:
+                        regIn = input('%s [%s] >' % (str(attr), oldVal))
+                        registrationDict[attr] = regIn or oldVal
+                    else:
+                        regIn = input(attr + ' >')
+                        registrationDict[attr] = regIn or ''
+
+            # write the updated md5
+            currentHashCode = calcHashCode(licensePath)
+            registrationDict[TERMSANDCONDITIONS] = currentHashCode
 
             Register.setHashCode(registrationDict)
             Register.saveDict(registrationDict)

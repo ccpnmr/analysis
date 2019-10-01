@@ -35,7 +35,7 @@ from ccpn.core.Project import Project
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core.lib.SpectrumLib import getExperimentClassifications
 from ccpn.ui.Ui import Ui
-from ccpn.ui.gui.popups.RegisterPopup import RegisterPopup
+from ccpn.ui.gui.popups.RegisterPopup import RegisterPopup, NewTermsConditionsPopup
 from ccpn.ui.gui.widgets.Application import Application
 from ccpn.core.lib.Notifiers import Notifier
 from ccpn.ui.gui.widgets.MessageDialog import showError
@@ -220,7 +220,7 @@ class Gui(Ui):
 
         self.qtApp.start()
 
-    def _registerDetails(self):
+    def _registerDetails(self, registered=False, acceptedTerms=False):
         """Display registration popup"""
         days = Register._graceCounter(Register._fetchGraceFile(self.application))
         # check valid internet connection first
@@ -230,7 +230,11 @@ class Gui(Ui):
             showError('Registration', msg )
 
         else:
-            popup = RegisterPopup(self.mainWindow,trial=days, version=self.application.applicationVersion, modal=True)
+            if registered and not acceptedTerms:
+                popup = NewTermsConditionsPopup(self.mainWindow, trial=days, version=self.application.applicationVersion, modal=True)
+            else:
+                popup = RegisterPopup(self.mainWindow,trial=days, version=self.application.applicationVersion, modal=True)
+
             self.mainWindow.show()
             popup.exec_()
             self.qtApp.processEvents()

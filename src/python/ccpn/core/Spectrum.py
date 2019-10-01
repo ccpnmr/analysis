@@ -1699,6 +1699,7 @@ assignmentTolerances
 
     def _setSeriesItem(self, spectrumGroup, item):
         """Set the series item for the current spectrum for the selected spectrumGroup
+        MUST be called from spectrumGroup - error checking for item types is handled there
         """
         from ccpn.core.SpectrumGroup import SpectrumGroup
 
@@ -1711,12 +1712,6 @@ assignmentTolerances
 
         seriesItems = self.getParameter(SPECTRUMSERIES, SPECTRUMSERIESITEMS)
         if seriesItems:
-
-            # check that item type matches items already in set
-            diffItems = set(type(si) for si in seriesItems) | set(type(item))
-            if len(diffItems) > 2 or (len(diffItems) == 2 and type(None) not in diffItems):
-                raise ValueError('Items must be of the same type (or None)')
-
             seriesItems[spectrumGroup.pid] = item
         else:
             seriesItems = {spectrumGroup.pid: item}

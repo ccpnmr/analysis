@@ -539,7 +539,8 @@ class Peak(AbstractWrapperObject):
             nmrAtoms = getattr(self, DIMENSIONNMRATOMSCHANGED, None)
             if nmrAtoms:
                 for nmrAtom in nmrAtoms:
-                    nmrAtom._finaliseAction(action=action)
+                    if not (nmrAtom.isDeleted or nmrAtom._flaggedForDelete):
+                        nmrAtom._finaliseAction(action=action)
 
     #=========================================================================================
     # CCPN functions

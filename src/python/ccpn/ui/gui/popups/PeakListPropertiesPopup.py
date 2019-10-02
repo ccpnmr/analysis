@@ -57,7 +57,7 @@ class PeakListPropertiesPopup(PeakListPropertiesPopupABC):
 
     def _refreshGLItems(self):
         # emit a signal to rebuild all peaks and multiplets
-        self.GLSignals.emitEvent(targets=[self.peakList], triggers=[GLNotifier.GLPEAKLISTS,
+        self.GLSignals.emitEvent(targets=[self.ccpnList], triggers=[GLNotifier.GLPEAKLISTS,
                                                                     GLNotifier.GLPEAKLISTLABELS])
 
     def _getListViews(self, ccpnList):

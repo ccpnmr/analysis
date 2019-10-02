@@ -23,11 +23,14 @@ __date__ = "$Date$"
 # Start of code
 #=========================================================================================
 
+from functools import partial
 import ccpn.util.Colour as Colour
 from ccpn.ui.gui.widgets.MessageDialog import MessageDialog
 from ccpn.ui.gui.widgets.Button import Button
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
+from ccpn.ui.gui.widgets.DoubleSpinbox import DoubleSpinbox
+from ccpn.ui.gui.widgets.CheckBox import CheckBox
 from ccpn.ui.gui.popups.Dialog import CcpnDialog, handleDialogApply
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
 from ccpn.core.lib.ContextManagers import undoStackBlocking
@@ -39,7 +42,9 @@ SYMBOLCOLOURBUTTON = 'symbolColour'
 TEXTCOLOURBUTTON = 'textColour'
 MERITCOLOURBUTTON = 'meritColour'
 LINECOLOURBUTTON = 'lineColour'
-BUTTONOPTIONS = [SYMBOLCOLOURBUTTON, TEXTCOLOURBUTTON, LINECOLOURBUTTON, MERITCOLOURBUTTON]
+BUTTONOPTIONS1 = (SYMBOLCOLOURBUTTON, TEXTCOLOURBUTTON, LINECOLOURBUTTON, None)
+BUTTONOPTIONS2 = (None, None, None, MERITCOLOURBUTTON)
+BUTTONOPTIONS = tuple(b1 or b2 for b1, b2 in zip(BUTTONOPTIONS1, BUTTONOPTIONS2))
 
 
 class PeakListPropertiesPopupABC(CcpnDialog):
@@ -87,16 +92,39 @@ class PeakListPropertiesPopupABC(CcpnDialog):
             self.ccpnListLabel = Label(self, ccpnList.id, grid=(row, 1))
 
             # set default colours if not defined
-            for colButton, enabled in zip(BUTTONOPTIONS,
+            for colButton, enabled in zip(BUTTONOPTIONS1,
                                           (self._symbolColourOption, self._textColourOption, self._lineColourOption, self._meritColourOption)):
-                if enabled:
+                if colButton and enabled:
                     if not getattr(self.ccpnList, colButton, None):
                         setattr(self.ccpnList, colButton, self.spectrumColourKeys[0])
 
                     row += 1
                     self._addButtonOption(self._colourPulldowns, colButton, row)
 
-            self.closeButton = Button(self, text='Close', grid=(6, 1), callback=self._accept)
+            if self._meritOptions:
+                row += 1
+                self.meritEnabledLabel = Label(self, text="Use Merit Threshold: ", grid=(row, 0))
+                self.meritEnabledBox = CheckBox(self, grid=(row, 1), checked=False)
+                # self.meritEnabledBox.toggled.connect(self._toggleMeritEnabled)
+
+                row += 1
+                self.meritThresholdLabel = Label(self, text="Merit Threshold", grid=(row, 0))
+                self.meritThresholdData = DoubleSpinbox(self, grid=(row, 1), hAlign='l', decimals=2, step=0.01, min=0.0, max=1.0)
+                self.meritThresholdData.setValue(float('%.2f' % 0.5))
+                # self.meritThresholdData.editingFinished.connect(self._setMeritThreshold)
+
+                # set default colours if not defined
+                for colButton, enabled in zip(BUTTONOPTIONS2,
+                                              (self._symbolColourOption, self._textColourOption, self._lineColourOption, self._meritColourOption)):
+                    if colButton and enabled:
+                        if not getattr(self.ccpnList, colButton, None):
+                            setattr(self.ccpnList, colButton, self.spectrumColourKeys[0])
+
+                        row += 1
+                        self._addButtonOption(self._colourPulldowns, colButton, row)
+
+            row += 1
+            self.closeButton = Button(self, text='Close', grid=(row, 1), callback=self._accept)
 
         self.setFixedSize(self.sizeHint())
         self.GLSignals = GLNotifier(parent=self)

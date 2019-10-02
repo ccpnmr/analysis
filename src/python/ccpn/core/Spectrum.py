@@ -2829,7 +2829,7 @@ assignmentTolerances
     @logCommand(get='self')
     def newMultipletList(self, title: str = None,
                          symbolColour: str = None, textColour: str = None, lineColour: str = None,
-                         multipletAveraging=0,
+                         multipletAveraging = None,
                          comment: str = None, multiplets: Sequence[Union['Multiplet', str]] = None, **kwds):
         """Create new MultipletList within Spectrum.
 

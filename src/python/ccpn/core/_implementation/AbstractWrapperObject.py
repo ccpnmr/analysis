@@ -357,6 +357,15 @@ class AbstractWrapperObject(NotifierBase):
             return False
         return parameterName in space
 
+    def _setNonApiAttributes(self, attribs):
+        """Set the non-api attributes that are stored in ccpnInternal
+        """
+        if not isinstance(attribs, dict):
+            raise TypeError('ERROR: %s must be a dict' % str(attribs))
+
+        for att, value in attribs.items():
+            setattr(self, att, value)
+
     @staticmethod
     def _str2none(value):
         """Covenience to convert an empty string to None; V2 requirement for some attributes
@@ -397,7 +406,6 @@ class AbstractWrapperObject(NotifierBase):
                 # we failed
                 result = objs
         return result
-
 
     #=========================================================================================
     # CCPN abstract properties

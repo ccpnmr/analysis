@@ -33,6 +33,7 @@ from ccpn.util.decorators import logCommand
 from ccpn.core.lib.ContextManagers import newObject
 from ccpn.util.Logging import getLogger
 from ccpn.core.lib.SpectrumLib import _oldEstimateNoiseLevel1D
+from ccpn.core.PeakListABC import PeakListABC
 
 
 # moved on peakUtil ####################################################################
@@ -77,7 +78,7 @@ def _getPeaksLimits(x, y, intersectingLine=None):
 ########################################################################################################################################
 
 
-class IntegralList(AbstractWrapperObject):
+class IntegralList(PeakListABC):
     """An object containing Integrals. Note: the object is not a (subtype of a) Python list.
     To access all Integral objects, use integralList.integrals."""
 
@@ -97,68 +98,81 @@ class IntegralList(AbstractWrapperObject):
     # Qualified name of matching API class - NB shared with PeakList
     _apiClassQualifiedName = ApiIntegralList._metaclass.qualifiedName()
 
-    # Special error-raising functions for people who think PeakList is a list
-    def __iter__(self):
-        raise TypeError("IntegralList object is not iterable -"
-                        "for a list of integrals use IntegralList.integrals")
+    # # Special error-raising functions for people who think PeakList is a list
+    # def __iter__(self):
+    #     raise TypeError("IntegralList object is not iterable -"
+    #                     "for a list of integrals use IntegralList.integrals")
+    #
+    # def __getitem__(self, index):
+    #     raise TypeError("IntegralList object does not support indexing -"
+    #                     " for a list of integrals use IntegralList.integrals")
+    #
+    # def __len__(self):
+    #     raise TypeError("IntegralList object has no length - "
+    #                     "for a list of integrals use IntegralList.integrals")
 
-    def __getitem__(self, index):
-        raise TypeError("IntegralList object does not support indexing -"
-                        " for a list of integrals use IntegralList.integrals")
-
-    def __len__(self):
-        raise TypeError("IntegralList object has no length - "
-                        "for a list of integrals use IntegralList.integrals")
-
+    #=========================================================================================
     # CCPN properties
+    #=========================================================================================
+
     @property
     def _apiIntegralList(self) -> ApiIntegralList:
         """API peakLists matching IntegralList."""
         return self._wrappedData
 
-    @property
-    def _key(self) -> str:
-        """id string - serial number converted to string."""
-        return str(self._wrappedData.serial)
+    def _setPrimaryChildClass(self):
+        """Set the primary classType for the child list attached to this container
+        """
+        from ccpn.core.Integral import Integral as klass
 
-    @property
-    def serial(self) -> int:
-        """serial number of IntegralList, used in Pid and to identify the IntegralList."""
-        return self._wrappedData.serial
+        if not klass in self._childClasses:
+            raise TypeError('PrimaryChildClass %s does not exist as child of %s' % (klass.className,
+                                                                                    self.className))
+        self._primaryChildClass = klass
 
-    @property
-    def _parent(self) -> Optional[Spectrum]:
-        """Spectrum containing IntegralList."""
-        return self._project._data2Obj[self._wrappedData.dataSource]
-
-    spectrum = _parent
-
-    @property
-    def title(self) -> str:
-        """title of IntegralList (not used in PID)."""
-        return self._wrappedData.name
-
-    @title.setter
-    def title(self, value: str):
-        self._wrappedData.name = value
-
-    @property
-    def symbolColour(self) -> str:
-        """Symbol colour for integral annotation display."""
-        return self._wrappedData.symbolColour
-
-    @symbolColour.setter
-    def symbolColour(self, value: str):
-        self._wrappedData.symbolColour = value
-
-    @property
-    def textColour(self) -> str:
-        """Text colour for integral annotation display."""
-        return self._wrappedData.textColour
-
-    @textColour.setter
-    def textColour(self, value: str):
-        self._wrappedData.textColour = value
+    # @property
+    # def _key(self) -> str:
+    #     """id string - serial number converted to string."""
+    #     return str(self._wrappedData.serial)
+    #
+    # @property
+    # def serial(self) -> int:
+    #     """serial number of IntegralList, used in Pid and to identify the IntegralList."""
+    #     return self._wrappedData.serial
+    #
+    # @property
+    # def _parent(self) -> Optional[Spectrum]:
+    #     """Spectrum containing IntegralList."""
+    #     return self._project._data2Obj[self._wrappedData.dataSource]
+    #
+    # spectrum = _parent
+    #
+    # @property
+    # def title(self) -> str:
+    #     """title of IntegralList (not used in PID)."""
+    #     return self._wrappedData.name
+    #
+    # @title.setter
+    # def title(self, value: str):
+    #     self._wrappedData.name = value
+    #
+    # @property
+    # def symbolColour(self) -> str:
+    #     """Symbol colour for integral annotation display."""
+    #     return self._wrappedData.symbolColour
+    #
+    # @symbolColour.setter
+    # def symbolColour(self, value: str):
+    #     self._wrappedData.symbolColour = value
+    #
+    # @property
+    # def textColour(self) -> str:
+    #     """Text colour for integral annotation display."""
+    #     return self._wrappedData.textColour
+    #
+    # @textColour.setter
+    # def textColour(self, value: str):
+    #     self._wrappedData.textColour = value
 
     # @property
     # def comment(self) -> str:
@@ -285,8 +299,12 @@ class IntegralList(AbstractWrapperObject):
 #=========================================================================================
 
 @newObject(IntegralList)
-def _newIntegralList(self: Spectrum, title: str = None, symbolColour: str = None,
-                     textColour: str = None, comment: str = None, serial: int = None) -> IntegralList:
+def _newIntegralList(self: Spectrum, title: str = None, comment: str = None,
+                     symbolStyle: str = None, symbolColour: str = None,
+                     textColour: str = None,
+                     meritColour: str = None, meritEnabled: bool = False, meritThreshold: float = None,
+                     lineColour: str = None,
+                     serial: int = None) -> IntegralList:
     """
     Create new IntegralList within Spectrum.
 
@@ -301,6 +319,8 @@ def _newIntegralList(self: Spectrum, title: str = None, symbolColour: str = None
     """
 
     dd = {'name': title, 'details': comment, 'dataType': 'Integral'}
+    if symbolStyle:
+        dd['symbolStyle'] = symbolStyle
     if symbolColour:
         dd['symbolColour'] = symbolColour
     if textColour:
@@ -319,8 +339,17 @@ def _newIntegralList(self: Spectrum, title: str = None, symbolColour: str = None
             getLogger().warning("Could not reset serial of %s to %s - keeping original value"
                                 % (result, serial))
 
-    return result
+    # set non-api attributes
+    if meritColour is not None:
+        result.meritColour = meritColour
+    if meritEnabled is not None:
+        result.meritEnabled = meritEnabled
+    if meritThreshold is not None:
+        result.meritThreshold = meritThreshold
+    if lineColour is not None:
+        result.lineColour = lineColour
 
+    return result
 
 # IntegralList._parentClass.newIntegralList = _newIntegralList
 # del _newIntegralList

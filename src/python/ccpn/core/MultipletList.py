@@ -32,15 +32,20 @@ from typing import Optional, Tuple, Sequence, Union
 from ccpn.util.decorators import logCommand
 from ccpn.core.lib.ContextManagers import newObject
 from ccpn.util.Logging import getLogger
+from ccpn.core.PeakListABC import PeakListABC
 
 
-LINECOLOUR = 'lineColour'
-DEFAULTLINECOLOUR = '#7a7a7a'
+# LINECOLOUR = 'lineColour'
+# DEFAULTLINECOLOUR = '#7a7a7a'
+MULTIPLETSETTINGS = 'multipletSettings'
 MULTIPLETAVERAGING = 'multipletAveraging'
-DEFAULTMULTIPLETAVERAGING = 0
+MULTIPLETAVERAGE = 'Average'
+MULTIPLETWEIGHTEDAVERAGE = 'Weighted Average'
+MULTIPLETLINECOLOURDEFAULT = '#7f7f7f'
+MULTIPLETAVERAGINGTYPES = [MULTIPLETAVERAGE, MULTIPLETWEIGHTEDAVERAGE]
 
 
-class MultipletList(AbstractWrapperObject):
+class MultipletList(PeakListABC):
     """MultipletList object, holding position, intensity, and assignment information
 
     Measurements that require more than one NmrAtom for an individual assignment
@@ -65,115 +70,119 @@ class MultipletList(AbstractWrapperObject):
     # Qualified name of matching API class
     _apiClassQualifiedName = ApiMultipletList._metaclass.qualifiedName()
 
+    #=========================================================================================
     # CCPN properties
+    #=========================================================================================
+
     @property
     def _apiMultipletList(self) -> ApiMultipletList:
         """ API multipletLists matching MultipletList"""
         return self._wrappedData
 
-    @property
-    def _key(self) -> str:
-        """id string - serial number converted to string"""
-        return str(self._wrappedData.serial)
-
-    @property
-    def serial(self) -> int:
-        """serial number of MultipletList, used in Pid and to identify the MultipletList. """
-        return self._wrappedData.serial
-
-    @property
-    def _parent(self) -> Optional[Spectrum]:
-        """parent containing multipletList."""
-        return self._project._data2Obj[self._wrappedData.dataSource]
-
-    spectrum = _parent
-
-    @property
-    def title(self) -> str:
-        """title of multiplet (not used in PID)."""
-        return self._wrappedData.name
-
-    @title.setter
-    def title(self, value: str):
-        self._wrappedData.name = value
-
-    @property
-    def dataType(self) -> str:
-        """dataType of multipletList."""
-        return self._wrappedData.dataType
-
-    @dataType.setter
-    def dataType(self, value: str):
-        self._wrappedData.dataType = value
-
-    @property
-    def symbolColour(self) -> str:
-        """Symbol colour for multipletList annotation display"""
-        return self._wrappedData.symbolColour
-
-    @symbolColour.setter
-    def symbolColour(self, value: str):
-        self._wrappedData.symbolColour = value
-
-    @property
-    def textColour(self) -> str:
-        """Text colour for multipletList annotation display"""
-        return self._wrappedData.textColour
-
-    @textColour.setter
-    def textColour(self, value: str):
-        self._wrappedData.textColour = value
-
-    def _setLineColour(self, value):
-        """set the internal line colour, default to '#7a7a7a'
+    def _setPrimaryChildClass(self):
+        """Set the primary classType for the child list attached to this container
         """
-        tempCcpn = self._ccpnInternalData.copy()
-        tempCcpn[LINECOLOUR] = value if value else DEFAULTLINECOLOUR
-        self._ccpnInternalData = tempCcpn
+        from ccpn.core.Multiplet import Multiplet as klass
 
-    @property
-    def lineColour(self) -> str:
-        """Line colour for multipletList annotation display"""
-        if self._ccpnInternalData:
-            if LINECOLOUR not in self._ccpnInternalData:
-                self._setLineColour(DEFAULTLINECOLOUR)
-        else:
-            self._ccpnInternalData = {LINECOLOUR: DEFAULTLINECOLOUR}
+        if not klass in self._childClasses:
+            raise TypeError('PrimaryChildClass %s does not exist as child of %s' % (klass.className,
+                                                                                    self.className))
+        self._primaryChildClass = klass
 
-        col = self._ccpnInternalData[LINECOLOUR]
-        return col if col else DEFAULTLINECOLOUR
+    # @property
+    # def _key(self) -> str:
+    #     """id string - serial number converted to string"""
+    #     return str(self._wrappedData.serial)
+    #
+    # @property
+    # def serial(self) -> int:
+    #     """serial number of MultipletList, used in Pid and to identify the MultipletList. """
+    #     return self._wrappedData.serial
+    #
+    # @property
+    # def _parent(self) -> Optional[Spectrum]:
+    #     """parent containing multipletList."""
+    #     return self._project._data2Obj[self._wrappedData.dataSource]
+    #
+    # spectrum = _parent
+    #
+    # @property
+    # def title(self) -> str:
+    #     """title of multiplet (not used in PID)."""
+    #     return self._wrappedData.name
+    #
+    # @title.setter
+    # def title(self, value: str):
+    #     self._wrappedData.name = value
+    #
+    # @property
+    # def dataType(self) -> str:
+    #     """dataType of multipletList."""
+    #     return self._wrappedData.dataType
+    #
+    # @dataType.setter
+    # def dataType(self, value: str):
+    #     self._wrappedData.dataType = value
+    #
+    # @property
+    # def symbolColour(self) -> str:
+    #     """Symbol colour for multipletList annotation display"""
+    #     return self._wrappedData.symbolColour
+    #
+    # @symbolColour.setter
+    # def symbolColour(self, value: str):
+    #     self._wrappedData.symbolColour = value
+    #
+    # @property
+    # def textColour(self) -> str:
+    #     """Text colour for multipletList annotation display"""
+    #     return self._wrappedData.textColour
+    #
+    # @textColour.setter
+    # def textColour(self, value: str):
+    #     self._wrappedData.textColour = value
 
-    @lineColour.setter
-    def lineColour(self, value: str):
-        if not self._ccpnInternalData:
-            self._ccpnInternalData = {LINECOLOUR: value}
-        else:
-            self._setLineColour(value)
-
-    def _setMultipletAveraging(self, value):
-        """set the internal line colour
-        """
-        tempCcpn = self._ccpnInternalData.copy()
-        tempCcpn[MULTIPLETAVERAGING] = value
-        self._ccpnInternalData = tempCcpn
+    # def _setLineColour(self, value):
+    #     """set the internal line colour, default to '#7a7a7a'
+    #     """
+    #     tempCcpn = self._ccpnInternalData.copy()
+    #     tempCcpn[LINECOLOUR] = value if value else DEFAULTLINECOLOUR
+    #     self._ccpnInternalData = tempCcpn
+    #
+    # @property
+    # def lineColour(self) -> str:
+    #     """Line colour for multipletList annotation display"""
+    #     if self._ccpnInternalData:
+    #         if LINECOLOUR not in self._ccpnInternalData:
+    #             self._setLineColour(DEFAULTLINECOLOUR)
+    #     else:
+    #         self._ccpnInternalData = {LINECOLOUR: DEFAULTLINECOLOUR}
+    #
+    #     col = self._ccpnInternalData[LINECOLOUR]
+    #     return col if col else DEFAULTLINECOLOUR
+    #
+    # @lineColour.setter
+    # def lineColour(self, value: str):
+    #     if not self._ccpnInternalData:
+    #         self._ccpnInternalData = {LINECOLOUR: value}
+    #     else:
+    #         self._setLineColour(value)
 
     @property
     def multipletAveraging(self) -> str:
-        """Line colour for multipletList annotation display"""
-        if self._ccpnInternalData:
-            if MULTIPLETAVERAGING not in self._ccpnInternalData:
-                self._setMultipletAveraging(DEFAULTMULTIPLETAVERAGING)
-        else:
-            self._ccpnInternalData = {MULTIPLETAVERAGING: DEFAULTMULTIPLETAVERAGING}
-
-        return self._ccpnInternalData[MULTIPLETAVERAGING]
+        """Multiplet averaging method
+        """
+        value = self.getParameter(MULTIPLETSETTINGS, MULTIPLETAVERAGING)
+        return MULTIPLETAVERAGINGTYPES[value] if value and 0 <= value < len(MULTIPLETAVERAGINGTYPES) else None
 
     @multipletAveraging.setter
     def multipletAveraging(self, value: str):
-        if not self._ccpnInternalData:
-            self._ccpnInternalData = {MULTIPLETAVERAGING: value}
-        else:
-            self._setMultipletAveraging(value)
+        if not isinstance(value, str):
+            raise ValueError("multipletAveraging must be a string")
+        if value not in MULTIPLETAVERAGINGTYPES:
+            raise ValueError("multipletAveraging %s not defined correctly, must be in %s" % (value, MULTIPLETAVERAGINGTYPES))
+
+        self.setParameter(MULTIPLETSETTINGS, MULTIPLETAVERAGING, MULTIPLETAVERAGINGTYPES.index(value))
 
     # @property
     # def comment(self) -> str:
@@ -227,7 +236,7 @@ class MultipletList(AbstractWrapperObject):
         :param comment: optional comment string
         :return: a new Multiplet instance.
         """
-        from ccpn.core.Multiplet import _newMultiplet     # imported here to avoid circular imports
+        from ccpn.core.Multiplet import _newMultiplet  # imported here to avoid circular imports
 
         return _newMultiplet(self, comment=comment, peaks=peaks, **kwds)
 
@@ -237,10 +246,12 @@ class MultipletList(AbstractWrapperObject):
 #=========================================================================================
 
 @newObject(MultipletList)
-def _newMultipletList(self: Spectrum, title: str = None,
-                      symbolColour: str = None, textColour: str = None, lineColour: str = None,
-                      multipletAveraging = 0,
-                      comment: str = None, multiplets: Sequence[Union['Multiplet', str]] = None,
+def _newMultipletList(self: Spectrum, title: str = None, comment: str = None,
+                      symbolStyle: str = None, symbolColour: str = None,
+                      textColour: str = None,
+                      meritColour: str = None, meritEnabled: bool = False, meritThreshold: float = None,
+                      lineColour: str = MULTIPLETLINECOLOURDEFAULT, multipletAveraging=MULTIPLETAVERAGE,
+                      multiplets: Sequence[Union['Multiplet', str]] = None,
                       serial: int = None) -> MultipletList:
     """Create new MultipletList within Spectrum.
 
@@ -257,6 +268,8 @@ def _newMultipletList(self: Spectrum, title: str = None,
     """
 
     dd = {'name': title, 'details': comment}
+    if symbolStyle:
+        dd['symbolStyle'] = symbolStyle
     if symbolColour:
         dd['symbolColour'] = symbolColour
     if textColour:
@@ -278,11 +291,18 @@ def _newMultipletList(self: Spectrum, title: str = None,
                                 % (result, serial))
 
     # set non-api attributes
-    result.lineColour = lineColour
-    result.multipletAveraging = multipletAveraging
+    if meritColour is not None:
+        result.meritColour = meritColour
+    if meritEnabled is not None:
+        result.meritEnabled = meritEnabled
+    if meritThreshold is not None:
+        result.meritThreshold = meritThreshold
+    if lineColour is not None:
+        result.lineColour = lineColour
+    if multipletAveraging is not None:
+        result.multipletAveraging = multipletAveraging
 
     return result
-
 
 # MultipletList._parentClass.newMultipletList = _newMultipletList
 # del _newMultipletList

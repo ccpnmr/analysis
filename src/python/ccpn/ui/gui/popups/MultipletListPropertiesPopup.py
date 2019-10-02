@@ -34,6 +34,7 @@ from ccpn.ui.gui.widgets.PulldownList import PulldownList
 from ccpn.ui.gui.popups.Dialog import CcpnDialog, handleDialogApply
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
 from ccpn.core.lib.ContextManagers import undoBlock, undoStackBlocking
+from ccpn.core.MultipletList import MULTIPLETAVERAGE, MULTIPLETWEIGHTEDAVERAGE, MULTIPLETAVERAGINGTYPES
 
 
 class MultipletListPropertiesPopup(CcpnDialog):
@@ -121,8 +122,8 @@ class MultipletListPropertiesPopup(CcpnDialog):
             row += 1
             self.multipletAveragingLabel = Label(self, text="Multiplet Averaging:", grid=(row, 0))
             multipletAveraging = self.multipletList.multipletAveraging
-            self.multipletAveraging = RadioButtons(self, texts=['Average', 'Weighted Average'],
-                                                   selectedInd=multipletAveraging,
+            self.multipletAveraging = RadioButtons(self, texts=MULTIPLETAVERAGINGTYPES,
+                                                   selectedInd=MULTIPLETAVERAGINGTYPES.index(multipletAveraging) if multipletAveraging in MULTIPLETAVERAGINGTYPES else 0,
                                                    callback=self._applyChanges,
                                                    direction='h',
                                                    grid=(row, 1), hAlign='l',
@@ -152,8 +153,8 @@ class MultipletListPropertiesPopup(CcpnDialog):
     def _setAttributes(self):
         """set the attributes from the other widgets
         """
-        index = self.multipletAveraging.getIndex()
-        self.multipletList.multipletAveraging = index
+        value = self.multipletAveraging.getSelectedText()
+        self.multipletList.multipletAveraging = value
 
     def _refreshGLItems(self):
         # emit a signal to rebuild all peaks and multiplets

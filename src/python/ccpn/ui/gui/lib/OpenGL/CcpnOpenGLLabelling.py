@@ -64,6 +64,8 @@ _totalTime = 0.0
 _timeCount = 0
 _numTimes = 12
 
+DEFAULTLINECOLOUR = '#7f7f7f'
+
 
 class GLLabelling():
     """Base class to handle symbol and symbol labelling
@@ -2569,7 +2571,8 @@ class GLmultipletNdLabelling(GLmultipletListMethods, GLLabelling):      #, GLpea
             return 0
 
         # cols = getColours()[CCPNGLWIDGET_MULTIPLETLINK][:3]
-        cols = getAutoColourRgbRatio(multiplet.multipletList.lineColour, multiplet.multipletList.spectrum, self.autoColour,
+        col = multiplet.multipletList.lineColour
+        cols = getAutoColourRgbRatio(col if col else DEFAULTLINECOLOUR, multiplet.multipletList.spectrum, self.autoColour,
                                      getColours()[CCPNGLWIDGET_MULTIPLETLINK])
 
         posList = p0
@@ -2600,7 +2603,8 @@ class GLmultipletNdLabelling(GLmultipletListMethods, GLLabelling):      #, GLpea
             return 0
 
         # cols = getColours()[CCPNGLWIDGET_MULTIPLETLINK][:3]
-        cols = getAutoColourRgbRatio(multiplet.multipletList.lineColour, multiplet.multipletList.spectrum, self.autoColour,
+        col = multiplet.multipletList.lineColour
+        cols = getAutoColourRgbRatio(col if col else DEFAULTLINECOLOUR, multiplet.multipletList.spectrum, self.autoColour,
                                      getColours()[CCPNGLWIDGET_MULTIPLETLINK])
 
         posList = p0
@@ -2647,7 +2651,8 @@ class GLmultiplet1dLabelling(GL1dLabelling, GLmultipletNdLabelling):
             return 0
 
         # cols = getColours()[CCPNGLWIDGET_MULTIPLETLINK][:3]
-        cols = getAutoColourRgbRatio(multiplet.multipletList.lineColour, multiplet.multipletList.spectrum, self.autoColour,
+        col = multiplet.multipletList.lineColour
+        cols = getAutoColourRgbRatio(col if col else DEFAULTLINECOLOUR, multiplet.multipletList.spectrum, self.autoColour,
                                      getColours()[CCPNGLWIDGET_MULTIPLETLINK])
 
         posList = p0
@@ -2677,7 +2682,8 @@ class GLmultiplet1dLabelling(GL1dLabelling, GLmultipletNdLabelling):
             return 0
 
         # cols = getColours()[CCPNGLWIDGET_MULTIPLETLINK][:3]
-        cols = getAutoColourRgbRatio(multiplet.multipletList.lineColour, multiplet.multipletList.spectrum, self.autoColour,
+        col = multiplet.multipletList.lineColour
+        cols = getAutoColourRgbRatio(col if col else DEFAULTLINECOLOUR, multiplet.multipletList.spectrum, self.autoColour,
                                      getColours()[CCPNGLWIDGET_MULTIPLETLINK])
 
         posList = p0

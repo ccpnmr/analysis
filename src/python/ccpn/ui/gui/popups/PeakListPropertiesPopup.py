@@ -33,114 +33,34 @@ from ccpn.ui.gui.widgets.PulldownList import PulldownList
 from ccpn.ui.gui.popups.Dialog import CcpnDialog, handleDialogApply
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
 from ccpn.core.lib.ContextManagers import undoStackBlocking
+from ccpn.ui.gui.popups.PeakListPropertiesPopupABC import PeakListPropertiesPopupABC
+from ccpn.core.PeakList import PeakList
 
 
-class PeakListPropertiesPopup(CcpnDialog):
+class PeakListPropertiesPopup(PeakListPropertiesPopupABC):
+    """
+    Popup to handle changing parameters in peakLists
+    """
+    # class of lists handled by popup
+    _baseClass = PeakList
+    _symbolColourOption = False
+    _textColourOption = True
+    _lineColourOption = True
+    _meritColourOption = False
+
     def __init__(self, parent=None, mainWindow=None, peakList=None, title='Peak List Properties', **kwds):
-        CcpnDialog.__init__(self, parent, setLayout=True, windowTitle=title, **kwds)
 
-        self.mainWindow = mainWindow
-        self.application = mainWindow.application
-        self.project = mainWindow.application.project
-        self.current = mainWindow.application.current
-        self.peakList = peakList
+        # CcpnDialog.__init__(self, parent, setLayout=True, windowTitle=title, **kwds)
 
-        if not self.peakList:
-            MessageDialog.showWarning(title, 'No PeakList Found')
-            self.close()
-
-        else:
-            self.peakListViews = [peakListView for peakListView in peakList.project.peakListViews if peakListView.peakList == peakList]
-
-            # NOTE: below is not sorted in any way, but if we change that, we also have to change loop in _fillColourPulldown
-            spectrumColourKeys = list(Colour.spectrumColours.keys())
-            if not self.peakList.symbolColour:
-                self.peakList.symbolColour = spectrumColourKeys[0]  # default
-            if not self.peakList.textColour:
-                self.peakList.textColour = spectrumColourKeys[1]  # default*
-
-            self.peakListLabel = Label(self, "PeakList Name ", grid=(0, 0))
-            self.peakListLabel = Label(self, peakList.id, grid=(0, 1))
-
-            self.symbolColourLabel = Label(self, 'Peak Symbol Colour', grid=(3, 0))
-            self.symbolColourPulldownList = PulldownList(self, grid=(3, 1))
-            Colour.fillColourPulldown(self.symbolColourPulldownList, allowAuto=True)
-
-            c = peakList.symbolColour
-            if c in spectrumColourKeys:
-                self.symbolColourPulldownList.setCurrentText(Colour.spectrumColours[c])
-            else:
-                Colour.addNewColourString(c)
-                Colour.fillColourPulldown(self.symbolColourPulldownList, allowAuto=True)
-                Colour.selectPullDownColour(self.symbolColourPulldownList, c, allowAuto=True)
-
-            self.symbolColourPulldownList.activated.connect(self._applyChanges)
-
-            self.textColourLabel = Label(self, 'Peak Text Colour', grid=(4, 0))
-            self.textColourPulldownList = PulldownList(self, grid=(4, 1))
-            Colour.fillColourPulldown(self.textColourPulldownList, allowAuto=True)
-
-            c = peakList.textColour
-            if c in spectrumColourKeys:
-                self.textColourPulldownList.setCurrentText(Colour.spectrumColours[c])
-            else:
-                Colour.addNewColourString(c)
-
-                # repopulate both pulldowns
-                Colour.fillColourPulldown(self.symbolColourPulldownList, allowAuto=True)
-                Colour.fillColourPulldown(self.textColourPulldownList, allowAuto=True)
-                Colour.selectPullDownColour(self.textColourPulldownList, c, allowAuto=True)
-
-            self.textColourPulldownList.activated.connect(self._applyChanges)
-
-            self.closeButton = Button(self, text='Close', grid=(6, 1), callback=self._accept)
-
-        self.GLSignals = GLNotifier(parent=self)
-
-    def _changeColours(self):
-        value = self.symbolColourPulldownList.currentText()
-        colour = Colour.getSpectrumColour(value, defaultReturn='#')
-        self.peakList.symbolColour = colour
-
-        value = self.textColourPulldownList.currentText()
-        colour = Colour.getSpectrumColour(value, defaultReturn='#')
-        self.peakList.textColour = colour
+        super().__init__(parent=parent, mainWindow=mainWindow, ccpnList=peakList,
+                         title='%s Properties' % self._baseClass.className, **kwds)
 
     def _refreshGLItems(self):
         # emit a signal to rebuild all peaks and multiplets
         self.GLSignals.emitEvent(targets=[self.peakList], triggers=[GLNotifier.GLPEAKLISTS,
-                                                                       GLNotifier.GLPEAKLISTLABELS])
+                                                                    GLNotifier.GLPEAKLISTLABELS])
 
-    def _applyChanges(self):
+    def _getListViews(self, ccpnList):
+        """Return the listViews containing this list
         """
-        The apply button has been clicked
-        Define an undo block for setting the properties of the object
-        If there is an error setting any values then generate an error message
-          If anything has been added to the undo queue then remove it with application.undo()
-          repopulate the popup widgets
-        """
-        with handleDialogApply(self) as error:
-
-            # add item here to redraw items
-            with undoStackBlocking() as addUndoItem:
-                addUndoItem(undo=self._refreshGLItems)
-
-            self._changeColours()
-
-            # add item here to redraw items
-            with undoStackBlocking() as addUndoItem:
-                addUndoItem(redo=self._refreshGLItems)
-
-            # redraw the items
-            self._refreshGLItems()
-
-        return error.errorValue is None
-
-    def _okButton(self):
-        if self._applyChanges() is True:
-            self._accept()
-
-    def _accept(self):
-        self.symbolColourPulldownList.activated.disconnect(self._applyChanges)
-        self.textColourPulldownList.activated.disconnect(self._applyChanges)
-        self.accept()
+        return [peakListView for peakListView in ccpnList.project.peakListViews if peakListView.peakList == ccpnList]

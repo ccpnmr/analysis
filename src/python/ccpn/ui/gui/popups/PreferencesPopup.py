@@ -54,6 +54,7 @@ from ccpn.ui.gui.widgets.ColourDialog import ColourDialog
 from ccpn.ui.gui.widgets.ScrollArea import ScrollArea
 from ccpn.ui.gui.widgets.Spacer import Spacer
 from ccpn.core.PeakList import GAUSSIANMETHOD, PARABOLICMETHOD
+from ccpn.core.MultipletList import MULTIPLETAVERAGINGTYPES
 from ccpn.util.UserPreferences import UserPreferences
 
 PEAKFITTINGDEFAULTS = [PARABOLICMETHOD, GAUSSIANMETHOD]
@@ -674,8 +675,8 @@ class PreferencesPopup(CcpnDialog):
         row += 1
         self.multipletAveragingLabel = Label(parent, text="Multiplet Averaging:", grid=(row, 0))
         multipletAveraging = self.preferences.general.multipletAveraging
-        self.multipletAveraging = RadioButtons(parent, texts=['Average', 'Weighted Average'],
-                                               selectedInd=multipletAveraging,
+        self.multipletAveraging = RadioButtons(parent, texts=MULTIPLETAVERAGINGTYPES,
+                                               selectedInd=MULTIPLETAVERAGINGTYPES.index(multipletAveraging) if multipletAveraging in MULTIPLETAVERAGINGTYPES else 0,
                                                callback=self._setMultipletAveraging,
                                                direction='h',
                                                grid=(row, 1), hAlign='l',
@@ -1051,7 +1052,7 @@ class PreferencesPopup(CcpnDialog):
         Set the multiplet averaging type - normal or weighted
         """
         try:
-            symbol = self.multipletAveraging.getIndex()
+            symbol = self.multipletAveraging.getSelectedText()
         except:
             return
         self.preferences.general.multipletAveraging = symbol

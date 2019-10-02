@@ -43,13 +43,13 @@ class PeakListPropertiesPopup(PeakListPropertiesPopupABC):
     """
     # class of lists handled by popup
     _baseClass = PeakList
-    _symbolColourOption = False
+    _symbolColourOption = True
     _textColourOption = True
     _lineColourOption = True
-    _meritColourOption = False
+    _meritColourOption = True
+    _meritOptions = True
 
     def __init__(self, parent=None, mainWindow=None, peakList=None, title='Peak List Properties', **kwds):
-
         # CcpnDialog.__init__(self, parent, setLayout=True, windowTitle=title, **kwds)
 
         super().__init__(parent=parent, mainWindow=mainWindow, ccpnList=peakList,

@@ -52,7 +52,7 @@ class PeakListPropertiesPopupABC(CcpnDialog):
     _textColourOption = False
     _lineColourOption = False
     _meritColourOption = False
-    _meritOptions = True
+    _meritOptions = False
 
     def __init__(self, parent=None, mainWindow=None, ccpnList=None, title=None, **kwds):
         CcpnDialog.__init__(self, parent, setLayout=True, windowTitle=title, **kwds)
@@ -88,7 +88,7 @@ class PeakListPropertiesPopupABC(CcpnDialog):
 
             # set default colours if not defined
             for colButton, enabled in zip(BUTTONOPTIONS,
-                                    (self._symbolColourOption, self._textColourOption, self._lineColourOption, self._meritColourOption)):
+                                          (self._symbolColourOption, self._textColourOption, self._lineColourOption, self._meritColourOption)):
                 if enabled:
                     if not getattr(self.ccpnList, colButton, None):
                         setattr(self.ccpnList, colButton, self.spectrumColourKeys[0])
@@ -118,7 +118,7 @@ class PeakListPropertiesPopupABC(CcpnDialog):
                 _, pl, _ = item
                 Colour.fillColourPulldown(pl, allowAuto=True)
             Colour.selectPullDownColour(_colourPulldownList, c, allowAuto=True)
-    
+
         _colourPulldownList.activated.connect(self._applyChanges)
 
     def _changeColours(self):
@@ -137,7 +137,6 @@ class PeakListPropertiesPopupABC(CcpnDialog):
           repopulate the popup widgets
         """
         with handleDialogApply(self) as error:
-
             # add item here to redraw items
             with undoStackBlocking() as addUndoItem:
                 addUndoItem(undo=self._refreshGLItems)
@@ -174,4 +173,3 @@ class PeakListPropertiesPopupABC(CcpnDialog):
         """
         # MUST BE SUBCLASSED
         raise NotImplementedError("Code error: function not implemented")
-

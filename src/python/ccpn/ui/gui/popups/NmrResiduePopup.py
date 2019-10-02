@@ -22,25 +22,16 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
-from PyQt5 import QtGui, QtWidgets
 import re
-
-from ccpn.core.Chain import Chain
 from ccpn.core.lib.AssignmentLib import CCP_CODES_SORTED, getNmrResiduePrediction
-from ccpn.ui.gui.widgets.Base import Base
-from ccpn.ui.gui.widgets.Button import Button
 from ccpn.ui.gui.widgets.ButtonList import ButtonList
-from ccpn.ui.gui.widgets.Label import Label
-from ccpn.ui.gui.widgets.PulldownList import PulldownList
-from ccpn.ui.gui.widgets.FilteringPulldownList import FilteringPulldownList
 from ccpn.ui.gui.widgets.CompoundWidgets import EntryCompoundWidget, PulldownListCompoundWidget
 from ccpn.ui.gui.widgets.PulldownListsForObjects import NmrChainPulldown
-
 from ccpn.ui.gui.popups.Dialog import CcpnDialog
 from ccpn.ui.gui.widgets.MessageDialog import showWarning
-from ccpn.util.Logging import getLogger
 
-import sys
+
+REMOVEPERCENT = '( ?\d+.?\d* ?%)+'
 
 
 class NmrResiduePopup(CcpnDialog):
@@ -122,7 +113,7 @@ class NmrResiduePopup(CcpnDialog):
         """Check the new pulldown item and strip bad characters
         """
         # Check the correct characters for residueType - need to remove spaceNumberPercent
-        value = re.sub('[^a-zA-Z_]+', '', value)
+        value = re.sub(REMOVEPERCENT, '', value)
         self.residueType.pulldownList.set(value)
 
     def _applyChanges(self):
@@ -136,7 +127,7 @@ class NmrResiduePopup(CcpnDialog):
             self.nmrResidue.moveToNmrChain(
                     self.chainPulldown.getText(),
                     self.sequenceCode.getText(),
-                    re.sub('[^a-zA-Z_]+', '', self.residueType.getText())
+                    re.sub(REMOVEPERCENT, '', self.residueType.getText())
             )
 
         except Exception as es:

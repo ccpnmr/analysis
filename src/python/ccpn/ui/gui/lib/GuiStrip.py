@@ -45,7 +45,8 @@ from ccpn.util.Logging import getLogger
 from ccpn.util.Constants import AXIS_MATCHATOMTYPE, AXIS_FULLATOMNAME, AXIS_ACTIVEAXES, DOUBLEAXIS_FULLATOMNAME
 from functools import partial
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs import AXISXUNITS, AXISYUNITS, AXISLOCKASPECTRATIO, \
-    SYMBOLTYPES, ANNOTATIONTYPES, SYMBOLSIZE, SYMBOLTHICKNESS, AXISUSEFIXEDASPECTRATIO
+    SYMBOLTYPES, ANNOTATIONTYPES, SYMBOLSIZE, SYMBOLTHICKNESS, AXISUSEFIXEDASPECTRATIO, \
+    MAINVIEW, BOTTOMAXIS, RIGHTAXIS, AXISCORNER
 from ccpn.core.lib.ContextManagers import undoStackBlocking, undoBlock, notificationBlanking
 from ccpn.util.decorators import logCommand
 from ccpn.ui.gui.guiSettings import textFont, getColours, STRIPHEADER_BACKGROUND, \
@@ -635,6 +636,22 @@ class GuiStrip(Frame):
                 else:
                     self.navigateCursorMenu.setEnabled(False)
 
+    def markAxisIndices(self, indices=None):
+        """Mark the X/Y/XY axisCodes by index
+        """
+        from functools import partial
+        from ccpn.ui.gui.lib.Strip import navigateToPositionInStrip
+
+        position = [self.current.mouseMovedDict[AXIS_FULLATOMNAME][ax] for ax in self.axisCodes]
+        if indices is None:
+            indices = tuple(range(len(self.axisCodes)))
+
+        pos = [position[ii] for ii in indices]
+        axes = [self.axisCodes[ii] for ii in indices]
+
+        self._createMarkAtPosition(positions=pos, axisCodes=axes)
+
+
     def _addItemsToMarkInPeakMenu(self, peaks):
         """Adds item to mark peak position from context menu.
         """
@@ -694,21 +711,32 @@ class GuiStrip(Frame):
     def _addItemsToCopyAxisFromMenuesMainView(self):
         """Setup the menu for the main view
         """
-        self._addItemsToCopyAxisFromMenues([self.copyAllAxisFromMenu, self.copyXAxisFromMenu, self.copyYAxisFromMenu],
-                                           ['All', 'X', 'Y'])
+        # self._addItemsToCopyAxisFromMenues([self.copyAllAxisFromMenu, self.copyXAxisFromMenu, self.copyYAxisFromMenu],
+        #                                    ['All', 'X', 'Y'])
+        self._addItemsToCopyAxisFromMenues(((self.copyAllAxisFromMenu, 'All'),
+                                            (self.copyXAxisFromMenu, 'X'),
+                                            (self.copyYAxisFromMenu, 'Y')))
 
-    def _addItemsToCopyAxisFromMenuesAxes(self):
+    def _addItemsToCopyAxisFromMenuesAxes(self, viewPort, thisMenu, is1D):
         """Setup the menu for the axis views
         """
-        self._addItemsToCopyAxisFromMenues([self.copyAllAxisFromMenu2, self.copyXAxisFromMenu2, self.copyYAxisFromMenu2],
-                                           ['All', 'X', 'Y'])
+        from ccpn.ui.gui.lib.GuiStripContextMenus import _addCopyMenuItems
 
-    def _addItemsToCopyAxisFromMenues(self, axisNames, axisIdList):
+        copyAttribs, matchAttribs = _addCopyMenuItems(self, viewPort, thisMenu, is1D)
+
+        self._addItemsToCopyAxisFromMenues(copyAttribs)
+        for nm, ax in matchAttribs:
+            self._addItemsToCopyAxisCodesFromMenues(ax, nm)
+
+    def _addItemsToCopyAxisFromMenues(self, copyAttribs):       #, axisNames, axisIdList):
         """Copied from old viewbox. This function apparently take the current cursorPosition
          and uses to pan a selected display from the list of spectrumViews or the current cursor position.
         """
         # TODO needs clear documentation
         from functools import partial
+
+        axisNames = tuple(nm[0] for nm in copyAttribs)
+        axisIdList = tuple(nm[1] for nm in copyAttribs)
 
         for axisName, axisId in zip(axisNames, axisIdList):
             if axisName:
@@ -732,11 +760,61 @@ class GuiStrip(Frame):
 
                 axisName.setEnabled(True if count else False)
 
+    def _addItemsToMarkAxesMenuAxesView(self, viewPort, thisMenu):
+        """Setup the menu for the main view for marking axis codes
+        """
+        indices = {BOTTOMAXIS: (0,), RIGHTAXIS: (1,)}
+        if viewPort in indices.keys():
+            self._addItemsToMarkAxesMenuMainView(thisMenu, indices[viewPort])
+
+    def _addItemsToMarkAxesMenuMainView(self, axisMenu=None, indices=None):
+        """Setup the menu for the main view for marking axis codes
+        """
+        axisName = axisMenu if axisMenu else self.markAxesMenu
+        position = [self.current.mouseMovedDict[AXIS_FULLATOMNAME][ax] for ax in self.axisCodes]
+
+        row = 0
+        if indices is None:
+            # get the indices to add to the menu
+            indices = tuple(range(len(self.axisCodes)))
+
+            pos = [position[ii] for ii in indices]
+            axes = [self.axisCodes[ii] for ii in indices]
+
+            toolTip = 'Mark all axis codes'
+            axisName.addItem(text='Mark All AxisCodes',
+                             callback=partial(self._createMarkAtPosition, positions=pos, axisCodes=axes, ),
+                             toolTip=toolTip)
+            row += 1
+
+        for ind in indices:
+            pos = [position[ind],]
+            axes = [self.axisCodes[ind],]
+
+            toolTip = 'Mark %s axis code' % str(self.axisCodes[ind])
+            axisName.addItem(text='Mark %s' % str(self.axisCodes[ind]),
+                             callback=partial(self._createMarkAtPosition, positions=pos, axisCodes=axes, ),
+                             toolTip=toolTip)
+            row += 1
+
+        if row:
+            axisName.addSeparator()
+
+    def _addItemsToMarkAxesMenuXAxisView(self):
+        """Setup the menu for the main view for marking axis codes
+        """
+        axisName = self.markAxesMenu
+
+    def _addItemsToMarkAxesMenuYAxisView(self):
+        """Setup the menu for the main view for marking axis codes
+        """
+        axisName = self.markAxesMenu
+
     def _addItemsToMatchAxisCodesFromMenuesMainView(self):
         """Setup the menu for the main view
         """
-        self._addItemsToCopyAxisCodesFromMenues(0, [self.matchXAxisCodeToMenu, self.matchYAxisCodeToMenu])
-        self._addItemsToCopyAxisCodesFromMenues(1, [self.matchXAxisCodeToMenu, self.matchYAxisCodeToMenu])
+        self._addItemsToCopyAxisCodesFromMenues(0, self.matchXAxisCodeToMenu)
+        self._addItemsToCopyAxisCodesFromMenues(1, self.matchYAxisCodeToMenu)
 
     def _addItemsToMatchAxisCodesFromMenuesAxes(self):
         """Setup the menu for the axis views
@@ -744,7 +822,7 @@ class GuiStrip(Frame):
         self._addItemsToCopyAxisCodesFromMenues(0, [self.matchXAxisCodeToMenu2, self.matchYAxisCodeToMenu2])
         self._addItemsToCopyAxisCodesFromMenues(1, [self.matchXAxisCodeToMenu2, self.matchYAxisCodeToMenu2])
 
-    def _addItemsToCopyAxisCodesFromMenues(self, axisIndex, axisList):
+    def _addItemsToCopyAxisCodesFromMenues(self, axisIndex, axisName):      #, axisList):
         """Copied from old viewbox. This function apparently take the current cursorPosition
          and uses to pan a selected display from the list of spectrumViews or the current cursor position.
         """
@@ -754,10 +832,10 @@ class GuiStrip(Frame):
 
         # axisList = (self.matchXAxisCodeToMenu2, self.matchYAxisCodeToMenu2)
 
-        if axisIndex not in range(len(axisList)):
-            return
+        # if axisIndex not in range(len(axisList)):
+        #     return
 
-        axisName = axisList[axisIndex]
+        # axisName = axisList[axisIndex]
         axisCode = self.axisCodes[axisIndex]
 
         if axisName:
@@ -791,7 +869,7 @@ class GuiStrip(Frame):
 
             axisName.setEnabled(True if count else False)
 
-    def _enableNdAxisMenuItems(self, axisName):
+    def _enableNdAxisMenuItems(self, axisName, axisMenu):
 
         from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs import BOTTOMAXIS, RIGHTAXIS, AXISCORNER
 

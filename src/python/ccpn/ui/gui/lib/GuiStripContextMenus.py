@@ -34,6 +34,7 @@ from ccpn.ui.gui.widgets.Menu import Menu
 from ccpn.util.Logging import getLogger
 from functools import partial
 
+
 MENU = 'Menu'
 ITEM = 'Item'
 SEPARATOR = 'Separator'
@@ -81,6 +82,20 @@ def _createMenu(strip, items):
         except Exception as e:
             getLogger().warning('Menu error: %s' % str(e))
     return menu
+
+
+def _addMenuItems(strip, menu, items):
+    """Add items to an existing menu
+    """
+    for i in items:
+        try:
+            ff = getattr(menu, i.typeItem)
+            if ff:
+                action = ff(i.name, **vars(i))
+                setattr(strip, i.stripMethodName, action)
+                strip._spectrumUtilActions[i.name] = action
+        except Exception as e:
+            getLogger().warning('Menu error: %s' % str(e))
 
 
 ##############################  Common default  menu items ##############################
@@ -346,6 +361,7 @@ def _navigateToPeakPosItem(strip):
                     callback=None)
 
 
+# mark positions
 def _markCursorPosItem(strip):
     return _SCMitem(name='Mark in:',
                     typeItem=ItemTypes.get(MENU), toolTip='Mark this position in the selected strip ',
@@ -357,6 +373,39 @@ def _markPeakPosItem(strip):
     return _SCMitem(name='Mark in:',
                     typeItem=ItemTypes.get(MENU), toolTip='Mark current.peak.position in the selected strip ',
                     stripMethodName='markInPeakMenu',
+                    callback=None)
+
+
+def _markAxesItem(strip):
+    return _SCMitem(name='Mark Axes:',
+                    typeItem=ItemTypes.get(MENU), toolTip='Mark axisCodes ',
+                    stripMethodName='markAxesMenu',
+                    callback=None)
+
+
+def _markAxesItem2(strip):
+    return _SCMitem(name='Mark Axes:',
+                    typeItem=ItemTypes.get(MENU), toolTip='Mark axisCodes ',
+                    stripMethodName='markAxesMenu2',
+                    callback=None)
+
+
+def _markCursorXPosItem(strip):
+    return _SCMitem(name='Mark %s' % strip.axisCodes[0],
+                    typeItem=ItemTypes.get(ITEM), toolTip='Mark %s axiscode' % strip.axisCodes[0],
+                    callback=partial(strip.markAxisIndices, indices=(0,)))
+
+
+def _markCursorYPosItem(strip):
+    return _SCMitem(name='Mark %s' % strip.axisCodes[1],
+                    typeItem=ItemTypes.get(ITEM), toolTip='Mark %s axiscode' % strip.axisCodes[1],
+                    callback=partial(strip.markAxisIndices, indices=(1,)))
+
+
+def _markPeakXYPosItem(strip):
+    return _SCMitem(name='Mark Selected Peaks:',
+                    typeItem=ItemTypes.get(MENU), toolTip='Mark selected peaks ',
+                    stripMethodName='markXYInPeakMenu',
                     callback=None)
 
 
@@ -573,6 +622,7 @@ def _get1dDefaultMenu(guiStrip1d) -> Menu:
         _separator(),
         _navigateToCursorPosItem(guiStrip1d),
         _markCursorPosItem(guiStrip1d),
+        _markAxesItem(guiStrip1d),
         _separator(),
         _copyAllAxisRangeFromStripItem(guiStrip1d),
         _copyXAxisRangeFromStripItem(guiStrip1d),
@@ -716,6 +766,7 @@ def _getNdDefaultMenu(guiStripNd) -> Menu:
         _separator(),
         _navigateToCursorPosItem(guiStripNd),
         _markCursorPosItem(guiStripNd),
+        _markAxesItem(guiStripNd),
         _separator(),
         _copyAllAxisRangeFromStripItem(guiStripNd),
         _copyXAxisRangeFromStripItem(guiStripNd),
@@ -808,11 +859,67 @@ def _getNdAxisMenu(guiStrip) -> Menu:
     Creates and returns the current Axis context menu. Opened when right clicked on axis
     """
     items = [
-        _copyAllAxisRangeFromStripItem2(guiStrip),
-        _copyXAxisRangeFromStripItem2(guiStrip),
-        _copyYAxisRangeFromStripItem2(guiStrip),
-        _copyXAxisCodeRangeFromStripItem2(guiStrip),
-        _copyYAxisCodeRangeFromStripItem2(guiStrip),
+        # _copyAllAxisRangeFromStripItem2(guiStrip),
+        # _copyXAxisRangeFromStripItem2(guiStrip),
+        # _copyYAxisRangeFromStripItem2(guiStrip),
+        # _copyXAxisCodeRangeFromStripItem2(guiStrip),
+        # _copyYAxisCodeRangeFromStripItem2(guiStrip),
         ]
     items = [itm for itm in items if itm is not None]
     return _createMenu(guiStrip, items)
+
+
+from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs import MAINVIEW, BOTTOMAXIS, RIGHTAXIS, AXISCORNER
+
+
+def _addCopyMenuItems(guiStrip, viewPort, thisMenu, is1D):
+    items = copyAttribs = matchAttribs = ()
+    if viewPort in (MAINVIEW, AXISCORNER):
+        items = (_copyAllAxisRangeFromStripItem2(guiStrip),
+                 _copyXAxisRangeFromStripItem2(guiStrip),
+                 _copyYAxisRangeFromStripItem2(guiStrip),)
+        if not is1D:
+            items = items + (_copyXAxisCodeRangeFromStripItem2(guiStrip),
+                             _copyYAxisCodeRangeFromStripItem2(guiStrip),
+                             )
+        items = items + (_separator(),)
+
+    elif viewPort == BOTTOMAXIS:
+        items = (_copyAllAxisRangeFromStripItem2(guiStrip),
+                 _copyXAxisRangeFromStripItem2(guiStrip),)
+        if not is1D:
+            items = items + (_copyXAxisCodeRangeFromStripItem2(guiStrip),
+                             )
+        items = items + (_separator(),)
+    elif viewPort == RIGHTAXIS:
+        items = (_copyAllAxisRangeFromStripItem2(guiStrip),
+                 _copyYAxisRangeFromStripItem2(guiStrip),)
+        if not is1D:
+            items = items + (_copyYAxisCodeRangeFromStripItem2(guiStrip),
+                             )
+        items = items + (_separator(),)
+
+    _addMenuItems(guiStrip, thisMenu, items)
+
+    if viewPort in (MAINVIEW, AXISCORNER):
+        copyAttribs = ((guiStrip.copyAllAxisFromMenu2, 'All'),
+                       (guiStrip.copyXAxisFromMenu2, 'X'),
+                       (guiStrip.copyYAxisFromMenu2, 'Y'),
+                       )
+        matchAttribs = ((guiStrip.matchXAxisCodeToMenu2, 0),
+                        (guiStrip.matchYAxisCodeToMenu2, 1),
+                        ) if not is1D else ()
+    elif viewPort == BOTTOMAXIS:
+        copyAttribs = ((guiStrip.copyAllAxisFromMenu2, 'All'),
+                       (guiStrip.copyXAxisFromMenu2, 'X'),
+                       )
+        matchAttribs = ((guiStrip.matchXAxisCodeToMenu2, 0),
+                        ) if not is1D else ()
+    elif viewPort == RIGHTAXIS:
+        copyAttribs = ((guiStrip.copyAllAxisFromMenu2, 'All'),
+                       (guiStrip.copyYAxisFromMenu2, 'Y'),
+                       )
+        matchAttribs = ((guiStrip.matchYAxisCodeToMenu2, 1),
+                        ) if not is1D else ()
+
+    return copyAttribs, matchAttribs

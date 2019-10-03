@@ -340,49 +340,6 @@ def logCommand(prefix='', get=None, isProperty=False):
 
     return theDecorator
 
-def logCommand__Container(prefix='', get=None, isProperty=False):
-    """A decorator to log the invocation of the call to a Framework, Project, ... method.
-    Use prefix to set the proper command context, e.g. 'application.' or 'project.'
-    Use isProperty to get ' = 'args[1]
-    """
-    from ccpn.core.lib.ContextManagers import notificationEchoBlocking # local to prevent circular imports
-
-    @decorator.decorator
-    def theDecorator(*args, **kwds):
-        # def logCommand(func, self, *args, **kwds):
-        # to avoid potential conflicts with potential 'func' named keywords
-        func = args[0]
-        args = args[1:]  # Optional 'self' is now args[0]
-        self = args[0]
-
-        application = self.__container.project.application
-        blocking = application._echoBlocking
-        if blocking == 0:
-            _pref = prefix
-            if get == 'self':
-                _pref += "get('%s')." % args[0].pid
-
-            if isProperty:
-                logS = _pref + '%s = %r' % (func.__name__, args[1])
-            else:
-                logS = _makeLogString(_pref, False, func, *args, **kwds)
-
-            application.ui.echoCommands([logS])
-
-        # blocking += 1
-        with notificationEchoBlocking(application=application):
-            result = func(*args, **kwds)
-        # application._increaseNotificationBlocking()
-        # try:
-        #     result = func(*args, **kwds)
-        # finally:
-        #     # blocking -= 1
-        #     application._decreaseNotificationBlocking()
-
-        return result
-
-    return theDecorator
-
 
 # def debugEnter(verbosityLevel=Logger.DEBUG1):
 #     """A decorator to log the invocation of the call

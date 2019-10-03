@@ -35,7 +35,7 @@ class PeakListViewABC(AbstractWrapperObject):
     """ListView for 1D or nD List"""
 
     #: Short class name, for PID.
-    shortClassName = 'GL'
+    shortClassName = 'Undefined'
     # Attribute it necessary as subclasses must use superclass className
     className = 'Undefined'
 
@@ -62,8 +62,7 @@ class PeakListViewABC(AbstractWrapperObject):
         # MUST BE SUBCLASSED
         raise NotImplementedError("Code error: function not implemented")
 
-    def __init__(self, *args, **kwds):
-        super().__init__(*args, **kwds)
+    def _init(self):
         self._setListClasses()
 
     #=========================================================================================
@@ -169,8 +168,8 @@ class PeakListViewABC(AbstractWrapperObject):
                 raise ValueError("textColour %s not defined correctly, must be a hex colour string (e.g. '#ABCDEF' or '#')" % value)
             value = value.upper()
 
-        if self.textColour != value:
-            self._apiListView.textColour = value
+        # if self.textColour != value:
+        self._apiListView.textColour = value
 
     @property
     def isSymbolDisplayed(self) -> bool:
@@ -224,7 +223,7 @@ class PeakListViewABC(AbstractWrapperObject):
         result = self.getParameter(MERITSETTINGS, MERITENABLED)
         if result is None:
             obj = self._childClass
-            result = obj and obj.lineColour
+            result = obj and obj.meritEnabled
         return result
 
     @meritEnabled.setter
@@ -244,7 +243,7 @@ class PeakListViewABC(AbstractWrapperObject):
         result = self.getParameter(MERITSETTINGS, MERITTHRESHOLD)
         if result is None:
             obj = self._childClass
-            result = obj and obj.lineColour
+            result = obj and obj.meritThreshold
         return result
 
     @meritThreshold.setter
@@ -254,7 +253,7 @@ class PeakListViewABC(AbstractWrapperObject):
         if not (0.0 <= value <= 1.0):
             raise ValueError("meritThreshold must be in the range [0.0, 1.0]")
 
-        self.setParameter(MERITSETTINGS, MERITENABLED, value)
+        self.setParameter(MERITSETTINGS, MERITTHRESHOLD, value)
 
     @property
     def lineColour(self) -> str:
@@ -289,7 +288,9 @@ class PeakListViewABC(AbstractWrapperObject):
     # Implementation functions
     #=========================================================================================
 
-    # None
+    # def _initializeAll(self):
+    #     self._setListClasses()
+    #     super()._initializeAll()
 
     #=========================================================================================
     # CCPN functions

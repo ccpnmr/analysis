@@ -634,6 +634,7 @@ class _PeakListView(coreClass, _GuiPeakListView):
         self._appBase = project._appBase
         self.application = project._appBase
         _GuiPeakListView.__init__(self)
+        self._init()
 
 
 Gui._factoryFunctions[coreClass.className] = _PeakListView
@@ -653,6 +654,7 @@ class _IntegralListView(coreClass, _GuiIntegralListView):
         self._appBase = project._appBase
         self.application = project._appBase
         _GuiIntegralListView.__init__(self)
+        self._init()
 
 
 Gui._factoryFunctions[coreClass.className] = _IntegralListView
@@ -672,6 +674,7 @@ class _MultipletListView(coreClass, _GuiMultipletListView):
         self._appBase = project._appBase
         self.application = project._appBase
         _GuiMultipletListView.__init__(self)
+        self._init()
 
 
 Gui._factoryFunctions[coreClass.className] = _MultipletListView

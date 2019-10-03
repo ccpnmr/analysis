@@ -294,8 +294,9 @@ class AbstractWrapperObject(NotifierBase):
         trampling by other code"""
         result = self._wrappedData.ccpnInternalData
         if result is None:
-            with notificationBlanking():
-                result = self._wrappedData.ccpnInternalData = {}
+            # with notificationBlanking():
+            #     result = self._wrappedData.ccpnInternalData = {}
+            result = {}
         return result
 
     @_ccpnInternalData.setter

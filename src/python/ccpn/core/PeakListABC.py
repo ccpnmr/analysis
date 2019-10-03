@@ -250,7 +250,7 @@ class PeakListABC(AbstractWrapperObject):
         if not (0.0 <= value <= 1.0):
             raise ValueError("meritThreshold must be in the range [0.0, 1.0]")
 
-        self.setParameter(MERITSETTINGS, MERITENABLED, value)
+        self.setParameter(MERITSETTINGS, MERITTHRESHOLD, value)
 
     @property
     def lineColour(self) -> str:

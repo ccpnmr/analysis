@@ -104,14 +104,15 @@ class PeakListPropertiesPopupABC(CcpnDialog):
             if self._meritOptions:
                 row += 1
                 self.meritEnabledLabel = Label(self, text="Use Merit Threshold: ", grid=(row, 0))
-                self.meritEnabledBox = CheckBox(self, grid=(row, 1), checked=False)
-                # self.meritEnabledBox.toggled.connect(self._toggleMeritEnabled)
+                self.meritEnabledBox = CheckBox(self, grid=(row, 1),
+                                                checked=getattr(self.ccpnList, MERITENABLED) or False)
+                self.meritEnabledBox.toggled.connect(self._applyChanges)
 
                 row += 1
                 self.meritThresholdLabel = Label(self, text="Merit Threshold", grid=(row, 0))
                 self.meritThresholdData = DoubleSpinbox(self, grid=(row, 1), hAlign='l', decimals=2, step=0.01, min=0.0, max=1.0)
-                self.meritThresholdData.setValue(float('%.2f' % 0.5))
-                # self.meritThresholdData.editingFinished.connect(self._setMeritThreshold)
+                self.meritThresholdData.setValue(float('%.2f' % (getattr(self.ccpnList, MERITTHRESHOLD) or 0.0)))
+                self.meritThresholdData.editingFinished.connect(self._applyChanges)
 
                 # set default colours if not defined
                 for colButton, enabled in zip(BUTTONOPTIONS2,
@@ -157,6 +158,13 @@ class PeakListPropertiesPopupABC(CcpnDialog):
             colour = Colour.getSpectrumColour(value, defaultReturn='#')
             setattr(self.ccpnList, attrib, colour)
 
+    def _changeMeritOptions(self):
+        meritEnabled = self.meritEnabledBox.isChecked()
+        setattr(self.ccpnList, MERITENABLED, meritEnabled)
+
+        meritThreshold = self.meritThresholdData.get()
+        setattr(self.ccpnList, MERITTHRESHOLD, float(meritThreshold))
+
     def _applyChanges(self):
         """The apply button has been clicked.
         Define an undo block for setting the properties of the object
@@ -169,6 +177,7 @@ class PeakListPropertiesPopupABC(CcpnDialog):
             with undoStackBlocking() as addUndoItem:
                 addUndoItem(undo=self._refreshGLItems)
 
+            self._changeMeritOptions()
             self._changeColours()
 
             # add item here to redraw items

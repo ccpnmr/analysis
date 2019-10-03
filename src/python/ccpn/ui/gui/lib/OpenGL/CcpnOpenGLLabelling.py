@@ -313,7 +313,12 @@ class GLLabelling():
             if self._isSelected(obj):
                 listCol = self._GLParent.highlightColour[:3]
             else:
-                listCol = getAutoColourRgbRatio(pls.textColour, pls.spectrum,
+                if objListView.meritEnabled and obj.figureOfMerit < objListView.meritThreshold:
+                    objCol = objListView.meritColour
+                else:
+                    objCol = objListView.textColour or '#7e7e7e'
+
+                listCol = getAutoColourRgbRatio(objCol, pls.spectrum,
                                                 self.autoColour,
                                                 getColours()[CCPNGLWIDGET_FOREGROUND])
 

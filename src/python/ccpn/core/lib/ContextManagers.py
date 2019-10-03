@@ -31,7 +31,6 @@ from contextlib import contextmanager
 from collections import Iterable
 from functools import partial
 from inspect import signature, Parameter
-from ccpn.core.lib import Util as coreUtil
 from ccpn.util.Logging import getLogger
 from ccpn.framework.Application import getApplication
 
@@ -39,6 +38,9 @@ from ccpn.framework.Application import getApplication
 @contextmanager
 def echoCommand(obj, funcName, *params, values=None, defaults=None,
                 parName=None, propertySetter=False, **objectParameters):
+
+    from ccpn.core.lib import Util as coreUtil
+
     try:
         project = obj._project
     except:

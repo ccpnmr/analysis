@@ -301,6 +301,7 @@ def logCommand(prefix='', get=None, isProperty=False):
     Use prefix to set the proper command context, e.g. 'application.' or 'project.'
     Use isProperty to get ' = 'args[1]
     """
+    from ccpn.core.lib.ContextManagers import notificationEchoBlocking # local to prevent circular imports
 
     @decorator.decorator
     def theDecorator(*args, **kwds):
@@ -325,12 +326,15 @@ def logCommand(prefix='', get=None, isProperty=False):
             application.ui.echoCommands([logS])
 
         # blocking += 1
-        application._increaseNotificationBlocking()
-        try:
+        with notificationEchoBlocking(application=application):
             result = func(*args, **kwds)
-        finally:
-            # blocking -= 1
-            application._decreaseNotificationBlocking()
+
+        # application._increaseNotificationBlocking()
+        # try:
+        #     result = func(*args, **kwds)
+        # finally:
+        #     # blocking -= 1
+        #     application._decreaseNotificationBlocking()
 
         return result
 
@@ -341,6 +345,7 @@ def logCommand__Container(prefix='', get=None, isProperty=False):
     Use prefix to set the proper command context, e.g. 'application.' or 'project.'
     Use isProperty to get ' = 'args[1]
     """
+    from ccpn.core.lib.ContextManagers import notificationEchoBlocking # local to prevent circular imports
 
     @decorator.decorator
     def theDecorator(*args, **kwds):
@@ -365,12 +370,14 @@ def logCommand__Container(prefix='', get=None, isProperty=False):
             application.ui.echoCommands([logS])
 
         # blocking += 1
-        application._increaseNotificationBlocking()
-        try:
+        with notificationEchoBlocking(application=application):
             result = func(*args, **kwds)
-        finally:
-            # blocking -= 1
-            application._decreaseNotificationBlocking()
+        # application._increaseNotificationBlocking()
+        # try:
+        #     result = func(*args, **kwds)
+        # finally:
+        #     # blocking -= 1
+        #     application._decreaseNotificationBlocking()
 
         return result
 

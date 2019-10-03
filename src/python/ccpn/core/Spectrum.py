@@ -84,6 +84,7 @@ from ccpn.core.lib.ContextManagers import newObject, deleteObject, \
 from ccpn.util.Common import getAxisCodeMatchIndices
 from ccpn.util.Path import Path, aPath
 from ccpn.util.Common import isIterable
+from ccpn.core.lib.ContextManagers import notificationEchoBlocking
 
 # 2019010:ED test new matching
 # from ccpn.util.Common import axisCodeMapping
@@ -2453,6 +2454,41 @@ assignmentTolerances
         return str(_p.parent / slice + HDF5_EXTENSION)
 
     @logCommand(get='self')
+    def allSlices(self, axisCode, exactMatch=True):
+        """An iterator over all slices defined by axisCode, yielding (position, data-array) tuples
+        positions are one-based
+        """
+
+        sliceDim = self.getByAxisCodes('dimensions', [axisCode], exactMatch=exactMatch)[0]
+
+        # get dimensions to interate over
+        dims = (sliceDim,)
+        iterDims = list(set(self.dimensions) - set(dims))
+        # get relevant iteration parameters
+        points = [self.pointCounts[dim-1] for dim in iterDims]
+        indices = [dim-1 for dim in iterDims]
+        iterData = list(zip(iterDims, points, indices))
+
+        def _nextPosition(currentPosition):
+            "Return a (done, position) tuple derived from currentPosition"
+            for dim, point, idx in iterData:
+                if currentPosition[idx] + 1 <= point:  # still an increment to make in this dimension
+                    currentPosition[idx] += 1
+                    return (False, currentPosition)
+                else:  # reset this dimension
+                    currentPosition[idx] = 1
+            return (True, None)  # reached the end
+
+        # loop over all slices
+        position = [1] * self.dimensionCount
+        done = False
+        while not done:
+            with notificationEchoBlocking(self.project.application):
+                sliceData = self.getSliceData(position=position, sliceDim=sliceDim)
+                yield (tuple(position), sliceData)
+            done, position = _nextPosition(position)
+
+    @logCommand(get='self')
     def extractSliceToFile(self, axisCode, position, path=None):
         """Extract 1d slice from self as new Spectrum; saved to path
         (auto-generated if not given)
@@ -2603,6 +2639,7 @@ assignmentTolerances
         self.copyParameters(axisCodes=axisCodes, target=newSpectrum)
         return newSpectrum
 
+    @logCommand(get='self')
     def allPlanes(self, axisCodes: tuple, exactMatch=True):
         """An iterator over all planes defined by axisCodes, yielding (position, data-array) tuples
         Expand axisCodes if exactMatch=False
@@ -2638,8 +2675,9 @@ assignmentTolerances
         while not done:
             # Using direct api getPlaneData call to reduce overhead; (all parameters have been checked)
             # By-passes the caching
-            planeData = self._apiDataSource.getPlaneData(position=position, xDim=xDim, yDim=yDim)
-            yield (position, planeData)
+            with notificationEchoBlocking(self.project.application):
+                planeData = self._apiDataSource.getPlaneData(position=position, xDim=xDim, yDim=yDim)
+                yield (position, planeData)
             done, position = _nextPosition(position)
 
     @logCommand(get='self')

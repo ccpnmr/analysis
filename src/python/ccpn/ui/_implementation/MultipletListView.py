@@ -239,7 +239,9 @@ Project._apiNotifiers.append(
 def _multipletListAddMultipletListViews(project: Project, apiMultipletList: Nmr.MultipletList):
     """Add ApiMultipletListView when ApiMultipletList is created"""
     for apiSpectrumView in apiMultipletList.dataSource.spectrumViews:
-        apiSpectrumView.newMultipletListView(multipletListSerial=apiMultipletList.serial, multipletList=apiMultipletList)
+        apiListView = apiSpectrumView.newMultipletListView(multipletListSerial=apiMultipletList.serial, multipletList=apiMultipletList)
+        apiListView.__dict__['symbolColour'] = None
+        apiListView.__dict__['textColour'] = None
 
 
 #
@@ -249,7 +251,9 @@ Project._setupApiNotifier(_multipletListAddMultipletListViews, Nmr.MultipletList
 def _spectrumViewAddMultipletListViews(project: Project, apiSpectrumView: ApiSpectrumView):
     """Add ApiMultipletListView when ApiSpectrumView is created"""
     for apiMultipletList in apiSpectrumView.dataSource.multipletLists:
-        apiSpectrumView.newMultipletListView(multipletListSerial=apiMultipletList.serial, multipletList=apiMultipletList)
+        apiListView = apiSpectrumView.newMultipletListView(multipletListSerial=apiMultipletList.serial, multipletList=apiMultipletList)
+        apiListView.__dict__['symbolColour'] = None
+        apiListView.__dict__['textColour'] = None
 
 
 #

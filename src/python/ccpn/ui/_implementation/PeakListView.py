@@ -194,6 +194,7 @@ class PeakListView(PeakListViewABC):
         else:
             return None
 
+
 #=========================================================================================
 # CCPN functions
 #========================================================================================
@@ -220,6 +221,7 @@ Project._apiNotifiers.append(
          ApiStripPeakListView._metaclass.qualifiedName(), '')
         )
 
+
 #EJB 20181122: moved to PeakList _finaliseAction
 # Notify PeakListView change when PeakList changes
 # PeakList._setupCoreNotifier('change', AbstractWrapperObject._finaliseRelatedObject,
@@ -229,7 +231,9 @@ Project._apiNotifiers.append(
 def _peakListAddPeakListViews(project: Project, apiPeakList: Nmr.PeakList):
     """Add ApiPeakListView when ApiPeakList is created"""
     for apiSpectrumView in apiPeakList.dataSource.spectrumViews:
-        apiSpectrumView.newPeakListView(peakListSerial=apiPeakList.serial, peakList=apiPeakList)
+        apiListView = apiSpectrumView.newPeakListView(peakListSerial=apiPeakList.serial, peakList=apiPeakList)
+        apiListView.__dict__['symbolColour'] = None
+        apiListView.__dict__['textColour'] = None
 
 
 #
@@ -239,7 +243,9 @@ Project._setupApiNotifier(_peakListAddPeakListViews, Nmr.PeakList, 'postInit')
 def _spectrumViewAddPeakListViews(project: Project, apiSpectrumView: ApiSpectrumView):
     """Add ApiPeakListView when ApiSpectrumView is created"""
     for apiPeakList in apiSpectrumView.dataSource.peakLists:
-        apiSpectrumView.newPeakListView(peakListSerial=apiPeakList.serial, peakList=apiPeakList)
+        apiListView = apiSpectrumView.newPeakListView(peakListSerial=apiPeakList.serial, peakList=apiPeakList)
+        apiListView.__dict__['symbolColour'] = None
+        apiListView.__dict__['textColour'] = None
 
 
 #

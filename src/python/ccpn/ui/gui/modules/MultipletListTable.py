@@ -143,6 +143,18 @@ class MultipletListTableWidget(GuiTable):
 
     positionsUnit = MultipletPosUnits[0]  #default
 
+    @staticmethod
+    def _setFigureOfMerit(obj, value):
+        """
+        CCPN-INTERNAL: Set figureOfMerit from table
+        Must be a floatRatio in range [0.0, 1.0]
+        """
+        # ejb - why is it blanking a notification here?
+        # NmrResidueTable._project.blankNotification()
+
+        # clip and set the figure of merit
+        obj.figureOfMerit = min(max(float(value), 0.0), 1.0) if value else None
+
     def __init__(self, parent=None, mainWindow=None, moduleParent=None, multipletList=None, multiSelect=True,
                  actionCallback=None, selectionCallback=None, **kwds):
         """
@@ -301,12 +313,13 @@ class MultipletListTableWidget(GuiTable):
 
         # figureOfMerit column
         figureOfMeritTipText = 'Figure of merit'
-        columnDefs.append(('Merit', lambda ml: ml.figureOfMerit, figureOfMeritTipText, None, None))
+        columnDefs.append(('Merit', lambda ml: ml.figureOfMerit, figureOfMeritTipText,
+                           lambda ml, value: self._setFigureOfMerit(ml, value), None))
 
         # comment column
         commentsTipText = 'Textual notes about the multiplet'
-        columnDefs.append(('Comment', lambda ml: MultipletListTableWidget._getCommentText(ml), commentsTipText,
-                           lambda ml, value: MultipletListTableWidget._setComment(ml, value), None))
+        columnDefs.append(('Comment', lambda ml: self._getCommentText(ml), commentsTipText,
+                           lambda ml, value: self._setComment(ml, value), None))
 
         return ColumnClass(columnDefs)
 

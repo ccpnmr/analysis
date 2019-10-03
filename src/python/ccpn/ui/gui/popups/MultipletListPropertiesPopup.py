@@ -25,175 +25,54 @@ __date__ = "$Date: 2017-03-30 11:28:58 +0100 (Thu, March 30, 2017) $"
 # Start of code
 #=========================================================================================
 
-import ccpn.util.Colour as Colour
-from ccpn.ui.gui.widgets.MessageDialog import MessageDialog
-from ccpn.ui.gui.widgets.Button import Button
 from ccpn.ui.gui.widgets.RadioButtons import RadioButtons
 from ccpn.ui.gui.widgets.Label import Label
-from ccpn.ui.gui.widgets.PulldownList import PulldownList
-from ccpn.ui.gui.popups.Dialog import CcpnDialog, handleDialogApply
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
-from ccpn.core.lib.ContextManagers import undoBlock, undoStackBlocking
-from ccpn.core.MultipletList import MULTIPLETAVERAGE, MULTIPLETWEIGHTEDAVERAGE, MULTIPLETAVERAGINGTYPES
+from ccpn.core.MultipletList import MULTIPLETAVERAGINGTYPES
+from ccpn.ui.gui.popups.PeakListPropertiesPopupABC import PeakListPropertiesPopupABC
+from ccpn.core.MultipletList import MultipletList
 
 
-class MultipletListPropertiesPopup(CcpnDialog):
-    def __init__(self, parent=None, mainWindow=None, multipletList=None, title='Multiplet List Properties', **kwds):
-        CcpnDialog.__init__(self, parent, setLayout=True, windowTitle=title, **kwds)
+class MultipletListPropertiesPopup(PeakListPropertiesPopupABC):
+    """
+    Popup to handle changing parameters in multipletLists
+    """
+    # class of lists handled by popup
+    _baseClass = MultipletList
+    _symbolColourOption = True
+    _textColourOption = True
+    _lineColourOption = True
+    _meritColourOption = True
+    _meritOptions = True
 
-        self.mainWindow = mainWindow
-        self.application = mainWindow.application
-        self.project = mainWindow.application.project
-        self.current = mainWindow.application.current
-        self.multipletList = multipletList
+    def __init__(self, parent=None, mainWindow=None, multipletList=None, title=None, **kwds):
+        super().__init__(parent=parent, mainWindow=mainWindow, ccpnList=multipletList,
+                         title='%s Properties' % self._baseClass.className, **kwds)
 
-        if not self.multipletList:
-            MessageDialog.showWarning(title, 'No MultipletList Found')
-            self.close()
-
-        else:
-            self.multipletListViews = [multipletListView for multipletListView in multipletList.project.multipletListViews]
-
-            # NOTE: below is not sorted in any way, but if we change that, we also have to change loop in _fillColourPulldown
-            spectrumColourKeys = list(Colour.spectrumColours.keys())
-            if not self.multipletList.symbolColour:
-                self.multipletList.symbolColour = spectrumColourKeys[0]  # default
-            if not self.multipletList.textColour:
-                self.multipletList.textColour = spectrumColourKeys[1]  # default
-            if not self.multipletList.textColour:
-                self.multipletList.textColour = spectrumColourKeys[2]  # default
-
-            row = 0
-            self.multipletListLabel = Label(self, "Multiplet List Name ", grid=(row, 0))
-            self.multipletListLabel = Label(self, multipletList.id, grid=(row, 1))
-
-            row += 1
-            self.symbolColourLabel = Label(self, 'Multiplet Colour', grid=(row, 0))
-            self.symbolColourPulldownList = PulldownList(self, grid=(row, 1))
-            Colour.fillColourPulldown(self.symbolColourPulldownList, allowAuto=True)
-
-            c = multipletList.symbolColour
-            if c in spectrumColourKeys:
-                self.symbolColourPulldownList.setCurrentText(Colour.spectrumColours[c])
-            else:
-                Colour.addNewColourString(c)
-                Colour.fillColourPulldown(self.symbolColourPulldownList, allowAuto=True)
-                Colour.selectPullDownColour(self.symbolColourPulldownList, c, allowAuto=True)
-
-            self.symbolColourPulldownList.activated.connect(self._applyChanges)
-
-            row += 1
-            self.textColourLabel = Label(self, 'Multiplet Text Colour', grid=(row, 0))
-            self.textColourPulldownList = PulldownList(self, grid=(row, 1))
-            Colour.fillColourPulldown(self.textColourPulldownList, allowAuto=True)
-
-            c = multipletList.textColour
-            if c in spectrumColourKeys:
-                self.textColourPulldownList.setCurrentText(Colour.spectrumColours[c])
-            else:
-                Colour.addNewColourString(c)
-
-                # repopulate both pulldowns
-                Colour.fillColourPulldown(self.symbolColourPulldownList, allowAuto=True)
-                Colour.fillColourPulldown(self.textColourPulldownList, allowAuto=True)
-                Colour.selectPullDownColour(self.textColourPulldownList, c, allowAuto=True)
-
-            self.textColourPulldownList.activated.connect(self._applyChanges)
-
-            row += 1
-            self.lineColourLabel = Label(self, 'Multiplet Line Colour', grid=(row, 0))
-            self.lineColourPulldownList = PulldownList(self, grid=(row, 1))
-            Colour.fillColourPulldown(self.lineColourPulldownList, allowAuto=True)
-
-            c = multipletList.lineColour
-            if c in spectrumColourKeys:
-                self.lineColourPulldownList.setCurrentText(Colour.spectrumColours[c])
-            else:
-                Colour.addNewColourString(c)
-
-                # repopulate all pulldowns
-                Colour.fillColourPulldown(self.symbolColourPulldownList, allowAuto=True)
-                Colour.fillColourPulldown(self.textColourPulldownList, allowAuto=True)
-                Colour.fillColourPulldown(self.lineColourPulldownList, allowAuto=True)
-                Colour.selectPullDownColour(self.lineColourPulldownList, c, allowAuto=True)
-
-            self.lineColourPulldownList.activated.connect(self._applyChanges)
-
-            row += 1
-            self.multipletAveragingLabel = Label(self, text="Multiplet Averaging:", grid=(row, 0))
-            multipletAveraging = self.multipletList.multipletAveraging
-            self.multipletAveraging = RadioButtons(self, texts=MULTIPLETAVERAGINGTYPES,
-                                                   selectedInd=MULTIPLETAVERAGINGTYPES.index(multipletAveraging) if multipletAveraging in MULTIPLETAVERAGINGTYPES else 0,
-                                                   callback=self._applyChanges,
-                                                   direction='h',
-                                                   grid=(row, 1), hAlign='l',
-                                                   tipTexts=None,
-                                                   )
-
-            row += 1
-            self.closeButton = Button(self, text='Close', grid=(row, 1), callback=self._accept)
-
-        self.GLSignals = GLNotifier(parent=self)
-
-    def _changeColours(self):
-        """set the colours from the pulldowns
-        """
-        value = self.symbolColourPulldownList.currentText()
-        colour = Colour.getSpectrumColour(value, defaultReturn='#')
-        self.multipletList.symbolColour = colour
-
-        value = self.textColourPulldownList.currentText()
-        colour = Colour.getSpectrumColour(value, defaultReturn='#')
-        self.multipletList.textColour = colour
-
-        value = self.lineColourPulldownList.currentText()
-        colour = Colour.getSpectrumColour(value, defaultReturn='#')
-        self.multipletList.lineColour = colour
+        self.multipletAveragingLabel = Label(self, text="Multiplet Averaging:", grid=(self._rowForNewItems, 0))
+        multipletAveraging = self.ccpnList.multipletAveraging
+        self.multipletAveraging = RadioButtons(self, texts=MULTIPLETAVERAGINGTYPES,
+                                               selectedInd=MULTIPLETAVERAGINGTYPES.index(multipletAveraging) if multipletAveraging in MULTIPLETAVERAGINGTYPES else 0,
+                                               callback=self._applyChanges,
+                                               direction='h',
+                                               grid=(self._rowForNewItems, 1), hAlign='l',
+                                               tipTexts=None,
+                                               )
 
     def _setAttributes(self):
         """set the attributes from the other widgets
         """
+        super()._setAttributes()
+
         value = self.multipletAveraging.getSelectedText()
-        self.multipletList.multipletAveraging = value
+        self.ccpnList.multipletAveraging = value
 
     def _refreshGLItems(self):
         # emit a signal to rebuild all peaks and multiplets
-        self.GLSignals.emitEvent(targets=[self.multipletList], triggers=[GLNotifier.GLMULTIPLETLISTS,
+        self.GLSignals.emitEvent(targets=[self.ccpnList], triggers=[GLNotifier.GLMULTIPLETLISTS,
                                                                             GLNotifier.GLMULTIPLETLISTLABELS])
 
-    def _applyChanges(self):
+    def _getListViews(self, ccpnList):
+        """Return the listViews containing this list
         """
-        The apply button has been clicked
-        Define an undo block for setting the properties of the object
-        If there is an error setting any values then generate an error message
-          If anything has been added to the undo queue then remove it with application.undo()
-          repopulate the popup widgets
-        """
-
-        with handleDialogApply(self) as error:
-
-            # add item here to redraw items
-            with undoStackBlocking() as addUndoItem:
-                addUndoItem(undo=self._refreshGLItems)
-
-            self._changeColours()
-            self._setAttributes()
-
-            # add item here to redraw items
-            with undoStackBlocking() as addUndoItem:
-                addUndoItem(redo=self._refreshGLItems)
-
-            # redraw the items
-            self._refreshGLItems()
-
-        return error.errorValue is None     # return True for no errors
-
-    def _okButton(self):
-        if self._applyChanges() is True:
-            self._accept()
-
-    def _accept(self):
-        self.symbolColourPulldownList.activated.disconnect(self._applyChanges)
-        self.textColourPulldownList.activated.disconnect(self._applyChanges)
-        self.lineColourPulldownList.activated.disconnect(self._applyChanges)
-        self.accept()
+        return [multipletListView for multipletListView in ccpnList.project.multipletListViews if multipletListView.multipletList == ccpnList]

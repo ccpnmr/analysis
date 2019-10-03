@@ -52,6 +52,8 @@ MERITENABLED = 'meritEnabled'
 MERITTHRESHOLD = 'meritThreshold'
 LINESETTINGS = 'lineSettings'
 LINECOLOUR = 'lineColour'
+SYMBOLCOLOUR = 'symbolColour'
+TEXTCOLOUR = 'textColour'
 
 COLOURCHECK = '#[a-fA-F0-9]{6}$'
 
@@ -160,39 +162,37 @@ class PeakListABC(AbstractWrapperObject):
     @property
     def symbolColour(self) -> str:
         """Symbol colour for annotation display in all displays.
-        symbolColour must be a hex colour string '#ABCDEF' or '#' to denote an auto-colour (take colour from spectrum).
+        symbolColour must be a valid hex colour string '#ABCDEF' or '#' to denote an auto-colour (take colour from spectrum).
         Lowercase will be changed to uppercase.
         """
         return self._wrappedData.symbolColour
 
     @symbolColour.setter
-    def symbolColour(self, value: Optional[str]):
-        if not isinstance(value, (str, type(None))):
-            raise TypeError("symbolColour must be a hex colour string (e.g. '#ABCDEF' or '#') or None")
-        if value is not None:
-            if not (re.findall(COLOURCHECK, value) or value == '#'):
-                raise ValueError("symbolColour %s not defined correctly, must be a hex colour string (e.g. '#ABCDEF' or '#')" % value)
-            value = value.upper()
+    def symbolColour(self, value: str):
+        if not isinstance(value, str):
+            raise TypeError("symbolColour must be a hex colour string (e.g. '#ABCDEF' or '#')")
+        if not (re.findall(COLOURCHECK, value) or value == '#'):
+            raise ValueError("symbolColour %s not defined correctly, must be a hex colour string (e.g. '#ABCDEF' or '#')" % value)
 
+        value = value.upper()
         self._wrappedData.symbolColour = value
 
     @property
     def textColour(self) -> str:
         """Text colour for annotation display in all displays.
-        textColour must be a hex colour string '#ABCDEF' or '#' to denote an auto-colour (take colour from spectrum).
+        textColour must be a valid hex colour string '#ABCDEF' or '#' to denote an auto-colour (take colour from spectrum).
         Lowercase will be changed to uppercase.
         """
         return self._wrappedData.textColour
 
     @textColour.setter
-    def textColour(self, value: Optional[str]):
-        if not isinstance(value, (str, type(None))):
-            raise TypeError("textColour must be a hex colour string (e.g. '#ABCDEF' or '#') or None")
-        if value is not None:
-            if not (re.findall(COLOURCHECK, value) or value == '#'):
-                raise ValueError("textColour %s not defined correctly, must be a hex colour string (e.g. '#ABCDEF' or '#')" % value)
-            value = value.upper()
+    def textColour(self, value: str):
+        if not isinstance(value, str):
+            raise TypeError("textColour must be a hex colour string (e.g. '#ABCDEF' or '#')")
+        if not (re.findall(COLOURCHECK, value) or value == '#'):
+            raise ValueError("textColour %s not defined correctly, must be a hex colour string (e.g. '#ABCDEF' or '#')" % value)
 
+        value = value.upper()
         self._wrappedData.textColour = value
 
     @property
@@ -207,26 +207,25 @@ class PeakListABC(AbstractWrapperObject):
     @property
     def meritColour(self) -> Optional[str]:
         """merit colour for annotation display in all displays.
-        meritColour must be a hex colour string '#ABCDEF' or '#' to denote an auto-colour (take colour from spectrum).
+        meritColour must be a valid hex colour string '#ABCDEF' or '#' to denote an auto-colour (take colour from spectrum).
         Lowercase will be changed to uppercase.
         """
         return self.getParameter(MERITSETTINGS, MERITCOLOUR)
 
     @meritColour.setter
-    def meritColour(self, value: Optional[str]):
-        if not isinstance(value, (str, type(None))):
-            raise TypeError("meritColour must be a hex colour string (e.g. '#ABCDEF' or '#') or None")
-        if value is not None:
-            if not (re.findall(COLOURCHECK, value) or value == '#'):
-                raise ValueError("meritColour %s not defined correctly, must be a hex colour string (e.g. '#ABCDEF' or '#')" % value)
-            value = value.upper()
+    def meritColour(self, value: str):
+        if not isinstance(value, str):
+            raise TypeError("meritColour must be a hex colour string (e.g. '#ABCDEF' or '#')")
+        if not (re.findall(COLOURCHECK, value) or value == '#'):
+            raise ValueError("meritColour %s not defined correctly, must be a hex colour string (e.g. '#ABCDEF' or '#')" % value)
 
-        # store the uppercase form
+        value = value.upper()
         self.setParameter(MERITSETTINGS, MERITCOLOUR, value)
 
     @property
     def meritEnabled(self) -> Optional[bool]:
         """Flag to enable merit threshold for annotation display in all displays.
+        Must be True/False.
         """
         return self.getParameter(MERITSETTINGS, MERITENABLED)
 
@@ -240,6 +239,7 @@ class PeakListABC(AbstractWrapperObject):
     @property
     def meritThreshold(self) -> Optional[float]:
         """Threshold to determine merit colouring for annotation display in all displays.
+        Must be a float in the range [0.0, 1.0]
         """
         return self.getParameter(MERITSETTINGS, MERITTHRESHOLD)
 
@@ -255,21 +255,19 @@ class PeakListABC(AbstractWrapperObject):
     @property
     def lineColour(self) -> str:
         """line colour for annotation display in all displays.
-        lineColour must be a hex colour string '#ABCDEF' or '#' to denote an auto-colour (take colour from spectrum).
+        lineColour must be a valid hex colour string '#ABCDEF' or '#' to denote an auto-colour (take colour from spectrum).
         Lowercase will be changed to uppercase.
         """
         return self.getParameter(LINESETTINGS, LINECOLOUR)
 
     @lineColour.setter
-    def lineColour(self, value: Optional[str]):
-        if not isinstance(value, (str, type(None))):
-            raise TypeError("lineColour must be a hex colour string (e.g. '#ABCDEF' or '#') or None")
-        if value is not None:
-            if not (re.findall(COLOURCHECK, value) or value == '#'):
-                raise ValueError("lineColour %s not defined correctly, must be a hex colour string (e.g. '#ABCDEF' or '#')" % value)
-            value = value.upper()
+    def lineColour(self, value: str):
+        if not isinstance(value, str):
+            raise TypeError("lineColour must be a hex colour string (e.g. '#ABCDEF' or '#')")
+        if not (re.findall(COLOURCHECK, value) or value == '#'):
+            raise ValueError("lineColour %s not defined correctly, must be a hex colour string (e.g. '#ABCDEF' or '#')" % value)
 
-        # store the uppercase form
+        value = value.upper()
         self.setParameter(LINESETTINGS, LINECOLOUR, value)
 
     #=========================================================================================

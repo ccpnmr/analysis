@@ -232,26 +232,9 @@ class GLLabelling():
         symbolType = self.strip.symbolType
         symbolWidth = self.strip.symbolSize / 2.0
 
-        # # this could be done in the int
-        # ax = self._GLParent._getValidAspectRatio(self._GLParent._axisCodes[0])
-        # ay = self._GLParent._getValidAspectRatio(self._GLParent._axisCodes[1])
-        # ratio = ax / ay
-        # baseCode = self._GLParent._getValidAspectRatio(self.strip.spectrumDisplay.axisCodes[0])
-        #
-        # symbolWidth *= (ay/baseCode)
-
         # pixelX/Y don't update on centre zoom yet
         r = self._GLParent.symbolX
         w = self._GLParent.symbolY
-
-        # if x <= y:
-        #     # symbolWidth *= ratio
-        #     r = symbolWidth
-        #     w = symbolWidth * y / x
-        # else:
-        #     # symbolWidth /= ratio
-        #     w = symbolWidth
-        #     r = symbolWidth * x / y
 
         return r, w, symbolType, symbolWidth
 
@@ -301,7 +284,6 @@ class GLLabelling():
                 r = GLDefs.STRINGSCALE * r
                 w = GLDefs.STRINGSCALE * w
 
-        # if axisCount == 2:
         if pIndex:
             # get visible/plane status
             _isInPlane, _isInFlankingPlane, planeIndex, fade = self.objIsInVisiblePlanes(spectrumView, obj)
@@ -314,9 +296,9 @@ class GLLabelling():
                 listCol = self._GLParent.highlightColour[:3]
             else:
                 if objListView.meritEnabled and obj.figureOfMerit < objListView.meritThreshold:
-                    objCol = objListView.meritColour
+                    objCol = objListView.meritColour or GLDefs.DEFAULTCOLOUR
                 else:
-                    objCol = objListView.textColour or '#7e7e7e'
+                    objCol = objListView.textColour or GLDefs.DEFAULTCOLOUR
 
                 listCol = getAutoColourRgbRatio(objCol, pls.spectrum,
                                                 self.autoColour,
@@ -391,7 +373,12 @@ class GLLabelling():
             if self._isSelected(obj):
                 listCol = self._GLParent.highlightColour[:3]
             else:
-                listCol = getAutoColourRgbRatio(pls.textColour, pls.spectrum,
+                if objListView.meritEnabled and obj.figureOfMerit < objListView.meritThreshold:
+                    objCol = objListView.meritColour or GLDefs.DEFAULTCOLOUR
+                else:
+                    objCol = objListView.textColour or GLDefs.DEFAULTCOLOUR
+
+                listCol = getAutoColourRgbRatio(objCol, pls.spectrum,
                                                 self.autoColour,
                                                 getColours()[CCPNGLWIDGET_FOREGROUND])
 
@@ -1136,7 +1123,12 @@ class GLLabelling():
         # pls = peakListView.peakList
         pls = self.objectList(objListView)
 
-        listCol = getAutoColourRgbRatio(pls.symbolColour, pls.spectrum,
+        if objListView.meritEnabled and obj.figureOfMerit < objListView.meritThreshold:
+            objCol = objListView.meritColour or GLDefs.DEFAULTCOLOUR
+        else:
+            objCol = objListView.symbolColour or GLDefs.DEFAULTCOLOUR
+
+        listCol = getAutoColourRgbRatio(objCol, pls.spectrum,
                                         self.autoColour,
                                         getColours()[CCPNGLWIDGET_FOREGROUND])
 
@@ -1156,8 +1148,18 @@ class GLLabelling():
         # pls = peakListView.peakList
         pls = self.objectList(objListView)
 
-        listCol = getAutoColourRgbRatio(pls.textColour, pls.spectrum, self.autoColour,
+        # if objListView.meritEnabled and obj.figureOfMerit < objListView.meritThreshold:
+        #     objCol = objListView.meritColour
+        # else:
+        #     objCol = objListView.textColour or GLDefs.DEFAULTCOLOUR
+        #
+
+        listCol = getAutoColourRgbRatio(objListView.textColour or GLDefs.DEFAULTCOLOUR, pls.spectrum, self.autoColour,
                                         getColours()[CCPNGLWIDGET_FOREGROUND])
+        meritCol = getAutoColourRgbRatio(objListView.meritColour or GLDefs.DEFAULTCOLOUR, pls.spectrum, self.autoColour,
+                                        getColours()[CCPNGLWIDGET_FOREGROUND])
+        meritEnabled = objListView.meritEnabled
+        meritThreshold = objListView.meritThreshold
 
         for drawStr in drawList.stringList:
 
@@ -1172,7 +1174,13 @@ class GLLabelling():
                     if self._isSelected(obj):
                         drawStr.setStringColour((*self._GLParent.highlightColour[:3], fade))
                     else:
-                        drawStr.setStringColour((*listCol, fade))
+
+                        if meritEnabled and obj.figureOfMerit < meritThreshold:
+                            cols = meritCol
+                        else:
+                            cols = listCol
+
+                        drawStr.setStringColour((*cols, fade))
                     drawStr.updateTextArrayVBOColour(enableVBO=True)
 
     def updateHighlightSymbols(self):
@@ -1224,8 +1232,20 @@ class GLLabelling():
         # pls = objListView.peakList
         pls = self.objectList(objListView)
 
-        listCol = getAutoColourRgbRatio(pls.symbolColour, pls.spectrum, self.autoColour,
+        # if objListView.meritEnabled and obj.figureOfMerit < objListView.meritThreshold:
+        #     objCol = objListView.meritColour
+        # else:
+        #     objCol = objListView.symbolColour or GLDefs.DEFAULTCOLOUR
+        #
+        # listCol = getAutoColourRgbRatio(objCol, pls.spectrum, self.autoColour,
+        #                                 getColours()[CCPNGLWIDGET_FOREGROUND])
+
+        listCol = getAutoColourRgbRatio(objListView.symbolColour or GLDefs.DEFAULTCOLOUR, pls.spectrum, self.autoColour,
                                         getColours()[CCPNGLWIDGET_FOREGROUND])
+        meritCol = getAutoColourRgbRatio(objListView.meritColour or GLDefs.DEFAULTCOLOUR, pls.spectrum, self.autoColour,
+                                        getColours()[CCPNGLWIDGET_FOREGROUND])
+        meritEnabled = objListView.meritEnabled
+        meritThreshold = objListView.meritThreshold
 
         if symbolType == 0 or symbolType == 3:
 
@@ -1251,7 +1271,10 @@ class GLLabelling():
                         if _selected:
                             cols = self._GLParent.highlightColour[:3]
                         else:
-                            cols = listCol
+                            if meritEnabled and obj.figureOfMerit < meritThreshold:
+                                cols = meritCol
+                            else:
+                                cols = listCol
 
                         # make sure that links for the multiplets are added
                         extraIndices = self.appendExtraIndices(drawList, index + GLDefs.LENSQ, obj)
@@ -1293,7 +1316,10 @@ class GLLabelling():
                                                                                      index + np2, index + np2 + 3,
                                                                                      index + np2 + 3, index + np2 + 1), dtype=np.uint32))
                         else:
-                            cols = listCol
+                            if objListView.meritEnabled and obj.figureOfMerit < objListView.meritThreshold:
+                                cols = meritCol
+                            else:
+                                cols = listCol
 
                         drawList.colors[offset * 4:(offset + np2 + 5) * 4] = (*cols, fade) * (np2 + 5)
 
@@ -1328,7 +1354,10 @@ class GLLabelling():
                             _selected = True
                             cols = self._GLParent.highlightColour[:3]
                         else:
-                            cols = listCol
+                            if objListView.meritEnabled and obj.figureOfMerit < objListView.meritThreshold:
+                                cols = meritCol
+                            else:
+                                cols = listCol
 
                         drawList.colors[offset * 4:(offset + np2 + 5) * 4] = (*cols, fade) * (np2 + 5)
 
@@ -1612,33 +1641,39 @@ class GLLabelling():
 
             pls = self.objectList(objListView)
 
-            listCol = getAutoColourRgbRatio(pls.symbolColour, pls.spectrum,
+            # if objListView.meritEnabled and obj.figureOfMerit < objListView.meritThreshold:
+            #     objCol = objListView.meritColour
+            # else:
+            #     objCol = objListView.symbolColour or GLDefs.DEFAULTCOLOUR
+
+            listCol = getAutoColourRgbRatio(objListView.symbolColour or GLDefs.DEFAULTCOLOUR, pls.spectrum,
                                             self.autoColour,
                                             getColours()[CCPNGLWIDGET_FOREGROUND])
+            meritCol = getAutoColourRgbRatio(objListView.meritColour or GLDefs.DEFAULTCOLOUR, pls.spectrum,
+                                            self.autoColour,
+                                            getColours()[CCPNGLWIDGET_FOREGROUND])
+            meritEnabled = objListView.meritEnabled
+            meritThreshold = objListView.meritThreshold
 
             spectrumFrequency = spectrum.spectrometerFrequencies
             strip = spectrumView.strip
-
-            # tk = time.time() - times[0]
-            # times.append('_col:' + str(tk))
 
             ind, vert = self._buildSymbolsCount(spectrumView, objListView, drawList)
             if ind:
 
                 # tsum = 0
                 for tcount, obj in enumerate(self.objects(pls)):
-                    self._insertSymbolItem(strip, obj, listCol, indexing, r, w,
+
+                    if meritEnabled and obj.figureOfMerit < meritThreshold:
+                        cols = meritCol
+                    else:
+                        cols = listCol
+
+                    self._insertSymbolItem(strip, obj, cols, indexing, r, w,
                                            spectrumFrequency, symbolType, drawList,
                                            spectrumView, buildIndex)
-                    # tsum += (time.time() - times[0])
-
-                # times.append('_sym:' + str((time.time() - times[0])))
-                # times.append('_t:' + str(tcount))
 
             drawList.defineIndexVBO(enableVBO=True)
-
-            # times.append('_def:' + str(time.time() - times[0]))
-            # print(', '.join([str(t) for t in times]))
 
     def buildSymbols(self):
         if self.strip.isDeleted:
@@ -2037,10 +2072,14 @@ class GL1dLabelling():
 
         if symbolType is not None:
             listView = self.objectList(objListView)
-            listCol = getAutoColourRgbRatio(listView.symbolColour,
-                                            listView.spectrum,
+            listCol = getAutoColourRgbRatio(objListView.symbolColour or GLDefs.DEFAULTCOLOUR, listView.spectrum,
                                             self.autoColour,
                                             getColours()[CCPNGLWIDGET_FOREGROUND])
+            meritCol = getAutoColourRgbRatio(objListView.meritColour or GLDefs.DEFAULTCOLOUR, listView.spectrum,
+                                            self.autoColour,
+                                            getColours()[CCPNGLWIDGET_FOREGROUND])
+            meritEnabled = objListView.meritEnabled
+            meritThreshold = objListView.meritThreshold
 
             for pp in range(0, len(drawList.pids), GLDefs.LENPID):
 
@@ -2059,7 +2098,10 @@ class GL1dLabelling():
                                                                                  index, index + 2, index + 2, index + 1,
                                                                                  index, index + 3, index + 3, index + 1), dtype=np.uint32))
                     else:
-                        cols = listCol
+                        if meritEnabled and obj.figureOfMerit < meritThreshold:
+                            cols = meritCol
+                        else:
+                            cols = listCol
 
                         drawList.indices = np.append(drawList.indices, np.array((index, index + 1, index + 2, index + 3), dtype=np.uint32))
 
@@ -2184,9 +2226,14 @@ class GL1dLabelling():
 
             pls = self.objectList(objListView)
 
-            listCol = getAutoColourRgbRatio(pls.symbolColour, pls.spectrum,
+            listCol = getAutoColourRgbRatio(objListView.symbolColour or GLDefs.DEFAULTCOLOUR, pls.spectrum,
                                             self.autoColour,
                                             getColours()[CCPNGLWIDGET_FOREGROUND])
+            meritCol = getAutoColourRgbRatio(objListView.meritColour or GLDefs.DEFAULTCOLOUR, pls.spectrum,
+                                            self.autoColour,
+                                            getColours()[CCPNGLWIDGET_FOREGROUND])
+            meritEnabled = objListView.meritEnabled
+            meritThreshold = objListView.meritThreshold
 
             spectrumFrequency = spectrum.spectrometerFrequencies
             strip = spectrumView.strip
@@ -2194,7 +2241,13 @@ class GL1dLabelling():
             ind, vert = self._buildSymbolsCount(spectrumView, objListView, drawList)
             if ind:
                 for tcount, obj in enumerate(self.objects(pls)):
-                    self._insertSymbolItem(strip, obj, listCol, indexing, r, w,
+
+                    if meritEnabled and obj.figureOfMerit < meritThreshold:
+                        cols = meritCol
+                    else:
+                        cols = listCol
+
+                    self._insertSymbolItem(strip, obj, cols, indexing, r, w,
                                            spectrumFrequency, 0, drawList,
                                            spectrumView, buildIndex)
 
@@ -2254,9 +2307,12 @@ class GL1dLabelling():
         pls = self.objectList(objListView)
 
         spectrumFrequency = spectrum.spectrometerFrequencies
-        listCol = getAutoColourRgbRatio(pls.symbolColour, pls.spectrum,
-                                        self.autoColour,
+        listCol = getAutoColourRgbRatio(objListView.symbolColour or GLDefs.DEFAULTCOLOUR, pls.spectrum, self.autoColour,
                                         getColours()[CCPNGLWIDGET_FOREGROUND])
+        meritCol = getAutoColourRgbRatio(objListView.meritColour or GLDefs.DEFAULTCOLOUR, pls.spectrum, self.autoColour,
+                                        getColours()[CCPNGLWIDGET_FOREGROUND])
+        meritEnabled = objListView.meritEnabled
+        meritThreshold = objListView.meritThreshold
 
         strip = spectrumView.strip
         # get visible/plane status
@@ -2265,7 +2321,10 @@ class GL1dLabelling():
         if self._isSelected(obj):
             cols = self._GLParent.highlightColour[:3]
         else:
-            cols = listCol
+            if meritEnabled and obj.figureOfMerit < meritThreshold:
+                cols = meritCol
+            else:
+                cols = listCol
 
         pIndex = self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_POINTINDEX]
         if not obj.position:
@@ -2382,11 +2441,19 @@ class GL1dLabelling():
             return
 
         if self._isSelected(obj):
-            listCol = self._GLParent.highlightColour[:3]
+            cols = self._GLParent.highlightColour[:3]
         else:
-            listCol = getAutoColourRgbRatio(pls.textColour, pls.spectrum,
-                                            self.autoColour,
+            listCol = getAutoColourRgbRatio(objListView.textColour or GLDefs.DEFAULTCOLOUR, pls.spectrum, self.autoColour,
                                             getColours()[CCPNGLWIDGET_FOREGROUND])
+            meritCol = getAutoColourRgbRatio(objListView.meritColour or GLDefs.DEFAULTCOLOUR, pls.spectrum, self.autoColour,
+                                             getColours()[CCPNGLWIDGET_FOREGROUND])
+            meritEnabled = objListView.meritEnabled
+            meritThreshold = objListView.meritThreshold
+
+            if meritEnabled and obj.figureOfMerit < meritThreshold:
+                cols = meritCol
+            else:
+                cols = listCol
 
         text = self.getLabelling(obj, self.strip.peakLabelling)
 
@@ -2396,7 +2463,7 @@ class GL1dLabelling():
                              ox=r * np.sign(self._GLParent.pixelX), oy=w * np.sign(self._GLParent.pixelY),
                              # ox=symbolWidth, oy=symbolWidth,
                              # x=self._screenZero[0], y=self._screenZero[1]
-                             colour=(*listCol, 1.0),
+                             colour=(*cols, 1.0),
                              GLContext=self._GLParent,
                              obj=obj)
         newString.stringOffset = None
@@ -2577,7 +2644,7 @@ class GLmultipletNdLabelling(GLmultipletListMethods, GLLabelling):      #, GLpea
 
         # cols = getColours()[CCPNGLWIDGET_MULTIPLETLINK][:3]
         col = multiplet.multipletList.lineColour
-        cols = getAutoColourRgbRatio(col if col else DEFAULTLINECOLOUR, multiplet.multipletList.spectrum, self.autoColour,
+        cols = getAutoColourRgbRatio(col or DEFAULTLINECOLOUR, multiplet.multipletList.spectrum, self.autoColour,
                                      getColours()[CCPNGLWIDGET_MULTIPLETLINK])
 
         posList = p0
@@ -2609,7 +2676,7 @@ class GLmultipletNdLabelling(GLmultipletListMethods, GLLabelling):      #, GLpea
 
         # cols = getColours()[CCPNGLWIDGET_MULTIPLETLINK][:3]
         col = multiplet.multipletList.lineColour
-        cols = getAutoColourRgbRatio(col if col else DEFAULTLINECOLOUR, multiplet.multipletList.spectrum, self.autoColour,
+        cols = getAutoColourRgbRatio(col or DEFAULTLINECOLOUR, multiplet.multipletList.spectrum, self.autoColour,
                                      getColours()[CCPNGLWIDGET_MULTIPLETLINK])
 
         posList = p0
@@ -2688,7 +2755,7 @@ class GLmultiplet1dLabelling(GL1dLabelling, GLmultipletNdLabelling):
 
         # cols = getColours()[CCPNGLWIDGET_MULTIPLETLINK][:3]
         col = multiplet.multipletList.lineColour
-        cols = getAutoColourRgbRatio(col if col else DEFAULTLINECOLOUR, multiplet.multipletList.spectrum, self.autoColour,
+        cols = getAutoColourRgbRatio(col or DEFAULTLINECOLOUR, multiplet.multipletList.spectrum, self.autoColour,
                                      getColours()[CCPNGLWIDGET_MULTIPLETLINK])
 
         posList = p0
@@ -2812,8 +2879,12 @@ class GLintegralNdLabelling(GL1dLabelling, GLintegralListMethods, GLLabelling): 
         # pls = peakListView.peakList
         pls = self.objectList(objListView)
 
-        listCol = getAutoColourRgbRatio(pls.textColour, pls.spectrum, self.autoColour,
+        listCol = getAutoColourRgbRatio(objListView.textColour or GLDefs.DEFAULTCOLOUR, pls.spectrum, self.autoColour,
                                         getColours()[CCPNGLWIDGET_FOREGROUND])
+        meritCol = getAutoColourRgbRatio(objListView.meritColour or GLDefs.DEFAULTCOLOUR, pls.spectrum, self.autoColour,
+                                        getColours()[CCPNGLWIDGET_FOREGROUND])
+        meritEnabled = objListView.meritEnabled
+        meritThreshold = objListView.meritThreshold
 
         for drawStr in drawList.stringList:
 
@@ -2824,7 +2895,12 @@ class GLintegralNdLabelling(GL1dLabelling, GLintegralListMethods, GLLabelling): 
                 if self._isSelected(obj):
                     drawStr.setStringColour((*self._GLParent.highlightColour[:3], GLDefs.INPLANEFADE))
                 else:
-                    drawStr.setStringColour((*listCol, GLDefs.INPLANEFADE))
+                    if meritEnabled and obj.figureOfMerit < meritThreshold:
+                        cols = meritCol
+                    else:
+                        cols = listCol
+                    drawStr.setStringColour((*cols, GLDefs.INPLANEFADE))
+
                 drawStr.updateTextArrayVBOColour(enableVBO=True)
 
     def drawSymbols(self, spectrumSettings):
@@ -2898,12 +2974,24 @@ class GLintegralNdLabelling(GL1dLabelling, GLintegralListMethods, GLLabelling): 
             drawList._clearRegions()
 
             ils = integralListView.integralList
-            listCol = getAutoColourRgbRatio(ils.symbolColour, ils.spectrum, self.autoColour,
+            # listCol = getAutoColourRgbRatio(ils.symbolColour, ils.spectrum, self.autoColour,
+            #                                 getColours()[CCPNGLWIDGET_FOREGROUND])
+
+            listCol = getAutoColourRgbRatio(integralListView.symbolColour or GLDefs.DEFAULTCOLOUR, ils.spectrum, self.autoColour,
                                             getColours()[CCPNGLWIDGET_FOREGROUND])
+            meritCol = getAutoColourRgbRatio(integralListView.meritColour or GLDefs.DEFAULTCOLOUR, ils.spectrum, self.autoColour,
+                                             getColours()[CCPNGLWIDGET_FOREGROUND])
+            meritEnabled = integralListView.meritEnabled
+            meritThreshold = integralListView.meritThreshold
 
             for integral in ils.integrals:
+                if meritEnabled and integral.figureOfMerit < meritThreshold:
+                    cols = meritCol
+                else:
+                    cols = listCol
+
                 drawList.addIntegral(integral, integralListView, colour=None,
-                                     brush=(*listCol, CCPNGLWIDGET_INTEGRALSHADE))
+                                     brush=(*cols, CCPNGLWIDGET_INTEGRALSHADE))
 
             drawList.defineIndexVBO(enableVBO=True)
 
@@ -2930,12 +3018,26 @@ class GLintegralNdLabelling(GL1dLabelling, GLintegralListMethods, GLLabelling): 
         for ils in self._GLSymbols.values():
 
             if not ils.integralListView.isDeleted and integral.integralList == ils.integralListView.integralList:
-                listCol = getAutoColourRgbRatio(ils.integralListView.integralList.symbolColour,
-                                                ils.integralListView.integralList.spectrum, self._GLParent.SPECTRUMPOSCOLOUR,
-                                                getColours()[CCPNGLWIDGET_FOREGROUND])
+                ilv = ils.integralListView
+                # listCol = getAutoColourRgbRatio(il.symbolColour,
+                #                                 il.spectrum, self._GLParent.SPECTRUMPOSCOLOUR,
+                #                                 getColours()[CCPNGLWIDGET_FOREGROUND])
 
-                ils.addIntegral(integral, ils.integralListView, colour=None,
-                                brush=(*listCol, CCPNGLWIDGET_INTEGRALSHADE))
+                listCol = getAutoColourRgbRatio(ilv.symbolColour or GLDefs.DEFAULTCOLOUR,
+                                                ilv.integralList.spectrum, self._GLParent.SPECTRUMPOSCOLOUR,
+                                                getColours()[CCPNGLWIDGET_FOREGROUND])
+                meritCol = getAutoColourRgbRatio(ilv.meritColour or GLDefs.DEFAULTCOLOUR,
+                                                 ilv.integralList.spectrum, self._GLParent.SPECTRUMPOSCOLOUR,
+                                                 getColours()[CCPNGLWIDGET_FOREGROUND])
+                meritEnabled = ilv.meritEnabled
+                meritThreshold = ilv.meritThreshold
+                if meritEnabled and integral.figureOfMerit < meritThreshold:
+                    cols = meritCol
+                else:
+                    cols = listCol
+
+                ils.addIntegral(integral, ilv, colour=None,
+                                brush=(*cols, CCPNGLWIDGET_INTEGRALSHADE))
                 return
 
     def _changeSymbol(self, integral):
@@ -2993,11 +3095,22 @@ class GLintegralNdLabelling(GL1dLabelling, GLintegralListMethods, GLLabelling): 
             return
 
         if self._isSelected(obj):
-            listCol = self._GLParent.highlightColour[:3]
+            cols = self._GLParent.highlightColour[:3]
         else:
-            listCol = getAutoColourRgbRatio(pls.textColour, pls.spectrum,
-                                            self.autoColour,
+            # listCol = getAutoColourRgbRatio(pls.textColour, pls.spectrum,
+            #                                 self.autoColour,
+            #                                 getColours()[CCPNGLWIDGET_FOREGROUND])
+
+            listCol = getAutoColourRgbRatio(objListView.textColour or GLDefs.DEFAULTCOLOUR, pls.spectrum, self.autoColour,
                                             getColours()[CCPNGLWIDGET_FOREGROUND])
+            meritCol = getAutoColourRgbRatio(objListView.meritColour or GLDefs.DEFAULTCOLOUR, pls.spectrum, self.autoColour,
+                                             getColours()[CCPNGLWIDGET_FOREGROUND])
+            meritEnabled = objListView.meritEnabled
+            meritThreshold = objListView.meritThreshold
+            if meritEnabled and obj.figureOfMerit < meritThreshold:
+                cols = meritCol
+            else:
+                cols = listCol
 
         text = self.getLabelling(obj, self.strip.peakLabelling)
 
@@ -3011,7 +3124,7 @@ class GLintegralNdLabelling(GL1dLabelling, GLintegralListMethods, GLLabelling): 
                              y=textY,
                              # ox=symbolWidth, oy=symbolWidth,
                              # x=self._screenZero[0], y=self._screenZero[1]
-                             colour=(*listCol, 1.0),
+                             colour=(*cols, 1.0),
                              GLContext=self._GLParent,
                              obj=obj)
         # this is in the attribs

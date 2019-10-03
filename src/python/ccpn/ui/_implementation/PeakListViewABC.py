@@ -28,7 +28,7 @@ import typing
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.ui._implementation.SpectrumView import SpectrumView
 from ccpn.core.PeakListABC import MERITCOLOUR, MERITTHRESHOLD, MERITENABLED, MERITSETTINGS, \
-    COLOURCHECK, LINECOLOUR, LINESETTINGS
+    COLOURCHECK, LINECOLOUR, LINESETTINGS, SYMBOLCOLOUR, TEXTCOLOUR
 
 
 class PeakListViewABC(AbstractWrapperObject):
@@ -123,12 +123,15 @@ class PeakListViewABC(AbstractWrapperObject):
     def symbolColour(self) -> str:
         """Symbol colour for displayed markers.
 
+        symbolColour must be a valid hex colour string '#ABCDEF' or '#' to denote an auto-colour (take colour from spectrum).
+        Can also be None or ''. Lowercase will be changed to uppercase.
+
         If not set for ListView gives you the value for List.
         If set for ListView overrides List value.
         Set ListView value to None to return to non-local value"""
         wrappedData = self._apiListView
         result = wrappedData.symbolColour
-        if result is None:
+        if not result:
             obj = self._apiList
             result = obj and obj.symbolColour
         return result
@@ -137,24 +140,27 @@ class PeakListViewABC(AbstractWrapperObject):
     def symbolColour(self, value: typing.Optional[str]):
         if not isinstance(value, (str, type(None))):
             raise TypeError("symbolColour must be a hex colour string (e.g. '#ABCDEF' or '#') or None")
-        if value is not None:
+        if value:
+            # a non-empty string
             if not (re.findall(COLOURCHECK, value) or value == '#'):
                 raise ValueError("symbolColour %s not defined correctly, must be a hex colour string (e.g. '#ABCDEF' or '#')" % value)
             value = value.upper()
 
-        # if self.symbolColour != value:
-        self._apiListView.symbolColour = value
+        self._apiListView.__dict__[SYMBOLCOLOUR] = value or None
 
     @property
     def textColour(self) -> str:
         """Text colour for displayed markers.
+
+        textColour must be a valid hex colour string '#ABCDEF' or '#' to denote an auto-colour (take colour from spectrum).
+        Can also be None or ''. Lowercase will be changed to uppercase.
 
         If not set for ListView gives you the value for List.
         If set for ListView overrides List value.
         Set ListView value to None to return to non-local value"""
         wrappedData = self._apiListView
         result = wrappedData.textColour
-        if result is None:
+        if not result:
             obj = self._apiList
             result = obj and obj.textColour
         return result
@@ -163,13 +169,14 @@ class PeakListViewABC(AbstractWrapperObject):
     def textColour(self, value: typing.Optional[str]):
         if not isinstance(value, (str, type(None))):
             raise TypeError("textColour must be a hex colour string (e.g. '#ABCDEF' or '#') or None")
-        if value is not None:
+        if value:
+            # a non-empty string
             if not (re.findall(COLOURCHECK, value) or value == '#'):
                 raise ValueError("textColour %s not defined correctly, must be a hex colour string (e.g. '#ABCDEF' or '#')" % value)
             value = value.upper()
 
-        # if self.textColour != value:
-        self._apiListView.textColour = value
+        # required to set values to None or ''
+        self._apiListView.__dict__[TEXTCOLOUR] = value or None
 
     @property
     def isSymbolDisplayed(self) -> bool:
@@ -193,11 +200,14 @@ class PeakListViewABC(AbstractWrapperObject):
     def meritColour(self) -> str:
         """Merit colour for displayed markers.
 
+        meritColour must be a valid hex colour string '#ABCDEF' or '#' to denote an auto-colour (take colour from spectrum).
+        Can also be None or ''. Lowercase will be changed to uppercase.
+
         If not set for ListView gives you the value for List.
         If set for ListView overrides List value.
         Set ListView value to None to return to non-local value"""
         result = self.getParameter(MERITSETTINGS, MERITCOLOUR)
-        if result is None:
+        if not result:
             obj = self._childClass
             result = obj and obj.meritColour
         return result
@@ -206,12 +216,13 @@ class PeakListViewABC(AbstractWrapperObject):
     def meritColour(self, value: typing.Optional[str]):
         if not isinstance(value, (str, type(None))):
             raise TypeError("meritColour must be a hex colour string (e.g. '#ABCDEF' or '#') or None")
-        if value is not None:
+        if value:
+            # a non-empty string
             if not (re.findall(COLOURCHECK, value) or value == '#'):
                 raise ValueError("meritColour %s not defined correctly, must be a hex colour string (e.g. '#ABCDEF' or '#')" % value)
             value = value.upper()
 
-        self.setParameter(MERITSETTINGS, MERITCOLOUR, value)
+        self.setParameter(MERITSETTINGS, MERITCOLOUR, value or None)
 
     @property
     def meritEnabled(self) -> typing.Optional[bool]:
@@ -259,11 +270,14 @@ class PeakListViewABC(AbstractWrapperObject):
     def lineColour(self) -> str:
         """Line colour for displayed markers.
 
+        lineColour must be a valid hex colour string '#ABCDEF' or '#' to denote an auto-colour (take colour from spectrum).
+        Can also be None or ''. Lowercase will be changed to uppercase.
+
         If not set for ListView gives you the value for List.
         If set for ListView overrides List value.
         Set ListView value to None to return to non-local value"""
         result = self.getParameter(LINESETTINGS, LINECOLOUR)
-        if result is None:
+        if not result:
             obj = self._childClass
             result = obj and obj.lineColour
         return result
@@ -272,12 +286,13 @@ class PeakListViewABC(AbstractWrapperObject):
     def lineColour(self, value: typing.Optional[str]):
         if not isinstance(value, (str, type(None))):
             raise TypeError("lineColour must be a hex colour string (e.g. '#ABCDEF' or '#') or None")
-        if value is not None:
+        if value:
+            # a non-empty string
             if not (re.findall(COLOURCHECK, value) or value == '#'):
                 raise ValueError("lineColour %s not defined correctly, must be a hex colour string (e.g. '#ABCDEF' or '#')" % value)
             value = value.upper()
 
-        self.setParameter(LINESETTINGS, LINECOLOUR, value)
+        self.setParameter(LINESETTINGS, LINECOLOUR, value or None)
 
     # @property
     # def peakList(self) -> PeakList:
@@ -288,9 +303,7 @@ class PeakListViewABC(AbstractWrapperObject):
     # Implementation functions
     #=========================================================================================
 
-    # def _initializeAll(self):
-    #     self._setListClasses()
-    #     super()._initializeAll()
+    # None
 
     #=========================================================================================
     # CCPN functions

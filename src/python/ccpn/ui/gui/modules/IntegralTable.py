@@ -120,6 +120,18 @@ class IntegralTable(GuiTable):
     OBJECT = 'object'
     TABLE = 'table'
 
+    @staticmethod
+    def _setFigureOfMerit(obj, value):
+        """
+        CCPN-INTERNAL: Set figureOfMerit from table
+        Must be a floatRatio in range [0.0, 1.0]
+        """
+        # ejb - why is it blanking a notification here?
+        # NmrResidueTable._project.blankNotification()
+
+        # clip and set the figure of merit
+        obj.figureOfMerit = min(max(float(value), 0.0), 1.0) if value else None
+
     def __init__(self, parent=None, mainWindow=None, moduleParent=None, integralList=None, **kwds):
         """
         Initialise the widgets for the module.
@@ -147,25 +159,30 @@ class IntegralTable(GuiTable):
         self._widgetScrollArea.setWidget(self._widget)
         self._widget.setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.Expanding)
 
+        figureOfMeritTipText = 'Figure of merit'
+        commentsTipText = 'Textual notes about the integral'
+
         # create the column objects
         self.ITcolumns = ColumnClass([
-            ('#', lambda integral: integral.serial, '', None, None),
-            ('Pid', lambda integral: integral.pid, 'Pid of integral', None, None),
-            ('_object', lambda integral: integral, 'Object', None, None),
+            ('#', lambda il: il.serial, '', None, None),
+            ('Pid', lambda il: il.pid, 'Pid of integral', None, None),
+            ('_object', lambda il: il, 'Object', None, None),
 
-            ('Spectrum', lambda integral: integral.integralList.spectrum.id, 'Spectrum containing the Integral', None, None),
-            ('IntegralList', lambda integral: integral.integralList.serial, 'IntegralList containing the Integral', None, None),
-            ('Id', lambda integral: integral.serial, 'Integral serial', None, None),
+            ('Spectrum', lambda il: il.integralList.spectrum.id, 'Spectrum containing the Integral', None, None),
+            ('IntegralList', lambda il: il.integralList.serial, 'IntegralList containing the Integral', None, None),
+            ('Id', lambda il: il.serial, 'Integral serial', None, None),
 
-            ('Value', lambda integral: integral.value, '', None, None),
-            ('Lower Limit', lambda integral: IntegralTable._getLowerLimit(integral), '', None, None),
-            ('Higher Limit', lambda integral: IntegralTable._getHigherLimit(integral), '', None, None),
-            ('ValueError', lambda integral: integral.valueError, '', None, None),
-            ('Bias', lambda integral: integral.bias, '', None, None),
-            ('FigureOfMerit', lambda integral: integral.figureOfMerit, '', None, None),
-            ('Slopes', lambda integral: integral.slopes, '', None, None),
-            ('Annotation', lambda integral: integral.annotation, '', None, None),
-            ('Comment', lambda integral: integral.annotation, '', None, None), ]
+            ('Value', lambda il: il.value, '', None, None),
+            ('Lower Limit', lambda il: IntegralTable._getLowerLimit(il), '', None, None),
+            ('Higher Limit', lambda il: IntegralTable._getHigherLimit(il), '', None, None),
+            ('ValueError', lambda il: il.valueError, '', None, None),
+            ('Bias', lambda il: il.bias, '', None, None),
+            ('FigureOfMerit', lambda il: il.figureOfMerit, figureOfMeritTipText,
+                           lambda il, value: self._setFigureOfMerit(il, value), None),
+            ('Slopes', lambda il: il.slopes, '', None, None),
+            # ('Annotation', lambda il: il.annotation, '', None, None),
+            ('Comment', lambda il: self._getCommentText(il), commentsTipText,
+                           lambda il, value: self._setComment(il, value), None), ]
                 )  #      [Column(colName, func, tipText=tipText, setEditValue=editValue, format=columnFormat)
                     # for colName, func, tipText, editValue, columnFormat in self.columnDefs]
 

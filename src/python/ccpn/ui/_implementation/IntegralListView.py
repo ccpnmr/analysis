@@ -194,6 +194,7 @@ class IntegralListView(PeakListViewABC):
         else:
             return None
 
+
 #=========================================================================================
 # CCPN functions
 #=========================================================================================
@@ -220,6 +221,7 @@ Project._apiNotifiers.append(
          ApiStripIntegralListView._metaclass.qualifiedName(), '')
         )
 
+
 #EJB 20181122: moved to IntegralList
 # Notify IntegralListView change when IntegralList changes
 # IntegralList._setupCoreNotifier('change', AbstractWrapperObject._finaliseRelatedObject,
@@ -229,7 +231,9 @@ Project._apiNotifiers.append(
 def _integralListAddIntegralListViews(project: Project, apiIntegralList: Nmr.IntegralList):
     """Add ApiIntegralListView when ApiIntegralList is created"""
     for apiSpectrumView in apiIntegralList.dataSource.spectrumViews:
-        apiSpectrumView.newIntegralListView(integralListSerial=apiIntegralList.serial, integralList=apiIntegralList)
+        apiListView = apiSpectrumView.newIntegralListView(integralListSerial=apiIntegralList.serial, integralList=apiIntegralList)
+        apiListView.__dict__['symbolColour'] = None
+        apiListView.__dict__['textColour'] = None
 
 
 #
@@ -239,7 +243,9 @@ Project._setupApiNotifier(_integralListAddIntegralListViews, Nmr.IntegralList, '
 def _spectrumViewAddIntegralListViews(project: Project, apiSpectrumView: ApiSpectrumView):
     """Add ApiIntegralListView when ApiSpectrumView is created"""
     for apiIntegralList in apiSpectrumView.dataSource.integralLists:
-        apiSpectrumView.newIntegralListView(integralListSerial=apiIntegralList.serial, integralList=apiIntegralList)
+        apiListView = apiSpectrumView.newIntegralListView(integralListSerial=apiIntegralList.serial, integralList=apiIntegralList)
+        apiListView.__dict__['symbolColour'] = None
+        apiListView.__dict__['textColour'] = None
 
 
 #

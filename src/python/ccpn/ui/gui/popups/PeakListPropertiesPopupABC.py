@@ -124,7 +124,10 @@ class PeakListPropertiesPopupABC(CcpnDialog):
                         row += 1
                         self._addButtonOption(self._colourPulldowns, colButton, row)
 
-            row += 1
+            # set the next available row for inserting new items from subclass
+            self._rowForNewItems = row + 1
+
+            row += 10
             self.closeButton = Button(self, text='Close', grid=(row, 1), callback=self._accept)
 
         self.setFixedSize(self.sizeHint())
@@ -150,7 +153,7 @@ class PeakListPropertiesPopupABC(CcpnDialog):
 
         _colourPulldownList.activated.connect(self._applyChanges)
 
-    def _changeColours(self):
+    def _setColours(self):
         for item in self._colourPulldowns:
             _, pl, attrib = item
 
@@ -158,7 +161,7 @@ class PeakListPropertiesPopupABC(CcpnDialog):
             colour = Colour.getSpectrumColour(value, defaultReturn='#')
             setattr(self.ccpnList, attrib, colour)
 
-    def _changeMeritOptions(self):
+    def _setAttributes(self):
         meritEnabled = self.meritEnabledBox.isChecked()
         setattr(self.ccpnList, MERITENABLED, meritEnabled)
 
@@ -177,8 +180,8 @@ class PeakListPropertiesPopupABC(CcpnDialog):
             with undoStackBlocking() as addUndoItem:
                 addUndoItem(undo=self._refreshGLItems)
 
-            self._changeMeritOptions()
-            self._changeColours()
+            self._setAttributes()
+            self._setColours()
 
             # add item here to redraw items
             with undoStackBlocking() as addUndoItem:

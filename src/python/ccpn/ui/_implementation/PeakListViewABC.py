@@ -142,8 +142,8 @@ class PeakListViewABC(AbstractWrapperObject):
                 raise ValueError("symbolColour %s not defined correctly, must be a hex colour string (e.g. '#ABCDEF' or '#')" % value)
             value = value.upper()
 
-        if self.symbolColour != value:
-            self._apiListView.symbolColour = value
+        # if self.symbolColour != value:
+        self._apiListView.symbolColour = value
 
     @property
     def textColour(self) -> str:

@@ -112,7 +112,7 @@ class PeakListPropertiesPopupABC(CcpnDialog):
                 self.meritThresholdLabel = Label(self, text="Merit Threshold", grid=(row, 0))
                 self.meritThresholdData = DoubleSpinbox(self, grid=(row, 1), hAlign='l', decimals=2, step=0.01, min=0.0, max=1.0)
                 self.meritThresholdData.setValue(float('%.2f' % (getattr(self.ccpnList, MERITTHRESHOLD) or 0.0)))
-                self.meritThresholdData.editingFinished.connect(self._applyChanges)
+                self.meritThresholdData.valueChanged.connect(self._applyChanges)
 
                 # set default colours if not defined
                 for colButton, enabled in zip(BUTTONOPTIONS2,

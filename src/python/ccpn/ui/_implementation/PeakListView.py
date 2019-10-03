@@ -232,8 +232,6 @@ def _peakListAddPeakListViews(project: Project, apiPeakList: Nmr.PeakList):
     """Add ApiPeakListView when ApiPeakList is created"""
     for apiSpectrumView in apiPeakList.dataSource.spectrumViews:
         apiListView = apiSpectrumView.newPeakListView(peakListSerial=apiPeakList.serial, peakList=apiPeakList)
-        apiListView.__dict__['symbolColour'] = None
-        apiListView.__dict__['textColour'] = None
 
 
 #
@@ -244,8 +242,6 @@ def _spectrumViewAddPeakListViews(project: Project, apiSpectrumView: ApiSpectrum
     """Add ApiPeakListView when ApiSpectrumView is created"""
     for apiPeakList in apiSpectrumView.dataSource.peakLists:
         apiListView = apiSpectrumView.newPeakListView(peakListSerial=apiPeakList.serial, peakList=apiPeakList)
-        apiListView.__dict__['symbolColour'] = None
-        apiListView.__dict__['textColour'] = None
 
 
 #

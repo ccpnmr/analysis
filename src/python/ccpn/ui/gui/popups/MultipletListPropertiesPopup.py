@@ -54,10 +54,12 @@ class MultipletListPropertiesPopup(PeakListPropertiesPopupABC):
         self.multipletAveraging = RadioButtons(self, texts=MULTIPLETAVERAGINGTYPES,
                                                selectedInd=MULTIPLETAVERAGINGTYPES.index(multipletAveraging) if multipletAveraging in MULTIPLETAVERAGINGTYPES else 0,
                                                callback=self._applyChanges,
-                                               direction='h',
+                                               direction='v',
                                                grid=(self._rowForNewItems, 1), hAlign='l',
                                                tipTexts=None,
                                                )
+
+        self.setFixedSize(self.sizeHint())
 
     def _setAttributes(self):
         """set the attributes from the other widgets

@@ -23,7 +23,7 @@ __date__ = "$Date$"
 # Start of code
 #=========================================================================================
 
-from functools import partial
+from PyQt5 import QtWidgets
 import ccpn.util.Colour as Colour
 from ccpn.ui.gui.widgets.MessageDialog import MessageDialog
 from ccpn.ui.gui.widgets.Button import Button
@@ -34,8 +34,7 @@ from ccpn.ui.gui.widgets.CheckBox import CheckBox
 from ccpn.ui.gui.popups.Dialog import CcpnDialog, handleDialogApply
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
 from ccpn.core.lib.ContextManagers import undoStackBlocking
-from ccpn.core.PeakListABC import MERITSETTINGS, MERITENABLED, MERITTHRESHOLD, MERITCOLOUR, \
-    LINESETTINGS, LINECOLOUR
+from ccpn.core.PeakListABC import MERITENABLED, MERITTHRESHOLD
 
 
 SYMBOLCOLOURBUTTON = 'symbolColour'
@@ -130,8 +129,8 @@ class PeakListPropertiesPopupABC(CcpnDialog):
             row += 10
             self.closeButton = Button(self, text='Close', grid=(row, 1), callback=self._accept)
 
-        self.setFixedSize(self.sizeHint())
         self.GLSignals = GLNotifier(parent=self)
+        self.setFixedSize(self.sizeHint())
 
     def _addButtonOption(self, pulldowns, attrib, row):
         """Add a labelled pulldown list for the selected attribute
@@ -213,3 +212,4 @@ class PeakListPropertiesPopupABC(CcpnDialog):
         """
         # MUST BE SUBCLASSED
         raise NotImplementedError("Code error: function not implemented")
+

@@ -38,7 +38,7 @@ class IntegralListPropertiesPopup(PeakListPropertiesPopupABC):
     _baseClass = IntegralList
     _symbolColourOption = True
     _textColourOption = True
-    _lineColourOption = True
+    _lineColourOption = False
     _meritColourOption = True
     _meritOptions = True
 

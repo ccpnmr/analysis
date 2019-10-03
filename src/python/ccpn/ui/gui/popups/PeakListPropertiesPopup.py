@@ -45,7 +45,7 @@ class PeakListPropertiesPopup(PeakListPropertiesPopupABC):
     _baseClass = PeakList
     _symbolColourOption = True
     _textColourOption = True
-    _lineColourOption = True
+    _lineColourOption = False
     _meritColourOption = True
     _meritOptions = True
 

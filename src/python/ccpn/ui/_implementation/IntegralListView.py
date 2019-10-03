@@ -232,8 +232,6 @@ def _integralListAddIntegralListViews(project: Project, apiIntegralList: Nmr.Int
     """Add ApiIntegralListView when ApiIntegralList is created"""
     for apiSpectrumView in apiIntegralList.dataSource.spectrumViews:
         apiListView = apiSpectrumView.newIntegralListView(integralListSerial=apiIntegralList.serial, integralList=apiIntegralList)
-        apiListView.__dict__['symbolColour'] = None
-        apiListView.__dict__['textColour'] = None
 
 
 #
@@ -244,8 +242,6 @@ def _spectrumViewAddIntegralListViews(project: Project, apiSpectrumView: ApiSpec
     """Add ApiIntegralListView when ApiSpectrumView is created"""
     for apiIntegralList in apiSpectrumView.dataSource.integralLists:
         apiListView = apiSpectrumView.newIntegralListView(integralListSerial=apiIntegralList.serial, integralList=apiIntegralList)
-        apiListView.__dict__['symbolColour'] = None
-        apiListView.__dict__['textColour'] = None
 
 
 #

@@ -33,15 +33,12 @@ from ccpn.ui.gui.widgets.CheckBox import CheckBox
 from ccpn.ui.gui.popups.Dialog import CcpnDialog, handleDialogApply
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
 from ccpn.core.lib.ContextManagers import undoStackBlocking
-from ccpn.core.PMIListABC import MERITENABLED, MERITTHRESHOLD
+from ccpn.core.PMIListABC import MERITENABLED, MERITTHRESHOLD, \
+    SYMBOLCOLOUR, TEXTCOLOUR, LINECOLOUR, MERITCOLOUR
 
 
-SYMBOLCOLOURBUTTON = 'symbolColour'
-TEXTCOLOURBUTTON = 'textColour'
-MERITCOLOURBUTTON = 'meritColour'
-LINECOLOURBUTTON = 'lineColour'
-BUTTONOPTIONS1 = (SYMBOLCOLOURBUTTON, TEXTCOLOURBUTTON, LINECOLOURBUTTON, None)
-BUTTONOPTIONS2 = (None, None, None, MERITCOLOURBUTTON)
+BUTTONOPTIONS1 = (SYMBOLCOLOUR, TEXTCOLOUR, LINECOLOUR, None)
+BUTTONOPTIONS2 = (None, None, None, MERITCOLOUR)
 BUTTONOPTIONS = tuple(b1 or b2 for b1, b2 in zip(BUTTONOPTIONS1, BUTTONOPTIONS2))
 
 

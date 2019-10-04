@@ -2677,7 +2677,7 @@ assignmentTolerances
             # By-passes the caching
             with notificationEchoBlocking(self.project.application):
                 planeData = self._apiDataSource.getPlaneData(position=position, xDim=xDim, yDim=yDim)
-                yield (position, planeData)
+                yield (tuple(position), planeData)
             done, position = _nextPosition(position)
 
     @logCommand(get='self')

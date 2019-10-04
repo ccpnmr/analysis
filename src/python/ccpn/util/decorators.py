@@ -329,13 +329,6 @@ def logCommand(prefix='', get=None, isProperty=False):
         with notificationEchoBlocking(application=application):
             result = func(*args, **kwds)
 
-        # application._increaseNotificationBlocking()
-        # try:
-        #     result = func(*args, **kwds)
-        # finally:
-        #     # blocking -= 1
-        #     application._decreaseNotificationBlocking()
-
         return result
 
     return theDecorator

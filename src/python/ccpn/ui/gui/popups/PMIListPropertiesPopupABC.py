@@ -23,7 +23,6 @@ __date__ = "$Date$"
 # Start of code
 #=========================================================================================
 
-from PyQt5 import QtWidgets
 import ccpn.util.Colour as Colour
 from ccpn.ui.gui.widgets.MessageDialog import MessageDialog
 from ccpn.ui.gui.widgets.Button import Button
@@ -87,7 +86,7 @@ class PMIListPropertiesPopupABC(CcpnDialog):
             self.spectrumColourKeys = list(Colour.spectrumColours.keys())
 
             row = 0
-            self.ccpnListLabel = Label(self, "%s Name " % self._baseClass.className, grid=(row, 0))
+            self.ccpnListLabel = Label(self, "name ", grid=(row, 0))
             self.ccpnListLabel = Label(self, ccpnList.id, grid=(row, 1))
 
             # set default colours if not defined
@@ -108,7 +107,7 @@ class PMIListPropertiesPopupABC(CcpnDialog):
                 self.meritEnabledBox.toggled.connect(self._applyChanges)
 
                 row += 1
-                self.meritThresholdLabel = Label(self, text="Merit Threshold", grid=(row, 0))
+                self.meritThresholdLabel = Label(self, text=MERITTHRESHOLD, grid=(row, 0))
                 self.meritThresholdData = DoubleSpinbox(self, grid=(row, 1), hAlign='l', decimals=2, step=0.01, min=0.0, max=1.0)
                 self.meritThresholdData.setValue(float('%.2f' % (getattr(self.ccpnList, MERITTHRESHOLD) or 0.0)))
                 self.meritThresholdData.valueChanged.connect(self._applyChanges)
@@ -135,7 +134,7 @@ class PMIListPropertiesPopupABC(CcpnDialog):
     def _addButtonOption(self, pulldowns, attrib, row):
         """Add a labelled pulldown list for the selected attribute
         """
-        _colourLabel = Label(self, '%s %s' % (self._baseClass.className, attrib), grid=(row, 0))
+        _colourLabel = Label(self, '%s' % attrib, grid=(row, 0))
         _colourPulldownList = PulldownList(self, grid=(row, 1))
         Colour.fillColourPulldown(_colourPulldownList, allowAuto=True)
 
@@ -203,7 +202,8 @@ class PMIListPropertiesPopupABC(CcpnDialog):
         self.accept()
 
     def _refreshGLItems(self):
-        # emit a signal to rebuild all list items
+        """emit a signal to rebuild all list items
+        """
         # MUST BE SUBCLASSED
         raise NotImplementedError("Code error: function not implemented")
 

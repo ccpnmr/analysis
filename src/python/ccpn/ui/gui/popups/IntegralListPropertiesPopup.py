@@ -48,9 +48,11 @@ class IntegralListPropertiesPopup(PMIListPropertiesPopupABC):
 
     def _refreshGLItems(self):
         # emit a signal to rebuild all peaks and multiplets
-        self.GLSignals.emitEvent(targets=[self.ccpnList], triggers=[GLNotifier.GLINTEGRALLISTS])
+        self.GLSignals.emitEvent(targets=[self.ccpnList], triggers=[GLNotifier.GLINTEGRALLISTS,
+                                                                    GLNotifier.GLINTEGRALLISTLABELS])
 
     def _getListViews(self, ccpnList):
         """Return the listViews containing this list
         """
-        return [integralListView for integralListView in ccpnList.project.integralListViews if integralListView.integralList == ccpnList]
+        return [integralListView for integralListView in ccpnList.project.integralListViews
+                if integralListView.integralList == ccpnList]

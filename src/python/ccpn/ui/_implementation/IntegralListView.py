@@ -29,17 +29,16 @@ import operator
 import typing
 from ccpn.core.IntegralList import IntegralList
 from ccpn.core.Project import Project
-# from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.ui._implementation.SpectrumView import SpectrumView
 from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import StripIntegralListView as ApiStripIntegralListView
-# from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import IntegralListView as ApiIntegralListView
 from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import SpectrumView as ApiSpectrumView
 from ccpnmodel.ccpncore.api.ccp.nmr import Nmr
 from ccpn.ui._implementation.PMIListViewABC import PMIListViewABC
 
 
 class IntegralListView(PMIListViewABC):
-    """Integral List View for 1D or nD IntegralList"""
+    """Integral List View for 1D or nD IntegralList
+    """
 
     #: Short class name, for PID.
     shortClassName = 'GI'
@@ -75,106 +74,10 @@ class IntegralListView(PMIListViewABC):
         """ CCPN IntegralListView matching IntegralListView"""
         return self._wrappedData
 
-    # @property
-    # def _parent(self) -> SpectrumView:
-    #     """SpectrumView containing IntegralListView."""
-    #     return self._project._data2Obj.get(self._wrappedData.stripSpectrumView)
-    #
-    # spectrumView = _parent
-    #
-    # def delete(self):
-    #     """IntegralListViews cannot be deleted, except as a byproduct of deleting other things"""
-    #     raise Exception("IntegralListViews cannot be deleted directly")
-    #
-    # @property
-    # def _key(self) -> str:
-    #     """id string - """
-    #     return str(self._wrappedData.integralListView.integralListSerial)
-
     @property
     def _childClass(self):
         """Ccpn core obj that integralListView refers to"""
         return self.integralList
-
-    # @property
-    # def _localCcpnSortKey(self) -> typing.Tuple:
-    #     """Local sorting key, in context of parent."""
-    #     return (self._wrappedData.integralListView.integralListSerial,)
-    #
-    # @property
-    # def symbolStyle(self) -> str:
-    #     """Symbol style for displayed integral markers.
-    #
-    #     If not set for IntegralListView gives you the value for IntegralList.
-    #     If set for IntegralListView overrides IntegralList value.
-    #     Set IntegralListView value to None to return to non-local value"""
-    #     wrappedData = self._wrappedData.integralListView
-    #     result = wrappedData.symbolStyle
-    #     if result is None:
-    #         obj = wrappedData.integralList
-    #         result = obj and obj.symbolStyle
-    #     return result
-    #
-    # @symbolStyle.setter
-    # def symbolStyle(self, value: str):
-    #     if self.symbolStyle != value:
-    #         self._wrappedData.integralListView.symbolStyle = value
-    #
-    # @property
-    # def symbolColour(self) -> str:
-    #     """Symbol style for displayed integral markers.
-    #
-    #     If not set for IntegralListView gives you the value for IntegralList.
-    #     If set for IntegralListView overrides IntegralList value.
-    #     Set IntegralListView value to None to return to non-local value"""
-    #     wrappedData = self._wrappedData.integralListView
-    #     result = wrappedData.symbolColour
-    #     if result is None:
-    #         obj = wrappedData.integralList
-    #         result = obj and obj.symbolColour
-    #     return result
-    #
-    # @symbolColour.setter
-    # def symbolColour(self, value: str):
-    #     if self.symbolColour != value:
-    #         self._wrappedData.integralListView.symbolColour = value
-    #
-    # @property
-    # def textColour(self) -> str:
-    #     """Symbol style for displayed integral markers.
-    #
-    #     If not set for IntegralListView gives you the value for IntegralList.
-    #     If set for IntegralListView overrides IntegralList value.
-    #     Set IntegralListView value to None to return to non-local value"""
-    #     wrappedData = self._wrappedData.integralListView
-    #     result = wrappedData.textColour
-    #     if result is None:
-    #         obj = wrappedData.integralList
-    #         result = obj and obj.textColour
-    #     return result
-    #
-    # @textColour.setter
-    # def textColour(self, value: str):
-    #     if self.textColour != value:
-    #         self._wrappedData.integralListView.textColour = value
-    #
-    # @property
-    # def isSymbolDisplayed(self) -> bool:
-    #     """True if the integral marker symbol is displayed."""
-    #     return self._wrappedData.integralListView.isSymbolDisplayed
-    #
-    # @isSymbolDisplayed.setter
-    # def isSymbolDisplayed(self, value: bool):
-    #     self._wrappedData.integralListView.isSymbolDisplayed = value
-    #
-    # @property
-    # def isTextDisplayed(self) -> bool:
-    #     """True if the integral annotation is displayed?"""
-    #     return self._wrappedData.integralListView.isTextDisplayed
-    #
-    # @isTextDisplayed.setter
-    # def isTextDisplayed(self, value: bool):
-    #     self._wrappedData.integralListView.isTextDisplayed = value
 
     @property
     def integralList(self) -> IntegralList:

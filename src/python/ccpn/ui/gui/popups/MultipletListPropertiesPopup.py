@@ -52,7 +52,8 @@ class MultipletListPropertiesPopup(PMIListPropertiesPopupABC):
         self.multipletAveragingLabel = Label(self, text="Multiplet Averaging:", grid=(self._rowForNewItems, 0))
         multipletAveraging = self.ccpnList.multipletAveraging
         self.multipletAveraging = RadioButtons(self, texts=MULTIPLETAVERAGINGTYPES,
-                                               selectedInd=MULTIPLETAVERAGINGTYPES.index(multipletAveraging) if multipletAveraging in MULTIPLETAVERAGINGTYPES else 0,
+                                               selectedInd=MULTIPLETAVERAGINGTYPES.index(
+                                                   multipletAveraging) if multipletAveraging in MULTIPLETAVERAGINGTYPES else 0,
                                                callback=self._applyChanges,
                                                direction='v',
                                                grid=(self._rowForNewItems, 1), hAlign='l',
@@ -72,9 +73,10 @@ class MultipletListPropertiesPopup(PMIListPropertiesPopupABC):
     def _refreshGLItems(self):
         # emit a signal to rebuild all peaks and multiplets
         self.GLSignals.emitEvent(targets=[self.ccpnList], triggers=[GLNotifier.GLMULTIPLETLISTS,
-                                                                            GLNotifier.GLMULTIPLETLISTLABELS])
+                                                                    GLNotifier.GLMULTIPLETLISTLABELS])
 
     def _getListViews(self, ccpnList):
         """Return the listViews containing this list
         """
-        return [multipletListView for multipletListView in ccpnList.project.multipletListViews if multipletListView.multipletList == ccpnList]
+        return [multipletListView for multipletListView in ccpnList.project.multipletListViews
+                if multipletListView.multipletList == ccpnList]

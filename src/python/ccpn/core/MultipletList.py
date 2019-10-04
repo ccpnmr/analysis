@@ -24,11 +24,10 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
-from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core.Peak import Peak
 from ccpn.core.Spectrum import Spectrum
 from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import MultipletList as ApiMultipletList
-from typing import Optional, Tuple, Sequence, Union
+from typing import Tuple, Sequence, Union
 from ccpn.util.decorators import logCommand
 from ccpn.core.lib.ContextManagers import newObject
 from ccpn.util.Logging import getLogger
@@ -89,85 +88,6 @@ class MultipletList(PMIListABC):
                                                                                     self.className))
         self._primaryChildClass = klass
 
-    # @property
-    # def _key(self) -> str:
-    #     """id string - serial number converted to string"""
-    #     return str(self._wrappedData.serial)
-    #
-    # @property
-    # def serial(self) -> int:
-    #     """serial number of MultipletList, used in Pid and to identify the MultipletList. """
-    #     return self._wrappedData.serial
-    #
-    # @property
-    # def _parent(self) -> Optional[Spectrum]:
-    #     """parent containing multipletList."""
-    #     return self._project._data2Obj[self._wrappedData.dataSource]
-    #
-    # spectrum = _parent
-    #
-    # @property
-    # def title(self) -> str:
-    #     """title of multiplet (not used in PID)."""
-    #     return self._wrappedData.name
-    #
-    # @title.setter
-    # def title(self, value: str):
-    #     self._wrappedData.name = value
-    #
-    # @property
-    # def dataType(self) -> str:
-    #     """dataType of multipletList."""
-    #     return self._wrappedData.dataType
-    #
-    # @dataType.setter
-    # def dataType(self, value: str):
-    #     self._wrappedData.dataType = value
-    #
-    # @property
-    # def symbolColour(self) -> str:
-    #     """Symbol colour for multipletList annotation display"""
-    #     return self._wrappedData.symbolColour
-    #
-    # @symbolColour.setter
-    # def symbolColour(self, value: str):
-    #     self._wrappedData.symbolColour = value
-    #
-    # @property
-    # def textColour(self) -> str:
-    #     """Text colour for multipletList annotation display"""
-    #     return self._wrappedData.textColour
-    #
-    # @textColour.setter
-    # def textColour(self, value: str):
-    #     self._wrappedData.textColour = value
-
-    # def _setLineColour(self, value):
-    #     """set the internal line colour, default to '#7a7a7a'
-    #     """
-    #     tempCcpn = self._ccpnInternalData.copy()
-    #     tempCcpn[LINECOLOUR] = value if value else DEFAULTLINECOLOUR
-    #     self._ccpnInternalData = tempCcpn
-    #
-    # @property
-    # def lineColour(self) -> str:
-    #     """Line colour for multipletList annotation display"""
-    #     if self._ccpnInternalData:
-    #         if LINECOLOUR not in self._ccpnInternalData:
-    #             self._setLineColour(DEFAULTLINECOLOUR)
-    #     else:
-    #         self._ccpnInternalData = {LINECOLOUR: DEFAULTLINECOLOUR}
-    #
-    #     col = self._ccpnInternalData[LINECOLOUR]
-    #     return col if col else DEFAULTLINECOLOUR
-    #
-    # @lineColour.setter
-    # def lineColour(self, value: str):
-    #     if not self._ccpnInternalData:
-    #         self._ccpnInternalData = {LINECOLOUR: value}
-    #     else:
-    #         self._setLineColour(value)
-
     @property
     def multipletAveraging(self) -> str:
         """Multiplet averaging method
@@ -183,15 +103,6 @@ class MultipletList(PMIListABC):
             raise ValueError("multipletAveraging %s not defined correctly, must be in %s" % (value, MULTIPLETAVERAGINGTYPES))
 
         self.setParameter(MULTIPLETSETTINGS, MULTIPLETAVERAGING, MULTIPLETAVERAGINGTYPES.index(value))
-
-    # @property
-    # def comment(self) -> str:
-    #     """Free-form text comment"""
-    #     return self._wrappedData.details
-    #
-    # @comment.setter
-    # def comment(self, value: str):
-    #     self._wrappedData.details = value
 
     #=========================================================================================
     # Implementation functions
@@ -303,6 +214,3 @@ def _newMultipletList(self: Spectrum, title: str = None, comment: str = None,
         result.multipletAveraging = multipletAveraging
 
     return result
-
-# MultipletList._parentClass.newMultipletList = _newMultipletList
-# del _newMultipletList

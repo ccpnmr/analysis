@@ -30,7 +30,6 @@ from typing import Sequence, List, Optional
 from ccpn.util.Common import percentage
 from scipy.ndimage import maximum_filter, minimum_filter
 from ccpn.util import Common as commonUtil
-# from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core.Spectrum import Spectrum
 from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import PeakList as ApiPeakList
 from ccpn.core.lib.SpectrumLib import _oldEstimateNoiseLevel1D
@@ -236,35 +235,6 @@ class PeakList(PMIListABC):
     # Qualified name of matching API class
     _apiClassQualifiedName = ApiPeakList._metaclass.qualifiedName()
 
-    # # Special error-raising functions for people who think PeakList is a list
-    # def __iter__(self):
-    #     raise TypeError("'%s object is not iterable - for a list of %s use %s.%s" % (self.className,
-    #                                                                                  self._primaryChildClass._pluralLinkName,
-    #                                                                                  self.className,
-    #                                                                                  self._primaryChildClass._pluralLinkName))
-    #
-    # def __getitem__(self, index):
-    #     raise TypeError("'%s object does not support indexing - for a list of %s use %s.%s"% (self.className,
-    #                                                                                  self._primaryChildClass._pluralLinkName,
-    #                                                                                  self.className,
-    #                                                                                  self._primaryChildClass._pluralLinkName))
-    #
-    # def __len__(self):
-    #     raise TypeError("'%s object has no length - for a list of %s use %s.%s"% (self.className,
-    #                                                                                  self._primaryChildClass._pluralLinkName,
-    #                                                                                  self.className,
-    #                                                                                  self._primaryChildClass._pluralLinkName))
-    #
-    # def _setPrimaryChildClass(self):
-    #     """Set the primary classType for the child list attached to this container
-    #     """
-    #     from ccpn.core.Peak import Peak
-    #     self._primaryChildClass = Peak
-    #
-    # def __init__(self, *args, **kwds):
-    #     super().__init__(*args, **kwds)
-    #     self._setPrimaryChildClass()
-
     #=========================================================================================
     # CCPN properties
     #=========================================================================================
@@ -283,77 +253,6 @@ class PeakList(PMIListABC):
             raise TypeError('PrimaryChildClass %s does not exist as child of %s' % (klass.className,
                                                                                     self.className))
         self._primaryChildClass = klass
-
-    # @property
-    # def _key(self) -> str:
-    #     """id string - serial number converted to string."""
-    #     return str(self._wrappedData.serial)
-    #
-    # @property
-    # def serial(self) -> int:
-    #     """serial number of PeakList, used in Pid and to identify the PeakList."""
-    #     return self._wrappedData.serial
-    #
-    # @property
-    # def _parent(self) -> Spectrum:
-    #     """Spectrum containing Peaklist."""
-    #     return self._project._data2Obj[self._wrappedData.dataSource]
-    #
-    # spectrum = _parent
-    #
-    # @property
-    # def title(self) -> str:
-    #     """title of PeakList (not used in PID)."""
-    #     return self._wrappedData.name
-    #
-    # @title.setter
-    # def title(self, value: str):
-    #     self._wrappedData.name = value
-    #
-    # # @property
-    # # def comment(self) -> str:
-    # #     """Free-form text comment"""
-    # #     return self._wrappedData.details
-    # #
-    # # @comment.setter
-    # # def comment(self, value: str):
-    # #     self._wrappedData.details = value
-    #
-    # @property
-    # def symbolStyle(self) -> str:
-    #     """Symbol style for peak annotation display in all displays."""
-    #     return self._wrappedData.symbolStyle
-    #
-    # @symbolStyle.setter
-    # def symbolStyle(self, value: str):
-    #     self._wrappedData.symbolStyle = value
-    #
-    # @property
-    # def symbolColour(self) -> str:
-    #     """Symbol colour for peak annotation display in all displays."""
-    #     return self._wrappedData.symbolColour
-    #
-    # @symbolColour.setter
-    # def symbolColour(self, value: str):
-    #     self._wrappedData.symbolColour = value
-    #
-    # @property
-    # def textColour(self) -> str:
-    #     """Text colour for peak annotation display in all displays."""
-    #     return self._wrappedData.textColour
-    #
-    # @textColour.setter
-    # def textColour(self, value: str):
-    #     self._wrappedData.textColour = value
-    #
-    # @property
-    # def isSimulated(self) -> bool:
-    #     """True if this PeakList is simulated."""
-    #     return self._wrappedData.isSimulated
-    #
-    # @isSimulated.setter
-    # def isSimulated(self, value: bool):
-    #     self._wrappedData.isSimulated = value
 
     #=========================================================================================
     # Implementation functions
@@ -1056,7 +955,7 @@ class PeakList(PMIListABC):
 
             if dataArray.size:
 
-                # # testing - plot the dataArray during debugging
+                # # 20191004:ED testing - plot the dataArray during debugging
                 # import np as np
                 # from mpl_toolkits import mplot3d
                 # import matplotlib.pyplot as plt
@@ -1198,6 +1097,7 @@ class PeakList(PMIListABC):
                     if fitMethod != PARABOLICMETHOD:
                         self.fitExistingPeaks(peaks, fitMethod=fitMethod, singularMode=True)
 
+                    # # 20191004:ED testing - plotting scatterplot of data
                     # else:
                     #
                     # # result = CPeak.fitPeaks(dataArray, regionArray, allPeaksArray, method)
@@ -1525,9 +1425,3 @@ def _newPeakList(self: Spectrum, title: str = None, comment: str = None,
         result.lineColour = lineColour
 
     return result
-
-#EJB 20181127: moved to Spectrum
-# Spectrum.newPeakList = _newPeakList
-# del _newPeakList
-
-# Notifiers:

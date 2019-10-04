@@ -24,9 +24,8 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
-from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core.Spectrum import Spectrum
-from typing import List, Tuple, Optional
+from typing import List, Tuple
 from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import IntegralList as ApiIntegralList
 import numpy as np
 from ccpn.util.decorators import logCommand
@@ -98,19 +97,6 @@ class IntegralList(PMIListABC):
     # Qualified name of matching API class - NB shared with PeakList
     _apiClassQualifiedName = ApiIntegralList._metaclass.qualifiedName()
 
-    # # Special error-raising functions for people who think PeakList is a list
-    # def __iter__(self):
-    #     raise TypeError("IntegralList object is not iterable -"
-    #                     "for a list of integrals use IntegralList.integrals")
-    #
-    # def __getitem__(self, index):
-    #     raise TypeError("IntegralList object does not support indexing -"
-    #                     " for a list of integrals use IntegralList.integrals")
-    #
-    # def __len__(self):
-    #     raise TypeError("IntegralList object has no length - "
-    #                     "for a list of integrals use IntegralList.integrals")
-
     #=========================================================================================
     # CCPN properties
     #=========================================================================================
@@ -129,59 +115,6 @@ class IntegralList(PMIListABC):
             raise TypeError('PrimaryChildClass %s does not exist as child of %s' % (klass.className,
                                                                                     self.className))
         self._primaryChildClass = klass
-
-    # @property
-    # def _key(self) -> str:
-    #     """id string - serial number converted to string."""
-    #     return str(self._wrappedData.serial)
-    #
-    # @property
-    # def serial(self) -> int:
-    #     """serial number of IntegralList, used in Pid and to identify the IntegralList."""
-    #     return self._wrappedData.serial
-    #
-    # @property
-    # def _parent(self) -> Optional[Spectrum]:
-    #     """Spectrum containing IntegralList."""
-    #     return self._project._data2Obj[self._wrappedData.dataSource]
-    #
-    # spectrum = _parent
-    #
-    # @property
-    # def title(self) -> str:
-    #     """title of IntegralList (not used in PID)."""
-    #     return self._wrappedData.name
-    #
-    # @title.setter
-    # def title(self, value: str):
-    #     self._wrappedData.name = value
-    #
-    # @property
-    # def symbolColour(self) -> str:
-    #     """Symbol colour for integral annotation display."""
-    #     return self._wrappedData.symbolColour
-    #
-    # @symbolColour.setter
-    # def symbolColour(self, value: str):
-    #     self._wrappedData.symbolColour = value
-    #
-    # @property
-    # def textColour(self) -> str:
-    #     """Text colour for integral annotation display."""
-    #     return self._wrappedData.textColour
-    #
-    # @textColour.setter
-    # def textColour(self, value: str):
-    #     self._wrappedData.textColour = value
-
-    # @property
-    # def comment(self) -> str:
-    #     """Free-form text comment."""
-    #     return self._wrappedData.details
-    #
-    # @comment.setter
-    # def comment(self, value: str):
-    #     self._wrappedData.details = value
 
     #=========================================================================================
     # Implementation functions
@@ -350,25 +283,3 @@ def _newIntegralList(self: Spectrum, title: str = None, comment: str = None,
         result.lineColour = lineColour
 
     return result
-
-# IntegralList._parentClass.newIntegralList = _newIntegralList
-# del _newIntegralList
-
-# def _factoryFunction(project:Project, wrappedData:ApiIntegralList) -> AbstractWrapperObject:
-#   """create PeakList or IntegralList from API PeakList"""
-#   if wrappedData.dataType == 'Peak':
-#     return PeakList(project, wrappedData)
-#   elif wrappedData.dataType == 'Integral':
-#     return IntegralList(project, wrappedData)
-#   else:
-#     raise ValueError("API PeakList object has illegal dataType: %s. Must be 'Peak' or 'Integral"
-#                      % wrappedData.dataType)
-#
-#
-# IntegralList._factoryFunction = staticmethod(_factoryFunction)
-# PeakList._factoryFunction = staticmethod(_factoryFunction)
-
-
-# Notifiers:
-
-# NB API level notifiers are (and must be) in PeakList instead

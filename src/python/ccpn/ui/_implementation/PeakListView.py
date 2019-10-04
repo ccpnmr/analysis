@@ -29,17 +29,16 @@ import operator
 import typing
 from ccpn.core.PeakList import PeakList
 from ccpn.core.Project import Project
-# from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.ui._implementation.SpectrumView import SpectrumView
 from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import StripPeakListView as ApiStripPeakListView
-# from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import PeakListView as ApiPeakListView
 from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import SpectrumView as ApiSpectrumView
 from ccpnmodel.ccpncore.api.ccp.nmr import Nmr
 from ccpn.ui._implementation.PMIListViewABC import PMIListViewABC
 
 
 class PeakListView(PMIListViewABC):
-    """Peak List View for 1D or nD PeakList"""
+    """Peak List View for 1D or nD PeakList
+    """
 
     #: Short class name, for PID.
     shortClassName = 'GL'
@@ -75,106 +74,10 @@ class PeakListView(PMIListViewABC):
         """ CCPN PeakListView matching PeakListView"""
         return self._wrappedData
 
-    # @property
-    # def _parent(self) -> SpectrumView:
-    #     """SpectrumView containing PeakListView."""
-    #     return self._project._data2Obj.get(self._wrappedData.stripSpectrumView)
-    #
-    # spectrumView = _parent
-    #
-    # def delete(self):
-    #     """PeakListViews cannot be deleted, except as a byproduct of deleting other things"""
-    #     raise Exception("PeakListViews cannot be deleted directly")
-    #
-    # @property
-    # def _key(self) -> str:
-    #     """id string - """
-    #     return str(self._wrappedData.peakListView.peakListSerial)
-
     @property
     def _childClass(self):
         """Ccpn core obj that PeakListView refers to"""
         return self.peakList
-
-    # @property
-    # def _localCcpnSortKey(self) -> typing.Tuple:
-    #     """Local sorting key, in context of parent."""
-    #     return (self._wrappedData.peakListView.peakListSerial,)
-    #
-    # @property
-    # def symbolStyle(self) -> str:
-    #     """Symbol style for displayed peak markers.
-    #
-    #     If not set for PeakListView gives you the value for PeakList.
-    #     If set for PeakListView overrides PeakList value.
-    #     Set PeakListView value to None to return to non-local value"""
-    #     wrappedData = self._wrappedData.peakListView
-    #     result = wrappedData.symbolStyle
-    #     if result is None:
-    #         obj = wrappedData.peakList
-    #         result = obj and obj.symbolStyle
-    #     return result
-    #
-    # @symbolStyle.setter
-    # def symbolStyle(self, value: str):
-    #     if self.symbolStyle != value:
-    #         self._wrappedData.peakListView.symbolStyle = value
-    #
-    # @property
-    # def symbolColour(self) -> str:
-    #     """Symbol colour for displayed peak markers.
-    #
-    #     If not set for PeakListView gives you the value for PeakList.
-    #     If set for PeakListView overrides PeakList value.
-    #     Set PeakListView value to None to return to non-local value"""
-    #     wrappedData = self._wrappedData.peakListView
-    #     result = wrappedData.symbolColour
-    #     if result is None:
-    #         obj = wrappedData.peakList
-    #         result = obj and obj.symbolColour
-    #     return result
-    #
-    # @symbolColour.setter
-    # def symbolColour(self, value: str):
-    #     if self.symbolColour != value:
-    #         self._wrappedData.peakListView.symbolColour = value
-    #
-    # @property
-    # def textColour(self) -> str:
-    #     """Text colour for displayed peak markers.
-    #
-    #     If not set for PeakListView gives you the value for PeakList.
-    #     If set for PeakListView overrides PeakList value.
-    #     Set PeakListView value to None to return to non-local value"""
-    #     wrappedData = self._wrappedData.peakListView
-    #     result = wrappedData.textColour
-    #     if result is None:
-    #         obj = wrappedData.peakList
-    #         result = obj and obj.textColour
-    #     return result
-    #
-    # @textColour.setter
-    # def textColour(self, value: str):
-    #     if self.textColour != value:
-    #         self._wrappedData.peakListView.textColour = value
-    #
-    # @property
-    # def isSymbolDisplayed(self) -> bool:
-    #     """True if the peak marker symbol is displayed."""
-    #     return self._wrappedData.peakListView.isSymbolDisplayed
-    #
-    # @isSymbolDisplayed.setter
-    # def isSymbolDisplayed(self, value: bool):
-    #     self._wrappedData.peakListView.isSymbolDisplayed = value
-    #
-    # @property
-    # def isTextDisplayed(self) -> bool:
-    #     """True if the peak annotation is displayed?"""
-    #     return self._wrappedData.peakListView.isTextDisplayed
-    #
-    # @isTextDisplayed.setter
-    # def isTextDisplayed(self, value: bool):
-    #     self._wrappedData.peakListView.isTextDisplayed = value
 
     @property
     def peakList(self) -> PeakList:

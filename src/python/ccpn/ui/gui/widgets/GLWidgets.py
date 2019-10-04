@@ -548,6 +548,7 @@ class Gui1dWidget(CcpnGLWidget):
 
         peak.position = p0
 
+
 class Gui1dWidgetAxis(Gui1dWidget):
     pass
 

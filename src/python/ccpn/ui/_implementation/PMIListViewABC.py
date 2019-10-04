@@ -28,7 +28,7 @@ import typing
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.ui._implementation.SpectrumView import SpectrumView
 from ccpn.core.PMIListABC import MERITCOLOUR, MERITTHRESHOLD, MERITENABLED, MERITSETTINGS, \
-    COLOURCHECK, LINECOLOUR, LINESETTINGS, SYMBOLCOLOUR, TEXTCOLOUR
+    COLOURCHECK, LINECOLOUR, LINESETTINGS, INHERITCOLOUR
 
 
 class PMIListViewABC(AbstractWrapperObject):
@@ -52,6 +52,7 @@ class PMIListViewABC(AbstractWrapperObject):
     # Qualified name of matching API class
     _apiClassQualifiedName = None
 
+    # attributes required to be set for subclasses
     _apiListView = None
     _apiListSerial = None
     _apiList = None
@@ -63,16 +64,13 @@ class PMIListViewABC(AbstractWrapperObject):
         raise NotImplementedError("Code error: function not implemented")
 
     def _init(self):
+        """Required to be called by the class constructor
+        """
         self._setListClasses()
 
     #=========================================================================================
     # CCPN properties
     #=========================================================================================
-
-    # @property
-    # def _apiPeakListView(self) -> ApiStripPeakListView:
-    #     """ CCPN PeakListView matching PeakListView"""
-    #     return self._wrappedData
 
     @property
     def _parent(self) -> SpectrumView:
@@ -89,11 +87,6 @@ class PMIListViewABC(AbstractWrapperObject):
     def _key(self) -> str:
         """id string - """
         return str(self._apiListSerial)
-
-    # @property
-    # def _childClass(self):
-    #     """Ccpn core obj that ListView refers to"""
-    #     return self.peakList
 
     @property
     def _localCcpnSortKey(self) -> typing.Tuple:
@@ -131,7 +124,7 @@ class PMIListViewABC(AbstractWrapperObject):
         Set ListView value to None to return to non-local value"""
         wrappedData = self._apiListView
         result = wrappedData.symbolColour
-        if result in ('#', None):
+        if result in (INHERITCOLOUR, None):
             obj = self._apiList
             result = obj and obj.symbolColour
         return result
@@ -140,14 +133,14 @@ class PMIListViewABC(AbstractWrapperObject):
     def symbolColour(self, value: typing.Optional[str]):
         # ccpnInternal - changes this to '#' for non-valid colour check to validate in model
         if not isinstance(value, (str, type(None))):
-            raise TypeError("symbolColour must be a hex colour string (e.g. '#ABCDEF' or '#') or None")
+            raise TypeError("symbolColour must be a hex colour string (e.g. '#ABCDEF' or '%s') or None" % INHERITCOLOUR)
         if value:
             # a non-empty string
-            if not (re.findall(COLOURCHECK, value) or value == '#'):
-                raise ValueError("symbolColour %s not defined correctly, must be a hex colour string (e.g. '#ABCDEF' or '#')" % value)
+            if not (re.findall(COLOURCHECK, value) or value == INHERITCOLOUR):
+                raise ValueError("symbolColour %s not defined correctly, must be a hex colour string (e.g. '#ABCDEF' or '%s')" % (value, INHERITCOLOUR))
             value = value.upper()
 
-        self._apiListView.symbolColour = value or '#'
+        self._apiListView.symbolColour = value or INHERITCOLOUR
 
     @property
     def textColour(self) -> str:
@@ -161,7 +154,7 @@ class PMIListViewABC(AbstractWrapperObject):
         Set ListView value to None to return to non-local value"""
         wrappedData = self._apiListView
         result = wrappedData.textColour
-        if result in ('#', None):
+        if result in (INHERITCOLOUR, None):
             obj = self._apiList
             result = obj and obj.textColour
         return result
@@ -170,14 +163,14 @@ class PMIListViewABC(AbstractWrapperObject):
     def textColour(self, value: typing.Optional[str]):
         # ccpnInternal - changes this to '#' for non-valid colour check to validate in model
         if not isinstance(value, (str, type(None))):
-            raise TypeError("textColour must be a hex colour string (e.g. '#ABCDEF' or '#') or None")
+            raise TypeError("textColour must be a hex colour string (e.g. '#ABCDEF' or '%s') or None" % INHERITCOLOUR)
         if value:
             # a non-empty string
-            if not (re.findall(COLOURCHECK, value) or value == '#'):
-                raise ValueError("textColour %s not defined correctly, must be a hex colour string (e.g. '#ABCDEF' or '#')" % value)
+            if not (re.findall(COLOURCHECK, value) or value == INHERITCOLOUR):
+                raise ValueError("textColour %s not defined correctly, must be a hex colour string (e.g. '#ABCDEF' or '%s')" % (value, INHERITCOLOUR))
             value = value.upper()
 
-        self._apiListView.textColour = value or '#'
+        self._apiListView.textColour = value or INHERITCOLOUR
 
     @property
     def isSymbolDisplayed(self) -> bool:
@@ -208,7 +201,7 @@ class PMIListViewABC(AbstractWrapperObject):
         If set for ListView overrides List value.
         Set ListView value to None to return to non-local value"""
         result = self.getParameter(MERITSETTINGS, MERITCOLOUR)
-        if result in ('#', None):
+        if result in (INHERITCOLOUR, None):
             obj = self._childClass
             result = obj and obj.meritColour
         return result
@@ -216,14 +209,14 @@ class PMIListViewABC(AbstractWrapperObject):
     @meritColour.setter
     def meritColour(self, value: typing.Optional[str]):
         if not isinstance(value, (str, type(None))):
-            raise TypeError("meritColour must be a hex colour string (e.g. '#ABCDEF' or '#') or None")
+            raise TypeError("meritColour must be a hex colour string (e.g. '#ABCDEF' or '%s') or None" % INHERITCOLOUR)
         if value:
             # a non-empty string
-            if not (re.findall(COLOURCHECK, value) or value == '#'):
-                raise ValueError("meritColour %s not defined correctly, must be a hex colour string (e.g. '#ABCDEF' or '#')" % value)
+            if not (re.findall(COLOURCHECK, value) or value == INHERITCOLOUR):
+                raise ValueError("meritColour %s not defined correctly, must be a hex colour string (e.g. '#ABCDEF' or '%s')" % (value, INHERITCOLOUR))
             value = value.upper()
 
-        self.setParameter(MERITSETTINGS, MERITCOLOUR, value or '#')
+        self.setParameter(MERITSETTINGS, MERITCOLOUR, value or INHERITCOLOUR)
 
     @property
     def meritEnabled(self) -> typing.Optional[bool]:
@@ -278,7 +271,7 @@ class PMIListViewABC(AbstractWrapperObject):
         If set for ListView overrides List value.
         Set ListView value to None to return to non-local value"""
         result = self.getParameter(LINESETTINGS, LINECOLOUR)
-        if result in ('#', None):
+        if result in (INHERITCOLOUR, None):
             obj = self._childClass
             result = obj and obj.lineColour
         return result
@@ -286,19 +279,14 @@ class PMIListViewABC(AbstractWrapperObject):
     @lineColour.setter
     def lineColour(self, value: typing.Optional[str]):
         if not isinstance(value, (str, type(None))):
-            raise TypeError("lineColour must be a hex colour string (e.g. '#ABCDEF' or '#') or None")
+            raise TypeError("lineColour must be a hex colour string (e.g. '#ABCDEF' or '%s') or None" % INHERITCOLOUR)
         if value:
             # a non-empty string
-            if not (re.findall(COLOURCHECK, value) or value == '#'):
-                raise ValueError("lineColour %s not defined correctly, must be a hex colour string (e.g. '#ABCDEF' or '#')" % value)
+            if not (re.findall(COLOURCHECK, value) or value == INHERITCOLOUR):
+                raise ValueError("lineColour %s not defined correctly, must be a hex colour string (e.g. '#ABCDEF' or '%s')" % (value, INHERITCOLOUR))
             value = value.upper()
 
-        self.setParameter(LINESETTINGS, LINECOLOUR, value or '#')
-
-    # @property
-    # def peakList(self) -> PeakList:
-    #     """PeakList that PeakListView refers to"""
-    #     return self._project._data2Obj.get(self._apiListView.peakList)
+        self.setParameter(LINESETTINGS, LINECOLOUR, value or INHERITCOLOUR)
 
     #=========================================================================================
     # Implementation functions

@@ -25,14 +25,7 @@ __date__ = "$Date: 2017-03-30 11:28:58 +0100 (Thu, March 30, 2017) $"
 # Start of code
 #=========================================================================================
 
-import ccpn.util.Colour as Colour
-from ccpn.ui.gui.widgets.MessageDialog import MessageDialog
-from ccpn.ui.gui.widgets.Button import Button
-from ccpn.ui.gui.widgets.Label import Label
-from ccpn.ui.gui.widgets.PulldownList import PulldownList
-from ccpn.ui.gui.popups.Dialog import CcpnDialog, handleDialogApply
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
-from ccpn.core.lib.ContextManagers import undoStackBlocking
 from ccpn.ui.gui.popups.PMIListPropertiesPopupABC import PMIListPropertiesPopupABC
 from ccpn.core.PeakList import PeakList
 
@@ -61,4 +54,5 @@ class PeakListPropertiesPopup(PMIListPropertiesPopupABC):
     def _getListViews(self, ccpnList):
         """Return the listViews containing this list
         """
-        return [peakListView for peakListView in ccpnList.project.peakListViews if peakListView.peakList == ccpnList]
+        return [peakListView for peakListView in ccpnList.project.peakListViews
+                if peakListView.peakList == ccpnList]

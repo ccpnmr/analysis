@@ -24,26 +24,10 @@ __date__ = "$Date$"
 #=========================================================================================
 
 
-# import numpy as np
-# import math
-
 import re
 from typing import Sequence, List, Optional
-
-# from ccpn.util.Common import percentage
-# from scipy.ndimage import maximum_filter, minimum_filter
-# from ccpn.util import Common as commonUtil
-
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core.Spectrum import Spectrum
-
-
-# from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import PeakList as ApiPeakList
-# from ccpn.core.lib.SpectrumLib import _oldEstimateNoiseLevel1D
-# from ccpnmodel.ccpncore.lib._ccp.nmr.Nmr.PeakList import pickNewPeaks
-# from ccpn.util.decorators import logCommand
-# from ccpn.core.lib.ContextManagers import newObject, undoBlock, undoBlockWithoutSideBar
-# from ccpn.util.Logging import getLogger
 
 
 MERITSETTINGS = 'meritSettings'
@@ -56,6 +40,7 @@ SYMBOLCOLOUR = 'symbolColour'
 TEXTCOLOUR = 'textColour'
 
 COLOURCHECK = '#[a-fA-F0-9]{6}$'
+INHERITCOLOUR = '#'
 
 
 class PMIListABC(AbstractWrapperObject):
@@ -170,9 +155,9 @@ class PMIListABC(AbstractWrapperObject):
     @symbolColour.setter
     def symbolColour(self, value: str):
         if not isinstance(value, str):
-            raise TypeError("symbolColour must be a hex colour string (e.g. '#ABCDEF' or '#')")
-        if not (re.findall(COLOURCHECK, value) or value == '#'):
-            raise ValueError("symbolColour %s not defined correctly, must be a hex colour string (e.g. '#ABCDEF' or '#')" % value)
+            raise TypeError("symbolColour must be a hex colour string (e.g. '#ABCDEF' or '%s')" % INHERITCOLOUR)
+        if not (re.findall(COLOURCHECK, value) or value == INHERITCOLOUR):
+            raise ValueError("symbolColour %s not defined correctly, must be a hex colour string (e.g. '#ABCDEF' or '%s')" % (value, INHERITCOLOUR))
 
         value = value.upper()
         self._wrappedData.symbolColour = value
@@ -188,9 +173,9 @@ class PMIListABC(AbstractWrapperObject):
     @textColour.setter
     def textColour(self, value: str):
         if not isinstance(value, str):
-            raise TypeError("textColour must be a hex colour string (e.g. '#ABCDEF' or '#')")
-        if not (re.findall(COLOURCHECK, value) or value == '#'):
-            raise ValueError("textColour %s not defined correctly, must be a hex colour string (e.g. '#ABCDEF' or '#')" % value)
+            raise TypeError("textColour must be a hex colour string (e.g. '#ABCDEF' or '%s')" % INHERITCOLOUR)
+        if not (re.findall(COLOURCHECK, value) or value == INHERITCOLOUR):
+            raise ValueError("textColour %s not defined correctly, must be a hex colour string (e.g. '#ABCDEF' or '%s')" % (value, INHERITCOLOUR))
 
         value = value.upper()
         self._wrappedData.textColour = value
@@ -215,9 +200,9 @@ class PMIListABC(AbstractWrapperObject):
     @meritColour.setter
     def meritColour(self, value: str):
         if not isinstance(value, str):
-            raise TypeError("meritColour must be a hex colour string (e.g. '#ABCDEF' or '#')")
-        if not (re.findall(COLOURCHECK, value) or value == '#'):
-            raise ValueError("meritColour %s not defined correctly, must be a hex colour string (e.g. '#ABCDEF' or '#')" % value)
+            raise TypeError("meritColour must be a hex colour string (e.g. '#ABCDEF' or '%s')" % INHERITCOLOUR)
+        if not (re.findall(COLOURCHECK, value) or value == INHERITCOLOUR):
+            raise ValueError("meritColour %s not defined correctly, must be a hex colour string (e.g. '#ABCDEF' or '%s')" % (value, INHERITCOLOUR))
 
         value = value.upper()
         self.setParameter(MERITSETTINGS, MERITCOLOUR, value)
@@ -263,9 +248,9 @@ class PMIListABC(AbstractWrapperObject):
     @lineColour.setter
     def lineColour(self, value: str):
         if not isinstance(value, str):
-            raise TypeError("lineColour must be a hex colour string (e.g. '#ABCDEF' or '#')")
-        if not (re.findall(COLOURCHECK, value) or value == '#'):
-            raise ValueError("lineColour %s not defined correctly, must be a hex colour string (e.g. '#ABCDEF' or '#')" % value)
+            raise TypeError("lineColour must be a hex colour string (e.g. '#ABCDEF' or '%s')" % INHERITCOLOUR)
+        if not (re.findall(COLOURCHECK, value) or value == INHERITCOLOUR):
+            raise ValueError("lineColour %s not defined correctly, must be a hex colour string (e.g. '#ABCDEF' or '%s')" % (value, INHERITCOLOUR))
 
         value = value.upper()
         self.setParameter(LINESETTINGS, LINECOLOUR, value)

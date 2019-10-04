@@ -71,6 +71,13 @@ class GuiWindow():
         addShortCut("Del", self, partial(self.deleteSelectedItems), context=context)
         addShortCut("m, k", self, self.createMark, context=context)
         addShortCut("m, c", self, self.clearMarks, context=context)
+        addShortCut("m, x", self, partial(self.createMark, 0), context=context)
+        addShortCut("m, y", self, partial(self.createMark, 1), context=context)
+        addShortCut("m, z", self, partial(self.createMark, 2), context=context)
+        addShortCut("p, m", self, self.createPeakAxisMarks, context=context)
+        addShortCut("p, x", self, partial(self.createPeakAxisMarks, 0), context=context)
+        addShortCut("p, y", self, partial(self.createPeakAxisMarks, 1), context=context)
+        addShortCut("p, z", self, partial(self.createPeakAxisMarks, 2), context=context)
         addShortCut("f, n", self, partial(navigateToCurrentNmrResiduePosition, self.application), context=context)
         addShortCut("f, p", self, partial(navigateToCurrentPeakPosition, self.application), context=context)
         addShortCut("c, a", self, partial(AssignmentLib.propagateAssignments, current=self.application.current), context=context)
@@ -521,13 +528,21 @@ class GuiWindow():
         if strip:
             strip.estimateNoise()
 
-    def createMark(self):
+    def createMark(self, axisIndex=None):
         """
         Creates a mark at the current cursor position in the current strip.
         """
         strip = self.application.current.strip
         if strip:
-            strip._createMarkAtCursorPosition()
+            strip._createMarkAtCursorPosition(axisIndex)
+
+    def createPeakAxisMarks(self, axisIndex=None):
+        """
+        Creates a mark at the current cursor position in the current strip.
+        """
+        strip = self.application.current.strip
+        if strip:
+            strip._markSelectedPeaks(axisIndex)
 
     @logCommand('mainWindow.')
     def clearMarks(self):

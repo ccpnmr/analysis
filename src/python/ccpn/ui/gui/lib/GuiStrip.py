@@ -47,7 +47,8 @@ from functools import partial
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs import AXISXUNITS, AXISYUNITS, AXISLOCKASPECTRATIO, \
     SYMBOLTYPES, ANNOTATIONTYPES, SYMBOLSIZE, SYMBOLTHICKNESS, AXISUSEFIXEDASPECTRATIO, \
     MAINVIEW, BOTTOMAXIS, RIGHTAXIS, AXISCORNER
-from ccpn.core.lib.ContextManagers import undoStackBlocking, undoBlock, notificationBlanking
+from ccpn.core.lib.ContextManagers import undoStackBlocking, undoBlock, \
+    notificationBlanking, undoBlockWithoutSideBar
 from ccpn.util.decorators import logCommand
 from ccpn.ui.gui.guiSettings import textFont, getColours, STRIPHEADER_BACKGROUND, \
     STRIPHEADER_FOREGROUND, GUINMRRESIDUE, CCPNGLWIDGET_BACKGROUND, textFontLarge
@@ -618,7 +619,12 @@ class GuiStrip(Frame):
             self.navigateCursorMenu.clear()
             currentStrip = self.current.strip
             # position = self.current.cursorPosition
-            position = [self.current.mouseMovedDict[AXIS_FULLATOMNAME][ax] for ax in self.axisCodes]
+            # position = [self.current.mouseMovedDict[AXIS_FULLATOMNAME][ax] for ax in self.axisCodes]
+            position = [self.current.mouseMovedDict[AXIS_FULLATOMNAME][ax]
+                        if ax in self.current.mouseMovedDict[AXIS_FULLATOMNAME] else None
+                        for ax in self.axisCodes]
+            if None in position:
+                return
 
             if currentStrip:
                 if len(self.current.project.spectrumDisplays) > 1:
@@ -658,7 +664,7 @@ class GuiStrip(Frame):
         # TODO, merge the two menu (cursor and peak) in one single menu to avoid code duplication. Issues: when tried, only one menu at the time worked!
         from functools import partial
 
-        if self.markInPeakMenu:
+        if hasattr(self, 'markInPeakMenu'):
             self.markInPeakMenu.clear()
             currentStrip = self.current.strip
 
@@ -687,7 +693,7 @@ class GuiStrip(Frame):
         # TODO needs clear documentation
         from functools import partial
 
-        if self.markInCursorMenu:
+        if hasattr(self, 'markInCursorMenu'):
             self.markInCursorMenu.clear()
             currentStrip = self.current.strip
             position = self.current.cursorPosition
@@ -707,6 +713,20 @@ class GuiStrip(Frame):
                         self.markInCursorMenu.addSeparator()
                 else:
                     self.markInCursorMenu.setEnabled(False)
+
+    def _markSelectedPeaks(self, axisIndex=None):
+        """Mark the positions of all selected peaks
+        """
+        with undoBlockWithoutSideBar():
+            for peak in self.current.peaks:
+                self._createObjectMark(peak, axisIndex)
+
+    def _markSelectedMultiplets(self, axisIndex=None):
+        """Mark the positions of all selected multiplets
+        """
+        with undoBlockWithoutSideBar():
+            for multiplet in self.current.multiplets:
+                self._createObjectMark(multiplet, axisIndex)
 
     def _addItemsToCopyAxisFromMenuesMainView(self):
         """Setup the menu for the main view
@@ -771,7 +791,11 @@ class GuiStrip(Frame):
         """Setup the menu for the main view for marking axis codes
         """
         axisName = axisMenu if axisMenu else self.markAxesMenu
-        position = [self.current.mouseMovedDict[AXIS_FULLATOMNAME][ax] for ax in self.axisCodes]
+        position = [self.current.mouseMovedDict[AXIS_FULLATOMNAME][ax]
+                    if ax in self.current.mouseMovedDict[AXIS_FULLATOMNAME] else None
+                    for ax in self.axisCodes]
+        if None in position:
+            return
 
         row = 0
         if indices is None:
@@ -800,15 +824,15 @@ class GuiStrip(Frame):
         if row:
             axisName.addSeparator()
 
-    def _addItemsToMarkAxesMenuXAxisView(self):
-        """Setup the menu for the main view for marking axis codes
-        """
-        axisName = self.markAxesMenu
-
-    def _addItemsToMarkAxesMenuYAxisView(self):
-        """Setup the menu for the main view for marking axis codes
-        """
-        axisName = self.markAxesMenu
+    # def _addItemsToMarkAxesMenuXAxisView(self):
+    #     """Setup the menu for the main view for marking axis codes
+    #     """
+    #     axisName = self.markAxesMenu
+    #
+    # def _addItemsToMarkAxesMenuYAxisView(self):
+    #     """Setup the menu for the main view for marking axis codes
+    #     """
+    #     axisName = self.markAxesMenu
 
     def _addItemsToMatchAxisCodesFromMenuesMainView(self):
         """Setup the menu for the main view
@@ -816,11 +840,11 @@ class GuiStrip(Frame):
         self._addItemsToCopyAxisCodesFromMenues(0, self.matchXAxisCodeToMenu)
         self._addItemsToCopyAxisCodesFromMenues(1, self.matchYAxisCodeToMenu)
 
-    def _addItemsToMatchAxisCodesFromMenuesAxes(self):
-        """Setup the menu for the axis views
-        """
-        self._addItemsToCopyAxisCodesFromMenues(0, [self.matchXAxisCodeToMenu2, self.matchYAxisCodeToMenu2])
-        self._addItemsToCopyAxisCodesFromMenues(1, [self.matchXAxisCodeToMenu2, self.matchYAxisCodeToMenu2])
+    # def _addItemsToMatchAxisCodesFromMenuesAxes(self):
+    #     """Setup the menu for the axis views
+    #     """
+    #     self._addItemsToCopyAxisCodesFromMenues(0, [self.matchXAxisCodeToMenu2, self.matchYAxisCodeToMenu2])
+    #     self._addItemsToCopyAxisCodesFromMenues(1, [self.matchXAxisCodeToMenu2, self.matchYAxisCodeToMenu2])
 
     def _addItemsToCopyAxisCodesFromMenues(self, axisIndex, axisName):      #, axisList):
         """Copied from old viewbox. This function apparently take the current cursorPosition
@@ -869,42 +893,42 @@ class GuiStrip(Frame):
 
             axisName.setEnabled(True if count else False)
 
-    def _enableNdAxisMenuItems(self, axisName, axisMenu):
+    # def _enableNdAxisMenuItems(self, axisName, axisMenu):
+    #
+    #     from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs import BOTTOMAXIS, RIGHTAXIS, AXISCORNER
+    #
+    #     axisMenuItems = (self.copyAllAxisFromMenu2, self.copyXAxisFromMenu2, self.copyYAxisFromMenu2,
+    #                      self.matchXAxisCodeToMenu2, self.matchYAxisCodeToMenu2)
+    #     enabledList = {BOTTOMAXIS: (False, True, False, True, False),
+    #                    RIGHTAXIS : (False, False, True, False, True),
+    #                    AXISCORNER: (True, True, True, True, True)
+    #                    }
+    #     if axisName in enabledList:
+    #         axisSelect = enabledList[axisName]
+    #         for menuItem, select in zip(axisMenuItems, axisSelect):
+    #             # only disable if already enabled
+    #             if menuItem.isEnabled():
+    #                 menuItem.setEnabled(select)
+    #     else:
+    #         getLogger().warning('Error selecting menu item')
 
-        from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs import BOTTOMAXIS, RIGHTAXIS, AXISCORNER
-
-        axisMenuItems = (self.copyAllAxisFromMenu2, self.copyXAxisFromMenu2, self.copyYAxisFromMenu2,
-                         self.matchXAxisCodeToMenu2, self.matchYAxisCodeToMenu2)
-        enabledList = {BOTTOMAXIS: (False, True, False, True, False),
-                       RIGHTAXIS : (False, False, True, False, True),
-                       AXISCORNER: (True, True, True, True, True)
-                       }
-        if axisName in enabledList:
-            axisSelect = enabledList[axisName]
-            for menuItem, select in zip(axisMenuItems, axisSelect):
-                # only disable if already enabled
-                if menuItem.isEnabled():
-                    menuItem.setEnabled(select)
-        else:
-            getLogger().warning('Error selecting menu item')
-
-    def _enable1dAxisMenuItems(self, axisName):
-
-        from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs import BOTTOMAXIS, RIGHTAXIS, AXISCORNER
-
-        axisMenuItems = (self.copyAllAxisFromMenu2, self.copyXAxisFromMenu2, self.copyYAxisFromMenu2)
-        enabledList = {BOTTOMAXIS: (False, True, False),
-                       RIGHTAXIS : (False, False, True),
-                       AXISCORNER: (True, True, True)
-                       }
-        if axisName in enabledList:
-            axisSelect = enabledList[axisName]
-            for menuItem, select in zip(axisMenuItems, axisSelect):
-                # only disable if already enabled
-                if menuItem.isEnabled():
-                    menuItem.setEnabled(select)
-        else:
-            getLogger().warning('Error selecting menu item')
+    # def _enable1dAxisMenuItems(self, axisName):
+    #
+    #     from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs import BOTTOMAXIS, RIGHTAXIS, AXISCORNER
+    #
+    #     axisMenuItems = (self.copyAllAxisFromMenu2, self.copyXAxisFromMenu2, self.copyYAxisFromMenu2)
+    #     enabledList = {BOTTOMAXIS: (False, True, False),
+    #                    RIGHTAXIS : (False, False, True),
+    #                    AXISCORNER: (True, True, True)
+    #                    }
+    #     if axisName in enabledList:
+    #         axisSelect = enabledList[axisName]
+    #         for menuItem, select in zip(axisMenuItems, axisSelect):
+    #             # only disable if already enabled
+    #             if menuItem.isEnabled():
+    #                 menuItem.setEnabled(select)
+    #     else:
+    #         getLogger().warning('Error selecting menu item')
 
     def _updateDisplayedIntegrals(self, data):
         """Callback when integrals have changed.
@@ -1394,22 +1418,34 @@ class GuiStrip(Frame):
             getLogger().warning('Error copying axis %s from strip %s' % (str(fromStrip.axisCodes[fromAxisId]), str(fromStrip)))
             raise (es)
 
-    def _createMarkAtCursorPosition(self):
+    def _createMarkAtCursorPosition(self, axisIndex=None):
         try:
-            # colourDict = guiSettings.MARK_LINE_COLOUR_DICT  # maps atomName --> colour
-
             defaultColour = self._preferences.defaultMarksColour
             mouseDict = self.current.mouseMovedDict[AXIS_FULLATOMNAME]
             positions = [mouseDict[ax] for ax in self.axisCodes if ax in mouseDict]
             axisCodes = [ax for ax in self.axisCodes if ax in mouseDict]
-            self._project.newMark(defaultColour, positions, axisCodes)
+
+            if axisIndex is not None:
+                if (0 <= axisIndex < len(positions)):
+                    positions = (positions[axisIndex],)
+                    axisCodes = (axisCodes[axisIndex],)
+                    self._project.newMark(defaultColour, positions, axisCodes)
+            else:
+                self._project.newMark(defaultColour, positions, axisCodes)
 
             # add the marks for the double cursor - needs to be enabled in preferences
             if self._preferences.showDoubleCrosshair and self._CcpnGLWidget._matchingIsotopeCodes:
                 mouseDict = self.current.mouseMovedDict[DOUBLEAXIS_FULLATOMNAME]
                 positions = [mouseDict[ax] for ax in self.axisCodes[:2] if ax in mouseDict]
                 axisCodes = [ax for ax in self.axisCodes[:2] if ax in mouseDict]
-                self._project.newMark(defaultColour, positions, axisCodes)
+
+                if axisIndex is not None:
+                    if (0 <= axisIndex < len(positions)):
+                        positions = (positions[axisIndex],)
+                        axisCodes = (axisCodes[axisIndex],)
+                        self._project.newMark(defaultColour, positions, axisCodes)
+                else:
+                    self._project.newMark(defaultColour, positions, axisCodes)
 
             # need new mark method of the form newMark(colour=colour, axisCode=position)
 

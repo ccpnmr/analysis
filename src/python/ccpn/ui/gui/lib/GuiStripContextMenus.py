@@ -371,9 +371,21 @@ def _markCursorPosItem(strip):
 
 def _markPeakPosItem(strip):
     return _SCMitem(name='Mark in:',
-                    typeItem=ItemTypes.get(MENU), toolTip='Mark current.peak.position in the selected strip ',
+                    typeItem=ItemTypes.get(MENU), toolTip='Mark positions of selected peaks',
                     stripMethodName='markInPeakMenu',
                     callback=None)
+
+
+def _markPeaksItem(strip):
+    return _SCMitem(name='Mark Peaks',
+                    typeItem=ItemTypes.get(ITEM), toolTip='Mark positions of selected peaks',
+                    callback=strip._markSelectedPeaks)
+
+
+def _markMultipletsItem(strip):
+    return _SCMitem(name='Mark Multiplets',
+                    typeItem=ItemTypes.get(ITEM), toolTip='Mark positions of selected multiplets',
+                    callback=strip._markSelectedMultiplets)
 
 
 def _markAxesItem(strip):
@@ -621,7 +633,7 @@ def _get1dDefaultMenu(guiStrip1d) -> Menu:
         _clearMarksItem(guiStrip1d),
         _separator(),
         _navigateToCursorPosItem(guiStrip1d),
-        _markCursorPosItem(guiStrip1d),
+        # _markCursorPosItem(guiStrip1d),
         _markAxesItem(guiStrip1d),
         _separator(),
         _copyAllAxisRangeFromStripItem(guiStrip1d),
@@ -671,7 +683,8 @@ def _get1dPeakMenu(guiStrip1d) -> Menu:
         _integrate1DItem(guiStrip1d),
         _separator(),
         _navigateToPeakPosItem(guiStrip1d),
-        _markPeakPosItem(guiStrip1d),
+        # _markPeakPosItem(guiStrip1d),
+        _markPeaksItem(guiStrip1d)
         ]
     items = [itm for itm in items if itm is not None]
     return _createMenu(guiStrip1d, items)
@@ -694,6 +707,8 @@ def _get1dMultipletMenu(guiStrip1d) -> Menu:
     """
     items = [
         _deleteMultipletItem(guiStrip1d),
+        _separator(),
+        _markMultipletsItem(guiStrip1d),
         ]
     items = [itm for itm in items if itm is not None]
     return _createMenu(guiStrip1d, items)
@@ -704,9 +719,9 @@ def _get1dAxisMenu(guiStrip) -> Menu:
     Creates and returns the current Axis context menu. Opened when right clicked on axis
     """
     items = [
-        _copyAllAxisRangeFromStripItem2(guiStrip),
-        _copyXAxisRangeFromStripItem2(guiStrip),
-        _copyYAxisRangeFromStripItem2(guiStrip),
+        # _copyAllAxisRangeFromStripItem2(guiStrip),
+        # _copyXAxisRangeFromStripItem2(guiStrip),
+        # _copyYAxisRangeFromStripItem2(guiStrip),
         ]
     items = [itm for itm in items if itm is not None]
     return _createMenu(guiStrip, items)
@@ -765,7 +780,7 @@ def _getNdDefaultMenu(guiStripNd) -> Menu:
         _clearMarksItem(guiStripNd),
         _separator(),
         _navigateToCursorPosItem(guiStripNd),
-        _markCursorPosItem(guiStripNd),
+        # _markCursorPosItem(guiStripNd),
         _markAxesItem(guiStripNd),
         _separator(),
         _copyAllAxisRangeFromStripItem(guiStripNd),
@@ -826,7 +841,8 @@ def _getNdPeakMenu(guiStripNd) -> Menu:
         _newMultipletItem(guiStripNd),
         _separator(),
         _navigateToPeakPosItem(guiStripNd),
-        _markPeakPosItem(guiStripNd),
+        # _markPeakPosItem(guiStripNd),
+        _markPeaksItem(guiStripNd),
         ]
     items = [itm for itm in items if itm is not None]
     return _createMenu(guiStripNd, items)
@@ -849,6 +865,8 @@ def _getNdMultipletMenu(guiStripNd) -> Menu:
     """
     items = [
         _deleteMultipletItem(guiStripNd),
+        _separator(),
+        _markMultipletsItem(guiStripNd),
         ]
     items = [itm for itm in items if itm is not None]
     return _createMenu(guiStripNd, items)

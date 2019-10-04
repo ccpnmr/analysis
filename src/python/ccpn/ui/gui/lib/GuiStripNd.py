@@ -742,3 +742,25 @@ class GuiStripNd(GuiStrip):
     def _closeCalibrateY(self):
         self.calibrateXYAction.setChecked(False)
         self.toggleCalibrateXY()
+
+    def _createObjectMark(self, obj, axisIndex=None):
+        """Create a mark at the object position.
+        Could be Peak/Multiplet.
+        """
+        try:
+            defaultColour = self._preferences.defaultMarksColour
+            position = obj.ppmPositions
+            axisCodes = obj.axisCodes
+
+            if axisIndex is not None:
+                if (0 <= axisIndex < len(position)):
+                    position = (position[axisIndex],)
+                    axisCodes = (axisCodes[axisIndex],)
+                else:
+                    return
+
+            self._project.newMark(defaultColour, position, axisCodes)
+
+        except Exception as es:
+            getLogger().warning('Error setting mark at position')
+            raise (es)

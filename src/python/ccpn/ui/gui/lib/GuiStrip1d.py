@@ -458,3 +458,25 @@ class GuiStrip1d(GuiStrip):
         """Cycle through peak symbol types.
         """
         pass
+
+    def _createObjectMark(self, obj, axisIndex=None):
+        """Create a mark at the object position.
+        Could be Peak/Multiplet
+        """
+        try:
+            defaultColour = self._preferences.defaultMarksColour
+            position = (obj.ppmPositions[0], obj.height)
+            axisCodes = self.axisCodes
+
+            if axisIndex is not None:
+                if (0 <= axisIndex < 2):
+                    position = (position[axisIndex],)
+                    axisCodes = (axisCodes[axisIndex],)
+                else:
+                    return
+
+            self._project.newMark(defaultColour, position, axisCodes)
+
+        except Exception as es:
+            getLogger().warning('Error setting mark at position')
+            raise (es)

@@ -377,13 +377,13 @@ def _markPeakPosItem(strip):
 
 
 def _markPeaksItem(strip):
-    return _SCMitem(name='Mark Peaks',
+    return _SCMitem(name='Mark Peak(s)',
                     typeItem=ItemTypes.get(ITEM), toolTip='Mark positions of selected peaks',
                     callback=strip._markSelectedPeaks)
 
 
 def _markMultipletsItem(strip):
-    return _SCMitem(name='Mark Multiplets',
+    return _SCMitem(name='Mark Multiplet(s)',
                     typeItem=ItemTypes.get(ITEM), toolTip='Mark positions of selected multiplets',
                     callback=strip._markSelectedMultiplets)
 

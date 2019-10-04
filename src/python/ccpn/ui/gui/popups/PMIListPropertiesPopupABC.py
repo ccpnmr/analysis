@@ -77,7 +77,6 @@ class PMIListPropertiesPopupABC(CcpnDialog):
             self.close()
 
         else:
-            # self.peakListViews = [peakListView for peakListView in ccpnList.project.peakListViews if peakListView.peakList == ccpnList]
             self.ccpnListViews = self._getListViews(ccpnList)
 
             self._colourPulldowns = []

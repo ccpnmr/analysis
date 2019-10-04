@@ -28,9 +28,10 @@ __date__ = "$Date: 2017-07-04 09:28:16 +0000 (Tue, July 04, 2017) $"
 from ccpn.ui.gui.widgets.ButtonList import ButtonList
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.popups.Dialog import CcpnDialog
-from ccpn.ui.gui.widgets.SettingsWidgets import StripPlot, STRIPPLOT_PEAKS, STRIPPLOT_NMRRESIDUES, STRIPPLOT_NMRCHAINS, NO_STRIP
+from ccpn.ui.gui.widgets.SettingsWidgets import StripPlot, STRIPPLOT_PEAKS, STRIPPLOT_NMRRESIDUES, \
+    STRIPPLOT_NMRCHAINS, NO_STRIP, STRIPPLOT_NMRATOMSFROMPEAKS
 from ccpn.ui.gui.widgets.MessageDialog import progressManager
-from ccpn.util.decorators import profile
+from ccpn.util.Common import makeIterableList
 
 
 STRIPPLOTMINIMUMWIDTH = 100
@@ -84,8 +85,13 @@ class StripPlotPopup(CcpnDialog):
 
                 if buttonType == STRIPPLOT_PEAKS:
                     self._buildStrips(peaks=self.current.peaks)
+
+                elif buttonType == STRIPPLOT_NMRATOMSFROMPEAKS:
+                    self._buildStripsFromPeaks(peaks=self.current.peaks)
+
                 elif buttonType == STRIPPLOT_NMRRESIDUES:
                     self._buildStrips(nmrResidues=self.current.nmrResidues)
+
                 elif buttonType == STRIPPLOT_NMRCHAINS:
                     if self._newStripPlotWidget.nmrChain:
                         self._buildStrips(nmrResidues=self._newStripPlotWidget.nmrChain.nmrResidues)
@@ -117,6 +123,18 @@ class StripPlotPopup(CcpnDialog):
     #
     #     finally:
     #         self._unblockEvents()
+
+    def _buildStripsFromPeaks(self, peaks=None):
+        """Build the strips in the selected spectrumDisplays for the nmrAtoms attached to the current peaks
+        """
+        nmrResidues = set()
+        for peak in self.current.peaks:
+            atoms = makeIterableList(peak.assignedNmrAtoms)
+            for atom in atoms:
+                nmrResidues.add(atom.nmrResidue)
+
+        if nmrResidues:
+            self._buildStrips(nmrResidues=list(nmrResidues))
 
     def _buildStrips(self, spectrumDisplays=None, peaks=None, nmrResidues=None):
         """Build the strips in the selected spectrumDisplays

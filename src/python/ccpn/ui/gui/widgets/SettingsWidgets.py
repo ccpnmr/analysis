@@ -58,6 +58,7 @@ ALL = '<all>'
 STRIPPLOT_PEAKS = 'peaks'
 STRIPPLOT_NMRRESIDUES = 'nmrResidues'
 STRIPPLOT_NMRCHAINS = 'nmrChains'
+STRIPPLOT_NMRATOMSFROMPEAKS = 'nmrAtomsPeaks'
 NO_STRIP = 'noStrip'
 LineEditsMinimumWidth = 195
 
@@ -663,6 +664,12 @@ class StripPlot(Widget, _commonSettings):
             tipTexts += ['Use current selected peaks']
             callbacks += [partial(self._buttonClick, STRIPPLOT_PEAKS)]
             buttonTypes += [STRIPPLOT_PEAKS]
+
+            texts += ['use NmrAtoms from Peak selection']
+            tipTexts += ['Use all nmrAtoms from current selected peaks']
+            callbacks += [partial(self._buttonClick, STRIPPLOT_NMRATOMSFROMPEAKS)]
+            buttonTypes += [STRIPPLOT_NMRATOMSFROMPEAKS]
+
         if includeNmrChains:
             texts += ['use nmrResidue selection']
             tipTexts += ['Use current selected nmrResidues']

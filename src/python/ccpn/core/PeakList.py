@@ -38,7 +38,7 @@ from ccpnmodel.ccpncore.lib._ccp.nmr.Nmr.PeakList import pickNewPeaks
 from ccpn.util.decorators import logCommand
 from ccpn.core.lib.ContextManagers import newObject, undoBlock, undoBlockWithoutSideBar
 from ccpn.util.Logging import getLogger
-from ccpn.core.PeakListABC import PeakListABC
+from ccpn.core.PMIListABC import PMIListABC
 
 
 GAUSSIANMETHOD = 'gaussian'
@@ -216,7 +216,7 @@ def _filtered1DArray(data, ignoredRegions):
     return newArray
 
 
-class PeakList(PeakListABC):
+class PeakList(PMIListABC):
     """An object containing Peaks. Note: the object is not a (subtype of a) Python list.
     To access all Peak objects, use PeakList.peaks."""
 

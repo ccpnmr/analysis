@@ -35,10 +35,10 @@ from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import StripPeakListView as ApiStrip
 # from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import PeakListView as ApiPeakListView
 from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import SpectrumView as ApiSpectrumView
 from ccpnmodel.ccpncore.api.ccp.nmr import Nmr
-from ccpn.ui._implementation.PeakListViewABC import PeakListViewABC
+from ccpn.ui._implementation.PMIListViewABC import PMIListViewABC
 
 
-class PeakListView(PeakListViewABC):
+class PeakListView(PMIListViewABC):
     """Peak List View for 1D or nD PeakList"""
 
     #: Short class name, for PID.

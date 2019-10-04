@@ -33,7 +33,7 @@ from ccpn.util.decorators import logCommand
 from ccpn.core.lib.ContextManagers import newObject
 from ccpn.util.Logging import getLogger
 from ccpn.core.lib.SpectrumLib import _oldEstimateNoiseLevel1D
-from ccpn.core.PeakListABC import PeakListABC
+from ccpn.core.PMIListABC import PMIListABC
 
 
 # moved on peakUtil ####################################################################
@@ -78,7 +78,7 @@ def _getPeaksLimits(x, y, intersectingLine=None):
 ########################################################################################################################################
 
 
-class IntegralList(PeakListABC):
+class IntegralList(PMIListABC):
     """An object containing Integrals. Note: the object is not a (subtype of a) Python list.
     To access all Integral objects, use integralList.integrals."""
 

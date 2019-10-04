@@ -35,10 +35,10 @@ from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import StripMultipletListView as Api
 # from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import MultipletListView as ApiMultipletListView
 from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import SpectrumView as ApiSpectrumView
 from ccpnmodel.ccpncore.api.ccp.nmr import Nmr
-from ccpn.ui._implementation.PeakListViewABC import PeakListViewABC
+from ccpn.ui._implementation.PMIListViewABC import PMIListViewABC
 
 
-class MultipletListView(PeakListViewABC):
+class MultipletListView(PMIListViewABC):
     """Multiplet List View for 1D or nD MultipletList"""
 
     #: Short class name, for PID.

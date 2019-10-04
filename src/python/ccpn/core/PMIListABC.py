@@ -58,7 +58,7 @@ TEXTCOLOUR = 'textColour'
 COLOURCHECK = '#[a-fA-F0-9]{6}$'
 
 
-class PeakListABC(AbstractWrapperObject):
+class PMIListABC(AbstractWrapperObject):
     """An ABC object containing Peaks/Multiplets/Integrals.
     Note: the object is not a (subtype of a) Python list.
     To access all List objects, use List.items."""

@@ -35,10 +35,10 @@ from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import StripIntegralListView as ApiS
 # from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import IntegralListView as ApiIntegralListView
 from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import SpectrumView as ApiSpectrumView
 from ccpnmodel.ccpncore.api.ccp.nmr import Nmr
-from ccpn.ui._implementation.PeakListViewABC import PeakListViewABC
+from ccpn.ui._implementation.PMIListViewABC import PMIListViewABC
 
 
-class IntegralListView(PeakListViewABC):
+class IntegralListView(PMIListViewABC):
     """Integral List View for 1D or nD IntegralList"""
 
     #: Short class name, for PID.

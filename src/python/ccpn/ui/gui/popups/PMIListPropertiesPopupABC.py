@@ -34,7 +34,7 @@ from ccpn.ui.gui.widgets.CheckBox import CheckBox
 from ccpn.ui.gui.popups.Dialog import CcpnDialog, handleDialogApply
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
 from ccpn.core.lib.ContextManagers import undoStackBlocking
-from ccpn.core.PeakListABC import MERITENABLED, MERITTHRESHOLD
+from ccpn.core.PMIListABC import MERITENABLED, MERITTHRESHOLD
 
 
 SYMBOLCOLOURBUTTON = 'symbolColour'
@@ -46,7 +46,7 @@ BUTTONOPTIONS2 = (None, None, None, MERITCOLOURBUTTON)
 BUTTONOPTIONS = tuple(b1 or b2 for b1, b2 in zip(BUTTONOPTIONS1, BUTTONOPTIONS2))
 
 
-class PeakListPropertiesPopupABC(CcpnDialog):
+class PMIListPropertiesPopupABC(CcpnDialog):
     """Abstract Base Class for popups for Peak/Multiplet/Integral
     """
 

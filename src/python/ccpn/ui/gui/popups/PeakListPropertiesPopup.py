@@ -33,11 +33,11 @@ from ccpn.ui.gui.widgets.PulldownList import PulldownList
 from ccpn.ui.gui.popups.Dialog import CcpnDialog, handleDialogApply
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
 from ccpn.core.lib.ContextManagers import undoStackBlocking
-from ccpn.ui.gui.popups.PeakListPropertiesPopupABC import PeakListPropertiesPopupABC
+from ccpn.ui.gui.popups.PMIListPropertiesPopupABC import PMIListPropertiesPopupABC
 from ccpn.core.PeakList import PeakList
 
 
-class PeakListPropertiesPopup(PeakListPropertiesPopupABC):
+class PeakListPropertiesPopup(PMIListPropertiesPopupABC):
     """
     Popup to handle changing parameters in peakLists
     """

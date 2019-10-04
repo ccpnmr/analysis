@@ -29,11 +29,11 @@ from ccpn.ui.gui.widgets.RadioButtons import RadioButtons
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
 from ccpn.core.MultipletList import MULTIPLETAVERAGINGTYPES
-from ccpn.ui.gui.popups.PeakListPropertiesPopupABC import PeakListPropertiesPopupABC
+from ccpn.ui.gui.popups.PMIListPropertiesPopupABC import PMIListPropertiesPopupABC
 from ccpn.core.MultipletList import MultipletList
 
 
-class MultipletListPropertiesPopup(PeakListPropertiesPopupABC):
+class MultipletListPropertiesPopup(PMIListPropertiesPopupABC):
     """
     Popup to handle changing parameters in multipletLists
     """

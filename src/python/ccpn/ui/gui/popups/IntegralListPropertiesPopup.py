@@ -26,11 +26,11 @@ __date__ = "$Date: 2017-03-30 11:28:58 +0100 (Thu, March 30, 2017) $"
 #=========================================================================================
 
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
-from ccpn.ui.gui.popups.PeakListPropertiesPopupABC import PeakListPropertiesPopupABC
+from ccpn.ui.gui.popups.PMIListPropertiesPopupABC import PMIListPropertiesPopupABC
 from ccpn.core.IntegralList import IntegralList
 
 
-class IntegralListPropertiesPopup(PeakListPropertiesPopupABC):
+class IntegralListPropertiesPopup(PMIListPropertiesPopupABC):
     """
     Popup to handle changing parameters in multipletLists
     """

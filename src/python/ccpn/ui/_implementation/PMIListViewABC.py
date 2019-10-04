@@ -27,11 +27,11 @@ import re
 import typing
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.ui._implementation.SpectrumView import SpectrumView
-from ccpn.core.PeakListABC import MERITCOLOUR, MERITTHRESHOLD, MERITENABLED, MERITSETTINGS, \
+from ccpn.core.PMIListABC import MERITCOLOUR, MERITTHRESHOLD, MERITENABLED, MERITSETTINGS, \
     COLOURCHECK, LINECOLOUR, LINESETTINGS, SYMBOLCOLOUR, TEXTCOLOUR
 
 
-class PeakListViewABC(AbstractWrapperObject):
+class PMIListViewABC(AbstractWrapperObject):
     """ListView for 1D or nD List"""
 
     #: Short class name, for PID.

@@ -32,7 +32,7 @@ from typing import Optional, Tuple, Sequence, Union
 from ccpn.util.decorators import logCommand
 from ccpn.core.lib.ContextManagers import newObject
 from ccpn.util.Logging import getLogger
-from ccpn.core.PeakListABC import PeakListABC
+from ccpn.core.PMIListABC import PMIListABC
 
 
 # LINECOLOUR = 'lineColour'
@@ -45,7 +45,7 @@ MULTIPLETLINECOLOURDEFAULT = '#7f7f7f'
 MULTIPLETAVERAGINGTYPES = [MULTIPLETAVERAGE, MULTIPLETWEIGHTEDAVERAGE]
 
 
-class MultipletList(PeakListABC):
+class MultipletList(PMIListABC):
     """MultipletList object, holding position, intensity, and assignment information
 
     Measurements that require more than one NmrAtom for an individual assignment

@@ -297,7 +297,7 @@ class ChemicalShiftTable(GuiTable):
                                pullDownWidget=self.CScolumns,
                                callBackClass=ChemicalShift,
                                selectCurrentCallBack=None,
-                               searchCallBack=NmrResidue,
+                               searchCallBack=None,
                                moduleParent=moduleParent)
 
         self._droppedNotifier = GuiNotifier(self,

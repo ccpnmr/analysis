@@ -55,7 +55,8 @@ class _PulldownABC(PulldownListCompoundWidget):
                  showBorder=False, orientation='left',
                  minimumWidths=(100, 150), maximumWidths=None, fixedWidths=None,
                  labelText=None,
-                 showSelectName=False, callback=None, default=None,
+                 showSelectName=False, selectNoneText=None,
+                 callback=None, default=None,
                  sizeAdjustPolicy=None, editable=False,
                  filterFunction=None, useIds=False,
                  setCurrent=False, followCurrent=False,
@@ -74,6 +75,7 @@ class _PulldownABC(PulldownListCompoundWidget):
         :param labelText: (optional) text for the Label
         :param texts: (optional) iterable generating text values for the Pulldown
         :param showSelectName: (optional) insert <Select> at the top of the Pulldown
+        :param selectNameText: (optional) alternative text for <Select> at the top of the Pulldown
         :param callback: (optional) callback for the Pulldown
         :param default: (optional) initially selected element of the Pulldown (text or index)
         :param editable: If True: allows for editing the value
@@ -94,6 +96,7 @@ class _PulldownABC(PulldownListCompoundWidget):
         self.current = self.project.application.current
 
         self._showSelectName = showSelectName
+        self._selectNoneText = selectNoneText
         self._filterFunction = filterFunction
         self._useIds = useIds
         self._userCallback = callback
@@ -251,7 +254,11 @@ class _PulldownABC(PulldownListCompoundWidget):
                 pids = [UNDEFINED] + pids
 
         if self._showSelectName:
-            pids = [SELECT] + pids
+            if self._selectNoneText:
+                select = [self._selectNoneText]
+            else:
+                select = [SELECT]
+            pids = select + pids
         return pids
 
     def _updatePulldownList(self, callbackDict=None):

@@ -2169,8 +2169,11 @@ class Framework(NotifierBase):
             MessageDialog.showWarning('Project contains no spectra.', 'Spectrum groups cannot be displayed')
         else:
             from ccpn.ui.gui.popups.SpectrumGroupEditor import SpectrumGroupEditor
-
-            SpectrumGroupEditor(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow, editMode=True).exec_()
+            if not self.project.spectrumGroups:
+                MessageDialog.showWarning('Project has no Spectrum Groups.',
+                                          'Create them using\nSidebar → SpectrumGroups → <New SpectrumGroup>\n ')
+            else:
+                SpectrumGroupEditor(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow, editMode=True).exec_()
 
     def showProjectionPopup(self):
         if not self.project.spectra:

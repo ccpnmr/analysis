@@ -29,6 +29,8 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 
 from ccpn.ui.gui.guiSettings import messageFont, messageFontBold
 
+def _isDarwin():
+    return 'darwin' in QtCore.QSysInfo().kernelType().lower()
 
 Ok            = QtWidgets.QMessageBox.Ok
 Cancel        = QtWidgets.QMessageBox.Cancel
@@ -39,12 +41,17 @@ Ignore        = QtWidgets.QMessageBox.Ignore
 Abort         = QtWidgets.QMessageBox.Abort
 Close         = QtWidgets.QMessageBox.Close
 Information   = QtWidgets.QMessageBox.Information
-Question      = QtWidgets.QMessageBox.Question
 Warning       = QtWidgets.QMessageBox.Warning
+Question      = QtWidgets.QMessageBox.Question
 Critical      = QtWidgets.QMessageBox.Critical
 Save          = QtWidgets.QMessageBox.Save
 Discard       = QtWidgets.QMessageBox.Discard
 
+default_icons = (Information,Question,Warning,Critical)
+
+
+if _isDarwin():
+    Question = Warning
 
 class MessageDialog(QtWidgets.QMessageBox):
     """

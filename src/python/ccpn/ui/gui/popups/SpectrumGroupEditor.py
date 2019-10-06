@@ -54,3 +54,7 @@ class SpectrumGroupEditor(_GroupEditorPopupABC):
 
     PROJECT_NEW_METHOD = 'newSpectrumGroup'  # Method of Project to create new KLASS instance
     PROJECT_ITEM_ATTRIBUTE = 'spectra'  # Attribute of Project containing items
+    PLURAL_GROUPED_NAME = 'Spectrum Groups'
+    SINGULAR_GROUP_NAME = 'Spectrum Group'
+
+    PID_KEY='SG'

@@ -72,6 +72,10 @@ class GLLabelling():
     """Base class to handle symbol and symbol labelling
     """
 
+    LENSQ = GLDefs.LENSQ
+    LENSQ2 = GLDefs.LENSQ2
+    LENSQ4 = GLDefs.LENSQ4
+
     def __init__(self, parent=None, strip=None, name=None, resizeGL=False):
         """Initialise the class
         """
@@ -2159,34 +2163,6 @@ class GL1dLabelling():
 
         self._insertSymbolItemVertices(True, True, _selected, buildIndex, cols, drawList, 1.0, iCount, index, indexList, indexPtr, obj, objNum, p0, 0, 0, r, vertexPtr, w)
 
-    # def _insertSymbolItemVertices(self, _selected, buildIndex, cols, drawList, iCount, index, indexList, indexPtr, obj, objNum, p0, r, vertexPtr, w):
-    #     # add extra indices
-    #     extraIndices, extraIndexCount = self.insertExtraIndices(drawList, indexPtr + iCount, index + GLDefs.LENSQ, obj)
-    #     drawList.vertices[vertexPtr:vertexPtr + GLDefs.LENSQ2] = (p0[0] - r, p0[1] - w,
-    #                                                               p0[0] + r, p0[1] + w,
-    #                                                               p0[0] + r, p0[1] - w,
-    #                                                               p0[0] - r, p0[1] + w,
-    #                                                               p0[0], p0[1],
-    #                                                               p0[0], p0[1] - w,
-    #                                                               p0[0], p0[1] + w,
-    #                                                               p0[0] + r, p0[1],
-    #                                                               p0[0] - r, p0[1]
-    #                                                               )
-    #     drawList.colors[2 * vertexPtr:2 * vertexPtr + GLDefs.LENSQ4] = (*cols, 1.0) * GLDefs.LENSQ
-    #     drawList.attribs[vertexPtr:vertexPtr + GLDefs.LENSQ2] = (p0[0], p0[1]) * GLDefs.LENSQ
-    #     # drawList.offsets[vertexPtr:vertexPtr + GLDefs.LENSQ2] = (p0[0]+r, p0[1]+w) * GLDefs.LENSQ
-    #     # add extra vertices for the multiplet
-    #     extraVertices = self.insertExtraVertices(drawList, vertexPtr + GLDefs.LENSQ2, 0, obj, p0, (*cols, 1.0), 1.0)
-    #     # keep a pointer to the obj
-    #     drawList.pids[objNum:objNum + GLDefs.LENPID] = (obj, drawList.numVertices, (GLDefs.LENSQ + extraVertices),
-    #                                                     True, True, _selected,
-    #                                                     indexPtr, len(drawList.indices), 0, 0, 0, 0)
-    #     indexList[0] += (GLDefs.LENSQ + extraIndexCount)
-    #     indexList[1] += (iCount + extraIndices)  # len(drawList.indices)
-    #     drawList.numVertices += (GLDefs.LENSQ + extraVertices)
-    #     buildIndex[0] += GLDefs.LENPID
-    #     buildIndex[1] += (2 * (GLDefs.LENSQ + extraVertices))
-
     def _buildSymbols(self, spectrumView, objListView):
         spectrum = spectrumView.spectrum
 
@@ -2308,8 +2284,9 @@ class GL1dLabelling():
             drawList.fillMode = None
 
         # build the peaks VBO
-        index = 0
+        index = len(drawList.indices)
         indexPtr = len(drawList.indices)
+        indexing = [len(drawList.indices), len(drawList.indices)]
 
         # SEEMS TO BE A BUG HERE WITH THE INDEXING BEFORE HIGHLIGHTING!
         # OTHERWISE 1d and Nd SHOULD BE THE SAME _appendSymbolVertices...
@@ -2360,32 +2337,9 @@ class GL1dLabelling():
                 drawList.indices = np.append(drawList.indices, np.array((index, index + 2, index + 2, index + 1,
                                                                          index, index + 3, index + 3, index + 1), dtype=np.uint32))
 
-            self._appendSymbolVertices(_selected, cols, drawList, index, indexPtr, obj, p0, pIndex, r, w)
-
-    def _appendSymbolVertices(self, _selected, cols, drawList, index, indexPtr, obj, p0, pIndex, r, w):
-        # add extra indices
-        extraIndices = self.appendExtraIndices(drawList, index + GLDefs.LENSQ, obj)
-        drawList.vertices = np.append(drawList.vertices, np.array((p0[0] - r, p0[1] - w,
-                                                                   p0[0] + r, p0[1] + w,
-                                                                   p0[0] + r, p0[1] - w,
-                                                                   p0[0] - r, p0[1] + w,
-                                                                   p0[0], p0[1],
-                                                                   p0[0], p0[1] - w,
-                                                                   p0[0], p0[1] + w,
-                                                                   p0[0] + r, p0[1],
-                                                                   p0[0] - r, p0[1]
-                                                                   ), dtype=np.float32))
-        drawList.colors = np.append(drawList.colors, np.array((*cols, 1.0) * GLDefs.LENSQ, dtype=np.float32))
-        drawList.attribs = np.append(drawList.attribs, np.array((p0[0], p0[1]) * GLDefs.LENSQ, dtype=np.float32))
-        # drawList.offsets = np.append(drawList.offsets, (p0[0]+r, p0[1]+w) * GLDefs.LENSQ)
-        # add extra vertices for the multiplet
-        extraVertices = self.appendExtraVertices(drawList, pIndex, obj, p0, (*cols, 1.0), 1.0)
-        # keep a pointer to the obj
-        drawList.pids = np.append(drawList.pids, (obj, drawList.numVertices, (GLDefs.LENSQ + extraVertices),
-                                                  True, True, _selected,
-                                                  indexPtr, len(drawList.indices), 0, 0, 0, 0))
-        index += (GLDefs.LENSQ + extraIndices)
-        drawList.numVertices += (GLDefs.LENSQ + extraVertices)
+            # self._appendSymbolVertices(_selected, cols, drawList, index, indexPtr, obj, p0, pIndex, r, w)
+            self._appendSymbolItemVertices(True, True, _selected, cols, drawList, 1.0, index, indexing, indexPtr, obj, p0, pIndex,
+                                           0, r, w)
 
     def _removeSymbol(self, spectrumView, objListView, delObj):
         """Remove a symbol from the list
@@ -2505,6 +2459,10 @@ class GLmultipletListMethods():
     """Class of methods common to 1d and Nd multiplets
     This is added to the Multiplet Classes below and doesn't require an __init__
     """
+
+    LENSQ = GLDefs.LENSQMULT
+    LENSQ2 = GLDefs.LENSQ2MULT
+    LENSQ4 = GLDefs.LENSQ4MULT
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     # List handlers
@@ -2830,6 +2788,9 @@ class GLmultipletListMethods():
 
         return _selected
 
+    def _rescaleSymbolOffsets(self, r, w):
+        return np.array([-r, -w, +r, +w, +r, -w, -r, +w, 0, 0, 0, -w, 0, +w, +r, 0, -r, 0], np.float32), GLDefs.LENSQ2
+
 
 # class GLmultipletNdLabelling(GLmultipletListMethods, GLLabelling):  #, GLpeakNdLabelling):
 #     """Class to handle symbol and symbol labelling for Nd displays
@@ -2909,31 +2870,6 @@ class GLmultipletListMethods():
         # drawList.offsets[vertexPTR:vertexPTR + 2 * numVertices] = p0 * numVertices
 
         return numVertices
-
-    def _appendSymbolVertices(self, _selected, cols, drawList, index, indexPtr, obj, p0, pIndex, r, w):
-        # add extra indices
-        extraIndices = self.appendExtraIndices(drawList, index + GLDefs.LENSQ, obj)
-        drawList.vertices = np.append(drawList.vertices, np.array((p0[0] - r, p0[1] - w,
-                                                                   p0[0] + r, p0[1] + w,
-                                                                   p0[0] + r, p0[1] - w,
-                                                                   p0[0] - r, p0[1] + w,
-                                                                   p0[0], p0[1],
-                                                                   p0[0], p0[1] - w,
-                                                                   p0[0], p0[1] + w,
-                                                                   p0[0] + r, p0[1],
-                                                                   p0[0] - r, p0[1]
-                                                                   ), dtype=np.float32))
-        drawList.colors = np.append(drawList.colors, np.array((*cols, 1.0) * GLDefs.LENSQ, dtype=np.float32))
-        drawList.attribs = np.append(drawList.attribs, np.array((p0[0], p0[1]) * GLDefs.LENSQ, dtype=np.float32))
-        # drawList.offsets = np.append(drawList.offsets, (p0[0]+r, p0[1]+w) * GLDefs.LENSQ)
-        # add extra vertices for the multiplet
-        extraVertices = self.appendExtraVertices(drawList, pIndex, obj, p0, (*cols, 1.0), 1.0)
-        # keep a pointer to the obj
-        drawList.pids = np.append(drawList.pids, (obj, drawList.numVertices, (GLDefs.LENSQ + extraVertices),
-                                                  True, True, _selected,
-                                                  indexPtr, len(drawList.indices), 0, 0, 0, 0))
-        index += (GLDefs.LENSQ + extraIndices)
-        drawList.numVertices += (GLDefs.LENSQ + extraVertices)
 
     def _insertSymbolItemVertices(self, _isInFlankingPlane, _isInPlane, _selected, buildIndex, cols, drawList, fade, iCount, index, indexList, indexPtr, obj,
                                   objNum, p0, pIndex, planeIndex, r, vertexPtr, w):
@@ -3085,34 +3021,6 @@ class GLmultiplet1dLabelling(GL1dLabelling, GLmultipletNdLabelling):
         # drawList.offsets[vertexPTR:vertexPTR + 2 * numVertices] = p0 * numVertices
 
         return numVertices
-
-    # def _insertSymbolItemVertices(self, _selected, buildIndex, cols, drawList, iCount, index, indexList, indexPtr, obj, objNum, p0, r, vertexPtr, w):
-    #     # add extra indices
-    #     extraIndices, extraIndexCount = self.insertExtraIndices(drawList, indexPtr + iCount, index + GLDefs.LENSQ, obj)
-    #     drawList.vertices[vertexPtr:vertexPtr + GLDefs.LENSQ2] = (p0[0] - r, p0[1] - w,
-    #                                                               p0[0] + r, p0[1] + w,
-    #                                                               p0[0] + r, p0[1] - w,
-    #                                                               p0[0] - r, p0[1] + w,
-    #                                                               p0[0], p0[1],
-    #                                                               p0[0], p0[1] - w,
-    #                                                               p0[0], p0[1] + w,
-    #                                                               p0[0] + r, p0[1],
-    #                                                               p0[0] - r, p0[1]
-    #                                                               )
-    #     drawList.colors[2 * vertexPtr:2 * vertexPtr + GLDefs.LENSQ4] = (*cols, 1.0) * GLDefs.LENSQ
-    #     drawList.attribs[vertexPtr:vertexPtr + GLDefs.LENSQ2] = (p0[0], p0[1]) * GLDefs.LENSQ
-    #     # drawList.offsets[vertexPtr:vertexPtr + GLDefs.LENSQ2] = (p0[0]+r, p0[1]+w) * GLDefs.LENSQ
-    #     # add extra vertices for the multiplet
-    #     extraVertices = self.insertExtraVertices(drawList, vertexPtr + GLDefs.LENSQ2, 0, obj, p0, (*cols, 1.0), 1.0)
-    #     # keep a pointer to the obj
-    #     drawList.pids[objNum:objNum + GLDefs.LENPID] = (obj, drawList.numVertices, (GLDefs.LENSQ + extraVertices),
-    #                                                     True, True, _selected,
-    #                                                     indexPtr, len(drawList.indices), 0, 0, 0, 0)
-    #     indexList[0] += (GLDefs.LENSQ + extraIndexCount)
-    #     indexList[1] += (iCount + extraIndices)  # len(drawList.indices)
-    #     drawList.numVertices += (GLDefs.LENSQ + extraVertices)
-    #     buildIndex[0] += GLDefs.LENPID
-    #     buildIndex[1] += (2 * (GLDefs.LENSQ + extraVertices))
 
 
 class GLintegralListMethods():

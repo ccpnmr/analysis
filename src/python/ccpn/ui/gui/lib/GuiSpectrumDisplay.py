@@ -61,7 +61,6 @@ from ccpn.core.lib.AssignmentLib import _assignNmrAtomsToPeaks, _assignNmrResidu
 from ccpn.util.Constants import MOUSEDICTSTRIP
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import PEAKSELECT, MULTIPLETSELECT
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import CcpnGLWidget
-
 from ccpn.util.Logging import getLogger
 from ccpn.core.NmrAtom import NmrAtom
 from ccpn.core.NmrResidue import NmrResidue

@@ -55,6 +55,16 @@ def qtMessageHandler(*errors):
 QtCore.qInstallMessageHandler(qtMessageHandler)
 
 
+class _MyAppProxyStyle(QtWidgets.QProxyStyle):
+    """Class to handle resizing icons in menus
+    """
+    def pixelMetric(self, QStyle_PixelMetric, option=None, widget=None):
+        if QStyle_PixelMetric == QtWidgets.QStyle.PM_SmallIconSize:
+            return 18
+        else:
+            return QtWidgets.QProxyStyle.pixelMetric(self, QStyle_PixelMetric, option, widget)
+
+
 class Gui(Ui):
     # Factory functions for UI-specific instantiation of wrapped graphics classes
     _factoryFunctions = {}
@@ -76,14 +86,19 @@ class Gui(Ui):
         # # self._CcpnGLWidget.setFormat(viewportFormat)
         # # viewportFormat = self._CcpnGLWidget.format()
 
+        # styles = QtWidgets.QStyleFactory()
+        # myStyle = _MyAppProxyStyle(styles.create('fusion'))
+        # QtWidgets.QApplication.setStyle(myStyle)
+
         self.qtApp = Application(self.application.applicationName,
                                  self.application.applicationVersion,
                                  organizationName='CCPN', organizationDomain='ccpn.ac.uk')
 
-        #self.qtApp.setStyleSheet(self.application.styleSheet)
-
         styles = QtWidgets.QStyleFactory()
-        self.qtApp.setStyle(styles.create('fusion'))
+        myStyle = _MyAppProxyStyle(styles.create('fusion'))
+        # # QtWidgets.QApplication.setStyle(myStyle)
+        #
+        self.qtApp.setStyle(myStyle)        # styles.create('fusion'))
 
     def initialize(self, mainWindow):
         """UI operations done after every project load/create"""
@@ -226,14 +241,14 @@ class Gui(Ui):
         # check valid internet connection first
         if not Register.checkInternetConnection():
             msg = 'Could not connect to the registration server, please check your internet connection. ' \
-                  'Register within %s day(s) to continue using the software' %str(days)
-            showError('Registration', msg )
+                  'Register within %s day(s) to continue using the software' % str(days)
+            showError('Registration', msg)
 
         else:
             if registered and not acceptedTerms:
                 popup = NewTermsConditionsPopup(self.mainWindow, trial=days, version=self.application.applicationVersion, modal=True)
             else:
-                popup = RegisterPopup(self.mainWindow,trial=days, version=self.application.applicationVersion, modal=True)
+                popup = RegisterPopup(self.mainWindow, trial=days, version=self.application.applicationVersion, modal=True)
 
             self.mainWindow.show()
             popup.exec_()

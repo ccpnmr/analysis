@@ -55,7 +55,9 @@ class Action(Base, QtWidgets.QAction):
             elif not isinstance(shortcut, QtGui.QKeySequence):
                 raise TypeError('Shortcut type must be a string or a keySequence')
 
-            QtWidgets.QAction.__init__(self, text, parent, shortcut=shortcut, checkable=checkable)
+            QtWidgets.QAction.__init__(self, text, parent)
+            self.setShortcut(shortcut)
+
             self.setShortcutContext(QtCore.Qt.ApplicationShortcut)
 
             # ED: new - store the keySequence in the shortcuts dict
@@ -65,7 +67,9 @@ class Action(Base, QtWidgets.QAction):
         #   QtGui.QAction.__init__(self, icon, text, parent, triggered=callback, checkable=checkable)
 
         else:
-            QtWidgets.QAction.__init__(self, text, parent, checkable=checkable)
+            QtWidgets.QAction.__init__(self, text, parent)
+
+        self.setCheckable(checkable)
 
         if checkable:
             self.setChecked(checked)
@@ -73,10 +77,13 @@ class Action(Base, QtWidgets.QAction):
         if callback:
             # PyQt5 always seems to add a checked argument for Action callbacks
             self.triggered.connect(lambda checked, *args, **kwds: callback(*args, **kwds))
+
         if toolTip:
             self.setToolTip(toolTip)
 
+        # cannot have checkable and icon at the same time
         if icon is not None:
             ic = Icon(icon)
             self.setIcon(ic)
+
         self.setEnabled(enabled)

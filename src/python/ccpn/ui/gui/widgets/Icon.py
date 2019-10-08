@@ -74,7 +74,7 @@ class Icon(QtGui.QIcon):
             if not os.path.exists(image):
                 image = os.path.join(ICON_DIR, image)
 
-        QtGui.QIcon.__init__(self, image)
+        super().__init__(image)
 
 
 if __name__ == '__main__':

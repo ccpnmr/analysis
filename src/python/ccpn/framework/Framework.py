@@ -1036,7 +1036,11 @@ class Framework(NotifierBase):
             # We have a UI with no mainWindow - nothing to do.
             return
 
-        topMenu = mainWindow.menuBar().findChildren(QtWidgets.QMenu)[0]
+        menuChildren = mainWindow.menuBar().findChildren(QtWidgets.QMenu)
+        if not menuChildren:
+            return
+
+        topMenu = menuChildren[0]
         topActionDict = {}
         for topAction in topMenu.actions():
             mainActionDict = {}
@@ -1222,7 +1226,8 @@ class Framework(NotifierBase):
             ("Structure Table", partial(self.showStructureTable, selectFirstItem=True), [('shortcut', 'st')]),
             (),
             ("Chemical Shift Mapping", self.showChemicalShiftMapping, [('shortcut', 'cm')]),
-            ("Notes Editor", partial(self.showNotesEditor, selectFirstItem=True), [('shortcut', 'no')]),
+            ("Notes Editor", partial(self.showNotesEditor, selectFirstItem=True), [('shortcut', 'no'),
+                                                     ('icon', 'icons/null')]),
             (),
             # (),
             ###("Sequence Graph", self.showSequenceGraph, [('shortcut', 'sg')]),

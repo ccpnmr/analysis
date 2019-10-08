@@ -29,7 +29,6 @@ __date__ = "$Date: 2018-05-17 10:28:43 +0000 (Thu, May 17, 2018) $"
 # Start of code
 #=========================================================================================
 
-
 from ccpn.ui.gui.widgets.Menu import Menu
 from ccpn.util.Logging import getLogger
 from functools import partial
@@ -69,7 +68,9 @@ def _createMenu(strip, items):
     :param items:  a list of _SCMitem obj :
     :return: Creates and returns a context menu for the guiStrip from a list of items
     """
-    strip._spectrumUtilActions = {}
+    if not hasattr(strip, '_spectrumUtilActions'):
+        strip._spectrumUtilActions = {}
+
     menu = strip.contextMenu = Menu('', strip, isFloatWidget=True)  # generate new menu
 
     for i in items:
@@ -84,7 +85,7 @@ def _createMenu(strip, items):
     return menu
 
 
-def _addMenuItems(strip, menu, items):
+def _addMenuItems(widget, menu, items):
     """Add items to an existing menu
     """
     for i in items:
@@ -92,8 +93,8 @@ def _addMenuItems(strip, menu, items):
             ff = getattr(menu, i.typeItem)
             if ff:
                 action = ff(i.name, **vars(i))
-                setattr(strip, i.stripMethodName, action)
-                strip._spectrumUtilActions[i.name] = action
+                setattr(widget, i.stripMethodName, action)
+                widget._spectrumUtilActions[i.name] = action
         except Exception as e:
             getLogger().warning('Menu error: %s' % str(e))
 
@@ -823,7 +824,6 @@ def _getNdPeakMenu(guiStripNd) -> Menu:
     Creates and returns the current peak Nd context menu. Opened when right clicked on selected peak/s
     """
     items = [
-
         _deletePeakItem(guiStripNd),
         _copyPeakItem(guiStripNd),
         _editPeakAssignmentItem(guiStripNd),
@@ -872,7 +872,7 @@ def _getNdMultipletMenu(guiStripNd) -> Menu:
     return _createMenu(guiStripNd, items)
 
 
-def _getNdAxisMenu(guiStrip) -> Menu:
+def _getNdAxisMenu(guiStripNd) -> Menu:
     """
     Creates and returns the current Axis context menu. Opened when right clicked on axis
     """
@@ -884,7 +884,22 @@ def _getNdAxisMenu(guiStrip) -> Menu:
         # _copyYAxisCodeRangeFromStripItem2(guiStrip),
         ]
     items = [itm for itm in items if itm is not None]
-    return _createMenu(guiStrip, items)
+    return _createMenu(guiStripNd, items)
+
+
+def _getSpectrumDisplayMenu(guiStripNd) -> Menu:
+    """
+    Creates and returns the current spectrumDisplay menu. Opened when right clicked on axis
+    """
+    items = []
+    items = [itm for itm in items if itm is not None]
+    newMenu = _createMenu(guiStripNd, items)
+    # setting visible=False works, but need an icon to set the checkbox correctly (Qt bug?)
+    # hideItems = ['TestCheckIcon']
+    # for action in newMenu.actions():
+    #     if action.text() in hideItems:
+    #         action.setVisible(False)
+    return newMenu
 
 
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs import MAINVIEW, BOTTOMAXIS, RIGHTAXIS, AXISCORNER

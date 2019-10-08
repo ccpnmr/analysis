@@ -134,8 +134,7 @@ class GuiStripNd(GuiStrip):
 
         self.haveSetupZWidgets = False
         self.viewStripMenu = _getNdDefaultMenu(self)
-
-        self._defaultMenu = _getNdDefaultMenu(self)
+        self._defaultMenu = self.viewStripMenu
         self._phasingMenu = _getNdPhasingMenu(self)
         self._peakMenu = _getNdPeakMenu(self)
         self._integralMenu = _getNdIntegralMenu(self)

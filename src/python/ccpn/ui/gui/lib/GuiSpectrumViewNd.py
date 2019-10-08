@@ -781,8 +781,9 @@ class GuiSpectrumViewNd(GuiSpectrumView):
                                         self.negativeContourFactor)
         else:
             self.negLevels = []
-        if not self.posLevels and not self.negLevels:
-            return
+
+        # if not self.posLevels and not self.negLevels:
+        #     return
 
         #contourDict = self.constructContours(guiStrip, posLevels, negLevels)
         try:
@@ -922,8 +923,8 @@ class GuiSpectrumViewNd(GuiSpectrumView):
         self.yDataDimPrev = yDataDim
         self.zRegionPrev = tuple([tuple(axis.region) for axis in self.strip.orderedAxes[2:]])
 
-        if not doPosLevels and not doNegLevels:
-            return
+        # if not doPosLevels and not doNegLevels:
+        #     return
 
         #for position, dataArray in self.getPlaneData(guiStrip):
         posContoursAll = negContoursAll = None
@@ -981,6 +982,7 @@ class GuiSpectrumViewNd(GuiSpectrumView):
                                                                       np.array(self.negColour * len(negLevels), dtype=np.float32))
 
             if contourList and contourList[1] > 0:
+                # set the contour arrays for the GL object
                 glList.numVertices = contourList[1]
                 glList.indices = contourList[2]
                 glList.vertices = contourList[3]
@@ -990,6 +992,12 @@ class GuiSpectrumViewNd(GuiSpectrumView):
                 # min1y = np.min(glList.vertices[1::2])
                 # max1y = np.max(glList.vertices[1::2])
                 # print('>>>min, max', min1x, max1x, min1y, max1y)
+            else:
+                # clear the arrays
+                glList.numVertices = 0
+                glList.indices = np.array((), dtype=np.uint32)
+                glList.vertices = np.array((), dtype=np.float32)
+                glList.colors = np.array((), dtype=np.float32)
 
         else:
             for position, dataArray in self._getPlaneData():

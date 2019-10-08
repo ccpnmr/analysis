@@ -3031,6 +3031,9 @@ class CcpnGLWidget(QOpenGLWidget):
             if spectrumView.isDeleted:
                 continue
 
+            if not spectrumView._showContours:
+                continue
+
             if spectrumView.isVisible():
 
                 if spectrumView.spectrum.dimensionCount > 1:
@@ -6004,14 +6007,15 @@ class CcpnGLWidget(QOpenGLWidget):
                 menu = strip._contextMenus.get(strip.contextMenuMode)
 
                 # create a dynamic menu based on the available axisCodes
-                strip._axisMenu.clear()
-                strip._addItemsToMarkAxesMenuAxesView(mouseInAxis, strip._axisMenu)
-                strip._addItemsToCopyAxisFromMenuesAxes(mouseInAxis, strip._axisMenu, self.is1D)
+                menu.clear()
+                strip._addItemsToMarkAxesMenuAxesView(mouseInAxis, menu)
+                strip._addItemsToCopyAxisFromMenuesAxes(mouseInAxis, menu, self.is1D)
 
             if menu is not None:
                 strip.viewStripMenu = menu
             else:
                 strip.viewStripMenu = self._getCanvasContextMenu()
+
             strip._raiseContextMenu(event)
 
         elif controlRightMouse(event) and axis is None:

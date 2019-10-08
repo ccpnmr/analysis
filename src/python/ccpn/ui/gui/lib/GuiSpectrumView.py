@@ -65,6 +65,8 @@ class GuiSpectrumView(QtWidgets.QGraphicsObject):
         if action and not action.isChecked():
             self.setVisible(False)
 
+        self._showContours = True
+
     # To write your own graphics item, you first create a subclass of QGraphicsItem, and
     # then start by implementing its two pure virtual public functions:
     # boundingRect(), which returns an estimate of the area painted by the item,
@@ -207,10 +209,13 @@ def _spectrumViewHasChanged(data):
     action = spectrumDisplay.spectrumActionDict.get(apiDataSource)
     if action:
         pix = QtGui.QPixmap(QtCore.QSize(60, 10))
-        if spectrumDisplay.is1D:
-            pix.fill(QtGui.QColor(self.sliceColour))
+        if self._showContours:
+            if spectrumDisplay.is1D:
+                pix.fill(QtGui.QColor(self.sliceColour))
+            else:
+                pix.fill(QtGui.QColor(self.positiveContourColour))
         else:
-            pix.fill(QtGui.QColor(self.positiveContourColour))
+            pix.fill(QtGui.QColor('gray'))
         action.setIcon(QtGui.QIcon(pix))
 
     # Update strip

@@ -27,7 +27,6 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 
 from contextlib import contextmanager
 from PyQt5 import QtCore, QtGui, QtWidgets
-
 from ccpn.ui.gui.widgets.Menu import Menu
 from ccpn.ui.gui.widgets.ToolBar import ToolBar
 from functools import partial
@@ -43,6 +42,7 @@ from ccpn.core.MultipletList import MultipletList
 from ccpn.ui.gui.lib.GuiSpectrumView import _spectrumViewHasChanged
 from ccpn.ui.gui.popups.SpectrumPropertiesPopup import SpectrumPropertiesPopup
 from ccpn.core.lib import Pid
+from ccpn.ui.gui.lib.GuiStripContextMenus import _SCMitem, ItemTypes, ITEM, _addMenuItems, _createMenu, _separator
 
 
 TOOLBAR_EXTENSIONNAME = 'qt_toolbar_ext_button'
@@ -161,8 +161,20 @@ class SpectrumToolBar(ToolBar):
                                     allViews.append(view)
                     views = list(set(allViews))
                     smenu.setEnabled(len(views) > 0)
-                    smenu.addAction('Show All', partial(self._setVisibleAllFromList, True, smenu, views))
-                    smenu.addAction('Hide All', partial(self._setVisibleAllFromList, False, smenu, views))
+
+                    menuItems = [_SCMitem(name='Show All',
+                                          typeItem=ItemTypes.get(ITEM), icon='icons/null',
+                                          callback=partial(self._setVisibleAllFromList, True, smenu, views)),
+                                 _SCMitem(name='Hide All',
+                                          typeItem=ItemTypes.get(ITEM), icon='icons/null',
+                                          callback=partial(self._setVisibleAllFromList, False, smenu, views)),
+                                 ]
+
+                    _addMenuItems(self.widget, smenu, menuItems)
+
+                    # smenu.addAction('Show All', partial(self._setVisibleAllFromList, True, smenu, views))
+                    # smenu.addAction('Hide All', partial(self._setVisibleAllFromList, False, smenu, views))
+
                     smenu.addSeparator()
                     for view in sorted(views, reverse=False):
                         ccpnObj = view._childClass
@@ -183,24 +195,59 @@ class SpectrumToolBar(ToolBar):
                             action.toggled.connect(view.setVisible)
                             action.toggled.connect(self._updateGl)
 
+    def _spectrumToolBarItem(self, button):
+        spectrum = self.widget.project.getByPid(button.actions()[0].objectName())
+        specViews = [spv for spv in self.widget.spectrumViews
+                     if spv.spectrum == spectrum]
+
+        if len(specViews) == 1:
+            return _SCMitem(name='Contours',
+                            typeItem=ItemTypes.get(ITEM), toolTip='Toggle Spectrum Contours On/Off',
+                            callback=partial(self._toggleSpectrumContours, button.actions()[0], specViews[0]),
+                            checkable=True,
+                            checked=specViews[0]._showContours)
+
+    def _toggleSpectrumContours(self, buttonAction, specView):
+        from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
+
+        specView._showContours = not specView._showContours
+        _spectrumViewHasChanged({Notifier.OBJECT: specView})
+
+        GLSignals = GLNotifier(parent=self)
+        GLSignals.emitPaintEvent()
+
     def _createContextMenu(self, button: QtWidgets.QToolButton):
         """
         Creates a context menu containing a command to delete the spectrum from the display and its
         button from the toolbar.
         """
-
         if not button:
             return None
         if len(button.actions()) < 1:
             return None
 
-        contextMenu = Menu('', self, isFloatWidget=True)
-        self._addSubMenusToContext(contextMenu, button)
+        contextMenu = Menu('', self.widget, isFloatWidget=True)
+
+        _addMenuItems(self.widget, contextMenu, [self._spectrumToolBarItem(button)])
 
         contextMenu.addSeparator()
-        contextMenu.addAction('Jump on SideBar', partial(self._jumpOnSideBar, button))
-        contextMenu.addAction('Properties...', partial(self._showSpectrumProperties, button))
-        contextMenu.addAction('Remove Spectrum', partial(self._removeSpectrum, button))
+
+        self._addSubMenusToContext(contextMenu, button)
+        contextMenu.addSeparator()
+
+        menuItems = [_SCMitem(name='Jump on SideBar',
+                              typeItem=ItemTypes.get(ITEM), icon='icons/null',
+                              callback=partial(self._jumpOnSideBar, button)),
+                     _SCMitem(name='Properties...',
+                              typeItem=ItemTypes.get(ITEM), icon='icons/null',
+                              callback=partial(self._showSpectrumProperties, button)),
+                     _SCMitem(name='Remove Spectrum',
+                              typeItem=ItemTypes.get(ITEM), icon='icons/null',
+                              callback=partial(self._removeSpectrum, button)),
+                     ]
+
+        _addMenuItems(self.widget, contextMenu, menuItems)
+
         return contextMenu
 
     def _jumpOnSideBar(self, button):
@@ -360,7 +407,8 @@ class SpectrumToolBar(ToolBar):
                 menu = self._createContextMenu(toolButton)
                 if menu:
                     menu.move(event.globalPos().x(), event.globalPos().y() + 10)
-                    menu.exec()
+                    menu.exec_()
+
             if event.button() == QtCore.Qt.MiddleButton:
                 self._dragButton(event)
 

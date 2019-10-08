@@ -175,7 +175,7 @@ class GLSimpleStrings():
                 if obj.spectrumView not in GLp._spectrumSettings:
                     return
 
-                position[1] = GLp._spectrumSettings[obj.spectrumView][GLDefs.SPECTRUM_STACKEDMATRIXOFFSET]
+                _, position[1] = GLp._spectrumSettings[obj.spectrumView][GLDefs.SPECTRUM_STACKEDMATRIXOFFSET]
 
             if lock == GLDefs.LOCKNONE:
 

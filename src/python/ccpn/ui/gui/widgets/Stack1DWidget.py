@@ -26,12 +26,15 @@ __date__ = "$Date: 2017-07-25 11:28:58 +0100 (Tue, July 25, 2017) $"
 #=========================================================================================
 
 
+from PyQt5 import QtWidgets
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.Frame import Frame
-from ccpn.ui.gui.widgets.DoubleSpinbox import ScientificDoubleSpinBox
+from ccpn.ui.gui.widgets.DoubleSpinbox import ScientificDoubleSpinBox, DoubleSpinbox
+from ccpn.ui.gui.widgets.Spacer import Spacer
 
 
-Offset = 'Offset Value: '
+OffsetX = 'X Offset: '
+OffsetY = 'Y Offset: '
 
 
 class Offset1DWidget(Frame):
@@ -50,24 +53,43 @@ class Offset1DWidget(Frame):
         self.offset = None
         self.strip1D = strip1D
 
-        i = 0
-        self.labelOffset = Label(self, Offset, grid=(0, i))
-        i += 1
-        self.boxOffset = ScientificDoubleSpinBox(self, step=1000, grid=(0, i))
+        ii = 0
+        self.labelOffset = Label(self, OffsetX, grid=(0, ii))
+        ii += 1
+        self.boxXOffset = DoubleSpinbox(self, step=0.01, grid=(0, ii), min=-100, max=100, decimals=2)
+
+        ii += 1
+        self.labelOffset = Label(self, OffsetY, grid=(0, ii))
+        ii += 1
+        self.boxYOffset = ScientificDoubleSpinBox(self, step=1000, grid=(0, ii), min=0, max=1e10)
+
+        ii += 1
+        Spacer(self, 2, 2,
+               QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.Minimum,
+               grid=(0, ii), gridSpan=(1, 1))
+        self.setSizePolicy(QtWidgets.QSizePolicy.Ignored, QtWidgets.QSizePolicy.Minimum)
+
+        self.boxXOffset.setFixedWidth(100)
+        self.boxYOffset.setFixedWidth(150)
 
         if self.strip1D is not None:
-            self.boxOffset.setValue(self.strip1D.offsetValue)
-        self.boxOffset.valueChanged.connect(self._applyOffset)
+            self.boxXOffset.setValue(self.strip1D.offsetValue[0])
+            self.boxYOffset.setValue(self.strip1D.offsetValue[1])
+
+        self.boxXOffset.valueChanged.connect(self._applyOffset)
+        self.boxYOffset.valueChanged.connect(self._applyOffset)
+
 
     def _applyOffset(self):
         if self.strip1D is not None:
-            self.strip1D._stack1DSpectra(offSet=self.boxOffset.value())
+            self.strip1D._stack1DSpectra(offSet=(self.boxXOffset.value(), self.boxYOffset.value()) )
 
     def value(self):
-        return self.boxOffset.value()
+        return (self.boxXOffset.value(), self.boxYOffset.value())
 
     def setValue(self, value):
-        self.boxOffset.set(value)
+        self.boxXOffset.set(value[0])
+        self.boxYOffset.set(value[1])
 
 
 if __name__ == '__main__':

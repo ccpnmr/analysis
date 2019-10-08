@@ -401,7 +401,7 @@ class CcpnGLWidget(QOpenGLWidget):
         self._axisYLabelling = []
         self._axisScaleLabelling = []
 
-        self._stackingValue = 0.0
+        self._stackingValue = (0.0, 0.0)
         self._stackingMode = False
         self._hTraceVisible = False
         self._vTraceVisible = False
@@ -763,13 +763,14 @@ class CcpnGLWidget(QOpenGLWidget):
                 self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_STACKEDMATRIX] = np.zeros((16,), dtype=np.float32)
 
                 # if self._stackingMode:
-                st = stackCount * self._stackingValue
+                stX = stackCount * self._stackingValue[0]
+                stY = stackCount * self._stackingValue[1]
                 # stackCount += 1
                 self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_STACKEDMATRIX][0:16] = [1.0, 0.0, 0.0, 0.0,
                                                                                              0.0, 1.0, 0.0, 0.0,
                                                                                              0.0, 0.0, 1.0, 0.0,
-                                                                                             0.0, st, 0.0, 1.0]
-                self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_STACKEDMATRIXOFFSET] = st
+                                                                                             stX, stY, 0.0, 1.0]
+                self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_STACKEDMATRIXOFFSET] = (stX, stY)
 
                 # else:
                 #     self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_STACKEDMATRIX][0:16] = [1.0, 0.0, 0.0, 0.0,

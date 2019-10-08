@@ -150,13 +150,13 @@ def _contoursItem(strip):
 def _raiseContoursItem(strip):
     return _SCMitem(name='Raise Base Level',
                     typeItem=ItemTypes.get(ITEM), icon='icons/contour-base-up', toolTip='Raise Contour Base Level',
-                    callback=strip.spectrumDisplay.raiseContourBase)
+                    callback=strip.spectrumDisplay.raiseContourBaseLevel)
 
 
 def _lowerContoursItem(strip):
     return _SCMitem(name='Lower Base Level',
                     typeItem=ItemTypes.get(ITEM), icon='icons/contour-base-down', toolTip='Lower Contour Base Level',
-                    callback=strip.spectrumDisplay.lowerContourBase)
+                    callback=strip.spectrumDisplay.lowerContourBaseLevel)
 
 
 def _resetZoom(strip):

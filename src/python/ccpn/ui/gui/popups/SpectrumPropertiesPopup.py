@@ -426,10 +426,14 @@ class GeneralTab(Widget):
             self.noiseLevelData = ScientificDoubleSpinBox(self, vAlign='t', grid=(10, 1))
             self.noiseLevelData.valueChanged.connect(self._queueNoiseLevelDataChange)
 
-            if spectrum.noiseLevel is None:
-                self.noiseLevelData.setValue(spectrum.estimateNoise())
-            else:
-                self.noiseLevelData.setValue(spectrum.noiseLevel)
+            # if spectrum.noiseLevel is None:
+            #     try:
+            #         noise = spectrum.estimateNoise()  # This sometimes fails
+            #     except:
+            #         noise = 1.0
+            #     self.noiseLevelData.setValue(noise)
+            # else:
+            self.noiseLevelData.setValue(spectrum.noiseLevel)
 
             # if spectrum.noiseLevel is None:
             #     self.noiseLevelData.setText(str('%.3d' % spectrum.estimateNoise()))

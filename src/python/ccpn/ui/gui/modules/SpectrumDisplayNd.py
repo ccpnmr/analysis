@@ -35,6 +35,8 @@ from ccpn.ui.gui.widgets.Icon import Icon
 from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import BoundDisplay as ApiBoundDisplay
 from ccpn.ui.gui.popups.SpectrumPropertiesPopup import SpectrumDisplayPropertiesPopupNd
 
+from ccpn.util.decorators import logCommand
+
 from ccpn.util.Logging import getLogger
 
 
@@ -90,8 +92,8 @@ class SpectrumDisplayNd(GuiSpectrumDisplay):
             ('removeStrip', 'icons/minus', 'Remove the current strip', True, self.removeCurrentStrip),
             ]
         toolBarItemsForNd = [
-            ('raiseBase', 'icons/contour-base-up', 'Raise Contour Base Level', True, self.raiseContourBase),
-            ('lowerBase', 'icons/contour-base-down', 'Lower Contour Base Level', True, self.lowerContourBase),
+            ('raiseBase', 'icons/contour-base-up', 'Raise Contour Base Level', True, self.raiseContourBaseLevel),
+            ('lowerBase', 'icons/contour-base-down', 'Lower Contour Base Level', True, self.lowerContourBaseLevel),
             ('maximiseZoom', 'icons/zoom-full', 'Maximise Zoom', True, self._resetAllZooms),
             ('storeZoom', 'icons/zoom-store', 'Store Zoom', True, self._storeZoom),
             ('restoreZoom', 'icons/zoom-restore', 'Restore Zoom', True, self._restoreZoom),
@@ -118,7 +120,8 @@ class SpectrumDisplayNd(GuiSpectrumDisplay):
         # repaint
         GLSignals.emitPaintEvent()
 
-    def raiseContourBase(self):
+    @logCommand(get='self')
+    def raiseContourBaseLevel(self):
         """
         Increases contour base level for all spectra visible in the display.
         """
@@ -157,18 +160,19 @@ class SpectrumDisplayNd(GuiSpectrumDisplay):
                 # spectrumView.rebuildContours()
                 # spectrumView.update()
 
-                mainWindow = self.mainWindow
-                mainWindow.pythonConsole.writeConsoleCommand(
-                        "spectrum.positiveContourBase = %s" % spectrum.positiveContourBase, spectrum=spectrum)
-                mainWindow.pythonConsole.writeConsoleCommand(
-                        "spectrum.negativeContourBase = %s" % spectrum.negativeContourBase, spectrum=spectrum)
-                getLogger().info("spectrum = project.getByPid(%s)" % spectrum.pid)
-                getLogger().info("spectrum.positiveContourBase = %s" % spectrum.positiveContourBase)
-                getLogger().info("spectrum.negativeContourBase = %s" % spectrum.negativeContourBase)
+                # mainWindow = self.mainWindow
+                # mainWindow.pythonConsole.writeConsoleCommand(
+                #         "spectrum.positiveContourBase = %s" % spectrum.positiveContourBase, spectrum=spectrum)
+                # mainWindow.pythonConsole.writeConsoleCommand(
+                #         "spectrum.negativeContourBase = %s" % spectrum.negativeContourBase, spectrum=spectrum)
+                # getLogger().info("spectrum = project.getByPid(%s)" % spectrum.pid)
+                # getLogger().info("spectrum.positiveContourBase = %s" % spectrum.positiveContourBase)
+                # getLogger().info("spectrum.negativeContourBase = %s" % spectrum.negativeContourBase)
 
         # self._rebuildContours()
 
-    def lowerContourBase(self):
+    @logCommand(get='self')
+    def lowerContourBaseLevel(self):
         """
         Decreases contour base level for all spectra visible in the display.
         """
@@ -206,18 +210,19 @@ class SpectrumDisplayNd(GuiSpectrumDisplay):
                 # spectrumView.rebuildContours()
                 # spectrumView.update()
 
-                mainWindow = self.mainWindow
-                mainWindow.pythonConsole.writeConsoleCommand(
-                        "spectrum.positiveContourBase = %s" % spectrum.positiveContourBase, spectrum=spectrum)
-                mainWindow.pythonConsole.writeConsoleCommand(
-                        "spectrum.negativeContourBase = %s" % spectrum.negativeContourBase, spectrum=spectrum)
-                getLogger().info("spectrum = project.getByPid(%s)" % spectrum.pid)
-                getLogger().info("spectrum.positiveContourBase = %s" % spectrum.positiveContourBase)
-                getLogger().info("spectrum.negativeContourBase = %s" % spectrum.negativeContourBase)
+                # mainWindow = self.mainWindow
+                # mainWindow.pythonConsole.writeConsoleCommand(
+                #         "spectrum.positiveContourBase = %s" % spectrum.positiveContourBase, spectrum=spectrum)
+                # mainWindow.pythonConsole.writeConsoleCommand(
+                #         "spectrum.negativeContourBase = %s" % spectrum.negativeContourBase, spectrum=spectrum)
+                # getLogger().info("spectrum = project.getByPid(%s)" % spectrum.pid)
+                # getLogger().info("spectrum.positiveContourBase = %s" % spectrum.positiveContourBase)
+                # getLogger().info("spectrum.negativeContourBase = %s" % spectrum.negativeContourBase)
 
         # self._rebuildContours()
 
-    def addContourLevel(self):
+    @logCommand(get='self')
+    def increaseContourCounts(self):
         """
         Increases number of contours by 1 for all spectra visible in the display.
         """
@@ -253,18 +258,19 @@ class SpectrumDisplayNd(GuiSpectrumDisplay):
                 # spectrumView.rebuildContours()
                 # spectrumView.update()
 
-                mainWindow = self.mainWindow
-                mainWindow.pythonConsole.writeConsoleCommand(
-                        "spectrum.positiveContourCount = %s" % spectrum.positiveContourCount, spectrum=spectrum)
-                mainWindow.pythonConsole.writeConsoleCommand(
-                        "spectrum.negativeContourCount = %s" % spectrum.negativeContourCount, spectrum=spectrum)
-                getLogger().info("spectrum = project.getByPid(%s)" % spectrum.pid)
-                getLogger().info("spectrum.positiveContourCount = %s" % spectrum.positiveContourCount)
-                getLogger().info("spectrum.negativeContourCount = %s" % spectrum.negativeContourCount)
+                # mainWindow = self.mainWindow
+                # mainWindow.pythonConsole.writeConsoleCommand(
+                #         "spectrum.positiveContourCount = %s" % spectrum.positiveContourCount, spectrum=spectrum)
+                # mainWindow.pythonConsole.writeConsoleCommand(
+                #         "spectrum.negativeContourCount = %s" % spectrum.negativeContourCount, spectrum=spectrum)
+                # getLogger().info("spectrum = project.getByPid(%s)" % spectrum.pid)
+                # getLogger().info("spectrum.positiveContourCount = %s" % spectrum.positiveContourCount)
+                # getLogger().info("spectrum.negativeContourCount = %s" % spectrum.negativeContourCount)
 
         # self._rebuildContours()
 
-    def removeContourLevel(self):
+    @logCommand(get='self')
+    def decreaseContourCounts(self):
         """
         Decreases number of contours by 1 for all spectra visible in the display.
         """
@@ -304,14 +310,14 @@ class SpectrumDisplayNd(GuiSpectrumDisplay):
                 # spectrumView.rebuildContours()
                 # spectrumView.update()
 
-                mainWindow = self.mainWindow
-                mainWindow.pythonConsole.writeConsoleCommand(
-                        "spectrum.positiveContourCount = %s" % spectrum.positiveContourCount, spectrum=spectrum)
-                mainWindow.pythonConsole.writeConsoleCommand(
-                        "spectrum.negativeContourCount = %s" % spectrum.negativeContourCount, spectrum=spectrum)
-                getLogger().info("spectrum = project.getByPid(%s)" % spectrum.pid)
-                getLogger().info("spectrum.positiveContourCount = %s" % spectrum.positiveContourCount)
-                getLogger().info("spectrum.negativeContourCount = %s" % spectrum.negativeContourCount)
+                # mainWindow = self.mainWindow
+                # mainWindow.pythonConsole.writeConsoleCommand(
+                #         "spectrum.positiveContourCount = %s" % spectrum.positiveContourCount, spectrum=spectrum)
+                # mainWindow.pythonConsole.writeConsoleCommand(
+                #         "spectrum.negativeContourCount = %s" % spectrum.negativeContourCount, spectrum=spectrum)
+                # getLogger().info("spectrum = project.getByPid(%s)" % spectrum.pid)
+                # getLogger().info("spectrum.positiveContourCount = %s" % spectrum.positiveContourCount)
+                # getLogger().info("spectrum.negativeContourCount = %s" % spectrum.negativeContourCount)
 
         # self._rebuildContours()
 

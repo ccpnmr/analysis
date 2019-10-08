@@ -527,8 +527,13 @@ assignmentTolerances
     @_includeInCopy
     def noiseLevel(self) -> float:
         """Estimated noise level for the spectrum,
-        defined as the estimated standard deviation of the points from the baseplane/baseline"""
-        return self._wrappedData.noiseLevel
+        defined as the estimated standard deviation of the points from the baseplane/baseline
+        """
+        noise = self._wrappedData.noiseLevel
+        if noise is None:
+            noise = self.estimateNoise()
+            self._wrappedData.noiseLevel = noise
+        return noise
 
     @noiseLevel.setter
     def noiseLevel(self, value: float):
@@ -1793,7 +1798,13 @@ assignmentTolerances
         return self._apiDataSource.automaticIntegration(spectralData)
 
     def estimateNoise(self):
-        return self._apiDataSource.estimateNoise()
+        "Estimate and set the noiseLevel"
+        try:
+            noiseLevel = self._apiDataSource.estimateNoise()  # This sometimes fails
+        except:
+            noiseLevel = 1.0
+        self.noiseLevel = noiseLevel
+        return noiseLevel
 
     def _mapAxisCodes(self, axisCodes: Sequence[str]):
         """Map axisCodes on self.axisCodes
@@ -2391,6 +2402,8 @@ assignmentTolerances
         """
         if position is None:
             position = [1] * self.dimensionCount
+        else:
+            position = list(position)
 
         if not isIterable(position) or len(position) < self.dimensionCount:
             raise ValueError('sliceDim should be a iterable with length %d; got "%s"' %

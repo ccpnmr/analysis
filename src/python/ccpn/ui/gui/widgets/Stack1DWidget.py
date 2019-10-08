@@ -79,10 +79,9 @@ class Offset1DWidget(Frame):
         self.boxXOffset.valueChanged.connect(self._applyOffset)
         self.boxYOffset.valueChanged.connect(self._applyOffset)
 
-
     def _applyOffset(self):
         if self.strip1D is not None:
-            self.strip1D._stack1DSpectra(offSet=(self.boxXOffset.value(), self.boxYOffset.value()) )
+            self.strip1D._stack1DSpectra(offSet=(self.boxXOffset.value(), self.boxYOffset.value()))
 
     def value(self):
         return (self.boxXOffset.value(), self.boxYOffset.value())

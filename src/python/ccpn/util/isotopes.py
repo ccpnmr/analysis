@@ -217,18 +217,19 @@ def findMostLikelyFieldFromSpectrometerFrequencies(spectrometerFrequencies):
     field500 = 11.7433073413584267  # 500.0 MHz reference; tweaked in 14+ th digit to minimize rounding
     fieldList = [Field(freq / 500.0 * field500) for freq in fieldsInMHz]  # list of Field instances
 
-    fieldsFound = Counter()
+    fieldsFound = []
     for sf in spectrometerFrequencies:
         for indx, field in enumerate(fieldList):
             nucleus = field.findNucleus(sf)
             if nucleus is not None:
-                fieldsFound[indx] = field
-            #print('Found>>', field.field, sf, nucleus)
+                fieldsFound.append(indx)
+                #print('Found>>', field.field, sf, nucleus)
 
-    mostCommon = fieldsFound.most_common()
+    counter = Counter(fieldsFound)
+    mostCommon = counter.most_common()
     #print('mostCommon', mostCommon)
     if len(mostCommon) > 0:
-        return mostCommon[0][1]
+        return fieldList[mostCommon[0][0]]
     else:
         return None
 

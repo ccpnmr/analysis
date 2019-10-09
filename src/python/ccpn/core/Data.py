@@ -64,6 +64,9 @@ class Data(AbstractWrapperObject):
         """ CCPN Data object matching Data"""
         return self._wrappedData
 
+    def print(self):
+        pass
+
     @property
     def _key(self) -> str:
         """id string - name"""

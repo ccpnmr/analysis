@@ -33,11 +33,22 @@ from ccpn.util.Logging import getLogger
 BG_COLOR = QtGui.QColor('#E0E0E0')
 
 
+
 # TODO:ED add some documentation here
 class ColumnClass:
-    def __init__(self, columnList=[None] * 5):
+    def __init__(self, columnList):
+        # ERROR checking for columnList. All of this as to be changed asap with a dict style and pass the kwargs and not rely on a tuple or tuple
+        ColDefs = ['colName', 'func', 'tipText', 'setEditValue', 'format']
+        columnList_ = []
+        for i in columnList:
+            if isinstance(i, tuple):
+                if len(i) != len(ColDefs):
+                    missing = len(ColDefs)-len(i)
+                    i += (None,)*missing # this is still a bad fix!
+                columnList_.append(i)
+
         self._columns = [Column(colName, func, tipText=tipText, setEditValue=editValue, format=columnFormat) for
-                         colName, func, tipText, editValue, columnFormat in columnList]  # FIXME . this mechanism is very fragile
+                         colName, func, tipText, editValue, columnFormat in columnList_]  # FIXME . this mechanism is very fragile
 
     def addColumn(self, newColumn):
         columnToAdd = [Column(colName, func, tipText=tipText, setEditValue=editValue, format=columnFormat) for

@@ -56,6 +56,8 @@ from ccpn.ui.gui.widgets.Spacer import Spacer
 from ccpn.core.PeakList import GAUSSIANMETHOD, PARABOLICMETHOD
 from ccpn.core.MultipletList import MULTIPLETAVERAGINGTYPES
 from ccpn.util.UserPreferences import UserPreferences
+from ccpn.ui.gui.lib.GuiPath import PathEdit
+
 
 PEAKFITTINGDEFAULTS = [PARABOLICMETHOD, GAUSSIANMETHOD]
 
@@ -243,17 +245,25 @@ class PreferencesPopup(CcpnDialog):
         row += 1
         HLine(parent, grid=(row, 0), gridSpan=(1, 3), colour=getColours()[DIVIDER], height=15)
 
-        # row += 1
-        # self.dataPathLabel = Label(parent, "Data Path", grid=(row, 0),)
-        # self.dataPathText = LineEdit(parent, grid=(row, 1), hAlign='l')
-        # self.dataPathText.setMinimumWidth(LineEditsMinimumWidth)
-        # self.dataPathText.editingFinished.connect(self._setDataPath)
-        # self.dataPathText.setText(self.preferences.general.dataPath)
-        # self.dataPathButton = Button(parent, grid=(row, 2), callback=self._getDataPath, icon='icons/directory', hPolicy='fixed')
+        row += 1
+        self.userWorkingPathLabel = Label(parent, "User Working Path", grid=(row, 0), )
+        self.userWorkingPathText = PathEdit(parent, grid=(row, 1), hAlign='l')
+        self.userWorkingPathText.setMinimumWidth(LineEditsMinimumWidth)
+        self.userWorkingPathText.editingFinished.connect(self._setUserWorkingPath)
+
+        # if self.project:
+        #     urls = _findDataUrl(self, 'remoteData')
+        #     if urls and urls[0]:
+        #         self.userWorkingPathText.setValidator(DataUrlValidator(parent=self.userWorkingPathText, dataUrl=urls[0]))
+        #         _setUrlData(self, urls[0], self.userWorkingPathText)
+
+        self.userWorkingPathText.setText(self.preferences.general.userWorkingPath)
+        self.userWorkingPathButton = Button(parent, grid=(row, 2), callback=self._getUserWorkingPath, icon='icons/directory',
+                                        hPolicy='fixed')
 
         row += 1
         userLayouts = Label(parent, text="User Predefined Layouts ", grid=(row, 0))
-        self.userLayoutsLe = LineEdit(parent, grid=(row, 1), hAlign='l')
+        self.userLayoutsLe = PathEdit(parent, grid=(row, 1), hAlign='l')
         self.userLayoutsLe.setMinimumWidth(LineEditsMinimumWidth)
         self.userLayoutsLeButton = Button(parent, grid=(row, 2), callback=self._getUserLayoutsPath,
                                                icon='icons/directory', hPolicy='fixed')
@@ -262,7 +272,7 @@ class PreferencesPopup(CcpnDialog):
 
         row += 1
         self.auxiliaryFilesLabel = Label(parent, text="Auxiliary Files Path ", grid=(row, 0))
-        self.auxiliaryFilesData = LineEdit(parent, grid=(row, 1), hAlign='l')
+        self.auxiliaryFilesData = PathEdit(parent, grid=(row, 1), hAlign='l')
         self.auxiliaryFilesData.setMinimumWidth(LineEditsMinimumWidth)
         self.auxiliaryFilesDataButton = Button(parent, grid=(row, 2), callback=self._getAuxiliaryFilesPath,
                                                icon='icons/directory', hPolicy='fixed')
@@ -271,7 +281,7 @@ class PreferencesPopup(CcpnDialog):
 
         row += 1
         self.macroPathLabel = Label(parent, text="Macro Path", grid=(row, 0))
-        self.macroPathData = LineEdit(parent, grid=(row, 1), hAlign='l')
+        self.macroPathData = PathEdit(parent, grid=(row, 1), hAlign='l')
         self.macroPathData.setMinimumWidth(LineEditsMinimumWidth)
         self.macroPathData.setText(self.preferences.general.userMacroPath)
         self.macroPathDataButton = Button(parent, grid=(row, 2), callback=self._getMacroFilesPath,
@@ -280,7 +290,7 @@ class PreferencesPopup(CcpnDialog):
 
         row += 1
         self.pluginPathLabel = Label(parent, text="Plugin Path", grid=(row, 0))
-        self.pluginPathData = LineEdit(parent, grid=(row, 1), hAlign='l', tipText=NotImplementedTipText)
+        self.pluginPathData = PathEdit(parent, grid=(row, 1), hAlign='l', tipText=NotImplementedTipText)
         self.pluginPathData.setMinimumWidth(LineEditsMinimumWidth)
         self.pluginPathData.setText(self.preferences.general.userPluginPath)
         self.pluginPathDataButton = Button(parent, grid=(row, 2), callback=self._getPluginFilesPath,
@@ -292,7 +302,7 @@ class PreferencesPopup(CcpnDialog):
 
         row += 1
         self.pipesPathLabel = Label(parent, text="Pipes Path", grid=(row, 0), )
-        self.pipesPathData = LineEdit(parent, grid=(row, 1), hAlign='l', tipText=NotImplementedTipText)
+        self.pipesPathData = PathEdit(parent, grid=(row, 1), hAlign='l', tipText=NotImplementedTipText)
         self.pipesPathData.setMinimumWidth(LineEditsMinimumWidth)
         self.pipesPathData.setText(self.preferences.general.userExtensionPath)
         self.pipesPathDataButton = Button(parent, grid=(row, 2), callback=self._getExtensionFilesPath,
@@ -375,15 +385,15 @@ class PreferencesPopup(CcpnDialog):
         ''' Insert a widget in here to appear in the Spectrum Tab. Parent = the Frame obj where the widget should live'''
 
         row = 0
-        self.dataPathLabel = Label(parent, "User Data Path", grid=(row, 0), )
-        self.dataPathText = LineEdit(parent, grid=(row, 1), vAlign='t')
-        self.dataPathText.setMinimumWidth(LineEditsMinimumWidth)
-        self.dataPathText.editingFinished.connect(self._setDataPath)
-        self.dataPathText.setText(self.preferences.general.dataPath)
-        self.dataPathButton = Button(parent, grid=(row, 2), callback=self._getDataPath, icon='icons/directory',
-                                     hPolicy='fixed')
-
-        row += 1
+        # self.dataPathLabel = Label(parent, "User Data Path", grid=(row, 0), )
+        # self.dataPathText = LineEdit(parent, grid=(row, 1), vAlign='t')
+        # self.dataPathText.setMinimumWidth(LineEditsMinimumWidth)
+        # self.dataPathText.editingFinished.connect(self._setDataPath)
+        # self.dataPathText.setText(self.preferences.general.dataPath)
+        # self.dataPathButton = Button(parent, grid=(row, 2), callback=self._getDataPath, icon='icons/directory',
+        #                              hPolicy='fixed')
+        #
+        # row += 1
         self.regionPaddingLabel = Label(parent, text="Spectral Padding (%)", grid=(row, 0))
         self.regionPaddingData = DoubleSpinbox(parent, grid=(row, 1), hAlign='l', decimals=1, step=0.1, min=0, max=100)
         self.regionPaddingData.setMinimumWidth(LineEditsMinimumWidth)
@@ -720,9 +730,8 @@ class PreferencesPopup(CcpnDialog):
         """
 
         row = 0
-
-        self.dataPathLabel = Label(parent, "Pymol Path", grid=(row, 0), )
-        self.pymolPath = LineEdit(parent, text='', grid=(row, 1), hAlign='l')
+        self.userWorkingPathLabel = Label(parent, "Pymol Path", grid=(row, 0), )
+        self.pymolPath = PathEdit(parent, grid=(row, 1), hAlign='l')
         self.pymolPath.setMinimumWidth(LineEditsMinimumWidth)
         self.pymolPath.editingFinished.connect(self._setPymolPath)
         self.pymolPath.setText(self.preferences.externalPrograms.pymol)
@@ -758,25 +767,44 @@ class PreferencesPopup(CcpnDialog):
             getLogger().warning('Testing External program: Failed.' + str(e))
             return False
 
-    def _getDataPath(self):
-        if os.path.exists('/'.join(self.dataPathText.text().split('/')[:-1])):
-            currentDataPath = '/'.join(self.dataPathText.text().split('/')[:-1])
+    # def _getDataPath(self):
+    #     if os.path.exists('/'.join(self.userWorkingPathText.text().split('/')[:-1])):
+    #         currentDataPath = '/'.join(self.userWorkingPathText.text().split('/')[:-1])
+    #     else:
+    #         currentDataPath = os.path.expanduser('~')
+    #     dialog = FileDialog(self, text='Select Data File', directory=currentDataPath, fileMode=2, acceptMode=0,
+    #                         preferences=self.preferences.general)
+    #     directory = dialog.selectedFiles()
+    #     if directory:
+    #         self.userWorkingPathText.setText(directory[0])
+    #         self.preferences.general.dataPath = directory[0]
+    #
+    # def _setDataPath(self):
+    #     if self.userWorkingPathText.isModified():
+    #         newPath = self.userWorkingPathText.text().strip()
+    #
+    #         self.preferences.general.dataPath = newPath     # do we need this?
+    #
+    #         dataUrl = self.project._apiNmrProject.root.findFirstDataLocationStore(
+    #                 name='standard').findFirstDataUrl(name='remoteData')
+    #         dataUrl.url = Implementation.Url(path=newPath)
+
+    def _getUserWorkingPath(self):
+        if os.path.exists('/'.join(self.userWorkingPathText.text().split('/')[:-1])):
+            currentPath = '/'.join(self.userWorkingPathText.text().split('/')[:-1])
         else:
-            currentDataPath = os.path.expanduser('~')
-        dialog = FileDialog(self, text='Select Data File', directory=currentDataPath, fileMode=2, acceptMode=0,
+            currentPath = os.path.expanduser('~')
+        dialog = FileDialog(self, text='Select User Working File', directory=currentPath, fileMode=2, acceptMode=0,
                             preferences=self.preferences.general)
         directory = dialog.selectedFiles()
         if directory:
-            self.dataPathText.setText(directory[0])
-            self.preferences.general.dataPath = directory[0]
+            self.userWorkingPathText.setText(directory[0])
+            self.preferences.general.userWorkingPath = directory[0]
 
-    def _setDataPath(self):
-        if self.dataPathText.isModified():
-            newPath = self.dataPathText.text()
-            self.preferences.general.dataPath = newPath
-            dataUrl = self.project._apiNmrProject.root.findFirstDataLocationStore(
-                    name='standard').findFirstDataUrl(name='remoteData')
-            dataUrl.url = Implementation.Url(path=newPath)
+    def _setUserWorkingPath(self):
+        if self.userWorkingPathText.isModified():
+            newPath = self.userWorkingPathText.text().strip()
+            self.preferences.general.userWorkingPath = newPath
 
     def _getAuxiliaryFilesPath(self):
         if os.path.exists(os.path.expanduser(self.auxiliaryFilesData.text())):

@@ -58,6 +58,7 @@ CCPN_PYTHON = 'miniconda/bin/python'
 
 from pathlib import Path as _Path_, _windows_flavour, _posix_flavour
 
+
 class Path(_Path_):
     """Subclassed for compatibility, convenience and enhancements
     """

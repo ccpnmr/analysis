@@ -114,6 +114,7 @@ def profile(func):
 
     return profileWrapper
 
+
 def pstatToText(pstatPath, outPath=None):
     """
     Converts a profile file of type .pstat into a plain text file.
@@ -124,15 +125,15 @@ def pstatToText(pstatPath, outPath=None):
     """
     import pstats
     import io
+
     s = io.StringIO()
     ps = pstats.Stats(pstatPath, stream=s).sort_stats('tottime')
     ps.print_stats()
     if not outPath:
-        outPath = pstatPath.replace('pstat','txt')
+        outPath = pstatPath.replace('pstat', 'txt')
     with open(outPath, 'w+') as f:
         f.write(s.getvalue())
     return ps
-
 
 
 def notify(trigger, preExecution=False):
@@ -284,7 +285,7 @@ def _makeLogString(prefix, addSelf, func, *args, **kwds):
             pStrings.append(repr(obj2pid(pValue)))
 
         elif kinds[pName] == inspect.Parameter.KEYWORD_ONLY or \
-             kinds[pName] == inspect.Parameter.POSITIONAL_OR_KEYWORD:  # #  keywords or positional keywords
+                kinds[pName] == inspect.Parameter.POSITIONAL_OR_KEYWORD:  # #  keywords or positional keywords
             pStrings.append('{0!s}={1!r}'.format(pName, obj2pid(pValue)))
 
     if ('self' in ba.arguments or 'cls' in ba.arguments) and addSelf:
@@ -335,6 +336,7 @@ def logCommand(prefix='', get=None, isProperty=False):
         return result
 
     return theDecorator
+
 
 def logCommand__Container(prefix='', get=None, isProperty=False):
     """A decorator to log the invocation of the call to a Framework, Project, ... method.

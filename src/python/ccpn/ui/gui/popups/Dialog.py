@@ -31,6 +31,11 @@ from ccpn.util.Logging import getLogger
 from contextlib import contextmanager
 
 
+CANCELBUTTONTEXT = 'Cancel'
+APPLYBUTTONTEXT = 'Apply'
+OKBUTTONTEXT = 'OK'
+
+
 def _updateGl(self, spectrumList):
     from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
 
@@ -117,6 +122,7 @@ def handleDialogApply(self):
             self.errorValue = None
 
     try:
+        # add an undoBlock
         with undoBlock():
 
             # transfer control to the calling function

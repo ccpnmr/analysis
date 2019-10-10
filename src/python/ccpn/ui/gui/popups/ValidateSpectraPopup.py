@@ -34,7 +34,6 @@ from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.LineEdit import LineEdit
 from ccpn.ui.gui.widgets.ScrollArea import ScrollArea
 from ccpn.ui.gui.widgets.Frame import Frame
-from ccpn.util.Logging import getLogger
 from ccpn.ui.gui.guiSettings import getColours, DIVIDER
 from ccpn.ui.gui.popups.Dialog import CcpnDialog
 from ccpn.ui.gui.widgets.Spacer import Spacer
@@ -42,13 +41,10 @@ from ccpn.ui.gui.widgets.HLine import HLine
 from ccpn.ui.gui.widgets.RadioButtons import RadioButtons
 from ccpn.ui.gui.widgets.Splitter import Splitter
 from ccpn.ui.gui.widgets.MessageDialog import showWarning
+from ccpn.ui.gui.lib.GuiPath import VALIDROWCOLOUR, ACCEPTROWCOLOUR, REJECTROWCOLOUR, INVALIDROWCOLOUR
 
 
 LINEEDITSMINIMUMWIDTH = 195
-VALIDROWCOLOUR = QtGui.QColor('palegreen')
-ACCEPTROWCOLOUR =  QtGui.QColor('darkseagreen')
-REJECTROWCOLOUR = QtGui.QColor('orange')
-INVALIDROWCOLOUR = QtGui.QColor('lightpink')
 
 
 class SpectrumValidator(QtGui.QValidator):
@@ -114,18 +110,18 @@ class DataUrlValidator(QtGui.QValidator):
         if os.path.isdir(filePath):
 
             # validate dataStores
-            localStores = [store for store in self.dataUrl.sortedDataStores()]
-            for store in self.dataUrl.sortedDataStores():
+            localStores = tuple(store for store in self.dataUrl.sortedDataStores())
+            for store in localStores:
                 if not os.path.exists(os.path.join(filePath, store.path)):
                     palette.setColor(QtGui.QPalette.Base, INVALIDROWCOLOUR)
                     break
             else:
                 palette.setColor(QtGui.QPalette.Base, self.baseColour)
 
-            state = QtGui.QValidator.Acceptable                                 # entry is valid
+            state = QtGui.QValidator.Acceptable  # entry is valid
         else:
             palette.setColor(QtGui.QPalette.Base, INVALIDROWCOLOUR)
-            state = QtGui.QValidator.Intermediate                                   # entry is NOT valid, but can continue editing
+            state = QtGui.QValidator.Intermediate  # entry is NOT valid, but can continue editing
         self.parent().setPalette(palette)
 
         return state, p_str, p_int
@@ -137,6 +133,36 @@ class DataUrlValidator(QtGui.QValidator):
 
     def resetCheck(self):
         self.validate(self.parent().text(), 0)
+
+
+def _findDataPath(obj, storeType):
+    dataUrl = obj.project._apiNmrProject.root.findFirstDataLocationStore(
+            name='standard').findFirstDataUrl(name=storeType)
+    return dataUrl.url.dataLocation
+
+
+def _findDataUrl(obj, storeType):
+    dataUrl = obj.project._apiNmrProject.root.findFirstDataLocationStore(
+            name='standard').findFirstDataUrl(name=storeType)
+    if dataUrl:
+        return (dataUrl,)
+    else:
+        return ()
+
+
+def _setUrlData(self, dataUrl, urlWidgets):
+    """Set the urlData widgets from the dataUrl.
+    """
+    if isinstance(urlWidgets, (tuple, list)):
+        urlData, _, _ = urlWidgets  #self.dataUrlData[dataUrl]
+    else:
+        urlData = urlWidgets
+
+    urlData.setText(dataUrl.url.dataLocation)
+    # if urlData.validator:
+    valid = urlData.validator()
+    if valid and hasattr(valid, 'resetCheck'):
+        urlData.validator().resetCheck()
 
 
 VALIDSPECTRA = 'valid'
@@ -193,19 +219,22 @@ class ValidateSpectraPopup(CcpnDialog):
         self.allUrls = [dataUrl for store in self.project._wrappedData.memopsRoot.sortedDataLocationStores()
                         for dataUrl in store.sortedDataUrls() if dataUrl.name not in ('insideData', 'alongsideData')]
 
-        urls = self._findDataUrl('remoteData')
+        # urls = self._findDataUrl('remoteData')
+        urls = _findDataUrl(self, 'remoteData')
         for url in urls:
             label = self._addUrl(self.dataUrlScrollAreaWidgetContents, url, urlList=self.dataUrlData, scrollRow=scrollRow, enabled=True)
             label.setText('$DATA (user datapath)')
             scrollRow += 1
 
-        urls = self._findDataUrl('insideData')
+        # urls = self._findDataUrl('insideData')
+        urls = _findDataUrl(self, 'insideData')
         for url in urls:
             label = self._addUrl(self.dataUrlScrollAreaWidgetContents, url, urlList=self.dataUrlData, scrollRow=scrollRow, enabled=False)
             label.setText('$INSIDE')
             scrollRow += 1
 
-        urls = self._findDataUrl('alongsideData')
+        # urls = self._findDataUrl('alongsideData')
+        urls = _findDataUrl(self, 'alongsideData')
         for url in urls:
             label = self._addUrl(self.dataUrlScrollAreaWidgetContents, url, urlList=self.dataUrlData, scrollRow=scrollRow, enabled=False)
             label.setText('$ALONGSIDE')
@@ -247,7 +276,7 @@ class ValidateSpectraPopup(CcpnDialog):
                                       )
         specRow += 1
 
-        self._spectrumFrame.addSpacer(5,10, grid=(specRow,0))
+        self._spectrumFrame.addSpacer(5, 10, grid=(specRow, 0))
         specRow += 1
 
         # set up a scroll area
@@ -294,13 +323,13 @@ class ValidateSpectraPopup(CcpnDialog):
                QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.MinimumExpanding,
                grid=(scrollRow, 1), gridSpan=(1, 1))
 
-        self._spectrumFrame.addSpacer(5,10, grid=(specRow,0))
+        self._spectrumFrame.addSpacer(5, 10, grid=(specRow, 0))
         specRow += 1
 
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
         row = 1
-        self.splitter = Splitter(self, grid=(row, 0), setLayout=True, horizontal=False, gridSpan=(1,3))
+        self.splitter = Splitter(self, grid=(row, 0), setLayout=True, horizontal=False, gridSpan=(1, 3))
         self.splitter.addWidget(self.dataUrlScrollArea)
         self.splitter.addWidget(self._spectrumFrame)
         self.getLayout().addWidget(self.splitter, row, 0, 1, 3)
@@ -342,7 +371,8 @@ class ValidateSpectraPopup(CcpnDialog):
                            icon='icons/directory')
 
         urlList[dataUrl] = (urlData, None, urlLabel)
-        self._setUrlData(dataUrl)
+        # self._setUrlData(dataUrl)
+        _setUrlData(self, dataUrl, self.dataUrlData[dataUrl])
         urlData.setEnabled(enabled)
         urlButton.setEnabled(enabled)
         urlButton.setVisible(enabled)
@@ -391,15 +421,15 @@ class ValidateSpectraPopup(CcpnDialog):
                 # self._setUrlData(dataUrl)
                 self._validateAll()
 
-    def _setUrlData(self, dataUrl):
-        """Set the urlData widgets from the dataUrl.
-        """
-        urlData, urlButton, urlLabel = self.dataUrlData[dataUrl]
-        urlData.setText(dataUrl.url.dataLocation)
-        # if urlData.validator:
-        valid = urlData.validator()
-        if valid and hasattr(valid, 'resetCheck'):
-            urlData.validator().resetCheck()
+    # def _setUrlData(self, dataUrl):
+    #     """Set the urlData widgets from the dataUrl.
+    #     """
+    #     urlData, urlButton, urlLabel = self.dataUrlData[dataUrl]
+    #     urlData.setText(dataUrl.url.dataLocation)
+    #     # if urlData.validator:
+    #     valid = urlData.validator()
+    #     if valid and hasattr(valid, 'resetCheck'):
+    #         urlData.validator().resetCheck()
 
     def _getSpectrumFile(self, spectrum):
         """Get the path from the widget and call the open dialog.
@@ -494,25 +524,26 @@ class ValidateSpectraPopup(CcpnDialog):
                 for widg in widgets:
                     widg.setVisible(visible)
 
-    def _findDataPath(self, storeType):
-        dataUrl = self.project._apiNmrProject.root.findFirstDataLocationStore(
-                name='standard').findFirstDataUrl(name=storeType)
-        return dataUrl.url.dataLocation
-
-    def _findDataUrl(self, storeType):
-        dataUrl = self.project._apiNmrProject.root.findFirstDataLocationStore(
-                name='standard').findFirstDataUrl(name=storeType)
-        if dataUrl:
-            return (dataUrl,)
-        else:
-            return ()
+    # def _findDataPath(self, storeType):
+    #     dataUrl = self.project._apiNmrProject.root.findFirstDataLocationStore(
+    #             name='standard').findFirstDataUrl(name=storeType)
+    #     return dataUrl.url.dataLocation
+    #
+    # def _findDataUrl(self, storeType):
+    #     dataUrl = self.project._apiNmrProject.root.findFirstDataLocationStore(
+    #             name='standard').findFirstDataUrl(name=storeType)
+    #     if dataUrl:
+    #         return (dataUrl,)
+    #     else:
+    #         return ()
 
     def _validateAll(self):
         """Validate all the objects as the dataUrls may have changed.
         """
         self._badUrls = False
         for url in self.allUrls:
-            self._setUrlData(url)
+            # self._setUrlData(url)
+            _setUrlData(self, url, self.dataUrlData[url])
             if not url.url.path:
                 self._badUrls = True
 

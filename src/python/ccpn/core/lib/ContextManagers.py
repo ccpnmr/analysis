@@ -1047,6 +1047,29 @@ def ccpNmrV3CoreSetter():
 
     return theDecorator
 
+
+def queueStateChange(verify=None, attributeName=None):
+    """A decorator wrap the property setters method in an undo block and triggering the
+    'change' notification
+    """
+
+    @decorator.decorator
+    def theDecorator(*args, **kwds):
+        func = args[0]
+        args = args[1:]  # Optional 'self' is now args[0]
+        self = args[0]
+
+        result = func(*args, **kwds)
+
+        # call the verify function for the decorator
+        if verify:
+            verify(self, attributeName, result)
+
+        return result
+
+    return theDecorator
+
+
 # if __name__ == '__main__':
 #     # check that the undo mechanism is working with the new context managers
 #     from sandbox.Geerten.Refactored.framework import Framework, getApplication, getProject, getColourScheme

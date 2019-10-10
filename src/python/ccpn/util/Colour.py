@@ -797,22 +797,23 @@ def fillColourPulldown(pulldown, allowAuto=False):
     currText = pulldown.currentText()
     # currIndex = pulldown.currentIndex()
     # print ('>>>', currText, currIndex)
-    pulldown.clear()
-    if allowAuto:
-        pulldown.addItem(text='<auto>')
-    for item in spectrumColours.items():
-        # if item[1] not in pulldown.texts:
+    with pulldown._blockSignals():
+        pulldown.clear()
+        if allowAuto:
+            pulldown.addItem(text='<auto>')
+        for item in spectrumColours.items():
+            # if item[1] not in pulldown.texts:
 
-        colName = item[1]  # colourNameWithSpace(item[1])
+            colName = item[1]  # colourNameWithSpace(item[1])
 
-        if item[0] != '#':
-            pix = QtGui.QPixmap(QtCore.QSize(20, 20))
-            pix.fill(QtGui.QColor(item[0]))
-            pulldown.addItem(icon=QtGui.QIcon(pix), text=colName)
-        elif allowAuto:
-            pulldown.addItem(text=colName)
+            if item[0] != '#':
+                pix = QtGui.QPixmap(QtCore.QSize(20, 20))
+                pix.fill(QtGui.QColor(item[0]))
+                pulldown.addItem(icon=QtGui.QIcon(pix), text=colName)
+            elif allowAuto:
+                pulldown.addItem(text=colName)
 
-    pulldown.setCurrentText(currText)
+        pulldown.setCurrentText(currText)
 
 
 def getSpectrumColour(colourName, defaultReturn=None):

@@ -26,10 +26,10 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
+from contextlib import contextmanager
 from PyQt5 import QtCore, QtGui, QtWidgets
 from ccpn.ui.gui.widgets.Base import Base
 from ccpn.ui.gui.widgets.Icon import Icon
-from functools import partial
 
 
 NULL = object()
@@ -75,6 +75,7 @@ class PulldownList(QtWidgets.QComboBox, Base):
         self.headerEnabled = headerEnabled
         self.headerIcon = headerIcon
         self.backgroundText = backgroundText
+        self._blockingLevel = 0
 
         if editable:
             self.setEditable(editable)
@@ -306,6 +307,46 @@ class PulldownList(QtWidgets.QComboBox, Base):
         # qt bug fix - maxVisible only works if the following is set in the stylesheet
         # self.setStyleSheet("combobox-popup: 0;")
         # This is currently set at the top but added here so I remember, Ed
+
+    def _blockEvents(self, blanking=False):
+        """Block all updates/signals/notifiers in the widget.
+        """
+        # block on first entry
+        if self._blockingLevel == 0:
+            self.blockSignals(True)
+            self.setUpdatesEnabled(False)
+            if blanking:
+                self.project.blankNotification()
+
+        self._blockingLevel += 1
+
+    def _unblockEvents(self, blanking=False):
+        """Unblock all updates/signals/notifiers in the widget.
+        """
+        if self._blockingLevel > 0:
+            self._blockingLevel -= 1
+
+            # unblock all signals on last exit
+            if self._blockingLevel == 0:
+                if blanking:
+                    self.project.unblankNotification()
+                self.setUpdatesEnabled(True)
+                self.blockSignals(False)
+        else:
+            raise RuntimeError('Error: PullDownList already at 0')
+
+    @contextmanager
+    def _blockSignals(self, blanking=False):
+        """Block all signals from the table
+        """
+        self._blockEvents(blanking)
+        try:
+            yield  # yield control to the calling process
+
+        except Exception as es:
+            raise es
+        finally:
+            self._unblockEvents(blanking)
 
 
 if __name__ == '__main__':

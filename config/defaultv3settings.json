@@ -7,6 +7,7 @@
         "userPluginPath": "~/.ccpn/plugins/",
         "userExtensionPath": "~/.ccpn/extensions/",
         "userLayoutsPath": "",
+        "userWorkingPath" : "~",
         "language": "English-UK",
         "editor": "default",
         "colourScheme": "dark",

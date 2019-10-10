@@ -1061,9 +1061,17 @@ def queueStateChange(verify=None, attributeName=None):
 
         result = func(*args, **kwds)
 
+        import inspect
+        # get the signature
+        sig = inspect.signature(func)
+        # fill in the missing parameters
+        ba = sig.bind(*args, **kwds)
+        ba.apply_defaults()
+        dim = ba.arguments.get('dim')
+
         # call the verify function for the decorator
         if verify:
-            verify(self, attributeName, result)
+            verify(self, func.__name__, result, dim)
 
         return result
 

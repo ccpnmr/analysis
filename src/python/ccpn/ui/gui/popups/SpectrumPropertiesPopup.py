@@ -163,7 +163,6 @@ class SpectrumPropertiesPopup(CcpnDialog):
         tabs = (self._generalTab, self._dimensionsTab, self._contoursTab)
         allChanges = any(t._changes for t in tabs if t is not None)
 
-        print('>>>>>>allChanges', allChanges)
         if not allChanges:
             return True
 
@@ -212,19 +211,28 @@ class SpectrumPropertiesPopup(CcpnDialog):
             self.accept()
 
 
-def _verifyApply(tab, attributeName, value):
+def _verifyApply(tab, attributeName, value, postFix=None):
     """Change the state of the apply button based on the changes in the tabs
     """
     popup = tab._parent
 
+    # if attributeName is defined use as key to dict to store change functions
+    # append postFix if need to differentiate partial functions
     if attributeName:
+        if postFix is not None:
+            attributeName += str(postFix)
         if value:
+
+            # store in dict
             tab._changes[attributeName] = value
         else:
             if attributeName in tab._changes:
-              del tab._changes[attributeName]
+
+                # delete from dict - empty dict implies no changes
+                del tab._changes[attributeName]
 
     if popup:
+        # set button state depending on number of changes
         tabs = (popup._generalTab, popup._dimensionsTab, popup._contoursTab)
         allChanges = any(t._changes for t in tabs if t is not None)
         popup.applyButtons.getButton(APPLYBUTTONTEXT).setEnabled(allChanges)
@@ -261,13 +269,13 @@ class GeneralTab(Widget):
         Label(self, text="Name ", grid=(row, 0))
         self.nameData = LineEdit(self, textAlignment='left', vAlign='t', grid=(row, 1))
         self.nameData.setText(spectrum.name)
-        self.nameData.textChanged.connect(self._queueSpectrumNameChange)  # ejb - was editingFinished
+        self.nameData.textChanged.connect(partial(self._queueSpectrumNameChange, spectrum))  # ejb - was editingFinished
         row += 1
 
         Label(self, text="Path", vAlign='t', hAlign='l', grid=(row, 0))
         self.pathData = LineEdit(self, textAlignment='left', vAlign='t', grid=(row, 1))
-        self.pathData.setValidator(SpectrumValidator(parent=self.pathData, spectrum=self.spectrum))
-        self.pathButton = Button(self, grid=(row, 2), callback=partial(self._getSpectrumFile, self.spectrum), icon='icons/directory')
+        self.pathData.setValidator(SpectrumValidator(parent=self.pathData, spectrum=spectrum))
+        self.pathButton = Button(self, grid=(row, 2), callback=partial(self._getSpectrumFile, spectrum), icon='icons/directory')
         row += 1
 
         self.pythonConsole = mainWindow.pythonConsole
@@ -291,7 +299,7 @@ class GeneralTab(Widget):
         #         self.pathData.setText(apiDataStore.fullPath)
         # else:
         #     self.pathData.setText(apiDataStore.fullPath)
-        self.pathData.editingFinished.connect(partial(self._queueSetSpectrumPath, self.spectrum))
+        self.pathData.editingFinished.connect(partial(self._queueSetSpectrumPath, spectrum))
 
         try:
             index = spectrum.project.chemicalShiftLists.index(spectrum.chemicalShiftList)
@@ -300,7 +308,7 @@ class GeneralTab(Widget):
         Label(self, text="ChemicalShiftList ", vAlign='t', hAlign='l', grid=(row, 0))
         self.chemicalShiftListPulldown = PulldownList(self, vAlign='t', grid=(row, 1), index=index,
                                                       texts=[csList.pid for csList in spectrum.project.chemicalShiftLists] + ['<New>'],
-                                                      callback=self._queueChemicalShiftListChange)
+                                                      callback=partial(self._queueChemicalShiftListChange, spectrum))
         row += 1
 
         Label(self, text="Sample", vAlign='t', hAlign='l', grid=(row, 0))
@@ -309,7 +317,7 @@ class GeneralTab(Widget):
             self.samplesPulldownList.addItem(sample.name, sample)
         if spectrum.sample is not None:
             self.samplesPulldownList.select(spectrum.sample.name)
-        self.samplesPulldownList.activated[str].connect(self._queueSampleChange)
+        self.samplesPulldownList.activated[str].connect(partial(self._queueSampleChange, spectrum))
 
         if spectrum.dimensionCount == 1:
             Label(self, text="Colour", vAlign='t', hAlign='l', grid=(7, 0))
@@ -341,14 +349,14 @@ class GeneralTab(Widget):
             self.spectrumType.setData(texts=list(experimentTypes.keys()), objects=list(experimentTypes.values()))
 
             # Added to account for renaming of experiments
-            self.spectrumType.currentIndexChanged.connect(self._queueSetSpectrumType)
+            self.spectrumType.currentIndexChanged.connect(partial(self._queueSetSpectrumType, spectrum))
             if spectrum.experimentType is not None:
                 self.spectrumType.select(spectrum.experimentType)
 
             Label(self, text='Spectrum Scaling', vAlign='t', hAlign='l', grid=(9, 0))
             self.spectrumScalingData = LineEdit(self, text=str(self.spectrum.scale), vAlign='t', hAlign='l', grid=(9, 1))
 
-            self.spectrumScalingData.textChanged.connect(self._queueSpectrumScaleChange)
+            self.spectrumScalingData.textChanged.connect(partial(self._queueSpectrumScaleChange, spectrum))
 
             Label(self, text="Date Recorded ", vAlign='t', hAlign='l', grid=(11, 0))
             Label(self, text='n/a', vAlign='t', hAlign='l', grid=(11, 1))
@@ -360,13 +368,7 @@ class GeneralTab(Widget):
                 self.noiseLevelData.setValue(spectrum.noiseLevel)
             else:
                 self.noiseLevelData.setValue(0)
-            self.noiseLevelData.valueChanged.connect(self._queueNoiseLevelDataChange)
-
-            # self.noiseLevelData.textChanged.connect(self._queueNoiseLevelDataChange)
-            # if spectrum.noiseLevel is not None:
-            #     self.noiseLevelData.setText(str('%.3d' % spectrum.noiseLevel))
-            # else:
-            #     self.noiseLevelData.setText('None')
+            self.noiseLevelData.valueChanged.connect(partial(self._queueNoiseLevelDataChange, spectrum))
 
         else:
             Label(self, text="Experiment Type ", vAlign='t', hAlign='l', grid=(7, 0))
@@ -403,13 +405,13 @@ class GeneralTab(Widget):
             text = priorityNameRemapping.get(text, text)
             self.spectrumType.setCurrentIndex(self.spectrumType.findText(text))
 
-            self.spectrumType.currentIndexChanged.connect(self._queueSetSpectrumType)
+            self.spectrumType.currentIndexChanged.connect(partial(self._queueSetSpectrumType, spectrum))
             self.spectrumType.setMinimumWidth(self.pathData.width() * 1.95)
             self.spectrumType.setFixedHeight(25)
 
             spectrumScalingLabel = Label(self, text='Spectrum Scaling', vAlign='t', grid=(9, 0))
             self.spectrumScalingData = LineEdit(self, text=str(self.spectrum.scale), vAlign='t', grid=(9, 1))
-            self.spectrumScalingData.textChanged.connect(self._queueSpectrumScaleChange)
+            self.spectrumScalingData.textChanged.connect(partial(self._queueSpectrumScaleChange, spectrum))
 
             noiseLevelLabel = Label(self, text="Noise Level ", vAlign='t', hAlign='l', grid=(10, 0))
             self.noiseLevelData = ScientificDoubleSpinBox(self, vAlign='t', grid=(10, 1))
@@ -418,17 +420,7 @@ class GeneralTab(Widget):
                 self.noiseLevelData.setValue(spectrum.estimateNoise())
             else:
                 self.noiseLevelData.setValue(spectrum.noiseLevel)
-            self.noiseLevelData.valueChanged.connect(self._queueNoiseLevelDataChange)
-
-            # if spectrum.noiseLevel is None:
-            #     self.noiseLevelData.setText(str('%.3d' % spectrum.estimateNoise()))
-            # else:
-            #     self.noiseLevelData.setText('%.3d' % spectrum.noiseLevel)
-
-            # doubleCrosshairLabel = Label(self, text="Show Second Cursor", grid=(11, 0), vAlign='t', hAlign='l')
-            # doubleCrosshairCheckBox = CheckBox(self, grid=(11, 1), checked=True, vAlign='t', hAlign='l')
-            # doubleCrosshairCheckBox.setChecked(spectrum.showDoubleCrosshair)
-            # doubleCrosshairCheckBox.stateChanged.connect(self._queueChangeDoubleCrosshair)
+            self.noiseLevelData.valueChanged.connect(partial(self._queueNoiseLevelDataChange, spectrum))
 
             self.layout().addItem(QtWidgets.QSpacerItem(0, 10), 0, 0)
 
@@ -507,29 +499,14 @@ class GeneralTab(Widget):
 
 
 
-    @queueStateChange(_verifyApply, 'NAMENAMENAME')
-    def _queueSpectrumNameChange(self):
+    @queueStateChange(_verifyApply, 'spectrumName')
+    def _queueSpectrumNameChange(self, spectrum, value):
         if self.nameData.isModified():
-            self._changes['spectrumName'] = partial(self._changeSpectrumName, self.nameData.text())
+            return partial(self._changeSpectrumName, spectrum, self.nameData.text())
 
-    def _changeSpectrumName(self, name):
-        self.spectrum.rename(name)
-        self._writeLoggingMessage("spectrum.rename('%s')" % self.nameData.text())
-
-
-
-
-
-
-
-    @queueStateChange(_verifyApply, 'NAMENAMENAME')
-    def _queueSpectrumScaleChange(self):
-        self._changes['spectrumScale'] = partial(self._setSpectrumScale, self.spectrumScalingData.text())
-
-    def _setSpectrumScale(self, scale):
-        self.spectrum.scale = float(scale)
-        self._writeLoggingMessage("spectrum.scale = %s" % self.spectrumScalingData.text())
-        self.pythonConsole.writeConsoleCommand("spectrum.scale = %s" % self.spectrumScalingData.text(), spectrum=self.spectrum)
+    def _changeSpectrumName(self, spectrum, name):
+        spectrum.rename(name)
+        self._writeLoggingMessage("spectrum.rename('%s')" % str(name))
 
 
 
@@ -537,23 +514,15 @@ class GeneralTab(Widget):
 
 
 
-    @queueStateChange(_verifyApply, 'NAMENAMENAME')
-    def _queueNoiseLevelDataChange(self):
-        self._changes['spectrumNoiseLevel'] = partial(self._setNoiseLevelData, self.noiseLevelData.value())
+    @queueStateChange(_verifyApply, 'spectrumScale')
+    def _queueSpectrumScaleChange(self, spectrum, value):
+        if value != spectrum.scale:
+            return partial(self._setSpectrumScale, spectrum, self.spectrumScalingData.text())
 
-    def _setNoiseLevelData(self, noise):
-        self.spectrum.noiseLevel = float(noise)
-        self._writeLoggingMessage("spectrum.noiseLevel = %s" % self.noiseLevelData.value())
-
-
-
-
-
-
-
-    @queueStateChange(_verifyApply, 'NAMENAMENAME')
-    def _queueChangePositiveContourDisplay(self, state):
-        self._changes['positiveContourDisplay'] = partial(self._changePositiveContourDisplay, state)
+    def _setSpectrumScale(self, spectrum, scale):
+        spectrum.scale = float(scale)
+        self._writeLoggingMessage("spectrum.scale = %s" % str(scale))
+        self.pythonConsole.writeConsoleCommand("spectrum.scale = %s" % self.spectrumScalingData.text(), spectrum=spectrum)
 
 
 
@@ -561,12 +530,14 @@ class GeneralTab(Widget):
 
 
 
-    @queueStateChange(_verifyApply, 'NAMENAMENAME')
-    def _queueChangeDoubleCrosshair(self, state):
-        flag = (state == QtCore.Qt.Checked)
-        self.spectrum.showDoubleCrosshair = flag
-        self.logger.info("spectrum = ui.getByGid('%s')" % self.spectrum.pid)
-        self.logger.info("spectrum.showDoubleCrosshair = %s" % flag)
+    @queueStateChange(_verifyApply, 'spectrumNoiseLevel')
+    def _queueNoiseLevelDataChange(self, spectrum, value):
+        if value != spectrum.noiseLevel:
+            return partial(self._setNoiseLevelData, spectrum, self.noiseLevelData.value())
+
+    def _setNoiseLevelData(self, spectrum, noise):
+        spectrum.noiseLevel = float(noise)
+        self._writeLoggingMessage("spectrum.noiseLevel = %s" % str(noise))
 
 
 
@@ -574,13 +545,21 @@ class GeneralTab(Widget):
 
 
 
-    @queueStateChange(_verifyApply, 'NAMENAMENAME')
-    def _queueChemicalShiftListChange(self, item):
+
+
+
+
+
+
+    @queueStateChange(_verifyApply, 'chemicalShiftList')
+    def _queueChemicalShiftListChange(self, spectrum, item):
         if item == '<New>':
             listLen = len(self.chemicalShiftListPulldown.texts)
-            self._changes['chemicalShiftList'] = partial(self._setNewChemicalShiftList, listLen)
+            return partial(self._setNewChemicalShiftList, spectrum, listLen)
         else:
-            self._changes['chemicalShiftList'] = partial(self._setChemicalShiftList, item)
+            value = spectrum.project.getByPid(item)
+            if value and value != spectrum.chemicalShiftList:
+                return partial(self._setChemicalShiftList, spectrum, item)
 
     def _raiseExperimentFilterPopup(self, spectrum):
         from ccpn.ui.gui.popups.ExperimentFilterPopup import ExperimentFilterPopup
@@ -589,8 +568,8 @@ class GeneralTab(Widget):
         popup.exec_()
         self.spectrumType.select(popup.expType)
 
-    def _setNewChemicalShiftList(self, listLen):
-        newChemicalShiftList = self.spectrum.project.newChemicalShiftList()
+    def _setNewChemicalShiftList(self, spectrum, listLen):
+        newChemicalShiftList = spectrum.project.newChemicalShiftList()
         insertionIndex = listLen - 1
         self.chemicalShiftListPulldown.texts.insert(insertionIndex, newChemicalShiftList.pid)
         self.chemicalShiftListPulldown.setData(self.chemicalShiftListPulldown.texts)
@@ -598,15 +577,15 @@ class GeneralTab(Widget):
         self.spectrum.chemicalShiftList = newChemicalShiftList
         self._writeLoggingMessage("""newChemicalShiftList = project.newChemicalShiftList()
                                 spectrum.chemicalShiftList = newChemicalShiftList""")
-        self.pythonConsole.writeConsoleCommand('spectrum.chemicalShiftList = chemicalShiftList', chemicalShiftList=newChemicalShiftList, spectrum=self.spectrum)
+        self.pythonConsole.writeConsoleCommand('spectrum.chemicalShiftList = chemicalShiftList', chemicalShiftList=newChemicalShiftList, spectrum=spectrum)
         self.logger.info('spectrum.chemicalShiftList = chemicalShiftList')
 
-    def _setChemicalShiftList(self, item):
-        self.spectrum.chemicalShiftList = self.spectrum.project.getByPid(item)
-        self.pythonConsole.writeConsoleCommand('spectrum.newChemicalShiftList = chemicalShiftList', chemicalShiftList=self.spectrum.chemicalShiftList,
-                                               spectrum=self.spectrum)
+    def _setChemicalShiftList(self, spectrum, item):
+        self.spectrum.chemicalShiftList = spectrum.project.getByPid(item)
+        self.pythonConsole.writeConsoleCommand('spectrum.newChemicalShiftList = chemicalShiftList', chemicalShiftList=spectrum.chemicalShiftList,
+                                               spectrum=spectrum)
         self._writeLoggingMessage("""chemicalShiftList = project.getByPid('%s')
-                                  spectrum.chemicalShiftList = chemicalShiftList""" % self.spectrum.chemicalShiftList.pid)
+                                  spectrum.chemicalShiftList = chemicalShiftList""" % spectrum.chemicalShiftList.pid)
 
 
 
@@ -614,16 +593,16 @@ class GeneralTab(Widget):
 
 
 
-    @queueStateChange(_verifyApply, 'NAMENAMENAME')
-    def _queueSampleChange(self):
-        self._changes['sampleSpectrum'] = partial(self._changeSampleSpectrum, self.samplesPulldownList.currentObject())
+    @queueStateChange(_verifyApply, 'sampleSpectrum')
+    def _queueSampleChange(self, spectrum, value):
+        return partial(self._changeSampleSpectrum, spectrum, self.samplesPulldownList.currentObject())
 
-    def _changeSampleSpectrum(self, sample):
+    def _changeSampleSpectrum(self, spectrum, sample):
         if sample is not None:
-            sample.spectra += (self.spectrum,)
+            sample.spectra += (spectrum,)
         else:
-            if self.spectrum.sample is not None:
-                self.spectrum.sample = None
+            if spectrum.sample is not None:
+                spectrum.sample = None
 
 
 
@@ -631,18 +610,22 @@ class GeneralTab(Widget):
 
 
 
-    @queueStateChange(_verifyApply, 'NAMENAMENAME')
-    def _queueSetSpectrumType(self, value):
-        self._changes['spectrumType'] = partial(self._setSpectrumType, value)
+    @queueStateChange(_verifyApply, 'spectrumType')
+    def _queueSetSpectrumType(self, spectrum, value):
+        if value != spectrum.experimentType:
+            return partial(self._setSpectrumType, spectrum, value)
 
-    def _setSpectrumType(self, value):
-
+    def _setSpectrumType(self, spectrum, value):
         # expType = self.experimentTypes[self.spectrum.dimensionCount].get(self.atomCodes).get(self.spectrumType.currentText())
         expType = self.spectrumType.getObject()
         print(expType)
         self.spectrum.experimentType = expType
         self.pythonConsole.writeConsoleCommand('spectrum.experimentType = experimentType', experimentType=expType, spectrum=self.spectrum)
         self._writeLoggingMessage("spectrum.experimentType = '%s'" % expType)
+
+
+
+
 
     def _getSpectrumFile(self, spectrum):
         """Get the path from the widget and call the open dialog.
@@ -664,21 +647,17 @@ class GeneralTab(Widget):
 
                     dataType, subType, usePath = ioFormats.analyseUrl(newFilePath)
                     if dataType == 'Spectrum':
-                        self._changes['spectrumFilePath'] = partial(self._setSpectrumFilePath, newFilePath)
+
+                        # self._changes['spectrumFilePath'] = partial(self._setSpectrumFilePath, newFilePath)
+                        self._setPathData(spectrum)
 
                     else:
                         getLogger().warning('Not a spectrum file: %s - (%s, %s)' % (newFilePath, dataType, subType))
 
                     # set the widget text
-                    self._setPathData(spectrum)
+                    # self._setPathData(spectrum)
 
-
-
-
-
-
-
-    @queueStateChange(_verifyApply, 'NAMENAMENAME')
+    @queueStateChange(_verifyApply, 'spectrumFilePath')
     def _queueSetSpectrumPath(self, spectrum):
         if spectrum and spectrum in self.spectrumData:
             pathData, pathButton, pathLabel = self.spectrumData[spectrum]
@@ -690,21 +669,9 @@ class GeneralTab(Widget):
 
                 dataType, subType, usePath = ioFormats.analyseUrl(newFilePath)
                 if dataType == 'Spectrum':
-                    # spectrum.filePath = newFilePath
-                    self._changes['spectrumFilePath'] = partial(self._setSpectrumFilePath, newFilePath)
+                    return partial(self._setSpectrumFilePath, newFilePath)
                 else:
                     getLogger().warning('Not a spectrum file: %s - (%s, %s)' % (newFilePath, dataType, subType))
-
-        # if self.pathData.isModified():
-        #     filePath = self.pathData.text()
-        #
-        #     # Convert from custom repository names to full names
-        #     filePath = ccpnUtil.expandDollarFilePath(self.spectrum._project, self.spectrum, filePath)
-        #
-        #     if os.path.exists(filePath):
-        #         self._changes['spectrumFilePath'] = partial(self._setSpectrumFilePath, filePath)
-        #     else:
-        #         self.logger.error('Cannot set spectrum path to %s. Path does not exist' % self.pathData.text())
 
     def _setSpectrumFilePath(self, filePath):
         self.spectrum.filePath = filePath
@@ -739,9 +706,7 @@ class GeneralTab(Widget):
 
 
 
-
-
-    @queueStateChange(_verifyApply, 'NAMENAMENAME')
+    # spectrum sliceColour button and pulldown
     def _queueSetSpectrumColour(self, spectrum):
         dialog = ColourDialog(self)
 
@@ -751,20 +716,7 @@ class GeneralTab(Widget):
             self._parent._fillPullDowns()  #fillColourPulldown(self.colourBox, allowAuto=False)
             self.colourBox.setCurrentText(spectrumColours[newColour.name()])
 
-            self._changes['spectrumColour'] = partial(self._setSpectrumColour, spectrum, newColour)
-
-    def _setSpectrumColour(self, spectrum, newColour):
-        spectrum._apiDataSource.setSliceColour(newColour.name())
-        self._writeLoggingMessage("spectrum.sliceColour = '%s'" % newColour.name())
-        self.pythonConsole.writeConsoleCommand("spectrum.sliceColour = '%s'" % newColour.name(), spectrum=self.spectrum)
-
-
-
-
-
-
-
-    @queueStateChange(_verifyApply, 'NAMENAMENAME')
+    @queueStateChange(_verifyApply, 'sliceComboIndex')
     def _queueChangeSliceComboIndex(self, spectrum, value):
         self._changes['sliceComboIndex'] = partial(self._changedSliceComboIndex, spectrum, value)
 
@@ -774,7 +726,8 @@ class GeneralTab(Widget):
         if newColour:
             spectrum.sliceColour = newColour
             self._writeLoggingMessage("spectrum.sliceColour = '%s'" % newColour)
-            self.pythonConsole.writeConsoleCommand("spectrum.sliceColour '%s'" % newColour, spectrum=self.spectrum)
+            self.pythonConsole.writeConsoleCommand("spectrum.sliceColour '%s'" % newColour, spectrum=spectrum)
+
 
 
 class DimensionsTab(Widget):
@@ -861,7 +814,7 @@ class DimensionsTab(Widget):
             self.axisCodeEdits[i] = LineEdit(self,
                                              text='<None>' if value is None else str(value),
                                              grid=(row, i + 1), vAlign='t', hAlign='l')
-            self.axisCodeEdits[i].textChanged.connect(partial(self._queueSetAxisCodes,
+            self.axisCodeEdits[i].textChanged.connect(partial(self._queueSetAxisCodes, spectrum,
                                                               self.axisCodeEdits[i].text, i))
 
             row += 1
@@ -876,7 +829,7 @@ class DimensionsTab(Widget):
                 index = isotopeList.index(spectrum.isotopeCodes[i])
                 self.isotopeCodePullDowns[i].setIndex(index)
 
-            self.isotopeCodePullDowns[i].currentIndexChanged.connect(partial(self._queueSetIsotopeCodes, self.isotopeCodePullDowns[i].getText, i))
+            self.isotopeCodePullDowns[i].currentIndexChanged.connect(partial(self._queueSetIsotopeCodes, spectrum, self.isotopeCodePullDowns[i].getText, i))
 
             row += 1
             Label(self, text=str(spectrum.pointCounts[i]), grid=(row, i + 1), vAlign='t', hAlign='l')
@@ -901,7 +854,7 @@ class DimensionsTab(Widget):
             self.spectralReferencingData[i] = LineEdit(self,
                                                        text='<None>' if value is None else str("%.3f" % value),
                                                        grid=(row, i + 1), vAlign='t', hAlign='l')
-            self.spectralReferencingData[i].textChanged.connect(partial(self._queueSetDimensionReferencing,
+            self.spectralReferencingData[i].textChanged.connect(partial(self._queueSetDimensionReferencing, spectrum,
                                                                         self.spectralReferencingData[i].text, i))
             # self.spectralReferencingDataList.append(spectralReferencingData)
 
@@ -912,7 +865,7 @@ class DimensionsTab(Widget):
                                                              text='<None>' if value is None else str("%.3f" % value),
                                                              # text=str("%.3f" % (spectrum.referencePoints[i] or 0.0)),
                                                              grid=(row, i + 1), vAlign='t', hAlign='l')
-            self.spectralReferencingDataPoints[i].textChanged.connect(partial(self._queueSetPointDimensionReferencing,
+            self.spectralReferencingDataPoints[i].textChanged.connect(partial(self._queueSetPointDimensionReferencing, spectrum,
                                                                               self.spectralReferencingDataPoints[i].text, i))
             # self.spectralReferencingDataPointsList.append(spectralReferencingDataPoints)
 
@@ -922,7 +875,7 @@ class DimensionsTab(Widget):
             self.spectralAssignmentToleranceData[i] = LineEdit(self,
                                                                text='<None>' if value is None else str("%.3f" % value),
                                                                grid=(row, i + 1), hAlign='l')
-            self.spectralAssignmentToleranceData[i].textChanged.connect(partial(self._queueSetAssignmentTolerances,
+            self.spectralAssignmentToleranceData[i].textChanged.connect(partial(self._queueSetAssignmentTolerances, spectrum,
                                                                                 self.spectralAssignmentToleranceData[i].text, i))
 
             row += 1
@@ -931,7 +884,7 @@ class DimensionsTab(Widget):
             self.spectralDoubleCursorOffset[i] = LineEdit(self,
                                                           text='0' if value is None else str("%.3f" % value),
                                                           grid=(row, i + 1), hAlign='l')
-            self.spectralDoubleCursorOffset[i].textChanged.connect(partial(self._queueSetDoubleCursorOffset,
+            self.spectralDoubleCursorOffset[i].textChanged.connect(partial(self._queueSetDoubleCursorOffset, spectrum,
                                                                            self.spectralDoubleCursorOffset[i].text, i))
 
             row += 1
@@ -940,14 +893,14 @@ class DimensionsTab(Widget):
                 showFolded = spectrum.displayFoldedContours
                 self.displayedFoldedContours = CheckBox(self, grid=(row, i + 1), vAlign='t',
                                                         checked=showFolded)
-                self.displayedFoldedContours.clicked.connect(partial(self._queueSetDisplayFoldedContours, self.displayedFoldedContours.isChecked))
+                self.displayedFoldedContours.clicked.connect(partial(self._queueSetDisplayFoldedContours, spectrum, self.displayedFoldedContours.isChecked))
 
             row += 1
             fModes = spectrum.foldingModes
             dd = {'circular': False, 'mirror': True, None: False}
             self.foldingModesCheckBox[i] = CheckBox(self, grid=(row, i + 1), vAlign='t')
             self.foldingModesCheckBox[i].setChecked(dd[fModes[i]])
-            self.foldingModesCheckBox[i].clicked.connect(partial(self._queueSetFoldingModes, self.foldingModesCheckBox[i].isChecked, i))
+            self.foldingModesCheckBox[i].clicked.connect(partial(self._queueSetFoldingModes, spectrum, self.foldingModesCheckBox[i].isChecked, i))
             self.foldingModesCheckBox[i].setEnabled(False)
 
             # pullDown for min/max aliasing
@@ -965,7 +918,7 @@ class DimensionsTab(Widget):
                 index = aliasMaxRange.index(aliasLim[i][1])
                 self.maxAliasingPullDowns[i].setIndex(index)
 
-            self.maxAliasingPullDowns[i].currentIndexChanged.connect(partial(self._queueSetMaxAliasing, self.maxAliasingPullDowns[i].getText, i))
+            self.maxAliasingPullDowns[i].currentIndexChanged.connect(partial(self._queueSetMaxAliasing, spectrum, self.maxAliasingPullDowns[i].getText, i))
 
             # min aliasing
             row += 1
@@ -975,7 +928,7 @@ class DimensionsTab(Widget):
                 index = aliasMinRange.index(aliasLim[i][0])
                 self.minAliasingPullDowns[i].setIndex(index)
 
-            self.minAliasingPullDowns[i].currentIndexChanged.connect(partial(self._queueSetMinAliasing, self.minAliasingPullDowns[i].getText, i))
+            self.minAliasingPullDowns[i].currentIndexChanged.connect(partial(self._queueSetMinAliasing, spectrum, self.minAliasingPullDowns[i].getText, i))
 
         row += 1
         HLine(self, grid=(row, 0), gridSpan=(1, dimensions + 1), colour=getColours()[DIVIDER], height=15)
@@ -1064,10 +1017,11 @@ class DimensionsTab(Widget):
 
 
 
-    @queueStateChange(_verifyApply, 'NAMENAMENAME')
-    def _queueSetAssignmentTolerances(self, valueGetter, dim):
-        self._changes['assignmentTolerances{}'.format(dim)] = partial(self._setAssignmentTolerances,
-                                                                      self.spectrum, dim, valueGetter())
+    @queueStateChange(_verifyApply, 'assignmentTolerances')
+    def _queueSetAssignmentTolerances(self, spectrum, valueGetter, dim):
+        value = valueGetter()
+        if value != spectrum.doubleCrosshairOffsets[dim]:
+            return partial(self._setAssignmentTolerances, spectrum, dim, valueGetter())
 
     def _setAssignmentTolerances(self, spectrum, dim, value):
         assignmentTolerances = list(spectrum.assignmentTolerances)
@@ -1082,10 +1036,11 @@ class DimensionsTab(Widget):
 
 
 
-    @queueStateChange(_verifyApply, 'NAMENAMENAME')
-    def _queueSetDoubleCursorOffset(self, valueGetter, dim):
-        self._changes['doubleCursorOffset{}'.format(dim)] = partial(self._setDoubleCursorOffset,
-                                                                    self.spectrum, dim, valueGetter())
+    @queueStateChange(_verifyApply, 'doubleCursorOffset')
+    def _queueSetDoubleCursorOffset(self, spectrum, valueGetter, dim):
+        value = valueGetter()
+        if value != spectrum.doubleCrosshairOffsets[dim]:
+            return partial(self._setDoubleCursorOffset, spectrum, dim, value)
 
     def _setDoubleCursorOffset(self, spectrum, dim, value):
         doubleCrosshairOffsets = list(spectrum.doubleCrosshairOffsets)
@@ -1100,10 +1055,11 @@ class DimensionsTab(Widget):
 
 
 
-    @queueStateChange(_verifyApply, 'NAMENAMENAME')
-    def _queueSetAxisCodes(self, valueGetter, dim):
-        self._changes['AxisCodes{}'.format(dim)] = partial(self._setAxisCodes,
-                                                           self.spectrum, dim, valueGetter())
+    @queueStateChange(_verifyApply, 'AxisCodes')
+    def _queueSetAxisCodes(self, spectrum, valueGetter, dim):
+        value = valueGetter()
+        if value != spectrum.axisCodes[dim]:
+            return partial(self._setAxisCodes, spectrum, dim, value)
 
         # repopulate the preferred axis order pulldown
         self._fillPreferredWidgetFromAxisTexts()
@@ -1124,10 +1080,11 @@ class DimensionsTab(Widget):
 
 
 
-    @queueStateChange(_verifyApply, 'NAMENAMENAME')
-    def _queueSetIsotopeCodes(self, valueGetter, dim):
-        self._changes['IsotopeCodes{}'.format(dim)] = partial(self._setIsotopeCodes,
-                                                              self.spectrum, dim, valueGetter())
+    @queueStateChange(_verifyApply, 'IsotopeCodes')
+    def _queueSetIsotopeCodes(self, spectrum, valueGetter, dim):
+        value = valueGetter()
+        if value != spectrum.isotopeCodes[dim]:
+            return partial(self._setIsotopeCodes, spectrum, dim, value)
 
     def _setIsotopeCodes(self, spectrum, dim, value):
         isotopeCodes = list(spectrum.isotopeCodes)
@@ -1145,10 +1102,11 @@ class DimensionsTab(Widget):
 
 
 
-    @queueStateChange(_verifyApply, 'NAMENAMENAME')
-    def _queueSetDimensionReferencing(self, valueGetter, dim):
-        self._changes['dimensionReferencing{}'.format(dim)] = partial(self._setDimensionReferencing,
-                                                                      self.spectrum, dim, valueGetter())
+    @queueStateChange(_verifyApply, 'dimensionReferencing')
+    def _queueSetDimensionReferencing(self, spectrum, valueGetter, dim):
+        value = valueGetter()
+        if value != spectrum.referencePoints[dim]:
+            return partial(self._setDimensionReferencing, spectrum, dim, value)
 
     def _setDimensionReferencing(self, spectrum, dim, value):
         spectrumReferencing = list(spectrum.referenceValues)
@@ -1167,7 +1125,7 @@ class DimensionsTab(Widget):
     def _queueSetPointDimensionReferencing(self, spectrum, valueGetter, dim):
         value = valueGetter()
         if value != spectrum.referencePoints[dim]:
-            return partial(self._setPointDimensionReferencing, self.spectrum, dim, valueGetter())
+            return partial(self._setPointDimensionReferencing, spectrum, dim, value)
 
     def _setPointDimensionReferencing(self, spectrum, dim, value):
         spectrumReferencing = list(spectrum.referencePoints)
@@ -1184,9 +1142,9 @@ class DimensionsTab(Widget):
 
     @queueStateChange(_verifyApply, 'minAliasing')
     def _queueSetMinAliasing(self, spectrum, valueGetter, dim):
-        returnVal = partial(self._setMinAliasing, self.spectrum, dim, valueGetter())
         minValue = int(valueGetter())
         if minValue != spectrum.minAliasing[dim]:
+            returnVal = partial(self._setMinAliasing, self.spectrum, dim, minValue)
             maxValue = int(self.maxAliasingPullDowns[dim].getText())
             if minValue > maxValue:
                 self.maxAliasingPullDowns[dim].select(str(minValue))
@@ -1210,9 +1168,9 @@ class DimensionsTab(Widget):
 
     @queueStateChange(_verifyApply, 'maxAliasing')
     def _queueSetMaxAliasing(self, spectrum, valueGetter, dim):
-        returnVal = partial(self._setMaxAliasing, spectrum, dim, valueGetter())
         maxValue = int(valueGetter())
         if maxValue != spectrum.maxAliasing[dim]:
+            returnVal = partial(self._setMaxAliasing, spectrum, dim, maxValue)
             minValue = int(self.minAliasingPullDowns[dim].getText())
             if maxValue < minValue:
                 self.minAliasingPullDowns[dim].select(str(maxValue))
@@ -1237,7 +1195,7 @@ class DimensionsTab(Widget):
     def _queueSetFoldingModes(self, spectrum, valueGetter, dim):
         value = valueGetter()
         if value != spectrum.foldingModes[dim]:
-            return partial(self._setFoldingModes, spectrum, dim, valueGetter())
+            return partial(self._setFoldingModes, spectrum, dim, value)
 
     def _setFoldingModes(self, spectrum, dim, value):
         dd = {True: 'mirror', False: 'circular', None: None}
@@ -1259,7 +1217,7 @@ class DimensionsTab(Widget):
     def _queueSetDisplayFoldedContours(self, spectrum, valueGetter):
         value = valueGetter()
         if value != spectrum.displayFoldedContours:
-            return partial(self._setDisplayFoldedContours, spectrum, valueGetter())
+            return partial(self._setDisplayFoldedContours, spectrum, value)
 
     def _setDisplayFoldedContours(self, spectrum, value):
         spectrum.displayFoldedContours = bool(value)
@@ -1303,7 +1261,7 @@ class ContoursTab(Widget):
         positiveContoursCheckBox.setChecked(self.spectrum.includePositiveContours)
 
         # self.layout().addItem(QtWidgets.QSpacerItem(0, 10), 0, 0)
-        positiveContoursCheckBox.stateChanged.connect(self._queueChangePositiveContourDisplay)
+        positiveContoursCheckBox.stateChanged.connect(partial(self._queueChangePositiveContourDisplay, spectrum))
 
         row += 1
         positiveContourBaseLabel = Label(self, text="Positive Base Level", grid=(row, 0), vAlign='c', hAlign='l')
@@ -1311,7 +1269,7 @@ class ContoursTab(Widget):
         self.positiveContourBaseData.setMaximum(1e12)
         self.positiveContourBaseData.setMinimum(0.1)
         self.positiveContourBaseData.setValue(self.spectrum.positiveContourBase)
-        self.positiveContourBaseData.valueChanged.connect(partial(self._queueChangePositiveContourBase, self.spectrum))
+        self.positiveContourBaseData.valueChanged.connect(partial(self._queueChangePositiveContourBase, spectrum))
         # self.positiveContourBaseData.setSingleStep(self.positiveContourBaseData.value()*(self.positiveMultiplierData.value()-1))
         # Changed to get less quickly to zero - but DoubleSpinBox is NOT right for this
         self.positiveContourBaseData.setSingleStep(self.positiveContourBaseData.value() * 0.1)
@@ -1321,13 +1279,13 @@ class ContoursTab(Widget):
         self.positiveMultiplierData = DoubleSpinbox(self, grid=(row, 1), vAlign='t')
         self.positiveMultiplierData.setSingleStep(0.1)
         self.positiveMultiplierData.setValue(float(self.spectrum.positiveContourFactor))
-        self.positiveMultiplierData.valueChanged.connect(partial(self._queueChangePositiveContourFactor, self.spectrum))
+        self.positiveMultiplierData.valueChanged.connect(partial(self._queueChangePositiveContourFactor, spectrum))
 
         row += 1
         positiveContourCountLabel = Label(self, text="Number of positive contours", grid=(row, 0), vAlign='c', hAlign='l')
         self.positiveContourCountData = Spinbox(self, grid=(row, 1), vAlign='t')
         self.positiveContourCountData.setValue(int(self.spectrum._apiDataSource.positiveContourCount))
-        self.positiveContourCountData.valueChanged.connect(partial(self._queueChangePositiveContourCount, self.spectrum))
+        self.positiveContourCountData.valueChanged.connect(partial(self._queueChangePositiveContourCount, spectrum))
 
         row += 1
         positiveContourColourLabel = Label(self, text="Positive Contour Colour", grid=(row, 0), vAlign='c', hAlign='l')
@@ -1357,7 +1315,7 @@ class ContoursTab(Widget):
 
         self.positiveColourButton = Button(self, grid=(row, 2), vAlign='t', hAlign='l',
                                            icon='icons/colours', hPolicy='fixed')
-        self.positiveColourButton.clicked.connect(partial(self._queueChangePosSpectrumColour, self.spectrum))
+        self.positiveColourButton.clicked.connect(partial(self._queueChangePosSpectrumColour, spectrum))
 
         row += 1
         negativeContoursLabel = Label(self, text="Show Negative Contours", grid=(row, 0), vAlign='c', hAlign='l')
@@ -1369,7 +1327,7 @@ class ContoursTab(Widget):
         #         negativeContoursCheckBox.setChecked(False)
         negativeContoursCheckBox.setChecked(self.spectrum.includeNegativeContours)
 
-        negativeContoursCheckBox.stateChanged.connect(self._queueChangeNegativeContourDisplay)
+        negativeContoursCheckBox.stateChanged.connect(partial(self._queueChangeNegativeContourDisplay, spectrum))
 
         row += 1
         negativeContourBaseLabel = Label(self, text="Negative Base Level", grid=(row, 0), vAlign='c', hAlign='l')
@@ -1382,23 +1340,23 @@ class ContoursTab(Widget):
         # self.negativeContourBaseData.setMinimum(0.1)
         # self.negativeContourBaseData.setValue(abs(self.spectrum.negativeContourBase))
 
-        self.negativeContourBaseData.valueChanged.connect(partial(self._queueChangeNegativeContourBase, self.spectrum))
+        self.negativeContourBaseData.valueChanged.connect(partial(self._queueChangeNegativeContourBase, spectrum, self.negativeContourBaseData.textFromValue))
         # self.negativeContourBaseData.setSingleStep((self.negativeContourBaseData.value()*-1)*self.negativeMultiplierData.value()-1)
         # Changed to get less quickly to zero - but DoubleSpinBox is NOT right for this
         self.negativeContourBaseData.setSingleStep((self.negativeContourBaseData.value() * -1) * 0.1)
 
         row += 1
         negativeMultiplierLabel = Label(self, text="Negative Multiplier", grid=(row, 0), vAlign='c', hAlign='l')
-        self.negativeMultiplierData = DoubleSpinbox(self, grid=(row, 1), vAlign='t')
+        self.negativeMultiplierData = DoubleSpinbox(self, grid=(row, 1), vAlign='t', min=0.0, decimals=3, step=0.1)
         self.negativeMultiplierData.setValue(self.spectrum.negativeContourFactor)
         self.negativeMultiplierData.setSingleStep(0.1)
-        self.negativeMultiplierData.valueChanged.connect(partial(self._queueChangeNegativeContourFactor, self.spectrum))
+        self.negativeMultiplierData.valueChanged.connect(partial(self._queueChangeNegativeContourFactor, spectrum, self.negativeMultiplierData.textFromValue))
 
         row += 1
         negativeContourCountLabel = Label(self, text="Number of negative contours", grid=(row, 0), vAlign='c', hAlign='l')
         self.negativeContourCountData = Spinbox(self, grid=(row, 1), vAlign='t')
         self.negativeContourCountData.setValue(self.spectrum.negativeContourCount)
-        self.negativeContourCountData.valueChanged.connect(partial(self._queueChangeNegativeContourCount, self.spectrum))
+        self.negativeContourCountData.valueChanged.connect(partial(self._queueChangeNegativeContourCount, spectrum))
 
         row += 1
         negativeContourColourLabel = Label(self, text="Negative Contour Colour", grid=(row, 0), vAlign='c', hAlign='l')
@@ -1414,12 +1372,12 @@ class ContoursTab(Widget):
             spectrumColourKeys = list(spectrumColours.keys())
             self.negativeColourBox.setCurrentText(spectrumColours[c])
 
-        self.positiveColourBox.currentIndexChanged.connect(partial(self._queueChangePosColourComboIndex, self.spectrum))
-        self.negativeColourBox.currentIndexChanged.connect(partial(self._queueChangeNegColourComboIndex, self.spectrum))
+        self.positiveColourBox.currentIndexChanged.connect(partial(self._queueChangePosColourComboIndex, spectrum))
+        self.negativeColourBox.currentIndexChanged.connect(partial(self._queueChangeNegColourComboIndex, spectrum))
 
         self.negativeColourButton = Button(self, grid=(row, 2), icon='icons/colours', hPolicy='fixed',
                                            vAlign='t', hAlign='l')
-        self.negativeColourButton.clicked.connect(partial(self._queueChangeNegSpectrumColour, self.spectrum))
+        self.negativeColourButton.clicked.connect(partial(self._queueChangeNegSpectrumColour, spectrum))
         # move to the correct row
         self.getLayout().addWidget(self.negativeColourBox, row, 1)
 
@@ -1517,78 +1475,71 @@ class ContoursTab(Widget):
 
 
 
-    @queueStateChange(_verifyApply, 'positiveContourBase')
-    def _queueChangePositiveContourBase(self, spectrum, value):
-        if value >= 0 and value != spectrum.positiveContourBase:
+    @queueStateChange(_verifyApply)
+    def _queueChangePositiveContourBase(self, spectrum, textFromValue, value):
+        specValue = textFromValue(spectrum.positiveContourBase)
+        if value >= 0 and textFromValue(value) != specValue:
             returnVal = partial(self._changePositiveContourBase, spectrum, value)
-            if self.linkContoursCheckBox.isChecked():
-                self.negativeContourBaseData.set(-value)
-            return returnVal
+        else:
+            returnVal = None
+
+        # check linked attribute
+        if self.linkContoursCheckBox.isChecked():
+            self.negativeContourBaseData.set(-value)
+        return returnVal
 
     def _changePositiveContourBase(self, spectrum, value):
         spectrum.positiveContourBase = float(value)
         self._writeLoggingMessage("spectrum.positiveContourBase = %f" % float(value))
         self.pythonConsole.writeConsoleCommand("spectrum.positiveContourBase = %f" % float(value), spectrum=spectrum)
 
-
-
-
-
-
-
-    @queueStateChange(_verifyApply, 'positiveContourFactor')
-    def _queueChangePositiveContourFactor(self, spectrum, value):
-        if value >= 0 and value != spectrum.positiveContourFactor:
+    @queueStateChange(_verifyApply)
+    def _queueChangePositiveContourFactor(self, spectrum, textFromValue, value):
+        specValue = textFromValue(spectrum.positiveContourFactor)
+        if value >= 0 and textFromValue(value) != specValue:
             returnVal = partial(self._changePositiveContourFactor, spectrum, value)
-            if self.linkContoursCheckBox.isChecked():
-                self.negativeMultiplierData.set(value)
-            return returnVal
+        else:
+            returnVal = None
+
+        # check linked attribute
+        if self.linkContoursCheckBox.isChecked():
+            self.negativeMultiplierData.set(value)
+        return returnVal
 
     def _changePositiveContourFactor(self, spectrum, value):
         spectrum.positiveContourFactor = float(value)
         self._writeLoggingMessage("spectrum.positiveContourFactor = %f" % float(value))
         self.pythonConsole.writeConsoleCommand("spectrum.positiveContourFactor = %f" % float(value), spectrum=spectrum)
 
-
-
-
-
-
-
-
-
-
-
-
-    @queueStateChange(_verifyApply, 'positiveContourCount')
+    @queueStateChange(_verifyApply)
     def _queueChangePositiveContourCount(self, spectrum, value):
         if value >= 0 and value != spectrum.positiveContourCount:
             returnVal = partial(self._changePositiveContourCount, spectrum, value)
-            if self.linkContoursCheckBox.isChecked():
-                self.negativeContourCountData.set(value)
-            return returnVal
+        else:
+            returnVal = None
+
+        # check linked attribute
+        if self.linkContoursCheckBox.isChecked():
+            self.negativeContourCountData.set(value)
+        return returnVal
 
     def _changePositiveContourCount(self, spectrum, value):
         spectrum.positiveContourCount = int(value)
         self._writeLoggingMessage("spectrum.positiveContourCount = %d" % int(value))
         self.pythonConsole.writeConsoleCommand("spectrum.positiveContourCount = %d" % int(value), spectrum=spectrum)
 
-
-
-
-
-
-
-
-
-
-    @queueStateChange(_verifyApply, 'negativeContourBase')
-    def _queueChangeNegativeContourBase(self, spectrum, value):
-        if value >= 0 and value != spectrum.negativeContourBase:
+    @queueStateChange(_verifyApply)
+    def _queueChangeNegativeContourBase(self, spectrum, textFromValue, value):
+        specValue = textFromValue(spectrum.negativeContourBase)
+        if value <= 0 and textFromValue(value) != specValue:
             returnVal = partial(self._changeNegativeContourBase, spectrum, value)
-            if self.linkContoursCheckBox.isChecked():
-                self.positiveContourBaseData.set(-value)
-            return returnVal
+        else:
+            returnVal = None
+
+        # check linked attribute
+        if self.linkContoursCheckBox.isChecked():
+            self.positiveContourBaseData.set(-value)
+        return returnVal
         
     def _changeNegativeContourBase(self, spectrum, value):
         # force to be negative
@@ -1597,58 +1548,40 @@ class ContoursTab(Widget):
         self._writeLoggingMessage("spectrum.negativeContourBase = %f" % float(value))
         self.pythonConsole.writeConsoleCommand("spectrum.negativeContourBase = %f" % float(value), spectrum=spectrum)
 
-
-
-
-
-
-
-
-
-
-
-    @queueStateChange(_verifyApply, 'negativeContourFactor')
-    def _queueChangeNegativeContourFactor(self, spectrum, value):
-        if value >= 0 and value != spectrum.negativeContourFactor:
+    @queueStateChange(_verifyApply)
+    def _queueChangeNegativeContourFactor(self, spectrum, textFromValue, value):
+        specValue = textFromValue(spectrum.negativeContourFactor)
+        if value >= 0 and textFromValue(value) != specValue:
             returnVal = partial(self._changeNegativeContourFactor, spectrum, value)
-            if self.linkContoursCheckBox.isChecked():
-                self.positiveMultiplierData.set(value)
-            return returnVal
+        else:
+            returnVal = None
+
+        # check linked attribute
+        if self.linkContoursCheckBox.isChecked():
+            self.positiveMultiplierData.set(value)
+        return returnVal
         
     def _changeNegativeContourFactor(self, spectrum, value):
         spectrum.negativeContourFactor = float(value)
         self._writeLoggingMessage("spectrum.negativeContourFactor = %f" % float(value))
         self.pythonConsole.writeConsoleCommand("spectrum.negativeContourFactor = %f" % float(value), spectrum=spectrum)
 
-
-
-
-
-
-
-
-
-
-
-
-    @queueStateChange(_verifyApply, 'negativeContourCount')
+    @queueStateChange(_verifyApply)
     def _queueChangeNegativeContourCount(self, spectrum, value):
         if value >= 0 and value != spectrum.negativeContourCount:
             returnVal = partial(self._changeNegativeContourCount, spectrum, value)
-            if self.linkContoursCheckBox.isChecked():
-                self.positiveContourCountData.set(value)
-            return returnVal
+        else:
+            returnVal = None
+
+        # check linked attribute
+        if self.linkContoursCheckBox.isChecked():
+            self.positiveContourCountData.set(value)
+        return returnVal
         
     def _changeNegativeContourCount(self, spectrum, value):
         spectrum.negativeContourCount = int(value)
         self._writeLoggingMessage("spectrum.negativeContourCount = %d" % int(value))
         self.pythonConsole.writeConsoleCommand("spectrum.negativeContourCount = %d" % int(value), spectrum=spectrum)
-
-
-
-
-
-
 
     # spectrum negativeContourColour button and pulldown
     def _queueChangePosSpectrumColour(self, spectrum):
@@ -1659,7 +1592,7 @@ class ContoursTab(Widget):
             self._parent._fillPullDowns()
             self.positiveColourBox.setCurrentText(spectrumColours[newColour.name()])
 
-    @queueStateChange(_verifyApply, 'positiveColourComboIndex')
+    @queueStateChange(_verifyApply)
     def _queueChangePosColourComboIndex(self, spectrum, value):
         if value >= 0 and list(spectrumColours.keys())[value] != spectrum.positiveContourColour:
             return partial(self._changePosColourComboIndex, spectrum, value)
@@ -1672,10 +1605,6 @@ class ContoursTab(Widget):
             self._writeLoggingMessage("spectrum.positiveContourColour = '%s'" % newColour)
             self.pythonConsole.writeConsoleCommand("spectrum.positiveContourColour = '%s'" % newColour, spectrum=spectrum)
 
-
-
-
-
     # spectrum negativeContourColour button and pulldown
     def _queueChangeNegSpectrumColour(self, spectrum):
         dialog = ColourDialog(self)
@@ -1685,7 +1614,7 @@ class ContoursTab(Widget):
             self._parent._fillPullDowns()
             self.negativeColourBox.setCurrentText(spectrumColours[newColour.name()])
 
-    @queueStateChange(_verifyApply, 'negativeColourComboIndex')
+    @queueStateChange(_verifyApply)
     def _queueChangeNegColourComboIndex(self, spectrum, value):
         if value >= 0 and list(spectrumColours.keys())[value] != spectrum.negativeContourColour:
             return partial(self._changeNegColourComboIndex, spectrum, value)
@@ -1961,9 +1890,9 @@ class ColourTab(Widget):
             spectrumColourKeys = list(spectrumColours.keys())
             self.colourBox.setCurrentText(spectrumColours[c])
 
-        self.colourBox.currentIndexChanged.connect(partial(self._queueChangeSliceComboIndex, self.spectrum))
+        self.colourBox.currentIndexChanged.connect(partial(self._queueChangeSliceComboIndex, spectrum))
         colourButton = Button(self, vAlign='t', hAlign='l', grid=(7, 2), hPolicy='fixed',
-                              callback=partial(self._queueSetSpectrumColour, self.spectrum), icon='icons/colours')
+                              callback=partial(self._queueSetSpectrumColour, spectrum), icon='icons/colours')
 
     def _repopulate(self):
         pass
@@ -1971,11 +1900,6 @@ class ColourTab(Widget):
     def _writeLoggingMessage(self, command):
         self.logger.info("spectrum = project.getByPid('%s')" % self.spectrum.pid)
         self.logger.info(command)
-
-
-
-
-
 
     # spectrum sliceColour button and pulldown
     def _queueSetSpectrumColour(self, spectrum):

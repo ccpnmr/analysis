@@ -178,7 +178,7 @@ class ScientificDoubleSpinBox(DoubleSpinbox):
         return float(text)
 
     def textFromValue(self, value):
-        return self.format_float(value)
+        return self.formatFloat(value)
 
     def stepBy(self, steps):
         """Increment the current value.
@@ -194,7 +194,7 @@ class ScientificDoubleSpinBox(DoubleSpinbox):
         # the double convert ensures number stays to the closest Sci notation
         self.lineEdit().setText(self.textFromValue(self.valueFromText(new_string)))
 
-    def format_float(self, value):
+    def formatFloat(self, value):
         """Modified form of the 'g' format specifier.
         """
         string = "{:g}".format(value).replace("e+", "e")

@@ -34,6 +34,7 @@ from ccpn.util.Logging import getLogger
 from ccpn.core.lib.SpectrumLib import _oldEstimateNoiseLevel1D
 from ccpn.core.PMIListABC import PMIListABC
 from scipy import signal
+from ccpn.util.Common import percentage
 
 
 # moved on peakUtil ####################################################################
@@ -143,6 +144,20 @@ class IntegralList(PMIListABC):
     # CCPN functions
     #=========================================================================================
 
+    def findLimits(self, f=20, stdFactor=0.001):
+        from ccpn.core.PeakList import  estimateNoiseLevel1D
+        spectrum = self.spectrum
+        x, y = np.array(spectrum.positions), np.array(spectrum.intensities)
+
+        const = int(len(y) * 0.0039)
+        y2 = signal.correlate(y, np.ones(const), mode='same') / const
+        yy = y - y2
+        # if noiseThreshold is None:
+        maxNL, minNL = estimateNoiseLevel1D(yy, f=f, stdFactor=stdFactor)
+        intersectingLine = [maxNL] * len(x)
+        limitsPairs = _getPeaksLimits(x, yy, intersectingLine)
+        return limitsPairs, maxNL, minNL
+
     def automaticIntegral1D(self, minimalLineWidth=0.01, deltaFactor=1.5, findPeak=False, noiseThreshold=None) -> List['Integral']:
         """
         minimalLineWidth:  an attempt to exclude noise. Below this threshold the area is discarded.
@@ -163,18 +178,24 @@ class IntegralList(PMIListABC):
             y2 = signal.correlate(y, np.ones(const), mode='same') / const
             yy = y-y2
             # if noiseThreshold is None:
-            maxNL, minNL = estimateNoiseLevel1D(yy, f=20, stdFactor=0.1)
+            maxNL, minNL = estimateNoiseLevel1D(yy, f=20, stdFactor=0.001)
             intersectingLine = [maxNL] * len(x)
             # else:
             #     intersectingLine = [noiseThreshold] * len(x)
             limitsPairs = _getPeaksLimits(x, yy, intersectingLine)
+            spectrum.noiseLevel = maxNL
 
             integrals = []
 
             for i in limitsPairs:
-                lineWidth = abs(i[0] - i[1])
+                minI, maxI = min(i), max(i)
+                # aminI = minI - percentage(0.05, minI) #add a bit on each sides
+                # amaxI = maxI + percentage(0.05, minI)
+                # print(i, aminI,amaxI)
+                lineWidth = abs(maxI - minI)
                 if lineWidth:
-                    newIntegral = self.newIntegral(value=None, limits=[[min(i), max(i)], ])
+                    newIntegral = self.newIntegral(value=None, limits=[[minI, maxI], ])
+                    newIntegral._baseline = maxNL
                     filteredX = np.where((x <= i[0]) & (x >= i[1]))
                     filteredY = spectrum.intensities[filteredX]
                     if findPeak:  # pick peaks and link to integral

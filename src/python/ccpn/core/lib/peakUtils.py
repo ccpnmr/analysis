@@ -559,7 +559,7 @@ def _fit1SiteBindCurve(bindingCurves, aFunc=oneSiteBindingCurve, xfStep=0.01, xf
     return errorValue
 
 
-def _fitExpDecayCurve(bindingCurves, aFunc=exponenial_func, xfStep=0.01, xfPercent=30, p0=(1, 0.1)):
+def _fitExpDecayCurve(bindingCurves, aFunc=exponenial_func, xfStep=0.01, xfPercent=80, p0=(1, 0.1)):
     """
     :param TODO
     """
@@ -580,18 +580,22 @@ def _fitExpDecayCurve(bindingCurves, aFunc=exponenial_func, xfStep=0.01, xfPerce
     xs = xss.flatten(order='F')  # #puts all x values in a 1d array preserving the original y positions (order='F').
     if len(xs) <= 1:
         return errorValue  #not enough datapoints
-    try:
+    # try:
 
-        popt, pcov = curve_fit(aFunc, xs, ys, p0=p0)
-        xfRange = np.max(xs) - np.min(xs)
-        xfPerc = percentage(xfPercent, xfRange)
-        xfMax = np.max(xs) + xfPerc
-        xf = np.arange(0, xfMax, step=xfStep)
-        yf = aFunc(xf, *popt)
-        return (xs, ys, xf, yf, *popt)
-    except Exception as err:
-        getLogger().warning('Impossible to estimate Kd value %s' % (err))
-    return errorValue
+    popt, pcov = curve_fit(aFunc, xs, ys, p0=p0)
+
+    interc, slope = popt
+    yScaled = ys / interc  # scales y to have values 0-1
+    # poptScaled, pcov  = curve_fit(aFunc, xs, yScaled)
+    xfRange = np.max(xs) - np.min(xs)
+    xfPerc = percentage(xfPercent, xfRange)
+    xfMax = np.max(xs) + xfPerc
+    xf = np.arange(0, xfMax, step=xfStep)
+    yf = aFunc(xf, *popt)
+    return (xs, yScaled, xf, yf, *popt)
+    # except Exception as err:
+    #     getLogger().warning('Impossible to estimate Kd value %s' % (err))
+    # return errorValue
 
 
 def snapToExtremum(peak: 'Peak', halfBoxSearchWidth: int = 3, halfBoxFitWidth: int = 3,

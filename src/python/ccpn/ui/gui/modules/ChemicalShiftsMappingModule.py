@@ -656,50 +656,62 @@ class ChemicalShiftsMapping(CcpnModule):
       self._raiseBindingCPlotContextMenu(event)
 
   def _plotBindingCFromCurrent(self):
-    self.bindingPlot.clear()
-    self._clearLegend(self.bindingPlot.legend)
-    # self.bindingPlot.setLimits(xMin=0, xMax=None, yMin=0, yMax=None)
+    # check current nmrResidues are present in the selected nmrChain. Otherwise keep the displayed plot
+    isOk = False
+    nc = self.project.getByPid(self.nmrResidueTable.ncWidget.getText())
+    if nc:
+      nrs = [nr for nr in self.current.nmrResidues if nr in nc.nmrResidues]
+      if len(nrs) == len(self.current.nmrResidues):
+        isOk = True
+    if isOk:
+      self.bindingPlot.clear()
+      self._clearLegend(self.bindingPlot.legend)
+      # self.bindingPlot.setLimits(xMin=0, xMax=None, yMin=0, yMax=None)
 
-    if self.current.nmrResidues is not None:
-      plotData, peaksDF = self._getBindingCurves(self.current.nmrResidues)
-      if self.scaleBindingCCb.isChecked():
-        plotData = self._getScaledBindingCurves(plotData)
+      if self.current.nmrResidues is not None:
+        plotData, peaksDF = self._getBindingCurves(self.current.nmrResidues)
+        if self.scaleBindingCCb.isChecked():
+          plotData = self._getScaledBindingCurves(plotData)
 
-      if plotData is not None:
-        plotData = plotData.replace(np.nan, 0)
-        for obj, row, in plotData.iterrows():
-          ys = list(row.values)
-          xs = list(plotData.columns)
-          pksPids = list(peaksDF.loc[obj].values)
-          points = []
-          pairs = list([i,j] for i,j in zip(xs,ys))
-          for pair, peakPid in zip(pairs,pksPids):
-            peak = self.project.getByPid(peakPid)
+        if plotData is not None:
+          plotData = plotData.replace(np.nan, 0)
+          for obj, row, in plotData.iterrows():
+            ys = list(row.values)
+            xs = list(plotData.columns)
+            pksPids = list(peaksDF.loc[obj].values)
+            points = []
+            pairs = list([i,j] for i,j in zip(xs,ys))
+            for pair, peakPid in zip(pairs,pksPids):
+              peak = self.project.getByPid(peakPid)
 
-            if isinstance(peak, Peak):
-              spectrum = peak.peakList.spectrum
-              dd = {'pos': [0, 0], 'data': 'obj', 'brush': pg.mkBrush(255, 0, 0), 'symbol': 'o', 'size': 10,
-                    'pen': None}  # red default
-              dd['pos'] = pair
-              dd['data'] = peak
-              if hasattr(spectrum, 'positiveContourColour'):  # colour from the spectrum. The only CCPN obj implemeted so far
-                brush = pg.functions.mkBrush(hexToRgb(spectrum.positiveContourColour), width=10)
-                dd['brush'] = brush
-              points.append(dd)
+              if isinstance(peak, Peak):
+                spectrum = peak.peakList.spectrum
+                dd = {'pos': [0, 0], 'data': 'obj', 'brush': pg.mkBrush(255, 0, 0), 'symbol': 'o', 'size': 10,
+                      'pen': None}  # red default
+                dd['pos'] = pair
+                dd['data'] = peak
+                if hasattr(spectrum, 'positiveContourColour'):  # colour from the spectrum. The only CCPN obj implemeted so far
+                  brush = pg.functions.mkBrush(hexToRgb(spectrum.positiveContourColour), width=10)
+                  dd['brush'] = brush
+                points.append(dd)
 
-          if obj._colour:
-            pen = pg.functions.mkPen(hexToRgb(obj._colour), width=5)
-            brush = pg.functions.mkBrush(hexToRgb(obj._colour), width=1)
-            plot = self.bindingPlot.plot(xs, ys, pen=pen, symbolBrush=brush, symbol='o', symbolSize=1,
-                                         name=obj.pid)  # name used for legend and retireve the obj
+            if obj._colour:
+              pen = pg.functions.mkPen(hexToRgb(obj._colour), width=5)
+              brush = pg.functions.mkBrush(hexToRgb(obj._colour), width=1)
+              plot = self.bindingPlot.plot(xs, ys, pen=pen, symbolBrush=brush, symbol='o', symbolSize=1,
+                                           name=obj.pid)  # name used for legend and retireve the obj
 
-            plot.scatter.addPoints(points)
-          else:
-            plot = self.bindingPlot.plot(xs, ys, symbol='o', name=obj.pid)
-          plot.sigPointsClicked.connect(self._bindingPlotSingleClick)
-          self.bindingPlot.autoRange()
-          self.bindingPlot.setLabel('left','Y')# DELTA+Delta)
-          self.bindingPlot.setLabel('bottom', self._kDunit)
+              plot.scatter.addPoints(points)
+            else:
+              plot = self.bindingPlot.plot(xs, ys, symbol='o', name=obj.pid)
+            plot.sigPointsClicked.connect(self._bindingPlotSingleClick)
+            self.bindingPlot.autoRange()
+            self.bindingPlot.setLabel('left','Y')# DELTA+Delta)
+            self.bindingPlot.setLabel('bottom', self._kDunit)
+
+
+
+
 
   def _bindingPlotSingleClick(self, item, points):
     """sig callback from the binding plot. Gets the obj from the curve name."""
@@ -1352,7 +1364,7 @@ class ChemicalShiftsMapping(CcpnModule):
     if not np.any(yf):
       return # just zeros
     A, K,  = popt
-    label = 'Fitted Function: %s, %s1' %(A, K)
+    label = 'Fitted Function: %.2f, %.3f' %(A, K)
     self.fittingPlot.plot(xs, ys, symbol='o', pen=None)
     self.fittingPlot.plot(xf, yf, name=label)
     self.fittingPlot.setLimits(xMin=0, xMax=None, yMin=0, yMax=None)

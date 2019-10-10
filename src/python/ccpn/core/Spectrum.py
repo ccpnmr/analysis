@@ -1619,20 +1619,23 @@ assignmentTolerances
 
             e.g. aliasingRange = ((0, 0), (-1, 1), ...)
         """
+        try:
+            # error checking that the tuples are correctly defined
+            if len(values) != self.dimensionCount:
+                raise ValueError("Length of %s does not match number of dimensions." % str(values))
+            if not all(isinstance(dimVal, Tuple) and len(dimVal) == 2 for dimVal in values):
+                raise ValueError("Aliasing values must be tuple(min, max).")
 
-        # error checking that the tuples are correctly defined
-        if len(values) != self.dimensionCount:
-            raise ValueError("Length of %s does not match number of dimensions." % str(values))
-        if not all(isinstance(dimVal, Tuple) and len(dimVal) == 2 for dimVal in values):
-            raise ValueError("Aliasing values must be tuple(min, max).")
+            for alias in values:
+                if not (isinstance(alias[0], int) and isinstance(alias[1], int)
+                        and alias[0] >= -MAXALIASINGRANGE and alias[1] <= MAXALIASINGRANGE and alias[0] <= alias[1]):
+                    raise ValueError("Aliasing values must be tuple(min >= -%i, max <= %i) of integer." % \
+                                     (MAXALIASINGRANGE, MAXALIASINGRANGE))
 
-        for alias in values:
-            if not (isinstance(alias[0], int) and isinstance(alias[1], int)
-                    and alias[0] >= -MAXALIASINGRANGE and alias[1] <= MAXALIASINGRANGE and alias[0] <= alias[1]):
-                raise ValueError("Aliasing values must be tuple(min >= -%i, max <= %i) of integer." % \
-                                 (MAXALIASINGRANGE, MAXALIASINGRANGE))
-
-        self.setParameter(SPECTRUMALIASING, ALIASINGRANGE, values)
+            self.setParameter(SPECTRUMALIASING, ALIASINGRANGE, values)
+        except:
+            # FIXME fix this bug
+            getLogger().Warn('Error Setting Aliasing Range')
 
     @property
     def _seriesItems(self):

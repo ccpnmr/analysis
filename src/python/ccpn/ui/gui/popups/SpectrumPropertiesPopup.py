@@ -1425,9 +1425,9 @@ class ContoursTab(Widget):
 
 
 
-    @queueStateChange(_verifyApply, 'includePositiveContours')
+    @queueStateChange(_verifyApply)
     def _queueChangePositiveContourDisplay(self, spectrum, state):
-        if state != spectrum.includeNegativeContours:
+        if (state == QtCore.Qt.Checked) != spectrum.includePositiveContours:
             return partial(self._changePositiveContourDisplay, spectrum, state)
 
     def _changePositiveContourDisplay(self, spectrum, state):
@@ -1444,15 +1444,9 @@ class ContoursTab(Widget):
                 self.logger.info("spectrumView = ui.getByGid('%s')" % spectrumView.pid)
                 self.logger.info("spectrumView.displayPositiveContours = False")
 
-
-
-
-
-
-
-    @queueStateChange(_verifyApply, 'includeNegativeContours')
+    @queueStateChange(_verifyApply)
     def _queueChangeNegativeContourDisplay(self, spectrum, state):
-        if state != self.spectrum.includeNegativeContours:
+        if (state == QtCore.Qt.Checked) != spectrum.includeNegativeContours:
             return partial(self._changeNegativeContourDisplay, spectrum, state)
 
     def _changeNegativeContourDisplay(self, spectrum, state):
@@ -1468,12 +1462,6 @@ class ContoursTab(Widget):
                 spectrumView.displayNegativeContours = False
                 self.logger.info("spectrumView = ui.getByGid('%s')" % spectrumView.pid)
                 self.logger.info("spectrumView.displayNegativeContours = False")
-
-
-
-
-
-
 
     @queueStateChange(_verifyApply)
     def _queueChangePositiveContourBase(self, spectrum, textFromValue, value):
@@ -1624,7 +1612,7 @@ class ContoursTab(Widget):
         newColour = list(spectrumColours.keys())[list(spectrumColours.values()).index(colourNameNoSpace(self.negativeColourBox.currentText()))]
         if newColour:
             spectrum.negativeContourColour = newColour
-            self._writeLoggingMessage("spectrum.negativeContourColour = %s" % newColour)
+            self._writeLoggingMessage("spectrum.negativeContourColour = '%s'" % newColour)
             self.pythonConsole.writeConsoleCommand("spectrum.negativeContourColour = '%s'" % newColour, spectrum=spectrum)
 
 
@@ -1905,14 +1893,15 @@ class ColourTab(Widget):
     def _queueSetSpectrumColour(self, spectrum):
         dialog = ColourDialog(self)
         newColour = dialog.getColor()
-        if newColour:
+        if newColour is not None:
             addNewColour(newColour)
-            self._parent._fillPullDowns()  #fillColourPulldown(self.colourBox, allowAuto=False)
+            self._parent._fillPullDowns()
             self.colourBox.setCurrentText(spectrumColours[newColour.name()])
 
-    @queueStateChange(_verifyApply, 'sliceComboIndex')
+    @queueStateChange(_verifyApply)
     def _queueChangeSliceComboIndex(self, spectrum, value):
-        self._changes['sliceComboIndex'] = partial(self._changedSliceComboIndex, spectrum, value)
+        if value >= 0 and list(spectrumColours.keys())[value] != spectrum.sliceColour:
+            return partial(self._changedSliceComboIndex, spectrum, value)
 
     def _changedSliceComboIndex(self, spectrum, value):
         # newColour = list(spectrumColours.keys())[value]

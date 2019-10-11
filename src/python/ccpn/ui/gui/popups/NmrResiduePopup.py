@@ -22,24 +22,17 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
-from PyQt5 import QtGui, QtWidgets
-
-from ccpn.core.Chain import Chain
-from ccpn.core.lib.AssignmentLib import CCP_CODES, getNmrResiduePrediction
-from ccpn.ui.gui.widgets.Base import Base
-from ccpn.ui.gui.widgets.Button import Button
+import re
+from ccpn.core.lib.AssignmentLib import CCP_CODES_SORTED, getNmrResiduePrediction
 from ccpn.ui.gui.widgets.ButtonList import ButtonList
-from ccpn.ui.gui.widgets.Label import Label
-from ccpn.ui.gui.widgets.PulldownList import PulldownList
-from ccpn.ui.gui.widgets.FilteringPulldownList import FilteringPulldownList
 from ccpn.ui.gui.widgets.CompoundWidgets import EntryCompoundWidget, PulldownListCompoundWidget
 from ccpn.ui.gui.widgets.PulldownListsForObjects import NmrChainPulldown
-
 from ccpn.ui.gui.popups.Dialog import CcpnDialog
 from ccpn.ui.gui.widgets.MessageDialog import showWarning
-from ccpn.util.Logging import getLogger
+from ccpn.util.OrderedSet import OrderedSet
 
-import sys
+
+REMOVEPERCENT = '( ?\d+.?\d* ?%)+'
 
 
 class NmrResiduePopup(CcpnDialog):
@@ -79,7 +72,8 @@ class NmrResiduePopup(CcpnDialog):
 
         row += 1
         self.residueType = PulldownListCompoundWidget(self, labelText="residueType", editable=True,
-                                                      fixedWidths=(hWidth, hWidth), grid=(row, 0), gridSpan=(1, hspan))
+                                                      fixedWidths=(hWidth, hWidth), grid=(row, 0), gridSpan=(1, hspan),
+                                                      callback=self._checkNmrResidue)
         row += 1
         self.comment = EntryCompoundWidget(self, labelText="comment",
                                            fixedWidths=(hWidth, hWidth), grid=(row, 0), gridSpan=(1, hspan))
@@ -108,13 +102,26 @@ class NmrResiduePopup(CcpnDialog):
 
         if self.project.chemicalShiftLists and len(self.project.chemicalShiftLists) > 0:
             predictions = getNmrResiduePrediction(currentNmrResidue, self.project.chemicalShiftLists[0])
-            preds1 = [' '.join([x[0], x[1]]) for x in predictions if not currentNmrResidue.residueType]
-            predictedTypes = [x[0] for x in predictions]
-            remainingResidues = [x for x in CCP_CODES if x not in predictedTypes and not currentNmrResidue.residueType]
+            preds1 = [' '.join([x[0].upper(), x[1]]) for x in predictions]  # if not currentNmrResidue.residueType]
+            preds1 = list(OrderedSet(preds1))
+            predictedTypes = [x[0].upper() for x in predictions]
+            # remainingResidues = [x for x in CCP_CODES_SORTED if x not in predictedTypes and not currentNmrResidue.residueType]
+            remainingResidues = list(CCP_CODES_SORTED)
             possibilities = [currentNmrResidue.residueType] + preds1 + remainingResidues
         else:
-            possibilities = ('',) + CCP_CODES
+            possibilities = ('',) + CCP_CODES_SORTED
         self.residueType.modifyTexts(possibilities)
+
+    def _checkNmrResidue(self, value):
+        """Check the new pulldown item and strip bad characters
+        """
+        # Check the correct characters for residueType - need to remove spaceNumberPercent
+        # print('>>>check value')
+        value = re.sub(REMOVEPERCENT, '', value)
+        if value not in self.residueType.pulldownList.texts:
+            # add modified value if not in the pulldown
+            self.residueType.pulldownList.addItem(value)
+        self.residueType.pulldownList.set(value)
 
     def _applyChanges(self):
         """
@@ -127,7 +134,7 @@ class NmrResiduePopup(CcpnDialog):
             self.nmrResidue.moveToNmrChain(
                     self.chainPulldown.getText(),
                     self.sequenceCode.getText(),
-                    self.residueType.getText()
+                    re.sub(REMOVEPERCENT, '', self.residueType.getText())
             )
 
         except Exception as es:

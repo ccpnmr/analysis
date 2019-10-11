@@ -154,6 +154,33 @@ class ButtonList(Widget):
         else:
             getLogger().warning('Button %s not found in the list' % buttonName)
 
+    def _insertSpacer(self, index):
+        from ccpn.ui.gui.widgets.Spacer import Spacer
+
+        if not (0 <= index < len(self.buttons)):
+            raise ValueError('Insert position out of range')
+
+        j = len(self.buttons)
+        for i, button in enumerate(self.buttons):
+            pos = (i + (1 if i >= index else 0))
+            if 'h' in self.direction:
+                grid = (0, pos)
+            else:
+                grid = (pos, 0)
+
+            self.getLayout().addWidget(self.buttons[i], *grid)
+
+        if 'h' in self.direction:
+            spacerGrid = (0, index)
+            xExpand = QtWidgets.QSizePolicy.Expanding
+            yExpand = QtWidgets.QSizePolicy.Fixed
+        else:
+            spacerGrid = (index, 0)
+            xExpand = QtWidgets.QSizePolicy.Fixed
+            yExpand = QtWidgets.QSizePolicy.Expanding
+
+        Spacer(self, 25, 5, xExpand, yExpand, grid=spacerGrid)
+
 
 class UtilityButtonList(ButtonList):
 

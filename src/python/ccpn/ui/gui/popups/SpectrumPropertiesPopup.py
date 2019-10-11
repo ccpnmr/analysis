@@ -107,7 +107,11 @@ class SpectrumPropertiesPopupABC(CcpnDialog):
                                                   'Close - all applied changes will be kept',
                                                   'Apply changes',
                                                   'Apply changes and close'],
-                                        direction='h', hAlign='r', grid=(4, 1), gridSpan=(1, 4))
+                                        direction='h', grid=(4, 0), gridSpan=(1, 4))
+
+        # test a small spacer to separate the revert button from the rest
+        self.dialogButtons._insertSpacer(1)
+
         self.dialogButtons.getButton(self.APPLYBUTTONTEXT).setFocus()
 
         # as this is a dialog, need to set one of the buttons as the default button when other widgets have focus

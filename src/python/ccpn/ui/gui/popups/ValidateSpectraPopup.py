@@ -442,7 +442,7 @@ class ValidateSpectraPopup(CcpnDialog):
                                 fileMode=1, acceptMode=0,
                                 preferences=self.application.preferences.general)
             directory = dialog.selectedFiles()
-            if len(directory) > 0:
+            if directory:
                 newFilePath = directory[0]
 
                 # if spectrum.filePath != newFilePath:

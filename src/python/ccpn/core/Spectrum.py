@@ -2237,11 +2237,11 @@ assignmentTolerances
         """
         order = self.getParameter(SPECTRUMAXES, SPECTRUMPREFERREDAXISORDERING)
         if order is not None:
-            return order
+            return tuple(order)
 
-        # set default ordering
-        self.setParameter(SPECTRUMAXES, SPECTRUMPREFERREDAXISORDERING, None)
-        return None
+        # # set default ordering
+        # self.setParameter(SPECTRUMAXES, SPECTRUMPREFERREDAXISORDERING, None)
+        # return None
 
     @preferredAxisOrdering.setter
     def preferredAxisOrdering(self, order):

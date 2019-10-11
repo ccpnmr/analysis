@@ -103,7 +103,7 @@ class SpectrumPropertiesPopupABC(CcpnDialog):
 
         self.dialogButtons = ButtonList(self, texts=[self.REVERTBUTTONTEXT, self.CLOSEBUTTONTEXT, self.APPLYBUTTONTEXT, self.OKBUTTONTEXT],
                                         callbacks=[self._revertButton, self._closeButton, self._applyButton, self._okButton],
-                                        tipTexts=['Revert - revert all applied settings and close',
+                                        tipTexts=['Revert - roll-back all applied settings and close',
                                                   'Close - all applied changes will be kept',
                                                   'Apply changes',
                                                   'Apply changes and close'],
@@ -142,7 +142,7 @@ class SpectrumPropertiesPopupABC(CcpnDialog):
 
     def _revertButton(self):
         """Revert button signal comes here
-        Revert the state of the project to before the popup was opened
+        Revert (roll-back) the state of the project to before the popup was opened
         """
         if self.project and self.project._undo:
             # with undoStackBlocking():

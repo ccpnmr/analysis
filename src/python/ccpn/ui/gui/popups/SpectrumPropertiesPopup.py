@@ -98,24 +98,6 @@ class SpectrumPropertiesPopupABC(CcpnDialog):
 
         self.tabWidget = Tabs(self, setLayout=True, grid=(0, 0), gridSpan=(2, 4), focusPolicy='strong')
 
-        # if spectrum.dimensionCount == 1:
-        #     self._generalTab = GeneralTab(parent=self, mainWindow=self.mainWindow, spectrum=spectrum)
-        #     self._dimensionsTab = DimensionsTab(parent=self, mainWindow=self.mainWindow,
-        #                                         spectrum=spectrum, dimensions=spectrum.dimensionCount)
-        #
-        #     self.tabWidget.addTab(self._generalTab, "General")
-        #     self.tabWidget.addTab(self._dimensionsTab, "Dimensions")
-        #     self._contoursTab = None
-        # else:
-        #     self._generalTab = GeneralTab(parent=self, mainWindow=self.mainWindow, spectrum=spectrum)
-        #     self._dimensionsTab = DimensionsTab(parent=self, mainWindow=self.mainWindow,
-        #                                         spectrum=spectrum, dimensions=spectrum.dimensionCount)
-        #     self._contoursTab = ContoursTab(parent=self, mainWindow=self.mainWindow, spectrum=spectrum)
-        #
-        #     self.tabWidget.addTab(self._generalTab, "General")
-        #     self.tabWidget.addTab(self._dimensionsTab, "Dimensions")
-        #     self.tabWidget.addTab(self._contoursTab, "Contours")
-
         Spacer(self, 5, 5, QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.MinimumExpanding,
                grid=(3, 1), gridSpan=(1, 1))
 
@@ -140,7 +122,7 @@ class SpectrumPropertiesPopupABC(CcpnDialog):
         """Set the primary classType for the child list attached to this container
         """
         # MUST BE SUBCLASSED
-        raise NotImplementedError("Code error: function not implemented")  # if self.spectrum.dimensionCount == 1:
+        raise NotImplementedError("Code error: function not implemented")
 
     def _keyPressEvent(self, event):
         if event.key() == QtCore.Qt.Key_Enter:
@@ -153,6 +135,8 @@ class SpectrumPropertiesPopupABC(CcpnDialog):
         raise NotImplementedError("Code error: function not implemented")
 
     def _applyAllChanges(self, changes):
+        """Execute the Apply/OK functions
+        """
         for v in changes.values():
             v()
 
@@ -163,18 +147,25 @@ class SpectrumPropertiesPopupABC(CcpnDialog):
         If there is an error setting any values then generate an error message
           If anything has been added to the undo queue then remove it with application.undo()
           repopulate the popup widgets
+
+        This is controlled by a series of dicts that contain change functions - operations that are scheduled
+        by changing items in the popup. These functions are executed when the Apply or OK buttons are clicked
+
+        Return True unless any errors occurred
         """
 
         if not self.tabs:
             raise RuntimeError("Code error: tabs not implemented")
 
+        # get the list of widgets that have been changed - exit if all empty
         allChanges = any(t._changes for t in self.tabs if t is not None)
-
         if not allChanges:
             return True
 
+        # handle clicking of the Apply/OK button
         with handleDialogApply(self) as error:
 
+            # get the list of spectra that have changed - for refreshing the displays
             spectrumList = []
             for t in self.tabs:
                 if t is not None:
@@ -182,28 +173,37 @@ class SpectrumPropertiesPopupABC(CcpnDialog):
                     if changes:
                         spectrumList.append(t.spectrum)
 
+            # add an undo item to redraw these spectra
             with undoStackBlocking() as addUndoItem:
                 addUndoItem(undo=partial(_updateGl, self, spectrumList))
 
+            # apply all functions to the spectra
             for t in self.tabs:
                 if t is not None:
                     changes = t._changes
                     if changes:
                         self._applyAllChanges(changes)
 
+            # add a redo item to redraw these spectra
             with undoStackBlocking() as addUndoItem:
                 addUndoItem(redo=partial(_updateGl, self, spectrumList))
 
+            # rebuild the contours as required
             for spec in spectrumList:
                 for specViews in spec.spectrumViews:
                     specViews.buildContours = True
             _updateGl(self, spectrumList)
 
+            # everything has happened - disable the apply button
             self.applyButtons.getButton(APPLYBUTTONTEXT).setEnabled(False)
+
+            # check for any errors
             if error.errorValue:
                 # repopulate popup on an error
                 self._repopulate()
                 return False
+
+            # remove all changes
             for tab in self.tabs:
                 tab._changes = {}
 
@@ -230,14 +230,6 @@ class SpectrumPropertiesPopup(SpectrumPropertiesPopupABC):
 
         super().__init__(parent=parent, mainWindow=mainWindow,
                          spectrum=spectrum, title=title, **kwds)
-
-        # self.mainWindow = mainWindow
-        # self.application = mainWindow.application
-        # self.project = mainWindow.application.project
-        # self.current = mainWindow.application.current
-        # self.spectrum = spectrum
-        #
-        # self.tabWidget = Tabs(self, setLayout=True, grid=(0, 0), gridSpan=(2, 4), focusPolicy='strong')
 
         if spectrum.dimensionCount == 1:
             self._generalTab = GeneralTab(parent=self, mainWindow=self.mainWindow, spectrum=spectrum)
@@ -274,6 +266,74 @@ class SpectrumPropertiesPopup(SpectrumPropertiesPopupABC):
             self._dimensionsTab._repopulate()
         if self._contoursTab:
             self._contoursTab._repopulate()
+
+
+class SpectrumDisplayPropertiesPopupNd(SpectrumPropertiesPopupABC):
+    """All spectra in the current display are added as tabs
+    The apply button then steps through each tab, and calls each function in the _changes dictionary
+    in order to set the parameters.
+    """
+
+    def __init__(self, parent=None, mainWindow=None, spectrum=None, orderedSpectrumViews=None,
+                 title='SpectrumDisplay Properties', **kwds):
+
+        super().__init__(parent=parent, mainWindow=mainWindow,
+                         spectrum=spectrum, title=title, **kwds)
+
+        self.orderedSpectrumViews = orderedSpectrumViews
+        self.orderedSpectra = OrderedSet([spec.spectrum for spec in self.orderedSpectrumViews])
+
+        self.tabWidget.setFixedWidth(self.MINIMUM_WIDTH)
+
+        for specNum, thisSpec in enumerate(self.orderedSpectra):
+            contoursTab = ContoursTab(parent=self, mainWindow=self.mainWindow, spectrum=thisSpec)
+            self.tabWidget.addTab(contoursTab, thisSpec.name)
+
+        self.tabWidget.setFixedWidth(self.MINIMUM_WIDTH)
+
+        # don't forget to call postInit to finish initialise
+        self.__postInit__()
+
+    def _fillPullDowns(self):
+        for aTab in self.tabs:
+            fillColourPulldown(aTab.positiveColourBox, allowAuto=False)
+            fillColourPulldown(aTab.negativeColourBox, allowAuto=False)
+
+    def _repopulate(self):
+        if self._contoursTab:
+            self._contoursTab._repopulate()
+
+
+class SpectrumDisplayPropertiesPopup1d(SpectrumPropertiesPopupABC):
+    """All spectra in the current display are added as tabs
+    The apply button then steps through each tab, and calls each function in the _changes dictionary
+    in order to set the parameters.
+    """
+
+    def __init__(self, parent=None, mainWindow=None, spectrum=None, orderedSpectrumViews=None,
+                 title='SpectrumDisplay Properties', **kwds):
+
+        super().__init__(parent=parent, mainWindow=mainWindow,
+                         spectrum=spectrum, title=title, **kwds)
+
+        self.orderedSpectrumViews = orderedSpectrumViews
+        self.orderedSpectra = [spec.spectrum for spec in self.orderedSpectrumViews]
+
+        for specNum, thisSpec in enumerate(self.orderedSpectra):
+            colourTab = ColourTab(parent=self, mainWindow=self.mainWindow, spectrum=thisSpec)
+            self.tabWidget.addTab(colourTab, thisSpec.name)
+
+        self.tabWidget.setFixedWidth(self.MINIMUM_WIDTH)
+
+        # don't forget to call postInit to finish initialise
+        self.__postInit__()
+
+    def _fillPullDowns(self):
+        for aTab in self.tabs:
+            fillColourPulldown(aTab.colourBox, allowAuto=False)
+
+    def _repopulate(self):
+        pass
 
 
 def _verifyApply(tab, attributeName, value, postFix=None):
@@ -1605,74 +1665,6 @@ class ContoursTab(Widget):
             spectrum.negativeContourColour = newColour
             self._writeLoggingMessage("spectrum.negativeContourColour = '%s'" % newColour)
             self.pythonConsole.writeConsoleCommand("spectrum.negativeContourColour = '%s'" % newColour, spectrum=spectrum)
-
-
-class SpectrumDisplayPropertiesPopupNd(SpectrumPropertiesPopupABC):
-    """All spectra in the current display are added as tabs
-    The apply button then steps through each tab, and calls each function in the _changes dictionary
-    in order to set the parameters.
-    """
-
-    def __init__(self, parent=None, mainWindow=None, spectrum=None, orderedSpectrumViews=None,
-                 title='SpectrumDisplay Properties', **kwds):
-
-        super().__init__(parent=parent, mainWindow=mainWindow,
-                         spectrum=spectrum, title=title, **kwds)
-
-        self.orderedSpectrumViews = orderedSpectrumViews
-        self.orderedSpectra = OrderedSet([spec.spectrum for spec in self.orderedSpectrumViews])
-
-        self.tabWidget.setFixedWidth(self.MINIMUM_WIDTH)
-
-        for specNum, thisSpec in enumerate(self.orderedSpectra):
-            contoursTab = ContoursTab(parent=self, mainWindow=self.mainWindow, spectrum=thisSpec)
-            self.tabWidget.addTab(contoursTab, thisSpec.name)
-
-        self.tabWidget.setFixedWidth(self.MINIMUM_WIDTH)
-
-        # don't forget to call postInit to finish initialise
-        self.__postInit__()
-
-    def _fillPullDowns(self):
-        for aTab in self.tabs:
-            fillColourPulldown(aTab.positiveColourBox, allowAuto=False)
-            fillColourPulldown(aTab.negativeColourBox, allowAuto=False)
-
-    def _repopulate(self):
-        if self._contoursTab:
-            self._contoursTab._repopulate()
-
-
-class SpectrumDisplayPropertiesPopup1d(SpectrumPropertiesPopupABC):
-    """All spectra in the current display are added as tabs
-    The apply button then steps through each tab, and calls each function in the _changes dictionary
-    in order to set the parameters.
-    """
-
-    def __init__(self, parent=None, mainWindow=None, spectrum=None, orderedSpectrumViews=None,
-                 title='SpectrumDisplay Properties', **kwds):
-
-        super().__init__(parent=parent, mainWindow=mainWindow,
-                         spectrum=spectrum, title=title, **kwds)
-
-        self.orderedSpectrumViews = orderedSpectrumViews
-        self.orderedSpectra = [spec.spectrum for spec in self.orderedSpectrumViews]
-
-        for specNum, thisSpec in enumerate(self.orderedSpectra):
-            colourTab = ColourTab(parent=self, mainWindow=self.mainWindow, spectrum=thisSpec)
-            self.tabWidget.addTab(colourTab, thisSpec.name)
-
-        self.tabWidget.setFixedWidth(self.MINIMUM_WIDTH)
-
-        # don't forget to call postInit to finish initialise
-        self.__postInit__()
-
-    def _fillPullDowns(self):
-        for aTab in self.tabs:
-            fillColourPulldown(aTab.colourBox, allowAuto=False)
-
-    def _repopulate(self):
-        pass
 
 
 class ColourTab(Widget):

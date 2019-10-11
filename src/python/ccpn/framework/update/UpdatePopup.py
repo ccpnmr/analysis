@@ -35,7 +35,7 @@ from ccpn.util.Update import UpdateAgent
 REFRESHBUTTONTEXT = 'Refresh Updates Information'
 DOWNLOADBUTTONTEXT = 'Download and Install Updates'
 UPDATELICENCEKEYTEXT = 'Update LicenceKey'
-CLOSEBUTTONTEXT = 'Close'
+# CLOSEBUTTONTEXT = 'Close'
 CLOSEEXITBUTTONTEXT = 'Close and Exit'
 
 
@@ -78,7 +78,7 @@ class UpdatePopup(CcpnDialog, UpdateAgent):
                                         callback=self._doUpdate, icon='icons/Filetype-Docs-icon.png', grid=(row, 0))
 
         row += 1
-        texts = (REFRESHBUTTONTEXT, DOWNLOADBUTTONTEXT, CLOSEBUTTONTEXT)
+        texts = (REFRESHBUTTONTEXT, DOWNLOADBUTTONTEXT, self.CLOSEBUTTONTEXT)
         callbacks = (self.resetFromServer, self._install, self._accept)
         tipTexts = ('Refresh the updates information by querying server and comparing with what is installed locally',
                     'Install the updates from the server',
@@ -100,7 +100,7 @@ class UpdatePopup(CcpnDialog, UpdateAgent):
         updateFilesInstalled = self.installUpdates()
         if updateFilesInstalled:
             self._numUpdatesInstalled += len(updateFilesInstalled)
-            self.buttonList.getButton(CLOSEBUTTONTEXT).setText(CLOSEEXITBUTTONTEXT)
+            self.buttonList.getButton(self.CLOSEBUTTONTEXT).setText(CLOSEEXITBUTTONTEXT)
 
     def _closeProgram(self):
         """Call the mainWindow close function giving user option to save, then close program

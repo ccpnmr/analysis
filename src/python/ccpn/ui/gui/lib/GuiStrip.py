@@ -127,7 +127,7 @@ class GuiStrip(Frame):
         self._fr = []
         self._sl = []
 
-        SHOWTESTWIDGETS = False
+        SHOWTESTWIDGETS = True
 
         if SHOWTESTWIDGETS:
             sp = Spacer(self, 1, 1, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding,
@@ -140,13 +140,14 @@ class GuiStrip(Frame):
                                     ('Some more text', (_StripLabel, (4, 1))),
                                     ('And another bit of text', (_StripLabel, (5, 1))),
                                     ('Extra Axis Code 1', (ActiveLabel, (6, 1))),
-                                    ('HIDDENWIDGETWITHOPTIONS1', (ActiveLabel, (7, 1))),
-                                    ('Extra Axis Code 2', (ActiveLabel, (8, 1))),
-                                    ('HIDDENWIDGETWITHOPTIONS2', (ActiveLabel, (9, 1)))
+                                    ('HIDDENWIDGETWITHOPTIONS1', (ActiveLabel, (6, 2))),
+                                    ('Extra Axis Code 2', (ActiveLabel, (7, 1))),
+                                    ('HIDDENWIDGETWITHOPTIONS2', (ActiveLabel, (7, 2)))
                                     ])
 
             self.addSpacer(10, 30, grid=(1, 0))
 
+            _lastFrame = None
             # ED: the only way I could find to cure the mis-aligned header
             for ii, (tl, (labelType, gridPos)) in enumerate(self._ts.items()):
 
@@ -156,10 +157,13 @@ class GuiStrip(Frame):
                 if labelType is _StripLabel:
                     sl = _StripLabel(fr, self.mainWindow, self, text=tl, grid=(0, 0))
                 else:
+                    # if tl in ('HIDDENWIDGETWITHOPTIONS1', 'HIDDENWIDGETWITHOPTIONS2'):
+                    #     sl = ActiveLabel(_lastFrame, text=tl, grid=(0, 1))
+                    # else:
                     sl = ActiveLabel(fr, text=tl, grid=(0, 0))
 
                 sl.setSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum)
-                sp = Spacer(fr, 1, 1, QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.Minimum, grid=(0, 1))
+                sp = Spacer(fr, 1, 1, QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.Minimum, grid=(0, 2))
 
                 sl.setStyleSheet('QLabel {'
                                  'padding: 0; '
@@ -177,6 +181,10 @@ class GuiStrip(Frame):
 
                 self._fr.append(fr)
                 self._sl.append(sl)
+                _lastFrame = fr
+
+            self._fr[4].getLayout().addWidget(self._sl[5], 0, 1)
+            self._fr[6].getLayout().addWidget(self._sl[7], 0, 1)
 
             keys = list(self._ts.keys())
             self.w1 = self._sl[keys.index('Extra Axis Code 1')]
@@ -289,8 +297,11 @@ class GuiStrip(Frame):
 
     def _selectCallback(self, widget1, widget2):
         # print('>>>select', widget1, widget2)
-        widget1.hide()
-        widget2.show()
+        # widget1.hide()
+        if widget2.isVisible():
+            widget2.hide()
+        else:
+            widget2.show()
 
     def _enterCallback(self, widget1, widget2):
         # print('>>>_enterCallback', widget1, widget2)
@@ -298,7 +309,7 @@ class GuiStrip(Frame):
 
     def _leaveCallback(self, widget1, widget2):
         # print('>>>_leaveCallback', widget1, widget2)
-        widget2.hide()
+        # widget2.hide()
         widget1.show()
 
     def setStripNotifiers(self):

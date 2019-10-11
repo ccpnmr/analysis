@@ -12,7 +12,7 @@
         "editor": "default",
         "colourScheme": "dark",
         "license": "",
-        "dataPath": "",
+        "dataPath": "~",
         "useNative": false,
         "useNativeWebbrowser": false,
         "keepSpectraInsideProject": false,

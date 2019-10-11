@@ -57,10 +57,11 @@ from ccpn.core.PeakList import GAUSSIANMETHOD, PARABOLICMETHOD
 from ccpn.core.MultipletList import MULTIPLETAVERAGINGTYPES
 from ccpn.util.UserPreferences import UserPreferences
 from ccpn.ui.gui.lib.GuiPath import PathEdit
+from ccpn.ui.gui.popups.ValidateSpectraPopup import ValidateSpectraForPreferences
+from ccpn.ui.gui.popups.Dialog import CcpnDialog
 
 
 PEAKFITTINGDEFAULTS = [PARABOLICMETHOD, GAUSSIANMETHOD]
-
 
 # FIXME separate pure GUI to project/preferences properites
 # The code sets Gui Parameters assuming that  Preference is not None and has a bunch of attributes.
@@ -96,14 +97,40 @@ class PreferencesPopup(CcpnDialog):
         self._setTabs()
 
         # self.buttonBox = Button(self, text='Close', callback=self._accept, grid=(1, 2))
-        self.buttonBox = ButtonList(self, texts=['Close', 'Apply'],
-                                    callbacks=[self._accept, self._applyChanges],
-                                    tipTexts=['Close and update preferences', 'Apply changes to all strips'],
-                                    direction='h', hAlign='r', grid=(1, 2))
+        self.dialogButtons = ButtonList(self, texts=[self.CLOSEBUTTONTEXT, self.APPLYBUTTONTEXT, self.OKBUTTONTEXT],
+                                        callbacks=[self._rejectButton, self._applyButton, self._okButton],
+                                        tipTexts=['Close preferences - all applied changes will be kept',
+                                              'Apply all changes',
+                                              'Accept changes and close'],
+                                        direction='h', hAlign='r', grid=(1, 2))
+
+        self.dialogButtons.getButton(self.APPLYBUTTONTEXT).setFocus()
+
+        # as this is a dialog, need to set one of the buttons as the default button when other widgets have focus
+        self.setDefaultButton(self.dialogButtons.getButton(self.APPLYBUTTONTEXT))
+        self.dialogButtons.getButton(self.APPLYBUTTONTEXT).setEnabled(False)
 
         self.setFixedWidth(self.sizeHint().width() + 24)
 
-    def _applyChanges(self):
+    def _rejectButton(self):
+        """Close button signal comes here
+        """
+        self.reject()
+
+    def _applyButton(self):
+        """Apply button signal comes here
+        """
+        self._applyChanges()
+
+    def _okButton(self):
+        """OK button signal comes here
+        """
+        if self._applyChanges() is True:
+            self.accept()
+
+    def _applyAllChanges(self, changes):
+        """Execute the Apply/OK functions
+        """
         for display in self.project.spectrumDisplays:
             for strip in display.strips:
                 strip.peakLabelling = self.preferences.general.annotationType
@@ -115,15 +142,16 @@ class PreferencesPopup(CcpnDialog):
                 strip._contourThickness = self.preferences.general.contourThickness
                 strip.crosshairVisible = self.preferences.general.showCrosshair
 
-
         if self.preferences.general.colourScheme != self._oldColourScheme:
             setColourScheme(self.preferences.general.colourScheme)
             self.application.correctColours()
         self.application._savePreferences()
-        self._accept()
 
-    def _accept(self):
-        self.accept()
+    def _applyChanges(self):
+        # dialog handler here
+        pass
+
+    def _updateGui(self):
 
         # prompt the GLwidgets to update
         from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
@@ -245,28 +273,29 @@ class PreferencesPopup(CcpnDialog):
         row += 1
         HLine(parent, grid=(row, 0), gridSpan=(1, 3), colour=getColours()[DIVIDER], height=15)
 
-        row += 1
-        self.userWorkingPathLabel = Label(parent, "User Working Path", grid=(row, 0), )
-        self.userWorkingPathText = PathEdit(parent, grid=(row, 1), hAlign='l')
-        self.userWorkingPathText.setMinimumWidth(LineEditsMinimumWidth)
-        self.userWorkingPathText.editingFinished.connect(self._setUserWorkingPath)
-
-        # if self.project:
-        #     urls = _findDataUrl(self, 'remoteData')
-        #     if urls and urls[0]:
-        #         self.userWorkingPathText.setValidator(DataUrlValidator(parent=self.userWorkingPathText, dataUrl=urls[0]))
-        #         _setUrlData(self, urls[0], self.userWorkingPathText)
-
-        self.userWorkingPathText.setText(self.preferences.general.userWorkingPath)
-        self.userWorkingPathButton = Button(parent, grid=(row, 2), callback=self._getUserWorkingPath, icon='icons/directory',
-                                        hPolicy='fixed')
+        # moved back to spectrum
+        # row += 1
+        # self.userDataPathLabel = Label(parent, "$DATA (user datapath)", grid=(row, 0), )
+        # self.userDataPathText = PathEdit(parent, grid=(row, 1), hAlign='l')
+        # self.userDataPathText.setMinimumWidth(LineEditsMinimumWidth)
+        # self.userDataPathText.editingFinished.connect(self._setUserDataPath)
+        #
+        # # if self.project:
+        # #     urls = _findDataUrl(self, 'remoteData')
+        # #     if urls and urls[0]:
+        # #         self.userDataPathText.setValidator(DataUrlValidator(parent=self.userDataPathText, dataUrl=urls[0]))
+        # #         _setUrlData(self, urls[0], self.userDataPathText)
+        #
+        # self.userDataPathText.setText(self.preferences.general.userDataPath)
+        # self.userDataPathButton = Button(parent, grid=(row, 2), callback=self._getUserDataPath, icon='icons/directory',
+        #                                 hPolicy='fixed')
 
         row += 1
         userLayouts = Label(parent, text="User Predefined Layouts ", grid=(row, 0))
         self.userLayoutsLe = PathEdit(parent, grid=(row, 1), hAlign='l')
         self.userLayoutsLe.setMinimumWidth(LineEditsMinimumWidth)
         self.userLayoutsLeButton = Button(parent, grid=(row, 2), callback=self._getUserLayoutsPath,
-                                               icon='icons/directory', hPolicy='fixed')
+                                          icon='icons/directory', hPolicy='fixed')
         self.userLayoutsLe.setText(self.preferences.general.get('userLayoutsPath'))
         self.userLayoutsLe.editingFinished.connect(self._setuserLayoutsPath)
 
@@ -394,6 +423,29 @@ class PreferencesPopup(CcpnDialog):
         #                              hPolicy='fixed')
         #
         # row += 1
+
+        # add validate frame
+        self._validateFrame = ValidateSpectraForPreferences(parent, mainWindow=self.mainWindow, spectra=self.project.spectra,
+                                                            setLayout=True, showBorder=False, grid=(row, 0), gridSpan=(1, 3))
+
+        # row += 1
+        # self._dataUrlData = {}
+        # self.userDataPathLabel = Label(parent, "$DATA (user datapath)", grid=(row, 0), )
+        # self.userDataPathText = PathEdit(parent, grid=(row, 1), vAlign='t')
+        # self.userDataPathText.setMinimumWidth(LineEditsMinimumWidth)
+        # self.userDataPathText.editingFinished.connect(self._setUserDataPath)
+        #
+        # # if self.project:
+        # #     urls = _findDataUrl(self, 'remoteData')
+        # #     if urls and urls[0]:
+        # #         self.userDataPathText.setValidator(DataUrlValidator(parent=self.userDataPathText, dataUrl=urls[0]))
+        # #         _setUrlData(self, urls[0], self.userDataPathText)
+        #
+        # self.userDataPathText.setText(self.preferences.general.dataPath)
+        # self.userDataPathButton = Button(parent, grid=(row, 2), callback=self._getUserDataPath, icon='icons/directory',
+        #                                  hPolicy='fixed')
+
+        row += 1
         self.regionPaddingLabel = Label(parent, text="Spectral Padding (%)", grid=(row, 0))
         self.regionPaddingData = DoubleSpinbox(parent, grid=(row, 1), hAlign='l', decimals=1, step=0.1, min=0, max=100)
         self.regionPaddingData.setMinimumWidth(LineEditsMinimumWidth)
@@ -411,7 +463,7 @@ class PreferencesPopup(CcpnDialog):
         volumeIntegralLimit = self.preferences.general.volumeIntegralLimit
         self.volumeIntegralLimitLabel = Label(parent, text="Volume Integral Limit", grid=(row, 0))
         self.volumeIntegralLimitData = DoubleSpinbox(parent, step=0.05, decimals=2,
-                                                       min=1.0, max=5.0, grid=(row, 1), hAlign='l')
+                                                     min=1.0, max=5.0, grid=(row, 1), hAlign='l')
         self.volumeIntegralLimitData.setValue(int(volumeIntegralLimit))
         self.volumeIntegralLimitData.setMinimumWidth(LineEditsMinimumWidth)
         self.volumeIntegralLimitData.editingFinished.connect(self._setVolumeIntegralLimit)
@@ -420,12 +472,12 @@ class PreferencesPopup(CcpnDialog):
         self.peakFittingMethodLabel = Label(parent, text="Peak Region Fitting Method", grid=(row, 0))
         peakFittingMethod = self.preferences.general.peakFittingMethod
         self.peakFittingMethod = RadioButtons(parent, texts=PEAKFITTINGDEFAULTS,
-                                          selectedInd=PEAKFITTINGDEFAULTS.index(peakFittingMethod),
-                                          callback=self._setPeakFittingMethod,
-                                          direction='h',
-                                          grid=(row, 1), hAlign='l',
-                                          tipTexts=None,
-                                          )
+                                              selectedInd=PEAKFITTINGDEFAULTS.index(peakFittingMethod),
+                                              callback=self._setPeakFittingMethod,
+                                              direction='h',
+                                              grid=(row, 1), hAlign='l',
+                                              tipTexts=None,
+                                              )
 
         ### Not fully Tested, Had some issues with $Path routines in setting the path of the copied spectra.
         ###  Needs more testing for different spectra formats etc. Disabled until completion.
@@ -481,12 +533,12 @@ class PreferencesPopup(CcpnDialog):
         self.axisOrderingOptionsLabel = Label(parent, text="Axis Ordering", grid=(row, 0))
         axisOrderingOptions = self.preferences.general.axisOrderingOptions
         self.axisOrderingOptions = RadioButtons(parent, texts=['Use Spectrum Settings', 'Always Ask'],
-                                          selectedInd=axisOrderingOptions,
-                                          callback=self._setAxisOrderingOptions,
-                                          direction='h',
-                                          grid=(row, 1), hAlign='l',
-                                          tipTexts=None,
-                                          )
+                                                selectedInd=axisOrderingOptions,
+                                                callback=self._setAxisOrderingOptions,
+                                                direction='h',
+                                                grid=(row, 1), hAlign='l',
+                                                tipTexts=None,
+                                                )
 
         row += 1
         HLine(parent, grid=(row, 0), gridSpan=(1, 3), colour=getColours()[DIVIDER], height=15)
@@ -624,7 +676,7 @@ class PreferencesPopup(CcpnDialog):
         row += 1
         self.symbolSizePixelLabel = Label(parent, text="Symbol Size (pixels)", grid=(row, 0))
         self.symbolSizePixelData = DoubleSpinbox(parent, decimals=0, step=1,
-                                              min=2, max=50, grid=(row, 1), hAlign='l')
+                                                 min=2, max=50, grid=(row, 1), hAlign='l')
         self.symbolSizePixelData.setMinimumWidth(LineEditsMinimumWidth)
         symbolSizePixel = self.preferences.general.symbolSizePixel
         self.symbolSizePixelData.setValue(float('%i' % symbolSizePixel))
@@ -642,7 +694,7 @@ class PreferencesPopup(CcpnDialog):
         row += 1
         self.contourThicknessLabel = Label(parent, text="Contour Thickness (points)", grid=(row, 0))
         self.contourThicknessData = Spinbox(parent, step=1,
-                                           min=1, max=20, grid=(row, 1), hAlign='l')
+                                            min=1, max=20, grid=(row, 1), hAlign='l')
         self.contourThicknessData.setMinimumWidth(LineEditsMinimumWidth)
         contourThickness = self.preferences.general.contourThickness
         self.contourThicknessData.setValue(int(contourThickness))
@@ -686,7 +738,8 @@ class PreferencesPopup(CcpnDialog):
         self.multipletAveragingLabel = Label(parent, text="Multiplet Averaging:", grid=(row, 0))
         multipletAveraging = self.preferences.general.multipletAveraging
         self.multipletAveraging = RadioButtons(parent, texts=MULTIPLETAVERAGINGTYPES,
-                                               selectedInd=MULTIPLETAVERAGINGTYPES.index(multipletAveraging) if multipletAveraging in MULTIPLETAVERAGINGTYPES else 0,
+                                               selectedInd=MULTIPLETAVERAGINGTYPES.index(
+                                                   multipletAveraging) if multipletAveraging in MULTIPLETAVERAGINGTYPES else 0,
                                                callback=self._setMultipletAveraging,
                                                direction='h',
                                                grid=(row, 1), hAlign='l',
@@ -730,7 +783,7 @@ class PreferencesPopup(CcpnDialog):
         """
 
         row = 0
-        self.userWorkingPathLabel = Label(parent, "Pymol Path", grid=(row, 0), )
+        self.pymolPathLabel = Label(parent, "Pymol Path", grid=(row, 0), )
         self.pymolPath = PathEdit(parent, grid=(row, 1), hAlign='l')
         self.pymolPath.setMinimumWidth(LineEditsMinimumWidth)
         self.pymolPath.editingFinished.connect(self._setPymolPath)
@@ -768,20 +821,20 @@ class PreferencesPopup(CcpnDialog):
             return False
 
     # def _getDataPath(self):
-    #     if os.path.exists('/'.join(self.userWorkingPathText.text().split('/')[:-1])):
-    #         currentDataPath = '/'.join(self.userWorkingPathText.text().split('/')[:-1])
+    #     if os.path.exists('/'.join(self.userDataPathText.text().split('/')[:-1])):
+    #         currentDataPath = '/'.join(self.userDataPathText.text().split('/')[:-1])
     #     else:
     #         currentDataPath = os.path.expanduser('~')
     #     dialog = FileDialog(self, text='Select Data File', directory=currentDataPath, fileMode=2, acceptMode=0,
     #                         preferences=self.preferences.general)
     #     directory = dialog.selectedFiles()
     #     if directory:
-    #         self.userWorkingPathText.setText(directory[0])
+    #         self.userDataPathText.setText(directory[0])
     #         self.preferences.general.dataPath = directory[0]
     #
     # def _setDataPath(self):
-    #     if self.userWorkingPathText.isModified():
-    #         newPath = self.userWorkingPathText.text().strip()
+    #     if self.userDataPathText.isModified():
+    #         newPath = self.userDataPathText.text().strip()
     #
     #         self.preferences.general.dataPath = newPath     # do we need this?
     #
@@ -789,22 +842,22 @@ class PreferencesPopup(CcpnDialog):
     #                 name='standard').findFirstDataUrl(name='remoteData')
     #         dataUrl.url = Implementation.Url(path=newPath)
 
-    def _getUserWorkingPath(self):
-        if os.path.exists('/'.join(self.userWorkingPathText.text().split('/')[:-1])):
-            currentPath = '/'.join(self.userWorkingPathText.text().split('/')[:-1])
+    def _getUserDataPath(self):
+        if os.path.exists('/'.join(self.userDataPathText.text().split('/')[:-1])):
+            currentPath = '/'.join(self.userDataPathText.text().split('/')[:-1])
         else:
             currentPath = os.path.expanduser('~')
         dialog = FileDialog(self, text='Select User Working File', directory=currentPath, fileMode=2, acceptMode=0,
                             preferences=self.preferences.general)
         directory = dialog.selectedFiles()
         if directory:
-            self.userWorkingPathText.setText(directory[0])
-            self.preferences.general.userWorkingPath = directory[0]
+            self.userDataPathText.setText(directory[0])
+            self.preferences.general.dataPath = directory[0]
 
-    def _setUserWorkingPath(self):
-        if self.userWorkingPathText.isModified():
-            newPath = self.userWorkingPathText.text().strip()
-            self.preferences.general.userWorkingPath = newPath
+    def _setUserDataPath(self):
+        if self.userDataPathText.isModified():
+            newPath = self.userDataPathText.text().strip()
+            self.preferences.general.dataPath = newPath
 
     def _getAuxiliaryFilesPath(self):
         if os.path.exists(os.path.expanduser(self.auxiliaryFilesData.text())):
@@ -833,7 +886,6 @@ class PreferencesPopup(CcpnDialog):
     def _setuserLayoutsPath(self):
         newPath = self.userLayoutsLe.text()
         self.preferences.general.userLayoutsPath = newPath
-
 
     def _setAuxiliaryFilesPath(self):
         newPath = self.auxiliaryFilesData.text()
@@ -1152,7 +1204,7 @@ class PreferencesPopup(CcpnDialog):
 
     def _setProxyButtons(self):
         useP = self.preferences.proxySettings.useProxy
-        useSP = False        #self.preferences.proxySettings.useSystemProxy
+        useSP = False  #self.preferences.proxySettings.useSystemProxy
         usePEnabled = useP and not useSP
         # self.useSystemProxyBox.setEnabled(useP)
         self.proxyAddressData.setEnabled(usePEnabled)

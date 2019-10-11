@@ -55,7 +55,7 @@ from ccpn.ui.gui.guiSettings import getColours, DIVIDER
 from ccpn.ui.gui.widgets.HLine import HLine
 from ccpn.ui.gui.widgets.CompoundWidgets import PulldownListCompoundWidget
 from ccpn.ui.gui.widgets.Spacer import Spacer
-from ccpn.ui.gui.popups.Dialog import CcpnDialog, handleDialogApply, CANCELBUTTONTEXT, APPLYBUTTONTEXT, OKBUTTONTEXT
+from ccpn.ui.gui.popups.Dialog import CcpnDialog, handleDialogApply
 from ccpn.core.lib.ContextManagers import undoStackBlocking
 from ccpn.ui.gui.popups.EstimateNoisePopup import _addContourNoiseButtons
 from ccpn.core.lib.SpectrumLib import getContourLevelsFromNoise
@@ -101,15 +101,21 @@ class SpectrumPropertiesPopupABC(CcpnDialog):
         Spacer(self, 5, 5, QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.MinimumExpanding,
                grid=(3, 1), gridSpan=(1, 1))
 
-        self.applyButtons = ButtonList(self, texts=[CANCELBUTTONTEXT, APPLYBUTTONTEXT, OKBUTTONTEXT],
-                                       callbacks=[self._rejectButton, self._applyButton, self._okButton],
-                                       tipTexts=['', '', '', None], direction='h',
-                                       hAlign='r', grid=(4, 1), gridSpan=(1, 4))
-        self.applyButtons.getButton(APPLYBUTTONTEXT).setFocus()
+        self.dialogButtons = ButtonList(self, texts=[self.REVERTBUTTONTEXT, self.CLOSEBUTTONTEXT, self.APPLYBUTTONTEXT, self.OKBUTTONTEXT],
+                                        callbacks=[self._revertButton, self._closeButton, self._applyButton, self._okButton],
+                                        tipTexts=['Revert - revert all applied settings and close',
+                                                  'Close - all applied changes will be kept',
+                                                  'Apply changes',
+                                                  'Apply changes and close'],
+                                        direction='h', hAlign='r', grid=(4, 1), gridSpan=(1, 4))
+        self.dialogButtons.getButton(self.APPLYBUTTONTEXT).setFocus()
 
         # as this is a dialog, need to set one of the buttons as the default button when other widgets have focus
-        self.setDefaultButton(self.applyButtons.getButton(APPLYBUTTONTEXT))
-        self.applyButtons.getButton(APPLYBUTTONTEXT).setEnabled(False)
+        self.setDefaultButton(self.dialogButtons.getButton(self.APPLYBUTTONTEXT))
+        self.dialogButtons.getButton(self.APPLYBUTTONTEXT).setEnabled(False)
+
+        # keep a record of how many times the apply button has been pressed
+        self._currentNumApplies = 0
 
     def __postInit__(self):
         """post initialise functions
@@ -133,6 +139,32 @@ class SpectrumPropertiesPopupABC(CcpnDialog):
         """
         # MUST BE SUBCLASSED
         raise NotImplementedError("Code error: function not implemented")
+
+    def _revertButton(self):
+        """Revert button signal comes here
+        Revert the state of the project to before the popup was opened
+        """
+        if self.project and self.project._undo:
+            # with undoStackBlocking():
+            for undos in range(self._currentNumApplies):
+                self.project._undo.undo()
+        self.reject()
+
+    def _closeButton(self):
+        """Close button signal comes here
+        """
+        self.reject()
+
+    def _applyButton(self):
+        """Apply button signal comes here
+        """
+        self._applyChanges()
+
+    def _okButton(self):
+        """OK button signal comes here
+        """
+        if self._applyChanges() is True:
+            self.accept()
 
     def _applyAllChanges(self, changes):
         """Execute the Apply/OK functions
@@ -195,7 +227,7 @@ class SpectrumPropertiesPopupABC(CcpnDialog):
             _updateGl(self, spectrumList)
 
             # everything has happened - disable the apply button
-            self.applyButtons.getButton(APPLYBUTTONTEXT).setEnabled(False)
+            self.dialogButtons.getButton(self.APPLYBUTTONTEXT).setEnabled(False)
 
             # check for any errors
             if error.errorValue:
@@ -207,17 +239,8 @@ class SpectrumPropertiesPopupABC(CcpnDialog):
             for tab in self.tabs:
                 tab._changes = {}
 
+            self._currentNumApplies += 1
             return True
-
-    def _rejectButton(self):
-        self.reject()
-
-    def _applyButton(self):
-        self._applyChanges()
-
-    def _okButton(self):
-        if self._applyChanges() is True:
-            self.accept()
 
 
 class SpectrumPropertiesPopup(SpectrumPropertiesPopupABC):
@@ -360,7 +383,7 @@ def _verifyApply(tab, attributeName, value, postFix=None):
         # tabs = (popup._generalTab, popup._dimensionsTab, popup._contoursTab)
         tabs = tuple(popup.tabWidget.widget(ii) for ii in range(popup.tabWidget.count()))
         allChanges = any(t._changes for t in tabs if t is not None)
-        popup.applyButtons.getButton(APPLYBUTTONTEXT).setEnabled(allChanges)
+        popup.dialogButtons.getButton(CcpnDialog.APPLYBUTTONTEXT).setEnabled(allChanges)
 
 
 class GeneralTab(Widget):
@@ -753,7 +776,6 @@ class GeneralTab(Widget):
 
                     dataType, subType, usePath = ioFormats.analyseUrl(newFilePath)
                     if dataType == 'Spectrum':
-
                         with undoStackBlocking():
                             self._setPathDataFromUrl(spectrum, newFilePath)
 

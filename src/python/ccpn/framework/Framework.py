@@ -2201,7 +2201,7 @@ class Framework(NotifierBase):
             popup = ExperimentTypePopup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow)
             popup.exec_()
 
-    def showValidateSpectraPopup(self, spectra=None, defaultSelected='all'):
+    def showValidateSpectraPopup(self, spectra=None, defaultSelected=None):
         """
         Displays validate spectra popup.
         """

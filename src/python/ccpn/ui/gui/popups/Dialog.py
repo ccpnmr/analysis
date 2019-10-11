@@ -31,11 +31,6 @@ from ccpn.util.Logging import getLogger
 from contextlib import contextmanager
 
 
-CANCELBUTTONTEXT = 'Cancel'
-APPLYBUTTONTEXT = 'Apply'
-OKBUTTONTEXT = 'OK'
-
-
 def _updateGl(self, spectrumList):
     from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
 
@@ -49,6 +44,17 @@ def _updateGl(self, spectrumList):
 
 
 class CcpnDialog(QtWidgets.QDialog, Base):
+    """
+    Class to handle popup dialogs
+    """
+
+    REVERTBUTTONTEXT = 'Revert'
+    CANCELBUTTONTEXT = 'Cancel'
+    CLOSEBUTTONTEXT = 'Close'
+    APPLYBUTTONTEXT = 'Apply'
+    OKBUTTONTEXT = 'OK'
+
+
     def __init__(self, parent=None, windowTitle='', setLayout=False, size=(300, 100), **kwds):
 
         super().__init__(parent)

@@ -84,6 +84,16 @@ class PeakListView(PMIListViewABC):
         """PeakList that PeakListView refers to"""
         return self._project._data2Obj.get(self._wrappedData.peakListView.peakList)
 
+    @property
+    def _key(self) -> str:
+        """id string - """
+        return str(self._wrappedData.peakListView.peakListSerial)
+
+    @property
+    def _localCcpnSortKey(self) -> typing.Tuple:
+        """Local sorting key, in context of parent."""
+        return (self._wrappedData.peakListView.peakListSerial,)
+
     #=========================================================================================
     # Implementation functions
     #=========================================================================================

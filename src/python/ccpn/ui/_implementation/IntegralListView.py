@@ -84,6 +84,16 @@ class IntegralListView(PMIListViewABC):
         """IntegralList that IntegralListView refers to"""
         return self._project._data2Obj.get(self._wrappedData.integralListView.integralList)
 
+    @property
+    def _key(self) -> str:
+        """id string - """
+        return str(self._wrappedData.integralListView.integralListSerial)
+
+    @property
+    def _localCcpnSortKey(self) -> typing.Tuple:
+        """Local sorting key, in context of parent."""
+        return (self._wrappedData.integralListView.integralListSerial,)
+
     #=========================================================================================
     # Implementation functions
     #=========================================================================================

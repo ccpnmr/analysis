@@ -83,15 +83,15 @@ class PMIListViewABC(AbstractWrapperObject):
         """ListViews cannot be deleted, except as a byproduct of deleting other things"""
         raise Exception("%s cannot be deleted directly" % str(self._pluralLinkName))
 
-    @property
-    def _key(self) -> str:
-        """id string - """
-        return str(self._apiListSerial)
-
-    @property
-    def _localCcpnSortKey(self) -> typing.Tuple:
-        """Local sorting key, in context of parent."""
-        return (self._apiListSerial,)
+    # @property
+    # def _key(self) -> str:
+    #     """id string - """
+    #     return str(self._apiListSerial)
+    #
+    # @property
+    # def _localCcpnSortKey(self) -> typing.Tuple:
+    #     """Local sorting key, in context of parent."""
+    #     return (self._apiListSerial,)
 
     @property
     def symbolStyle(self) -> str:

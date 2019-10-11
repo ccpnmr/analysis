@@ -77,10 +77,13 @@ def _updateGl(self, spectrumList):
     GLSignals.emitPaintEvent()
 
 
-class SpectrumPropertiesPopup(CcpnDialog):
+class SpectrumPropertiesPopupABC(CcpnDialog):
     # The values on the 'General' and 'Dimensions' tabs are queued as partial functions when set.
     # The apply button then steps through each tab, and calls each function in the _changes dictionary
     # in order to set the parameters.
+
+    MINIMUM_WIDTH_PER_TAB = 120
+    MINIMUM_WIDTH = 400
 
     def __init__(self, parent=None, mainWindow=None, spectrum=None,
                  title='Spectrum Properties', **kwds):
@@ -94,6 +97,147 @@ class SpectrumPropertiesPopup(CcpnDialog):
         self.spectrum = spectrum
 
         self.tabWidget = Tabs(self, setLayout=True, grid=(0, 0), gridSpan=(2, 4), focusPolicy='strong')
+
+        # if spectrum.dimensionCount == 1:
+        #     self._generalTab = GeneralTab(parent=self, mainWindow=self.mainWindow, spectrum=spectrum)
+        #     self._dimensionsTab = DimensionsTab(parent=self, mainWindow=self.mainWindow,
+        #                                         spectrum=spectrum, dimensions=spectrum.dimensionCount)
+        #
+        #     self.tabWidget.addTab(self._generalTab, "General")
+        #     self.tabWidget.addTab(self._dimensionsTab, "Dimensions")
+        #     self._contoursTab = None
+        # else:
+        #     self._generalTab = GeneralTab(parent=self, mainWindow=self.mainWindow, spectrum=spectrum)
+        #     self._dimensionsTab = DimensionsTab(parent=self, mainWindow=self.mainWindow,
+        #                                         spectrum=spectrum, dimensions=spectrum.dimensionCount)
+        #     self._contoursTab = ContoursTab(parent=self, mainWindow=self.mainWindow, spectrum=spectrum)
+        #
+        #     self.tabWidget.addTab(self._generalTab, "General")
+        #     self.tabWidget.addTab(self._dimensionsTab, "Dimensions")
+        #     self.tabWidget.addTab(self._contoursTab, "Contours")
+
+        Spacer(self, 5, 5, QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.MinimumExpanding,
+               grid=(3, 1), gridSpan=(1, 1))
+
+        self.applyButtons = ButtonList(self, texts=[CANCELBUTTONTEXT, APPLYBUTTONTEXT, OKBUTTONTEXT],
+                                       callbacks=[self._rejectButton, self._applyButton, self._okButton],
+                                       tipTexts=['', '', '', None], direction='h',
+                                       hAlign='r', grid=(4, 1), gridSpan=(1, 4))
+        self.applyButtons.getButton(APPLYBUTTONTEXT).setFocus()
+
+        # as this is a dialog, need to set one of the buttons as the default button when other widgets have focus
+        self.setDefaultButton(self.applyButtons.getButton(APPLYBUTTONTEXT))
+        self.applyButtons.getButton(APPLYBUTTONTEXT).setEnabled(False)
+
+    def __postInit__(self):
+        """post initialise functions
+        """
+        self.tabs = tuple(self.tabWidget.widget(ii) for ii in range(self.tabWidget.count()))
+        self._fillPullDowns()
+        self.setFixedSize(self.sizeHint())
+
+    def _fillPullDowns(self):
+        """Set the primary classType for the child list attached to this container
+        """
+        # MUST BE SUBCLASSED
+        raise NotImplementedError("Code error: function not implemented")  # if self.spectrum.dimensionCount == 1:
+
+    def _keyPressEvent(self, event):
+        if event.key() == QtCore.Qt.Key_Enter:
+            pass
+
+    def _repopulate(self):
+        """Set the primary classType for the child list attached to this container
+        """
+        # MUST BE SUBCLASSED
+        raise NotImplementedError("Code error: function not implemented")
+
+    def _applyAllChanges(self, changes):
+        for v in changes.values():
+            v()
+
+    def _applyChanges(self):
+        """
+        The apply button has been clicked
+        Define an undo block for setting the properties of the object
+        If there is an error setting any values then generate an error message
+          If anything has been added to the undo queue then remove it with application.undo()
+          repopulate the popup widgets
+        """
+
+        if not self.tabs:
+            raise RuntimeError("Code error: tabs not implemented")
+
+        allChanges = any(t._changes for t in self.tabs if t is not None)
+
+        if not allChanges:
+            return True
+
+        with handleDialogApply(self) as error:
+
+            spectrumList = []
+            for t in self.tabs:
+                if t is not None:
+                    changes = t._changes
+                    if changes:
+                        spectrumList.append(t.spectrum)
+
+            with undoStackBlocking() as addUndoItem:
+                addUndoItem(undo=partial(_updateGl, self, spectrumList))
+
+            for t in self.tabs:
+                if t is not None:
+                    changes = t._changes
+                    if changes:
+                        self._applyAllChanges(changes)
+
+            with undoStackBlocking() as addUndoItem:
+                addUndoItem(redo=partial(_updateGl, self, spectrumList))
+
+            for spec in spectrumList:
+                for specViews in spec.spectrumViews:
+                    specViews.buildContours = True
+            _updateGl(self, spectrumList)
+
+            self.applyButtons.getButton(APPLYBUTTONTEXT).setEnabled(False)
+            if error.errorValue:
+                # repopulate popup on an error
+                self._repopulate()
+                return False
+            for tab in self.tabs:
+                tab._changes = {}
+
+            return True
+
+    def _rejectButton(self):
+        self.reject()
+
+    def _applyButton(self):
+        self._applyChanges()
+
+    def _okButton(self):
+        if self._applyChanges() is True:
+            self.accept()
+
+
+class SpectrumPropertiesPopup(SpectrumPropertiesPopupABC):
+    # The values on the 'General' and 'Dimensions' tabs are queued as partial functions when set.
+    # The apply button then steps through each tab, and calls each function in the _changes dictionary
+    # in order to set the parameters.
+
+    def __init__(self, parent=None, mainWindow=None, spectrum=None,
+                 title='Spectrum Properties', **kwds):
+
+        super().__init__(parent=parent, mainWindow=mainWindow,
+                         spectrum=spectrum, title=title, **kwds)
+
+        # self.mainWindow = mainWindow
+        # self.application = mainWindow.application
+        # self.project = mainWindow.application.project
+        # self.current = mainWindow.application.current
+        # self.spectrum = spectrum
+        #
+        # self.tabWidget = Tabs(self, setLayout=True, grid=(0, 0), gridSpan=(2, 4), focusPolicy='strong')
 
         if spectrum.dimensionCount == 1:
             self._generalTab = GeneralTab(parent=self, mainWindow=self.mainWindow, spectrum=spectrum)
@@ -113,21 +257,8 @@ class SpectrumPropertiesPopup(CcpnDialog):
             self.tabWidget.addTab(self._dimensionsTab, "Dimensions")
             self.tabWidget.addTab(self._contoursTab, "Contours")
 
-        Spacer(self, 5, 5, QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.MinimumExpanding,
-               grid=(3, 1), gridSpan=(1, 1))
-
-        self.applyButtons = ButtonList(self, texts=[CANCELBUTTONTEXT, APPLYBUTTONTEXT, OKBUTTONTEXT],
-                                       callbacks=[self._rejectButton, self._applyButton, self._okButton],
-                                       tipTexts=['', '', '', None], direction='h',
-                                       hAlign='r', grid=(4, 1), gridSpan=(1, 4))
-        self.applyButtons.getButton(APPLYBUTTONTEXT).setFocus()
-
-        self._fillPullDowns()
-        self.setFixedSize(self.sizeHint())
-
-        # as this is a dialog, need to set one of the buttons as the default button when other widgets have focus
-        self.setDefaultButton(self.applyButtons.getButton(APPLYBUTTONTEXT))
-        self.applyButtons.getButton(APPLYBUTTONTEXT).setEnabled(False)
+        # don't forget to call postInit to finish initialise
+        self.__postInit__()
 
     def _fillPullDowns(self):
         if self.spectrum.dimensionCount == 1:
@@ -136,10 +267,6 @@ class SpectrumPropertiesPopup(CcpnDialog):
             fillColourPulldown(self._contoursTab.positiveColourBox, allowAuto=False)
             fillColourPulldown(self._contoursTab.negativeColourBox, allowAuto=False)
 
-    def _keyPressEvent(self, event):
-        if event.key() == QtCore.Qt.Key_Enter:
-            pass
-
     def _repopulate(self):
         if self._generalTab:
             self._generalTab._repopulate()
@@ -147,68 +274,6 @@ class SpectrumPropertiesPopup(CcpnDialog):
             self._dimensionsTab._repopulate()
         if self._contoursTab:
             self._contoursTab._repopulate()
-
-    def _applyAllChanges(self, changes):
-        for v in changes.values():
-            v()
-
-    def _applyChanges(self):
-        """
-        The apply button has been clicked
-        Define an undo block for setting the properties of the object
-        If there is an error setting any values then generate an error message
-          If anything has been added to the undo queue then remove it with application.undo()
-          repopulate the popup widgets
-        """
-        tabs = (self._generalTab, self._dimensionsTab, self._contoursTab)
-        allChanges = any(t._changes for t in tabs if t is not None)
-
-        if not allChanges:
-            return True
-
-        with handleDialogApply(self) as error:
-
-            spectrumList = []
-            for t in tabs:
-                if t is not None:
-                    changes = t._changes
-                    if changes:
-                        spectrumList.append(t.spectrum)
-
-            with undoStackBlocking() as addUndoItem:
-                addUndoItem(undo=partial(_updateGl, self, spectrumList))
-
-            for t in tabs:
-                if t is not None:
-                    changes = t._changes
-                    if changes:
-                        self._applyAllChanges(changes)
-
-            with undoStackBlocking() as addUndoItem:
-                addUndoItem(redo=partial(_updateGl, self, spectrumList))
-
-            for spec in spectrumList:
-                for specViews in spec.spectrumViews:
-                    specViews.buildContours = True
-            _updateGl(self, spectrumList)
-
-            self.applyButtons.getButton(APPLYBUTTONTEXT).setEnabled(False)
-            if error.errorValue:
-                # repopulate popup on an error
-                self._repopulate()
-                return False
-
-            return True
-
-    def _rejectButton(self):
-        self.reject()
-
-    def _applyButton(self):
-        self._applyChanges()
-
-    def _okButton(self):
-        if self._applyChanges() is True:
-            self.accept()
 
 
 def _verifyApply(tab, attributeName, value, postFix=None):
@@ -227,7 +292,6 @@ def _verifyApply(tab, attributeName, value, postFix=None):
             tab._changes[attributeName] = value
         else:
             if attributeName in tab._changes:
-
                 # delete from dict - empty dict implies no changes
                 del tab._changes[attributeName]
 
@@ -535,12 +599,6 @@ class GeneralTab(Widget):
         self.logger.info("spectrum = project.getByPid('%s')" % self.spectrum.pid)
         self.logger.info(command)
 
-
-
-
-
-
-
     @queueStateChange(_verifyApply)
     def _queueSpectrumNameChange(self, spectrum, value):
         if value != spectrum.name:
@@ -549,12 +607,6 @@ class GeneralTab(Widget):
     def _changeSpectrumName(self, spectrum, name):
         spectrum.rename(name)
         self._writeLoggingMessage("spectrum.rename('%s')" % str(name))
-
-
-
-
-
-
 
     @queueStateChange(_verifyApply)
     def _queueSpectrumScaleChange(self, spectrum, textFromValue, value):
@@ -567,12 +619,6 @@ class GeneralTab(Widget):
         self._writeLoggingMessage("spectrum.scale = %s" % str(scale))
         self.pythonConsole.writeConsoleCommand("spectrum.scale = %s" % scale, spectrum=spectrum)
 
-
-
-
-
-
-
     @queueStateChange(_verifyApply)
     def _queueNoiseLevelDataChange(self, spectrum, textFromValue, value):
         specValue = textFromValue(spectrum.noiseLevel) if spectrum.noiseLevel else None
@@ -582,18 +628,6 @@ class GeneralTab(Widget):
     def _setNoiseLevelData(self, spectrum, noise):
         spectrum.noiseLevel = float(noise)
         self._writeLoggingMessage("spectrum.noiseLevel = %s" % str(noise))
-
-
-
-
-
-
-
-
-
-
-
-
 
     @queueStateChange(_verifyApply)
     def _queueChemicalShiftListChange(self, spectrum, item):
@@ -631,12 +665,6 @@ class GeneralTab(Widget):
         self._writeLoggingMessage("""chemicalShiftList = project.getByPid('%s')
                                   spectrum.chemicalShiftList = chemicalShiftList""" % spectrum.chemicalShiftList.pid)
 
-
-
-
-
-
-
     @queueStateChange(_verifyApply)
     def _queueSampleChange(self, spectrum, value):
         return partial(self._changeSampleSpectrum, spectrum, self.samplesPulldownList.currentObject())
@@ -647,12 +675,6 @@ class GeneralTab(Widget):
         else:
             if spectrum.sample is not None:
                 spectrum.sample = None
-
-
-
-
-
-
 
     @queueStateChange(_verifyApply)
     def _queueSetSpectrumType(self, spectrum, value):
@@ -667,9 +689,6 @@ class GeneralTab(Widget):
         spectrum.experimentType = expType
         self.pythonConsole.writeConsoleCommand('spectrum.experimentType = experimentType', experimentType=expType, spectrum=self.spectrum)
         self._writeLoggingMessage("spectrum.experimentType = '%s'" % expType)
-
-
-
 
     @queueStateChange(_verifyApply)
     def _getSpectrumFile(self, spectrum):
@@ -692,7 +711,6 @@ class GeneralTab(Widget):
 
                     dataType, subType, usePath = ioFormats.analyseUrl(newFilePath)
                     if dataType == 'Spectrum':
-
                         # self._changes['spectrumFilePath'] = partial(self._setSpectrumFilePath, newFilePath)
                         with undoStackBlocking():
                             self._setPathDataFromUrl(spectrum, newFilePath)
@@ -750,10 +768,6 @@ class GeneralTab(Widget):
         #     shortenedPath = apiDataStore.fullPath
         # self.pathData.setText(shortenedPath)
 
-
-
-
-
     # spectrum sliceColour button and pulldown
     def _queueSetSpectrumColour(self, spectrum):
         dialog = ColourDialog(self)
@@ -776,7 +790,6 @@ class GeneralTab(Widget):
             spectrum.sliceColour = newColour
             self._writeLoggingMessage("spectrum.sliceColour = '%s'" % newColour)
             self.pythonConsole.writeConsoleCommand("spectrum.sliceColour '%s'" % newColour, spectrum=spectrum)
-
 
 
 class DimensionsTab(Widget):
@@ -1060,12 +1073,6 @@ class DimensionsTab(Widget):
         self.logger.info("spectrum = project.getByPid('%s')" % self.spectrum.pid)
         self.logger.info(command)
 
-
-
-
-
-
-
     @queueStateChange(_verifyApply)
     def _queueSetAssignmentTolerances(self, spectrum, dim, textFromValue, value):
         specValue = textFromValue(spectrum.assignmentTolerances[dim])
@@ -1079,12 +1086,6 @@ class DimensionsTab(Widget):
         self.pythonConsole.writeConsoleCommand("spectrum.assignmentTolerances = {0}".format(assignmentTolerances), spectrum=spectrum)
         self._writeLoggingMessage("spectrum.assignmentTolerances = {0}".format(assignmentTolerances))
 
-
-
-
-
-
-
     @queueStateChange(_verifyApply)
     def _queueSetDoubleCursorOffset(self, spectrum, dim, textFromValue, value):
         specValue = textFromValue(spectrum.doubleCrosshairOffsets[dim])
@@ -1097,12 +1098,6 @@ class DimensionsTab(Widget):
         spectrum.doubleCrosshairOffsets = doubleCrosshairOffsets
         self.pythonConsole.writeConsoleCommand("spectrum.doubleCrosshairOffsets = {0}".format(doubleCrosshairOffsets), spectrum=spectrum)
         self._writeLoggingMessage("spectrum.doubleCrosshairOffsets = {0}".format(doubleCrosshairOffsets))
-
-
-
-
-
-
 
     @queueStateChange(_verifyApply)
     def _queueSetAxisCodes(self, spectrum, valueGetter, dim):
@@ -1123,12 +1118,6 @@ class DimensionsTab(Widget):
         self.pythonConsole.writeConsoleCommand("spectrum.axisCodes = {0}".format(axisCodes), spectrum=spectrum)
         self._writeLoggingMessage("spectrum.referenceValues = {0}".format(axisCodes))
 
-
-
-
-
-
-
     @queueStateChange(_verifyApply)
     def _queueSetIsotopeCodes(self, spectrum, valueGetter, dim):
         value = valueGetter()
@@ -1145,12 +1134,6 @@ class DimensionsTab(Widget):
         self.pythonConsole.writeConsoleCommand("spectrum.isotopeCodes = {0}".format(isotopeCodes), spectrum=spectrum)
         self._writeLoggingMessage("spectrum.referenceValues = {0}".format(isotopeCodes))
 
-
-
-
-
-
-
     @queueStateChange(_verifyApply)
     def _queueSetDimensionReferencing(self, spectrum, dim, textFromValue, value):
         specValue = textFromValue(spectrum.referenceValues[dim])
@@ -1164,7 +1147,6 @@ class DimensionsTab(Widget):
         self.pythonConsole.writeConsoleCommand("spectrum.referenceValues = {0}".format(spectrumReferencing), spectrum=spectrum)
         self._writeLoggingMessage("spectrum.referenceValues = {0}".format(spectrumReferencing))
 
-
     @queueStateChange(_verifyApply)
     def _queueSetPointDimensionReferencing(self, spectrum, dim, textFromValue, value):
         specValue = textFromValue(spectrum.referencePoints[dim])
@@ -1177,7 +1159,6 @@ class DimensionsTab(Widget):
         spectrum.referencePoints = spectrumReferencing
         self.pythonConsole.writeConsoleCommand("spectrum.referencePoints = {0}".format(spectrumReferencing), spectrum=spectrum)
         self._writeLoggingMessage("spectrum.referencePoints = {0}".format(spectrumReferencing))
-
 
     @queueStateChange(_verifyApply, 'minAliasing')
     def _queueSetMinAliasing(self, spectrum, valueGetter, dim):
@@ -1199,12 +1180,6 @@ class DimensionsTab(Widget):
         self.pythonConsole.writeConsoleCommand("spectrum.visibleAliasingRange = {0}".format(tuple(alias)), spectrum=spectrum)
         self._writeLoggingMessage("spectrum.visibleAliasingRange = {0}".format(tuple(alias)))
 
-
-
-
-
-
-
     @queueStateChange(_verifyApply)
     def _queueSetMaxAliasing(self, spectrum, valueGetter, dim):
         maxValue = int(valueGetter())
@@ -1224,12 +1199,6 @@ class DimensionsTab(Widget):
         self.pythonConsole.writeConsoleCommand("spectrum.visibleAliasingRange = {0}".format(tuple(alias)), spectrum=spectrum)
         self._writeLoggingMessage("spectrum.aliasingLimits = {0}".format(tuple(alias)))
 
-
-
-
-
-
-
     @queueStateChange(_verifyApply)
     def _queueSetFoldingModes(self, spectrum, valueGetter, dim):
         dd = {True: 'mirror', False: 'circular', None: None}
@@ -1244,12 +1213,6 @@ class DimensionsTab(Widget):
 
         self.pythonConsole.writeConsoleCommand("spectrum.foldingModes = {0}".format(tuple(folding)), spectrum=spectrum)
         self._writeLoggingMessage("spectrum.foldingModes = {0}".format(tuple(folding)))
-
-
-
-
-
-
 
     @queueStateChange(_verifyApply)
     def _queueSetDisplayFoldedContours(self, spectrum, valueGetter):
@@ -1326,7 +1289,6 @@ class ContoursTab(Widget):
         row += 1
         positiveContourColourLabel = Label(self, text="Positive Contour Colour", grid=(row, 0), vAlign='c', hAlign='l')
         self.positiveColourBox = PulldownList(self, grid=(row, 1), vAlign='t')
-
 
         self.negativeColourBox = PulldownList(self, grid=(row, 1), vAlign='t')
 
@@ -1426,11 +1388,11 @@ class ContoursTab(Widget):
         """Estimate the contour levels for the current spectrum
         """
         posBase, negBase, posMult, negMult, posLevels, negLevels = getContourLevelsFromNoise(self.spectrum, setNoiseLevel=False,
-                                                                                 setPositiveContours=self.setPositiveContours.isChecked(),
-                                                                                 setNegativeContours=self.setNegativeContours.isChecked(),
-                                                                                 useSameMultiplier=self.setUseSameMultiplier.isChecked(),
-                                                                                 useDefaultLevels=self.setDefaults.isChecked(),
-                                                                                 useDefaultMultiplier=self.setDefaults.isChecked())
+                                                                                             setPositiveContours=self.setPositiveContours.isChecked(),
+                                                                                             setNegativeContours=self.setNegativeContours.isChecked(),
+                                                                                             useSameMultiplier=self.setUseSameMultiplier.isChecked(),
+                                                                                             useDefaultLevels=self.setDefaults.isChecked(),
+                                                                                             useDefaultMultiplier=self.setDefaults.isChecked())
 
         # put the new values into the widgets (will queue changes)
         if posBase:
@@ -1453,12 +1415,6 @@ class ContoursTab(Widget):
     def _writeLoggingMessage(self, command):
         self.logger.info("spectrum = project.getByPid('%s')" % self.spectrum.pid)
         self.logger.info(command)
-
-
-
-
-
-
 
     @queueStateChange(_verifyApply)
     def _queueChangePositiveContourDisplay(self, spectrum, state):
@@ -1563,7 +1519,7 @@ class ContoursTab(Widget):
         if self.linkContoursCheckBox.isChecked():
             self.positiveContourBaseData.set(-value)
         return returnVal
-        
+
     def _changeNegativeContourBase(self, spectrum, value):
         # force to be negative
         value = -abs(value)
@@ -1583,7 +1539,7 @@ class ContoursTab(Widget):
         if self.linkContoursCheckBox.isChecked():
             self.positiveMultiplierData.set(value)
         return returnVal
-        
+
     def _changeNegativeContourFactor(self, spectrum, value):
         spectrum.negativeContourFactor = float(value)
         self._writeLoggingMessage("spectrum.negativeContourFactor = %f" % float(value))
@@ -1600,7 +1556,7 @@ class ContoursTab(Widget):
         if self.linkContoursCheckBox.isChecked():
             self.positiveContourCountData.set(value)
         return returnVal
-        
+
     def _changeNegativeContourCount(self, spectrum, value):
         spectrum.negativeContourCount = int(value)
         self._writeLoggingMessage("spectrum.negativeContourCount = %d" % int(value))
@@ -1651,255 +1607,72 @@ class ContoursTab(Widget):
             self.pythonConsole.writeConsoleCommand("spectrum.negativeContourColour = '%s'" % newColour, spectrum=spectrum)
 
 
-class SpectrumDisplayPropertiesPopupNd(CcpnDialog):
+class SpectrumDisplayPropertiesPopupNd(SpectrumPropertiesPopupABC):
     """All spectra in the current display are added as tabs
     The apply button then steps through each tab, and calls each function in the _changes dictionary
     in order to set the parameters.
     """
-    MINIMUM_WIDTH_PER_TAB = 120
-    MINIMUM_WIDTH = 400
 
-    def __init__(self, parent=None, mainWindow=None, orderedSpectrumViews=None,
+    def __init__(self, parent=None, mainWindow=None, spectrum=None, orderedSpectrumViews=None,
                  title='SpectrumDisplay Properties', **kwds):
-        CcpnDialog.__init__(self, parent, setLayout=True, windowTitle=title, **kwds)
 
-        self.mainWindow = mainWindow
-        self.application = mainWindow.application
-        self.project = mainWindow.application.project
-        self.current = mainWindow.application.current
+        super().__init__(parent=parent, mainWindow=mainWindow,
+                         spectrum=spectrum, title=title, **kwds)
 
         self.orderedSpectrumViews = orderedSpectrumViews
         self.orderedSpectra = OrderedSet([spec.spectrum for spec in self.orderedSpectrumViews])
 
-        self.tabWidget = Tabs(self, setLayout=True, grid=(0, 0), gridSpan=(2, 4), focusPolicy='strong')
         self.tabWidget.setFixedWidth(self.MINIMUM_WIDTH)
 
-        self._contoursTab = []
         for specNum, thisSpec in enumerate(self.orderedSpectra):
-            self._contoursTab.append(ContoursTab(parent=self, mainWindow=self.mainWindow, spectrum=thisSpec))
-            self.tabWidget.addTab(self._contoursTab[specNum], thisSpec.name)
+            contoursTab = ContoursTab(parent=self, mainWindow=self.mainWindow, spectrum=thisSpec)
+            self.tabWidget.addTab(contoursTab, thisSpec.name)
 
-        self.applyButtons = ButtonList(self, texts=[CANCELBUTTONTEXT, APPLYBUTTONTEXT, OKBUTTONTEXT],
-                                       callbacks=[self.reject, self._applyChanges, self._okButton],
-                                       tipTexts=['', '', '', None], direction='h',
-                                       hAlign='r', grid=(2, 1), gridSpan=(1, 4))
-        self.applyButtons.getButton(APPLYBUTTONTEXT).setFocus()
+        self.tabWidget.setFixedWidth(self.MINIMUM_WIDTH)
 
-        self._fillPullDowns()
-
-        # clear the changes dict in each tab
-        tabs = self._contoursTab
-        for t in tabs:
-            t._changes = dict()
-
-        self.setFixedSize(self.sizeHint())
-
-        # as this is a dialog, need to set one of the buttons as the default button when other widgets have focus
-        self.setDefaultButton(self.applyButtons.getButton(APPLYBUTTONTEXT))
-        self.applyButtons.getButton(APPLYBUTTONTEXT).setEnabled(False)
+        # don't forget to call postInit to finish initialise
+        self.__postInit__()
 
     def _fillPullDowns(self):
-        for aTab in self._contoursTab:
+        for aTab in self.tabs:
             fillColourPulldown(aTab.positiveColourBox, allowAuto=False)
             fillColourPulldown(aTab.negativeColourBox, allowAuto=False)
-
-    def _keyPressEvent(self, event):
-        if event.key() == QtCore.Qt.Key_Enter:
-            pass
 
     def _repopulate(self):
         if self._contoursTab:
             self._contoursTab._repopulate()
 
-    def _applyAllChanges(self, changes):
-        for v in changes.values():
-            v()
 
-    def _applyChanges(self):
-        """
-        The apply button has been clicked
-        Define an undo block for setting the properties of the object
-        If there is an error setting any values then generate an error message
-          If anything has been added to the undo queue then remove it with application.undo()
-          repopulate the popup widgets
-        """
-        tabs = self._contoursTab
-        allChanges = any(t._changes for t in tabs if t is not None)
-
-        if not allChanges:
-            return True
-
-        with handleDialogApply(self) as error:
-
-            spectrumList = []
-            for t in tabs:
-                if t is not None:
-                    changes = t._changes
-                    if changes:
-                        spectrumList.append(t.spectrum)
-
-            with undoStackBlocking() as addUndoItem:
-                addUndoItem(undo=partial(_updateGl, self, spectrumList))
-
-            for t in tabs:
-                if t is not None:
-                    changes = t._changes
-                    if changes:
-                        self._applyAllChanges(changes)
-
-            with undoStackBlocking() as addUndoItem:
-                addUndoItem(redo=partial(_updateGl, self, spectrumList))
-
-            for spec in spectrumList:
-                for specViews in spec.spectrumViews:
-                    specViews.buildContours = True
-            _updateGl(self, spectrumList)
-
-        self.applyButtons.getButton(APPLYBUTTONTEXT).setEnabled(False)
-        if error.errorValue:
-            # repopulate popup
-            self._repopulate()
-            return False
-
-        return True
-
-    def _rejectButton(self):
-        self.reject()
-
-    def _applyButton(self):
-        self._applyChanges()
-
-    def _okButton(self):
-        if self._applyChanges() is True:
-            self.accept()
-
-
-class SpectrumDisplayPropertiesPopup1d(CcpnDialog):
+class SpectrumDisplayPropertiesPopup1d(SpectrumPropertiesPopupABC):
     """All spectra in the current display are added as tabs
     The apply button then steps through each tab, and calls each function in the _changes dictionary
     in order to set the parameters.
     """
 
-    MINIMUM_WIDTH_PER_TAB = 120
-    MINIMUM_WIDTH = 400
-
-    def __init__(self, parent=None, mainWindow=None, orderedSpectrumViews=None,
+    def __init__(self, parent=None, mainWindow=None, spectrum=None, orderedSpectrumViews=None,
                  title='SpectrumDisplay Properties', **kwds):
-        CcpnDialog.__init__(self, parent, setLayout=True, windowTitle=title, **kwds)
 
-        self.mainWindow = mainWindow
-        self.application = mainWindow.application
-        self.project = mainWindow.application.project
-        self.current = mainWindow.application.current
+        super().__init__(parent=parent, mainWindow=mainWindow,
+                         spectrum=spectrum, title=title, **kwds)
+
         self.orderedSpectrumViews = orderedSpectrumViews
         self.orderedSpectra = [spec.spectrum for spec in self.orderedSpectrumViews]
 
-        self.tabWidget = Tabs(self, setLayout=True, grid=(0, 0), gridSpan=(2, 4), focusPolicy='strong')
+        for specNum, thisSpec in enumerate(self.orderedSpectra):
+            colourTab = ColourTab(parent=self, mainWindow=self.mainWindow, spectrum=thisSpec)
+            self.tabWidget.addTab(colourTab, thisSpec.name)
+
         self.tabWidget.setFixedWidth(self.MINIMUM_WIDTH)
 
-        self._generalTab = []
-        # for specNum, thisSpec in enumerate(self.orderedSpectra):
-        for specNum, thisSpec in enumerate(self.orderedSpectra):
-            self._generalTab.append(ColourTab(parent=self, mainWindow=self.mainWindow, spectrum=thisSpec))
-            self.tabWidget.addTab(self._generalTab[specNum], thisSpec.name)
-
-        self.applyButtons = ButtonList(self, texts=[CANCELBUTTONTEXT, APPLYBUTTONTEXT, OKBUTTONTEXT],
-                                       callbacks=[self._rejectButton, self._applyButton, self._okButton],
-                                       tipTexts=['', '', '', None], direction='h',
-                                       hAlign='r', grid=(2, 1), gridSpan=(1, 4))
-        self.applyButtons.getButton(APPLYBUTTONTEXT).setFocus()
-
-        self._fillPullDowns()
-
-        # clear the changes dict in each tab
-        tabs = self._generalTab
-        for t in tabs:
-            t._changes = dict()
-
-        self.setFixedSize(self.sizeHint())
-
-        # as this is a dialog, need to set one of the buttons as the default button when other widgets have focus
-        self.setDefaultButton(self.applyButtons.getButton(APPLYBUTTONTEXT))
-        self.applyButtons.getButton(APPLYBUTTONTEXT).setEnabled(False)
+        # don't forget to call postInit to finish initialise
+        self.__postInit__()
 
     def _fillPullDowns(self):
-        for aTab in self._generalTab:
+        for aTab in self.tabs:
             fillColourPulldown(aTab.colourBox, allowAuto=False)
-
-    def _keyPressEvent(self, event):
-        if event.key() == QtCore.Qt.Key_Enter:
-            pass
 
     def _repopulate(self):
         pass
-        # if self._generalTab:
-        #   self._generalTab._repopulate()
-
-    def _applyAllChanges(self, changes):
-        for v in changes.values():
-            v()
-
-    def _applyChanges(self):
-        """
-        The apply button has been clicked
-        Define an undo block for setting the properties of the object
-        If there is an error setting any values then generate an error message
-          If anything has been added to the undo queue then remove it with application.undo()
-          repopulate the popup widgets
-        """
-        # tabs = self.tabWidget.findChildren(QtGui.QStackedWidget)[0].children()
-        # tabs = [t for t in tabs if not isinstance(t, QtGui.QStackedLayout)]
-
-        # ejb - error above, need to set the tabs explicitly
-        tabs = self._generalTab
-        allChanges = any(t._changes for t in tabs if t is not None)
-
-        if not allChanges:
-            return True
-
-        with handleDialogApply(self) as error:
-
-            spectrumList = []
-            for t in tabs:
-                if t is not None:
-                    changes = t._changes
-                    if changes:
-                        spectrumList.append(t.spectrum)
-
-            with undoStackBlocking() as addUndoItem:
-                addUndoItem(undo=partial(_updateGl, self, spectrumList))
-
-            for t in tabs:
-                if t is not None:
-                    changes = t._changes
-                    if changes:
-                        self._applyAllChanges(changes)
-
-            with undoStackBlocking() as addUndoItem:
-                addUndoItem(redo=partial(_updateGl, self, spectrumList))
-
-            for spec in spectrumList:
-                for specViews in spec.spectrumViews:
-                    specViews.buildContours = True
-            _updateGl(self, spectrumList)
-
-        self.applyButtons.getButton(APPLYBUTTONTEXT).setEnabled(False)
-        if error.errorValue:
-            # repopulate popup
-            self._repopulate()
-            return False
-
-        return True
-
-    def _rejectButton(self):
-        self.reject()
-
-    def _applyButton(self):
-        self._applyChanges()
-
-    def _okButton(self):
-        if self._applyChanges() is True:
-            self.accept()
 
 
 class ColourTab(Widget):
@@ -1930,16 +1703,19 @@ class ColourTab(Widget):
         fillColourPulldown(self.colourBox, allowAuto=False)
         c = self.spectrum.sliceColour
         if c in spectrumColourKeys:
-            self.colourBox.setCurrentText(spectrumColours[c])
+            col = spectrumColours[c]
+            self.colourBox.setCurrentText(col)
         else:
             addNewColourString(c)
             fillColourPulldown(self.colourBox, allowAuto=False)
             spectrumColourKeys = list(spectrumColours.keys())
-            self.colourBox.setCurrentText(spectrumColours[c])
+            col = spectrumColours[c]
+            self.colourBox.setCurrentText(col)
 
+        self.colourButton = Button(self, vAlign='t', hAlign='l', grid=(7, 2),
+                                   icon='icons/colours', hPolicy='fixed')
+        self.colourButton.clicked.connect(partial(self._queueSetSpectrumColour, spectrum))
         self.colourBox.currentIndexChanged.connect(partial(self._queueChangeSliceComboIndex, spectrum))
-        colourButton = Button(self, vAlign='t', hAlign='l', grid=(7, 2), hPolicy='fixed',
-                              callback=partial(self._queueSetSpectrumColour, spectrum), icon='icons/colours')
 
     def _repopulate(self):
         pass
@@ -1950,6 +1726,7 @@ class ColourTab(Widget):
 
     # spectrum sliceColour button and pulldown
     def _queueSetSpectrumColour(self, spectrum):
+        print('>>>_queueSetSpectrumColour')
         dialog = ColourDialog(self)
         newColour = dialog.getColor()
         if newColour is not None:
@@ -1960,6 +1737,7 @@ class ColourTab(Widget):
     @queueStateChange(_verifyApply)
     def _queueChangeSliceComboIndex(self, spectrum, value):
         if value >= 0 and list(spectrumColours.keys())[value] != spectrum.sliceColour:
+            print('>>>_queueChangeSliceComboIndex')
             return partial(self._changedSliceComboIndex, spectrum, value)
 
     def _changedSliceComboIndex(self, spectrum, value):

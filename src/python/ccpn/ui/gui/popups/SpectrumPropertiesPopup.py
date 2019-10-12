@@ -97,6 +97,9 @@ class SpectrumPropertiesPopupABC(CcpnDialog):
         self.current = mainWindow.application.current
         self.spectrum = spectrum
 
+        # keep a record of how many times the apply button has been pressed
+        self._currentNumApplies = 0
+
         self.tabWidget = Tabs(self, setLayout=True, grid=(0, 0), gridSpan=(2, 4), focusPolicy='strong')
 
         Spacer(self, 5, 5, QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.MinimumExpanding,
@@ -138,9 +141,6 @@ class SpectrumPropertiesPopupABC(CcpnDialog):
         self._applyButton = self.dialogButtons.button(QtWidgets.QDialogButtonBox.Apply)
         self._applyButton.setEnabled(False)
         self._applyButton.setFocus()
-
-        # keep a record of how many times the apply button has been pressed
-        self._currentNumApplies = 0
 
     def __postInit__(self):
         """post initialise functions

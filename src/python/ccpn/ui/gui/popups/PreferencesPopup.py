@@ -94,6 +94,9 @@ class PreferencesPopup(CcpnDialog):
         self.oldPreferences = preferences
         self._userPreferences = UserPreferences(readPreferences=False)
 
+        # keep a record of how many times the apply button has been pressed
+        self._currentNumApplies = 0
+
         self.mainLayout = self.getLayout()
         self._setTabs()
 
@@ -175,8 +178,21 @@ class PreferencesPopup(CcpnDialog):
         self.application._savePreferences()
 
     def _applyChanges(self):
-        # dialog handler here
-        pass
+        """
+        The apply button has been clicked
+        Define an undo block for setting the properties of the object
+        If there is an error setting any values then generate an error message
+          If anything has been added to the undo queue then remove it with application.undo()
+          repopulate the popup widgets
+
+        This is controlled by a series of dicts that contain change functions - operations that are scheduled
+        by changing items in the popup. These functions are executed when the Apply or OK buttons are clicked
+
+        Return True unless any errors occurred
+        """
+
+        self._currentNumApplies += 1
+        return True
 
     def _updateGui(self):
 
@@ -766,7 +782,7 @@ class PreferencesPopup(CcpnDialog):
         multipletAveraging = self.preferences.general.multipletAveraging
         self.multipletAveraging = RadioButtons(parent, texts=MULTIPLETAVERAGINGTYPES,
                                                selectedInd=MULTIPLETAVERAGINGTYPES.index(
-                                                   multipletAveraging) if multipletAveraging in MULTIPLETAVERAGINGTYPES else 0,
+                                                       multipletAveraging) if multipletAveraging in MULTIPLETAVERAGINGTYPES else 0,
                                                callback=self._setMultipletAveraging,
                                                direction='h',
                                                grid=(row, 1), hAlign='l',

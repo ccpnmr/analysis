@@ -127,7 +127,7 @@ class SpectrumPropertiesPopupABC(CcpnDialog):
                                              callbacks=(self._revertButton, self._closeButton,
                                                         self._applyButton, self._okButton),
                                              texts=['Revert'],
-                                             tipTexts=['Revert - roll-back all applied settings and close',
+                                             tipTexts=['Revert - roll-back all applied changes and close',
                                                        'Close - keep all applied changes and close',
                                                        'Apply changes',
                                                        'Apply changes and close'],

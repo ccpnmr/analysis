@@ -55,6 +55,7 @@ from ccpn.ui.gui.guiSettings import getColours, DIVIDER
 from ccpn.ui.gui.widgets.HLine import HLine
 from ccpn.ui.gui.widgets.CompoundWidgets import PulldownListCompoundWidget
 from ccpn.ui.gui.widgets.Spacer import Spacer
+from ccpn.ui.gui.widgets.DialogButtonBox import DialogButtonBox
 from ccpn.ui.gui.popups.Dialog import CcpnDialog, handleDialogApply
 from ccpn.core.lib.ContextManagers import undoStackBlocking
 from ccpn.ui.gui.popups.EstimateNoisePopup import _addContourNoiseButtons
@@ -101,22 +102,42 @@ class SpectrumPropertiesPopupABC(CcpnDialog):
         Spacer(self, 5, 5, QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.MinimumExpanding,
                grid=(3, 1), gridSpan=(1, 1))
 
-        self.dialogButtons = ButtonList(self, texts=[self.REVERTBUTTONTEXT, self.CLOSEBUTTONTEXT, self.APPLYBUTTONTEXT, self.OKBUTTONTEXT],
-                                        callbacks=[self._revertButton, self._closeButton, self._applyButton, self._okButton],
-                                        tipTexts=['Revert - roll-back all applied settings and close',
-                                                  'Close - all applied changes will be kept',
-                                                  'Apply changes',
-                                                  'Apply changes and close'],
-                                        direction='h', grid=(4, 0), gridSpan=(1, 4))
+        # self.dialogButtons = ButtonList(self, texts=[self.REVERTBUTTONTEXT, self.CLOSEBUTTONTEXT, self.APPLYBUTTONTEXT, self.OKBUTTONTEXT],
+        #                                 callbacks=[self._revertButton, self._closeButton, self._applyButton, self._okButton],
+        #                                 tipTexts=['Revert - roll-back all applied settings and close',
+        #                                           'Close - all applied changes will be kept',
+        #                                           'Apply changes',
+        #                                           'Apply changes and close'],
+        #                                 direction='h', grid=(4, 0), gridSpan=(1, 4))
+        #
+        # # test a small spacer to separate the revert button from the rest
+        # self.dialogButtons._insertSpacer(1)
+        #
+        # self.dialogButtons.getButton(self.APPLYBUTTONTEXT).setFocus()
+        #
+        # # as this is a dialog, need to set one of the buttons as the default button when other widgets have focus
+        # self.setDefaultButton(self.dialogButtons.getButton(self.APPLYBUTTONTEXT))
+        # self.dialogButtons.getButton(self.APPLYBUTTONTEXT).setEnabled(False)
 
-        # test a small spacer to separate the revert button from the rest
-        self.dialogButtons._insertSpacer(1)
+        self.dialogButtons = DialogButtonBox(self, grid=(5, 0), gridSpan=(1, 4), orientation='horizontal',
+                                             buttons=(QtWidgets.QDialogButtonBox.Reset,
+                                                      QtWidgets.QDialogButtonBox.Close,
+                                                      QtWidgets.QDialogButtonBox.Apply,
+                                                      QtWidgets.QDialogButtonBox.Ok),
+                                             callbacks=(self._revertButton, self._closeButton,
+                                                        self._applyButton, self._okButton),
+                                             texts=['Revert'],
+                                             tipTexts=['Revert - roll-back all applied settings and close',
+                                                       'Close - keep all applied changes and close',
+                                                       'Apply changes',
+                                                       'Apply changes and close'],
+                                             icons=['icons/undo', 'icons/window-close',
+                                                    'icons/yellow-arrow-down', 'icons/dialog-apply.png'])
 
-        self.dialogButtons.getButton(self.APPLYBUTTONTEXT).setFocus()
-
-        # as this is a dialog, need to set one of the buttons as the default button when other widgets have focus
-        self.setDefaultButton(self.dialogButtons.getButton(self.APPLYBUTTONTEXT))
-        self.dialogButtons.getButton(self.APPLYBUTTONTEXT).setEnabled(False)
+        self.setDefaultButton(self.dialogButtons.button(QtWidgets.QDialogButtonBox.Close))
+        self._applyButton = self.dialogButtons.button(QtWidgets.QDialogButtonBox.Apply)
+        self._applyButton.setEnabled(False)
+        self._applyButton.setFocus()
 
         # keep a record of how many times the apply button has been pressed
         self._currentNumApplies = 0
@@ -231,7 +252,8 @@ class SpectrumPropertiesPopupABC(CcpnDialog):
             _updateGl(self, spectrumList)
 
             # everything has happened - disable the apply button
-            self.dialogButtons.getButton(self.APPLYBUTTONTEXT).setEnabled(False)
+            # self.dialogButtons.getButton(self.APPLYBUTTONTEXT).setEnabled(False)
+            self._applyButton.setEnabled(False)
 
             # check for any errors
             if error.errorValue:
@@ -387,7 +409,10 @@ def _verifyApply(tab, attributeName, value, postFix=None):
         # tabs = (popup._generalTab, popup._dimensionsTab, popup._contoursTab)
         tabs = tuple(popup.tabWidget.widget(ii) for ii in range(popup.tabWidget.count()))
         allChanges = any(t._changes for t in tabs if t is not None)
-        popup.dialogButtons.getButton(CcpnDialog.APPLYBUTTONTEXT).setEnabled(allChanges)
+        # popup.dialogButtons.getButton(CcpnDialog.APPLYBUTTONTEXT).setEnabled(allChanges)
+        _button = popup.dialogButtons.button(QtWidgets.QDialogButtonBox.Apply)
+        if _button:
+            _button.setEnabled(allChanges)
 
 
 class GeneralTab(Widget):

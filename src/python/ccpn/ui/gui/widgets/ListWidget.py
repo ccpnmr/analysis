@@ -71,6 +71,8 @@ class ListWidget(QtWidgets.QListWidget, Base):
         self._items = list(objects or [])
         self.multiSelect = multiSelect
         self.dropSource = None
+
+        #GST this only works for sorting on drops...
         self.sortOnDrop = sortOnDrop
         self.copyDrop = copyDrop
         self.allowDuplicates = allowDuplicates

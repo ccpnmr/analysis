@@ -53,6 +53,7 @@ from ccpn.util.Colour import spectrumColours, addNewColour, fillColourPulldown, 
 from ccpn.ui.gui.widgets.ColourDialog import ColourDialog
 from ccpn.ui.gui.widgets.ScrollArea import ScrollArea
 from ccpn.ui.gui.widgets.Spacer import Spacer
+from ccpn.ui.gui.widgets.DialogButtonBox import DialogButtonBox
 from ccpn.core.PeakList import GAUSSIANMETHOD, PARABOLICMETHOD
 from ccpn.core.MultipletList import MULTIPLETAVERAGINGTYPES
 from ccpn.util.UserPreferences import UserPreferences
@@ -96,23 +97,49 @@ class PreferencesPopup(CcpnDialog):
         self.mainLayout = self.getLayout()
         self._setTabs()
 
-        # self.buttonBox = Button(self, text='Close', callback=self._accept, grid=(1, 2))
-        self.dialogButtons = ButtonList(self, texts=[self.CLOSEBUTTONTEXT, self.APPLYBUTTONTEXT, self.OKBUTTONTEXT],
-                                        callbacks=[self._rejectButton, self._applyButton, self._okButton],
-                                        tipTexts=['Close preferences - all applied changes will be kept',
-                                              'Apply all changes',
-                                              'Accept changes and close'],
-                                        direction='h', hAlign='r', grid=(1, 2))
+        # # self.buttonBox = Button(self, text='Close', callback=self._accept, grid=(1, 2))
+        # self.dialogButtons = ButtonList(self, texts=[self.CLOSEBUTTONTEXT, self.APPLYBUTTONTEXT, self.OKBUTTONTEXT],
+        #                                 callbacks=[self._rejectButton, self._applyButton, self._okButton],
+        #                                 tipTexts=['Close preferences - all applied changes will be kept',
+        #                                       'Apply all changes',
+        #                                       'Accept changes and close'],
+        #                                 direction='h', hAlign='r', grid=(1, 2))
+        #
+        # self.dialogButtons.getButton(self.APPLYBUTTONTEXT).setFocus()
+        #
+        # # as this is a dialog, need to set one of the buttons as the default button when other widgets have focus
+        # self.setDefaultButton(self.dialogButtons.getButton(self.APPLYBUTTONTEXT))
+        # self.dialogButtons.getButton(self.APPLYBUTTONTEXT).setEnabled(False)
 
-        self.dialogButtons.getButton(self.APPLYBUTTONTEXT).setFocus()
+        self.dialogButtons = DialogButtonBox(self, grid=(1, 2), orientation='horizontal',
+                                             buttons=(QtWidgets.QDialogButtonBox.Reset,
+                                                      QtWidgets.QDialogButtonBox.Close,
+                                                      QtWidgets.QDialogButtonBox.Apply,
+                                                      QtWidgets.QDialogButtonBox.Ok),
+                                             callbacks=(self._revertButton, self._closeButton,
+                                                        self._applyButton, self._okButton),
+                                             texts=['Revert'],
+                                             tipTexts=['Revert - roll-back all applied changes and close',
+                                                       'Close - keep all applied changes and close',
+                                                       'Apply changes',
+                                                       'Apply changes and close'],
+                                             icons=['icons/undo', 'icons/window-close',
+                                                    'icons/yellow-arrow-down', 'icons/dialog-apply.png'])
 
-        # as this is a dialog, need to set one of the buttons as the default button when other widgets have focus
-        self.setDefaultButton(self.dialogButtons.getButton(self.APPLYBUTTONTEXT))
-        self.dialogButtons.getButton(self.APPLYBUTTONTEXT).setEnabled(False)
+        self.setDefaultButton(self.dialogButtons.button(QtWidgets.QDialogButtonBox.Close))
+        self._applyButton = self.dialogButtons.button(QtWidgets.QDialogButtonBox.Apply)
+        self._applyButton.setEnabled(False)
+        self._applyButton.setFocus()
 
         self.setFixedWidth(self.sizeHint().width() + 24)
 
-    def _rejectButton(self):
+    def _revertButton(self):
+        """Revert button signal comes here
+        Revert (roll-back) the state of the project to before the popup was opened
+        """
+        self.reject()
+
+    def _closeButton(self):
         """Close button signal comes here
         """
         self.reject()

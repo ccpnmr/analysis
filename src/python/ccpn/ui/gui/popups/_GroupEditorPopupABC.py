@@ -72,13 +72,17 @@ class _ListWidget(ListWidget):
     """Subclassed for dropEvent"""
 
     ROLES = ('Left','Right')
-    def __init__(self, *args, dragRole=None, feedbackWidget = None, emptyText=None, **kwds):
+    def __init__(self, *args, dragRole=None, feedbackWidget = None, rearrangeable=False,  emptyText=None, **kwds):
 
         super().__init__(*args, **kwds)
 
 
         if dragRole.capitalize() not in self.ROLES:
             raise Exception('position must be one of left or right')
+
+        self._rearrangeable = rearrangeable
+        self.setDropIndicatorShown(self._rearrangeable)
+
         self._dragRole = dragRole
         clonedRoles = list(self.ROLES)
         clonedRoles.remove(self._dragRole.capitalize())
@@ -86,19 +90,17 @@ class _ListWidget(ListWidget):
 
         self._emptyText = emptyText
 
-        self.setSortingEnabled(True)
 
         self._feedbackWidget = feedbackWidget
-        self.partner = None
+        self._partner = None
 
         self.itemDoubleClicked.connect(self._itemDoubleClickedCallback)
 
-        #seems to be missing a border, why?
+        # GST seems to be missing a border, why?
         self.setStyleSheet('ListWidget { border: 1px solid rgb(207,207,207)}')
 
         self._feedbackWidget.highlight(False)
 
-    
     def setPartner(self,partner):
         self._partner=partner
 
@@ -108,7 +110,6 @@ class _ListWidget(ListWidget):
         if self.count() == 0:
             self.paintEmpty(event)
 
-    
     def paintEmpty(self,event):
 
          p = QtGui.QPainter(self.viewport())
@@ -126,11 +127,15 @@ class _ListWidget(ListWidget):
         if 'source' in data and data['source'] != None:
             source = data['source']
             okEvent = 'GroupEditorPopupABC' in str(data['source'])
-            okSide = source._dragRole != self._dragRole
+            okSide = False
+            if self._rearrangeable and source == self:
+                okSide = True
+            elif source == self._partner:
+                okSide = True
+
             result = okEvent and okSide
         return result
 
-    
     def dragEnterEvent(self, event):
         if self._isAcceptableDrag(event):
             event.accept()
@@ -139,16 +144,20 @@ class _ListWidget(ListWidget):
         else:
             event.ignore()
 
-    
     def dragLeaveEvent(self, event):
         event.accept()
         self._dragReset()
 
 
-    
     def dropEvent(self, event):
         if self._isAcceptableDrag(event):
-            super().dropEvent(event=event)
+
+            data = self.parseEvent(event)
+            if self._rearrangeable and data['source'] == self:
+                QtWidgets.QListWidget.dropEvent(self,event)
+            else:
+                super().dropEvent(event=event)
+
             self._dragReset()
         else:
             event.ignore()
@@ -209,7 +218,7 @@ class _ListWidget(ListWidget):
     
     def moveAll(self):
         count = self.count()
-        if count > 0 and self._partner:
+        if count > 0 and self._partner is not None:
             for i in reversed(range(count)):
                 item = self.takeItem(i)
                 self._partner.addItem(item)
@@ -297,14 +306,14 @@ class _GroupEditorPopupABC(CcpnDialog):
 
     def _getPreviousState(self):
         result = {}
-        beforeKeys = self.project._pid2Obj.get(self.PID_KEY)
+        beforeKeys = self.project._pid2Obj.get(self.GROUP_PID_KEY)
         if beforeKeys != None:
             for key in beforeKeys:
 
                 #GST do I need to filter object in an undo state, if so could we add some interface for this...
-                object = self.project._pid2Obj.get(self.PID_KEY)[key]
+                object = self.project._pid2Obj.get(self.GROUP_PID_KEY)[key]
                 items = [elem.pid for elem in getattr(object, self.PROJECT_ITEM_ATTRIBUTE)]
-                result[key] = sorted(items)
+                result[key] = items
         return result
 
     def _setLeftWidgets(self):
@@ -338,7 +347,7 @@ class _GroupEditorPopupABC(CcpnDialog):
         self.leftListFeedbackWidget = FeedbackFrame(self)
         self.leftListWidget = _ListWidget(self.leftListFeedbackWidget, feedbackWidget = self.leftListFeedbackWidget,
                                           grid=(0,0),dragRole='right',acceptDrops=True, sortOnDrop=False, copyDrop=False,
-                                          emptyText=self.LEFT_EMPTY_TEXT)
+                                          emptyText=self.LEFT_EMPTY_TEXT,rearrangeable=True)
 
 
 
@@ -347,12 +356,14 @@ class _GroupEditorPopupABC(CcpnDialog):
         self.leftListWidget.model().dataChanged.connect(self._updateModelsOnEdit)
         self.leftListWidget.model().rowsRemoved.connect(self._updateModelsOnEdit)
         self.leftListWidget.model().rowsInserted.connect(self._updateModelsOnEdit)
+        self.leftListWidget.model().rowsMoved.connect(self._updateModelsOnEdit)
 
     def disconnectModels(self):
         self.nameEdit.textChanged.disconnect(self._updateModelsOnEdit)
         self.leftListWidget.model().dataChanged.disconnect(self._updateModelsOnEdit)
         self.leftListWidget.model().rowsRemoved.disconnect(self._updateModelsOnEdit)
         self.leftListWidget.model().rowsInserted.disconnect(self._updateModelsOnEdit)
+        self.leftListWidget.model().rowsMoved.disconnect(self._updateModelsOnEdit)
 
     def _setRightWidgets(self):
 
@@ -514,7 +525,7 @@ class _GroupEditorPopupABC(CcpnDialog):
             items = self._groupedObjects
 
         if len(key) > 0:
-            result = {key : sorted(items)}
+            result = {key : items}
 
         return result
 
@@ -815,7 +826,7 @@ class _GroupEditorPopupABC(CcpnDialog):
     def _updateRight(self):
         """Update Right
         """
-        if self.rightPullDown.getSelectedObject() == None:
+        if self.rightPullDown.getSelectedObject() is None:
             self._setRightListWidgetItems(self._projectObjectItems)
         else:
             self.rightListWidget.clear()
@@ -881,13 +892,13 @@ class _GroupEditorPopupABC(CcpnDialog):
                 if self.editMode:
                     # edit mode
                     for name,items in updateList.items():
-                        pid = '%s:%s' % (self.PID_KEY,name)
+                        pid = '%s:%s' % (self.GROUP_PID_KEY,name)
                         obj =  self.project.getByPid(pid)
 
                         setattr(obj, self.KLASS_ITEM_ATTRIBUTE, items)
 
                     for name in renameList:
-                        pid = '%s:%s' % (self.PID_KEY,name)
+                        pid = '%s:%s' % (self.GROUP_PID_KEY,name)
 
                         obj =  self.project.getByPid(pid)
                         newName = renameList[name]

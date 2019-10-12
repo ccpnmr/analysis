@@ -57,4 +57,5 @@ class SpectrumGroupEditor(_GroupEditorPopupABC):
     PLURAL_GROUPED_NAME = 'Spectrum Groups'
     SINGULAR_GROUP_NAME = 'Spectrum Group'
 
-    PID_KEY='SG'
+    GROUP_PID_KEY= 'SG'
+    ITEM_PID_KEY='SP'

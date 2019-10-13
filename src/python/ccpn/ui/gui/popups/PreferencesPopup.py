@@ -901,7 +901,7 @@ class PreferencesPopup(CcpnDialog):
                grid=(row, 3), gridSpan=(1, 1))
 
     @queueStateChange(_verifyApply)
-    def _queueChangeSliceComboIndex(self, value):
+    def _queueChangeMarksColourIndex(self, value):
         if value >= 0 and list(spectrumColours.keys())[value] != self.preferences.general.defaultMarksColour:
             return partial(self._changeMarksColourIndex, value)
 
@@ -1355,7 +1355,7 @@ class PreferencesPopup(CcpnDialog):
         self.preferences.general.zoomPercent = value
 
     @queueStateChange(_verifyApply)
-    def _queueSetAspect(self):
+    def _queueSetStripWidthZoomPercent(self):
         textFromValue = self.stripWidthZoomPercentData.textFromValue
         value = self.stripWidthZoomPercentData.get()
         prefValue = textFromValue(self.preferences.general.stripWidthZoomPercent)

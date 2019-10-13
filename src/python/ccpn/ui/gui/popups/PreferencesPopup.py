@@ -1176,7 +1176,7 @@ class PreferencesPopup(CcpnDialog):
                     return partial(self._setPymolPath, value)
 
     def _setPymolPath(self, value):
-        pymolPath = self.pymolPath.get()
+        # pymolPath = self.pymolPath.get()
         if 'externalPrograms' in self.preferences:
             if 'pymol' in self.preferences.externalPrograms:
                 self.preferences.externalPrograms.pymol = value

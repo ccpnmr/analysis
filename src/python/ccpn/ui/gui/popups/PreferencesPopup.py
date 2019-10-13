@@ -982,23 +982,39 @@ class PreferencesPopup(CcpnDialog):
     #                 name='standard').findFirstDataUrl(name='remoteData')
     #         dataUrl.url = Implementation.Url(path=newPath)
 
-    def _getUserDataPath(self):
-        if os.path.exists('/'.join(self.userDataPathText.text().split('/')[:-1])):
-            currentPath = '/'.join(self.userDataPathText.text().split('/')[:-1])
-        else:
-            currentPath = os.path.expanduser('~')
-        dialog = FileDialog(self, text='Select User Working File', directory=currentPath, fileMode=2, acceptMode=0,
-                            preferences=self.preferences.general)
-        directory = dialog.selectedFiles()
-        if directory:
-            self.userDataPathText.setText(directory[0])
-            self._setUserDataPath()
-            # self.preferences.general.dataPath = directory[0]
+    # @queueStateChange(_verifyApply)
+    # def _queueSetUserDataPath(self):
+    #     value = self.userDataPathText.get()
+    #     if value != self.preferences.general.dataPath:
+    #         return partial(self._setUserDataPath, value)
+    #
+    # def _setUserDataPath(self):
+    #     if self.userDataPathText.isModified():
+    #         newPath = self.userDataPathText.text().strip()
+    #         self.preferences.general.dataPath = newPath
+    #
+    # def _getUserDataPath(self):
+    #     if os.path.exists('/'.join(self.userDataPathText.text().split('/')[:-1])):
+    #         currentPath = '/'.join(self.userDataPathText.text().split('/')[:-1])
+    #     else:
+    #         currentPath = os.path.expanduser('~')
+    #     dialog = FileDialog(self, text='Select User Working File', directory=currentPath, fileMode=2, acceptMode=0,
+    #                         preferences=self.preferences.general)
+    #     directory = dialog.selectedFiles()
+    #     if directory:
+    #         self.userDataPathText.setText(directory[0])
+    #         # self._setUserDataPath()
+    #         # self.preferences.general.dataPath = directory[0]
 
-    def _setUserDataPath(self):
-        if self.userDataPathText.isModified():
-            newPath = self.userDataPathText.text().strip()
-            self.preferences.general.dataPath = newPath
+    @queueStateChange(_verifyApply)
+    def _queueSetAuxiliaryFilesPath(self):
+        value = self.auxiliaryFilesData.get()
+        if value != self.preferences.general.auxiliaryFilesPath:
+            return partial(self._setAuxiliaryFilesPath, value)
+
+    def _setAuxiliaryFilesPath(self, value):
+        # newPath = self.auxiliaryFilesData.text()
+        self.preferences.general.auxiliaryFilesPath = value
 
     def _getAuxiliaryFilesPath(self):
         if os.path.exists(os.path.expanduser(self.auxiliaryFilesData.text())):
@@ -1010,12 +1026,18 @@ class PreferencesPopup(CcpnDialog):
         directory = dialog.selectedFiles()
         if len(directory) > 0:
             self.auxiliaryFilesData.setText(directory[0])
-            self._setAuxiliaryFilesPath()
+            # self._setAuxiliaryFilesPath()
             # self.preferences.general.auxiliaryFilesPath = directory[0]
 
-    def _setAuxiliaryFilesPath(self):
-        newPath = self.auxiliaryFilesData.text()
-        self.preferences.general.auxiliaryFilesPath = newPath
+    @queueStateChange(_verifyApply)
+    def _queueSetuserLayoutsPath(self):
+        value = self.userLayoutsLe.get()
+        if value != self.preferences.general.userLayoutsPath:
+            return partial(self._setuserLayoutsPath, value)
+
+    def _setuserLayoutsPath(self, value):
+        # newPath = self.userLayoutsLe.text()
+        self.preferences.general.userLayoutsPath = value
 
     def _getUserLayoutsPath(self):
         if os.path.exists(os.path.expanduser(self.userLayoutsLe.text())):
@@ -1027,12 +1049,18 @@ class PreferencesPopup(CcpnDialog):
         directory = dialog.selectedFiles()
         if len(directory) > 0:
             self.userLayoutsLe.setText(directory[0])
-            self._setuserLayoutsPath()
+            # self._setuserLayoutsPath()
             # self.preferences.general.userLayoutsPath = directory[0]
 
-    def _setuserLayoutsPath(self):
-        newPath = self.userLayoutsLe.text()
-        self.preferences.general.userLayoutsPath = newPath
+    @queueStateChange(_verifyApply)
+    def _queueSetMacroFilesPath(self):
+        value = self.macroPathData.get()
+        if value != self.preferences.general.userMacroPath:
+            return partial(self._setMacroFilesPath, value)
+
+    def _setMacroFilesPath(self, value):
+        # newPath = self.macroPathData.text()
+        self.preferences.general.userMacroPath = value
 
     def _getMacroFilesPath(self):
         if os.path.exists(os.path.expanduser(self.macroPathData.text())):
@@ -1044,12 +1072,18 @@ class PreferencesPopup(CcpnDialog):
         directory = dialog.selectedFiles()
         if len(directory) > 0:
             self.macroPathData.setText(directory[0])
-            self._setMacroFilesPath()
+            # self._setMacroFilesPath()
             # self.preferences.general.userMacroPath = directory[0]
 
-    def _setMacroFilesPath(self):
-        newPath = self.macroPathData.text()
-        self.preferences.general.userMacroPath = newPath
+    @queueStateChange(_verifyApply)
+    def _queueSetPluginFilesPath(self):
+        value = self.pluginPathData.get()
+        if value != self.preferences.general.userPluginPath:
+            return partial(self._setPluginFilesPath, value)
+
+    def _setPluginFilesPath(self, value):
+        # newPath = self.pluginPathData.text()
+        self.preferences.general.userPluginPath = value
 
     def _getPluginFilesPath(self):
         if os.path.exists(os.path.expanduser(self.pluginPathData.text())):
@@ -1061,12 +1095,18 @@ class PreferencesPopup(CcpnDialog):
         directory = dialog.selectedFiles()
         if len(directory) > 0:
             self.pluginPathData.setText(directory[0])
-            self._setPluginFilesPath()
+            # self._setPluginFilesPath()
             # self.preferences.general.pluginMacroPath = directory[0]
 
-    def _setPluginFilesPath(self):
-        newPath = self.pluginPathData.text()
-        self.preferences.general.userPluginPath = newPath
+    @queueStateChange(_verifyApply)
+    def _queueSetPipesFilesPath(self):
+        value = self.pipesPathData.get()
+        if value != self.preferences.general.userExtensionPath:
+            return partial(self._setPipesFilesPath, value)
+
+    def _setPipesFilesPath(self, value):
+        # newPath = self.pipesPathData.text()
+        self.preferences.general.userExtensionPath = value
 
     def _getExtensionFilesPath(self):
         if os.path.exists(os.path.expanduser(self.pipesPathData.text())):
@@ -1078,18 +1118,30 @@ class PreferencesPopup(CcpnDialog):
         directory = dialog.selectedFiles()
         if len(directory) > 0:
             self.pipesPathData.setText(directory[0])
-            self._setPipesFilesPath()
+            # self._setPipesFilesPath()
             # self.preferences.general.userExtensionPath = directory[0]
 
-    def _setPipesFilesPath(self):
-        newPath = self.pipesPathData.text()
-        self.preferences.general.userExtensionPath = newPath
+    def _setPipesFilesPath(self, value):
+        # newPath = self.pipesPathData.text()
+        self.preferences.general.userExtensionPath = value
+
+    @queueStateChange(_verifyApply)
+    def _queueChangeLanguage(self, value):
+        value = languages[value]
+        if value != self.preferences.general.language:
+            return partial(self._changeLanguage, value)
 
     def _changeLanguage(self, value):
-        self.preferences.general.language = (languages[value])
+        self.preferences.general.language = value       #(languages[value])
+
+    @queueStateChange(_verifyApply)
+    def _queueChangeColourScheme(self, value):
+        value = COLOUR_SCHEMES[value]
+        if value != self.preferences.general.colourScheme:
+            return partial(self._changeColourScheme, value)
 
     def _changeColourScheme(self, value):
-        self.preferences.general.colourScheme = (COLOUR_SCHEMES[value])
+        self.preferences.general.colourScheme = value       #(COLOUR_SCHEMES[value])
 
     @queueStateChange(_verifyApply)
     def _queueToggleGeneralOptions(self, preference, checked):

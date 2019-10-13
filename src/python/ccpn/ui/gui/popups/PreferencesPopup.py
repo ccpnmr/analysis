@@ -29,7 +29,9 @@ from PyQt5 import QtWidgets, QtCore
 
 import os
 from functools import partial
+from copy import deepcopy
 from ccpnmodel.ccpncore.api.memops import Implementation
+from ccpn.util.AttrDict import AttrDict
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.Frame import Frame
 from ccpn.ui.gui.widgets.Button import Button
@@ -60,6 +62,7 @@ from ccpn.util.UserPreferences import UserPreferences
 from ccpn.ui.gui.lib.GuiPath import PathEdit
 from ccpn.ui.gui.popups.ValidateSpectraPopup import ValidateSpectraForPreferences
 from ccpn.ui.gui.popups.Dialog import CcpnDialog
+from ccpn.core.lib.ContextManagers import queueStateChange
 
 
 PEAKFITTINGDEFAULTS = [PARABOLICMETHOD, GAUSSIANMETHOD]
@@ -71,6 +74,36 @@ PEAKFITTINGDEFAULTS = [PARABOLICMETHOD, GAUSSIANMETHOD]
 PulldownListsMinimumWidth = 200
 LineEditsMinimumWidth = 195
 NotImplementedTipText = 'This option has not been implemented yet'
+
+
+def _verifyApply(tab, attributeName, value, postFix=None):
+    """Change the state of the apply button based on the changes in the tabs
+    """
+    popup = tab._parent
+
+    # if attributeName is defined use as key to dict to store change functions
+    # append postFix if need to differentiate partial functions
+    if attributeName:
+        if postFix is not None:
+            attributeName += str(postFix)
+        if value:
+
+            # store in dict
+            tab._changes[attributeName] = value
+        else:
+            if attributeName in tab._changes:
+                # delete from dict - empty dict implies no changes
+                del tab._changes[attributeName]
+
+    if popup:
+        # set button state depending on number of changes
+        # tabs = (popup._generalTab, popup._dimensionsTab, popup._contoursTab)
+        tabs = tuple(popup.tabWidget.widget(ii) for ii in range(popup.tabWidget.count()))
+        allChanges = any(t._changes for t in tabs if t is not None)
+        # popup.dialogButtons.getButton(CcpnDialog.APPLYBUTTONTEXT).setEnabled(allChanges)
+        _button = popup.dialogButtons.button(QtWidgets.QDialogButtonBox.Apply)
+        if _button:
+            _button.setEnabled(allChanges)
 
 
 class PreferencesPopup(CcpnDialog):
@@ -91,11 +124,12 @@ class PreferencesPopup(CcpnDialog):
             return
 
         self.preferences = preferences
-        self.oldPreferences = preferences
         self._userPreferences = UserPreferences(readPreferences=False)
+        self._lastPrefs = AttrDict(deepcopy(self.preferences))
 
         # keep a record of how many times the apply button has been pressed
         self._currentNumApplies = 0
+        self._changes = dict()
 
         self.mainLayout = self.getLayout()
         self._setTabs()
@@ -895,7 +929,8 @@ class PreferencesPopup(CcpnDialog):
         directory = dialog.selectedFiles()
         if directory:
             self.userDataPathText.setText(directory[0])
-            self.preferences.general.dataPath = directory[0]
+            self._setUserDataPath()
+            # self.preferences.general.dataPath = directory[0]
 
     def _setUserDataPath(self):
         if self.userDataPathText.isModified():
@@ -912,7 +947,12 @@ class PreferencesPopup(CcpnDialog):
         directory = dialog.selectedFiles()
         if len(directory) > 0:
             self.auxiliaryFilesData.setText(directory[0])
-            self.preferences.general.auxiliaryFilesPath = directory[0]
+            self._setAuxiliaryFilesPath()
+            # self.preferences.general.auxiliaryFilesPath = directory[0]
+
+    def _setAuxiliaryFilesPath(self):
+        newPath = self.auxiliaryFilesData.text()
+        self.preferences.general.auxiliaryFilesPath = newPath
 
     def _getUserLayoutsPath(self):
         if os.path.exists(os.path.expanduser(self.userLayoutsLe.text())):
@@ -924,15 +964,12 @@ class PreferencesPopup(CcpnDialog):
         directory = dialog.selectedFiles()
         if len(directory) > 0:
             self.userLayoutsLe.setText(directory[0])
-            self.preferences.general.userLayoutsPath = directory[0]
+            self._setuserLayoutsPath()
+            # self.preferences.general.userLayoutsPath = directory[0]
 
     def _setuserLayoutsPath(self):
         newPath = self.userLayoutsLe.text()
         self.preferences.general.userLayoutsPath = newPath
-
-    def _setAuxiliaryFilesPath(self):
-        newPath = self.auxiliaryFilesData.text()
-        self.preferences.general.auxiliaryFilesPath = newPath
 
     def _getMacroFilesPath(self):
         if os.path.exists(os.path.expanduser(self.macroPathData.text())):
@@ -944,7 +981,12 @@ class PreferencesPopup(CcpnDialog):
         directory = dialog.selectedFiles()
         if len(directory) > 0:
             self.macroPathData.setText(directory[0])
-            self.preferences.general.userMacroPath = directory[0]
+            self._setMacroFilesPath()
+            # self.preferences.general.userMacroPath = directory[0]
+
+    def _setMacroFilesPath(self):
+        newPath = self.macroPathData.text()
+        self.preferences.general.userMacroPath = newPath
 
     def _getPluginFilesPath(self):
         if os.path.exists(os.path.expanduser(self.pluginPathData.text())):
@@ -956,7 +998,12 @@ class PreferencesPopup(CcpnDialog):
         directory = dialog.selectedFiles()
         if len(directory) > 0:
             self.pluginPathData.setText(directory[0])
-            self.preferences.general.pluginMacroPath = directory[0]
+            self._setPluginFilesPath()
+            # self.preferences.general.pluginMacroPath = directory[0]
+
+    def _setPluginFilesPath(self):
+        newPath = self.pluginPathData.text()
+        self.preferences.general.userPluginPath = newPath
 
     def _getExtensionFilesPath(self):
         if os.path.exists(os.path.expanduser(self.pipesPathData.text())):
@@ -968,15 +1015,8 @@ class PreferencesPopup(CcpnDialog):
         directory = dialog.selectedFiles()
         if len(directory) > 0:
             self.pipesPathData.setText(directory[0])
-            self.preferences.general.userExtensionPath = directory[0]
-
-    def _setMacroFilesPath(self):
-        newPath = self.macroPathData.text()
-        self.preferences.general.userMacroPath = newPath
-
-    def _setPluginFilesPath(self):
-        newPath = self.pluginPathData.text()
-        self.preferences.general.userPluginPath = newPath
+            self._setPipesFilesPath()
+            # self.preferences.general.userExtensionPath = directory[0]
 
     def _setPipesFilesPath(self):
         newPath = self.pipesPathData.text()

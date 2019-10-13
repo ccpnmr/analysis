@@ -76,24 +76,28 @@ LineEditsMinimumWidth = 195
 NotImplementedTipText = 'This option has not been implemented yet'
 
 
-def _updateGl(self):
+def _updateSettings(self, newPrefs):
     from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
 
+    self.application.preferences = newPrefs
     self._updateDisplay()
 
     GLSignals = GLNotifier(parent=self)
     GLSignals.emitPaintEvent()
 
 
-def _verifyApply(popup, attributeName, value, postFix=None):
+def _verifyApply(popup, attributeName, value, *postFixes):
     """Change the state of the apply button based on the changes in the tabs
     """
 
     # if attributeName is defined use as key to dict to store change functions
     # append postFix if need to differentiate partial functions
     if attributeName:
-        if postFix is not None:
-            attributeName += str(postFix)
+        if postFixes is not None:
+            # attributeName += str(postFixes)
+            for pf in postFixes:
+                if pf:
+                    attributeName += pf
         if value:
 
             # store in dict
@@ -183,14 +187,13 @@ class PreferencesPopup(CcpnDialog):
         """
         # Reset preferences to previous state
         if self._currentNumApplies > 0:
-            self.application.preferences = self._lastPrefs
-            self.application._savePreferences()
-            _updateGl(self)
 
-        if self.project and self.project._undo:
-            # with undoStackBlocking():
-            for undos in range(self._currentNumApplies):
-                self.project._undo.undo()
+            if self.project and self.project._undo:
+                for undos in range(self._currentNumApplies):
+                    self.project._undo.undo()
+
+            self.application._savePreferences()
+
         self.reject()
 
     def _closeButton(self):
@@ -227,6 +230,10 @@ class PreferencesPopup(CcpnDialog):
                 strip._contourThickness = self.preferences.general.contourThickness
                 strip.crosshairVisible = self.preferences.general.showCrosshair
 
+        checked = self.preferences.general['showToolbar']
+        for spectrumDisplay in self.project.spectrumDisplays:
+            spectrumDisplay.spectrumUtilToolBar.setVisible(checked)
+
         if self.preferences.general.colourScheme != self._oldColourScheme:
             setColourScheme(self.preferences.general.colourScheme)
             self.application.correctColours()
@@ -252,18 +259,21 @@ class PreferencesPopup(CcpnDialog):
         # handle clicking of the Apply/OK button
         with handleDialogApply(self) as error:
 
+            lastPrefs = deepcopy(self.preferences)
+
             # add an undo item to redraw these spectra
             with undoStackBlocking() as addUndoItem:
-                addUndoItem(undo=partial(_updateGl, self))
+                addUndoItem(undo=partial(_updateSettings, self, lastPrefs))
 
             # apply all functions to the spectra
             self._applyAllChanges(self._changes)
 
+            newPrefs = deepcopy(self.preferences)
+            _updateSettings(self, newPrefs)
+
             # add a redo item to redraw these spectra
             with undoStackBlocking() as addUndoItem:
-                addUndoItem(redo=partial(_updateGl, self))
-
-            _updateGl(self)
+                addUndoItem(redo=partial(_updateSettings, self, newPrefs))
 
             # everything has happened - disable the apply button
             self._applyButton.setEnabled(False)
@@ -1081,6 +1091,11 @@ class PreferencesPopup(CcpnDialog):
     def _changeColourScheme(self, value):
         self.preferences.general.colourScheme = (COLOUR_SCHEMES[value])
 
+    @queueStateChange(_verifyApply)
+    def _queueToggleGeneralOptions(self, preference, checked):
+        if checked != self.preferences.general[preference]:
+            return partial(self._toggleGeneralOptions, preference, checked)
+
     def _toggleGeneralOptions(self, preference, checked):
         self.preferences.general[preference] = checked
         if preference == 'showToolbar':
@@ -1093,115 +1108,202 @@ class PreferencesPopup(CcpnDialog):
         elif preference == 'autoBackupEnabled':
             self.application.updateAutoBackup()
 
-    def _setPymolPath(self):
+    @queueStateChange(_verifyApply)
+    def _queueSetPymolPath(self):
+        value = self.pymolPath.get()
+        if 'externalPrograms' in self.preferences:
+            if 'pymol' in self.preferences.externalPrograms:
+                if value != self.preferences.externalPrograms.pymol:
+                    self.testPymolPathButton.setText('test')
+                    return partial(self._setPymolPath, value)
+
+    def _setPymolPath(self, value):
         pymolPath = self.pymolPath.get()
         if 'externalPrograms' in self.preferences:
             if 'pymol' in self.preferences.externalPrograms:
-                self.preferences.externalPrograms.pymol = pymolPath
-        self.testPymolPathButton.setText('test')
+                self.preferences.externalPrograms.pymol = value
+        # self.testPymolPathButton.setText('test')
 
     def _getPymolPath(self):
-
         dialog = FileDialog(self, text='Select File', preferences=self.preferences.general)
         file = dialog.selectedFile()
         if file:
             self.pymolPath.setText(file)
-            self._setPymolPath()
+            # self._setPymolPath()
 
-    def _setAutoBackupFrequency(self):
-        try:
-            frequency = int(self.autoBackupFrequencyData.text())
-        except:
-            return
-        self.preferences.general.autoBackupFrequency = frequency
+    @queueStateChange(_verifyApply)
+    def _queueSetAutoBackupFrequency(self):
+        value = self.autoBackupFrequencyData.get()
+        if value != self.preferences.general.autoBackupFrequency:
+            return partial(self._setAutoBackupFrequency, value)
+
+    def _setAutoBackupFrequency(self, value):
+        # try:
+        #     frequency = int(self.autoBackupFrequencyData.text())
+        # except:
+        #     return
+        self.preferences.general.autoBackupFrequency = value
         self.application.updateAutoBackup()
 
-    def _setRegionPadding(self):
-        try:
-            padding = 0.01 * float(self.regionPaddingData.text())
-        except:
-            return
-        self.preferences.general.stripRegionPadding = padding
+    @queueStateChange(_verifyApply)
+    def _queueSetRegionPadding(self):
+        textFromValue = self.regionPaddingData.textFromValue
+        value = 0.01 * self.regionPaddingData.get()
+        prefValue = textFromValue(self.preferences.general.stripRegionPadding)
+        if value >= 0 and textFromValue(value) != prefValue:
+            return partial(self._setRegionPadding, value)
 
-    def _setDropFactor(self):
-        try:
-            dropFactor = 0.01 * float(self.dropFactorData.text())
-        except:
-            return
-        self.preferences.general.peakDropFactor = dropFactor
+    def _setRegionPadding(self, value):
+        # try:
+        #     padding = 0.01 * float(self.regionPaddingData.text())
+        # except:
+        #     return
+        self.preferences.general.stripRegionPadding = value
 
-    def _setSymbolSizePixel(self):
+    @queueStateChange(_verifyApply)
+    def _queueSetDropFactor(self):
+        textFromValue = self.dropFactorData.textFromValue
+        value = 0.01 * self.dropFactorData.get()
+        prefValue = textFromValue(self.preferences.general.peakDropFactor)
+        if value >= 0 and textFromValue(value) != prefValue:
+            return partial(self._setDropFactor, value)
+
+    def _setDropFactor(self, value):
+        # try:
+        #     dropFactor = 0.01 * float(self.dropFactorData.text())
+        # except:
+        #     return
+        self.preferences.general.peakDropFactor = value
+
+    @queueStateChange(_verifyApply)
+    def _queueSetSymbolSizePixel(self):
+        value = self.symbolSizePixelData.get()
+        if value != self.preferences.general.symbolSizePixel:
+            return partial(self._setSymbolSizePixel, value)
+
+    def _setSymbolSizePixel(self, value):
         """
         Set the size of the symbols (pixels)
         """
-        try:
-            symbolSizePixel = int(self.symbolSizePixelData.text())
-        except:
-            return
-        self.preferences.general.symbolSizePixel = symbolSizePixel
+        # try:
+        #     symbolSizePixel = int(self.symbolSizePixelData.text())
+        # except:
+        #     return
+        self.preferences.general.symbolSizePixel = value
 
-    def _setSymbolThickness(self):
+    @queueStateChange(_verifyApply)
+    def _queueSetSymbolThickness(self):
+        value = self.symbolThicknessData.get()
+        if value != self.preferences.general.symbolThickness:
+            return partial(self._setSymbolThickness, value)
+
+    def _setSymbolThickness(self, value):
         """
         Set the Thickness of the peak symbols (ppm)
         """
-        try:
-            symbolThickness = int(self.symbolThicknessData.text())
-        except:
-            return
-        self.preferences.general.symbolThickness = symbolThickness
+        # try:
+        #     symbolThickness = int(self.symbolThicknessData.text())
+        # except:
+        #     return
+        self.preferences.general.symbolThickness = value
 
-    def _setContourThickness(self):
+    @queueStateChange(_verifyApply)
+    def _queueSetContourThickness(self):
+        value = self.contourThicknessData.get()
+        if value != self.preferences.general.contourThickness:
+            return partial(self._setContourThickness, value)
+
+    def _setContourThickness(self, value):
         """
         Set the Thickness of the peak contours (ppm)
         """
-        try:
-            contourThickness = int(self.contourThicknessData.text())
-        except:
-            return
-        self.preferences.general.contourThickness = contourThickness
+        # try:
+        #     contourThickness = int(self.contourThicknessData.text())
+        # except:
+        #     return
+        self.preferences.general.contourThickness = value
 
-    def _toggleSpectralOptions(self, preference, checked):
-        self.preferences.spectra[preference] = str(checked)
+    # @queueStateChange(_verifyApply)
+    # def _queueToggleSpectralOptions(self, preference, checked):
+    #     if checked != self.preferences.spectra[preference]:
+    #         return partial(self._toggleSpectralOptions, checked)
+    #
+    # def _toggleSpectralOptions(self, preference, checked):
+    #     self.preferences.spectra[preference] = str(checked)
 
-    def _setAnnotations(self):
+    @queueStateChange(_verifyApply)
+    def _queueSetAnnotations(self):
+        value = self.annotationsData.getIndex()
+        if value != self.preferences.general.annotationType:
+            return partial(self._setAnnotations, value)
+
+    def _setAnnotations(self, value):
         """
         Set the annotation type for the pid labels
         """
-        try:
-            annotationType = self.annotationsData.getIndex()
-        except:
-            return
-        self.preferences.general.annotationType = annotationType
+        # try:
+        #     annotationType = self.annotationsData.getIndex()
+        # except:
+        #     return
+        self.preferences.general.annotationType = value
 
-    def _setSymbol(self):
+    @queueStateChange(_verifyApply)
+    def _queueSetSymbol(self):
+        value = self.symbol.getIndex()
+        if value != self.preferences.general.symbolType:
+            return partial(self._setSymbol, value)
+
+    def _setSymbol(self, value):
         """
         Set the peak symbol type - current a cross or lineWidths
         """
-        try:
-            symbol = self.symbol.getIndex()
-        except:
-            return
-        self.preferences.general.symbolType = symbol
+        # try:
+        #     symbol = self.symbol.getIndex()
+        # except:
+        #     return
+        self.preferences.general.symbolType = value
 
-    def _setZoomCentre(self):
+    @queueStateChange(_verifyApply)
+    def _queueSetZoomCentre(self):
+        value = self.zoomCentre.getIndex()
+        if value != self.preferences.general.zoomCentreType:
+            return partial(self._setZoomCentre, value)
+
+    def _setZoomCentre(self, value):
         """
         Set the zoom centring method to either mouse position or centre of the screen
         """
-        try:
-            zoomCentre = self.zoomCentre.getIndex()
-        except:
-            return
-        self.preferences.general.zoomCentreType = zoomCentre
+        # try:
+        #     zoomCentre = self.zoomCentre.getIndex()
+        # except:
+        #     return
+        self.preferences.general.zoomCentreType = value
 
-    def _setZoomPercent(self):
+    @queueStateChange(_verifyApply)
+    def _queueSetZoomPercent(self):
+        textFromValue = self.zoomPercentData.textFromValue
+        value = self.zoomPercentData.get()
+        prefValue = textFromValue(self.preferences.general.zoomPercent)
+        if value >= 0 and textFromValue(value) != prefValue:
+            return partial(self._setZoomPercent, value)
+
+    def _setZoomPercent(self, value):
         """
         Set the value for manual zoom
         """
-        try:
-            zoomPercent = float(self.zoomPercentData.text())
-        except:
-            return
-        self.preferences.general.zoomPercent = zoomPercent
+        # try:
+        #     zoomPercent = float(self.zoomPercentData.text())
+        # except:
+        #     return
+        self.preferences.general.zoomPercent = value
+
+    @queueStateChange(_verifyApply)
+    def _queueSetAspect(self):
+        textFromValue = self.stripWidthZoomPercentData.textFromValue
+        value = self.stripWidthZoomPercentData.get()
+        prefValue = textFromValue(self.preferences.general.stripWidthZoomPercent)
+        if value >= 0 and textFromValue(value) != prefValue:
+            return partial(self._setStripWidthZoomPercent, value)
 
     def _setStripWidthZoomPercent(self):
         """
@@ -1213,6 +1315,12 @@ class PreferencesPopup(CcpnDialog):
             return
         self.preferences.general.stripWidthZoomPercent = stripWidthZoomPercent
 
+    @queueStateChange(_verifyApply)
+    def _queueSetMatchAxisCode(self):
+        value = self.matchAxisCode.getIndex()
+        if value != self.preferences.general.matchAxisCode:
+            return partial(self._setMatchAxisCode, value)
+
     def _setMatchAxisCode(self):
         """
         Set the matching of the axis codes across different strips
@@ -1223,65 +1331,107 @@ class PreferencesPopup(CcpnDialog):
             return
         self.preferences.general.matchAxisCode = matchAxisCode
 
-    def _setAxisOrderingOptions(self):
+    @queueStateChange(_verifyApply)
+    def _queueSetAxisOrderingOptions(self):
+        value = self.axisOrderingOptions.getIndex()
+        if value != self.preferences.general.axisOrderingOptions:
+            return partial(self._setAxisOrderingOptions, value)
+
+    def _setAxisOrderingOptions(self, value):
         """
         Set the option for the axis ordering of strips when opening a new display
         """
-        try:
-            axisOrderingOptions = self.axisOrderingOptions.getIndex()
-        except:
-            return
-        self.preferences.general.axisOrderingOptions = axisOrderingOptions
+        # try:
+        #     axisOrderingOptions = self.axisOrderingOptions.getIndex()
+        # except:
+        #     return
+        self.preferences.general.axisOrderingOptions = value
 
-    def _setPeakFittingMethod(self):
+    @queueStateChange(_verifyApply)
+    def _queueSetPeakFittingMethod(self):
+        value = PEAKFITTINGDEFAULTS[self.peakFittingMethod.getIndex()]
+        if value != self.preferences.general.peakFittingMethod:
+            return partial(self._setPeakFittingMethod, value)
+
+    def _setPeakFittingMethod(self, value):
         """
         Set the matching of the axis codes across different strips
         """
-        try:
-            peakFittingMethod = PEAKFITTINGDEFAULTS[self.peakFittingMethod.getIndex()]
-        except:
-            return
-        self.preferences.general.peakFittingMethod = peakFittingMethod
+        # try:
+        #     peakFittingMethod = PEAKFITTINGDEFAULTS[self.peakFittingMethod.getIndex()]
+        # except:
+        #     return
+        self.preferences.general.peakFittingMethod = value
 
-    def _setAspect(self, aspect):
+    @queueStateChange(_verifyApply)
+    def _queueSetAspect(self, aspect):
+        textFromValue = self.aspectData[aspect].textFromValue
+        value = self.aspectData[aspect].get()
+        prefValue = textFromValue(self.preferences.general.aspectRatios[aspect])
+        if textFromValue(value) != prefValue:
+            return partial(self._setAspect, aspect, value)
+
+    def _setAspect(self, aspect, value):
         """
         Set the aspect ratio for the axes
         """
-        try:
-            aspectValue = float(self.aspectData[aspect].text())
-        except Exception as es:
-            return
-        self.preferences.general.aspectRatios[aspect] = aspectValue
+        # try:
+        #     aspectValue = float(self.aspectData[aspect].text())
+        # except Exception as es:
+        #     return
+        self.preferences.general.aspectRatios[aspect] = value
 
-    def _setIntensityLimit(self):
+    @queueStateChange(_verifyApply)
+    def _queueSetIntensityLimit(self):
+        textFromValue = self.showIntensityLimitBox.textFromValue
+        value = self.showIntensityLimitBox.get()
+        prefValue = textFromValue(self.preferences.general.intensityLimit)
+        if value >= 0 and textFromValue(value) != prefValue:
+            return partial(self._setIntensityLimit, value)
+
+    def _setIntensityLimit(self, value):
         """
         Set the value for the minimum intensity limit
         """
-        try:
-            limitValue = float(self.showIntensityLimitBox.text())
-        except Exception as es:
-            return
-        self.preferences.general.intensityLimit = limitValue
+        # try:
+        #     limitValue = float(self.showIntensityLimitBox.text())
+        # except Exception as es:
+        #     return
+        self.preferences.general.intensityLimit = value
 
-    def _setMultipletAveraging(self):
+    @queueStateChange(_verifyApply)
+    def _queueSetMultipletAveraging(self):
+        value = self.multipletAveraging.getSelectedText()
+        if value != self.preferences.general.multipletAveraging:
+            return partial(self._setMultipletAveraging, value)
+
+    def _setMultipletAveraging(self, value):
         """
         Set the multiplet averaging type - normal or weighted
         """
-        try:
-            symbol = self.multipletAveraging.getSelectedText()
-        except:
-            return
-        self.preferences.general.multipletAveraging = symbol
+        # try:
+        #     symbol = self.multipletAveraging.getSelectedText()
+        # except:
+        #     return
+        self.preferences.general.multipletAveraging = value
 
-    def _setVolumeIntegralLimit(self):
+    @queueStateChange(_verifyApply)
+    def _queueSetVolumeIntegralLimit(self):
+        textFromValue = self.volumeIntegralLimitData.textFromValue
+        value = self.volumeIntegralLimitData.get()
+        prefValue = textFromValue(self.preferences.general.volumeIntegralLimit)
+        if value >= 0 and textFromValue(value) != prefValue:
+            return partial(self._setVolumeIntegralLimit, value)
+
+    def _setVolumeIntegralLimit(self, value):
         """
         Set the value for increasing/decreasing width of strips
         """
-        try:
-            volumeIntegralLimit = float(self.volumeIntegralLimitData.text())
-        except:
-            return
-        self.preferences.general.volumeIntegralLimit = volumeIntegralLimit
+        # try:
+        #     volumeIntegralLimit = float(self.volumeIntegralLimitData.text())
+        # except:
+        #     return
+        self.preferences.general.volumeIntegralLimit = value
 
     @queueStateChange(_verifyApply)
     def _queueSetUseProxy(self):

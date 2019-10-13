@@ -1068,10 +1068,11 @@ def queueStateChange(verify=None, attributeName=None):
         ba = sig.bind(*args, **kwds)
         ba.apply_defaults()
         dim = ba.arguments.get('dim')
+        pref = ba.arguments.get('preference')
 
         # call the verify function for the decorator
         if verify:
-            verify(self, func.__name__, result, dim)
+            verify(self, func.__name__, result, dim, pref)
 
         return result
 

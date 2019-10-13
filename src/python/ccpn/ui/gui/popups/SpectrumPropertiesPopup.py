@@ -384,7 +384,7 @@ class SpectrumDisplayPropertiesPopup1d(SpectrumPropertiesPopupABC):
         pass
 
 
-def _verifyApply(tab, attributeName, value, postFix=None):
+def _verifyApply(tab, attributeName, value, *postFixes):
     """Change the state of the apply button based on the changes in the tabs
     """
     popup = tab._parent
@@ -392,8 +392,11 @@ def _verifyApply(tab, attributeName, value, postFix=None):
     # if attributeName is defined use as key to dict to store change functions
     # append postFix if need to differentiate partial functions
     if attributeName:
-        if postFix is not None:
-            attributeName += str(postFix)
+        if postFixes is not None:
+            # attributeName += str(postFixes)
+            for pf in postFixes:
+                if pf:
+                    attributeName += pf
         if value:
 
             # store in dict

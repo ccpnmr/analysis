@@ -21,13 +21,22 @@ __version__ = "$Revision: 3.0.0 $"
 #=========================================================================================
 __author__ = "$Author: CCPN $"
 __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
-
-
 #=========================================================================================
 # Start of code
 #=========================================================================================
+
+from copy import deepcopy
+
 
 class AttrDict(dict):
     def __init__(self, *args, **kwargs):
         super(AttrDict, self).__init__(*args, **kwargs)
         self.__dict__ = self
+
+    # def __getattr__(self, key):
+    #     # required to access data with dot notation
+    #     return self[key]
+
+    def __deepcopy__(self, memo):
+        # required to handle deepcopy function for nested mutable objects
+        return AttrDict(deepcopy(dict(self)))

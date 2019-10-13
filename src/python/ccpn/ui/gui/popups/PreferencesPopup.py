@@ -45,7 +45,7 @@ from ccpn.ui.gui.widgets.CheckBox import CheckBox
 from ccpn.ui.gui.widgets.RadioButtons import RadioButtons
 from ccpn.ui.gui.guiSettings import COLOUR_SCHEMES, getColours, DIVIDER, setColourScheme
 from ccpn.framework.Translation import languages
-from ccpn.ui.gui.popups.Dialog import CcpnDialog
+from ccpn.ui.gui.popups.Dialog import CcpnDialog, handleDialogApply
 from ccpn.ui.gui.widgets import MessageDialog
 from ccpn.ui.gui.widgets.Tabs import Tabs
 from ccpn.ui.gui.widgets.Spacer import Spacer
@@ -62,7 +62,7 @@ from ccpn.util.UserPreferences import UserPreferences
 from ccpn.ui.gui.lib.GuiPath import PathEdit
 from ccpn.ui.gui.popups.ValidateSpectraPopup import ValidateSpectraForPreferences
 from ccpn.ui.gui.popups.Dialog import CcpnDialog
-from ccpn.core.lib.ContextManagers import queueStateChange
+from ccpn.core.lib.ContextManagers import queueStateChange, undoStackBlocking
 
 
 PEAKFITTINGDEFAULTS = [PARABOLICMETHOD, GAUSSIANMETHOD]
@@ -76,10 +76,18 @@ LineEditsMinimumWidth = 195
 NotImplementedTipText = 'This option has not been implemented yet'
 
 
-def _verifyApply(tab, attributeName, value, postFix=None):
+def _updateGl(self):
+    from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
+
+    self._updateDisplay()
+
+    GLSignals = GLNotifier(parent=self)
+    GLSignals.emitPaintEvent()
+
+
+def _verifyApply(popup, attributeName, value, postFix=None):
     """Change the state of the apply button based on the changes in the tabs
     """
-    popup = tab._parent
 
     # if attributeName is defined use as key to dict to store change functions
     # append postFix if need to differentiate partial functions
@@ -89,18 +97,15 @@ def _verifyApply(tab, attributeName, value, postFix=None):
         if value:
 
             # store in dict
-            tab._changes[attributeName] = value
+            popup._changes[attributeName] = value
         else:
-            if attributeName in tab._changes:
+            if attributeName in popup._changes:
                 # delete from dict - empty dict implies no changes
-                del tab._changes[attributeName]
+                del popup._changes[attributeName]
 
     if popup:
         # set button state depending on number of changes
-        # tabs = (popup._generalTab, popup._dimensionsTab, popup._contoursTab)
-        tabs = tuple(popup.tabWidget.widget(ii) for ii in range(popup.tabWidget.count()))
-        allChanges = any(t._changes for t in tabs if t is not None)
-        # popup.dialogButtons.getButton(CcpnDialog.APPLYBUTTONTEXT).setEnabled(allChanges)
+        allChanges = True if popup._changes else False
         _button = popup.dialogButtons.button(QtWidgets.QDialogButtonBox.Apply)
         if _button:
             _button.setEnabled(allChanges)
@@ -125,7 +130,9 @@ class PreferencesPopup(CcpnDialog):
 
         self.preferences = preferences
         self._userPreferences = UserPreferences(readPreferences=False)
-        self._lastPrefs = AttrDict(deepcopy(self.preferences))
+
+        # store the original values - needs to be recursive
+        self._lastPrefs = deepcopy(self.preferences)
 
         # keep a record of how many times the apply button has been pressed
         self._currentNumApplies = 0
@@ -174,6 +181,16 @@ class PreferencesPopup(CcpnDialog):
         """Revert button signal comes here
         Revert (roll-back) the state of the project to before the popup was opened
         """
+        # Reset preferences to previous state
+        if self._currentNumApplies > 0:
+            self.application.preferences = self._lastPrefs
+            self.application._savePreferences()
+            _updateGl(self)
+
+        if self.project and self.project._undo:
+            # with undoStackBlocking():
+            for undos in range(self._currentNumApplies):
+                self.project._undo.undo()
         self.reject()
 
     def _closeButton(self):
@@ -195,6 +212,10 @@ class PreferencesPopup(CcpnDialog):
     def _applyAllChanges(self, changes):
         """Execute the Apply/OK functions
         """
+        for v in changes.values():
+            v()
+
+    def _updateDisplay(self):
         for display in self.project.spectrumDisplays:
             for strip in display.strips:
                 strip.peakLabelling = self.preferences.general.annotationType
@@ -209,7 +230,7 @@ class PreferencesPopup(CcpnDialog):
         if self.preferences.general.colourScheme != self._oldColourScheme:
             setColourScheme(self.preferences.general.colourScheme)
             self.application.correctColours()
-        self.application._savePreferences()
+        # self.application._savePreferences()
 
     def _applyChanges(self):
         """
@@ -224,8 +245,40 @@ class PreferencesPopup(CcpnDialog):
 
         Return True unless any errors occurred
         """
+        allChanges = True if self._changes else False
+        if not allChanges:
+            return True
+
+        # handle clicking of the Apply/OK button
+        with handleDialogApply(self) as error:
+
+            # add an undo item to redraw these spectra
+            with undoStackBlocking() as addUndoItem:
+                addUndoItem(undo=partial(_updateGl, self))
+
+            # apply all functions to the spectra
+            self._applyAllChanges(self._changes)
+
+            # add a redo item to redraw these spectra
+            with undoStackBlocking() as addUndoItem:
+                addUndoItem(redo=partial(_updateGl, self))
+
+            _updateGl(self)
+
+            # everything has happened - disable the apply button
+            self._applyButton.setEnabled(False)
+
+        # check for any errors
+        if error.errorValue:
+            # repopulate popup on an error
+            self._repopulate()
+            return False
+
+        # remove all changes
+        self._changes = {}
 
         self._currentNumApplies += 1
+        self.application._savePreferences()
         return True
 
     def _updateGui(self):
@@ -439,7 +492,7 @@ class PreferencesPopup(CcpnDialog):
         row += 1
         self.useProxyLabel = Label(parent, text="Use Proxy Settings: ", grid=(row, 0))
         self.useProxyBox = CheckBox(parent, grid=(row, 1), checked=self.preferences.proxySettings.useProxy)
-        self.useProxyBox.toggled.connect(self._setUseProxy)
+        self.useProxyBox.toggled.connect(self._queueSetUseProxy)
 
         # row += 1
         # self.useSystemProxyLabel = Label(parent, text="   Use System Proxy for Network: ", grid=(row, 0))
@@ -451,33 +504,33 @@ class PreferencesPopup(CcpnDialog):
         self.proxyAddressData = LineEdit(parent, grid=(row, 1), hAlign='l')
         self.proxyAddressData.setMinimumWidth(LineEditsMinimumWidth)
         self.proxyAddressData.setText(str(self.preferences.proxySettings.proxyAddress))
-        self.proxyAddressData.editingFinished.connect(self._setProxyAddress)
+        self.proxyAddressData.textEdited.connect(self._queueSetProxyAddress)
 
         row += 1
         self.proxyPortLabel = Label(parent, text="   Port: ", grid=(row, 0), hAlign='l')
         self.proxyPortData = LineEdit(parent, grid=(row, 1), hAlign='l')
         self.proxyPortData.setMinimumWidth(LineEditsMinimumWidth)
         self.proxyPortData.setText(str(self.preferences.proxySettings.proxyPort))
-        self.proxyPortData.editingFinished.connect(self._setProxyPort)
+        self.proxyPortData.textEdited.connect(self._queueSetProxyPort)
 
         row += 1
         self.useProxyPasswordLabel = Label(parent, text="   Proxy Server Requires Password: ", grid=(row, 0))
         self.useProxyPasswordBox = CheckBox(parent, grid=(row, 1), checked=self.preferences.proxySettings.useProxyPassword)
-        self.useProxyPasswordBox.toggled.connect(self._setUseProxyPassword)
+        self.useProxyPasswordBox.toggled.connect(self._queueSetUseProxyPassword)
 
         row += 1
         self.proxyUsernameLabel = Label(parent, text="        Username: ", grid=(row, 0), hAlign='l')
         self.proxyUsernameData = LineEdit(parent, grid=(row, 1), hAlign='l')
         self.proxyUsernameData.setMinimumWidth(LineEditsMinimumWidth)
         self.proxyUsernameData.setText(str(self.preferences.proxySettings.proxyUsername))
-        self.proxyUsernameData.editingFinished.connect(self._setProxyUsername)
+        self.proxyUsernameData.textEdited.connect(self._queueSetProxyUsername)
 
         row += 1
         self.proxyPasswordLabel = Label(parent, text="        Password: ", grid=(row, 0), hAlign='l')
         self.proxyPasswordData = PasswordEdit(parent, grid=(row, 1), hAlign='l')
         self.proxyPasswordData.setMinimumWidth(LineEditsMinimumWidth)
         self.proxyPasswordData.setText(self._userPreferences.decodeValue(str(self.preferences.proxySettings.proxyPassword)))
-        self.proxyPasswordData.editingFinished.connect(self._setProxyPassword)
+        self.proxyPasswordData.textEdited.connect(self._queueSetProxyPassword)
 
         # set the enabled state of the proxy settings boxes
         self._setProxyButtons()
@@ -1230,59 +1283,105 @@ class PreferencesPopup(CcpnDialog):
             return
         self.preferences.general.volumeIntegralLimit = volumeIntegralLimit
 
-    def _setUseProxy(self):
-        try:
-            value = self.useProxyBox.isChecked()
-        except:
-            return
+    @queueStateChange(_verifyApply)
+    def _queueSetUseProxy(self):
+        value = self.useProxyBox.get()
+        if value != self.preferences.proxySettings.useProxy:
+            return partial(self._setUseProxy, value)
+        # set the state of the other buttons
+        self._setProxyButtons()
+
+    def _setUseProxy(self, value):
+        # try:
+        #     value = self.useProxyBox.isChecked()
+        # except:
+        #     return
         self.preferences.proxySettings.useProxy = value
         # set the state of the other buttons
-        self._setProxyButtons()
+        # self._setProxyButtons()
 
-    def _setUseSystemProxy(self):
-        try:
-            value = self.useSystemProxyBox.isChecked()
-        except:
-            return
-        self.preferences.proxySettings.useSystemProxy = value
+    @queueStateChange(_verifyApply)
+    def _queueetUseSystemProxy(self):
+        value = self.useSystemProxyBox.get()
+        if value != self.preferences.proxySettings.useSystemProxy:
+            return partial(self._setUseSystemProxy, value)
         # set the state of the other buttons
         self._setProxyButtons()
 
-    def _setProxyAddress(self):
-        try:
-            value = str(self.proxyAddressData.text())
-        except:
-            return
+    def _setUseSystemProxy(self, value):
+        # try:
+        #     value = self.useSystemProxyBox.isChecked()
+        # except:
+        #     return
+        self.preferences.proxySettings.useSystemProxy = value
+        # set the state of the other buttons
+        # self._setProxyButtons()
+
+    @queueStateChange(_verifyApply)
+    def _queueSetProxyAddress(self):
+        value = self.proxyAddressData.get()
+        if value != self.preferences.proxySettings.proxyAddress:
+            return partial(self._setProxyAddress, value)
+
+    def _setProxyAddress(self, value):
+        # try:
+        #     value = str(self.proxyAddressData.text())
+        # except:
+        #     return
         self.preferences.proxySettings.proxyAddress = value
 
-    def _setProxyPort(self):
-        try:
-            value = str(self.proxyPortData.text())
-        except:
-            return
+    @queueStateChange(_verifyApply)
+    def _queueSetProxyPort(self):
+        value = self.proxyPortData.get()
+        if value != self.preferences.proxySettings.proxyPort:
+            return partial(self._setProxyPort, value)
+
+    def _setProxyPort(self, value):
+        # try:
+        #     value = str(self.proxyPortData.text())
+        # except:
+        #     return
         self.preferences.proxySettings.proxyPort = value
 
-    def _setUseProxyPassword(self):
-        try:
-            value = self.useProxyPasswordBox.isChecked()
-        except:
-            return
+    @queueStateChange(_verifyApply)
+    def _queueSetUseProxyPassword(self):
+        value = self.useProxyPasswordBox.get()
+        if value != self.preferences.proxySettings.useProxyPassword:
+            return partial(self._setUseProxyPassword, value)
+
+    def _setUseProxyPassword(self, value):
+        # try:
+        #     value = self.useProxyPasswordBox.isChecked()
+        # except:
+        #     return
         self.preferences.proxySettings.useProxyPassword = value
         # set the state of the other buttons
         self._setProxyButtons()
 
-    def _setProxyUsername(self):
-        try:
-            value = str(self.proxyUsernameData.text())
-        except:
-            return
+    @queueStateChange(_verifyApply)
+    def _queueSetProxyUsername(self):
+        value = self.proxyUsernameData.get()
+        if value != self.preferences.proxySettings.proxyUsername:
+            return partial(self._setProxyUsername, value)
+
+    def _setProxyUsername(self, value):
+        # try:
+        #     value = str(self.proxyUsernameData.text())
+        # except:
+        #     return
         self.preferences.proxySettings.proxyUsername = value
 
-    def _setProxyPassword(self):
-        try:
-            value = self._userPreferences.encodeValue(str(self.proxyPasswordData.text()))
-        except:
-            return
+    @queueStateChange(_verifyApply)
+    def _queueSetProxyPassword(self):
+        value = self._userPreferences.encodeValue(str(self.proxyPasswordData.get()))
+        if value != self.preferences.proxySettings.proxyPassword:
+            return partial(self._setProxyPassword, value)
+
+    def _setProxyPassword(self, value):
+        # try:
+        #     value = self._userPreferences.encodeValue(str(self.proxyPasswordData.text()))
+        # except:
+        #     return
         self.preferences.proxySettings.proxyPassword = value
 
     def _setProxyButtons(self):

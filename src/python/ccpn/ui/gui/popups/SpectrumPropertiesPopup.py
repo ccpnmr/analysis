@@ -251,22 +251,21 @@ class SpectrumPropertiesPopupABC(CcpnDialog):
                     specViews.buildContours = True
             _updateGl(self, spectrumList)
 
-            # everything has happened - disable the apply button
-            # self.dialogButtons.getButton(self.APPLYBUTTONTEXT).setEnabled(False)
-            self._applyButton.setEnabled(False)
+        # everything has happened - disable the apply button
+        self._applyButton.setEnabled(False)
 
-            # check for any errors
-            if error.errorValue:
-                # repopulate popup on an error
-                self._repopulate()
-                return False
+        # check for any errors
+        if error.errorValue:
+            # repopulate popup on an error
+            self._repopulate()
+            return False
 
-            # remove all changes
-            for tab in self.tabs:
-                tab._changes = {}
+        # remove all changes
+        for tab in self.tabs:
+            tab._changes = {}
 
-            self._currentNumApplies += 1
-            return True
+        self._currentNumApplies += 1
+        return True
 
 
 class SpectrumPropertiesPopup(SpectrumPropertiesPopupABC):

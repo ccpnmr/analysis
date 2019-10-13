@@ -375,12 +375,12 @@ class PreferencesPopup(CcpnDialog):
         row += 1
         self.useNativeLabel = Label(parent, text="Use Native File Dialogs: ", grid=(row, 0))
         self.useNativeBox = CheckBox(parent, grid=(row, 1), checked=self.preferences.general.useNative)
-        self.useNativeBox.toggled.connect(partial(self._toggleGeneralOptions, 'useNative'))
+        self.useNativeBox.toggled.connect(partial(self._queueToggleGeneralOptions, 'useNative'))
 
         row += 1
         self.useNativeLabel = Label(parent, text="Use Native Web Browser: ", grid=(row, 0))
         self.useNativeBox = CheckBox(parent, grid=(row, 1), checked=self.preferences.general.useNativeWebbrowser)
-        self.useNativeBox.toggled.connect(partial(self._toggleGeneralOptions, 'useNativeWebbrowser'))
+        self.useNativeBox.toggled.connect(partial(self._queueToggleGeneralOptions, 'useNativeWebbrowser'))
 
         self._toggleGeneralOptions('useNativeWebbrowser', True)
         self.useNativeLabel.setEnabled(False)
@@ -390,25 +390,25 @@ class PreferencesPopup(CcpnDialog):
         self.autoSaveLayoutOnQuitLabel = Label(parent, text="Auto Save Layout On Quit: ", grid=(row, 0))
         self.autoSaveLayoutOnQuitBox = CheckBox(parent, grid=(row, 1),
                                                 checked=self.preferences.general.autoSaveLayoutOnQuit)
-        self.autoSaveLayoutOnQuitBox.toggled.connect(partial(self._toggleGeneralOptions, 'autoSaveLayoutOnQuit'))
+        self.autoSaveLayoutOnQuitBox.toggled.connect(partial(self._queueToggleGeneralOptions, 'autoSaveLayoutOnQuit'))
 
         row += 1
         self.restoreLayoutOnOpeningLabel = Label(parent, text="Restore Layout On Opening: ", grid=(row, 0))
         self.restoreLayoutOnOpeningBox = CheckBox(parent, grid=(row, 1),
                                                   checked=self.preferences.general.restoreLayoutOnOpening)
-        self.restoreLayoutOnOpeningBox.toggled.connect(partial(self._toggleGeneralOptions, 'restoreLayoutOnOpening'))
+        self.restoreLayoutOnOpeningBox.toggled.connect(partial(self._queueToggleGeneralOptions, 'restoreLayoutOnOpening'))
 
         row += 1
         self.autoBackupEnabledLabel = Label(parent, text="Auto Backup On: ", grid=(row, 0))
         self.autoBackupEnabledBox = CheckBox(parent, grid=(row, 1), checked=self.preferences.general.autoBackupEnabled)
-        self.autoBackupEnabledBox.toggled.connect(partial(self._toggleGeneralOptions, 'autoBackupEnabled'))
+        self.autoBackupEnabledBox.toggled.connect(partial(self._queueToggleGeneralOptions, 'autoBackupEnabled'))
 
         row += 1
         self.autoBackupFrequencyLabel = Label(parent, text="Auto Backup Freq (mins)", grid=(row, 0))
         self.autoBackupFrequencyData = LineEdit(parent, grid=(row, 1), hAlign='l')
         self.autoBackupFrequencyData.setMinimumWidth(LineEditsMinimumWidth)
         self.autoBackupFrequencyData.setText('%.0f' % self.preferences.general.autoBackupFrequency)
-        self.autoBackupFrequencyData.editingFinished.connect(self._setAutoBackupFrequency)
+        self.autoBackupFrequencyData.editingFinished.connect(self._queueSetAutoBackupFrequency)
 
         row += 1
         HLine(parent, grid=(row, 0), gridSpan=(1, 3), colour=getColours()[DIVIDER], height=15)
@@ -418,7 +418,7 @@ class PreferencesPopup(CcpnDialog):
         # self.userDataPathLabel = Label(parent, "$DATA (user datapath)", grid=(row, 0), )
         # self.userDataPathText = PathEdit(parent, grid=(row, 1), hAlign='l')
         # self.userDataPathText.setMinimumWidth(LineEditsMinimumWidth)
-        # self.userDataPathText.editingFinished.connect(self._setUserDataPath)
+        # self.userDataPathText.editingFinished.connect(self._queueSetUserDataPath)
         #
         # # if self.project:
         # #     urls = _findDataUrl(self, 'remoteData')
@@ -437,7 +437,7 @@ class PreferencesPopup(CcpnDialog):
         self.userLayoutsLeButton = Button(parent, grid=(row, 2), callback=self._getUserLayoutsPath,
                                           icon='icons/directory', hPolicy='fixed')
         self.userLayoutsLe.setText(self.preferences.general.get('userLayoutsPath'))
-        self.userLayoutsLe.editingFinished.connect(self._setuserLayoutsPath)
+        self.userLayoutsLe.editingFinished.connect(self._queueSetuserLayoutsPath)
 
         row += 1
         self.auxiliaryFilesLabel = Label(parent, text="Auxiliary Files Path ", grid=(row, 0))
@@ -446,7 +446,7 @@ class PreferencesPopup(CcpnDialog):
         self.auxiliaryFilesDataButton = Button(parent, grid=(row, 2), callback=self._getAuxiliaryFilesPath,
                                                icon='icons/directory', hPolicy='fixed')
         self.auxiliaryFilesData.setText(self.preferences.general.auxiliaryFilesPath)
-        self.auxiliaryFilesData.editingFinished.connect(self._setAuxiliaryFilesPath)
+        self.auxiliaryFilesData.editingFinished.connect(self._queueSetAuxiliaryFilesPath)
 
         row += 1
         self.macroPathLabel = Label(parent, text="Macro Path", grid=(row, 0))
@@ -455,7 +455,7 @@ class PreferencesPopup(CcpnDialog):
         self.macroPathData.setText(self.preferences.general.userMacroPath)
         self.macroPathDataButton = Button(parent, grid=(row, 2), callback=self._getMacroFilesPath,
                                           icon='icons/directory', hPolicy='fixed')
-        self.macroPathData.editingFinished.connect(self._setMacroFilesPath)
+        self.macroPathData.editingFinished.connect(self._queueSetMacroFilesPath)
 
         row += 1
         self.pluginPathLabel = Label(parent, text="Plugin Path", grid=(row, 0))
@@ -464,7 +464,7 @@ class PreferencesPopup(CcpnDialog):
         self.pluginPathData.setText(self.preferences.general.userPluginPath)
         self.pluginPathDataButton = Button(parent, grid=(row, 2), callback=self._getPluginFilesPath,
                                            icon='icons/directory', hPolicy='fixed')
-        self.pluginPathData.editingFinished.connect(self._setPluginFilesPath)
+        self.pluginPathData.editingFinished.connect(self._queueSetPluginFilesPath)
         # TODO enable plugin PathData
         self.pluginPathData.setDisabled(True)
         self.pluginPathDataButton.setDisabled(True)
@@ -476,7 +476,7 @@ class PreferencesPopup(CcpnDialog):
         self.pipesPathData.setText(self.preferences.general.userExtensionPath)
         self.pipesPathDataButton = Button(parent, grid=(row, 2), callback=self._getExtensionFilesPath,
                                           icon='icons/directory', hPolicy='fixed')
-        self.pipesPathData.editingFinished.connect(self._setPipesFilesPath)
+        self.pipesPathData.editingFinished.connect(self._queueSetPipesFilesPath)
         # TODO enable pipes PathData
         self.pipesPathData.setDisabled(True)
         self.pipesPathDataButton.setDisabled(True)
@@ -507,7 +507,7 @@ class PreferencesPopup(CcpnDialog):
         # row += 1
         # self.useSystemProxyLabel = Label(parent, text="   Use System Proxy for Network: ", grid=(row, 0))
         # self.useSystemProxyBox = CheckBox(parent, grid=(row, 1), checked=self.preferences.proxySettings.useSystemProxy)
-        # self.useSystemProxyBox.toggled.connect(self._setUseSystemProxy)
+        # self.useSystemProxyBox.toggled.connect(self._queueSetUseSystemProxy)
 
         row += 1
         self.proxyAddressLabel = Label(parent, text="   Web Proxy Server: ", grid=(row, 0), hAlign='l')
@@ -557,7 +557,7 @@ class PreferencesPopup(CcpnDialog):
         # self.dataPathLabel = Label(parent, "User Data Path", grid=(row, 0), )
         # self.dataPathText = LineEdit(parent, grid=(row, 1), vAlign='t')
         # self.dataPathText.setMinimumWidth(LineEditsMinimumWidth)
-        # self.dataPathText.editingFinished.connect(self._setDataPath)
+        # self.dataPathText.editingFinished.connect(self._queueSetDataPath)
         # self.dataPathText.setText(self.preferences.general.dataPath)
         # self.dataPathButton = Button(parent, grid=(row, 2), callback=self._getDataPath, icon='icons/directory',
         #                              hPolicy='fixed')
@@ -573,7 +573,7 @@ class PreferencesPopup(CcpnDialog):
         # self.userDataPathLabel = Label(parent, "$DATA (user datapath)", grid=(row, 0), )
         # self.userDataPathText = PathEdit(parent, grid=(row, 1), vAlign='t')
         # self.userDataPathText.setMinimumWidth(LineEditsMinimumWidth)
-        # self.userDataPathText.editingFinished.connect(self._setUserDataPath)
+        # self.userDataPathText.editingFinished.connect(self._queueSetUserDataPath)
         #
         # # if self.project:
         # #     urls = _findDataUrl(self, 'remoteData')
@@ -590,14 +590,14 @@ class PreferencesPopup(CcpnDialog):
         self.regionPaddingData = DoubleSpinbox(parent, grid=(row, 1), hAlign='l', decimals=1, step=0.1, min=0, max=100)
         self.regionPaddingData.setMinimumWidth(LineEditsMinimumWidth)
         self.regionPaddingData.setValue(float('%.1f' % (100 * self.preferences.general.stripRegionPadding)))
-        self.regionPaddingData.editingFinished.connect(self._setRegionPadding)
+        self.regionPaddingData.editingFinished.connect(self._queueSetRegionPadding)
 
         row += 1
         self.dropFactorLabel = Label(parent, text="Peak Picking Drop (%)", grid=(row, 0))
         self.dropFactorData = DoubleSpinbox(parent, grid=(row, 1), hAlign='l', decimals=1, step=0.1, min=0, max=100)
         self.dropFactorData.setMinimumWidth(LineEditsMinimumWidth)
         self.dropFactorData.setValue(float('%.1f' % (100 * self.preferences.general.peakDropFactor)))
-        self.dropFactorData.editingFinished.connect(self._setDropFactor)
+        self.dropFactorData.editingFinished.connect(self._queueSetDropFactor)
 
         row += 1
         volumeIntegralLimit = self.preferences.general.volumeIntegralLimit
@@ -606,7 +606,7 @@ class PreferencesPopup(CcpnDialog):
                                                      min=1.0, max=5.0, grid=(row, 1), hAlign='l')
         self.volumeIntegralLimitData.setValue(int(volumeIntegralLimit))
         self.volumeIntegralLimitData.setMinimumWidth(LineEditsMinimumWidth)
-        self.volumeIntegralLimitData.editingFinished.connect(self._setVolumeIntegralLimit)
+        self.volumeIntegralLimitData.editingFinished.connect(self._queueSetVolumeIntegralLimit)
 
         row += 1
         self.peakFittingMethodLabel = Label(parent, text="Peak Region Fitting Method", grid=(row, 0))
@@ -626,37 +626,37 @@ class PreferencesPopup(CcpnDialog):
         # self.keepSPWithinProject = Label(parent, text="Keep a Copy Inside Project: ", grid=(row, 0))
         # self.keepSPWithinProjectBox = CheckBox(parent, grid=(row, 1), checked=self.preferences.general.keepSpectraInsideProject,
         #                                        tipText=self.keepSPWithinProjectTipText)
-        # self.keepSPWithinProjectBox.toggled.connect(partial(self._toggleGeneralOptions, 'keepSpectraInsideProject'))
+        # self.keepSPWithinProjectBox.toggled.connect(partial(self._queueToggleGeneralOptions, 'keepSpectraInsideProject'))
 
         row += 1
         self.showToolbarLabel = Label(parent, text="Show ToolBar(s): ", grid=(row, 0))
         self.showToolbarBox = CheckBox(parent, grid=(row, 1), checked=self.preferences.general.showToolbar)
-        self.showToolbarBox.toggled.connect(partial(self._toggleGeneralOptions, 'showToolbar'))
+        self.showToolbarBox.toggled.connect(partial(self._queueToggleGeneralOptions, 'showToolbar'))
 
         row += 1
         self.spectrumBorderLabel = Label(parent, text="Show Spectrum Border: ", grid=(row, 0))
         self.spectrumBorderBox = CheckBox(parent, grid=(row, 1), checked=self.preferences.general.showSpectrumBorder)
-        self.spectrumBorderBox.toggled.connect(partial(self._toggleGeneralOptions, 'showSpectrumBorder'))
+        self.spectrumBorderBox.toggled.connect(partial(self._queueToggleGeneralOptions, 'showSpectrumBorder'))
 
         row += 1
         self.showGridLabel = Label(parent, text="Show Grids: ", grid=(row, 0))
         self.showGridBox = CheckBox(parent, grid=(row, 1), checked=self.preferences.general.showGrid)
-        self.showGridBox.toggled.connect(partial(self._toggleGeneralOptions, 'showGrid'))
+        self.showGridBox.toggled.connect(partial(self._queueToggleGeneralOptions, 'showGrid'))
 
         row += 1
         self.showCrosshairLabel = Label(parent, text="Show Crosshairs: ", grid=(row, 0))
         self.showCrosshairBox = CheckBox(parent, grid=(row, 1), checked=self.preferences.general.showCrosshair)
-        self.showCrosshairBox.toggled.connect(partial(self._toggleGeneralOptions, 'showCrosshair'))
+        self.showCrosshairBox.toggled.connect(partial(self._queueToggleGeneralOptions, 'showCrosshair'))
 
         row += 1
         self.showDoubleCrosshairLabel = Label(parent, text="    - and Double Crosshairs: ", grid=(row, 0))
         self.showDoubleCrosshairBox = CheckBox(parent, grid=(row, 1), checked=self.preferences.general.showDoubleCrosshair)
-        self.showDoubleCrosshairBox.toggled.connect(partial(self._toggleGeneralOptions, 'showDoubleCrosshair'))
+        self.showDoubleCrosshairBox.toggled.connect(partial(self._queueToggleGeneralOptions, 'showDoubleCrosshair'))
 
         row += 1
         self.showLastAxisOnlyLabel = Label(parent, text="Share Y Axis: ", grid=(row, 0))
         self.showLastAxisOnlyBox = CheckBox(parent, grid=(row, 1), checked=self.preferences.general.lastAxisOnly)
-        self.showLastAxisOnlyBox.toggled.connect(partial(self._toggleGeneralOptions, 'lastAxisOnly'))
+        self.showLastAxisOnlyBox.toggled.connect(partial(self._queueToggleGeneralOptions, 'lastAxisOnly'))
 
         row += 1
         self.matchAxisCodeLabel = Label(parent, text="Match Axis Codes", grid=(row, 0))
@@ -688,7 +688,7 @@ class PreferencesPopup(CcpnDialog):
         #self.showDoubleCursorBox = CheckBox(parent, grid=(row, 1), tipText=NotImplementedTipText)#, checked=self.preferences.general.showDoubleCursor)
         # TODO enable DoubleCursor
         #self.showDoubleCursorBox.setDisabled(True)
-        ## self.showDoubleCursorBox.toggled.connect(partial(self._toggleGeneralOptions, 'showDoubleCursor'))
+        ## self.showDoubleCursorBox.toggled.connect(partial(self._queueToggleGeneralOptions, 'showDoubleCursor'))
 
         row += 1
         self.zoomCentreLabel = Label(parent, text="Zoom Centre", grid=(row, 0))
@@ -709,7 +709,7 @@ class PreferencesPopup(CcpnDialog):
                                              min=1, max=100, grid=(row, 1), hAlign='l')
         self.zoomPercentData.setValue(int(zoomPercent))
         self.zoomPercentData.setMinimumWidth(LineEditsMinimumWidth)
-        self.zoomPercentData.editingFinished.connect(self._setZoomPercent)
+        self.zoomPercentData.editingFinished.connect(self._queueSetZoomPercent)
 
         row += 1
         stripWidthZoomPercent = self.preferences.general.stripWidthZoomPercent
@@ -718,7 +718,7 @@ class PreferencesPopup(CcpnDialog):
                                                        min=1, max=100, grid=(row, 1), hAlign='l')
         self.stripWidthZoomPercentData.setValue(int(stripWidthZoomPercent))
         self.stripWidthZoomPercentData.setMinimumWidth(LineEditsMinimumWidth)
-        self.stripWidthZoomPercentData.editingFinished.connect(self._setStripWidthZoomPercent)
+        self.stripWidthZoomPercentData.editingFinished.connect(self._queueSetStripWidthZoomPercent)
 
         # row += 1
         # self.matchAxisCodeLabel = Label(parent, text="Match Axis Codes", grid=(row, 0))
@@ -734,17 +734,17 @@ class PreferencesPopup(CcpnDialog):
         # row += 1
         # self.showGridLabel = Label(parent, text="Show Grids: ", grid=(row, 0))
         # self.showGridBox = CheckBox(parent, grid=(row, 1), checked=self.preferences.general.showGrid)
-        # self.showGridBox.toggled.connect(partial(self._toggleGeneralOptions, 'showGrid'))
+        # self.showGridBox.toggled.connect(partial(self._queueToggleGeneralOptions, 'showGrid'))
         #
         # row += 1
         # self.showLastAxisOnlyLabel = Label(parent, text="Share Y Axis: ", grid=(row, 0))
         # self.showLastAxisOnlyBox = CheckBox(parent, grid=(row, 1), checked=self.preferences.general.lastAxisOnly)
-        # self.showLastAxisOnlyBox.toggled.connect(partial(self._toggleGeneralOptions, 'lastAxisOnly'))
+        # self.showLastAxisOnlyBox.toggled.connect(partial(self._queueToggleGeneralOptions, 'lastAxisOnly'))
 
         row += 1
         self.lockAspectRatioLabel = Label(parent, text="Aspect Ratios: ", grid=(row, 0))
         # self.lockAspectRatioBox = CheckBox(parent, grid=(row, 1), checked=self.preferences.general.lockAspectRatio)
-        # self.lockAspectRatioBox.toggled.connect(partial(self._toggleGeneralOptions, 'lockAspectRatio'))
+        # self.lockAspectRatioBox.toggled.connect(partial(self._queueToggleGeneralOptions, 'lockAspectRatio'))
 
         self.aspectLabel = {}
         self.aspectData = {}
@@ -755,13 +755,13 @@ class PreferencesPopup(CcpnDialog):
                                                               min=1, grid=(row, 1), hAlign='l')
             self.aspectData[aspect].setValue(aspectValue)
             self.aspectData[aspect].setMinimumWidth(LineEditsMinimumWidth)
-            self.aspectData[aspect].editingFinished.connect(partial(self._setAspect, aspect))
+            self.aspectData[aspect].editingFinished.connect(partial(self._queueSetAspect, aspect))
             row += 1
 
         row += 1
         self.showZoomXLimitApplyLabel = Label(parent, text="Apply Zoom limit to X axis: ", grid=(row, 0))
         self.showZoomXLimitApplyBox = CheckBox(parent, grid=(row, 1), checked=self.preferences.general.zoomXLimitApply)
-        self.showZoomXLimitApplyBox.toggled.connect(partial(self._toggleGeneralOptions, 'zoomXLimitApply'))
+        self.showZoomXLimitApplyBox.toggled.connect(partial(self._queueToggleGeneralOptions, 'zoomXLimitApply'))
 
         # self._toggleGeneralOptions('zoomXLimitApply', True)
         # self.showZoomXLimitApplyBox.setChecked(True)
@@ -770,7 +770,7 @@ class PreferencesPopup(CcpnDialog):
         row += 1
         self.showZoomYLimitApplyLabel = Label(parent, text="Apply Zoom limit to Y axis: ", grid=(row, 0))
         self.showZoomYLimitApplyBox = CheckBox(parent, grid=(row, 1), checked=self.preferences.general.zoomYLimitApply)
-        self.showZoomYLimitApplyBox.toggled.connect(partial(self._toggleGeneralOptions, 'zoomYLimitApply'))
+        self.showZoomYLimitApplyBox.toggled.connect(partial(self._queueToggleGeneralOptions, 'zoomYLimitApply'))
 
         # self._toggleGeneralOptions('zoomYLimitApply', True)
         # self.showZoomYLimitApplyBox.setChecked(True)
@@ -783,7 +783,7 @@ class PreferencesPopup(CcpnDialog):
                                                              min=1e-6, grid=(row, 1), hAlign='l')
         self.showIntensityLimitBox.setValue(intensityLimit)
         self.showIntensityLimitBox.setMinimumWidth(LineEditsMinimumWidth)
-        self.showIntensityLimitBox.editingFinished.connect(self._setIntensityLimit)
+        self.showIntensityLimitBox.editingFinished.connect(self._queueSetIntensityLimit)
 
         row += 1
         HLine(parent, grid=(row, 0), gridSpan=(1, 3), colour=getColours()[DIVIDER], height=15)
@@ -820,7 +820,7 @@ class PreferencesPopup(CcpnDialog):
         self.symbolSizePixelData.setMinimumWidth(LineEditsMinimumWidth)
         symbolSizePixel = self.preferences.general.symbolSizePixel
         self.symbolSizePixelData.setValue(float('%i' % symbolSizePixel))
-        self.symbolSizePixelData.editingFinished.connect(self._setSymbolSizePixel)
+        self.symbolSizePixelData.editingFinished.connect(self._queueSetSymbolSizePixel)
 
         row += 1
         self.symbolThicknessLabel = Label(parent, text="Symbol Thickness (points)", grid=(row, 0))
@@ -829,7 +829,7 @@ class PreferencesPopup(CcpnDialog):
         self.symbolThicknessData.setMinimumWidth(LineEditsMinimumWidth)
         symbolThickness = self.preferences.general.symbolThickness
         self.symbolThicknessData.setValue(int(symbolThickness))
-        self.symbolThicknessData.editingFinished.connect(self._setSymbolThickness)
+        self.symbolThicknessData.editingFinished.connect(self._queueSetSymbolThickness)
 
         row += 1
         self.contourThicknessLabel = Label(parent, text="Contour Thickness (points)", grid=(row, 0))
@@ -838,7 +838,7 @@ class PreferencesPopup(CcpnDialog):
         self.contourThicknessData.setMinimumWidth(LineEditsMinimumWidth)
         contourThickness = self.preferences.general.contourThickness
         self.contourThicknessData.setValue(int(contourThickness))
-        self.contourThicknessData.editingFinished.connect(self._setContourThickness)
+        self.contourThicknessData.editingFinished.connect(self._queueSetContourThickness)
 
         row += 1
         HLine(parent, grid=(row, 0), gridSpan=(1, 3), colour=getColours()[DIVIDER], height=15)
@@ -846,7 +846,7 @@ class PreferencesPopup(CcpnDialog):
         row += 1
         self.autoCorrectLabel = Label(parent, text="Autocorrect Colours: ", grid=(row, 0))
         self.autoCorrectBox = CheckBox(parent, grid=(row, 1), checked=self.preferences.general.autoCorrectColours)
-        self.autoCorrectBox.toggled.connect(partial(self._toggleGeneralOptions, 'autoCorrectColours'))
+        self.autoCorrectBox.toggled.connect(partial(self._queueToggleGeneralOptions, 'autoCorrectColours'))
 
         row += 1
         self.marksDefaultColourLabel = Label(parent, text="Default Marks Colour:", grid=(row, 0))
@@ -892,7 +892,7 @@ class PreferencesPopup(CcpnDialog):
         row += 1
         self.singleContoursLabel = Label(parent, text="Generate Single Contours\n   per Plane: ", grid=(row, 0))
         self.singleContoursBox = CheckBox(parent, grid=(row, 1), checked=self.preferences.general.generateSinglePlaneContours)
-        self.singleContoursBox.toggled.connect(partial(self._toggleGeneralOptions, 'generateSinglePlaneContours'))
+        self.singleContoursBox.toggled.connect(partial(self._queueToggleGeneralOptions, 'generateSinglePlaneContours'))
 
         # add spacer to stop columns changing width
         row += 1
@@ -926,7 +926,7 @@ class PreferencesPopup(CcpnDialog):
         self.pymolPathLabel = Label(parent, "Pymol Path", grid=(row, 0), )
         self.pymolPath = PathEdit(parent, grid=(row, 1), hAlign='l')
         self.pymolPath.setMinimumWidth(LineEditsMinimumWidth)
-        self.pymolPath.editingFinished.connect(self._setPymolPath)
+        self.pymolPath.editingFinished.connect(self._queueSetPymolPath)
         self.pymolPath.setText(self.preferences.externalPrograms.pymol)
         self.pymolPathButton = Button(parent, grid=(row, 2), callback=self._getPymolPath, icon='icons/directory',
                                       hPolicy='fixed')

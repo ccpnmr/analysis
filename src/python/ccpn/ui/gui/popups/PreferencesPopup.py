@@ -359,7 +359,7 @@ class PreferencesPopup(CcpnDialog):
         self.languageBox.addItems(languages)
         self.languageBox.setMinimumWidth(PulldownListsMinimumWidth)
         self.languageBox.setCurrentIndex(self.languageBox.findText(self.preferences.general.language))
-        self.languageBox.currentIndexChanged.connect(self._changeLanguage)
+        self.languageBox.currentIndexChanged.connect(self._queueChangeLanguage)
 
         row += 1
         self.colourSchemeLabel = Label(parent, text="Colour Scheme ", grid=(row, 0))
@@ -370,7 +370,7 @@ class PreferencesPopup(CcpnDialog):
         self.colourSchemeBox.setCurrentIndex(self.colourSchemeBox.findText(
                 self.preferences.general.colourScheme))
         self._oldColourScheme = self.preferences.general.colourScheme
-        self.colourSchemeBox.currentIndexChanged.connect(self._changeColourScheme)
+        self.colourSchemeBox.currentIndexChanged.connect(self._queueChangeColourScheme)
 
         row += 1
         self.useNativeLabel = Label(parent, text="Use Native File Dialogs: ", grid=(row, 0))
@@ -864,12 +864,12 @@ class PreferencesPopup(CcpnDialog):
             fillColourPulldown(self.marksDefaultColourBox, allowAuto=False)
             col = spectrumColours[c]
             self.marksDefaultColourBox.setCurrentText(col)
-        self.marksDefaultColourBox.currentIndexChanged.connect(self._changeMarksColour)
+        self.marksDefaultColourBox.currentIndexChanged.connect(self._queueChangeMarksColour)
 
         # add a colour dialog button
         self.marksDefaultColourButton = Button(parent, grid=(row, 2), vAlign='t', hAlign='l',
                                                icon='icons/colours', hPolicy='fixed')
-        self.marksDefaultColourButton.clicked.connect(self._changeMarksColourButton)
+        self.marksDefaultColourButton.clicked.connect(self._queueChangeMarksColourButton)
 
         row += 1
         HLine(parent, grid=(row, 0), gridSpan=(1, 3), colour=getColours()[DIVIDER], height=15)

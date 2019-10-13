@@ -408,7 +408,7 @@ class PreferencesPopup(CcpnDialog):
         self.autoBackupFrequencyData = LineEdit(parent, grid=(row, 1), hAlign='l')
         self.autoBackupFrequencyData.setMinimumWidth(LineEditsMinimumWidth)
         self.autoBackupFrequencyData.setText('%.0f' % self.preferences.general.autoBackupFrequency)
-        self.autoBackupFrequencyData.editingFinished.connect(self._queueSetAutoBackupFrequency)
+        self.autoBackupFrequencyData.textChanged.connect(self._queueSetAutoBackupFrequency)
 
         row += 1
         HLine(parent, grid=(row, 0), gridSpan=(1, 3), colour=getColours()[DIVIDER], height=15)
@@ -418,7 +418,7 @@ class PreferencesPopup(CcpnDialog):
         # self.userDataPathLabel = Label(parent, "$DATA (user datapath)", grid=(row, 0), )
         # self.userDataPathText = PathEdit(parent, grid=(row, 1), hAlign='l')
         # self.userDataPathText.setMinimumWidth(LineEditsMinimumWidth)
-        # self.userDataPathText.editingFinished.connect(self._queueSetUserDataPath)
+        # self.userDataPathText.textChanged.connect(self._queueSetUserDataPath)
         #
         # # if self.project:
         # #     urls = _findDataUrl(self, 'remoteData')
@@ -437,7 +437,7 @@ class PreferencesPopup(CcpnDialog):
         self.userLayoutsLeButton = Button(parent, grid=(row, 2), callback=self._getUserLayoutsPath,
                                           icon='icons/directory', hPolicy='fixed')
         self.userLayoutsLe.setText(self.preferences.general.get('userLayoutsPath'))
-        self.userLayoutsLe.editingFinished.connect(self._queueSetuserLayoutsPath)
+        self.userLayoutsLe.textChanged.connect(self._queueSetuserLayoutsPath)
 
         row += 1
         self.auxiliaryFilesLabel = Label(parent, text="Auxiliary Files Path ", grid=(row, 0))
@@ -446,7 +446,7 @@ class PreferencesPopup(CcpnDialog):
         self.auxiliaryFilesDataButton = Button(parent, grid=(row, 2), callback=self._getAuxiliaryFilesPath,
                                                icon='icons/directory', hPolicy='fixed')
         self.auxiliaryFilesData.setText(self.preferences.general.auxiliaryFilesPath)
-        self.auxiliaryFilesData.editingFinished.connect(self._queueSetAuxiliaryFilesPath)
+        self.auxiliaryFilesData.textChanged.connect(self._queueSetAuxiliaryFilesPath)
 
         row += 1
         self.macroPathLabel = Label(parent, text="Macro Path", grid=(row, 0))
@@ -455,7 +455,7 @@ class PreferencesPopup(CcpnDialog):
         self.macroPathData.setText(self.preferences.general.userMacroPath)
         self.macroPathDataButton = Button(parent, grid=(row, 2), callback=self._getMacroFilesPath,
                                           icon='icons/directory', hPolicy='fixed')
-        self.macroPathData.editingFinished.connect(self._queueSetMacroFilesPath)
+        self.macroPathData.textChanged.connect(self._queueSetMacroFilesPath)
 
         row += 1
         self.pluginPathLabel = Label(parent, text="Plugin Path", grid=(row, 0))
@@ -464,7 +464,7 @@ class PreferencesPopup(CcpnDialog):
         self.pluginPathData.setText(self.preferences.general.userPluginPath)
         self.pluginPathDataButton = Button(parent, grid=(row, 2), callback=self._getPluginFilesPath,
                                            icon='icons/directory', hPolicy='fixed')
-        self.pluginPathData.editingFinished.connect(self._queueSetPluginFilesPath)
+        self.pluginPathData.textChanged.connect(self._queueSetPluginFilesPath)
         # TODO enable plugin PathData
         self.pluginPathData.setDisabled(True)
         self.pluginPathDataButton.setDisabled(True)
@@ -476,7 +476,7 @@ class PreferencesPopup(CcpnDialog):
         self.pipesPathData.setText(self.preferences.general.userExtensionPath)
         self.pipesPathDataButton = Button(parent, grid=(row, 2), callback=self._getExtensionFilesPath,
                                           icon='icons/directory', hPolicy='fixed')
-        self.pipesPathData.editingFinished.connect(self._queueSetPipesFilesPath)
+        self.pipesPathData.textChanged.connect(self._queueSetPipesFilesPath)
         # TODO enable pipes PathData
         self.pipesPathData.setDisabled(True)
         self.pipesPathDataButton.setDisabled(True)
@@ -557,7 +557,7 @@ class PreferencesPopup(CcpnDialog):
         # self.dataPathLabel = Label(parent, "User Data Path", grid=(row, 0), )
         # self.dataPathText = LineEdit(parent, grid=(row, 1), vAlign='t')
         # self.dataPathText.setMinimumWidth(LineEditsMinimumWidth)
-        # self.dataPathText.editingFinished.connect(self._queueSetDataPath)
+        # self.dataPathText.textChanged.connect(self._queueSetDataPath)
         # self.dataPathText.setText(self.preferences.general.dataPath)
         # self.dataPathButton = Button(parent, grid=(row, 2), callback=self._getDataPath, icon='icons/directory',
         #                              hPolicy='fixed')
@@ -573,7 +573,7 @@ class PreferencesPopup(CcpnDialog):
         # self.userDataPathLabel = Label(parent, "$DATA (user datapath)", grid=(row, 0), )
         # self.userDataPathText = PathEdit(parent, grid=(row, 1), vAlign='t')
         # self.userDataPathText.setMinimumWidth(LineEditsMinimumWidth)
-        # self.userDataPathText.editingFinished.connect(self._queueSetUserDataPath)
+        # self.userDataPathText.textChanged.connect(self._queueSetUserDataPath)
         #
         # # if self.project:
         # #     urls = _findDataUrl(self, 'remoteData')
@@ -590,14 +590,14 @@ class PreferencesPopup(CcpnDialog):
         self.regionPaddingData = DoubleSpinbox(parent, grid=(row, 1), hAlign='l', decimals=1, step=0.1, min=0, max=100)
         self.regionPaddingData.setMinimumWidth(LineEditsMinimumWidth)
         self.regionPaddingData.setValue(float('%.1f' % (100 * self.preferences.general.stripRegionPadding)))
-        self.regionPaddingData.editingFinished.connect(self._queueSetRegionPadding)
+        self.regionPaddingData.valueChanged.connect(self._queueSetRegionPadding)
 
         row += 1
         self.dropFactorLabel = Label(parent, text="Peak Picking Drop (%)", grid=(row, 0))
         self.dropFactorData = DoubleSpinbox(parent, grid=(row, 1), hAlign='l', decimals=1, step=0.1, min=0, max=100)
         self.dropFactorData.setMinimumWidth(LineEditsMinimumWidth)
         self.dropFactorData.setValue(float('%.1f' % (100 * self.preferences.general.peakDropFactor)))
-        self.dropFactorData.editingFinished.connect(self._queueSetDropFactor)
+        self.dropFactorData.valueChanged.connect(self._queueSetDropFactor)
 
         row += 1
         volumeIntegralLimit = self.preferences.general.volumeIntegralLimit
@@ -606,7 +606,7 @@ class PreferencesPopup(CcpnDialog):
                                                      min=1.0, max=5.0, grid=(row, 1), hAlign='l')
         self.volumeIntegralLimitData.setValue(int(volumeIntegralLimit))
         self.volumeIntegralLimitData.setMinimumWidth(LineEditsMinimumWidth)
-        self.volumeIntegralLimitData.editingFinished.connect(self._queueSetVolumeIntegralLimit)
+        self.volumeIntegralLimitData.valueChanged.connect(self._queueSetVolumeIntegralLimit)
 
         row += 1
         self.peakFittingMethodLabel = Label(parent, text="Peak Region Fitting Method", grid=(row, 0))
@@ -709,7 +709,7 @@ class PreferencesPopup(CcpnDialog):
                                              min=1, max=100, grid=(row, 1), hAlign='l')
         self.zoomPercentData.setValue(int(zoomPercent))
         self.zoomPercentData.setMinimumWidth(LineEditsMinimumWidth)
-        self.zoomPercentData.editingFinished.connect(self._queueSetZoomPercent)
+        self.zoomPercentData.valueChanged.connect(self._queueSetZoomPercent)
 
         row += 1
         stripWidthZoomPercent = self.preferences.general.stripWidthZoomPercent
@@ -718,7 +718,7 @@ class PreferencesPopup(CcpnDialog):
                                                        min=1, max=100, grid=(row, 1), hAlign='l')
         self.stripWidthZoomPercentData.setValue(int(stripWidthZoomPercent))
         self.stripWidthZoomPercentData.setMinimumWidth(LineEditsMinimumWidth)
-        self.stripWidthZoomPercentData.editingFinished.connect(self._queueSetStripWidthZoomPercent)
+        self.stripWidthZoomPercentData.valueChanged.connect(self._queueSetStripWidthZoomPercent)
 
         # row += 1
         # self.matchAxisCodeLabel = Label(parent, text="Match Axis Codes", grid=(row, 0))
@@ -755,7 +755,7 @@ class PreferencesPopup(CcpnDialog):
                                                               min=1, grid=(row, 1), hAlign='l')
             self.aspectData[aspect].setValue(aspectValue)
             self.aspectData[aspect].setMinimumWidth(LineEditsMinimumWidth)
-            self.aspectData[aspect].editingFinished.connect(partial(self._queueSetAspect, aspect))
+            self.aspectData[aspect].valueChanged.connect(partial(self._queueSetAspect, aspect))
             row += 1
 
         row += 1
@@ -783,7 +783,7 @@ class PreferencesPopup(CcpnDialog):
                                                              min=1e-6, grid=(row, 1), hAlign='l')
         self.showIntensityLimitBox.setValue(intensityLimit)
         self.showIntensityLimitBox.setMinimumWidth(LineEditsMinimumWidth)
-        self.showIntensityLimitBox.editingFinished.connect(self._queueSetIntensityLimit)
+        self.showIntensityLimitBox.valueChanged.connect(self._queueSetIntensityLimit)
 
         row += 1
         HLine(parent, grid=(row, 0), gridSpan=(1, 3), colour=getColours()[DIVIDER], height=15)
@@ -820,7 +820,7 @@ class PreferencesPopup(CcpnDialog):
         self.symbolSizePixelData.setMinimumWidth(LineEditsMinimumWidth)
         symbolSizePixel = self.preferences.general.symbolSizePixel
         self.symbolSizePixelData.setValue(float('%i' % symbolSizePixel))
-        self.symbolSizePixelData.editingFinished.connect(self._queueSetSymbolSizePixel)
+        self.symbolSizePixelData.valueChanged.connect(self._queueSetSymbolSizePixel)
 
         row += 1
         self.symbolThicknessLabel = Label(parent, text="Symbol Thickness (points)", grid=(row, 0))
@@ -829,7 +829,7 @@ class PreferencesPopup(CcpnDialog):
         self.symbolThicknessData.setMinimumWidth(LineEditsMinimumWidth)
         symbolThickness = self.preferences.general.symbolThickness
         self.symbolThicknessData.setValue(int(symbolThickness))
-        self.symbolThicknessData.editingFinished.connect(self._queueSetSymbolThickness)
+        self.symbolThicknessData.valueChanged.connect(self._queueSetSymbolThickness)
 
         row += 1
         self.contourThicknessLabel = Label(parent, text="Contour Thickness (points)", grid=(row, 0))
@@ -838,7 +838,7 @@ class PreferencesPopup(CcpnDialog):
         self.contourThicknessData.setMinimumWidth(LineEditsMinimumWidth)
         contourThickness = self.preferences.general.contourThickness
         self.contourThicknessData.setValue(int(contourThickness))
-        self.contourThicknessData.editingFinished.connect(self._queueSetContourThickness)
+        self.contourThicknessData.valueChanged.connect(self._queueSetContourThickness)
 
         row += 1
         HLine(parent, grid=(row, 0), gridSpan=(1, 3), colour=getColours()[DIVIDER], height=15)
@@ -864,7 +864,7 @@ class PreferencesPopup(CcpnDialog):
             fillColourPulldown(self.marksDefaultColourBox, allowAuto=False)
             col = spectrumColours[c]
             self.marksDefaultColourBox.setCurrentText(col)
-        self.marksDefaultColourBox.currentIndexChanged.connect(self._queueChangeMarksColour)
+        self.marksDefaultColourBox.currentIndexChanged.connect(self._queueChangeMarksColourIndex)
 
         # add a colour dialog button
         self.marksDefaultColourButton = Button(parent, grid=(row, 2), vAlign='t', hAlign='l',
@@ -900,14 +900,19 @@ class PreferencesPopup(CcpnDialog):
                QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.MinimumExpanding,
                grid=(row, 3), gridSpan=(1, 1))
 
-    def _changeMarksColour(self):
+    @queueStateChange(_verifyApply)
+    def _queueChangeSliceComboIndex(self, value):
+        if value >= 0 and list(spectrumColours.keys())[value] != self.preferences.general.defaultMarksColour:
+            return partial(self._changeMarksColourIndex, value)
+
+    def _changeMarksColourIndex(self, value):
         """Change the default maerks colour in the preferences
         """
         newColour = list(spectrumColours.keys())[list(spectrumColours.values()).index(colourNameNoSpace(self.marksDefaultColourBox.currentText()))]
         if newColour:
             self.preferences.general.defaultMarksColour = newColour
 
-    def _changeMarksColourButton(self):
+    def _queueChangeMarksColourButton(self):
         """set the default marks colour from the colour dialog
         """
         dialog = ColourDialog(self)
@@ -926,7 +931,7 @@ class PreferencesPopup(CcpnDialog):
         self.pymolPathLabel = Label(parent, "Pymol Path", grid=(row, 0), )
         self.pymolPath = PathEdit(parent, grid=(row, 1), hAlign='l')
         self.pymolPath.setMinimumWidth(LineEditsMinimumWidth)
-        self.pymolPath.editingFinished.connect(self._queueSetPymolPath)
+        self.pymolPath.textChanged.connect(self._queueSetPymolPath)
         self.pymolPath.setText(self.preferences.externalPrograms.pymol)
         self.pymolPathButton = Button(parent, grid=(row, 2), callback=self._getPymolPath, icon='icons/directory',
                                       hPolicy='fixed')

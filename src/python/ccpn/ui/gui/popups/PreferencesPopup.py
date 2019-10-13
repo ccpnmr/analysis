@@ -30,6 +30,7 @@ from PyQt5 import QtWidgets, QtCore
 import os
 from functools import partial
 from copy import deepcopy
+from math import floor
 from ccpnmodel.ccpncore.api.memops import Implementation
 from ccpn.util.AttrDict import AttrDict
 from ccpn.ui.gui.widgets.Label import Label
@@ -405,10 +406,10 @@ class PreferencesPopup(CcpnDialog):
 
         row += 1
         self.autoBackupFrequencyLabel = Label(parent, text="Auto Backup Freq (mins)", grid=(row, 0))
-        self.autoBackupFrequencyData = LineEdit(parent, grid=(row, 1), hAlign='l')
+        self.autoBackupFrequencyData = DoubleSpinbox(parent, grid=(row, 1), hAlign='l', min=10, decimals=0, step=10)
         self.autoBackupFrequencyData.setMinimumWidth(LineEditsMinimumWidth)
-        self.autoBackupFrequencyData.setText('%.0f' % self.preferences.general.autoBackupFrequency)
-        self.autoBackupFrequencyData.textChanged.connect(self._queueSetAutoBackupFrequency)
+        self.autoBackupFrequencyData.setValue(self.preferences.general.autoBackupFrequency)
+        self.autoBackupFrequencyData.valueChanged.connect(self._queueSetAutoBackupFrequency)
 
         row += 1
         HLine(parent, grid=(row, 0), gridSpan=(1, 3), colour=getColours()[DIVIDER], height=15)
@@ -613,7 +614,7 @@ class PreferencesPopup(CcpnDialog):
         peakFittingMethod = self.preferences.general.peakFittingMethod
         self.peakFittingMethod = RadioButtons(parent, texts=PEAKFITTINGDEFAULTS,
                                               selectedInd=PEAKFITTINGDEFAULTS.index(peakFittingMethod),
-                                              callback=self._setPeakFittingMethod,
+                                              callback=self._queueSetPeakFittingMethod,
                                               direction='h',
                                               grid=(row, 1), hAlign='l',
                                               tipTexts=None,
@@ -663,7 +664,7 @@ class PreferencesPopup(CcpnDialog):
         matchAxisCode = self.preferences.general.matchAxisCode
         self.matchAxisCode = RadioButtons(parent, texts=['Atom Type', 'Full Axis Code'],
                                           selectedInd=matchAxisCode,
-                                          callback=self._setMatchAxisCode,
+                                          callback=self._queueSetMatchAxisCode,
                                           direction='h',
                                           grid=(row, 1), hAlign='l',
                                           tipTexts=None,
@@ -674,7 +675,7 @@ class PreferencesPopup(CcpnDialog):
         axisOrderingOptions = self.preferences.general.axisOrderingOptions
         self.axisOrderingOptions = RadioButtons(parent, texts=['Use Spectrum Settings', 'Always Ask'],
                                                 selectedInd=axisOrderingOptions,
-                                                callback=self._setAxisOrderingOptions,
+                                                callback=self._queueSetAxisOrderingOptions,
                                                 direction='h',
                                                 grid=(row, 1), hAlign='l',
                                                 tipTexts=None,
@@ -695,7 +696,7 @@ class PreferencesPopup(CcpnDialog):
         zoomCentre = self.preferences.general.zoomCentreType
         self.zoomCentre = RadioButtons(parent, texts=['Mouse', 'Screen'],
                                        selectedInd=zoomCentre,
-                                       callback=self._setZoomCentre,
+                                       callback=self._queueSetZoomCentre,
                                        direction='h',
                                        grid=(row, 1), hAlign='l',
                                        tipTexts=None,
@@ -797,7 +798,7 @@ class PreferencesPopup(CcpnDialog):
             self.preferences.general.annotationType = annType
         self.annotationsData = RadioButtons(parent, texts=['Short', 'Full', 'Pid', 'Minimal', 'Peak Id'],
                                             selectedInd=annType,
-                                            callback=self._setAnnotations,
+                                            callback=self._queueSetAnnotations,
                                             direction='horizontal',
                                             grid=(row, 1), hAlign='l',
                                             tipTexts=None,
@@ -807,7 +808,7 @@ class PreferencesPopup(CcpnDialog):
         symbol = self.preferences.general.symbolType
         self.symbol = RadioButtons(parent, texts=['Cross', 'lineWidths', 'Filled lineWidths', 'Plus'],
                                    selectedInd=symbol,
-                                   callback=self._setSymbol,
+                                   callback=self._queueSetSymbol,
                                    direction='h',
                                    grid=(row, 1), hAlign='l',
                                    tipTexts=None,
@@ -880,7 +881,7 @@ class PreferencesPopup(CcpnDialog):
         self.multipletAveraging = RadioButtons(parent, texts=MULTIPLETAVERAGINGTYPES,
                                                selectedInd=MULTIPLETAVERAGINGTYPES.index(
                                                        multipletAveraging) if multipletAveraging in MULTIPLETAVERAGINGTYPES else 0,
-                                               callback=self._setMultipletAveraging,
+                                               callback=self._queueSetMultipletAveraging,
                                                direction='h',
                                                grid=(row, 1), hAlign='l',
                                                tipTexts=None,
@@ -1190,8 +1191,10 @@ class PreferencesPopup(CcpnDialog):
 
     @queueStateChange(_verifyApply)
     def _queueSetAutoBackupFrequency(self):
+        textFromValue = self.autoBackupFrequencyData.textFromValue
         value = self.autoBackupFrequencyData.get()
-        if value != self.preferences.general.autoBackupFrequency:
+        prefValue = textFromValue(self.preferences.general.autoBackupFrequency)
+        if textFromValue(value) != prefValue:
             return partial(self._setAutoBackupFrequency, value)
 
     def _setAutoBackupFrequency(self, value):
@@ -1205,10 +1208,10 @@ class PreferencesPopup(CcpnDialog):
     @queueStateChange(_verifyApply)
     def _queueSetRegionPadding(self):
         textFromValue = self.regionPaddingData.textFromValue
-        value = 0.01 * self.regionPaddingData.get()
-        prefValue = textFromValue(self.preferences.general.stripRegionPadding)
+        value = self.regionPaddingData.get()
+        prefValue = textFromValue(100 * self.preferences.general.stripRegionPadding)
         if value >= 0 and textFromValue(value) != prefValue:
-            return partial(self._setRegionPadding, value)
+            return partial(self._setRegionPadding, 0.01 * value)
 
     def _setRegionPadding(self, value):
         # try:
@@ -1220,10 +1223,12 @@ class PreferencesPopup(CcpnDialog):
     @queueStateChange(_verifyApply)
     def _queueSetDropFactor(self):
         textFromValue = self.dropFactorData.textFromValue
-        value = 0.01 * self.dropFactorData.get()
-        prefValue = textFromValue(self.preferences.general.peakDropFactor)
+        value = self.dropFactorData.get()
+        prefValue = textFromValue(100 * self.preferences.general.peakDropFactor)
         if value >= 0 and textFromValue(value) != prefValue:
-            return partial(self._setDropFactor, value)
+            return partial(self._setDropFactor, 0.01 * value)
+        else:
+            pass
 
     def _setDropFactor(self, value):
         # try:
@@ -1458,7 +1463,7 @@ class PreferencesPopup(CcpnDialog):
 
     @queueStateChange(_verifyApply)
     def _queueSetMultipletAveraging(self):
-        value = self.multipletAveraging.getSelectedText()
+        value = self.multipletAveraging.getIndex()
         if value != self.preferences.general.multipletAveraging:
             return partial(self._setMultipletAveraging, value)
 

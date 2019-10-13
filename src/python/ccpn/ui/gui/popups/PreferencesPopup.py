@@ -1098,14 +1098,14 @@ class PreferencesPopup(CcpnDialog):
 
     def _toggleGeneralOptions(self, preference, checked):
         self.preferences.general[preference] = checked
-        if preference == 'showToolbar':
-            for spectrumDisplay in self.project.spectrumDisplays:
-                spectrumDisplay.spectrumUtilToolBar.setVisible(checked)
+        # if preference == 'showToolbar':
+        #     for spectrumDisplay in self.project.spectrumDisplays:
+        #         spectrumDisplay.spectrumUtilToolBar.setVisible(checked)
         # elif preference == 'showSpectrumBorder':
         #     for strip in self.project.strips:
         #         for spectrumView in strip.spectrumViews:
         #             spectrumView._setBorderItemHidden(checked)
-        elif preference == 'autoBackupEnabled':
+        if preference == 'autoBackupEnabled':
             self.application.updateAutoBackup()
 
     @queueStateChange(_verifyApply)

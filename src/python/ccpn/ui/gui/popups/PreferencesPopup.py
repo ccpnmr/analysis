@@ -52,7 +52,8 @@ from ccpn.ui.gui.widgets.Tabs import Tabs
 from ccpn.ui.gui.widgets.Spacer import Spacer
 from ccpn.ui.gui.widgets.HLine import HLine
 from ccpn.util.Logging import getLogger
-from ccpn.util.Colour import spectrumColours, addNewColour, fillColourPulldown, addNewColourString, colourNameNoSpace
+from ccpn.util.Colour import spectrumColours, addNewColour, fillColourPulldown, addNewColourString, \
+    colourNameNoSpace, _setColourPulldown
 from ccpn.ui.gui.widgets.ColourDialog import ColourDialog
 from ccpn.ui.gui.widgets.ScrollArea import ScrollArea
 from ccpn.ui.gui.widgets.Spacer import Spacer
@@ -276,8 +277,8 @@ class PreferencesPopup(CcpnDialog):
 
         # check for any errors
         if error.errorValue:
-            # repopulate popup on an error
-            self._repopulate()
+            # re-populate popup from self.preferences on error
+            self._populate()
             return False
 
         # remove all changes
@@ -551,7 +552,6 @@ class PreferencesPopup(CcpnDialog):
         """Populate the widgets in the tabs
         """
         with self.blockWidgetSignals():
-            
             self._populateGeneralTab()
             self._populateSpectrumTab()
             self._populateExternalProgramsTab()
@@ -605,6 +605,7 @@ class PreferencesPopup(CcpnDialog):
 
         self.regionPaddingData.setValue(float('%.1f' % (100 * self.preferences.general.stripRegionPadding)))
         self.dropFactorData.setValue(float('%.1f' % (100 * self.preferences.general.peakDropFactor)))
+
         volumeIntegralLimit = self.preferences.general.volumeIntegralLimit
         self.volumeIntegralLimitData.setValue(int(volumeIntegralLimit))
         self.peakFittingMethod.setIndex(PEAKFITTINGDEFAULTS.index(self.preferences.general.peakFittingMethod))
@@ -642,26 +643,11 @@ class PreferencesPopup(CcpnDialog):
         self.symbolThicknessData.setValue(int(self.preferences.general.symbolThickness))
         self.contourThicknessData.setValue(int(self.preferences.general.contourThickness))
         self.autoCorrectBox.setChecked(self.preferences.general.autoCorrectColours)
-        self._setColourPulldown(self.marksDefaultColourBox, self.preferences.general.defaultMarksColour)
+        _setColourPulldown(self.marksDefaultColourBox, self.preferences.general.defaultMarksColour)
 
         multipletAveraging = self.preferences.general.multipletAveraging
         self.multipletAveraging.setIndex(MULTIPLETAVERAGINGTYPES.index(multipletAveraging) if multipletAveraging in MULTIPLETAVERAGINGTYPES else 0)
         self.singleContoursBox.setChecked(self.preferences.general.generateSinglePlaneContours)
-
-    def _setColourPulldown(self, pulldown, attrib):
-        """Populate colour pulldown and set to the current colour
-        """
-        spectrumColourKeys = list(spectrumColours.keys())
-        fillColourPulldown(pulldown, allowAuto=False)
-        c = attrib
-        if c in spectrumColourKeys:
-            col = spectrumColours[c]
-            pulldown.setCurrentText(col)
-        else:
-            addNewColourString(c)
-            fillColourPulldown(pulldown, allowAuto=False)
-            col = spectrumColours[c]
-            pulldown.setCurrentText(col)
 
     def _populateExternalProgramsTab(self):
         """Populate the widgets in the externalProgramsTab
@@ -975,17 +961,7 @@ class PreferencesPopup(CcpnDialog):
         self.marksDefaultColourBox = PulldownList(parent, grid=(row, 1), vAlign='t')
 
         # populate colour pulldown and set to the current colour
-        # spectrumColourKeys = list(spectrumColours.keys())
         fillColourPulldown(self.marksDefaultColourBox, allowAuto=False)
-        # c = self.preferences.general.defaultMarksColour
-        # if c in spectrumColourKeys:
-        #     col = spectrumColours[c]
-        #     self.marksDefaultColourBox.setCurrentText(col)
-        # else:
-        #     addNewColourString(c)
-        #     fillColourPulldown(self.marksDefaultColourBox, allowAuto=False)
-        #     col = spectrumColours[c]
-        #     self.marksDefaultColourBox.setCurrentText(col)
         self.marksDefaultColourBox.currentIndexChanged.connect(self._queueChangeMarksColourIndex)
 
         # add a colour dialog button

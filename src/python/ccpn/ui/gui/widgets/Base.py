@@ -277,7 +277,7 @@ class Base(DropBase):
 
         return Spacer(self, width, height, expandingX, expandingY, grid=grid, gridSpan=gridSpan)
 
-    def _blockEvents(self, projectBlanking=False, project=None):
+    def _blockEvents(self, blanking=False, project=None):
         """Block all updates/signals/notifiers in the widget.
         """
         if not hasattr(self, '_widgetSignalBlockingLevel'):
@@ -288,7 +288,7 @@ class Base(DropBase):
             self._widgetSignalBlockers = {}
             self._blockAllWidgetSignals(self)
             self.setUpdatesEnabled(False)
-            if projectBlanking and project:
+            if blanking and project:
                 project.blankNotification()
 
         self._widgetSignalBlockingLevel += 1

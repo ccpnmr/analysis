@@ -816,6 +816,22 @@ def fillColourPulldown(pulldown, allowAuto=False):
         pulldown.setCurrentText(currText)
 
 
+def _setColourPulldown(pulldown, attrib):
+    """Populate colour pulldown and set to the current colour
+    """
+    spectrumColourKeys = list(spectrumColours.keys())
+    fillColourPulldown(pulldown, allowAuto=False)
+    c = attrib
+    if c in spectrumColourKeys:
+        col = spectrumColours[c]
+        pulldown.setCurrentText(col)
+    else:
+        addNewColourString(c)
+        fillColourPulldown(pulldown, allowAuto=False)
+        col = spectrumColours[c]
+        pulldown.setCurrentText(col)
+
+
 def getSpectrumColour(colourName, defaultReturn=None):
     """
     return the hex colour of the named colour

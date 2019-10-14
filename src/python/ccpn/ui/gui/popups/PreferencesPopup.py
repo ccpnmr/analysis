@@ -95,8 +95,6 @@ def _verifyApply(popup, attributeName, value, *postFixes):
     # append postFix if need to differentiate partial functions
     if attributeName:
 
-        print('>>>verify', attributeName)
-
         if postFixes is not None:
             # attributeName += str(postFixes)
             for pf in postFixes:

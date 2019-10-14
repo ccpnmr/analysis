@@ -277,7 +277,7 @@ class Base(DropBase):
 
         return Spacer(self, width, height, expandingX, expandingY, grid=grid, gridSpan=gridSpan)
 
-    def _blockEvents(self, blanking=False, project=None):
+    def _blockEvents(self, projectBlanking=False, project=None):
         """Block all updates/signals/notifiers in the widget.
         """
         if not hasattr(self, '_widgetSignalBlockingLevel'):
@@ -288,7 +288,7 @@ class Base(DropBase):
             self._widgetSignalBlockers = {}
             self._blockAllWidgetSignals(self)
             self.setUpdatesEnabled(False)
-            if blanking and project:
+            if projectBlanking and project:
                 project.blankNotification()
 
         self._widgetSignalBlockingLevel += 1
@@ -310,26 +310,27 @@ class Base(DropBase):
             raise RuntimeError('Error: Widget signal blocking already at 0')
 
     @contextmanager
-    def blockWidgetSignals(self, blanking=False):
+    def blockWidgetSignals(self, projectBlanking=False):
         """Block all signals for the widget (recursive)
         """
-        self._blockEvents(blanking)
+        self._blockEvents(projectBlanking)
         try:
             yield  # yield control to the calling process
 
         except Exception as es:
             raise es
         finally:
-            self._unblockEvents(blanking)
+            self._unblockEvents(projectBlanking)
 
     def _blockAllWidgetSignals(self, widget=None):
         """Recursively block/unblock signals to all children
         """
-        for child in widget.children():
-            self._blockAllWidgetSignals(child)
+        if widget:
+            for child in widget.children():
+                self._blockAllWidgetSignals(child)
 
-        # add the blocking signal by creation of QSignalBlocker
-        self._widgetSignalBlockers[widget] = QtCore.QSignalBlocker(widget)
+            # add the blocking signal by creation of QSignalBlocker
+            self._widgetSignalBlockers[widget] = QtCore.QSignalBlocker(widget)
 
     def _removeWidget(self, widget, removeTopWidget=False):
         """Destroy a widget and all it's contents

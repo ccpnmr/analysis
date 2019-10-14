@@ -797,7 +797,7 @@ def fillColourPulldown(pulldown, allowAuto=False):
     currText = pulldown.currentText()
     # currIndex = pulldown.currentIndex()
     # print ('>>>', currText, currIndex)
-    with pulldown._blockSignals():
+    with pulldown.blockWidgetSignals():
         pulldown.clear()
         if allowAuto:
             pulldown.addItem(text='<auto>')

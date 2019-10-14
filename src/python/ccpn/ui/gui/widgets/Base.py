@@ -30,11 +30,10 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 
 from functools import partial
-from PyQt5 import QtGui, QtWidgets, QtCore, Qt
-
+from contextlib import contextmanager
+from PyQt5 import QtWidgets, QtCore
 from pyqtgraph.dockarea import Dock
 from ccpn.ui.gui.widgets.DropBase import DropBase
-
 from ccpn.util.Logging import getLogger
 
 
@@ -277,3 +276,75 @@ class Base(DropBase):
         expandingY = QtWidgets.QSizePolicy.MinimumExpanding if expandY else QtWidgets.QSizePolicy.Fixed
 
         return Spacer(self, width, height, expandingX, expandingY, grid=grid, gridSpan=gridSpan)
+
+    def _blockEvents(self, blanking=False, project=None):
+        """Block all updates/signals/notifiers in the widget.
+        """
+        if not hasattr(self, '_widgetSignalBlockingLevel'):
+            self._widgetSignalBlockingLevel = 0
+
+        # block on first entry
+        if self._widgetSignalBlockingLevel == 0:
+            self._widgetSignalBlockers = {}
+            self._blockAllWidgetSignals(self)
+            self.setUpdatesEnabled(False)
+            if blanking and project:
+                project.blankNotification()
+
+        self._widgetSignalBlockingLevel += 1
+
+    def _unblockEvents(self, blanking=False, project=None):
+        """Unblock all updates/signals/notifiers in the dialog.
+        """
+        if self._widgetSignalBlockingLevel > 0:
+            self._widgetSignalBlockingLevel -= 1
+
+            # unblock all signals on last exit
+            if self._widgetSignalBlockingLevel == 0:
+                del self._widgetSignalBlockers
+                if blanking and project:
+                    project.unblankNotification()
+                self.setUpdatesEnabled(True)
+
+        else:
+            raise RuntimeError('Error: Widget signal blocking already at 0')
+
+    @contextmanager
+    def blockWidgetSignals(self, blanking=False):
+        """Block all signals for the widget (recursive)
+        """
+        self._blockEvents(blanking)
+        try:
+            yield  # yield control to the calling process
+
+        except Exception as es:
+            raise es
+        finally:
+            self._unblockEvents(blanking)
+
+    def _blockAllWidgetSignals(self, widget=None):
+        """Recursively block/unblock signals to all children
+        """
+        for child in widget.children():
+            self._blockAllWidgetSignals(child)
+
+        # add the blocking signal by creation of QSignalBlocker
+        self._widgetSignalBlockers[widget] = QtCore.QSignalBlocker(widget)
+
+    def _removeWidget(self, widget, removeTopWidget=False):
+        """Destroy a widget and all it's contents
+        """
+
+        def deleteItems(layout):
+            if layout is not None:
+                while layout.count():
+                    item = layout.takeAt(0)
+                    widget = item.widget()
+                    if widget is not None:
+                        widget.setVisible(False)
+                        widget.setParent(None)
+                        del widget
+
+        deleteItems(widget.getLayout())
+        if removeTopWidget:
+            del widget

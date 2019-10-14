@@ -32,7 +32,8 @@ from functools import reduce
 
 class DialogButtonBox(QtWidgets.QDialogButtonBox, Base):
 
-    def __init__(self, parent=None, buttons=None, callbacks=None, texts=None, tipTexts=None, icons=None,
+    def __init__(self, parent=None, buttons=None, callbacks=None, texts=None, tipTexts=None,
+                 icons=None, enabledStates=None, visibleStates=None, defaultButton=None,
                  orientation='horizontal', **kwds):
 
         super().__init__(parent)
@@ -48,6 +49,8 @@ class DialogButtonBox(QtWidgets.QDialogButtonBox, Base):
         texts = texts or []
         tipTexts = tipTexts or []
         icons = icons or []
+        enabledStates = enabledStates or []
+        visibleStates = visibleStates or []
 
         if not isinstance(callbacks, (tuple, list)):
             raise TypeError('Error, callbacks must be tuple/list')
@@ -65,6 +68,17 @@ class DialogButtonBox(QtWidgets.QDialogButtonBox, Base):
             raise TypeError('Error, icons must be tuple/list')
         icons = (list(icons) + N * [None])[:N]
 
+        if not isinstance(enabledStates, (tuple, list)):
+            raise TypeError('Error, enabledStates must be tuple/list')
+        enabledStates = (list(enabledStates) + N * [None])[:N]
+
+        if not isinstance(visibleStates, (tuple, list)):
+            raise TypeError('Error, visibleStates must be tuple/list')
+        visibleStates = (list(visibleStates) + N * [None])[:N]
+
+        if defaultButton is not None and defaultButton not in buttons:
+            raise TypeError("Error, defaultButton not in buttons")
+
         if not isinstance(orientation, str):
             raise TypeError("Error, orientation must be str: 'h' or 'v'")
 
@@ -80,16 +94,29 @@ class DialogButtonBox(QtWidgets.QDialogButtonBox, Base):
             self.setStandardButtons(buttonTypes)
 
             if callbacks:
-                for button, callback, text, tipText, icon in zip(buttons, callbacks, texts, tipTexts, icons):
+                for button, callback, text, tipText, icon, enabledState, visibleState in \
+                        zip(buttons, callbacks, texts, tipTexts, icons, enabledStates, visibleStates):
+
                     thisButton = self.button(button)
-                    if callback:
+                    if callback is not None:
                         thisButton.clicked.connect(callback)
-                    if text:
+                    if text is not None:
                         thisButton.setText(text)
-                    if tipText:
+                        if not text:
+                            # reduce the padding to give a better shape
+                            thisButton.setStyleSheet('QPushButton { padding: 0px 2px 0px 2px; }')
+                    if tipText is not None:
                         thisButton.setToolTip(tipText)
-                    if icon:  # filename or pixmap
+                    if icon is not None:  # filename or pixmap
                         thisButton.setIcon(Icon(icon))
-                        # this causes the button to reset its stylesheet
+                        # NOTE: sometimes this causes the button to reset its stylesheet
                         thisButton.setIconSize(QtCore.QSize(22, 22))
-                    thisButton.setFixedHeight(24)
+                    if enabledState is not None:
+                        thisButton.setEnabled(enabledState)
+                    if visibleState is not None:
+                        thisButton.setVisible(visibleState)
+
+                    thisButton.setMinimumHeight(24)
+
+            if defaultButton is not None:
+                self._parent.setDefaultButton(self.button(defaultButton))

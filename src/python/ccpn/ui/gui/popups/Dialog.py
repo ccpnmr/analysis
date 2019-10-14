@@ -54,7 +54,6 @@ class CcpnDialog(QtWidgets.QDialog, Base):
     APPLYBUTTONTEXT = 'Apply'
     OKBUTTONTEXT = 'OK'
 
-
     def __init__(self, parent=None, windowTitle='', setLayout=False, size=(300, 100), **kwds):
 
         super().__init__(parent)
@@ -120,12 +119,15 @@ def handleDialogApply(self):
     """
 
     from ccpn.core.lib.ContextManagers import undoBlock
+
     undo = self.project._undo
+
 
     # object to hold the error value
     class errorContent():
         def __init__(self):
             self.errorValue = None
+
 
     try:
         # add an undoBlock
@@ -144,4 +146,3 @@ def handleDialogApply(self):
         # re-raise the error if in debug mode
         if self.application._isInDebugMode:
             raise es
-

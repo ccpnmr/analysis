@@ -105,42 +105,29 @@ class SpectrumPropertiesPopupABC(CcpnDialog):
         Spacer(self, 5, 5, QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.MinimumExpanding,
                grid=(3, 1), gridSpan=(1, 1))
 
-        # self.dialogButtons = ButtonList(self, texts=[self.REVERTBUTTONTEXT, self.CLOSEBUTTONTEXT, self.APPLYBUTTONTEXT, self.OKBUTTONTEXT],
-        #                                 callbacks=[self._revertButton, self._closeButton, self._applyButton, self._okButton],
-        #                                 tipTexts=['Revert - roll-back all applied settings and close',
-        #                                           'Close - all applied changes will be kept',
-        #                                           'Apply changes',
-        #                                           'Apply changes and close'],
-        #                                 direction='h', grid=(4, 0), gridSpan=(1, 4))
-        #
-        # # test a small spacer to separate the revert button from the rest
-        # self.dialogButtons._insertSpacer(1)
-        #
-        # self.dialogButtons.getButton(self.APPLYBUTTONTEXT).setFocus()
-        #
-        # # as this is a dialog, need to set one of the buttons as the default button when other widgets have focus
-        # self.setDefaultButton(self.dialogButtons.getButton(self.APPLYBUTTONTEXT))
-        # self.dialogButtons.getButton(self.APPLYBUTTONTEXT).setEnabled(False)
-
         self.dialogButtons = DialogButtonBox(self, grid=(5, 0), gridSpan=(1, 4), orientation='horizontal',
                                              buttons=(QtWidgets.QDialogButtonBox.Reset,
                                                       QtWidgets.QDialogButtonBox.Close,
                                                       QtWidgets.QDialogButtonBox.Apply,
-                                                      QtWidgets.QDialogButtonBox.Ok),
+                                                      QtWidgets.QDialogButtonBox.Ok,
+                                                      QtWidgets.QDialogButtonBox.Help),
                                              callbacks=(self._revertButton, self._closeButton,
                                                         self._applyButton, self._okButton),
-                                             texts=['Revert'],
+                                             texts=['Revert', None, None, None, ''],
                                              tipTexts=['Revert - roll-back all applied changes and close',
                                                        'Close - keep all applied changes and close',
                                                        'Apply changes',
-                                                       'Apply changes and close'],
+                                                       'Apply changes and close',
+                                                       'Help'],
                                              icons=['icons/undo', 'icons/window-close',
-                                                    'icons/yellow-arrow-down', 'icons/dialog-apply.png'])
+                                                    'icons/orange-apply', 'icons/dialog-apply.png',
+                                                    'icons/system-help'],
+                                             enabledStates=[False, None, False, None, False],
+                                             visibleStates=[None],
+                                             defaultButton=QtWidgets.QDialogButtonBox.Close)
 
-        self.setDefaultButton(self.dialogButtons.button(QtWidgets.QDialogButtonBox.Close))
         self._applyButton = self.dialogButtons.button(QtWidgets.QDialogButtonBox.Apply)
-        self._applyButton.setEnabled(False)
-        self._applyButton.setFocus()
+        self._revertButton = self.dialogButtons.button(QtWidgets.QDialogButtonBox.Reset)
 
     def __postInit__(self):
         """post initialise functions
@@ -265,6 +252,7 @@ class SpectrumPropertiesPopupABC(CcpnDialog):
             tab._changes = {}
 
         self._currentNumApplies += 1
+        self._revertButton.setEnabled(True)
         return True
 
 

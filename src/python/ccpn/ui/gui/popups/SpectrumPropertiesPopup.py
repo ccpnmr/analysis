@@ -134,7 +134,7 @@ class SpectrumPropertiesPopupABC(CcpnDialog):
         """post initialise functions
         """
         self.tabs = tuple(self.tabWidget.widget(ii) for ii in range(self.tabWidget.count()))
-        # self._populate()
+        self._populate()
         self.setFixedSize(self.sizeHint())
 
     def _fillPullDowns(self):
@@ -303,7 +303,7 @@ class SpectrumPropertiesPopup(SpectrumPropertiesPopupABC):
             if self._generalTab:
                 self._generalTab._populateGeneral()
             if self._dimensionsTab:
-                self._dimensionsTab._populate()
+                self._dimensionsTab._populateDimension()
             if self._contoursTab:
                 self._contoursTab._populateColour()
 
@@ -344,8 +344,8 @@ class SpectrumDisplayPropertiesPopupNd(SpectrumPropertiesPopupABC):
         """Populate the widgets in the tabs
         """
         with self.blockWidgetSignals():
-            if self._contoursTab:
-                self._contoursTab._populateColour()
+            for aTab in self.tabs:
+                aTab._populateColour()
 
 
 class SpectrumDisplayPropertiesPopup1d(SpectrumPropertiesPopupABC):
@@ -393,11 +393,12 @@ def _verifyApply(tab, attributeName, value, *postFixes):
     # if attributeName is defined use as key to dict to store change functions
     # append postFix if need to differentiate partial functions
     if attributeName:
+
         if postFixes is not None:
             # attributeName += str(postFixes)
             for pf in postFixes:
                 if pf:
-                    attributeName += pf
+                    attributeName += str(pf)
         if value:
 
             # store in dict
@@ -513,7 +514,7 @@ class GeneralTab(Widget):
             # self.spectrumType.setData(texts=list(experimentTypes.keys()), objects=list(experimentTypes.values()))
 
             # Added to account for renaming of experiments
-            self.spectrumType.currentIndexChanged.connect(partial(self._queueSetSpectrumType, spectrum))
+            self.spectrumType.activated.connect(partial(self._queueSetSpectrumType, spectrum))
             # if spectrum.experimentType is not None:
             #     self.spectrumType.select(spectrum.experimentType)
 
@@ -569,7 +570,7 @@ class GeneralTab(Widget):
             # text = priorityNameRemapping.get(text, text)
             # self.spectrumType.setCurrentIndex(self.spectrumType.findText(text))
 
-            self.spectrumType.currentIndexChanged.connect(partial(self._queueSetSpectrumType, spectrum))
+            self.spectrumType.activated.connect(partial(self._queueSetSpectrumType, spectrum))
             # self.spectrumType.setMinimumWidth(self.pathData.width() * 1.95)
             # self.spectrumType.setFixedHeight(25)
 
@@ -660,6 +661,9 @@ class GeneralTab(Widget):
             pathData.validator().resetCheck()
 
     def _populateGeneral(self):
+        """Populate general tab from self.spectrum
+        Blocking to be performed by tab container
+        """
         from ccpnmodel.ccpncore.lib.spectrum.NmrExpPrototype import priorityNameRemapping
 
         self.spectrumPidLabel.setText(self.spectrum.pid)
@@ -673,7 +677,7 @@ class GeneralTab(Widget):
             index = self.spectrum.project.chemicalShiftLists.index(self.spectrum.chemicalShiftList)
         except:
             index = 0
-        self.chemicalShiftListPulldown.setTexts([csList.pid for csList in self.spectrum.project.chemicalShiftLists] + ['<New>'])
+        self.chemicalShiftListPulldown.setData([csList.pid for csList in self.spectrum.project.chemicalShiftLists] + ['<New>'])
         self.chemicalShiftListPulldown.setIndex(index)
 
         self.samplesPulldownList.clear()
@@ -686,15 +690,14 @@ class GeneralTab(Widget):
         if self.spectrum.dimensionCount == 1:
             _setColourPulldown(self.colourBox, self.spectrum.sliceColour)
 
-        if self.atomCodes:
-            itemsList = list(self.experimentTypes[self.spectrum.dimensionCount].get(self.atomCodes).keys())
-            self.spectrumType.clear()
-            self.spectrumType.addItems(itemsList)
-            text = self.spectrum.experimentName
-            if text not in itemsList:
-                text = self.spectrum.experimentType
-            text = priorityNameRemapping.get(text, text)
-            self.spectrumType.setCurrentIndex(self.spectrumType.findText(text))
+        experimentTypes = _getExperimentTypes(self.spectrum.project, self.spectrum)
+        texts = ('',) + tuple(experimentTypes.keys())
+        objects = ('',) + tuple(experimentTypes.values())
+        # self.spectrumType.setData(texts=list(experimentTypes.keys()), objects=list(experimentTypes.values()))
+        self.spectrumType.setData(texts=texts, objects=objects)
+
+        if self.spectrum.experimentType is not None:
+            self.spectrumType.select(self.spectrum.experimentType)
 
         if self.spectrum.scale is not None:
             self.spectrumScalingData.setValue(self.spectrum.scale)
@@ -1057,7 +1060,7 @@ class DimensionsTab(Widget):
             #     index = aliasMaxRange.index(aliasLim[i][1])
             #     self.maxAliasingPullDowns[i].setIndex(index)
 
-            self.maxAliasingPullDowns[i].currentIndexChanged.connect(partial(self._queueSetMaxAliasing, spectrum, self.maxAliasingPullDowns[i].getText, i))
+            self.maxAliasingPullDowns[i].activated.connect(partial(self._queueSetMaxAliasing, spectrum, self.maxAliasingPullDowns[i].getText, i))
 
             # min aliasing
             row += 1
@@ -1067,7 +1070,7 @@ class DimensionsTab(Widget):
             #     index = aliasMinRange.index(aliasLim[i][0])
             #     self.minAliasingPullDowns[i].setIndex(index)
 
-            self.minAliasingPullDowns[i].currentIndexChanged.connect(partial(self._queueSetMinAliasing, spectrum, self.minAliasingPullDowns[i].getText, i))
+            self.minAliasingPullDowns[i].activated.connect(partial(self._queueSetMinAliasing, spectrum, self.minAliasingPullDowns[i].getText, i))
 
         row += 1
         HLine(self, grid=(row, 0), gridSpan=(1, dimensions + 1), colour=getColours()[DIVIDER], height=15)
@@ -1141,13 +1144,16 @@ class DimensionsTab(Widget):
         self.pythonConsole.writeConsoleCommand("spectrum.preferredAxisOrdering = {0}".format(str(value)), spectrum=spectrum)
         self._writeLoggingMessage("spectrum.preferredAxisOrdering = {0}".format(str(value)))
 
-    def _populate(self):
+    def _populateDimension(self):
+        """Populate dimensions tab from self.spectrum
+        Blocking to be performed by tab container
+        """
         for i in range(self.dimensions):
             value = self.spectrum.axisCodes[i]
-            self.axisCodeEdits[i].setText(text='<None>' if value is None else str(value))
+            self.axisCodeEdits[i].setText('<None>' if value is None else str(value))
 
             if self.spectrum.isotopeCodes[i] in self._isotopeList:
-                self.isotopeCodePullDowns[i].setIndex(self.isotopeList.index(self.spectrum.isotopeCodes[i]))
+                self.isotopeCodePullDowns[i].setIndex(self._isotopeList.index(self.spectrum.isotopeCodes[i]))
 
             self._pointCountsLabels[i].setText(str(self.spectrum.pointCounts[i]))
             self._dimensionTypesLabels[i].setText(self.spectrum.dimensionTypes[i])
@@ -1156,13 +1162,13 @@ class DimensionsTab(Widget):
             self._spectrometerFrequenciesLabels[i].setText(str("%.3f" % (self.spectrum.spectrometerFrequencies[i] or 0.0)))
 
             value = self.spectrum.referenceValues[i]
-            self.spectralReferencingData[i].setText('<None>' if value is None else str("%.3f" % value))
+            self.spectralReferencingData[i].setValue(value)
 
             value = self.spectrum.referencePoints[i]
-            self.spectralReferencingDataPoints[i].setText('<None>' if value is None else str("%.3f" % value))
+            self.spectralReferencingDataPoints[i].setValue(value)
 
             value = self.spectrum.assignmentTolerances[i]
-            self.spectralAssignmentToleranceData[i].setText('<None>' if value is None else str("%.3f" % value))
+            self.spectralAssignmentToleranceData[i].setValue(value)
 
             value = self.spectrum.doubleCrosshairOffsets[i]
             self.spectralDoubleCursorOffset[i].setValue(value)
@@ -1176,25 +1182,27 @@ class DimensionsTab(Widget):
             dd = {'circular': False, 'mirror': True, None: False}
             self.foldingModesCheckBox[i].setChecked(dd[fModes[i]])
 
+
             # pullDown for min/max aliasing
             aliasLim = self.spectrum.visibleAliasingRange
             aliasMaxRange = list(range(MAXALIASINGRANGE, -1, -1))
             aliasMinRange = list(range(0, -MAXALIASINGRANGE - 1, -1))
             aliasMaxText = [str(aa) for aa in aliasMaxRange]
             aliasMinText = [str(aa) for aa in aliasMinRange]
-            self.maxAliasingPullDowns[i].setTexts(aliasMaxText)
+
+            self.maxAliasingPullDowns[i].setData(aliasMaxText)
 
             if aliasLim[i][1] in aliasMaxRange:
                 index = aliasMaxRange.index(aliasLim[i][1])
                 self.maxAliasingPullDowns[i].setIndex(index)
 
-            self.minAliasingPullDowns[i].setTexts(aliasMinText)
+            self.minAliasingPullDowns[i].setData(aliasMinText)
+
             if aliasLim[i][0] in aliasMinRange:
                 index = aliasMinRange.index(aliasLim[i][0])
                 self.minAliasingPullDowns[i].setIndex(index)
 
-            self.preferredAxisOrderPulldown.setPreSelect(self._fillPreferredWidgetFromAxisTexts)
-            self._fillPreferredWidget()
+        self.preferredAxisOrderPulldown.setPreSelect(self._fillPreferredWidgetFromAxisTexts)
 
     def _writeLoggingMessage(self, command):
         self.logger.info("spectrum = project.getByPid('%s')" % self.spectrum.pid)
@@ -1292,8 +1300,8 @@ class DimensionsTab(Widget):
         minValue = int(valueGetter())
         if minValue != spectrum.visibleAliasingRange[dim][1]:
             returnVal = partial(self._setMinAliasing, self.spectrum, dim, minValue)
-            maxValue = int(self.maxAliasingPullDowns[dim].getText())
-            if minValue > maxValue:
+            maxValue = self.maxAliasingPullDowns[dim].get()
+            if isinstance(maxValue, int) and isinstance(minValue, int) and minValue > maxValue:
                 self.maxAliasingPullDowns[dim].select(str(minValue))
             return returnVal
 
@@ -1312,8 +1320,8 @@ class DimensionsTab(Widget):
         maxValue = int(valueGetter())
         if maxValue != spectrum.visibleAliasingRange[dim][0]:
             returnVal = partial(self._setMaxAliasing, spectrum, dim, maxValue)
-            minValue = int(self.minAliasingPullDowns[dim].getText())
-            if maxValue < minValue:
+            minValue = self.minAliasingPullDowns[dim].get()
+            if isinstance(maxValue, int) and isinstance(minValue, int) and maxValue < minValue:
                 self.minAliasingPullDowns[dim].select(str(maxValue))
             return returnVal
 
@@ -1511,6 +1519,9 @@ class ContoursTab(Widget):
             self.negativeContourCountData.setValue(negLevels)
 
     def _populateColour(self):
+        """Populate colour tab from self.spectrum
+        Blocking to be performed by tab container
+        """
         self.positiveContoursCheckBox.setChecked(self.spectrum.includePositiveContours)
         self.positiveContourBaseData.setValue(self.spectrum.positiveContourBase)
         self.positiveMultiplierData.setValue(float(self.spectrum.positiveContourFactor))
@@ -1749,6 +1760,9 @@ class ColourTab(Widget):
         self.colourButton.clicked.connect(partial(self._queueSetSpectrumColour, spectrum))
 
     def _populateColour(self):
+        """Populate dimensions tab from self.spectrum
+        Blocking to be performed by tab container
+        """
         _setColourPulldown(self.colourBox, self.spectrum.sliceColour)
 
     def _writeLoggingMessage(self, command):

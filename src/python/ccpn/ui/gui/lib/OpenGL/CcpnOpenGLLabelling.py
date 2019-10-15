@@ -2681,10 +2681,7 @@ class GLmultipletListMethods():
                                                             index, index + 3, index + 3, index + 1,) + circleVertices
                 iCount = 36
             else:
-                try:
-                    drawList.indices[indexPtr:indexPtr + 28] = (index, index + 1, index + 2, index + 3,) + circleVertices
-                except:
-                    pass
+                drawList.indices[indexPtr:indexPtr + 28] = (index, index + 1, index + 2, index + 3,) + circleVertices
                 iCount = 28
 
         return iCount, _selected

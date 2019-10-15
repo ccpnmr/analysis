@@ -66,14 +66,14 @@
 <p>Library functions for (semi)automatic assignment routines</p>
 <dl class="function">
 <dt id="ccpn.core.lib.AssignmentLib.assignAlphas">
-<code class="descclassname">ccpn.core.lib.AssignmentLib.</code><code class="descname">assignAlphas</code><span class="sig-paren">(</span><em>nmrResidue: ccpn.core.NmrResidue.NmrResidue</em>, <em>peaks: List[]</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/lib/AssignmentLib.html#assignAlphas"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.lib.AssignmentLib.assignAlphas" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">ccpn.core.lib.AssignmentLib.</code><code class="descname">assignAlphas</code><span class="sig-paren">(</span><em>nmrResidue: ccpn.core.NmrResidue.NmrResidue</em>, <em>peaks: List[]</em>, <em>axisCode='C'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/lib/AssignmentLib.html#assignAlphas"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.lib.AssignmentLib.assignAlphas" title="Permalink to this definition">¶</a></dt>
 <dd><p>Assigns CA and CA-1 NmrAtoms to dimensions of pairs of specified peaks, assuming that one has
 a height greater than the other, e.g. in an HNCA or HNCACB experiment.</p>
 </dd></dl>
 
 <dl class="function">
 <dt id="ccpn.core.lib.AssignmentLib.assignBetas">
-<code class="descclassname">ccpn.core.lib.AssignmentLib.</code><code class="descname">assignBetas</code><span class="sig-paren">(</span><em>nmrResidue: ccpn.core.NmrResidue.NmrResidue</em>, <em>peaks: List[]</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/lib/AssignmentLib.html#assignBetas"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.lib.AssignmentLib.assignBetas" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">ccpn.core.lib.AssignmentLib.</code><code class="descname">assignBetas</code><span class="sig-paren">(</span><em>nmrResidue: ccpn.core.NmrResidue.NmrResidue</em>, <em>peaks: List[]</em>, <em>axisCode='C'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/lib/AssignmentLib.html#assignBetas"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.lib.AssignmentLib.assignBetas" title="Permalink to this definition">¶</a></dt>
 <dd><p>Assigns CB and CB-1 NmrAtoms to dimensions of specified peaks.</p>
 </dd></dl>
 
@@ -240,6 +240,7 @@ peak dimension.</p>
 <ul class="simple">
 <li>Retains (item, value) pairs; item must be a hash-able object (e.g. tuple)</li>
 <li>Retains either maxItem or unlimited number of objects.</li>
+<li>maxItem == 0 disables caching</li>
 <li>Clearing cache is responsibility of the instantiating code; e.g. by decorating a cleanup function
 with cached.clear(attributeName); see above in description for example.</li>
 </ul>
@@ -265,6 +266,18 @@ with cached.clear(attributeName); see above in description for example.</li>
 <dt id="ccpn.core.lib.Cache.Cache.hasItem">
 <code class="descname">hasItem</code><span class="sig-paren">(</span><em>item</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/lib/Cache.html#Cache.hasItem"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.lib.Cache.Cache.hasItem" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return True of item is in cache</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ccpn.core.lib.Cache.Cache.pop">
+<code class="descname">pop</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/lib/Cache.html#Cache.pop"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.lib.Cache.Cache.pop" title="Permalink to this definition">¶</a></dt>
+<dd><p>Remove oldest item from stack</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ccpn.core.lib.Cache.Cache.resize">
+<code class="descname">resize</code><span class="sig-paren">(</span><em>maxItems</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/lib/Cache.html#Cache.resize"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.lib.Cache.Cache.resize" title="Permalink to this definition">¶</a></dt>
+<dd><p>Resize the cache to contain maxItems</p>
 </dd></dl>
 
 </dd></dl>
@@ -324,6 +337,11 @@ attributeName defines the cache object</p>
 <dl class="attribute">
 <dt id="ccpn.core.lib.CallBack.CallBack.ROWITEM">
 <code class="descname">ROWITEM</code><em class="property"> = 'rowItem'</em><a class="headerlink" href="#ccpn.core.lib.CallBack.CallBack.ROWITEM" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ccpn.core.lib.CallBack.CallBack.ROWOBJECT">
+<code class="descname">ROWOBJECT</code><em class="property"> = 'rowObject'</em><a class="headerlink" href="#ccpn.core.lib.CallBack.CallBack.ROWOBJECT" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
@@ -387,7 +405,7 @@ with input None</p>
 
 <dl class="attribute">
 <dt id="ccpn.core.lib.CcpnNefIo.CcpnNefReader.importers">
-<code class="descname">importers</code><em class="property"> = {'nef_nmr_meta_data': &lt;function CcpnNefReader.load_nef_nmr_meta_data at 0x12458d158&gt;, 'nef_distance_restraint_list': &lt;function CcpnNefReader.load_nef_restraint_list at 0x12458d510&gt;, 'nef_dihedral_restraint': &lt;function CcpnNefReader.load_nef_restraint at 0x12458d598&gt;, 'ccpn_spectrum_group': &lt;function CcpnNefReader.load_ccpn_spectrum_group at 0x12458e158&gt;, 'ccpn_additional_data': &lt;function CcpnNefReader.load_ccpn_additional_data at 0x12458e6a8&gt;, 'nef_nmr_spectrum': &lt;function CcpnNefReader.load_nef_nmr_spectrum at 0x12458d620&gt;, 'nef_chemical_shift': &lt;function CcpnNefReader.load_nef_chemical_shift at 0x12458d488&gt;, 'ccpn_assignment': &lt;function CcpnNefReader.load_ccpn_assignment at 0x12458e598&gt;, 'nef_covalent_links': &lt;function CcpnNefReader.load_nef_covalent_links at 0x12458d2f0&gt;, 'ccpn_restraint': &lt;function CcpnNefReader.load_nef_restraint at 0x12458d598&gt;, 'ccpn_substance': &lt;function CcpnNefReader.load_ccpn_substance at 0x12458e488&gt;, 'nef_sequence': &lt;function CcpnNefReader.load_nef_sequence at 0x12458d268&gt;, 'nef_distance_restraint': &lt;function CcpnNefReader.load_nef_restraint at 0x12458d598&gt;, 'ccpn_group_spectrum': &lt;function CcpnNefReader.load_ccpn_group_spectrum at 0x12458e1e0&gt;, 'ccpn_multiplet_peaks': &lt;function CcpnNefReader.load_ccpn_multiplet_peaks at 0x12458d9d8&gt;, 'nef_rdc_restraint_list': &lt;function CcpnNefReader.load_nef_restraint_list at 0x12458d510&gt;, 'ccpn_complex_chain': &lt;function CcpnNefReader.load_ccpn_complex_chain at 0x12458e2f0&gt;, 'ccpn_dataset': &lt;function CcpnNefReader.load_ccpn_dataset at 0x12458e730&gt;, 'ccpn_integral': &lt;function CcpnNefReader.load_ccpn_integral at 0x12458dc80&gt;, 'ccpn_sample': &lt;function CcpnNefReader.load_ccpn_sample at 0x12458e378&gt;, 'ccpn_restraint_list': &lt;function CcpnNefReader.load_nef_restraint_list at 0x12458d510&gt;, 'ccpn_integral_list': &lt;function CcpnNefReader.load_ccpn_integral_list at 0x12458da60&gt;, 'nef_chemical_shift_list': &lt;function CcpnNefReader.load_nef_chemical_shift_list at 0x12458d400&gt;, 'ccpn_complex': &lt;function CcpnNefReader.load_ccpn_complex at 0x12458e268&gt;, 'nef_peak_restraint_links': &lt;function CcpnNefReader.load_nef_peak_restraint_links at 0x12458e048&gt;, 'nef_peak': &lt;function CcpnNefReader.load_nef_peak at 0x12458df28&gt;, 'ccpn_notes': &lt;function CcpnNefReader.load_ccpn_notes at 0x12458e620&gt;, 'nef_molecular_system': &lt;function CcpnNefReader.load_nef_molecular_system at 0x12458d1e0&gt;, 'nef_rdc_restraint': &lt;function CcpnNefReader.load_nef_restraint at 0x12458d598&gt;, 'ccpn_multiplet_list': &lt;function CcpnNefReader.load_ccpn_multiplet_list at 0x12458db70&gt;, 'ccpn_substance_synonym': &lt;function CcpnNefReader.load_ccpn_substance_synonym at 0x12458e510&gt;, 'ccpn_peak_cluster_list': &lt;function CcpnNefReader.load_ccpn_peak_cluster_list at 0x12458dea0&gt;, 'nef_dihedral_restraint_list': &lt;function CcpnNefReader.load_nef_restraint_list at 0x12458d510&gt;, 'ccpn_spectrum_dimension': &lt;function CcpnNefReader.load_ccpn_spectrum_dimension at 0x12458d7b8&gt;, 'ccpn_sample_component': &lt;function CcpnNefReader.load_ccpn_sample_component at 0x12458e400&gt;, 'ccpn_multiplet': &lt;function CcpnNefReader.load_ccpn_multiplet at 0x12458dd90&gt;, 'nef_peak_restraint_link': &lt;function CcpnNefReader.load_nef_peak_restraint_link at 0x12458e0d0&gt;}</em><a class="headerlink" href="#ccpn.core.lib.CcpnNefIo.CcpnNefReader.importers" title="Permalink to this definition">¶</a></dt>
+<code class="descname">importers</code><em class="property"> = {'ccpn_substance_synonym': &lt;function CcpnNefReader.load_ccpn_substance_synonym at 0x1098541e0&gt;, 'nef_sequence': &lt;function CcpnNefReader.load_nef_sequence at 0x10984ee18&gt;, 'ccpn_multiplet_peaks': &lt;function CcpnNefReader.load_ccpn_multiplet_peaks at 0x109853620&gt;, 'ccpn_integral': &lt;function CcpnNefReader.load_ccpn_integral at 0x1098538c8&gt;, 'ccpn_assignment': &lt;function CcpnNefReader.load_ccpn_assignment at 0x109854268&gt;, 'nef_chemical_shift_list': &lt;function CcpnNefReader.load_nef_chemical_shift_list at 0x109853048&gt;, 'ccpn_multiplet': &lt;function CcpnNefReader.load_ccpn_multiplet at 0x1098539d8&gt;, 'ccpn_spectrum_dimension': &lt;function CcpnNefReader.load_ccpn_spectrum_dimension at 0x109853400&gt;, 'ccpn_substance': &lt;function CcpnNefReader.load_ccpn_substance at 0x109854158&gt;, 'ccpn_spectrum_group': &lt;function CcpnNefReader.load_ccpn_spectrum_group at 0x109853d90&gt;, 'ccpn_restraint': &lt;function CcpnNefReader.load_nef_restraint at 0x1098531e0&gt;, 'ccpn_dataset': &lt;function CcpnNefReader.load_ccpn_dataset at 0x109854400&gt;, 'nef_peak': &lt;function CcpnNefReader.load_nef_peak at 0x109853bf8&gt;, 'nef_covalent_links': &lt;function CcpnNefReader.load_nef_covalent_links at 0x10984eea0&gt;, 'nef_distance_restraint': &lt;function CcpnNefReader.load_nef_restraint at 0x1098531e0&gt;, 'ccpn_sample': &lt;function CcpnNefReader.load_ccpn_sample at 0x109854048&gt;, 'nef_rdc_restraint': &lt;function CcpnNefReader.load_nef_restraint at 0x1098531e0&gt;, 'nef_molecular_system': &lt;function CcpnNefReader.load_nef_molecular_system at 0x10984ed90&gt;, 'ccpn_complex': &lt;function CcpnNefReader.load_ccpn_complex at 0x109853ea0&gt;, 'ccpn_sample_component': &lt;function CcpnNefReader.load_ccpn_sample_component at 0x1098540d0&gt;, 'ccpn_restraint_list': &lt;function CcpnNefReader.load_nef_restraint_list at 0x109853158&gt;, 'ccpn_complex_chain': &lt;function CcpnNefReader.load_ccpn_complex_chain at 0x109853f28&gt;, 'nef_peak_restraint_links': &lt;function CcpnNefReader.load_nef_peak_restraint_links at 0x109853b70&gt;, 'nef_nmr_spectrum': &lt;function CcpnNefReader.load_nef_nmr_spectrum at 0x109853268&gt;, 'nef_chemical_shift': &lt;function CcpnNefReader.load_nef_chemical_shift at 0x1098530d0&gt;, 'ccpn_group_spectrum': &lt;function CcpnNefReader.load_ccpn_group_spectrum at 0x109853e18&gt;, 'ccpn_integral_list': &lt;function CcpnNefReader.load_ccpn_integral_list at 0x1098536a8&gt;, 'ccpn_notes': &lt;function CcpnNefReader.load_ccpn_notes at 0x1098542f0&gt;, 'ccpn_additional_data': &lt;function CcpnNefReader.load_ccpn_additional_data at 0x109854378&gt;, 'nef_nmr_meta_data': &lt;function CcpnNefReader.load_nef_nmr_meta_data at 0x10984ed08&gt;, 'nef_dihedral_restraint_list': &lt;function CcpnNefReader.load_nef_restraint_list at 0x109853158&gt;, 'nef_dihedral_restraint': &lt;function CcpnNefReader.load_nef_restraint at 0x1098531e0&gt;, 'nef_rdc_restraint_list': &lt;function CcpnNefReader.load_nef_restraint_list at 0x109853158&gt;, 'nef_peak_restraint_link': &lt;function CcpnNefReader.load_nef_peak_restraint_link at 0x109853d08&gt;, 'ccpn_peak_cluster_list': &lt;function CcpnNefReader.load_ccpn_peak_cluster_list at 0x109853ae8&gt;, 'nef_distance_restraint_list': &lt;function CcpnNefReader.load_nef_restraint_list at 0x109853158&gt;, 'ccpn_multiplet_list': &lt;function CcpnNefReader.load_ccpn_multiplet_list at 0x1098537b8&gt;}</em><a class="headerlink" href="#ccpn.core.lib.CcpnNefIo.CcpnNefReader.importers" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -984,6 +1002,34 @@ STAR special values (like null,  unknown, ...) are only recognised if unquoted s
 <code class="descclassname">ccpn.core.lib.CcpnSparkyIo.</code><code class="descname">getSparkyTokenIterator</code><span class="sig-paren">(</span><em>text</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/lib/CcpnSparkyIo.html#getSparkyTokenIterator"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.lib.CcpnSparkyIo.getSparkyTokenIterator" title="Permalink to this definition">¶</a></dt>
 <dd><p>Iterator that returns an iterator over all STAR tokens in a generic STAR file</p>
 </dd></dl>
+
+</div>
+<div class="section" id="module-ccpn.core.lib.CcpnStarIo">
+<span id="ccpn-core-lib-ccpnstario-module"></span><h2>ccpn.core.lib.CcpnStarIo module<a class="headerlink" href="#module-ccpn.core.lib.CcpnStarIo" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="ccpn.core.lib.CcpnStarIo.makeCSLfromDF">
+<code class="descclassname">ccpn.core.lib.CcpnStarIo.</code><code class="descname">makeCSLfromDF</code><span class="sig-paren">(</span><em>project</em>, <em>df</em>, <em>chemicalShiftListName=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/lib/CcpnStarIo.html#makeCSLfromDF"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.lib.CcpnStarIo.makeCSLfromDF" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>df</strong> &#8211; Pandas dataFrame</li>
+<li><strong>chemicalShiftListName</strong> &#8211; str, default if None</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">Chemical Shift List Object</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="ccpn.core.lib.CcpnStarIo.makeDataFrame">
+<code class="descclassname">ccpn.core.lib.CcpnStarIo.</code><code class="descname">makeDataFrame</code><span class="sig-paren">(</span><em>bmrbLines</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/lib/CcpnStarIo.html#makeDataFrame"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.lib.CcpnStarIo.makeDataFrame" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 </div>
 <div class="section" id="module-ccpn.core.lib.ContextManagers">
@@ -2257,6 +2303,12 @@ interpolate: Where are the peaks: interpolate the points from neighbours otherwi
 </dd></dl>
 
 <dl class="function">
+<dt id="ccpn.core.lib.SpectrumLib.getContourLevelsFromNoise">
+<code class="descclassname">ccpn.core.lib.SpectrumLib.</code><code class="descname">getContourLevelsFromNoise</code><span class="sig-paren">(</span><em>spectrum</em>, <em>setNoiseLevel=False</em>, <em>setPositiveContours=False</em>, <em>setNegativeContours=False</em>, <em>useDefaultMultiplier=True</em>, <em>useDefaultLevels=True</em>, <em>useDefaultContourBase=False</em>, <em>useSameMultiplier=True</em>, <em>defaultMultiplier=1.414214</em>, <em>defaultLevels=10</em>, <em>defaultContourBase=10000.0</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/lib/SpectrumLib.html#getContourLevelsFromNoise"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.lib.SpectrumLib.getContourLevelsFromNoise" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate the noise level, base contour level and positive/negative multipliers for the given spectrum</p>
+</dd></dl>
+
+<dl class="function">
 <dt id="ccpn.core.lib.SpectrumLib.getDefaultSpectrumColours">
 <code class="descclassname">ccpn.core.lib.SpectrumLib.</code><code class="descname">getDefaultSpectrumColours</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/lib/SpectrumLib.html#getDefaultSpectrumColours"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.lib.SpectrumLib.getDefaultSpectrumColours" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get default positivecontourcolour, negativecontourcolour for Spectrum
@@ -2322,6 +2374,12 @@ wd : float  Median window size in pts.</td>
 </table>
 </dd></dl>
 
+<dl class="function">
+<dt id="ccpn.core.lib.SpectrumLib.setContourLevelsFromNoise">
+<code class="descclassname">ccpn.core.lib.SpectrumLib.</code><code class="descname">setContourLevelsFromNoise</code><span class="sig-paren">(</span><em>spectrum</em>, <em>setNoiseLevel=True</em>, <em>setPositiveContours=True</em>, <em>setNegativeContours=True</em>, <em>useDefaultMultiplier=True</em>, <em>useDefaultLevels=True</em>, <em>useDefaultContourBase=False</em>, <em>useSameMultiplier=True</em>, <em>defaultMultiplier=1.414214</em>, <em>defaultLevels=10</em>, <em>defaultContourBase=10000.0</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/lib/SpectrumLib.html#setContourLevelsFromNoise"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.lib.SpectrumLib.setContourLevelsFromNoise" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate the noise level, base contour level and positive/negative multipliers for the given spectrum</p>
+</dd></dl>
+
 </div>
 <div class="section" id="module-ccpn.core.lib.Summary">
 <span id="ccpn-core-lib-summary-module"></span><h2>ccpn.core.lib.Summary module<a class="headerlink" href="#module-ccpn.core.lib.Summary" title="Permalink to this headline">¶</a></h2>
@@ -2373,7 +2431,7 @@ Sometimes-equivalent atom groups (rotating aromatic rings) count as equivalent</
 <p>from ccpn.core.lib.Undo import _deleteAllApiObjects, restoreOriginalLinks, no_op</p>
 <dl class="class">
 <dt id="ccpn.core.lib.Undo.Undo">
-<em class="property">class </em><code class="descclassname">ccpn.core.lib.Undo.</code><code class="descname">Undo</code><span class="sig-paren">(</span><em>maxWaypoints=20</em>, <em>maxOperations=10000</em>, <em>debug=False</em>, <em>application=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/lib/Undo.html#Undo"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.lib.Undo.Undo" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">ccpn.core.lib.Undo.</code><code class="descname">Undo</code><span class="sig-paren">(</span><em>maxWaypoints=25</em>, <em>maxOperations=10000</em>, <em>debug=False</em>, <em>application=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/lib/Undo.html#Undo"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.lib.Undo.Undo" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">collections.deque</span></code></p>
 <p>Implementation of an undo and redo stack, with possibility of waypoints.
 A waypoint is the level at which an undo happens, and each of them could
@@ -2388,13 +2446,19 @@ consist of multiple individual undo operations.</p>
 <dl class="method">
 <dt id="ccpn.core.lib.Undo.Undo.canUndo">
 <code class="descname">canUndo</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &rarr; bool<a class="reference internal" href="../_modules/ccpn/core/lib/Undo.html#Undo.canUndo"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.lib.Undo.Undo.canUndo" title="Permalink to this definition">¶</a></dt>
-<dd><p>True if an undo operation can be performed?</p>
+<dd><p>True if an undo operation can be performed</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="ccpn.core.lib.Undo.Undo.clear">
 <code class="descname">clear</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/lib/Undo.html#Undo.clear"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.lib.Undo.Undo.clear" title="Permalink to this definition">¶</a></dt>
 <dd><p>Clear and reset undo object</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ccpn.core.lib.Undo.Undo.clearRedoItems">
+<code class="descname">clearRedoItems</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/lib/Undo.html#Undo.clearRedoItems"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.lib.Undo.Undo.clearRedoItems" title="Permalink to this definition">¶</a></dt>
+<dd><p>Clear the items above the current next index, if there has been an error adding items</p>
 </dd></dl>
 
 <dl class="method">
@@ -2427,6 +2491,14 @@ consist of multiple individual undo operations.</p>
 <dd><p>Add item to the undo stack.</p>
 </dd></dl>
 
+<dl class="attribute">
+<dt id="ccpn.core.lib.Undo.Undo.newItemsAdded">
+<code class="descname">newItemsAdded</code><a class="headerlink" href="#ccpn.core.lib.Undo.Undo.newItemsAdded" title="Permalink to this definition">¶</a></dt>
+<dd><p>- <em>None</em>, <em>immutable</em> - 
+Return the number of new items that have been added to the undo deque since
+the last new waypoint was created</p>
+</dd></dl>
+
 <dl class="method">
 <dt id="ccpn.core.lib.Undo.Undo.newWaypoint">
 <code class="descname">newWaypoint</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/lib/Undo.html#Undo.newWaypoint"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.lib.Undo.Undo.newWaypoint" title="Permalink to this definition">¶</a></dt>
@@ -2436,7 +2508,8 @@ consist of multiple individual undo operations.</p>
 <dl class="method">
 <dt id="ccpn.core.lib.Undo.Undo.numItems">
 <code class="descname">numItems</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/lib/Undo.html#Undo.numItems"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.lib.Undo.Undo.numItems" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Return the number of undo items currently on the undo deque</p>
+</dd></dl>
 
 <dl class="method">
 <dt id="ccpn.core.lib.Undo.Undo.redo">
@@ -2495,7 +2568,7 @@ Allows multiple external functions to set blocking without trampling each other<
 
 <dl class="function">
 <dt id="ccpn.core.lib.Undo.resetUndo">
-<code class="descclassname">ccpn.core.lib.Undo.</code><code class="descname">resetUndo</code><span class="sig-paren">(</span><em>memopsRoot</em>, <em>maxWaypoints=20</em>, <em>maxOperations=10000</em>, <em>debug: bool = False</em>, <em>application=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/lib/Undo.html#resetUndo"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.lib.Undo.resetUndo" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">ccpn.core.lib.Undo.</code><code class="descname">resetUndo</code><span class="sig-paren">(</span><em>memopsRoot</em>, <em>maxWaypoints=25</em>, <em>maxOperations=10000</em>, <em>debug: bool = False</em>, <em>application=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/lib/Undo.html#resetUndo"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.lib.Undo.resetUndo" title="Permalink to this definition">¶</a></dt>
 <dd><p>Set or reset undo stack, using passed-in parameters.
 NB setting either parameter to 0 removes the undo stack.</p>
 </dd></dl>
@@ -2640,12 +2713,20 @@ Unrecognised strings are returned unchanged</p>
 </dd></dl>
 
 </div>
-<div class="section" id="module-ccpn.core.lib.peakUtils">
-<span id="ccpn-core-lib-peakutils-module"></span><h2>ccpn.core.lib.peakUtils module<a class="headerlink" href="#module-ccpn.core.lib.peakUtils" title="Permalink to this headline">¶</a></h2>
-<dl class="class">
+<div class="section" id="ccpn-core-lib-peakutils-module">
+<h2>ccpn.core.lib.peakUtils module<a class="headerlink" href="#ccpn-core-lib-peakutils-module" title="Permalink to this headline">¶</a></h2>
+<span class="target" id="module-ccpn.core.lib.peakUtils"></span><dl class="class">
 <dt id="ccpn.core.lib.peakUtils.Dictlist">
 <em class="property">class </em><code class="descclassname">ccpn.core.lib.peakUtils.</code><code class="descname">Dictlist</code><a class="reference internal" href="../_modules/ccpn/core/lib/peakUtils.html#Dictlist"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.lib.peakUtils.Dictlist" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">dict</span></code></p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ccpn.core.lib.peakUtils.estimateVolumes">
+<code class="descclassname">ccpn.core.lib.peakUtils.</code><code class="descname">estimateVolumes</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/lib/peakUtils.html#estimateVolumes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.lib.peakUtils.estimateVolumes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Estimate the volumes for the peaks
+:param peaks: list of peaks as pids or strings
+:param volumeIntegralLimit: integral width as a multiple of lineWidth (FWHM)</p>
 </dd></dl>
 
 <dl class="function">
@@ -2706,6 +2787,28 @@ Unrecognised strings are returned unchanged</p>
 </dd></dl>
 
 <dl class="function">
+<dt id="ccpn.core.lib.peakUtils.getNmrResiduePeakProperty">
+<code class="descclassname">ccpn.core.lib.peakUtils.</code><code class="descname">getNmrResiduePeakProperty</code><span class="sig-paren">(</span><em>nmrResidue</em>, <em>nmrAtomsNames</em>, <em>spectra</em>, <em>theProperty='height'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/lib/peakUtils.html#getNmrResiduePeakProperty"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.lib.peakUtils.getNmrResiduePeakProperty" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>nmrResidue</strong> &#8211; </li>
+<li><strong>nmrAtomsNames</strong> &#8211; nmr Atoms to compare. str &#8216;H&#8217;, &#8216;N&#8217;, &#8216;CA&#8217; etc</li>
+<li><strong>spectra</strong> &#8211; compare peaks only from given spectra</li>
+<li><strong>theProperty</strong> &#8211; &#8216;height&#8217; or &#8216;volume&#8217;</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
 <dt id="ccpn.core.lib.peakUtils.getPeakAnnotation">
 <code class="descclassname">ccpn.core.lib.peakUtils.</code><code class="descname">getPeakAnnotation</code><span class="sig-paren">(</span><em>peak</em>, <em>dim</em>, <em>separator='</em>, <em>'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/lib/peakUtils.html#getPeakAnnotation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.lib.peakUtils.getPeakAnnotation" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
@@ -2713,12 +2816,40 @@ Unrecognised strings are returned unchanged</p>
 <dl class="function">
 <dt id="ccpn.core.lib.peakUtils.getPeakLinewidth">
 <code class="descclassname">ccpn.core.lib.peakUtils.</code><code class="descname">getPeakLinewidth</code><span class="sig-paren">(</span><em>peak</em>, <em>dim</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/lib/peakUtils.html#getPeakLinewidth"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.lib.peakUtils.getPeakLinewidth" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Return the lineWidth in dimension &#8216;dim&#8217; for the peakTable entries</p>
+</dd></dl>
 
 <dl class="function">
 <dt id="ccpn.core.lib.peakUtils.getPeakPosition">
 <code class="descclassname">ccpn.core.lib.peakUtils.</code><code class="descname">getPeakPosition</code><span class="sig-paren">(</span><em>peak</em>, <em>dim</em>, <em>unit='ppm'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/lib/peakUtils.html#getPeakPosition"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.lib.peakUtils.getPeakPosition" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
+
+<dl class="function">
+<dt id="ccpn.core.lib.peakUtils.getRawDataFrame">
+<code class="descclassname">ccpn.core.lib.peakUtils.</code><code class="descname">getRawDataFrame</code><span class="sig-paren">(</span><em>nmrResidues</em>, <em>nmrAtomsNames</em>, <em>spectra</em>, <em>theProperty</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/lib/peakUtils.html#getRawDataFrame"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.lib.peakUtils.getRawDataFrame" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="ccpn.core.lib.peakUtils.getSpectrumData">
+<code class="descclassname">ccpn.core.lib.peakUtils.</code><code class="descname">getSpectrumData</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/lib/peakUtils.html#getSpectrumData"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.lib.peakUtils.getSpectrumData" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get a region of the spectrum data centred on the peak.
+Will return the smallest region containing the peak ±halfBoxWidth about the current peak position.</p>
+<p>returns a tuple of the form (dataArray, region, position, planePosition)</p>
+<blockquote>
+<div>dataArray is the numpy array surrounding the peak, ordered by spectrum axisCodes
+region is a tuple (bottomLeft, topRight)
+position is the float32 relative position of the peak in dataArray
+planePosition is the int32 position of the nearest planes to the peak</div></blockquote>
+<dl class="docutils">
+<dt>where bottomLeft is the co-ordinates of the bottom-left corner of the region</dt>
+<dd><p class="first">topRight is the co-ordinates of the top-right corner of the region</p>
+<p>Co-ordinates are indexed from (0, 0)</p>
+<p class="last">Note: screen point co-ordinates are indexed from (1, 1)</p>
+</dd>
+</dl>
+<p>The region will be cropped to the bounds of the spectrum, in which case position will not correspond to the centre
+if no region is found, returns None</p>
+</dd></dl>
 
 <dl class="function">
 <dt id="ccpn.core.lib.peakUtils.oneSiteBindingCurve">
@@ -2731,6 +2862,13 @@ Unrecognised strings are returned unchanged</p>
 <dd><p>Converted from MATLAB script at <a class="reference external" href="http://billauer.co.il/peakdet.html">http://billauer.co.il/peakdet.html</a>
 % Eli Billauer, 3.4.05 (Explicitly not copyrighted).
 % This function is released to the public domain; Any use is allowed.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ccpn.core.lib.peakUtils.snapToExtremum">
+<code class="descclassname">ccpn.core.lib.peakUtils.</code><code class="descname">snapToExtremum</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/lib/peakUtils.html#snapToExtremum"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.lib.peakUtils.snapToExtremum" title="Permalink to this definition">¶</a></dt>
+<dd><p>Snap the position of the peak the nearest extremum.
+Assumes called with an existing peak, will fit within a box ±halfBoxSearchWidth about the current peak position.</p>
 </dd></dl>
 
 </div>
@@ -2752,6 +2890,7 @@ Unrecognised strings are returned unchanged</p>
 <li><a class="reference internal" href="#ccpn-core-lib-ccpnnefio-module">ccpn.core.lib.CcpnNefIo module</a></li>
 <li><a class="reference internal" href="#module-ccpn.core.lib.CcpnSorting">ccpn.core.lib.CcpnSorting module</a></li>
 <li><a class="reference internal" href="#module-ccpn.core.lib.CcpnSparkyIo">ccpn.core.lib.CcpnSparkyIo module</a></li>
+<li><a class="reference internal" href="#module-ccpn.core.lib.CcpnStarIo">ccpn.core.lib.CcpnStarIo module</a></li>
 <li><a class="reference internal" href="#module-ccpn.core.lib.ContextManagers">ccpn.core.lib.ContextManagers module</a></li>
 <li><a class="reference internal" href="#module-ccpn.core.lib.DataFrameObject">ccpn.core.lib.DataFrameObject module</a></li>
 <li><a class="reference internal" href="#ccpn-core-lib-dataio-module">ccpn.core.lib.DataIo module</a></li>
@@ -2766,7 +2905,7 @@ Unrecognised strings are returned unchanged</p>
 <li><a class="reference internal" href="#module-ccpn.core.lib.Summary">ccpn.core.lib.Summary module</a></li>
 <li><a class="reference internal" href="#module-ccpn.core.lib.Undo">ccpn.core.lib.Undo module</a></li>
 <li><a class="reference internal" href="#ccpn-core-lib-util-module">ccpn.core.lib.Util module</a></li>
-<li><a class="reference internal" href="#module-ccpn.core.lib.peakUtils">ccpn.core.lib.peakUtils module</a></li>
+<li><a class="reference internal" href="#ccpn-core-lib-peakutils-module">ccpn.core.lib.peakUtils module</a></li>
 </ul>
 </li>
 </ul>

@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
 __dateModified__ = "$dateModified: 2018-12-20 14:08:00 +0000 (Thu, December 20, 2018) $"
-__version__ = "$Revision: 3.0.b5 $"
+__version__ = "$Revision: 3.0.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -104,6 +104,8 @@ class GLRegion(QtWidgets.QWidget):
 
     @values.setter
     def values(self, values):
+        from ccpn.core.lib.ContextManagers import undoBlock, notificationEchoBlocking, undoBlockWithoutSideBar,notificationBlanking
+        # with notificationBlanking():
         self._values = tuple(values)
         try:
             self._glList.renderMode = GLRENDERMODE_REBUILD
@@ -114,8 +116,10 @@ class GLRegion(QtWidgets.QWidget):
             self.valuesChanged.emit(list(values))
 
         # change the limits in the integral object
-        if self._object and not self._object.isDeleted:
-            self._object.limits = [(min(values), max(values))]
+        # with notificationBlanking():
+        with notificationEchoBlocking():
+            if self._object and not self._object.isDeleted:
+                self._object.limits = [(min(values), max(values))]
 
         # emit notifiers to repaint the GL windows
         self.GLSignals.emitPaintEvent()

@@ -61,7 +61,7 @@
 <span class="c1">#=========================================================================================</span>
 <span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: CCPN $&quot;</span>
 <span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2017-07-07 16:32:55 +0100 (Fri, July 07, 2017) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b5 $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.0 $&quot;</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Created</span>
 <span class="c1">#=========================================================================================</span>
@@ -74,7 +74,7 @@
 <span class="kn">from</span> <span class="nn">PyQt5</span> <span class="kn">import</span> <span class="n">QtGui</span><span class="p">,</span> <span class="n">QtWidgets</span><span class="p">,</span> <span class="n">QtCore</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Base</span> <span class="kn">import</span> <span class="n">Base</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.RadioButton</span> <span class="kn">import</span> <span class="n">RadioButton</span>
-
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Icon</span> <span class="kn">import</span> <span class="n">Icon</span>
 
 <span class="n">CHECKED</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">Checked</span>
 <span class="n">UNCHECKED</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">Unchecked</span>
@@ -83,7 +83,9 @@
 <div class="viewcode-block" id="RadioButtons"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.RadioButtons.RadioButtons">[docs]</a><span class="k">class</span> <span class="nc">RadioButtons</span><span class="p">(</span><span class="n">QtWidgets</span><span class="o">.</span><span class="n">QWidget</span><span class="p">,</span> <span class="n">Base</span><span class="p">):</span>
 
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">texts</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">selectedInd</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">exclusive</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
-                 <span class="n">callback</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">direction</span><span class="o">=</span><span class="s1">&#39;h&#39;</span><span class="p">,</span> <span class="n">tipTexts</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">objectNames</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
+                 <span class="n">callback</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">direction</span><span class="o">=</span><span class="s1">&#39;h&#39;</span><span class="p">,</span> <span class="n">tipTexts</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">objectNames</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                 <span class="n">icons</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                 <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
 
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">parent</span><span class="p">)</span>
         <span class="n">Base</span><span class="o">.</span><span class="n">_init</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">setLayout</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">)</span>
@@ -102,8 +104,22 @@
         <span class="k">if</span> <span class="ow">not</span> <span class="n">objectNames</span><span class="p">:</span>
             <span class="n">objectNames</span> <span class="o">=</span> <span class="p">[</span><span class="bp">None</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">texts</span><span class="p">)</span>
 
+        <span class="c1"># added functionality for icons</span>
+        <span class="c1"># icons is a list of str/tuple</span>
+        <span class="c1">#</span>
+        <span class="c1">#   e.g. icons = (&#39;icons/strip-row&#39;, &#39;strip-column&#39;)</span>
+        <span class="c1">#       icons = ( (&#39;icons/strip-row&#39;, (24,24)),</span>
+        <span class="c1">#                 (&#39;strip-column&#39;, (24,24))</span>
+        <span class="c1">#               )</span>
+        <span class="c1">#       where (24,24) is the size of the bounding box containing the icon</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">icons</span><span class="p">:</span>
+            <span class="n">icons</span> <span class="o">=</span> <span class="p">[</span><span class="bp">None</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">texts</span><span class="p">)</span>
+
         <span class="bp">self</span><span class="o">.</span><span class="n">radioButtons</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">setButtons</span><span class="p">(</span><span class="n">texts</span><span class="p">,</span> <span class="n">selectedInd</span><span class="p">,</span> <span class="n">direction</span><span class="p">,</span> <span class="n">tipTexts</span><span class="p">,</span> <span class="n">objectNames</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setButtons</span><span class="p">(</span><span class="n">texts</span><span class="p">,</span> <span class="n">selectedInd</span><span class="p">,</span> <span class="n">direction</span><span class="p">,</span> <span class="n">tipTexts</span><span class="p">,</span> <span class="n">objectNames</span><span class="p">,</span>
+                        <span class="n">icons</span><span class="o">=</span><span class="n">icons</span><span class="p">)</span>
+
         <span class="c1"># for i, text in enumerate(texts):</span>
         <span class="c1">#   if &#39;h&#39; in direction:</span>
         <span class="c1">#     grid = (0, i)</span>
@@ -123,7 +139,8 @@
 
         <span class="bp">self</span><span class="o">.</span><span class="n">setCallback</span><span class="p">(</span><span class="n">callback</span><span class="p">)</span>
 
-<div class="viewcode-block" id="RadioButtons.setButtons"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.RadioButtons.RadioButtons.setButtons">[docs]</a>    <span class="k">def</span> <span class="nf">setButtons</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">texts</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">selectedInd</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">direction</span><span class="o">=</span><span class="s1">&#39;h&#39;</span><span class="p">,</span> <span class="n">tipTexts</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">objectNames</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">silent</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+<div class="viewcode-block" id="RadioButtons.setButtons"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.RadioButtons.RadioButtons.setButtons">[docs]</a>    <span class="k">def</span> <span class="nf">setButtons</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">texts</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">selectedInd</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">direction</span><span class="o">=</span><span class="s1">&#39;h&#39;</span><span class="p">,</span> <span class="n">tipTexts</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">objectNames</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">silent</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
+                   <span class="n">icons</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Change the buttons in the button group</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># clear the original buttons</span>
@@ -148,6 +165,31 @@
             <span class="k">if</span> <span class="n">objectNames</span> <span class="ow">and</span> <span class="n">objectNames</span><span class="p">[</span><span class="n">i</span><span class="p">]:</span>
                 <span class="n">button</span><span class="o">.</span><span class="n">setObjectName</span><span class="p">(</span><span class="n">objectNames</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
 
+            <span class="c1"># set icons if required - these will automatically go to the left of the text</span>
+            <span class="k">if</span> <span class="n">icons</span> <span class="ow">and</span> <span class="n">icons</span><span class="p">[</span><span class="n">i</span><span class="p">]:</span>
+                <span class="n">thisIcon</span> <span class="o">=</span> <span class="n">icons</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">thisIcon</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+                    <span class="c1"># icon list item only contains a name</span>
+                    <span class="n">button</span><span class="o">.</span><span class="n">setIcon</span><span class="p">(</span><span class="n">Icon</span><span class="p">(</span><span class="n">thisIcon</span><span class="p">))</span>
+
+                <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">thisIcon</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)):</span>
+
+                    <span class="c1"># icon item contains a list/tuple</span>
+                    <span class="k">if</span> <span class="n">thisIcon</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">thisIcon</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="nb">str</span><span class="p">):</span>
+                        <span class="c1">#first item is a string name</span>
+                        <span class="n">button</span><span class="o">.</span><span class="n">setIcon</span><span class="p">(</span><span class="n">Icon</span><span class="p">(</span><span class="n">thisIcon</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+
+                        <span class="c1"># second value must be tuple of integer, length == 2</span>
+                        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">thisIcon</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+                            <span class="n">iconSize</span> <span class="o">=</span> <span class="n">thisIcon</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+
+                            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">iconSize</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span><span class="nb">tuple</span><span class="p">))</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">iconSize</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span> <span class="ow">and</span> \
+                                <span class="nb">all</span><span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">iconVal</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> <span class="k">for</span> <span class="n">iconVal</span> <span class="ow">in</span> <span class="n">iconSize</span><span class="p">):</span>
+
+                                <span class="c1"># set the iconSize</span>
+                                <span class="n">button</span><span class="o">.</span><span class="n">setIconSize</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">QSize</span><span class="p">(</span><span class="o">*</span><span class="n">iconSize</span><span class="p">))</span>
+
         <span class="bp">self</span><span class="o">.</span><span class="n">texts</span> <span class="o">=</span> <span class="n">texts</span>
         <span class="k">if</span> <span class="n">selectedInd</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">radioButtons</span><span class="p">[</span><span class="n">selectedInd</span><span class="p">]</span><span class="o">.</span><span class="n">setChecked</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
@@ -159,7 +201,9 @@
 <div class="viewcode-block" id="RadioButtons.getRadioButton"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.RadioButtons.RadioButtons.getRadioButton">[docs]</a>    <span class="k">def</span> <span class="nf">getRadioButton</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="p">):</span>
         <span class="k">for</span> <span class="n">rb</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">radioButtons</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">rb</span><span class="o">.</span><span class="n">text</span><span class="p">()</span> <span class="o">==</span> <span class="n">text</span><span class="p">:</span>
-                <span class="k">return</span> <span class="n">rb</span></div>
+                <span class="k">return</span> <span class="n">rb</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;radioButton </span><span class="si">%s</span><span class="s1"> not found in the list&#39;</span> <span class="o">%</span> <span class="n">text</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="RadioButtons.get"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.RadioButtons.RadioButtons.get">[docs]</a>    <span class="k">def</span> <span class="nf">get</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 

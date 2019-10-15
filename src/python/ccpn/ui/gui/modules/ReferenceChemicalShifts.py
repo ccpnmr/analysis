@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: CCPN $"
 __dateModified__ = "$dateModified: 2017-07-07 16:32:46 +0100 (Fri, July 07, 2017) $"
-__version__ = "$Revision: 3.0.b5 $"
+__version__ = "$Revision: 3.0.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -28,7 +28,7 @@ from ccpn.core.lib.AssignmentLib import CCP_CODES
 from ccpn.ui.gui.modules.CcpnModule import CcpnModule
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
-from ccpn.util.Colour import spectrumHexColours
+from ccpn.util.Colour import spectrumHexColours, spectrumHexDarkColours, spectrumHexLightColours
 from ccpnmodel.ccpncore.lib.assignment.ChemicalShift import getCcpCodeData
 from ccpn.ui.gui.guiSettings import autoCorrectHexColour, getColours, CCPNGLWIDGET_HEXBACKGROUND
 
@@ -42,6 +42,9 @@ class ReferenceChemicalShifts(CcpnModule):  # DropBase needs to be first, else t
 
     def __init__(self, mainWindow, name='Reference Chemical Shifts', ):
         CcpnModule.__init__(self, mainWindow=mainWindow, name=name)
+
+        self.preferences = self.mainWindow.application.preferences
+
         bc = getColours()[CCPNGLWIDGET_HEXBACKGROUND]
         self.plotWidget = pg.PlotWidget(background=bc)
         self.plotWidget.invertX()
@@ -78,7 +81,12 @@ class ReferenceChemicalShifts(CcpnModule):  # DropBase needs to be first, else t
             valuePerPoint = ccpData[atomName].valuePerPoint
             x = []
             y = []
-            colour = spectrumHexColours[atomNames.index(atomName)]
+            if self.preferences.general.colourScheme == 'dark':
+                col = (11 + 7 * atomNames.index(atomName)) % len(spectrumHexLightColours)-1
+                colour = spectrumHexLightColours[col]
+            else:
+                col = (11 + 7 * atomNames.index(atomName)) % len(spectrumHexDarkColours)-1
+                colour = spectrumHexDarkColours[col]
             for i in range(len(distribution)):
                 x.append(refValue + valuePerPoint * (i - refPoint))
                 y.append(distribution[i])

@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
 __dateModified__ = "$dateModified: 2017-07-07 16:32:37 +0100 (Fri, July 07, 2017) $"
-__version__ = "$Revision: 3.0.b5 $"
+__version__ = "$Revision: 3.0.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -80,16 +80,20 @@ class Pipeline(object):
 
     def runPipeline(self):
         '''Run all pipes in the specified order '''
-        self._kwargs = {}
-        if len(self.queue) > 0:
-            for pipe in self.queue:
-                if pipe is not None:
-                    self.updateInputData = False
-                    pipe.inputData = self.inputData
-                    pipe.spectrumGroups = self.spectrumGroups
-                    result = pipe.runPipe(self.inputData)
-                    # if not result: # that means the ran pipe does not return a valid data to use as input for next pipes
-                    #   break
-                    self.inputData = result or set()
+        from ccpn.core.lib.ContextManagers import undoBlock, notificationEchoBlocking, undoBlockWithoutSideBar
 
-        return self.inputData
+        with undoBlockWithoutSideBar():
+            with notificationEchoBlocking():
+                self._kwargs = {}
+                if len(self.queue) > 0:
+                    for pipe in self.queue:
+                        if pipe is not None:
+                            self.updateInputData = False
+                            pipe.inputData = self.inputData
+                            pipe.spectrumGroups = self.spectrumGroups
+                            result = pipe.runPipe(self.inputData)
+                            # if not result: # that means the ran pipe does not return a valid data to use as input for next pipes
+                            #   break
+                            self.inputData = result or set()
+
+                return self.inputData

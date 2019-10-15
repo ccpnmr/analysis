@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: CCPN $"
 __dateModified__ = "$dateModified: 2017-07-07 16:32:59 +0100 (Fri, July 07, 2017) $"
-__version__ = "$Revision: 3.0.b5 $"
+__version__ = "$Revision: 3.0.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -34,9 +34,8 @@ import datetime
 from ccpn.util import Logging
 from ccpn.util import Url
 import json
-
-from ccpn.framework.PathsAndUrls import ccpn2Url, userPreferencesDirectory
-
+import platform
+import re, uuid
 
 userAttributes = ('name', 'organisation', 'email')
 
@@ -46,11 +45,15 @@ def _registrationPath():
 
 
 def _registrationServerScript():
-    return ccpn2Url + '/cgi-bin/register/registerV3'
+    from ccpn.framework.PathsAndUrls import ccpn2Url
+
+    return ccpn2Url + '/cgi-bin/register/updateRegistrationV3'
 
 
 def _checkRegistrationServerScript():
-    return ccpn2Url + '/cgi-bin/register/checkV3'
+    from ccpn.framework.PathsAndUrls import ccpn2Url
+
+    return ccpn2Url + '/cgi-bin/register/checkRegistrationV3'
 
 
 def loadDict():
@@ -83,8 +86,6 @@ def saveDict(registrationDict):
 
 
 def getHashCode(registrationDict):
-    macAddress = uuid.getnode()
-
     m = hashlib.md5()
     for attrib in userAttributes:
         value = registrationDict.get(attrib, '')
@@ -97,30 +98,58 @@ def setHashCode(registrationDict):
     registrationDict['hashcode'] = getHashCode(registrationDict)
 
 
+def _build(*chars):
+    return ''.join([c for c in map(chr, chars)])
+
+
+_bF = _build(98, 117, 105, 108, 100, 70, 111, 114)
+_hc = _build(104, 97, 115, 104, 99, 111, 100, 101)
+_cS = _build(99, 104, 101, 99, 107, 83, 117, 109)
+_nP = _build(110, 111, 110, 45, 112, 114, 111, 102, 105, 116)
+_r0 = _build(79, 75)
+_r1 = _build(78, 111, 116, 32, 70, 111, 117, 110, 100)
+_r2 = _build(68, 105, 102, 102, 101, 114, 101, 110, 116, 32, 76, 105, 99, 101, 110, 99, 101)
+_otherAttributes = (_hc,)
+_serverResponses = (_r0, _r1, _r2)
+
+
+def _insertRegistration(registrationDict):
+    val0, _, _, val1 = _getBuildID()
+    return {_bF: val0, _cS: val1}
+
+
 def isNewRegistration(registrationDict):
     for attrib in userAttributes:
         if not registrationDict.get(attrib):
             return True
 
-    if 'hashcode' not in registrationDict:
+    if _hc not in registrationDict:
         return True
 
     hashcode = getHashCode(registrationDict)
 
-    return hashcode != registrationDict['hashcode']
+    return hashcode != registrationDict[_hc]
 
 
 def updateServer(registrationDict, version='3'):
     url = _registrationServerScript()
 
     values = {}
-    for attr in userAttributes + ('hashcode',):
+    for attr in userAttributes + (_hc,):
         value = []
         for c in registrationDict[attr]:
             value.append(c if 32 <= ord(c) < 128 else '_')
         values[attr] = ''.join(value)
 
     values['version'] = str(version)
+    values['OSversion'] = platform.platform()
+    values['systemInfo'] = ';'.join(platform.uname())
+    values['ID'] = ':'.join(re.findall('..', '%012x' % uuid.getnode()))
+    values['compileVersion'] = _getCompileVersion()
+    var0, var1, var2, _ = _getBuildID()
+    values[_build(98, 117, 105, 108, 100, 70, 111, 114)] = var0
+    values[_build(108, 105, 99, 101, 110, 99, 101, 84, 121, 112, 101)] = var1
+    values[_build(108, 105, 99, 101, 110, 99, 101, 73, 68)] = var2
 
     try:
         return Url.fetchUrl(url, values, timeout=2.0)
@@ -129,21 +158,69 @@ def updateServer(registrationDict, version='3'):
         logger.warning('Could not update registration on server.')
 
 
+def _getCompileVersion():
+    """Get the compileVersion information from the compileVersion file
+    """
+    from ccpn.framework.PathsAndUrls import ccpnConfigPath
+
+    COMPILEVERSIONFILE = 'compileVersion.txt'
+
+    lfile = os.path.join(ccpnConfigPath, COMPILEVERSIONFILE)
+    if not os.path.exists(lfile):
+        return 'noCompileVersionInformation'
+
+    with open(lfile, 'r', encoding='UTF-8') as fp:
+        try:
+            # return the first line of the compileVersion information file - should be created by ./buildDistribution
+            return fp.readlines()[0]
+        except:
+            return 'badCompileVersionInformation'
+
+
+def _checkLicenceScript():
+    from ccpn.framework.PathsAndUrls import ccpn2Url
+
+    return ccpn2Url + '/cgi-bin/register/checkLicence'
+
+
+def _getBuildID():
+    from ccpn.util import Data
+
+    vals = []
+    for val in (_build(98, 117, 105, 108, 100, 70, 111, 114), _build(108, 105, 99, 101, 110, 99, 101, 84, 121, 112, 101),
+                _build(108, 105, 99, 101, 110, 99, 101, 73, 68), _build(99, 104, 101, 99, 107, 83, 117, 109)):
+        vals.append(getattr(Data, val, ''))
+
+    return vals[0], vals[1], vals[2], vals[3]
+
+
 def checkServer(registrationDict, version='3'):
+    """Check the registration status on the server
+    """
     url = _checkRegistrationServerScript()
 
     values = {}
-    for attr in userAttributes + ('hashcode',):
+    for attr in userAttributes + (_hc,):
         value = []
-        for c in registrationDict[attr]:
-            value.append(c if 32 <= ord(c) < 128 else '_')
-        values[attr] = ''.join(value)
+        if attr in registrationDict:
+            for c in registrationDict[attr]:
+                value.append(c if 32 <= ord(c) < 128 else '_')
+            values[attr] = ''.join(value)
 
     values['version'] = str(version)
+    values['OSversion'] = platform.platform()
+    values['systemInfo'] = ';'.join(platform.uname())
+    values['ID'] = ':'.join(re.findall('..', '%012x' % uuid.getnode()))
+    values['compileVersion'] = _getCompileVersion()
+    var0, var1, var2, _ = _getBuildID()
+    values[_build(98, 117, 105, 108, 100, 70, 111, 114)] = var0
+    values[_build(108, 105, 99, 101, 110, 99, 101, 84, 121, 112, 101)] = var1
+    values[_build(108, 105, 99, 101, 110, 99, 101, 73, 68)] = var2
 
     try:
         found = Url.fetchUrl(url, values, timeout=2.0)
-        return found.strip() == 'OK'
+        if found.strip() in _serverResponses:
+            return found.strip() == 'OK'
 
     except Exception as e:
         logger = Logging.getLogger()
@@ -157,14 +234,17 @@ def checkInternetConnection():
     except:
         return False
 
+
 def _fetchGraceFile(application):
     """
     :return: grace filepath used as time stamp
     """
+    from ccpn.framework.PathsAndUrls import userPreferencesDirectory
+
     msg = 'If you are modifying this file it means you are a computer savvy! Please register and contribute to the project.'
     v = application.applicationVersion
     f = 'grace.json'
-    path = os.path.join(userPreferencesDirectory,v+f)
+    path = os.path.join(userPreferencesDirectory, v + f)
     if not os.path.exists(path):
 
         with open(path, "w") as file:
@@ -173,7 +253,6 @@ def _fetchGraceFile(application):
         return path
     else:
         return path
-
 
 
 def _graceCounter(apath, d=5):

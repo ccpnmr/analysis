@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: CCPN $"
 __dateModified__ = "$dateModified: 2017-07-07 16:32:45 +0100 (Fri, July 07, 2017) $"
-__version__ = "$Revision: 3.0.b5 $"
+__version__ = "$Revision: 3.0.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -30,14 +30,14 @@ from PyQt5 import QtWidgets
 from ccpn.core.PeakList import PeakList
 from ccpn.util import Phasing
 from ccpn.ui.gui.lib.GuiStrip import GuiStrip, DefaultMenu, PeakMenu, \
-    IntegralMenu, MultipletMenu, PhasingMenu, MAXPEAKLABELTYPES
+    IntegralMenu, MultipletMenu, PhasingMenu, AxisMenu, MAXPEAKLABELTYPES
 
 from ccpn.ui.gui.widgets.Icon import Icon
 from ccpn.ui.gui.widgets.Menu import Menu
 import numpy as np
 from ccpn.util.Logging import getLogger
 from ccpn.ui.gui.lib.GuiStripContextMenus import _get1dPhasingMenu, _get1dDefaultMenu, \
-    _get1dPeakMenu, _get1dIntegralMenu, _get1dMultipletMenu
+    _get1dPeakMenu, _get1dIntegralMenu, _get1dMultipletMenu, _get1dAxisMenu
 
 
 class GuiStrip1d(GuiStrip):
@@ -120,12 +120,15 @@ class GuiStrip1d(GuiStrip):
         self._peakMenu = _get1dPeakMenu(self)
         self._integralMenu = _get1dIntegralMenu(self)
         self._multipletMenu = _get1dMultipletMenu(self)
+        self._axisMenu = _get1dAxisMenu(self)
 
         self._contextMenus.update({DefaultMenu  : self._defaultMenu,
                                    PhasingMenu  : self._phasingMenu,
                                    PeakMenu     : self._peakMenu,
                                    IntegralMenu : self._integralMenu,
-                                   MultipletMenu: self._multipletMenu})
+                                   MultipletMenu: self._multipletMenu,
+                                   AxisMenu     : self._axisMenu
+                                  })
 
         # self.plotWidget.plotItem.setAcceptDrops(True)
         self.spectrumIndex = 0
@@ -333,6 +336,14 @@ class GuiStrip1d(GuiStrip):
         else:
             self.calibrateY1DWidgets.setVisible(False)
             self.calibrateY1DWidgets._toggleLines()
+
+    def _closeCalibrateX(self):
+        self.calibrateXAction.setChecked(False)
+        self.toggleCalibrateX()
+
+    def _closeCalibrateY(self):
+        self.calibrateYAction.setChecked(False)
+        self.toggleCalibrateY()
 
     def _getInitialOffset(self):
         offSets = []

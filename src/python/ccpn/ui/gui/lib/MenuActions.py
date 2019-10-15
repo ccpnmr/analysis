@@ -61,9 +61,9 @@ from ccpn.ui.gui.popups.SamplePropertiesPopup import SamplePropertiesPopup
 from ccpn.ui.gui.popups.SpectrumPropertiesPopup import SpectrumPropertiesPopup
 from ccpn.ui.gui.popups.StructureEnsemblePopup import StructureEnsemblePopup
 from ccpn.ui.gui.popups.SubstancePropertiesPopup import SubstancePropertiesPopup
-from ccpn.core.lib.ContextManagers import undoBlock, notificationEchoBlocking
+from ccpn.core.lib.ContextManagers import undoBlock, notificationEchoBlocking, undoBlockWithoutSideBar
 
-MAXITEMLOGGING = 4
+MAXITEMLOGGING = 2
 
 
 class CreateNewObjectABC():
@@ -584,14 +584,15 @@ class _openItemSpectrumGroupDisplay(OpenItemABC):
             spectrumDisplay = mainWindow.createSpectrumDisplay(spectrumGroup.spectra[0])
             mainWindow.moduleArea.addModule(spectrumDisplay, position=position, relativeTo=relativeTo)
 
-            with undoBlock():
-                for spectrum in spectrumGroup.spectra:  # Add the other spectra
-                    spectrumDisplay.displaySpectrum(spectrum)
+            with undoBlockWithoutSideBar():
+                with notificationEchoBlocking:
+                    for spectrum in spectrumGroup.spectra:  # Add the other spectra
+                        spectrumDisplay.displaySpectrum(spectrum)
 
-                spectrumDisplay.isGrouped = True
-                spectrumDisplay.spectrumToolBar.hide()
-                spectrumDisplay.spectrumGroupToolBar.show()
-                spectrumDisplay.spectrumGroupToolBar._addAction(spectrumGroup)
+                    spectrumDisplay.isGrouped = True
+                    spectrumDisplay.spectrumToolBar.hide()
+                    spectrumDisplay.spectrumGroupToolBar.show()
+                    spectrumDisplay.spectrumGroupToolBar._addAction(spectrumGroup)
 
             mainWindow.application.current.strip = spectrumDisplay.strips[0]
             # if any([sp.dimensionCount for sp in spectrumGroup.spectra]) == 1:
@@ -675,7 +676,7 @@ OpenObjAction = {
 
 def _openItemObject(mainWindow, objs, **kwds):
     if len(objs) > 0:
-        with undoBlock():
+        with undoBlockWithoutSideBar():
 
             # if 5 or more then don't log, otherwise log may be overloaded
             if len(objs) > MAXITEMLOGGING:
@@ -692,28 +693,29 @@ def _openItemObjects(mainWindow, objs, **kwds):
     obj classes
     """
     spectrumDisplay = None
-    for obj in objs:
-        if obj:
-            try:
-                if obj.__class__ in OpenObjAction:
+    with undoBlockWithoutSideBar():
+            for obj in objs:
+                if obj:
+                    try:
+                        if obj.__class__ in OpenObjAction:
 
-                    # if a spectrum object has already been opened then attach to that spectrumDisplay
-                    if isinstance(obj, Spectrum) and spectrumDisplay:
-                        spectrumDisplay.displaySpectrum(obj)
+                            # if a spectrum object has already been opened then attach to that spectrumDisplay
+                            if isinstance(obj, Spectrum) and spectrumDisplay:
+                                spectrumDisplay.displaySpectrum(obj)
 
-                    else:
+                            else:
 
-                        # process objects to open
-                        func = OpenObjAction[obj.__class__](useNone=True, **kwds)
-                        returnObj = func._execOpenItem(mainWindow, obj)
+                                # process objects to open
+                                func = OpenObjAction[obj.__class__](useNone=True, **kwds)
+                                returnObj = func._execOpenItem(mainWindow, obj)
 
-                        # if the first spectrum then set the spectrumDisplay
-                        if isinstance(obj, Spectrum):
-                            spectrumDisplay = returnObj
+                                # if the first spectrum then set the spectrumDisplay
+                                if isinstance(obj, Spectrum):
+                                    spectrumDisplay = returnObj
 
-                else:
-                    info = showInfo('Not implemented yet!',
-                                    'This function has not been implemented in the current version')
-            except Exception as e:
-                getLogger().warning('Error: %s' % e)
-                # raise e
+                        else:
+                            info = showInfo('Not implemented yet!',
+                                            'This function has not been implemented in the current version')
+                    except Exception as e:
+                        getLogger().warning('Error: %s' % e)
+                        # raise e

@@ -56,7 +56,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
 __dateModified__ = "$dateModified: 2018-12-20 16:43:53 +0000 (Thu, December 20, 2018) $"
-__version__ = "$Revision: 3.0.b5 $"
+__version__ = "$Revision: 3.0.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -89,7 +89,7 @@ from ccpn.core.Multiplet import Multiplet
 # from ccpn.core.IntegralList import IntegralList
 from ccpn.ui.gui.lib.mouseEvents import getCurrentMouseMode
 from ccpn.ui.gui.lib.GuiStrip import DefaultMenu, PeakMenu, IntegralMenu, \
-    MultipletMenu, PhasingMenu
+    MultipletMenu, PhasingMenu, AxisMenu
 
 from ccpn.core.lib.Cache import cached
 
@@ -120,7 +120,7 @@ except ImportError:
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLNotifier import GLNotifier
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLGlobal import GLGlobalData
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLFonts import GLString
-from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLSimpleLabels import GLSimpleStrings
+from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLSimpleLabels import GLSimpleStrings, GLSimpleLegend
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLArrays import GLRENDERMODE_IGNORE, GLRENDERMODE_DRAW, \
     GLRENDERMODE_RESCALE, GLRENDERMODE_REBUILD, \
     GLREFRESHMODE_NEVER, GLREFRESHMODE_ALWAYS, \
@@ -192,6 +192,7 @@ class CcpnGLWidget(QOpenGLWidget):
 
         # flag to display paintGL but keep an empty screen
         self._blankDisplay = False
+        self.setAutoFillBackground(False)
 
         if not strip:  # don't initialise if nothing there
             return
@@ -463,7 +464,8 @@ class CcpnGLWidget(QOpenGLWidget):
     def rescale(self, rescaleOverlayText=True, rescaleMarksRulers=True,
                 rescaleIntegralLists=True, rescaleRegions=True,
                 rescaleSpectra=True, rescaleStaticHTraces=True,
-                rescaleStaticVTraces=True, rescaleSpectrumLabels=True):
+                rescaleStaticVTraces=True, rescaleSpectrumLabels=True,
+                rescaleLegend=True):
         """Change to axes of the view, axis visibility, scale and rebuild matrices when necessary
         to improve display speed
         """
@@ -585,6 +587,9 @@ class CcpnGLWidget(QOpenGLWidget):
         if rescaleSpectrumLabels:
             self._spectrumLabelling.rescale()
 
+        # if rescaleLegend:
+        #     self._legend.rescale()
+
         if rescaleStaticHTraces:
             self.rescaleStaticHTraces()
 
@@ -599,6 +604,11 @@ class CcpnGLWidget(QOpenGLWidget):
         self.rescaleSpectra()
         self._spectrumLabelling.rescale()
         self.update()
+
+    # def setLegendMode(self, value):
+    #     self._legendMode = value
+    #     self._legend.rescale()
+    #     self.update()
 
     def resetRangeLimits(self, allLimits=True):
         # reset zoom limits for the display
@@ -1746,11 +1756,12 @@ class CcpnGLWidget(QOpenGLWidget):
                                            GLContext=self)
 
         self._spectrumLabelling = GLSimpleStrings(parent=self, strip=self.strip, name='spectrumLabelling')
+
+        # self._legend = GLSimpleLegend(parent=self, strip=self.strip, name='legend')
         # for ii, spectrum in enumerate(self.project.spectra):
         #     # add some test strings
-        #     self._spectrumLabelling.addString(spectrum, (ii*15,ii*15),
-        #                                       colour="#FE64C6", alpha=0.75,
-        #                                       lock=GLDefs.LOCKNONE)
+        #     self._legend.addString(spectrum, (ii*15,ii*15),
+        #                                       colour="#FE64C6", alpha=0.75)
 
         self.viewports = GLViewports()
 
@@ -2245,6 +2256,10 @@ class CcpnGLWidget(QOpenGLWidget):
 
     def mouseReleaseEvent(self, ev):
 
+        # if no self.current then strip is not defined correctly
+        if not getattr(self.current, 'mouseMovedDict', None):
+            return
+
         self._mousePressed = False
         self._draggingLabel = False
 
@@ -2572,7 +2587,7 @@ class CcpnGLWidget(QOpenGLWidget):
                 self._drawMouseMoveLine = True
                 self._drawDeltaOffset = True
 
-        self.GLSignals._emitMouseMoved(source=self, coords=self.cursorCoordinate, mouseMovedDict=mouseMovedDict)
+        self.GLSignals._emitMouseMoved(source=self, coords=self.cursorCoordinate, mouseMovedDict=mouseMovedDict, mainWindow=self.mainWindow)
 
         # spawn rebuild/paint of traces
         if self._updateHTrace or self._updateVTrace:
@@ -2766,13 +2781,19 @@ class CcpnGLWidget(QOpenGLWidget):
         if not self._ordering:
             return
 
+        # tt = time.time()
+
         with self.glBlocking():
             self._buildGL()
             self._paintGL()
 
+        # print('>>>>>> _paintGL', self.strip, time.time()-tt)
+
     def _paintGL(self):
         w = self.w
         h = self.h
+
+        # print('>>>>>> _paintGL', self.strip, time.time())
 
         if self._updateBackgroundColour:
             self._updateBackgroundColour = False
@@ -2829,6 +2850,9 @@ class CcpnGLWidget(QOpenGLWidget):
             # make the overlay/axis solid
             currentShader.setBlendEnabled(0)
             self._spectrumLabelling.drawStrings()
+
+            # not fully implemented yet
+            # self._legend.drawStrings()
             currentShader.setBlendEnabled(1)
 
         self.disableTextClientState()
@@ -2926,6 +2950,9 @@ class CcpnGLWidget(QOpenGLWidget):
         if self.strip.isDeleted:
             return
 
+        # printTime = False
+        # startTime = time.time()
+
         # self._spectrumSettings = {}
         rebuildFlag = False
         for spectrumView in self._ordering:  # strip.spectrumViews:
@@ -2933,6 +2960,8 @@ class CcpnGLWidget(QOpenGLWidget):
                 continue
 
             if spectrumView.buildContours or spectrumView.buildContoursOnly:
+
+                # printTime = True
 
                 # flag the peaks for rebuilding
                 if not spectrumView.buildContoursOnly:
@@ -2969,6 +2998,9 @@ class CcpnGLWidget(QOpenGLWidget):
         # rebuild the traces as the spectrum/plane may have changed
         if rebuildFlag:
             self.rebuildTraces()
+
+        # if printTime:
+        #     print('>>>>>>buildingContours', time.time()-startTime)
 
     def enableTextClientState(self):
         GL.glEnableClientState(GL.GL_VERTEX_ARRAY)
@@ -3704,7 +3736,7 @@ class CcpnGLWidget(QOpenGLWidget):
                     index += 2
 
                     # add the double cursor
-                    if _drawDouble:
+                    if _drawDouble and self._matchingIsotopeCodes:
                         vertices.extend([doubleCoords[0], 1.0, doubleCoords[0], 0.0])
                         indices.extend([index, index + 1])
                         index += 2
@@ -3715,7 +3747,7 @@ class CcpnGLWidget(QOpenGLWidget):
                     index += 2
 
                     # add the double cursor
-                    if _drawDouble:
+                    if _drawDouble and self._matchingIsotopeCodes:
                         vertices.extend([0.0, doubleCoords[1], 1.0, doubleCoords[1]])
                         indices.extend([index, index + 1])
                         index += 2
@@ -5575,6 +5607,8 @@ class CcpnGLWidget(QOpenGLWidget):
 
             if self._crosshairVisible:  # or self._updateVTrace or self._updateHTrace:
 
+                # print('>>>>>>', self.strip, time.time())
+
                 exactMatch = (self._preferences.matchAxisCode == AXIS_FULLATOMNAME)
                 indices = getAxisCodeMatchIndices(self._axisCodes[:2], mouseMovedDict[AXIS_ACTIVEAXES], exactMatch=exactMatch)
 
@@ -5585,18 +5619,21 @@ class CcpnGLWidget(QOpenGLWidget):
                         self.cursorCoordinate[n] = mouseMovedDict[AXIS_FULLATOMNAME][axis]
 
                         # coordinates have already been flipped
-                        self.doubleCursorCoordinate[n] = mouseMovedDict[DOUBLEAXIS_FULLATOMNAME][axis]
+                        # self.doubleCursorCoordinate[n] = mouseMovedDict[DOUBLEAXIS_FULLATOMNAME][axis]
+                        self.doubleCursorCoordinate[1-n] = self.cursorCoordinate[n]
 
                     else:
                         self.cursorCoordinate[n] = None
-                        self.doubleCursorCoordinate[n] = None
+                        self.doubleCursorCoordinate[1-n] = None
 
                 self.current.cursorPosition = (self.cursorCoordinate[0], self.cursorCoordinate[1])
 
                 # only need to redraw if we can see the cursor
                 # if self._updateVTrace or self._updateHTrace:
                 #   self.updateTraces()
+                # self.makeCurrent()
                 self.update()
+                # self.doneCurrent()
 
     @pyqtSlot(dict)
     def _glKeyEvent(self, aDict):
@@ -5914,93 +5951,58 @@ class CcpnGLWidget(QOpenGLWidget):
             event.accept()
             self._resetBoxes()
 
-            # # Search if the event is in a range of a selected peak.
-            # peaks = list(self.current.peaks)
-            # strip._addItemsToNavigateToCursorPosMenu()
-            # strip._addItemsToMarkInCursorPosMenu()
-            #
-            # from ccpn.ui.gui.lib.GuiStripContextMenus import _hidePeaksSingleActionItems, _enableAllItems
-            #
-            # ii = strip._contextMenus.get(PeakMenu)
-            # if len(peaks) > 1:
-            #     _hidePeaksSingleActionItems(strip, ii)
-            # else:
-            #     _enableAllItems(ii)
-            #
-            # # will only work for self.current.peak
-            # strip._addItemsToNavigateToPeakMenu()
-            # strip._addItemsToMarkInPeakMenu()
+            mouseInAxis = self._mouseInAxis(event.pos())
 
-            # # check other menu items before raising menues
-            # strip._checkMenuItems()
+            if mouseInAxis == GLDefs.MAINVIEW:
+                selectedDict = self.getObjectsUnderMouse()
+                if PEAKSELECT in selectedDict:
 
-            # # set the correct rightMouseMenu for the clicked object (must be selected?)
-            # objs = self._mouseInPeak(xPosition, yPosition, firstOnly=False)
-            # strip._lastClickedObjects = None
-            #
-            # if (set(objs or []) & set(self.current.peaks or [])):
-            #     strip.contextMenuMode = PeakMenu
-            #     menu = strip._contextMenus.get(strip.contextMenuMode)
-            #     strip._lastClickedObjects = objs
-            #
-            # else:
-            #     objs = self._mouseInIntegral(xPosition, yPosition, firstOnly=False)
-            #
-            #     if (set(objs or []) & set(self.current.integrals or [])):
-            #         strip.contextMenuMode = IntegralMenu
-            #         menu = strip._contextMenus.get(strip.contextMenuMode)
-            #         strip._lastClickedObjects = objs
-            #
-            #     else:
-            #         objs = self._mouseInMultiplet(xPosition, yPosition, firstOnly=False)
-            #
-            #         if (set(objs or []) & set(self.current.multiplets or [])):
-            #             strip.contextMenuMode = MultipletMenu
-            #             menu = strip._contextMenus.get(strip.contextMenuMode)
-            #             strip._lastClickedObjects = objs
+                    # Search if the event is in a range of a selected peak.
+                    peaks = list(self.current.peaks)
 
+                    from ccpn.ui.gui.lib.GuiStripContextMenus import _hidePeaksSingleActionItems, _enableAllItems
 
-            #~~~~~~~
+                    ii = strip._contextMenus.get(PeakMenu)
+                    if len(peaks) > 1:
+                        _hidePeaksSingleActionItems(strip, ii)
+                    else:
+                        _enableAllItems(ii)
 
-            # strip._addItemsToNavigateToCursorPosMenu()
-            # strip._addItemsToMarkInCursorPosMenu()
+                    # will only work for self.current.peak
+                    strip._addItemsToNavigateToPeakMenu(selectedDict[PEAKSELECT])
+                    strip._addItemsToMarkInPeakMenu(selectedDict[PEAKSELECT])
 
-            selectedDict = self.getObjectsUnderMouse()
-            if PEAKSELECT in selectedDict:
+                    strip.contextMenuMode = PeakMenu
+                    menu = strip._contextMenus.get(strip.contextMenuMode)
+                    strip._lastClickedObjects = selectedDict[PEAKSELECT]
 
-                # Search if the event is in a range of a selected peak.
-                peaks = list(self.current.peaks)
+                elif INTEGRALSELECT in selectedDict:
+                    strip.contextMenuMode = IntegralMenu
+                    menu = strip._contextMenus.get(strip.contextMenuMode)
+                    strip._lastClickedObjects = selectedDict[INTEGRALSELECT]
 
-                from ccpn.ui.gui.lib.GuiStripContextMenus import _hidePeaksSingleActionItems, _enableAllItems
+                elif MULTIPLETSELECT in selectedDict:
+                    strip.contextMenuMode = MultipletMenu
+                    menu = strip._contextMenus.get(strip.contextMenuMode)
+                    strip._lastClickedObjects = selectedDict[MULTIPLETSELECT]
 
-                ii = strip._contextMenus.get(PeakMenu)
-                if len(peaks) > 1:
-                    _hidePeaksSingleActionItems(strip, ii)
+                # check other menu items before raising menues
+                strip._addItemsToNavigateToCursorPosMenu()
+                strip._addItemsToMarkInCursorPosMenu()
+                strip._addItemsToCopyAxisFromMenuesMainView()
+                if not self.is1D:
+                    strip._addItemsToMatchAxisCodesFromMenuesMainView()
+                strip._checkMenuItems()
+
+            elif mouseInAxis in [GLDefs.BOTTOMAXIS, GLDefs.RIGHTAXIS, GLDefs.AXISCORNER]:
+                strip.contextMenuMode = AxisMenu
+                menu = strip._contextMenus.get(strip.contextMenuMode)
+                strip._addItemsToCopyAxisFromMenuesAxes()
+                if not self.is1D:
+                    strip._addItemsToMatchAxisCodesFromMenuesAxes()
+                    strip._enableNdAxisMenuItems(mouseInAxis)
                 else:
-                    _enableAllItems(ii)
-
-                # will only work for self.current.peak
-                strip._addItemsToNavigateToPeakMenu(selectedDict[PEAKSELECT])
-                strip._addItemsToMarkInPeakMenu(selectedDict[PEAKSELECT])
-
-                strip.contextMenuMode = PeakMenu
-                menu = strip._contextMenus.get(strip.contextMenuMode)
-                strip._lastClickedObjects = selectedDict[PEAKSELECT]
-
-            elif INTEGRALSELECT in selectedDict:
-                strip.contextMenuMode = IntegralMenu
-                menu = strip._contextMenus.get(strip.contextMenuMode)
-                strip._lastClickedObjects = selectedDict[INTEGRALSELECT]
-
-            elif MULTIPLETSELECT in selectedDict:
-                strip.contextMenuMode = MultipletMenu
-                menu = strip._contextMenus.get(strip.contextMenuMode)
-                strip._lastClickedObjects = selectedDict[MULTIPLETSELECT]
-
-            # check other menu items before raising menues
-            strip._addItemsToNavigateToCursorPosMenu()
-            strip._addItemsToMarkInCursorPosMenu()
-            strip._checkMenuItems()
+                    strip._enable1dAxisMenuItems(mouseInAxis)
 
             if menu is not None:
                 strip.viewStripMenu = menu
@@ -6021,6 +6023,54 @@ class CcpnGLWidget(QOpenGLWidget):
             event.ignore()
 
         self.update()
+
+    def _mouseInAxis(self, mousePos):
+        h = self.h
+        w = self.w
+
+        # find the correct viewport
+        if (self._drawRightAxis and self._drawBottomAxis):
+            mw = [0, self.AXIS_MARGINBOTTOM, w - self.AXIS_MARGINRIGHT, h - 1]
+            ba = [0, 0, w - self.AXIS_MARGINRIGHT, self.AXIS_MARGINBOTTOM - 1]
+            ra = [w - self.AXIS_MARGINRIGHT, self.AXIS_MARGINBOTTOM, w, h]
+
+        elif (self._drawBottomAxis):
+            mw = [0, self.AXIS_MARGINBOTTOM, w, h - 1]
+            ba = [0, 0, w, self.AXIS_MARGINBOTTOM - 1]
+            ra = [w, self.AXIS_MARGINBOTTOM, w, h]
+
+        elif (self._drawRightAxis):
+            mw = [0, 0, w - self.AXIS_MARGINRIGHT, h - 1]
+            ba = [0, 0, w - self.AXIS_MARGINRIGHT, 0]
+            ra = [w - self.AXIS_MARGINRIGHT, 0, w, h]
+
+        else:  # no axes visible
+            mw = [0, 0, w, h]
+            ba = [0, 0, w, 0]
+            ra = [w, 0, w, h]
+
+        mx = mousePos.x()
+        my = self.height() - mousePos.y()
+
+        if self.between(mx, mw[0], mw[2]) and self.between(my, mw[1], mw[3]):
+
+            # if in the mainView
+            return GLDefs.MAINVIEW
+
+        elif self.between(mx, ba[0], ba[2]) and self.between(my, ba[1], ba[3]):
+
+            # in the bottomAxisBar, so zoom in the X axis
+            return GLDefs.BOTTOMAXIS
+
+        elif self.between(mx, ra[0], ra[2]) and self.between(my, ra[1], ra[3]):
+
+            # in the rightAxisBar, so zoom in the Y axis
+            return GLDefs.RIGHTAXIS
+
+        else:
+
+            # must be in the corner
+            return GLDefs.AXISCORNER
 
     def _getCanvasContextMenu(self):
         """Give a needed menu based on strip mode

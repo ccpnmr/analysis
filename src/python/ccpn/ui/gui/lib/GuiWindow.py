@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: CCPN $"
 __dateModified__ = "$dateModified: 2017-07-07 16:32:45 +0100 (Fri, July 07, 2017) $"
-__version__ = "$Revision: 3.0.b5 $"
+__version__ = "$Revision: 3.0.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -167,6 +167,16 @@ class GuiWindow():
             #   except:
             #     getLogger().warning('Function cannot be found')
 
+    def deassignPeaks(self):
+        """Deassign all from selected peaks
+        """
+        if self.current.peaks:
+            with undoBlock():
+                for peak in self.current.peaks:
+                    assignedDims = list(peak.dimensionNmrAtoms)
+                    assignedDims = tuple([] for dd in assignedDims)
+                    peak.dimensionNmrAtoms = assignedDims
+
     def deleteSelectedItems(self, parent=None):
         """Delete peaks/integrals/multiplets from the project
         """
@@ -274,55 +284,42 @@ class GuiWindow():
     def add1DIntegral(self, peak=None):
         """Peak: take self.application.currentPeak as default
         """
-        strip = self.application.current.strip
-        peak = self.project.getByPid(peak) if isinstance(peak, str) else peak
 
-        if strip is not None:
-            if strip.spectrumDisplay.is1D:
-                cursorPosition = self.application.current.cursorPosition
-                if cursorPosition is not None:
-                    limits = [cursorPosition[0], cursorPosition[0] + 0.005]
+        from ccpn.core.lib.ContextManagers import undoBlock, notificationEchoBlocking, undoBlockWithoutSideBar
+        with undoBlockWithoutSideBar():
+            with notificationEchoBlocking():
+                strip = self.application.current.strip
+                peak = self.project.getByPid(peak) if isinstance(peak, str) else peak
 
-                    validViews = [sv for sv in strip.spectrumViews if sv.isVisible()]
+                if strip is not None:
+                    if strip.spectrumDisplay.is1D:
+                        cursorPosition = self.application.current.cursorPosition
+                        if cursorPosition is not None:
+                            limits = [cursorPosition[0], cursorPosition[0] + 0.01]
 
-                    # with logCommandBlock(get='self') as log:
-                    #     if peak:
-                    #         log('add1DIntegral', peak=repr(peak.pid))
-                    #     else:
-                    #         log('add1DIntegral')
+                            validViews = [sv for sv in strip.spectrumViews if sv.isVisible()]
+                            currentIntegrals = list(self.current.integrals)
+                            for spectrumView in validViews:
 
-                    with undoBlock():
-                        currentIntegrals = list(self.current.integrals)
-                        for spectrumView in validViews:
+                                if not spectrumView.spectrum.integralLists:
+                                    spectrumView.spectrum.newIntegralList()
 
-                            if not spectrumView.spectrum.integralLists:
-                                spectrumView.spectrum.newIntegralList()
+                                # stupid bug! mixing views and lists
+                                validIntegralLists = [ilv.integralList for ilv in spectrumView.integralListViews if ilv.isVisible()]
 
-                            # stupid bug! mixing views and lists
-                            validIntegralLists = [ilv.integralList for ilv in spectrumView.integralListViews if ilv.isVisible()]
+                                for integralList in validIntegralLists:
+                                    integral = integralList.newIntegral(value=None, limits=[limits, ])
+                                    currentIntegrals.append(integral)
+                                    if peak:
+                                        integral.peak = peak
+                                    else:
+                                        if len(self.application.current.peaks) == 1:
+                                            if self.application.current.peak.peakList.spectrum == integral.integralList.spectrum:
+                                                integral.peak = self.application.current.peak
+                            self.current.integrals = currentIntegrals
 
-                            # if len(validIntegralLists) > 1:  # make a integralView always visible if there is only one and are creating a new integral
-                            #     validIntegralLists = [il for il in validIntegralLists if il.isVisible()]
-
-                            # if len(validIntegralLists) == 1:
-                            #     for il in spectrumView.integralListViews:
-                            #         if il in validIntegralLists:
-                            #             il.setVisible(True)
-
-                            for integralList in validIntegralLists:
-                                integral = integralList.newIntegral(value=None, limits=[limits, ])
-                                currentIntegrals.append(integral)
-
-                                if peak:
-                                    integral.peak = peak
-                                else:
-                                    if len(self.application.current.peaks) == 1:
-                                        if self.application.current.peak.peakList.spectrum == integral.integralList.spectrum:
-                                            integral.peak = self.application.current.peak
-                        self.current.integrals = currentIntegrals
-
-            else:
-                getLogger().warning('Current strip is not 1D')
+                else:
+                    getLogger().warning('Current strip is not 1D')
 
     def refitCurrentPeaks(self, singularMode=True):
         peaks = self.application.current.peaks

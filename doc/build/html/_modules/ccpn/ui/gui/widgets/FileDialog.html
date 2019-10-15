@@ -64,7 +64,7 @@
 <span class="c1">#=========================================================================================</span>
 <span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: CCPN $&quot;</span>
 <span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2017-07-07 16:32:53 +0100 (Fri, July 07, 2017) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b5 $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.0 $&quot;</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Created</span>
 <span class="c1">#=========================================================================================</span>
@@ -81,6 +81,7 @@
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.ButtonList</span> <span class="kn">import</span> <span class="n">ButtonList</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Frame</span> <span class="kn">import</span> <span class="n">Frame</span>
 <span class="kn">from</span> <span class="nn">ccpn.util.Path</span> <span class="kn">import</span> <span class="n">aPath</span>
+<span class="kn">from</span> <span class="nn">ccpn.util.Common</span> <span class="kn">import</span> <span class="n">makeIterableList</span>
 
 
 <div class="viewcode-block" id="FileDialog"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.FileDialog.FileDialog">[docs]</a><span class="k">class</span> <span class="nc">FileDialog</span><span class="p">(</span><span class="n">QtWidgets</span><span class="o">.</span><span class="n">QFileDialog</span><span class="p">):</span>
@@ -91,7 +92,7 @@
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">fileMode</span><span class="o">=</span><span class="n">QtWidgets</span><span class="o">.</span><span class="n">QFileDialog</span><span class="o">.</span><span class="n">AnyFile</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
                  <span class="n">acceptMode</span><span class="o">=</span><span class="n">QtWidgets</span><span class="o">.</span><span class="n">QFileDialog</span><span class="o">.</span><span class="n">AcceptOpen</span><span class="p">,</span> <span class="n">preferences</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
                  <span class="n">selectFile</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="nb">filter</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">directory</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
-                 <span class="n">restrictDirToFilter</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">multiSelection</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
+                 <span class="n">restrictDirToFilter</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">multiSelection</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">useNative</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
                  <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
 
         <span class="c1"># ejb - added selectFile to suggest a filename in the file box</span>
@@ -125,7 +126,11 @@
             <span class="p">}</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">setFileMode</span><span class="p">(</span><span class="n">fileMode</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">setAcceptMode</span><span class="p">(</span><span class="n">acceptMode</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_customMultiSelectedFiles</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1">#used to multiselect directories and files at the same time. Available only on Non Native</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_multiSelect</span> <span class="o">=</span> <span class="n">multiSelection</span>
+
+        <span class="k">if</span> <span class="n">acceptMode</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">setAcceptMode</span><span class="p">(</span><span class="n">acceptMode</span><span class="p">)</span>
         <span class="k">if</span> <span class="nb">filter</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">setNameFilter</span><span class="p">(</span><span class="nb">filter</span><span class="p">)</span>
 
@@ -135,7 +140,10 @@
         <span class="k">if</span> <span class="n">preferences</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> <span class="n">preferences</span><span class="o">.</span><span class="n">useNative</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">useNative</span> <span class="o">=</span> <span class="bp">True</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">useNative</span> <span class="o">=</span> <span class="bp">False</span>
+            <span class="k">if</span> <span class="n">useNative</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">useNative</span> <span class="o">=</span> <span class="bp">True</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">useNative</span> <span class="o">=</span> <span class="bp">False</span>
 
         <span class="c1"># need to do this before setting DontUseNativeDialog</span>
         <span class="k">if</span> <span class="n">restrictDirToFilter</span> <span class="o">==</span> <span class="bp">True</span><span class="p">:</span>
@@ -145,6 +153,8 @@
 
         <span class="c1"># self.result is &#39;&#39; (first case) or 0 (second case) if Cancel button selected</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">useNative</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">sys</span><span class="o">.</span><span class="n">platform</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;linux&#39;</span><span class="p">:</span>
+
+            <span class="c1"># get the function name from the dict above</span>
             <span class="n">funcName</span> <span class="o">=</span> <span class="n">staticFunctionDict</span><span class="p">[(</span><span class="n">acceptMode</span><span class="p">,</span> <span class="n">fileMode</span><span class="p">)]</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">result</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">funcName</span><span class="p">)(</span><span class="n">caption</span><span class="o">=</span><span class="n">text</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">)</span>
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">result</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">):</span>
@@ -153,12 +163,27 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">setOption</span><span class="p">(</span><span class="n">QtWidgets</span><span class="o">.</span><span class="n">QFileDialog</span><span class="o">.</span><span class="n">DontUseNativeDialog</span><span class="p">)</span>
 
             <span class="c1"># add a multiselection option - only for non-native dialogs</span>
-            <span class="k">if</span> <span class="n">multiSelection</span><span class="p">:</span>
-                <span class="k">for</span> <span class="n">view</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">findChildren</span><span class="p">((</span><span class="n">QtWidgets</span><span class="o">.</span><span class="n">QListView</span><span class="p">,</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QTreeView</span><span class="p">)):</span>
-                    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">view</span><span class="o">.</span><span class="n">model</span><span class="p">(),</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QFileSystemModel</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">view</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">findChildren</span><span class="p">((</span><span class="n">QtWidgets</span><span class="o">.</span><span class="n">QListView</span><span class="p">,</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QTreeView</span><span class="p">)):</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">view</span><span class="o">.</span><span class="n">model</span><span class="p">(),</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QFileSystemModel</span><span class="p">):</span>
+
+                    <span class="c1"># set the selection mode for the dialog</span>
+                    <span class="k">if</span> <span class="n">multiSelection</span><span class="p">:</span>
                         <span class="n">view</span><span class="o">.</span><span class="n">setSelectionMode</span><span class="p">(</span><span class="n">QtWidgets</span><span class="o">.</span><span class="n">QAbstractItemView</span><span class="o">.</span><span class="n">ExtendedSelection</span><span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">view</span><span class="o">.</span><span class="n">setSelectionMode</span><span class="p">(</span><span class="n">QtWidgets</span><span class="o">.</span><span class="n">QAbstractItemView</span><span class="o">.</span><span class="n">SingleSelection</span><span class="p">)</span>
+
+            <span class="n">btns</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">findChildren</span><span class="p">(</span><span class="n">QtWidgets</span><span class="o">.</span><span class="n">QPushButton</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">btns</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">openBtn</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">btns</span> <span class="k">if</span> <span class="s1">&#39;open&#39;</span> <span class="ow">in</span> <span class="nb">str</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">text</span><span class="p">())</span><span class="o">.</span><span class="n">lower</span><span class="p">()]</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">openBtn</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">openBtn</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">disconnect</span><span class="p">()</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">openBtn</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_openClicked</span><span class="p">)</span>
 
             <span class="bp">self</span><span class="o">.</span><span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">exec_</span><span class="p">()</span>
+
+<div class="viewcode-block" id="FileDialog.reject"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.FileDialog.FileDialog.reject">[docs]</a>    <span class="k">def</span> <span class="nf">reject</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">selectedFiles</span> <span class="o">=</span> <span class="k">lambda</span> <span class="p">:</span> <span class="bp">None</span> <span class="c1"># needs to clear the selection when closing</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">FileDialog</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">reject</span><span class="p">()</span></div>
 
     <span class="k">def</span> <span class="nf">_predir</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">file</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
         <span class="k">if</span> <span class="nb">file</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_restrictedType</span><span class="p">):</span>
@@ -170,19 +195,40 @@
 
         <span class="k">return</span> <span class="bp">True</span>
 
+    <span class="k">def</span> <span class="nf">_openClicked</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Custom action to multiselect files and dir at the same time or just Dirs or just Files. Needed to open a top dir</span>
+<span class="sd">        containing the spectra. Eg 10 Brukers at once</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tree</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">findChild</span><span class="p">(</span><span class="n">QtWidgets</span><span class="o">.</span><span class="n">QTreeView</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">tree</span><span class="p">:</span>
+            <span class="n">inds</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tree</span><span class="o">.</span><span class="n">selectionModel</span><span class="p">()</span><span class="o">.</span><span class="n">selectedIndexes</span><span class="p">()</span>
+            <span class="n">files</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">inds</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">i</span><span class="o">.</span><span class="n">column</span><span class="p">()</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">files</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">directory</span><span class="p">()</span><span class="o">.</span><span class="n">absolutePath</span><span class="p">()),</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="o">.</span><span class="n">data</span><span class="p">())))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_customMultiSelectedFiles</span> <span class="o">=</span> <span class="n">files</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">hide</span><span class="p">()</span>
+
     <span class="c1"># overrides Qt function, which does not pay any attention to whether Cancel button selected</span>
 <div class="viewcode-block" id="FileDialog.selectedFiles"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.FileDialog.FileDialog.selectedFiles">[docs]</a>    <span class="k">def</span> <span class="nf">selectedFiles</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">result</span> <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">useNative</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QFileDialog</span><span class="o">.</span><span class="n">selectedFiles</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
-        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">result</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">useNative</span><span class="p">:</span>
-            <span class="k">return</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">result</span><span class="p">]</span>
+        <span class="sd">&quot;&quot;&quot;Get the list of selected files</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">useNative</span><span class="p">:</span>
+            <span class="c1"># get the selected files from the native dialog</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">result</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">makeIterableList</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">result</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="p">[]</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">return</span> <span class="p">[]</span></div>
+            <span class="c1"># use our ccpn dialog</span>
+            <span class="n">files</span> <span class="o">=</span> <span class="nb">super</span><span class="p">(</span><span class="n">FileDialog</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">selectedFiles</span><span class="p">()</span>
+            <span class="k">return</span> <span class="n">files</span></div>
 
-    <span class="c1"># Qt does not have this but useful if you know you only want one file</span>
 <div class="viewcode-block" id="FileDialog.selectedFile"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.FileDialog.FileDialog.selectedFile">[docs]</a>    <span class="k">def</span> <span class="nf">selectedFile</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-
+        <span class="sd">&quot;&quot;&quot;Get the first selected file</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Qt does not have this but useful if you know you only want one file</span>
         <span class="n">files</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">selectedFiles</span><span class="p">()</span>
         <span class="k">if</span> <span class="n">files</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">files</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">files</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
@@ -367,7 +413,9 @@
 
     <span class="n">app</span> <span class="o">=</span> <span class="n">TestApplication</span><span class="p">()</span>
     <span class="n">popup</span> <span class="o">=</span> <span class="n">CcpnDialog</span><span class="p">(</span><span class="n">windowTitle</span><span class="o">=</span><span class="s1">&#39;Test LineEditButtonDialog&#39;</span><span class="p">)</span>
-    <span class="n">slider</span> <span class="o">=</span> <span class="n">LineEditButtonDialog</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="n">popup</span><span class="p">,</span> <span class="n">fileMode</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="nb">filter</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;ccpn (*.ccpn)&#39;</span><span class="p">))</span>
+    <span class="n">slider</span> <span class="o">=</span> <span class="n">FileDialog</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="n">popup</span><span class="p">)</span>
+    <span class="k">print</span><span class="p">(</span><span class="n">slider</span><span class="o">.</span><span class="n">selectedFile</span><span class="p">())</span>
+
     <span class="n">popup</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
     <span class="n">popup</span><span class="o">.</span><span class="n">raise_</span><span class="p">()</span>
     <span class="n">app</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>

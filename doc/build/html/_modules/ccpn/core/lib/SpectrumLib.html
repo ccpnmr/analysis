@@ -63,7 +63,7 @@
 <span class="c1">#=========================================================================================</span>
 <span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: CCPN $&quot;</span>
 <span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2017-07-07 16:32:32 +0100 (Fri, July 07, 2017) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b5 $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.0 $&quot;</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Created</span>
 <span class="c1">#=========================================================================================</span>
@@ -81,6 +81,7 @@
 <span class="kn">from</span> <span class="nn">ccpnmodel.ccpncore.lib.Io</span> <span class="kn">import</span> <span class="n">Formats</span>
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">ccpn.util.Logging</span> <span class="kn">import</span> <span class="n">getLogger</span>
 
 
 <span class="n">MagnetisationTransferTuple</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">namedtuple</span><span class="p">(</span><span class="s1">&#39;MagnetisationTransferTuple&#39;</span><span class="p">,</span>
@@ -133,15 +134,38 @@
     <span class="n">spectrum</span><span class="o">.</span><span class="n">intensities</span> <span class="o">=</span> <span class="n">spectrum</span><span class="o">.</span><span class="n">intensities</span> <span class="o">+</span> <span class="n">shift</span>
 
 
-<span class="k">def</span> <span class="nf">_calibrateXND</span><span class="p">(</span><span class="n">spectrum</span><span class="p">,</span> <span class="n">currentPosition</span><span class="p">,</span> <span class="n">newPosition</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">_calibrateXND</span><span class="p">(</span><span class="n">spectrum</span><span class="p">,</span> <span class="n">strip</span><span class="p">,</span> <span class="n">currentPosition</span><span class="p">,</span> <span class="n">newPosition</span><span class="p">):</span>
+    <span class="kn">from</span> <span class="nn">ccpn.util.Common</span> <span class="kn">import</span> <span class="n">getAxisCodeMatchIndices</span>
+
+    <span class="c1"># map the X change to the correct spectrum axis</span>
     <span class="n">spectrumReferencing</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">spectrum</span><span class="o">.</span><span class="n">referenceValues</span><span class="p">)</span>
-    <span class="n">spectrumReferencing</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">spectrumReferencing</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="p">(</span><span class="n">newPosition</span> <span class="o">-</span> <span class="n">currentPosition</span><span class="p">))</span>
+    <span class="n">indices</span> <span class="o">=</span> <span class="n">getAxisCodeMatchIndices</span><span class="p">(</span><span class="n">strip</span><span class="o">.</span><span class="n">axisCodes</span><span class="p">,</span> <span class="n">spectrum</span><span class="o">.</span><span class="n">axisCodes</span><span class="p">)</span>
+
+    <span class="c1"># as modifying the spectrum, spectrum needs to be the second argument of getAxisCodeMatchIndices</span>
+    <span class="n">spectrumReferencing</span><span class="p">[</span><span class="n">indices</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">spectrumReferencing</span><span class="p">[</span><span class="n">indices</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span> <span class="o">+</span> <span class="p">(</span><span class="n">newPosition</span> <span class="o">-</span> <span class="n">currentPosition</span><span class="p">))</span>
     <span class="n">spectrum</span><span class="o">.</span><span class="n">referenceValues</span> <span class="o">=</span> <span class="n">spectrumReferencing</span>
 
 
-<span class="k">def</span> <span class="nf">_calibrateYND</span><span class="p">(</span><span class="n">spectrum</span><span class="p">,</span> <span class="n">currentPosition</span><span class="p">,</span> <span class="n">newPosition</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">_calibrateNDAxis</span><span class="p">(</span><span class="n">spectrum</span><span class="p">,</span> <span class="n">axisIndex</span><span class="p">,</span> <span class="n">currentPosition</span><span class="p">,</span> <span class="n">newPosition</span><span class="p">):</span>
+    <span class="kn">from</span> <span class="nn">ccpn.util.Common</span> <span class="kn">import</span> <span class="n">getAxisCodeMatchIndices</span>
+
+    <span class="c1"># map the X change to the correct spectrum axis</span>
     <span class="n">spectrumReferencing</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">spectrum</span><span class="o">.</span><span class="n">referenceValues</span><span class="p">)</span>
-    <span class="n">spectrumReferencing</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">spectrumReferencing</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="p">(</span><span class="n">newPosition</span> <span class="o">-</span> <span class="n">currentPosition</span><span class="p">))</span>
+
+    <span class="c1"># as modifying the spectrum, spectrum needs to be the second argument of getAxisCodeMatchIndices</span>
+    <span class="n">spectrumReferencing</span><span class="p">[</span><span class="n">axisIndex</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">spectrumReferencing</span><span class="p">[</span><span class="n">axisIndex</span><span class="p">]</span> <span class="o">+</span> <span class="p">(</span><span class="n">newPosition</span> <span class="o">-</span> <span class="n">currentPosition</span><span class="p">))</span>
+    <span class="n">spectrum</span><span class="o">.</span><span class="n">referenceValues</span> <span class="o">=</span> <span class="n">spectrumReferencing</span>
+
+
+<span class="k">def</span> <span class="nf">_calibrateYND</span><span class="p">(</span><span class="n">spectrum</span><span class="p">,</span> <span class="n">strip</span><span class="p">,</span> <span class="n">currentPosition</span><span class="p">,</span> <span class="n">newPosition</span><span class="p">):</span>
+    <span class="kn">from</span> <span class="nn">ccpn.util.Common</span> <span class="kn">import</span> <span class="n">getAxisCodeMatchIndices</span>
+
+    <span class="c1"># map the Y change to the correct spectrum axis</span>
+    <span class="n">spectrumReferencing</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">spectrum</span><span class="o">.</span><span class="n">referenceValues</span><span class="p">)</span>
+    <span class="n">indices</span> <span class="o">=</span> <span class="n">getAxisCodeMatchIndices</span><span class="p">(</span><span class="n">strip</span><span class="o">.</span><span class="n">axisCodes</span><span class="p">,</span> <span class="n">spectrum</span><span class="o">.</span><span class="n">axisCodes</span><span class="p">)</span>
+
+    <span class="c1"># as modifying the spectrum, spectrum needs to be the second argument of getAxisCodeMatchIndices</span>
+    <span class="n">spectrumReferencing</span><span class="p">[</span><span class="n">indices</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">spectrumReferencing</span><span class="p">[</span><span class="n">indices</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span> <span class="o">+</span> <span class="p">(</span><span class="n">newPosition</span> <span class="o">-</span> <span class="n">currentPosition</span><span class="p">))</span>
     <span class="n">spectrum</span><span class="o">.</span><span class="n">referenceValues</span> <span class="o">=</span> <span class="n">spectrumReferencing</span>
 
 
@@ -580,26 +604,73 @@
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Tuple</span>
 
 
-<div class="viewcode-block" id="getDefaultSpectrumColours"><a class="viewcode-back" href="../../../../ccpn/ccpn.core.lib.html#ccpn.core.lib.SpectrumLib.getDefaultSpectrumColours">[docs]</a><span class="k">def</span> <span class="nf">getDefaultSpectrumColours</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="s1">&#39;DataSource&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]:</span>
+<span class="k">def</span> <span class="nf">_getDefaultApiSpectrumColours</span><span class="p">(</span><span class="n">apiSpectrum</span><span class="p">:</span> <span class="s1">&#39;DataSource&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;Get the default colours from the core spectrum class</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># from ccpn.util.Colour import spectrumHexColours</span>
+    <span class="kn">from</span> <span class="nn">ccpn.ui.gui.guiSettings</span> <span class="kn">import</span> <span class="n">getColours</span><span class="p">,</span> <span class="n">SPECTRUM_HEXCOLOURS</span><span class="p">,</span> \
+        <span class="n">SPECTRUM_HEXDEFAULTCOLOURS</span><span class="p">,</span> <span class="n">CCPNGLWIDGET_BACKGROUND</span>
+    <span class="kn">from</span> <span class="nn">ccpn.util.Colour</span> <span class="kn">import</span> <span class="n">gray</span><span class="p">,</span> <span class="n">hexToRgb</span><span class="p">,</span> <span class="n">findNearestHex</span><span class="p">,</span> <span class="n">invertRGBHue</span><span class="p">,</span> <span class="n">rgbToHex</span>
+
+    <span class="n">dimensionCount</span> <span class="o">=</span> <span class="n">apiSpectrum</span><span class="o">.</span><span class="n">numDim</span>
+    <span class="n">serial</span> <span class="o">=</span> <span class="n">apiSpectrum</span><span class="o">.</span><span class="n">serial</span>
+    <span class="n">expSerial</span> <span class="o">=</span> <span class="n">apiSpectrum</span><span class="o">.</span><span class="n">experiment</span><span class="o">.</span><span class="n">serial</span>
+
+    <span class="n">spectrumHexColours</span> <span class="o">=</span> <span class="n">getColours</span><span class="p">()</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">SPECTRUM_HEXCOLOURS</span><span class="p">)</span>
+    <span class="n">spectrumHexDefaultColours</span> <span class="o">=</span> <span class="n">getColours</span><span class="p">()</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">SPECTRUM_HEXDEFAULTCOLOURS</span><span class="p">)</span>
+
+    <span class="c1"># use different colour lists for 1d and Nd</span>
+    <span class="k">if</span> <span class="n">dimensionCount</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="n">colorCount</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">spectrumHexColours</span><span class="p">)</span>
+        <span class="n">step</span> <span class="o">=</span> <span class="p">((</span><span class="n">colorCount</span> <span class="o">//</span> <span class="mi">2</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">//</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="n">kk</span> <span class="o">=</span> <span class="n">colorCount</span> <span class="o">//</span> <span class="mi">7</span>
+        <span class="n">index</span> <span class="o">=</span> <span class="n">expSerial</span> <span class="o">-</span> <span class="mi">1</span> <span class="o">+</span> <span class="n">step</span> <span class="o">*</span> <span class="p">(</span><span class="n">serial</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">posCol</span> <span class="o">=</span> <span class="n">spectrumHexColours</span><span class="p">[(</span><span class="n">kk</span> <span class="o">*</span> <span class="n">index</span> <span class="o">+</span> <span class="mi">10</span><span class="p">)</span> <span class="o">%</span> <span class="n">colorCount</span><span class="p">]</span>
+        <span class="n">negCol</span> <span class="o">=</span> <span class="n">spectrumHexColours</span><span class="p">[((</span><span class="n">kk</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">index</span> <span class="o">+</span> <span class="mi">10</span><span class="p">)</span> <span class="o">%</span> <span class="n">colorCount</span><span class="p">]</span>
+
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="c1"># try and get the colourPalette number from the preferences, otherwise use 0</span>
+            <span class="kn">from</span> <span class="nn">ccpn.framework.Application</span> <span class="kn">import</span> <span class="n">getApplication</span>
+
+            <span class="n">colourPalette</span> <span class="o">=</span> <span class="n">getApplication</span><span class="p">()</span><span class="o">.</span><span class="n">preferences</span><span class="o">.</span><span class="n">general</span><span class="o">.</span><span class="n">colourPalette</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">colourPalette</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="k">if</span> <span class="n">colourPalette</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="c1"># colours for Vicky :)</span>
+            <span class="n">colorCount</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">spectrumHexDefaultColours</span><span class="p">)</span>
+            <span class="n">step</span> <span class="o">=</span> <span class="p">((</span><span class="n">colorCount</span> <span class="o">//</span> <span class="mi">2</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">//</span> <span class="mi">2</span><span class="p">)</span>
+            <span class="n">index</span> <span class="o">=</span> <span class="n">expSerial</span> <span class="o">-</span> <span class="mi">1</span> <span class="o">+</span> <span class="n">step</span> <span class="o">*</span> <span class="p">(</span><span class="n">serial</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+            <span class="n">posCol</span> <span class="o">=</span> <span class="n">spectrumHexDefaultColours</span><span class="p">[(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">index</span><span class="p">)</span> <span class="o">%</span> <span class="n">colorCount</span><span class="p">]</span>
+            <span class="n">negCol</span> <span class="o">=</span> <span class="n">spectrumHexDefaultColours</span><span class="p">[(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">index</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">%</span> <span class="n">colorCount</span><span class="p">]</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># automatic colours</span>
+            <span class="n">colorCount</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">spectrumHexColours</span><span class="p">)</span>
+            <span class="n">step</span> <span class="o">=</span> <span class="p">((</span><span class="n">colorCount</span> <span class="o">//</span> <span class="mi">2</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">//</span> <span class="mi">2</span><span class="p">)</span>
+            <span class="n">kk</span> <span class="o">=</span> <span class="mi">11</span>  <span class="c1">#colorCount // 11</span>
+            <span class="n">index</span> <span class="o">=</span> <span class="n">expSerial</span> <span class="o">-</span> <span class="mi">1</span> <span class="o">+</span> <span class="n">step</span> <span class="o">*</span> <span class="p">(</span><span class="n">serial</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+            <span class="n">posCol</span> <span class="o">=</span> <span class="n">spectrumHexColours</span><span class="p">[(</span><span class="n">kk</span> <span class="o">*</span> <span class="n">index</span> <span class="o">+</span> <span class="mi">10</span><span class="p">)</span> <span class="o">%</span> <span class="n">colorCount</span><span class="p">]</span>
+
+            <span class="c1"># invert the colour by reversing the ycbcr palette</span>
+            <span class="n">rgbIn</span> <span class="o">=</span> <span class="n">hexToRgb</span><span class="p">(</span><span class="n">posCol</span><span class="p">)</span>
+            <span class="n">negRGB</span> <span class="o">=</span> <span class="n">invertRGBHue</span><span class="p">(</span><span class="o">*</span><span class="n">rgbIn</span><span class="p">)</span>
+            <span class="n">oppCol</span> <span class="o">=</span> <span class="n">rgbToHex</span><span class="p">(</span><span class="o">*</span><span class="n">negRGB</span><span class="p">)</span>
+            <span class="c1"># get the nearest one in the current colour list, so colourName exists</span>
+            <span class="n">negCol</span> <span class="o">=</span> <span class="n">findNearestHex</span><span class="p">(</span><span class="n">oppCol</span><span class="p">,</span> <span class="n">spectrumHexColours</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="p">(</span><span class="n">posCol</span><span class="p">,</span> <span class="n">negCol</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="getDefaultSpectrumColours"><a class="viewcode-back" href="../../../../ccpn/ccpn.core.lib.html#ccpn.core.lib.SpectrumLib.getDefaultSpectrumColours">[docs]</a><span class="k">def</span> <span class="nf">getDefaultSpectrumColours</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="s1">&#39;Spectrum&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]:</span>
     <span class="sd">&quot;&quot;&quot;Get default positivecontourcolour, negativecontourcolour for Spectrum</span>
 <span class="sd">    (calculated by hashing spectrum properties to avoid always getting the same colours</span>
 <span class="sd">    Currently matches getDefaultColours in dataSource that is set through the api</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="c1"># from ccpn.util.Colour import spectrumHexColours</span>
-    <span class="kn">from</span> <span class="nn">ccpn.ui.gui.guiSettings</span> <span class="kn">import</span> <span class="n">getColours</span><span class="p">,</span> <span class="n">getColourScheme</span><span class="p">,</span> <span class="n">SPECTRUM_HEXCOLOURS</span>
-
-    <span class="n">spectrumHexColours</span> <span class="o">=</span> <span class="n">getColours</span><span class="p">()</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">SPECTRUM_HEXCOLOURS</span><span class="p">)</span>
-    <span class="n">colorCount</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">spectrumHexColours</span><span class="p">)</span>
-    <span class="n">step</span> <span class="o">=</span> <span class="p">((</span><span class="n">colorCount</span> <span class="o">//</span> <span class="mi">2</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">//</span> <span class="mi">2</span><span class="p">)</span>
-    <span class="n">index</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">experiment</span><span class="o">.</span><span class="n">serial</span> <span class="o">-</span> <span class="mi">1</span> <span class="o">+</span> <span class="n">step</span> <span class="o">*</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_serial</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
-
-    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_numDim</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-        <span class="n">ii</span> <span class="o">=</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">index</span><span class="p">)</span> <span class="o">%</span> <span class="n">colorCount</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="n">ii</span> <span class="o">=</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">index</span><span class="p">)</span> <span class="o">%</span> <span class="n">colorCount</span>
-    <span class="c1">#</span>
-    <span class="k">return</span> <span class="p">(</span><span class="n">spectrumHexColours</span><span class="p">[</span><span class="n">ii</span><span class="p">],</span> <span class="n">spectrumHexColours</span><span class="p">[</span><span class="n">ii</span> <span class="o">+</span> <span class="mi">1</span><span class="p">])</span></div>
+    <span class="n">apiSpectrum</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span>
+    <span class="k">return</span> <span class="n">_getDefaultApiSpectrumColours</span><span class="p">(</span><span class="n">apiSpectrum</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="get1DdataInRange"><a class="viewcode-back" href="../../../../ccpn/ccpn.core.lib.html#ccpn.core.lib.SpectrumLib.get1DdataInRange">[docs]</a><span class="k">def</span> <span class="nf">get1DdataInRange</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">xRange</span><span class="p">):</span>
@@ -618,6 +689,310 @@
     <span class="n">y_filtered</span> <span class="o">=</span> <span class="n">y</span><span class="p">[</span><span class="n">x_filtered</span><span class="p">]</span>
 
     <span class="k">return</span> <span class="n">x_filtered</span><span class="p">,</span> <span class="n">y_filtered</span></div>
+
+
+<span class="k">def</span> <span class="nf">_recurseData</span><span class="p">(</span><span class="n">ii</span><span class="p">,</span> <span class="n">dataList</span><span class="p">,</span> <span class="n">startCondition</span><span class="p">,</span> <span class="n">endCondition</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Iterate over the dataArray, subdividing each iteration</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">data</span> <span class="ow">in</span> <span class="n">dataList</span><span class="p">:</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">data</span><span class="o">.</span><span class="n">size</span><span class="p">:</span>
+            <span class="k">continue</span>
+
+        <span class="c1"># calculate the noise values</span>
+        <span class="n">flatData</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
+
+        <span class="n">SD</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">flatData</span><span class="p">)</span>
+        <span class="nb">max</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">flatData</span><span class="p">)</span>
+        <span class="nb">min</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">flatData</span><span class="p">)</span>
+        <span class="n">mn</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">flatData</span><span class="p">)</span>
+        <span class="n">noiseLevel</span> <span class="o">=</span> <span class="n">mn</span> <span class="o">+</span> <span class="mf">3.0</span> <span class="o">*</span> <span class="n">SD</span>
+
+        <span class="c1"># print(&#39;&gt;&gt;&gt;iterate&#39;, ii, data.shape, SD, max, min, mn, noiseLevel, &#39;*&#39; if noiseLevel &gt; max else &#39;-&#39;)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">startCondition</span><span class="p">:</span>
+            <span class="n">startCondition</span><span class="p">[:]</span> <span class="o">=</span> <span class="p">[</span><span class="n">ii</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">SD</span><span class="p">,</span> <span class="nb">max</span><span class="p">,</span> <span class="nb">min</span><span class="p">,</span> <span class="n">mn</span><span class="p">,</span> <span class="n">noiseLevel</span><span class="p">]</span>
+            <span class="n">endCondition</span><span class="p">[:]</span> <span class="o">=</span> <span class="n">startCondition</span><span class="p">[:]</span>
+
+        <span class="k">if</span> <span class="n">SD</span> <span class="o">&lt;</span> <span class="n">endCondition</span><span class="p">[</span><span class="mi">2</span><span class="p">]:</span>
+            <span class="n">endCondition</span><span class="p">[:]</span> <span class="o">=</span> <span class="p">[</span><span class="n">ii</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">SD</span><span class="p">,</span> <span class="nb">max</span><span class="p">,</span> <span class="nb">min</span><span class="p">,</span> <span class="n">mn</span><span class="p">,</span> <span class="n">noiseLevel</span><span class="p">]</span>
+
+        <span class="c1"># stop iterating when all dimensions are &lt;= 64 elements</span>
+        <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">dim</span> <span class="o">&gt;</span> <span class="mi">64</span> <span class="k">for</span> <span class="n">dim</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">):</span>
+
+            <span class="n">newData</span> <span class="o">=</span> <span class="p">[</span><span class="n">data</span><span class="p">]</span>
+            <span class="k">for</span> <span class="n">jj</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">)):</span>
+                <span class="n">newData</span> <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">array_split</span><span class="p">(</span><span class="n">dd</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="n">jj</span><span class="p">)</span> <span class="k">for</span> <span class="n">dd</span> <span class="ow">in</span> <span class="n">newData</span><span class="p">]</span>
+                <span class="n">newData</span> <span class="o">=</span> <span class="p">[</span><span class="n">val</span> <span class="k">for</span> <span class="n">sublist</span> <span class="ow">in</span> <span class="n">newData</span> <span class="k">for</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">sublist</span><span class="p">]</span>
+
+            <span class="n">_recurseData</span><span class="p">(</span><span class="n">ii</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">newData</span><span class="p">,</span> <span class="n">startCondition</span><span class="p">,</span> <span class="n">endCondition</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">_setApiContourLevelsFromNoise</span><span class="p">(</span><span class="n">apiSpectrum</span><span class="p">,</span> <span class="n">setNoiseLevel</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+                                  <span class="n">setPositiveContours</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">setNegativeContours</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+                                  <span class="n">useSameMultiplier</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Calculate the noise level, base contour level and positive/negative multipliers for the given apiSpectrum</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">project</span> <span class="o">=</span> <span class="n">apiSpectrum</span><span class="o">.</span><span class="n">topObject</span>
+
+    <span class="c1"># the core objects should have been initialised at this point</span>
+    <span class="k">if</span> <span class="n">project</span> <span class="ow">and</span> <span class="n">apiSpectrum</span> <span class="ow">in</span> <span class="n">project</span><span class="o">.</span><span class="n">_data2Obj</span><span class="p">:</span>
+        <span class="n">spectrum</span> <span class="o">=</span> <span class="n">project</span><span class="o">.</span><span class="n">_data2Obj</span><span class="p">[</span><span class="n">apiSpectrum</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">spectrum</span><span class="o">.</span><span class="n">dimensionCount</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span> <span class="k">return</span>
+        <span class="n">setContourLevelsFromNoise</span><span class="p">(</span><span class="n">spectrum</span><span class="p">,</span> <span class="n">setNoiseLevel</span><span class="o">=</span><span class="n">setNoiseLevel</span><span class="p">,</span>
+                                  <span class="n">setPositiveContours</span><span class="o">=</span><span class="n">setPositiveContours</span><span class="p">,</span> <span class="n">setNegativeContours</span><span class="o">=</span><span class="n">setNegativeContours</span><span class="p">,</span>
+                                  <span class="n">useSameMultiplier</span><span class="o">=</span><span class="n">useSameMultiplier</span><span class="p">)</span>
+
+
+<span class="n">DEFAULTMULTIPLIER</span> <span class="o">=</span> <span class="mf">1.414214</span>
+<span class="n">DEFAULTLEVELS</span> <span class="o">=</span> <span class="mi">10</span>
+<span class="n">DEFAULTCONTOURBASE</span> <span class="o">=</span> <span class="mf">10000.0</span>
+
+
+<div class="viewcode-block" id="setContourLevelsFromNoise"><a class="viewcode-back" href="../../../../ccpn/ccpn.core.lib.html#ccpn.core.lib.SpectrumLib.setContourLevelsFromNoise">[docs]</a><span class="k">def</span> <span class="nf">setContourLevelsFromNoise</span><span class="p">(</span><span class="n">spectrum</span><span class="p">,</span> <span class="n">setNoiseLevel</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+                              <span class="n">setPositiveContours</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">setNegativeContours</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+                              <span class="n">useDefaultMultiplier</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">useDefaultLevels</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">useDefaultContourBase</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
+                              <span class="n">useSameMultiplier</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+                              <span class="n">defaultMultiplier</span> <span class="o">=</span> <span class="n">DEFAULTMULTIPLIER</span><span class="p">,</span> <span class="n">defaultLevels</span><span class="o">=</span><span class="n">DEFAULTLEVELS</span><span class="p">,</span> <span class="n">defaultContourBase</span><span class="o">=</span><span class="n">DEFAULTCONTOURBASE</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Calculate the noise level, base contour level and positive/negative multipliers for the given spectrum</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># parameter error checking</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">setNegativeContours</span><span class="p">,</span> <span class="nb">bool</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;setNoiseLevel is not boolean.&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">setPositiveContours</span><span class="p">,</span> <span class="nb">bool</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;setPositiveContours is not boolean.&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">setNegativeContours</span><span class="p">,</span> <span class="nb">bool</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;setNegativeContours is not boolean.&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">useDefaultMultiplier</span><span class="p">,</span> <span class="nb">bool</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;useDefaultMultiplier is not boolean.&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">useDefaultLevels</span><span class="p">,</span> <span class="nb">bool</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;useDefaultLevels is not boolean.&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">useDefaultContourBase</span><span class="p">,</span> <span class="nb">bool</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;useDefaultContourBase is not boolean.&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">useSameMultiplier</span><span class="p">,</span> <span class="nb">bool</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;useSameMultiplier is not boolean.&#39;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">defaultMultiplier</span><span class="p">,</span> <span class="nb">float</span><span class="p">)</span> <span class="ow">and</span> <span class="n">defaultMultiplier</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;defaultMultiplier is not a positive float.&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">defaultLevels</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> <span class="ow">and</span> <span class="n">defaultLevels</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;defaultLevels is not a positive int.&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">defaultContourBase</span><span class="p">,</span> <span class="nb">float</span><span class="p">)</span> <span class="ow">and</span> <span class="n">defaultContourBase</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;defaultContourBase is not a positive float.&#39;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">spectrum</span><span class="o">.</span><span class="n">dimensionCount</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">return</span>
+
+    <span class="c1"># exit if nothing set</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">setNoiseLevel</span> <span class="ow">or</span> <span class="n">setPositiveContours</span> <span class="ow">or</span> <span class="n">setNegativeContours</span><span class="p">):</span>
+        <span class="k">return</span>
+
+    <span class="c1"># get specLimits for all dimensions</span>
+    <span class="n">specLimits</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">spectrum</span><span class="o">.</span><span class="n">spectrumLimits</span><span class="p">)</span>
+    <span class="n">dims</span> <span class="o">=</span> <span class="n">spectrum</span><span class="o">.</span><span class="n">dimensionCount</span>
+    <span class="n">valsPerPoint</span> <span class="o">=</span> <span class="n">spectrum</span><span class="o">.</span><span class="n">valuesPerPoint</span>
+
+    <span class="c1"># set dimensions above 1 to just the centre of the spectrum +- 1/2 the values per point</span>
+    <span class="c1"># the ensures that at least 1 point is returned in each dimension</span>
+    <span class="k">for</span> <span class="n">ii</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">dims</span><span class="p">):</span>
+        <span class="n">k</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">specLimits</span><span class="p">[</span><span class="n">ii</span><span class="p">])</span>
+        <span class="n">specLimits</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">k</span> <span class="o">-</span> <span class="p">(</span><span class="n">valsPerPoint</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span> <span class="o">/</span> <span class="mi">2</span><span class="p">),</span> <span class="n">k</span> <span class="o">+</span> <span class="p">(</span><span class="n">valsPerPoint</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span> <span class="o">/</span> <span class="mi">2</span><span class="p">))</span>
+
+    <span class="n">axisCodeDict</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">((</span><span class="n">k</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">spectrum</span><span class="o">.</span><span class="n">axisCodes</span><span class="p">,</span> <span class="n">specLimits</span><span class="p">))</span>
+    <span class="c1"># exclusionBuffer = [1] * len(axisCodeDict)</span>
+
+    <span class="n">foundRegions</span> <span class="o">=</span> <span class="n">spectrum</span><span class="o">.</span><span class="n">getRegionData</span><span class="p">(</span><span class="n">minimumDimensionSize</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="o">**</span><span class="n">axisCodeDict</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">foundRegions</span><span class="p">:</span>
+
+        <span class="c1"># just use the first region</span>
+        <span class="k">for</span> <span class="n">region</span> <span class="ow">in</span> <span class="n">foundRegions</span><span class="p">[:</span><span class="mi">1</span><span class="p">]:</span>
+            <span class="n">dataArray</span><span class="p">,</span> <span class="n">intRegion</span><span class="p">,</span> <span class="o">*</span><span class="n">rest</span> <span class="o">=</span> <span class="n">region</span>
+
+            <span class="k">if</span> <span class="n">dataArray</span><span class="o">.</span><span class="n">size</span><span class="p">:</span>
+
+                <span class="c1"># iterate over the array to calculate noise at each level</span>
+                <span class="n">dataList</span> <span class="o">=</span> <span class="p">[</span><span class="n">dataArray</span><span class="p">]</span>
+                <span class="n">startCondition</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="n">endCondition</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="n">_recurseData</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">dataList</span><span class="p">,</span> <span class="n">startCondition</span><span class="p">,</span> <span class="n">endCondition</span><span class="p">)</span>
+
+                <span class="k">if</span> <span class="n">useDefaultLevels</span><span class="p">:</span>
+                    <span class="n">posLevels</span> <span class="o">=</span> <span class="n">defaultLevels</span>
+                    <span class="n">negLevels</span> <span class="o">=</span> <span class="n">defaultLevels</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="c1"># get from the spectrum</span>
+                    <span class="n">posLevels</span> <span class="o">=</span> <span class="n">spectrum</span><span class="o">.</span><span class="n">positiveContourCount</span>
+                    <span class="n">negLevels</span> <span class="o">=</span> <span class="n">spectrum</span><span class="o">.</span><span class="n">negativeContourCount</span>
+
+                <span class="k">if</span> <span class="n">useDefaultContourBase</span><span class="p">:</span>
+                    <span class="n">base</span> <span class="o">=</span> <span class="n">defaultContourBase</span>
+                    <span class="k">if</span> <span class="n">setNoiseLevel</span><span class="p">:</span>
+                        <span class="n">spectrum</span><span class="o">.</span><span class="n">noiseLevel</span> <span class="o">=</span> <span class="n">base</span>
+                <span class="k">else</span><span class="p">:</span>
+
+                    <span class="c1"># calculate the base levels</span>
+                    <span class="k">if</span> <span class="n">setNoiseLevel</span><span class="p">:</span>
+                        <span class="c1"># put the new values into the spectrum</span>
+                        <span class="n">base</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">endCondition</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span> <span class="o">+</span> <span class="mf">3.0</span> <span class="o">*</span> <span class="n">endCondition</span><span class="p">[</span><span class="mi">6</span><span class="p">])</span>  <span class="c1"># abs(mean) + (3 * noiseLevel)</span>
+                        <span class="n">spectrum</span><span class="o">.</span><span class="n">noiseLevel</span> <span class="o">=</span> <span class="n">base</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="c1"># get the noise from the spectrum</span>
+                        <span class="n">base</span> <span class="o">=</span> <span class="n">spectrum</span><span class="o">.</span><span class="n">noiseLevel</span>
+
+                <span class="k">if</span> <span class="n">useDefaultMultiplier</span><span class="p">:</span>
+                    <span class="c1"># use default as root2</span>
+                    <span class="n">posMult</span> <span class="o">=</span> <span class="n">negMult</span> <span class="o">=</span> <span class="n">defaultMultiplier</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="c1"># calculate multiplier to give contours across range of spectrum; trap base = 0</span>
+                    <span class="n">mx</span> <span class="o">=</span> <span class="n">startCondition</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span>  <span class="c1"># global array max</span>
+                    <span class="n">mn</span> <span class="o">=</span> <span class="n">startCondition</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span>  <span class="c1"># global array min</span>
+
+                    <span class="n">posMult</span> <span class="o">=</span> <span class="nb">pow</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">mx</span> <span class="o">/</span> <span class="n">base</span><span class="p">),</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">posLevels</span><span class="p">)</span> <span class="k">if</span> <span class="n">base</span> <span class="k">else</span> <span class="mf">0.0</span>
+                    <span class="k">if</span> <span class="n">useSameMultiplier</span><span class="p">:</span>
+                        <span class="n">negMult</span> <span class="o">=</span> <span class="n">posMult</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">negMult</span> <span class="o">=</span> <span class="nb">pow</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">mn</span> <span class="o">/</span> <span class="n">base</span><span class="p">),</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">negLevels</span><span class="p">)</span> <span class="k">if</span> <span class="n">base</span> <span class="k">else</span> <span class="mf">0.0</span>
+
+                <span class="k">if</span> <span class="n">setPositiveContours</span><span class="p">:</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">spectrum</span><span class="o">.</span><span class="n">positiveContourBase</span> <span class="o">=</span> <span class="n">base</span>         <span class="c1"># do</span>
+                        <span class="n">spectrum</span><span class="o">.</span><span class="n">positiveContourFactor</span> <span class="o">=</span> <span class="n">posMult</span>
+                    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">es</span><span class="p">:</span>
+
+                        <span class="c1"># set to defaults if an error occurs</span>
+                        <span class="n">spectrum</span><span class="o">.</span><span class="n">positiveContourBase</span> <span class="o">=</span> <span class="n">defaultContourBase</span>
+                        <span class="n">spectrum</span><span class="o">.</span><span class="n">positiveContourFactor</span> <span class="o">=</span> <span class="n">defaultMultiplier</span>
+                        <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;Error setting contour levels - </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">es</span><span class="p">))</span>
+
+                    <span class="n">spectrum</span><span class="o">.</span><span class="n">positiveContourCount</span> <span class="o">=</span> <span class="n">posLevels</span>
+
+                <span class="k">if</span> <span class="n">setNegativeContours</span><span class="p">:</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">spectrum</span><span class="o">.</span><span class="n">negativeContourBase</span> <span class="o">=</span> <span class="o">-</span><span class="n">base</span>
+                        <span class="n">spectrum</span><span class="o">.</span><span class="n">negativeContourFactor</span> <span class="o">=</span> <span class="n">negMult</span>
+                    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">es</span><span class="p">:</span>
+
+                        <span class="c1"># set to defaults if an error occurs</span>
+                        <span class="n">spectrum</span><span class="o">.</span><span class="n">negativeContourBase</span> <span class="o">=</span> <span class="o">-</span><span class="n">defaultContourBase</span>
+                        <span class="n">spectrum</span><span class="o">.</span><span class="n">negativeContourFactor</span> <span class="o">=</span> <span class="n">defaultMultiplier</span>
+                        <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;Error setting contour levels - </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">es</span><span class="p">))</span>
+
+                    <span class="n">spectrum</span><span class="o">.</span><span class="n">negativeContourCount</span> <span class="o">=</span> <span class="n">negLevels</span></div>
+
+<div class="viewcode-block" id="getContourLevelsFromNoise"><a class="viewcode-back" href="../../../../ccpn/ccpn.core.lib.html#ccpn.core.lib.SpectrumLib.getContourLevelsFromNoise">[docs]</a><span class="k">def</span> <span class="nf">getContourLevelsFromNoise</span><span class="p">(</span><span class="n">spectrum</span><span class="p">,</span> <span class="n">setNoiseLevel</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
+                              <span class="n">setPositiveContours</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">setNegativeContours</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
+                              <span class="n">useDefaultMultiplier</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">useDefaultLevels</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">useDefaultContourBase</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
+                              <span class="n">useSameMultiplier</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+                              <span class="n">defaultMultiplier</span> <span class="o">=</span> <span class="n">DEFAULTMULTIPLIER</span><span class="p">,</span> <span class="n">defaultLevels</span><span class="o">=</span><span class="n">DEFAULTLEVELS</span><span class="p">,</span> <span class="n">defaultContourBase</span><span class="o">=</span><span class="n">DEFAULTCONTOURBASE</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Calculate the noise level, base contour level and positive/negative multipliers for the given spectrum</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># parameter error checking</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">setNegativeContours</span><span class="p">,</span> <span class="nb">bool</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;setNoiseLevel is not boolean.&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">setPositiveContours</span><span class="p">,</span> <span class="nb">bool</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;setPositiveContours is not boolean.&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">setNegativeContours</span><span class="p">,</span> <span class="nb">bool</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;setNegativeContours is not boolean.&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">useDefaultMultiplier</span><span class="p">,</span> <span class="nb">bool</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;useDefaultMultiplier is not boolean.&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">useDefaultLevels</span><span class="p">,</span> <span class="nb">bool</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;useDefaultLevels is not boolean.&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">useDefaultContourBase</span><span class="p">,</span> <span class="nb">bool</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;useDefaultContourBase is not boolean.&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">useSameMultiplier</span><span class="p">,</span> <span class="nb">bool</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;useSameMultiplier is not boolean.&#39;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">defaultMultiplier</span><span class="p">,</span> <span class="nb">float</span><span class="p">)</span> <span class="ow">and</span> <span class="n">defaultMultiplier</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;defaultMultiplier is not a positive float.&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">defaultLevels</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> <span class="ow">and</span> <span class="n">defaultLevels</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;defaultLevels is not a positive int.&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">defaultContourBase</span><span class="p">,</span> <span class="nb">float</span><span class="p">)</span> <span class="ow">and</span> <span class="n">defaultContourBase</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;defaultContourBase is not a positive float.&#39;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">spectrum</span><span class="o">.</span><span class="n">dimensionCount</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">[</span><span class="bp">None</span><span class="p">]</span> <span class="o">*</span> <span class="mi">6</span>
+
+    <span class="c1"># # exit if nothing set</span>
+    <span class="c1"># if not (setNoiseLevel or setPositiveContours or setNegativeContours):</span>
+    <span class="c1">#     return [None] * 5</span>
+
+    <span class="c1"># get specLimits for all dimensions</span>
+    <span class="n">specLimits</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">spectrum</span><span class="o">.</span><span class="n">spectrumLimits</span><span class="p">)</span>
+    <span class="n">dims</span> <span class="o">=</span> <span class="n">spectrum</span><span class="o">.</span><span class="n">dimensionCount</span>
+    <span class="n">valsPerPoint</span> <span class="o">=</span> <span class="n">spectrum</span><span class="o">.</span><span class="n">valuesPerPoint</span>
+
+    <span class="c1"># set dimensions above 1 to just the centre of the spectrum +- 1/2 the values per point</span>
+    <span class="c1"># the ensures that at least 1 point is returned in each dimension</span>
+    <span class="k">for</span> <span class="n">ii</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">dims</span><span class="p">):</span>
+        <span class="n">k</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">specLimits</span><span class="p">[</span><span class="n">ii</span><span class="p">])</span>
+        <span class="n">specLimits</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">k</span> <span class="o">-</span> <span class="p">(</span><span class="n">valsPerPoint</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span> <span class="o">/</span> <span class="mi">2</span><span class="p">),</span> <span class="n">k</span> <span class="o">+</span> <span class="p">(</span><span class="n">valsPerPoint</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span> <span class="o">/</span> <span class="mi">2</span><span class="p">))</span>
+
+    <span class="n">axisCodeDict</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">((</span><span class="n">k</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">spectrum</span><span class="o">.</span><span class="n">axisCodes</span><span class="p">,</span> <span class="n">specLimits</span><span class="p">))</span>
+    <span class="c1"># exclusionBuffer = [1] * len(axisCodeDict)</span>
+
+    <span class="n">foundRegions</span> <span class="o">=</span> <span class="n">spectrum</span><span class="o">.</span><span class="n">getRegionData</span><span class="p">(</span><span class="n">minimumDimensionSize</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="o">**</span><span class="n">axisCodeDict</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">foundRegions</span><span class="p">:</span>
+
+        <span class="c1"># just use the first region</span>
+        <span class="k">for</span> <span class="n">region</span> <span class="ow">in</span> <span class="n">foundRegions</span><span class="p">[:</span><span class="mi">1</span><span class="p">]:</span>
+            <span class="n">dataArray</span><span class="p">,</span> <span class="n">intRegion</span><span class="p">,</span> <span class="o">*</span><span class="n">rest</span> <span class="o">=</span> <span class="n">region</span>
+
+            <span class="k">if</span> <span class="n">dataArray</span><span class="o">.</span><span class="n">size</span><span class="p">:</span>
+
+                <span class="c1"># iterate over the array to calculate noise at each level</span>
+                <span class="n">dataList</span> <span class="o">=</span> <span class="p">[</span><span class="n">dataArray</span><span class="p">]</span>
+                <span class="n">startCondition</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="n">endCondition</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="n">_recurseData</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">dataList</span><span class="p">,</span> <span class="n">startCondition</span><span class="p">,</span> <span class="n">endCondition</span><span class="p">)</span>
+
+                <span class="k">if</span> <span class="n">useDefaultLevels</span><span class="p">:</span>
+                    <span class="n">posLevels</span> <span class="o">=</span> <span class="n">defaultLevels</span>
+                    <span class="n">negLevels</span> <span class="o">=</span> <span class="n">defaultLevels</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="c1"># get from the spectrum</span>
+                    <span class="n">posLevels</span> <span class="o">=</span> <span class="n">spectrum</span><span class="o">.</span><span class="n">positiveContourCount</span>
+                    <span class="n">negLevels</span> <span class="o">=</span> <span class="n">spectrum</span><span class="o">.</span><span class="n">negativeContourCount</span>
+
+                <span class="k">if</span> <span class="n">useDefaultContourBase</span><span class="p">:</span>
+                    <span class="n">posBase</span> <span class="o">=</span> <span class="n">defaultContourBase</span>
+                    <span class="c1"># if setNoiseLevel:</span>
+                    <span class="c1">#     spectrum.noiseLevel = base</span>
+                <span class="k">else</span><span class="p">:</span>
+
+                    <span class="c1"># calculate the base levels</span>
+                    <span class="k">if</span> <span class="n">setNoiseLevel</span><span class="p">:</span>
+                        <span class="c1"># put the new values into the spectrum</span>
+                        <span class="n">posBase</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">endCondition</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span> <span class="o">+</span> <span class="mf">3.0</span> <span class="o">*</span> <span class="n">endCondition</span><span class="p">[</span><span class="mi">6</span><span class="p">])</span>  <span class="c1"># abs(mean) + (3 * noiseLevel)</span>
+                        <span class="c1"># spectrum.noiseLevel = base</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="c1"># get the noise from the spectrum</span>
+                        <span class="n">posBase</span> <span class="o">=</span> <span class="n">spectrum</span><span class="o">.</span><span class="n">noiseLevel</span>
+                <span class="n">negBase</span> <span class="o">=</span> <span class="o">-</span><span class="n">posBase</span>
+
+                <span class="k">if</span> <span class="n">useDefaultMultiplier</span><span class="p">:</span>
+                    <span class="c1"># use default as root2</span>
+                    <span class="n">posMult</span> <span class="o">=</span> <span class="n">negMult</span> <span class="o">=</span> <span class="n">defaultMultiplier</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="c1"># calculate multiplier to give contours across range of spectrum; trap base = 0</span>
+                    <span class="n">mx</span> <span class="o">=</span> <span class="n">startCondition</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span>  <span class="c1"># global array max</span>
+                    <span class="n">mn</span> <span class="o">=</span> <span class="n">startCondition</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span>  <span class="c1"># global array min</span>
+
+                    <span class="n">posMult</span> <span class="o">=</span> <span class="nb">pow</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">mx</span> <span class="o">/</span> <span class="n">posBase</span><span class="p">),</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">posLevels</span><span class="p">)</span> <span class="k">if</span> <span class="n">posBase</span> <span class="k">else</span> <span class="mf">0.0</span>
+                    <span class="k">if</span> <span class="n">useSameMultiplier</span><span class="p">:</span>
+                        <span class="n">negMult</span> <span class="o">=</span> <span class="n">posMult</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">negMult</span> <span class="o">=</span> <span class="nb">pow</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">mn</span> <span class="o">/</span> <span class="n">negBase</span><span class="p">),</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">negLevels</span><span class="p">)</span> <span class="k">if</span> <span class="n">negBase</span> <span class="k">else</span> <span class="mf">0.0</span>
+
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">setPositiveContours</span><span class="p">:</span>
+                    <span class="n">posBase</span> <span class="o">=</span> <span class="n">posMult</span> <span class="o">=</span> <span class="n">posLevels</span> <span class="o">=</span>  <span class="bp">None</span>
+
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">setNegativeContours</span><span class="p">:</span>
+                    <span class="n">negBase</span> <span class="o">=</span> <span class="n">negMult</span> <span class="o">=</span> <span class="n">negLevels</span> <span class="o">=</span> <span class="bp">None</span>
+
+                <span class="k">return</span> <span class="n">posBase</span><span class="p">,</span> <span class="n">negBase</span><span class="p">,</span> <span class="n">posMult</span><span class="p">,</span> <span class="n">negMult</span><span class="p">,</span> <span class="n">posLevels</span><span class="p">,</span> <span class="n">negLevels</span>
+
+    <span class="k">return</span> <span class="p">[</span><span class="bp">None</span><span class="p">]</span> <span class="o">*</span> <span class="mi">6</span></div>
 </pre></div>
 
           </div>

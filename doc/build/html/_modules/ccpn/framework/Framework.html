@@ -61,7 +61,7 @@
 <span class="c1">#=========================================================================================</span>
 <span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: Wayne Boucher $&quot;</span>
 <span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2017-07-07 16:32:36 +0100 (Fri, July 07, 2017) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b5 $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.0 $&quot;</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Created</span>
 <span class="c1">#=========================================================================================</span>
@@ -352,10 +352,11 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_getUserPrefs</span><span class="p">()</span>
 
         <span class="c1"># set the preferences if added from the commandline</span>
-        <span class="c1"># if self.args.darkColourScheme:</span>
-        <span class="c1">#     self.preferences.general.colourScheme = &#39;dark&#39;</span>
-        <span class="c1"># elif self.args.lightColourScheme:</span>
-        <span class="c1">#     self.preferences.general.colourScheme = &#39;light&#39;</span>
+        <span class="c1"># this causes errors when running the nose_tests</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">args</span><span class="o">.</span><span class="n">darkColourScheme</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">preferences</span><span class="o">.</span><span class="n">general</span><span class="o">.</span><span class="n">colourScheme</span> <span class="o">=</span> <span class="s1">&#39;dark&#39;</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">args</span><span class="o">.</span><span class="n">lightColourScheme</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">preferences</span><span class="o">.</span><span class="n">general</span><span class="o">.</span><span class="n">colourScheme</span> <span class="o">=</span> <span class="s1">&#39;light&#39;</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_registrationDict</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_setLanguage</span><span class="p">()</span>
@@ -612,18 +613,20 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">layout</span>
 
 <div class="viewcode-block" id="Framework.saveLayout"><a class="viewcode-back" href="../../../ccpn/ccpn.framework.html#ccpn.framework.Framework.Framework.saveLayout">[docs]</a>    <span class="k">def</span> <span class="nf">saveLayout</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="n">Layout</span><span class="o">.</span><span class="n">updateSavedLayout</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">mainWindow</span><span class="p">)</span></div>
+        <span class="n">Layout</span><span class="o">.</span><span class="n">updateSavedLayout</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">mainWindow</span><span class="p">)</span>
+        <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Layout saved&#39;</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="Framework.saveLayoutAs"><a class="viewcode-back" href="../../../ccpn/ccpn.framework.html#ccpn.framework.Framework.Framework.saveLayoutAs">[docs]</a>    <span class="k">def</span> <span class="nf">saveLayoutAs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">fp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getSaveLayoutPath</span><span class="p">()</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">Layout</span><span class="o">.</span><span class="n">saveLayoutToJson</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">mainWindow</span><span class="p">,</span> <span class="n">jsonFilePath</span><span class="o">=</span><span class="n">fp</span><span class="p">)</span>
+            <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Layout saved&#39;</span><span class="p">)</span>
         <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
             <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;Impossible to save layout. </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">e</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="Framework.restoreLastSavedLayout"><a class="viewcode-back" href="../../../ccpn/ccpn.framework.html#ccpn.framework.Framework.Framework.restoreLastSavedLayout">[docs]</a>    <span class="k">def</span> <span class="nf">restoreLastSavedLayout</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">moduleArea</span><span class="o">.</span><span class="n">_closeAll</span><span class="p">()</span>
-        <span class="n">Layout</span><span class="o">.</span><span class="n">restoreLayout</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">mainWindow</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">layout</span><span class="p">)</span></div>
+        <span class="n">Layout</span><span class="o">.</span><span class="n">restoreLayout</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">mainWindow</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">layout</span><span class="p">,</span> <span class="n">restoreSpectrumDisplay</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="Framework.restoreLayoutFromFile"><a class="viewcode-back" href="../../../ccpn/ccpn.framework.html#ccpn.framework.Framework.Framework.restoreLayoutFromFile">[docs]</a>    <span class="k">def</span> <span class="nf">restoreLayoutFromFile</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">jsonFilePath</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">jsonFilePath</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
@@ -638,7 +641,7 @@
         <span class="k">try</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">moduleArea</span><span class="o">.</span><span class="n">_closeAll</span><span class="p">()</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_getUserLayout</span><span class="p">(</span><span class="n">jsonFilePath</span><span class="p">)</span>
-            <span class="n">Layout</span><span class="o">.</span><span class="n">restoreLayout</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">mainWindow</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">layout</span><span class="p">)</span>
+            <span class="n">Layout</span><span class="o">.</span><span class="n">restoreLayout</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">mainWindow</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">layout</span><span class="p">,</span> <span class="n">restoreSpectrumDisplay</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
         <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
             <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;Impossible to restore layout. </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">e</span><span class="p">)</span></div>
 
@@ -782,9 +785,17 @@
             <span class="n">strips</span> <span class="o">=</span> <span class="n">spectrumDisplay</span><span class="o">.</span><span class="n">orderedStrips</span>
             <span class="k">for</span> <span class="n">si</span><span class="p">,</span> <span class="n">strip</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">strips</span><span class="p">):</span>
 
-                <span class="c1"># move to the correct place in the widget</span>
-                <span class="n">stripIndex</span> <span class="o">=</span> <span class="n">strips</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">strip</span><span class="p">)</span>
-                <span class="n">spectrumDisplay</span><span class="o">.</span><span class="n">stripFrame</span><span class="o">.</span><span class="n">layout</span><span class="p">()</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">strip</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">si</span><span class="p">)</span>  <span class="c1">#stripIndex)</span>
+                <span class="c1"># temporary to catch bad strips from ordering bug</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">strip</span><span class="p">:</span>
+                    <span class="k">continue</span>
+
+                <span class="c1"># move to the correct place in the widget - check stripDirection to display as row or column</span>
+                <span class="k">if</span> <span class="n">spectrumDisplay</span><span class="o">.</span><span class="n">stripArrangement</span> <span class="o">==</span> <span class="s1">&#39;Y&#39;</span><span class="p">:</span>
+                    <span class="n">spectrumDisplay</span><span class="o">.</span><span class="n">stripFrame</span><span class="o">.</span><span class="n">layout</span><span class="p">()</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">strip</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">si</span><span class="p">)</span>  <span class="c1">#stripIndex)</span>
+                <span class="k">elif</span> <span class="n">spectrumDisplay</span><span class="o">.</span><span class="n">stripArrangement</span> <span class="o">==</span> <span class="s1">&#39;X&#39;</span><span class="p">:</span>
+                    <span class="n">spectrumDisplay</span><span class="o">.</span><span class="n">stripFrame</span><span class="o">.</span><span class="n">layout</span><span class="p">()</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">strip</span><span class="p">,</span> <span class="n">si</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>  <span class="c1">#stripIndex)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;Strip direction is not defined for spectrumDisplay: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">spectrumDisplay</span><span class="p">))</span>
 
                 <span class="k">if</span> <span class="ow">not</span> <span class="n">spectrumDisplay</span><span class="o">.</span><span class="n">isGrouped</span><span class="p">:</span>
 
@@ -1184,17 +1195,19 @@
             <span class="p">(</span><span class="s2">&quot;Save&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">saveProject</span><span class="p">,</span> <span class="p">[(</span><span class="s1">&#39;shortcut&#39;</span><span class="p">,</span> <span class="s1">&#39;⌃s&#39;</span><span class="p">)]),</span>  <span class="c1"># Unicode U+2303, NOT the carrot on your keyboard.</span>
             <span class="p">(</span><span class="s2">&quot;Save As...&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">saveProjectAs</span><span class="p">,</span> <span class="p">[(</span><span class="s1">&#39;shortcut&#39;</span><span class="p">,</span> <span class="s1">&#39;sa&#39;</span><span class="p">)]),</span>
             <span class="p">(),</span>
-            <span class="p">(</span><span class="s2">&quot;NEF&quot;</span><span class="p">,</span> <span class="p">((</span><span class="s2">&quot;Import Nef File&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_importNef</span><span class="p">,</span> <span class="p">[(</span><span class="s1">&#39;shortcut&#39;</span><span class="p">,</span> <span class="s1">&#39;in&#39;</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;enabled&#39;</span><span class="p">,</span> <span class="bp">True</span><span class="p">)]),</span>
-                     <span class="p">(</span><span class="s2">&quot;Export Nef File&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_exportNEF</span><span class="p">,</span> <span class="p">[(</span><span class="s1">&#39;shortcut&#39;</span><span class="p">,</span> <span class="s1">&#39;ex&#39;</span><span class="p">)])</span>
-                     <span class="p">)),</span>
+            <span class="p">(</span><span class="s2">&quot;Import&quot;</span><span class="p">,</span> <span class="p">((</span><span class="s2">&quot;Nef File&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_importNef</span><span class="p">,</span> <span class="p">[(</span><span class="s1">&#39;shortcut&#39;</span><span class="p">,</span> <span class="s1">&#39;in&#39;</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;enabled&#39;</span><span class="p">,</span> <span class="bp">True</span><span class="p">)]),</span>
+                        <span class="p">(</span><span class="s2">&quot;NmrStar File&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_loadNMRStarFile</span><span class="p">,</span> <span class="p">[(</span><span class="s1">&#39;shortcut&#39;</span><span class="p">,</span> <span class="s1">&#39;bi&#39;</span><span class="p">)]),</span>
+                        <span class="p">)),</span>
+            <span class="p">(</span><span class="s2">&quot;Export&quot;</span><span class="p">,</span> <span class="p">((</span><span class="s2">&quot;Nef File&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_exportNEF</span><span class="p">,</span> <span class="p">[(</span><span class="s1">&#39;shortcut&#39;</span><span class="p">,</span> <span class="s1">&#39;ex&#39;</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;enabled&#39;</span><span class="p">,</span> <span class="bp">True</span><span class="p">)]),</span>
+                        <span class="p">)),</span>
             <span class="p">(),</span>
-            <span class="p">(),</span>
-            <span class="p">(</span><span class="s2">&quot;Layout&quot;</span><span class="p">,</span> <span class="p">((</span><span class="s2">&quot;Save&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">saveLayout</span><span class="p">,</span> <span class="p">[(</span><span class="s1">&#39;enabled&#39;</span><span class="p">,</span> <span class="bp">False</span><span class="p">)]),</span>
-                        <span class="p">(</span><span class="s2">&quot;Save as...&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">saveLayoutAs</span><span class="p">,</span> <span class="p">[(</span><span class="s1">&#39;enabled&#39;</span><span class="p">,</span> <span class="bp">False</span><span class="p">)]),</span>
-                        <span class="p">(</span><span class="s2">&quot;Restore last&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">restoreLastSavedLayout</span><span class="p">,</span> <span class="p">[(</span><span class="s1">&#39;enabled&#39;</span><span class="p">,</span> <span class="bp">False</span><span class="p">)]),</span>
-                        <span class="p">(</span><span class="s2">&quot;Restore from file...&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">restoreLayoutFromFile</span><span class="p">,</span> <span class="p">[(</span><span class="s1">&#39;enabled&#39;</span><span class="p">,</span> <span class="bp">False</span><span class="p">)]),</span>
+            <span class="p">(</span><span class="s2">&quot;Layout&quot;</span><span class="p">,</span> <span class="p">((</span><span class="s2">&quot;Save&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">saveLayout</span><span class="p">,</span> <span class="p">[(</span><span class="s1">&#39;enabled&#39;</span><span class="p">,</span> <span class="bp">True</span><span class="p">)]),</span>
+                        <span class="p">(</span><span class="s2">&quot;Save as...&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">saveLayoutAs</span><span class="p">,</span> <span class="p">[(</span><span class="s1">&#39;enabled&#39;</span><span class="p">,</span> <span class="bp">True</span><span class="p">)]),</span>
                         <span class="p">(),</span>
-                        <span class="p">(</span><span class="s2">&quot;Open pre-defined...&quot;</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="p">[(</span><span class="s1">&#39;enabled&#39;</span><span class="p">,</span> <span class="bp">False</span><span class="p">)]),</span>
+                        <span class="p">(</span><span class="s2">&quot;Restore last&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">restoreLastSavedLayout</span><span class="p">,</span> <span class="p">[(</span><span class="s1">&#39;enabled&#39;</span><span class="p">,</span> <span class="bp">True</span><span class="p">)]),</span>
+                        <span class="p">(</span><span class="s2">&quot;Restore from file...&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">restoreLayoutFromFile</span><span class="p">,</span> <span class="p">[(</span><span class="s1">&#39;enabled&#39;</span><span class="p">,</span> <span class="bp">True</span><span class="p">)]),</span>
+                        <span class="p">(),</span>
+                        <span class="p">(</span><span class="s2">&quot;Open pre-defined&quot;</span><span class="p">,</span>  <span class="p">()),</span>
 
                         <span class="p">)),</span>
             <span class="p">(),</span>
@@ -1212,7 +1225,7 @@
                    <span class="p">))</span>
 
         <span class="n">ms</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="s1">&#39;Spectrum&#39;</span><span class="p">,</span> <span class="p">[</span>
-            <span class="p">(</span><span class="s2">&quot;Load Spectrum...&quot;</span><span class="p">,</span> <span class="k">lambda</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_loadDataFromMenu</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="s1">&#39;Load Spectrum&#39;</span><span class="p">),</span> <span class="p">[(</span><span class="s1">&#39;shortcut&#39;</span><span class="p">,</span> <span class="s1">&#39;ls&#39;</span><span class="p">)]),</span>
+            <span class="p">(</span><span class="s2">&quot;Load Spectra...&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">loadSpectra</span><span class="p">,</span> <span class="p">[(</span><span class="s1">&#39;shortcut&#39;</span><span class="p">,</span> <span class="s1">&#39;ls&#39;</span><span class="p">)]),</span>
             <span class="p">(),</span>
             <span class="p">(</span><span class="s2">&quot;Spectrum Groups...&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">showSpectrumGroupsPopup</span><span class="p">,</span> <span class="p">[(</span><span class="s1">&#39;shortcut&#39;</span><span class="p">,</span> <span class="s1">&#39;ss&#39;</span><span class="p">)]),</span>
             <span class="p">(</span><span class="s2">&quot;Set Experiment Types...&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">showExperimentTypePopup</span><span class="p">,</span> <span class="p">[(</span><span class="s1">&#39;shortcut&#39;</span><span class="p">,</span> <span class="s1">&#39;et&#39;</span><span class="p">)]),</span>
@@ -1223,6 +1236,8 @@
                             <span class="p">)),</span>
             <span class="p">(</span><span class="s2">&quot;Copy PeakList...&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">showCopyPeakListPopup</span><span class="p">,</span> <span class="p">[(</span><span class="s1">&#39;shortcut&#39;</span><span class="p">,</span> <span class="s1">&#39;cl&#39;</span><span class="p">)]),</span>
             <span class="p">(</span><span class="s2">&quot;Copy Peaks...&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">showCopyPeaks</span><span class="p">,</span> <span class="p">[(</span><span class="s1">&#39;shortcut&#39;</span><span class="p">,</span> <span class="s1">&#39;cp&#39;</span><span class="p">)]),</span>
+            <span class="p">(</span><span class="s2">&quot;Estimate Volumes...&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">showEstimateVolumesPopup</span><span class="p">,</span> <span class="p">[(</span><span class="s1">&#39;shortcut&#39;</span><span class="p">,</span> <span class="s1">&#39;ev&#39;</span><span class="p">)]),</span>
+            <span class="p">(),</span>
             <span class="p">(</span><span class="s2">&quot;Make Strip Plot...&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">makeStripPlotPopup</span><span class="p">,</span> <span class="p">[(</span><span class="s1">&#39;shortcut&#39;</span><span class="p">,</span> <span class="s1">&#39;sp&#39;</span><span class="p">)]),</span>
 
             <span class="p">(),</span>
@@ -1249,7 +1264,7 @@
             <span class="p">(</span><span class="s2">&quot;NmrResidue Table&quot;</span><span class="p">,</span> <span class="n">partial</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">showNmrResidueTable</span><span class="p">,</span> <span class="n">selectFirstItem</span><span class="o">=</span><span class="bp">True</span><span class="p">),</span> <span class="p">[(</span><span class="s1">&#39;shortcut&#39;</span><span class="p">,</span> <span class="s1">&#39;nt&#39;</span><span class="p">)]),</span>
             <span class="c1"># (&quot;Structure Table&quot;, partial(self.showStructureTable, selectFirstItem=True), [(&#39;shortcut&#39;, &#39;st&#39;)]),</span>
             <span class="p">(</span><span class="s2">&quot;Residue Table&quot;</span><span class="p">,</span> <span class="n">partial</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">showResidueTable</span><span class="p">,</span> <span class="n">selectFirstItem</span><span class="o">=</span><span class="bp">True</span><span class="p">)),</span>
-            <span class="p">(</span><span class="s2">&quot;Peak Table&quot;</span><span class="p">,</span> <span class="n">partial</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">showPeakTable</span><span class="p">,</span> <span class="n">selectFirstItem</span><span class="o">=</span><span class="bp">True</span><span class="p">),</span> <span class="p">[(</span><span class="s1">&#39;shortcut&#39;</span><span class="p">,</span> <span class="s1">&#39;lt&#39;</span><span class="p">)]),</span>
+            <span class="p">(</span><span class="s2">&quot;Peak Table&quot;</span><span class="p">,</span> <span class="n">partial</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">showPeakTable</span><span class="p">,</span> <span class="n">selectFirstItem</span><span class="o">=</span><span class="bp">True</span><span class="p">),</span> <span class="p">[(</span><span class="s1">&#39;shortcut&#39;</span><span class="p">,</span> <span class="s1">&#39;pt&#39;</span><span class="p">)]),</span>
             <span class="p">(</span><span class="s2">&quot;Integral Table&quot;</span><span class="p">,</span> <span class="n">partial</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">showIntegralTable</span><span class="p">,</span> <span class="n">selectFirstItem</span><span class="o">=</span><span class="bp">True</span><span class="p">),</span> <span class="p">[(</span><span class="s1">&#39;shortcut&#39;</span><span class="p">,</span> <span class="s1">&#39;it&#39;</span><span class="p">)]),</span>
             <span class="p">(</span><span class="s2">&quot;Multiplet Table&quot;</span><span class="p">,</span> <span class="n">partial</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">showMultipletTable</span><span class="p">,</span> <span class="n">selectFirstItem</span><span class="o">=</span><span class="bp">True</span><span class="p">),</span> <span class="p">[(</span><span class="s1">&#39;shortcut&#39;</span><span class="p">,</span> <span class="s1">&#39;mt&#39;</span><span class="p">)]),</span>
             <span class="p">(</span><span class="s2">&quot;Restraint Table&quot;</span><span class="p">,</span> <span class="n">partial</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">showRestraintTable</span><span class="p">,</span> <span class="n">selectFirstItem</span><span class="o">=</span><span class="bp">True</span><span class="p">),</span> <span class="p">[(</span><span class="s1">&#39;shortcut&#39;</span><span class="p">,</span> <span class="s1">&#39;rt&#39;</span><span class="p">)]),</span>
@@ -1270,15 +1285,17 @@
             <span class="c1">#                                               ]),</span>
             <span class="p">(),</span>
             <span class="p">(</span><span class="s2">&quot;Current&quot;</span><span class="p">,</span> <span class="p">((</span><span class="s2">&quot;Show/Hide Toolbar&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">toggleToolbar</span><span class="p">,</span> <span class="p">[(</span><span class="s1">&#39;shortcut&#39;</span><span class="p">,</span> <span class="s1">&#39;tb&#39;</span><span class="p">)]),</span>
+                         <span class="p">(</span><span class="s2">&quot;Show/Hide Spectrum Toolbar&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">toggleSpectrumToolbar</span><span class="p">,</span> <span class="p">[(</span><span class="s1">&#39;shortcut&#39;</span><span class="p">,</span> <span class="s1">&#39;sb&#39;</span><span class="p">)]),</span>
                          <span class="p">(</span><span class="s2">&quot;Show/Hide Phasing Console&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">togglePhaseConsole</span><span class="p">,</span> <span class="p">[(</span><span class="s1">&#39;shortcut&#39;</span><span class="p">,</span> <span class="s1">&#39;pc&#39;</span><span class="p">)]),</span>
                          <span class="p">(),</span>
                          <span class="p">(</span><span class="s2">&quot;Set Zoom...&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_setZoomPopup</span><span class="p">,</span> <span class="p">[(</span><span class="s1">&#39;shortcut&#39;</span><span class="p">,</span> <span class="s1">&#39;sz&#39;</span><span class="p">)]),</span>
                          <span class="p">(</span><span class="s2">&quot;Reset Zoom&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">resetZoom</span><span class="p">,</span> <span class="p">[(</span><span class="s1">&#39;shortcut&#39;</span><span class="p">,</span> <span class="s1">&#39;rz&#39;</span><span class="p">)]),</span>
                          <span class="p">(),</span>
                          <span class="p">(</span><span class="s2">&quot;New SpectrumDisplay with strip&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">copyStrip</span><span class="p">,</span> <span class="p">[]),</span>
-                         <span class="p">(</span><span class="s2">&quot;Flip X-Y Axis&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">flipXYAxis</span><span class="p">,</span> <span class="p">[(</span><span class="s1">&#39;shortcut&#39;</span><span class="p">,</span> <span class="s1">&#39;xy&#39;</span><span class="p">)]),</span>
-                         <span class="p">(</span><span class="s2">&quot;Flip X-Z Axis&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">flipXZAxis</span><span class="p">,</span> <span class="p">[(</span><span class="s1">&#39;shortcut&#39;</span><span class="p">,</span> <span class="s1">&#39;xz&#39;</span><span class="p">)]),</span>
-                         <span class="p">(</span><span class="s2">&quot;Flip Y-Z Axis&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">flipYZAxis</span><span class="p">,</span> <span class="p">[(</span><span class="s1">&#39;shortcut&#39;</span><span class="p">,</span> <span class="s1">&#39;yz&#39;</span><span class="p">)])</span>
+                         <span class="p">(</span><span class="s2">&quot;Copy with X-Y Axes flipped&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">flipXYAxis</span><span class="p">,</span> <span class="p">[(</span><span class="s1">&#39;shortcut&#39;</span><span class="p">,</span> <span class="s1">&#39;xy&#39;</span><span class="p">)]),</span>
+                         <span class="p">(</span><span class="s2">&quot;Copy with X-Z Axes flipped&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">flipXZAxis</span><span class="p">,</span> <span class="p">[(</span><span class="s1">&#39;shortcut&#39;</span><span class="p">,</span> <span class="s1">&#39;xz&#39;</span><span class="p">)]),</span>
+                         <span class="p">(</span><span class="s2">&quot;Copy with Y-Z Axes flipped&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">flipYZAxis</span><span class="p">,</span> <span class="p">[(</span><span class="s1">&#39;shortcut&#39;</span><span class="p">,</span> <span class="s1">&#39;yz&#39;</span><span class="p">)]),</span>
+                         <span class="p">(</span><span class="s2">&quot;Copy with Axes Flipped...&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">flipArbitraryAxis</span><span class="p">,</span> <span class="p">[(</span><span class="s1">&#39;shortcut&#39;</span><span class="p">,</span> <span class="s1">&#39;fa&#39;</span><span class="p">)]),</span>
                          <span class="p">)),</span>
             <span class="p">(),</span>
             <span class="p">(</span><span class="s2">&quot;Show/hide Modules&quot;</span><span class="p">,</span> <span class="p">([</span>
@@ -1384,6 +1401,9 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_initialiseProject</span><span class="p">(</span><span class="n">project</span><span class="p">)</span>
         <span class="n">project</span><span class="o">.</span><span class="n">_resetUndo</span><span class="p">(</span><span class="n">debug</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">level</span> <span class="o">&lt;=</span> <span class="n">Logging</span><span class="o">.</span><span class="n">DEBUG2</span><span class="p">,</span> <span class="n">application</span><span class="o">=</span><span class="bp">self</span><span class="p">)</span>
 
+        <span class="c1"># 20190424:ED reset the flag so that spectrumDisplays open correctly again</span>
+        <span class="n">project</span><span class="o">.</span><span class="n">_isNew</span> <span class="o">=</span> <span class="bp">None</span>
+
         <span class="k">return</span> <span class="n">project</span></div>
 
 <div class="viewcode-block" id="Framework.openProject"><a class="viewcode-back" href="../../../ccpn/ccpn.framework.html#ccpn.framework.Framework.Framework.openProject">[docs]</a>    <span class="k">def</span> <span class="nf">openProject</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
@@ -1417,7 +1437,7 @@
         <span class="n">dataType</span><span class="p">,</span> <span class="n">subType</span><span class="p">,</span> <span class="n">usePath</span> <span class="o">=</span> <span class="n">ioFormats</span><span class="o">.</span><span class="n">analyseUrl</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">dataType</span> <span class="o">==</span> <span class="s1">&#39;Project&#39;</span> <span class="ow">and</span> <span class="n">subType</span> <span class="ow">in</span> <span class="p">(</span><span class="n">ioFormats</span><span class="o">.</span><span class="n">CCPN</span><span class="p">,</span>
                                                  <span class="n">ioFormats</span><span class="o">.</span><span class="n">NEF</span><span class="p">,</span>
-                                                 <span class="n">ioFormats</span><span class="o">.</span><span class="n">NMRSTAR</span><span class="p">,</span>
+                                                 <span class="c1"># ioFormats.NMRSTAR,</span>
                                                  <span class="n">ioFormats</span><span class="o">.</span><span class="n">SPARKY</span><span class="p">):</span>
 
             <span class="c1"># if subType != ioFormats.NEF:    # ejb - only reset project for CCPN files</span>
@@ -1438,10 +1458,10 @@
                 <span class="n">project</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_loadNefFile</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">makeNewProject</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>  <span class="c1"># RHF - new by default</span>
                 <span class="n">project</span><span class="o">.</span><span class="n">_resetUndo</span><span class="p">(</span><span class="n">debug</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">level</span> <span class="o">&lt;=</span> <span class="n">Logging</span><span class="o">.</span><span class="n">DEBUG2</span><span class="p">,</span> <span class="n">application</span><span class="o">=</span><span class="bp">self</span><span class="p">)</span>
 
-            <span class="k">elif</span> <span class="n">subType</span> <span class="o">==</span> <span class="n">ioFormats</span><span class="o">.</span><span class="n">NMRSTAR</span><span class="p">:</span>
-                <span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;==&gt; Loading </span><span class="si">%s</span><span class="s1"> NMRStar project &quot;</span><span class="si">%s</span><span class="s1">&quot;</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">subType</span><span class="p">,</span> <span class="n">path</span><span class="p">))</span>
-                <span class="n">project</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_loadNMRStarFile</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">makeNewProject</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>  <span class="c1"># RHF - new by default</span>
-                <span class="n">project</span><span class="o">.</span><span class="n">_resetUndo</span><span class="p">(</span><span class="n">debug</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">level</span> <span class="o">&lt;=</span> <span class="n">Logging</span><span class="o">.</span><span class="n">DEBUG2</span><span class="p">,</span> <span class="n">application</span><span class="o">=</span><span class="bp">self</span><span class="p">)</span>
+            <span class="c1"># elif subType == ioFormats.NMRSTAR: This is all Broken!</span>
+            <span class="c1">#     sys.stderr.write(&#39;==&gt; Loading %s NMRStar project &quot;%s&quot;\n&#39; % (subType, path))</span>
+            <span class="c1">#     project = self._loadNMRStarFile(path, makeNewProject=True)  # RHF - new by default</span>
+            <span class="c1">#     project._resetUndo(debug=self.level &lt;= Logging.DEBUG2, application=self)</span>
 
             <span class="k">elif</span> <span class="n">subType</span> <span class="o">==</span> <span class="n">ioFormats</span><span class="o">.</span><span class="n">SPARKY</span><span class="p">:</span>
                 <span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;==&gt; Loading </span><span class="si">%s</span><span class="s1"> Sparky project &quot;</span><span class="si">%s</span><span class="s1">&quot;</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">subType</span><span class="p">,</span> <span class="n">path</span><span class="p">))</span>
@@ -1499,25 +1519,42 @@
         <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;==&gt; Loaded NEF file: &quot;</span><span class="si">%s</span><span class="s1">&quot;&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">path</span><span class="p">,))</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span>
 
-    <span class="k">def</span> <span class="nf">_loadNMRStarFile</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">makeNewProject</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Project</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Load Project from NEF file at path, and do necessary setup&quot;&quot;&quot;</span>
-
-        <span class="kn">from</span> <span class="nn">ccpn.core.lib.ContextManagers</span> <span class="kn">import</span> <span class="n">undoBlock</span><span class="p">,</span> <span class="n">notificationEchoBlocking</span>
-
+    <span class="k">def</span> <span class="nf">_loadNMRStarFile</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">path</span><span class="p">:</span>
+            <span class="n">text</span> <span class="o">=</span> <span class="s1">&#39;Import NMR-Star File into Project&#39;</span>
+            <span class="n">dialog</span> <span class="o">=</span> <span class="n">FileDialog</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">mainWindow</span><span class="p">,</span> <span class="n">fileMode</span><span class="o">=</span><span class="n">FileDialog</span><span class="o">.</span><span class="n">AnyFile</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="n">text</span><span class="p">,</span>
+                                <span class="n">acceptMode</span><span class="o">=</span><span class="n">FileDialog</span><span class="o">.</span><span class="n">AcceptOpen</span><span class="p">,</span> <span class="n">preferences</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">preferences</span><span class="o">.</span><span class="n">general</span><span class="p">)</span>
+            <span class="n">path</span> <span class="o">=</span> <span class="n">dialog</span><span class="o">.</span><span class="n">selectedFile</span><span class="p">()</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">path</span><span class="p">:</span>
+                <span class="k">return</span>
+        <span class="kn">from</span> <span class="nn">ccpn.ui.gui.popups.ImportStarPopup</span> <span class="kn">import</span> <span class="n">StarImporterPopup</span>
+        <span class="n">relativePath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">realpath</span><span class="p">(</span><span class="n">path</span><span class="p">))</span>
         <span class="n">dataBlock</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">nefReader</span><span class="o">.</span><span class="n">getNMRStarData</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_importedStarDataBlock</span> <span class="o">=</span> <span class="n">dataBlock</span>
 
-        <span class="k">if</span> <span class="n">makeNewProject</span><span class="p">:</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_closeProject</span><span class="p">()</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">project</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">newProject</span><span class="p">(</span><span class="n">dataBlock</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+        <span class="n">popup</span> <span class="o">=</span> <span class="n">StarImporterPopup</span><span class="p">(</span><span class="n">project</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="p">,</span> <span class="n">bmrbFilePath</span><span class="o">=</span><span class="n">path</span><span class="p">,</span> <span class="n">directory</span><span class="o">=</span><span class="n">relativePath</span><span class="p">,</span> <span class="n">dataBlock</span><span class="o">=</span><span class="n">dataBlock</span><span class="p">)</span>
+        <span class="n">popup</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+        <span class="n">popup</span><span class="o">.</span><span class="n">raise_</span><span class="p">()</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">shiftAveraging</span> <span class="o">=</span> <span class="bp">False</span>
+    <span class="c1">#     # FIXME Below is broken. This does not create a project! Looks like a copy-paste from NEF code.</span>
+        <span class="c1"># &quot;&quot;&quot;Load Project from NEF file at path, and do necessary setup&quot;&quot;&quot;</span>
+        <span class="c1">#</span>
+        <span class="c1"># from ccpn.core.lib.ContextManagers import undoBlock, notificationEchoBlocking</span>
+        <span class="c1">#</span>
+        <span class="c1"># dataBlock = self.nefReader.getNMRStarData(path)</span>
 
-        <span class="c1"># with suspendSideBarNotifications(project=self.project):</span>
-        <span class="k">with</span> <span class="n">undoBlock</span><span class="p">():</span>
-            <span class="k">with</span> <span class="n">notificationEchoBlocking</span><span class="p">():</span>
-                <span class="k">with</span> <span class="n">catchExceptions</span><span class="p">(</span><span class="n">application</span><span class="o">=</span><span class="bp">self</span><span class="p">,</span> <span class="n">errorStringTemplate</span><span class="o">=</span><span class="s1">&#39;Error loading NMRStar file: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">):</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">nefReader</span><span class="o">.</span><span class="n">importNewProject</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="p">,</span> <span class="n">dataBlock</span><span class="p">)</span>
+        <span class="c1"># if makeNewProject:</span>
+        <span class="c1">#     if self.project is not None:</span>
+        <span class="c1">#         self._closeProject()</span>
+        <span class="c1">#     self.project = self.newProject(dataBlock.name)</span>
+        <span class="c1">#</span>
+        <span class="c1"># self.project._wrappedData.shiftAveraging = False</span>
+        <span class="c1">#</span>
+        <span class="c1"># # with suspendSideBarNotifications(project=self.project):</span>
+        <span class="c1"># with undoBlock():</span>
+        <span class="c1">#     with notificationEchoBlocking():</span>
+        <span class="c1">#         # with catchExceptions(application=self, errorStringTemplate=&#39;Error loading NMRStar file: %s&#39;):</span>
+        <span class="c1">#             self.nefReader.importNewProject(self.project, dataBlock)</span>
 
         <span class="c1"># with undoBlock():</span>
         <span class="c1">#     try:</span>
@@ -1525,10 +1562,10 @@
         <span class="c1">#     except Exception as es:</span>
         <span class="c1">#         getLogger().warning(&#39;Error loading NMRStar file: %s&#39; % str(es))</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">shiftAveraging</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="c1"># self.project._wrappedData.shiftAveraging = True</span>
 
-        <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;==&gt; Loaded NmrStar file: &quot;</span><span class="si">%s</span><span class="s1">&quot;&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">path</span><span class="p">,))</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span>
+        <span class="c1"># getLogger().info(&#39;==&gt; Loaded NmrStar file: &quot;%s&quot;&#39; % (path,))</span>
+        <span class="c1"># return self.project</span>
 
     <span class="k">def</span> <span class="nf">_loadSparkyProject</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">makeNewProject</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Project</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Load Project from Sparky file at path, and do necessary setup&quot;&quot;&quot;</span>
@@ -1576,6 +1613,47 @@
 <div class="viewcode-block" id="Framework.clearRecentMacros"><a class="viewcode-back" href="../../../ccpn/ccpn.framework.html#ccpn.framework.Framework.Framework.clearRecentMacros">[docs]</a>    <span class="k">def</span> <span class="nf">clearRecentMacros</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">preferences</span><span class="o">.</span><span class="n">recentMacros</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">_fillRecentMacrosMenu</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="Framework.loadSpectra"><a class="viewcode-back" href="../../../ccpn/ccpn.framework.html#ccpn.framework.Framework.Framework.loadSpectra">[docs]</a>    <span class="k">def</span> <span class="nf">loadSpectra</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">paths</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="nb">filter</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">askBeforeOpen_lenght</span><span class="o">=</span><span class="mi">20</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        :param paths: list of str of paths</span>
+<span class="sd">        :param filter:</span>
+<span class="sd">        :param askBeforeOpen_lenght: how many spectra can open without asking first</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="kn">from</span> <span class="nn">ccpn.core.lib.ContextManagers</span> <span class="kn">import</span> <span class="n">undoBlock</span><span class="p">,</span> <span class="n">notificationEchoBlocking</span>
+        <span class="kn">from</span> <span class="nn">tqdm</span> <span class="kn">import</span> <span class="n">tqdm</span>
+
+        <span class="k">if</span> <span class="n">paths</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">preferences</span><span class="o">.</span><span class="n">general</span><span class="o">.</span><span class="n">useNative</span><span class="p">:</span>
+                <span class="n">m</span> <span class="o">=</span> <span class="s1">&#39;Native dialog not available on multiple selections. &#39;</span> \
+                    <span class="s1">&#39;For loading a single file (not Dir) through a native dialog please use: Project &gt; Load Data...&#39;</span>
+                <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">m</span><span class="p">)</span>
+            <span class="n">dialog</span> <span class="o">=</span> <span class="n">FileDialog</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">mainWindow</span><span class="p">,</span> <span class="n">fileMode</span><span class="o">=</span><span class="n">FileDialog</span><span class="o">.</span><span class="n">ExistingFiles</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s1">&#39;Load Spectra&#39;</span><span class="p">,</span>
+                                <span class="n">acceptMode</span><span class="o">=</span><span class="n">FileDialog</span><span class="o">.</span><span class="n">AcceptOpen</span><span class="p">,</span> <span class="n">multiSelection</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+                                <span class="nb">filter</span><span class="o">=</span><span class="nb">filter</span><span class="p">,</span> <span class="n">useNative</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+            <span class="n">paths</span> <span class="o">=</span> <span class="n">dialog</span><span class="o">.</span><span class="n">_customMultiSelectedFiles</span>
+
+        <span class="n">spectraPaths</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">path</span> <span class="ow">in</span> <span class="n">paths</span><span class="p">:</span>
+            <span class="n">path</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+            <span class="n">subPaths</span> <span class="o">=</span> <span class="n">ioFormats</span><span class="o">.</span><span class="n">_searchSpectraPathsInSubDir</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>  <span class="c1"># Filter only spectra files</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">subPaths</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">spectraPaths</span> <span class="o">+=</span> <span class="n">subPaths</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">spectraPaths</span><span class="p">)</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">paths</span><span class="p">):</span>
+            <span class="n">notRecognised</span> <span class="o">=</span> <span class="p">[</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">paths</span> <span class="k">if</span> <span class="n">i</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">spectraPaths</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">i</span><span class="p">)]</span>
+            <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;Not valid spectrum Path(s): &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">notRecognised</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">spectraPaths</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">askBeforeOpen_lenght</span><span class="p">:</span>
+            <span class="n">okToOpenAll</span> <span class="o">=</span> <span class="n">MessageDialog</span><span class="o">.</span><span class="n">showYesNo</span><span class="p">(</span><span class="s1">&#39;Load data&#39;</span><span class="p">,</span> <span class="s1">&#39;The directory contains multiple items (~</span><span class="si">%s</span><span class="s1">).&#39;</span>
+                                                               <span class="s1">&#39; Do you want to open all?&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">spectraPaths</span><span class="p">)))</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">okToOpenAll</span><span class="p">:</span>
+                <span class="k">return</span>
+        <span class="k">with</span> <span class="n">undoBlock</span><span class="p">():</span>
+            <span class="k">with</span> <span class="n">notificationEchoBlocking</span><span class="p">():</span>
+                <span class="k">for</span> <span class="n">spectrumPath</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span><span class="n">spectraPaths</span><span class="p">):</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">loadData</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">spectrumPath</span><span class="p">))</span></div>
 
 <div class="viewcode-block" id="Framework.loadData"><a class="viewcode-back" href="../../../ccpn/ccpn.framework.html#ccpn.framework.Framework.Framework.loadData">[docs]</a>    <span class="k">def</span> <span class="nf">loadData</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">paths</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="nb">filter</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -2185,8 +2263,8 @@
 <span class="sd">        Displays Peak Picking 1D Popup.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">peakLists</span><span class="p">:</span>
-            <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;Peak Picking: Project has no Specta.&#39;</span><span class="p">)</span>
-            <span class="n">MessageDialog</span><span class="o">.</span><span class="n">showWarning</span><span class="p">(</span><span class="s1">&#39;Peak Picking&#39;</span><span class="p">,</span> <span class="s1">&#39;Project has no Spectra.&#39;</span><span class="p">)</span>
+            <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;Peak Picking: Project has no peakLists.&#39;</span><span class="p">)</span>
+            <span class="n">MessageDialog</span><span class="o">.</span><span class="n">showWarning</span><span class="p">(</span><span class="s1">&#39;Peak Picking&#39;</span><span class="p">,</span> <span class="s1">&#39;Project has no peakLists.&#39;</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">spectra</span> <span class="o">=</span> <span class="p">[</span><span class="n">spec</span> <span class="k">for</span> <span class="n">spec</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">spectra</span> <span class="k">if</span> <span class="n">spec</span><span class="o">.</span><span class="n">dimensionCount</span> <span class="o">==</span> <span class="mi">1</span><span class="p">]</span>
             <span class="k">if</span> <span class="n">spectra</span><span class="p">:</span>
@@ -2194,7 +2272,6 @@
 
                 <span class="n">popup</span> <span class="o">=</span> <span class="n">PickPeak1DPopup</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">mainWindow</span><span class="p">,</span> <span class="n">mainWindow</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">mainWindow</span><span class="p">)</span>
                 <span class="n">popup</span><span class="o">.</span><span class="n">exec_</span><span class="p">()</span>
-                <span class="n">popup</span><span class="o">.</span><span class="n">raise_</span><span class="p">()</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;Peak Picking: Project has no 1d Specta.&#39;</span><span class="p">)</span>
                 <span class="n">MessageDialog</span><span class="o">.</span><span class="n">showWarning</span><span class="p">(</span><span class="s1">&#39;Peak Picking&#39;</span><span class="p">,</span> <span class="s1">&#39;Project has no 1d Spectra.&#39;</span><span class="p">)</span></div>
@@ -2204,8 +2281,8 @@
 <span class="sd">        Displays Peak Picking ND Popup.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">peakLists</span><span class="p">:</span>
-            <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;Peak Picking: Project has no Specta.&#39;</span><span class="p">)</span>
-            <span class="n">MessageDialog</span><span class="o">.</span><span class="n">showWarning</span><span class="p">(</span><span class="s1">&#39;Peak Picking&#39;</span><span class="p">,</span> <span class="s1">&#39;Project has no Spectra.&#39;</span><span class="p">)</span>
+            <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;Peak Picking: Project has no peakLists.&#39;</span><span class="p">)</span>
+            <span class="n">MessageDialog</span><span class="o">.</span><span class="n">showWarning</span><span class="p">(</span><span class="s1">&#39;Peak Picking&#39;</span><span class="p">,</span> <span class="s1">&#39;Project has no peakLists.&#39;</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">spectra</span> <span class="o">=</span> <span class="p">[</span><span class="n">spec</span> <span class="k">for</span> <span class="n">spec</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">spectra</span> <span class="k">if</span> <span class="n">spec</span><span class="o">.</span><span class="n">dimensionCount</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">]</span>
             <span class="k">if</span> <span class="n">spectra</span><span class="p">:</span>
@@ -2214,7 +2291,6 @@
                 <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">strip</span><span class="p">:</span>
                     <span class="n">popup</span> <span class="o">=</span> <span class="n">PeakFindPopup</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">mainWindow</span><span class="p">,</span> <span class="n">mainWindow</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">mainWindow</span><span class="p">)</span>
                     <span class="n">popup</span><span class="o">.</span><span class="n">exec_</span><span class="p">()</span>
-                    <span class="n">popup</span><span class="o">.</span><span class="n">raise_</span><span class="p">()</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;Pick Nd Peaks, no strip selected&#39;</span><span class="p">)</span>
                     <span class="n">MessageDialog</span><span class="o">.</span><span class="n">showWarning</span><span class="p">(</span><span class="s1">&#39;Pick Nd Peaks&#39;</span><span class="p">,</span> <span class="s1">&#39;No strip selected&#39;</span><span class="p">)</span>
@@ -2246,6 +2322,28 @@
             <span class="n">popup</span><span class="o">.</span><span class="n">_selectPeaks</span><span class="p">(</span><span class="n">peaks</span><span class="p">)</span>
             <span class="n">popup</span><span class="o">.</span><span class="k">exec</span><span class="p">()</span>
             <span class="n">popup</span><span class="o">.</span><span class="n">raise_</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="Framework.showEstimateVolumesPopup"><a class="viewcode-back" href="../../../ccpn/ccpn.framework.html#ccpn.framework.Framework.Framework.showEstimateVolumesPopup">[docs]</a>    <span class="k">def</span> <span class="nf">showEstimateVolumesPopup</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Displays Estimate Volumes Popup.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">peakLists</span><span class="p">:</span>
+            <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;Estimate Volumes: Project has no peakLists.&#39;</span><span class="p">)</span>
+            <span class="n">MessageDialog</span><span class="o">.</span><span class="n">showWarning</span><span class="p">(</span><span class="s1">&#39;Estimate Volumes&#39;</span><span class="p">,</span> <span class="s1">&#39;Project has no peakLists.&#39;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="kn">from</span> <span class="nn">ccpn.ui.gui.popups.EstimateVolumes</span> <span class="kn">import</span> <span class="n">EstimateVolumes</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">strip</span><span class="p">:</span>
+                <span class="n">spectra</span> <span class="o">=</span> <span class="p">[</span><span class="n">specView</span><span class="o">.</span><span class="n">spectrum</span> <span class="k">for</span> <span class="n">specView</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">strip</span><span class="o">.</span><span class="n">spectrumDisplay</span><span class="o">.</span><span class="n">spectrumViews</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">spectra</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">spectra</span>
+
+            <span class="k">if</span> <span class="n">spectra</span><span class="p">:</span>
+                <span class="n">popup</span> <span class="o">=</span> <span class="n">EstimateVolumes</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">mainWindow</span><span class="p">,</span> <span class="n">mainWindow</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">mainWindow</span><span class="p">,</span> <span class="n">spectra</span><span class="o">=</span><span class="n">spectra</span><span class="p">)</span>
+                <span class="n">popup</span><span class="o">.</span><span class="n">exec_</span><span class="p">()</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;Peak Picking: no specta selected.&#39;</span><span class="p">)</span>
+                <span class="n">MessageDialog</span><span class="o">.</span><span class="n">showWarning</span><span class="p">(</span><span class="s1">&#39;Peak Picking&#39;</span><span class="p">,</span> <span class="s1">&#39;no specta selected.&#39;</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="Framework.makeStripPlotPopup"><a class="viewcode-back" href="../../../ccpn/ccpn.framework.html#ccpn.framework.Framework.Framework.makeStripPlotPopup">[docs]</a>    <span class="k">def</span> <span class="nf">makeStripPlotPopup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">includePeakLists</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">includeNmrChains</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">includeNmrChainPullSelection</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">peaks</span> <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">nmrResidues</span> <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">nmrChains</span><span class="p">:</span>
@@ -2554,6 +2652,12 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;No strip selected&#39;</span><span class="p">)</span></div>
 
+<div class="viewcode-block" id="Framework.toggleSpectrumToolbar"><a class="viewcode-back" href="../../../ccpn/ccpn.framework.html#ccpn.framework.Framework.Framework.toggleSpectrumToolbar">[docs]</a>    <span class="k">def</span> <span class="nf">toggleSpectrumToolbar</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">strip</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">strip</span><span class="o">.</span><span class="n">spectrumDisplay</span><span class="o">.</span><span class="n">toggleSpectrumToolbar</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;No strip selected&#39;</span><span class="p">)</span></div>
+
 <div class="viewcode-block" id="Framework.togglePhaseConsole"><a class="viewcode-back" href="../../../ccpn/ccpn.framework.html#ccpn.framework.Framework.Framework.togglePhaseConsole">[docs]</a>    <span class="k">def</span> <span class="nf">togglePhaseConsole</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">strip</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">strip</span><span class="o">.</span><span class="n">spectrumDisplay</span><span class="o">.</span><span class="n">togglePhaseConsole</span><span class="p">()</span>
@@ -2575,6 +2679,22 @@
 <div class="viewcode-block" id="Framework.copyStrip"><a class="viewcode-back" href="../../../ccpn/ccpn.framework.html#ccpn.framework.Framework.Framework.copyStrip">[docs]</a>    <span class="k">def</span> <span class="nf">copyStrip</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">strip</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">strip</span><span class="o">.</span><span class="n">copyStrip</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;No strip selected&#39;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Framework.flipArbitraryAxis"><a class="viewcode-back" href="../../../ccpn/ccpn.framework.html#ccpn.framework.Framework.Framework.flipArbitraryAxis">[docs]</a>    <span class="k">def</span> <span class="nf">flipArbitraryAxis</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">strip</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">strip</span><span class="o">.</span><span class="n">spectrumDisplay</span><span class="o">.</span><span class="n">is1D</span><span class="p">:</span>
+                <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;Function not permitted on 1D spectra&#39;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+
+                <span class="kn">from</span> <span class="nn">ccpn.ui.gui.popups.CopyStripFlippedAxesPopup</span> <span class="kn">import</span> <span class="n">CopyStripFlippedSpectraPopup</span>
+
+                <span class="n">popup</span> <span class="o">=</span> <span class="n">CopyStripFlippedSpectraPopup</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">mainWindow</span><span class="p">,</span> <span class="n">mainWindow</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">mainWindow</span><span class="p">,</span>
+                                                     <span class="n">strip</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">strip</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">strip</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
+                <span class="n">popup</span><span class="o">.</span><span class="n">exec_</span><span class="p">()</span>
+
         <span class="k">else</span><span class="p">:</span>
             <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;No strip selected&#39;</span><span class="p">)</span></div>
 
@@ -2768,8 +2888,7 @@
         <span class="kn">from</span> <span class="nn">ccpn.ui.gui.popups.AboutPopup</span> <span class="kn">import</span> <span class="n">AboutPopup</span>
 
         <span class="n">popup</span> <span class="o">=</span> <span class="n">AboutPopup</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">mainWindow</span><span class="p">)</span>
-        <span class="n">popup</span><span class="o">.</span><span class="n">exec_</span><span class="p">()</span>
-        <span class="n">popup</span><span class="o">.</span><span class="n">raise_</span><span class="p">()</span></div>
+        <span class="n">popup</span><span class="o">.</span><span class="n">exec_</span><span class="p">()</span></div>
 
 <div class="viewcode-block" id="Framework.showAboutCcpn"><a class="viewcode-back" href="../../../ccpn/ccpn.framework.html#ccpn.framework.Framework.Framework.showAboutCcpn">[docs]</a>    <span class="k">def</span> <span class="nf">showAboutCcpn</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="kn">from</span> <span class="nn">ccpn.framework.PathsAndUrls</span> <span class="kn">import</span> <span class="n">ccpnUrl</span>
@@ -2811,6 +2930,10 @@
                 <span class="bp">self</span><span class="o">.</span><span class="n">updatePopup</span> <span class="o">=</span> <span class="n">UpdatePopup</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">mainWindow</span><span class="p">,</span> <span class="n">mainWindow</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">mainWindow</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">updatePopup</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">updatePopup</span><span class="o">.</span><span class="n">exec_</span><span class="p">()</span>
+
+            <span class="c1"># if updates have been installed then popup the quit dialog with no cancel button</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">updatePopup</span><span class="o">.</span><span class="n">_numUpdatesInstalled</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">_closeWindowFromUpdate</span><span class="p">(</span><span class="n">disableCancel</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
 
         <span class="k">else</span><span class="p">:</span>
             <span class="n">MessageDialog</span><span class="o">.</span><span class="n">showWarning</span><span class="p">(</span><span class="s1">&#39;Check For Updates&#39;</span><span class="p">,</span>
@@ -2892,13 +3015,17 @@
     <span class="k">if</span> <span class="ow">not</span> <span class="n">projectName</span><span class="p">:</span>
         <span class="k">return</span>
 
-    <span class="n">name</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">projectName</span><span class="p">)</span> <span class="k">if</span> <span class="n">stripFullPath</span> <span class="k">else</span> <span class="n">projectName</span>
-    <span class="n">name</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">name</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="n">stripExtension</span> <span class="k">else</span> <span class="n">name</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">projectName</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
 
-    <span class="n">STRIPCHARS</span> <span class="o">=</span> <span class="s1">&#39;_&#39;</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">projectName</span><span class="p">)</span> <span class="k">if</span> <span class="n">stripFullPath</span> <span class="k">else</span> <span class="n">projectName</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">name</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="n">stripExtension</span> <span class="k">else</span> <span class="n">name</span>
 
-    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">and</span> <span class="n">name</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="n">STRIPCHARS</span><span class="p">)</span><span class="o">.</span><span class="n">isalnum</span><span class="p">():</span>
-        <span class="k">return</span> <span class="bp">True</span></div>
+        <span class="n">STRIPCHARS</span> <span class="o">=</span> <span class="s1">&#39;_&#39;</span>
+        <span class="k">for</span> <span class="n">ss</span> <span class="ow">in</span> <span class="n">STRIPCHARS</span><span class="p">:</span>
+            <span class="n">name</span> <span class="o">=</span> <span class="n">name</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">ss</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">name</span><span class="o">.</span><span class="n">isalnum</span><span class="p">():</span>
+            <span class="k">return</span> <span class="bp">True</span></div>
 
 
 <div class="viewcode-block" id="getSaveDirectory"><a class="viewcode-back" href="../../../ccpn/ccpn.framework.html#ccpn.framework.Framework.getSaveDirectory">[docs]</a><span class="k">def</span> <span class="nf">getSaveDirectory</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="n">preferences</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>

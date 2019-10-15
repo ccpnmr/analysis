@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: CCPN $"
 __dateModified__ = "$dateModified: 2017-07-07 16:32:41 +0100 (Fri, July 07, 2017) $"
-__version__ = "$Revision: 3.0.b5 $"
+__version__ = "$Revision: 3.0.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -95,29 +95,29 @@ class SpectrumDisplay(AbstractWrapperObject):
 
     project = _parent
 
-    @property
-    def stripDirection(self) -> str:
-        """Strip axis direction ('X', 'Y', None) - None only for non-strip plots"""
-        getLogger().warn('StripDirection is deprecated. Used stripArrangement instead')
-        return self.stripArrangement
-
-        # return self._wrappedData.stripDirection
-
-    @stripDirection.setter
-    def stripDirection(self, value:str='Y'):
-        """Set the new strip direction ('X', 'Y', None) - None only for non-strip plots
-        """
-        self.stripArrangement(value)
-        getLogger().warn('StripDirection is deprecated. Used stripArrangement instead')
-        # raise RuntimeError('deprecated: use stripArrangement') no need of raising an error!
-
-        # if not isinstance(value, str):
-        #     raise TypeError('stripDirection must be a string')
-        # elif value not in ['X', 'Y']:
-        #     raise ValueError("stripDirection must be either 'X' or 'Y'")
-        #
-        # # override 'frozen' set
-        # self._wrappedData.__dict__['stripDirection'] = value
+    # @property
+    # def stripDirection(self) -> str:
+    #     """Strip axis direction ('X', 'Y', None) - None only for non-strip plots"""
+    #     getLogger().warn('StripDirection is deprecated. Used stripArrangement instead')
+    #     return self.stripArrangement
+    #
+    #     # return self._wrappedData.stripDirection
+    #
+    # @stripDirection.setter
+    # def stripDirection(self, value:str='Y'):
+    #     """Set the new strip direction ('X', 'Y', None) - None only for non-strip plots
+    #     """
+    #     self.stripArrangement(value)
+    #     getLogger().warn('StripDirection is deprecated. Used stripArrangement instead')
+    #     # raise RuntimeError('deprecated: use stripArrangement') no need of raising an error!
+    #
+    #     # if not isinstance(value, str):
+    #     #     raise TypeError('stripDirection must be a string')
+    #     # elif value not in ['X', 'Y']:
+    #     #     raise ValueError("stripDirection must be either 'X' or 'Y'")
+    #     #
+    #     # # override 'frozen' set
+    #     # self._wrappedData.__dict__['stripDirection'] = value
 
     @property
     def stripCount(self) -> str:
@@ -450,6 +450,11 @@ def _newSpectrumDisplay(self: Project, axisCodes: (str,), stripDirection: str = 
             stripSerial = 0
         else:
             stripSerial = 1
+
+        # NOTE: ED setting to 1 notifies api to create a full axis set for each additional spectrum
+        #       required for dynamic switching of strip arrangement
+        #       stripDirection is no longer used in the api
+        stripSerial = 1
 
         if code[0].isupper():
             apiSpectrumDisplay.newFrequencyAxis(code=code, stripSerial=stripSerial)

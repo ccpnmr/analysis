@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: CCPN $"
 __dateModified__ = "$dateModified: 2017-07-07 16:32:30 +0100 (Fri, July 07, 2017) $"
-__version__ = "$Revision: 3.0.b5 $"
+__version__ = "$Revision: 3.0.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -24,7 +24,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
-from typing import Tuple
+from typing import Tuple, Dict
 from functools import partial
 from ccpn.core.Project import Project
 from ccpn.core.Spectrum import Spectrum
@@ -100,7 +100,7 @@ class SpectrumGroup(AbstractWrapperObject):
         return self._project
 
     #-------------------------------------------------------------------------------------------------------
-    # GWV hack to alleviate (temporarily) the loass of order on spectra
+    # GWV hack to alleviate (temporarily) the loss of order on spectra
     #-------------------------------------------------------------------------------------------------------
 
     SPECTRUM_ORDER = 'spectrum_order'
@@ -123,6 +123,44 @@ class SpectrumGroup(AbstractWrapperObject):
         self._saveObjectOrder(data, self.SPECTRUM_ORDER)
         # Store the api objects
         self._wrappedData.dataSources = [x._wrappedData for x in data]
+
+    @property
+    def series(self) -> Tuple[Dict, ...]:
+        """Returns a tuple of series values for the attached spectra
+
+        series = ({ attrib1: val1,
+                    ...
+                    attribN : valN },
+                    ...
+                  { attrib1: val1,
+                    ...
+                    attribN : valN }
+                  )
+        where each dict corresponds to the series values in the attached spectra associated with this group
+        For a spectrum with no values, returns None in place of a dict
+        """
+        series = ()
+        for spectrum in self.spectra:
+            series += (spectrum._getSeriesValues(self),)
+
+        return series
+
+    @series.setter
+    @ccpNmrV3CoreSetter()
+    def series(self, values):
+        """Setter for series
+        series must be a tuple of dicts or Nones, the contents of the dicts are not checked
+        """
+        if not isinstance(values, (tuple, list)):
+            raise ValueError('Expected a tuple or list')
+        for ll in values:
+            if not isinstance(ll, (dict, type(None))):
+                raise ValueError('Values must be of type dict/None: %s' % ll)
+        if len(self.spectra) != len(values):
+            raise ValueError('Number of values does not match number of spectra in group')
+
+        for spectrum, value in zip(self.spectra, values):
+            spectrum._setSeriesValues(self, value)
 
     #=========================================================================================
     # Implementation functions
@@ -148,6 +186,17 @@ class SpectrumGroup(AbstractWrapperObject):
 
             addUndoItem(undo=partial(self.rename, oldName),
                         redo=partial(self.rename, value))
+
+    def _finaliseAction(self, action: str):
+        """Subclassed to handle associated seriesValues instances
+        """
+        oldPid = self.pid
+        super()._finaliseAction(action=action)
+        # propagate the rename to associated seriesValues
+        if action in ['rename']:
+            # rename the items in _seriesValues as they are referenced by pid
+            for spectrum in self.spectra:
+                spectrum._renameSeriesValues(self, oldPid, self.pid)
 
     #=========================================================================================
     # CCPN functions

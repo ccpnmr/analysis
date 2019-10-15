@@ -34,7 +34,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: CCPN $"
 __dateModified__ = "$dateModified: 2017-07-07 16:32:45 +0100 (Fri, July 07, 2017) $"
-__version__ = "$Revision: 3.0.b5 $"
+__version__ = "$Revision: 3.0.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -52,9 +52,9 @@ from ccpn.ui.gui.widgets.PlaneToolbar import PlaneToolbar  #, PlaneSelectorWidge
 from ccpn.util.Logging import getLogger
 from ccpn.util.decorators import logCommand
 from ccpn.core.lib.ContextManagers import undoBlock
-from ccpn.ui.gui.lib.GuiStrip import GuiStrip, DefaultMenu, PeakMenu, IntegralMenu, MultipletMenu, PhasingMenu
+from ccpn.ui.gui.lib.GuiStrip import GuiStrip, DefaultMenu, PeakMenu, IntegralMenu, MultipletMenu, PhasingMenu, AxisMenu
 from ccpn.ui.gui.lib.GuiStripContextMenus import _getNdPhasingMenu, _getNdDefaultMenu, _getNdPeakMenu, \
-    _getNdIntegralMenu, _getNdMultipletMenu
+    _getNdIntegralMenu, _getNdMultipletMenu, _getNdAxisMenu
 from ccpn.ui.gui.lib.Strip import copyStripPosition
 from ccpn.util.Common import getAxisCodeMatchIndices
 
@@ -140,12 +140,15 @@ class GuiStripNd(GuiStrip):
         self._peakMenu = _getNdPeakMenu(self)
         self._integralMenu = _getNdIntegralMenu(self)
         self._multipletMenu = _getNdMultipletMenu(self)
+        self._axisMenu = _getNdAxisMenu(self)
 
         self._contextMenus.update({DefaultMenu  : self._defaultMenu,
                                    PhasingMenu  : self._phasingMenu,
                                    PeakMenu     : self._peakMenu,
                                    IntegralMenu : self._integralMenu,
-                                   MultipletMenu: self._multipletMenu})
+                                   MultipletMenu: self._multipletMenu,
+                                   AxisMenu     : self._axisMenu
+                                   })
 
         # self.viewBox.invertX()
         # self.viewBox.invertY()
@@ -161,7 +164,9 @@ class GuiStripNd(GuiStrip):
         # Adds the plane toolbar to the strip.
         callbacks = [self.prevZPlane, self.nextZPlane, self._setZPlanePosition, self._changePlaneCount]
         self.planeToolbar = PlaneToolbar(self._stripToolBarWidget, strip=self, callbacks=callbacks,
-                                         grid=(0, 0), hPolicy='minimum', hAlign='center', vAlign='center')
+                                         grid=(0, 0), hPolicy='minimum', hAlign='center', vAlign='center',
+                                         stripArrangement=getattr(self.spectrumDisplay, 'stripArrangement', None))
+
         #self._stripToolBarWidget.addWidget(self.planeToolbar)
         #self.planeToolBar.hide()
         # test
@@ -216,156 +221,6 @@ class GuiStripNd(GuiStrip):
             thisSpecView.buildContours = True
 
         GLSignals.emitPaintEvent()
-
-    # def _get2dContextMenu(self) -> Menu:
-    #   """
-    #   Creates and returns the Nd context menu
-    #   """
-    #   class tType:
-    #     menu, item, actn, sep = range(1,5)
-    #
-    #   self._spectrumUtilActions = {}
-    #   self.contextMenu = Menu('', self, isFloatWidget=True)     # generate new menu
-    #
-    #   toolBarItems = [
-    #      # type,      action name             icon                      tooltip/name                shortcut  active  checked,    callback,                             method
-    #     (tType.item, 'ToolBar',               'toolbarAction',          '',                         'TB',     True,   True,       self.spectrumDisplay.toggleToolbar,   'toolbarAction'),
-    #     (tType.item, 'Crosshair',             'crosshairAction',        '',                         'CH',     True,   True,       self.spectrumDisplay.toggleCrosshair,                'crosshairAction'),
-    #     (tType.item, 'Grid',                  'gridAction',             '',                         'GS',     True,   True,       self.spectrumDisplay.toggleGrid,                      'gridAction'),
-    #     (tType.item, 'Share Y Axis',          '',                       '',                         'TA',     True,   True,       self._toggleLastAxisOnly, 'lastAxisOnlyCheckBox'),
-    #     (tType.actn, 'Cycle Peak Labels', 'icons/preferences-desktop-font', 'Cycle Peak Labelling Types', 'PL', True,  True,      self.cyclePeakLabelling, ''),
-    #     (tType.actn, 'Cycle Peak Symbols', 'icons/peak-symbols', 'Cycle Peak Symbols',              'PS',     True,   True,       self.cyclePeakSymbols, ''),
-    #
-    #     (tType.sep, None, None, None, None, None, None, None, None),
-    #     (tType.actn, 'Contours...',           'icons/contours',      'Contour Settings',            '',       True,   True,       self.spectrumDisplay.adjustContours, ''),
-    #     # (tType.actn, 'Add Contour Level',     'icons/contour-add',      'Add One Level',            True,   True,       self.spectrumDisplay.addContourLevel, ''),
-    #     # (tType.actn, 'Remove Contour Level',  'icons/contour-remove',   'Remove One Level',         True,   True,       self.spectrumDisplay.removeContourLevel,''),
-    #     # (tType.actn, 'Raise Base Level',      'icons/contour-base-up',  'Raise Contour Base Level', True,   True,       self.spectrumDisplay.raiseContourBase,''),
-    #     # (tType.actn, 'Lower Base Level',      'icons/contour-base-down','Lower Contour Base Level', True,   True,       self.spectrumDisplay.lowerContourBase,''),
-    #     # (tType.actn, 'Store Zoom',            'icons/zoom-store',       'Store Zoom',               True,   True,       self.spectrumDisplay._storeZoom,      ''),
-    #     # (tType.actn, 'Restore Zoom',          'icons/zoom-restore',     'Restore Zoom',             True,   True,       self.spectrumDisplay._restoreZoom,    ''),
-    #     (tType.actn, 'Reset Zoom',            'icons/zoom-full',        'Reset Zoom',               'ZR',   True,   True,       self.resetZoom,                       ''),
-    #     (tType.menu, 'Navigate To', '', '', 'NT', True, True, None, 'navigateToMenu'),
-    #
-    #     (tType.sep, None, None, None, None, None, None, None, None),
-    #     (tType.item, 'Horizontal Trace',       'hTraceAction',     'Toggle horizontal trace on/off', 'TH',   True,   False,      self.toggleHorizontalTrace,                   'hTraceAction'),
-    #     (tType.item, 'Vertical Trace',         'vTraceAction',     'Toggle vertical trace on/off',   'TV',   True,   False,      self.toggleVerticalTrace,                   'vTraceAction'),
-    #     (tType.actn, 'Enter Phasing Console',  'icons/phase-console',    'Enter Phasing Console',    'PC',   True,   True,       self.spectrumDisplay.togglePhaseConsole, ''),
-    #
-    #     (tType.sep, None, None, None, None, None, None, None, None),
-    #     (tType.actn, 'Mark Positions',          None,                  'Mark positions of all axes', 'MK', True, False,        self.createMark, ''),
-    #     (tType.actn, 'Clear Marks',             None,                     'Clear all mark',          'MC', True, False,        self.clearMarks, ''),
-    #
-    #     (tType.sep, None, None, None, None, None, None, None, None),
-    #     (tType.actn, 'Print to File...',      'icons/print',            'Print Spectrum Display to File', 'PT', True, True,   self.showExportDialog, ''),
-    #   ]
-    #
-    #   for aType, aName, icon, tooltip, shortcut, active, checked, callback, attrib in toolBarItems:     # build the menu items/actions
-    #     # self.contextMenu.navigateToMenu = self.contextMenu.addMenu('Navigate To')
-    #     def tempMethod():           # ejb - how does this work?????
-    #       return
-    #     if aType == tType.menu:
-    #       action = self.contextMenu.addMenu(aName)
-    #       tempMethod.__doc__=''
-    #       tempMethod.__name__=attrib
-    #       setattr(self.contextMenu, tempMethod.__name__, action)      # add to the menu
-    #
-    #     elif aType == tType.item:
-    #       # self.gridAction = self.contextMenu.addItem("Grid", callback=self.toggleGrid, checkable=True)
-    #       action = self.contextMenu.addItem(aName, callback=callback, checkable=active, checked=checked, shortcut=shortcut)
-    #       tempMethod.__doc__=''
-    #       tempMethod.__name__=attrib
-    #       setattr(self, tempMethod.__name__, action)
-    #       # add to self
-    #
-    #     elif aType == tType.actn:
-    #       # printAction = self.contextMenu.addAction("Print to File...", lambda: self.spectrumDisplay.window.printToFile(self.spectrumDisplay))
-    #       action = self.contextMenu.addItem(aName, callback=callback, shortcut=shortcut)
-    #       if icon is not None:
-    #         ic = Icon(icon)
-    #         action.setIcon(ic)
-    #       self._spectrumUtilActions[aName] = action
-    #
-    #     elif aType == tType.sep:
-    #       self.contextMenu.addSeparator()
-    #
-    #   # self.navigateToMenu = self.contextMenu.addMenu('Navigate To')
-    #   # self.spectrumDisplays = self.getSpectrumDisplays()
-    #   # for spectrumDisplay in self.spectrumDisplays:
-    #   #   spectrumDisplayAction = self.navigateToMenu.addAction(spectrumDisplay.pid)
-    #   #   receiver = lambda spectrumDisplay=spectrumDisplay.pid: self.navigateTo(spectrumDisplay)
-    #   #   self.connect(spectrumDisplayAction, QtCore.SIGNAL('triggered()'), receiver)
-    #   #   self.navigateToMenu.addAction(spectrumDisplay)
-    #
-    #   self.crosshairAction.setChecked(self.crosshairIsVisible)
-    #   self.gridAction.setChecked(self.gridIsVisible)
-    #   self.lastAxisOnlyCheckBox.setChecked(self.spectrumDisplay.lastAxisOnly)
-    #
-    #   return self.contextMenu
-
-    # def _get2dContextPhasingMenu(self) -> Menu:
-    #   """
-    #   Creates and returns the Nd context menu
-    #   """
-    #   class tType:
-    #     menu, item, actn, sep = range(1,5)
-    #
-    #   self._spectrumUtilActions = {}
-    #   self.contextMenu = Menu('', self, isFloatWidget=True)     # generate new menu
-    #
-    #   toolBarItems = [
-    #      # type,      action name             icon                      tooltip/name                shortcut  active  checked,    callback,                             method
-    #     (tType.actn, 'Add Trace',               None,                     'Add new trace',          'PT',   True,   True,       self._newPhasingTrace,''),
-    #     (tType.actn, 'Remove All Traces',       None,                     'Remove all traces',      'TR',   True,   True,       self.spectrumDisplay.removePhasingTraces,''),
-    #     (tType.actn, 'Set Pivot',               None,                     'Set pivot value',        'PV',   True,   True,       self._setPhasingPivot,''),
-    #     (tType.actn, 'Increase Trace Scale',    'icons/tracescale-up',  'Increase trace scale',     'TU',   True,   True,       self.spectrumDisplay.increaseTraceScale,''),
-    #     (tType.actn, 'Decrease Trace Scale',    'icons/tracescale-down','Decrease trace scale',     'TD',   True,   True,       self.spectrumDisplay.decreaseTraceScale,      ''),
-    #     (tType.sep, None, None, None, None, None, None, None, None),
-    #     (tType.actn, 'Exit Phasing Console', 'icons/phase-console',                     'Exit phasing console',   'PC',   True,   True,       self.spectrumDisplay.togglePhaseConsole,    ''),
-    #   ]
-    #
-    #   for aType, aName, icon, tooltip, shortcut, active, checked, callback, attrib in toolBarItems:     # build the menu items/actions
-    #     # self.contextMenu.navigateToMenu = self.contextMenu.addMenu('Navigate To')
-    #     def tempMethod():           # ejb - how does this work?????
-    #       return
-    #     if aType == tType.menu:
-    #       action = self.contextMenu.addMenu(aName)
-    #       tempMethod.__doc__=''
-    #       tempMethod.__name__=attrib
-    #       setattr(self.contextMenu, tempMethod.__name__, action)      # add to the menu
-    #
-    #     elif aType == tType.item:
-    #       # self.gridAction = self.contextMenu.addItem("Grid", callback=self.toggleGrid, checkable=True)
-    #       action = self.contextMenu.addItem(aName, callback=callback, checkable=active, checked=checked)
-    #       tempMethod.__doc__=''
-    #       tempMethod.__name__=attrib
-    #       setattr(self, tempMethod.__name__, action)
-    #       # add to self
-    #
-    #     elif aType == tType.actn:
-    #       # printAction = self.contextMenu.addAction("Print to File...", lambda: self.spectrumDisplay.window.printToFile(self.spectrumDisplay))
-    #       action = self.contextMenu.addItem(aName, callback=callback, shortcut=shortcut)
-    #       if icon is not None:
-    #         ic = Icon(icon)
-    #         action.setIcon(ic)
-    #       self._spectrumUtilActions[aName] = action
-    #
-    #     elif aType == tType.sep:
-    #       self.contextMenu.addSeparator()
-    #
-    #   # self.navigateToMenu = self.contextMenu.addMenu('Navigate To')
-    #   # self.spectrumDisplays = self.getSpectrumDisplays()
-    #   # for spectrumDisplay in self.spectrumDisplays:
-    #   #   spectrumDisplayAction = self.navigateToMenu.addAction(spectrumDisplay.pid)
-    #   #   receiver = lambda spectrumDisplay=spectrumDisplay.pid: self.navigateTo(spectrumDisplay)
-    #   #   self.connect(spectrumDisplayAction, QtCore.SIGNAL('triggered()'), receiver)
-    #   #   self.navigateToMenu.addAction(spectrumDisplay)
-    #
-    #   # self.crosshairAction.setChecked(self.crosshairIsVisible)
-    #   # self.gridAction.setChecked(self.gridIsVisible)
-    #   # self.lastAxisOnlyCheckBox.setChecked(self.spectrumDisplay.lastAxisOnly)
-    #
-    #   return self.contextMenu
 
     def showExportDialog(self):
         """show the export strip to file dialog
@@ -807,6 +662,8 @@ class GuiStripNd(GuiStrip):
 
     def resizeEvent(self, event):
         super(GuiStripNd, self).resizeEvent(event)
+        # call subclass _resize event
+        self._resize()
 
         # if hasattr(self, 'spectrumViews'):
         #     for spectrumView in self.spectrumViews:
@@ -877,3 +734,11 @@ class GuiStripNd(GuiStrip):
             self.calibrateXNDWidgets._toggleLines()
             self.calibrateYNDWidgets.setVisible(False)
             self.calibrateYNDWidgets._toggleLines()
+
+    def _closeCalibrateX(self):
+        self.calibrateXYAction.setChecked(False)
+        self.toggleCalibrateXY()
+
+    def _closeCalibrateY(self):
+        self.calibrateXYAction.setChecked(False)
+        self.toggleCalibrateXY()

@@ -63,7 +63,7 @@
 <span class="c1">#=========================================================================================</span>
 <span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: CCPN $&quot;</span>
 <span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2017-07-07 16:32:27 +0100 (Fri, July 07, 2017) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b5 $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.0 $&quot;</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Created</span>
 <span class="c1">#=========================================================================================</span>
@@ -186,7 +186,7 @@
         <span class="sd">&quot;&quot;&quot;get wrappedData (ApiShift) for all ChemicalShift children of parent ChemicalShiftList&quot;&quot;&quot;</span>
         <span class="c1"># NB this is NOT the right sorting order, but sorting on atomId is not possible at the API level</span>
         <span class="k">return</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">parent</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">measurements</span><span class="p">,</span>
-                      <span class="n">key</span><span class="o">=</span><span class="n">operator</span><span class="o">.</span><span class="n">attrgetter</span><span class="p">(</span><span class="s1">&#39;resonance.serial&#39;</span><span class="p">))</span></div>
+                      <span class="n">key</span><span class="o">=</span><span class="n">operator</span><span class="o">.</span><span class="n">attrgetter</span><span class="p">(</span><span class="s1">&#39;resonance.serial&#39;</span><span class="p">))</span>
 
     <span class="c1">#=========================================================================================</span>
     <span class="c1"># CCPN functions</span>
@@ -196,6 +196,11 @@
     <span class="c1"># new&#39;Object&#39; and other methods</span>
     <span class="c1"># Call appropriate routines in their respective locations</span>
     <span class="c1">#===========================================================================================</span>
+
+    <span class="k">def</span> <span class="nf">_tryToRecover</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Routine to try to recover an object that has not loaded correctly to repair integrity</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">pass</span></div>
 
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Connections to parents:</span>
@@ -228,6 +233,14 @@
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">nmrAtom</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getByPid</span><span class="p">(</span><span class="n">nmrAtom</span><span class="p">)</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">nmrAtom</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="k">else</span> <span class="n">nmrAtom</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">nmrAtom</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="c1"># if there is no nmrAtom, create a new one from the default chain</span>
+            <span class="n">nmrChain</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">fetchNmrChain</span><span class="p">(</span><span class="n">shortName</span><span class="o">=</span><span class="s1">&#39;@-&#39;</span><span class="p">)</span>
+            <span class="n">nmrResidue</span> <span class="o">=</span> <span class="n">nmrChain</span><span class="o">.</span><span class="n">fetchNmrResidue</span><span class="p">()</span>
+            <span class="n">nmrAtom</span> <span class="o">=</span> <span class="n">nmrResidue</span><span class="o">.</span><span class="n">fetchNmrAtom</span><span class="p">()</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">es</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;chemicalShift: nmrAtom undefined - unable to create associated nmrAtom&#39;</span><span class="p">)</span>
 
     <span class="n">apiShift</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">newShift</span><span class="p">(</span><span class="n">value</span><span class="o">=</span><span class="n">value</span><span class="p">,</span>
                                      <span class="n">resonance</span><span class="o">=</span><span class="n">nmrAtom</span><span class="o">.</span><span class="n">_wrappedData</span><span class="p">,</span> <span class="n">error</span><span class="o">=</span><span class="n">valueError</span><span class="p">,</span>

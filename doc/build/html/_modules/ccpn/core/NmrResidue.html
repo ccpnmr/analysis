@@ -64,7 +64,7 @@
 <span class="c1">#=========================================================================================</span>
 <span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: Ed Brooksbank $&quot;</span>
 <span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2017-09-20 17:23:41 +0100 (Wed, September 20, 2017) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b5 $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.0 $&quot;</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Created</span>
 <span class="c1">#=========================================================================================</span>
@@ -85,7 +85,7 @@
 <span class="kn">from</span> <span class="nn">ccpnmodel.ccpncore.lib.Constants</span> <span class="kn">import</span> <span class="n">defaultNmrChainCode</span>
 <span class="kn">from</span> <span class="nn">ccpn.core</span> <span class="kn">import</span> <span class="n">_importOrder</span>
 <span class="kn">from</span> <span class="nn">ccpn.util.decorators</span> <span class="kn">import</span> <span class="n">logCommand</span>
-<span class="kn">from</span> <span class="nn">ccpn.core.lib.ContextManagers</span> <span class="kn">import</span> <span class="n">newObject</span><span class="p">,</span> <span class="n">ccpNmrV3CoreSetter</span><span class="p">,</span> <span class="n">renameObjectNoBlanking</span><span class="p">,</span> <span class="n">undoBlock</span>
+<span class="kn">from</span> <span class="nn">ccpn.core.lib.ContextManagers</span> <span class="kn">import</span> <span class="n">newObject</span><span class="p">,</span> <span class="n">ccpNmrV3CoreSetter</span><span class="p">,</span> <span class="n">renameObject</span><span class="p">,</span> <span class="n">renameObjectNoBlanking</span><span class="p">,</span> <span class="n">undoBlock</span>
 <span class="kn">from</span> <span class="nn">ccpn.util.Logging</span> <span class="kn">import</span> <span class="n">getLogger</span>
 
 
@@ -1177,8 +1177,28 @@
     <span class="k">def</span> <span class="nf">_reverseChainForDelete</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">apiNmrChain</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Reverse the chain.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">print</span><span class="p">(</span><span class="s1">&#39;&gt;&gt;&gt;FLIP CHAIN&#39;</span><span class="p">)</span>
         <span class="n">apiNmrChain</span><span class="o">.</span><span class="n">__dict__</span><span class="p">[</span><span class="s1">&#39;mainResonanceGroups&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">reverse</span><span class="p">()</span>
+
+    <span class="c1"># def _finaliseAction(self, action: str):</span>
+    <span class="c1">#     &quot;&quot;&quot;Subclassed to handle associated ChemicalShift instances</span>
+    <span class="c1">#     &quot;&quot;&quot;</span>
+    <span class="c1">#     super()._finaliseAction(action=action)</span>
+    <span class="c1">#     # propagate the rename to associated ChemicalShift instances</span>
+    <span class="c1">#     if action == &#39;rename&#39;:</span>
+    <span class="c1">#         for cs in self.chemicalShifts:</span>
+    <span class="c1">#             cs._finaliseAction(action=action)</span>
+
+    <span class="c1"># nmrResidue._finaliseAction(&#39;rename&#39;)</span>
+    <span class="c1"># for xx in nmrResidue.offsetNmrResidues:</span>
+    <span class="c1">#     xx._finaliseAction(&#39;rename&#39;)</span>
+
+    <span class="k">def</span> <span class="nf">_finaliseAction</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">action</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Subclassed to handle associated offsetNMrResidues</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_finaliseAction</span><span class="p">(</span><span class="n">action</span><span class="o">=</span><span class="n">action</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">action</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;rename&#39;</span><span class="p">]:</span>
+            <span class="k">for</span> <span class="n">xx</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">offsetNmrResidues</span><span class="p">:</span>
+                <span class="n">xx</span><span class="o">.</span><span class="n">_finaliseAction</span><span class="p">(</span><span class="s1">&#39;rename&#39;</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_delete</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Delete object, with all contained objects and underlying data.</span>
@@ -1248,7 +1268,8 @@
 
         <span class="n">oldName</span> <span class="o">=</span> <span class="s1">&#39;.&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">((</span><span class="n">apiResonanceGroup</span><span class="o">.</span><span class="n">sequenceCode</span><span class="p">,</span> <span class="n">apiResonanceGroup</span><span class="o">.</span><span class="n">residueType</span> <span class="ow">or</span> <span class="s1">&#39;&#39;</span><span class="p">))</span>
 
-        <span class="k">with</span> <span class="n">renameObjectNoBlanking</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="k">as</span> <span class="n">addUndoItem</span><span class="p">:</span>
+        <span class="k">with</span> <span class="n">renameObject</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="k">as</span> <span class="n">addUndoItem</span><span class="p">:</span>
+        <span class="c1"># with renameObjectNoBlanking(self) as addUndoItem:</span>
             <span class="n">apiResonanceGroup</span><span class="o">.</span><span class="n">sequenceCode</span> <span class="o">=</span> <span class="n">sequenceCode</span>
             <span class="n">apiResonanceGroup</span><span class="o">.</span><span class="n">resetResidueType</span><span class="p">(</span><span class="n">residueType</span><span class="p">)</span>
 
@@ -1351,25 +1372,25 @@
 <span class="c1">#                                   &quot;AllNmrResidues corresponding to Residue - E.g. (for MR:A.87)&quot;</span>
 <span class="c1">#                                   &quot; NmrResidues NR:A.87, NR:A.87+0, NR:A.88-1, NR:A.82+5, etc.&quot;)</span>
 
-<span class="k">def</span> <span class="nf">getter</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">NmrChain</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">Tuple</span><span class="p">[</span><span class="n">NmrResidue</span><span class="p">]:</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="p">:</span>
-        <span class="k">return</span> <span class="p">()</span>
-
-    <span class="n">result</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_data2Obj</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">mainResonanceGroups</span><span class="p">)</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">isConnected</span><span class="p">:</span>
-        <span class="n">result</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
-    <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
-
-
-<span class="k">def</span> <span class="nf">setter</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">NmrChain</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">mainResonanceGroups</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span><span class="o">.</span><span class="n">_wrappedData</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">value</span><span class="p">]</span>
-
-
-<span class="n">NmrChain</span><span class="o">.</span><span class="n">mainNmrResidues</span> <span class="o">=</span> <span class="nb">property</span><span class="p">(</span><span class="n">getter</span><span class="p">,</span> <span class="n">setter</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="s2">&quot;&quot;&quot;NmrResidues belonging to NmrChain that are NOT defined relative to another NmrResidue</span>
-<span class="s2">  (sequenceCode ending in &#39;-1&#39;, &#39;+1&#39;, etc.) For connected NmrChains in sequential order, otherwise sorted by assignment&quot;&quot;&quot;</span><span class="p">)</span>
-
-<span class="k">del</span> <span class="n">getter</span>
-<span class="k">del</span> <span class="n">setter</span>
+<span class="c1"># def getter(self: NmrChain) -&gt; typing.Tuple[NmrResidue]:</span>
+<span class="c1">#     if not self._wrappedData:</span>
+<span class="c1">#         return ()</span>
+<span class="c1">#</span>
+<span class="c1">#     result = list(self._project._data2Obj.get(x) for x in self._wrappedData.mainResonanceGroups)</span>
+<span class="c1">#     if not self.isConnected:</span>
+<span class="c1">#         result.sort()</span>
+<span class="c1">#     return tuple(result)</span>
+<span class="c1">#</span>
+<span class="c1">#</span>
+<span class="c1"># def setter(self: NmrChain, value):</span>
+<span class="c1">#     self._wrappedData.mainResonanceGroups = [x._wrappedData for x in value]</span>
+<span class="c1">#</span>
+<span class="c1">#</span>
+<span class="c1"># NmrChain.mainNmrResidues = property(getter, setter, None, &quot;&quot;&quot;NmrResidues belonging to NmrChain that are NOT defined relative to another NmrResidue</span>
+<span class="c1">#   (sequenceCode ending in &#39;-1&#39;, &#39;+1&#39;, etc.) For connected NmrChains in sequential order, otherwise sorted by assignment&quot;&quot;&quot;)</span>
+<span class="c1">#</span>
+<span class="c1"># del getter</span>
+<span class="c1"># del setter</span>
 
 
 <span class="c1">#=========================================================================================</span>
@@ -1529,14 +1550,15 @@
 <span class="c1"># del _newNmrResidue</span>
 <span class="c1"># NmrChain.fetchNmrResidue = _fetchNmrResidue</span>
 
-
 <span class="k">def</span> <span class="nf">_renameNmrResidue</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">Project</span><span class="p">,</span> <span class="n">apiResonanceGroup</span><span class="p">:</span> <span class="n">ApiResonanceGroup</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Reset pid for NmrResidue and all offset NmrResidues&quot;&quot;&quot;</span>
     <span class="n">nmrResidue</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data2Obj</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">apiResonanceGroup</span><span class="p">)</span>
     <span class="n">nmrResidue</span><span class="o">.</span><span class="n">_finaliseAction</span><span class="p">(</span><span class="s1">&#39;rename&#39;</span><span class="p">)</span>
-    <span class="k">for</span> <span class="n">xx</span> <span class="ow">in</span> <span class="n">nmrResidue</span><span class="o">.</span><span class="n">offsetNmrResidues</span><span class="p">:</span>
-        <span class="n">xx</span><span class="o">.</span><span class="n">_finaliseAction</span><span class="p">(</span><span class="s1">&#39;rename&#39;</span><span class="p">)</span>
+    <span class="c1"># for xx in nmrResidue.offsetNmrResidues:</span>
+    <span class="c1">#     xx._finaliseAction(&#39;rename&#39;)</span>
 
+<span class="c1"># 20190501:ED haven&#39;t investigated this properly</span>
+<span class="c1"># but not tested fully - but moved the offsetNmrResidue._finaliseAction into nmrResidue._finaliseAction</span>
 
 <span class="c1"># Notifiers:</span>
 <span class="c1">#NBNB TBD We must make Resonance.ResonanceGroup 1..1 when we move beyond transition model</span>

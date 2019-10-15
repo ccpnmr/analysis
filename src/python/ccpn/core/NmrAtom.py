@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
 __dateModified__ = "$dateModified: 2017-09-20 17:23:40 +0100 (Wed, September 20, 2017) $"
-__version__ = "$Revision: 3.0.b5 $"
+__version__ = "$Revision: 3.0.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -326,7 +326,7 @@ class NmrAtom(AbstractWrapperObject):
         """
         super()._finaliseAction(action=action)
         # propagate the rename to associated ChemicalShift instances
-        if action == 'rename':
+        if action in ['rename', 'change']:
             for cs in self.chemicalShifts:
                 cs._finaliseAction(action=action)
 

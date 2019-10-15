@@ -1,4 +1,5 @@
-PYTHON_DIR = <pythonDir, edit or inserted from compileCCode>
+#PYTHON_DIR = C:\Users\localadmin1\Desktop\ccpn\ccpnv3\miniconda\
+PYTHON_DIR = C:\Users\localadmin1\Anaconda3\envs\ccpnmr_distqt5
 
 # should work if suitably edited for Linux, Irix, Solaris, OSX, Windows
 
@@ -8,19 +9,20 @@ PYTHON_DIR = <pythonDir, edit or inserted from compileCCode>
 # *_LIB_FLAGS = where to find libraries (use -L)
 
 # the C compiler and associated things
-CC = cc -m64
-LINK = $(CC)
-MAKE = make
-CO_NAME = -c $<
-OUT_NAME = -o $@
-OBJ_SUFFIX = o
-DYLIB_SUFFIX = so
-RM = rm -f
+# use below for Windows
+CC = cl
+LINK = $(CC) /LD
+MAKE = nmake
+CO_NAME = -c $**
+OUT_NAME = /Fe$@
+OBJ_SUFFIX = obj
+DYLIB_SUFFIX = pyd
+RM = DEL /f
 
 # compiler flags
 
 # Windows specific flag
-WIN_FLAG = 
+WIN_FLAG = /DWIN64 /MD
 
 # use below for everything with malloc.h
 MALLOC_FLAG =
@@ -33,33 +35,36 @@ MALLOC_FLAG =
 FPIC_FLAG =
 
 # optimisation flag
-OPT_FLAG = -O
+OPT_FLAG = /Ox
 
-CC_FLAGS = $(WIN_FLAG) $(OPT_FLAG) $(FPIC_FLAG) $(MALLOC_FLAG)
+CC_FLAGS = $(WIN_FLAG) $(OPT_FLAG) $(FPIC_FLAG) $(MALLOC_FLAG) $(XOR_FLAG)
 LINK_FLAGS = $(WIN_FLAG) $(OPT_FLAG) $(FPIC_FLAG)
 
 # linking command for C libraries into Python world
-LINK_LIBRARIES = sh linkSharedObjs
+# LINK_LIBRARIES = sh linkSharedObjs
 
 # copying command for C libraries into Python world
-COPY_LIBRARIES = sh copySharedObjs
+COPY_LIBRARIES = copySharedObjs.bat
 
 # math
-MATH_LIB = -lm
+MATH_LIB = /Lm
 
 # rest of Python
-PYTHON_VERSION = 3.5
+PYTHON_VERSION = 37
 
 # for Unix do not seem to need PYTHON_LIB
 # for Windows seem to need below (or similar)
-PYTHON_LIB = -lpython$(PYTHON_VERSION)m
-PYTHON_INCLUDE_FLAGS = -I$(PYTHON_DIR)/include/python$(PYTHON_VERSION)m -I$(PYTHON_DIR)/lib/python$(PYTHON_VERSION)/site-packages/numpy/core/include/numpy
+#PYTHON_LIB = -lpython$(PYTHON_VERSION)
+PYTHON_LIB = $(PYTHON_DIR)\libs\python37.lib
+
+# PYTHON_INCLUDE_FLAGS = /I$(PYTHON_DIR)\include /I$(PYTHON_DIR)\Lib\site-packages /I$(PYTHON_DIR)\Lib\site-packages\numpy\core\include\numpy
+PYTHON_INCLUDE_FLAGS = /I$(PYTHON_DIR)\include /I$(PYTHON_DIR)\Lib\site-packages\numpy\core\include\numpy
 
 # for Unix do not seem to need PYTHON_LIB_FLAGS
-PYTHON_LIB_FLAGS = -L$(PYTHON_DIR)/lib/python$(PYTHON_VERSION)/config-$(PYTHON_VERSION)m
+# PYTHON_LIB_FLAGS = -L$(PYTHON_DIR)\lib\python$(PYTHON_VERSION)\config-$(PYTHON_VERSION)m
 
 # for Windows seem to need below (or similar)
-PYTHON_LIB_FLAGS = -L$(PYTHON_DIR)/libs
+#PYTHON_LIB_FLAGS = $(PYTHON_DIR)\Library\
 
 # shared library flags
 # use below for Linux or Irix

@@ -65,7 +65,7 @@
 <span class="c1">#=========================================================================================</span>
 <span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: CCPN $&quot;</span>
 <span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2017-07-07 16:32:43 +0100 (Fri, July 07, 2017) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b5 $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.0 $&quot;</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Created</span>
 <span class="c1">#=========================================================================================</span>
@@ -93,7 +93,8 @@
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.CheckBox</span> <span class="kn">import</span> <span class="n">CheckBox</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Menu</span> <span class="kn">import</span> <span class="n">Menu</span>
 
-<span class="kn">from</span> <span class="nn">ccpn.ui.gui.guiSettings</span> <span class="kn">import</span> <span class="n">getColours</span><span class="p">,</span> <span class="n">CCPNMODULELABEL_BACKGROUND</span><span class="p">,</span> <span class="n">CCPNMODULELABEL_FOREGROUND</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.guiSettings</span> <span class="kn">import</span> <span class="n">getColours</span><span class="p">,</span> <span class="n">CCPNMODULELABEL_BACKGROUND</span><span class="p">,</span> <span class="n">CCPNMODULELABEL_FOREGROUND</span><span class="p">,</span> \
+    <span class="n">CCPNMODULELABEL_BACKGROUND_ACTIVE</span><span class="p">,</span> <span class="n">CCPNMODULELABEL_FOREGROUND_ACTIVE</span><span class="p">,</span> <span class="n">CCPNMODULELABEL_BORDER</span><span class="p">,</span> <span class="n">CCPNMODULELABEL_BORDER_ACTIVE</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.ColourDialog</span> <span class="kn">import</span> <span class="n">ColourDialog</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.DoubleSpinbox</span> <span class="kn">import</span> <span class="n">DoubleSpinbox</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Label</span> <span class="kn">import</span> <span class="n">Label</span>
@@ -114,7 +115,7 @@
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Icon</span> <span class="kn">import</span> <span class="n">Icon</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.guiSettings</span> <span class="kn">import</span> <span class="n">moduleLabelFont</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Widget</span> <span class="kn">import</span> <span class="n">Widget</span>
-<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.SideBar</span> <span class="kn">import</span> <span class="n">SideBar</span>      <span class="c1">#,SideBar</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.SideBar</span> <span class="kn">import</span> <span class="n">SideBar</span>  <span class="c1">#,SideBar</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.PythonEditor</span> <span class="kn">import</span> <span class="n">QCodeEditor</span>
 
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Frame</span> <span class="kn">import</span> <span class="n">ScrollableFrame</span><span class="p">,</span> <span class="n">Frame</span>
@@ -260,9 +261,6 @@
         <span class="n">CcpnModule</span><span class="o">.</span><span class="n">moduleName</span> <span class="o">=</span> <span class="n">name</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">widgetArea</span><span class="o">.</span><span class="n">setContentsMargins</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
-        <span class="c1"># hide original dock label and generate a new CCPN one</span>
-        <span class="c1"># self._originalLabel = self.label</span>
-        <span class="c1"># self._originalLabel.hide()</span>
 
         <span class="c1"># remove old label, so it can be redefined</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">topLayout</span><span class="o">.</span><span class="n">removeWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">label</span><span class="p">)</span>
@@ -276,51 +274,19 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">topLayout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">label</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>  <span class="c1"># ejb - swap out the old widget, keeps hierarchy</span>
         <span class="c1"># except it doesn&#39;t work properly</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">setOrientation</span><span class="p">(</span><span class="n">o</span><span class="o">=</span><span class="s1">&#39;horizontal&#39;</span><span class="p">)</span>
-        <span class="c1"># self.widgetArea = LayoutWidget()    # ejb - transparent, make normal drops better</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">setAutoFillBackground</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
 
-        <span class="c1"># ejb - below, True allows normal drops from outside and spectra, False for DockArea drops</span>
-        <span class="c1"># self.widgetArea.setAttribute(QtCore.Qt.WA_TransparentForMouseEvents, False)</span>
-
-        <span class="c1"># ejb - add eventFilter for toggling WA_TransparentForMouseEvents</span>
-
         <span class="c1"># main widget area</span>
-        <span class="c1">#self.mainWidget = Frame(parent=self, fShape=&#39;styledPanel&#39;, fShadow=&#39;plain&#39;)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">mainWidget</span> <span class="o">=</span> <span class="n">Frame</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">setLayout</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">acceptDrops</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>  <span class="c1">#QtWidgets.QWidget(self)</span>
-
-        <span class="c1"># print(&#39;&gt;&gt;&gt;mainWidget &#39;)</span>
-        <span class="c1">#self.mainWidget.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mainWidget</span> <span class="o">=</span> <span class="n">Frame</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">setLayout</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">acceptDrops</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
 
         <span class="c1"># optional settings widget area</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">settingsWidget</span> <span class="o">=</span> <span class="bp">None</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">includeSettingsWidget</span><span class="p">:</span>
-            <span class="c1"># self.settingsWidget = ScrollableWidget(parent=self.widgetArea, setLayout=True,</span>
-            <span class="c1">#                                       scrollBarPolicies=(&#39;always&#39;,&#39;asNeeded&#39;),</span>
-            <span class="c1">#                                       minimumSizes=self.settingsMinimumSizes</span>
-            <span class="c1">#                                      )</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_settingsScrollArea</span> <span class="o">=</span> <span class="n">ScrollArea</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">widgetArea</span><span class="p">)</span>
-
-            <span class="c1"># self.settingsWidget = Frame(parent=None, showBorder=False)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">settingsWidget</span> <span class="o">=</span> <span class="n">Widget</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">acceptDrops</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
-
-            <span class="c1"># self.settingsWidget.setMinimumWidth(self.settingsMinimumSizes[0])</span>
-            <span class="c1"># self.settingsWidget.setMinimumHeight(self.settingsMinimumSizes[1])</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_settingsScrollArea</span><span class="o">.</span><span class="n">setWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">settingsWidget</span><span class="p">)</span>
-            <span class="c1">#self.settingsWidget.setLayout(QtWidgets.QGridLayout())</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">settingsWidget</span><span class="o">.</span><span class="n">setGridLayout</span><span class="p">()</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_settingsScrollArea</span><span class="o">.</span><span class="n">setWidgetResizable</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
-            <span class="c1">#self._settingsScrollArea.getLayout().addWidget(self.settingsWidget)</span>
-            <span class="c1">#self.settingsWidget.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)</span>
-
-            <span class="c1"># if self.settingsOnTop:</span>
-            <span class="c1">#   # self.addWidget(self.settingsWidget.getScrollArea(), 0, 0)</span>
-            <span class="c1">#   self.addWidget(self._settingsScrollArea, 0, 0)</span>
-            <span class="c1">#   self.addWidget(self.mainWidget, 1, 0)</span>
-            <span class="c1"># else:</span>
-            <span class="c1">#   # self.addWidget(self.settingsWidget.getScrollArea(), 1, 0)</span>
-            <span class="c1">#   self.addWidget(self._settingsScrollArea, 1, 0)</span>
-            <span class="c1">#   self.addWidget(self.mainWidget, 1, 1)</span>
-            <span class="c1"># # self.settingsWidget._sequenceGraphScrollArea.hide()</span>
 
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">settingsPosition</span> <span class="ow">in</span> <span class="n">settingsWidgetPositions</span><span class="p">:</span>
                 <span class="n">hSettings</span><span class="p">,</span> <span class="n">vSettings</span> <span class="o">=</span> <span class="n">settingsWidgetPositions</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">settingsPosition</span><span class="p">][</span><span class="s1">&#39;settings&#39;</span><span class="p">]</span>
@@ -333,8 +299,6 @@
 
             <span class="bp">self</span><span class="o">.</span><span class="n">_settingsScrollArea</span><span class="o">.</span><span class="n">hide</span><span class="p">()</span>
 
-            <span class="c1"># testing a splitter to improve settings</span>
-            <span class="c1"># self._splitter.setChildrenCollapsible(False)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">layout</span><span class="o">.</span><span class="n">removeWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_settingsScrollArea</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">layout</span><span class="o">.</span><span class="n">removeWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mainWidget</span><span class="p">)</span>
 
@@ -358,56 +322,15 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_splitter</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_splitter</span><span class="o">.</span><span class="n">setStretchFactor</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>
 
-            <span class="c1"># #another fix for the stylesheet</span>
-            <span class="c1"># if hasattr(mainWindow, &#39;application&#39;) and mainWindow.application:</span>
-            <span class="c1">#   # check that application has been attached - may not be the case for some test modules</span>
-            <span class="c1">#   self.colourScheme = mainWindow.application.colourScheme</span>
-            <span class="c1">#   if self.colourScheme == &#39;dark&#39;:</span>
-            <span class="c1">#     self.setStyleSheet(&quot;&quot;&quot;QSplitter{</span>
-            <span class="c1">#                                 background-color: #2a3358;</span>
-            <span class="c1">#                           }</span>
-            <span class="c1">#                           QSplitter::handle:horizontal {</span>
-            <span class="c1">#                                 width: 3px;</span>
-            <span class="c1">#                           }</span>
-            <span class="c1">#                           QSplitter::handle:vertical {</span>
-            <span class="c1">#                                 height: 3px;</span>
-            <span class="c1">#                           }</span>
-            <span class="c1">#                           QSplitter::handle { background-color: LightGray }</span>
-            <span class="c1">#                           &quot;&quot;&quot;)</span>
-            <span class="c1">#   elif self.colourScheme == &#39;light&#39;:</span>
-            <span class="c1">#     self.setStyleSheet(&quot;&quot;&quot;QSplitter{</span>
-            <span class="c1">#                                 background-color: #FBF4CC;</span>
-            <span class="c1">#                           }</span>
-            <span class="c1">#                           QSplitter::handle:horizontal {</span>
-            <span class="c1">#                                 width: 3px;</span>
-            <span class="c1">#                           }</span>
-            <span class="c1">#                           QSplitter::handle:vertical {</span>
-            <span class="c1">#                                 height: 3px;</span>
-            <span class="c1">#                           }</span>
-            <span class="c1">#                           QSplitter::handle { background-color: DarkGray }</span>
-            <span class="c1">#                           &quot;&quot;&quot;)</span>
-
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">settingsWidget</span> <span class="o">=</span> <span class="bp">None</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mainWidget</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
 
-        <span class="c1"># self.setWidgetTransparency(False)</span>
-
-        <span class="c1"># add an event filter to handle transparency</span>
-        <span class="c1"># and to check when the dock has been floated - it needs to have a callback</span>
+        <span class="c1"># add an event filter to check when the dock has been floated - it needs to have a callback</span>
         <span class="c1"># that fires when the window has been maximised</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_maximiseFunc</span> <span class="o">=</span> <span class="bp">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_closeFunc</span> <span class="o">=</span> <span class="bp">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">eventFilter</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_eventFilter</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">installEventFilter</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
         <span class="n">CcpnModule</span><span class="o">.</span><span class="n">_lastActionWasDrop</span> <span class="o">=</span> <span class="bp">False</span>
-
-        <span class="c1"># attach the mouse events to the widget</span>
-        <span class="c1"># self.mainWidget.dragMoveEvent = self.dragMoveEvent</span>
-        <span class="c1"># self.mainWidget.mouseMoveEvent = self.mouseMoveEvent</span>
-        <span class="c1"># self.mainWidget.dragEnterEvent = self.dragEnterEvent</span>
-        <span class="c1"># self.mainWidget.dragLeaveEvent = self.dragLeaveEvent</span>
-        <span class="c1"># self.mainWidget.dropEvent = self.dropEvent</span>
 
         <span class="c1"># always explicitly show the mainWidget and/or settings widget</span>
         <span class="c1"># default state (increased by one by settingsCallback)</span>
@@ -420,47 +343,26 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">setParent</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">moduleArea</span><span class="p">)</span>  <span class="c1"># ejb</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">widgetArea</span><span class="o">.</span><span class="n">setParent</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
 
-        <span class="c1"># # Not needed after all - SpectrumDisplay &#39;name&#39; is renamed to &#39;title&#39;</span>
-        <span class="c1"># def getName(self):</span>
-        <span class="c1">#   &quot;Return name of self; done to allow for override in GuiSpectrumDisplay as that is a wrapper object as well&quot;</span>
-        <span class="c1">#   return self.name()</span>
-
-        <span class="c1"># stop the blue overlay popping up when dragging over a spectrum</span>
+        <span class="c1"># stop the blue overlay popping up when dragging over a spectrum (no central region)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">allowedAreas</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;top&#39;</span><span class="p">,</span> <span class="s1">&#39;left&#39;</span><span class="p">,</span> <span class="s1">&#39;right&#39;</span><span class="p">,</span> <span class="s1">&#39;bottom&#39;</span><span class="p">]</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_updateStyle</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">update</span><span class="p">()</span>  <span class="c1"># ejb - make sure that the widgetArea starts the correct size</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">update</span><span class="p">()</span>  <span class="c1"># make sure that the widgetArea starts the correct size</span>
 
-        <span class="c1"># self._instances.add(ref(self))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_allChildren</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
 
-    <span class="c1"># def setWidgetTransparency(self, transparent):</span>
-    <span class="c1">#     &quot;&quot;&quot;Set the transparency of the mainWidgets, currently required because</span>
-    <span class="c1">#     dragMovevent is not propagated through all the widgets</span>
-    <span class="c1">#     &quot;&quot;&quot;</span>
-    <span class="c1">#     return</span>
-    <span class="c1">#</span>
-    <span class="c1">#     self.mainWidget.setAttribute(QtCore.Qt.WA_TransparentForMouseEvents, transparent)</span>
-    <span class="c1">#     if self.settingsWidget:</span>
-    <span class="c1">#         self.settingsWidget.setAttribute(QtCore.Qt.WA_TransparentForMouseEvents, transparent)</span>
+    <span class="c1"># Leave this in so I remember ShortcutOverride</span>
+    <span class="c1"># def event(self, event):</span>
+    <span class="c1">#     if event.type() == QtCore.QEvent.ShortcutOverride:</span>
+    <span class="c1">#         event.accept()</span>
+    <span class="c1">#         print(&#39;&gt;&gt;&gt;Override&#39;)</span>
+    <span class="c1">#     else:</span>
+    <span class="c1">#         super(CcpnModule, self).event(event)</span>
 
     <span class="k">def</span> <span class="nf">_findChildren</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">widget</span><span class="p">):</span>
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">widget</span><span class="o">.</span><span class="n">children</span><span class="p">():</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_allChildren</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">i</span><span class="p">})</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_findChildren</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
-
-    <span class="c1"># @classmethod</span>
-    <span class="c1"># def getInstances(cls):</span>
-    <span class="c1">#   dead = set()</span>
-    <span class="c1">#   for ref in cls._instances:</span>
-    <span class="c1">#     obj = ref()</span>
-    <span class="c1">#     if obj is not None:</span>
-    <span class="c1">#       # if isinstance(obj, cls):</span>
-    <span class="c1">#       if obj.className == cls.className:</span>
-    <span class="c1">#         yield obj</span>
-    <span class="c1">#     else:</span>
-    <span class="c1">#       dead.add(ref)</span>
-    <span class="c1">#   cls._instances -= dead</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">titleName</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -508,15 +410,23 @@
         <span class="k">for</span> <span class="n">num</span><span class="p">,</span> <span class="n">w</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_allChildren</span><span class="p">):</span>
             <span class="k">if</span> <span class="n">w</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span> <span class="ow">in</span> <span class="n">CommonWidgets</span><span class="p">:</span>
                 <span class="n">allStorableWidgets</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">w</span><span class="p">)</span>
-        <span class="n">widgtesWithinSelf</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">widgetsWithinSelf</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">varName</span><span class="p">,</span> <span class="n">varObj</span> <span class="ow">in</span> <span class="nb">vars</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
             <span class="k">if</span> <span class="n">varObj</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span> <span class="ow">in</span> <span class="n">CommonWidgets</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
-                <span class="n">widgtesWithinSelf</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">varObj</span><span class="p">)</span>
-        <span class="n">nestedWidgtes</span> <span class="o">=</span> <span class="p">[</span><span class="n">widget</span> <span class="k">for</span> <span class="n">widget</span> <span class="ow">in</span> <span class="n">allStorableWidgets</span> <span class="k">if</span> <span class="n">widget</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">widgtesWithinSelf</span><span class="p">]</span>
-        <span class="n">nestedWidgts</span> <span class="o">=</span> <span class="p">[</span><span class="n">widget</span> <span class="k">for</span> <span class="n">widget</span> <span class="ow">in</span> <span class="n">nestedWidgtes</span> <span class="k">if</span> <span class="n">widget</span><span class="o">.</span><span class="n">parent</span><span class="p">()</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">widgtesWithinSelf</span><span class="p">]</span>
-        <span class="n">nestedWidgts</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">x</span><span class="p">)),</span> <span class="n">reverse</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
-        <span class="n">grouppedNestedWidgtes</span> <span class="o">=</span> <span class="p">[</span><span class="nb">list</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">itertools</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">nestedWidgts</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">x</span><span class="p">)),</span> <span class="p">)]</span>
-        <span class="k">for</span> <span class="n">widgetsGroup</span> <span class="ow">in</span> <span class="n">grouppedNestedWidgtes</span><span class="p">:</span>
+                <span class="n">widgetsWithinSelf</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">varObj</span><span class="p">)</span>
+
+        <span class="n">nestedWidgets</span> <span class="o">=</span> <span class="p">[</span><span class="n">widget</span> <span class="k">for</span> <span class="n">widget</span> <span class="ow">in</span> <span class="n">allStorableWidgets</span> <span class="k">if</span> <span class="n">widget</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">widgetsWithinSelf</span><span class="p">]</span>
+        <span class="n">nestedWidgs</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">widg</span> <span class="ow">in</span> <span class="n">nestedWidgets</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">widg</span><span class="o">.</span><span class="n">parent</span><span class="p">()</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">widgetsWithinSelf</span><span class="p">:</span>
+                    <span class="n">nestedWidgs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">widg</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">es</span><span class="p">:</span>
+                <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">debug2</span><span class="p">(</span><span class="s1">&#39;ignoring bad widget </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">widg</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">es</span><span class="p">)))</span>
+
+        <span class="n">nestedWidgs</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">x</span><span class="p">)),</span> <span class="n">reverse</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+        <span class="n">groupednestedWidgets</span> <span class="o">=</span> <span class="p">[</span><span class="nb">list</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">itertools</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">nestedWidgs</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">x</span><span class="p">)),</span> <span class="p">)]</span>
+        <span class="k">for</span> <span class="n">widgetsGroup</span> <span class="ow">in</span> <span class="n">groupednestedWidgets</span><span class="p">:</span>
             <span class="k">for</span> <span class="n">count</span><span class="p">,</span> <span class="n">widget</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">widgetsGroup</span><span class="p">):</span>
                 <span class="k">if</span> <span class="n">widget</span><span class="o">.</span><span class="n">objectName</span><span class="p">():</span>
                     <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">DoubleUnderscore</span> <span class="o">+</span> <span class="n">widget</span><span class="o">.</span><span class="n">objectName</span><span class="p">(),</span> <span class="n">widget</span><span class="p">)</span>
@@ -574,50 +484,18 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">label</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="n">newName</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_name</span> <span class="o">=</span> <span class="n">newName</span></div>
 
-    <span class="k">def</span> <span class="nf">_eventFilter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">source</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
+<div class="viewcode-block" id="CcpnModule.event"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.Gui.CcpnModule.event">[docs]</a>    <span class="k">def</span> <span class="nf">event</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        CCPNInternal</span>
 <span class="sd">        Handle events for switching transparency of modules</span>
 <span class="sd">        Modules become transparent when dragging to another module.</span>
 <span class="sd">        Ensure that the dropAreas become active</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-
-        <span class="c1"># if isinstance(source, CcpnModule) or isinstance(source, SideBar):</span>
-        <span class="c1">#     if event.type() == QtCore.QEvent.DragEnter:</span>
-        <span class="c1">#         data = self.parseEvent(event)</span>
-        <span class="c1">#         if DropBase.PIDS in data and not isinstance(data[&#39;event&#39;].source(), (SideBar, SideBar)):</span>
-        <span class="c1">#             self.setWidgetTransparency(False)</span>
-        <span class="c1">#         else:</span>
-        <span class="c1">#</span>
-        <span class="c1">#             # make transparent to enable module dragging</span>
-        <span class="c1">#             self.setWidgetTransparency(True)</span>
-        <span class="c1">#</span>
-        <span class="c1">#     elif event.type() == QtCore.QEvent.Leave:</span>
-        <span class="c1">#         self.setWidgetTransparency(False)</span>
-        <span class="c1">#</span>
-        <span class="c1">#     elif event.type() == QtCore.QEvent.Drop:</span>
-        <span class="c1">#         self.setWidgetTransparency(False)</span>
-        <span class="c1">#</span>
-        <span class="c1">#     elif event.type() == QtCore.QEvent.MouseButtonRelease:</span>
-        <span class="c1">#         self.setWidgetTransparency(False)</span>
-        <span class="c1">#</span>
-        <span class="c1"># else:</span>
-        <span class="c1">#     if event.type() == QtCore.QEvent.DragLeave:</span>
-        <span class="c1">#         self.setWidgetTransparency(False)</span>
-        <span class="c1">#</span>
-        <span class="c1">#     if event.type() == QtCore.QEvent.Enter:</span>
-        <span class="c1">#         self.setWidgetTransparency(False)</span>
-        <span class="c1">#</span>
-        <span class="c1">#     if event.type() == QtCore.QEvent.Leave:</span>
-        <span class="c1">#         self.setWidgetTransparency(False)</span>
-        <span class="c1">#</span>
-        <span class="c1">#     elif event.type() == QtCore.QEvent.MouseButtonRelease:</span>
-        <span class="c1">#         self.setWidgetTransparency(False)</span>
-
         <span class="k">if</span> <span class="n">event</span><span class="o">.</span><span class="n">type</span><span class="p">()</span> <span class="o">==</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">QEvent</span><span class="o">.</span><span class="n">ParentChange</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_maximiseFunc</span><span class="p">:</span>
             <span class="k">try</span><span class="p">:</span>
                 <span class="n">found</span> <span class="o">=</span> <span class="bp">False</span>
                 <span class="n">searchWidget</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="p">()</span>
+
                 <span class="c1"># while searchWidget is not None and not found:</span>
                 <span class="c1">#   # print (searchWidget)</span>
                 <span class="c1">#   if isinstance(searchWidget, TempAreaWindow):</span>
@@ -630,29 +508,7 @@
             <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">es</span><span class="p">:</span>
                 <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;Error setting maximiseFunc&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">es</span><span class="p">))</span>
 
-        <span class="k">return</span> <span class="bp">False</span>
-
-    <span class="c1"># def _transparentAllModules(self, transparency:bool=True):</span>
-    <span class="c1">#   if self.area:</span>
-    <span class="c1">#     areaList = self.area.findAll()</span>
-    <span class="c1">#     for modInArea in areaList:</span>
-    <span class="c1">#       modInArea.widgetArea.setAttribute(QtCore.Qt.WA_TransparentForMouseEvents, transparency)</span>
-
-    <span class="c1"># def resizeEvent(self, event):</span>
-    <span class="c1">#   # self.setOrientation(self.labelOrientation, force=True)</span>
-    <span class="c1">#   newSize = self.size()</span>
-    <span class="c1">#   self.resizeOverlay(newSize)</span>
-    <span class="c1">#   self.widgetArea.resize(newSize)   # ejb - to make the DropArea work properly</span>
-    <span class="c1">#   self.mainWidget.resize(newSize)   # ejb - to make the DropArea work properly</span>
-
-    <span class="c1"># override the default dock settings</span>
-    <span class="c1"># self.widgetArea.setStyleSheet(&quot;&quot;&quot;</span>
-    <span class="c1"># Dock &gt; QWidget {</span>
-    <span class="c1">#   padding: 0;</span>
-    <span class="c1">#   margin: 0px 0px 0px 0px;</span>
-    <span class="c1">#   border: 0px;</span>
-    <span class="c1"># }</span>
-    <span class="c1"># &quot;&quot;&quot;)</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">CcpnModule</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">event</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="CcpnModule.installMaximiseEventHandler"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.Gui.CcpnModule.installMaximiseEventHandler">[docs]</a>    <span class="k">def</span> <span class="nf">installMaximiseEventHandler</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">maximiseFunc</span><span class="p">,</span> <span class="n">closeFunc</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -661,10 +517,10 @@
 
 <span class="sd">        :param maximiseFunc:</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span>
+        <span class="k">return</span></div>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">_maximiseFunc</span> <span class="o">=</span> <span class="n">maximiseFunc</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_closeFunc</span> <span class="o">=</span> <span class="n">closeFunc</span></div>
+        <span class="c1"># self._maximiseFunc = maximiseFunc</span>
+        <span class="c1"># self._closeFunc = closeFunc</span>
 
 <div class="viewcode-block" id="CcpnModule.removeMaximiseEventHandler"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.Gui.CcpnModule.removeMaximiseEventHandler">[docs]</a>    <span class="k">def</span> <span class="nf">removeMaximiseEventHandler</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -749,9 +605,6 @@
         <span class="c1"># except:</span>
         <span class="c1">#     pass</span>
 
-        <span class="c1"># if ref(self) in self._instances:</span>
-        <span class="c1">#   self._instances.remove(ref(self))</span>
-
         <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Closing </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">container</span><span class="p">()))</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_container</span><span class="p">:</span>
             <span class="n">area</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">moduleArea</span>
@@ -760,15 +613,21 @@
                     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">area</span><span class="o">.</span><span class="n">children</span><span class="p">():</span>
                         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">Container</span><span class="p">):</span>
                             <span class="bp">self</span><span class="o">.</span><span class="n">_container</span> <span class="o">=</span> <span class="n">i</span>
-        <span class="c1"># try:</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
-        <span class="c1"># self.deleteLater()   # ejb - remove recursion when closing table from commandline</span>
-        <span class="c1"># except Exception as es:</span>
-        <span class="c1">#   getLogger().debug(&#39;&gt;&gt;&gt;delete CcpnModule Error %s&#39; %es)</span>
 
-    <span class="c1"># def setAcceptDrops(self, value):</span>
-    <span class="c1">#     &quot;&quot;&quot;Method to pass drops&quot;&quot;&quot;</span>
-    <span class="c1">#     self.mainWidget.setAcceptDrops(value)</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+<div class="viewcode-block" id="CcpnModule.enterEvent"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.Gui.CcpnModule.enterEvent">[docs]</a>    <span class="k">def</span> <span class="nf">enterEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">preferences</span><span class="o">.</span><span class="n">general</span><span class="o">.</span><span class="n">focusFollowsMouse</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">setFocus</span><span class="p">()</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">label</span><span class="o">.</span><span class="n">setModuleHighlight</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">enterEvent</span><span class="p">(</span><span class="n">event</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="CcpnModule.leaveEvent"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.Gui.CcpnModule.leaveEvent">[docs]</a>    <span class="k">def</span> <span class="nf">leaveEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">preferences</span><span class="o">.</span><span class="n">general</span><span class="o">.</span><span class="n">focusFollowsMouse</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">label</span><span class="o">.</span><span class="n">setModuleHighlight</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">enterEvent</span><span class="p">(</span><span class="n">event</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="CcpnModule.dragMoveEvent"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.Gui.CcpnModule.dragMoveEvent">[docs]</a>    <span class="k">def</span> <span class="nf">dragMoveEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
         <span class="n">DockDrop</span><span class="o">.</span><span class="n">dragMoveEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">)</span></div>
@@ -781,7 +640,7 @@
             <span class="n">ev</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
             <span class="c1"># print (&#39;&gt;&gt;&gt;&#39;, ev.source())</span>
             <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parseEvent</span><span class="p">(</span><span class="n">ev</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">DropBase</span><span class="o">.</span><span class="n">PIDS</span> <span class="ow">in</span> <span class="n">data</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;event&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">source</span><span class="p">(),</span> <span class="n">SideBar</span><span class="p">):</span>      <span class="c1">#(SideBar, SideBar)):</span>
+            <span class="k">if</span> <span class="n">DropBase</span><span class="o">.</span><span class="n">PIDS</span> <span class="ow">in</span> <span class="n">data</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;event&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">source</span><span class="p">(),</span> <span class="n">SideBar</span><span class="p">):</span>  <span class="c1">#(SideBar, SideBar)):</span>
                 <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">widgetArea</span><span class="p">:</span>
 
                     <span class="n">ld</span> <span class="o">=</span> <span class="n">ev</span><span class="o">.</span><span class="n">pos</span><span class="p">()</span><span class="o">.</span><span class="n">x</span><span class="p">()</span>
@@ -843,19 +702,14 @@
                 <span class="n">DockDrop</span><span class="o">.</span><span class="n">dragEnterEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="CcpnModule.dropEvent"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.Gui.CcpnModule.dropEvent">[docs]</a>    <span class="k">def</span> <span class="nf">dropEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
-        <span class="c1"># self.setWidgetTransparency(False)</span>
+
         <span class="k">if</span> <span class="n">event</span><span class="p">:</span>
             <span class="n">source</span> <span class="o">=</span> <span class="n">event</span><span class="o">.</span><span class="n">source</span><span class="p">()</span>
             <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parseEvent</span><span class="p">(</span><span class="n">event</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">DropBase</span><span class="o">.</span><span class="n">PIDS</span> <span class="ow">in</span> <span class="n">data</span><span class="p">:</span>
-                <span class="n">pids</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">DropBase</span><span class="o">.</span><span class="n">PIDS</span><span class="p">]</span>
-                <span class="n">objs</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">getByPid</span><span class="p">(</span><span class="n">pid</span><span class="p">)</span> <span class="k">for</span> <span class="n">pid</span> <span class="ow">in</span> <span class="n">pids</span><span class="p">]</span>
-
-                <span class="k">with</span> <span class="n">undoBlock</span><span class="p">():</span>
-                    <span class="n">_openItemObject</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span><span class="p">,</span> <span class="n">objs</span><span class="p">,</span> <span class="n">position</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">dropArea</span><span class="p">,</span> <span class="n">relativeTo</span><span class="o">=</span><span class="bp">self</span><span class="p">)</span>
-
+                <span class="c1"># process Pids</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">_processPids</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">position</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">dropArea</span><span class="p">,</span> <span class="n">relativeTo</span><span class="o">=</span><span class="bp">self</span><span class="p">)</span>
                 <span class="n">event</span><span class="o">.</span><span class="n">accept</span><span class="p">()</span>
-                <span class="c1"># print(&#39;DONE&#39;)</span>
 
                 <span class="c1"># reset the dock area</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">dropArea</span> <span class="o">=</span> <span class="bp">None</span>
@@ -870,8 +724,8 @@
                 <span class="k">return</span></div>
 
     <span class="k">def</span> <span class="nf">_fillDisplayWidget</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="nb">list</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;&gt; select-to-add &lt;&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="n">ALL</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="n">display</span><span class="o">.</span><span class="n">pid</span> <span class="k">for</span> <span class="n">display</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">spectrumDisplays</span><span class="p">]</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">displaysWidget</span><span class="o">.</span><span class="n">pulldownList</span><span class="o">.</span><span class="n">setData</span><span class="p">(</span><span class="n">texts</span><span class="o">=</span><span class="nb">list</span><span class="p">)</span>
+        <span class="n">ll</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;&gt; select-to-add &lt;&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="n">ALL</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="n">display</span><span class="o">.</span><span class="n">pid</span> <span class="k">for</span> <span class="n">display</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">spectrumDisplays</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">displaysWidget</span><span class="o">.</span><span class="n">pulldownList</span><span class="o">.</span><span class="n">setData</span><span class="p">(</span><span class="n">texts</span><span class="o">=</span><span class="n">ll</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_getDisplays</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -905,10 +759,8 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">setStyleSheet</span><span class="p">(</span><span class="n">tempStyle</span><span class="p">)</span>
 
 <div class="viewcode-block" id="CcpnModule.startDrag"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.Gui.CcpnModule.startDrag">[docs]</a>    <span class="k">def</span> <span class="nf">startDrag</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="c1"># print(&#39;&gt;&gt;&gt;startDrag&#39;)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">drag</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QDrag</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
         <span class="n">mime</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">QMimeData</span><span class="p">()</span>
-        <span class="c1">#mime.setPlainText(&quot;asd&quot;)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">drag</span><span class="o">.</span><span class="n">setMimeData</span><span class="p">(</span><span class="n">mime</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">widgetArea</span><span class="o">.</span><span class="n">setStyleSheet</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dragStyle</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">update</span><span class="p">()</span>
@@ -949,19 +801,12 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">module</span> <span class="o">=</span> <span class="n">module</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">fixedWidth</span> <span class="o">=</span> <span class="bp">True</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">setFont</span><span class="p">(</span><span class="n">moduleLabelFont</span><span class="p">)</span>
-        <span class="c1">#print(&#39;&gt;&gt;&#39;, name, self.module.application.colourScheme)</span>
-
         <span class="bp">self</span><span class="o">.</span><span class="n">setAlignment</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">AlignVCenter</span> <span class="o">|</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">AlignHCenter</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">showCloseButton</span><span class="p">:</span>
             <span class="c1"># button is already there because of the DockLabel init</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">closeButton</span><span class="o">.</span><span class="n">setIconSize</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">QSize</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">labelSize</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">labelSize</span><span class="p">))</span>
-            <span class="c1"># hardcoded because stylesheet appears not to work</span>
-            <span class="c1"># self.closeButton.setStyleSheet(&quot;&quot;&quot;</span>
-            <span class="c1">#   QToolButton</span>
-            <span class="c1">#     border-width: 0px;</span>
-            <span class="c1">#     padding: 0px;</span>
-            <span class="c1">#   }&quot;&quot;&quot;)</span>
+
             <span class="k">if</span> <span class="n">closeCallback</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;Requested closeButton without callback&#39;</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
@@ -969,28 +814,63 @@
 
         <span class="c1"># Settings</span>
         <span class="k">if</span> <span class="n">showSettingsButton</span><span class="p">:</span>
-            <span class="c1"># self.settingsButton = QtWidgets.QToolButton(self)</span>
-
             <span class="bp">self</span><span class="o">.</span><span class="n">settingsButton</span> <span class="o">=</span> <span class="n">ToolButton</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">settingsButton</span><span class="o">.</span><span class="n">setIcon</span><span class="p">(</span><span class="n">Icon</span><span class="p">(</span><span class="s1">&#39;icons/settings&#39;</span><span class="p">))</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">settingsButton</span><span class="o">.</span><span class="n">setIconSize</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">QSize</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">labelSize</span> <span class="o">-</span> <span class="mi">5</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">labelSize</span> <span class="o">-</span> <span class="mi">5</span><span class="p">))</span>  <span class="c1"># GWV hack to make it work</span>
-            <span class="c1"># hardcoded because stylesheet appears not to work</span>
-            <span class="c1"># colours = getColours()</span>
-            <span class="c1"># styleSheet = &quot;&quot;&quot;</span>
-            <span class="c1">#   QComboBox {</span>
-            <span class="c1">#     border-width: 0px;</span>
-            <span class="c1">#     padding: 0px;</span>
-            <span class="c1">#     background-color : %s;</span>
-            <span class="c1">#     color : %s;</span>
-            <span class="c1">#   }&quot;&quot;&quot; % (colours[CCPNMODULELABEL_BACKGROUND], colours[CCPNMODULELABEL_FOREGROUND])</span>
-            <span class="c1"># print(&quot;&gt;&gt;&gt;&quot;, styleSheet)</span>
-            <span class="c1"># self.settingsButton.setStyleSheet(styleSheet)</span>
+
             <span class="k">if</span> <span class="n">settingsCallback</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;Requested settingsButton without callback&#39;</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">settingsButton</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">settingsCallback</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">updateStyle</span><span class="p">()</span>
+
+        <span class="c1"># flag to disable dragMoveEvent during a doubleClick</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_inDoubleClick</span> <span class="o">=</span> <span class="bp">False</span>
+
+<div class="viewcode-block" id="CcpnModuleLabel.setModuleHighlight"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.Gui.CcpnModuleLabel.setModuleHighlight">[docs]</a>    <span class="k">def</span> <span class="nf">setModuleHighlight</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">hightlighted</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setDim</span><span class="p">(</span><span class="n">hightlighted</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="CcpnModuleLabel.updateStyle"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.Gui.CcpnModuleLabel.updateStyle">[docs]</a>    <span class="k">def</span> <span class="nf">updateStyle</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">r</span> <span class="o">=</span> <span class="s1">&#39;3px&#39;</span>
+        <span class="c1"># get the colours from the colourScheme</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">dim</span><span class="p">:</span>
+            <span class="n">fg</span> <span class="o">=</span> <span class="n">getColours</span><span class="p">()[</span><span class="n">CCPNMODULELABEL_FOREGROUND_ACTIVE</span><span class="p">]</span>
+            <span class="n">bg</span> <span class="o">=</span> <span class="n">getColours</span><span class="p">()[</span><span class="n">CCPNMODULELABEL_BACKGROUND_ACTIVE</span><span class="p">]</span>
+            <span class="n">border</span> <span class="o">=</span> <span class="n">getColours</span><span class="p">()[</span><span class="n">CCPNMODULELABEL_BORDER_ACTIVE</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">fg</span> <span class="o">=</span> <span class="n">getColours</span><span class="p">()[</span><span class="n">CCPNMODULELABEL_FOREGROUND</span><span class="p">]</span>
+            <span class="n">bg</span> <span class="o">=</span> <span class="n">getColours</span><span class="p">()[</span><span class="n">CCPNMODULELABEL_BACKGROUND</span><span class="p">]</span>
+            <span class="n">border</span> <span class="o">=</span> <span class="n">getColours</span><span class="p">()[</span><span class="n">CCPNMODULELABEL_BORDER</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">orientation</span> <span class="o">==</span> <span class="s1">&#39;vertical&#39;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">vStyle</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;DockLabel {</span>
+<span class="s2">                background-color : </span><span class="si">%s</span><span class="s2">;</span>
+<span class="s2">                color : </span><span class="si">%s</span><span class="s2">;</span>
+<span class="s2">                border-top-right-radius: 0px;</span>
+<span class="s2">                border-top-left-radius: </span><span class="si">%s</span><span class="s2">;</span>
+<span class="s2">                border-bottom-right-radius: 0px;</span>
+<span class="s2">                border-bottom-left-radius: </span><span class="si">%s</span><span class="s2">;</span>
+<span class="s2">                border-width: 0px;</span>
+<span class="s2">                border-right: 2px solid </span><span class="si">%s</span><span class="s2">;</span>
+<span class="s2">                padding-top: 3px;</span>
+<span class="s2">                padding-bottom: 3px;</span>
+<span class="s2">            }&quot;&quot;&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">bg</span><span class="p">,</span> <span class="n">fg</span><span class="p">,</span> <span class="n">r</span><span class="p">,</span> <span class="n">r</span><span class="p">,</span> <span class="n">border</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">setStyleSheet</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">vStyle</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">hStyle</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;DockLabel {</span>
+<span class="s2">                background-color : </span><span class="si">%s</span><span class="s2">;</span>
+<span class="s2">                color : </span><span class="si">%s</span><span class="s2">;</span>
+<span class="s2">                border-top-right-radius: </span><span class="si">%s</span><span class="s2">;</span>
+<span class="s2">                border-top-left-radius: </span><span class="si">%s</span><span class="s2">;</span>
+<span class="s2">                border-bottom-right-radius: 0px;</span>
+<span class="s2">                border-bottom-left-radius: 0px;</span>
+<span class="s2">                border-width: 0px;</span>
+<span class="s2">                border-bottom: 2px solid </span><span class="si">%s</span><span class="s2">;</span>
+<span class="s2">                padding-left: 3px;</span>
+<span class="s2">                padding-right: 3px;</span>
+<span class="s2">            }&quot;&quot;&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">bg</span><span class="p">,</span> <span class="n">fg</span><span class="p">,</span> <span class="n">r</span><span class="p">,</span> <span class="n">r</span><span class="p">,</span> <span class="n">border</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">setStyleSheet</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">hStyle</span><span class="p">)</span></div>
 
     <span class="k">def</span> <span class="nf">_createContextMenu</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 
@@ -999,16 +879,6 @@
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">module</span><span class="o">.</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">moduleArea</span><span class="o">.</span><span class="n">ccpnModules</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
             <span class="n">closeOthers</span> <span class="o">=</span> <span class="n">contextMenu</span><span class="o">.</span><span class="n">addAction</span><span class="p">(</span><span class="s1">&#39;Close Others&#39;</span><span class="p">,</span> <span class="n">partial</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">module</span><span class="o">.</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">moduleArea</span><span class="o">.</span><span class="n">_closeOthers</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">module</span><span class="p">))</span>
             <span class="n">closeAllModules</span> <span class="o">=</span> <span class="n">contextMenu</span><span class="o">.</span><span class="n">addAction</span><span class="p">(</span><span class="s1">&#39;Close All&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">module</span><span class="o">.</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">moduleArea</span><span class="o">.</span><span class="n">_closeAll</span><span class="p">)</span>
-            <span class="c1"># contextMenu.addSeparator()</span>
-            <span class="c1"># moveMenu = Menu(&#39;Move&#39;, self, isFloatWidget=True)</span>
-            <span class="c1"># popout = moveMenu.addAction(&#39;Out&#39;, self.module.float)</span>
-            <span class="c1"># # position has to be one of str  &#39;bottom&#39;, &#39;top&#39;, &#39;left&#39;, &#39;right&#39;, &#39;above&#39; as pyqtgraph wants!</span>
-            <span class="c1"># positions = [&#39;top&#39;,&#39;bottom&#39;, &#39;left&#39;, &#39;right&#39;]</span>
-            <span class="c1"># for position in positions:</span>
-            <span class="c1">#   mm = self._modulesMenu(position, self.module)</span>
-            <span class="c1">#   moveMenu._addQMenu(mm)</span>
-            <span class="c1">#</span>
-            <span class="c1"># contextMenu._addQMenu(moveMenu)</span>
 
         <span class="k">return</span> <span class="n">contextMenu</span>
 
@@ -1035,42 +905,6 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="nb">super</span><span class="p">(</span><span class="n">CcpnModuleLabel</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">mousePressEvent</span><span class="p">(</span><span class="n">event</span><span class="p">)</span></div>
 
-    <span class="c1"># GWV: not sure why this was copied as it is identical to the routine in the parent class</span>
-    <span class="c1"># def mousePressEvent(self, ev):</span>
-    <span class="c1">#   if ev.button() == QtCore.Qt.LeftButton:</span>
-    <span class="c1">#     self.pressPos = ev.pos()</span>
-    <span class="c1">#     self.startedDrag = False</span>
-    <span class="c1">#     ev.accept()</span>
-
-    <span class="c1"># def updateStyle(self):</span>
-    <span class="c1">#   &quot;&quot;&quot;</span>
-    <span class="c1">#   Copied from the parent class to allow for modification in StyleSheet</span>
-    <span class="c1">#   However, that appears not to work (fully);</span>
-    <span class="c1">#</span>
-    <span class="c1">#   GWV: many calls to the updateStyle are triggered during initialization</span>
-    <span class="c1">#        probably from paint event</span>
-    <span class="c1">#   &quot;&quot;&quot;</span>
-    <span class="c1">#</span>
-    <span class="c1">#   # Padding apears not to work; overriden somewhere else?</span>
-    <span class="c1">#   colours = getColours()</span>
-    <span class="c1">#   print(&#39;&gt;&gt;&gt;&#39;, colours)</span>
-    <span class="c1">#   # retain &#39;horizontal&#39; and &#39;vertical&#39; as the underlying PyQtGraph has it</span>
-    <span class="c1">#   if self.orientation == &#39;vertical&#39;:</span>
-    <span class="c1">#     self.vStyle = &quot;&quot;&quot;CcpnModuleLabel {</span>
-    <span class="c1">#             background-color : %s;</span>
-    <span class="c1">#             color : %s;</span>
-    <span class="c1">#             border-width: 0px;</span>
-    <span class="c1">#         }&quot;&quot;&quot; % (colours[CCPNMODULELABEL_BACKGROUND], colours[CCPNMODULELABEL_FOREGROUND])</span>
-    <span class="c1">#     self.setStyleSheet(self.vStyle)</span>
-    <span class="c1">#   else:</span>
-    <span class="c1">#     self.hStyle = &quot;&quot;&quot;CcpnModuleLabel {</span>
-    <span class="c1">#             background-color %s;</span>
-    <span class="c1">#             color : %s;</span>
-    <span class="c1">#             border-width: 0px;</span>
-    <span class="c1">#         }&quot;&quot;&quot; % (colours[CCPNMODULELABEL_BACKGROUND], colours[CCPNMODULELABEL_FOREGROUND])</span>
-    <span class="c1">#     print(&#39;&gt;&gt;&gt;&#39;, self.hStyle)</span>
-    <span class="c1">#     self.setStyleSheet(self.hStyle)</span>
-
 <div class="viewcode-block" id="CcpnModuleLabel.paintEvent"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.Gui.CcpnModuleLabel.paintEvent">[docs]</a>    <span class="k">def</span> <span class="nf">paintEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ev</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Copied from the parent VerticalLabel class to allow for modification in StyleSheet</span>
@@ -1085,8 +919,6 @@
             <span class="n">rgn</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">QRect</span><span class="p">(</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">height</span><span class="p">(),</span> <span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">height</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">width</span><span class="p">()</span> <span class="o">+</span> <span class="n">added</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">rgn</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">contentsRect</span><span class="p">()</span>
-            <span class="c1">#print(&#39;&gt;&gt;&#39;, self.width(), self.height())</span>
-            <span class="c1">#print(rgn, rgn.left(), rgn.top())</span>
             <span class="n">added</span> <span class="o">=</span> <span class="mi">4</span>
             <span class="n">rgn</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">QRect</span><span class="p">(</span><span class="n">rgn</span><span class="o">.</span><span class="n">left</span><span class="p">(),</span> <span class="n">rgn</span><span class="o">.</span><span class="n">top</span><span class="p">(),</span> <span class="n">rgn</span><span class="o">.</span><span class="n">width</span><span class="p">(),</span> <span class="n">rgn</span><span class="o">.</span><span class="n">height</span><span class="p">()</span> <span class="o">+</span> <span class="n">added</span><span class="p">)</span>
 
@@ -1104,49 +936,32 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">setMinimumHeight</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">labelSize</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">setMaximumHeight</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">labelSize</span><span class="p">)</span></div>
 
-        <span class="c1"># if self.orientation == &#39;vertical&#39;:</span>
-        <span class="c1">#   self.setMaximumWidth(self.hint.height())</span>
-        <span class="c1">#   self.setMinimumWidth(0)</span>
-        <span class="c1">#   self.setMaximumHeight(16777215)</span>
-        <span class="c1">#   if self.forceWidth:</span>
-        <span class="c1">#     self.setMinimumHeight(self.hint.width())</span>
-        <span class="c1">#   else:</span>
-        <span class="c1">#     self.setMinimumHeight(minSize)</span>
-        <span class="c1"># else:</span>
-        <span class="c1">#   self.setMaximumHeight(self.hint.height())</span>
-        <span class="c1">#   self.setMinimumHeight(0)</span>
-        <span class="c1">#   self.setMaximumWidth(16777215)</span>
-        <span class="c1">#   if self.forceWidth:</span>
-        <span class="c1">#     self.setMinimumWidth(self.hint.width())</span>
-        <span class="c1">#   else:</span>
-        <span class="c1">#     self.setMinimumWidth(minSize)</span>
-
 <div class="viewcode-block" id="CcpnModuleLabel.mouseMoveEvent"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.Gui.CcpnModuleLabel.mouseMoveEvent">[docs]</a>    <span class="k">def</span> <span class="nf">mouseMoveEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ev</span><span class="p">):</span>
-        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;pressPos&#39;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Handle the mouse move event to spawn a drag event</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;pressPos&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_inDoubleClick</span><span class="p">:</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">startedDrag</span> <span class="ow">and</span> <span class="p">(</span><span class="n">ev</span><span class="o">.</span><span class="n">pos</span><span class="p">()</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">pressPos</span><span class="p">)</span><span class="o">.</span><span class="n">manhattanLength</span><span class="p">()</span> <span class="o">&gt;</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QApplication</span><span class="o">.</span><span class="n">startDragDistance</span><span class="p">():</span>
                 <span class="c1"># emit a drag started event</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">sigDragEntered</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="p">(),</span> <span class="n">ev</span><span class="p">)</span>
-
                 <span class="bp">self</span><span class="o">.</span><span class="n">dock</span><span class="o">.</span><span class="n">startDrag</span><span class="p">()</span>
 
-            <span class="n">ev</span><span class="o">.</span><span class="n">accept</span><span class="p">()</span></div></div>
+            <span class="n">ev</span><span class="o">.</span><span class="n">accept</span><span class="p">()</span></div>
 
-    <span class="c1"># def startDrag(self):</span>
-    <span class="c1">#   print(&#39;&gt;&gt;&gt;startDrag&#39;)</span>
-    <span class="c1">#   self.drag = QtGui.QDrag(self)</span>
-    <span class="c1">#   mime = QtCore.QMimeData()</span>
-    <span class="c1">#   #mime.setPlainText(&quot;asd&quot;)</span>
-    <span class="c1">#   self.drag.setMimeData(mime)</span>
-    <span class="c1">#   self.parent().widgetArea.setStyleSheet(self.parent().dragStyle)</span>
-    <span class="c1">#   self.parent().update()</span>
-    <span class="c1">#</span>
-    <span class="c1">#   self.drag.destroyed.connect(self.parent()._destroyed)</span>
-    <span class="c1">#   action = self.drag.exec_()</span>
-    <span class="c1">#   self.parent().updateStyle()</span>
-    <span class="c1">#</span>
-    <span class="c1"># def _destroyed(self, ev):</span>
-    <span class="c1">#   print(&#39;&gt;&gt;&gt;_destroyed&#39;)</span>
-    <span class="c1">#   self.parent()._dragFinished(ev)</span>
+<div class="viewcode-block" id="CcpnModuleLabel.mouseDoubleClickEvent"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.Gui.CcpnModuleLabel.mouseDoubleClickEvent">[docs]</a>    <span class="k">def</span> <span class="nf">mouseDoubleClickEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ev</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Handle the double click event</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># start a small timer when doubleClicked</span>
+        <span class="c1"># disables the dragMoveEvent whilst in a doubleClick</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_inDoubleClick</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="n">QtCore</span><span class="o">.</span><span class="n">QTimer</span><span class="o">.</span><span class="n">singleShot</span><span class="p">(</span><span class="n">QtWidgets</span><span class="o">.</span><span class="n">QApplication</span><span class="o">.</span><span class="n">instance</span><span class="p">()</span><span class="o">.</span><span class="n">doubleClickInterval</span><span class="p">()</span> <span class="o">*</span> <span class="mi">2</span><span class="p">,</span>
+                                 <span class="bp">self</span><span class="o">.</span><span class="n">_resetDoubleClick</span><span class="p">)</span>
+
+        <span class="nb">super</span><span class="p">(</span><span class="n">CcpnModuleLabel</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">mouseDoubleClickEvent</span><span class="p">(</span><span class="n">ev</span><span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="nf">_resetDoubleClick</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;reset the double click flag</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_inDoubleClick</span> <span class="o">=</span> <span class="bp">False</span></div>
 
 
 <div class="viewcode-block" id="DropAreaSelectedOverlay"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.Gui.DropAreaSelectedOverlay">[docs]</a><span class="k">class</span> <span class="nc">DropAreaSelectedOverlay</span><span class="p">(</span><span class="n">QtWidgets</span><span class="o">.</span><span class="n">QWidget</span><span class="p">):</span>
@@ -1179,6 +994,7 @@
     <span class="k">def</span> <span class="nf">_resize</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Resize the overlay, sometimes the overlay is temporarily visible while the module is moving</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># called from ccpnModule during resize to update rect()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">setDropArea</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dropArea</span><span class="p">)</span>
 
 <div class="viewcode-block" id="DropAreaSelectedOverlay.paintEvent"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.Gui.DropAreaSelectedOverlay.paintEvent">[docs]</a>    <span class="k">def</span> <span class="nf">paintEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ev</span><span class="p">):</span>
@@ -1186,6 +1002,8 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">dropArea</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
             <span class="k">return</span>
+
+        <span class="c1"># create a transparent rectangle and painter over the widget</span>
         <span class="n">p</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QPainter</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
         <span class="n">rgn</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">rect</span><span class="p">()</span>
 

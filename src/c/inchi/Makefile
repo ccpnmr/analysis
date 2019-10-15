@@ -5,14 +5,7 @@
 # In addition, inchi.map restricts set of expoorted from .so
 # functions to those which belong to InChI API
 include ../environment.txt
-
-ifndef windir
-#LINUX_MAP = ,--version-script=libinchi.map
-ifdef ISLINUX
-LINUX_FPIC  = -fPIC
-LINUX_Z_RELRO = ,-z,relro
-endif
-endif
+# above gives CC, LINK, MAKE, CC_FLAGS, LINKFLAGS, ..._INCLUDE_FLAGS, ..._LIB_FLAGS, ..._LIB
 
 # === version ===
 # MAIN_VERSION = .1
@@ -29,33 +22,6 @@ ifndef INCHI_LIB_NAME
   INCHI_LIB_NAME = libinchi
 endif
 INCHI_LIB_PATHNAME = $(LIB_DIR)/$(INCHI_LIB_NAME)
-
-# === Linker to create (Shared) InChI library ====
-ifndef SHARED_LINK
-  SHARED_LINK = $(CC) $(SHARED_FLAGS)
-endif
-
-# === C Compiler ===============
-ifndef C_COMPILER
-  C_COMPILER = gcc
-endif
-
-# === C Compiler Options =======
-ifndef C_OPTIONS
-  C_OPTIONS = -ansi $(FPIC_FLAG) $(OPT_FLAG) $(M32_FLAG) $(M64_FLAG) -c
-  ifndef C_SO_OPTIONS
-    C_SO_OPTIONS = $(FPIC_FLAG) $(M32_FLAG) $(M64_FLAG)
-  endif
-  ifndef C_MAIN_OPTIONS
-    C_MAIN_OPTIONS = -DINCHI_LINK_AS_DLL
-  endif
-endif
-
-ifdef windir
-  INCHI_DEF        = $(INCHI_LIB_NAME).def
-  SHARED_LINK_PARM =
-endif
-
 
 # === InChI Library Source files ============
 
@@ -83,55 +49,54 @@ INCHI_LIB_SRCS = ichican2.c       ichicano.c \
 
 # === InChI Library Object files ============
 
-INCHI_LIB_OBJS = ichican2.o       ichicano.o \
-                 ichicans.o       ichiisot.o \
-                 ichilnct.o       ichimak2.o \
-                 ichimake.o       ichimap1.o \
-                 ichimap2.o       ichimap4.o \
-                 ichinorm.o       ichiparm.o \
-                 ichiprt1.o       ichiprt2.o \
-                 ichiprt3.o       ichiqueu.o \
-                 ichiring.o       ichisort.o \
-                 ichister.o       ichitaut.o \
-                 ichi_bns.o       inchi_dll.o \
-                 ichiread.o       ichirvr1.o \
-                 ichirvr2.o       ichirvr3.o \
-                 ichirvr4.o       ichirvr5.o \
-                 ichirvr6.o       ichirvr7.o \
-                 inchi_dll_main.o runichi.o  \
-                 inchi_dll_a.o    inchi_dll_a2.o  \
-                 ikey_dll.o       ikey_base26.o  \
-                 ichi_io.o                   \
-                 sha2.o           strutil.o  \
-                 util.o           inchi_py.o
+INCHI_LIB_OBJS = ichican2.$(OBJ_SUFFIX)       ichicano.$(OBJ_SUFFIX) \
+                 ichicans.$(OBJ_SUFFIX)       ichiisot.$(OBJ_SUFFIX) \
+                 ichilnct.$(OBJ_SUFFIX)       ichimak2.$(OBJ_SUFFIX) \
+                 ichimake.$(OBJ_SUFFIX)       ichimap1.$(OBJ_SUFFIX) \
+                 ichimap2.$(OBJ_SUFFIX)       ichimap4.$(OBJ_SUFFIX) \
+                 ichinorm.$(OBJ_SUFFIX)       ichiparm.$(OBJ_SUFFIX) \
+                 ichiprt1.$(OBJ_SUFFIX)       ichiprt2.$(OBJ_SUFFIX) \
+                 ichiprt3.$(OBJ_SUFFIX)       ichiqueu.$(OBJ_SUFFIX) \
+                 ichiring.$(OBJ_SUFFIX)       ichisort.$(OBJ_SUFFIX) \
+                 ichister.$(OBJ_SUFFIX)       ichitaut.$(OBJ_SUFFIX) \
+                 ichi_bns.$(OBJ_SUFFIX)       inchi_dll.$(OBJ_SUFFIX) \
+                 ichiread.$(OBJ_SUFFIX)       ichirvr1.$(OBJ_SUFFIX) \
+                 ichirvr2.$(OBJ_SUFFIX)       ichirvr3.$(OBJ_SUFFIX) \
+                 ichirvr4.$(OBJ_SUFFIX)       ichirvr5.$(OBJ_SUFFIX) \
+                 ichirvr6.$(OBJ_SUFFIX)       ichirvr7.$(OBJ_SUFFIX) \
+                 inchi_dll_main.$(OBJ_SUFFIX) runichi.$(OBJ_SUFFIX)  \
+                 inchi_dll_a.$(OBJ_SUFFIX)    inchi_dll_a2.$(OBJ_SUFFIX)  \
+                 ikey_dll.$(OBJ_SUFFIX)       ikey_base26.$(OBJ_SUFFIX)  \
+                 ichi_io.$(OBJ_SUFFIX)                   \
+                 sha2.$(OBJ_SUFFIX)           strutil.$(OBJ_SUFFIX)  \
+                 util.$(OBJ_SUFFIX)           inchi_py.$(OBJ_SUFFIX)
 
 # === InChI Library link rule =========
 
-ifdef windir
+ALL_INCLUDE_FLAGS = $(PYTHON_INCLUDE_FLAGS)
 
-$(INCHI_LIB_PATHNAME).a: $(INCHI_LIB_OBJS)
-	$(SHARED_LINK) -o $(INCHI_LIB_PATHNAME).$(DYLIB_SUFFIX) $(INCHI_DEF) \
-  $(INCHI_LIB_OBJS) \
-  -Wl,--out-implib,$(INCHI_LIB_PATHNAME).a,-soname,$(INCHI_LIB_PATHNAME).$(DYLIB_SUFFIX)
+ALL_LIB_FLAGS = $(PYTHON_LIB_FLAGS)
 
-else
+ALL_LIB = $(PYTHON_LIB) $(MATH_LIB)
 
-$(INCHI_LIB_PATHNAME).so$(VERSION): $(INCHI_LIB_OBJS)
-	$(SHARED_LINK) $(SHARED_LINK_PARM) $(C_SO_OPTIONS) -o \
-  $(INCHI_LIB_PATHNAME).$(DYLIB_SUFFIX)$(VERSION) \
-  $(PYTHON_LIB_FLAGS) $(PYTHON_LIB) \
-  $(INCHI_LIB_OBJS)
+all: $(INCHI_LIB_NAME).$(DYLIB_SUFFIX)
 
-endif
+$(INCHI_LIB_NAME).$(DYLIB_SUFFIX): $(INCHI_LIB_OBJS)
+	$(LINK) $(LINK_FLAGS) $(SHARED_FLAGS) $(OUT_NAME) $(ALL_LIB_FLAGS) \
+		$(INCHI_LIB_OBJS) $(ALL_LIB)
 
 # === InChI Library compile rule =========
 
-%.o: %.c
-	$(CC) $(CC_FLAGS) $(C_OPTIONS) $(PYTHON_INCLUDE_FLAGS) $<
+# Special case, inchi_py requires include flags for numpy and python
+inchi_py.$(OBJ_SUFFIX): inchi_py.c
+	$(CC) $(CC_FLAGS) $(ALL_INCLUDE_FLAGS) $(CO_NAME)
+
+# Generic case for all others
+.c.$(OBJ_SUFFIX):;  $(CC) $(CC_FLAGS) $(CO_NAME)
 
 # Cleaning rules
 clean:
 	$(RM) *.$(OBJ_SUFFIX)
- 
+
 realclean: clean
 	$(RM) *.$(DYLIB_SUFFIX)

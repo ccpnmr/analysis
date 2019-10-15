@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: CCPN $"
 __dateModified__ = "$dateModified: 2018-12-20 15:53:25 +0000 (Thu, December 20, 2018) $"
-__version__ = "$Revision: 3.0.b5 $"
+__version__ = "$Revision: 3.0.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -187,6 +187,7 @@ GuiTable::item::selected {
                  mainWindow=None,
                  dataFrameObject=None,  # collate into a single object that can be changed quickly
                  actionCallback=None, selectionCallback=None, checkBoxCallback=None,
+                 pulldownCallback = None,
                  multiSelect=False, selectRows=True, numberRows=False, autoResize=False,
                  enableExport=True, enableDelete=True, enableSearch=True,
                  hideIndex=True, stretchLastSection=True, _applyPostSort=True,
@@ -254,6 +255,7 @@ GuiTable::item::selected {
 
         self._checkBoxCallback = checkBoxCallback
         # set all the elements to the same size
+        self.pulldownCallback = pulldownCallback
         self.hideIndex = hideIndex
         self._setDefaultRowHeight()
 
@@ -328,6 +330,8 @@ GuiTable::item::selected {
 
         # self.horizontalHeader().sortIndicatorChanged.connect(self._sortChanged)
         # self.horizontalHeader().sectionPressed.connect(self._preSort)
+
+        # self.setFormat('%0.3f')
 
         if _applyPostSort:
             self.horizontalHeader().sectionClicked.connect(self._postSort)
@@ -642,7 +646,6 @@ GuiTable::item::selected {
             format = self._formats.get(col, self._formats[None])
             item.setFormat(format)
             self.items.append(item)
-            self.setItem(row, col, item)
 
             # item.setValue(val)  # Required--the text-change callback is invoked
             # when we call setItem.
@@ -652,12 +655,67 @@ GuiTable::item::selected {
                 item.setCheckState(state)
 
             if isinstance(val, list or tuple):
-                pulldown = PulldownList(None, )
+                pulldown = PulldownList(None, callback=self._pulldownCallback)
+                pulldown.setMaximumWidth(300)
                 pulldown.setData(*val)
+
+                pulldown.setObjectName(str((row, col)))
+                model = self.selectionModel()
+                # selects all the items in the row
+                selection =  model.selectedIndexes()
+
                 self.setCellWidget(row, col, pulldown)
+                self.setItem(row, col, item)
+                item.setValue('') # values are in the pulldown. Otherwise they are inserted inside the cell as str in a long list
 
             else:
+                self.setItem(row, col, item)
                 item.setValue(val)
+
+    def _pulldownCallback(self, value):
+        if self.pulldownCallback:
+            self.pulldownCallback(value)
+
+
+    def _pulldownCallback_(self, itemSelection):
+
+        state = True if itemSelection.checkState() == 2 else False
+        state = not state # as to be opposite before catches the event before you clicked
+        value = itemSelection.value
+        # if not state == value:
+
+        # TODO:ED check with Luca on when this should fire
+        # get the row for the checkbox item
+        selection = [self.model().index(itemSelection.row(), cc) for cc in range(self.columnCount())]
+
+        obj = self.getSelectedObjects(selection)
+        obj = obj[0] if obj else None
+
+        if obj:
+            data = CallBack(theObject=self._dataFrameObject,
+                            object=obj,
+                            index=0,
+                            targetName=obj.className,
+                            trigger=CallBack.CLICK,
+                            row=itemSelection.row(),
+                            col=itemSelection.column(),
+                            rowItem=itemSelection,
+                            checked=state)
+            textHeader = self.horizontalHeaderItem(itemSelection.column()).text()
+            if textHeader:
+                self._dataFrameObject.setObjAttr(textHeader, obj, state)
+                # setattr(objList[0], textHeader, state)
+        else:
+            data = CallBack(theObject=self._dataFrameObject,
+                            object=None,
+                            index=0,
+                            targetName=None,
+                            trigger=CallBack.CLICK,
+                            row=itemSelection.row(),
+                            col=itemSelection.column(),
+                            rowItem=itemSelection,
+                            checked=state)
+        self._checkBoxCallback(data)
 
     def _selectionTableCallback(self, itemSelection, mouseDrag=True):
         """Handler when selection has changed on the table
@@ -790,7 +848,7 @@ GuiTable::item::selected {
         # set a minimum height to the rows based on the fontmetrics of a generic character
         self.fontMetric = QtGui.QFontMetricsF(self.font())
         self.bbox = self.fontMetric.boundingRect
-        rowHeight = self.bbox('A').height() + 4
+        rowHeight = self.bbox('A').height() + 8
 
         # pyqt4
         # headers = self.verticalHeader()
@@ -873,7 +931,6 @@ GuiTable::item::selected {
     def mouseMoveEvent(self, event):
         event.ignore()
         super(GuiTable, self).mouseMoveEvent(event)
-
         if self._mousePressedPos is not None:
             # if the mouse has been pressed, then re-enable selection if started a mouse drag, and override double-click
             if self._selectOverride and (event.pos() - self._mousePressedPos).manhattanLength() > QtWidgets.QApplication.startDragDistance():
@@ -1240,7 +1297,7 @@ GuiTable::item::selected {
                                                          hiddenColumns=self._hiddenColumns)
 
             # populate from the Pandas dataFrame inside the dataFrameObject
-            self.setTableFromDataFrameObject(dataFrameObject=_dataFrameObject)
+            self.setTableFromDataFrameObject(dataFrameObject=_dataFrameObject, columnDefs=columnDefs)
 
         except Exception as es:
             getLogger().warning('Error populating table', str(es))
@@ -1249,7 +1306,7 @@ GuiTable::item::selected {
             self._highLightObjs(objs)
             self.project.unblankNotification()
 
-    def setTableFromDataFrameObject(self, dataFrameObject):
+    def setTableFromDataFrameObject(self, dataFrameObject, columnDefs=None):
         """Populate the table from a Pandas dataFrame
         """
 
@@ -1270,6 +1327,11 @@ GuiTable::item::selected {
                 # store the current headings, in case table is cleared, to stop table jumping
                 self._defaultHeadings = dataFrameObject.headings
                 self._defaultHiddenColumns = dataFrameObject.hiddenColumns
+
+                if columnDefs:
+                    for col, colFormat in enumerate(columnDefs.formats):
+                        if colFormat is not None:
+                            self.setFormat(colFormat, column=col)
 
             # highlight them back again
             self._highLightObjs(objs)
@@ -1619,6 +1681,7 @@ GuiTable::item::selected {
 
     def getIndexList(self, classItems, attribute):
         """Get the list of objects on which to before the indexing
+        To be subclassed as required
         """
         # classItem is usually a type such as PeakList, MultipletList
         # with an attribute such as peaks/peaks
@@ -1875,6 +1938,16 @@ GuiTable::item::selected {
 
         return _update
 
+    def getCellToRows(self, cellItem, attribute):
+        """Get the list of objects which cellItem maps to for this table
+        To be subclassed as required
+        """
+        # classItem is usually a type such as PeakList, MultipletList
+        # with an attribute such as peaks/peaks
+
+        # this is a step towards making guiTableABC and subclass for each table
+        return getattr(cellItem, attribute, [])
+
     def _updateCellCallback(self, attr, data):
         """
         Notifier callback for updating the table
@@ -1900,7 +1973,8 @@ GuiTable::item::selected {
 
                         # check if row is the correct type of class
                         if isinstance(cell, cBack[OBJECT_CLASS]):
-                            rowObj = getattr(cell, cBack[OBJECT_PARENT])
+                            # rowObj = getattr(cell, cBack[OBJECT_PARENT])
+                            rowObj = self.getCellToRows(cell, cBack[OBJECT_PARENT])
                             rowCallback = cBack[OBJECT_PARENT]
                             break
                 else:
@@ -2307,7 +2381,7 @@ if __name__ == '__main__':
         exampleFloat = 3.1  # This will create a double spin box
         exampleBool = True  # This will create a check box
         string = 'white'  # This will create a line Edit
-        exampleList = [('Mock', 'Test'), ]  # This will create a pulldown
+        exampleList = [(' ', 'Mock','Test'), ]  # This will create a pulldown
         color = QtGui.QColor('Red')
         icon = Icon('icons/warning')
         r = Colour.colourNameToHexDict['red']
@@ -2332,10 +2406,16 @@ if __name__ == '__main__':
         def editFlags(self, value):
             print(value)
 
+    def _comboboxCallBack(value):
+
+        print('called value =',value)
 
     def _checkBoxCallBack(data):
         s = data['checked']
         print('called value =', s)
+
+    def table_pulldownCallback(value):
+        print('NEW', value)
 
 
     popup = CcpnDialog(windowTitle='Test Table', setLayout=True)
@@ -2345,7 +2425,8 @@ if __name__ == '__main__':
             'Float',
             lambda i: mockObj.exampleFloat,
             'TipText: Float',
-            lambda mockObj, value: mockObj.editFloat(mockObj, value)
+            lambda mockObj, value: mockObj.editFloat(mockObj, value),
+            None,
             ),
 
         (
@@ -2353,6 +2434,7 @@ if __name__ == '__main__':
             lambda i: mockObj.exampleBool,
             'TipText: Bool',
             lambda mockObj, value: mockObj.editBool(mockObj, value),
+            None,
             ),
 
         (
@@ -2360,6 +2442,7 @@ if __name__ == '__main__':
             lambda i: mockObj.exampleList,
             'TipText: Pulldown',
             lambda mockObj, value: mockObj.editPulldown(mockObj, value),
+            None,
             ),
 
         (
@@ -2367,15 +2450,18 @@ if __name__ == '__main__':
             lambda i: mockObj.flagsList,
             'TipText: Flags',
             lambda mockObj, value: mockObj.editFlags(mockObj, value),
+            None,
             )
         ])
-    table = GuiTable(parent=popup, dataFrameObject=None, checkBoxCallback=_checkBoxCallBack, grid=(0, 0))
+    table = GuiTable(parent=popup, dataFrameObject=None, pulldownCallback=table_pulldownCallback, checkBoxCallback=_checkBoxCallBack, grid=(0, 0))
     df = table.getDataFrameFromList(table, [mockObj] * 5, colDefs=columns)
 
     table.setTableFromDataFrameObject(dataFrameObject=df)
     table.item(0, 0).setBackground(QtGui.QColor(100, 100, 150))  #color the first item
-    combo = QtGui.QComboBox()
-    table.setCellWidget(0, 0, combo)
+    # combo = PulldownList(table, callback=_comboboxCallBack)
+    # table.setCellWidget(0, 0, combo)
+    # combo.addItem('DDD')
+    # combo.addItem('TTTT')
     # table.item(0, 0).setFlags(QtCore.Qt.ItemIsUserCheckable | QtCore.Qt.ItemIsEnabled)
     # table.item(0, 0).setCheckState(QtCore.Qt.Unchecked)
     # table.item(0,0).setFormat(float(table.item(0,0).format))

@@ -279,3 +279,117 @@ class GLSimpleStrings():
         """
         for string in self.strings.values():
             self._rescaleString(string)
+
+
+class GLSimpleLegend(GLSimpleStrings):
+    """
+    Class to handle drawing the legend to the screen
+    """
+    def buildStrings(self):
+        for spectrumView in self._GLParent._ordering:  # strip.spectrumViews:
+
+            if spectrumView.isDeleted:
+                continue
+
+            if spectrumView not in self.strings:
+                self.addString(spectrumView, (0, 0),
+                               colour=spectrumView.spectrum.sliceColour, alpha=1.0)
+
+    def drawStrings(self):
+        if self.strip.isDeleted:
+            return
+
+        self.buildStrings()
+
+        # iterate over and draw all strings for visible spectrumViews
+        for specView, string in self.strings.items():
+            if specView in self._GLParent._visibleOrdering and string.object and not string.object.isDeleted:
+                string.drawTextArrayVBO(enableVBO=True)
+
+    def objectText(self, obj):
+        """return the string to be used for the label
+        To be subclassed as required
+        """
+        return str(obj.id)
+
+    def objectInstance(self, obj):
+        """return the object instance to insert into the string
+        To be subclassed as required
+        """
+        return obj
+
+    def objectSettings(self, string, obj):
+        """Set up class specific settings for the new string
+        To be subclassed as required
+        """
+        string.spectrum = obj
+
+    def addString(self, obj, position=(0, 0), axisCodes=None, colour="#FF0000", alpha=1.0,
+                  lock=GLDefs.LOCKNONE, serial=0):
+        """Add a new string to the list
+        """
+        GLp = self._GLParent
+        col = hexToRgbRatio(colour)
+
+        # fixed ppm position - rescale will do the rest
+        textX = position[0]
+        textY = position[1]
+
+        # create new label, should be ready to draw
+        newLabel = GLString(text=self.objectText(obj),
+                            font=GLp.globalGL.glSmallFont,
+                            x=textX,
+                            y=textY,
+                            colour=(*col, alpha),
+                            GLContext=GLp,
+                            obj=self.objectInstance(obj),
+                            serial=serial)
+        newLabel.position = position
+        newLabel.axisCodes = axisCodes
+        newLabel.lock = lock
+
+        # set up class specific settings, to be subclassed as required
+        self.objectSettings(newLabel, obj)
+
+        # shouldn't be necessary but here for completeness
+        self._rescaleString(newLabel)
+
+        # assume objects are only used once, will replace a previous object
+        self.strings[obj] = newLabel
+
+        # return the new created GLstring
+        return newLabel
+
+    def _rescaleString(self, stringObj):
+        vertices = stringObj.numVertices
+
+        if vertices:
+
+            GLp = self._GLParent
+            position = list(stringObj.position)
+
+            # fixed screen co-ordinates from top-left
+            offsets = [GLp.axisL + position[0] * GLp.pixelX,
+                       GLp.axisB + position[1] * GLp.pixelY]
+
+            for pp in range(0, 2 * vertices, 2):
+                stringObj.attribs[pp:pp + 2] = offsets
+
+            # redefine the string's position VBOs
+            stringObj.updateTextArrayVBOAttribs(enableVBO=True)
+
+            try:
+                # reset the colour, may have changed due to spectrum colour change, but not caught anywhere else yet
+                stringObj.setStringHexColour(stringObj.object.sliceColour, alpha=1.0)
+
+                # redefine the string's colour VBOs
+                stringObj.updateTextArrayVBOColour(enableVBO=True)
+
+            except Exception as es:
+                getLogger().warning('error setting legend string colour')
+
+    def rescale(self):
+        """rescale the objects
+        """
+        for string in self.strings.values():
+            self._rescaleString(string)

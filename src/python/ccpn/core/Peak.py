@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: CCPN $"
 __dateModified__ = "$dateModified: 2017-07-07 16:32:29 +0100 (Fri, July 07, 2017) $"
-__version__ = "$Revision: 3.0.b5 $"
+__version__ = "$Revision: 3.0.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -38,9 +38,11 @@ from ccpn.core.lib.peakUtils import snapToExtremum as peakUtilsSnapToExtremum
 from ccpn.util.decorators import logCommand
 from ccpn.core.lib.ContextManagers import newObject, deleteObject, ccpNmrV3CoreSetter, undoBlock
 from ccpn.util.Logging import getLogger
+from ccpn.util.Common import makeIterableList
 
 
 ALIASINGCHANGED = '_aliasingChanged'
+DIMENSIONNMRATOMSCHANGED = '_dimensionNmrAtomsChanged'
 
 
 class Peak(AbstractWrapperObject):
@@ -328,6 +330,9 @@ class Peak(AbstractWrapperObject):
         if not isinstance(value, Sequence):
             raise ValueError("dimensionNmrAtoms must be set to a sequence of list/tuples")
 
+        # store the currently attached nmrAtoms
+        assigned = makeIterableList(self.assignedNmrAtoms)
+
         isotopeCodes = self.peakList.spectrum.isotopeCodes
 
         apiPeak = self._wrappedData
@@ -355,6 +360,11 @@ class Peak(AbstractWrapperObject):
                 dimResonances.append(resonances)
 
         apiPeak.assignByDimensions(dimResonances)
+
+        # insert the new attached nmrAtoms - deleted and new will be included so tables can update with deleted peaks/nmrAtoms
+        # hopefully traitlets will solve notifier problems
+        changedAssigned = tuple(set(assigned) | set(makeIterableList(self.assignedNmrAtoms)))
+        setattr(self, DIMENSIONNMRATOMSCHANGED, changedAssigned)
 
     @property
     def assignedNmrAtoms(self) -> Tuple[Tuple[Optional['NmrAtom'], ...], ...]:
@@ -523,6 +533,13 @@ class Peak(AbstractWrapperObject):
             if getattr(self, ALIASINGCHANGED, None):
                 self._aliasingChanged = False
                 self.peakList.spectrum._finaliseAction(action=action)
+
+            # if the assignedNmrAtoms have changed then notifier the nmrAtoms
+            # This contains the pre-post set to handle updating the chemicalShift table
+            nmrAtoms = getattr(self, DIMENSIONNMRATOMSCHANGED, None)
+            if nmrAtoms:
+                for nmrAtom in nmrAtoms:
+                    nmrAtom._finaliseAction(action=action)
 
     #=========================================================================================
     # CCPN functions

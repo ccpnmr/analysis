@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: CCPN $"
 __dateModified__ = "$dateModified: 2017-07-07 16:32:44 +0100 (Fri, July 07, 2017) $"
-__version__ = "$Revision: 3.0.b5 $"
+__version__ = "$Revision: 3.0.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -46,6 +46,7 @@ from ccpnc.contour import Contourer2d
 from ccpn.ui.gui.lib.GuiSpectrumView import GuiSpectrumView
 from ccpn.util.Logging import getLogger
 from ccpn.core.lib.SpectrumLib import setContourLevelsFromNoise
+
 
 ###from ccpn.ui.gui.widgets.ToolButton import ToolButton
 ###from ccpnc.peak import Peak
@@ -146,7 +147,7 @@ class GuiSpectrumViewNd(GuiSpectrumView):
         # widget = self._parent.spectrumDisplay.spectrumToolBar.widgetForAction(action)
         # widget.setFixedSize(60, 30)
         #
-            # for func in ('setPositiveContourColour', 'setSliceColour'):
+        # for func in ('setPositiveContourColour', 'setSliceColour'):
         #   Notifiers.registerNotify(self.changedSpectrumColour, 'ccp.nmr.Nmr.DataSource', func)
 
         # self.strip.viewBox.addItem(self)
@@ -877,6 +878,8 @@ class GuiSpectrumViewNd(GuiSpectrumView):
                 GL.glCallList(displayLists[n])
         # GL.glPopMatrix()
 
+    # from ccpn.util.decorators import profile
+    # @profile
     def _constructContours(self, posLevels, negLevels, doRefresh=False, glList=None):
         """ Construct the contours for this spectrum using an OpenGL display list
             The way this is done here, any change in contour level needs to call this function.
@@ -925,20 +928,57 @@ class GuiSpectrumViewNd(GuiSpectrumView):
         #for position, dataArray in self.getPlaneData(guiStrip):
         posContoursAll = negContoursAll = None
 
+        numDims = self.spectrum.dimensionCount
+
         if _NEWCOMPILEDCONTOURS:
             # new code for the recompiled glList
             # test = None
-            dataArrays = tuple()
-            for position, dataArray in self._getPlaneData():
-                dataArrays += (dataArray,)
 
-            # call the c routine
-            # the colourArray must be 1d array which is colour*number of levels
-            contourList = Contourer2d.contourerGLList(dataArrays,
-                                                      posLevelsArray,
-                                                      negLevelsArray,
-                                                      np.array(self.posColour * len(posLevels), dtype=np.float32),
-                                                      np.array(self.negColour * len(negLevels), dtype=np.float32))
+            contourList = None
+            if numDims < 3 or self._application.preferences.general.generateSinglePlaneContours:
+                dataArrays = tuple()
+                for position, dataArray in self._getPlaneData():
+                    dataArrays += (dataArray,)
+
+                contourList = Contourer2d.contourerGLList(dataArrays,
+                                                          posLevelsArray,
+                                                          negLevelsArray,
+                                                          np.array(self.posColour * len(posLevels), dtype=np.float32),
+                                                          np.array(self.negColour * len(negLevels), dtype=np.float32))
+            else:
+
+                specIndices = self._displayOrderSpectrumDimensionIndices
+                stripIndices = tuple(specIndices.index(ii) for ii in range(numDims))
+                regionLimits = tuple(axis.region for axis in self.strip.orderedAxes)
+
+                axisLimits = dict([ (self.spectrum.axisCodes[ii], regionLimits[stripIndices[ii]])
+                                    for ii in range(numDims) if stripIndices[ii] is not None and stripIndices[ii] > 1])
+
+                # this isn't fully tested and still has an offset of -1
+                # cheat to move the spectrum by 1 point by adding buffer to visible XY axes
+                exclusionBuffer = [0 if stripIndices[ii] > 1 else 1 for ii in range(numDims)]
+
+                foundRegions = self.spectrum.getRegionData(exclusionBuffer=exclusionBuffer, minimumDimensionSize=1, **axisLimits)
+
+                if foundRegions:
+                    # just use the first region
+                    for region in foundRegions[:1]:
+                        dataArray, intRegion, *rest = region
+
+                        if dataArray.size:
+                            xyzDims = tuple((numDims - ind - 1) for ind in specIndices)
+                            xyzDims = tuple(reversed(xyzDims))
+                            tempDataArray = dataArray.transpose(*xyzDims)
+
+                            # flatten multidimensional arrays into single array
+                            for maxCount in range(numDims-2):
+                                tempDataArray = np.max(tempDataArray.clip(0.0, 1e15), axis=0) + np.min(tempDataArray.clip(-1e12, 0.0), axis=0)
+
+                            contourList = Contourer2d.contourerGLList((tempDataArray,),
+                                                                      posLevelsArray,
+                                                                      negLevelsArray,
+                                                                      np.array(self.posColour * len(posLevels), dtype=np.float32),
+                                                                      np.array(self.negColour * len(negLevels), dtype=np.float32))
 
             if contourList and contourList[1] > 0:
                 glList.numVertices = contourList[1]
@@ -1047,7 +1087,6 @@ class GuiSpectrumViewNd(GuiSpectrumView):
 
         # NBNB TODO FIXME - Wayne, please check through the modified code
 
-
         spectrum = self.spectrum
         dimensionCount = spectrum.dimensionCount
         dimIndices = self._displayOrderSpectrumDimensionIndices
@@ -1091,8 +1130,8 @@ class GuiSpectrumViewNd(GuiSpectrumView):
             zPointFloat0 = valueToPoint(zRegionValue[0]) - 1
             zPointFloat1 = valueToPoint(zRegionValue[1]) - 1
 
-            zPoint0, zPoint1 = (int(zPointFloat0 + (1 if zPointFloat0 >= 0 else 0)),        # this gives first and 1+last integer in range
-                                int(zPointFloat1 + (1 if zPointFloat1 >= 0 else 0)))        # and take into account negative valueToPoint
+            zPoint0, zPoint1 = (int(zPointFloat0 + (1 if zPointFloat0 >= 0 else 0)),  # this gives first and 1+last integer in range
+                                int(zPointFloat1 + (1 if zPointFloat1 >= 0 else 0)))  # and take into account negative valueToPoint
             if zPoint0 == zPoint1:
                 if zPointFloat0 - (zPoint0 - 1) < zPoint1 - zPointFloat1:  # which is closest to an integer
                     zPoint0 -= 1
@@ -1142,8 +1181,8 @@ class GuiSpectrumViewNd(GuiSpectrumView):
             zPointFloat0 = valueToPoint(zRegionValue[0]) - 1
             zPointFloat1 = valueToPoint(zRegionValue[1]) - 1
 
-            zPoint0, zPoint1 = (int(zPointFloat0 + (1 if zPointFloat0 >= 0 else 0)),        # this gives first and 1+last integer in range
-                                int(zPointFloat1 + (1 if zPointFloat1 >= 0 else 0)))        # and take into account negative valueToPoint
+            zPoint0, zPoint1 = (int(zPointFloat0 + (1 if zPointFloat0 >= 0 else 0)),  # this gives first and 1+last integer in range
+                                int(zPointFloat1 + (1 if zPointFloat1 >= 0 else 0)))  # and take into account negative valueToPoint
             if zPoint0 == zPoint1:
                 if zPointFloat0 - (zPoint0 - 1) < zPoint1 - zPointFloat1:  # which is closest to an integer
                     zPoint0 -= 1
@@ -1240,7 +1279,7 @@ class GuiSpectrumViewNd(GuiSpectrumView):
                 zPosition = orderedAxes[dim].position
 
                 # check as there could be more dimensions
-                planeCount = self.strip.planeToolbar.planeCounts[dim-2].value()
+                planeCount = self.strip.planeToolbar.planeCounts[dim - 2].value()
 
                 # valuePerPoint, _, _, _, _ = useFirstVisible._getSpectrumViewParams(2)
                 # zRegionValue = (zPosition + 0.5 * (planeCount+2) * valuePerPoint, zPosition - 0.5 * (planeCount+2) * valuePerPoint)  # Note + and - (axis backwards)
@@ -1250,7 +1289,7 @@ class GuiSpectrumViewNd(GuiSpectrumView):
 
                 # pass in a smaller valuePerPoint - if there are differences in the z-resolution, otherwise just use local valuePerPoint
                 minZWidth = 3 * valuePerPoint
-                zWidth = (planeCount+2) * minimumValuePerPoint[dim-2] if minimumValuePerPoint else (planeCount+2) * valuePerPoint
+                zWidth = (planeCount + 2) * minimumValuePerPoint[dim - 2] if minimumValuePerPoint else (planeCount + 2) * valuePerPoint
                 zWidth = max(zWidth, minZWidth)
 
                 zRegionValue = (zPosition + 0.5 * zWidth, zPosition - 0.5 * zWidth)  # Note + and - (axis backwards)
@@ -1271,7 +1310,7 @@ class GuiSpectrumViewNd(GuiSpectrumView):
                 zPoint0, zPoint1 = (int(zPointFloat0 + (1 if zPointFloat0 >= 0 else 0)),  # this gives first and 1+last integer in range
                                     int(zPointFloat1 + (1 if zPointFloat1 >= 0 else 0)))  # and take into account negative valueToPoint
                 if zPoint0 == zPoint1:
-                    if zPointFloat0 - (zPoint0 - 1) < zPoint1 - zPointFloat1:       # which is closest to an integer
+                    if zPointFloat0 - (zPoint0 - 1) < zPoint1 - zPointFloat1:  # which is closest to an integer
                         zPoint0 -= 1
                     else:
                         zPoint1 += 1
@@ -1290,7 +1329,7 @@ class GuiSpectrumViewNd(GuiSpectrumView):
                 zPointOffset = zDataDim.pointOffset if hasattr(zDataDim, "pointOffset") else 0
                 zPointCount = zDataDim.numPoints
 
-                planeList = planeList + ((tuple(zz for zz in range(zPoint0, zPoint1)), zPointOffset, zPointCount), )
+                planeList = planeList + ((tuple(zz for zz in range(zPoint0, zPoint1)), zPointOffset, zPointCount),)
 
             # return (tuple(zz for zz in range(zPoint0, zPoint1)), zPointOffset, zPointCount)
             return planeList
@@ -1379,7 +1418,7 @@ class GuiSpectrumViewNd(GuiSpectrumView):
     #     else:
     #         return [None, None, None, None, None]
 
-    def _getValues(self, dimensionCount = None):
+    def _getValues(self, dimensionCount=None):
         # ejb - get some spectrum information for scaling the display
         if not dimensionCount:
             dimensionCount = self.spectrum.dimensionCount

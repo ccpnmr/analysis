@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: CCPN $"
 __dateModified__ = "$dateModified: 2017-07-07 16:32:45 +0100 (Fri, July 07, 2017) $"
-__version__ = "$Revision: 3.0.b5 $"
+__version__ = "$Revision: 3.0.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -122,12 +122,21 @@ class SpectrumDisplayNd(GuiSpectrumDisplay):
         """
         Increases contour base level for all spectra visible in the display.
         """
+        modifiedSpectra = set()
         for spectrumView in self.spectrumViews:
             if spectrumView.isVisible():
                 spectrum = spectrumView.spectrum
+
+                # only increase once - duh
+                if spectrum in modifiedSpectra:
+                    continue
+
+                modifiedSpectra.add(spectrum)
+
                 if spectrum.positiveContourBase == spectrumView.positiveContourBase:
                     # We want to set the base for ALL spectra
                     # and to ensure that any private settings are overridden for this display
+                    # setting to None forces the spectrumVIew to access the spectrum attributes
                     spectrumView.positiveContourBase = None
                     spectrumView.positiveContourFactor = None
                     spectrum.positiveContourBase *= spectrum.positiveContourFactor
@@ -157,15 +166,23 @@ class SpectrumDisplayNd(GuiSpectrumDisplay):
                 getLogger().info("spectrum.positiveContourBase = %s" % spectrum.positiveContourBase)
                 getLogger().info("spectrum.negativeContourBase = %s" % spectrum.negativeContourBase)
 
-        self._rebuildContours()
+        # self._rebuildContours()
 
     def lowerContourBase(self):
         """
         Decreases contour base level for all spectra visible in the display.
         """
+        modifiedSpectra = set()
         for spectrumView in self.spectrumViews:
             if spectrumView.isVisible():
                 spectrum = spectrumView.spectrum
+
+                # only increase once - duh
+                if spectrum in modifiedSpectra:
+                    continue
+
+                modifiedSpectra.add(spectrum)
+
                 if spectrum.positiveContourBase == spectrumView.positiveContourBase:
                     # We want to set the base for ALL spectra
                     # and to ensure that any private settings are overridden for this display
@@ -198,15 +215,23 @@ class SpectrumDisplayNd(GuiSpectrumDisplay):
                 getLogger().info("spectrum.positiveContourBase = %s" % spectrum.positiveContourBase)
                 getLogger().info("spectrum.negativeContourBase = %s" % spectrum.negativeContourBase)
 
-        self._rebuildContours()
+        # self._rebuildContours()
 
     def addContourLevel(self):
         """
         Increases number of contours by 1 for all spectra visible in the display.
         """
+        modifiedSpectra = set()
         for spectrumView in self.spectrumViews:
             if spectrumView.isVisible():
                 spectrum = spectrumView.spectrum
+
+                # only increase once - duh
+                if spectrum in modifiedSpectra:
+                    continue
+
+                modifiedSpectra.add(spectrum)
+
                 if spectrum.positiveContourCount == spectrumView.positiveContourCount:
                     # We want to set the base for ALL spectra
                     # and to ensure that any private settings are overridden for this display
@@ -237,15 +262,23 @@ class SpectrumDisplayNd(GuiSpectrumDisplay):
                 getLogger().info("spectrum.positiveContourCount = %s" % spectrum.positiveContourCount)
                 getLogger().info("spectrum.negativeContourCount = %s" % spectrum.negativeContourCount)
 
-        self._rebuildContours()
+        # self._rebuildContours()
 
     def removeContourLevel(self):
         """
         Decreases number of contours by 1 for all spectra visible in the display.
         """
+        modifiedSpectra = set()
         for spectrumView in self.spectrumViews:
             if spectrumView.isVisible():
                 spectrum = spectrumView.spectrum
+
+                # only increase once - duh
+                if spectrum in modifiedSpectra:
+                    continue
+
+                modifiedSpectra.add(spectrum)
+
                 if spectrum.positiveContourCount == spectrumView.positiveContourCount:
                     # We want to set the base for ALL spectra
                     # and to ensure that any private settings are overridden for this display
@@ -280,7 +313,7 @@ class SpectrumDisplayNd(GuiSpectrumDisplay):
                 getLogger().info("spectrum.positiveContourCount = %s" % spectrum.positiveContourCount)
                 getLogger().info("spectrum.negativeContourCount = %s" % spectrum.negativeContourCount)
 
-        self._rebuildContours()
+        # self._rebuildContours()
 
     def updateTraces(self):
         for strip in self.strips:

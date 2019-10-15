@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: CCPN $"
 __dateModified__ = "$dateModified: 2017-07-07 16:32:47 +0100 (Fri, July 07, 2017) $"
-__version__ = "$Revision: 3.0.b5 $"
+__version__ = "$Revision: 3.0.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -25,17 +25,11 @@ __date__ = "$Date: 2017-07-04 15:21:16 +0000 (Tue, July 04, 2017) $"
 # Start of code
 #=========================================================================================
 
-import base64
 import difflib
 import hashlib
 import os
-import re
 import shutil
 import sys
-import time
-import urllib
-from urllib.parse import urlencode, quote
-from urllib.request import urlopen
 from datetime import datetime
 
 
@@ -52,6 +46,7 @@ SERVER_DB_FILE = '__UpdateData.db'
 # (and not a 404 or whatever)
 SERVER_DOWNLOAD_SCRIPT = 'cgi-bin/update/downloadFile'
 SERVER_UPLOAD_SCRIPT = 'cgi-bin/updateadmin/uploadFile'
+SERVER_DOWNLOADCHECK_SCRIPT = 'cgi-bin/register/downloadFileCheckV3'
 
 FIELD_SEP = '\t'
 PATH_SEP = '__sep_'
@@ -130,64 +125,43 @@ def isBinaryData(data):
         return isBinary
 
 
-# def downloadFile(serverScript, serverDbRoot, fileName):
-#     import ssl
-#
-#     context = ssl._create_unverified_context()
-#
-#     fileName = os.path.join(serverDbRoot, fileName)
-#
-#     addr = '%s?fileName=%s' % (serverScript, fileName)
-#     try:
-#         response = urlopen(addr, context=context)
-#
-#         data = response.read()  # just split for testing
-#
-#         try:
-#             data = data.decode('utf-8')
-#             if data.startswith(BAD_DOWNLOAD):
-#                 raise Exception(data[len(BAD_DOWNLOAD):])
-#
-#         except Exception as es:
-#             # may be a binary file
-#             if not isBinaryData(data):
-#                 raise es
-#
-#         finally:
-#             response.close()
-#             return data
-#
-#     except Exception as es:
-#         return None
+def fetchUrl(url, data=None, headers=None, timeout=2.0, decodeResponse=True):
+    """Fetch url request from the server
+    """
+    from ccpn.util.Url import fetchHttpResponse
+    from ccpn.util.UserPreferences import UserPreferences
+
+    try:
+        _userPreferences = UserPreferences(readPreferences=True)
+        proxySettings = None
+        if _userPreferences.proxyDefined:
+            proxyNames = ['useProxy', 'proxyAddress', 'proxyPort', 'useProxyPassword',
+                          'proxyUsername', 'proxyPassword']
+            proxySettings = {}
+            for name in proxyNames:
+                proxySettings[name] = _userPreferences._getPreferencesParameter(name)
+
+        response = fetchHttpResponse('POST', url, data, headers=headers, proxySettings=proxySettings)
+
+        # if response:
+        #     ll = len(response.data)
+        #     print('>>>>>>responseUpdate', proxySettings, response.data[0:min(ll, 20)])
+
+        return response.data.decode('utf-8') if decodeResponse else response
+    except:
+        print('Error fetching Url.')
+
 
 def downloadFile(serverScript, serverDbRoot, fileName):
     """Download a file from the server
     """
-    import ssl
-    import certifi
-    import urllib3.contrib.pyopenssl
-
     fileName = os.path.join(serverDbRoot, fileName)
 
-    context = ssl.create_default_context()
-    context.check_hostname = False
-    context.verify_mode = ssl.CERT_NONE
-
-    headers = {'Content-type': 'application/x-www-form-urlencoded;charset=UTF-8'}
-    body = urlencode({'fileName': fileName}, quote_via=quote).encode('utf-8')
-
-    urllib3.contrib.pyopenssl.inject_into_urllib3()
-    http = urllib3.PoolManager(cert_reqs='CERT_REQUIRED',
-                               ca_certs=certifi.where(),
-                               timeout=urllib3.Timeout(connect=5.0, read=5.0),
-                               retries=urllib3.Retry(1, redirect=False))
-
     try:
-        response = http.request('POST', serverScript,
-                                headers=headers,
-                                body=body,
-                                preload_content=False)
-        data = response.read()
+        values = {'fileName': fileName}
+        response = fetchUrl(serverScript, values, decodeResponse=False)
+        data = response.data
+
         if isBinaryData(data):
             result = data
         else:
@@ -202,13 +176,15 @@ def downloadFile(serverScript, serverDbRoot, fileName):
         return result
 
     except Exception as es:
-        print(str(es))
+        print('Error downloading file from server.')
 
 
-def installUpdates(version):
-    updateAgent = UpdateAgent(version)
+def installUpdates(version, dryRun=True):
+    updateAgent = UpdateAgent(version, dryRun=dryRun)
     updateAgent.resetFromServer()
     updateAgent.installUpdates()
+    if updateAgent._check():
+        updateAgent._resetMd5()
 
 
 class UpdateFile:
@@ -281,7 +257,8 @@ class UpdateAgent(object):
 
     def __init__(self, version, showError=None, showInfo=None, askPassword=None,
                  serverUser=None, server=SERVER, serverDbRoot=SERVER_DB_ROOT, serverDbFile=SERVER_DB_FILE,
-                 serverDownloadScript=SERVER_DOWNLOAD_SCRIPT, serverUploadScript=SERVER_UPLOAD_SCRIPT):
+                 serverDownloadScript=SERVER_DOWNLOAD_SCRIPT, serverUploadScript=SERVER_UPLOAD_SCRIPT,
+                 dryRun=True):
 
         if not showError:
             # showError = MessageDialog.showError
@@ -303,6 +280,7 @@ class UpdateAgent(object):
         self.serverDbRoot = '%s%s' % (serverDbRoot, version)
         self.serverDbFile = serverDbFile
         self.serverDownloadScript = serverDownloadScript
+        self._serverDownloadCheckScript = SERVER_DOWNLOADCHECK_SCRIPT
         self.serverUploadScript = serverUploadScript
         # self.serverDownloadScript = '%s%s' % (server, serverDownloadScript)
         # self.serverUploadScript = '%s%s' % (server, serverUploadScript)
@@ -310,6 +288,8 @@ class UpdateAgent(object):
         self.installLocation = Path.getTopDirectory()
         self.updateFiles = []
         self.updateFileDict = {}
+        self._found = None
+        self._dryRun = dryRun
 
     def checkNumberUpdates(self):
         self.fetchUpdateDb()
@@ -366,10 +346,63 @@ class UpdateAgent(object):
 
         return isDifferent
 
+    def _check(self):
+        """Check the checkSum from the gui
+        """
+        try:
+            self._checkMd5()
+        except:
+            pass
+        finally:
+            return self._found is not None and 'valid' not in self._found
+
+    def _checkMd5(self):
+        """Check the checkSum status on the server
+        """
+        serverDownloadScript = '%s%s' % (self.server, self._serverDownloadCheckScript)
+
+        try:
+            self._numAdditionalUpdates = 0
+            self._found = 'invalid'
+            from ccpn.util.Register import userAttributes, loadDict, _otherAttributes, _insertRegistration
+
+            registrationDict = loadDict()
+            val2 = _insertRegistration(registrationDict)
+            values = {}
+            for attr in userAttributes + _otherAttributes:
+                value = []
+                for c in registrationDict[attr]:
+                    value.append(c if 32 <= ord(c) < 128 else '_')
+                values[attr] = ''.join(value)
+            values.update(val2)
+            values['version'] = self.version
+
+            self._found = fetchUrl(serverDownloadScript, values, timeout=2.0, decodeResponse=True)
+            if isinstance(self._found, str):
+                # file returns with EOF chars on the end
+                self._found = self._found.rstrip('\r\n')
+
+        except:
+            self.showError('Update error', 'Could not check details on server.')
+
+    def _resetMd5(self):
+        # only write the file if it is non-empty
+        if self._found:
+            # from ccpn.util.UserPreferences import userPreferencesDirectory, ccpnConfigPath
+            from ccpn.framework.PathsAndUrls import userPreferencesDirectory, ccpnConfigPath
+
+            fname = ''.join([c for c in map(chr, (108, 105, 99, 101, 110, 99, 101, 75, 101, 121, 46, 116, 120, 116))])
+            lfile = os.path.join(userPreferencesDirectory, fname)
+            if not os.path.exists(lfile):
+                lfile = os.path.join(ccpnConfigPath, fname)
+            with open(lfile, 'w', encoding='UTF-8') as fp:
+                fp.write(self._found)
+
     def resetFromServer(self):
 
         try:
             self.fetchUpdateDb()
+
         except Exception as e:
             self.showError('Update error', 'Could not fetch updates: %s' % e)
 
@@ -386,7 +419,8 @@ class UpdateAgent(object):
                 if filePath in self.updateFileDict:
                     updateFile = self.updateFileDict[filePath]
                     updateFile.shouldCommit = True
-                    print('File %s already in updates' % filePath)
+
+                    self.showInfo('Add Files', 'File %s already in updates' % filePath)
                     existsErrorCount += 1
                 else:
                     updateFile = UpdateFile(self.installLocation, self.serverDbRoot, filePath, shouldCommit=True,
@@ -395,7 +429,7 @@ class UpdateAgent(object):
                     self.updateFiles.append(updateFile)
                     self.updateFileDict[filePath] = updateFile
             else:
-                print('Ignoring "%s", not on installation path "%s"' % (filePath, installLocation))
+                self.showInfo('Ignoring Files', 'Ignoring "%s", not on installation path "%s"' % (filePath, installLocation))
                 installErrorCount += 1
 
         if installErrorCount > 0:
@@ -433,13 +467,16 @@ class UpdateAgent(object):
         if self.haveWriteAccess():
             for updateFile in updateFiles:
                 try:
-                    print('Installing %s' % (updateFile.fullFilePath))
-                    updateFile.installUpdate()
+                    if not self._dryRun:
+                        self.showInfo('Install Updates', 'Installing %s' % (updateFile.fullFilePath))
+                        updateFile.installUpdate()
+                    else:
+                        self.showInfo('Install Updates', 'dry-run %s' % (updateFile.fullFilePath))
 
                     n += 1
                     updateFilesInstalled.append(updateFile)
                 except Exception as e:
-                    print('Could not install %s: %s' % (updateFile.fullFilePath, e))
+                    self.showError('Install Error', 'Could not install %s: %s' % (updateFile.fullFilePath, e))
 
             ss = n != 1 and 's' or ''
             if n != len(updateFiles):
@@ -496,5 +533,6 @@ class UpdateAgent(object):
 
 
 if __name__ == '__main__':
-    applicationVersion = __version__.split()[1]  # ejb - read from the header
-    installUpdates(applicationVersion)
+    from ccpn.framework.Version import applicationVersion
+    # applicationVersion = __version__.split()[1]  # ejb - read from the header
+    installUpdates(applicationVersion, dryRun=False)

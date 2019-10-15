@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Wayne Boucher $"
 __dateModified__ = "$dateModified: 2017-07-07 16:32:41 +0100 (Fri, July 07, 2017) $"
-__version__ = "$Revision: 3.0.b5 $"
+__version__ = "$Revision: 3.0.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -28,7 +28,7 @@ __date__ = "$Date: 2017-03-16 18:20:01 +0000 (Thu, March 16, 2017) $"
 import sys
 import typing
 
-from PyQt5 import QtWidgets, QtCore
+from PyQt5 import QtWidgets, QtCore, QtGui
 
 from ccpn.core import _coreClassMap
 from ccpn.core.Project import Project
@@ -67,12 +67,19 @@ class Gui(Ui):
         # On the Mac (at least) it does not matter what you set the applicationName to be,
         # it will come out as the executable you are running (e.g. "python3")
 
-        # QtCore.QCoreApplication.setAttribute(QtCore.Qt.AA_EnableHighDpiScaling, True)
+        # # QtCore.QCoreApplication.setAttribute(QtCore.Qt.AA_EnableHighDpiScaling, True)
         # QtCore.QCoreApplication.setAttribute(QtCore.Qt.AA_ShareOpenGLContexts, True)
+        # viewportFormat = QtGui.QSurfaceFormat()
+        # viewportFormat.setSwapInterval(0)  #disable VSync
+        # viewportFormat.setSwapBehavior(QtGui.QSurfaceFormat.SingleBuffer)
+        # QtGui.QSurfaceFormat().setDefaultFormat(viewportFormat)
+        # # self._CcpnGLWidget.setFormat(viewportFormat)
+        # # viewportFormat = self._CcpnGLWidget.format()
 
         self.qtApp = Application(self.application.applicationName,
                                  self.application.applicationVersion,
                                  organizationName='CCPN', organizationDomain='ccpn.ac.uk')
+
         #self.qtApp.setStyleSheet(self.application.styleSheet)
 
         styles = QtWidgets.QStyleFactory()
@@ -237,7 +244,7 @@ class Gui(Ui):
         # mainWindow.sideBar.setProject(project)
         # mainWindow.sideBar.fillSideBar(project)
 
-        mainWindow.sideBar.buildTree(project)
+        mainWindow.sideBar.buildTree(project, False)
 
         mainWindow.raise_()
         mainWindow.namespace['current'] = self.application.current
@@ -485,7 +492,13 @@ class Strip1d(coreClass, _GuiStrip1d):
         Logging.getLogger().debug('Strip1d>> spectrumDisplay: %s' % self.spectrumDisplay)
         _GuiStrip1d.__init__(self, self.spectrumDisplay)
 
-        stripIndex = self.spectrumDisplay.orderedStrips.index(self)
+        # cannot add the Frame until fully done
+        strips = self.spectrumDisplay.orderedStrips
+        if self in strips:
+            stripIndex = strips.index(self)
+        else:
+            stripIndex = len(strips)
+            Logging.getLogger().warning('Strip ordering not defined for %s in %s' % (str(self.pid), str(self.spectrumDisplay.pid)))
 
         if self.spectrumDisplay.stripArrangement == 'Y':
 
@@ -513,7 +526,12 @@ class StripNd(coreClass, _GuiStripNd):
         _GuiStripNd.__init__(self, self.spectrumDisplay)
 
         # cannot add the Frame until fully done
-        stripIndex = self.spectrumDisplay.orderedStrips.index(self)
+        strips = self.spectrumDisplay.orderedStrips
+        if self in strips:
+            stripIndex = strips.index(self)
+        else:
+            stripIndex = len(strips)
+            Logging.getLogger().warning('Strip ordering not defined for %s in %s' % (str(self.pid), str(self.spectrumDisplay.pid)))
 
         if self.spectrumDisplay.stripArrangement == 'Y':
 

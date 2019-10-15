@@ -244,6 +244,7 @@ NmrResidue objects behave in there different ways:</p>
 <li class="toctree-l2"><a class="reference internal" href="ccpn.core.lib.html#ccpn-core-lib-ccpnnefio-module">ccpn.core.lib.CcpnNefIo module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ccpn.core.lib.html#module-ccpn.core.lib.CcpnSorting">ccpn.core.lib.CcpnSorting module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ccpn.core.lib.html#module-ccpn.core.lib.CcpnSparkyIo">ccpn.core.lib.CcpnSparkyIo module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ccpn.core.lib.html#module-ccpn.core.lib.CcpnStarIo">ccpn.core.lib.CcpnStarIo module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ccpn.core.lib.html#module-ccpn.core.lib.ContextManagers">ccpn.core.lib.ContextManagers module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ccpn.core.lib.html#module-ccpn.core.lib.DataFrameObject">ccpn.core.lib.DataFrameObject module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ccpn.core.lib.html#ccpn-core-lib-dataio-module">ccpn.core.lib.DataIo module</a></li>
@@ -258,7 +259,7 @@ NmrResidue objects behave in there different ways:</p>
 <li class="toctree-l2"><a class="reference internal" href="ccpn.core.lib.html#module-ccpn.core.lib.Summary">ccpn.core.lib.Summary module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ccpn.core.lib.html#module-ccpn.core.lib.Undo">ccpn.core.lib.Undo module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ccpn.core.lib.html#ccpn-core-lib-util-module">ccpn.core.lib.Util module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="ccpn.core.lib.html#module-ccpn.core.lib.peakUtils">ccpn.core.lib.peakUtils module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ccpn.core.lib.html#ccpn-core-lib-peakutils-module">ccpn.core.lib.peakUtils module</a></li>
 </ul>
 </li>
 </ul>
@@ -2040,7 +2041,7 @@ Identifying label of NmrChain. Defaults to &#8216;?&#8217;</p>
 <dl class="attribute">
 <dt id="ccpn.core.NmrChain.NmrChain.mainNmrResidues">
 <code class="descname">mainNmrResidues</code><a class="headerlink" href="#ccpn.core.NmrChain.NmrChain.mainNmrResidues" title="Permalink to this definition">¶</a></dt>
-<dd><p>- <em>Tuple[ccpn.core.NmrResidue.NmrResidue]</em>, <em>mutable</em> - 
+<dd><p>- <em>Tuple[NmrResidue]</em>, <em>mutable</em> - 
 NmrResidues belonging to NmrChain that are NOT defined relative to another NmrResidue
 (sequenceCode ending in &#8216;-1&#8217;, &#8216;+1&#8217;, etc.) For connected NmrChains in sequential order, otherwise sorted by assignment</p>
 </dd></dl>
@@ -2533,7 +2534,7 @@ either as a list of assignments for each dimension (dimensionNmrAtoms) or as a
 list of all possible assignment combinations (assignedNmrAtoms)</p>
 <dl class="method">
 <dt id="ccpn.core.Peak.Peak.addAssignment">
-<code class="descname">addAssignment</code><span class="sig-paren">(</span><em>value: Sequence[]</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/Peak.html#Peak.addAssignment"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.Peak.Peak.addAssignment" title="Permalink to this definition">¶</a></dt>
+<code class="descname">addAssignment</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/Peak.html#Peak.addAssignment"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.Peak.Peak.addAssignment" title="Permalink to this definition">¶</a></dt>
 <dd><p>Add a peak assignment - a list of one NmrAtom or Pid for each dimension</p>
 </dd></dl>
 
@@ -2664,17 +2665,20 @@ possible - in the example that all four protons could be bound to either of the 
 <p>To (re)set the assignment for a single dimension, use the Peak.assignDimension method.</p>
 </dd></dl>
 
+<dl class="method">
+<dt id="ccpn.core.Peak.Peak.estimateVolume">
+<code class="descname">estimateVolume</code><span class="sig-paren">(</span><em>volumeIntegralLimit=2.0</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/Peak.html#Peak.estimateVolume"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.Peak.Peak.estimateVolume" title="Permalink to this definition">¶</a></dt>
+<dd><p>Estimate the volume of the peak from a gaussian distribution.
+The width of the volume integral in each dimension is the lineWidth (FWHM) * volumeIntegralLimit,
+the default is 2.0 * FWHM of the peak.
+:param volumeIntegralLimit: integral width as a multiple of lineWidth (FWHM)</p>
+</dd></dl>
+
 <dl class="attribute">
 <dt id="ccpn.core.Peak.Peak.figureOfMerit">
 <code class="descname">figureOfMerit</code><a class="headerlink" href="#ccpn.core.Peak.Peak.figureOfMerit" title="Permalink to this definition">¶</a></dt>
 <dd><p>- <em>float=None</em>, <em>mutable</em> - 
 figureOfMerit of Peak, between 0.0 and 1.0 inclusive.</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="ccpn.core.Peak.Peak.fitPositionHeightLineWidths">
-<code class="descname">fitPositionHeightLineWidths</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/Peak.html#Peak.fitPositionHeightLineWidths"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.Peak.Peak.fitPositionHeightLineWidths" title="Permalink to this definition">¶</a></dt>
-<dd><p>Set the position, height and lineWidth of the Peak.</p>
 </dd></dl>
 
 <dl class="method">
@@ -2802,7 +2806,7 @@ serial number of Peak, used in Pid and to identify the Peak.</p>
 
 <dl class="method">
 <dt id="ccpn.core.Peak.Peak.snapToExtremum">
-<code class="descname">snapToExtremum</code><span class="sig-paren">(</span><em>halfBoxSearchWidth: int = 4</em>, <em>halfBoxFitWidth: int = 2</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/Peak.html#Peak.snapToExtremum"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.Peak.Peak.snapToExtremum" title="Permalink to this definition">¶</a></dt>
+<code class="descname">snapToExtremum</code><span class="sig-paren">(</span><em>halfBoxSearchWidth: int = 4</em>, <em>halfBoxFitWidth: int = 4</em>, <em>minDropFactor: float = 0.1</em>, <em>fitMethod: str = 'parabolic'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/Peak.html#Peak.snapToExtremum"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.Peak.Peak.snapToExtremum" title="Permalink to this definition">¶</a></dt>
 <dd><p>Snap the Peak to the closest local extrema, if within range.</p>
 </dd></dl>
 
@@ -2942,10 +2946,19 @@ ChemicalShiftList associated with PeakList.</p>
 </dd></dl>
 
 <dl class="method">
+<dt id="ccpn.core.PeakList.PeakList.estimateVolumes">
+<code class="descname">estimateVolumes</code><span class="sig-paren">(</span><em>volumeIntegralLimit=2.0</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/PeakList.html#PeakList.estimateVolumes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.PeakList.PeakList.estimateVolumes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Estimate the volumes for the peaks in this peakList
+The width of the volume integral in each dimension is the lineWidth * volumeIntegralLimit,
+the default is 2.0 * FWHM of the peak.
+:param volumeIntegralLimit: integral width as a multiple of lineWidth (FWHM)</p>
+</dd></dl>
+
+<dl class="method">
 <dt id="ccpn.core.PeakList.PeakList.fitExistingPeaks">
 <code class="descname">fitExistingPeaks</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/PeakList.html#PeakList.fitExistingPeaks"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.PeakList.PeakList.fitExistingPeaks" title="Permalink to this definition">¶</a></dt>
 <dd><p>Refit the current selected peaks.
-Must be called with opeaks that belong to this peakList</p>
+Must be called with peaks that belong to this peakList</p>
 </dd></dl>
 
 <dl class="method">
@@ -3051,7 +3064,7 @@ PeakListViews showing Spectrum</p>
 
 <dl class="method">
 <dt id="ccpn.core.PeakList.PeakList.pickPeaksRegion">
-<code class="descname">pickPeaksRegion</code><span class="sig-paren">(</span><em>regionToPick: dict = {}</em>, <em>doPos: bool = True</em>, <em>doNeg: bool = True</em>, <em>minLinewidth=None</em>, <em>exclusionBuffer=None</em>, <em>minDropFactor: float = 0.1</em>, <em>checkAllAdjacent: bool = True</em>, <em>fitMethod: str = 'parabolic'</em>, <em>excludedRegions=None</em>, <em>excludedDiagonalDims=None</em>, <em>excludedDiagonalTransform=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/PeakList.html#PeakList.pickPeaksRegion"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.PeakList.PeakList.pickPeaksRegion" title="Permalink to this definition">¶</a></dt>
+<code class="descname">pickPeaksRegion</code><span class="sig-paren">(</span><em>regionToPick: dict = {}</em>, <em>doPos: bool = True</em>, <em>doNeg: bool = True</em>, <em>minLinewidth=None</em>, <em>exclusionBuffer=None</em>, <em>minDropFactor: float = 0.1</em>, <em>checkAllAdjacent: bool = True</em>, <em>fitMethod: str = 'parabolic'</em>, <em>excludedRegions=None</em>, <em>excludedDiagonalDims=None</em>, <em>excludedDiagonalTransform=None</em>, <em>estimateLineWidths=True</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/PeakList.html#PeakList.pickPeaksRegion"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.PeakList.PeakList.pickPeaksRegion" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -3790,8 +3803,8 @@ Return None for Un-recognised or un-parsable files; return empty list for ???</p
 
 <dl class="method">
 <dt id="ccpn.core.Project.Project.loadSpectrum">
-<code class="descname">loadSpectrum</code><span class="sig-paren">(</span><em>path: str</em>, <em>subType: str</em><span class="sig-paren">)</span> &rarr; list<a class="reference internal" href="../_modules/ccpn/core/Project.html#Project.loadSpectrum"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.Project.Project.loadSpectrum" title="Permalink to this definition">¶</a></dt>
-<dd><p>Load spectrum from file into application</p>
+<code class="descname">loadSpectrum</code><span class="sig-paren">(</span><em>path: str</em>, <em>subType: str</em>, <em>name=None</em><span class="sig-paren">)</span> &rarr; list<a class="reference internal" href="../_modules/ccpn/core/Project.html#Project.loadSpectrum"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.Project.Project.loadSpectrum" title="Permalink to this definition">¶</a></dt>
+<dd><p>Load spectrum defined by path into application</p>
 </dd></dl>
 
 <dl class="attribute">
@@ -5658,6 +5671,15 @@ Axis code of acquisition axis - None if not known</p>
 <p>tuple of tuples of (lowerAliasingLimit, higherAliasingLimit) for spectrum</p>
 </dd></dl>
 
+<dl class="attribute">
+<dt id="ccpn.core.Spectrum.Spectrum.aliasingRange">
+<code class="descname">aliasingRange</code><a class="headerlink" href="#ccpn.core.Spectrum.Spectrum.aliasingRange" title="Permalink to this definition">¶</a></dt>
+<dd><p>- <em>Tuple[Tuple, ...]=None</em>, <em>mutable</em> - 
+Return a tuple of the aliasing range in each dimension, or None of not set
+Note, this is an attribute, not a property;
+to get the property use spectrum._getAliasingRange, or peakList._getAliasingRange</p>
+</dd></dl>
+
 <dl class="method">
 <dt id="ccpn.core.Spectrum.Spectrum.allPlanes">
 <code class="descname">allPlanes</code><span class="sig-paren">(</span><em>axisCodes: tuple</em>, <em>exactMatch=True</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/Spectrum.html#Spectrum.allPlanes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.Spectrum.Spectrum.allPlanes" title="Permalink to this definition">¶</a></dt>
@@ -5711,6 +5733,12 @@ ccpn.ChemicalShiftList used for ccpn.Spectrum</p>
 Hypercomplex numbers are stored by (&#8216;timepoint&#8217;, &#8216;quadrant&#8217;, or &#8216;dimension&#8217;).</p>
 </dd></dl>
 
+<dl class="method">
+<dt id="ccpn.core.Spectrum.Spectrum.copyParameters">
+<code class="descname">copyParameters</code><span class="sig-paren">(</span><em>axisCodes</em>, <em>target</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/Spectrum.html#Spectrum.copyParameters"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.Spectrum.Spectrum.copyParameters" title="Permalink to this definition">¶</a></dt>
+<dd><p>Copy non-dimensional and dimensional parameters for axisCodes from self to target</p>
+</dd></dl>
+
 <dl class="attribute">
 <dt id="ccpn.core.Spectrum.Spectrum.defaultAssignmentTolerances">
 <code class="descname">defaultAssignmentTolerances</code><a class="headerlink" href="#ccpn.core.Spectrum.Spectrum.defaultAssignmentTolerances" title="Permalink to this definition">¶</a></dt>
@@ -5747,6 +5775,13 @@ tuple of length dimensionCount with dimesnion integers; ie. (1,2,3,..).
 Useful for mapping axisCodes: eg: self.getByAxisCodes(&#8216;dimensions&#8217;, [&#8216;N&#8217;,&#8217;C&#8217;,&#8217;H&#8217;]</p>
 </dd></dl>
 
+<dl class="attribute">
+<dt id="ccpn.core.Spectrum.Spectrum.displayFoldedContours">
+<code class="descname">displayFoldedContours</code><a class="headerlink" href="#ccpn.core.Spectrum.Spectrum.displayFoldedContours" title="Permalink to this definition">¶</a></dt>
+<dd><p>- <em>None</em>, <em>mutable</em> - 
+Return whether the folded spectrum contours are to be displayed</p>
+</dd></dl>
+
 <dl class="method">
 <dt id="ccpn.core.Spectrum.Spectrum.estimateNoise">
 <code class="descname">estimateNoise</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/Spectrum.html#Spectrum.estimateNoise"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.Spectrum.Spectrum.estimateNoise" title="Permalink to this definition">¶</a></dt>
@@ -5774,6 +5809,54 @@ Systematic experiment type descriptor (CCPN system).</p>
 </dd></dl>
 
 <dl class="attribute">
+<dt id="ccpn.core.Spectrum.Spectrum.extendAliasingRangeFlag">
+<code class="descname">extendAliasingRangeFlag</code><a class="headerlink" href="#ccpn.core.Spectrum.Spectrum.extendAliasingRangeFlag" title="Permalink to this definition">¶</a></dt>
+<dd><p>- <em>None</em>, <em>mutable</em> - 
+Return whether the aliasingRange needs to be extended when aliasing
+of peaks has changed - from spectrumProperties popup</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ccpn.core.Spectrum.Spectrum.extractPlaneToFile">
+<code class="descname">extractPlaneToFile</code><span class="sig-paren">(</span><em>axisCodes: tuple</em>, <em>position=None</em>, <em>path=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/Spectrum.html#Spectrum.extractPlaneToFile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.Spectrum.Spectrum.extractPlaneToFile" title="Permalink to this definition">¶</a></dt>
+<dd><p>Save plane defined by a tuple of two axisCodes and position
+to file. Save to path (auto-generated if None).</p>
+<p>:returns plane as Spectrum instance</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ccpn.core.Spectrum.Spectrum.extractProjectionToFile">
+<code class="descname">extractProjectionToFile</code><span class="sig-paren">(</span><em>axisCodes: tuple</em>, <em>method: str = 'max'</em>, <em>threshold=None</em>, <em>path=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/Spectrum.html#Spectrum.extractProjectionToFile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.Spectrum.Spectrum.extractProjectionToFile" title="Permalink to this definition">¶</a></dt>
+<dd><p>Save projected plane defined by a tuple of two axisCodes, using method and an optional threshold
+to file. Save to path (auto-generated if None) using format
+return projected spectrum as Spectrum instance</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ccpn.core.Spectrum.Spectrum.extractSliceToFile">
+<code class="descname">extractSliceToFile</code><span class="sig-paren">(</span><em>axisCode</em>, <em>position</em>, <em>path=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/Spectrum.html#Spectrum.extractSliceToFile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.Spectrum.Spectrum.extractSliceToFile" title="Permalink to this definition">¶</a></dt>
+<dd><p>Extract 1d slice from self as new Spectrum; saved to path
+(auto-generated if not given)
+if 1D it effectively yields a copy of self</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>axisCode</strong> &#8211; axiscode of slice to extract</li>
+<li><strong>position</strong> &#8211; position vector (1-based)</li>
+<li><strong>path</strong> &#8211; optional path; constructed from current filePath and name of instance</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">Spectrum instance</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
 <dt id="ccpn.core.Spectrum.Spectrum.filePath">
 <code class="descname">filePath</code><a class="headerlink" href="#ccpn.core.Spectrum.Spectrum.filePath" title="Permalink to this definition">¶</a></dt>
 <dd><p>- <em>str=None</em>, <em>mutable</em> - 
@@ -5795,13 +5878,6 @@ Gaussian broadening per dimension. Always None for sampled dimensions.</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="ccpn.core.Spectrum.Spectrum.get1dSpectrumData">
-<code class="descname">get1dSpectrumData</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/Spectrum.html#Spectrum.get1dSpectrumData"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.Spectrum.Spectrum.get1dSpectrumData" title="Permalink to this definition">¶</a></dt>
-<dd><p>Get position,scaledData numpy array for 1D spectrum.
-Yields first 1D slice for nD</p>
-</dd></dl>
-
-<dl class="method">
 <dt id="ccpn.core.Spectrum.Spectrum.getByAxisCodes">
 <code class="descname">getByAxisCodes</code><span class="sig-paren">(</span><em>attributeName: str</em>, <em>axisCodes: Sequence[] = None</em>, <em>exactMatch: bool = False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/Spectrum.html#Spectrum.getByAxisCodes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.Spectrum.Spectrum.getByAxisCodes" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return values defined by attributeName in order defined by axisCodes:
@@ -5817,6 +5893,11 @@ Yields first 1D slice for nD</p>
 (default order if None)
 NB: Use getByAxisCodes for axisCode based access</p>
 </dd></dl>
+
+<dl class="method">
+<dt id="ccpn.core.Spectrum.Spectrum.getDefaultOrdering">
+<code class="descname">getDefaultOrdering</code><span class="sig-paren">(</span><em>axisOrder</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/Spectrum.html#Spectrum.getDefaultOrdering"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.Spectrum.Spectrum.getDefaultOrdering" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 <dl class="method">
 <dt id="ccpn.core.Spectrum.Spectrum.getHeight">
@@ -5865,7 +5946,7 @@ NB: Use getByAxisCodes for axisCode based access</p>
 <code class="descname">getPlane</code><span class="sig-paren">(</span><em>axisCodes: tuple</em>, <em>position=None</em>, <em>exactMatch=True</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/Spectrum.html#Spectrum.getPlane"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.Spectrum.Spectrum.getPlane" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get a plane defined by a tuple of two axisCodes, and a position vector (&#8216;1&#8217; based, defaults to first point)
 Expand axisCodes if exactMatch=False
-return data array
+returns np-data array
 NB: use getPlaneData method for dimension based access</p>
 </dd></dl>
 
@@ -5901,10 +5982,9 @@ Dimensionality must be &gt;= 2</p>
 
 <dl class="method">
 <dt id="ccpn.core.Spectrum.Spectrum.getProjection">
-<code class="descname">getProjection</code><span class="sig-paren">(</span><em>axisCodes: tuple</em>, <em>method: str = 'max'</em>, <em>threshold=None</em>, <em>path=None</em>, <em>format: str = 'NmrPipe'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/Spectrum.html#Spectrum.getProjection"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.Spectrum.Spectrum.getProjection" title="Permalink to this definition">¶</a></dt>
+<code class="descname">getProjection</code><span class="sig-paren">(</span><em>axisCodes: tuple</em>, <em>method: str = 'max'</em>, <em>threshold=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/Spectrum.html#Spectrum.getProjection"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.Spectrum.Spectrum.getProjection" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get projected plane defined by a tuple of two axisCodes, using method and an optional threshold
-optionally save to path as format
-return projected spectrum data array</p>
+return projected spectrum data as NumPy data array</p>
 </dd></dl>
 
 <dl class="method">
@@ -5915,7 +5995,7 @@ return projected spectrum data array</p>
 
 <dl class="method">
 <dt id="ccpn.core.Spectrum.Spectrum.getRegionData">
-<code class="descname">getRegionData</code><span class="sig-paren">(</span><em>exclusionBuffer=None</em>, <em>**axisDict</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/Spectrum.html#Spectrum.getRegionData"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.Spectrum.Spectrum.getRegionData" title="Permalink to this definition">¶</a></dt>
+<code class="descname">getRegionData</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/Spectrum.html#Spectrum.getRegionData"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.Spectrum.Spectrum.getRegionData" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return the region of the spectrum data defined by the axis limits.</p>
 <p>Axis limits are passed in as a dict containing the axis codes and the required limits.
 Each limit is defined as a key, value pair: (str, tuple),
@@ -5929,26 +6009,52 @@ with the tuple supplied as (min,max) axis limits in ppm.</p>
 </pre></div>
 </div>
 <p>Example calling function:</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">regionData</span> <span class="o">=</span> <span class="n">spectrum</span><span class="o">.</span><span class="n">getRegionData</span><span class="p">(</span><span class="o">**</span><span class="n">limitsDict</span><span class="p">)</span>
-<span class="n">regionData</span> <span class="o">=</span> <span class="n">spectrum</span><span class="o">.</span><span class="n">getRegionData</span><span class="p">(</span><span class="n">Hn</span><span class="o">=</span><span class="p">(</span><span class="mf">7.0</span><span class="p">,</span> <span class="mf">9.0</span><span class="p">),</span> <span class="n">Nh</span><span class="o">=</span><span class="p">(</span><span class="mi">110</span><span class="p">,</span> <span class="mi">130</span><span class="p">))</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span>regionData = spectrum.getRegionData(**limitsDict)
+regionData = spectrum.getRegionData(Hn=(7.0, 9.0), Nh=(110, 130))
+
+and
+
+regionData = spectrum.getRegionData()           to get all the data, this may be very large!
 </pre></div>
 </div>
 <dl class="docutils">
-<dt>exclusionBuffer: defines the size to extend the region by in index units, e.g. [1, 1, 1]</dt>
+<dt>exclusionBuffer: defines the size to extend the region by in index units, e.g. [1, 1, 1] for a 3d array,</dt>
 <dd>extends the region by 1 index point in all axes.
-Default is 1 in all axis directions.</dd>
+Default is 1 in all axis directions.
+Must be the correct length for the number of dimensions</dd>
+<dt>minimumDimensionSize:   defines the minimum number of elements in each dimension that are needed</dt>
+<dd><p class="first">for the region to be valid.</p>
+<p class="last">default is 3, as mostly used for parabolic curve fitting which
+requires 3 points in any given dimension</p>
+</dd>
 </dl>
+<p>The returned regionData is a tuple of regions, each of the form:</p>
+<blockquote>
+<div><dl class="docutils">
+<dt>single region = (dataArray,                 numpy array containing the data</dt>
+<dd>intRegion,
+startPoints,
+endPoints,
+startPointBufferActual,
+endPointBufferActual,
+startPointIntActual,
+numPointInt,
+startPointBuffer,
+endPointBuffer)</dd>
+</dl>
+</div></blockquote>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
 <li><strong>exclusionBuffer</strong> &#8211; array of int</li>
+<li><strong>minimumDimensionSize</strong> &#8211; int</li>
 <li><strong>axisDict</strong> &#8211; dict of axis limits</li>
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">numpy data array</p>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">tuple of regions</p>
 </td>
 </tr>
 </tbody>
@@ -5956,12 +6062,29 @@ Default is 1 in all axis directions.</dd>
 </dd></dl>
 
 <dl class="method">
+<dt id="ccpn.core.Spectrum.Spectrum.getSlice">
+<code class="descname">getSlice</code><span class="sig-paren">(</span><em>axisCode</em>, <em>position</em>, <em>exactMatch=True</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/Spectrum.html#Spectrum.getSlice"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.Spectrum.Spectrum.getSlice" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get 1D slice along axisCode through position; sets the intensities attribute
+:return: 1D NumPy data array</p>
+</dd></dl>
+
+<dl class="method">
 <dt id="ccpn.core.Spectrum.Spectrum.getSliceData">
 <code class="descname">getSliceData</code><span class="sig-paren">(</span><em>position=None</em>, <em>sliceDim: int = 1</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/Spectrum.html#Spectrum.getSliceData"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.Spectrum.Spectrum.getSliceData" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get a slice through position along sliceDim from the Spectrum
-:param position: A list/tuple of positions (1-based)
-:param sliceDim: Dimension of the slice (1-based)
-:return: numpy data array</p>
+:param position: An optional list/tuple of point positions (1-based);</p>
+<blockquote>
+<div>defaults to [1,1,1,1]</div></blockquote>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>sliceDim</strong> &#8211; Dimension of the slice (1-based)</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">numpy data array</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
@@ -6304,6 +6427,13 @@ Data type of numbers stored in data matrix (&#8216;int&#8217; or &#8216;float&#8
 </dd></dl>
 
 <dl class="attribute">
+<dt id="ccpn.core.Spectrum.Spectrum.path">
+<code class="descname">path</code><a class="headerlink" href="#ccpn.core.Spectrum.Spectrum.path" title="Permalink to this definition">¶</a></dt>
+<dd><p>- <em>None</em>, <em>immutable</em> - 
+return a Path instance defining the absolute path of filePath</p>
+</dd></dl>
+
+<dl class="attribute">
 <dt id="ccpn.core.Spectrum.Spectrum.peakLists">
 <code class="descname">peakLists</code><a class="headerlink" href="#ccpn.core.Spectrum.Spectrum.peakLists" title="Permalink to this definition">¶</a></dt>
 <dd><p>- <em>(&#8216;ccpn.core.PeakList.PeakList,)</em>  - contained PeakList objects in creation order. This may differ from the standard sorting order</p>
@@ -6349,7 +6479,7 @@ index of first active point relative to total points, per dimension</p>
 <dl class="attribute">
 <dt id="ccpn.core.Spectrum.Spectrum.positions">
 <code class="descname">positions</code><a class="headerlink" href="#ccpn.core.Spectrum.Spectrum.positions" title="Permalink to this definition">¶</a></dt>
-<dd><p>- <em>numpy.ndarray</em>, <em>mutable</em> - 
+<dd><p>- <em>&lt;built-in function array&gt;</em>, <em>mutable</em> - 
 spectral region in ppm as NumPy array for 1D spectra</p>
 </dd></dl>
 
@@ -6379,6 +6509,19 @@ number of positive contours to draw</p>
 <code class="descname">positiveContourFactor</code><a class="headerlink" href="#ccpn.core.Spectrum.Spectrum.positiveContourFactor" title="Permalink to this definition">¶</a></dt>
 <dd><p>- <em>float</em>, <em>mutable</em> - 
 level multiplier for positive contours</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ccpn.core.Spectrum.Spectrum.preferredAxisOrdering">
+<code class="descname">preferredAxisOrdering</code><a class="headerlink" href="#ccpn.core.Spectrum.Spectrum.preferredAxisOrdering" title="Permalink to this definition">¶</a></dt>
+<dd><p>- <em>None</em>, <em>mutable</em> - 
+Return the preferred ordering for the axis codes when opening a new spectrumDisplay</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ccpn.core.Spectrum.Spectrum.printInfoString">
+<code class="descname">printInfoString</code><span class="sig-paren">(</span><em>includeDimensions=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/Spectrum.html#Spectrum.printInfoString"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.Spectrum.Spectrum.printInfoString" title="Permalink to this definition">¶</a></dt>
+<dd><p>Print the info string</p>
 </dd></dl>
 
 <dl class="attribute">
@@ -6427,6 +6570,12 @@ ccpn.Sample used to acquire ccpn.Spectrum</p>
 <dd><p>- <em>float</em>, <em>mutable</em> - 
 Scaling factor for intensities and volumes.
 Intensities and volumes should be <em>multiplied</em> by scale before comparison.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ccpn.core.Spectrum.Spectrum.searchAxisCodePermutations">
+<code class="descname">searchAxisCodePermutations</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/Spectrum.html#Spectrum.searchAxisCodePermutations"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.Spectrum.Spectrum.searchAxisCodePermutations" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate the permutations of the current axisCodes</p>
 </dd></dl>
 
 <dl class="method">
@@ -6551,6 +6700,24 @@ Total number of points per dimension</p>
 for FreqDataDims these are the points after transformation before cutting down.</p>
 <p>NB, changing the totalPointCount will <em>not</em> modify the resolution (or dwell time),
 so the implied total width will change.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ccpn.core.Spectrum.Spectrum.valuesPerPoint">
+<code class="descname">valuesPerPoint</code><a class="headerlink" href="#ccpn.core.Spectrum.Spectrum.valuesPerPoint" title="Permalink to this definition">¶</a></dt>
+<dd><p>- <em>Tuple[float=None, ...]</em>, <em>immutable</em> - 
+valuePerPoint for each dimension</p>
+<p>in ppm for Frequency dimensions with a single, well-defined reference</p>
+<p>None for Frequency dimensions without a single, well-defined reference</p>
+<p>in time units (seconds) for FId dimensions</p>
+<p>None for sampled dimensions</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ccpn.core.Spectrum.Spectrum.visibleAliasingRange">
+<code class="descname">visibleAliasingRange</code><a class="headerlink" href="#ccpn.core.Spectrum.Spectrum.visibleAliasingRange" title="Permalink to this definition">¶</a></dt>
+<dd><p>- <em>Tuple[Tuple, ...]=None</em>, <em>mutable</em> - 
+Return a tuple of the aliasing range in each dimension, or None of not set</p>
 </dd></dl>
 
 <dl class="attribute">
@@ -6843,6 +7010,12 @@ Type of NMR measurement referred to by this reference. Legal values are:
 <code class="descname">minAliasedFrequency</code><a class="headerlink" href="#ccpn.core.SpectrumReference.SpectrumReference.minAliasedFrequency" title="Permalink to this definition">¶</a></dt>
 <dd><p>- <em>float</em>, <em>mutable</em> - 
 minimum possible peak frequency (in ppm) for this reference</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ccpn.core.SpectrumReference.SpectrumReference.numPointsOrig">
+<code class="descname">numPointsOrig</code><a class="headerlink" href="#ccpn.core.SpectrumReference.SpectrumReference.numPointsOrig" title="Permalink to this definition">¶</a></dt>
+<dd><p>- <em>bool</em>, <em>immutable</em> -</p>
 </dd></dl>
 
 <dl class="method">

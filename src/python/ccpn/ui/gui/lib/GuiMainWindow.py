@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
 __dateModified__ = "$dateModified: 2017-07-07 16:32:44 +0100 (Fri, July 07, 2017) $"
-__version__ = "$Revision: 3.0.b5 $"
+__version__ = "$Revision: 3.0.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -75,7 +75,6 @@ from ccpn.ui.gui.widgets.DropBase import DropBase
 from ccpn.ui.gui.lib.MenuActions import _openItemObject
 
 
-
 # For readability there should be a class:
 # _MainWindowShortCuts which (Only!) has the shortcut definitions and the callbacks to initiate them.
 # The latter should all be private methods!
@@ -96,6 +95,11 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
         # super(GuiMainWindow, self).__init__(parent=None)
         GuiWindow.__init__(self, application)
         QtWidgets.QMainWindow.__init__(self)
+
+        # format = QtGui.QSurfaceFormat()
+        # format.setSwapInterval(0)
+        # QtGui.QSurfaceFormat.setDefaultFormat(format)
+
         self.setAttribute(QtCore.Qt.WA_DeleteOnClose, True)
         # Layout
         layout = self.layout()
@@ -122,7 +126,7 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
         logger.debug('GuiMainWindow.moduleArea: layout: %s' % self.moduleArea.layout)  ## pyqtgraph object
         self.moduleArea.setGeometry(0, 0, 1000, 800)
         self.setCentralWidget(self.moduleArea)
-
+        self._shortcutsDict = {}
         self.recordingMacro = False
         self._setupWindow()
         self._setupMenus()
@@ -142,44 +146,44 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
         setCurrentMouseMode(SELECT)
         self.show()
 
-    #   QtWidgets.QShortcut.installEventFilter(self)
-    #   # for action in self.actions():
-    #   #   print (action)
-    #   # QtWidgets.QShortcut.activated.connect(self._activatedkeySequence)
-    #     # action.activatedAmbiguously.connect(self._ambiguouskeySequence)
-    #
-    # def eventFilter(self, obj, event):
-    #   # if event.type() == QtGui.QKeySequence.ExactMatch or event.type() == QtGui.QKeySequence.PartialMatch:
-    #   #   try:
-    #   #     print ('>>>key')
-    #   #     self.statusBar().showMessage('key: %s' % str(event.key()))
-    #   #     QtGui.QKeySequence.count = 0
-    #   #
-    #   #   except Exception as es:
-    #   #     print (str(es))
-    #
-    #   if event.type() == QtCore.QEvent.KeyPress:
-    #     print ('key: %s' % str(event.key()))
-    #     return True
-    #
-    #   return False
+        #   QtWidgets.QShortcut.installEventFilter(self)
+        #   # for action in self.actions():
+        #   #   print (action)
+        #   # QtWidgets.QShortcut.activated.connect(self._activatedkeySequence)
+        #     # action.activatedAmbiguously.connect(self._ambiguouskeySequence)
+        #
+        # def eventFilter(self, obj, event):
+        #   # if event.type() == QtGui.QKeySequence.ExactMatch or event.type() == QtGui.QKeySequence.PartialMatch:
+        #   #   try:
+        #   #     print ('>>>key')
+        #   #     self.statusBar().showMessage('key: %s' % str(event.key()))
+        #   #     QtGui.QKeySequence.count = 0
+        #   #
+        #   #   except Exception as es:
+        #   #     print (str(es))
+        #
+        #   if event.type() == QtCore.QEvent.KeyPress:
+        #     print ('key: %s' % str(event.key()))
+        #     return True
+        #
+        #   return False
 
-    #     self.installEventFilter(self)
-    #
-    # def eventFilter(self, obj, event):
-    #     if event.type() == QtCore.QEvent.ShortcutOverride:
-    #         # Stop obj from treating the event itself
-    #         print('>>>', chr(event.key()))
-    #
-    #     elif event.type() == QtCore.QEvent.KeyPress:
-    #         # Stop obj from treating the event itself
-    #         print('>>>key', chr(event.key()))
-    #
-    #     elif event.type() == QtCore.QEvent.Shortcut:
-    #         # Stop obj from treating the event itself
-    #         print('>>>shortcut')
-    #
-    #     return False
+        #     self.installEventFilter(self)
+        #
+        # def eventFilter(self, obj, event):
+        #     if event.type() == QtCore.QEvent.ShortcutOverride:
+        #         # Stop obj from treating the event itself
+        #         print('>>>', chr(event.key()))
+        #
+        #     elif event.type() == QtCore.QEvent.KeyPress:
+        #         # Stop obj from treating the event itself
+        #         print('>>>key', chr(event.key()))
+        #
+        #     elif event.type() == QtCore.QEvent.Shortcut:
+        #         # Stop obj from treating the event itself
+        #         print('>>>shortcut')
+        #
+        #     return False
 
         # install handler to resize when moving between displays
         self.window().windowHandle().screenChanged.connect(self._screenChangedEvent)
@@ -333,18 +337,25 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
 
         # create the sidebar
         self._sideBarFrame = Frame(self, setLayout=True)  # in this frame is inserted the search widget
-        self._sideBarFrame.setContentsMargins(4,2,0,0)
+        self._sideBarFrame.setContentsMargins(4, 2, 0, 0)
 
-        self._sidebarSplitter = Splitter(self._sideBarFrame,horizontal=False)
-        self._sidebarSplitter.setContentsMargins(0,0,0,0)
+        # create a splitter for the sidebar
+        self._sidebarSplitter = Splitter(self._sideBarFrame, horizontal=False)
+        self._sidebarSplitter.setContentsMargins(0, 0, 0, 0)
+        self._sideBarFrame.getLayout().addWidget(self._sidebarSplitter, 0, 0)   # must be inserted this way
 
-        self._sideBarFrame.getLayout().addWidget(self._sidebarSplitter,1,0)
+        # create 2 more containers for the search bar and the results
+        self.searchWidgetContainer = Frame(self._sideBarFrame, setLayout=True, grid=(1, 0))  # in this frame is inserted the search widget
+        self.searchResultsContainer = Frame(self, setLayout=True)  # in this frame is inserted the search widget
 
-        self.sideBar = SideBar(parent=self._sidebarSplitter,mainWindow=self, grid=(0,0))
-        self._sidebarSplitter.insertWidget(0,self.sideBar)
+        # create a SideBar pointing to the required containers
+        self.sideBar = SideBar(parent=self, mainWindow=self,
+                               searchWidgetContainer=self.searchWidgetContainer,
+                               searchResultsContainer=self.searchResultsContainer)
 
-        self._horizontalSplitter = Splitter(horizontal=True)
-
+        # insert into the splitter
+        self._sidebarSplitter.insertWidget(0, self.sideBar)
+        self._sidebarSplitter.insertWidget(1, self.searchResultsContainer)
 
         # create a splitter to put the sidebar on the left
         self._horizontalSplitter = Splitter(horizontal=True)
@@ -352,10 +363,6 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
         self._horizontalSplitter.addWidget(self._sideBarFrame)
         self._horizontalSplitter.addWidget(self.moduleArea)
         self.setCentralWidget(self._horizontalSplitter)
-
-        # create a hidden widget to temporarily store strips after deletion
-        self._UndoWidgetStorage = Frame(setLayout=False)
-        self._UndoWidgetStorage.setLayout(QtWidgets.QVBoxLayout())
 
     def _setupMenus(self):
         """
@@ -400,7 +407,26 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
             menu = targetMenu.addMenu(menuTitle)
         return menu
 
+    def _storeShortcut(self, twoLetters, thecallable):
+        if twoLetters is not None:
+            twoLetters = twoLetters.replace(', ','')
+            if twoLetters not in self._shortcutsDict:
+                self._shortcutsDict[twoLetters] = thecallable
+            else:
+                alreadyUsed = self._shortcutsDict.get(twoLetters)
+                getLogger().warning(" Ambiguous shortcut overload: %s. \n Assigning to: %s. \nAlready in use for: \n %s." %
+                                    (twoLetters, thecallable, alreadyUsed))
+
+    def _storeMainMenuShortcuts(self, actions):
+        for action in actions:
+            if len(action) == 3:
+                name, thecallable, shortCutDefs = action
+                kwDict = dict(shortCutDefs)
+                twoLetters = kwDict.get('shortcut')
+                self._storeShortcut(twoLetters, thecallable)
+
     def _addMenuActions(self, menu, actions):
+        self._storeMainMenuShortcuts(actions)
         for action in actions:
             if len(action) == 0:
                 menu.addSeparator()
@@ -452,13 +478,14 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
             badSpectra = [str(spectrum) for spectrum in project.spectra if not spectrum.isValidPath]
             if badSpectra:
                 from ccpn.ui.gui.widgets.MessageDialog import showWarning
+
                 showWarning('Spectrum file paths',
-'''Detected invalid Spectrum file path(s) for: 
-
-\t%s
-
-Use menu Spectrum-->Validate paths.. or "VP" shortcut to correct''' % '\n\t'.join(badSpectra)
-                )
+                            '''Detected invalid Spectrum file path(s) for: 
+                            
+                            \t%s
+                            
+                            Use menu Spectrum-->Validate paths.. or "VP" shortcut to correct''' % '\n\t'.join(badSpectra)
+                            )
                 # project.application.showValidateSpectraPopup(defaultSelected='invalid')
                 # project.save(createFallback=False, overwriteExisting=True)
 
@@ -559,6 +586,7 @@ Use menu Spectrum-->Validate paths.. or "VP" shortcut to correct''' % '\n\t'.joi
         """
         from ccpn.util import Layout
         from ccpn.framework.PathsAndUrls import predefinedLayouts
+
         userDefinedLayoutDirPath = self.application.preferences.general.get('userLayoutsPath')
         prelayouts = Layout._dictLayoutsNamePath(Layout._getPredefinedLayouts(predefinedLayouts))
         prelayoutMenu = self.getMenuAction('Project->Layout->Open pre-defined')
@@ -577,8 +605,6 @@ Use menu Spectrum-->Validate paths.. or "VP" shortcut to correct''' % '\n\t'.joi
         action = Action(self, text='Update', translate=False,
                         callback=self._fillPredefinedLayoutMenu)
         prelayoutMenu.addAction(action)
-
-
 
     def _fillMacrosMenu(self):
         """
@@ -659,6 +685,7 @@ Use menu Spectrum-->Validate paths.. or "VP" shortcut to correct''' % '\n\t'.joi
         visible = moduleSize.width() != 0 and moduleSize.height() != 0 and self.sideBar.isVisible()
         modulesMenu.addAction(Action(modulesMenu, text='Sidebar',
                                      checkable=True, checked=visible,
+                                     # callback=partial(self._showSideBarModule, self._sideBarFrame, self, visible)))
                                      callback=partial(self._showSideBarModule, self._sideBarFrame, self, visible)))
 
         for module in self.moduleArea.ccpnModules:
@@ -712,9 +739,11 @@ Use menu Spectrum-->Validate paths.. or "VP" shortcut to correct''' % '\n\t'.joi
         pluginsMenu.addSeparator()
         pluginsMenu.addAction(Action(pluginsMenu, text='Reload',
                                      callback=self._reloadPlugins))
+
     def _reloadPlugins(self):
         from ccpn import plugins
         from importlib import reload
+
         reload(plugins)
         self._fillPluginsMenu()
 
@@ -981,7 +1010,7 @@ Use menu Spectrum-->Validate paths.. or "VP" shortcut to correct''' % '\n\t'.joi
         # CCPN INTERNAL. Called also from module area and GuiStrip. They should have same behaviour
         # use an undoBlock, and ignore logging if 5 or more items
         # to stop overloading of the log
-
+        objs = []
         urls = data.get('urls', [])
         if urls and len(urls) > 0:
 
@@ -1015,10 +1044,10 @@ Use menu Spectrum-->Validate paths.. or "VP" shortcut to correct''' % '\n\t'.joi
             # check whether a new spectrumDisplay is needed, check axisOrdering
             # add show popup for ordering if required
             from ccpn.ui.gui.popups.AxisOrderingPopup import checkSpectraToOpen
+
             checkSpectraToOpen(self, objs)
 
             _openItemObject(self, objs, position=position, relativeTo=relativeTo)
-
 
     def _checkUrlsForProject(self, urls):
         """Check whether there is a project in the dropped url list,
@@ -1032,7 +1061,6 @@ Use menu Spectrum-->Validate paths.. or "VP" shortcut to correct''' % '\n\t'.joi
                                                      ioFormats.NEF,
                                                      ioFormats.NMRSTAR,
                                                      ioFormats.SPARKY):
-
                 return url
 
     def _processUrls(self, urls):
@@ -1066,10 +1094,10 @@ Use menu Spectrum-->Validate paths.. or "VP" shortcut to correct''' % '\n\t'.joi
                 # with progressManager(self.mainWindow, 'Loading data... ' + url):
                 try:  #  Why do we need this try?
                     spectraPathsCount = len(ioFormats._searchSpectraPathsInSubDir(url))
-                    askBeforeOpen_lenght = 20 # Ask user if want to open all (spectra) before start loading the full set.
+                    askBeforeOpen_lenght = 20  # Ask user if want to open all (spectra) before start loading the full set.
                     if spectraPathsCount > askBeforeOpen_lenght:
                         okToOpenAll = MessageDialog.showYesNo('Load data', 'The directory contains multiple items (~%s).'
-                                                                           ' Do you want to open all?' %str(spectraPathsCount))
+                                                                           ' Do you want to open all?' % str(spectraPathsCount))
                         if not okToOpenAll:
                             continue
                     with notificationEchoBlocking():

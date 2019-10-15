@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: CCPN $"
 __dateModified__ = "$dateModified: 2017-07-07 16:32:46 +0100 (Fri, July 07, 2017) $"
-__version__ = "$Revision: 3.0.b5 $"
+__version__ = "$Revision: 3.0.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -260,53 +260,53 @@ class MultipletListTableWidget(GuiTable):
         columnDefs = []
 
         # Serial column
-        columnDefs.append(('#', 'serial', 'Multiplet serial number', None))
-        columnDefs.append(('Pid', lambda ml: ml.pid, 'Pid of the Multiplet', None))
-        columnDefs.append(('_object', lambda ml: ml, 'Object', None))
+        columnDefs.append(('#', 'serial', 'Multiplet serial number', None, None))
+        columnDefs.append(('Pid', lambda ml: ml.pid, 'Pid of the Multiplet', None, None))
+        columnDefs.append(('_object', lambda ml: ml, 'Object', None, None))
 
-        columnDefs.append(('Spectrum', lambda multiplet: multiplet.multipletList.spectrum.id, 'Spectrum containing the Multiplet', None))
-        columnDefs.append(('MultipletList', lambda multiplet: multiplet.multipletList.serial, 'MultipletList containing the Multiplet', None))
-        columnDefs.append(('Id', lambda multiplet: multiplet.serial, 'Multiplet serial', None))
+        columnDefs.append(('Spectrum', lambda multiplet: multiplet.multipletList.spectrum.id, 'Spectrum containing the Multiplet', None, None))
+        columnDefs.append(('MultipletList', lambda multiplet: multiplet.multipletList.serial, 'MultipletList containing the Multiplet', None, None))
+        columnDefs.append(('Id', lambda multiplet: multiplet.serial, 'Multiplet serial', None, None))
 
         # # Assignment column
         # for i in range(multipletList.spectrum.dimensionCount):
         #     assignTipText = 'NmrAtom assignments of multiplet in dimension %s' % str(i + 1)
         #     columnDefs.append(
-        #             ('Assign F%s' % str(i + 1), lambda ml, dim=i: getPeakAnnotation(ml, dim), assignTipText, None))
+        #             ('Assign F%s' % str(i + 1), lambda ml, dim=i: getPeakAnnotation(ml, dim), assignTipText, None, None))
 
         # Multiplet positions column
         for i in range(multipletList.spectrum.dimensionCount):
             positionTipText = 'Multiplet position in dimension %s' % str(i + 1)
             columnDefs.append(('Pos F%s' % str(i + 1),
                                lambda ml, dim=i, unit=MultipletListTableWidget.positionsUnit: getMultipletPosition(ml, dim, unit),
-                               positionTipText, None))
+                               positionTipText, None, '%0.3f'))
 
         # linewidth column
         for i in range(multipletList.spectrum.dimensionCount):
             linewidthTipTexts = 'Multiplet line width %s' % str(i + 1)
             columnDefs.append(
-                    ('LW F%s' % str(i + 1), lambda ml, dim=i: getPeakLinewidth(ml, dim), linewidthTipTexts, None))
+                    ('LW F%s' % str(i + 1), lambda ml, dim=i: getPeakLinewidth(ml, dim), linewidthTipTexts, None, '%0.3f'))
 
         # height column
         heightTipText = 'Magnitude of spectrum intensity at multiplet center (interpolated), unless user edited'
-        columnDefs.append(('Height', lambda ml: ml.height, heightTipText, None))
+        columnDefs.append(('Height', lambda ml: ml.height, heightTipText, None, None))
 
         # volume column
         volumeTipText = 'Integral of spectrum intensity around multiplet location, according to chosen volume method'
-        columnDefs.append(('Volume', lambda ml: ml.volume, volumeTipText, None))
+        columnDefs.append(('Volume', lambda ml: ml.volume, volumeTipText, None, None))
 
         # numPeaks column
         numPeaksTipText = 'Peaks count'
-        columnDefs.append(('Peaks count', lambda ml: ml.numPeaks, numPeaksTipText, None))
+        columnDefs.append(('Peaks count', lambda ml: ml.numPeaks, numPeaksTipText, None, None))
 
         # figureOfMerit column
         figureOfMeritTipText = 'Figure of merit'
-        columnDefs.append(('Merit', lambda ml: ml.figureOfMerit, figureOfMeritTipText, None))
+        columnDefs.append(('Merit', lambda ml: ml.figureOfMerit, figureOfMeritTipText, None, None))
 
         # comment column
         commentsTipText = 'Textual notes about the multiplet'
         columnDefs.append(('Comment', lambda ml: MultipletListTableWidget._getCommentText(ml), commentsTipText,
-                           lambda ml, value: MultipletListTableWidget._setComment(ml, value)))
+                           lambda ml, value: MultipletListTableWidget._setComment(ml, value), None))
 
         return ColumnClass(columnDefs)
 

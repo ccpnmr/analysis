@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: CCPN $"
 __dateModified__ = "$dateModified: 2017-07-07 16:32:47 +0100 (Fri, July 07, 2017) $"
-__version__ = "$Revision: 3.0.b5 $"
+__version__ = "$Revision: 3.0.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -182,21 +182,22 @@ class RestraintTable(GuiTable):
         self.restraintList = None
 
         # create the column objects
-        self.RLcolumns = ColumnClass([('#', '_key', 'Restraint Id', None),
-                                      ('Pid', lambda restraint: restraint.pid, 'Pid of integral', None),
-                                      ('_object', lambda restraint: restraint, 'Object', None),
+        self.RLcolumns = ColumnClass([('#', '_key', 'Restraint Id', None, None),
+                                      ('Pid', lambda restraint: restraint.pid, 'Pid of integral', None, None),
+                                      ('_object', lambda restraint: restraint, 'Object', None, None),
                                       ('Atoms', lambda restraint: RestraintTable._getContributions(restraint),
-                                       'Atoms involved in the restraint', None),
-                                      ('Target Value.', 'targetValue', 'Target value for the restraint', None),
-                                      ('Upper Limit', 'upperLimit', 'Upper limit for the restraint', None),
-                                      ('Lower Limit', 'lowerLimit', 'Lower limit or the restraint', None),
-                                      ('Error', 'error', 'Error on the restraint', None),
+                                       'Atoms involved in the restraint', None, None),
+                                      ('Target Value.', 'targetValue', 'Target value for the restraint', None, None),
+                                      ('Upper Limit', 'upperLimit', 'Upper limit for the restraint', None, None),
+                                      ('Lower Limit', 'lowerLimit', 'Lower limit or the restraint', None, None),
+                                      ('Error', 'error', 'Error on the restraint', None, None),
                                       ('Peaks', lambda restraint: '%3d ' % RestraintTable._getRestraintPeakCount(restraint),
-                                       'Number of peaks used to derive this restraint', None),
-                                      # ('Peak count', lambda chemicalShift: '%3d ' % self._getShiftPeakCount(chemicalShift))
+                                       'Number of peaks used to derive this restraint', None, None),
+                                      # ('Peak count', lambda chemicalShift: '%3d ' % self._getShiftPeakCount(chemicalShift), None, None)
                                       ('Comment', lambda restraint: RestraintTable._getCommentText(restraint), 'Notes',
-                                       lambda restraint, value: RestraintTable._setComment(restraint, value))
-                                      ])  # [Column(colName, func, tipText=tipText, setEditValue=editValue) for colName, func, tipText, editValue in self.columnDefs]
+                                       lambda restraint, value: RestraintTable._setComment(restraint, value), None)
+                                      ])  # [Column(colName, func, tipText=tipText, setEditValue=editValue, format=columnFormat)
+                                        # for colName, func, tipText, editValue, columnFormat in self.columnDefs]
 
         row = 0
         self.spacer = Spacer(self._widget, 5, 5,

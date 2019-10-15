@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: CCPN $"
 __dateModified__ = "$dateModified: 2017-07-07 16:32:49 +0100 (Fri, July 07, 2017) $"
-__version__ = "$Revision: 3.0.b5 $"
+__version__ = "$Revision: 3.0.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -88,6 +88,13 @@ This needs to be done once on every computer you use the programme on.
                 entry.textChanged.connect(partial(self._checkEmailValid, entry, currentBaseColour))
                 self.validateEntries.append(entry)
             row += 1
+
+        from ccpn.util import Data
+        label = Label(frame, 'Build For:', grid=(row, 0))
+        text = getattr(Data, ''.join([c for c in map(chr, (98, 117, 105, 108, 100, 70, 111, 114))]), '')
+        entry = Entry(frame, text=text, grid=(row, 1), maxLength=60)
+        entry.setEnabled(False)
+        row += 1
 
         licenseFrame = Frame(frame, setLayout=True, grid=(row, 0), gridSpan=(1, 2))
         row += 1

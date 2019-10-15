@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: CCPN $"
 __dateModified__ = "$dateModified: 2017-07-07 16:32:56 +0100 (Fri, July 07, 2017) $"
-__version__ = "$Revision: 3.0.b5 $"
+__version__ = "$Revision: 3.0.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -377,7 +377,9 @@ class SpectrumToolBar(ToolBar):
         self._addSpectrumViewToolButtons(spectrum.spectrumViews)
 
     def _addSpectrumViewToolButtons(self, spectrumView):
-
+        spectrumDisplay = spectrumView.strip.spectrumDisplay
+        if spectrumDisplay.isGrouped:
+            return
         with self.spectrumToolBarBlocking():
             spectrumDisplay = spectrumView.strip.spectrumDisplay
             spectrum = spectrumView.spectrum

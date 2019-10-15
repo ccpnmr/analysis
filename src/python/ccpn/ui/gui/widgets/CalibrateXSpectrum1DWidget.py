@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: CCPN $"
 __dateModified__ = "$dateModified: 2017-07-07 16:32:47 +0100 (Fri, July 07, 2017) $"
-__version__ = "$Revision: 3.0.b5 $"
+__version__ = "$Revision: 3.0.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -45,6 +45,7 @@ from functools import partial
 
 OP = 'Calibrate X - Original Position: '
 NP = 'New Position: '
+DELTA = 'Delta'
 
 ToolTip = 'Click the line to select. Hold left click and drag. Release the mouse to set the original ' \
           'position to the new position '
@@ -82,13 +83,12 @@ class CalibrateX1DWidgets(Frame):
         i += 1
         self.boxNewPosition = ScientificDoubleSpinBox(self, step=0.001, decimals=3, grid=(0, i))
         i += 1
-        # self.okButtons = ButtonList(self, ['Apply', 'Close'], callbacks=[self._apply, self._close],
-        #                             grid=(0, i))
-        self.okButtons = ButtonList(self, ['Apply'], callbacks=[self._apply],
+        self.labelDelta = Label(self, DELTA, grid=(0, i), hAlign='r')
+        i += 1
+        self.boxDelta = ScientificDoubleSpinBox(self, step=0.001, decimals=3, grid=(0, i))
+        i += 1
+        self.okButtons = ButtonList(self, ['Apply', 'Close'], callbacks=[self._apply, self._close],
                                     grid=(0, i))
-
-        # self.infiniteLine = pg.InfiniteLine(movable=True)
-        # self.originalPosInfiniteLine = pg.InfiniteLine(movable=False, pen='g')
 
         self.labelOriginalPosition.setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.Minimum)
         self.boxOriginalPosition.setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.Minimum)
@@ -104,11 +104,9 @@ class CalibrateX1DWidgets(Frame):
             self.infiniteLine.valuesChanged.connect(self._newPositionLineCallback)
             self.originalPosInfiniteLine.valuesChanged.connect(self._originalPositionLineCallback)
 
-        # self.infiniteLine.sigPositionChangeFinished.connect(self._calibrateSpectra)
-        # self.infiniteLine.sigPositionChanged.connect(self._newPositionLineCallback)
-
         self.boxOriginalPosition.valueChanged.connect(self._originalPositionBoxCallback)
         self.boxNewPosition.valueChanged.connect(self._newPositionBoxCallback)
+        self.boxDelta.valueChanged.connect(self._deltaBoxCallback)
 
         self._initLines()
         self.setSizePolicy(QtWidgets.QSizePolicy.Ignored, QtWidgets.QSizePolicy.Minimum)
@@ -116,15 +114,7 @@ class CalibrateX1DWidgets(Frame):
         self.GLSignals = GLNotifier(parent=None)
 
     def _initLines(self):
-
         if self.mainWindow is not None:
-            # if self.strip is not None:
-            #   self.strip.plotWidget.addItem(self.infiniteLine)
-            #   self.strip.plotWidget.addItem(self.originalPosInfiniteLine)
-            ## NB Current.cursorPosition is extremely unreliable.
-            # if self.strip.plotWidget.viewBox.contextMenuPosition is not None:
-            # self.originalPosition = self.strip.plotWidget.viewBox.contextMenuPosition[0]
-
             self.originalPosition = float(self.strip._CcpnGLWidget.cursorCoordinate[0])
 
             self.infiniteLine.setValue(self.originalPosition)
@@ -134,45 +124,44 @@ class CalibrateX1DWidgets(Frame):
             self.infiniteLine.visible = True and self.targetLineVisible
             self.originalPosInfiniteLine.visible = True
 
-    def _newBoxCallback(self):
-        spinboxValue = self.sender().value()
-        self.infiniteLine.setValue(spinboxValue)
-
     def _newPositionLineCallback(self):
-        # self.newPosition = self.infiniteLine.pos().x()
-
-        self.newPosition = self.infiniteLine.values  # [0]
+        self.newPosition = self.infiniteLine.values                             # [0]
         self.boxNewPosition.setValue(round(self.newPosition, 3))
+        self.boxDelta.setValue(round(self.newPosition-self.originalPosition, 3))
 
     def _newPositionBoxCallback(self):
         box = self.sender()
         if box.hasFocus():
             self.newPosition = round(box.value(), 3)
             self.infiniteLine.setValue(self.newPosition)
+            self.boxDelta.setValue(round(self.newPosition-self.originalPosition, 3))
 
     def _originalPositionLineCallback(self):
-        self.originalPosition = self.originalPosInfiniteLine.values  # [0]
+        self.originalPosition = self.originalPosInfiniteLine.values             # [0]
         self.boxOriginalPosition.setValue(round(self.originalPosition, 3))
+        self.boxDelta.setValue(round(self.newPosition-self.originalPosition, 3))
 
     def _originalPositionBoxCallback(self):
         box = self.sender()
         if box.hasFocus():
             self.originalPosition = round(box.value(), 3)
             self.originalPosInfiniteLine.setValue(self.originalPosition)
+            self.boxDelta.setValue(round(self.newPosition-self.originalPosition, 3))
 
     def setOriginalPos(self, value):
         self.originalPosition = round(value, 3)
         self.originalPosInfiniteLine.setValue(self.originalPosition)
 
-    def _removeLines(self):
-        if self.mainWindow is not None:
-            # if self.strip is not None:
-            #   self.strip.plotWidget.removeItem(self.infiniteLine)
-            #   self.strip.plotWidget.removeItem(self.originalPosInfiniteLine)
+    def _deltaBoxCallback(self):
+        box = self.sender()
+        if box.hasFocus():
+            val = round(self.originalPosition + box.value(), 3)
+            self.infiniteLine.setValue(val)
 
-            if self.GLWidget:
-                self.infiniteLine.visible = False
-                self.originalPosInfiniteLine.visible = False
+    def _removeLines(self):
+        if self.mainWindow is not None and self.GLWidget:
+            self.infiniteLine.visible = False
+            self.originalPosInfiniteLine.visible = False
 
     def _toggleLines(self):
         if self.isVisible():
@@ -216,9 +205,7 @@ class CalibrateX1DWidgets(Frame):
         pass
 
     def _close(self):
-        self.setVisible(False)
-        self.strip.calibrateXAction.setChecked(False)
-        self._toggleLines()
+        self.strip._closeCalibrateX()
 
 
 if __name__ == '__main__':

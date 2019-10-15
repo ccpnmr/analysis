@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: CCPN $"
 __dateModified__ = "$dateModified: 2017-07-07 16:32:32 +0100 (Fri, July 07, 2017) $"
-__version__ = "$Revision: 3.0.b5 $"
+__version__ = "$Revision: 3.0.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -86,7 +86,8 @@ def getMultipletPosition(multiplet, dim, unit='ppm'):
             return
 
         if isinstance(value, (int, float, np.float32, np.float64)):
-            return '{0:.2f}'.format(value)
+            return float(value)                                         # '{0:.2f}'.format(value)
+
     except Exception as e:
         getLogger().warning('Error on setting Position. %s' % e)
 
@@ -123,7 +124,7 @@ def getPeakPosition(peak, dim, unit='ppm'):
                              % unit)
 
         if isinstance(value, (int, float, np.float32, np.float64)):
-            return '{0:.2f}'.format(value)
+            return float(value)                                         # '{0:.4f}'.format(value)
 
         return None
 
@@ -160,7 +161,9 @@ def _get1DPeaksPosAndHeightAsArray(peakList):
 import sys
 from numpy import NaN, Inf, arange, isscalar, asarray, array
 
-
+# from numba import jit, prange
+from numba import jit
+@jit(nopython=True, nogil=True)
 def peakdet(y, x, delta, negative=False):
     """
     Converted from MATLAB script at http://billauer.co.il/peakdet.html
@@ -178,6 +181,7 @@ def peakdet(y, x, delta, negative=False):
     lookformax = True
 
     for i in arange(len(y)):
+    # for i in prange(len(y)):
         this = y[i]
         if this > mx:
             mx = this

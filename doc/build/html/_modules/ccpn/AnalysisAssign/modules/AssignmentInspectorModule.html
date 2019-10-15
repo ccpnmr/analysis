@@ -67,7 +67,7 @@
 <span class="c1">#=========================================================================================</span>
 <span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: CCPN $&quot;</span>
 <span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2017-07-07 16:32:21 +0100 (Fri, July 07, 2017) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b5 $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.0 $&quot;</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Created</span>
 <span class="c1">#=========================================================================================</span>
@@ -78,6 +78,8 @@
 <span class="c1">#=========================================================================================</span>
 
 <span class="kn">from</span> <span class="nn">PyQt5</span> <span class="kn">import</span> <span class="n">QtCore</span><span class="p">,</span> <span class="n">QtWidgets</span>
+<span class="kn">from</span> <span class="nn">contextlib</span> <span class="kn">import</span> <span class="n">contextmanager</span>
+<span class="kn">from</span> <span class="nn">ccpn.util.OrderedSet</span> <span class="kn">import</span> <span class="n">OrderedSet</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.modules.CcpnModule</span> <span class="kn">import</span> <span class="n">CcpnModule</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Frame</span> <span class="kn">import</span> <span class="n">Frame</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Label</span> <span class="kn">import</span> <span class="n">Label</span>
@@ -97,13 +99,22 @@
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Splitter</span> <span class="kn">import</span> <span class="n">Splitter</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.MessageDialog</span> <span class="kn">import</span> <span class="n">showWarning</span>
 <span class="kn">from</span> <span class="nn">ccpn.core.lib.CallBack</span> <span class="kn">import</span> <span class="n">CallBack</span>
-<span class="kn">from</span> <span class="nn">ccpn.ui.gui.lib.Strip</span> <span class="kn">import</span> <span class="n">navigateToPositionInStrip</span><span class="p">,</span> <span class="n">navigateToNmrAtomsInStrip</span><span class="p">,</span> <span class="n">_getCurrentZoomRatio</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.lib.Strip</span> <span class="kn">import</span> <span class="n">navigateToNmrAtomsInStrip</span><span class="p">,</span> \
+    <span class="n">_getCurrentZoomRatio</span><span class="p">,</span> <span class="n">navigateToNmrResidueInDisplay</span>
 <span class="kn">from</span> <span class="nn">ccpn.core.PeakList</span> <span class="kn">import</span> <span class="n">PeakList</span>
 <span class="kn">from</span> <span class="nn">ccpn.util.Common</span> <span class="kn">import</span> <span class="n">makeIterableList</span>
 
 
 <span class="n">logger</span> <span class="o">=</span> <span class="n">getLogger</span><span class="p">()</span>
 <span class="n">ALL</span> <span class="o">=</span> <span class="s1">&#39;&lt;all&gt;&#39;</span>
+<span class="n">NMRRESIDUES</span> <span class="o">=</span> <span class="s1">&#39;nmrResidues&#39;</span>
+<span class="n">NMRATOMS</span> <span class="o">=</span> <span class="s1">&#39;nmrAtoms&#39;</span>
+
+
+<span class="k">class</span> <span class="nc">_emptyObject</span><span class="p">():</span>
+    <span class="c1"># small object to facilitate passing data to simulated event</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">pass</span>
 
 
 <div class="viewcode-block" id="AssignmentInspectorModule"><a class="viewcode-back" href="../../../../ccpn/ccpn.AnalysisAssign.modules.html#ccpn.AnalysisAssign.modules.AssignmentInspectorModule.AssignmentInspectorModule">[docs]</a><span class="k">class</span> <span class="nc">AssignmentInspectorModule</span><span class="p">(</span><span class="n">CcpnModule</span><span class="p">):</span>
@@ -120,7 +131,7 @@
 
     <span class="n">includeSettingsWidget</span> <span class="o">=</span> <span class="bp">True</span>
     <span class="n">maxSettingsState</span> <span class="o">=</span> <span class="mi">2</span>  <span class="c1"># states are defined as: 0: invisible, 1: both visible, 2: only settings visible</span>
-    <span class="n">settingsPosition</span> <span class="o">=</span> <span class="s1">&#39;left&#39;</span>
+    <span class="n">settingsPosition</span> <span class="o">=</span> <span class="s1">&#39;top&#39;</span>
 
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mainWindow</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;Assignment Inspector&#39;</span><span class="p">,</span> <span class="n">chemicalShiftList</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">mainWindow</span><span class="o">=</span><span class="n">mainWindow</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>  <span class="c1"># gwv</span>
@@ -145,6 +156,11 @@
         <span class="c1"># self._chemicalShiftFrame = Frame(self.mainWidget, setLayout=True, grid=(0,0))</span>
         <span class="c1"># self._assignmentFrame = Frame(self.mainWidget, setLayout=True, grid=(1,0))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">mainWidget</span><span class="o">.</span><span class="n">getLayout</span><span class="p">()</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">splitter</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">splitter</span><span class="o">.</span><span class="n">setStretchFactor</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">splitter</span><span class="o">.</span><span class="n">setStretchFactor</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">splitter</span><span class="o">.</span><span class="n">setChildrenCollapsible</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_assignmentFrame</span><span class="o">.</span><span class="n">setMinimumHeight</span><span class="p">(</span><span class="mi">100</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_AIwidget</span> <span class="o">=</span> <span class="n">Widget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">settingsWidget</span><span class="p">,</span> <span class="n">setLayout</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
                                 <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">vAlign</span><span class="o">=</span><span class="s1">&#39;top&#39;</span><span class="p">,</span> <span class="n">hAlign</span><span class="o">=</span><span class="s1">&#39;left&#39;</span><span class="p">)</span>
@@ -194,6 +210,16 @@
                 <span class="n">labelText</span><span class="o">=</span><span class="s1">&#39;Auto clear marks:&#39;</span><span class="p">,</span>
                 <span class="n">checked</span><span class="o">=</span><span class="bp">True</span>
                 <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">showNmrAtomListWidget</span> <span class="o">=</span> <span class="n">CheckBoxCompoundWidget</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_AIwidget</span><span class="p">,</span>
+                <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">vAlign</span><span class="o">=</span><span class="s1">&#39;top&#39;</span><span class="p">,</span> <span class="n">stretch</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">hAlign</span><span class="o">=</span><span class="s1">&#39;left&#39;</span><span class="p">,</span>
+                <span class="c1">#minimumWidths=(colwidth, 0),</span>
+                <span class="n">fixedWidths</span><span class="o">=</span><span class="p">(</span><span class="n">colwidth</span><span class="p">,</span> <span class="mi">30</span><span class="p">),</span>
+                <span class="n">orientation</span><span class="o">=</span><span class="s1">&#39;left&#39;</span><span class="p">,</span>
+                <span class="n">labelText</span><span class="o">=</span><span class="s1">&#39;Show nmrAtom list:&#39;</span><span class="p">,</span>
+                <span class="n">checked</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+                <span class="n">callback</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_setNmrAtomListVisible</span><span class="p">,</span>
+                <span class="p">)</span>
 
         <span class="c1"># main window</span>
 
@@ -211,13 +237,10 @@
                                                      <span class="n">mainWindow</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span><span class="p">,</span>
                                                      <span class="n">moduleParent</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">assignedPeaksTable</span><span class="p">,</span>  <span class="c1"># just to give a unique id</span>
                                                      <span class="n">setLayout</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
-                                                     <span class="n">actionCallback</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_actionCallback</span><span class="p">,</span>
+                                                     <span class="n">actionCallback</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">navigateToNmrResidueCallBack</span><span class="p">,</span>
                                                      <span class="n">selectionCallback</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_selectionCallback</span><span class="p">,</span>
                                                      <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
                                                      <span class="n">hiddenColumns</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;Pid&#39;</span><span class="p">,</span> <span class="s1">&#39;Shift list peaks&#39;</span><span class="p">,</span> <span class="s1">&#39;All peaks&#39;</span><span class="p">])</span>
-
-        <span class="bp">self</span><span class="o">.</span><span class="n">_selectCurrentNmrAtomsNotifier</span> <span class="o">=</span> <span class="n">Notifier</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">current</span><span class="p">,</span> <span class="p">[</span><span class="n">Notifier</span><span class="o">.</span><span class="n">CURRENT</span><span class="p">],</span> <span class="n">targetName</span><span class="o">=</span><span class="n">NmrAtom</span><span class="o">.</span><span class="n">_pluralLinkName</span><span class="p">,</span>
-                                                       <span class="n">callback</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_highlightNmrAtoms</span><span class="p">)</span>
 
         <span class="c1"># settingsWidget</span>
         <span class="k">if</span> <span class="n">chemicalShiftList</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
@@ -225,12 +248,13 @@
 
         <span class="c1"># install the event filter to handle maximising from floated dock</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">installMaximiseEventHandler</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_maximise</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_closeModule</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_setNmrAtomListVisible</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_registerNotifiers</span><span class="p">()</span>
 
     <span class="k">def</span> <span class="nf">_fillDisplayWidget</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="nb">list</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;&gt; select-to-add &lt;&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="n">ALL</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="n">display</span><span class="o">.</span><span class="n">pid</span> <span class="k">for</span> <span class="n">display</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">spectrumDisplays</span><span class="p">]</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">displaysWidget</span><span class="o">.</span><span class="n">pulldownList</span><span class="o">.</span><span class="n">setData</span><span class="p">(</span><span class="n">texts</span><span class="o">=</span><span class="nb">list</span><span class="p">)</span>
+        <span class="n">ll</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;&gt; select-to-add &lt;&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="n">ALL</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="n">display</span><span class="o">.</span><span class="n">pid</span> <span class="k">for</span> <span class="n">display</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">spectrumDisplays</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">displaysWidget</span><span class="o">.</span><span class="n">pulldownList</span><span class="o">.</span><span class="n">setData</span><span class="p">(</span><span class="n">texts</span><span class="o">=</span><span class="n">ll</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_getDisplays</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -257,13 +281,13 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">setNotifier</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">current</span><span class="p">,</span> <span class="p">[</span><span class="n">Notifier</span><span class="o">.</span><span class="n">CURRENT</span><span class="p">],</span> <span class="n">targetName</span><span class="o">=</span><span class="n">NmrResidue</span><span class="o">.</span><span class="n">_pluralLinkName</span><span class="p">,</span>
                          <span class="n">callback</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_highlightNmrResidues</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setNotifier</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">current</span><span class="p">,</span> <span class="p">[</span><span class="n">Notifier</span><span class="o">.</span><span class="n">CURRENT</span><span class="p">],</span> <span class="n">targetName</span><span class="o">=</span><span class="n">NmrAtom</span><span class="o">.</span><span class="n">_pluralLinkName</span><span class="p">,</span>
+                         <span class="n">callback</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_highlightNmrAtoms</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_closeModule</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        CCPN-INTERNAL: used to close the module</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_selectCurrentNmrAtomsNotifier</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_selectCurrentNmrAtomsNotifier</span><span class="o">.</span><span class="n">unRegister</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">assignedPeaksTable</span><span class="o">.</span><span class="n">_close</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">chemicalShiftTable</span><span class="o">.</span><span class="n">_close</span><span class="p">()</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_closeModule</span><span class="p">()</span>
@@ -274,41 +298,163 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_closeModule</span><span class="p">()</span></div>
 
+    <span class="k">def</span> <span class="nf">_setNmrAtomListVisible</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">visible</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;change the visibility of the nmrAtom list in the peak tables widget</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">visible</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">visible</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">showNmrAtomListWidget</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">visible</span><span class="p">,</span> <span class="nb">bool</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;nmrList visibility must be True/False&#39;</span><span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">showNmrAtomListWidget</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">visible</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">assignedPeaksTable</span><span class="o">.</span><span class="n">nmrAtomListFrame</span><span class="o">.</span><span class="n">setVisible</span><span class="p">(</span><span class="n">visible</span><span class="p">)</span>
+
     <span class="k">def</span> <span class="nf">_setCurrentPeak</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        PeakTable select callback</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="kn">from</span> <span class="nn">ccpn.core.lib.CallBack</span> <span class="kn">import</span> <span class="n">CallBack</span>
+        <span class="n">peaks</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">CallBack</span><span class="o">.</span><span class="n">OBJECT</span><span class="p">]</span>
+        <span class="c1"># multiselection allowed, set current to all selected peaks</span>
+        <span class="k">if</span> <span class="n">peaks</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">peaks</span> <span class="o">=</span> <span class="n">peaks</span>
 
-        <span class="n">peak</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">CallBack</span><span class="o">.</span><span class="n">OBJECT</span><span class="p">]</span>
-        <span class="c1"># multiselection not allowed, sot only return the first object in list</span>
-        <span class="k">if</span> <span class="n">peak</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">peaks</span> <span class="o">=</span> <span class="n">peak</span>
+    <span class="nd">@contextmanager</span>
+    <span class="k">def</span> <span class="nf">_notifierBlanking</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;block nmrAtom and nmrResidue notifiers for this module only</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setBlankingAllNotifiers</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="c1"># transfer control to the calling function</span>
+            <span class="k">yield</span>
+
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">es</span><span class="p">:</span>
+            <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;Error in AssignmentInspectorModule&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">es</span><span class="p">))</span>
+
+        <span class="k">finally</span><span class="p">:</span>
+            <span class="c1"># reset notifiers</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">setBlankingAllNotifiers</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
+
+<div class="viewcode-block" id="AssignmentInspectorModule.navigateToNmrResidueCallBack"><a class="viewcode-back" href="../../../../ccpn/ccpn.AnalysisAssign.modules.html#ccpn.AnalysisAssign.modules.AssignmentInspectorModule.AssignmentInspectorModule.navigateToNmrResidueCallBack">[docs]</a>    <span class="k">def</span> <span class="nf">navigateToNmrResidueCallBack</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Navigate in selected displays to nmrResidue; skip if none defined</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># handle a single chemicalShift - SHOULD always contain an object</span>
+        <span class="n">objs</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">CallBack</span><span class="o">.</span><span class="n">OBJECT</span><span class="p">]</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">objs</span><span class="p">:</span>
+            <span class="k">return</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">objs</span><span class="p">,</span> <span class="p">(</span><span class="nb">tuple</span><span class="p">,</span> <span class="nb">list</span><span class="p">)):</span>
+            <span class="n">chemicalShift</span> <span class="o">=</span> <span class="n">objs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">chemicalShift</span> <span class="o">=</span> <span class="n">objs</span>
+
+        <span class="n">nmrResidue</span> <span class="o">=</span> <span class="n">chemicalShift</span><span class="o">.</span><span class="n">nmrAtom</span><span class="o">.</span><span class="n">nmrResidue</span>
+
+        <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;nmrResidue=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">nmrResidue</span><span class="o">.</span><span class="n">id</span><span class="p">))</span>
+
+        <span class="n">displays</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getDisplays</span><span class="p">()</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">displays</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;Undefined display module(s); select in settings first&#39;</span><span class="p">)</span>
+            <span class="n">showWarning</span><span class="p">(</span><span class="s1">&#39;startAssignment&#39;</span><span class="p">,</span> <span class="s1">&#39;Undefined display module(s);</span><span class="se">\n</span><span class="s1">select in settings first&#39;</span><span class="p">)</span>
+            <span class="k">return</span>
+
+        <span class="kn">from</span> <span class="nn">ccpn.core.lib.ContextManagers</span> <span class="kn">import</span> <span class="n">undoBlock</span>
+
+        <span class="k">with</span> <span class="n">undoBlock</span><span class="p">():</span>
+            <span class="c1"># optionally clear the marks</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">autoClearMarksWidget</span><span class="o">.</span><span class="n">checkBox</span><span class="o">.</span><span class="n">isChecked</span><span class="p">():</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">clearMarks</span><span class="p">()</span>
+
+            <span class="c1"># navigate the displays</span>
+            <span class="k">for</span> <span class="n">display</span> <span class="ow">in</span> <span class="n">displays</span><span class="p">:</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">display</span><span class="o">.</span><span class="n">strips</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">newWidths</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1">#_getCurrentZoomRatio(display.strips[0].viewBox.viewRange())</span>
+                    <span class="n">navigateToNmrResidueInDisplay</span><span class="p">(</span><span class="n">nmrResidue</span><span class="p">,</span> <span class="n">display</span><span class="p">,</span> <span class="n">stripIndex</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+                                                  <span class="n">widths</span><span class="o">=</span><span class="n">newWidths</span><span class="p">,</span>  <span class="c1">#[&#39;full&#39;] * len(display.strips[0].axisCodes),</span>
+                                                  <span class="n">showSequentialResidues</span><span class="o">=</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">display</span><span class="o">.</span><span class="n">axisCodes</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">2</span><span class="p">)</span> <span class="ow">and</span>
+                                                                         <span class="bp">self</span><span class="o">.</span><span class="n">sequentialStripsWidget</span><span class="o">.</span><span class="n">checkBox</span><span class="o">.</span><span class="n">isChecked</span><span class="p">(),</span>
+                                                  <span class="n">markPositions</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">markPositionsWidget</span><span class="o">.</span><span class="n">checkBox</span><span class="o">.</span><span class="n">isChecked</span><span class="p">()</span>
+                                                  <span class="p">)</span></div>
 
     <span class="k">def</span> <span class="nf">_actionCallback</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+        <span class="c1"># def _selectionCallback(self, data):</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Notifier DoubleClick action on item in table</span>
+<span class="sd">        Notifier single-click action on item in table</span>
+<span class="sd">        Highlight nmrAtoms from chemicalShifts</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">obj</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">CallBack</span><span class="o">.</span><span class="n">OBJECT</span><span class="p">]</span>
+        <span class="c1"># multiselection table will return a list of objects</span>
+        <span class="n">objs</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">CallBack</span><span class="o">.</span><span class="n">OBJECT</span><span class="p">]</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">objs</span><span class="p">:</span>
+            <span class="k">return</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">objs</span><span class="p">,</span> <span class="p">(</span><span class="nb">tuple</span><span class="p">,</span> <span class="nb">list</span><span class="p">)):</span>
+            <span class="n">objList</span> <span class="o">=</span> <span class="n">objs</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">objList</span> <span class="o">=</span> <span class="p">(</span><span class="n">objs</span><span class="p">,)</span>
 
-        <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;AssignmentInspector_ChemicalShift&gt;&gt;&gt; action&#39;</span><span class="p">,</span> <span class="n">obj</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">objList</span><span class="p">:</span>
+            <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;AssignmentInspector_ChemicalShift&gt;&gt;&gt; action&#39;</span><span class="p">,</span> <span class="n">objList</span><span class="p">)</span>
+            <span class="n">nmrResidues</span> <span class="o">=</span> <span class="p">[</span><span class="n">cs</span><span class="o">.</span><span class="n">nmrAtom</span><span class="o">.</span><span class="n">nmrResidue</span> <span class="k">for</span> <span class="n">cs</span> <span class="ow">in</span> <span class="n">objList</span><span class="p">]</span>
+
+            <span class="k">if</span> <span class="n">nmrResidues</span><span class="p">:</span>
+                <span class="c1"># navigate to nmrResidues in displays</span>
+
+                <span class="k">pass</span>
+
+                <span class="c1"># with self._notifierBlanking():</span>
+                <span class="c1">#     # SHOULD be only 1, but multi-selection may give more</span>
+                <span class="c1">#     self.current.nmrAtoms = [cs.nmrAtom for cs in objList]</span>
+                <span class="c1">#     self.current.nmrResidues = nmrResidues</span>
+                <span class="c1">#</span>
+                <span class="c1">#     # don&#39;t need to update the selection on the chemicalShiftTable</span>
+                <span class="c1">#</span>
+                <span class="c1">#     self.assignedPeaksTable._updateModuleCallback({NMRRESIDUES: nmrResidues,</span>
+                <span class="c1">#                                                    NMRATOMS   : self.current.nmrAtoms},</span>
+                <span class="c1">#                                                   updateFromNmrResidues=False)</span>
 
     <span class="k">def</span> <span class="nf">_selectionCallback</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+        <span class="c1"># def _actionCallback(self, data):</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Notifier Callback for selecting a row in the table</span>
+<span class="sd">        Notifier Callback for double-clicking a row in the table</span>
+<span class="sd">        Highlight all nmrAtoms belonging to the same nmrResidue as nmrAtom in checmicalShifts</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+
         <span class="n">objList</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">CallBack</span><span class="o">.</span><span class="n">OBJECT</span><span class="p">]</span>
 
         <span class="k">if</span> <span class="n">objList</span><span class="p">:</span>
-            <span class="n">residues</span> <span class="o">=</span> <span class="p">[</span><span class="n">cs</span><span class="o">.</span><span class="n">nmrAtom</span><span class="o">.</span><span class="n">nmrResidue</span> <span class="k">for</span> <span class="n">cs</span> <span class="ow">in</span> <span class="n">objList</span><span class="p">]</span>
+            <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;AssignmentInspector_ChemicalShift&gt;&gt;&gt; action&#39;</span><span class="p">,</span> <span class="n">objList</span><span class="p">)</span>
 
-            <span class="k">if</span> <span class="n">residues</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">nmrAtoms</span> <span class="o">=</span> <span class="p">[</span><span class="n">cs</span><span class="o">.</span><span class="n">nmrAtom</span> <span class="k">for</span> <span class="n">cs</span> <span class="ow">in</span> <span class="n">objList</span><span class="p">]</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">nmrResidues</span> <span class="o">=</span> <span class="p">[</span><span class="n">cs</span><span class="o">.</span><span class="n">nmrAtom</span><span class="o">.</span><span class="n">nmrResidue</span> <span class="k">for</span> <span class="n">cs</span> <span class="ow">in</span> <span class="n">objList</span><span class="p">]</span>
+            <span class="n">nmrResidues</span> <span class="o">=</span> <span class="p">[</span><span class="n">cs</span><span class="o">.</span><span class="n">nmrAtom</span><span class="o">.</span><span class="n">nmrResidue</span> <span class="k">for</span> <span class="n">cs</span> <span class="ow">in</span> <span class="n">objList</span><span class="p">]</span>
 
-                <span class="bp">self</span><span class="o">.</span><span class="n">assignedPeaksTable</span><span class="o">.</span><span class="n">_updateModuleCallback</span><span class="p">({</span><span class="s1">&#39;value&#39;</span><span class="p">:</span> <span class="n">residues</span><span class="p">})</span>
+            <span class="k">if</span> <span class="n">nmrResidues</span><span class="p">:</span>
+                <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">_notifierBlanking</span><span class="p">():</span>
 
-        <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;AssignmentInspector_ChemicalShift&gt;&gt;&gt; selection&#39;</span><span class="p">,</span> <span class="n">objList</span><span class="p">)</span>
+                    <span class="n">nmrAtoms</span> <span class="o">=</span> <span class="n">OrderedSet</span><span class="p">()</span>
+                    <span class="k">for</span> <span class="n">nmrRes</span> <span class="ow">in</span> <span class="n">nmrResidues</span><span class="p">:</span>
+                        <span class="k">for</span> <span class="n">nmrAtom</span> <span class="ow">in</span> <span class="n">nmrRes</span><span class="o">.</span><span class="n">nmrAtoms</span><span class="p">:</span>
+                            <span class="n">nmrAtoms</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">nmrAtom</span><span class="p">)</span>
+
+                    <span class="bp">self</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">nmrAtoms</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">nmrAtoms</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">nmrResidues</span> <span class="o">=</span> <span class="n">nmrResidues</span>
+
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_highlightChemicalShifts</span><span class="p">(</span><span class="n">nmrResidues</span><span class="p">)</span>
+
+                    <span class="bp">self</span><span class="o">.</span><span class="n">assignedPeaksTable</span><span class="o">.</span><span class="n">_updateModuleCallback</span><span class="p">({</span><span class="n">NMRRESIDUES</span><span class="p">:</span> <span class="n">nmrResidues</span><span class="p">,</span>
+                                                                   <span class="n">NMRATOMS</span>   <span class="p">:</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">nmrAtoms</span><span class="p">)},</span>
+                                                                  <span class="n">updateFromNmrResidues</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_highlightChemicalShifts</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nmrResidues</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Highlight chemical shifts in the table</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">chemicalShiftTable</span><span class="o">.</span><span class="n">_dataFrameObject</span><span class="p">:</span>
+            <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;_highlightChemicalShifts &#39;</span><span class="p">,</span> <span class="n">nmrResidues</span><span class="p">)</span>
+
+            <span class="n">chemicalShifts</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">chemicalShiftTable</span><span class="o">.</span><span class="n">_dataFrameObject</span><span class="o">.</span><span class="n">_objects</span>
+
+            <span class="n">residues</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">nmrResidues</span><span class="p">)</span>
+            <span class="c1"># highlightList = [cs for cs in chemicalShifts if cs.nmrAtom.nmrResidue in residues]</span>
+            <span class="n">highlightList</span> <span class="o">=</span> <span class="p">[</span><span class="n">cs</span> <span class="k">for</span> <span class="n">cs</span> <span class="ow">in</span> <span class="n">chemicalShifts</span> <span class="k">if</span> <span class="n">cs</span><span class="o">.</span><span class="n">nmrAtom</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">cs</span><span class="o">.</span><span class="n">nmrAtom</span><span class="o">.</span><span class="n">isDeleted</span> <span class="ow">and</span> <span class="n">cs</span><span class="o">.</span><span class="n">nmrAtom</span><span class="o">.</span><span class="n">nmrResidue</span> <span class="ow">in</span> <span class="n">residues</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">chemicalShiftTable</span><span class="o">.</span><span class="n">_highLightObjs</span><span class="p">(</span><span class="n">highlightList</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_navigateToPeak</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -322,7 +468,15 @@
             <span class="n">showWarning</span><span class="p">(</span><span class="s1">&#39;startAssignment&#39;</span><span class="p">,</span> <span class="s1">&#39;Undefined display module(s);</span><span class="se">\n</span><span class="s1">select in settings first&#39;</span><span class="p">)</span>
             <span class="k">return</span>
 
-        <span class="n">peak</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">CallBack</span><span class="o">.</span><span class="n">OBJECT</span><span class="p">]</span>
+        <span class="c1"># get the first object from the callback</span>
+        <span class="n">objs</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">CallBack</span><span class="o">.</span><span class="n">OBJECT</span><span class="p">]</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">objs</span><span class="p">:</span>
+            <span class="k">return</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">objs</span><span class="p">,</span> <span class="p">(</span><span class="nb">tuple</span><span class="p">,</span> <span class="nb">list</span><span class="p">)):</span>
+            <span class="n">peak</span> <span class="o">=</span> <span class="n">objs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">peak</span> <span class="o">=</span> <span class="n">objs</span>
+
         <span class="k">if</span> <span class="n">peak</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">peak</span> <span class="o">=</span> <span class="n">peak</span>
 
@@ -344,7 +498,6 @@
                             <span class="k">if</span> <span class="n">peak</span><span class="o">.</span><span class="n">peakList</span><span class="o">.</span><span class="n">spectrum</span><span class="o">.</span><span class="n">dimensionCount</span> <span class="o">&lt;=</span> <span class="mi">2</span><span class="p">:</span>
                                 <span class="n">widths</span> <span class="o">=</span> <span class="n">_getCurrentZoomRatio</span><span class="p">(</span><span class="n">strip</span><span class="o">.</span><span class="n">viewRange</span><span class="p">())</span>
 
-                            <span class="c1"># navigateToPositionInStrip(strip=strip, positions=peak.position, widths=widths)</span>
                             <span class="n">navigateToNmrAtomsInStrip</span><span class="p">(</span><span class="n">strip</span><span class="p">,</span> <span class="n">makeIterableList</span><span class="p">(</span><span class="n">peak</span><span class="o">.</span><span class="n">assignedNmrAtoms</span><span class="p">),</span>
                                                       <span class="n">widths</span><span class="o">=</span><span class="n">widths</span><span class="p">,</span> <span class="n">markPositions</span><span class="o">=</span><span class="n">markPositions</span><span class="p">,</span>
                                                       <span class="n">setNmrResidueLabel</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
@@ -356,17 +509,19 @@
         <span class="n">objList</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">CallBack</span><span class="o">.</span><span class="n">OBJECT</span><span class="p">]</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">chemicalShiftTable</span><span class="o">.</span><span class="n">_dataFrameObject</span><span class="p">:</span>
+            <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;_highlightNmrResidues &#39;</span><span class="p">,</span> <span class="n">objList</span><span class="p">)</span>
+
             <span class="n">chemicalShifts</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">chemicalShiftTable</span><span class="o">.</span><span class="n">_dataFrameObject</span><span class="o">.</span><span class="n">_objects</span>
             <span class="c1"># peaks = self.assignedPeaksTable._dataFrameObject._objects</span>
 
-            <span class="n">residues</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">objList</span><span class="o">.</span><span class="n">nmrResidues</span><span class="p">)</span>  <span class="c1">#        set([atom.nmrResidue for atom in self.current.nmrAtoms if atom])</span>
-            <span class="n">highlightList</span> <span class="o">=</span> <span class="p">[</span><span class="n">cs</span> <span class="k">for</span> <span class="n">cs</span> <span class="ow">in</span> <span class="n">chemicalShifts</span> <span class="k">if</span> <span class="n">cs</span><span class="o">.</span><span class="n">nmrAtom</span><span class="o">.</span><span class="n">nmrResidue</span> <span class="ow">in</span> <span class="n">residues</span><span class="p">]</span>
-            <span class="c1"># print (&#39;&gt;&gt;&gt;&#39;, highlightList)</span>
+            <span class="n">nmrResidues</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">objList</span><span class="o">.</span><span class="n">nmrResidues</span><span class="p">)</span>  <span class="c1">#        set([atom.nmrResidue for atom in self.current.nmrAtoms if atom])</span>
+            <span class="n">highlightList</span> <span class="o">=</span> <span class="p">[</span><span class="n">cs</span> <span class="k">for</span> <span class="n">cs</span> <span class="ow">in</span> <span class="n">chemicalShifts</span> <span class="k">if</span> <span class="n">cs</span><span class="o">.</span><span class="n">nmrAtom</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">cs</span><span class="o">.</span><span class="n">nmrAtom</span><span class="o">.</span><span class="n">isDeleted</span> <span class="ow">and</span> <span class="n">cs</span><span class="o">.</span><span class="n">nmrAtom</span><span class="o">.</span><span class="n">nmrResidue</span> <span class="ow">in</span> <span class="n">nmrResidues</span><span class="p">]</span>
 
             <span class="bp">self</span><span class="o">.</span><span class="n">chemicalShiftTable</span><span class="o">.</span><span class="n">_highLightObjs</span><span class="p">(</span><span class="n">highlightList</span><span class="p">)</span>
 
             <span class="c1"># will respond to selection of nmrAtom in sequenceGraph</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">assignedPeaksTable</span><span class="o">.</span><span class="n">_updateModuleCallback</span><span class="p">({</span><span class="s1">&#39;value&#39;</span><span class="p">:</span> <span class="nb">list</span><span class="p">(</span><span class="n">residues</span><span class="p">)})</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assignedPeaksTable</span><span class="o">.</span><span class="n">_updateModuleCallback</span><span class="p">({</span><span class="n">NMRRESIDUES</span><span class="p">:</span> <span class="n">nmrResidues</span><span class="p">},</span>
+                                                          <span class="n">updateFromNmrResidues</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_highlightNmrAtoms</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -375,17 +530,21 @@
         <span class="n">objList</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">CallBack</span><span class="o">.</span><span class="n">OBJECT</span><span class="p">]</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">chemicalShiftTable</span><span class="o">.</span><span class="n">_dataFrameObject</span><span class="p">:</span>
+            <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;_highlightNmrAtoms &#39;</span><span class="p">,</span> <span class="n">objList</span><span class="p">)</span>
+
             <span class="n">chemicalShifts</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">chemicalShiftTable</span><span class="o">.</span><span class="n">_dataFrameObject</span><span class="o">.</span><span class="n">_objects</span>
             <span class="c1"># peaks = self.assignedPeaksTable._dataFrameObject._objects</span>
 
-            <span class="n">residues</span> <span class="o">=</span> <span class="nb">set</span><span class="p">([</span><span class="n">atom</span><span class="o">.</span><span class="n">nmrResidue</span> <span class="k">for</span> <span class="n">atom</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">nmrAtoms</span> <span class="k">if</span> <span class="n">atom</span><span class="p">])</span>
-            <span class="n">highlightList</span> <span class="o">=</span> <span class="p">[</span><span class="n">cs</span> <span class="k">for</span> <span class="n">cs</span> <span class="ow">in</span> <span class="n">chemicalShifts</span> <span class="k">if</span> <span class="n">cs</span><span class="o">.</span><span class="n">nmrAtom</span><span class="o">.</span><span class="n">nmrResidue</span> <span class="ow">in</span> <span class="n">residues</span><span class="p">]</span>
+            <span class="n">nmrResidues</span> <span class="o">=</span> <span class="nb">set</span><span class="p">([</span><span class="n">atom</span><span class="o">.</span><span class="n">nmrResidue</span> <span class="k">for</span> <span class="n">atom</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">nmrAtoms</span> <span class="k">if</span> <span class="n">atom</span><span class="p">])</span>
+            <span class="n">highlightList</span> <span class="o">=</span> <span class="p">[</span><span class="n">cs</span> <span class="k">for</span> <span class="n">cs</span> <span class="ow">in</span> <span class="n">chemicalShifts</span> <span class="k">if</span> <span class="n">cs</span><span class="o">.</span><span class="n">nmrAtom</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">cs</span><span class="o">.</span><span class="n">nmrAtom</span><span class="o">.</span><span class="n">isDeleted</span> <span class="ow">and</span> <span class="n">cs</span><span class="o">.</span><span class="n">nmrAtom</span><span class="o">.</span><span class="n">nmrResidue</span> <span class="ow">in</span> <span class="n">nmrResidues</span><span class="p">]</span>
             <span class="c1"># print (&#39;&gt;&gt;&gt;&#39;, highlightList)</span>
 
             <span class="bp">self</span><span class="o">.</span><span class="n">chemicalShiftTable</span><span class="o">.</span><span class="n">_highLightObjs</span><span class="p">(</span><span class="n">highlightList</span><span class="p">)</span>
 
             <span class="c1"># will respond to selection of nmrAtom in sequenceGraph</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">assignedPeaksTable</span><span class="o">.</span><span class="n">_updateModuleCallback</span><span class="p">({</span><span class="s1">&#39;value&#39;</span><span class="p">:</span> <span class="nb">list</span><span class="p">(</span><span class="n">residues</span><span class="p">)})</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assignedPeaksTable</span><span class="o">.</span><span class="n">_updateModuleCallback</span><span class="p">({</span><span class="n">NMRRESIDUES</span><span class="p">:</span> <span class="n">nmrResidues</span><span class="p">,</span>
+                                                           <span class="n">NMRATOMS</span>   <span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">nmrAtoms</span><span class="p">},</span>
+                                                          <span class="n">updateFromNmrResidues</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
 
         <span class="k">return</span></div>
 
@@ -432,62 +591,59 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">ids</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># list of currently displayed NmrAtom ids + &lt;all&gt;</span>
 
         <span class="c1"># main window</span>
-        <span class="c1"># Frame-1: NmrAtoms</span>
-        <span class="n">width</span> <span class="o">=</span> <span class="mi">130</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">frame1</span> <span class="o">=</span> <span class="n">Frame</span><span class="p">(</span><span class="bp">None</span><span class="p">,</span> <span class="n">setLayout</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>  <span class="c1"># ejb</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">frame1</span><span class="o">.</span><span class="n">setFixedWidth</span><span class="p">(</span><span class="n">width</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">nmrAtomLabel</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">frame1</span><span class="p">,</span> <span class="s1">&#39;NmrAtom(s):&#39;</span><span class="p">,</span> <span class="n">bold</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+
+        <span class="c1"># Frame-1: NmrAtoms list, hidden when table first opens</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_nmrAtomListFrameWidth</span> <span class="o">=</span> <span class="mi">130</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nmrAtomListFrame</span> <span class="o">=</span> <span class="n">Frame</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">gridSpan</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">setLayout</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>  <span class="c1"># ejb</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">nmrAtomListFrame</span><span class="o">.</span><span class="n">setFixedWidth</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_nmrAtomListFrameWidth</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nmrAtomLabel</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nmrAtomListFrame</span><span class="p">,</span> <span class="s1">&#39;NmrAtom(s):&#39;</span><span class="p">,</span> <span class="n">bold</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
                                   <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">gridSpan</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">vAlign</span><span class="o">=</span><span class="s1">&#39;center&#39;</span><span class="p">,</span> <span class="n">margins</span><span class="o">=</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">5</span><span class="p">])</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">attachedNmrAtomsList</span> <span class="o">=</span> <span class="n">ListWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">frame1</span><span class="p">,</span>
-                                               <span class="n">callback</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_updatePeakTableCallback</span><span class="p">,</span> <span class="n">contextMenu</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">attachedNmrAtomsList</span> <span class="o">=</span> <span class="n">ListWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nmrAtomListFrame</span><span class="p">,</span>
+                                               <span class="n">contextMenu</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
                                                <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">gridSpan</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
                                                <span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">attachedNmrAtomsList</span><span class="o">.</span><span class="n">setFixedWidth</span><span class="p">(</span><span class="n">width</span> <span class="o">-</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">attachedNmrAtomsList</span><span class="o">.</span><span class="n">itemSelectionChanged</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_updatePeakTableCallback</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">attachedNmrAtomsList</span><span class="o">.</span><span class="n">setDragEnabled</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">frame1</span><span class="o">.</span><span class="n">hide</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">attachedNmrAtomsList</span><span class="o">.</span><span class="n">setFixedWidth</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_nmrAtomListFrameWidth</span> <span class="o">-</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">attachedNmrAtomsList</span><span class="o">.</span><span class="n">setSizePolicy</span><span class="p">(</span><span class="n">QtWidgets</span><span class="o">.</span><span class="n">QSizePolicy</span><span class="o">.</span><span class="n">Ignored</span><span class="p">,</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QSizePolicy</span><span class="o">.</span><span class="n">MinimumExpanding</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nmrAtomListFrame</span><span class="o">.</span><span class="n">setSizePolicy</span><span class="p">(</span><span class="n">QtWidgets</span><span class="o">.</span><span class="n">QSizePolicy</span><span class="o">.</span><span class="n">Ignored</span><span class="p">,</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QSizePolicy</span><span class="o">.</span><span class="n">Ignored</span><span class="p">)</span>
 
         <span class="c1"># Frame-2: peaks</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">frame2</span> <span class="o">=</span> <span class="n">Frame</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">gridSpan</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">setLayout</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>  <span class="c1"># ejb</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">frame2</span> <span class="o">=</span> <span class="n">Frame</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">gridSpan</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">setLayout</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>  <span class="c1"># ejb</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">peaksLabel</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">frame2</span><span class="p">,</span> <span class="s1">&#39;Peaks assigned to NmrAtom(s):&#39;</span><span class="p">,</span> <span class="n">bold</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
-                                <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">gridSpan</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">margins</span><span class="o">=</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">5</span><span class="p">])</span>
+                                <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">gridSpan</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span> <span class="n">margins</span><span class="o">=</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">5</span><span class="p">])</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">frame2</span><span class="o">.</span><span class="n">setFixedHeight</span><span class="p">(</span><span class="mi">24</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">peaksLabel</span><span class="o">.</span><span class="n">setFixedHeight</span><span class="p">(</span><span class="mi">24</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">peaksLabel</span><span class="o">.</span><span class="n">setSizePolicy</span><span class="p">(</span><span class="n">QtWidgets</span><span class="o">.</span><span class="n">QSizePolicy</span><span class="o">.</span><span class="n">MinimumExpanding</span><span class="p">,</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QSizePolicy</span><span class="o">.</span><span class="n">MinimumExpanding</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">frame2</span><span class="o">.</span><span class="n">setSizePolicy</span><span class="p">(</span><span class="n">QtWidgets</span><span class="o">.</span><span class="n">QSizePolicy</span><span class="o">.</span><span class="n">Ignored</span><span class="p">,</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QSizePolicy</span><span class="o">.</span><span class="n">Minimum</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">frame2</span><span class="o">.</span><span class="n">setSizePolicy</span><span class="p">(</span><span class="n">QtWidgets</span><span class="o">.</span><span class="n">QSizePolicy</span><span class="o">.</span><span class="n">Ignored</span><span class="p">,</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QSizePolicy</span><span class="o">.</span><span class="n">Ignored</span><span class="p">)</span>
+
         <span class="c1"># initialise the currently attached dataFrame</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_hiddenColumns</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Pid&#39;</span><span class="p">]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">dataFrameObject</span> <span class="o">=</span> <span class="bp">None</span>
 
-        <span class="c1"># self.assignedPeaksTable = ObjectTable(self.frame2, self.getColumns(),</span>
-        <span class="c1">#                                       selectionCallback=self._setCurrentPeak,</span>
-        <span class="c1">#                                       actionCallback=self._navigateToPeak,</span>
-        <span class="c1">#                                       objects=[], autoResize=True,</span>
-        <span class="c1">#                                       grid=(1, 0), gridSpan=(1, 5), **policies</span>
-        <span class="c1">#                                       )</span>
-
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="n">parent</span><span class="p">,</span>
+        <span class="c1"># initialise the table and put in the second column (first hidden at start)</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">frame2</span><span class="p">,</span>
                          <span class="n">mainWindow</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span><span class="p">,</span>
                          <span class="n">dataFrameObject</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
                          <span class="n">setLayout</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
                          <span class="n">autoResize</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">multiSelect</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
                          <span class="n">selectionCallback</span><span class="o">=</span><span class="n">selectionCallback</span><span class="p">,</span>
                          <span class="n">actionCallback</span><span class="o">=</span><span class="n">actionCallback</span><span class="p">,</span>
-                         <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">gridSpan</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">6</span><span class="p">),</span>
+                         <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">gridSpan</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span>
                          <span class="n">enableDelete</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">enableSearch</span><span class="o">=</span><span class="bp">False</span>
                          <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">moduleParent</span> <span class="o">=</span> <span class="n">moduleParent</span>
 
-        <span class="c1"># self._assignmentFrame.setSizePolicy(QtWidgets.QSizePolicy.Ignored, QtWidgets.QSizePolicy.Ignored)</span>
-        <span class="c1">#self.attachedNmrAtomsList.setFixedHeight(200)</span>
-        <span class="c1">#self.assignedPeaksTable.setFixedHeight(200)</span>
-
-        <span class="c1"># self._registerNotifiers()</span>
+        <span class="c1"># self._registerNotifiers() - removed for testing</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_peakList</span> <span class="o">=</span> <span class="bp">None</span>
         <span class="c1"># update if current.nmrResidue is defined</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">nmrResidue</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">chemicalShiftList</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_updateModuleCallback</span><span class="p">({</span><span class="s1">&#39;value&#39;</span><span class="p">:</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">nmrResidue</span><span class="p">]})</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_updateModuleCallback</span><span class="p">({</span><span class="n">NMRRESIDUES</span><span class="p">:</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">nmrResidue</span><span class="p">]},</span>
+                                       <span class="n">updateFromNmrResidues</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
 
         <span class="c1"># set the required table notifiers</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">setTableNotifiers</span><span class="p">(</span><span class="n">tableClass</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
@@ -499,107 +655,180 @@
                                <span class="n">updateFunc</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_refreshTable</span><span class="p">,</span>
                                <span class="n">tableSelection</span><span class="o">=</span><span class="s1">&#39;_peakList&#39;</span><span class="p">,</span>
                                <span class="n">pullDownWidget</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>  <span class="c1">#self.ncWidget</span>
-                               <span class="n">callBackClass</span><span class="o">=</span><span class="n">NmrResidue</span><span class="p">,</span>
-                               <span class="n">selectCurrentCallBack</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
-                               <span class="n">moduleParent</span><span class="o">=</span><span class="n">moduleParent</span><span class="p">)</span>  <span class="c1">#self._updateModuleCallback)   #self._selectOnTableCurrentNmrResiduesNotifierCallback)</span>
+                               <span class="n">callBackClass</span><span class="o">=</span><span class="n">Peak</span><span class="p">,</span>
+                               <span class="n">selectCurrentCallBack</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_selectOnTableCurrentPeaksNotifierCallback</span><span class="p">,</span>
+                               <span class="n">moduleParent</span><span class="o">=</span><span class="n">moduleParent</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">_updateModuleCallback</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="nb">dict</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_updateModuleCallback</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">updateFromNmrResidues</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Callback function: Module responsive to nmrResidues; updates the list widget with nmrAtoms and updates peakTable if</span>
 <span class="sd">        current.nmrAtom belongs to nmrResidue</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="n">data</span> <span class="ow">and</span> <span class="s1">&#39;value&#39;</span> <span class="ow">in</span> <span class="n">data</span><span class="p">:</span>
-            <span class="n">nmrResidues</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;value&#39;</span><span class="p">]</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">attachedNmrAtomsList</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">data</span><span class="p">:</span>
 
-            <span class="k">if</span> <span class="n">nmrResidues</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">nmrResidues</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span> \
-                    <span class="ow">and</span> <span class="n">nmrResidues</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">nmrResidues</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">nmrAtoms</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="c1"># update list from nmrResidues, show all nmrAtoms connected</span>
+            <span class="n">nmrResidues</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">NMRRESIDUES</span><span class="p">]</span> <span class="k">if</span> <span class="n">NMRRESIDUES</span> <span class="ow">in</span> <span class="n">data</span> <span class="k">else</span> <span class="p">[]</span>
 
-                <span class="c1"># get the pids and append &lt;all&gt;</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">ids</span> <span class="o">=</span> <span class="p">[</span><span class="n">atm</span><span class="o">.</span><span class="n">id</span> <span class="k">for</span> <span class="n">atm</span> <span class="ow">in</span> <span class="n">nmrResidues</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">nmrAtoms</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="n">ALL</span><span class="p">]</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">attachedNmrAtomsList</span><span class="o">.</span><span class="n">addItems</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ids</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">updateFromNmrResidues</span><span class="p">:</span>
+                <span class="c1"># generate nmrAtom list from nmrResidues</span>
+                <span class="n">nmrAtoms</span> <span class="o">=</span> <span class="n">OrderedSet</span><span class="p">()</span>
+                <span class="k">for</span> <span class="n">nmrRes</span> <span class="ow">in</span> <span class="n">nmrResidues</span><span class="p">:</span>
+                    <span class="k">for</span> <span class="n">nmrAtom</span> <span class="ow">in</span> <span class="n">nmrRes</span><span class="o">.</span><span class="n">nmrAtoms</span><span class="p">:</span>
+                        <span class="n">nmrAtoms</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">nmrAtom</span><span class="p">)</span>
 
-                <span class="c1"># # clear and fill the peak table</span>
-                <span class="c1"># self.assignedPeaksTable.setObjects([])</span>
-                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">nmrAtom</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">nmrAtom</span><span class="o">.</span><span class="n">id</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">ids</span><span class="p">:</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">_updatePeakTable</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">nmrAtom</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
-                <span class="k">else</span><span class="p">:</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">_updatePeakTable</span><span class="p">(</span><span class="n">ALL</span><span class="p">)</span>
-
-                <span class="c1"># new to populate table</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;No valid nmrAtom/nmrResidue defined&#39;</span><span class="p">)</span>
+                <span class="c1"># get from the data dict</span>
+                <span class="n">nmrAtoms</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">NMRATOMS</span><span class="p">]</span> <span class="k">if</span> <span class="n">NMRATOMS</span> <span class="ow">in</span> <span class="n">data</span> <span class="k">else</span> <span class="p">[]</span>
 
-    <span class="k">def</span> <span class="nf">_updatePeakTableCallback</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">):</span>
+            <span class="c1"># there is currently a hidden list widget containing the nmrAtom ids</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">attachedNmrAtomsList</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ids</span> <span class="o">=</span> <span class="p">[</span><span class="n">atm</span><span class="o">.</span><span class="n">id</span> <span class="k">for</span> <span class="n">atm</span> <span class="ow">in</span> <span class="n">nmrAtoms</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">attachedNmrAtomsList</span><span class="o">.</span><span class="n">addItems</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ids</span><span class="p">)</span>
+
+            <span class="c1"># populate peak table with the correct peaks</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_updatePeakTable</span><span class="p">(</span><span class="n">nmrAtoms</span><span class="p">,</span> <span class="n">messageAll</span><span class="o">=</span><span class="n">updateFromNmrResidues</span><span class="p">)</span>
+
+            <span class="c1"># self.attachedNmrAtomsList.clear()</span>
+            <span class="c1">#</span>
+            <span class="c1"># if nmrResidues is not None and len(nmrResidues) &gt; 0 \</span>
+            <span class="c1">#         and nmrResidues[-1] and len(nmrResidues[-1].nmrAtoms) &gt; 0:</span>
+            <span class="c1">#</span>
+            <span class="c1">#     # get the pids and append &lt;all&gt;</span>
+            <span class="c1">#     self.ids = [atm.id for atm in nmrResidues[-1].nmrAtoms] + [ALL]</span>
+            <span class="c1">#     self.attachedNmrAtomsList.addItems(self.ids)</span>
+            <span class="c1">#</span>
+            <span class="c1">#     # # clear and fill the peak table</span>
+            <span class="c1">#     # self.assignedPeaksTable.setObjects([])</span>
+            <span class="c1">#     if self.application.current.nmrAtom is not None and self.application.current.nmrAtom.id in self.ids:</span>
+            <span class="c1">#         logger.debug(&#39;UPDATING selection&#39;)</span>
+            <span class="c1">#</span>
+            <span class="c1">#         self._updatePeakTable(self.application.current.nmrAtom.id)</span>
+            <span class="c1">#     else:</span>
+            <span class="c1">#         logger.debug(&#39;UPDATING All&#39;)</span>
+            <span class="c1">#</span>
+            <span class="c1">#         self._updatePeakTable(ALL)</span>
+            <span class="c1">#</span>
+            <span class="c1">#     # new to populate table</span>
+            <span class="c1"># else:</span>
+            <span class="c1">#     logger.debug(&#39;No valid nmrAtom/nmrResidue defined&#39;)</span>
+
+    <span class="k">def</span> <span class="nf">_selectOnTableCurrentPeaksNotifierCallback</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Callback from a notifier to highlight the peaks on the peak table</span>
+<span class="sd">        :param data:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">currentPeaks</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;value&#39;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_selectOnTableCurrentPeaks</span><span class="p">(</span><span class="n">currentPeaks</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_selectOnTableCurrentPeaks</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">currentPeaks</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Highlight the list of peaks on the table</span>
+<span class="sd">        :param currentPeaks:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">highlightObjects</span><span class="p">(</span><span class="n">currentPeaks</span><span class="p">)</span>
+        <span class="c1"># if len(currentPeaks) &gt; 0:</span>
+        <span class="c1">#     self._highLightObjs(currentPeaks)</span>
+        <span class="c1"># else:</span>
+        <span class="c1">#     self.clearSelection()</span>
+
+    <span class="k">def</span> <span class="nf">_updatePeakTableCallback</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Update the peakTable using item.text (which contains a NmrAtom pid or &lt;all&gt;)</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="n">item</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
-            <span class="n">text</span> <span class="o">=</span> <span class="n">item</span><span class="o">.</span><span class="n">text</span><span class="p">()</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_updatePeakTable</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;No valid item selected&#39;</span><span class="p">)</span>
+        <span class="c1"># something has been selected, so get all selected items</span>
+        <span class="n">numTexts</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">attachedNmrAtomsList</span><span class="o">.</span><span class="n">count</span><span class="p">()</span>
+        <span class="n">selectedTexts</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">attachedNmrAtomsList</span><span class="o">.</span><span class="n">getSelectedTexts</span><span class="p">()</span>
+        <span class="n">nmrAtoms</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">getByPid</span><span class="p">(</span><span class="s1">&#39;NA:&#39;</span> <span class="o">+</span> <span class="nb">id</span><span class="p">)</span> <span class="k">for</span> <span class="nb">id</span> <span class="ow">in</span> <span class="n">selectedTexts</span><span class="p">]</span>
 
+        <span class="c1"># populate the table with valid nmrAtoms</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_updatePeakTable</span><span class="p">([</span><span class="n">atm</span> <span class="k">for</span> <span class="n">atm</span> <span class="ow">in</span> <span class="n">nmrAtoms</span> <span class="k">if</span> <span class="n">atm</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">],</span>
+                              <span class="n">messageAll</span><span class="o">=</span><span class="bp">True</span> <span class="k">if</span> <span class="n">numTexts</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">nmrAtoms</span><span class="p">)</span> <span class="k">else</span> <span class="bp">False</span><span class="p">)</span>
 
-<div class="viewcode-block" id="AssignmentInspectorTable.emptyObject"><a class="viewcode-back" href="../../../../ccpn/ccpn.AnalysisAssign.modules.html#ccpn.AnalysisAssign.modules.AssignmentInspectorModule.AssignmentInspectorTable.emptyObject">[docs]</a>    <span class="k">class</span> <span class="nc">emptyObject</span><span class="p">():</span>
-        <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-            <span class="k">pass</span></div>
+    <span class="c1"># @contextmanager</span>
+    <span class="c1"># def _projectBlanking(self):</span>
+    <span class="c1">#</span>
+    <span class="c1">#     self.project.blankNotification()</span>
+    <span class="c1">#     objs = self.getSelectedObjects()</span>
+    <span class="c1">#</span>
+    <span class="c1">#     try:</span>
+    <span class="c1">#         # transfer control to the calling function</span>
+    <span class="c1">#         yield</span>
+    <span class="c1">#</span>
+    <span class="c1">#     except Exception as es:</span>
+    <span class="c1">#         getLogger().warning(&#39;Error in AssignmentInspectorModule&#39;, str(es))</span>
+    <span class="c1">#</span>
+    <span class="c1">#     finally:</span>
+    <span class="c1">#         # populate from the Pandas dataFrame inside the dataFrameObject</span>
+    <span class="c1">#         self.setTableFromDataFrameObject(dataFrameObject=self._dataFrameObject)</span>
+    <span class="c1">#         self._highLightObjs(objs)</span>
+    <span class="c1">#         self.project.unblankNotification()</span>
 
-
-    <span class="k">def</span> <span class="nf">_updatePeakTable</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">id</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_updatePeakTable</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nmrAtoms</span><span class="p">,</span> <span class="n">messageAll</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Update peak table depending on value of id;</span>
 <span class="sd">        clears peakTable if pid is None</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="nb">id</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
-            <span class="c1"># self.assignedPeaksTable.setObjects([])</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">assignedPeaksTable</span><span class="o">.</span><span class="n">clearTable</span><span class="p">()</span>
-            <span class="k">return</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">nmrAtoms</span><span class="p">:</span>
+            <span class="c1"># get all items from the table</span>
+            <span class="n">nmrAtoms</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">getByPid</span><span class="p">(</span><span class="s1">&#39;NA:&#39;</span> <span class="o">+</span> <span class="nb">id</span><span class="p">)</span> <span class="k">for</span> <span class="nb">id</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">attachedNmrAtomsList</span><span class="o">.</span><span class="n">getTexts</span><span class="p">()]</span>
 
-        <span class="k">if</span> <span class="nb">id</span> <span class="o">==</span> <span class="n">ALL</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_peakList</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">emptyObject</span><span class="p">()</span>
+            <span class="c1"># # populate the table with valid nmrAtoms</span>
+            <span class="c1"># self._updatePeakTable([atm for atm in nmrAtoms if atm is not None], messageAll=True)</span>
 
-            <span class="bp">self</span><span class="o">.</span><span class="n">_peakList</span><span class="o">.</span><span class="n">peaks</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">([</span><span class="n">pk</span> <span class="k">for</span> <span class="n">nmrAtom</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">nmrResidue</span><span class="o">.</span><span class="n">nmrAtoms</span> <span class="k">for</span> <span class="n">pk</span> <span class="ow">in</span> <span class="n">nmrAtom</span><span class="o">.</span><span class="n">assignedPeaks</span><span class="p">]))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_peakList</span> <span class="o">=</span> <span class="n">_emptyObject</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_peakList</span><span class="o">.</span><span class="n">peaks</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">([</span><span class="n">pk</span> <span class="k">for</span> <span class="n">nmrAtom</span> <span class="ow">in</span> <span class="n">nmrAtoms</span> <span class="k">for</span> <span class="n">pk</span> <span class="ow">in</span> <span class="n">nmrAtom</span><span class="o">.</span><span class="n">assignedPeaks</span><span class="p">]))</span>
 
-            <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">blankNotification</span><span class="p">()</span>
-            <span class="n">objs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getSelectedObjects</span><span class="p">()</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_dataFrameObject</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getDataFrameFromList</span><span class="p">(</span><span class="n">table</span><span class="o">=</span><span class="bp">self</span><span class="p">,</span>
-                                                              <span class="n">buildList</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_peakList</span><span class="o">.</span><span class="n">peaks</span><span class="p">,</span>
-                                                              <span class="n">colDefs</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">getColumns</span><span class="p">(),</span>
-                                                              <span class="n">hiddenColumns</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_hiddenColumns</span><span class="p">)</span>
+        <span class="c1"># with self._projectBlanking():</span>
+        <span class="c1">#     self._dataFrameObject = self.getDataFrameFromList(table=self,</span>
+        <span class="c1">#                                                       buildList=self._peakList.peaks,</span>
+        <span class="c1">#                                                       colDefs=self.getColumns(),</span>
+        <span class="c1">#                                                       hiddenColumns=self._hiddenColumns)</span>
 
-            <span class="c1"># populate from the Pandas dataFrame inside the dataFrameObject</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">setTableFromDataFrameObject</span><span class="p">(</span><span class="n">dataFrameObject</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_dataFrameObject</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_highLightObjs</span><span class="p">(</span><span class="n">objs</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">unblankNotification</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">populateTable</span><span class="p">(</span><span class="n">rowObjects</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_peakList</span><span class="o">.</span><span class="n">peaks</span><span class="p">,</span>
+                           <span class="n">columnDefs</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">getColumns</span><span class="p">())</span>
 
-            <span class="c1"># self.assignedPeaksTable.setObjects(peaks)</span>
-            <span class="c1"># highlight current.nmrAtom in the list widget</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">attachedNmrAtomsList</span><span class="o">.</span><span class="n">setCurrentRow</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ids</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="nb">id</span><span class="p">))</span>
+        <span class="n">ids</span> <span class="o">=</span> <span class="p">[</span><span class="n">atm</span><span class="o">.</span><span class="n">id</span> <span class="k">for</span> <span class="n">atm</span> <span class="ow">in</span> <span class="n">nmrAtoms</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="n">messageAll</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">peaksLabel</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="s1">&#39;Peaks assigned to NmrAtom(s): </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">ALL</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">pid</span> <span class="o">=</span> <span class="s1">&#39;NA:&#39;</span> <span class="o">+</span> <span class="nb">id</span>
-            <span class="n">nmrAtom</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">getByPid</span><span class="p">(</span><span class="n">pid</span><span class="p">)</span>
-            <span class="c1">#print(&#39;&gt;&gt;&#39;, pid, nmrAtom)</span>
-            <span class="k">if</span> <span class="n">nmrAtom</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">blankNotification</span><span class="p">()</span>
-                <span class="n">objs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getSelectedObjects</span><span class="p">()</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_dataFrameObject</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getDataFrameFromList</span><span class="p">(</span><span class="n">table</span><span class="o">=</span><span class="bp">self</span><span class="p">,</span>
-                                                                  <span class="n">buildList</span><span class="o">=</span><span class="n">nmrAtom</span><span class="o">.</span><span class="n">assignedPeaks</span><span class="p">,</span>
-                                                                  <span class="n">colDefs</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">getColumns</span><span class="p">(),</span>
-                                                                  <span class="n">hiddenColumns</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_hiddenColumns</span><span class="p">)</span>
+            <span class="n">atomList</span> <span class="o">=</span> <span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="nb">str</span><span class="p">(</span><span class="nb">id</span><span class="p">)</span> <span class="k">for</span> <span class="nb">id</span> <span class="ow">in</span> <span class="n">ids</span><span class="p">])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">peaksLabel</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="s1">&#39;Peaks assigned to NmrAtom(s): </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">atomList</span><span class="p">)</span>  <span class="c1"># nmrAtom.id)</span>
 
-                <span class="c1"># populate from the Pandas dataFrame inside the dataFrameObject</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">setTableFromDataFrameObject</span><span class="p">(</span><span class="n">dataFrameObject</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_dataFrameObject</span><span class="p">)</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_highLightObjs</span><span class="p">(</span><span class="n">objs</span><span class="p">)</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">unblankNotification</span><span class="p">()</span>
-
-                <span class="c1"># self.assignedPeaksTable.setObjects(nmrAtom.assignedPeaks)</span>
-                <span class="c1"># highlight current.nmrAtom in the list widget</span>
-
-                <span class="bp">self</span><span class="o">.</span><span class="n">attachedNmrAtomsList</span><span class="o">.</span><span class="n">setCurrentRow</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ids</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="nb">id</span><span class="p">))</span>
-                <span class="n">atomList</span> <span class="o">=</span> <span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="nb">str</span><span class="p">(</span><span class="nb">id</span><span class="p">)</span> <span class="k">for</span> <span class="nb">id</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">ids</span> <span class="k">if</span> <span class="nb">id</span> <span class="o">!=</span> <span class="n">ALL</span><span class="p">])</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">peaksLabel</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="s1">&#39;Peaks assigned to NmrAtom(s): </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">atomList</span><span class="p">)</span>  <span class="c1"># nmrAtom.id)</span>
+        <span class="c1"># if messageAll:</span>
+        <span class="c1">#</span>
+        <span class="c1">#     self._peakList = _emptyObject()</span>
+        <span class="c1">#     self._peakList.peaks = list(set([pk for nmrAtom in nmrAtoms for pk in nmrAtom.assignedPeaks]))</span>
+        <span class="c1">#</span>
+        <span class="c1">#     with self._projectBlanking():</span>
+        <span class="c1">#         self._dataFrameObject = self.getDataFrameFromList(table=self,</span>
+        <span class="c1">#                                                           buildList=self._peakList.peaks,</span>
+        <span class="c1">#                                                           colDefs=self.getColumns(),</span>
+        <span class="c1">#                                                           hiddenColumns=self._hiddenColumns)</span>
+        <span class="c1">#</span>
+        <span class="c1">#     # self.assignedPeaksTable.setObjects(peaks)</span>
+        <span class="c1">#     # highlight current.nmrAtom in the list widget</span>
+        <span class="c1">#     self.attachedNmrAtomsList.setCurrentRow(self.ids.index(id))</span>
+        <span class="c1">#     self.peaksLabel.setText(&#39;Peaks assigned to NmrAtom(s): %s&#39; % ALL)</span>
+        <span class="c1"># else:</span>
+        <span class="c1">#     pid = &#39;NA:&#39; + id</span>
+        <span class="c1">#     nmrAtom = self.application.project.getByPid(pid)</span>
+        <span class="c1">#</span>
+        <span class="c1">#     if nmrAtom is not None:</span>
+        <span class="c1">#         with self._projectBlanking():</span>
+        <span class="c1">#             self._dataFrameObject = self.getDataFrameFromList(table=self,</span>
+        <span class="c1">#                                                               buildList=nmrAtom.assignedPeaks,</span>
+        <span class="c1">#                                                               colDefs=self.getColumns(),</span>
+        <span class="c1">#                                                               hiddenColumns=self._hiddenColumns)</span>
+        <span class="c1">#</span>
+        <span class="c1">#         # self.assignedPeaksTable.setObjects(nmrAtom.assignedPeaks)</span>
+        <span class="c1">#         # highlight current.nmrAtom in the list widget</span>
+        <span class="c1">#</span>
+        <span class="c1">#         self.attachedNmrAtomsList.setCurrentRow(self.ids.index(id))</span>
+        <span class="c1">#         atomList = &#39;, &#39;.join([str(id) for id in self.ids if id != ALL])</span>
+        <span class="c1">#         self.peaksLabel.setText(&#39;Peaks assigned to NmrAtom: %s&#39; % id)  # nmrAtom.id)</span>
 
 <div class="viewcode-block" id="AssignmentInspectorTable.getColumns"><a class="viewcode-back" href="../../../../ccpn/ccpn.AnalysisAssign.modules.html#ccpn.AnalysisAssign.modules.AssignmentInspectorModule.AssignmentInspectorTable.getColumns">[docs]</a>    <span class="k">def</span> <span class="nf">getColumns</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="s2">&quot;get columns for initialisation of table&quot;</span>
@@ -641,7 +870,8 @@
 
             <span class="c1"># columns.append(c)</span>
             <span class="c1"># tipTexts.append(tipText)</span>
-
+        <span class="n">columns</span><span class="o">.</span><span class="n">_columns</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Column</span><span class="p">(</span><span class="s1">&#39;height&#39;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">pk</span><span class="p">:</span> <span class="n">pk</span><span class="o">.</span><span class="n">height</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">))</span>
+        <span class="n">columns</span><span class="o">.</span><span class="n">_columns</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Column</span><span class="p">(</span><span class="s1">&#39;volume&#39;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">pk</span><span class="p">:</span> <span class="n">pk</span><span class="o">.</span><span class="n">volume</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">))</span>
         <span class="k">return</span> <span class="n">columns</span></div>
 
     <span class="c1"># def _setCurrentPeak(self, data):</span>

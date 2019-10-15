@@ -64,7 +64,7 @@
 <span class="c1">#=========================================================================================</span>
 <span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: CCPN $&quot;</span>
 <span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2017-07-07 16:32:48 +0100 (Fri, July 07, 2017) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b5 $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.0 $&quot;</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Created</span>
 <span class="c1">#=========================================================================================</span>
@@ -79,9 +79,9 @@
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Button</span> <span class="kn">import</span> <span class="n">Button</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Label</span> <span class="kn">import</span> <span class="n">Label</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.PulldownList</span> <span class="kn">import</span> <span class="n">PulldownList</span>
-<span class="kn">from</span> <span class="nn">ccpn.ui.gui.popups.Dialog</span> <span class="kn">import</span> <span class="n">CcpnDialog</span>
-<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.MessageDialog</span> <span class="kn">import</span> <span class="n">showWarning</span>
-<span class="kn">from</span> <span class="nn">ccpn.util.Logging</span> <span class="kn">import</span> <span class="n">getLogger</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.popups.Dialog</span> <span class="kn">import</span> <span class="n">CcpnDialog</span><span class="p">,</span> <span class="n">handleDialogApply</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.lib.OpenGL.CcpnOpenGL</span> <span class="kn">import</span> <span class="n">GLNotifier</span>
+<span class="kn">from</span> <span class="nn">ccpn.core.lib.ContextManagers</span> <span class="kn">import</span> <span class="n">undoStackBlocking</span>
 
 
 <div class="viewcode-block" id="PeakListPropertiesPopup"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.popups.html#ccpn.ui.gui.popups.PeakListPropertiesPopup.PeakListPropertiesPopup">[docs]</a><span class="k">class</span> <span class="nc">PeakListPropertiesPopup</span><span class="p">(</span><span class="n">CcpnDialog</span><span class="p">):</span>
@@ -144,7 +144,7 @@
 
             <span class="bp">self</span><span class="o">.</span><span class="n">closeButton</span> <span class="o">=</span> <span class="n">Button</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s1">&#39;Close&#39;</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">callback</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_accept</span><span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">numUndos</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">GLSignals</span> <span class="o">=</span> <span class="n">GLNotifier</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="bp">self</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_changeColours</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">symbolColourPulldownList</span><span class="o">.</span><span class="n">currentText</span><span class="p">()</span>
@@ -155,6 +155,11 @@
         <span class="n">colour</span> <span class="o">=</span> <span class="n">Colour</span><span class="o">.</span><span class="n">getSpectrumColour</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">defaultReturn</span><span class="o">=</span><span class="s1">&#39;#&#39;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">peakList</span><span class="o">.</span><span class="n">textColour</span> <span class="o">=</span> <span class="n">colour</span>
 
+    <span class="k">def</span> <span class="nf">_refreshGLItems</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1"># emit a signal to rebuild all peaks and multiplets</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">GLSignals</span><span class="o">.</span><span class="n">emitEvent</span><span class="p">(</span><span class="n">targets</span><span class="o">=</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">peakList</span><span class="p">],</span> <span class="n">triggers</span><span class="o">=</span><span class="p">[</span><span class="n">GLNotifier</span><span class="o">.</span><span class="n">GLPEAKLISTS</span><span class="p">,</span>
+                                                                       <span class="n">GLNotifier</span><span class="o">.</span><span class="n">GLPEAKLISTLABELS</span><span class="p">])</span>
+
     <span class="k">def</span> <span class="nf">_applyChanges</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        The apply button has been clicked</span>
@@ -163,49 +168,22 @@
 <span class="sd">          If anything has been added to the undo queue then remove it with application.undo()</span>
 <span class="sd">          repopulate the popup widgets</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">while</span> <span class="bp">self</span><span class="o">.</span><span class="n">numUndos</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>  <span class="c1"># remove any previous undo from this popup</span>
-            <span class="c1"># self.application.undo()     # so only the last colour change is kept</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">_undo</span><span class="o">.</span><span class="n">undo</span><span class="p">()</span>  <span class="c1"># this doesn&#39;t popup the undo progressManager</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">numUndos</span> <span class="o">-=</span> <span class="mi">1</span>
+        <span class="k">with</span> <span class="n">handleDialogApply</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="k">as</span> <span class="n">error</span><span class="p">:</span>
 
-        <span class="n">applyAccept</span> <span class="o">=</span> <span class="bp">False</span>
-        <span class="n">oldUndo</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">_undo</span><span class="o">.</span><span class="n">numItems</span><span class="p">()</span>
+            <span class="c1"># add item here to redraw items</span>
+            <span class="k">with</span> <span class="n">undoStackBlocking</span><span class="p">()</span> <span class="k">as</span> <span class="n">addUndoItem</span><span class="p">:</span>
+                <span class="n">addUndoItem</span><span class="p">(</span><span class="n">undo</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_refreshGLItems</span><span class="p">)</span>
 
-        <span class="kn">from</span> <span class="nn">ccpn.ui.gui.lib.OpenGL.CcpnOpenGL</span> <span class="kn">import</span> <span class="n">GLNotifier</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_changeColours</span><span class="p">()</span>
 
-        <span class="n">GLSignals</span> <span class="o">=</span> <span class="n">GLNotifier</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="bp">self</span><span class="p">)</span>
+            <span class="c1"># add item here to redraw items</span>
+            <span class="k">with</span> <span class="n">undoStackBlocking</span><span class="p">()</span> <span class="k">as</span> <span class="n">addUndoItem</span><span class="p">:</span>
+                <span class="n">addUndoItem</span><span class="p">(</span><span class="n">redo</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_refreshGLItems</span><span class="p">)</span>
 
-        <span class="kn">from</span> <span class="nn">ccpn.core.lib.ContextManagers</span> <span class="kn">import</span> <span class="n">undoBlock</span>
+            <span class="c1"># redraw the items</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_refreshGLItems</span><span class="p">()</span>
 
-        <span class="k">with</span> <span class="n">undoBlock</span><span class="p">():</span>
-            <span class="k">try</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_changeColours</span><span class="p">()</span>
-
-                <span class="c1"># repaint</span>
-                <span class="n">GLSignals</span><span class="o">.</span><span class="n">emitEvent</span><span class="p">(</span><span class="n">targets</span><span class="o">=</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">peakList</span><span class="p">],</span> <span class="n">triggers</span><span class="o">=</span><span class="p">[</span><span class="n">GLNotifier</span><span class="o">.</span><span class="n">GLPEAKLISTS</span><span class="p">,</span>
-                                                                       <span class="n">GLNotifier</span><span class="o">.</span><span class="n">GLPEAKLISTLABELS</span><span class="p">])</span>
-
-                <span class="n">applyAccept</span> <span class="o">=</span> <span class="bp">True</span>
-            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">es</span><span class="p">:</span>
-                <span class="n">showWarning</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">windowTitle</span><span class="p">()),</span> <span class="nb">str</span><span class="p">(</span><span class="n">es</span><span class="p">))</span>
-                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">_isInDebugMode</span><span class="p">:</span>
-                    <span class="k">raise</span> <span class="n">es</span>
-
-        <span class="k">if</span> <span class="n">applyAccept</span> <span class="ow">is</span> <span class="bp">False</span><span class="p">:</span>
-            <span class="c1"># should only undo if something new has been added to the undo deque</span>
-            <span class="c1"># may cause a problem as some things may be set with the same values</span>
-            <span class="c1"># and still be added to the change list, so only undo if length has changed</span>
-            <span class="n">errorName</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">oldUndo</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">_undo</span><span class="o">.</span><span class="n">numItems</span><span class="p">():</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">_undo</span><span class="o">.</span><span class="n">undo</span><span class="p">()</span>
-                <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;&gt;&gt;&gt;Undo.</span><span class="si">%s</span><span class="s1">._applychanges&#39;</span> <span class="o">%</span> <span class="n">errorName</span><span class="p">)</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;&gt;&gt;&gt;Undo.</span><span class="si">%s</span><span class="s1">._applychanges nothing to remove&#39;</span> <span class="o">%</span> <span class="n">errorName</span><span class="p">)</span>
-
-            <span class="k">return</span> <span class="bp">False</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">numUndos</span> <span class="o">+=</span> <span class="mi">1</span>
-            <span class="k">return</span> <span class="bp">True</span>
+        <span class="k">return</span> <span class="n">error</span><span class="o">.</span><span class="n">errorValue</span> <span class="ow">is</span> <span class="bp">None</span>
 
     <span class="k">def</span> <span class="nf">_okButton</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_applyChanges</span><span class="p">()</span> <span class="ow">is</span> <span class="bp">True</span><span class="p">:</span>

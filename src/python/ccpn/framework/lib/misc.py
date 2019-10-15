@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: CCPN $"
 __dateModified__ = "$dateModified: 2017-07-07 16:32:37 +0100 (Fri, July 07, 2017) $"
-__version__ = "$Revision: 3.0.b5 $"
+__version__ = "$Revision: 3.0.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -29,19 +29,17 @@ import hashlib
 import sys
 import os
 import json
-from ccpn.util.Time import Time, now, day, week, year
 
 
-def _codeFunc(version, valid, licenceType):
+def _codeFunc(version, valid, licenceType, programList, buildFor, licenceID, numSeats):
     m = hashlib.sha256()
-    for value in version, valid, licenceType:
+    for value in version, valid, licenceType, programList, buildFor, licenceID, numSeats:
         m.update(bytes(str(value), 'utf-8'))
 
     return m.hexdigest()
 
 
 def _decode(key, string):
-    #string = string.decode()
     decoded_chars = []
     for i in range(len(string)):
         key_c = key[i % len(key)]
@@ -49,6 +47,10 @@ def _decode(key, string):
         decoded_chars.append(decoded_c)
     decoded_string = "".join(decoded_chars)
     return decoded_string
+
+
+def _codeMajorV(v1, v2):
+    return type(v1) == str and type(v2) == str and v1 is not None and v2 is not None and v1.split('.')[0] == v2.split('.')[0]
 
 
 def _check(key=None, doDecode=True):
@@ -74,6 +76,17 @@ def _check(key=None, doDecode=True):
                        101, 32, 40, 37, 115, 41, 32, 118, 97, 108, 105, 100, 32, 117, 110, 116, 105, 108,
                        32, 37, 115, 10)
 
+    _l0 = message(98, 117, 105, 108, 100, 70, 111, 114)
+    _l1 = message(108, 105, 99, 101, 110, 99, 101, 84, 121, 112, 101)
+    _l2 = message(108, 105, 99, 101, 110, 99, 101, 73, 68)
+    _l3 = message(99, 104, 101, 99, 107, 83, 117, 109)
+    _v0 = message(95, 100, 97, 116, 97)
+    _p0 = message(95, 117, 112, 100, 97, 116, 101)
+    _p1 = message(95, 99, 104, 101, 99, 107, 75, 101, 121)
+    _m0 = message(99, 99, 112, 110, 46, 117, 116, 105, 108, 46, 68, 97, 116, 97)
+
+    _val = _p0 if _m0 in sys.modules else _p1
+
     if key is None:
         from ccpn.framework.PathsAndUrls import userPreferencesDirectory, ccpnConfigPath
 
@@ -81,38 +94,57 @@ def _check(key=None, doDecode=True):
         lfile = os.path.join(userPreferencesDirectory, fname)
         if not os.path.exists(lfile):
             lfile = os.path.join(ccpnConfigPath, fname)
-        #print(fname)
+
         if not os.path.exists(lfile):
             sys.stderr.write(message1)
             sys.exit(1)
+
         with open(lfile, 'r', encoding='UTF-8') as fp:
             key = fp.readlines()[0]
             fp.close()
 
     try:
+        keysum = ''
         if doDecode:
+            h = hashlib.md5()
+            h.update(key.encode('utf-8'))
+            keysum = h.hexdigest()
             key = _decode('ccpnVersion3', key)
         ldict = json.loads(key)
-    except:
+        ldict[_l3] = keysum
+    except Exception as es:
         sys.stderr.write(message2 % (applicationVersion))
         sys.exit(1)
 
-    #print(ldict)
-
-    if 'code' not in ldict or 'version' not in ldict or 'valid' not in ldict or 'licenceType' not in ldict:
+    if 'code' not in ldict or 'version' not in ldict or 'valid' not in ldict or \
+            _l1 not in ldict or 'programList' not in ldict or \
+            _l0 not in ldict or _l2 not in ldict or 'numSeats' not in ldict:
         sys.stderr.write(message2 % (applicationVersion))
         sys.exit(1)
 
-    if applicationVersion != ldict['version']:
+    if not _codeMajorV(applicationVersion, ldict['version']):
         sys.stderr.write(message2 % (applicationVersion))
         sys.exit(1)
 
-    if ldict['code'] != _codeFunc(ldict['version'], ldict['valid'], ldict['licenceType']):
+    if ldict['code'] != _codeFunc(ldict['version'], ldict['valid'], ldict[_l1],
+                                  ldict['programList'], ldict[_l0],
+                                  ldict[_l2], ldict['numSeats']):
         sys.stderr.write(message2 % (applicationVersion))
         sys.exit(1)
 
-    if ldict['licenceType'] == 'developer':
-        sys.stderr.write(message4 % (ldict['licenceType'], now() + year))
+    from ccpn.util import Data
+    setattr(Data, _v0, _val)
+
+    for val in (_l0, _l1, _l2, _l3):
+        setattr(Data, val, ldict[val])
+
+    if _val == _p0:
+        return True
+
+    from ccpn.util.Time import Time, now, year
+
+    if ldict[_l1] == 'developer':
+        sys.stderr.write(message4 % (ldict[_l1], now() + year))
         return True
 
     valid = Time(ldict['valid'])
@@ -120,10 +152,9 @@ def _check(key=None, doDecode=True):
         sys.stderr.write(message3 % (applicationVersion, valid))
         sys.exit(1)
     else:
-        sys.stderr.write(message4 % (ldict['licenceType'], valid))
+        sys.stderr.write(message4 % (ldict[_l1], valid))
 
     return True
 
 
-#_checked = _check(None, doDecode=True)
-_checked = True
+_checked = _check(None, doDecode=True)

@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
 __dateModified__ = "$dateModified: 2017-07-07 16:32:26 +0100 (Fri, July 07, 2017) $"
-__version__ = "$Revision: 3.0.b5 $"
+__version__ = "$Revision: 3.0.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -72,7 +72,7 @@ class SpectraSelectionWidget(Widget):
                                                     grid=(i, 0))
             i += 1
 
-            self.selectAllButton = ButtonList(self, texts=['All','Clear', 'From Display'],
+            self.selectAllButton = ButtonList(self, texts=['All','Clear', 'Add From Current Display'],
                                                     callbacks=[partial(self._toggleAll, True),
                                                                partial(self._toggleAll, False),
                                                                self._selectFromDisplay],
@@ -145,12 +145,22 @@ class SpectraSelectionWidget(Widget):
         checkBoxes = [cb for cb in self.allSpectraCheckBoxes if self.project.getByPid(cb.text()) in spectra]
         tt = [checkBox.setChecked(True) for checkBox in checkBoxes]
 
+    def _selectSpectrumGroups(self, spectrumGroups):
+        checkBoxes = [cb for cb in self.allSGCheckBoxes if self.project.getByPid(cb.text()) in spectrumGroups]
+        tt = [checkBox.setChecked(True) for checkBox in checkBoxes]
+
     def showSpectraOption(self):
         if self.selectSpectraOption:
-            sel = [(sbox.show(), gbox.hide()) if self.selectSpectraOption.getIndex() == 0 else (sbox.hide(), gbox.show())
-                   for gbox in self.allSGCheckBoxes for sbox in self.allSpectraCheckBoxes]
+            sel = [(sbox.show(), gbox.hide())
+                   if self.selectSpectraOption.getIndex() == 0
+                   else (sbox.hide(), gbox.show())
+                   for gbox in self.allSGCheckBoxes
+                   for sbox in self.allSpectraCheckBoxes]
 
     def _selectFromDisplay(self):
         """ Select spectra from current strip"""
         if self.current.strip:
-            self._selectSpectra(self.current.strip.spectra)
+            if self.selectSpectraOption.getIndex() == 0: # SPECTRA selected
+                self._selectSpectra(self.current.strip.spectra)
+            if self.selectSpectraOption.getIndex() == 1:
+                self._selectSpectrumGroups(self.current.strip.spectrumGroups)

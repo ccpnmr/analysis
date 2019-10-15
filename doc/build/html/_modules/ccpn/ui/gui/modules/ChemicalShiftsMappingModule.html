@@ -122,7 +122,7 @@
 <span class="c1">#=========================================================================================</span>
 <span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: Luca Mureddu $&quot;</span>
 <span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2017-07-07 16:32:46 +0100 (Fri, July 07, 2017) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b5 $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.0 $&quot;</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Created</span>
 <span class="c1">#=========================================================================================</span>
@@ -152,6 +152,7 @@
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.GuiTable</span> <span class="kn">import</span> <span class="n">exportTableDialog</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Label</span> <span class="kn">import</span> <span class="n">Label</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.TextEditor</span> <span class="kn">import</span> <span class="n">TextEditor</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.LegendItem</span> <span class="kn">import</span> <span class="n">LegendItem</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.PulldownList</span> <span class="kn">import</span> <span class="n">PulldownList</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.ScrollArea</span> <span class="kn">import</span> <span class="n">ScrollArea</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.FileDialog</span> <span class="kn">import</span> <span class="n">LineEditButtonDialog</span>
@@ -177,11 +178,15 @@
 <span class="kn">from</span> <span class="nn">ccpn.util.Common</span> <span class="kn">import</span> <span class="n">splitDataFrameWithinRange</span>
 <span class="kn">from</span> <span class="nn">ccpn.util.Colour</span> <span class="kn">import</span> <span class="n">spectrumColours</span><span class="p">,</span> <span class="n">hexToRgb</span><span class="p">,</span> <span class="n">rgbaRatioToHex</span><span class="p">,</span> <span class="n">_getRandomColours</span>
 <span class="kn">from</span> <span class="nn">ccpn.core.lib.Notifiers</span> <span class="kn">import</span> <span class="n">Notifier</span>
+<span class="kn">from</span> <span class="nn">ccpn.core.lib.CallBack</span> <span class="kn">import</span> <span class="n">CallBack</span>
 <span class="kn">from</span> <span class="nn">ccpn.core.lib.peakUtils</span> <span class="kn">import</span> <span class="n">getNmrResidueDeltas</span><span class="p">,</span><span class="n">_getKd</span><span class="p">,</span> <span class="n">oneSiteBindingCurve</span><span class="p">,</span> <span class="n">_fit1SiteBindCurve</span><span class="p">,</span> <span class="n">_fitExpDecayCurve</span><span class="p">,</span>\
-                                    <span class="n">MODES</span><span class="p">,</span> <span class="n">LINEWIDTHS</span><span class="p">,</span> <span class="n">HEIGHT</span><span class="p">,</span> <span class="n">POSITIONS</span><span class="p">,</span> <span class="n">VOLUME</span><span class="p">,</span> <span class="n">DefaultAtomWeights</span><span class="p">,</span> <span class="n">H</span><span class="p">,</span> <span class="n">N</span><span class="p">,</span> <span class="n">OTHER</span><span class="p">,</span> <span class="n">C</span>
+                                    <span class="n">MODES</span><span class="p">,</span> <span class="n">LINEWIDTHS</span><span class="p">,</span> <span class="n">HEIGHT</span><span class="p">,</span> <span class="n">POSITIONS</span><span class="p">,</span> <span class="n">VOLUME</span><span class="p">,</span> <span class="n">DefaultAtomWeights</span><span class="p">,</span> <span class="n">H</span><span class="p">,</span> <span class="n">N</span><span class="p">,</span> <span class="n">OTHER</span><span class="p">,</span> <span class="n">C</span><span class="p">,</span> <span class="n">DISPLAYDATA</span><span class="p">,</span> \
+                                    <span class="n">getRawDataFrame</span><span class="p">,</span> <span class="n">RAW</span><span class="p">,</span> <span class="n">getNmrResiduePeakProperty</span><span class="p">,</span> <span class="n">_getPeaksForNmrResidue</span>
 <span class="kn">from</span> <span class="nn">ccpn.core.lib</span> <span class="kn">import</span> <span class="n">CcpnSorting</span>
 <span class="kn">from</span> <span class="nn">ccpn.core.lib.DataFrameObject</span> <span class="kn">import</span>  <span class="n">DATAFRAME_OBJECT</span>
 <span class="kn">from</span> <span class="nn">ccpn.core.NmrChain</span> <span class="kn">import</span> <span class="n">NmrChain</span>
+<span class="kn">from</span> <span class="nn">ccpn.core.Spectrum</span> <span class="kn">import</span> <span class="n">Spectrum</span>
+<span class="kn">from</span> <span class="nn">ccpn.core.Peak</span> <span class="kn">import</span> <span class="n">Peak</span>
 <span class="kn">from</span> <span class="nn">ccpn.core.NmrResidue</span> <span class="kn">import</span> <span class="n">NmrResidue</span>
 <span class="kn">from</span> <span class="nn">ccpn.core.Project</span> <span class="kn">import</span> <span class="n">Project</span>
 <span class="kn">from</span> <span class="nn">ccpn.core.lib.ContextManagers</span> <span class="kn">import</span> <span class="n">undoBlock</span><span class="p">,</span> <span class="n">undoBlockWithoutSideBar</span>
@@ -292,14 +297,8 @@
     <span class="n">BarGraph</span><span class="o">.</span><span class="n">mouseDoubleClickEvent</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_navigateToNmrItems</span>
 
     <span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span> <span class="o">=</span> <span class="n">mainWindow</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">OtherAtoms</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">Natoms</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">Hatoms</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">Catoms</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">atomWeightSpinBoxes</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">nmrAtomsCheckBoxes</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">nmrAtomsLabels</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">atomNames</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">relativeContribuitions</span> <span class="o">=</span> <span class="n">DefaultAtomWeights</span> <span class="c1"># used in other classes (set in popup)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">selectedNmrAtomNames</span> <span class="o">=</span> <span class="p">[]</span> <span class="c1"># used in other classes  (set in popup)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">project</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">project</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">application</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">application</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">current</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">current</span>
@@ -327,7 +326,7 @@
     <span class="bp">self</span><span class="o">.</span><span class="n">_nrDeletedNotifier</span> <span class="o">=</span> <span class="n">Notifier</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="p">,</span> <span class="p">[</span><span class="n">Notifier</span><span class="o">.</span><span class="n">DELETE</span><span class="p">],</span> <span class="s1">&#39;NmrResidue&#39;</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">_nmrResidueDeleted</span><span class="p">)</span>
 
 
-    <span class="bp">self</span><span class="o">.</span><span class="n">_addSettingsWAttr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nmrAtomsCheckBoxes</span><span class="p">)</span>
+    <span class="c1"># self._addSettingsWAttr(self.nmrAtomsCheckBoxes)</span>
     <span class="c1"># self._selectCurrentNmrResiduesNotifierCallback()</span>
 
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="p">:</span>
@@ -337,7 +336,11 @@
           <span class="bp">self</span><span class="o">.</span><span class="n">nmrResidueTable</span><span class="o">.</span><span class="n">ncWidget</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">nmrChains</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">pid</span><span class="p">)</span>
           <span class="bp">self</span><span class="o">.</span><span class="n">_setThresholdLineBySTD</span><span class="p">()</span>
           <span class="bp">self</span><span class="o">.</span><span class="n">_setKdUnit</span><span class="p">()</span>
-          <span class="c1"># self._updateModule()</span>
+          <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">selectedNmrAtomNames</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">spectra</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectraSelectionWidget</span><span class="o">.</span><span class="n">getSelections</span><span class="p">()</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">spectra</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+              <span class="bp">self</span><span class="o">.</span><span class="n">selectedNmrAtomNames</span> <span class="o">=</span> <span class="n">spectra</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">axisCodes</span>
+              <span class="bp">self</span><span class="o">.</span><span class="n">_updateModule</span><span class="p">()</span>
 
   <span class="c1">#####################################################</span>
   <span class="c1">#############   Main widgets creation    ############</span>
@@ -422,13 +425,15 @@
     <span class="bp">self</span><span class="o">.</span><span class="n">scrollArea</span><span class="o">.</span><span class="n">setWidgetResizable</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">scrollAreaWidgetContents</span> <span class="o">=</span> <span class="n">Frame</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">setLayout</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">scrollArea</span><span class="o">.</span><span class="n">setWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scrollAreaWidgetContents</span><span class="p">)</span>
-    <span class="c1"># self.scrollAreaWidgetContents.getLayout().setAlignment(QtCore.Qt.AlignTop)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">scrollAreaWidgetContents</span><span class="o">.</span><span class="n">getLayout</span><span class="p">()</span><span class="o">.</span><span class="n">setAlignment</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">AlignLeft</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">settingsWidget</span><span class="o">.</span><span class="n">getLayout</span><span class="p">()</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scrollArea</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">scrollArea</span><span class="o">.</span><span class="n">setContentsMargins</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">15</span><span class="p">)</span>  <span class="c1">#l,t,r,b</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">scrollAreaWidgetContents</span><span class="o">.</span><span class="n">setContentsMargins</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">15</span><span class="p">)</span>  <span class="c1">#l,t,r,b</span>
     <span class="c1"># self.scrollAreaWidgetContents.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">scrollAreaWidgetContents</span><span class="o">.</span><span class="n">getLayout</span><span class="p">()</span><span class="o">.</span><span class="n">setSpacing</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_splitter</span><span class="o">.</span><span class="n">setStretchFactor</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>  <span class="c1">#makes the setting space fully visible when opening</span>
+    <span class="c1"># self._splitter.setStretchFactor(1, 0)  #makes the setting space fully visible when opening</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">settingsWidget</span><span class="o">.</span><span class="n">setMinimumWidth</span><span class="p">(</span><span class="mi">300</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">settingsWidget</span><span class="o">.</span><span class="n">getLayout</span><span class="p">()</span><span class="o">.</span><span class="n">setAlignment</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">AlignTop</span><span class="p">)</span>
 
     <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">inputLabel</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scrollAreaWidgetContents</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s1">&#39;Select input data&#39;</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">vAlign</span><span class="o">=</span><span class="s1">&#39;t&#39;</span><span class="p">)</span>
@@ -449,12 +454,19 @@
     <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">modeLabel</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scrollAreaWidgetContents</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s1">&#39;Calculation mode &#39;</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">modeButtons</span> <span class="o">=</span> <span class="n">RadioButtons</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scrollAreaWidgetContents</span><span class="p">,</span> <span class="n">selectedInd</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">texts</span><span class="o">=</span><span class="n">MODES</span><span class="p">,</span>
-                                    <span class="n">callback</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_toggleRelativeContribuitions</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+                                    <span class="n">callback</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_toggleRawDataOption</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+
+    <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">displayDataLabel</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scrollAreaWidgetContents</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s1">&#39;Display data &#39;</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">displayDataButton</span> <span class="o">=</span> <span class="n">RadioButtons</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scrollAreaWidgetContents</span><span class="p">,</span> <span class="n">selectedInd</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">texts</span><span class="o">=</span><span class="n">DISPLAYDATA</span><span class="p">,</span>
+                                     <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">hAlign</span><span class="o">=</span><span class="s1">&#39;l&#39;</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">displayDataButton</span><span class="o">.</span><span class="n">hide</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">displayDataLabel</span><span class="o">.</span><span class="n">hide</span><span class="p">()</span>
     <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">atomsLabel</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scrollAreaWidgetContents</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s1">&#39;Select NmrAtoms&#39;</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">nmrAtomsFrame</span> <span class="o">=</span> <span class="n">Frame</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scrollAreaWidgetContents</span><span class="p">,</span> <span class="n">setLayout</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_updateNmrAtomsOption</span><span class="p">()</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_hideNonNecessaryNmrAtomsOption</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">showNmrAtoms</span>  <span class="o">=</span> <span class="n">Button</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scrollAreaWidgetContents</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s1">&#39;NmrAtoms settings&#39;</span><span class="p">,</span>
+                                <span class="n">callback</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">showNmrAtomsSettings</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
     <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">thresholdLAbel</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scrollAreaWidgetContents</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s1">&#39;Threshold value&#39;</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">thresholdFrame</span> <span class="o">=</span> <span class="n">Frame</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scrollAreaWidgetContents</span><span class="p">,</span> <span class="n">setLayout</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
@@ -467,6 +479,20 @@
                                   <span class="n">tipText</span><span class="o">=</span><span class="s1">&#39;Default: STD of deltas&#39;</span><span class="p">,</span>
                                   <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">thresholdButton</span><span class="o">.</span><span class="n">setMaximumWidth</span><span class="p">(</span><span class="mi">50</span><span class="p">)</span>
+
+    <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">scaleBindingC</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scrollAreaWidgetContents</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s1">&#39;Scale binding curves&#39;</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">scaleBindingCCb</span> <span class="o">=</span> <span class="n">CheckBox</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scrollAreaWidgetContents</span><span class="p">,</span> <span class="n">checked</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+                                    <span class="n">callback</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_plotBindingCFromCurrent</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+    <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">fittingModeL</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scrollAreaWidgetContents</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s1">&#39;Fitting mode&#39;</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">fittingModeRB</span> <span class="o">=</span> <span class="n">RadioButtons</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scrollAreaWidgetContents</span><span class="p">,</span> <span class="n">texts</span><span class="o">=</span><span class="n">FittingAvailable</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+    <span class="c1">#</span>
+    <span class="c1"># i += 1 ####  # Text editor to allow user curve fitting. N.B. Not implemented yet the mechanism to do this</span>
+    <span class="c1"># self.fittingModeTextL = Label(self.scrollAreaWidgetContents, text=&#39;&#39;, grid=(i, 0))</span>
+    <span class="c1"># self.fittingModeEditor = TextEditor(self.scrollAreaWidgetContents,    grid=(i, 1))</span>
+    <span class="c1"># self.fittingModeEditor.hide()</span>
+
     <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">aboveThresholdColourLabel</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scrollAreaWidgetContents</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s1">&#39;Above threshold colour&#39;</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">aboveThresholdColourBox</span> <span class="o">=</span> <span class="n">PulldownList</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scrollAreaWidgetContents</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
@@ -475,7 +501,7 @@
       <span class="n">pix</span><span class="o">.</span><span class="n">fill</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QColor</span><span class="p">(</span><span class="n">item</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">aboveThresholdColourBox</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="n">icon</span><span class="o">=</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QIcon</span><span class="p">(</span><span class="n">pix</span><span class="p">),</span> <span class="n">text</span><span class="o">=</span><span class="n">item</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
     <span class="k">try</span><span class="p">:</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">aboveThresholdColourBox</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="s1">&#39;light green&#39;</span><span class="p">)</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">aboveThresholdColourBox</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="s1">&#39;lime&#39;</span><span class="p">)</span>
     <span class="k">except</span><span class="p">:</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">aboveThresholdColourBox</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">aboveThresholdColourBox</span><span class="o">.</span><span class="n">texts</span><span class="p">))</span>
 
@@ -501,7 +527,7 @@
       <span class="n">pix</span><span class="o">.</span><span class="n">fill</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QColor</span><span class="p">(</span><span class="n">item</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">disappearedColourBox</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="n">icon</span><span class="o">=</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QIcon</span><span class="p">(</span><span class="n">pix</span><span class="p">),</span> <span class="n">text</span><span class="o">=</span><span class="n">item</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
     <span class="k">try</span><span class="p">:</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">disappearedColourBox</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="s1">&#39;dark grey&#39;</span><span class="p">)</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">disappearedColourBox</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="s1">&#39;cyan&#39;</span><span class="p">)</span>
     <span class="k">except</span><span class="p">:</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">disappearedColourBox</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">disappearedColourBox</span><span class="o">.</span><span class="n">texts</span><span class="p">))</span>
 
@@ -528,21 +554,8 @@
     <span class="bp">self</span><span class="o">.</span><span class="n">pathPDB</span> <span class="o">=</span> <span class="n">LineEditButtonDialog</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mvWidgetContents</span><span class="p">,</span> <span class="n">textDialog</span><span class="o">=</span><span class="s1">&#39;Select PDB File&#39;</span><span class="p">,</span>
                                         <span class="nb">filter</span><span class="o">=</span><span class="s2">&quot;PDB files (*.pdb)&quot;</span><span class="p">,</span> <span class="n">directory</span><span class="o">=</span><span class="n">scriptPath</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
     <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">scaleBindingC</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scrollAreaWidgetContents</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s1">&#39;Scale binding curves&#39;</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">scaleBindingCCb</span> <span class="o">=</span> <span class="n">CheckBox</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scrollAreaWidgetContents</span><span class="p">,</span> <span class="n">checked</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
-                                    <span class="n">callback</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_plotBindingCFromCurrent</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
-    <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">fittingModeL</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scrollAreaWidgetContents</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s1">&#39;Fitting mode&#39;</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">fittingModeRB</span> <span class="o">=</span> <span class="n">RadioButtons</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scrollAreaWidgetContents</span><span class="p">,</span> <span class="n">texts</span><span class="o">=</span><span class="n">FittingAvailable</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
-    <span class="c1">#</span>
-    <span class="c1"># i += 1 ####  # Text editor to allow user curve fitting. N.B. Not implemented yet the mechanism to do this</span>
-    <span class="c1"># self.fittingModeTextL = Label(self.scrollAreaWidgetContents, text=&#39;&#39;, grid=(i, 0))</span>
-    <span class="c1"># self.fittingModeEditor = TextEditor(self.scrollAreaWidgetContents,    grid=(i, 1))</span>
-    <span class="c1"># self.fittingModeEditor.hide()</span>
-    <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">updateButton</span> <span class="o">=</span> <span class="n">Button</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scrollAreaWidgetContents</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s1">&#39;Update All&#39;</span><span class="p">,</span> <span class="n">callback</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_updateModule</span><span class="p">,</span>
                                <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
-    <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
 
 
 
@@ -610,8 +623,17 @@
   <span class="c1">#####################################################</span>
 
   <span class="k">def</span> <span class="nf">_customActionCallBack</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
-    <span class="n">nmrResidue</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">Notifier</span><span class="o">.</span><span class="n">OBJECT</span><span class="p">]</span>
+    <span class="c1"># nmrResidue = data[Notifier.OBJECT]</span>
+    <span class="n">objs</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">CallBack</span><span class="o">.</span><span class="n">OBJECT</span><span class="p">]</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">objs</span><span class="p">:</span>
+      <span class="k">return</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">objs</span><span class="p">,</span> <span class="p">(</span><span class="nb">tuple</span><span class="p">,</span> <span class="nb">list</span><span class="p">)):</span>
+      <span class="n">nmrResidue</span> <span class="o">=</span> <span class="n">objs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="n">nmrResidue</span> <span class="o">=</span> <span class="n">objs</span>
+
     <span class="k">if</span> <span class="n">nmrResidue</span><span class="p">:</span>
+
       <span class="n">xPos</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">nmrResidue</span><span class="o">.</span><span class="n">sequenceCode</span><span class="p">)</span>
       <span class="n">yPos</span> <span class="o">=</span> <span class="n">nmrResidue</span><span class="o">.</span><span class="n">_delta</span>
       <span class="k">if</span> <span class="n">xPos</span> <span class="ow">and</span> <span class="n">yPos</span><span class="p">:</span>
@@ -689,77 +711,131 @@
     <span class="bp">self</span><span class="o">.</span><span class="n">_clearLegend</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">bindingPlot</span><span class="o">.</span><span class="n">legend</span><span class="p">)</span>
     <span class="c1"># self.bindingPlot.setLimits(xMin=0, xMax=None, yMin=0, yMax=None)</span>
 
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">nmrResidues</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+      <span class="n">plotData</span><span class="p">,</span> <span class="n">peaksDF</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getBindingCurves</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">nmrResidues</span><span class="p">)</span>
+      <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">scaleBindingCCb</span><span class="o">.</span><span class="n">isChecked</span><span class="p">():</span>
+        <span class="n">plotData</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getScaledBindingCurves</span><span class="p">(</span><span class="n">plotData</span><span class="p">)</span>
 
-    <span class="n">plotData</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getBindingCurves</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">nmrResidues</span><span class="p">)</span>
-    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">scaleBindingCCb</span><span class="o">.</span><span class="n">isChecked</span><span class="p">():</span>
-      <span class="n">plotData</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getScaledBindingCurves</span><span class="p">(</span><span class="n">plotData</span><span class="p">)</span>
+      <span class="k">if</span> <span class="n">plotData</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">plotData</span> <span class="o">=</span> <span class="n">plotData</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">obj</span><span class="p">,</span> <span class="n">row</span><span class="p">,</span> <span class="ow">in</span> <span class="n">plotData</span><span class="o">.</span><span class="n">iterrows</span><span class="p">():</span>
+          <span class="n">ys</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">row</span><span class="o">.</span><span class="n">values</span><span class="p">)</span>
+          <span class="n">xs</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">plotData</span><span class="o">.</span><span class="n">columns</span><span class="p">)</span>
+          <span class="n">pksPids</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">peaksDF</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">obj</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">)</span>
+          <span class="n">points</span> <span class="o">=</span> <span class="p">[]</span>
+          <span class="n">pairs</span> <span class="o">=</span> <span class="nb">list</span><span class="p">([</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">j</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">xs</span><span class="p">,</span><span class="n">ys</span><span class="p">))</span>
+          <span class="k">for</span> <span class="n">pair</span><span class="p">,</span> <span class="n">peakPid</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">pairs</span><span class="p">,</span><span class="n">pksPids</span><span class="p">):</span>
+            <span class="n">peak</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">getByPid</span><span class="p">(</span><span class="n">peakPid</span><span class="p">)</span>
 
-    <span class="k">if</span> <span class="n">plotData</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
-      <span class="n">plotData</span> <span class="o">=</span> <span class="n">plotData</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
-      <span class="k">for</span> <span class="n">obj</span><span class="p">,</span> <span class="n">row</span><span class="p">,</span> <span class="ow">in</span> <span class="n">plotData</span><span class="o">.</span><span class="n">iterrows</span><span class="p">():</span>
-        <span class="n">ys</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">row</span><span class="o">.</span><span class="n">values</span><span class="p">)</span>
-        <span class="n">xs</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">plotData</span><span class="o">.</span><span class="n">columns</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">obj</span><span class="o">.</span><span class="n">_colour</span><span class="p">:</span>
-          <span class="n">pen</span> <span class="o">=</span> <span class="n">pg</span><span class="o">.</span><span class="n">functions</span><span class="o">.</span><span class="n">mkPen</span><span class="p">(</span><span class="n">hexToRgb</span><span class="p">(</span><span class="n">obj</span><span class="o">.</span><span class="n">_colour</span><span class="p">),</span> <span class="n">width</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-          <span class="n">brush</span> <span class="o">=</span> <span class="n">pg</span><span class="o">.</span><span class="n">functions</span><span class="o">.</span><span class="n">mkBrush</span><span class="p">(</span><span class="n">hexToRgb</span><span class="p">(</span><span class="n">obj</span><span class="o">.</span><span class="n">_colour</span><span class="p">),</span> <span class="n">width</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-          <span class="n">plot</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bindingPlot</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">xs</span><span class="p">,</span> <span class="n">ys</span><span class="p">,</span> <span class="n">symbol</span><span class="o">=</span><span class="s1">&#39;o&#39;</span><span class="p">,</span> <span class="n">pen</span><span class="o">=</span><span class="n">pen</span><span class="p">,</span> <span class="n">symbolBrush</span><span class="o">=</span><span class="n">brush</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">obj</span><span class="o">.</span><span class="n">pid</span><span class="p">)</span> <span class="c1">#name used for legend and retireve the obj</span>
-        <span class="k">else</span><span class="p">:</span>
-          <span class="n">plot</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bindingPlot</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">xs</span><span class="p">,</span> <span class="n">ys</span><span class="p">,</span> <span class="n">symbol</span><span class="o">=</span><span class="s1">&#39;o&#39;</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">obj</span><span class="o">.</span><span class="n">pid</span><span class="p">)</span>
-        <span class="n">plot</span><span class="o">.</span><span class="n">sigPointsClicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_bindingPlotSingleClick</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">peak</span><span class="p">,</span> <span class="n">Peak</span><span class="p">):</span>
+              <span class="n">spectrum</span> <span class="o">=</span> <span class="n">peak</span><span class="o">.</span><span class="n">peakList</span><span class="o">.</span><span class="n">spectrum</span>
+              <span class="n">dd</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;pos&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="s1">&#39;data&#39;</span><span class="p">:</span> <span class="s1">&#39;obj&#39;</span><span class="p">,</span> <span class="s1">&#39;brush&#39;</span><span class="p">:</span> <span class="n">pg</span><span class="o">.</span><span class="n">mkBrush</span><span class="p">(</span><span class="mi">255</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="s1">&#39;symbol&#39;</span><span class="p">:</span> <span class="s1">&#39;o&#39;</span><span class="p">,</span> <span class="s1">&#39;size&#39;</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span>
+                    <span class="s1">&#39;pen&#39;</span><span class="p">:</span> <span class="bp">None</span><span class="p">}</span>  <span class="c1"># red default</span>
+              <span class="n">dd</span><span class="p">[</span><span class="s1">&#39;pos&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">pair</span>
+              <span class="n">dd</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">peak</span>
+              <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">spectrum</span><span class="p">,</span> <span class="s1">&#39;positiveContourColour&#39;</span><span class="p">):</span>  <span class="c1"># colour from the spectrum. The only CCPN obj implemeted so far</span>
+                <span class="n">brush</span> <span class="o">=</span> <span class="n">pg</span><span class="o">.</span><span class="n">functions</span><span class="o">.</span><span class="n">mkBrush</span><span class="p">(</span><span class="n">hexToRgb</span><span class="p">(</span><span class="n">spectrum</span><span class="o">.</span><span class="n">positiveContourColour</span><span class="p">),</span> <span class="n">width</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+                <span class="n">dd</span><span class="p">[</span><span class="s1">&#39;brush&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">brush</span>
+              <span class="n">points</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">dd</span><span class="p">)</span>
 
-    <span class="bp">self</span><span class="o">.</span><span class="n">bindingPlot</span><span class="o">.</span><span class="n">autoRange</span><span class="p">()</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">bindingPlot</span><span class="o">.</span><span class="n">setLabel</span><span class="p">(</span><span class="s1">&#39;left&#39;</span><span class="p">,</span> <span class="n">DELTA</span><span class="o">+</span><span class="n">Delta</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">bindingPlot</span><span class="o">.</span><span class="n">setLabel</span><span class="p">(</span><span class="s1">&#39;bottom&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_kDunit</span><span class="p">)</span>
+          <span class="k">if</span> <span class="n">obj</span><span class="o">.</span><span class="n">_colour</span><span class="p">:</span>
+            <span class="n">pen</span> <span class="o">=</span> <span class="n">pg</span><span class="o">.</span><span class="n">functions</span><span class="o">.</span><span class="n">mkPen</span><span class="p">(</span><span class="n">hexToRgb</span><span class="p">(</span><span class="n">obj</span><span class="o">.</span><span class="n">_colour</span><span class="p">),</span> <span class="n">width</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
+            <span class="n">brush</span> <span class="o">=</span> <span class="n">pg</span><span class="o">.</span><span class="n">functions</span><span class="o">.</span><span class="n">mkBrush</span><span class="p">(</span><span class="n">hexToRgb</span><span class="p">(</span><span class="n">obj</span><span class="o">.</span><span class="n">_colour</span><span class="p">),</span> <span class="n">width</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+            <span class="n">plot</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bindingPlot</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">xs</span><span class="p">,</span> <span class="n">ys</span><span class="p">,</span> <span class="n">pen</span><span class="o">=</span><span class="n">pen</span><span class="p">,</span> <span class="n">symbolBrush</span><span class="o">=</span><span class="n">brush</span><span class="p">,</span> <span class="n">symbol</span><span class="o">=</span><span class="s1">&#39;o&#39;</span><span class="p">,</span> <span class="n">symbolSize</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                                         <span class="n">name</span><span class="o">=</span><span class="n">obj</span><span class="o">.</span><span class="n">pid</span><span class="p">)</span>  <span class="c1"># name used for legend and retireve the obj</span>
+
+            <span class="n">plot</span><span class="o">.</span><span class="n">scatter</span><span class="o">.</span><span class="n">addPoints</span><span class="p">(</span><span class="n">points</span><span class="p">)</span>
+          <span class="k">else</span><span class="p">:</span>
+            <span class="n">plot</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bindingPlot</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">xs</span><span class="p">,</span> <span class="n">ys</span><span class="p">,</span> <span class="n">symbol</span><span class="o">=</span><span class="s1">&#39;o&#39;</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">obj</span><span class="o">.</span><span class="n">pid</span><span class="p">)</span>
+          <span class="n">plot</span><span class="o">.</span><span class="n">sigPointsClicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_bindingPlotSingleClick</span><span class="p">)</span>
+          <span class="bp">self</span><span class="o">.</span><span class="n">bindingPlot</span><span class="o">.</span><span class="n">autoRange</span><span class="p">()</span>
+          <span class="bp">self</span><span class="o">.</span><span class="n">bindingPlot</span><span class="o">.</span><span class="n">setLabel</span><span class="p">(</span><span class="s1">&#39;left&#39;</span><span class="p">,</span><span class="s1">&#39;Y&#39;</span><span class="p">)</span><span class="c1"># DELTA+Delta)</span>
+          <span class="bp">self</span><span class="o">.</span><span class="n">bindingPlot</span><span class="o">.</span><span class="n">setLabel</span><span class="p">(</span><span class="s1">&#39;bottom&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_kDunit</span><span class="p">)</span>
 
   <span class="k">def</span> <span class="nf">_bindingPlotSingleClick</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">,</span> <span class="n">points</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;sig callback from the binding plot. Gets the obj from the curve name.&quot;&quot;&quot;</span>
     <span class="n">obj</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">getByPid</span><span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">name</span><span class="p">())</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_bindingItemClicked</span> <span class="o">=</span> <span class="n">obj</span>
+
+    <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">points</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">data</span><span class="p">(),</span> <span class="p">(</span><span class="n">Spectrum</span><span class="p">,</span> <span class="n">Peak</span><span class="p">)):</span>
+          <span class="k">print</span><span class="p">(</span><span class="s1">&#39;CLicked&#39;</span><span class="p">,</span> <span class="n">p</span><span class="o">.</span><span class="n">data</span><span class="p">(),</span> <span class="n">p</span><span class="o">.</span><span class="n">pos</span><span class="p">())</span>
+
+          <span class="bp">self</span><span class="o">.</span><span class="n">_bindingItemClicked</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">data</span><span class="p">()</span>
 
   <span class="k">def</span> <span class="nf">_bindingPlotDoubleClick</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bindingItemClicked</span> <span class="ow">is</span> <span class="ow">not</span>  <span class="bp">None</span><span class="p">:</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">_navigateToNmrItems</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_bindingItemClicked</span><span class="p">)</span>
+      <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_bindingItemClicked</span><span class="p">,</span> <span class="n">Peak</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_navigateToPeakPosition</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_bindingItemClicked</span><span class="p">)</span>
+      <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_bindingItemClicked</span><span class="p">,</span> <span class="n">NmrResidue</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_navigateToNmrItems</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_bindingItemClicked</span><span class="p">)</span>
 
-  <span class="k">def</span> <span class="nf">_getBindingCurves</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nmrResidues</span><span class="p">):</span>
+  <span class="k">def</span> <span class="nf">_getBindingCurves</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nmrResidues</span><span class="p">,</span> <span class="n">singleColumn</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 
 <span class="sd">    :param nmrResidues:</span>
 <span class="sd">    :return: dataframe</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="n">selectedAtomNames</span> <span class="o">=</span> <span class="p">[</span><span class="n">cb</span><span class="o">.</span><span class="n">text</span><span class="p">()</span> <span class="k">for</span> <span class="n">cb</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">nmrAtomsCheckBoxes</span> <span class="k">if</span> <span class="n">cb</span><span class="o">.</span><span class="n">isChecked</span><span class="p">()]</span>
     <span class="n">mode</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">modeButtons</span><span class="o">.</span><span class="n">getSelectedText</span><span class="p">()</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">mode</span> <span class="ow">in</span> <span class="n">MODES</span><span class="p">:</span>
       <span class="k">return</span>
-    <span class="n">weights</span> <span class="o">=</span> <span class="p">{}</span>
-    <span class="k">for</span> <span class="n">atomWSB</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">atomWeightSpinBoxes</span><span class="p">:</span>
-      <span class="n">weights</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">atomWSB</span><span class="o">.</span><span class="n">objectName</span><span class="p">():</span> <span class="n">atomWSB</span><span class="o">.</span><span class="n">value</span><span class="p">()})</span>
+    <span class="n">weights</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">relativeContribuitions</span>
+    <span class="n">selectedAtomNames</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">selectedNmrAtomNames</span>
     <span class="n">values</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">peaksDFs</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">for</span> <span class="n">nmrResidue</span> <span class="ow">in</span> <span class="n">nmrResidues</span><span class="p">:</span>
       <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_isInt</span><span class="p">(</span><span class="n">nmrResidue</span><span class="o">.</span><span class="n">sequenceCode</span><span class="p">):</span>
         <span class="n">spectra</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectraSelectionWidget</span><span class="o">.</span><span class="n">getSelections</span><span class="p">()</span>
-        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">spectra</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">1</span><span class="p">:</span>
-          <span class="n">deltas</span> <span class="o">=</span> <span class="p">[]</span>
-          <span class="n">concentrationsValues</span> <span class="o">=</span> <span class="p">[]</span>
-          <span class="n">zeroSpectrum</span><span class="p">,</span> <span class="n">otherSpectra</span> <span class="o">=</span> <span class="n">spectra</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">spectra</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
-          <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">spectrum</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">otherSpectra</span><span class="p">,</span><span class="mi">1</span><span class="p">):</span>
-            <span class="k">if</span> <span class="n">nmrResidue</span><span class="o">.</span><span class="n">_includeInDeltaShift</span><span class="p">:</span>
-              <span class="n">delta</span> <span class="o">=</span> <span class="n">getNmrResidueDeltas</span><span class="p">(</span><span class="n">nmrResidue</span><span class="p">,</span> <span class="n">selectedAtomNames</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="n">mode</span><span class="p">,</span> <span class="n">spectra</span><span class="o">=</span><span class="p">[</span><span class="n">zeroSpectrum</span><span class="p">,</span> <span class="n">spectrum</span><span class="p">],</span>
-                                          <span class="n">atomWeights</span><span class="o">=</span><span class="n">weights</span><span class="p">)</span>
-              <span class="n">deltas</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">delta</span><span class="p">)</span>
+        <span class="n">concentrationsValues</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">peaksPids</span> <span class="o">=</span> <span class="p">[]</span>
 
-              <span class="n">concentrations</span><span class="p">,</span> <span class="n">units</span> <span class="o">=</span>  <span class="bp">self</span><span class="o">.</span><span class="n">_getConcentrationsFromSpectra</span><span class="p">([</span><span class="n">spectrum</span><span class="p">])</span>
-              <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">concentrations</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">spectra</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">1</span><span class="p">:</span>
+          <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">displayDataButton</span><span class="o">.</span><span class="n">get</span><span class="p">()</span> <span class="o">==</span> <span class="n">RAW</span> <span class="ow">and</span> <span class="n">mode</span> <span class="ow">in</span> <span class="p">[</span><span class="n">HEIGHT</span><span class="p">,</span> <span class="n">VOLUME</span><span class="p">]</span> <span class="p">:</span>
+            <span class="n">deltas</span><span class="p">,</span> <span class="n">peaks</span> <span class="o">=</span> <span class="n">getNmrResiduePeakProperty</span><span class="p">(</span><span class="n">nmrResidue</span><span class="p">,</span> <span class="n">selectedAtomNames</span><span class="p">,</span> <span class="n">spectra</span><span class="p">,</span> <span class="n">mode</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">p</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">peaks</span><span class="p">):</span>
+              <span class="n">spectrum</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">peakList</span><span class="o">.</span><span class="n">spectrum</span>
+              <span class="n">concentrations</span><span class="p">,</span> <span class="n">units</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getConcentrationsFromSpectra</span><span class="p">([</span><span class="n">spectrum</span><span class="p">])</span>
+              <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">concentrations</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
                 <span class="n">concentration</span> <span class="o">=</span> <span class="n">concentrations</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
                 <span class="k">if</span> <span class="n">concentration</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
                   <span class="n">concentration</span> <span class="o">=</span> <span class="n">i</span>
                 <span class="n">concentrationsValues</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">concentration</span><span class="p">)</span>
+                <span class="n">peaksPids</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">pid</span><span class="p">)</span>
 
+          <span class="k">else</span><span class="p">:</span>
+            <span class="n">zeroSpectrum</span><span class="p">,</span> <span class="n">otherSpectra</span> <span class="o">=</span> <span class="n">spectra</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">spectra</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+            <span class="n">deltas</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">peaks</span> <span class="o">=</span> <span class="n">_getPeaksForNmrResidue</span><span class="p">(</span><span class="n">nmrResidue</span><span class="p">,</span> <span class="n">selectedAtomNames</span><span class="p">,</span> <span class="n">spectra</span><span class="p">)</span>
+            <span class="c1"># deltas.append(0)</span>
+            <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">spectrum</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">spectra</span><span class="p">):</span>
+              <span class="k">if</span> <span class="n">nmrResidue</span><span class="o">.</span><span class="n">_includeInDeltaShift</span><span class="p">:</span>
+                  <span class="n">delta</span> <span class="o">=</span> <span class="n">getNmrResidueDeltas</span><span class="p">(</span><span class="n">nmrResidue</span><span class="p">,</span> <span class="n">selectedAtomNames</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="n">mode</span><span class="p">,</span> <span class="n">spectra</span><span class="o">=</span><span class="p">[</span><span class="n">zeroSpectrum</span><span class="p">,</span> <span class="n">spectrum</span><span class="p">],</span>
+                                              <span class="n">atomWeights</span><span class="o">=</span><span class="n">weights</span><span class="p">)</span>
+                  <span class="n">deltas</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">delta</span><span class="p">)</span>
+              <span class="k">else</span><span class="p">:</span>
+                <span class="n">deltas</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">None</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">spectra</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">peaks</span><span class="p">):</span>
+              <span class="k">continue</span>
+            <span class="k">else</span><span class="p">:</span>
+              <span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">p</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">peaks</span><span class="p">):</span>
+                <span class="n">spectrum</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">peakList</span><span class="o">.</span><span class="n">spectrum</span>
+                <span class="n">concentrations</span><span class="p">,</span> <span class="n">units</span> <span class="o">=</span>  <span class="bp">self</span><span class="o">.</span><span class="n">_getConcentrationsFromSpectra</span><span class="p">([</span><span class="n">spectrum</span><span class="p">])</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">concentrations</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">:</span>
+                  <span class="n">concentration</span> <span class="o">=</span> <span class="n">concentrations</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                  <span class="k">if</span> <span class="n">concentration</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+                    <span class="n">concentration</span> <span class="o">=</span> <span class="n">i</span>
+                  <span class="n">concentrationsValues</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="n">concentration</span><span class="p">)</span>
+                  <span class="n">peaksPids</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">pid</span><span class="p">)</span>
           <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">([</span><span class="n">deltas</span><span class="p">],</span> <span class="n">index</span><span class="o">=</span><span class="p">[</span><span class="n">nmrResidue</span><span class="p">],</span> <span class="n">columns</span><span class="o">=</span><span class="n">concentrationsValues</span><span class="p">)</span>
+          <span class="n">dfPeaks</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">([</span><span class="n">peaksPids</span><span class="p">],</span> <span class="n">index</span><span class="o">=</span><span class="p">[</span><span class="n">nmrResidue</span><span class="p">],</span> <span class="n">columns</span><span class="o">=</span><span class="n">concentrationsValues</span><span class="p">)</span>
           <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
           <span class="n">values</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
+          <span class="n">peaksDFs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">dfPeaks</span><span class="p">)</span>
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">values</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">:</span>
-      <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">values</span><span class="p">)</span>
+      <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">values</span><span class="p">)</span>
+      <span class="n">dfPeaks</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">peaksDFs</span><span class="p">)</span>
+      <span class="k">return</span> <span class="n">df</span><span class="p">,</span> <span class="n">dfPeaks</span>
+    <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(),</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">()</span>
 
   <span class="k">def</span> <span class="nf">_getScaledBindingCurves</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bindingCurves</span><span class="p">):</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">bindingCurves</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">):</span>
@@ -983,6 +1059,27 @@
   <span class="c1">############   Settings widgets callbacks    ################</span>
   <span class="c1">#############################################################</span>
 
+<div class="viewcode-block" id="ChemicalShiftsMapping.showNmrAtomsSettings"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.modules.ChemicalShiftsMappingModule.ChemicalShiftsMapping.showNmrAtomsSettings">[docs]</a>  <span class="k">def</span> <span class="nf">showNmrAtomsSettings</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.NmrAtomsSelections</span> <span class="kn">import</span> <span class="n">_NmrAtomsSelection</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="p">:</span>
+      <span class="n">nmrAtoms</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">([</span><span class="n">n</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">nmrAtoms</span><span class="p">]))</span>
+
+      <span class="n">popup</span> <span class="o">=</span> <span class="n">_NmrAtomsSelection</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                                 <span class="n">nmrAtoms</span><span class="o">=</span><span class="n">nmrAtoms</span><span class="p">,</span>
+                                 <span class="n">checked</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">selectedNmrAtomNames</span><span class="p">,</span>
+                                 <span class="n">size</span><span class="o">=</span><span class="p">[</span><span class="mi">500</span><span class="p">,</span> <span class="mi">450</span><span class="p">],</span>
+                                 <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+      <span class="n">popup</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+      <span class="n">popup</span><span class="o">.</span><span class="n">raise_</span><span class="p">()</span></div>
+
+  <span class="k">def</span> <span class="nf">_navigateToPeakPosition</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">peak</span><span class="p">):</span>
+    <span class="kn">from</span> <span class="nn">ccpn.ui.gui.lib.Strip</span> <span class="kn">import</span> <span class="n">navigateToPositionInStrip</span><span class="p">,</span> <span class="n">_getCurrentZoomRatio</span>
+
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">current</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+      <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">strip</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">widths</span> <span class="o">=</span> <span class="n">_getCurrentZoomRatio</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">strip</span><span class="o">.</span><span class="n">viewRange</span><span class="p">())</span>
+        <span class="n">navigateToPositionInStrip</span><span class="p">(</span><span class="n">strip</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">strip</span><span class="p">,</span> <span class="n">positions</span><span class="o">=</span><span class="n">peak</span><span class="o">.</span><span class="n">position</span><span class="p">,</span> <span class="n">widths</span><span class="o">=</span><span class="n">widths</span><span class="p">)</span>
+
   <span class="k">def</span> <span class="nf">_navigateToNmrItems</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nmrResidue</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    _ccpnInternal. NB Called by several points within the CSM</span>
@@ -1021,85 +1118,10 @@
           <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_openSpectra</span><span class="p">():</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_navigateToNmrItems</span><span class="p">()</span>
 
-  <span class="c1">#</span>
   <span class="k">def</span> <span class="nf">_addSettingsWAttr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">checkboxes</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;For restoring layouts only&quot;&quot;&quot;</span>
     <span class="k">for</span> <span class="n">n</span><span class="p">,</span> <span class="n">w</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">checkboxes</span><span class="p">):</span>
       <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">w</span><span class="o">.</span><span class="n">text</span><span class="p">(),</span> <span class="n">w</span><span class="p">)</span>
-
-  <span class="k">def</span> <span class="nf">_availableNmrAtoms</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">source</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">nmrAtomType</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
-    <span class="sd">&#39;&#39;&#39;</span>
-<span class="sd">    source = ccpn object: Project or nmrChain, Default project.</span>
-<span class="sd">    returns sorted nmrAtoms names present in nmrResidues of the selected  source.</span>
-<span class="sd">    Used to init the option. The module starts with all nmr atoms available in the project and hides/shows only for the selected nmrChain in the pulldown.</span>
-<span class="sd">    This solutions is a bit slower on opening the first time but makes faster switching between nmrChains.</span>
-<span class="sd">    &#39;&#39;&#39;</span>
-    <span class="k">if</span> <span class="n">source</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
-      <span class="n">source</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span>
-
-    <span class="k">if</span> <span class="n">source</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="p">(</span><span class="n">NmrChain</span><span class="p">,</span> <span class="n">Project</span><span class="p">)):</span>
-      <span class="n">nmrAtoms</span> <span class="o">=</span> <span class="p">[]</span>
-      <span class="k">for</span> <span class="n">nmrResidue</span> <span class="ow">in</span> <span class="n">source</span><span class="o">.</span><span class="n">nmrResidues</span><span class="p">:</span>
-        <span class="n">nmrAtoms</span> <span class="o">+=</span> <span class="n">nmrResidue</span><span class="o">.</span><span class="n">nmrAtoms</span>
-      <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">nmrAtoms</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-        <span class="n">availableNmrAtoms</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">([</span><span class="n">nmrAtom</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">nmrAtom</span> <span class="ow">in</span> <span class="n">nmrAtoms</span><span class="p">]))</span>
-        <span class="n">allAvailable</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">availableNmrAtoms</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="n">CcpnSorting</span><span class="o">.</span><span class="n">stringSortKey</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">nmrAtomType</span><span class="p">:</span>
-          <span class="k">return</span> <span class="p">[</span><span class="n">na</span> <span class="k">for</span> <span class="n">na</span> <span class="ow">in</span> <span class="n">allAvailable</span> <span class="k">if</span> <span class="n">na</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">nmrAtomType</span><span class="p">)]</span>
-        <span class="k">else</span><span class="p">:</span>
-          <span class="k">return</span> <span class="n">allAvailable</span>
-    <span class="k">return</span> <span class="p">[]</span>
-
-  <span class="k">def</span> <span class="nf">_addMoreNmrAtomsForAtomType</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nmrAtomsNames</span><span class="p">,</span> <span class="n">widget</span><span class="p">):</span>
-    <span class="sd">&#39;&#39;&#39;</span>
-
-<span class="sd">    :param widget: Widget where to add the option. EG frame</span>
-<span class="sd">    :return:</span>
-<span class="sd">    &#39;&#39;&#39;</span>
-    <span class="n">editableOption</span> <span class="o">=</span> <span class="n">EditableCheckBox</span><span class="p">(</span><span class="n">widget</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">nmrAtomsCheckBoxes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">editableOption</span><span class="p">)</span>
-    <span class="n">regioncount</span> <span class="o">=</span> <span class="mi">0</span>
-    <span class="n">totalCount</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">nmrAtomsNames</span><span class="p">)</span>
-    <span class="n">valueCount</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">nmrAtomsNames</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">totalCount</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-      <span class="n">positions</span> <span class="o">=</span> <span class="p">[(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span> <span class="o">+</span> <span class="n">regioncount</span><span class="p">,</span> <span class="n">j</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">valueCount</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
-                   <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">2</span><span class="p">)]</span>
-
-      <span class="k">for</span> <span class="n">position</span><span class="p">,</span> <span class="n">nmrAtomName</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">positions</span><span class="p">,</span> <span class="n">nmrAtomsNames</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">atomSelection</span> <span class="o">=</span> <span class="n">CheckBox</span><span class="p">(</span><span class="n">widget</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="n">nmrAtomName</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="n">position</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">nmrAtomsCheckBoxes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">atomSelection</span><span class="p">)</span>
-
-  <span class="k">def</span> <span class="nf">_toggleMoreNmrAtoms</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">widget</span><span class="p">):</span>
-    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">sender</span><span class="p">():</span>
-      <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sender</span><span class="p">()</span><span class="o">.</span><span class="n">text</span><span class="p">()</span>
-      <span class="k">if</span> <span class="n">widget</span><span class="o">.</span><span class="n">isHidden</span><span class="p">():</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">sender</span><span class="p">()</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="n">name</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">MORE</span><span class="p">,</span> <span class="n">LESS</span><span class="p">))</span>
-        <span class="n">widget</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
-      <span class="k">else</span><span class="p">:</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">sender</span><span class="p">()</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="n">name</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">LESS</span><span class="p">,</span> <span class="n">MORE</span><span class="p">))</span>
-        <span class="n">widget</span><span class="o">.</span><span class="n">hide</span><span class="p">()</span>
-
-  <span class="k">def</span> <span class="nf">_hideNonNecessaryNmrAtomsOption</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="sd">&#39;&#39;&#39;</span>
-<span class="sd">    :return: hides nmrAtoms not needed for the selected nmrChain.</span>
-<span class="sd">    &#39;&#39;&#39;</span>
-    <span class="n">neededNmrAtoms</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_availableNmrAtoms</span><span class="p">(</span><span class="n">source</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">nmrResidueTable</span><span class="o">.</span><span class="n">_nmrChain</span><span class="p">)</span>
-    <span class="k">for</span> <span class="n">selectedWidget</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">nmrAtomsCheckBoxes</span><span class="p">:</span>
-      <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">selectedWidget</span><span class="p">,</span> <span class="n">EditableCheckBox</span><span class="p">):</span>
-        <span class="k">if</span> <span class="n">selectedWidget</span><span class="o">.</span><span class="n">text</span><span class="p">()</span> <span class="ow">in</span> <span class="n">neededNmrAtoms</span><span class="p">:</span>
-          <span class="n">selectedWidget</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
-        <span class="k">else</span><span class="p">:</span>
-          <span class="n">selectedWidget</span><span class="o">.</span><span class="n">hide</span><span class="p">()</span>
-
-  <span class="k">def</span> <span class="nf">_addOtherNmrAtomsAvailable</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">availableNmrAtoms</span><span class="p">):</span>
-    <span class="sd">&#39;&#39;&#39;Adds more nmr atoms if not in the default atoms&#39;&#39;&#39;</span>
-    <span class="n">addedNmrAtoms</span> <span class="o">=</span> <span class="p">[</span><span class="n">i</span><span class="o">.</span><span class="n">text</span><span class="p">()</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">nmrAtomsCheckBoxes</span> <span class="k">if</span> <span class="n">i</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">]</span>
-    <span class="n">othersAvailable</span> <span class="o">=</span> <span class="p">[</span><span class="n">name</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">availableNmrAtoms</span> <span class="k">if</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">addedNmrAtoms</span><span class="p">]</span>
-    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">othersAvailable</span><span class="p">):</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">moreButton</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">_addMoreNmrAtomsForAtomType</span><span class="p">(</span><span class="n">othersAvailable</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">moreOptionFrame</span><span class="p">)</span>
-      <span class="k">return</span> <span class="bp">True</span>
-    <span class="k">return</span> <span class="bp">False</span>
 
   <span class="k">def</span> <span class="nf">_checkSpectraWithPeakListsOnly</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="k">for</span> <span class="n">cb</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectraSelectionWidget</span><span class="o">.</span><span class="n">allSpectraCheckBoxes</span><span class="p">:</span>
@@ -1114,20 +1136,14 @@
       <span class="k">else</span><span class="p">:</span>
         <span class="n">cb</span><span class="o">.</span><span class="n">setChecked</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
 
-  <span class="k">def</span> <span class="nf">_toggleRelativeContribuitions</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+  <span class="k">def</span> <span class="nf">_toggleRawDataOption</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="n">value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">modeButtons</span><span class="o">.</span><span class="n">getSelectedText</span><span class="p">()</span>
     <span class="k">if</span> <span class="n">value</span> <span class="o">==</span> <span class="n">HEIGHT</span> <span class="ow">or</span> <span class="n">value</span> <span class="o">==</span>  <span class="n">VOLUME</span><span class="p">:</span>
-      <span class="s1">&#39;hide weight&#39;</span>
-      <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">atomWeightSpinBoxes</span><span class="p">:</span>
-        <span class="n">i</span><span class="o">.</span><span class="n">hide</span><span class="p">()</span>
-      <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">nmrAtomsLabels</span><span class="p">:</span>
-        <span class="n">i</span><span class="o">.</span><span class="n">hide</span><span class="p">()</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">displayDataButton</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">displayDataLabel</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
     <span class="k">else</span><span class="p">:</span>
-      <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">atomWeightSpinBoxes</span><span class="p">:</span>
-        <span class="n">i</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
-      <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">nmrAtomsLabels</span><span class="p">:</span>
-        <span class="n">i</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
-
+      <span class="bp">self</span><span class="o">.</span><span class="n">displayDataButton</span><span class="o">.</span><span class="n">hide</span><span class="p">()</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">displayDataLabel</span><span class="o">.</span><span class="n">hide</span><span class="p">()</span>
 
   <span class="k">def</span> <span class="nf">_setDefaultThreshold</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_updateModule</span><span class="p">(</span><span class="n">silent</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
@@ -1149,12 +1165,10 @@
     <span class="n">vs</span><span class="p">,</span> <span class="n">u</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getConcentrationsFromSpectra</span><span class="p">(</span><span class="n">spectra</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_kDunit</span> <span class="o">=</span> <span class="n">u</span>
 
-
   <span class="k">def</span> <span class="nf">_displayTableForNmrChain</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nmrChain</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; Add custom action when selecting a chain on the table pulldown&quot;&quot;&quot;</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_addNmrResidueColour</span><span class="p">(</span><span class="n">nmrChain</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_updateModule</span><span class="p">()</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_hideNonNecessaryNmrAtomsOption</span><span class="p">()</span>
 
   <span class="k">def</span> <span class="nf">_peakDeletedCallBack</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">peaks</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
@@ -1177,20 +1191,17 @@
     <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    Callback from checkboxes inside a table</span>
 <span class="sd">    &#39;&#39;&#39;</span>
-    <span class="c1"># objs = data[Notifier.OBJECT]</span>
+    <span class="n">objs</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">Notifier</span><span class="o">.</span><span class="n">OBJECT</span><span class="p">]</span>
 
-    <span class="c1"># itemSelection = data[&#39;rowItem&#39;]</span>
+    <span class="n">itemSelection</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;rowItem&#39;</span><span class="p">]</span>
     <span class="c1"># att = self.nmrResidueTable.horizontalHeaderItem(itemSelection.column()).text()</span>
     <span class="c1"># if att == &#39;Included&#39;:</span>
-    <span class="c1"># objs = data[Notifier.OBJECT]</span>
-    <span class="c1"># print(objs)</span>
-    <span class="c1"># if objs:</span>
-    <span class="c1">#   obj = objs[0]</span>
-    <span class="c1"># #     print(obj)</span>
-    <span class="c1"># #   obj._includeInDeltaShift = data[&#39;checked&#39;]</span>
-    <span class="c1">#   obj._finaliseAction(&#39;change&#39;)</span>
-    <span class="c1"># self._updateModule()</span>
-    <span class="k">pass</span>
+    <span class="n">obj</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">Notifier</span><span class="o">.</span><span class="n">OBJECT</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">obj</span><span class="p">:</span>
+      <span class="n">obj</span><span class="o">.</span><span class="n">_includeInDeltaShift</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;checked&#39;</span><span class="p">]</span>
+      <span class="c1"># obj._finaliseAction(&#39;change&#39;)</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_updateModule</span><span class="p">()</span>
+    <span class="c1"># pass</span>
     <span class="c1"># print(data)</span>
 
   <span class="k">def</span> <span class="nf">_nmrTableSelectionCallback</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
@@ -1215,8 +1226,6 @@
     <span class="bp">self</span><span class="o">.</span><span class="n">thresholdSpinBox</span><span class="o">.</span><span class="n">setValue</span><span class="p">(</span><span class="n">pos</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_updateBarGraph</span><span class="p">()</span>
 
-
-
   <span class="k">def</span> <span class="nf">_isInt</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">s</span><span class="p">):</span>
     <span class="k">try</span><span class="p">:</span>
       <span class="nb">int</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
@@ -1240,11 +1249,8 @@
     <span class="n">mode</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">modeButtons</span><span class="o">.</span><span class="n">getSelectedText</span><span class="p">()</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">mode</span> <span class="ow">in</span> <span class="n">MODES</span><span class="p">:</span>
       <span class="k">return</span>
-    <span class="n">weights</span> <span class="o">=</span> <span class="p">{}</span>
-    <span class="k">for</span> <span class="n">atomWSB</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">atomWeightSpinBoxes</span><span class="p">:</span>
-      <span class="n">weights</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">atomWSB</span><span class="o">.</span><span class="n">objectName</span><span class="p">():</span><span class="n">atomWSB</span><span class="o">.</span><span class="n">value</span><span class="p">()})</span>
-
-    <span class="n">selectedAtomNames</span> <span class="o">=</span> <span class="p">[</span><span class="n">cb</span><span class="o">.</span><span class="n">text</span><span class="p">()</span> <span class="k">for</span> <span class="n">cb</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">nmrAtomsCheckBoxes</span> <span class="k">if</span> <span class="n">cb</span><span class="o">.</span><span class="n">isChecked</span><span class="p">()]</span>
+    <span class="n">weights</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">relativeContribuitions</span>
+    <span class="n">selectedAtomNames</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">selectedNmrAtomNames</span>
     <span class="n">spectra</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectraSelectionWidget</span><span class="o">.</span><span class="n">getSelections</span><span class="p">()</span>
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">nmrResidueTable</span><span class="p">:</span>
       <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">nmrResidueTable</span><span class="o">.</span><span class="n">_nmrChain</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
@@ -1256,12 +1262,14 @@
               <span class="n">nmrResidueAtoms</span> <span class="o">=</span> <span class="p">[</span><span class="n">atom</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">atom</span> <span class="ow">in</span> <span class="n">nmrResidue</span><span class="o">.</span><span class="n">nmrAtoms</span><span class="p">]</span>
               <span class="n">nmrResidue</span><span class="o">.</span><span class="n">selectedNmrAtomNames</span> <span class="o">=</span>  <span class="p">[</span><span class="n">atom</span> <span class="k">for</span> <span class="n">atom</span> <span class="ow">in</span> <span class="n">nmrResidueAtoms</span> <span class="k">if</span> <span class="n">atom</span> <span class="ow">in</span> <span class="n">selectedAtomNames</span><span class="p">]</span>
               <span class="n">nmrResidue</span><span class="o">.</span><span class="n">_delta</span> <span class="o">=</span> <span class="n">getNmrResidueDeltas</span><span class="p">(</span><span class="n">nmrResidue</span><span class="p">,</span> <span class="n">selectedAtomNames</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="n">mode</span><span class="p">,</span> <span class="n">spectra</span><span class="o">=</span><span class="n">spectra</span><span class="p">,</span> <span class="n">atomWeights</span><span class="o">=</span><span class="n">weights</span><span class="p">)</span>
-              <span class="n">df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getBindingCurves</span><span class="p">([</span><span class="n">nmrResidue</span><span class="p">])</span>
+
+              <span class="n">df</span><span class="p">,</span><span class="n">peaksdf</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getBindingCurves</span><span class="p">([</span><span class="n">nmrResidue</span><span class="p">])</span>
               <span class="n">bindingCurves</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getScaledBindingCurves</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
               <span class="k">if</span> <span class="n">bindingCurves</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
                 <span class="n">plotData</span> <span class="o">=</span> <span class="n">bindingCurves</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+                <span class="n">columns</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span>
                 <span class="n">y</span> <span class="o">=</span> <span class="n">plotData</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">flatten</span><span class="p">(</span><span class="n">order</span><span class="o">=</span><span class="s1">&#39;F&#39;</span><span class="p">)</span>
-                <span class="n">xss</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">plotData</span><span class="o">.</span><span class="n">columns</span><span class="p">]</span> <span class="o">*</span> <span class="n">plotData</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+                <span class="n">xss</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">columns</span><span class="p">]</span> <span class="o">*</span> <span class="n">plotData</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
                 <span class="n">x</span> <span class="o">=</span> <span class="n">xss</span><span class="o">.</span><span class="n">flatten</span><span class="p">(</span><span class="n">order</span><span class="o">=</span><span class="s1">&#39;F&#39;</span><span class="p">)</span>
                 <span class="n">kd</span> <span class="o">=</span> <span class="n">_getKd</span><span class="p">(</span><span class="n">oneSiteBindingCurve</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
                 <span class="k">if</span> <span class="ow">not</span> <span class="n">kd</span><span class="p">:</span>
@@ -1274,9 +1282,6 @@
           <span class="bp">self</span><span class="o">.</span><span class="n">_updateBarGraph</span><span class="p">()</span>
           <span class="bp">self</span><span class="o">.</span><span class="n">_plotScatters</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_getScatterData</span><span class="p">(),</span> <span class="n">selectedObjs</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">nmrResidues</span><span class="p">)</span>
           <span class="bp">self</span><span class="o">.</span><span class="n">_plotBindingCFromCurrent</span><span class="p">()</span>
-
-
-
 
   <span class="k">def</span> <span class="nf">_showOnMolecularViewer</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
@@ -1308,22 +1313,16 @@
       <span class="k">else</span><span class="p">:</span>
         <span class="k">return</span>
 
-
     <span class="n">aboveThresholdResidues</span> <span class="o">=</span> <span class="s2">&quot;+&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="nb">str</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">aboveX</span><span class="p">])</span>
     <span class="n">belowThresholdResidues</span> <span class="o">=</span> <span class="s2">&quot;+&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="nb">str</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">belowX</span><span class="p">])</span>
     <span class="n">missingdResidues</span> <span class="o">=</span> <span class="s2">&quot;+&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="nb">str</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">disappearedX</span><span class="p">])</span>
     <span class="n">selection</span> <span class="o">=</span> <span class="s2">&quot;+&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="nb">str</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">sequenceCode</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">nmrResidues</span><span class="p">])</span>
-
     <span class="n">colourAboveThreshold</span> <span class="o">=</span> <span class="n">hexToRgb</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">aboveBrush</span><span class="p">)</span>
     <span class="n">colourBelowThreshold</span> <span class="o">=</span> <span class="n">hexToRgb</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">belowBrush</span><span class="p">)</span>
     <span class="n">colourMissing</span> <span class="o">=</span> <span class="n">hexToRgb</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">disappearedPeakBrush</span><span class="p">)</span>
-
-
     <span class="n">scriptPath</span> <span class="o">=</span> <span class="n">_chemicalShiftMappingPymolTemplate</span><span class="p">(</span><span class="n">filePath</span><span class="p">,</span> <span class="n">pdbPath</span><span class="p">,</span> <span class="n">aboveThresholdResidues</span><span class="p">,</span> <span class="n">belowThresholdResidues</span><span class="p">,</span>
                                                    <span class="n">missingdResidues</span><span class="p">,</span> <span class="n">colourMissing</span><span class="p">,</span> <span class="n">colourAboveThreshold</span><span class="p">,</span> <span class="n">colourBelowThreshold</span><span class="p">,</span>
                                                    <span class="n">selection</span><span class="p">)</span>
-
-
     <span class="k">try</span><span class="p">:</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">pymolProcess</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">Popen</span><span class="p">(</span><span class="n">pymolPath</span><span class="o">+</span><span class="s1">&#39; -r &#39;</span><span class="o">+</span><span class="n">scriptPath</span><span class="p">,</span>
                        <span class="n">shell</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
@@ -1332,15 +1331,11 @@
     <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
       <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;Pymol not started. Check executable.&#39;</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span>
 
-
-
-
   <span class="k">def</span> <span class="nf">_toggleUserFncBox</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">fittingModeRB</span><span class="o">.</span><span class="n">get</span><span class="p">()</span> <span class="o">==</span> <span class="n">OTHER</span><span class="p">:</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">fittingModeEditor</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
     <span class="k">else</span><span class="p">:</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">fittingModeEditor</span><span class="o">.</span><span class="n">hide</span><span class="p">()</span>
-
 
   <span class="k">def</span> <span class="nf">_selectCurrentNmrResiduesNotifierCallback</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
     <span class="n">nmrResidues</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">nmrResidues</span>
@@ -1351,19 +1346,18 @@
       <span class="bp">self</span><span class="o">.</span><span class="n">_plotScatters</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_getScatterData</span><span class="p">(),</span> <span class="n">selectedObjs</span><span class="o">=</span><span class="n">nmrResidues</span><span class="p">)</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">_selectBarLabels</span><span class="p">(</span><span class="n">pss</span><span class="p">)</span>
 
-
   <span class="k">def</span> <span class="nf">_getAllBindingCurvesDataFrameForChain</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="n">nmrChainTxt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">nmrResidueTable</span><span class="o">.</span><span class="n">ncWidget</span><span class="o">.</span><span class="n">getText</span><span class="p">()</span>
     <span class="n">nmrChain</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">getByPid</span><span class="p">(</span><span class="n">nmrChainTxt</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">nmrChain</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
-      <span class="n">dataFrame</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getBindingCurves</span><span class="p">(</span><span class="n">nmrChain</span><span class="o">.</span><span class="n">nmrResidues</span><span class="p">)</span>
+      <span class="n">dataFrame</span><span class="p">,</span><span class="n">pkDf</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getBindingCurves</span><span class="p">(</span><span class="n">nmrChain</span><span class="o">.</span><span class="n">nmrResidues</span><span class="p">)</span>
       <span class="k">return</span> <span class="n">dataFrame</span>
 
   <span class="k">def</span> <span class="nf">_plotFittedCallback</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">fittingPlot</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_clearLegend</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fittingPlot</span><span class="o">.</span><span class="n">legend</span><span class="p">)</span>
 
-    <span class="n">plotData</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getBindingCurves</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">nmrResidues</span><span class="p">)</span>
+    <span class="n">plotData</span><span class="p">,</span> <span class="n">pksdf</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getBindingCurves</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">nmrResidues</span><span class="p">,</span> <span class="bp">True</span><span class="p">)</span>
     <span class="n">plotData</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getScaledBindingCurves</span><span class="p">(</span><span class="n">plotData</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">plotData</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
@@ -1413,9 +1407,6 @@
     <span class="bp">self</span><span class="o">.</span><span class="n">fittingPlot</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">xf</span><span class="p">,</span> <span class="n">yf</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">label</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">fittingPlot</span><span class="o">.</span><span class="n">setLimits</span><span class="p">(</span><span class="n">xMin</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">xMax</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">yMin</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">yMax</span><span class="o">=</span><span class="bp">None</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">bindingPlot</span><span class="o">.</span><span class="n">autoRange</span><span class="p">()</span>
-
-
-
 
   <span class="k">def</span> <span class="nf">_openSpectra</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="n">openSpectra</span> <span class="o">=</span> <span class="n">MessageDialog</span><span class="o">.</span><span class="n">showYesNo</span><span class="p">(</span><span class="s1">&#39;No Spectra displayed.&#39;</span><span class="p">,</span> <span class="s1">&#39;Impossible to navigate to peak position.&#39;</span>
@@ -1486,7 +1477,7 @@
 
   <span class="k">def</span> <span class="nf">_addConcentrationsFromSpectra</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">spectra</span><span class="p">,</span> <span class="n">concentrationValues</span><span class="p">,</span> <span class="n">concentrationUnit</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    # add concentrations</span>
+<span class="sd">    # add concentrations. To be chaned with series from SpectrumGroups</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">with</span> <span class="n">undoBlockWithoutSideBar</span><span class="p">():</span>
@@ -1507,8 +1498,9 @@
   <span class="c1">#############################################################</span>
   <span class="c1">######   Updating widgets (plots and table) callbacks #######</span>
   <span class="c1">#############################################################</span>
-  <span class="kn">from</span> <span class="nn">ccpn.util.decorators</span> <span class="kn">import</span> <span class="n">profile</span>
-  <span class="nd">@profile</span>
+
+  <span class="c1"># from ccpn.util.decorators import profile</span>
+  <span class="c1"># @profile</span>
   <span class="k">def</span> <span class="nf">_updateBarGraph</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="n">xs</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="n">ys</span> <span class="o">=</span> <span class="p">[]</span>
@@ -1526,6 +1518,7 @@
     <span class="bp">self</span><span class="o">.</span><span class="n">belowBrush</span> <span class="o">=</span> <span class="s1">&#39;r&#39;</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">disappearedPeakBrush</span> <span class="o">=</span> <span class="s1">&#39;b&#39;</span>
     <span class="c1"># check if all values are none:</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">nmrResidueTable</span><span class="o">.</span><span class="n">_dataFrameObject</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span> <span class="k">return</span>
     <span class="n">shifts</span> <span class="o">=</span> <span class="p">[</span><span class="n">nmrResidue</span><span class="o">.</span><span class="n">_delta</span> <span class="k">for</span> <span class="n">nmrResidue</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">nmrResidueTable</span><span class="o">.</span><span class="n">_dataFrameObject</span><span class="o">.</span><span class="n">objects</span><span class="p">]</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="nb">any</span><span class="p">(</span><span class="n">shifts</span><span class="p">):</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">barGraphWidget</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
@@ -1638,102 +1631,6 @@
       <span class="n">nmrResidue</span><span class="o">.</span><span class="n">_spectraWithMissingPeaks</span> <span class="o">=</span> <span class="n">spectraWithMissingPeaks</span>
 
       <span class="k">return</span> <span class="n">nmrResidue</span><span class="o">.</span><span class="n">_spectraWithMissingPeaks</span>
-
-  <span class="k">def</span> <span class="nf">_updateNmrAtomsOption</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="n">otherAvailable</span> <span class="o">=</span> <span class="bp">False</span>
-    <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>
-    <span class="n">availableNmrAtoms</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_availableNmrAtoms</span><span class="p">()</span>
-    <span class="c1"># line = HLine(self.nmrAtomsFrame,  style=&#39;DashLine&#39;,  height=1, grid=(i, 1))</span>
-    <span class="n">line</span> <span class="o">=</span> <span class="n">HLine</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nmrAtomsFrame</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">colour</span><span class="o">=</span><span class="n">getColours</span><span class="p">()[</span><span class="n">DIVIDER</span><span class="p">],</span> <span class="n">height</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
-    <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
-    <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">DefaultAtomWeights</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-      <span class="n">atomFrame</span> <span class="o">=</span> <span class="n">Frame</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nmrAtomsFrame</span><span class="p">,</span> <span class="n">setLayout</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
-      <span class="n">hFrame</span> <span class="o">=</span> <span class="mi">0</span>
-      <span class="n">vFrame</span> <span class="o">=</span> <span class="mi">0</span>
-      <span class="n">labelRelativeContribution</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="n">atomFrame</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> Relative Contribution&#39;</span> <span class="o">%</span> <span class="n">name</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">vFrame</span><span class="p">,</span> <span class="n">hFrame</span><span class="p">))</span>
-      <span class="n">hFrame</span> <span class="o">+=</span> <span class="mi">1</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">atomWeightSpinBox</span> <span class="o">=</span> <span class="n">DoubleSpinbox</span><span class="p">(</span><span class="n">atomFrame</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="n">DefaultAtomWeights</span><span class="p">[</span><span class="n">name</span><span class="p">],</span>
-                                             <span class="n">prefix</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="s1">&#39;Weight&#39;</span> <span class="o">+</span> <span class="p">(</span><span class="s1">&#39; &#39;</span> <span class="o">*</span> <span class="mi">2</span><span class="p">)),</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">vFrame</span><span class="p">,</span> <span class="n">hFrame</span><span class="p">),</span>
-                                             <span class="n">tipText</span><span class="o">=</span><span class="s1">&#39;Relative Contribution for the selected nmrAtom&#39;</span><span class="p">)</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">atomWeightSpinBox</span><span class="o">.</span><span class="n">setObjectName</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">atomWeightSpinBox</span><span class="o">.</span><span class="n">setMaximumWidth</span><span class="p">(</span><span class="mi">150</span><span class="p">)</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">atomWeightSpinBoxes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">atomWeightSpinBox</span><span class="p">)</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">nmrAtomsLabels</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">labelRelativeContribution</span><span class="p">)</span>
-
-      <span class="n">vFrame</span> <span class="o">+=</span> <span class="mi">1</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">commonAtomsFrame</span> <span class="o">=</span> <span class="n">Frame</span><span class="p">(</span><span class="n">atomFrame</span><span class="p">,</span> <span class="n">setLayout</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">vFrame</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
-      <span class="c1"># add the first three of ccpn Sorted.</span>
-      <span class="n">vFrame</span> <span class="o">+=</span> <span class="mi">1</span>
-
-      <span class="bp">self</span><span class="o">.</span><span class="n">scrollAreaMoreNmrAtoms</span> <span class="o">=</span> <span class="n">ScrollArea</span><span class="p">(</span><span class="n">atomFrame</span><span class="p">,</span> <span class="n">setLayout</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">vFrame</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">scrollAreaMoreNmrAtoms</span><span class="o">.</span><span class="n">setWidgetResizable</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">moreOptionFrame</span> <span class="o">=</span> <span class="n">Frame</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">setLayout</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="p">)</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">scrollAreaMoreNmrAtoms</span><span class="o">.</span><span class="n">setWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">moreOptionFrame</span><span class="p">)</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">moreOptionFrame</span><span class="o">.</span><span class="n">getLayout</span><span class="p">()</span><span class="o">.</span><span class="n">setAlignment</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">AlignTop</span><span class="p">)</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">scrollAreaMoreNmrAtoms</span><span class="o">.</span><span class="n">hide</span><span class="p">()</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">moreButton</span> <span class="o">=</span> <span class="n">Button</span><span class="p">(</span><span class="n">atomFrame</span><span class="p">,</span> <span class="s1">&#39;More </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">name</span><span class="p">,</span>
-                               <span class="n">callback</span><span class="o">=</span><span class="n">partial</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_toggleMoreNmrAtoms</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">scrollAreaMoreNmrAtoms</span><span class="p">),</span>
-                               <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">vFrame</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">hAlign</span><span class="o">=</span><span class="s1">&#39;l&#39;</span><span class="p">,</span> <span class="p">)</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">moreButton</span><span class="o">.</span><span class="n">hide</span><span class="p">()</span>
-
-      <span class="n">availableNmrAtomsForType</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_availableNmrAtoms</span><span class="p">(</span><span class="n">nmrAtomType</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
-      <span class="n">n</span> <span class="o">=</span> <span class="mi">0</span>
-      <span class="n">checkFirst</span> <span class="o">=</span> <span class="bp">False</span>
-      <span class="n">maxCountRow</span> <span class="o">=</span> <span class="mi">3</span>
-      <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">availableNmrAtomsForType</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">maxCountRow</span><span class="p">:</span>
-        <span class="k">for</span> <span class="n">nmrAtomName</span> <span class="ow">in</span> <span class="n">availableNmrAtomsForType</span><span class="p">:</span>
-          <span class="bp">self</span><span class="o">.</span><span class="n">atomSelection</span> <span class="o">=</span> <span class="n">CheckBox</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">commonAtomsFrame</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="n">nmrAtomName</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">n</span><span class="p">))</span>
-          <span class="k">if</span> <span class="ow">not</span> <span class="n">checkFirst</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">atomSelection</span><span class="o">.</span><span class="n">setChecked</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
-            <span class="n">checkFirst</span> <span class="o">=</span> <span class="bp">True</span>
-          <span class="bp">self</span><span class="o">.</span><span class="n">nmrAtomsCheckBoxes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">atomSelection</span><span class="p">)</span>
-          <span class="n">n</span> <span class="o">+=</span> <span class="mi">1</span>
-      <span class="k">else</span><span class="p">:</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">moreButton</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
-        <span class="n">showPreferredFirst</span> <span class="o">=</span> <span class="p">[</span><span class="n">nmrAtomName</span> <span class="k">for</span> <span class="n">nmrAtomName</span> <span class="ow">in</span> <span class="n">availableNmrAtomsForType</span> <span class="k">if</span>
-                              <span class="n">nmrAtomName</span> <span class="ow">in</span> <span class="n">PreferredNmrAtoms</span><span class="p">]</span>
-        <span class="n">rest</span> <span class="o">=</span> <span class="p">[</span><span class="n">nmrAtomName</span> <span class="k">for</span> <span class="n">nmrAtomName</span> <span class="ow">in</span> <span class="n">availableNmrAtomsForType</span> <span class="k">if</span> <span class="n">nmrAtomName</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">showPreferredFirst</span><span class="p">]</span>
-        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">showPreferredFirst</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-          <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">showPreferredFirst</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">maxCountRow</span><span class="p">:</span>
-            <span class="n">needed</span> <span class="o">=</span> <span class="n">maxCountRow</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">showPreferredFirst</span><span class="p">)</span>
-            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">rest</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">needed</span><span class="p">:</span>
-              <span class="n">showPreferredFirst</span> <span class="o">+=</span> <span class="n">rest</span><span class="p">[:</span><span class="n">needed</span><span class="p">]</span>
-              <span class="n">rest</span> <span class="o">=</span> <span class="n">rest</span><span class="p">[</span><span class="n">needed</span><span class="p">:]</span>
-            <span class="k">else</span><span class="p">:</span>
-              <span class="n">showPreferredFirst</span> <span class="o">+=</span> <span class="n">rest</span>
-              <span class="n">rest</span> <span class="o">=</span> <span class="p">[]</span>
-              <span class="bp">self</span><span class="o">.</span><span class="n">moreButton</span><span class="o">.</span><span class="n">hide</span><span class="p">()</span>
-          <span class="k">for</span> <span class="n">nmrAtomName</span> <span class="ow">in</span> <span class="n">showPreferredFirst</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">atomSelection</span> <span class="o">=</span> <span class="n">CheckBox</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">commonAtomsFrame</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="n">nmrAtomName</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">n</span><span class="p">))</span>
-            <span class="n">n</span> <span class="o">+=</span> <span class="mi">1</span>
-            <span class="k">if</span> <span class="ow">not</span> <span class="n">checkFirst</span><span class="p">:</span>
-              <span class="bp">self</span><span class="o">.</span><span class="n">atomSelection</span><span class="o">.</span><span class="n">setChecked</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
-              <span class="n">checkFirst</span> <span class="o">=</span> <span class="bp">True</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">nmrAtomsCheckBoxes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">atomSelection</span><span class="p">)</span>
-          <span class="bp">self</span><span class="o">.</span><span class="n">_addMoreNmrAtomsForAtomType</span><span class="p">(</span><span class="n">rest</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">moreOptionFrame</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-          <span class="k">for</span> <span class="n">nmrAtomName</span> <span class="ow">in</span> <span class="n">availableNmrAtomsForType</span><span class="p">[:</span><span class="mi">3</span><span class="p">]:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">atomSelection</span> <span class="o">=</span> <span class="n">CheckBox</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">commonAtomsFrame</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="n">nmrAtomName</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">n</span><span class="p">))</span>
-            <span class="k">if</span> <span class="ow">not</span> <span class="n">checkFirst</span><span class="p">:</span>
-              <span class="bp">self</span><span class="o">.</span><span class="n">atomSelection</span><span class="o">.</span><span class="n">setChecked</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
-              <span class="n">checkFirst</span> <span class="o">=</span> <span class="bp">True</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">nmrAtomsCheckBoxes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">atomSelection</span><span class="p">)</span>
-            <span class="n">n</span> <span class="o">+=</span> <span class="mi">1</span>
-          <span class="bp">self</span><span class="o">.</span><span class="n">_addMoreNmrAtomsForAtomType</span><span class="p">(</span><span class="n">availableNmrAtomsForType</span><span class="p">[</span><span class="mi">2</span><span class="p">:],</span> <span class="bp">self</span><span class="o">.</span><span class="n">moreOptionFrame</span><span class="p">)</span>
-
-      <span class="n">vFrame</span> <span class="o">+=</span> <span class="mi">1</span>
-      <span class="c1">## Scrollable area where to add more atoms</span>
-
-      <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
-      <span class="k">if</span> <span class="n">name</span> <span class="o">==</span> <span class="n">OTHER</span><span class="p">:</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">otherAvailable</span><span class="p">:</span>
-          <span class="n">otherAvailable</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_addOtherNmrAtomsAvailable</span><span class="p">(</span><span class="n">availableNmrAtoms</span><span class="p">)</span>
-
-      <span class="k">if</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">availableNmrAtoms</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">otherAvailable</span><span class="p">:</span>
-        <span class="n">atomFrame</span><span class="o">.</span><span class="n">hide</span><span class="p">()</span>
-
-    <span class="c1"># line = HLine(self.nmrAtomsFrame, style=&#39;DashLine&#39;, height=1, grid=(i, 1))</span>
-    <span class="n">line</span> <span class="o">=</span> <span class="n">HLine</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nmrAtomsFrame</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">colour</span><span class="o">=</span><span class="n">getColours</span><span class="p">()[</span><span class="n">DIVIDER</span><span class="p">],</span> <span class="n">height</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
 
   <span class="k">def</span> <span class="nf">_clearLegend</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">legend</span><span class="p">):</span>
     <span class="k">while</span> <span class="n">legend</span><span class="o">.</span><span class="n">layout</span><span class="o">.</span><span class="n">count</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>

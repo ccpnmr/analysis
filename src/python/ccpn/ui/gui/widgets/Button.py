@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: CCPN $"
 __dateModified__ = "$dateModified: 2017-07-07 16:32:51 +0100 (Fri, July 07, 2017) $"
-__version__ = "$Revision: 3.0.b5 $"
+__version__ = "$Revision: 3.0.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -53,6 +53,8 @@ class Button(QtWidgets.QPushButton, Base):
             self.setIcon(Icon(icon))
             # this causes the button to reset its stylesheet
             self.setIconSize(QtCore.QSize(22, 22))
+        else:
+            self.setStyleSheet('QPushButton { padding: 3px 3px 3px 3px; }')
 
         if toggle is not None:
             self.setCheckable(True)

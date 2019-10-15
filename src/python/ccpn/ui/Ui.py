@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: CCPN $"
 __dateModified__ = "$dateModified: 2017-07-07 16:32:40 +0100 (Fri, July 07, 2017) $"
-__version__ = "$Revision: 3.0.b5 $"
+__version__ = "$Revision: 3.0.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -87,6 +87,8 @@ class Ui(NotifierBase):
         # We want to give some feedback; sometimes this takes a while (e.g. poor internet)
         # sys.stderr.write('==> Checking registration ... \n')
         sys.stderr.flush()  # It seems to be necessary as without the output comes after the registration screen
+
+        # check local registration details
         if not self._isRegistered:
             # call the subclassed register method
             self._registerDetails()
@@ -106,10 +108,15 @@ class Ui(NotifierBase):
         #
         # else:
 
-        # check whether your registration details are on the server
+        # check whether your registration details are on the server (and match)
         check = Register.checkServer(self.application._registrationDict, self.application.applicationVersion)
+        if check is None:
+            return True
+        if check is False:
+            self._registerDetails()
+            check = Register.checkServer(self.application._registrationDict, self.application.applicationVersion)
 
-        return True
+        return check if check is not None else True
 
     def echoCommands(self, commands: typing.List[str]):
         """Echo commands strings, one by one, to logger.
@@ -123,9 +130,10 @@ class Ui(NotifierBase):
         raise ('ERROR: ..to be subclassed by ui types')
 
     def _checkUpdates(self):
-        applicationVersion = __version__.split()[1]  # ejb - read from the header
+        from ccpn.framework.Version import applicationVersion
+        # applicationVersion = __version__.split()[1]  # ejb - read from the header
 
-        updateAgent = UpdateAgent(applicationVersion)
+        updateAgent = UpdateAgent(applicationVersion, dryRun=False)
         numUpdates = updateAgent.checkNumberUpdates()
         # sys.stderr.write('==> Updates available: %s\n' % str(numUpdates))
 
@@ -152,7 +160,8 @@ class NoUi(Ui):
             sys.stderr.write('Could not connect to the registration server, please check your internet connection.')
             sys.exit(0)
 
-        applicationVersion = __version__.split()[1]
+        from ccpn.framework.Version import applicationVersion
+        # applicationVersion = __version__.split()[1]
 
         # sys.stderr.write('\n### Please register, using another application, or in Gui Mode\n')
 
@@ -209,8 +218,9 @@ class NoUi(Ui):
     def _execUpdates(self):
         sys.stderr.write('==> NoUi update\n')
 
-        applicationVersion = __version__.split()[1]  # ejb - read from the header
-        installUpdates(applicationVersion)
+        from ccpn.framework.Version import applicationVersion
+        # applicationVersion = __version__.split()[1]  # ejb - read from the header
+        installUpdates(applicationVersion, dryRun=False)
 
         sys.stderr.write('Please restart the program to apply the updates\n')
         sys.exit(1)

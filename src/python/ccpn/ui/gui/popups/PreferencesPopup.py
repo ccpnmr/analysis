@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: CCPN $"
 __dateModified__ = "$dateModified: 2017-07-07 16:32:49 +0100 (Fri, July 07, 2017) $"
-__version__ = "$Revision: 3.0.b5 $"
+__version__ = "$Revision: 3.0.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -35,7 +35,7 @@ from ccpn.ui.gui.widgets.Frame import Frame
 from ccpn.ui.gui.widgets.Button import Button
 from ccpn.ui.gui.widgets.ButtonList import ButtonList
 from ccpn.ui.gui.widgets.FileDialog import FileDialog
-from ccpn.ui.gui.widgets.LineEdit import LineEdit
+from ccpn.ui.gui.widgets.LineEdit import LineEdit, PasswordEdit
 from ccpn.ui.gui.widgets.DoubleSpinbox import DoubleSpinbox, ScientificDoubleSpinBox
 from ccpn.ui.gui.widgets.Spinbox import Spinbox
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
@@ -54,6 +54,7 @@ from ccpn.ui.gui.widgets.ColourDialog import ColourDialog
 from ccpn.ui.gui.widgets.ScrollArea import ScrollArea
 from ccpn.ui.gui.widgets.Spacer import Spacer
 from ccpn.core.PeakList import GAUSSIANMETHOD, PARABOLICMETHOD
+from ccpn.util.UserPreferences import UserPreferences
 
 PEAKFITTINGDEFAULTS = [PARABOLICMETHOD, GAUSSIANMETHOD]
 
@@ -79,13 +80,14 @@ class PreferencesPopup(CcpnDialog):
             self.application = None
             self.project = None
 
-        if not self.project:  # ejb - should always be loaded
+        if not self.project:
             MessageDialog.showWarning(title, 'No project loaded')
             self.close()
             return
 
         self.preferences = preferences
         self.oldPreferences = preferences
+        self._userPreferences = UserPreferences(readPreferences=False)
 
         self.mainLayout = self.getLayout()
         self._setTabs()
@@ -188,7 +190,6 @@ class PreferencesPopup(CcpnDialog):
         self.languageBox.setCurrentIndex(self.languageBox.findText(self.preferences.general.language))
         self.languageBox.currentIndexChanged.connect(self._changeLanguage)
 
-        # disabled for 3.0.b5
         row += 1
         self.colourSchemeLabel = Label(parent, text="Colour Scheme ", grid=(row, 0))
         self.colourSchemeBox = PulldownList(parent, grid=(row, 1), hAlign='l')
@@ -314,6 +315,55 @@ class PreferencesPopup(CcpnDialog):
         #                                                    grid=(row, 1), hAlign='l',
         #                                                    tipTexts=None,
         #                                                    )
+
+        row += 1
+        HLine(parent, grid=(row, 0), gridSpan=(1, 3), colour=getColours()[DIVIDER], height=15)
+
+        row += 1
+        self.useProxyLabel = Label(parent, text="Use Proxy Settings: ", grid=(row, 0))
+        self.useProxyBox = CheckBox(parent, grid=(row, 1), checked=self.preferences.proxySettings.useProxy)
+        self.useProxyBox.toggled.connect(self._setUseProxy)
+
+        # row += 1
+        # self.useSystemProxyLabel = Label(parent, text="   Use System Proxy for Network: ", grid=(row, 0))
+        # self.useSystemProxyBox = CheckBox(parent, grid=(row, 1), checked=self.preferences.proxySettings.useSystemProxy)
+        # self.useSystemProxyBox.toggled.connect(self._setUseSystemProxy)
+
+        row += 1
+        self.proxyAddressLabel = Label(parent, text="   Web Proxy Server: ", grid=(row, 0), hAlign='l')
+        self.proxyAddressData = LineEdit(parent, grid=(row, 1), hAlign='l')
+        self.proxyAddressData.setMinimumWidth(LineEditsMinimumWidth)
+        self.proxyAddressData.setText(str(self.preferences.proxySettings.proxyAddress))
+        self.proxyAddressData.editingFinished.connect(self._setProxyAddress)
+
+        row += 1
+        self.proxyPortLabel = Label(parent, text="   Port: ", grid=(row, 0), hAlign='l')
+        self.proxyPortData = LineEdit(parent, grid=(row, 1), hAlign='l')
+        self.proxyPortData.setMinimumWidth(LineEditsMinimumWidth)
+        self.proxyPortData.setText(str(self.preferences.proxySettings.proxyPort))
+        self.proxyPortData.editingFinished.connect(self._setProxyPort)
+
+        row += 1
+        self.useProxyPasswordLabel = Label(parent, text="   Proxy Server Requires Password: ", grid=(row, 0))
+        self.useProxyPasswordBox = CheckBox(parent, grid=(row, 1), checked=self.preferences.proxySettings.useProxyPassword)
+        self.useProxyPasswordBox.toggled.connect(self._setUseProxyPassword)
+
+        row += 1
+        self.proxyUsernameLabel = Label(parent, text="        Username: ", grid=(row, 0), hAlign='l')
+        self.proxyUsernameData = LineEdit(parent, grid=(row, 1), hAlign='l')
+        self.proxyUsernameData.setMinimumWidth(LineEditsMinimumWidth)
+        self.proxyUsernameData.setText(str(self.preferences.proxySettings.proxyUsername))
+        self.proxyUsernameData.editingFinished.connect(self._setProxyUsername)
+
+        row += 1
+        self.proxyPasswordLabel = Label(parent, text="        Password: ", grid=(row, 0), hAlign='l')
+        self.proxyPasswordData = PasswordEdit(parent, grid=(row, 1), hAlign='l')
+        self.proxyPasswordData.setMinimumWidth(LineEditsMinimumWidth)
+        self.proxyPasswordData.setText(self._userPreferences.decodeValue(str(self.preferences.proxySettings.proxyPassword)))
+        self.proxyPasswordData.editingFinished.connect(self._setProxyPassword)
+
+        # set the enabled state of the proxy settings boxes
+        self._setProxyButtons()
 
         # row += 1
         Spacer(parent, row, 1,
@@ -631,6 +681,14 @@ class PreferencesPopup(CcpnDialog):
                                                grid=(row, 1), hAlign='l',
                                                tipTexts=None,
                                                )
+
+        row += 1
+        HLine(parent, grid=(row, 0), gridSpan=(1, 3), colour=getColours()[DIVIDER], height=15)
+
+        row += 1
+        self.singleContoursLabel = Label(parent, text="Generate Single Contours\n   per Plane: ", grid=(row, 0))
+        self.singleContoursBox = CheckBox(parent, grid=(row, 1), checked=self.preferences.general.generateSinglePlaneContours)
+        self.singleContoursBox.toggled.connect(partial(self._toggleGeneralOptions, 'generateSinglePlaneContours'))
 
         # add spacer to stop columns changing width
         row += 1
@@ -1008,3 +1066,68 @@ class PreferencesPopup(CcpnDialog):
             return
         self.preferences.general.volumeIntegralLimit = volumeIntegralLimit
 
+    def _setUseProxy(self):
+        try:
+            value = self.useProxyBox.isChecked()
+        except:
+            return
+        self.preferences.proxySettings.useProxy = value
+        # set the state of the other buttons
+        self._setProxyButtons()
+
+    def _setUseSystemProxy(self):
+        try:
+            value = self.useSystemProxyBox.isChecked()
+        except:
+            return
+        self.preferences.proxySettings.useSystemProxy = value
+        # set the state of the other buttons
+        self._setProxyButtons()
+
+    def _setProxyAddress(self):
+        try:
+            value = str(self.proxyAddressData.text())
+        except:
+            return
+        self.preferences.proxySettings.proxyAddress = value
+
+    def _setProxyPort(self):
+        try:
+            value = str(self.proxyPortData.text())
+        except:
+            return
+        self.preferences.proxySettings.proxyPort = value
+
+    def _setUseProxyPassword(self):
+        try:
+            value = self.useProxyPasswordBox.isChecked()
+        except:
+            return
+        self.preferences.proxySettings.useProxyPassword = value
+        # set the state of the other buttons
+        self._setProxyButtons()
+
+    def _setProxyUsername(self):
+        try:
+            value = str(self.proxyUsernameData.text())
+        except:
+            return
+        self.preferences.proxySettings.proxyUsername = value
+
+    def _setProxyPassword(self):
+        try:
+            value = self._userPreferences.encodeValue(str(self.proxyPasswordData.text()))
+        except:
+            return
+        self.preferences.proxySettings.proxyPassword = value
+
+    def _setProxyButtons(self):
+        useP = self.preferences.proxySettings.useProxy
+        useSP = False        #self.preferences.proxySettings.useSystemProxy
+        usePEnabled = useP and not useSP
+        # self.useSystemProxyBox.setEnabled(useP)
+        self.proxyAddressData.setEnabled(usePEnabled)
+        self.proxyPortData.setEnabled(usePEnabled)
+        self.useProxyPasswordBox.setEnabled(usePEnabled)
+        self.proxyUsernameData.setEnabled(usePEnabled and self.preferences.proxySettings.useProxyPassword)
+        self.proxyPasswordData.setEnabled(usePEnabled and self.preferences.proxySettings.useProxyPassword)

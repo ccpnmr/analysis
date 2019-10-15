@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Wayne Boucher $"
 __dateModified__ = "$dateModified: 2017-07-07 16:32:44 +0100 (Fri, July 07, 2017) $"
-__version__ = "$Revision: 3.0.b5 $"
+__version__ = "$Revision: 3.0.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -32,18 +32,23 @@ from ccpn.core.Peak import Peak
 from ccpn.core.lib.Notifiers import Notifier
 from ccpn.ui.gui.guiSettings import getColours, GUISTRIP_PIVOT
 from ccpn.ui.gui.widgets.PlaneToolbar import StripHeader
-from ccpn.ui.gui.widgets.Frame import Frame
+from ccpn.ui.gui.widgets.Frame import Frame, OpenGLOverlayFrame
 from ccpn.ui.gui.widgets.Widget import Widget
+from ccpn.ui.gui.widgets.Label import Label
+from ccpn.ui.gui.widgets.LineEdit import LineEdit
+from ccpn.ui.gui.widgets.Spacer import Spacer
 from ccpn.ui.gui.lib.GuiNotifier import GuiNotifier
 from ccpn.ui.gui.widgets.DropBase import DropBase
 from ccpn.ui.gui.widgets import MessageDialog
 from ccpn.util.Logging import getLogger
-from ccpn.util.Constants import AXIS_MATCHATOMTYPE, AXIS_FULLATOMNAME, AXIS_ACTIVEAXES
+from ccpn.util.Constants import AXIS_MATCHATOMTYPE, AXIS_FULLATOMNAME, AXIS_ACTIVEAXES, DOUBLEAXIS_FULLATOMNAME
 from functools import partial
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs import AXISXUNITS, AXISYUNITS, AXISLOCKASPECTRATIO, \
     SYMBOLTYPES, ANNOTATIONTYPES, SYMBOLSIZE, SYMBOLTHICKNESS, AXISUSEFIXEDASPECTRATIO
 from ccpn.core.lib.ContextManagers import undoStackBlocking, undoBlock, notificationBlanking
 from ccpn.util.decorators import logCommand
+from ccpn.ui.gui.guiSettings import textFont, getColours, STRIPHEADER_BACKGROUND, \
+    STRIPHEADER_FOREGROUND, GUINMRRESIDUE, CCPNGLWIDGET_BACKGROUND, textFontLarge
 
 
 STRIPLABEL_ISPLUS = 'stripLabel_isPlus'
@@ -57,6 +62,7 @@ DefaultMenu = 'DefaultMenu'
 PeakMenu = 'PeakMenu'
 IntegralMenu = 'IntegralMenu'
 MultipletMenu = 'MultipletMenu'
+AxisMenu = 'AxisMenu'
 PhasingMenu = 'PhasingMenu'
 
 
@@ -87,8 +93,22 @@ class GuiStrip(Frame):
         self.setMinimumWidth(150)
         self.setMinimumHeight(150)
 
-        self.header = StripHeader(parent=self, mainWindow=self.mainWindow, strip=self,
-                                  grid=(0, 0), gridSpan=(1, 2), setLayout=True, spacing=(0, 0))
+        # stripArrangement = getattr(self.spectrumDisplay, 'stripArrangement', None)
+        # if stripArrangement == 'X':
+        #     headerGrid = (0, 0)
+        #     openGLGrid = (0, 1)
+        #     stripToolBarGrid = (0, 2)
+        # else:
+        #     headerGrid = (0, 0)
+        #     openGLGrid = (1, 0)
+        #     stripToolBarGrid = (2, 0)
+
+        headerGrid = (0, 0)
+        headerSpan = (1, 5)
+        openGLGrid = (1, 0)
+        openGlSpan = (10, 5)
+        stripToolBarGrid = (11, 0)
+        stripToolBarSpan = (1, 5)
 
         if spectrumDisplay.is1D:
             from ccpn.ui.gui.widgets.GLWidgets import Gui1dWidget as CcpnGLWidget
@@ -97,9 +117,73 @@ class GuiStrip(Frame):
 
         self._CcpnGLWidget = CcpnGLWidget(strip=self, mainWindow=self.mainWindow)
 
-        self.getLayout().addWidget(self._CcpnGLWidget, 1, 0)
-        self._CcpnGLWidget.setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding,
-                                         QtWidgets.QSizePolicy.MinimumExpanding)
+        self.getLayout().addWidget(self._CcpnGLWidget, *openGLGrid, *openGlSpan)
+        self._CcpnGLWidget.setSizePolicy(QtWidgets.QSizePolicy.Expanding,
+                                         QtWidgets.QSizePolicy.Expanding)
+
+        # # self._testTopFrame = OpenGLOverlayFrame(self, setLayout=True, grid=(0, 0), gridSpan=(1, 5), backgroundColour=(123, 123, 123, 255))
+        #
+        # self._testTopFrame1 = Frame(self, setLayout=True, grid=(1, 1))
+        # self._testTopFrame2 = Frame(self, setLayout=True, grid=(2, 1))
+        #
+        # self._ts = [_StripLabel(self, self.mainWindow, self, text='HELP'),
+        #        _StripLabel(self, self.mainWindow, self, text='HELP AGAIN WHEN I HAVE LOTS'),
+        #        _StripLabel(self, self.mainWindow, self, text='Some more text'),
+        #        _StripLabel(self, self.mainWindow, self, text='And another bit of text')]
+
+        self._fr = []
+
+
+        # sp = Spacer(self, 1, 1, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding,
+        #             grid=(10, 4), gridSpan=(1, 1))
+        #
+        # from ccpn.ui.gui.widgets.PlaneToolbar import _StripLabel
+        #
+        # self._ts = ['HELP', 'HELP AGAIN WHEN I HAVE LOTS', 'Some more text', 'And another bit of text']
+        #
+        # # ED: the only way I could find to cure the mis-aligned header
+        # for ii, tl in enumerate(self._ts):
+        #     fr = OpenGLOverlayFrame(self, setLayout=True, showBorder=False, grid=(ii + 2, 0), backgroundColour=None)
+        #     fr.setSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum)
+        #
+        #     sl = _StripLabel(fr, self.mainWindow, self, text=tl, grid=(0, 0))
+        #     sl.setSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum)
+        #     sp = Spacer(fr, 1, 1, QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.Minimum,
+        #                 grid=(0, 1), gridSpan=(1, 1))
+        #
+        #     sl.setStyleSheet('QLabel {'
+        #                      'padding: 0; '
+        #                      'margin: 0px 0px 0px 0px;'
+        #                      'color:  %s;'
+        #                      'background-color: %s;'
+        #                      'border: 0 px;'
+        #                      'font-family: %s;'
+        #                      'font-size: %dpx;'
+        #                      'qproperty-alignment: AlignLeft;'
+        #                      '}' % ('white',
+        #                             'black',
+        #                             textFontLarge.fontName,
+        #                             textFontLarge.pointSize()))
+        #
+        #     self._fr.append(fr)
+
+            # ff = QtGui.QFontMetrics(textFontLarge)
+            # # bounds = ff.boundingRect(QtCore.QRect(0, 0, 500, 24), QtCore.Qt.AlignLeft, tl.text())
+            # bounds = ff.tightBoundingRect(tl.text())
+            # tl.setFixedSize(bounds.width(), bounds.height())
+            # # tl.setFixedSize(bounds.width() - bounds.left(), bounds.height())
+            # tl.move(20, 20 + ii * 25)
+
+        # self._testTopFrame1.setSizePolicy(QtWidgets.QSizePolicy.Ignored, QtWidgets.QSizePolicy.Ignored)
+        # self._testTopFrame2.setSizePolicy(QtWidgets.QSizePolicy.Ignored, QtWidgets.QSizePolicy.Ignored)
+
+        # self._testLine = LineEdit(self._testFrame, text='ENTER SOMETHING', grid=(1,0))
+        # self._testFrame.setSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum)
+
+        self.header = StripHeader(parent=self, mainWindow=self.mainWindow, strip=self,
+                                  grid=headerGrid, gridSpan=headerSpan, setLayout=True, spacing=(0, 0))
+
+        # self._testTopFrame.setFixedHeight(24)
 
         # # test to see if a single axis widget can be added
         # from ccpn.ui.gui.widgets.GLWidgets import GuiNdWidgetAxis
@@ -107,13 +191,14 @@ class GuiStrip(Frame):
         # self.getLayout().addWidget(self._CcpnGLWidgetAxis, 1, 1)
 
         # set the ID label in the new widget
+
         self._CcpnGLWidget.setStripID('.'.join(self.id.split('.')))
 
         # Widgets for toolbar; items will be added by GuiStripNd (eg. the Z/A-plane boxes)
         # and GuiStrip1d; will be hidden for 2D's by GuiSpectrumView
         self._stripToolBarWidget = Widget(parent=self, setLayout=True,
                                           hPolicy='expanding',
-                                          grid=(2, 0), spacing=(5, 5))
+                                          grid=stripToolBarGrid, gridSpan=stripToolBarSpan, spacing=(5, 5))
 
         self.viewStripMenu = None
         # self._showCrosshair()
@@ -129,7 +214,8 @@ class GuiStrip(Frame):
                               PeakMenu     : None,
                               PhasingMenu  : None,
                               MultipletMenu: None,
-                              IntegralMenu : None
+                              IntegralMenu : None,
+                              AxisMenu     : None
                               }
 
         self.navigateToPeakMenu = None  #set from context menu and in CcpnOpenGL rightClick
@@ -188,6 +274,12 @@ class GuiStrip(Frame):
 
         # respond to values changed in the containing spectrumDisplay settings widget
         self.spectrumDisplay._spectrumDisplaySettings.symbolsChanged.connect(self._symbolsChangedInSettings)
+
+    def _resize(self):
+        """Resize event to handle resizing of frames that overlay the OpenGL frame
+        """
+        for fr in self._fr:
+            fr._setMaskToChildren()
 
     def setStripNotifiers(self):
         """Set the notifiers for the strip.
@@ -580,6 +672,143 @@ class GuiStrip(Frame):
                         self.markInCursorMenu.addSeparator()
                 else:
                     self.markInCursorMenu.setEnabled(False)
+
+    def _addItemsToCopyAxisFromMenuesMainView(self):
+        """Setup the menu for the main view
+        """
+        self._addItemsToCopyAxisFromMenues([self.copyAllAxisFromMenu, self.copyXAxisFromMenu, self.copyYAxisFromMenu],
+                                           ['All', 'X', 'Y'])
+
+    def _addItemsToCopyAxisFromMenuesAxes(self):
+        """Setup the menu for the axis views
+        """
+        self._addItemsToCopyAxisFromMenues([self.copyAllAxisFromMenu2, self.copyXAxisFromMenu2, self.copyYAxisFromMenu2],
+                                           ['All', 'X', 'Y'])
+
+    def _addItemsToCopyAxisFromMenues(self, axisNames, axisIdList):
+        """Copied from old viewbox. This function apparently take the current cursorPosition
+         and uses to pan a selected display from the list of spectrumViews or the current cursor position.
+        """
+        # TODO needs clear documentation
+        from functools import partial
+
+        for axisName, axisId in zip(axisNames, axisIdList):
+            if axisName:
+                axisName.clear()
+                currentStrip = self.current.strip
+                position = self.current.cursorPosition
+
+                count = 0
+                if currentStrip:
+                    for spectrumDisplay in self.current.project.spectrumDisplays:
+                        for strip in spectrumDisplay.strips:
+                            if strip != currentStrip:
+                                toolTip = 'Copy %s axis range from strip %s' % (str(axisId), str(strip.id))
+                                if len(list(set(strip.axisCodes) & set(currentStrip.axisCodes))) <= 4:
+                                    axisName.addItem(text=strip.pid,
+                                                     callback=partial(self._copyAxisFromStrip,
+                                                                      axisId=axisId, fromStrip=strip, ),
+                                                     toolTip=toolTip)
+                                    count += 1
+                        axisName.addSeparator()
+
+                axisName.setEnabled(True if count else False)
+
+    def _addItemsToMatchAxisCodesFromMenuesMainView(self):
+        """Setup the menu for the main view
+        """
+        self._addItemsToCopyAxisCodesFromMenues(0, [self.matchXAxisCodeToMenu, self.matchYAxisCodeToMenu])
+        self._addItemsToCopyAxisCodesFromMenues(1, [self.matchXAxisCodeToMenu, self.matchYAxisCodeToMenu])
+
+    def _addItemsToMatchAxisCodesFromMenuesAxes(self):
+        """Setup the menu for the axis views
+        """
+        self._addItemsToCopyAxisCodesFromMenues(0, [self.matchXAxisCodeToMenu2, self.matchYAxisCodeToMenu2])
+        self._addItemsToCopyAxisCodesFromMenues(1, [self.matchXAxisCodeToMenu2, self.matchYAxisCodeToMenu2])
+
+    def _addItemsToCopyAxisCodesFromMenues(self, axisIndex, axisList):
+        """Copied from old viewbox. This function apparently take the current cursorPosition
+         and uses to pan a selected display from the list of spectrumViews or the current cursor position.
+        """
+        # TODO needs clear documentation
+        from functools import partial
+        from ccpn.util.Common import getAxisCodeMatchIndices
+
+        # axisList = (self.matchXAxisCodeToMenu2, self.matchYAxisCodeToMenu2)
+
+        if axisIndex not in range(len(axisList)):
+            return
+
+        axisName = axisList[axisIndex]
+        axisCode = self.axisCodes[axisIndex]
+
+        if axisName:
+            axisName.clear()
+            currentStrip = self.current.strip
+            position = self.current.cursorPosition
+
+            count = 0
+            if currentStrip:
+                for spectrumDisplay in self.current.project.spectrumDisplays:
+                    addSeparator = False
+                    for strip in spectrumDisplay.strips:
+                        if strip != currentStrip:
+
+                            indices = getAxisCodeMatchIndices(strip.axisCodes, (axisCode,))
+
+                            for ii, ind in enumerate(indices):
+                                if ind is not None:
+
+                                    toolTip = 'Copy %s axis range from strip %s' % (str(strip.axisCodes[ii]), str(strip.id))
+                                    if len(list(set(strip.axisCodes) & set(currentStrip.axisCodes))) <= 4:
+                                        axisName.addItem(text='%s from %s' % (str(strip.axisCodes[ii]), str(strip.pid)),
+                                                         callback=partial(self._copyAxisCodeFromStrip,
+                                                                          axisIndex=axisIndex, fromStrip=strip, fromAxisId=ii),
+                                                         toolTip=toolTip)
+                                        count += 1
+                                        addSeparator = True
+
+                    if addSeparator:
+                        axisName.addSeparator()
+
+            axisName.setEnabled(True if count else False)
+
+    def _enableNdAxisMenuItems(self, axisName):
+
+        from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs import BOTTOMAXIS, RIGHTAXIS, AXISCORNER
+
+        axisMenuItems = (self.copyAllAxisFromMenu2, self.copyXAxisFromMenu2, self.copyYAxisFromMenu2,
+                         self.matchXAxisCodeToMenu2, self.matchYAxisCodeToMenu2)
+        enabledList = {BOTTOMAXIS: (False, True, False, True, False),
+                       RIGHTAXIS : (False, False, True, False, True),
+                       AXISCORNER: (True, True, True, True, True)
+                       }
+        if axisName in enabledList:
+            axisSelect = enabledList[axisName]
+            for menuItem, select in zip(axisMenuItems, axisSelect):
+                # only disable if already enabled
+                if menuItem.isEnabled():
+                    menuItem.setEnabled(select)
+        else:
+            getLogger().warning('Error selecting menu item')
+
+    def _enable1dAxisMenuItems(self, axisName):
+
+        from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs import BOTTOMAXIS, RIGHTAXIS, AXISCORNER
+
+        axisMenuItems = (self.copyAllAxisFromMenu2, self.copyXAxisFromMenu2, self.copyYAxisFromMenu2)
+        enabledList = {BOTTOMAXIS: (False, True, False),
+                       RIGHTAXIS : (False, False, True),
+                       AXISCORNER: (True, True, True)
+                       }
+        if axisName in enabledList:
+            axisSelect = enabledList[axisName]
+            for menuItem, select in zip(axisMenuItems, axisSelect):
+                # only disable if already enabled
+                if menuItem.isEnabled():
+                    menuItem.setEnabled(select)
+        else:
+            getLogger().warning('Error selecting menu item')
 
     def _updateDisplayedIntegrals(self, data):
         """Callback when integrals have changed.
@@ -1035,13 +1264,58 @@ class GuiStrip(Frame):
             getLogger().warning('Error setting mark at position')
             raise (es)
 
+    def _copyAxisFromStrip(self, axisId, fromStrip):
+        try:
+            axisRange = fromStrip.viewRange()
+            if axisId == 'X':
+                # copy X axis from strip
+                self.zoomX(*axisRange[0])
+
+            elif axisId == 'Y':
+                # copy Y axis from strip
+                self.zoomY(*axisRange[1])
+
+            elif axisId == 'All':
+                # copy both axes from strip
+                self.zoom(axisRange[0], axisRange[1])
+
+        except Exception as es:
+            getLogger().warning('Error copying axis %s from strip %s' % (str(axisId), str(fromStrip)))
+            raise (es)
+
+    def _copyAxisCodeFromStrip(self, axisIndex, fromStrip, fromAxisId):
+        try:
+            axisRange = fromStrip.orderedAxes[fromAxisId].region
+            if axisIndex == 0:
+                # copy X axis from strip
+                self.zoomX(*axisRange)
+
+            elif axisIndex == 1:
+                # copy Y axis from strip
+                self.zoomY(*axisRange)
+
+        except Exception as es:
+            getLogger().warning('Error copying axis %s from strip %s' % (str(fromStrip.axisCodes[fromAxisId]), str(fromStrip)))
+            raise (es)
+
     def _createMarkAtCursorPosition(self):
         try:
             # colourDict = guiSettings.MARK_LINE_COLOUR_DICT  # maps atomName --> colour
 
-            positions = [self.current.mouseMovedDict[AXIS_FULLATOMNAME][ax] for ax in self.axisCodes]
             defaultColour = self._preferences.defaultMarksColour
-            self._project.newMark(defaultColour, positions, self.axisCodes)
+            mouseDict = self.current.mouseMovedDict[AXIS_FULLATOMNAME]
+            positions = [mouseDict[ax] for ax in self.axisCodes if ax in mouseDict]
+            axisCodes = [ax for ax in self.axisCodes if ax in mouseDict]
+            self._project.newMark(defaultColour, positions, axisCodes)
+
+            # add the marks for the double cursor - needs to be enabled in preferences
+            if self._preferences.showDoubleCrosshair and self._CcpnGLWidget._matchingIsotopeCodes:
+                mouseDict = self.current.mouseMovedDict[DOUBLEAXIS_FULLATOMNAME]
+                positions = [mouseDict[ax] for ax in self.axisCodes[:2] if ax in mouseDict]
+                axisCodes = [ax for ax in self.axisCodes[:2] if ax in mouseDict]
+                self._project.newMark(defaultColour, positions, axisCodes)
+
+            # need new mark method of the form newMark(colour=colour, axisCode=position)
 
         except Exception as es:
             getLogger().warning('Error setting mark at current cursor position')
@@ -1094,14 +1368,12 @@ class GuiStrip(Frame):
         """
         Zooms x axis of strip to the specified region
         """
-        padding = self._preferences.stripRegionPadding
-        self.viewBox.setXRange(x1, x2, padding=padding)
+        self._CcpnGLWidget.zoomX(x1, x2)
 
     def zoomY(self, y1: float, y2: float):
         """Zooms y axis of strip to the specified region
         """
-        padding = self._preferences.stripRegionPadding
-        self.viewBox.setYRange(y1, y2, padding=padding)
+        self._CcpnGLWidget.zoomY(y1, y2)
 
     # def showZoomPopup(self):
     #     """
@@ -1225,7 +1497,7 @@ class GuiStrip(Frame):
         :param zoomState: list of Axis coordinate Left, Right, Bottom, Top
         """
         if zoomState is not None:
-            if len(zoomState)==4:
+            if len(zoomState) == 4:
                 # self._restoreZoom(zoomState=zoomState)
                 axisL, axisR, axisB, axisT = zoomState[0], zoomState[1], zoomState[2], zoomState[3]
 

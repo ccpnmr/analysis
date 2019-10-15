@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: CCPN $"
 __dateModified__ = "$dateModified: 2017-07-07 16:32:50 +0100 (Fri, July 07, 2017) $"
-__version__ = "$Revision: 3.0.b5 $"
+__version__ = "$Revision: 3.0.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -882,7 +882,7 @@ class DimensionsTab(Widget):
             self.foldingModesCheckBox[i] = CheckBox(self, grid=(row, i + 1), vAlign='t')
             self.foldingModesCheckBox[i].setChecked(dd[fModes[i]])
             self.foldingModesCheckBox[i].clicked.connect(partial(self._queueSetFoldingModes, self.foldingModesCheckBox[i].isChecked, i))
-            # self.foldingModesCheckBox[i].setEnabled(False)
+            self.foldingModesCheckBox[i].setEnabled(False)
 
             # pullDown for min/max aliasing
             aliasLim = spectrum.visibleAliasingRange
@@ -1144,8 +1144,16 @@ class ContoursTab(Widget):
         # Check if the lot can be removed
         self._changes = dict()
 
-        positiveContoursLabel = Label(self, text="Show Positive Contours", grid=(1, 0), vAlign='t', hAlign='l')
-        positiveContoursCheckBox = CheckBox(self, grid=(1, 1), checked=True, vAlign='t', hAlign='l')
+        row = 0
+        self.layout().addItem(QtWidgets.QSpacerItem(0, 10), row, 0)
+
+        row += 1
+        linkContoursLabel = Label(self, text="Link Contours", grid=(row, 0), vAlign='t', hAlign='l')
+        self.linkContoursCheckBox = CheckBox(self, grid=(row, 1), checked=True, vAlign='t', hAlign='l')
+
+        row += 1
+        positiveContoursLabel = Label(self, text="Show Positive Contours", grid=(row, 0), vAlign='t', hAlign='l')
+        positiveContoursCheckBox = CheckBox(self, grid=(row, 1), checked=True, vAlign='t', hAlign='l')
         # for spectrumView in self.spectrum.spectrumViews:
         #     if spectrumView.displayPositiveContours:
         #         positiveContoursCheckBox.setChecked(True)
@@ -1153,11 +1161,12 @@ class ContoursTab(Widget):
         #         positiveContoursCheckBox.setChecked(False)
         positiveContoursCheckBox.setChecked(self.spectrum.includePositiveContours)
 
-        self.layout().addItem(QtWidgets.QSpacerItem(0, 10), 0, 0)
+        # self.layout().addItem(QtWidgets.QSpacerItem(0, 10), 0, 0)
         positiveContoursCheckBox.stateChanged.connect(self._queueChangePositiveContourDisplay)
 
-        positiveBaseLevelLabel = Label(self, text="Positive Base Level", grid=(2, 0), vAlign='c', hAlign='l')
-        self.positiveBaseLevelData = ScientificDoubleSpinBox(self, grid=(2, 1), vAlign='t')
+        row += 1
+        positiveBaseLevelLabel = Label(self, text="Positive Base Level", grid=(row, 0), vAlign='c', hAlign='l')
+        self.positiveBaseLevelData = ScientificDoubleSpinBox(self, grid=(row, 1), vAlign='t')
         self.positiveBaseLevelData.setMaximum(1e12)
         self.positiveBaseLevelData.setMinimum(0.1)
         self.positiveBaseLevelData.setValue(self.spectrum.positiveContourBase)
@@ -1166,20 +1175,25 @@ class ContoursTab(Widget):
         # Changed to get less quickly to zero - but DoubleSpinBox is NOT right for this
         self.positiveBaseLevelData.setSingleStep(self.positiveBaseLevelData.value() * 0.1)
 
-        positiveMultiplierLabel = Label(self, text="Positive Multiplier", grid=(3, 0), vAlign='c', hAlign='l')
-        self.positiveMultiplierData = DoubleSpinbox(self, grid=(3, 1), vAlign='t')
+        row += 1
+        positiveMultiplierLabel = Label(self, text="Positive Multiplier", grid=(row, 0), vAlign='c', hAlign='l')
+        self.positiveMultiplierData = DoubleSpinbox(self, grid=(row, 1), vAlign='t')
         self.positiveMultiplierData.setSingleStep(0.1)
         self.positiveMultiplierData.setValue(float(self.spectrum.positiveContourFactor))
         self.positiveMultiplierData.valueChanged.connect(partial(self._queueChangePositiveContourMultiplier, self.spectrum))
 
-        positiveContourCountLabel = Label(self, text="Number of positive contours", grid=(4, 0), vAlign='c', hAlign='l')
-        self.positiveContourCountData = Spinbox(self, grid=(4, 1), vAlign='t')
+        row += 1
+        positiveContourCountLabel = Label(self, text="Number of positive contours", grid=(row, 0), vAlign='c', hAlign='l')
+        self.positiveContourCountData = Spinbox(self, grid=(row, 1), vAlign='t')
         self.positiveContourCountData.setValue(int(self.spectrum._apiDataSource.positiveContourCount))
         self.positiveContourCountData.valueChanged.connect(partial(self._queueChangePositiveContourCount, self.spectrum))
-        positiveContourColourLabel = Label(self, text="Positive Contour Colour", grid=(5, 0), vAlign='c', hAlign='l')
 
-        self.positiveColourBox = PulldownList(self, grid=(5, 1), vAlign='t')
-        self.negativeColourBox = PulldownList(self, grid=(10, 1), vAlign='t')
+        row += 1
+        positiveContourColourLabel = Label(self, text="Positive Contour Colour", grid=(row, 0), vAlign='c', hAlign='l')
+        self.positiveColourBox = PulldownList(self, grid=(row, 1), vAlign='t')
+
+
+        self.negativeColourBox = PulldownList(self, grid=(row, 1), vAlign='t')
 
         # populate initial pulldown
         spectrumColourKeys = list(spectrumColours.keys())
@@ -1200,12 +1214,13 @@ class ContoursTab(Widget):
 
         self.positiveColourBox.currentIndexChanged.connect(partial(self._queueChangePosColourComboIndex, self.spectrum))
 
-        self.positiveColourButton = Button(self, grid=(5, 2), vAlign='t', hAlign='l',
+        self.positiveColourButton = Button(self, grid=(row, 2), vAlign='t', hAlign='l',
                                            icon='icons/colours', hPolicy='fixed')
         self.positiveColourButton.clicked.connect(partial(self._queueChangePosSpectrumColour, self.spectrum))
 
-        negativeContoursLabel = Label(self, text="Show Negative Contours", grid=(6, 0), vAlign='c', hAlign='l')
-        negativeContoursCheckBox = CheckBox(self, grid=(6, 1), checked=True, vAlign='t', hAlign='l')
+        row += 1
+        negativeContoursLabel = Label(self, text="Show Negative Contours", grid=(row, 0), vAlign='c', hAlign='l')
+        negativeContoursCheckBox = CheckBox(self, grid=(row, 1), checked=True, vAlign='t', hAlign='l')
         # for spectrumView in self.spectrum.spectrumViews:
         #     if spectrumView.displayNegativeContours:
         #         negativeContoursCheckBox.setChecked(True)
@@ -1215,27 +1230,37 @@ class ContoursTab(Widget):
 
         negativeContoursCheckBox.stateChanged.connect(self._queueChangeNegativeContourDisplay)
 
-        negativeBaseLevelLabel = Label(self, text="Negative Base Level", grid=(7, 0), vAlign='c', hAlign='l')
-        self.negativeBaseLevelData = ScientificDoubleSpinBox(self, grid=(7, 1), vAlign='t')
+        row += 1
+        negativeBaseLevelLabel = Label(self, text="Negative Base Level", grid=(row, 0), vAlign='c', hAlign='l')
+        self.negativeBaseLevelData = ScientificDoubleSpinBox(self, grid=(row, 1), vAlign='t')
+
         self.negativeBaseLevelData.setMaximum(-0.1)
         self.negativeBaseLevelData.setMinimum(-1e12)
-        self.negativeBaseLevelData.setValue(self.spectrum.negativeContourBase)
+        self.negativeBaseLevelData.setValue(-abs(self.spectrum.negativeContourBase))
+        # self.negativeBaseLevelData.setMaximum(1e12)
+        # self.negativeBaseLevelData.setMinimum(0.1)
+        # self.negativeBaseLevelData.setValue(abs(self.spectrum.negativeContourBase))
+
         self.negativeBaseLevelData.valueChanged.connect(partial(self._queueChangeNegativeBaseLevel, self.spectrum))
         # self.negativeBaseLevelData.setSingleStep((self.negativeBaseLevelData.value()*-1)*self.negativeMultiplierData.value()-1)
         # Changed to get less quickly to zero - but DoubleSpinBox is NOT right for this
         self.negativeBaseLevelData.setSingleStep((self.negativeBaseLevelData.value() * -1) * 0.1)
 
-        negativeMultiplierLabel = Label(self, text="Negative Multiplier", grid=(8, 0), vAlign='c', hAlign='l')
-        self.negativeMultiplierData = DoubleSpinbox(self, grid=(8, 1), vAlign='t')
+        row += 1
+        negativeMultiplierLabel = Label(self, text="Negative Multiplier", grid=(row, 0), vAlign='c', hAlign='l')
+        self.negativeMultiplierData = DoubleSpinbox(self, grid=(row, 1), vAlign='t')
         self.negativeMultiplierData.setValue(self.spectrum.negativeContourFactor)
         self.negativeMultiplierData.setSingleStep(0.1)
         self.negativeMultiplierData.valueChanged.connect(partial(self._queueChangeNegativeContourMultiplier, self.spectrum))
 
-        negativeContourCountLabel = Label(self, text="Number of negative contours", grid=(9, 0), vAlign='c', hAlign='l')
-        self.negativeContourCountData = Spinbox(self, grid=(9, 1), vAlign='t')
+        row += 1
+        negativeContourCountLabel = Label(self, text="Number of negative contours", grid=(row, 0), vAlign='c', hAlign='l')
+        self.negativeContourCountData = Spinbox(self, grid=(row, 1), vAlign='t')
         self.negativeContourCountData.setValue(self.spectrum.negativeContourCount)
         self.negativeContourCountData.valueChanged.connect(partial(self._queueChangeNegativeContourCount, self.spectrum))
-        negativeContourColourLabel = Label(self, text="Negative Contour Colour", grid=(10, 0), vAlign='c', hAlign='l')
+
+        row += 1
+        negativeContourColourLabel = Label(self, text="Negative Contour Colour", grid=(row, 0), vAlign='c', hAlign='l')
 
         # self.negativeColourBox = PulldownList(self, grid=(10, 1), vAlign='t')
         c = self.spectrum.negativeContourColour
@@ -1251,14 +1276,17 @@ class ContoursTab(Widget):
         self.negativeColourBox.currentIndexChanged.connect(
                 partial(self._queueChangeNegColourComboIndex, self.spectrum)
                 )
-        self.negativeColourButton = Button(self, grid=(10, 2), icon='icons/colours', hPolicy='fixed',
+        self.negativeColourButton = Button(self, grid=(row, 2), icon='icons/colours', hPolicy='fixed',
                                            vAlign='t', hAlign='l')
         self.negativeColourButton.clicked.connect(partial(self._queueChangeNegSpectrumColour, self.spectrum))
+        # move to the correct row
+        self.getLayout().addWidget(self.negativeColourBox, row, 1)
 
         # self._contourOptionsFromNoise = _addContourNoiseButtons(self, 11, buttonLabel='Estimate Levels')
 
+        row += 1
         Spacer(self, 5, 5, QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.MinimumExpanding,
-               grid=(12, 1), gridSpan=(1, 1))
+               grid=(row, 1), gridSpan=(1, 1))
 
     def _setContourLevels(self):
         """Estimate the contour levels for the current spectrum
@@ -1328,6 +1356,8 @@ class ContoursTab(Widget):
 
     def _queueChangePositiveBaseLevel(self, spectrum, value):
         self._changes['positiveContourBaseLevel'] = partial(self._changePositiveBaseLevel, spectrum, value)
+        if self.linkContoursCheckBox.isChecked():
+            self.negativeBaseLevelData.set(-value)
 
     def _changePositiveBaseLevel(self, spectrum, value):
         spectrum.positiveContourBase = float(value)
@@ -1336,6 +1366,8 @@ class ContoursTab(Widget):
 
     def _queueChangePositiveContourMultiplier(self, spectrum, value):
         self._changes['positiveContourMultiplier'] = partial(self._changePositiveContourMultiplier, spectrum, value)
+        if self.linkContoursCheckBox.isChecked():
+            self.negativeMultiplierData.set(value)
 
     def _changePositiveContourMultiplier(self, spectrum, value):
         spectrum.positiveContourFactor = float(value)
@@ -1344,6 +1376,8 @@ class ContoursTab(Widget):
 
     def _queueChangePositiveContourCount(self, spectrum, value):
         self._changes['positiveContourCount'] = partial(self._changePositiveContourCount, spectrum, value)
+        if self.linkContoursCheckBox.isChecked():
+            self.negativeContourCountData.set(value)
 
     def _changePositiveContourCount(self, spectrum, value):
         spectrum.positiveContourCount = int(value)
@@ -1352,14 +1386,20 @@ class ContoursTab(Widget):
 
     def _queueChangeNegativeBaseLevel(self, spectrum, value):
         self._changes['negativeContourBaseLevel'] = partial(self._changeNegativeBaseLevel, spectrum, value)
+        if self.linkContoursCheckBox.isChecked():
+            self.positiveBaseLevelData.set(-value)
 
     def _changeNegativeBaseLevel(self, spectrum, value):
+        # force to be negative
+        value = -abs(value)
         spectrum.negativeContourBase = float(value)
         self._writeLoggingMessage("spectrum.negativeContourBase = %f" % float(value))
         self.pythonConsole.writeConsoleCommand("spectrum.negativeContourBase = %f" % float(value), spectrum=spectrum)
 
     def _queueChangeNegativeContourMultiplier(self, spectrum, value):
         self._changes['negativeContourMultiplier'] = partial(self._changeNegativeContourMultiplier, spectrum, value)
+        if self.linkContoursCheckBox.isChecked():
+            self.positiveMultiplierData.set(value)
 
     def _changeNegativeContourMultiplier(self, spectrum, value):
         spectrum.negativeContourFactor = float(value)
@@ -1368,6 +1408,8 @@ class ContoursTab(Widget):
 
     def _queueChangeNegativeContourCount(self, spectrum, value):
         self._changes['negativeContourCount'] = partial(self._changeNegativeContourCount, spectrum, value)
+        if self.linkContoursCheckBox.isChecked():
+            self.positiveContourCountData.set(value)
 
     def _changeNegativeContourCount(self, spectrum, value):
         spectrum.negativeContourCount = int(value)

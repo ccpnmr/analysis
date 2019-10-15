@@ -21,7 +21,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: CCPN $"
 __dateModified__ = "$dateModified: 2017-07-07 16:32:45 +0100 (Fri, July 07, 2017) $"
-__version__ = "$Revision: 3.0.b5 $"
+__version__ = "$Revision: 3.0.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -58,6 +58,9 @@ ALL = '<all>'
 _getNmrIndex = Clibrary.getNmrResidueIndex
 
 
+LINKTOPULLDOWNCLASS = 'linkToPulldownClass'
+
+
 class NmrResidueTableModule(CcpnModule):
     """
     This class implements the module by wrapping a NmrResidueTable instance
@@ -70,6 +73,7 @@ class NmrResidueTableModule(CcpnModule):
     includePeakLists = False
     includeNmrChains = False
     includeSpectrumTable = False
+    activePulldownClass = NmrChain
 
     className = 'NmrResidueTableModule'
 
@@ -97,6 +101,7 @@ class NmrResidueTableModule(CcpnModule):
                                                  includePeakLists=self.includePeakLists,
                                                  includeNmrChains=self.includeNmrChains,
                                                  includeSpectrumTable=self.includeSpectrumTable,
+                                                 activePulldownClass=self.activePulldownClass,
                                                  grid=(0, 0))
 
         # initialise the table
@@ -116,11 +121,28 @@ class NmrResidueTableModule(CcpnModule):
         # install the event filter to handle maximising from floated dock
         self.installMaximiseEventHandler(self._maximise, self._closeModule)
 
+        if self.activePulldownClass:
+            self._setCurrentPulldown = Notifier(self.current,
+                                                [Notifier.CURRENT],
+                                                targetName=self.activePulldownClass._pluralLinkName,
+                                                callback=self._selectCurrentPulldownClass)
+
+        # put these in a smaller additional class
+        if self.activePulldownClass:
+            self.nmrResidueTable._activePulldownClass = self.activePulldownClass
+            self.nmrResidueTable._activeCheckbox = getattr(self.nmrResidueTableSettings, LINKTOPULLDOWNCLASS, None)
+
     def _maximise(self):
         """
         Maximise the attached table
         """
         self.nmrResidueTable._maximise()
+
+    def _selectCurrentPulldownClass(self, data):
+        """Respond to change in current activePulldownClass
+        """
+        if self.activePulldownClass and self.nmrResidueTable._activeCheckbox and self.nmrResidueTable._activeCheckbox.isChecked():
+            self.selectNmrChain(self.current.nmrChain)
 
     def selectNmrChain(self, nmrChain=None):
         """
@@ -273,7 +295,7 @@ class NmrResidueTable(GuiTable):
             return None
 
     def __init__(self, parent=None, mainWindow=None, moduleParent=None, actionCallback=None, selectionCallback=None,
-                 checkBoxCallback=None, nmrChain=None, multiSelect=False,
+                 checkBoxCallback=None, pulldownCallback=None, nmrChain=None, multiSelect=False,
                  **kwds):
         """
         Initialise the widgets for the module. kwds passed to the scrollArea widget
@@ -305,22 +327,22 @@ class NmrResidueTable(GuiTable):
 
         # create the column objects
         self.NMRcolumns = ColumnClass([
-            ('#', lambda nmrResidue: nmrResidue.serial, 'NmrResidue serial number', None),
-            ('Index', lambda nmrResidue: NmrResidueTable._nmrIndex(nmrResidue), 'Index of NmrResidue in the NmrChain', None),
-            # ('Index', lambda nmrResidue: NmrResidueTable._nmrLamInt(nmrResidue, 'Index'), 'Index of NmrResidue in the NmrChain', None),
+            ('#', lambda nmrResidue: nmrResidue.serial, 'NmrResidue serial number', None, None),
+            ('Index', lambda nmrResidue: NmrResidueTable._nmrIndex(nmrResidue), 'Index of NmrResidue in the NmrChain', None, None),
+            # ('Index', lambda nmrResidue: NmrResidueTable._nmrLamInt(nmrResidue, 'Index'), 'Index of NmrResidue in the NmrChain', None, None),
 
-            # ('Index',      lambda nmrResidue: nmrResidue.nmrChain.nmrResidues.index(nmrResidue), 'Index of NmrResidue in the NmrChain', None),
-            # ('NmrChain',   lambda nmrResidue: nmrResidue.nmrChain.id, 'NmrChain id', None),
-            ('Pid', lambda nmrResidue: nmrResidue.pid, 'Pid of NmrResidue', None),
-            ('_object', lambda nmrResidue: nmrResidue, 'Object', None),
-            ('NmrChain', lambda nmrResidue: nmrResidue.nmrChain.id, 'NmrChain containing the nmrResidue', None),        # just add the nmrChain for clarity
-            ('Sequence', lambda nmrResidue: nmrResidue.sequenceCode, 'Sequence code of NmrResidue', None),
-            ('Type', lambda nmrResidue: nmrResidue.residueType, 'NmrResidue type', None),
-            ('NmrAtoms', lambda nmrResidue: NmrResidueTable._getNmrAtomNames(nmrResidue), 'NmrAtoms in NmrResidue', None),
+            # ('Index',      lambda nmrResidue: nmrResidue.nmrChain.nmrResidues.index(nmrResidue), 'Index of NmrResidue in the NmrChain', None, None),
+            # ('NmrChain',   lambda nmrResidue: nmrResidue.nmrChain.id, 'NmrChain id', None, None),
+            ('Pid', lambda nmrResidue: nmrResidue.pid, 'Pid of NmrResidue', None, None),
+            ('_object', lambda nmrResidue: nmrResidue, 'Object', None, None),
+            ('NmrChain', lambda nmrResidue: nmrResidue.nmrChain.id, 'NmrChain containing the nmrResidue', None, None),        # just add the nmrChain for clarity
+            ('Sequence', lambda nmrResidue: nmrResidue.sequenceCode, 'Sequence code of NmrResidue', None, None),
+            ('Type', lambda nmrResidue: nmrResidue.residueType, 'NmrResidue type', None, None),
+            ('NmrAtoms', lambda nmrResidue: NmrResidueTable._getNmrAtomNames(nmrResidue), 'NmrAtoms in NmrResidue', None, None),
             ('Peak count', lambda nmrResidue: '%3d ' % NmrResidueTable._getNmrResiduePeakCount(nmrResidue),
-             'Number of peaks assigned to NmrResidue', None),
+             'Number of peaks assigned to NmrResidue', None, None),
             ('Comment', lambda nmr: NmrResidueTable._getCommentText(nmr), 'Notes',
-             lambda nmr, value: NmrResidueTable._setComment(nmr, value))
+             lambda nmr, value: NmrResidueTable._setComment(nmr, value), None)
             ])
 
         selectionCallback = self._selectionCallback if selectionCallback is None else selectionCallback
@@ -353,6 +375,7 @@ class NmrResidueTable(GuiTable):
                          actionCallback=actionCallback,
                          selectionCallback=selectionCallback,
                          checkBoxCallback=checkBoxCallback,
+                         pulldownCallback=pulldownCallback,
                          grid=(3, 0), gridSpan=(1, 6),
                          enableDelete=True
                          )
@@ -380,6 +403,10 @@ class NmrResidueTable(GuiTable):
         self.droppedNotifier = GuiNotifier(self,
                                            [GuiNotifier.DROPEVENT], [DropBase.PIDS],
                                            self._processDroppedItems)
+
+        # put into subclass
+        self._activePulldownClass = None
+        self._activeCheckbox = None
 
     def _processDroppedItems(self, data):
         """
@@ -425,19 +452,21 @@ class NmrResidueTable(GuiTable):
                 raise TypeError('select: Object is not of type NmrChain')
             else:
                 for widgetObj in self.ncWidget.textList:
-                    if nmrChain.pid == widgetObj:
+                    if nmrChain.pid == widgetObj and self._nmrChain != nmrChain:
                         self._nmrChain = nmrChain
                         self.ncWidget.select(self._nmrChain.pid)
 
-    def defaultActionCallback(self, nmrResidue, *args):
+    def defaultActionCallback(self, data):
         """
         default Action Callback if not defined in the parent Module
         If current strip contains the double clicked nmrResidue will navigateToPositionInStrip
         """
         from ccpn.ui.gui.lib.Strip import navigateToPositionInStrip, _getCurrentZoomRatio
 
-        self.application.ui.mainWindow.clearMarks()
+        nmrResidue = data[Notifier.OBJECT]
+
         if self.current.strip is not None:
+            self.application.ui.mainWindow.clearMarks()
             strip = self.current.strip
             newWidths = _getCurrentZoomRatio(strip.viewRange())
             navigateToNmrResidueInDisplay(nmrResidue, strip.spectrumDisplay, stripIndex=0,
@@ -445,7 +474,7 @@ class NmrResidueTable(GuiTable):
             # widths=['default'] * len(strip.axisCodes))
 
         else:
-            logger.warning('Impossible to navigate to peak position. Set a current strip first')
+            logger.warning('Impossible to navigate to position. Set a current strip first')
 
     def displayTableForNmrChain(self, nmrChain):
         """
@@ -607,6 +636,10 @@ class NmrResidueTable(GuiTable):
         logger.debug('>selectionPulldownCallback>', item, type(item), self._nmrChain)
         if self._nmrChain is not None:
             self.displayTableForNmrChain(self._nmrChain)
+
+            if self._activePulldownClass and self._activeCheckbox and \
+                    self._nmrChain != self.current.nmrChain and self._activeCheckbox.isChecked():
+                self.current.nmrChain = self._nmrChain
         else:
             self.clearTable()
 
@@ -759,21 +792,22 @@ class _CSMNmrResidueTable(NmrResidueTable):
                              **kwds)
 
     self.NMRcolumns = ColumnClass([
-        ('#', lambda nmrResidue: nmrResidue.serial, 'NmrResidue serial number', None),
-        ('Pid', lambda nmrResidue:nmrResidue.pid, 'Pid of NmrResidue', None),
-        ('_object', lambda nmrResidue:nmrResidue, 'Object', None),
-        ('Index', lambda nmrResidue: NmrResidueTable._nmrIndex(nmrResidue), 'Index of NmrResidue in the NmrChain', None),
-        ('Sequence', lambda nmrResidue: nmrResidue.sequenceCode, 'Sequence code of NmrResidue', None),
-        ('Type', lambda nmrResidue: nmrResidue.residueType, 'NmrResidue type', None),
-        ('Selected', lambda nmrResidue: _CSMNmrResidueTable._getSelectedNmrAtomNames(nmrResidue), 'NmrAtoms selected in NmrResidue', None),
+        ('#', lambda nmrResidue: nmrResidue.serial, 'NmrResidue serial number', None, None),
+        ('Pid', lambda nmrResidue:nmrResidue.pid, 'Pid of NmrResidue', None, None),
+        ('_object', lambda nmrResidue:nmrResidue, 'Object', None, None),
+        ('Index', lambda nmrResidue: NmrResidueTable._nmrIndex(nmrResidue), 'Index of NmrResidue in the NmrChain', None, None),
+        ('Sequence', lambda nmrResidue: nmrResidue.sequenceCode, 'Sequence code of NmrResidue', None, None),
+        ('Type', lambda nmrResidue: nmrResidue.residueType, 'NmrResidue type', None, None),
+        ('Selected', lambda nmrResidue: _CSMNmrResidueTable._getSelectedNmrAtomNames(nmrResidue), 'NmrAtoms selected in NmrResidue', None, None),
         ('Spectra', lambda nmrResidue: _CSMNmrResidueTable._getNmrResidueSpectraCount(nmrResidue)
-         , 'Number of spectra selected for calculating the deltas', None),
-        (Deltas, lambda nmrResidue: nmrResidue._delta, '', None),
-        (KD, lambda nmrResidue: nmrResidue._estimatedKd, '', None),
-        ('Include', lambda nmrResidue: nmrResidue._includeInDeltaShift, 'Include this residue in the Mapping calculation', lambda nmr, value: _CSMNmrResidueTable._setChecked(nmr, value)),
-        # ('Flag', lambda nmrResidue: nmrResidue._flag,  '',  None),
-        ('Comment', lambda nmr: NmrResidueTable._getCommentText(nmr), 'Notes', lambda nmr, value: NmrResidueTable._setComment(nmr, value))
-      ])        #[Column(colName, func, tipText=tipText, setEditValue=editValue) for colName, func, tipText, editValue in self.columnDefs]
+         , 'Number of spectra selected for calculating the deltas', None, None),
+        (Deltas, lambda nmrResidue: nmrResidue._delta, '', None, None),
+        (KD, lambda nmrResidue: nmrResidue._estimatedKd, '', None, None),
+        ('Include', lambda nmrResidue: nmrResidue._includeInDeltaShift, 'Include this residue in the Mapping calculation', lambda nmr, value: _CSMNmrResidueTable._setChecked(nmr, value), None),
+        # ('Flag', lambda nmrResidue: nmrResidue._flag,  '',  None, None),
+        ('Comment', lambda nmr: NmrResidueTable._getCommentText(nmr), 'Notes', lambda nmr, value: NmrResidueTable._setComment(nmr, value), None)
+      ])        #[Column(colName, func, tipText=tipText, setEditValue=editValue, format=columnFormat)
+                # for colName, func, tipText, editValue, columnFormat in self.columnDefs]
 
     self._widget.setFixedHeight(45)
     self.chemicalShiftsMappingModule = None

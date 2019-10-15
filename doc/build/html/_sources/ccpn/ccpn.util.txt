@@ -57,6 +57,14 @@ ccpn.util.Constants module
     :undoc-members:
     :show-inheritance:
 
+ccpn.util.Data module
+---------------------
+
+.. automodule:: ccpn.util.Data
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 ccpn.util.ExcelReader module
 ----------------------------
 

@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: CCPN $"
 __dateModified__ = "$dateModified: 2017-07-07 16:32:40 +0100 (Fri, July 07, 2017) $"
-__version__ = "$Revision: 3.0.b5 $"
+__version__ = "$Revision: 3.0.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -149,6 +149,7 @@ class Axis(AbstractWrapperObject):
         apiStrip = parent._wrappedData
         dd = {x.axis.code: x for x in apiStrip.stripAxes}
         return [dd[x] for x in apiStrip.axisCodes]
+        # return [dd[x] if x in dd else None for x in apiStrip.axisCodes]
 
     def delete(self):
         """Overrides normal delete"""

@@ -65,7 +65,7 @@ Development of a Software Pipeline. Proteins 59, 687 - 696.
 */
 
 // define a global object(cheating for the minute)
-static PyArrayObject *glObject;
+static PyObject *glObject;
 static int numIndices = 0;
 static int numVertices = 0;
 static int numColours = 0;
@@ -1315,7 +1315,7 @@ static struct PyModuleDef moduledef =
     NULL
 };
 
-PyObject *PyInit_Contourer2d(void)
+PyMODINIT_FUNC PyInit_Contourer2d(void)
 {
     PyObject *module;
 

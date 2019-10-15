@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: CCPN $"
 __dateModified__ = "$dateModified: 2017-07-07 16:32:48 +0100 (Fri, July 07, 2017) $"
-__version__ = "$Revision: 3.0.b5 $"
+__version__ = "$Revision: 3.0.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -26,31 +26,20 @@ __date__ = "$Date: 2017-07-06 15:51:11 +0000 (Thu, July 06, 2017) $"
 #=========================================================================================
 
 import os
-import sys
 from ccpn.ui.gui.widgets.ButtonList import ButtonList
 from ccpn.ui.gui.widgets.Label import Label
-from ccpn.ui.gui.widgets.LineEdit import LineEdit
 from ccpn.ui.gui.popups.Dialog import CcpnDialog
 from ccpn.ui.gui.widgets.FileDialog import FileDialog, NefFileDialog
-from ccpn.ui.gui.widgets.Widget import Widget
 from ccpn.ui.gui.widgets.Frame import Frame
-from ccpn.ui.gui.widgets.Base import Base
 from ccpn.ui.gui.widgets.LineEdit import LineEdit
-from ccpn.ui.gui.widgets.TextEditor import TextEditor
 from ccpn.ui.gui.widgets.Icon import Icon
 from ccpn.ui.gui.widgets.Button import Button
 from ccpn.ui.gui.widgets.Spacer import Spacer
-from PyQt5 import QtGui, QtWidgets, QtCore
-from os.path import expanduser
-from ccpn.util.Logging import getLogger
-from ccpn.ui.gui.widgets.CheckBox import CheckBox
-from ccpn.ui.gui.widgets.ListWidget import ListWidget
-from ccpn.ui.gui.widgets.ListWidget import ListWidgetPair
+from ccpn.ui.gui.widgets.MessageDialog import progressManager
+from PyQt5 import QtWidgets
 from ccpn.ui.gui.widgets.MessageDialog import showYesNoWarning, showWarning
-from ccpn.ui.gui.widgets.ProjectTreeCheckBoxes import ProjectTreeCheckBoxes
 from ccpn.ui.gui.guiSettings import COLOUR_SCHEMES, getColours, DIVIDER
 from ccpn.ui.gui.widgets.HLine import HLine
-from ccpn.ui.gui.widgets.Base import Base
 
 
 class ExportDialog(CcpnDialog):
@@ -228,14 +217,15 @@ class ExportDialog(CcpnDialog):
 
     def _exportToFile(self):
         # build the export dict
-        params = self.buildParameters()
+        with progressManager(self, 'Saving to file:\n%s' % self.exitFilename):
+            params = self.buildParameters()
 
-        # do the export
-        if params:
-            self.exportToFile(params=params)
+            # do the export
+            if params:
+                self.exportToFile(params=params)
 
-        # return the filename
-        return params
+            # return the filename
+            return params
 
     def exec_(self):
         """popup the dialog

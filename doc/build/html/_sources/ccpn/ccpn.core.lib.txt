@@ -57,6 +57,14 @@ ccpn.core.lib.CcpnSparkyIo module
     :undoc-members:
     :show-inheritance:
 
+ccpn.core.lib.CcpnStarIo module
+-------------------------------
+
+.. automodule:: ccpn.core.lib.CcpnStarIo
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 ccpn.core.lib.ContextManagers module
 ------------------------------------
 

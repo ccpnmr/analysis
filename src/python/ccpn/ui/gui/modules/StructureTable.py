@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: CCPN $"
 __dateModified__ = "$dateModified: 2017-07-07 16:32:47 +0100 (Fri, July 07, 2017) $"
-__version__ = "$Revision: 3.0.b5 $"
+__version__ = "$Revision: 3.0.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -384,32 +384,33 @@ class StructureTable(GuiTableStructure):
 
         # create the column objects
         self.structureColumns = [
-            ('#', lambda row: StructureTable._stLamInt(row, 'Index'), 'Index', None),
-            ('modelNumber', lambda row: StructureTable._stLamInt(row, 'modelNumber'), 'modelNumber', None),
-            ('chainCode', lambda row: StructureTable._stLamStr(row, 'chainCode'), 'chainCode', None),
-            ('sequenceId', lambda row: StructureTable._stLamInt(row, 'sequenceId'), 'sequenceId', None),
+            ('#', lambda row: StructureTable._stLamInt(row, 'Index'), 'Index', None, None),
+            ('modelNumber', lambda row: StructureTable._stLamInt(row, 'modelNumber'), 'modelNumber', None, None),
+            ('chainCode', lambda row: StructureTable._stLamStr(row, 'chainCode'), 'chainCode', None, None),
+            ('sequenceId', lambda row: StructureTable._stLamInt(row, 'sequenceId'), 'sequenceId', None, None),
             ('insertionCode', lambda row: StructureTable._stLamStr(row, 'insertionCode'), 'insertionCode',
-             None),
-            ('residueName', lambda row: StructureTable._stLamStr(row, 'residueName'), 'residueName', None),
-            ('atomName', lambda row: StructureTable._stLamStr(row, 'atomName'), 'atomName', None),
+             None, None),
+            ('residueName', lambda row: StructureTable._stLamStr(row, 'residueName'), 'residueName', None, None),
+            ('atomName', lambda row: StructureTable._stLamStr(row, 'atomName'), 'atomName', None, None),
             ('altLocationCode', lambda row: StructureTable._stLamStr(row, 'altLocationCode'),
-             'altLocationCode', None),
-            ('element', lambda row: StructureTable._stLamStr(row, 'element'), 'element', None),
-            ('x', lambda row: StructureTable._stLamFloat(row, 'x'), 'x', None),
-            ('y', lambda row: StructureTable._stLamFloat(row, 'y'), 'y', None),
-            ('z', lambda row: StructureTable._stLamFloat(row, 'z'), 'z', None),
-            ('occupancy', lambda row: StructureTable._stLamFloat(row, 'occupancy'), 'occupancy', None),
-            ('bFactor', lambda row: StructureTable._stLamFloat(row, 'bFactor'), 'bFactor', None),
+             'altLocationCode', None, None),
+            ('element', lambda row: StructureTable._stLamStr(row, 'element'), 'element', None, None),
+            ('x', lambda row: StructureTable._stLamFloat(row, 'x'), 'x', None, '%0.3f'),
+            ('y', lambda row: StructureTable._stLamFloat(row, 'y'), 'y', None, '%0.3f'),
+            ('z', lambda row: StructureTable._stLamFloat(row, 'z'), 'z', None, '%0.3f'),
+            ('occupancy', lambda row: StructureTable._stLamFloat(row, 'occupancy'), 'occupancy', None, None),
+            ('bFactor', lambda row: StructureTable._stLamFloat(row, 'bFactor'), 'bFactor', None, None),
             ('nmrChainCode', lambda row: StructureTable._stLamStr(row, 'nmrChainCode'), 'nmrChainCode',
-             None),
+             None, None),
             ('nmrSequenceCode', lambda row: StructureTable._stLamStr(row, 'nmrSequenceCode'),
-             'nmrSequenceCode', None),
+             'nmrSequenceCode', None, None),
             ('nmrResidueName', lambda row: StructureTable._stLamStr(row, 'nmrResidueName'),
-             'nmrResidueName', None),
-            ('nmrAtomName', lambda row: StructureTable._stLamStr(row, 'nmrAtomName'), 'nmrAtomName', None),
+             'nmrResidueName', None, None),
+            ('nmrAtomName', lambda row: StructureTable._stLamStr(row, 'nmrAtomName'), 'nmrAtomName', None, None),
             ('Comment', lambda row: StructureTable._getCommentText(row), 'Notes',
-             lambda row, value: StructureTable._setComment(row, 'comment', value))
-            ]  # [Column(colName, func, tipText, editValue) for colName, func, tipText, editValue in self.columnDefs]
+             lambda row, value: StructureTable._setComment(row, 'comment', value), None)
+            ]  # [Column(colName, func, tipText, editValue, columnFormat)
+                # for colName, func, tipText, editValue, columnFormat in self.columnDefs]
         self.STcolumns = ColumnClass(self.structureColumns)
 
         # create the table; objects are added later via the displayTableForStructure method

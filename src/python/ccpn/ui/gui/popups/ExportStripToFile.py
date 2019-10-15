@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: CCPN $"
 __dateModified__ = "$dateModified: 2017-07-07 16:32:48 +0100 (Fri, July 07, 2017) $"
-__version__ = "$Revision: 3.0.b5 $"
+__version__ = "$Revision: 3.0.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -124,42 +124,14 @@ class ExportStripToFilePopup(ExportDialog):
                 for spec in specDisplays:
                     self.objects['SpectrumDisplay: %s' % spec.id] = (spec, spec.pid)
 
-                if specDisplays:
-                    # Label(userFrame, text='Select Item to Print', grid=(row, 0),
-                    #       hAlign='left', vAlign='centre')
-                    pulldownLabel = 'Select Item:'
-
-                    # row += 1
-                    # self.specToExport = RadioButtons(userFrame, [ky for ky in self.objects.keys() if 'SpectrumDisplay' in ky],
-                    #                                  grid=(row, 0), direction='v',
-                    #                                  callback=self._changeSpectrumDisplay)
-                else:
-                    # Label(userFrame, text='Select Strip to Print', grid=(row, 0),
-                    #       hAlign='left', vAlign='centre')
-                    pulldownLabel = 'Select Strip:'
+                pulldownLabel = 'Select Item:' if specDisplays else 'Select Strip:'
 
         else:
-            # Label(userFrame, text='Current selected strip', grid=(row, 0),
-            #       hAlign='left', vAlign='centre')
             pulldownLabel = 'Current Strip:'
-
-        # row += 1
-        # self.stripToExport = RadioButtons(userFrame, [ky for ky in self.objects.keys() if 'SpectrumDisplay' not in ky],
-        #                                   grid=(row, 0), direction='v',
-        #                                   callback=self._changeStrip)
-
-        # if self.current.strip:
-        #     self.stripToExport.set(self.current.strip.id)
-        #     self.strip = self.current.strip
-        # else:
-        #     self.stripToExport.set(self.strips[0].id)
-        #     self.strip = self.strips[0]
-        #
-        # self.stripToExport.setMinimumSize(self.stripToExport.sizeHint())
 
         row = 0
         self.objectPulldown = PulldownListCompoundWidget(userFrame,
-                                                         grid=(row, 0), vAlign='top', hAlign='left',
+                                                         grid=(row, 0), gridSpan=(1, 3), vAlign='top', hAlign='left',
                                                          orientation='left',
                                                          labelText=pulldownLabel,
                                                          texts=sorted([ky for ky in self.objects.keys()]),
@@ -168,7 +140,7 @@ class ExportStripToFilePopup(ExportDialog):
 
         # add a spacer to separate from the common save widgets
         row += 1
-        HLine(userFrame, grid=(row, 0), gridSpan=(1, 2), colour=getColours()[DIVIDER], height=20)
+        HLine(userFrame, grid=(row, 0), gridSpan=(1, 3), colour=getColours()[DIVIDER], height=20)
         row += 1
         topRow = row
         Label(userFrame, text='Print Type', grid=(row, 0), hAlign='left', vAlign='centre')
@@ -332,7 +304,7 @@ class ExportStripToFilePopup(ExportDialog):
 
             self.updateFilename(self.strip.id + exportExtension)
 
-        selectedList = self.treeView.getItems()
+        selectedList = self.treeView.getCheckStateItems()
         self._populateTreeView(selectedList)
 
     # def _changeSpectrumDisplay(self):
@@ -608,22 +580,19 @@ class ExportStripToFilePopup(ExportDialog):
 
         if self.pathEdited is False:
             # user has not changed the path so we can accept()
-            with progressManager(self, 'Saving to file:\n%s' % self.exitFilename):
-                self._exportToFile()
+            self._exportToFile()
         else:
             # have edited the path so check the new file
             if os.path.isfile(self.exitFilename):
                 yes = showYesNoWarning('%s already exists.' % os.path.basename(self.exitFilename),
                                        'Do you want to replace it?')
                 if yes:
-                    with progressManager(self, 'Saving to file:\n%s' % self.exitFilename):
-                        self._exportToFile()
+                    self._exportToFile()
             else:
                 if not self.exitFilename:
                     showWarning('FileName Error:', 'Filename is empty.')
                 else:
-                    with progressManager(self, 'Saving to file:\n%s' % self.exitFilename):
-                        self._exportToFile()
+                    self._exportToFile()
 
 
 if __name__ == '__main__':

@@ -65,7 +65,7 @@
 <span class="c1">#=========================================================================================</span>
 <span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: CCPN $&quot;</span>
 <span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2017-07-07 16:32:31 +0100 (Fri, July 07, 2017) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b5 $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.0 $&quot;</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Created</span>
 <span class="c1">#=========================================================================================</span>
@@ -972,7 +972,10 @@
                         <span class="n">obj</span> <span class="o">=</span> <span class="n">childClass</span><span class="p">(</span><span class="n">project</span><span class="p">,</span> <span class="n">apiObj</span><span class="p">)</span>
                     <span class="k">else</span><span class="p">:</span>
                         <span class="n">obj</span> <span class="o">=</span> <span class="n">factoryFunction</span><span class="p">(</span><span class="n">project</span><span class="p">,</span> <span class="n">apiObj</span><span class="p">)</span>
-                <span class="n">obj</span><span class="o">.</span><span class="n">_initializeAll</span><span class="p">()</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">obj</span><span class="o">.</span><span class="n">_initializeAll</span><span class="p">()</span>
+                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">er</span><span class="p">:</span>
+                    <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s1">&#39;Error initialising object </span><span class="si">%s</span><span class="s1">. </span><span class="si">%s</span><span class="s1">1&#39;</span> <span class="o">%</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span><span class="n">er</span><span class="p">))</span>
                 <span class="c1"># getLogger().info(str(obj))   # ejb - temp</span>
 
     <span class="k">def</span> <span class="nf">_unwrapAll</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -1200,6 +1203,24 @@
 
         <span class="n">commonUtil</span><span class="o">.</span><span class="n">resetSerial</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="p">,</span> <span class="n">newSerial</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_resetIds</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">getAsDict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">_includePrivate</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">OrderedDict</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        :return: Ordered dictionary of all class properties and their values. Key= str of property Value=any</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">od</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">dir</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+            <span class="k">try</span><span class="p">:</span> <span class="c1"># deals with badly set property which will raise an error instead of returning an attribute.</span>
+                <span class="n">att</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">i</span><span class="p">)</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="nb">callable</span><span class="p">(</span><span class="n">att</span><span class="p">):</span>
+                    <span class="k">if</span> <span class="n">_includePrivate</span><span class="p">:</span>
+                            <span class="n">od</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">att</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="ow">not</span> <span class="n">i</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">):</span>
+                            <span class="n">od</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">att</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s1">&#39;Potential error for the property </span><span class="si">%s</span><span class="s1"> in creating dictionary from object: </span><span class="si">%s</span><span class="s1"> . Error: </span><span class="si">%s</span><span class="s1">&#39;</span>  <span class="o">%</span> <span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="bp">self</span><span class="p">,</span> <span class="n">e</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">od</span>
 
     <span class="c1"># def _startCommandEchoBlock(self, funcName, *params, values=None, defaults=None, parName=None, propertySetter=False,</span>
     <span class="c1">#                            quiet=False):</span>

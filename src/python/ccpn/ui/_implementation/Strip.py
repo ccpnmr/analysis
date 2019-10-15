@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: CCPN $"
 __dateModified__ = "$dateModified: 2017-07-07 16:32:41 +0100 (Fri, July 07, 2017) $"
-__version__ = "$Revision: 3.0.b5 $"
+__version__ = "$Revision: 3.0.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -114,6 +114,12 @@ class Strip(AbstractWrapperObject):
         ff = self._project._data2Obj.get
         return tuple(ff(apiStrip.findFirstStripAxis(axis=x)) for x in apiStrip.orderedAxes)
 
+        # # NOTE: ED new code to read axes ignoring stripDirection
+        # # All strips will return their own axes
+        # stripSerial = apiStrip.stripSerial
+        # apiSpectrumDisplay = apiStrip.spectrumDisplay
+        # return tuple(ff(apiSpectrumDisplay.findFirstAxis(code=x, stripSerial=stripSerial)) for x in apiSpectrumDisplay.axisOrder)
+
     @orderedAxes.setter
     def orderedAxes(self, value: Sequence):
         value = [self.getByPid(x) if isinstance(x, str) else x for x in value]
@@ -147,6 +153,12 @@ class Strip(AbstractWrapperObject):
     def spectra(self) -> Tuple[Spectrum, ...]:
         """The spectra attached to the strip (whether display is currently turned on  or not)"""
         return tuple(x.spectrum for x in self.spectrumViews)
+
+    @property
+    def spectrumGroups(self) -> Tuple[Spectrum, ...]:
+        """The spectra attached to the strip (whether display is currently turned on  or not)"""
+        pids = self.spectrumDisplay._getSpectrumGroups()
+        return tuple(self.project.getByPid(x) for x in pids)
 
     # def _retrieveOrderedSpectrumViews(self, pid):
     #   for dd in self.project.dataSets:

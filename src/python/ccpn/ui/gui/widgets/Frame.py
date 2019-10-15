@@ -58,7 +58,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: CCPN $"
 __dateModified__ = "$dateModified: 2017-07-07 16:32:53 +0100 (Fri, July 07, 2017) $"
-__version__ = "$Revision: 3.0.b5 $"
+__version__ = "$Revision: 3.0.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -242,6 +242,34 @@ class ScrollableFrame2(Widget):
     def getFrame(self):
         "Return the frame widget; for external usage"
         return self._frame
+
+
+class OpenGLOverlayFrame(Frame):
+
+    def __init__(self, parent=None, showBorder=False, fShape=None, fShadow=None,
+                 setLayout=False, backgroundColour=None, **kwds):
+        super(OpenGLOverlayFrame, self).__init__(parent=parent, showBorder=showBorder, fShape=fShape, fShadow=fShadow,
+                                                 setLayout=setLayout, **kwds)
+
+        self._backgroundColour = backgroundColour
+
+    def _setMaskToChildren(self):
+        """Set the mouse mask to only the children of the frame - required to make sections transparent
+        """
+        region = QtGui.QRegion(self.frameGeometry())
+        region -= QtGui.QRegion(self.geometry())
+        region += self.childrenRegion()
+        self.setMask(region)
+
+    def paintEvent(self, ev):
+        """Paint the region of the frame to the desired background colour, required when overlaying a GL widget
+        """
+        if self._backgroundColour is not None:
+            painter = QtGui.QPainter(self)
+            painter.setCompositionMode(painter.CompositionMode_SourceOver)
+            painter.fillRect(self.rect(), QtGui.QColor(*self._backgroundColour))
+            painter.end()
+        super().paintEvent(ev)
 
 
 if __name__ == '__main__':

@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: CCPN $"
 __dateModified__ = "$dateModified: 2017-07-07 16:32:54 +0100 (Fri, July 07, 2017) $"
-__version__ = "$Revision: 3.0.b5 $"
+__version__ = "$Revision: 3.0.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -537,6 +537,9 @@ class _commonSettings():
         self._fillSpectrumFrame([self.application.getByGid(gid)])
 
 
+LINKTOPULLDOWNCLASS = 'linkToPulldownClass'
+LINKTOACTIVESTATE = True
+
 class StripPlot(Widget, _commonSettings):
 
     def __init__(self, parent=None,
@@ -545,9 +548,11 @@ class StripPlot(Widget, _commonSettings):
                  returnCallback=None,
                  applyCallback=None,
                  includeDisplaySettings=True,
+                 includeSequentialStrips=True,
                  includePeakLists=True, includeNmrChains=True, includeNmrChainPullSelection=False,
                  includeSpectrumTable=True,
                  defaultSpectrum=None,
+                 activePulldownClass=None,
                  labelText='Display(s):',
                  **kwds):
         super().__init__(parent, setLayout=True, **kwds)
@@ -573,12 +578,13 @@ class StripPlot(Widget, _commonSettings):
         self.includeNmrChains = includeNmrChains
         self.includeNmrChainPullSelection = includeNmrChainPullSelection
         self.includeSpectrumTable = includeSpectrumTable
+        self.activePulldownClass = activePulldownClass
         self.nmrChain = None
 
         # cannot set a notifier for displays, as these are not (yet?) implemented and the Notifier routines
         # underpinning the addNotifier call do not allow for it either
         row = 0
-        colwidth = 140
+        colwidth = 180
 
         texts = [defaultSpectrum.pid] if (defaultSpectrum and defaultSpectrum is not NO_STRIP) else ([ALL] + displayText)
 
@@ -589,16 +595,19 @@ class StripPlot(Widget, _commonSettings):
         else:
             self.displaysWidget = None
 
-        row += 1
-        self.sequentialStripsWidget = CheckBoxCompoundWidget(
-                self,
-                grid=(row, 0), vAlign='top', stretch=(0, 0), hAlign='left',
-                #minimumWidths=(colwidth, 0),
-                fixedWidths=(colwidth, 30),
-                orientation='left',
-                labelText='Show sequential strips:',
-                checked=False
-                )
+        if includeSequentialStrips:
+            row += 1
+            self.sequentialStripsWidget = CheckBoxCompoundWidget(
+                    self,
+                    grid=(row, 0), vAlign='top', stretch=(0, 0), hAlign='left',
+                    #minimumWidths=(colwidth, 0),
+                    fixedWidths=(colwidth, 30),
+                    orientation='left',
+                    labelText='Show sequential strips:',
+                    checked=False
+                    )
+        else:
+            self.sequentialStripsWidget = None
 
         row += 1
         self.markPositionsWidget = CheckBoxCompoundWidget(
@@ -621,6 +630,19 @@ class StripPlot(Widget, _commonSettings):
                 labelText='Auto clear marks:',
                 checked=True
                 )
+
+        if self.activePulldownClass is not None:
+            row += 1
+            setattr(self, LINKTOPULLDOWNCLASS, CheckBoxCompoundWidget(
+                    self,
+                    grid=(row, 0), vAlign='top', stretch=(0, 0), hAlign='left',
+                    #minimumWidths=(colwidth, 0),
+                    fixedWidths=(colwidth, 30),
+                    orientation='left',
+                    labelText='Link to current %s:' % self.activePulldownClass.className,
+                    tipText='Set/update current %s when selecting from pulldown' % self.activePulldownClass.className,
+                    checked=LINKTOACTIVESTATE
+                    ))
 
         row += 1
         texts = []
@@ -699,8 +721,9 @@ class StripPlot(Widget, _commonSettings):
         cols = self.getLayout().columnCount()
         Spacer(self, 5, 5,
                QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding,
-               grid=(rows, cols), gridSpan=(1, 1))
+               grid=(rows + 20, cols + 1), gridSpan=(1, 1))
 
+        self.maxRows = rows
         self._registerNotifiers()
 
     def setLabelText(self, label):
@@ -817,7 +840,7 @@ class _SpectrumRow(Frame):
                     fixedWidths=(30, 50),
                     labelText=axisCode,
                     value=spectrum.assignmentTolerances[ii],
-                    decimals=decimals, step=step, range=(0, None),
+                    decimals=decimals, step=step, range=(step, None),
                     )
             ds.setObjectName(str(spectrum.pid + axisCode))
             self.spinBoxes.append(ds)
@@ -836,6 +859,9 @@ class _SpectrumRow(Frame):
         assignment = list(spectrum.assignmentTolerances)
         assignment[ii] = float(spinBox.getValue())
         spectrum.assignmentTolerances = tuple(assignment)
+
+
+SETTINGSCHECKBOX = 'checkBox'
 
 
 class SequenceGraphSettings(Widget):  #, _commonSettings):
@@ -870,7 +896,7 @@ class SequenceGraphSettings(Widget):  #, _commonSettings):
         # cannot set a notifier for displays, as these are not (yet?) implemented and the Notifier routines
         # underpinning the addNotifier call does not allow for it either
         row = 0
-        colwidth = 140
+        colwidth = 180
 
         texts = [ALL] + defaultListItem.pid if defaultListItem else ([ALL] + displayText)
 
@@ -899,6 +925,7 @@ class SequenceGraphSettings(Widget):  #, _commonSettings):
                                          'item'      : item,
                                          'signalFunc': None
                                          }
+
                 # if data['_init']:
                 #     # attach a one-off signal to the checkBox
                 #     signalFunc = partial(self._checkInit, newItem, item, data)
@@ -962,6 +989,13 @@ class SequenceGraphSettings(Widget):  #, _commonSettings):
         """Cleanup the notifiers that are left behind after the widget is closed
         """
         self._unRegisterNotifiers()
+
+    def _getCheckBox(self, widgetName):
+        """Get the required widget from the new setting Widget class
+        Should be moved to a new settings class
+        """
+        if widgetName in self.checkBoxes and SETTINGSCHECKBOX in self.checkBoxes[widgetName]:
+            return self.checkBoxes[widgetName][SETTINGSCHECKBOX]
 
 
 class SpectrumDisplaySelectionWidget(ListCompoundWidget):

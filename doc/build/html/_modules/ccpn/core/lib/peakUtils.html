@@ -61,7 +61,7 @@
 <span class="c1">#=========================================================================================</span>
 <span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: CCPN $&quot;</span>
 <span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2017-07-07 16:32:32 +0100 (Fri, July 07, 2017) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b5 $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.0 $&quot;</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Created</span>
 <span class="c1">#=========================================================================================</span>
@@ -71,19 +71,25 @@
 <span class="c1"># Start of code</span>
 <span class="c1">#=========================================================================================</span>
 
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Sequence</span><span class="p">,</span> <span class="n">Union</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
 <span class="kn">from</span> <span class="nn">ccpn.util.Logging</span> <span class="kn">import</span> <span class="n">getLogger</span>
 <span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">OrderedDict</span>
 <span class="kn">from</span> <span class="nn">scipy.optimize</span> <span class="kn">import</span> <span class="n">curve_fit</span>
-<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">OrderedDict</span>
+<span class="kn">from</span> <span class="nn">ccpn.core.PeakList</span> <span class="kn">import</span> <span class="n">GAUSSIANMETHOD</span><span class="p">,</span> <span class="n">PARABOLICMETHOD</span>
+<span class="kn">from</span> <span class="nn">ccpn.util.Common</span> <span class="kn">import</span> <span class="n">makeIterableList</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="kn">as</span> <span class="nn">pd</span>
 
 <span class="n">POSITIONS</span> <span class="o">=</span> <span class="s1">&#39;positions&#39;</span>
 <span class="n">HEIGHT</span> <span class="o">=</span> <span class="s1">&#39;height&#39;</span>
 <span class="n">VOLUME</span> <span class="o">=</span> <span class="s1">&#39;volume&#39;</span>
 <span class="n">LINEWIDTHS</span> <span class="o">=</span> <span class="s1">&#39;lineWidths&#39;</span>
-
+<span class="n">RAW</span> <span class="o">=</span> <span class="s1">&#39;raw&#39;</span>
+<span class="n">DELTAS</span> <span class="o">=</span> <span class="s1">&#39;deltas&#39;</span>
+<span class="n">DELTA</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="se">\u0394</span><span class="s1">&#39;</span>
+<span class="n">Delta</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="se">\u03B4</span><span class="s1">&#39;</span>
 <span class="n">MODES</span> <span class="o">=</span> <span class="p">[</span><span class="n">POSITIONS</span><span class="p">,</span> <span class="n">HEIGHT</span><span class="p">,</span> <span class="n">VOLUME</span><span class="p">,</span> <span class="n">LINEWIDTHS</span><span class="p">]</span>
-
+<span class="n">DISPLAYDATA</span> <span class="o">=</span> <span class="p">[</span><span class="n">DELTA</span> <span class="o">+</span> <span class="n">Delta</span><span class="p">,</span> <span class="n">RAW</span><span class="p">]</span>
 <span class="n">OTHER</span> <span class="o">=</span> <span class="s1">&#39;Other&#39;</span>
 <span class="n">H</span> <span class="o">=</span> <span class="s1">&#39;H&#39;</span>
 <span class="n">N</span> <span class="o">=</span> <span class="s1">&#39;N&#39;</span>
@@ -102,6 +108,10 @@
 
 <div class="viewcode-block" id="getMultipletPosition"><a class="viewcode-back" href="../../../../ccpn/ccpn.core.lib.html#ccpn.core.lib.peakUtils.getMultipletPosition">[docs]</a><span class="k">def</span> <span class="nf">getMultipletPosition</span><span class="p">(</span><span class="n">multiplet</span><span class="p">,</span> <span class="n">dim</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;ppm&#39;</span><span class="p">):</span>
     <span class="k">try</span><span class="p">:</span>
+        <span class="c1"># skip if the position is None, otherwise check for dimensions</span>
+        <span class="k">if</span> <span class="n">multiplet</span><span class="o">.</span><span class="n">position</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">return</span>
+
         <span class="k">if</span> <span class="n">multiplet</span><span class="o">.</span><span class="n">position</span><span class="p">[</span><span class="n">dim</span><span class="p">]</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
             <span class="n">value</span> <span class="o">=</span> <span class="bp">None</span>  <span class="c1">#&quot;*NOT SET*&quot;</span>
 
@@ -177,11 +187,16 @@
 
 
 <div class="viewcode-block" id="getPeakLinewidth"><a class="viewcode-back" href="../../../../ccpn/ccpn.core.lib.html#ccpn.core.lib.peakUtils.getPeakLinewidth">[docs]</a><span class="k">def</span> <span class="nf">getPeakLinewidth</span><span class="p">(</span><span class="n">peak</span><span class="p">,</span> <span class="n">dim</span><span class="p">):</span>
-    <span class="k">if</span> <span class="n">dim</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">peak</span><span class="o">.</span><span class="n">lineWidths</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Return the lineWidth in dimension &#39;dim&#39; for the peakTable entries</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">lineWidths</span> <span class="o">=</span> <span class="n">peak</span><span class="o">.</span><span class="n">lineWidths</span>
+    <span class="k">if</span> <span class="n">lineWidths</span> <span class="ow">and</span> <span class="n">dim</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">lineWidths</span><span class="p">):</span>
         <span class="n">lw</span> <span class="o">=</span> <span class="n">peak</span><span class="o">.</span><span class="n">lineWidths</span><span class="p">[</span><span class="n">dim</span><span class="p">]</span>
-        <span class="k">if</span> <span class="n">lw</span><span class="p">:</span>
-            <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">lw</span><span class="p">)</span></div>
+        <span class="k">if</span> <span class="n">lw</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">lw</span><span class="p">)</span>
 
+    <span class="c1"># need to return this as a string otherwise the table changes between &#39;None&#39; and &#39;nan&#39;</span>
+    <span class="k">return</span> <span class="s1">&#39;None&#39;</span></div>
 
 <span class="k">def</span> <span class="nf">_get1DPeaksPosAndHeightAsArray</span><span class="p">(</span><span class="n">peakList</span><span class="p">):</span>
     <span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
@@ -220,7 +235,7 @@
             <span class="n">mn</span> <span class="o">=</span> <span class="n">this</span>
             <span class="n">mnpos</span> <span class="o">=</span> <span class="n">x</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
         <span class="k">if</span> <span class="n">lookformax</span><span class="p">:</span>
-            <span class="k">if</span> <span class="ow">not</span> <span class="n">negative</span><span class="p">:</span> <span class="c1"># just positives</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">negative</span><span class="p">:</span>  <span class="c1"># just positives</span>
                 <span class="n">this</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">this</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">this</span> <span class="o">&lt;</span> <span class="n">mx</span> <span class="o">-</span> <span class="n">delta</span><span class="p">:</span>
                 <span class="n">maxtab</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="nb">float</span><span class="p">(</span><span class="n">mxpos</span><span class="p">),</span> <span class="nb">float</span><span class="p">(</span><span class="n">mx</span><span class="p">)))</span>
@@ -362,27 +377,65 @@
     <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="n">OrderedDict</span><span class="o">.</span><span class="n">fromkeys</span><span class="p">(</span><span class="n">peaks</span><span class="p">))</span>
 
 
-<div class="viewcode-block" id="getNmrResiduePeakHeight"><a class="viewcode-back" href="../../../../ccpn/ccpn.core.lib.html#ccpn.core.lib.peakUtils.getNmrResiduePeakHeight">[docs]</a><span class="k">def</span> <span class="nf">getNmrResiduePeakHeight</span><span class="p">(</span><span class="n">nmrResidue</span><span class="p">,</span> <span class="n">nmrAtomsNames</span><span class="p">,</span> <span class="n">spectra</span><span class="p">):</span>
+
+
+<div class="viewcode-block" id="getNmrResiduePeakProperty"><a class="viewcode-back" href="../../../../ccpn/ccpn.core.lib.html#ccpn.core.lib.peakUtils.getNmrResiduePeakProperty">[docs]</a><span class="k">def</span> <span class="nf">getNmrResiduePeakProperty</span><span class="p">(</span><span class="n">nmrResidue</span><span class="p">,</span> <span class="n">nmrAtomsNames</span><span class="p">,</span> <span class="n">spectra</span><span class="p">,</span> <span class="n">theProperty</span><span class="o">=</span><span class="s1">&#39;height&#39;</span><span class="p">):</span>
     <span class="sd">&#39;&#39;&#39;</span>
 
 <span class="sd">    :param nmrResidue:</span>
 <span class="sd">    :param nmrAtomsNames: nmr Atoms to compare. str &#39;H&#39;, &#39;N&#39;, &#39;CA&#39; etc</span>
 <span class="sd">    :param spectra: compare peaks only from given spectra</span>
+<span class="sd">    :param theProperty: &#39;height&#39; or &#39;volume&#39;</span>
 <span class="sd">    :return:</span>
 <span class="sd">    &#39;&#39;&#39;</span>
 
-    <span class="n">heights</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">ll</span> <span class="o">=</span> <span class="p">[]</span>
 
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">spectra</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">return</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">theProperty</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;height&#39;</span><span class="p">,</span><span class="s1">&#39;volume&#39;</span><span class="p">]:</span>
+        <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s1">&#39;Property not currently available </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span><span class="n">theProperty</span><span class="p">)</span>
         <span class="k">return</span>
     <span class="n">peaks</span> <span class="o">=</span> <span class="n">__filterPeaksBySelectedNmrAtomOption</span><span class="p">(</span><span class="n">nmrResidue</span><span class="p">,</span> <span class="n">nmrAtomsNames</span><span class="p">,</span> <span class="n">spectra</span><span class="p">)</span>
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">peaks</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
         <span class="k">for</span> <span class="n">peak</span> <span class="ow">in</span> <span class="n">peaks</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">peak</span><span class="o">.</span><span class="n">peakList</span><span class="o">.</span><span class="n">spectrum</span> <span class="ow">in</span> <span class="n">spectra</span><span class="p">:</span>
-                <span class="n">heights</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">peak</span><span class="o">.</span><span class="n">height</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">heights</span></div>
+                <span class="n">p</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">peak</span><span class="p">,</span> <span class="n">theProperty</span><span class="p">)</span>
+                <span class="n">ll</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">ll</span><span class="p">,</span> <span class="n">peaks</span></div>
 
+<div class="viewcode-block" id="getNmrResiduePeakHeight"><a class="viewcode-back" href="../../../../ccpn/ccpn.core.lib.html#ccpn.core.lib.peakUtils.getNmrResiduePeakHeight">[docs]</a><span class="k">def</span> <span class="nf">getNmrResiduePeakHeight</span><span class="p">(</span><span class="n">nmrResidue</span><span class="p">,</span> <span class="n">nmrAtomsNames</span><span class="p">,</span> <span class="n">spectra</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    :param nmrResidue:</span>
+<span class="sd">    :param nmrAtomsNames: nmr Atoms to compare. str &#39;H&#39;, &#39;N&#39;, &#39;CA&#39; etc</span>
+<span class="sd">    :param spectra: compare peaks only from given spectra</span>
+<span class="sd">    :return:</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s1">&#39;Deprecated. Used getNmrResiduePeakProperty with theProperty = &quot;height&quot;&#39;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">getNmrResiduePeakProperty</span><span class="p">(</span><span class="n">nmrResidue</span><span class="p">,</span> <span class="n">nmrAtomsNames</span><span class="p">,</span> <span class="n">spectra</span><span class="p">,</span> <span class="n">theProperty</span><span class="o">=</span><span class="s1">&#39;height&#39;</span><span class="p">)</span></div>
 
+<div class="viewcode-block" id="getRawDataFrame"><a class="viewcode-back" href="../../../../ccpn/ccpn.core.lib.html#ccpn.core.lib.peakUtils.getRawDataFrame">[docs]</a><span class="k">def</span> <span class="nf">getRawDataFrame</span><span class="p">(</span><span class="n">nmrResidues</span><span class="p">,</span> <span class="n">nmrAtomsNames</span><span class="p">,</span> <span class="n">spectra</span><span class="p">,</span> <span class="n">theProperty</span><span class="p">):</span>
+    <span class="n">dfs</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">names</span> <span class="o">=</span> <span class="p">[</span><span class="n">sp</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">sp</span> <span class="ow">in</span> <span class="n">spectra</span><span class="p">]</span>
+    <span class="k">for</span> <span class="n">nmrResidue</span> <span class="ow">in</span> <span class="n">nmrResidues</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="s1">&#39;-&#39;</span> <span class="ow">in</span> <span class="n">nmrResidue</span><span class="o">.</span><span class="n">sequenceCode</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;+&#39;</span><span class="p">,</span> <span class="s1">&#39;-&#39;</span><span class="p">):</span> <span class="c1"># not consider the +1 and -1 residues</span>
+            <span class="n">ll</span> <span class="o">=</span>  <span class="n">getNmrResiduePeakProperty</span><span class="p">(</span><span class="n">nmrResidue</span><span class="p">,</span> <span class="n">nmrAtomsNames</span><span class="p">,</span> <span class="n">spectra</span><span class="p">,</span> <span class="n">theProperty</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">ll</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">:</span>
+                <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">([</span><span class="n">ll</span><span class="p">],</span> <span class="n">index</span><span class="o">=</span><span class="p">[</span><span class="n">nmrResidue</span><span class="o">.</span><span class="n">pid</span><span class="p">],</span> <span class="n">columns</span><span class="o">=</span><span class="n">names</span><span class="p">)</span>
+                <span class="n">dfs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">dfs</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">data</span></div>
+
+<span class="k">def</span> <span class="nf">_getPeaksForNmrResidue</span><span class="p">(</span><span class="n">nmrResidue</span><span class="p">,</span> <span class="n">nmrAtomsNames</span><span class="p">,</span> <span class="n">spectra</span><span class="p">):</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">spectra</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">return</span>
+    <span class="n">_peaks</span> <span class="o">=</span> <span class="n">__filterPeaksBySelectedNmrAtomOption</span><span class="p">(</span><span class="n">nmrResidue</span><span class="p">,</span> <span class="n">nmrAtomsNames</span><span class="p">,</span> <span class="n">spectra</span><span class="p">)</span>
+    <span class="n">usepeaks</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">_peaks</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">peak</span> <span class="ow">in</span> <span class="n">_peaks</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">peak</span><span class="o">.</span><span class="n">peakList</span><span class="o">.</span><span class="n">spectrum</span> <span class="ow">in</span> <span class="n">spectra</span><span class="p">:</span>
+                <span class="n">usepeaks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">peak</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">usepeaks</span>
 
 <div class="viewcode-block" id="getNmrResidueDeltas"><a class="viewcode-back" href="../../../../ccpn/ccpn.core.lib.html#ccpn.core.lib.peakUtils.getNmrResidueDeltas">[docs]</a><span class="k">def</span> <span class="nf">getNmrResidueDeltas</span><span class="p">(</span><span class="n">nmrResidue</span><span class="p">,</span> <span class="n">nmrAtomsNames</span><span class="p">,</span> <span class="n">spectra</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="n">POSITIONS</span><span class="p">,</span> <span class="n">atomWeights</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
     <span class="sd">&#39;&#39;&#39;</span>
@@ -449,26 +502,29 @@
         <span class="k">return</span> <span class="nb">round</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">deltas</span><span class="p">)),</span> <span class="mi">3</span><span class="p">)</span>
     <span class="k">return</span></div>
 
+
 <span class="k">def</span> <span class="nf">_getKd</span><span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
-    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">&lt;=</span><span class="mi">1</span><span class="p">:</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="mi">1</span><span class="p">:</span>
         <span class="k">return</span>
     <span class="n">param</span> <span class="o">=</span> <span class="n">curve_fit</span><span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
     <span class="n">bindingUnscaled</span><span class="p">,</span> <span class="n">bmax</span> <span class="o">=</span> <span class="n">param</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
     <span class="n">yScaled</span> <span class="o">=</span> <span class="n">y</span> <span class="o">/</span> <span class="n">bmax</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="n">paramScaled</span> <span class="o">=</span> <span class="n">curve_fit</span><span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">yScaled</span><span class="p">)</span>
-        <span class="n">kd</span><span class="p">,</span> <span class="n">bmax</span> <span class="o">=</span>  <span class="n">paramScaled</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">kd</span><span class="p">,</span> <span class="n">bmax</span> <span class="o">=</span> <span class="n">paramScaled</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
     <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
-        <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;Impossible to estimate Kd values. </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span><span class="n">err</span><span class="p">)</span>
+        <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;Impossible to estimate Kd values. </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">err</span><span class="p">)</span>
         <span class="n">kd</span><span class="p">,</span> <span class="n">bmax</span> <span class="o">=</span> <span class="p">[</span><span class="bp">None</span><span class="p">,</span> <span class="bp">None</span><span class="p">]</span>
     <span class="k">return</span> <span class="n">kd</span>
 
 
 <div class="viewcode-block" id="oneSiteBindingCurve"><a class="viewcode-back" href="../../../../ccpn/ccpn.core.lib.html#ccpn.core.lib.peakUtils.oneSiteBindingCurve">[docs]</a><span class="k">def</span> <span class="nf">oneSiteBindingCurve</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">kd</span><span class="p">,</span> <span class="n">bmax</span><span class="p">):</span>
-    <span class="k">return</span> <span class="p">(</span><span class="n">bmax</span><span class="o">*</span><span class="n">x</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="n">x</span><span class="o">+</span><span class="n">kd</span><span class="p">)</span></div>
+    <span class="k">return</span> <span class="p">(</span><span class="n">bmax</span> <span class="o">*</span> <span class="n">x</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">x</span> <span class="o">+</span> <span class="n">kd</span><span class="p">)</span></div>
+
 
 <div class="viewcode-block" id="exponenial_func"><a class="viewcode-back" href="../../../../ccpn/ccpn.core.lib.html#ccpn.core.lib.peakUtils.exponenial_func">[docs]</a><span class="k">def</span> <span class="nf">exponenial_func</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">):</span>
-    <span class="k">return</span> <span class="n">a</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">b</span><span class="o">*</span><span class="n">x</span><span class="p">)</span></div>
+    <span class="k">return</span> <span class="n">a</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">b</span> <span class="o">*</span> <span class="n">x</span><span class="p">)</span></div>
+
 
 <span class="k">def</span> <span class="nf">_fit1SiteBindCurve</span><span class="p">(</span><span class="n">bindingCurves</span><span class="p">,</span> <span class="n">aFunc</span><span class="o">=</span><span class="n">oneSiteBindingCurve</span><span class="p">,</span> <span class="n">xfStep</span><span class="o">=</span><span class="mf">0.01</span><span class="p">,</span> <span class="n">xfPercent</span><span class="o">=</span><span class="mi">30</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
@@ -498,7 +554,8 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="kn">from</span> <span class="nn">scipy.optimize</span> <span class="kn">import</span> <span class="n">curve_fit</span>
     <span class="kn">from</span> <span class="nn">ccpn.util.Common</span> <span class="kn">import</span> <span class="n">percentage</span>
-    <span class="n">errorValue</span> <span class="o">=</span> <span class="p">(</span><span class="bp">None</span><span class="p">,)</span><span class="o">*</span><span class="mi">6</span>
+
+    <span class="n">errorValue</span> <span class="o">=</span> <span class="p">(</span><span class="bp">None</span><span class="p">,)</span> <span class="o">*</span> <span class="mi">6</span>
     <span class="k">if</span> <span class="n">aFunc</span> <span class="ow">is</span> <span class="bp">None</span> <span class="ow">or</span> <span class="ow">not</span> <span class="nb">callable</span><span class="p">(</span><span class="n">aFunc</span><span class="p">):</span>
         <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Error. Fitting curve </span><span class="si">%s</span><span class="s2"> is not callable&quot;</span> <span class="o">%</span> <span class="n">aFunc</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">errorValue</span>
@@ -510,8 +567,8 @@
     <span class="n">ys</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">flatten</span><span class="p">(</span><span class="n">order</span><span class="o">=</span><span class="s1">&#39;F&#39;</span><span class="p">)</span>  <span class="c1">#puts all y values in a single 1d array.</span>
     <span class="n">xss</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">data</span><span class="o">.</span><span class="n">columns</span><span class="p">]</span> <span class="o">*</span> <span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
     <span class="n">xs</span> <span class="o">=</span> <span class="n">xss</span><span class="o">.</span><span class="n">flatten</span><span class="p">(</span><span class="n">order</span><span class="o">=</span><span class="s1">&#39;F&#39;</span><span class="p">)</span>  <span class="c1"># #puts all x values in a 1d array preserving the original y positions (order=&#39;F&#39;).</span>
-    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">xs</span><span class="p">)</span><span class="o">&lt;=</span><span class="mi">1</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">errorValue</span> <span class="c1">#not enough datapoints</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">xs</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">errorValue</span>  <span class="c1">#not enough datapoints</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="n">param</span> <span class="o">=</span> <span class="n">curve_fit</span><span class="p">(</span><span class="n">aFunc</span><span class="p">,</span> <span class="n">xs</span><span class="p">,</span> <span class="n">ys</span><span class="p">)</span>
         <span class="n">xhalfUnscaled</span><span class="p">,</span> <span class="n">bMaxUnscaled</span> <span class="o">=</span> <span class="n">param</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
@@ -526,21 +583,18 @@
         <span class="n">x_atHalf_Y</span><span class="p">,</span> <span class="n">bmax</span> <span class="o">=</span> <span class="n">paramScaled</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
         <span class="k">return</span> <span class="p">(</span><span class="n">x_atHalf_Y</span><span class="p">,</span> <span class="n">bmax</span><span class="p">,</span> <span class="n">xs</span><span class="p">,</span> <span class="n">yScaled</span><span class="p">,</span> <span class="n">xf</span><span class="p">,</span> <span class="n">yf</span><span class="p">)</span>
     <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
-        <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;Impossible to estimate Kd value </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span><span class="p">(</span><span class="n">err</span><span class="p">))</span>
+        <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;Impossible to estimate Kd value </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">err</span><span class="p">))</span>
     <span class="k">return</span> <span class="n">errorValue</span>
 
 
-
-
-
-
-<span class="k">def</span> <span class="nf">_fitExpDecayCurve</span><span class="p">(</span><span class="n">bindingCurves</span><span class="p">,</span> <span class="n">aFunc</span><span class="o">=</span><span class="n">exponenial_func</span><span class="p">,</span> <span class="n">xfStep</span><span class="o">=</span><span class="mf">0.01</span><span class="p">,</span> <span class="n">xfPercent</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span> <span class="n">p0</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">)):</span>
+<span class="k">def</span> <span class="nf">_fitExpDecayCurve</span><span class="p">(</span><span class="n">bindingCurves</span><span class="p">,</span> <span class="n">aFunc</span><span class="o">=</span><span class="n">exponenial_func</span><span class="p">,</span> <span class="n">xfStep</span><span class="o">=</span><span class="mf">0.01</span><span class="p">,</span> <span class="n">xfPercent</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span> <span class="n">p0</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">)):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    :param TODO</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="kn">from</span> <span class="nn">ccpn.util.Common</span> <span class="kn">import</span> <span class="n">percentage</span>
-    <span class="n">errorValue</span> <span class="o">=</span> <span class="p">(</span><span class="bp">None</span><span class="p">,)</span><span class="o">*</span><span class="mi">6</span>
+
+    <span class="n">errorValue</span> <span class="o">=</span> <span class="p">(</span><span class="bp">None</span><span class="p">,)</span> <span class="o">*</span> <span class="mi">6</span>
     <span class="k">if</span> <span class="n">aFunc</span> <span class="ow">is</span> <span class="bp">None</span> <span class="ow">or</span> <span class="ow">not</span> <span class="nb">callable</span><span class="p">(</span><span class="n">aFunc</span><span class="p">):</span>
         <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Error. Fitting curve </span><span class="si">%s</span><span class="s2"> is not callable&quot;</span> <span class="o">%</span> <span class="n">aFunc</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">errorValue</span>
@@ -552,8 +606,8 @@
     <span class="n">ys</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">flatten</span><span class="p">(</span><span class="n">order</span><span class="o">=</span><span class="s1">&#39;F&#39;</span><span class="p">)</span>  <span class="c1">#puts all y values in a single 1d array.</span>
     <span class="n">xss</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">data</span><span class="o">.</span><span class="n">columns</span><span class="p">]</span> <span class="o">*</span> <span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
     <span class="n">xs</span> <span class="o">=</span> <span class="n">xss</span><span class="o">.</span><span class="n">flatten</span><span class="p">(</span><span class="n">order</span><span class="o">=</span><span class="s1">&#39;F&#39;</span><span class="p">)</span>  <span class="c1"># #puts all x values in a 1d array preserving the original y positions (order=&#39;F&#39;).</span>
-    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">xs</span><span class="p">)</span><span class="o">&lt;=</span><span class="mi">1</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">errorValue</span> <span class="c1">#not enough datapoints</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">xs</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">errorValue</span>  <span class="c1">#not enough datapoints</span>
     <span class="k">try</span><span class="p">:</span>
 
         <span class="n">popt</span><span class="p">,</span> <span class="n">pcov</span> <span class="o">=</span> <span class="n">curve_fit</span><span class="p">(</span><span class="n">aFunc</span><span class="p">,</span> <span class="n">xs</span><span class="p">,</span> <span class="n">ys</span><span class="p">,</span> <span class="n">p0</span><span class="o">=</span><span class="n">p0</span><span class="p">)</span>
@@ -564,34 +618,236 @@
         <span class="n">yf</span> <span class="o">=</span> <span class="n">aFunc</span><span class="p">(</span><span class="n">xf</span><span class="p">,</span> <span class="o">*</span><span class="n">popt</span><span class="p">)</span>
         <span class="k">return</span> <span class="p">(</span><span class="n">xs</span><span class="p">,</span> <span class="n">ys</span><span class="p">,</span> <span class="n">xf</span><span class="p">,</span> <span class="n">yf</span><span class="p">,</span> <span class="o">*</span><span class="n">popt</span><span class="p">)</span>
     <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
-        <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;Impossible to estimate Kd value </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span><span class="p">(</span><span class="n">err</span><span class="p">))</span>
+        <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;Impossible to estimate Kd value </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">err</span><span class="p">))</span>
     <span class="k">return</span> <span class="n">errorValue</span>
 
 
+<div class="viewcode-block" id="snapToExtremum"><a class="viewcode-back" href="../../../../ccpn/ccpn.core.lib.html#ccpn.core.lib.peakUtils.snapToExtremum">[docs]</a><span class="k">def</span> <span class="nf">snapToExtremum</span><span class="p">(</span><span class="n">peak</span><span class="p">:</span> <span class="s1">&#39;Peak&#39;</span><span class="p">,</span> <span class="n">halfBoxSearchWidth</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">3</span><span class="p">,</span> <span class="n">halfBoxFitWidth</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">3</span><span class="p">,</span>
+                   <span class="n">minDropFactor</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.1</span><span class="p">,</span> <span class="n">fitMethod</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">PARABOLICMETHOD</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Snap the position of the peak the nearest extremum.</span>
+<span class="sd">    Assumes called with an existing peak, will fit within a box ±halfBoxSearchWidth about the current peak position.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="kn">from</span> <span class="nn">ccpn.core.Peak</span> <span class="kn">import</span> <span class="n">Peak</span>
+    <span class="kn">from</span> <span class="nn">ccpnc.peak</span> <span class="kn">import</span> <span class="n">Peak</span> <span class="k">as</span> <span class="n">CPeak</span>
+    <span class="kn">from</span> <span class="nn">ccpn.framework.Application</span> <span class="kn">import</span> <span class="n">getApplication</span>
+
+    <span class="c1"># error checking - that the peak is a valid peak</span>
+    <span class="n">peak</span> <span class="o">=</span> <span class="n">getApplication</span><span class="p">()</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">getByPid</span><span class="p">(</span><span class="n">peak</span><span class="p">)</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">peak</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="k">else</span> <span class="n">peak</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">peak</span><span class="p">,</span> <span class="n">Peak</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> is not of type Peak&#39;</span> <span class="o">%</span> <span class="n">peak</span><span class="p">)</span>
+
+    <span class="n">apiPeak</span> <span class="o">=</span> <span class="n">peak</span><span class="o">.</span><span class="n">_wrappedData</span>
+
+    <span class="n">dataSource</span> <span class="o">=</span> <span class="n">apiPeak</span><span class="o">.</span><span class="n">peakList</span><span class="o">.</span><span class="n">dataSource</span>
+    <span class="n">numDim</span> <span class="o">=</span> <span class="n">dataSource</span><span class="o">.</span><span class="n">numDim</span>
+    <span class="n">peakDims</span> <span class="o">=</span> <span class="n">apiPeak</span><span class="o">.</span><span class="n">sortedPeakDims</span><span class="p">()</span>
+
+    <span class="c1"># get the height - remember not to use (position-1) because function does that</span>
+    <span class="n">height</span> <span class="o">=</span> <span class="n">dataSource</span><span class="o">.</span><span class="n">getPositionValue</span><span class="p">([</span><span class="n">peakDim</span><span class="o">.</span><span class="n">position</span> <span class="k">for</span> <span class="n">peakDim</span> <span class="ow">in</span> <span class="n">peakDims</span><span class="p">])</span>
+
+    <span class="c1"># generate a np array with the position of the peak in points rounded to integers</span>
+    <span class="n">position</span> <span class="o">=</span> <span class="p">[</span><span class="n">peakDim</span><span class="o">.</span><span class="n">position</span> <span class="o">-</span> <span class="mi">1</span> <span class="k">for</span> <span class="n">peakDim</span> <span class="ow">in</span> <span class="n">peakDims</span><span class="p">]</span>  <span class="c1"># API position starts at 1</span>
+
+    <span class="c1"># round up/down the position</span>
+    <span class="n">pLower</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">position</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">)</span>
+    <span class="n">pUpper</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">position</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">)</span>
+    <span class="n">position</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">position</span><span class="p">)</span>
+
+    <span class="c1"># generate a np array with the number of points per dimension</span>
+    <span class="c1"># numPoints = [peakDim.dataDim.numPoints for peakDim in peakDims]</span>
+    <span class="n">numPoints</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">peakDim</span><span class="o">.</span><span class="n">dataDim</span><span class="o">.</span><span class="n">numPoints</span> <span class="k">for</span> <span class="n">peakDim</span> <span class="ow">in</span> <span class="n">peakDims</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">)</span>
+
+    <span class="c1"># extra plane in each direction increases accuracy of group fitting</span>
+    <span class="n">startPoint</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="n">pLower</span> <span class="o">-</span> <span class="n">halfBoxSearchWidth</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="n">endPoint</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">minimum</span><span class="p">(</span><span class="n">pUpper</span> <span class="o">+</span> <span class="n">halfBoxSearchWidth</span><span class="p">,</span> <span class="n">numPoints</span><span class="p">)</span>
+
+    <span class="c1"># map to co-ordinates to a (0,0) cornered box</span>
+    <span class="n">regionArray</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">((</span><span class="n">startPoint</span> <span class="o">-</span> <span class="n">startPoint</span><span class="p">,</span> <span class="n">endPoint</span> <span class="o">-</span> <span class="n">startPoint</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">)</span>
+
+    <span class="c1"># Get the data; note that arguments have to be cast to int32s/float32s for the C routines</span>
+    <span class="n">dataArray</span><span class="p">,</span> <span class="n">intRegion</span> <span class="o">=</span> <span class="n">dataSource</span><span class="o">.</span><span class="n">getRegionData</span><span class="p">(</span><span class="n">startPoint</span><span class="p">,</span> <span class="n">endPoint</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">dataArray</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> <span class="n">dataArray</span><span class="o">.</span><span class="n">size</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">):</span>
+        <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;no region found&#39;</span><span class="p">)</span>
+        <span class="k">return</span>
+
+    <span class="n">scaledHeight</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">height</span>  <span class="c1"># this is so that have sensible pos/negLevel</span>
+    <span class="k">if</span> <span class="n">height</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">doPos</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="n">doNeg</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="n">posLevel</span> <span class="o">=</span> <span class="n">scaledHeight</span>
+        <span class="n">negLevel</span> <span class="o">=</span> <span class="mi">0</span>  <span class="c1"># arbitrary - not necessary</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">doPos</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="n">doNeg</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="n">posLevel</span> <span class="o">=</span> <span class="mi">0</span>  <span class="c1"># arbitrary - not necessary</span>
+        <span class="n">negLevel</span> <span class="o">=</span> <span class="n">scaledHeight</span>
+
+    <span class="n">exclusionBuffer</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">numDim</span>
+
+    <span class="n">nonAdj</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">minLinewidth</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.0</span><span class="p">]</span> <span class="o">*</span> <span class="n">numDim</span>
+
+    <span class="n">excludedRegionsList</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">excludedDiagonalDimsList</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">excludedDiagonalTransformList</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="n">peakPoints</span> <span class="o">=</span> <span class="n">CPeak</span><span class="o">.</span><span class="n">findPeaks</span><span class="p">(</span><span class="n">dataArray</span><span class="p">,</span> <span class="n">doNeg</span><span class="p">,</span> <span class="n">doPos</span><span class="p">,</span>
+                                 <span class="n">negLevel</span><span class="p">,</span> <span class="n">posLevel</span><span class="p">,</span> <span class="n">exclusionBuffer</span><span class="p">,</span>
+                                 <span class="n">nonAdj</span><span class="p">,</span> <span class="n">minDropFactor</span><span class="p">,</span> <span class="n">minLinewidth</span><span class="p">,</span>
+                                 <span class="n">excludedRegionsList</span><span class="p">,</span> <span class="n">excludedDiagonalDimsList</span><span class="p">,</span> <span class="n">excludedDiagonalTransformList</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">peakPoints</span><span class="p">:</span>
+        <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;no points found&#39;</span><span class="p">)</span>
+        <span class="k">return</span>
+
+    <span class="c1"># catch any C errors</span>
+    <span class="k">try</span><span class="p">:</span>
+
+        <span class="c1"># find the closest peak in the found list</span>
+        <span class="c1"># peakPoint, height = peakPoints[0]</span>
+        <span class="n">dist</span> <span class="o">=</span> <span class="n">peakPoint</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="k">for</span> <span class="n">findNextPeak</span> <span class="ow">in</span> <span class="n">peakPoints</span><span class="p">:</span>
+            <span class="n">peakDist</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">findNextPeak</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">-</span> <span class="n">position</span> <span class="o">-</span> <span class="n">startPoint</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">dist</span> <span class="o">==</span> <span class="bp">None</span> <span class="ow">or</span> <span class="n">peakDist</span> <span class="o">&lt;</span> <span class="n">dist</span><span class="p">:</span>
+                <span class="n">dist</span> <span class="o">=</span> <span class="n">peakDist</span>
+                <span class="n">peakPoint</span> <span class="o">=</span> <span class="n">findNextPeak</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="c1"># use this as the centre for the peak fitting</span>
+        <span class="n">peakPoint</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">peakPoint</span><span class="p">)</span>
+        <span class="n">peakArray</span> <span class="o">=</span> <span class="n">peakPoint</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="mi">1</span><span class="p">,</span> <span class="n">numDim</span><span class="p">))</span>
+        <span class="n">peakArray</span> <span class="o">=</span> <span class="n">peakArray</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">fitMethod</span> <span class="o">==</span> <span class="n">PARABOLICMETHOD</span><span class="p">:</span>
+            <span class="c1"># parabolic - generate all peaks in one operation</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="n">CPeak</span><span class="o">.</span><span class="n">fitParabolicPeaks</span><span class="p">(</span><span class="n">dataArray</span><span class="p">,</span> <span class="n">regionArray</span><span class="p">,</span> <span class="n">peakArray</span><span class="p">)</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">method</span> <span class="o">=</span> <span class="mi">0</span> <span class="k">if</span> <span class="n">fitMethod</span> <span class="o">==</span> <span class="n">GAUSSIANMETHOD</span> <span class="k">else</span> <span class="mi">1</span>
+
+            <span class="c1"># fit all peaks in one operation</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="n">CPeak</span><span class="o">.</span><span class="n">fitPeaks</span><span class="p">(</span><span class="n">dataArray</span><span class="p">,</span> <span class="n">regionArray</span><span class="p">,</span> <span class="n">peakArray</span><span class="p">,</span> <span class="n">method</span><span class="p">)</span>
+
+    <span class="k">except</span> <span class="n">CPeak</span><span class="o">.</span><span class="n">error</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="c1"># there could be some fitting error</span>
+        <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Aborting peak fit, Error for peak: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">peak</span><span class="p">)</span>
+        <span class="k">return</span>
+
+    <span class="c1"># if any results are found then set the new peak position/height</span>
+    <span class="k">if</span> <span class="n">result</span><span class="p">:</span>
+        <span class="n">height</span><span class="p">,</span> <span class="n">center</span><span class="p">,</span> <span class="n">linewidth</span> <span class="o">=</span> <span class="n">result</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="c1"># work on the _wrappedData</span>
+        <span class="n">apiPeak</span> <span class="o">=</span> <span class="n">peak</span><span class="o">.</span><span class="n">_wrappedData</span>
+        <span class="n">peakDims</span> <span class="o">=</span> <span class="n">apiPeak</span><span class="o">.</span><span class="n">sortedPeakDims</span><span class="p">()</span>
+
+        <span class="n">dataSource</span> <span class="o">=</span> <span class="n">apiPeak</span><span class="o">.</span><span class="n">peakList</span><span class="o">.</span><span class="n">dataSource</span>
+        <span class="n">dataDims</span> <span class="o">=</span> <span class="n">dataSource</span><span class="o">.</span><span class="n">sortedDataDims</span><span class="p">()</span>
+
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">peakDim</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">peakDims</span><span class="p">):</span>
+            <span class="n">newPos</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="n">center</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="mf">0.5</span><span class="p">),</span> <span class="n">dataArray</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">-</span> <span class="mf">1.5</span><span class="p">)</span>
+
+            <span class="c1"># ignore if out of range</span>
+            <span class="k">if</span> <span class="nb">abs</span><span class="p">(</span><span class="n">newPos</span> <span class="o">-</span> <span class="n">center</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="o">&lt;</span> <span class="mf">1e-9</span><span class="p">:</span>
+                <span class="n">peakDim</span><span class="o">.</span><span class="n">position</span> <span class="o">=</span> <span class="n">center</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+</span> <span class="n">startPoint</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+</span> <span class="mf">1.0</span>  <span class="c1"># API position starts at 1</span>
+            <span class="n">peakDim</span><span class="o">.</span><span class="n">lineWidth</span> <span class="o">=</span> <span class="n">dataDims</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">valuePerPoint</span> <span class="o">*</span> <span class="n">linewidth</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+
+        <span class="n">apiPeak</span><span class="o">.</span><span class="n">height</span> <span class="o">=</span> <span class="n">dataSource</span><span class="o">.</span><span class="n">scale</span> <span class="o">*</span> <span class="n">height</span></div>
 
 
+<div class="viewcode-block" id="getSpectrumData"><a class="viewcode-back" href="../../../../ccpn/ccpn.core.lib.html#ccpn.core.lib.peakUtils.getSpectrumData">[docs]</a><span class="k">def</span> <span class="nf">getSpectrumData</span><span class="p">(</span><span class="n">peak</span><span class="p">:</span> <span class="s1">&#39;Peak&#39;</span><span class="p">,</span> <span class="n">halfBoxWidth</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">3</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Get a region of the spectrum data centred on the peak.</span>
+<span class="sd">    Will return the smallest region containing the peak ±halfBoxWidth about the current peak position.</span>
+
+<span class="sd">    returns a tuple of the form (dataArray, region, position, planePosition)</span>
+
+<span class="sd">        dataArray is the numpy array surrounding the peak, ordered by spectrum axisCodes</span>
+<span class="sd">        region is a tuple (bottomLeft, topRight)</span>
+<span class="sd">        position is the float32 relative position of the peak in dataArray</span>
+<span class="sd">        planePosition is the int32 position of the nearest planes to the peak</span>
+
+<span class="sd">    where bottomLeft is the co-ordinates of the bottom-left corner of the region</span>
+<span class="sd">            topRight is the co-ordinates of the top-right corner of the region</span>
+
+<span class="sd">            Co-ordinates are indexed from (0, 0)</span>
+
+<span class="sd">            Note: screen point co-ordinates are indexed from (1, 1)</span>
+
+<span class="sd">    The region will be cropped to the bounds of the spectrum, in which case position will not correspond to the centre</span>
+<span class="sd">    if no region is found, returns None</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="kn">from</span> <span class="nn">ccpn.core.Peak</span> <span class="kn">import</span> <span class="n">Peak</span>
+    <span class="kn">from</span> <span class="nn">ccpn.framework.Application</span> <span class="kn">import</span> <span class="n">getApplication</span>
+
+    <span class="c1"># error checking - that the peak is a valid peak</span>
+    <span class="n">peak</span> <span class="o">=</span> <span class="n">getApplication</span><span class="p">()</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">getByPid</span><span class="p">(</span><span class="n">peak</span><span class="p">)</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">peak</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="k">else</span> <span class="n">peak</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">peak</span><span class="p">,</span> <span class="n">Peak</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> is not of type Peak&#39;</span> <span class="o">%</span> <span class="n">peak</span><span class="p">)</span>
+
+    <span class="n">apiPeak</span> <span class="o">=</span> <span class="n">peak</span><span class="o">.</span><span class="n">_wrappedData</span>
+
+    <span class="n">dataSource</span> <span class="o">=</span> <span class="n">apiPeak</span><span class="o">.</span><span class="n">peakList</span><span class="o">.</span><span class="n">dataSource</span>
+    <span class="n">peakDims</span> <span class="o">=</span> <span class="n">apiPeak</span><span class="o">.</span><span class="n">sortedPeakDims</span><span class="p">()</span>
+
+    <span class="c1"># generate a np array with the position of the peak in points rounded to integers</span>
+    <span class="n">position</span> <span class="o">=</span> <span class="p">[</span><span class="n">peakDim</span><span class="o">.</span><span class="n">position</span> <span class="o">-</span> <span class="mi">1</span> <span class="k">for</span> <span class="n">peakDim</span> <span class="ow">in</span> <span class="n">peakDims</span><span class="p">]</span>  <span class="c1"># API position starts at 1</span>
+
+    <span class="c1"># round up/down the position to give the square containing the peak</span>
+    <span class="n">pLower</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">position</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">)</span>
+    <span class="n">pUpper</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">position</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">)</span>
+    <span class="n">position</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">position</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+
+    <span class="c1"># generate a np array with the number of points per dimension</span>
+    <span class="c1"># numPoints = [peakDim.dataDim.numPoints for peakDim in peakDims]</span>
+    <span class="n">numPoints</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">peakDim</span><span class="o">.</span><span class="n">dataDim</span><span class="o">.</span><span class="n">numPoints</span> <span class="k">for</span> <span class="n">peakDim</span> <span class="ow">in</span> <span class="n">peakDims</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">)</span>
+
+    <span class="c1"># add extra points in each direction</span>
+    <span class="n">startPoint</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="n">pLower</span> <span class="o">-</span> <span class="n">halfBoxWidth</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="n">endPoint</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">minimum</span><span class="p">(</span><span class="n">pUpper</span> <span class="o">+</span> <span class="n">halfBoxWidth</span><span class="p">,</span> <span class="n">numPoints</span><span class="p">)</span>
+
+    <span class="c1"># Get the data; note that arguments has to be cast to ints for the C routines</span>
+    <span class="n">dataArray</span><span class="p">,</span> <span class="n">intRegion</span> <span class="o">=</span> <span class="n">dataSource</span><span class="o">.</span><span class="n">getRegionData</span><span class="p">(</span><span class="n">startPoint</span><span class="p">,</span> <span class="n">endPoint</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">dataArray</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> <span class="n">dataArray</span><span class="o">.</span><span class="n">size</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">):</span>
+        <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;no region found&#39;</span><span class="p">)</span>
+        <span class="k">return</span>
+
+    <span class="k">return</span> <span class="p">(</span><span class="n">dataArray</span><span class="p">,</span> <span class="n">intRegion</span><span class="p">,</span> <span class="nb">list</span><span class="p">(</span><span class="n">position</span> <span class="o">-</span> <span class="n">startPoint</span><span class="p">),</span> <span class="nb">list</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">position</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">)))</span></div>
 
 
+<div class="viewcode-block" id="estimateVolumes"><a class="viewcode-back" href="../../../../ccpn/ccpn.core.lib.html#ccpn.core.lib.peakUtils.estimateVolumes">[docs]</a><span class="k">def</span> <span class="nf">estimateVolumes</span><span class="p">(</span><span class="n">peaks</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="s1">&#39;Peak&#39;</span><span class="p">]],</span> <span class="n">volumeIntegralLimit</span><span class="o">=</span><span class="mf">2.0</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Estimate the volumes for the peaks</span>
+<span class="sd">    :param peaks: list of peaks as pids or strings</span>
+<span class="sd">    :param volumeIntegralLimit: integral width as a multiple of lineWidth (FWHM)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># move to peakList</span>
 
+    <span class="kn">from</span> <span class="nn">ccpn.core.Peak</span> <span class="kn">import</span> <span class="n">Peak</span>
+    <span class="kn">from</span> <span class="nn">ccpn.framework.Application</span> <span class="kn">import</span> <span class="n">getApplication</span>
 
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">getApplication</span><span class="p">()</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">getApplication</span><span class="p">()</span><span class="o">.</span><span class="n">project</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;There is no project&#39;</span><span class="p">)</span>
 
+    <span class="n">getByPid</span> <span class="o">=</span> <span class="n">getApplication</span><span class="p">()</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">getByPid</span>
 
+    <span class="c1"># error checking - that the peaks are valid</span>
+    <span class="n">peakList</span> <span class="o">=</span> <span class="n">makeIterableList</span><span class="p">(</span><span class="n">peaks</span><span class="p">)</span>
+    <span class="n">pks</span> <span class="o">=</span> <span class="p">[</span><span class="n">getByPid</span><span class="p">(</span><span class="n">peak</span><span class="p">)</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">peak</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="k">else</span> <span class="n">peak</span> <span class="k">for</span> <span class="n">peak</span> <span class="ow">in</span> <span class="n">peakList</span><span class="p">]</span>
 
+    <span class="k">for</span> <span class="n">pp</span> <span class="ow">in</span> <span class="n">pks</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">pp</span><span class="p">,</span> <span class="n">Peak</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> is not of type Peak&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">pp</span><span class="p">))</span>
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    <span class="c1"># estimate the volume for each peak</span>
+    <span class="k">for</span> <span class="n">pp</span> <span class="ow">in</span> <span class="n">pks</span><span class="p">:</span>
+        <span class="n">height</span> <span class="o">=</span> <span class="n">pp</span><span class="o">.</span><span class="n">height</span>
+        <span class="n">lineWidths</span> <span class="o">=</span> <span class="n">pp</span><span class="o">.</span><span class="n">lineWidths</span>
+        <span class="k">if</span> <span class="n">lineWidths</span> <span class="ow">and</span> <span class="bp">None</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">lineWidths</span> <span class="ow">and</span> <span class="n">height</span><span class="p">:</span>
+            <span class="n">pp</span><span class="o">.</span><span class="n">estimateVolume</span><span class="p">(</span><span class="n">volumeIntegralLimit</span><span class="o">=</span><span class="n">volumeIntegralLimit</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;Peak </span><span class="si">%s</span><span class="s1"> contains undefined height/lineWidths&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">pp</span><span class="p">))</span></div>
 </pre></div>
 
           </div>

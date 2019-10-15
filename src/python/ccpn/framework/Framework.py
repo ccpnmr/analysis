@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Wayne Boucher $"
 __dateModified__ = "$dateModified: 2017-07-07 16:32:36 +0100 (Fri, July 07, 2017) $"
-__version__ = "$Revision: 3.0.b5 $"
+__version__ = "$Revision: 3.0.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -303,6 +303,7 @@ class Framework(NotifierBase):
         self._getUserPrefs()
 
         # set the preferences if added from the commandline
+        # this causes errors when running the nose_tests
         if self.args.darkColourScheme:
             self.preferences.general.colourScheme = 'dark'
         elif self.args.lightColourScheme:
@@ -2143,7 +2144,7 @@ class Framework(NotifierBase):
             # ui/gui cleanup
             self._closeMainWindows()
             self._closeExtraWindows()
-            self.ui.mainWindow.sideBar.clearSideBar()
+            self.ui.mainWindow.sideBar.deleteLater()
             self.ui.mainWindow.deleteLater()
             self.ui.mainWindow = None
 

@@ -37,7 +37,7 @@ static struct PyModuleDef moduledef = {
 };
 
 /*PyMODINIT_FUNC initlibinchi(void)*/
-PyObject *PyInit_inchi(void)
+PyMODINIT_FUNC PyInit_inchi(void)
 {
     PyObject *module;
 

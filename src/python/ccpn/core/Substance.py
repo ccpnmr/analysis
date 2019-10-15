@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: CCPN $"
 __dateModified__ = "$dateModified: 2017-07-07 16:32:31 +0100 (Fri, July 07, 2017) $"
-__version__ = "$Revision: 3.0.b5 $"
+__version__ = "$Revision: 3.0.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -42,6 +42,7 @@ from ccpnmodel.ccpncore.lib.molecule import MoleculeModify
 from ccpn.util.decorators import logCommand
 from ccpn.core.lib.ContextManagers import newObject, renameObject, undoBlock
 from ccpn.util.Logging import getLogger
+from contextlib import contextmanager
 
 
 _apiClassNameMap = {
@@ -873,15 +874,18 @@ def _createPolymerSubstance(self: Project, sequence: typing.Sequence[str], name:
             raise ValueError("Character %s not allowed in ccpn.Substance labelling, id: %s.%s" %
                              (Pid.altCharacter, name, labelling))
 
+    # NOTE: ED I need to open the undoStack here so this adds to the list
     apiMolecule = MoleculeModify.createMolecule(apiNmrProject.root, sequence, molType=molType,
                                                 name=name, startNumber=startNumber,
                                                 isCyclic=isCyclic)
+    _addUndoApiObject(self.project, apiMolecule)
+
     apiMolecule.commonNames = synonyms
     apiMolecule.smiles = smiles
     apiMolecule.details = comment
 
-    result = self._data2Obj[apiNmrProject.sampleStore.refSampleComponentStore.fetchMolComponent(
-            apiMolecule, labeling=apiLabeling)]
+    mol = apiNmrProject.sampleStore.refSampleComponentStore.fetchMolComponent(apiMolecule, labeling=apiLabeling)
+    result = self._data2Obj[mol]
 
     # print('>>>create substance:', apiNmrProject.sampleStore.refSampleComponentStore.fetchMolComponent(apiMolecule))
     # print('>>>result          :', result)
@@ -899,6 +903,62 @@ def _createPolymerSubstance(self: Project, sequence: typing.Sequence[str], name:
     result.userCode = userCode
 
     return result
+
+
+@contextmanager
+def _addUndoApiObject(project, apiObject):
+
+    def _getApiObjectTree(apiObject) -> tuple:
+        """Retrieve the apiObject tree contained by this object
+
+        CCPNINTERNAL   used for undo's, redo's
+        """
+        #EJB 20181127: taken from memops.Implementation.DataObject.delete
+        #                   should be in the model??
+        #EJB 20190926: taken from AbstractWrapperObject - needed for apiObjects that do not have a v3 object
+
+        from ccpn.util.OrderedSet import OrderedSet
+
+        apiObjectlist = OrderedSet()
+        # objects still to be checked
+        objsToBeChecked = list()
+        # counter keyed on (obj, roleName) for how many objects at other end of link
+        linkCounter = {}
+
+        # topObjects to check if modifiable
+        topObjectsToCheck = set()
+
+        objsToBeChecked.append(apiObject)
+        while len(objsToBeChecked) > 0:
+            obj = objsToBeChecked.pop()
+            if obj:
+                obj._checkDelete(apiObjectlist, objsToBeChecked, linkCounter, topObjectsToCheck)  # This builds the list/set
+
+        for topObjectToCheck in topObjectsToCheck:
+            if (not (topObjectToCheck.__dict__.get('isModifiable'))):
+                raise ValueError("""%s.delete:
+           Storage not modifiable""" % apiObject.qualifiedName
+                                 + ": %s" % (topObjectToCheck,)
+                                 )
+
+        return tuple(apiObjectlist)
+
+    from ccpn.core.lib.ContextManagers import BlankedPartial
+    from ccpn.core.lib import Undo
+    undo = project._undo
+    undo.decreaseBlocking()
+
+    apiObjectsCreated = _getApiObjectTree(apiObject)
+    undo._newItem(undoPartial=BlankedPartial(Undo._deleteAllApiObjects,
+                                             obj=None, trigger='delete', preExecution=True,
+                                             objsToBeDeleted=apiObjectsCreated),
+                  redoPartial=BlankedPartial(apiObject.root._unDelete,
+                                             topObjectsToCheck=(apiObject.topObject,),
+                                             obj=None, trigger='create', preExecution=False,
+                                             objsToBeUnDeleted=apiObjectsCreated)
+                  )
+
+    undo.increaseBlocking()
 
 
 #EJB 20181206: moved to Project

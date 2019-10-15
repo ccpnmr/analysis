@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: CCPN $"
 __dateModified__ = "$dateModified: 2017-07-07 16:32:43 +0100 (Fri, July 07, 2017) $"
-__version__ = "$Revision: 3.0.b5 $"
+__version__ = "$Revision: 3.0.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -40,6 +40,8 @@ from ccpn.ui.gui.widgets.Spacer import Spacer
 from ccpn.core.ChemicalShiftList import ChemicalShiftList
 from ccpn.core.ChemicalShift import ChemicalShift
 from ccpn.core.NmrResidue import NmrResidue
+from ccpn.core.NmrAtom import NmrAtom
+from ccpn.core.Peak import Peak
 from ccpn.core.lib.CallBack import CallBack
 from PyQt5 import QtGui, QtWidgets
 from ccpn.util.Logging import getLogger
@@ -213,29 +215,30 @@ class ChemicalShiftTable(GuiTable):
 
         # create the column objects
         self.CScolumns = ColumnClass(
-                [('#', lambda cs: cs.nmrAtom.serial, 'NmrAtom serial number', None),
-                 ('Pid', lambda cs: cs.pid, 'Pid of chemicalShift', None),
-                 ('_object', lambda cs: cs, 'Object', None),
-                 ('NmrResidue', lambda cs: cs._key.rsplit('.', 1)[0], 'NmrResidue Id', None),
+                [('#', lambda cs: cs.nmrAtom.serial, 'NmrAtom serial number', None, None),
+                 ('Pid', lambda cs: cs.pid, 'Pid of chemicalShift', None, None),
+                 ('_object', lambda cs: cs, 'Object', None, None),
+                 ('NmrResidue', lambda cs: cs._key.rsplit('.', 1)[0], 'NmrResidue Id', None, None),
 
-                 # ('testResidue', lambda cs: ChemicalShiftTable._getNmrResidue(cs), 'NmrResidue: nmrChain', None),  # should be the same as above
-                 ('NmrChain', lambda cs: ChemicalShiftTable._getNmrChain(cs), 'NmrChain containing the nmrResidue linked to this chemicalShift', None),
-                 ('Sequence', lambda cs: ChemicalShiftTable._getSequenceCode(cs), 'NmrResidue sequence code', None),
-                 ('Type', lambda cs: ChemicalShiftTable._getResidueType(cs), 'NmrResidue residue type', None),
+                 # ('testResidue', lambda cs: ChemicalShiftTable._getNmrResidue(cs), 'NmrResidue: nmrChain', None, None),  # should be the same as above
+                 ('NmrChain', lambda cs: ChemicalShiftTable._getNmrChain(cs), 'NmrChain containing the nmrResidue linked to this chemicalShift', None, None),
+                 ('Sequence', lambda cs: ChemicalShiftTable._getSequenceCode(cs), 'NmrResidue sequence code', None, None),
+                 ('Type', lambda cs: ChemicalShiftTable._getResidueType(cs), 'NmrResidue residue type', None, None),
 
-                 ('Name', lambda cs: cs._key.rsplit('.', 1)[-1], 'NmrAtom name', None),
-                 ('Shift', lambda cs: '%8.3f' % ChemicalShiftTable._stLamFloat(cs, 'value'), 'Value of chemical shift, in selected ChemicalShiftList', None),
-                 ('Std. Dev.', lambda cs: '%6.3f' % ChemicalShiftTable._stLamFloat(cs, 'valueError'),
-                  'Standard deviation of chemical shift, in selected ChemicalShiftList', None),
+                 ('Name', lambda cs: cs._key.rsplit('.', 1)[-1], 'NmrAtom name', None, None),
+                 ('Shift', lambda cs: ChemicalShiftTable._stLamFloat(cs, 'value'), 'Value of chemical shift, in selected ChemicalShiftList', None, '%8.3f'),
+                 ('Std. Dev.', lambda cs: ChemicalShiftTable._stLamFloat(cs, 'valueError'),
+                  'Standard deviation of chemical shift, in selected ChemicalShiftList', None, '%6.3f'),
                  ('Shift list peaks',
-                  lambda cs: '%3d ' % ChemicalShiftTable._getShiftPeakCount(cs), 'Number of peaks assigned to this NmrAtom in PeakLists associated with this'
-                                                                                 'ChemicalShiftList', None),
+                  lambda cs: ChemicalShiftTable._getShiftPeakCount(cs), 'Number of peaks assigned to this NmrAtom in PeakLists associated with this'
+                                                                                 'ChemicalShiftList', None, '%3d'),
                  ('All peaks',
-                  lambda cs: '%3d ' % len(set(x for x in cs.nmrAtom.assignedPeaks)), 'Number of peaks assigned to this NmrAtom across all PeakLists', None),
+                  lambda cs: len(set(x for x in cs.nmrAtom.assignedPeaks)), 'Number of peaks assigned to this NmrAtom across all PeakLists', None, '%3d'),
                  ('Comment', lambda cs: ChemicalShiftTable._getCommentText(cs), 'Notes',
-                  lambda cs, value: ChemicalShiftTable._setComment(cs, value))
+                  lambda cs, value: ChemicalShiftTable._setComment(cs, value), None)
                  ])
-        #[Column(colName, func, tipText=tipText, setEditValue=editValue) for colName, func, tipText, editValue in self.columnDefs]
+        #[Column(colName, func, tipText=tipText, setEditValue=editValue, format=columnFormat)
+        # for colName, func, tipText, editValue, columnFormat in self.columnDefs]
 
         # create the table; objects are added later via the displayTableForNmrChain method
         # initialise the table
@@ -287,7 +290,7 @@ class ChemicalShiftTable(GuiTable):
                                className=self.attributeName,
                                tableSelection='chemicalShiftList',
                                rowClass=ChemicalShift,
-                               cellClassNames=None,
+                               cellClassNames=None,     # handled by the _finaliseAction notifier system
                                tableName='chemicalShiftList', rowName='chemicalShift',
                                changeFunc=self.displayTableForChemicalShift,
                                updateFunc=self._update,
@@ -429,6 +432,19 @@ class ChemicalShiftTable(GuiTable):
         return (len(set(x for x in peaks
                         if x.peakList.chemicalShiftList is chemicalShiftList)))
 
+    # this is now deprecated and replaced by notifers in _finaliseAction - may do this for all tables
+    # def getCellToRows(self, cellItem, attribute):
+    #     """Get the list of objects which cellItem maps to for this table
+    #     """
+    #     # this is a step towards making guiTableABC and subclass for each table
+    #     chemicalShifts = ()
+    #     if self.chemicalShiftList:
+    #         # chemicalShifts = tuple(set([cs for cs in self.chemicalShiftList.chemicalShifts if cs.nmrAtom and cellItem in cs.nmrAtom.assignedPeaks]))
+    #         chemicalShifts = tuple(set([cs for cs in self.chemicalShiftList.chemicalShifts if cs.nmrAtom is cellItem]))
+    #
+    #     print('>>>>>>chemicalShift on nmrAtom', cellItem, chemicalShifts)
+    #     return chemicalShifts
+
     @staticmethod
     def _stLamFloat(row, name):
         """
@@ -486,3 +502,4 @@ class ChemicalShiftTable(GuiTable):
         # self.clearTableNotifiers()
         self._chemicalShiftListPulldown.unRegister()
         super()._close()
+

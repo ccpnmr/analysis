@@ -68,7 +68,7 @@
 <span class="c1">#=========================================================================================</span>
 <span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: CCPN $&quot;</span>
 <span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2017-07-07 16:32:51 +0100 (Fri, July 07, 2017) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b5 $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.0 $&quot;</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Created</span>
 <span class="c1">#=========================================================================================</span>
@@ -117,6 +117,13 @@
     <span class="s1">&#39;ignored&#39;</span>         <span class="p">:</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QSizePolicy</span><span class="o">.</span><span class="n">Ignored</span><span class="p">,</span>
     <span class="p">}</span>
 
+<span class="n">FOCUS_DICT</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">&#39;no&#39;</span>    <span class="p">:</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">NoFocus</span><span class="p">,</span>
+    <span class="s1">&#39;tab&#39;</span>   <span class="p">:</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">TabFocus</span><span class="p">,</span>
+    <span class="s1">&#39;click&#39;</span> <span class="p">:</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">ClickFocus</span><span class="p">,</span>
+    <span class="s1">&#39;string&#39;</span><span class="p">:</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">StrongFocus</span>
+    <span class="p">}</span>
+
 
 <div class="viewcode-block" id="Base"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.Base.Base">[docs]</a><span class="k">class</span> <span class="nc">Base</span><span class="p">(</span><span class="n">DropBase</span><span class="p">):</span>
 
@@ -135,11 +142,13 @@
               <span class="c1"># keywords for adding to parent</span>
               <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="bp">None</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span> <span class="n">gridSpan</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">stretch</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
               <span class="n">hAlign</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">vAlign</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
-              <span class="n">hidden</span><span class="o">=</span> <span class="bp">False</span><span class="p">,</span>
+              <span class="n">hidden</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
 
               <span class="c1"># keywords related to dropable properties</span>
               <span class="n">acceptDrops</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
 
+              <span class="c1"># other keywords</span>
+              <span class="n">focusPolicy</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
               <span class="n">objectName</span><span class="o">=</span><span class="bp">None</span>
               <span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -202,6 +211,10 @@
         <span class="k">if</span> <span class="ow">not</span> <span class="n">isFloatWidget</span> <span class="ow">and</span> <span class="p">(</span><span class="n">grid</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">or</span> <span class="n">grid</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">):</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_addToParent</span><span class="p">(</span><span class="n">grid</span><span class="o">=</span><span class="n">grid</span><span class="p">,</span> <span class="n">gridSpan</span><span class="o">=</span><span class="n">gridSpan</span><span class="p">,</span> <span class="n">stretch</span><span class="o">=</span><span class="n">stretch</span><span class="p">,</span>
                               <span class="n">hAlign</span><span class="o">=</span><span class="n">hAlign</span><span class="p">,</span> <span class="n">vAlign</span><span class="o">=</span><span class="n">vAlign</span><span class="p">)</span>
+
+        <span class="c1"># set the focus policy for the widget, if not valid, will default to strongFocus</span>
+        <span class="k">if</span> <span class="n">focusPolicy</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">setFocusPolicy</span><span class="p">(</span><span class="n">FOCUS_DICT</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">focusPolicy</span><span class="p">,</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">StrongFocus</span><span class="p">))</span>
 
         <span class="c1"># set the object name of the widget to give unique name for restoring widgets</span>
         <span class="k">if</span> <span class="n">objectName</span><span class="p">:</span>
@@ -299,8 +312,8 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="p">()</span></div>
 
-<div class="viewcode-block" id="Base.addSpacer"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.Base.Base.addSpacer">[docs]</a>    <span class="k">def</span> <span class="nf">addSpacer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">width</span><span class="p">,</span> <span class="n">height</span><span class="p">,</span> <span class="n">grid</span><span class="p">,</span> <span class="n">gridSpan</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">)):</span>
-        <span class="sd">&quot;&quot;&quot;Convience to insert spacer</span>
+<div class="viewcode-block" id="Base.addSpacer"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.Base.Base.addSpacer">[docs]</a>    <span class="k">def</span> <span class="nf">addSpacer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">width</span><span class="p">,</span> <span class="n">height</span><span class="p">,</span> <span class="n">grid</span><span class="p">,</span> <span class="n">gridSpan</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">expandX</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">expandY</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Convenience to insert spacer</span>
 <span class="sd">        width, height: in pixels</span>
 <span class="sd">        grid=(row,col): tuple or list defining row, column</span>
 <span class="sd">        gridSpan: tuple or list defining grid-span along row, column</span>
@@ -308,7 +321,11 @@
 <span class="sd">        :returns: Spacer widget</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Spacer</span> <span class="kn">import</span> <span class="n">Spacer</span>
-        <span class="k">return</span> <span class="n">Spacer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="n">width</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="n">height</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="n">grid</span><span class="p">,</span> <span class="n">gridSpan</span><span class="o">=</span><span class="n">gridSpan</span><span class="p">)</span></div></div>
+
+        <span class="n">expandingX</span> <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QSizePolicy</span><span class="o">.</span><span class="n">MinimumExpanding</span> <span class="k">if</span> <span class="n">expandX</span> <span class="k">else</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QSizePolicy</span><span class="o">.</span><span class="n">Fixed</span>
+        <span class="n">expandingY</span> <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QSizePolicy</span><span class="o">.</span><span class="n">MinimumExpanding</span> <span class="k">if</span> <span class="n">expandY</span> <span class="k">else</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QSizePolicy</span><span class="o">.</span><span class="n">Fixed</span>
+
+        <span class="k">return</span> <span class="n">Spacer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">width</span><span class="p">,</span> <span class="n">height</span><span class="p">,</span> <span class="n">expandingX</span><span class="p">,</span> <span class="n">expandingY</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="n">grid</span><span class="p">,</span> <span class="n">gridSpan</span><span class="o">=</span><span class="n">gridSpan</span><span class="p">)</span></div></div>
 </pre></div>
 
           </div>

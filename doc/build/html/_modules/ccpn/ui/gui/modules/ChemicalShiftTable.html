@@ -66,7 +66,7 @@
 <span class="c1">#=========================================================================================</span>
 <span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: CCPN $&quot;</span>
 <span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2017-07-07 16:32:43 +0100 (Fri, July 07, 2017) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b5 $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.0 $&quot;</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Created</span>
 <span class="c1">#=========================================================================================</span>
@@ -190,8 +190,8 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">installMaximiseEventHandler</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_maximise</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_closeModule</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_fillDisplayWidget</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="nb">list</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;&gt; select-to-add &lt;&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="n">ALL</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="n">display</span><span class="o">.</span><span class="n">pid</span> <span class="k">for</span> <span class="n">display</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">spectrumDisplays</span><span class="p">]</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">displaysWidget</span><span class="o">.</span><span class="n">pulldownList</span><span class="o">.</span><span class="n">setData</span><span class="p">(</span><span class="n">texts</span><span class="o">=</span><span class="nb">list</span><span class="p">)</span>
+        <span class="n">ll</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;&gt; select-to-add &lt;&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="n">ALL</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="n">display</span><span class="o">.</span><span class="n">pid</span> <span class="k">for</span> <span class="n">display</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">spectrumDisplays</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">displaysWidget</span><span class="o">.</span><span class="n">pulldownList</span><span class="o">.</span><span class="n">setData</span><span class="p">(</span><span class="n">texts</span><span class="o">=</span><span class="n">ll</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_maximise</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -243,7 +243,7 @@
 
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">mainWindow</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">moduleParent</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
                  <span class="n">actionCallback</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">selectionCallback</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
-                 <span class="n">chemicalShiftList</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">hiddenColumns</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;Pid&#39;</span><span class="p">],</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
+                 <span class="n">chemicalShiftList</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">hiddenColumns</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;Pid&#39;</span><span class="p">,</span> <span class="s1">&#39;NmrChain&#39;</span><span class="p">,</span> <span class="s1">&#39;Sequence&#39;</span><span class="p">,</span> <span class="s1">&#39;Type&#39;</span><span class="p">],</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Initialise the widgets for the module.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -266,6 +266,12 @@
                  <span class="p">(</span><span class="s1">&#39;Pid&#39;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">cs</span><span class="p">:</span> <span class="n">cs</span><span class="o">.</span><span class="n">pid</span><span class="p">,</span> <span class="s1">&#39;Pid of chemicalShift&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span>
                  <span class="p">(</span><span class="s1">&#39;_object&#39;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">cs</span><span class="p">:</span> <span class="n">cs</span><span class="p">,</span> <span class="s1">&#39;Object&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span>
                  <span class="p">(</span><span class="s1">&#39;NmrResidue&#39;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">cs</span><span class="p">:</span> <span class="n">cs</span><span class="o">.</span><span class="n">_key</span><span class="o">.</span><span class="n">rsplit</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">],</span> <span class="s1">&#39;NmrResidue Id&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span>
+
+                 <span class="c1"># (&#39;testResidue&#39;, lambda cs: ChemicalShiftTable._getNmrResidue(cs), &#39;NmrResidue: nmrChain&#39;, None),  # should be the same as above</span>
+                 <span class="p">(</span><span class="s1">&#39;NmrChain&#39;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">cs</span><span class="p">:</span> <span class="n">ChemicalShiftTable</span><span class="o">.</span><span class="n">_getNmrChain</span><span class="p">(</span><span class="n">cs</span><span class="p">),</span> <span class="s1">&#39;NmrChain containing the nmrResidue linked to this chemicalShift&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span>
+                 <span class="p">(</span><span class="s1">&#39;Sequence&#39;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">cs</span><span class="p">:</span> <span class="n">ChemicalShiftTable</span><span class="o">.</span><span class="n">_getSequenceCode</span><span class="p">(</span><span class="n">cs</span><span class="p">),</span> <span class="s1">&#39;NmrResidue sequence code&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span>
+                 <span class="p">(</span><span class="s1">&#39;Type&#39;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">cs</span><span class="p">:</span> <span class="n">ChemicalShiftTable</span><span class="o">.</span><span class="n">_getResidueType</span><span class="p">(</span><span class="n">cs</span><span class="p">),</span> <span class="s1">&#39;NmrResidue residue type&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span>
+
                  <span class="p">(</span><span class="s1">&#39;Name&#39;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">cs</span><span class="p">:</span> <span class="n">cs</span><span class="o">.</span><span class="n">_key</span><span class="o">.</span><span class="n">rsplit</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="s1">&#39;NmrAtom name&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span>
                  <span class="p">(</span><span class="s1">&#39;Shift&#39;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">cs</span><span class="p">:</span> <span class="s1">&#39;</span><span class="si">%8.3f</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">ChemicalShiftTable</span><span class="o">.</span><span class="n">_stLamFloat</span><span class="p">(</span><span class="n">cs</span><span class="p">,</span> <span class="s1">&#39;value&#39;</span><span class="p">),</span> <span class="s1">&#39;Value of chemical shift, in selected ChemicalShiftList&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span>
                  <span class="p">(</span><span class="s1">&#39;Std. Dev.&#39;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">cs</span><span class="p">:</span> <span class="s1">&#39;</span><span class="si">%6.3f</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">ChemicalShiftTable</span><span class="o">.</span><span class="n">_stLamFloat</span><span class="p">(</span><span class="n">cs</span><span class="p">,</span> <span class="s1">&#39;valueError&#39;</span><span class="p">),</span>
@@ -290,6 +296,7 @@
                          <span class="n">actionCallback</span><span class="o">=</span><span class="n">actionCallback</span> <span class="k">if</span> <span class="n">actionCallback</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">_actionCallback</span><span class="p">,</span>
                          <span class="n">selectionCallback</span><span class="o">=</span><span class="n">selectionCallback</span> <span class="k">if</span> <span class="n">selectionCallback</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">_selectionCallback</span><span class="p">,</span>
                          <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">gridSpan</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">6</span><span class="p">),</span>
+                         <span class="n">multiSelect</span><span class="o">=</span><span class="bp">True</span>
                          <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">moduleParent</span> <span class="o">=</span> <span class="n">moduleParent</span>
 
@@ -302,7 +309,7 @@
                                                                     <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">gridSpan</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">minimumWidths</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">100</span><span class="p">),</span>
                                                                     <span class="n">showSelectName</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
                                                                     <span class="n">sizeAdjustPolicy</span><span class="o">=</span><span class="n">QtWidgets</span><span class="o">.</span><span class="n">QComboBox</span><span class="o">.</span><span class="n">AdjustToContents</span><span class="p">,</span>
-                                                                    <span class="n">callback</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_selectionPulldownCallback</span>
+                                                                    <span class="n">callback</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_selectionPulldownCallback</span><span class="p">,</span>
                                                                     <span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">spacer</span> <span class="o">=</span> <span class="n">Spacer</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_widget</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span>
@@ -318,7 +325,6 @@
         <span class="c1"># TODO: see how to handle peaks as this is too costly at present</span>
         <span class="c1"># Notifier object to update the table if the peaks change</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_peaksNotifier</span> <span class="o">=</span> <span class="bp">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_updateSilence</span> <span class="o">=</span> <span class="bp">False</span>  <span class="c1"># flag to silence updating of the table</span>
         <span class="c1"># self._setNotifiers()</span>
 
         <span class="c1"># self.setColumns(self.CScolumns)   # ejb - moved here but doesn&#39;t allow changing of the columns</span>
@@ -407,31 +413,22 @@
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Update the table</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_updateSilence</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">blankNotification</span><span class="p">()</span>
-            <span class="n">objs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getSelectedObjects</span><span class="p">()</span>
-
-            <span class="bp">self</span><span class="o">.</span><span class="n">_dataFrameObject</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getDataFrameFromList</span><span class="p">(</span><span class="n">table</span><span class="o">=</span><span class="bp">self</span><span class="p">,</span>
-                                                              <span class="n">buildList</span><span class="o">=</span><span class="n">chemicalShiftList</span><span class="o">.</span><span class="n">chemicalShifts</span><span class="p">,</span>
-                                                              <span class="n">colDefs</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">CScolumns</span><span class="p">,</span>
-                                                              <span class="n">hiddenColumns</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_hiddenColumns</span><span class="p">)</span>
-
-            <span class="c1"># populate from the Pandas dataFrame inside the dataFrameObject</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">setTableFromDataFrameObject</span><span class="p">(</span><span class="n">dataFrameObject</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_dataFrameObject</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_highLightObjs</span><span class="p">(</span><span class="n">objs</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">unblankNotification</span><span class="p">()</span>
-
-<div class="viewcode-block" id="ChemicalShiftTable.setUpdateSilence"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.modules.ChemicalShiftTable.ChemicalShiftTable.setUpdateSilence">[docs]</a>    <span class="k">def</span> <span class="nf">setUpdateSilence</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">silence</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Silences/unsilences the update of the table until switched again</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_updateSilence</span> <span class="o">=</span> <span class="n">silence</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">populateTable</span><span class="p">(</span><span class="n">rowObjects</span><span class="o">=</span><span class="n">chemicalShiftList</span><span class="o">.</span><span class="n">chemicalShifts</span><span class="p">,</span>
+                           <span class="n">columnDefs</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">CScolumns</span>
+                           <span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_actionCallback</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Notifier DoubleClick action on item in table</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">obj</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">CallBack</span><span class="o">.</span><span class="n">OBJECT</span><span class="p">]</span>
+        <span class="c1"># multiselection table will return a list of objects</span>
+        <span class="n">objs</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">CallBack</span><span class="o">.</span><span class="n">OBJECT</span><span class="p">]</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">objs</span><span class="p">:</span>
+            <span class="k">return</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">objs</span><span class="p">,</span> <span class="p">(</span><span class="nb">tuple</span><span class="p">,</span> <span class="nb">list</span><span class="p">)):</span>
+            <span class="n">obj</span> <span class="o">=</span> <span class="n">objs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">obj</span> <span class="o">=</span> <span class="n">objs</span>
 
         <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;ChemicalShiftTable&gt;&gt;&gt; action&#39;</span><span class="p">,</span> <span class="n">obj</span><span class="p">)</span>
 
@@ -439,27 +436,23 @@
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Notifier Callback for selecting a row in the table</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">obj</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">CallBack</span><span class="o">.</span><span class="n">OBJECT</span><span class="p">]</span>
+        <span class="c1"># obj = data[CallBack.OBJECT]</span>
+        <span class="c1">#</span>
+        <span class="c1"># getLogger().debug(&#39;ChemicalShiftTable&gt;&gt;&gt; selection&#39;, obj)</span>
+        <span class="c1"># return</span>
 
-        <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;ChemicalShiftTable&gt;&gt;&gt; selection&#39;</span><span class="p">,</span> <span class="n">obj</span><span class="p">)</span>
-        <span class="k">return</span>
-
-        <span class="n">selected</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">CallBack</span><span class="o">.</span><span class="n">OBJECT</span><span class="p">]</span>
-
-        <span class="k">if</span> <span class="n">selected</span><span class="p">:</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">multiSelect</span><span class="p">:</span>  <span class="c1">#In this case selected is a List!!</span>
-                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">selected</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
-                    <span class="n">obj</span> <span class="o">=</span> <span class="n">selected</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">obj</span> <span class="o">=</span> <span class="n">selected</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">objs</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">CallBack</span><span class="o">.</span><span class="n">OBJECT</span><span class="p">]</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">objs</span><span class="p">:</span>
+            <span class="k">return</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">objs</span><span class="p">,</span> <span class="p">(</span><span class="nb">tuple</span><span class="p">,</span> <span class="nb">list</span><span class="p">)):</span>
+            <span class="n">chemicalShift</span> <span class="o">=</span> <span class="n">objs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">obj</span> <span class="o">=</span> <span class="bp">None</span>
+            <span class="n">chemicalShift</span> <span class="o">=</span> <span class="n">objs</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">chemicalShift</span> <span class="o">=</span> <span class="n">obj</span>
-        <span class="n">ChemicalShiftTableModule</span><span class="o">.</span><span class="n">currentCallback</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;object&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">chemicalShiftList</span><span class="p">,</span> <span class="s1">&#39;table&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="p">}</span>
+        <span class="k">if</span> <span class="n">chemicalShift</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">chemicalShift</span> <span class="o">=</span> <span class="n">chemicalShift</span>
+            <span class="n">ChemicalShiftTableModule</span><span class="o">.</span><span class="n">currentCallback</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;object&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">chemicalShiftList</span><span class="p">,</span> <span class="s1">&#39;table&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="p">}</span>
 
-        <span class="k">if</span> <span class="n">obj</span><span class="p">:</span>  <span class="c1"># should presumably always be the case</span>
-            <span class="n">chemicalShift</span> <span class="o">=</span> <span class="n">obj</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">nmrAtom</span> <span class="o">=</span> <span class="n">chemicalShift</span><span class="o">.</span><span class="n">nmrAtom</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">nmrResidue</span> <span class="o">=</span> <span class="n">chemicalShift</span><span class="o">.</span><span class="n">nmrAtom</span><span class="o">.</span><span class="n">nmrResidue</span>
 
@@ -492,6 +485,46 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="n">name</span><span class="p">))</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">None</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_getNmrChain</span><span class="p">(</span><span class="n">chemicalShift</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        CCPN-INTERNAL: get the nmrChain for the nmrResidue associated with this chemicalShift</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">chemicalShift</span><span class="o">.</span><span class="n">nmrAtom</span><span class="o">.</span><span class="n">nmrResidue</span><span class="o">.</span><span class="n">nmrChain</span><span class="o">.</span><span class="n">id</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">None</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_getSequenceCode</span><span class="p">(</span><span class="n">chemicalShift</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        CCPN-INTERNAL: get the sequenceCode for the nmrResidue associated with this chemicalShift</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">chemicalShift</span><span class="o">.</span><span class="n">nmrAtom</span><span class="o">.</span><span class="n">nmrResidue</span><span class="o">.</span><span class="n">sequenceCode</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">None</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_getResidueType</span><span class="p">(</span><span class="n">chemicalShift</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        CCPN-INTERNAL: get the residueType for the nmrResidue associated with this chemicalShift</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">chemicalShift</span><span class="o">.</span><span class="n">nmrAtom</span><span class="o">.</span><span class="n">nmrResidue</span><span class="o">.</span><span class="n">residueType</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">None</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_getNmrResidue</span><span class="p">(</span><span class="n">chemicalShift</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        CCPN-INTERNAL: get the nmrResidue for the nmrResidue associated with this chemicalShift</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">chemicalShift</span><span class="o">.</span><span class="n">nmrAtom</span><span class="o">.</span><span class="n">nmrResidue</span>
         <span class="k">except</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">None</span>
 

@@ -33,7 +33,10 @@ from ccpn.ui.gui.widgets.Base import Base
 from ccpn.ui.gui.widgets.Menu import Menu
 from ccpn.util.Constants import ccpnmrJsonData
 
-
+# GST is this really a WrapperObject ListWidget because there appear to be some
+# methods and features that are possibly quite coupled to them or some defined
+# object e.g objects with text() methods and which have items associated with them
+# maybe needs a refactoring or a rename (or both)... or of course I maybe reading this wrong...
 class ListWidget(QtWidgets.QListWidget, Base):
     # # To be done more rigeriously later
     # _styleSheet = """
@@ -67,12 +70,15 @@ class ListWidget(QtWidgets.QListWidget, Base):
         self.setAcceptDrops(acceptDrops)
         self.contextMenu = contextMenu
         self.callback = callback
+        # GST why dow we keep our own list of items and objects when we could add them as user data
+        # to the ListWidgetItem... this st seems like a way for things to get out of sync
         self.objects = {id(obj): obj for obj in objects} if objects else {}  # list(objects) or [])
         self._items = list(objects or [])
         self.multiSelect = multiSelect
         self.dropSource = None
 
-        #GST this only works for sorting on drops...
+        # GST this only works for sorting on drops... it doesn't allow for sorting on moving items
+        # with double clicks or menus
         self.sortOnDrop = sortOnDrop
         self.copyDrop = copyDrop
         self.allowDuplicates = allowDuplicates
@@ -104,6 +110,8 @@ class ListWidget(QtWidgets.QListWidget, Base):
             self.clear()
             self.cleared.emit()
 
+            # GST why don't we clear self._items and self.objects
+            # GST why don't we add to self.objects
             # self.items = []
         for text in texts:
             item = QtWidgets.QListWidgetItem(str(text))
@@ -120,6 +128,7 @@ class ListWidget(QtWidgets.QListWidget, Base):
                 item.setData(QtCore.Qt.UserRole, id(obj))
                 obj.item = item
                 self.addItem(item)
+                #GST why do we store items when a list widget stores them as well...
                 self._items.append(item)
 
             else:

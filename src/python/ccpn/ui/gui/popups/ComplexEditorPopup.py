@@ -46,5 +46,7 @@ class ComplexEditorPopup(_GroupEditorPopupABC):
 
     PLURAL_GROUPED_NAME = 'Complexes'
     SINGULAR_GROUP_NAME = 'Complex'
-    PID_KEY='MX'
+
+    ITEM_PID_KEY='MC'
+    GROUP_PID_KEY= 'MX'
 

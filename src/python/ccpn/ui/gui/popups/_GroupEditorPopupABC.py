@@ -26,6 +26,7 @@ __date__ = "$Date: 2017-03-30 11:28:58 +0100 (Thu, March 30, 2017) $"
 #=========================================================================================
 
 from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5.QtCore import QDataStream, Qt, QVariant
 
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.ListWidget import ListWidget
@@ -42,7 +43,8 @@ from ccpn.core.lib.ContextManagers import undoBlock
 
 from re import finditer
 
-from collections import Counter
+from collections import Counter, OrderedDict
+from itertools import zip_longest
 import copy
 
 
@@ -67,12 +69,121 @@ class FeedbackFrame(Frame):
             # this is background grey which I guess should be defined somewhere
             self.setStyleSheet('FeedbackFrame {border: 2px solid rgb(235,235,235)}')
 
+class OrderedListWidgteItem(QtWidgets.QListWidgetItem):
+    def __init__(self,*args,**kwargs):
+        super().__init__(*args,**kwargs)
+
+    def __lt__(self, other):
+        self_data = self.data(_ListWidget.SEARCH_ROLE_INDEX)
+        other_data = other.data(_ListWidget.SEARCH_ROLE_INDEX)
+
+        return self_data  < other_data
+
+class DefaultItemFactory:
+
+    def __init__(self,roleMap=None):
+
+        self._roleMap ={}
+
+        if roleMap is not None:
+            for role in roleMap.values():
+                if role ==  QtCore.Qt.UserRole:
+                    raise Exception('role QtCore.Qt.UserRole is reserved for ccpn use a value > QtCore.Qt.UserRole ')
+
+            self._roleMap.update(roleMap)
+
+        self._roleMap['USER_ROLE'] = QtCore.Qt.UserRole
+
+    def instantiateItem(self,item,parent):
+
+        if not isinstance(item,QtWidgets.QListWidgetItem):
+            result = QtWidgets.QListWidgetItem(item,parent)
+        else:
+            result =  None
+
+        return result
+
+    def ensureItem(self,item,parent=None):
+
+        result = self.instantiateItem(item,parent)
+
+        if result is None:
+            result = item
+
+            if parent != None:
+                result.setParent(parent)
+
+        return result
+
+    # GST from https://wiki.python.org/moin/PyQt/Handling%20Qt%27s%20internal%20item%20MIME%20type
+    # note the original has a bug! the items {} is declared to high and is aliased, this only appears
+    # when multiple items are dragged
+    def decodeDragData(self, bytearray):
+
+        data = OrderedDict()
+
+
+        ds = QDataStream(bytearray)
+        while not ds.atEnd():
+            item = {}
+            row = ds.readInt32()
+            column = ds.readInt32()
+            key=(row,column)
+
+            data[key] = item
+            map_items = ds.readInt32()
+            for i in range(map_items):
+                key = ds.readInt32()
+
+                value = QVariant()
+                ds >> value
+                item[Qt.ItemDataRole(key)] = value
+
+        return data
+
+    def createItemsFromMimeData(self,data):
+        data =  self.decodeDragData(data)
+
+        result = []
+        for i,item in enumerate(data.values()):
+            string = item[0].value()
+            del item[0]
+            result.append(self.createItem(string,data=item))
+
+        return result
+
+    def createItem(self,string,data=[], parent=None):
+        result = self.ensureItem(string,parent=parent)
+        for role,value in data.items():
+            result.setData(role,value)
+
+        return result
+
+
+class OrderedListWidgetItemFactory(DefaultItemFactory):
+
+    def __init__(self):
+        super().__init__({_ListWidget.SEARCH_ROLE : _ListWidget.SEARCH_ROLE_INDEX})
+
+    def instantiateItem(self,item, parent):
+
+        if not isinstance(item,OrderedListWidgteItem):
+            result = OrderedListWidgteItem(item,parent)
+        else:
+            result = None
+
+        return result
 
 class _ListWidget(ListWidget):
     """Subclassed for dropEvent"""
 
     ROLES = ('Left','Right')
-    def __init__(self, *args, dragRole=None, feedbackWidget = None, rearrangeable=False,  emptyText=None, **kwds):
+
+    SEARCH_ROLE =  'SEARCH'
+    SEARCH_ROLE_INDEX = QtCore.Qt.UserRole + 1
+
+    def __init__(self, *args, dragRole=None, feedbackWidget = None, rearrangeable=False,  itemFactory=None,
+                 sorted = False, emptyText=None, **kwds):
 
         super().__init__(*args, **kwds)
 
@@ -90,7 +201,6 @@ class _ListWidget(ListWidget):
 
         self._emptyText = emptyText
 
-
         self._feedbackWidget = feedbackWidget
         self._partner = None
 
@@ -99,7 +209,68 @@ class _ListWidget(ListWidget):
         # GST seems to be missing a border, why?
         self.setStyleSheet('ListWidget { border: 1px solid rgb(207,207,207)}')
 
+        self.setSortingEnabled(sorted)
+
+        self._itemFactory=itemFactory
+        if self._itemFactory is None:
+            self._itemFactory = DefaultItemFactory()
+
         self._feedbackWidget.highlight(False)
+
+    def startDrag(self,*args,**kwargs):
+        super().startDrag(*args,**kwargs)
+
+    def setTexts(self, texts, clear=True, data=[]):
+
+        if clear:
+            self.clear()
+            self.cleared.emit()
+
+        if len(texts) < len(data):
+            raise Exception('more data than items!')
+
+        for text,datum in zip_longest(texts,data,fillvalue={}):
+            item = self._itemFactory.createItem(str(text),datum)
+
+            self.addItem(item)
+
+    def _buildItemData(self,objects,data):
+
+        data = copy.deepcopy(data)
+        for i,object in enumerate(objects):
+
+            if i < len(data):
+                data[i]['USER_ROLE'] = id(object)
+            else:
+                data.append({'USER_ROLE' : id(object)})
+
+        return data
+
+
+
+    def setObjects(self, objects, name='pid', data=[]):
+        self.clear()
+        self.cleared.emit()
+
+        self.objects = {id(obj): obj for obj in objects}  # list(objects)
+
+        if len(objects) < len(data):
+            raise Exception('more data than items!')
+
+        data  = self._buildItemData(objects,data)
+        for obj,datum in zip_longest(objects,data,fillvalue={}):
+            if hasattr(obj, name):
+                item = self._itemFactory.createItem(getattr(obj, name),data=datum,parent=self)
+                # GST why does each object need to have an item associated with it?
+                # this associates data with 'model items' which 'isn't good'
+                obj.item = item
+                self.addItem(item)
+                self._items.append(item)
+
+            else:
+                item = self._itemFactory.createItem(str(obj),data=datum,parent=self)
+                self.addItem(item)
+
 
     def setPartner(self,partner):
         self._partner=partner
@@ -149,13 +320,25 @@ class _ListWidget(ListWidget):
         self._dragReset()
 
 
+    def dropMimeData(self, index, data,  action):
+
+        mimeData = data.data('application/x-qabstractitemmodeldatalist')
+        items  = self._itemFactory.createItemsFromMimeData(mimeData)
+
+        for item in reversed(items):
+            self.insertItem(index,item)
+
+        return True
+
     def dropEvent(self, event):
+
         if self._isAcceptableDrag(event):
 
             data = self.parseEvent(event)
             if self._rearrangeable and data['source'] == self:
                 QtWidgets.QListWidget.dropEvent(self,event)
             else:
+                data = self.parseEvent(event)
                 super().dropEvent(event=event)
 
             self._dragReset()
@@ -255,7 +438,6 @@ class _GroupEditorPopupABC(CcpnDialog):
         """
         Initialise the widget, note defaultItems is only used for create
         """
-        print(editMode)
 
         self.GROUP_NAME = camelCaseSplit(self.KLASS.className)
 
@@ -346,8 +528,8 @@ class _GroupEditorPopupABC(CcpnDialog):
         self.leftItemsLabel = Label(self, self.KLASS_ITEM_ATTRIBUTE.capitalize())
         self.leftListFeedbackWidget = FeedbackFrame(self)
         self.leftListWidget = _ListWidget(self.leftListFeedbackWidget, feedbackWidget = self.leftListFeedbackWidget,
-                                          grid=(0,0),dragRole='right',acceptDrops=True, sortOnDrop=False, copyDrop=False,
-                                          emptyText=self.LEFT_EMPTY_TEXT,rearrangeable=True)
+                                          grid=(0,0), dragRole='right', acceptDrops=True, sortOnDrop=False, copyDrop=False,
+                                          emptyText=self.LEFT_EMPTY_TEXT, rearrangeable=True, itemFactory=OrderedListWidgetItemFactory())
 
 
 
@@ -379,8 +561,8 @@ class _GroupEditorPopupABC(CcpnDialog):
 
         self.rightListFeedbackWidget = FeedbackFrame(self)
         self.rightListWidget = _ListWidget(self.rightListFeedbackWidget, feedbackWidget = self.rightListFeedbackWidget,
-                                           grid=(0,0),dragRole='left',acceptDrops=True, sortOnDrop=False, copyDrop=False,
-                                           emptyText=self.RIGHT_EMPTY_TEXT)
+                                           grid=(0,0), dragRole='left', acceptDrops=True, sortOnDrop=False, copyDrop=False,
+                                           emptyText=self.RIGHT_EMPTY_TEXT, sorted=True, itemFactory=OrderedListWidgetItemFactory())
         self.rightFilterLabel = Label(self, self.BUTTON_FILTER)
         self.errorFrame = Frame(self,setLayout=True)
         # self.rightListWidget.setFixedWidth(2*self.FIXEDWIDTH)
@@ -790,6 +972,17 @@ class _GroupEditorPopupABC(CcpnDialog):
             self.rightPullDown.setEnabled(True)
         self.connectModels()
 
+    def _getItemPositions(self,items):
+
+        result  = []
+
+        orderedPids = [elem.pid for elem in getattr(self.project, self.PROJECT_ITEM_ATTRIBUTE)]
+        for item in items:
+
+            result.append({_ListWidget.SEARCH_ROLE_INDEX : orderedPids.index(item)})
+
+        return result
+
 
     def _updateLeft(self):
         """Update Left
@@ -832,7 +1025,7 @@ class _GroupEditorPopupABC(CcpnDialog):
             self.rightListWidget.clear()
             group = self.rightPullDown.getSelectedObject()
             if group is not None:
-                self._setRightListWidgetItems(group.spectra)
+                self._setRightListWidgetItems(getattr(group, self.PROJECT_ITEM_ATTRIBUTE))
 
 
 
@@ -840,7 +1033,8 @@ class _GroupEditorPopupABC(CcpnDialog):
         """Convenience to set the items in the left ListWidget
         """
         # convert items to pid's
-        self.leftListWidget.setTexts(pids, clear=True)
+        data = self._getItemPositions(pids)
+        self.leftListWidget.setTexts(pids, clear=True, data=data)
 
     def _setRightListWidgetItems(self, items: list):
         """Convenience to set the items in the right ListWidget
@@ -850,7 +1044,8 @@ class _GroupEditorPopupABC(CcpnDialog):
         # filter for those pid's already on the left hand side
         leftPids = self.leftListWidget.getTexts()
         pids = [s for s in pids if s not in leftPids]
-        self.rightListWidget.setTexts(pids, clear=True)
+        data = self._getItemPositions(pids)
+        self.rightListWidget.setTexts(pids, clear=True, data=data)
 
     def _leftPullDownCallback(self, value=None):
         """Callback when selecting the left spectrumGroup pulldown item"""

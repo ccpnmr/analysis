@@ -1106,6 +1106,6 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
                             objs.extend(data)
 
                 except Exception as es:
-                    MessageDialog.showError('Load Data', 'loadData Error: %s' % str(es))
+                    MessageDialog.showError('Load Data', 'Loading "%s" encountered error: %s' % (url,str(es)))
                     getLogger().warning('loadData Error: %s' % str(es))
         return objs

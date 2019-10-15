@@ -30,7 +30,7 @@ from PyQt5 import QtWidgets
 from ccpn.core.PeakList import PeakList
 from ccpn.util import Phasing
 from ccpn.ui.gui.lib.GuiStrip import GuiStrip, DefaultMenu, PeakMenu, \
-    IntegralMenu, MultipletMenu, PhasingMenu, AxisMenu, MAXPEAKLABELTYPES
+    IntegralMenu, MultipletMenu, PhasingMenu, AxisMenu
 
 from ccpn.ui.gui.widgets.Icon import Icon
 from ccpn.ui.gui.widgets.Menu import Menu
@@ -96,6 +96,9 @@ class GuiStrip1d(GuiStrip):
                           :param selectedRegion:<List>  of <List> of coordinates to test
                           :return <Tuple>:(<Peak>, ...)
     """
+
+    MAXPEAKLABELTYPES = 1
+    MAXPEAKSYMBOLTYPES = 1
 
     def __init__(self, spectrumDisplay):
         """

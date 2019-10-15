@@ -2585,7 +2585,7 @@ class GLmultipletListMethods():
         """Calculate how many indices to add
         Returns the size of array needed to hold the indices, see insertExtraIndices
         """
-        return 2 * len(multiplet.peaks)
+        return 2 * len(multiplet.peaks) if multiplet.peaks else 0
 
     def extraVerticesCount(self, multiplet):
         """Calculate how many vertices to add
@@ -3161,13 +3161,18 @@ class GLintegralListMethods():
         """
         return obj.id + '\n' + str(obj.value)
 
-    def extraIndicesCount(self, multiplet):
+    def extraIndicesCount(self, integral):
         """Calculate how many indices to add
         """
         return 0
 
     def appendExtraIndices(self, *args):
         """Add extra indices to the index list
+        """
+        return 0
+
+    def extraVerticesCount(self, integral):
+        """Calculate how many vertices to add
         """
         return 0
 

@@ -58,9 +58,6 @@ STRIPLABEL_ISPLUS = 'stripLabel_isPlus'
 STRIPMINIMUMWIDTH = 100
 STRIPPLOTMINIMUMWIDTH = 100
 
-MAXPEAKLABELTYPES = 4
-MAXPEAKSYMBOLTYPES = 3
-
 DefaultMenu = 'DefaultMenu'
 PeakMenu = 'PeakMenu'
 IntegralMenu = 'IntegralMenu'
@@ -71,6 +68,9 @@ PhasingMenu = 'PhasingMenu'
 
 class GuiStrip(Frame):
     # inherits NotifierBase
+
+    MAXPEAKLABELTYPES = 4
+    MAXPEAKSYMBOLTYPES = 3
 
     def __init__(self, spectrumDisplay):
         """
@@ -243,8 +243,9 @@ class GuiStrip(Frame):
         if len(spectrumDisplay.strips) > 1:
 
             # copy the values form the first strip
-            self.peakLabelling = spectrumDisplay.strips[0].peakLabelling
-            self.symbolType = spectrumDisplay.strips[0].symbolType
+            self.peakLabelling = min(spectrumDisplay.strips[0].peakLabelling, self.MAXPEAKLABELTYPES - 1)
+            self.symbolType = min(spectrumDisplay.strips[0].symbolType, self.MAXPEAKSYMBOLTYPES - 1)
+
             self._symbolSize = spectrumDisplay.strips[0].symbolSize
             self._symbolThickness = spectrumDisplay.strips[0].symbolThickness
             self.gridVisible = spectrumDisplay.strips[0].gridVisible
@@ -257,10 +258,10 @@ class GuiStrip(Frame):
         else:
 
             # get the values from the preferences
-            self.peakLabelling = self._preferences.annotationType
-            self.symbolType = self._preferences.symbolType
-            self._symbolSize = self._preferences.symbolSizePixel
+            self.peakLabelling = min(self._preferences.annotationType, self.MAXPEAKLABELTYPES - 1)
+            self.symbolType = min(self._preferences.symbolType, self.MAXPEAKSYMBOLTYPES - 1)
 
+            self._symbolSize = self._preferences.symbolSizePixel
             self._symbolThickness = self._preferences.symbolThickness
             self.gridVisible = self._preferences.showGrid
             self.crosshairVisible = self._preferences.showCrosshair
@@ -1274,7 +1275,7 @@ class GuiStrip(Frame):
         """Toggles whether peak labelling is minimal is visible in the strip.
         """
         self.peakLabelling += 1
-        if self.peakLabelling > MAXPEAKLABELTYPES:
+        if self.peakLabelling > self.MAXPEAKLABELTYPES:
             self.peakLabelling = 0
 
         self._setPeakLabelling()
@@ -1285,7 +1286,7 @@ class GuiStrip(Frame):
         """Toggles whether peak labelling is minimal is visible in the strip.
         """
         self.peakLabelling = labelling
-        if self.peakLabelling > MAXPEAKLABELTYPES:
+        if self.peakLabelling > self.MAXPEAKLABELTYPES:
             self.peakLabelling = 0
 
         self._setPeakLabelling()
@@ -1318,7 +1319,7 @@ class GuiStrip(Frame):
         """Cycle through peak symbol types.
         """
         self.symbolType += 1
-        if self.symbolType > MAXPEAKSYMBOLTYPES:
+        if self.symbolType > self.MAXPEAKSYMBOLTYPES:
             self.symbolType = 0
 
         self._setPeakSymbols()
@@ -1329,7 +1330,7 @@ class GuiStrip(Frame):
         """set the peak symbol type.
         """
         self.symbolType = symbolNum
-        if self.symbolType > MAXPEAKSYMBOLTYPES:
+        if self.symbolType > self.MAXPEAKSYMBOLTYPES:
             self.symbolType = 0
 
         self._setPeakSymbols()

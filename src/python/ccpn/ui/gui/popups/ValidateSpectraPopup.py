@@ -458,7 +458,6 @@ class ValidateSpectraFrameABC(Frame):
         """Set the new url in the dataUrl
         """
         dataUrl.url = dataUrl.url.clone(path=newUrl)
-        print('>>>dataUrlFunc')
         self._validateAll()
 
     def _getDataUrlDialog(self, dataUrl):
@@ -534,7 +533,6 @@ class ValidateSpectraFrameABC(Frame):
     def filePathFunc(self, spectrum, filePath, dim=0):
         """Set the new filePath for the spectrum
         """
-        print('>>>filePathFunc')
         spectrum.filePath = filePath
         self._validateAll()
 

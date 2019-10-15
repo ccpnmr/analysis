@@ -112,10 +112,10 @@ class SpectrumPropertiesPopupABC(CcpnDialog):
                                                       QtWidgets.QDialogButtonBox.Apply,
                                                       QtWidgets.QDialogButtonBox.Ok,
                                                       QtWidgets.QDialogButtonBox.Help),
-                                             callbacks=(self._revertButton, self._closeButton,
-                                                        self._applyButton, self._okButton),
+                                             callbacks=(self._revertClicked, self._closeClicked,
+                                                        self._applyClicked, self._okClicked),
                                              texts=['Revert', None, None, None, ''],
-                                             tipTexts=['Revert - roll-back all applied changes and close',
+                                             tipTexts=['Revert - roll-back all applied changes',
                                                        'Close - keep all applied changes and close',
                                                        'Apply changes',
                                                        'Apply changes and close',
@@ -153,7 +153,7 @@ class SpectrumPropertiesPopupABC(CcpnDialog):
         # MUST BE SUBCLASSED
         raise NotImplementedError("Code error: function not implemented")
 
-    def _revertButton(self):
+    def _revertClicked(self):
         """Revert button signal comes here
         Revert (roll-back) the state of the project to before the popup was opened
         """
@@ -161,19 +161,22 @@ class SpectrumPropertiesPopupABC(CcpnDialog):
             # with undoStackBlocking():
             for undos in range(self._currentNumApplies):
                 self.project._undo.undo()
-        self.reject()
 
-    def _closeButton(self):
+        self._populate()
+        self._applyButton.setEnabled(False)
+        self._revertButton.setEnabled(False)
+
+    def _closeClicked(self):
         """Close button signal comes here
         """
         self.reject()
 
-    def _applyButton(self):
+    def _applyClicked(self):
         """Apply button signal comes here
         """
         self._applyChanges()
 
-    def _okButton(self):
+    def _okClicked(self):
         """OK button signal comes here
         """
         if self._applyChanges() is True:
@@ -399,6 +402,9 @@ def _verifyApply(tab, attributeName, value, *postFixes):
             for pf in postFixes:
                 if pf:
                     attributeName += str(pf)
+
+        print('>>>verifySpec', attributeName)
+
         if value:
 
             # store in dict
@@ -415,6 +421,9 @@ def _verifyApply(tab, attributeName, value, *postFixes):
         _button = popup.dialogButtons.button(QtWidgets.QDialogButtonBox.Apply)
         if _button:
             _button.setEnabled(allChanges)
+        _button = popup.dialogButtons.button(QtWidgets.QDialogButtonBox.Reset)
+        if _button:
+            _button.setEnabled(allChanges or popup._currentNumApplies)
 
 
 class GeneralTab(Widget):

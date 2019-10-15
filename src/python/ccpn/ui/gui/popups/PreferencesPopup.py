@@ -78,11 +78,14 @@ LineEditsMinimumWidth = 195
 NotImplementedTipText = 'This option has not been implemented yet'
 
 
-def _updateSettings(self, newPrefs):
+def _updateSettings(self, newPrefs, updateColourScheme):
     from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
 
     self.application.preferences = newPrefs
-    self._updateDisplay()
+    # application preferences updated so re-save
+    self.application._savePreferences()
+
+    self._updateDisplay(updateColourScheme)
 
     GLSignals = GLNotifier(parent=self)
     GLSignals.emitPaintEvent()
@@ -100,7 +103,8 @@ def _verifyApply(popup, attributeName, value, *postFixes):
             # attributeName += str(postFixes)
             for pf in postFixes:
                 if pf:
-                    attributeName += pf
+                    attributeName += str(pf)
+
         if value:
 
             # store in dict
@@ -116,6 +120,9 @@ def _verifyApply(popup, attributeName, value, *postFixes):
         _button = popup.dialogButtons.button(QtWidgets.QDialogButtonBox.Apply)
         if _button:
             _button.setEnabled(allChanges)
+        _button = popup.dialogButtons.button(QtWidgets.QDialogButtonBox.Reset)
+        if _button:
+            _button.setEnabled(allChanges or popup._currentNumApplies)
 
 
 class PreferencesPopup(CcpnDialog):
@@ -135,7 +142,10 @@ class PreferencesPopup(CcpnDialog):
             self.close()
             return
 
-        self.preferences = preferences
+        # copy the current preferences
+        self.preferences = deepcopy(preferences)
+
+        # grab the class with the preferences methods
         self._userPreferences = UserPreferences(readPreferences=False)
 
         # store the original values - needs to be recursive
@@ -154,10 +164,10 @@ class PreferencesPopup(CcpnDialog):
                                                       QtWidgets.QDialogButtonBox.Apply,
                                                       QtWidgets.QDialogButtonBox.Ok,
                                                       QtWidgets.QDialogButtonBox.Help),
-                                             callbacks=(self._revertButton, self._closeButton,
-                                                        self._applyButton, self._okButton),
+                                             callbacks=(self._revertClicked, self._closeClicked,
+                                                        self._applyClicked, self._okClicked),
                                              texts=['Revert', None, None, None, ''],
-                                             tipTexts=['Revert - roll-back all applied changes and close',
+                                             tipTexts=['Revert - roll-back all applied changes',
                                                        'Close - keep all applied changes and close',
                                                        'Apply changes',
                                                        'Apply changes and close',
@@ -176,7 +186,7 @@ class PreferencesPopup(CcpnDialog):
 
         self.setFixedWidth(self.sizeHint().width() + 24)
 
-    def _revertButton(self):
+    def _revertClicked(self):
         """Revert button signal comes here
         Revert (roll-back) the state of the project to before the popup was opened
         """
@@ -189,19 +199,23 @@ class PreferencesPopup(CcpnDialog):
 
             self.application._savePreferences()
 
-        self.reject()
+        # retrieve the original preferences
+        self.preferences = deepcopy(self._lastPrefs)
+        self._populate()
+        self._applyButton.setEnabled(False)
+        self._revertButton.setEnabled(False)
 
-    def _closeButton(self):
+    def _closeClicked(self):
         """Close button signal comes here
         """
         self.reject()
 
-    def _applyButton(self):
+    def _applyClicked(self):
         """Apply button signal comes here
         """
         self._applyChanges()
 
-    def _okButton(self):
+    def _okClicked(self):
         """OK button signal comes here
         """
         if self._applyChanges() is True:
@@ -213,25 +227,31 @@ class PreferencesPopup(CcpnDialog):
         for v in changes.values():
             v()
 
-    def _updateDisplay(self):
-        for display in self.project.spectrumDisplays:
-            for strip in display.strips:
-                strip.peakLabelling = self.preferences.general.annotationType
-                strip.symbolType = self.preferences.general.symbolType
-                strip.symbolSize = self.preferences.general.symbolSizePixel
+    def _updateDisplay(self, updateColourScheme):
 
-                strip.symbolThickness = self.preferences.general.symbolThickness
-                strip.gridVisible = self.preferences.general.showGrid
-                strip._contourThickness = self.preferences.general.contourThickness
-                strip.crosshairVisible = self.preferences.general.showCrosshair
+        # for display in self.project.spectrumDisplays:
+        #     for strip in display.strips:
+        #         strip.peakLabelling = self.preferences.general.annotationType
+        #         strip.symbolType = self.preferences.general.symbolType
+        #         strip.symbolSize = self.preferences.general.symbolSizePixel
+        #
+        #         strip.symbolThickness = self.preferences.general.symbolThickness
+        #         strip.gridVisible = self.preferences.general.showGrid
+        #         strip._contourThickness = self.preferences.general.contourThickness
+        #         strip.crosshairVisible = self.preferences.general.showCrosshair
 
-        checked = self.preferences.general['showToolbar']
-        for spectrumDisplay in self.project.spectrumDisplays:
-            spectrumDisplay.spectrumUtilToolBar.setVisible(checked)
+        # checked = self.preferences.general['showToolbar']
+        # for spectrumDisplay in self.project.spectrumDisplays:
+        #     spectrumDisplay.spectrumUtilToolBar.setVisible(checked)
 
-        if self.preferences.general.colourScheme != self._oldColourScheme:
-            setColourScheme(self.preferences.general.colourScheme)
+        if updateColourScheme:
+            # change the colour theme
+            setColourScheme(self.application.preferences.general.colourScheme)
             self.application.correctColours()
+
+            # colour theme has changed - flag displays to update
+            self._updateGui()
+
         # self.application._savePreferences()
 
     def _applyChanges(self):
@@ -254,23 +274,26 @@ class PreferencesPopup(CcpnDialog):
         # handle clicking of the Apply/OK button
         with handleDialogApply(self) as error:
 
-            # remember the last state before aplying changes
+            # remember the last state before applying changes
             lastPrefs = deepcopy(self.preferences)
+
+            # apply all changes - only to self.preferences
+            self._applyAllChanges(self._changes)
+
+            # check whether the colourScheme needs updating
+            _changeColour = self.preferences.general.colourScheme != lastPrefs.general.colourScheme
 
             # add an undo item to update settings
             with undoStackBlocking() as addUndoItem:
-                addUndoItem(undo=partial(_updateSettings, self, lastPrefs))
+                addUndoItem(undo=partial(_updateSettings, self, lastPrefs, _changeColour))
 
-            # apply all changes
-            self._applyAllChanges(self._changes)
-
-            # remember the new state
+            # remember the new state - between addUndoItems because it may append to the undo stack
             newPrefs = deepcopy(self.preferences)
-            _updateSettings(self, newPrefs)
+            _updateSettings(self, newPrefs, _changeColour)
 
             # add a redo item to update settings
             with undoStackBlocking() as addUndoItem:
-                addUndoItem(redo=partial(_updateSettings, self, newPrefs))
+                addUndoItem(redo=partial(_updateSettings, self, newPrefs, _changeColour))
 
             # everything has happened - disable the apply button
             self._applyButton.setEnabled(False)
@@ -286,7 +309,6 @@ class PreferencesPopup(CcpnDialog):
 
         self._currentNumApplies += 1
         self._revertButton.setEnabled(True)
-        self.application._savePreferences()
         return True
 
     def _updateGui(self):
@@ -410,22 +432,14 @@ class PreferencesPopup(CcpnDialog):
         row += 1
         HLine(parent, grid=(row, 0), gridSpan=(1, 3), colour=getColours()[DIVIDER], height=15)
 
-        # moved back to spectrum
-        # row += 1
-        # self.userDataPathLabel = Label(parent, "$DATA (user datapath)", grid=(row, 0), )
-        # self.userDataPathText = PathEdit(parent, grid=(row, 1), hAlign='l')
-        # self.userDataPathText.setMinimumWidth(LineEditsMinimumWidth)
-        # self.userDataPathText.textChanged.connect(self._queueSetUserDataPath)
-        #
-        # # if self.project:
-        # #     urls = _findDataUrl(self, 'remoteData')
-        # #     if urls and urls[0]:
-        # #         self.userDataPathText.setValidator(DataUrlValidator(parent=self.userDataPathText, dataUrl=urls[0]))
-        # #         _setUrlData(self, urls[0], self.userDataPathText)
-        #
-        # self.userDataPathText.setText(self.preferences.general.userDataPath)
-        # self.userDataPathButton = Button(parent, grid=(row, 2), callback=self._getUserDataPath, icon='icons/directory',
-        #                                 hPolicy='fixed')
+        row += 1
+        self.userWorkingPathLabel = Label(parent, "User Working Path ", grid=(row, 0), )
+        self.userWorkingPathData = PathEdit(parent, grid=(row, 1), hAlign='l')
+        self.userWorkingPathData.setMinimumWidth(LineEditsMinimumWidth)
+        self.userWorkingPathButton = Button(parent, grid=(row, 2), callback=self._getUserWorkingPath, 
+                                            icon='icons/directory', hPolicy='fixed')
+        # self.userLayoutsLe.setText(self.preferences.general.get('userLayoutsPath'))
+        self.userWorkingPathData.textChanged.connect(self._queueSetUserWorkingPath)
 
         row += 1
         userLayouts = Label(parent, text="User Predefined Layouts ", grid=(row, 0))
@@ -574,6 +588,7 @@ class PreferencesPopup(CcpnDialog):
         self.autoBackupEnabledBox.setChecked(self.preferences.general.autoBackupEnabled)
         self.autoBackupFrequencyData.setValue(self.preferences.general.autoBackupFrequency)
         self.userLayoutsLe.setText(self.preferences.general.userLayoutsPath)
+        self.userWorkingPathData.setText(self.preferences.general.userWorkingPath)
         self.auxiliaryFilesData.setText(self.preferences.general.auxiliaryFilesPath)
         self.macroPathData.setText(self.preferences.general.userMacroPath)
         self.pluginPathData.setText(self.preferences.general.userPluginPath)
@@ -1110,6 +1125,29 @@ class PreferencesPopup(CcpnDialog):
     #         # self.preferences.general.dataPath = directory[0]
 
     @queueStateChange(_verifyApply)
+    def _queueSetUserWorkingPath(self):
+        value = self.userWorkingPathData.get()
+        if value != self.preferences.general.userWorkingPath:
+            return partial(self._setUserWorkingPath, value)
+
+    def _setUserWorkingPath(self, value):
+        # newPath = self.userWorkingData.text()
+        self.preferences.general.userWorkingPath = value
+
+    def _getUserWorkingPath(self):
+        if os.path.exists(os.path.expanduser(self.userWorkingPathData.text())):
+            currentDataPath = os.path.expanduser(self.userWorkingPathData.text())
+        else:
+            currentDataPath = os.path.expanduser('~')
+        dialog = FileDialog(self, text='Select Data File', directory=currentDataPath, fileMode=2, acceptMode=0,
+                            preferences=self.preferences.general)
+        directory = dialog.selectedFiles()
+        if len(directory) > 0:
+            self.userWorkingData.setText(directory[0])
+            # self._setUserWorkingPath()
+            # self.preferences.general.userWorkingPath = directory[0]
+
+    @queueStateChange(_verifyApply)
     def _queueSetAuxiliaryFilesPath(self):
         value = self.auxiliaryFilesData.get()
         if value != self.preferences.general.auxiliaryFilesPath:
@@ -1136,9 +1174,9 @@ class PreferencesPopup(CcpnDialog):
     def _queueSetuserLayoutsPath(self):
         value = self.userLayoutsLe.get()
         if value != self.preferences.general.userLayoutsPath:
-            return partial(self._setuserLayoutsPath, value)
+            return partial(self._setUserLayoutsPath, value)
 
-    def _setuserLayoutsPath(self, value):
+    def _setUserLayoutsPath(self, value):
         # newPath = self.userLayoutsLe.text()
         self.preferences.general.userLayoutsPath = value
 
@@ -1244,7 +1282,7 @@ class PreferencesPopup(CcpnDialog):
             return partial(self._changeColourScheme, value)
 
     def _changeColourScheme(self, value):
-        self._oldColourScheme = self.preferences.general.colourScheme
+        # self._oldColourScheme = self.preferences.general.colourScheme
         self.preferences.general.colourScheme = value       #(COLOUR_SCHEMES[value])
 
     @queueStateChange(_verifyApply)
@@ -1596,10 +1634,10 @@ class PreferencesPopup(CcpnDialog):
     @queueStateChange(_verifyApply)
     def _queueSetUseProxy(self):
         value = self.useProxyBox.get()
-        if value != self.preferences.proxySettings.useProxy:
-            return partial(self._setUseProxy, value)
         # set the state of the other buttons
         self._setProxyButtons()
+        if value != self.preferences.proxySettings.useProxy:
+            return partial(self._setUseProxy, value)
 
     def _setUseProxy(self, value):
         # try:
@@ -1611,12 +1649,12 @@ class PreferencesPopup(CcpnDialog):
         # self._setProxyButtons()
 
     @queueStateChange(_verifyApply)
-    def _queueetUseSystemProxy(self):
+    def _queueUseSystemProxy(self):
         value = self.useSystemProxyBox.get()
-        if value != self.preferences.proxySettings.useSystemProxy:
-            return partial(self._setUseSystemProxy, value)
         # set the state of the other buttons
         self._setProxyButtons()
+        if value != self.preferences.proxySettings.useSystemProxy:
+            return partial(self._setUseSystemProxy, value)
 
     def _setUseSystemProxy(self, value):
         # try:
@@ -1656,6 +1694,8 @@ class PreferencesPopup(CcpnDialog):
     @queueStateChange(_verifyApply)
     def _queueSetUseProxyPassword(self):
         value = self.useProxyPasswordBox.get()
+        # set the state of the other buttons
+        self._setProxyButtons()
         if value != self.preferences.proxySettings.useProxyPassword:
             return partial(self._setUseProxyPassword, value)
 
@@ -1666,7 +1706,7 @@ class PreferencesPopup(CcpnDialog):
         #     return
         self.preferences.proxySettings.useProxyPassword = value
         # set the state of the other buttons
-        self._setProxyButtons()
+        # self._setProxyButtons()
 
     @queueStateChange(_verifyApply)
     def _queueSetProxyUsername(self):
@@ -1695,12 +1735,16 @@ class PreferencesPopup(CcpnDialog):
         self.preferences.proxySettings.proxyPassword = value
 
     def _setProxyButtons(self):
-        useP = self.preferences.proxySettings.useProxy
-        useSP = False  #self.preferences.proxySettings.useSystemProxy
+        """Enable/disable proxy widgets based on check boxes
+        """
+        usePW = self.useProxyPasswordBox.get()          #self.preferences.proxySettings.useProxyPassword
+        useP = self.useProxyBox.get()                   #self.preferences.proxySettings.useProxy
+        useSP = False
         usePEnabled = useP and not useSP
+
         # self.useSystemProxyBox.setEnabled(useP)
         self.proxyAddressData.setEnabled(usePEnabled)
         self.proxyPortData.setEnabled(usePEnabled)
         self.useProxyPasswordBox.setEnabled(usePEnabled)
-        self.proxyUsernameData.setEnabled(usePEnabled and self.preferences.proxySettings.useProxyPassword)
-        self.proxyPasswordData.setEnabled(usePEnabled and self.preferences.proxySettings.useProxyPassword)
+        self.proxyUsernameData.setEnabled(usePEnabled and usePW)
+        self.proxyPasswordData.setEnabled(usePEnabled and usePW)

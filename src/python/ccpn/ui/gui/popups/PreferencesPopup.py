@@ -105,6 +105,8 @@ def _verifyApply(popup, attributeName, value, *postFixes):
                 if pf:
                     attributeName += str(pf)
 
+        print('>>>verify', attributeName)
+
         if value:
 
             # store in dict
@@ -617,6 +619,7 @@ class PreferencesPopup(CcpnDialog):
         """Populate the widgets in the spectrumTab
         """
         # populate ValidateFrame
+        self._validateFrame._populate()
 
         self.regionPaddingData.setValue(float('%.1f' % (100 * self.preferences.general.stripRegionPadding)))
         self.dropFactorData.setValue(float('%.1f' % (100 * self.preferences.general.peakDropFactor)))
@@ -686,6 +689,9 @@ class PreferencesPopup(CcpnDialog):
         # add validate frame
         self._validateFrame = ValidateSpectraForPreferences(parent, mainWindow=self.mainWindow, spectra=self.project.spectra,
                                                             setLayout=True, showBorder=False, grid=(row, 0), gridSpan=(1, 3))
+
+        self._validateFrame._filePathCallback = self._queueSetValidateFilePath
+        self._validateFrame._dataUrlCallback = self._queueSetValidateDataUrl
 
         # row += 1
         # self._dataUrlData = {}
@@ -1169,6 +1175,16 @@ class PreferencesPopup(CcpnDialog):
             self.auxiliaryFilesData.setText(directory[0])
             # self._setAuxiliaryFilesPath()
             # self.preferences.general.auxiliaryFilesPath = directory[0]
+
+    @queueStateChange(_verifyApply)
+    def _queueSetValidateDataUrl(self, dataUrl, newUrl, dim):
+        print('>>>set dataUrl')
+        return partial(self._validateFrame.dataUrlFunc, dataUrl, newUrl, dim)
+
+    @queueStateChange(_verifyApply)
+    def _queueSetValidateFilePath(self, spectrum, filePath, dim):
+        print('>>>set filePath')
+        return partial(self._validateFrame.filePathFunc, spectrum, filePath, dim)
 
     @queueStateChange(_verifyApply)
     def _queueSetuserLayoutsPath(self):

@@ -25,6 +25,7 @@ __date__ = "$Date$"
 
 import os
 from functools import partial
+from collections import OrderedDict
 from PyQt5 import QtWidgets, QtGui
 from ccpn.core.lib import Util as ccpnUtil
 from ccpn.ui.gui.widgets.Button import Button
@@ -231,6 +232,8 @@ class ValidateSpectraFrameABC(Frame):
     ENABLECLOSEBUTTON = False
     AUTOUPDATE = False
     USESCROLLFRAME = True
+    _filePathCallback = None
+    _dataUrlCallback = None
 
     def __init__(self, parent, mainWindow=None, spectra=None, defaultSelected=None, **kwds):
         super().__init__(parent, **kwds)
@@ -270,7 +273,7 @@ class ValidateSpectraFrameABC(Frame):
         if self.VIEWDATAURLS:
             # populate the widget with a list of spectrum buttons and filepath buttons
             scrollRow = 0
-            self.dataUrlData = {}
+            self.dataUrlData = OrderedDict()
 
             standardStore = self.project._wrappedData.memopsRoot.findFirstDataLocationStore(name='standard')
             stores = [(store.name, store.url.dataLocation, url.path,) for store in standardStore.sortedDataUrls() for url in store.sortedDataStores()]
@@ -282,21 +285,21 @@ class ValidateSpectraFrameABC(Frame):
             urls = self._findDataUrl('remoteData')
             # urls = _findDataUrl(self, 'remoteData')
             for url in urls:
-                label = self._addUrl(self.dataUrlScrollAreaWidgetContents, url, urlList=self.dataUrlData, scrollRow=scrollRow, enabled=True)
+                label = self._addUrlWidget(self.dataUrlScrollAreaWidgetContents, url, urlList=self.dataUrlData, scrollRow=scrollRow, enabled=True)
                 label.setText('$DATA (user datapath)')
                 scrollRow += 1
 
             urls = self._findDataUrl('insideData')
             # urls = _findDataUrl(self, 'insideData')
             for url in urls:
-                label = self._addUrl(self.dataUrlScrollAreaWidgetContents, url, urlList=self.dataUrlData, scrollRow=scrollRow, enabled=False)
+                label = self._addUrlWidget(self.dataUrlScrollAreaWidgetContents, url, urlList=self.dataUrlData, scrollRow=scrollRow, enabled=False)
                 label.setText('$INSIDE')
                 scrollRow += 1
 
             urls = self._findDataUrl('alongsideData')
             # urls = _findDataUrl(self, 'alongsideData')
             for url in urls:
-                label = self._addUrl(self.dataUrlScrollAreaWidgetContents, url, urlList=self.dataUrlData, scrollRow=scrollRow, enabled=False)
+                label = self._addUrlWidget(self.dataUrlScrollAreaWidgetContents, url, urlList=self.dataUrlData, scrollRow=scrollRow, enabled=False)
                 label.setText('$ALONGSIDE')
                 scrollRow += 1
 
@@ -307,9 +310,9 @@ class ValidateSpectraFrameABC(Frame):
                 for url in otherUrls:
                     # only show the urls that contain spectra
                     if url.sortedDataStores():
-                        self._addUrl(self.dataUrlScrollAreaWidgetContents, url, urlList=self.dataUrlData, scrollRow=scrollRow, enabled=True)
+                        self._addUrlWidget(self.dataUrlScrollAreaWidgetContents, url, urlList=self.dataUrlData, scrollRow=scrollRow, enabled=True)
                     else:
-                        self._addUrl(self.dataUrlScrollAreaWidgetContents, url, urlList=self.dataUrlData, scrollRow=scrollRow, enabled=False)
+                        self._addUrlWidget(self.dataUrlScrollAreaWidgetContents, url, urlList=self.dataUrlData, scrollRow=scrollRow, enabled=False)
                     scrollRow += 1
 
             # finalise the spectrumScrollArea
@@ -319,7 +322,7 @@ class ValidateSpectraFrameABC(Frame):
             row += 1
 
         self._spectrumFrame = Frame(self, setLayout=True, grid=(row, 0), gridSpan=(1, 3), showBorder=False)
-        self.spectrumData = {}
+        self.spectrumData = OrderedDict()
 
         if self.VIEWSPECTRA:
             specRow = 0
@@ -413,7 +416,16 @@ class ValidateSpectraFrameABC(Frame):
         self._badUrls = False
         self._validateAll()
 
-    def _addUrl(self, widget, dataUrl, urlList, scrollRow, enabled=True):
+    def _populate(self):
+        """Populate the frames with the values from dataUrls and project
+        """
+        for dataUrl in self.dataUrlData:
+            self._setUrlData(dataUrl)
+
+        for spectrum in self.spectra:
+            self._setPathData(spectrum)
+
+    def _addUrlWidget(self, widget, dataUrl, urlList, scrollRow, enabled=True):
         """add a url row to the frame
         """
         urlLabel = Label(widget, text=dataUrl.name, grid=(scrollRow, 0))
@@ -442,11 +454,19 @@ class ValidateSpectraFrameABC(Frame):
 
         return urlLabel
 
+    def dataUrlFunc(self, dataUrl, newUrl, dim):
+        """Set the new url in the dataUrl
+        """
+        dataUrl.url = dataUrl.url.clone(path=newUrl)
+        print('>>>dataUrlFunc')
+        self._validateAll()
+
     def _getDataUrlDialog(self, dataUrl):
         """Get the path from the widget and call the open dialog.
         """
         if dataUrl and dataUrl in self.dataUrlData:
             urlData, urlButton, urlLabel = self.dataUrlData[dataUrl]
+            urlNum = list(self.dataUrlData.keys()).index(dataUrl)
 
             newUrl = urlData.text().strip()
 
@@ -459,27 +479,44 @@ class ValidateSpectraFrameABC(Frame):
 
                 # newUrl cannot be '' otherwise the api cannot re-load the project
                 if newUrl and dataUrl.url.dataLocation != newUrl:
-                    dataUrl.url = dataUrl.url.clone(path=newUrl)
+
+                    # NOTE:ED AUTOUPDATE
+                    if not self.AUTOUPDATE and self._dataUrlCallback:
+                        self._dataUrlCallback(dataUrl, newUrl, urlNum)
+                    else:
+                        # define a function to clone the datUrl
+                        self.dataUrlFunc(dataUrl, newUrl, urlNum)
+
+                    # dataUrl.url = dataUrl.url.clone(path=newUrl)
 
                     # set the widget text
                     # self._setUrlData(dataUrl)
-                    self._validateAll()
+                    # self._validateAll()
 
     def _setDataUrlPath(self, dataUrl):
         """Set the path from the widget by pressing enter
         """
         if dataUrl and dataUrl in self.dataUrlData:
             urlData, urlButton, urlLabel = self.dataUrlData[dataUrl]
+            urlNum = list(self.dataUrlData.keys()).index(dataUrl)
 
             newUrl = urlData.text().strip()
 
             # newUrl cannot be '' otherwise the api cannot re-load the project
             if newUrl and dataUrl.url.dataLocation != newUrl:
-                dataUrl.url = dataUrl.url.clone(path=newUrl)
+
+                # NOTE:ED AUTOUPDATE
+                if not self.AUTOUPDATE and self._dataUrlCallback:
+                    self._dataUrlCallback(dataUrl, newUrl, urlNum)
+                else:
+                    # define a function to clone the datUrl
+                    self.dataUrlFunc(dataUrl, newUrl, urlNum)
+
+                # dataUrl.url = dataUrl.url.clone(path=newUrl)
 
                 # set the widget text
                 # self._setUrlData(dataUrl)
-                self._validateAll()
+                # self._validateAll()
 
     def _setUrlData(self, dataUrl):
         """Set the urlData widgets from the dataUrl.
@@ -494,11 +531,20 @@ class ValidateSpectraFrameABC(Frame):
         if valid and hasattr(valid, 'resetCheck'):
             urlData.validator().resetCheck()
 
+    def filePathFunc(self, spectrum, filePath, dim=0):
+        """Set the new filePath for the spectrum
+        """
+        print('>>>filePathFunc')
+        spectrum.filePath = filePath
+        self._validateAll()
+
     def _getSpectrumFile(self, spectrum):
         """Get the path from the widget and call the open dialog.
         """
         if spectrum and spectrum in self.spectrumData:
             pathData, pathButton, pathLabel = self.spectrumData[spectrum]
+            specNum = list(self.spectrumData.keys()).index(spectrum)
+
             filePath = ccpnUtil.expandDollarFilePath(self.project, spectrum, pathData.text().strip())
 
             dialog = FileDialog(self, text='Select Spectrum File', directory=filePath,
@@ -514,14 +560,22 @@ class ValidateSpectraFrameABC(Frame):
 
                 dataType, subType, usePath = ioFormats.analyseUrl(newFilePath)
                 if dataType == 'Spectrum':
-                    spectrum.filePath = newFilePath
+
+                    # NOTE:ED AUTOUPDATE
+                    if not self.AUTOUPDATE and self._filePathCallback:
+                        self._filePathCallback(spectrum, newFilePath, specNum)
+                    else:
+                        # define a function to update the filePath
+                        self.filePathFunc(spectrum, newFilePath)
+
+                    # spectrum.filePath = newFilePath
 
                 # else:
                 #     getLogger().warning('Not a spectrum file: %s - (%s, %s)' % (newFilePath, dataType, subType))
 
                 # set the widget text
                 # self._setPathData(spectrum)
-                self._validateAll()
+                # self._validateAll()
 
     def _setPathData(self, spectrum):
         """Set the pathData widgets from the spectrum.
@@ -552,6 +606,8 @@ class ValidateSpectraFrameABC(Frame):
         """
         if spectrum and spectrum in self.spectrumData:
             pathData, pathButton, pathLabel = self.spectrumData[spectrum]
+            specNum = list(self.spectrumData.keys()).index(spectrum)
+
             newFilePath = ccpnUtil.expandDollarFilePath(self.project, spectrum, pathData.text().strip())
 
             # if spectrum.filePath != newFilePath:
@@ -560,7 +616,13 @@ class ValidateSpectraFrameABC(Frame):
 
             dataType, subType, usePath = ioFormats.analyseUrl(newFilePath)
             if dataType == 'Spectrum':
-                spectrum.filePath = newFilePath
+
+                # NOTE:ED AUTOUPDATE
+                if not self.AUTOUPDATE and self._filePathCallback:
+                    self._filePathCallback(spectrum, newFilePath, specNum)
+                else:
+                    # define a function to update the filePath
+                    self.filePathFunc(spectrum, newFilePath)
 
             # else:
             #     getLogger().warning('Not a spectrum file: %s - (%s, %s)' % (newFilePath, dataType, subType))

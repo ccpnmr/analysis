@@ -26,7 +26,7 @@ __date__ = "$Date$"
 import os
 from functools import partial
 from collections import OrderedDict
-from PyQt5 import QtWidgets, QtGui
+from PyQt5 import QtWidgets, QtGui, QtCore
 from ccpn.core.lib import Util as ccpnUtil
 from ccpn.ui.gui.widgets.Button import Button
 from ccpn.ui.gui.widgets.ButtonList import ButtonList
@@ -43,6 +43,7 @@ from ccpn.ui.gui.widgets.RadioButtons import RadioButtons
 from ccpn.ui.gui.widgets.Splitter import Splitter
 from ccpn.ui.gui.widgets.MessageDialog import showWarning
 from ccpn.ui.gui.lib.GuiPath import VALIDROWCOLOUR, ACCEPTROWCOLOUR, REJECTROWCOLOUR, INVALIDROWCOLOUR
+from ccpn.core.lib.ContextManagers import undoStackBlocking
 
 
 LINEEDITSMINIMUMWIDTH = 195
@@ -231,10 +232,15 @@ class ValidateSpectraFrameABC(Frame):
     VIEWSPECTRA = False
     ENABLECLOSEBUTTON = False
     AUTOUPDATE = False
-    USESCROLLFRAME = True
+    USESCROLLFRAME = False
+    SHOWSPECTRUMBUTTONS = False
+    VERTICALSIZEPOLICY = QtWidgets.QSizePolicy.MinimumExpanding
+
     _filePathCallback = None
     _dataUrlCallback = None
-
+    _matchDataUrlWidths = None
+    _matchFilePathWidths = None
+    
     def __init__(self, parent, mainWindow=None, spectra=None, defaultSelected=None, **kwds):
         super().__init__(parent, **kwds)
 
@@ -258,6 +264,8 @@ class ValidateSpectraFrameABC(Frame):
 
         # set up a scroll area
         self.dataUrlScrollAreaWidgetContents = Frame(self, setLayout=True, showBorder=False, grid=(row, 0), gridSpan=(1, 3))
+        self.dataUrlScrollAreaWidgetContents.setAutoFillBackground(False)
+
         if self.USESCROLLFRAME:
             self.dataUrlScrollArea = ScrollArea(self, setLayout=True, grid=(row, 0), gridSpan=(1, 3))
             self.dataUrlScrollArea.setWidgetResizable(True)
@@ -267,7 +275,7 @@ class ValidateSpectraFrameABC(Frame):
             self.dataUrlScrollArea.setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.MinimumExpanding)
             self.dataUrlScrollArea.setStyleSheet("""ScrollArea { border: 0px; }""")
             # self.dataUrlScrollArea.setFixedHeight(120)
-            row += 1
+        row += 1
 
         self.allUrls = []
         if self.VIEWDATAURLS:
@@ -315,13 +323,14 @@ class ValidateSpectraFrameABC(Frame):
                         self._addUrlWidget(self.dataUrlScrollAreaWidgetContents, url, urlList=self.dataUrlData, scrollRow=scrollRow, enabled=False)
                     scrollRow += 1
 
-            # finalise the spectrumScrollArea
-            Spacer(self.dataUrlScrollAreaWidgetContents, 2, 2,
-                   QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.MinimumExpanding,
+            # finalise the dataUrl ScrollArea
+            Spacer(self.dataUrlScrollAreaWidgetContents, 0, 0,
+                   QtWidgets.QSizePolicy.MinimumExpanding, self.VERTICALSIZEPOLICY,
                    grid=(scrollRow, 1), gridSpan=(1, 1))
             row += 1
 
         self._spectrumFrame = Frame(self, setLayout=True, grid=(row, 0), gridSpan=(1, 3), showBorder=False)
+        self._spectrumFrame.setAutoFillBackground(False)
         self.spectrumData = OrderedDict()
 
         if self.VIEWSPECTRA:
@@ -331,30 +340,35 @@ class ValidateSpectraFrameABC(Frame):
                 HLine(self._spectrumFrame, grid=(specRow, 0), gridSpan=(1, 3), colour=getColours()[DIVIDER], height=15)
                 specRow += 1
 
-            self.buttonFrame = Frame(self._spectrumFrame, setLayout=True, showBorder=False, fShape='noFrame',
-                                     grid=(specRow, 0), gridSpan=(1, 3),
-                                     vAlign='top', hAlign='left')
-            self.showValidLabel = Label(self.buttonFrame, text="Show spectra: ", vAlign='t', grid=(0, 0), bold=True)
-            self.showValid = RadioButtons(self.buttonFrame, texts=['valid', 'invalid', 'all'],
-                                          selectedInd=self._defaultSelected,
-                                          callback=self._toggleValid,
-                                          direction='h',
-                                          grid=(0, 1), hAlign='l',
-                                          tipTexts=None,
-                                          )
-            specRow += 1
+            if self.SHOWSPECTRUMBUTTONS:
+                self.buttonFrame = Frame(self._spectrumFrame, setLayout=True, showBorder=False, fShape='noFrame',
+                                         grid=(specRow, 0), gridSpan=(1, 3),
+                                         vAlign='top', hAlign='left')
+                self.showValidLabel = Label(self.buttonFrame, text="Show spectra: ", vAlign='t', grid=(0, 0), bold=True)
+                self.showValid = RadioButtons(self.buttonFrame, texts=['valid', 'invalid', 'all'],
+                                              selectedInd=self._defaultSelected,
+                                              callback=self._toggleValid,
+                                              direction='h',
+                                              grid=(0, 1), hAlign='l',
+                                              tipTexts=None,
+                                              )
+                specRow += 1
 
-            self._spectrumFrame.addSpacer(5, 10, grid=(specRow, 0))
-            specRow += 1
+                self._spectrumFrame.addSpacer(5, 10, grid=(specRow, 0))
+                specRow += 1
 
             # set up a scroll area
-            self.spectrumScrollArea = ScrollArea(self._spectrumFrame, setLayout=True, grid=(specRow, 0), gridSpan=(1, 3))
-            self.spectrumScrollArea.setWidgetResizable(True)
-            self.spectrumScrollAreaWidgetContents = Frame(self, setLayout=True, showBorder=False)
-            self.spectrumScrollArea.setWidget(self.spectrumScrollAreaWidgetContents)
-            self.spectrumScrollAreaWidgetContents.setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.MinimumExpanding)
-            self.spectrumScrollArea.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
-            self.spectrumScrollArea.setStyleSheet("""ScrollArea { border: 0px; }""")
+            self.spectrumScrollAreaWidgetContents = Frame(self, setLayout=True, showBorder=False, grid=(specRow, 0), gridSpan=(1, 3))
+            self.spectrumScrollAreaWidgetContents.setAutoFillBackground(False)
+
+            if self.USESCROLLFRAME:
+                self.spectrumScrollArea = ScrollArea(self._spectrumFrame, setLayout=True, grid=(specRow, 0), gridSpan=(1, 3))
+                self.spectrumScrollArea.setWidgetResizable(True)
+                # self.spectrumScrollAreaWidgetContents = Frame(self, setLayout=True, showBorder=False)
+                self.spectrumScrollArea.setWidget(self.spectrumScrollAreaWidgetContents)
+                self.spectrumScrollAreaWidgetContents.setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.MinimumExpanding)
+                self.spectrumScrollArea.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
+                self.spectrumScrollArea.setStyleSheet("""ScrollArea { border: 0px; }""")
             specRow += 1
 
             # if not self.spectra:
@@ -369,46 +383,49 @@ class ValidateSpectraFrameABC(Frame):
             # urls = [(store.dataUrl.name, store.dataUrl.url.dataLocation, store.path,) for store in standardStore.sortedDataStores()]
             # [dataUrl for store in self.project._wrappedData.memopsRoot.sortedDataLocationStores() for dataUrl in store.sortedDataUrls()]
 
-            for spectrum in self.spectra:
-                # if not spectrum.isValidPath:
+            if self.spectra:
+                for spectrum in self.spectra:
+                    # if not spectrum.isValidPath:
 
-                pathLabel = Label(self.spectrumScrollAreaWidgetContents, text=spectrum.pid, grid=(scrollRow, 0))
-                pathData = LineEdit(self.spectrumScrollAreaWidgetContents, textAlignment='left', grid=(scrollRow, 1))
-                pathData.setValidator(SpectrumValidator(parent=pathData, spectrum=spectrum))
-                pathButton = Button(self.spectrumScrollAreaWidgetContents, grid=(scrollRow, 2), callback=partial(self._getSpectrumFile, spectrum),
-                                    icon='icons/directory')
+                    pathLabel = Label(self.spectrumScrollAreaWidgetContents, text=spectrum.pid, grid=(scrollRow, 0))
+                    pathData = LineEdit(self.spectrumScrollAreaWidgetContents, textAlignment='left', grid=(scrollRow, 1))
+                    pathData.setValidator(SpectrumValidator(parent=pathData, spectrum=spectrum))
+                    pathButton = Button(self.spectrumScrollAreaWidgetContents, grid=(scrollRow, 2), callback=partial(self._getSpectrumFile, spectrum),
+                                        icon='icons/directory')
 
-                self.spectrumData[spectrum] = (pathData, pathButton, pathLabel)
-                self._setPathData(spectrum)
+                    self.spectrumData[spectrum] = (pathData, pathButton, pathLabel)
+                    self._setPathData(spectrum)
 
-                # pathData.editingFinished.connect(partial(self._setSpectrumPath, spectrum))
-                pathData.textEdited.connect(partial(self._setSpectrumPath, spectrum))
+                    # pathData.editingFinished.connect(partial(self._setSpectrumPath, spectrum))
+                    pathData.textEdited.connect(partial(self._setSpectrumPath, spectrum))
 
-                scrollRow += 1
+                    scrollRow += 1
 
             # finalise the spectrumScrollArea
-            Spacer(self.spectrumScrollAreaWidgetContents, 2, 2,
-                   QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.MinimumExpanding,
+            Spacer(self.spectrumScrollAreaWidgetContents, 0, 0,
+                   QtWidgets.QSizePolicy.MinimumExpanding, self.VERTICALSIZEPOLICY,
                    grid=(scrollRow, 1), gridSpan=(1, 1))
 
-            self._spectrumFrame.addSpacer(5, 10, grid=(specRow, 0))
-            specRow += 1
+            # self._spectrumFrame.addSpacer(5, 10, grid=(specRow, 0))
+            # specRow += 1
 
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
         row = 1
-        self.splitter = Splitter(self, grid=(row, 0), setLayout=True, horizontal=False, gridSpan=(1, 3))
-        if self.USESCROLLFRAME:
-            self.splitter.addWidget(self.dataUrlScrollArea)
-        else:
-            self.splitter.addWidget(self.dataUrlScrollAreaWidgetContents)
-        self.splitter.addWidget(self._spectrumFrame)
-        self.getLayout().addWidget(self.splitter, row, 0, 1, 3)
-        # self.splitter.setStretchFactor(0, 5)
-        # self.splitter.setStretchFactor(1, 1)
-        self.splitter.setChildrenCollapsible(False)
-        self.splitter.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
-        row += 1
+        if self.VIEWDATAURLS and self.VIEWSPECTRA:
+            # put a splitter of both are visible
+            self.splitter = Splitter(self, grid=(row, 0), setLayout=True, horizontal=False, gridSpan=(1, 3))
+            if self.USESCROLLFRAME:
+                self.splitter.addWidget(self.dataUrlScrollArea)
+            else:
+                self.splitter.addWidget(self.dataUrlScrollAreaWidgetContents)
+            self.splitter.addWidget(self._spectrumFrame)
+            self.getLayout().addWidget(self.splitter, row, 0, 1, 3)
+            # self.splitter.setStretchFactor(0, 5)
+            # self.splitter.setStretchFactor(1, 1)
+            self.splitter.setChildrenCollapsible(False)
+            self.splitter.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
+            row += 1
 
         self._parent.lastRow = row
 
@@ -559,6 +576,9 @@ class ValidateSpectraFrameABC(Frame):
                 dataType, subType, usePath = ioFormats.analyseUrl(newFilePath)
                 if dataType == 'Spectrum':
 
+                    # populate the widget
+                    self._setPathDataFromUrl(spectrum, newFilePath)
+
                     # NOTE:ED AUTOUPDATE
                     if not self.AUTOUPDATE and self._filePathCallback:
                         self._filePathCallback(spectrum, newFilePath, specNum)
@@ -574,6 +594,41 @@ class ValidateSpectraFrameABC(Frame):
                 # set the widget text
                 # self._setPathData(spectrum)
                 # self._validateAll()
+
+    def _setPathDataFromUrl(self, spectrum, newFilePath):
+        """Set the pathData widgets from the filePath
+        Creates a temporary dataUrl to get the required data location
+        to populate the widget
+        """
+        if spectrum and spectrum in self.spectrumData:
+            with undoStackBlocking():
+                pathData, pathButton, pathLabel = self.spectrumData[spectrum]
+
+                dataUrl = spectrum.project._wrappedData.root.fetchDataUrl(newFilePath)
+
+                # get the list of dataUrls
+                apiDataStores = [store for store in dataUrl.sortedDataStores() if store.fullPath == newFilePath]
+                if not apiDataStores:
+                    return
+
+                apiDataStore = apiDataStores[0]
+
+                if not apiDataStore:
+                    pathData.setText('<None>')
+                elif apiDataStore.dataLocationStore.name == 'standard':
+
+                    # this fails on the first loading of V2 projects - ordering issue?
+                    dataUrlName = apiDataStore.dataUrl.name
+                    if dataUrlName == 'insideData':
+                        pathData.setText('$INSIDE/%s' % apiDataStore.path)
+                    elif dataUrlName == 'alongsideData':
+                        pathData.setText('$ALONGSIDE/%s' % apiDataStore.path)
+                    elif dataUrlName == 'remoteData':
+                        pathData.setText('$DATA/%s' % apiDataStore.path)
+                else:
+                    pathData.setText(apiDataStore.fullPath)
+
+                pathData.validator().resetCheck()
 
     def _setPathData(self, spectrum):
         """Set the pathData widgets from the spectrum.
@@ -614,6 +669,9 @@ class ValidateSpectraFrameABC(Frame):
 
             dataType, subType, usePath = ioFormats.analyseUrl(newFilePath)
             if dataType == 'Spectrum':
+
+                # populate the widget
+                self._setPathDataFromUrl(spectrum, newFilePath)
 
                 # NOTE:ED AUTOUPDATE
                 if not self.AUTOUPDATE and self._filePathCallback:
@@ -697,10 +755,92 @@ class ValidateSpectraFrameABC(Frame):
             event.ignore()
             showWarning(str(self.windowTitle()), 'Project contains empty dataUrls')
 
+    def resizeEvent(self, a0: QtGui.QResizeEvent) -> None:
+        super().resizeEvent(a0)
+
+        if self._matchDataUrlWidths and self.VIEWDATAURLS:
+            parentLayout = self._matchDataUrlWidths.getLayout()
+            dataUrlLayout = self.dataUrlScrollAreaWidgetContents.getLayout()
+            dataUrlLayout.setSpacing(parentLayout.spacing())
+
+            for urlData, urlButton, urlLabel in self.dataUrlData.values():
+
+                col0 = col1 = col2 = 0
+
+                for index in range(parentLayout.count()):
+
+                    row, column, cols, rows = parentLayout.getItemPosition(index)
+                    wid = parentLayout.itemAt(index).widget()
+
+                    if column == 0:
+                        if wid and not isinstance(wid, (ValidateSpectraForSpectrumPopup,
+                                                        ValidateSpectraForPreferences,
+                                                        ValidateSpectraForPopup,
+                                                        ValidateSpectraPopup,
+                                                        HLine)):
+
+                            # print('>>>wid', wid, row, column, cols, rows, wid.width())
+                            col0 = max(wid.width(), col0)
+
+                    elif column == 1:
+                        if wid:
+                            # print('>>>wid', wid, row, column, cols, rows, wid.width())
+                            col1 = max(wid.width(), col1)
+
+                    elif column == 2:
+                        if wid and wid.isVisible():
+                            # print('>>>wid', wid, row, column, cols, rows, wid.width())
+                            col2 = max(wid.width(), col2)
+
+                if urlLabel:
+                    urlLabel.setFixedWidth(col0)
+                if urlData:
+                    urlData.setFixedWidth(col1)
+                if urlButton:
+                    urlButton.setFixedWidth(col2)
+
+        if self._matchFilePathWidths and self.spectra and self.VIEWSPECTRA:
+            parentLayout = self._matchFilePathWidths.getLayout()
+            spectrumLayout = self.spectrumScrollAreaWidgetContents.getLayout()
+            spectrumLayout.setSpacing(parentLayout.spacing())
+
+            for spectrum in self.spectra[:1]:
+                if spectrum and spectrum in self.spectrumData:
+                    pathData, pathButton, pathLabel = self.spectrumData[spectrum]
+
+                    col0 = col1 = col2 = 0
+
+                    for index in range(parentLayout.count()):
+
+                        row, column, cols, rows = parentLayout.getItemPosition(index)
+                        wid = parentLayout.itemAt(index).widget()
+
+                        if column == 0:
+                            if wid and not isinstance(wid, ValidateSpectraForSpectrumPopup):
+                                # print('>>>wid', wid, row, column, cols, rows, wid.width())
+                                col0 = max(wid.width(), col0)
+
+                        elif column == 1:
+                            if wid:
+                                # print('>>>wid', wid, row, column, cols, rows, wid.width())
+                                col1 = max(wid.width(), col1)
+
+                        elif column == 2:
+                            if wid and wid.isVisible():
+                                # print('>>>wid', wid, row, column, cols, rows, wid.width())
+                                col2 = max(wid.width(), col2)
+
+                    if pathLabel:
+                        pathLabel.setFixedWidth(col0)
+                    if pathData:
+                        pathData.setFixedWidth(col1)
+                    if pathButton:
+                        pathButton.setFixedWidth(col2)
+
 
 class ValidateSpectraForPopup(ValidateSpectraFrameABC):
     """
-    Class to handle a frame containing the dataPaths
+    Class to handle a frame containing the dataUrls/filePaths
     """
 
     VIEWDATAURLS = True
@@ -708,10 +848,13 @@ class ValidateSpectraForPopup(ValidateSpectraFrameABC):
     ENABLECLOSEBUTTON = True
     AUTOUPDATE = True
     USESCROLLFRAME = True
+    SHOWSPECTRUMBUTTONS = True
+    VERTICALSIZEPOLICY = QtWidgets.QSizePolicy.MinimumExpanding
+
 
 class ValidateSpectraForPreferences(ValidateSpectraFrameABC):
     """
-    Class to handle a frame containing the dataPaths
+    Class to handle a frame containing the dataUrls/filePaths
     """
 
     VIEWDATAURLS = True
@@ -719,3 +862,19 @@ class ValidateSpectraForPreferences(ValidateSpectraFrameABC):
     ENABLECLOSEBUTTON = False
     AUTOUPDATE = False
     USESCROLLFRAME = False
+    SHOWSPECTRUMBUTTONS = False
+    VERTICALSIZEPOLICY = QtWidgets.QSizePolicy.Minimum
+
+
+class ValidateSpectraForSpectrumPopup(ValidateSpectraFrameABC):
+    """
+    Class to handle a frame containing the dataUrls/filePaths
+    """
+
+    VIEWDATAURLS = False
+    VIEWSPECTRA = True
+    ENABLECLOSEBUTTON = False
+    AUTOUPDATE = False
+    USESCROLLFRAME = False
+    SHOWSPECTRUMBUTTONS = False
+    VERTICALSIZEPOLICY = QtWidgets.QSizePolicy.Minimum

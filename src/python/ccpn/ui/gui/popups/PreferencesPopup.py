@@ -692,6 +692,7 @@ class PreferencesPopup(CcpnDialog):
 
         self._validateFrame._filePathCallback = self._queueSetValidateFilePath
         self._validateFrame._dataUrlCallback = self._queueSetValidateDataUrl
+        self._validateFrame._matchDataUrlWidths = parent
 
         # row += 1
         # self._dataUrlData = {}
@@ -1178,12 +1179,12 @@ class PreferencesPopup(CcpnDialog):
 
     @queueStateChange(_verifyApply)
     def _queueSetValidateDataUrl(self, dataUrl, newUrl, dim):
-        print('>>>set dataUrl')
+        print('>>>set dataUrl - prefPopup')
         return partial(self._validateFrame.dataUrlFunc, dataUrl, newUrl, dim)
 
     @queueStateChange(_verifyApply)
     def _queueSetValidateFilePath(self, spectrum, filePath, dim):
-        print('>>>set filePath')
+        print('>>>set filePath - prefPopup')
         return partial(self._validateFrame.filePathFunc, spectrum, filePath, dim)
 
     @queueStateChange(_verifyApply)

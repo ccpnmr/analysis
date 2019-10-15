@@ -62,6 +62,7 @@ from ccpn.core.lib.ContextManagers import undoStackBlocking
 from ccpn.ui.gui.popups.EstimateNoisePopup import _addContourNoiseButtons
 from ccpn.core.lib.SpectrumLib import getContourLevelsFromNoise
 from ccpn.core.lib.ContextManagers import queueStateChange
+from ccpn.ui.gui.popups.ValidateSpectraPopup import ValidateSpectraForSpectrumPopup
 
 
 SPECTRA = ['1H', 'STD', 'Relaxation Filtered', 'Water LOGSY']
@@ -460,11 +461,24 @@ class GeneralTab(Widget):
         self.nameData.textChanged.connect(partial(self._queueSpectrumNameChange, spectrum))  # ejb - was editingFinished
         row += 1
 
-        Label(self, text="Path", vAlign='t', hAlign='l', grid=(row, 0))
+        # add validate frame
+        self._validateFrame = ValidateSpectraForSpectrumPopup(self, mainWindow=self.mainWindow, spectra=(spectrum,),
+                                                              setLayout=True, showBorder=False, grid=(row, 0), gridSpan=(1, 3))
+
+        self._validateFrame._filePathCallback = self._queueSetValidateFilePath
+        self._validateFrame._dataUrlCallback = self._queueSetValidateDataUrl
+        self._validateFrame._matchFilePathWidths = self
+        row += 1
+
+        self.pathLabel = Label(self, text="Path", vAlign='t', hAlign='l', grid=(row, 0))
         self.pathData = LineEdit(self, textAlignment='left', vAlign='t', grid=(row, 1))
         # self.pathData.setValidator(SpectrumValidator(parent=self.pathData, spectrum=spectrum))
         self.pathButton = Button(self, grid=(row, 2), callback=partial(self._getSpectrumFile, spectrum), icon='icons/directory')
         row += 1
+
+        self.pathLabel.setVisible(False)
+        self.pathData.setVisible(False)
+        self.pathButton.setVisible(False)
 
         self.pythonConsole = mainWindow.pythonConsole
         self.logger = getLogger()  # self.spectrum.project._logger
@@ -727,6 +741,16 @@ class GeneralTab(Widget):
     def _writeLoggingMessage(self, command):
         self.logger.info("spectrum = project.getByPid('%s')" % self.spectrum.pid)
         self.logger.info(command)
+
+    @queueStateChange(_verifyApply)
+    def _queueSetValidateDataUrl(self, dataUrl, newUrl, dim):
+        print('>>>set dataUrl - specPopup')
+        return partial(self._validateFrame.dataUrlFunc, dataUrl, newUrl, dim)
+
+    @queueStateChange(_verifyApply)
+    def _queueSetValidateFilePath(self, spectrum, filePath, dim):
+        print('>>>set filePath - specPopup')
+        return partial(self._validateFrame.filePathFunc, spectrum, filePath, dim)
 
     @queueStateChange(_verifyApply)
     def _queueSpectrumNameChange(self, spectrum, value):
@@ -1000,15 +1024,15 @@ class DimensionsTab(Widget):
             self.isotopeCodePullDowns[i].currentIndexChanged.connect(partial(self._queueSetIsotopeCodes, spectrum, self.isotopeCodePullDowns[i].getText, i))
 
             row += 1
-            self._pointCountsLabels[i] = Label(self, #text=str(spectrum.pointCounts[i]),
+            self._pointCountsLabels[i] = Label(self,  #text=str(spectrum.pointCounts[i]),
                                                grid=(row, i + 1), vAlign='t', hAlign='l')
 
             row += 1
-            self._dimensionTypesLabels[i] = Label(self, #text=spectrum.dimensionTypes[i],
+            self._dimensionTypesLabels[i] = Label(self,  #text=spectrum.dimensionTypes[i],
                                                   grid=(row, i + 1), vAlign='t', hAlign='l')
 
             row += 1
-            self._spectralWidthsLabels[i] = Label(self, #text=str("%.3f" % (spectrum.spectralWidths[i] or 0.0)),
+            self._spectralWidthsLabels[i] = Label(self,  #text=str("%.3f" % (spectrum.spectralWidths[i] or 0.0)),
                                                   grid=(row, i + 1), vAlign='t', hAlign='l')
 
             row += 1
@@ -1016,7 +1040,7 @@ class DimensionsTab(Widget):
                                                     grid=(row, i + 1), vAlign='t', hAlign='l')
 
             row += 1
-            self._spectrometerFrequenciesLabels[i] = Label(self, #text=str("%.3f" % (spectrum.spectrometerFrequencies[i] or 0.0)),
+            self._spectrometerFrequenciesLabels[i] = Label(self,  #text=str("%.3f" % (spectrum.spectrometerFrequencies[i] or 0.0)),
                                                            grid=(row, i + 1), vAlign='t', hAlign='l')
 
             row += 1
@@ -1071,8 +1095,8 @@ class DimensionsTab(Widget):
 
             # max aliasing
             row += 1
-            self.maxAliasingPullDowns[i] = PulldownList(self, grid=(row, i + 1), vAlign='t',)
-                                                        # texts=aliasMaxText)
+            self.maxAliasingPullDowns[i] = PulldownList(self, grid=(row, i + 1), vAlign='t', )
+            # texts=aliasMaxText)
             # if aliasLim[i][1] in aliasMaxRange:
             #     index = aliasMaxRange.index(aliasLim[i][1])
             #     self.maxAliasingPullDowns[i].setIndex(index)
@@ -1081,8 +1105,8 @@ class DimensionsTab(Widget):
 
             # min aliasing
             row += 1
-            self.minAliasingPullDowns[i] = PulldownList(self, grid=(row, i + 1), vAlign='t',)
-                                                        # texts=aliasMinText)
+            self.minAliasingPullDowns[i] = PulldownList(self, grid=(row, i + 1), vAlign='t', )
+            # texts=aliasMinText)
             # if aliasLim[i][0] in aliasMinRange:
             #     index = aliasMinRange.index(aliasLim[i][0])
             #     self.minAliasingPullDowns[i].setIndex(index)
@@ -1198,7 +1222,6 @@ class DimensionsTab(Widget):
             fModes = self.spectrum.foldingModes
             dd = {'circular': False, 'mirror': True, None: False}
             self.foldingModesCheckBox[i].setChecked(dd[fModes[i]])
-
 
             # pullDown for min/max aliasing
             aliasLim = self.spectrum.visibleAliasingRange

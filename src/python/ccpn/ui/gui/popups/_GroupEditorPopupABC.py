@@ -512,7 +512,8 @@ class _GroupEditorPopupABC(CcpnDialog):
 
 
 
-        self.nameEdit.setFixedWidth(self.FIXEDWIDTH)
+        # GST need something better than this..!
+        self.nameEdit.setFixedWidth(self.FIXEDWIDTH *1.5)
 
         if self.editMode:
             self.leftPullDownLabel = Label(self, self.GROUP_NAME)
@@ -631,6 +632,7 @@ class _GroupEditorPopupABC(CcpnDialog):
         layout.setAlignment(self.rightItemsLabel,QtCore.Qt.AlignLeft)
         self._doublePane.getLayout().addWidget(self.rightListFeedbackWidget,1,0)
         self._doublePane.getLayout().addWidget(self.leftListFeedbackWidget,1,1)
+        self._doublePane.getLayout().setRowStretch(1,1000)
         self.leftListWidget.setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.Preferred)
 
 

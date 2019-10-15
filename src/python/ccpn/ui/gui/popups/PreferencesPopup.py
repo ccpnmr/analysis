@@ -105,8 +105,6 @@ def _verifyApply(popup, attributeName, value, *postFixes):
                 if pf:
                     attributeName += str(pf)
 
-        print('>>>verify', attributeName)
-
         if value:
 
             # store in dict
@@ -1179,13 +1177,13 @@ class PreferencesPopup(CcpnDialog):
 
     @queueStateChange(_verifyApply)
     def _queueSetValidateDataUrl(self, dataUrl, newUrl, dim):
-        print('>>>set dataUrl - prefPopup')
-        return partial(self._validateFrame.dataUrlFunc, dataUrl, newUrl, dim)
+        if newUrl != dataUrl.url.path:
+            return partial(self._validateFrame.dataUrlFunc, dataUrl, newUrl, dim)
 
     @queueStateChange(_verifyApply)
     def _queueSetValidateFilePath(self, spectrum, filePath, dim):
-        print('>>>set filePath - prefPopup')
-        return partial(self._validateFrame.filePathFunc, spectrum, filePath, dim)
+        if filePath != spectrum.filePath:
+            return partial(self._validateFrame.filePathFunc, spectrum, filePath, dim)
 
     @queueStateChange(_verifyApply)
     def _queueSetuserLayoutsPath(self):

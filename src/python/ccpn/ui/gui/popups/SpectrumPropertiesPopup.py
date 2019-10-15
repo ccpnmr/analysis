@@ -404,8 +404,6 @@ def _verifyApply(tab, attributeName, value, *postFixes):
                 if pf:
                     attributeName += str(pf)
 
-        print('>>>verifySpec', attributeName)
-
         if value:
 
             # store in dict
@@ -689,6 +687,8 @@ class GeneralTab(Widget):
         """
         from ccpnmodel.ccpncore.lib.spectrum.NmrExpPrototype import priorityNameRemapping
 
+        self._validateFrame._populate()
+
         self.spectrumPidLabel.setText(self.spectrum.pid)
         self.nameData.setText(self.spectrum.name)
         self.pathData.setValidator(SpectrumValidator(parent=self.pathData, spectrum=self.spectrum))
@@ -744,13 +744,13 @@ class GeneralTab(Widget):
 
     @queueStateChange(_verifyApply)
     def _queueSetValidateDataUrl(self, dataUrl, newUrl, dim):
-        print('>>>set dataUrl - specPopup')
-        return partial(self._validateFrame.dataUrlFunc, dataUrl, newUrl, dim)
+        if newUrl != dataUrl.url.path:
+            return partial(self._validateFrame.dataUrlFunc, dataUrl, newUrl, dim)
 
     @queueStateChange(_verifyApply)
     def _queueSetValidateFilePath(self, spectrum, filePath, dim):
-        print('>>>set filePath - specPopup')
-        return partial(self._validateFrame.filePathFunc, spectrum, filePath, dim)
+        if filePath != spectrum.filePath:
+            return partial(self._validateFrame.filePathFunc, spectrum, filePath, dim)
 
     @queueStateChange(_verifyApply)
     def _queueSpectrumNameChange(self, spectrum, value):

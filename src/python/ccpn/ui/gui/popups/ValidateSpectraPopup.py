@@ -278,10 +278,11 @@ class ValidateSpectraFrameABC(Frame):
         row += 1
 
         self.allUrls = []
+        self.dataUrlData = OrderedDict()
+
         if self.VIEWDATAURLS:
             # populate the widget with a list of spectrum buttons and filepath buttons
             scrollRow = 0
-            self.dataUrlData = OrderedDict()
 
             standardStore = self.project._wrappedData.memopsRoot.findFirstDataLocationStore(name='standard')
             stores = [(store.name, store.url.dataLocation, url.path,) for store in standardStore.sortedDataUrls() for url in store.sortedDataStores()]
@@ -494,17 +495,17 @@ class ValidateSpectraFrameABC(Frame):
                 newUrl = directory[0]
 
                 # newUrl cannot be '' otherwise the api cannot re-load the project
-                if newUrl and dataUrl.url.dataLocation != newUrl:
+                if newUrl:
 
                     # NOTE:ED AUTOUPDATE
                     if not self.AUTOUPDATE and self._dataUrlCallback:
                         self._dataUrlCallback(dataUrl, newUrl, urlNum)
-                    else:
+
+                    elif dataUrl.url.dataLocation != newUrl:
                         # define a function to clone the datUrl
                         self.dataUrlFunc(dataUrl, newUrl, urlNum)
 
                     # dataUrl.url = dataUrl.url.clone(path=newUrl)
-
                     # set the widget text
                     # self._setUrlData(dataUrl)
                     # self._validateAll()
@@ -519,17 +520,17 @@ class ValidateSpectraFrameABC(Frame):
             newUrl = urlData.text().strip()
 
             # newUrl cannot be '' otherwise the api cannot re-load the project
-            if newUrl and dataUrl.url.dataLocation != newUrl:
+            if newUrl:
 
                 # NOTE:ED AUTOUPDATE
                 if not self.AUTOUPDATE and self._dataUrlCallback:
                     self._dataUrlCallback(dataUrl, newUrl, urlNum)
-                else:
+
+                elif dataUrl.url.dataLocation != newUrl:
                     # define a function to clone the datUrl
                     self.dataUrlFunc(dataUrl, newUrl, urlNum)
 
                 # dataUrl.url = dataUrl.url.clone(path=newUrl)
-
                 # set the widget text
                 # self._setUrlData(dataUrl)
                 # self._validateAll()

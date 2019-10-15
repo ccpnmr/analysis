@@ -700,13 +700,21 @@ class GeneralTab(Widget):
             _setColourPulldown(self.colourBox, self.spectrum.sliceColour)
 
         experimentTypes = _getExperimentTypes(self.spectrum.project, self.spectrum)
-        texts = ('',) + tuple(experimentTypes.keys())
-        objects = ('',) + tuple(experimentTypes.values())
+        texts = ('',) + tuple(experimentTypes.keys()) if experimentTypes else ()
+        objects = ('',) + tuple(experimentTypes.values()) if experimentTypes else ()
         # self.spectrumType.setData(texts=list(experimentTypes.keys()), objects=list(experimentTypes.values()))
         self.spectrumType.setData(texts=texts, objects=objects)
 
-        if self.spectrum.experimentType is not None:
-            self.spectrumType.select(self.spectrum.experimentType)
+        # if self.spectrum.experimentType is not None:
+        #     self.spectrumType.select(self.spectrum.experimentType)
+        text = self.spectrum.experimentName
+        if experimentTypes and text not in experimentTypes:
+            text = self.spectrum.experimentType
+        # apiRefExperiment = spectrum._wrappedData.experiment.refExperiment
+        # text = apiRefExperiment and (apiRefExperiment.synonym or apiRefExperiment.name)
+        # Added to account for renaming of experiments
+        text = priorityNameRemapping.get(text, text)
+        self.spectrumType.setCurrentIndex(self.spectrumType.findText(text))
 
         if self.spectrum.scale is not None:
             self.spectrumScalingData.setValue(self.spectrum.scale)

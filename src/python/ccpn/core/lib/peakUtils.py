@@ -413,45 +413,62 @@ def getNmrResidueDeltas(nmrResidue, nmrAtomsNames, spectra, mode=POSITIONS, atom
     if len(peaks) > 0:
         for peak in peaks:
             if peak.peakList.spectrum in spectra:
-                try:  #some None value can get in here
+                # try:  #some None value can get in here
                     if mode == POSITIONS:
-                        delta = None
+                        deltaTemp = []
                         for i, axisCode in enumerate(peak.axisCodes):
                             if len(axisCode) > 0:
                                 if any(s.startswith(axisCode[0]) for s in nmrAtomsNames):
                                     weight = _getAtomWeight(axisCode, atomWeights)
-                                    if delta is None:
-                                        delta = 0.0
-                                    delta += ((peak.position[i] - list(peaks)[0].position[i]) * weight) ** 2
-                        if delta is not None:
-                            delta = delta ** 0.5
+                                    if peaks[0] != peak:  # dont' compare to same peak
+                                        delta = peak.position[i] - peaks[0].position[i]
+                                        delta = delta ** 2
+                                        delta = delta * weight
+                                        deltaTemp.append(delta)
+                                        # deltaInts.append(((peak.position[i] - list(peaks)[0].position[i]) * weight) ** 2)
+                                        # delta += ((list(peaks)[0].position[i] - peak.position[i]) * weight) ** 2
+                        if len(deltaTemp)>0:
+                            delta = sum(deltaTemp) ** 0.5
                             deltas += [delta]
 
                     if mode == VOLUME:
-                        delta1Atoms = (peak.volume / list(peaks)[0].volume)
-                        deltas += [((delta1Atoms) ** 2) ** 0.5, ]
+                        if list(peaks)[0] != peak:  # dont' compare to same peak
+                            if not peak.volume or not peaks[0].volume or peaks[0].volume == 0:
+                                getLogger().warn('Volume has to be set for peaks: %s, %s' %(peak,peaks[0]))
+                                break
+
+                            delta1Atoms = (peak.volume / list(peaks)[0].volume)
+                            deltas += [((delta1Atoms) ** 2) ** 0.5, ]
 
                     if mode == HEIGHT:
-                        delta1Atoms = (peak.height / list(peaks)[0].height)
-                        deltas += [((delta1Atoms) ** 2) ** 0.5, ]
+                        if list(peaks)[0] != peak:  # dont' compare to same peak
+                            if not peak.height or not peaks[0].height or peaks[0].height == 0:
+                                getLogger().warn('Height has to be set for peaks: %s, %s' %(peak,peaks[0]))
+                                break
+
+                            delta1Atoms = (peak.height / list(peaks)[0].height)
+                            deltas += [((delta1Atoms) ** 2) ** 0.5, ]
 
                     if mode == LINEWIDTHS:
-                        delta = None
+                        deltaTemp = []
                         for i, axisCode in enumerate(peak.axisCodes):
-                            if axisCode:
-                                if len(axisCode) > 0:
-                                    if any(s.startswith(axisCode[0]) for s in nmrAtomsNames):
-                                        weight = _getAtomWeight(axisCode, atomWeights)
-                                        if delta is None:
-                                            delta = 0.0
-                                        delta += ((peak.lineWidths[i] - list(peaks)[0].lineWidths[i]) * weight) ** 2
-                        if delta is not None:
-                            delta = delta ** 0.5
+                            if list(peaks)[0] != peak:  # dont' compare to same peak
+                                if axisCode:
+                                    if len(axisCode) > 0:
+                                        if any(s.startswith(axisCode[0]) for s in nmrAtomsNames):
+                                            weight = _getAtomWeight(axisCode, atomWeights)
+                                            if not peak.lineWidths[i] or not peaks[0].lineWidths[i]:
+                                                getLogger().warn('lineWidth has to be set for peaks: %s, %s' % (peak, peaks[0]))
+                                                break
+                                            delta = ((peak.lineWidths[i] - list(peaks)[0].lineWidths[i]) * weight) ** 2
+                                            deltaTemp.append(delta)
+                        if len(deltaTemp)>0:
+                            delta = sum(deltaTemp) ** 0.5
                             deltas += [delta]
 
-                except Exception as e:
-                    message = 'Error for calculation mode: %s on %s and %s. ' % (mode, peak.pid, list(peaks)[0].pid) + str(e)
-                    getLogger().debug(message)
+                # except Exception as e:
+                #     message = 'Error for calculation mode: %s on %s and %s. ' % (mode, peak.pid, list(peaks)[0].pid) + str(e)
+                #     getLogger().debug(message)
 
     if deltas and not None in deltas:
         return round(float(np.mean(deltas)), 3)

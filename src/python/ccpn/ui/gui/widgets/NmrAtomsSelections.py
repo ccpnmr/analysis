@@ -68,7 +68,7 @@ class _NmrAtomsSelection(CcpnDialog):
     """
 
 
-    def __init__(self, parent=None, project=None, nmrAtoms=None, checked=None, **kwds):
+    def __init__(self, parent=None, project=None, nmrAtoms=None, relativeContribuitions=None, checked=None, **kwds):
         title = 'NmrAtoms settings'
         CcpnDialog.__init__(self, parent, setLayout=True, windowTitle=title, **kwds)
 
@@ -81,7 +81,8 @@ class _NmrAtomsSelection(CcpnDialog):
         self.atomWeightSpinBoxes = []
         self.nmrAtomsCheckBoxes = []
         self.nmrAtomsLabels = []
-        self.setRelativeContribuitions()
+        print('relativeContribuitions ',relativeContribuitions)
+        self.setRelativeContribuitions(relativeContribuitions or DefaultAtomWeights)
         self.setNmrAtomsCheckBoxes(self.nmrAtoms, setChecked=self.checked)
         self.addButtons()
         self.setFixedWidth(350)
@@ -93,11 +94,13 @@ class _NmrAtomsSelection(CcpnDialog):
         calls = [self.showIndo, self.uncheckAll, self.reject, self._apply ]
         buttons = ButtonList(self, texts=texts, callbacks=calls, grid = (i,0), gridSpan=(i,2))
 
-    def setRelativeContribuitions(self):
+    def setRelativeContribuitions(self, relativeContribuitions=DefaultAtomWeights):
         global i
-        for name, value in DefaultAtomWeights.items():
+        for name, value in relativeContribuitions.items():
             labelRelativeContribution = Label(self, text='%s Relative Contribution' % name, grid=(i, 0))
-            self.atomWeightSpinBox = DoubleSpinbox(self, value=DefaultAtomWeights[name],
+            self.atomWeightSpinBox = DoubleSpinbox(self, value=value,
+                                                   decimals = 3,
+                                                   step=0.1,
                                                    prefix=str('Weight' + (' ' * 2)), grid=(i, 1),
                                                    tipText='Relative Contribution for the selected nmrAtom')
             self.atomWeightSpinBox.setObjectName(name)
@@ -146,9 +149,11 @@ class _NmrAtomsSelection(CcpnDialog):
         showInfo('NmrAtom info',text)
 
     def _apply(self):
+        print( self.getRelativeContribuitions())
         if self.parent is not None:
             self.parent.relativeContribuitions = self.getRelativeContribuitions()
             self.parent.selectedNmrAtomNames = self.getNmrAtomNames()
+
         self.reject()
 
     def uncheckAll(self):
@@ -161,13 +166,15 @@ if __name__ == '__main__':
     app = TestApplication()
 
 
-
+    rc = OrderedDict([('H', 17.0), ('N', 11.0), ('C', 14.0), ('Other', 11.0)])
 
     popup = _NmrAtomsSelection(None,
                                nmrAtoms=['H', 'Hn', 'Hr', 'F', 'Ca'],
                                checked=['H'],
+                               relativeContribuitions=rc,
                                size=[500, 450],
                                grid=(0, 0))
+
     popup.show()
     popup.raise_()
     app.start()

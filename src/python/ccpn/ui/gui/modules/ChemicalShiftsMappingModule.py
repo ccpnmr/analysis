@@ -1018,7 +1018,8 @@ class ChemicalShiftsMapping(CcpnModule):
 
       popup = _NmrAtomsSelection(self,
                                  nmrAtoms=nmrAtoms,
-                                 checked=self.selectedNmrAtomNames,
+                                 checked = self.selectedNmrAtomNames,
+                                 relativeContribuitions = self.relativeContribuitions,
                                  size=[500, 450],
                                  grid=(0, 0))
       popup.show()

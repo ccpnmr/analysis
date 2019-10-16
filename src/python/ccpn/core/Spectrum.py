@@ -2622,6 +2622,15 @@ assignmentTolerances
         _p = aPath(self.filePath)
         return os.path.join(str(_p.parent), _p.basename) + planeStr + '.dat'
 
+    def _savePlaneToNmrPipe(self, planeData, xDim, yDim, path):
+        "Save planeData as xDim,yDim) as NmrPipe path file"
+        from ccpnmodel.ccpncore.lib.spectrum.formats.NmrPipe import _makeNmrPipe2DHeader
+        with open(path, 'wb') as fp:
+            #TODO: remove dependency on filestorage on apiLayer
+            header = _makeNmrPipe2DHeader(self._wrappedData, xDim, yDim)
+            header.tofile(fp)
+            planeData.tofile(fp)
+
     @logCommand(get='self')
     def extractPlaneToFile(self, axisCodes: tuple, position=None, path=None):
         """Save plane defined by a tuple of two axisCodes and position
@@ -2633,19 +2642,14 @@ assignmentTolerances
             raise RuntimeError('Cannot extract plane from 1D data (%s)' % self)
 
         if position is None:
-            position = [1] * 2
+            position = [1] * self.dimensionCount
 
         if path is None:
             path = self._getDefaultPlanePath(axisCodes, position)
 
-        planeData = self.getPlane(axisCodes=axisCodes, position=position)
-        from ccpnmodel.ccpncore.lib._ccp.nmr.Nmr.DataSource import _saveNmrPipe2DHeader
-
-        with open(path, 'wb') as fp:
-            #TODO: remove dependency on filestorage on apiLayer
-            xDim, yDim = self.getByAxisCodes('dimensions', axisCodes)[0:2]
-            _saveNmrPipe2DHeader(self._wrappedData, fp, xDim, yDim)
-            planeData.tofile(fp)
+        xDim, yDim = self.getByAxisCodes('dimensions', axisCodes)[0:2]
+        planeData = self.getPlaneData(position=position, xDim=xDim, yDim=yDim)
+        self._savePlaneToNmrPipe(planeData, xDim=xDim, yDim=yDim, path=path)
 
         newSpectrum = self.project.loadSpectrum(path, subType=Formats.NMRPIPE)[0]
         newSpectrum.axisCodes = axisCodes  # to override the loadSpectrum routine
@@ -2717,14 +2721,8 @@ assignmentTolerances
             path = self._getDefaultProjectionPath(axisCodes)
 
         projectedData = self.getProjection(axisCodes=axisCodes, method=method, threshold=threshold)
-
-        from ccpnmodel.ccpncore.lib._ccp.nmr.Nmr.DataSource import _saveNmrPipe2DHeader
-
-        with open(path, 'wb') as fp:
-            #TODO: remove dependency on filestorage on apiLayer
-            xDim, yDim = self.getByAxisCodes('dimensions', axisCodes)[0:2]
-            _saveNmrPipe2DHeader(self._wrappedData, fp, xDim, yDim)
-            projectedData.tofile(fp)
+        xDim, yDim = self.getByAxisCodes('dimensions', axisCodes)[0:2]
+        self._savePlaneToNmrPipe(projectedData, xDim=xDim, yDim=yDim, path=path)
 
         newSpectrum = self.project.loadSpectrum(path, subType=Formats.NMRPIPE)[0]
         newSpectrum.axisCodes = axisCodes  # to override the loadSpectrum routine

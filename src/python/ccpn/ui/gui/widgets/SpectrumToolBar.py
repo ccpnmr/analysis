@@ -216,6 +216,37 @@ class SpectrumToolBar(ToolBar):
         GLSignals = GLNotifier(parent=self)
         GLSignals.emitPaintEvent()
 
+    def _createToolBarContextMenu(self):
+        """
+        Creates a context menu for the toolbar with general actions.
+        """
+
+        contextMenu = Menu('', self.widget, isFloatWidget=True)
+        dd = OrderedDict([(PeakList, PeakListView), (IntegralList, IntegralListView), (MultipletList, MultipletListView)])
+        for coreObj, viewObj in dd.items():
+                smenuItems = []
+                smenu = contextMenu.addMenu(coreObj.className)
+                labelsBools = OrderedDict([('Show All',True),
+                                           ('Hide All',False)])
+                for label, abool in labelsBools.items():
+                    item = _SCMitem(name=label,
+                                    typeItem=ItemTypes.get(ITEM), icon='icons/null',
+                                    callback=partial(self._toggleAllViews,viewObj._pluralLinkName,abool))
+                    smenuItems.append(item)
+                _addMenuItems(self.widget, smenu, smenuItems)
+
+        return contextMenu
+
+    def _toggleAllViews(self, viewPluralLinkName, abool=True):
+        """
+        :param viewPluralLinkName: peakListViews etc which is defined in the self.widget
+        :param abool: True or False
+        :return: Toggles all Views on display
+        """
+        for view in getattr(self.widget,viewPluralLinkName):
+            view.setVisible(abool)
+
+
     def _createContextMenu(self, button: QtWidgets.QToolButton):
         """
         Creates a context menu containing a command to delete the spectrum from the display and its
@@ -403,11 +434,16 @@ class SpectrumToolBar(ToolBar):
 
             if event.button() == QtCore.Qt.RightButton:
                 toolButton = self.childAt(event.pos())
-
-                menu = self._createContextMenu(toolButton)
-                if menu:
-                    menu.move(event.globalPos().x(), event.globalPos().y() + 10)
-                    menu.exec_()
+                if toolButton:
+                    menu = self._createContextMenu(toolButton)
+                    if menu:
+                        menu.move(event.globalPos().x(), event.globalPos().y() + 10)
+                        menu.exec_()
+                else:
+                    menu = self._createToolBarContextMenu()
+                    if menu:
+                        menu.move(event.globalPos().x(), event.globalPos().y() + 10)
+                        menu.exec_()
 
             if event.button() == QtCore.Qt.MiddleButton:
                 self._dragButton(event)

@@ -91,38 +91,39 @@ def _updateSettings(self, newPrefs, updateColourScheme):
     GLSignals.emitPaintEvent()
 
 
-def _verifyApply(popup, attributeName, value, *postFixes):
+def _verifyApply(self, attributeName, value, *postArgs, **postKwds):
     """Change the state of the apply button based on the changes in the tabs
     """
 
     # if attributeName is defined use as key to dict to store change functions
-    # append postFix if need to differentiate partial functions
+    # append postFixes if need to differentiate partial functions
     if attributeName:
 
-        if postFixes is not None:
-            # attributeName += str(postFixes)
-            for pf in postFixes:
-                if pf:
-                    attributeName += str(pf)
+        for pf in postArgs:
+            if pf is not None:
+                attributeName += str(pf)
+        for k, pf in sorted(postKwds.items()):
+            if pf is not None:
+                attributeName += str(pf)
+        attributeName += str(id(self))
 
         if value:
-
-            # store in dict
-            popup._changes[attributeName] = value
+            # store in dict - overwrite as required
+            self._changes[attributeName] = value
         else:
-            if attributeName in popup._changes:
+            if attributeName in self._changes:
                 # delete from dict - empty dict implies no changes
-                del popup._changes[attributeName]
+                del self._changes[attributeName]
 
-    if popup:
+    if self:
         # set button state depending on number of changes
-        allChanges = True if popup._changes else False
-        _button = popup.dialogButtons.button(QtWidgets.QDialogButtonBox.Apply)
+        allChanges = True if self._changes else False
+        _button = self.dialogButtons.button(QtWidgets.QDialogButtonBox.Apply)
         if _button:
             _button.setEnabled(allChanges)
-        _button = popup.dialogButtons.button(QtWidgets.QDialogButtonBox.Reset)
+        _button = self.dialogButtons.button(QtWidgets.QDialogButtonBox.Reset)
         if _button:
-            _button.setEnabled(allChanges or popup._currentNumApplies)
+            _button.setEnabled(allChanges or self._currentNumApplies)
 
 
 class PreferencesPopup(CcpnDialog):
@@ -153,7 +154,7 @@ class PreferencesPopup(CcpnDialog):
 
         # keep a record of how many times the apply button has been pressed
         self._currentNumApplies = 0
-        self._changes = dict()
+        self._changes = {}
 
         self.mainLayout = self.getLayout()
         self._setTabs()
@@ -566,6 +567,9 @@ class PreferencesPopup(CcpnDialog):
         """Populate the widgets in the tabs
         """
         with self.blockWidgetSignals():
+            # clear all changes
+            self._changes = {}
+
             self._populateGeneralTab()
             self._populateSpectrumTab()
             self._populateExternalProgramsTab()
@@ -691,6 +695,7 @@ class PreferencesPopup(CcpnDialog):
         self._validateFrame._filePathCallback = self._queueSetValidateFilePath
         self._validateFrame._dataUrlCallback = self._queueSetValidateDataUrl
         self._validateFrame._matchDataUrlWidths = parent
+        # self._validateFrame._matchFilePathWidths = parent
 
         # row += 1
         # self._dataUrlData = {}
@@ -1177,11 +1182,17 @@ class PreferencesPopup(CcpnDialog):
 
     @queueStateChange(_verifyApply)
     def _queueSetValidateDataUrl(self, dataUrl, newUrl, dim):
+        """Set the new url in the dataUrl
+        dim is required by the decorator to give a unique id for dataUrl row
+        """
         if newUrl != dataUrl.url.path:
             return partial(self._validateFrame.dataUrlFunc, dataUrl, newUrl, dim)
 
     @queueStateChange(_verifyApply)
     def _queueSetValidateFilePath(self, spectrum, filePath, dim):
+        """Set the new filePath for the spectrum
+        dim is required by the decorator to give a unique id for filePath row
+        """
         if filePath != spectrum.filePath:
             return partial(self._validateFrame.filePathFunc, spectrum, filePath, dim)
 

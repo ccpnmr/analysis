@@ -234,6 +234,7 @@ class ValidateSpectraFrameABC(Frame):
     AUTOUPDATE = False
     USESCROLLFRAME = False
     SHOWSPECTRUMBUTTONS = False
+    USESPLITTER = True
     VERTICALSIZEPOLICY = QtWidgets.QSizePolicy.MinimumExpanding
 
     _filePathCallback = None
@@ -413,7 +414,7 @@ class ValidateSpectraFrameABC(Frame):
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
         row = 1
-        if self.VIEWDATAURLS and self.VIEWSPECTRA:
+        if self.VIEWDATAURLS and self.VIEWSPECTRA and self.USESPLITTER:
             # put a splitter of both are visible
             self.splitter = Splitter(self, grid=(row, 0), setLayout=True, horizontal=False, gridSpan=(1, 3))
             if self.USESCROLLFRAME:
@@ -472,7 +473,7 @@ class ValidateSpectraFrameABC(Frame):
 
         return urlLabel
 
-    def dataUrlFunc(self, dataUrl, newUrl, dim):
+    def dataUrlFunc(self, dataUrl, newUrl):
         """Set the new url in the dataUrl
         """
         dataUrl.url = dataUrl.url.clone(path=newUrl)
@@ -548,7 +549,7 @@ class ValidateSpectraFrameABC(Frame):
         if valid and hasattr(valid, 'resetCheck'):
             urlData.validator().resetCheck()
 
-    def filePathFunc(self, spectrum, filePath, dim=0):
+    def filePathFunc(self, spectrum, filePath):
         """Set the new filePath for the spectrum
         """
         spectrum.filePath = filePath
@@ -850,6 +851,7 @@ class ValidateSpectraForPopup(ValidateSpectraFrameABC):
     AUTOUPDATE = True
     USESCROLLFRAME = True
     SHOWSPECTRUMBUTTONS = True
+    USESPLITTER = True
     VERTICALSIZEPOLICY = QtWidgets.QSizePolicy.MinimumExpanding
 
 
@@ -859,11 +861,12 @@ class ValidateSpectraForPreferences(ValidateSpectraFrameABC):
     """
 
     VIEWDATAURLS = True
-    VIEWSPECTRA = False
+    VIEWSPECTRA = True
     ENABLECLOSEBUTTON = False
     AUTOUPDATE = False
     USESCROLLFRAME = False
     SHOWSPECTRUMBUTTONS = False
+    USESPLITTER = False
     VERTICALSIZEPOLICY = QtWidgets.QSizePolicy.Minimum
 
 
@@ -878,4 +881,5 @@ class ValidateSpectraForSpectrumPopup(ValidateSpectraFrameABC):
     AUTOUPDATE = False
     USESCROLLFRAME = False
     SHOWSPECTRUMBUTTONS = False
+    USESPLITTER = True
     VERTICALSIZEPOLICY = QtWidgets.QSizePolicy.Minimum

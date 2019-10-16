@@ -27,6 +27,7 @@ __date__ = "$Date: 2018-12-20 15:44:34 +0000 (Thu, December 20, 2018) $"
 
 import sys
 import decorator
+import inspect
 from contextlib import contextmanager
 from collections import Iterable
 from functools import partial
@@ -1048,7 +1049,7 @@ def ccpNmrV3CoreSetter():
     return theDecorator
 
 
-def queueStateChange(verify=None, attributeName=None):
+def queueStateChange(verify):
     """A decorator wrap the property setters method in an undo block and triggering the
     'change' notification
     """
@@ -1059,20 +1060,21 @@ def queueStateChange(verify=None, attributeName=None):
         args = args[1:]  # Optional 'self' is now args[0]
         self = args[0]
 
-        result = func(*args, **kwds)
-
-        import inspect
         # get the signature
         sig = inspect.signature(func)
         # fill in the missing parameters
         ba = sig.bind(*args, **kwds)
         ba.apply_defaults()
-        dim = ba.arguments.get('dim')
-        pref = ba.arguments.get('preference')
 
-        # call the verify function for the decorator
-        if verify:
-            verify(self, func.__name__, result, dim, pref)
+        # get specific arguments - cannot just grab all as may contain variants
+        dim = ba.arguments.get('dim')
+        option = ba.arguments.get('option')
+
+        # call the function - should return None if returning to unmodified state
+        result = func(*args, **kwds)
+
+        # call the verify function to update the _changes dict
+        verify(self, func.__name__, result, dim, option)
 
         return result
 

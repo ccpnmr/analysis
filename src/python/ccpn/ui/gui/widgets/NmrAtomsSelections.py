@@ -81,7 +81,6 @@ class _NmrAtomsSelection(CcpnDialog):
         self.atomWeightSpinBoxes = []
         self.nmrAtomsCheckBoxes = []
         self.nmrAtomsLabels = []
-        print('relativeContribuitions ',relativeContribuitions)
         self.setRelativeContribuitions(relativeContribuitions or DefaultAtomWeights)
         self.setNmrAtomsCheckBoxes(self.nmrAtoms, setChecked=self.checked)
         self.addButtons()

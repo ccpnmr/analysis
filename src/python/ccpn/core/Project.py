@@ -876,6 +876,11 @@ class Project(AbstractWrapperObject):
         # read the dataPath from the preferences of defined
         project = self
         general = self.application.preferences.general if self.application.preferences and self.application.preferences.general else None
+        autoSet = general.autoSetDataPath if general.autoSetDataPath else False
+
+        # skip setting the path if autoSetDataPath is false
+        if not autoSet:
+            return
 
         newDataUrlPath = newDataUrlPath if newDataUrlPath else general.dataPath \
             if general and general.dataPath else general.userWorkingPath \

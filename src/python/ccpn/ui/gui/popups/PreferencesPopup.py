@@ -620,6 +620,8 @@ class PreferencesPopup(CcpnDialog):
     def _populateSpectrumTab(self):
         """Populate the widgets in the spectrumTab
         """
+        self.autoSetDataPathBox.setChecked(self.preferences.general.autoSetDataPath)
+
         # populate ValidateFrame
         self._validateFrame._populate()
 
@@ -689,7 +691,12 @@ class PreferencesPopup(CcpnDialog):
         #
         # row += 1
 
+        self.autoSetDataPathLabel = Label(parent, text="Auto Set dataPath: ", grid=(row, 0))
+        self.autoSetDataPathBox = CheckBox(parent, grid=(row, 1))#, checked=self.preferences.general.autoSetDataPath)
+        self.autoSetDataPathBox.toggled.connect(partial(self._queueToggleGeneralOptions, 'autoSetDataPath'))
+
         # add validate frame
+        row += 1
         self._validateFrame = ValidateSpectraForPreferences(parent, mainWindow=self.mainWindow, spectra=self.project.spectra,
                                                             setLayout=True, showBorder=False, grid=(row, 0), gridSpan=(1, 3))
 

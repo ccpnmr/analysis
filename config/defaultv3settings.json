@@ -12,6 +12,7 @@
         "editor": "default",
         "colourScheme": "dark",
         "license": "",
+        "autoSetDataPath": false,
         "dataPath": "~",
         "useNative": false,
         "useNativeWebbrowser": false,

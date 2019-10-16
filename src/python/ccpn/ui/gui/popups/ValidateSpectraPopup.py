@@ -52,7 +52,8 @@ LINEEDITSMINIMUMWIDTH = 195
 class SpectrumValidator(QtGui.QValidator):
 
     def __init__(self, spectrum, parent=None, validationType='exists'):
-        QtGui.QValidator.__init__(self, parent=parent)
+        super().__init__(parent=parent)
+
         self.spectrum = spectrum
         self.validationType = validationType
         self.baseColour = self.parent().palette().color(QtGui.QPalette.Base)
@@ -61,6 +62,7 @@ class SpectrumValidator(QtGui.QValidator):
         if self.validationType != 'exists':
             raise NotImplemented('%s only checks that the path exists', self.__class__.__name__)
         filePath = ccpnUtil.expandDollarFilePath(self.spectrum._project, self.spectrum, p_str.strip())
+        # filePath = p_str.strip()
 
         palette = self.parent().palette()
 
@@ -91,6 +93,11 @@ class SpectrumValidator(QtGui.QValidator):
 
     def resetCheck(self):
         self.validate(self.parent().text(), 0)
+
+    @property
+    def checkState(self):
+        state, _, _ = self.validate(self.parent().text(), 0)
+        return state
 
 
 class DataUrlValidator(QtGui.QValidator):
@@ -136,35 +143,10 @@ class DataUrlValidator(QtGui.QValidator):
     def resetCheck(self):
         self.validate(self.parent().text(), 0)
 
-
-# def _findDataPath(obj, storeType):
-#     dataUrl = obj.project._apiNmrProject.root.findFirstDataLocationStore(
-#             name='standard').findFirstDataUrl(name=storeType)
-#     return dataUrl.url.dataLocation
-#
-#
-# def _findDataUrl(obj, storeType):
-#     dataUrl = obj.project._apiNmrProject.root.findFirstDataLocationStore(
-#             name='standard').findFirstDataUrl(name=storeType)
-#     if dataUrl:
-#         return (dataUrl,)
-#     else:
-#         return ()
-#
-#
-# def _setUrlData(self, dataUrl, urlWidgets):
-#     """Set the urlData widgets from the dataUrl.
-#     """
-#     if isinstance(urlWidgets, (tuple, list)):
-#         urlData, _, _ = urlWidgets  #self.dataUrlData[dataUrl]
-#     else:
-#         urlData = urlWidgets
-#
-#     urlData.setText(dataUrl.url.dataLocation)
-#     # if urlData.validator:
-#     valid = urlData.validator()
-#     if valid and hasattr(valid, 'resetCheck'):
-#         urlData.validator().resetCheck()
+    @property
+    def checkState(self):
+        state, _, _ = self.validate(self.parent().text(), 0)
+        return state
 
 
 VALIDSPECTRA = 'valid'
@@ -450,8 +432,11 @@ class ValidateSpectraFrameABC(Frame):
         urlLabel = Label(widget, text=dataUrl.name, grid=(scrollRow, 0))
         urlData = LineEdit(widget, textAlignment='left', grid=(scrollRow, 1))
 
+        urlData.setValidator(DataUrlValidator(parent=urlData, dataUrl=dataUrl))
         if enabled:
-            urlData.setValidator(DataUrlValidator(parent=urlData, dataUrl=dataUrl))
+            pass
+
+            # urlData.setValidator(DataUrlValidator(parent=urlData, dataUrl=dataUrl))
         else:
             # set to italic/grey
             oldFont = urlData.font()
@@ -473,16 +458,68 @@ class ValidateSpectraFrameABC(Frame):
 
         return urlLabel
 
+    @staticmethod
+    def _fetchDataUrl(self: 'MemopsRoot', fullPath: str) -> 'DataUrl':
+        """Get or create DataUrl that matches fullPath, prioritising insideData, alongsideDta, remoteData
+        and existing dataUrls"""
+        from ccpnmodel.ccpncore.api.memops.Implementation import Url
+        from ccpn.util import Path
+
+        standardStore = self.findFirstDataLocationStore(name='standard')
+        fullPath = Path.normalisePath(fullPath, makeAbsolute=True)
+        standardTags = ('remoteData',)
+        # Check standard DataUrls first
+        checkUrls = [standardStore.findFirstDataUrl(name=tag) for tag in standardTags]
+        # Then check other existing DataUrls
+        checkUrls += [x for x in standardStore.sortedDataUrls() if x.name not in standardTags]
+        for dataUrl in checkUrls:
+            directoryPath = os.path.join(dataUrl.url.path, '')
+            if fullPath.startswith(directoryPath):
+                break
+        else:
+            # No matches found, make a new one
+            dirName, path = os.path.split(fullPath)
+            dataUrl = standardStore.newDataUrl(url=Url(path=fullPath))
+        #
+        return dataUrl
+
     def dataUrlFunc(self, dataUrl, newUrl):
         """Set the new url in the dataUrl
         """
+        # tempDataUrl = self._fetchDataUrl(dataUrl.root, newUrl)
+        # #
+        # dataUrl.url = tempDataUrl.url
+        # # pass
+
+
+
+        oldUrl = dataUrl.url
         dataUrl.url = dataUrl.url.clone(path=newUrl)
-        self._validateAll()
+
+        for spec in self.project.spectra:
+            apiDataStore = spec._wrappedData.dataStore
+            if apiDataStore is None:
+                raise ValueError("Spectrum is not stored, cannot change file path")
+
+            else:
+                # dataUrl = self._project._wrappedData.root.fetchDataUrl(value)
+                dataUrlName = apiDataStore.dataUrl.name
+                if dataUrlName == 'remoteData':
+                    apiDataStore.repointToDataUrl(dataUrl)
+                    apiDataStore.path = apiDataStore.fullPath[len(dataUrl.url.path) + 1:]
+
+
+        self._validateSpectra()
+
+        print('>>>dataUrlFunc - clone dataUrl', dataUrl.url.dataLocation)
 
     def _getDataUrlDialog(self, dataUrl):
         """Get the path from the widget and call the open dialog.
         """
         if dataUrl and dataUrl in self.dataUrlData:
+
+            print('>>>>dataurlget', str(dataUrl))
+
             urlData, urlButton, urlLabel = self.dataUrlData[dataUrl]
             urlNum = list(self.dataUrlData.keys()).index(dataUrl)
 
@@ -498,23 +535,30 @@ class ValidateSpectraFrameABC(Frame):
                 # newUrl cannot be '' otherwise the api cannot re-load the project
                 if newUrl:
 
+                    # populate the widget
+                    self._setUrlData(dataUrl, newFilePath=newUrl)
+
+                    # only accept valid paths from the urlData box
+                    urlValid = urlData.validator().checkState == QtGui.QValidator.Acceptable
+
                     # NOTE:ED AUTOUPDATE
                     if not self.AUTOUPDATE and self._dataUrlCallback:
-                        self._dataUrlCallback(dataUrl, newUrl, urlNum)
+                        self._dataUrlCallback(dataUrl, newUrl, urlValid, urlNum)
+                        self._validateSpectra()
 
                     elif dataUrl.url.dataLocation != newUrl:
-                        # define a function to clone the datUrl
+                        # define a function to clone the dataUrl
                         self.dataUrlFunc(dataUrl, newUrl)
-
-                    # dataUrl.url = dataUrl.url.clone(path=newUrl)
-                    # set the widget text
-                    # self._setUrlData(dataUrl)
-                    # self._validateAll()
 
     def _setDataUrlPath(self, dataUrl):
         """Set the path from the widget by pressing enter
         """
+        print('>>>>_setDataUrlPath pre', str(dataUrl))
+
         if dataUrl and dataUrl in self.dataUrlData:
+
+            print('>>>>_setDataUrlPath', str(dataUrl))
+
             urlData, urlButton, urlLabel = self.dataUrlData[dataUrl]
             urlNum = list(self.dataUrlData.keys()).index(dataUrl)
 
@@ -523,27 +567,28 @@ class ValidateSpectraFrameABC(Frame):
             # newUrl cannot be '' otherwise the api cannot re-load the project
             if newUrl:
 
+                # only accept valid paths from the urlData box
+                urlValid = urlData.validator().checkState == QtGui.QValidator.Acceptable
+
                 # NOTE:ED AUTOUPDATE
                 if not self.AUTOUPDATE and self._dataUrlCallback:
-                    self._dataUrlCallback(dataUrl, newUrl, urlNum)
+                    self._dataUrlCallback(dataUrl, newUrl, urlValid, urlNum)
+                    self._validateSpectra()
 
                 elif dataUrl.url.dataLocation != newUrl:
-                    # define a function to clone the datUrl
+                    # define a function to clone the dataUrl
                     self.dataUrlFunc(dataUrl, newUrl)
 
-                # dataUrl.url = dataUrl.url.clone(path=newUrl)
-                # set the widget text
-                # self._setUrlData(dataUrl)
-                # self._validateAll()
+                print('>>>_setDataUrlPath post', dataUrl.url.dataLocation)
 
-    def _setUrlData(self, dataUrl):
+    def _setUrlData(self, dataUrl, newFilePath=None):
         """Set the urlData widgets from the dataUrl.
         """
         if dataUrl not in self.dataUrlData:
             return
 
         urlData, urlButton, urlLabel = self.dataUrlData[dataUrl]
-        urlData.setText(dataUrl.url.dataLocation)
+        urlData.setText(newFilePath if newFilePath else dataUrl.url.path)
         # if urlData.validator:
         valid = urlData.validator()
         if valid and hasattr(valid, 'resetCheck'):
@@ -552,8 +597,9 @@ class ValidateSpectraFrameABC(Frame):
     def filePathFunc(self, spectrum, filePath):
         """Set the new filePath for the spectrum
         """
+        print('>>>filePathFunc - set filePath')
         spectrum.filePath = filePath
-        self._validateAll()
+        self._validateDataUrls()
 
     def _getSpectrumFile(self, spectrum):
         """Get the path from the widget and call the open dialog.
@@ -577,16 +623,18 @@ class ValidateSpectraFrameABC(Frame):
 
                 dataType, subType, usePath = ioFormats.analyseUrl(newFilePath)
                 if dataType == 'Spectrum':
+                    pass
 
-                    # populate the widget
-                    self._setPathDataFromUrl(spectrum, newFilePath)
+                # populate the widget
+                self._setPathDataFromUrl(spectrum, newFilePath)
 
-                    # NOTE:ED AUTOUPDATE
-                    if not self.AUTOUPDATE and self._filePathCallback:
-                        self._filePathCallback(spectrum, newFilePath, specNum)
-                    else:
-                        # define a function to update the filePath
-                        self.filePathFunc(spectrum, newFilePath)
+                # NOTE:ED AUTOUPDATE
+                if not self.AUTOUPDATE and self._filePathCallback:
+                    self._filePathCallback(spectrum, newFilePath, specNum)
+                    self._validateDataUrls()
+                else:
+                    # define a function to update the filePath
+                    self.filePathFunc(spectrum, newFilePath)
 
                     # spectrum.filePath = newFilePath
 
@@ -607,10 +655,10 @@ class ValidateSpectraFrameABC(Frame):
                 pathData, pathButton, pathLabel = self.spectrumData[spectrum]
 
                 # create a new temporary dataUrl to validate the path names
-                dataUrl = spectrum.project._wrappedData.root.fetchDataUrl(newFilePath)
+                tempDataUrl = spectrum.project._wrappedData.root.fetchDataUrl(newFilePath)
 
                 # get the list of dataUrls
-                apiDataStores = [store for store in dataUrl.sortedDataStores() if store.fullPath == newFilePath]
+                apiDataStores = [store for store in tempDataUrl.sortedDataStores() if store.fullPath == newFilePath]
                 if not apiDataStores:
                     return
 
@@ -672,16 +720,18 @@ class ValidateSpectraFrameABC(Frame):
 
             dataType, subType, usePath = ioFormats.analyseUrl(newFilePath)
             if dataType == 'Spectrum':
+                pass
 
-                # populate the widget
-                self._setPathDataFromUrl(spectrum, newFilePath)
+            # populate the widget
+            self._setPathDataFromUrl(spectrum, newFilePath)
 
-                # NOTE:ED AUTOUPDATE
-                if not self.AUTOUPDATE and self._filePathCallback:
-                    self._filePathCallback(spectrum, newFilePath, specNum)
-                else:
-                    # define a function to update the filePath
-                    self.filePathFunc(spectrum, newFilePath)
+            # NOTE:ED AUTOUPDATE
+            if not self.AUTOUPDATE and self._filePathCallback:
+                self._filePathCallback(spectrum, newFilePath, specNum)
+                self._validateDataUrls()
+            else:
+                # define a function to update the filePath
+                self.filePathFunc(spectrum, newFilePath)
 
             # else:
             #     getLogger().warning('Not a spectrum file: %s - (%s, %s)' % (newFilePath, dataType, subType))
@@ -721,24 +771,46 @@ class ValidateSpectraFrameABC(Frame):
         else:
             return ()
 
-    def _validateAll(self):
-        """Validate all the objects as the dataUrls may have changed.
-        """
-        self._badUrls = False
+    def _validateDataUrls(self):
+        print('>>> _validateDataUrls')
         for url in self.allUrls:
             self._setUrlData(url)
             # _setUrlData(self, url, self.dataUrlData[url])
             if not url.url.path:
                 self._badUrls = True
 
+    def _validateSpectra(self):
+        print('>>> _validateSpectra')
         if self.spectra:
             for spectrum in self.spectra:
                 self._setPathData(spectrum)
 
-        if self.ENABLECLOSEBUTTON:
-            applyButtons = getattr(self._parent, 'applyButtons', None)
-            if applyButtons:
-                applyButtons.getButton('Close').setEnabled(not self._badUrls)
+    def _validateAll(self):
+        """Validate all the objects as the dataUrls may have changed.
+        """
+        print('>>> validateAll')
+
+        self._validateDataUrls()
+        self._validateSpectra()
+
+        # self._badUrls = False
+        # for url in self.allUrls:
+        #     self._setUrlData(url)
+        #     # _setUrlData(self, url, self.dataUrlData[url])
+        #     print('  >>> vvv', url.url.path)
+        #     if not url.url.path:
+        #         print('    >>> vvv', url.url.path)
+        #         self._badUrls = True
+        # print('>>> vvv')
+        #
+        # if self.spectra:
+        #     for spectrum in self.spectra:
+        #         self._setPathData(spectrum)
+
+        # if self.ENABLECLOSEBUTTON:
+        #     applyButtons = getattr(self._parent, 'applyButtons', None)
+        #     if applyButtons:
+        #         applyButtons.getButton('Close').setEnabled(not self._badUrls)
 
     def _apply(self):
         # apply all the buttons
@@ -825,7 +897,7 @@ class ValidateSpectraForPreferences(ValidateSpectraFrameABC):
     """
 
     VIEWDATAURLS = True
-    VIEWSPECTRA = False
+    VIEWSPECTRA = True
     ENABLECLOSEBUTTON = False
     AUTOUPDATE = False
     USESCROLLFRAME = False

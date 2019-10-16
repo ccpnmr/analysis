@@ -73,6 +73,11 @@ class PathValidator(QtGui.QValidator):
     def resetCheck(self):
         self.validate(self.parent().text(), 0)
 
+    @property
+    def checkState(self):
+        state, _, _ = self.validate(self.parent().text(), 0)
+        return state
+
 
 class PathEdit(LineEdit):
     """LineEdit widget that contains validator for checking filePaths exists

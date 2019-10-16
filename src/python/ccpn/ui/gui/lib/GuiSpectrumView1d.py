@@ -59,6 +59,7 @@ class GuiSpectrumView1d(GuiSpectrumView):
         self._application = self.strip.spectrumDisplay.mainWindow.application
 
         self.data = self.spectrum.positions, self.spectrum.intensities
+        print('>>>filePath', self.spectrum.filePath, self.spectrum.positions, self.spectrum.intensities)
 
         # for strip in self.strips:
         if self.spectrum.sliceColour is None:
@@ -297,8 +298,13 @@ class GuiSpectrumView1d(GuiSpectrumView):
 
         glList.colors = np.array([colR, colG, colB, 1.0] * numVertices, dtype=np.float32)
         glList.vertices = np.zeros(numVertices * 2, dtype=np.float32)
-        glList.vertices[::2] = self.spectrum.positions
-        glList.vertices[1::2] = self.spectrum.intensities
+
+        try:
+            # may be empty
+            glList.vertices[::2] = self.spectrum.positions
+            glList.vertices[1::2] = self.spectrum.intensities
+        except:
+            pass
 
     def _paintContoursNoClip(self, plotHeight=0.0):
 

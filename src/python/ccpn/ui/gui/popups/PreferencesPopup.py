@@ -115,6 +115,8 @@ def _verifyApply(self, attributeName, value, *postArgs, **postKwds):
                 # delete from dict - empty dict implies no changes
                 del self._changes[attributeName]
 
+        print('>>>attrib', attributeName, self._changes[attributeName] if attributeName in self._changes else 'None')
+
     if self:
         # set button state depending on number of changes
         allChanges = True if self._changes else False
@@ -621,6 +623,7 @@ class PreferencesPopup(CcpnDialog):
         """Populate the widgets in the spectrumTab
         """
         self.autoSetDataPathBox.setChecked(self.preferences.general.autoSetDataPath)
+        self.userDataPathText.setText(self.preferences.general.dataPath)
 
         # populate ValidateFrame
         self._validateFrame._populate()
@@ -681,19 +684,18 @@ class PreferencesPopup(CcpnDialog):
         """
 
         row = 0
-        # self.dataPathLabel = Label(parent, "User Data Path", grid=(row, 0), )
-        # self.dataPathText = LineEdit(parent, grid=(row, 1), vAlign='t')
-        # self.dataPathText.setMinimumWidth(LineEditsMinimumWidth)
-        # self.dataPathText.textChanged.connect(self._queueSetDataPath)
-        # self.dataPathText.setText(self.preferences.general.dataPath)
-        # self.dataPathButton = Button(parent, grid=(row, 2), callback=self._getDataPath, icon='icons/directory',
-        #                              hPolicy='fixed')
-        #
-        # row += 1
-
         self.autoSetDataPathLabel = Label(parent, text="Auto Set dataPath: ", grid=(row, 0))
         self.autoSetDataPathBox = CheckBox(parent, grid=(row, 1))#, checked=self.preferences.general.autoSetDataPath)
         self.autoSetDataPathBox.toggled.connect(partial(self._queueToggleGeneralOptions, 'autoSetDataPath'))
+
+        row += 1
+        self.userDataPathLabel = Label(parent, "User Data Path", grid=(row, 0), )
+        self.userDataPathText = PathEdit(parent, grid=(row, 1), vAlign='t')
+        self.userDataPathText.setMinimumWidth(LineEditsMinimumWidth)
+        self.userDataPathText.textChanged.connect(self._queueSetUserDataPath)
+        # self.userDataPathText.setText(self.preferences.general.dataPath)
+        self.userDataPathButton = Button(parent, grid=(row, 2), callback=self._getUserDataPath, icon='icons/directory',
+                                     hPolicy='fixed')
 
         # add validate frame
         row += 1
@@ -1118,29 +1120,28 @@ class PreferencesPopup(CcpnDialog):
     #                 name='standard').findFirstDataUrl(name='remoteData')
     #         dataUrl.url = Implementation.Url(path=newPath)
 
-    # @queueStateChange(_verifyApply)
-    # def _queueSetUserDataPath(self):
-    #     value = self.userDataPathText.get()
-    #     if value != self.preferences.general.dataPath:
-    #         return partial(self._setUserDataPath, value)
-    #
-    # def _setUserDataPath(self):
-    #     if self.userDataPathText.isModified():
-    #         newPath = self.userDataPathText.text().strip()
-    #         self.preferences.general.dataPath = newPath
-    #
-    # def _getUserDataPath(self):
-    #     if os.path.exists('/'.join(self.userDataPathText.text().split('/')[:-1])):
-    #         currentPath = '/'.join(self.userDataPathText.text().split('/')[:-1])
-    #     else:
-    #         currentPath = os.path.expanduser('~')
-    #     dialog = FileDialog(self, text='Select User Working File', directory=currentPath, fileMode=2, acceptMode=0,
-    #                         preferences=self.preferences.general)
-    #     directory = dialog.selectedFiles()
-    #     if directory:
-    #         self.userDataPathText.setText(directory[0])
-    #         # self._setUserDataPath()
-    #         # self.preferences.general.dataPath = directory[0]
+    @queueStateChange(_verifyApply)
+    def _queueSetUserDataPath(self):
+        value = self.userDataPathText.get()
+        if value != self.preferences.general.dataPath:
+            return partial(self._setUserDataPath, value)
+
+    def _setUserDataPath(self, value):
+        # newPath = self.userDataPathText.text().strip()
+        self.preferences.general.dataPath = value
+
+    def _getUserDataPath(self):
+        if os.path.exists(os.path.expanduser(self.userDataPathText.text())):
+            currentDataPath = os.path.expanduser(self.userDataPathText.text())
+        else:
+            currentDataPath = os.path.expanduser('~')
+        dialog = FileDialog(self, text='Select User Working File', directory=currentDataPath, fileMode=2, acceptMode=0,
+                            preferences=self.preferences.general)
+        directory = dialog.selectedFiles()
+        if directory:
+            self.userDataPathText.setText(directory[0])
+            # self._setUserDataPath()
+            # self.preferences.general.dataPath = directory[0]
 
     @queueStateChange(_verifyApply)
     def _queueSetUserWorkingPath(self):
@@ -1160,7 +1161,7 @@ class PreferencesPopup(CcpnDialog):
         dialog = FileDialog(self, text='Select Data File', directory=currentDataPath, fileMode=2, acceptMode=0,
                             preferences=self.preferences.general)
         directory = dialog.selectedFiles()
-        if len(directory) > 0:
+        if directory:
             self.userWorkingData.setText(directory[0])
             # self._setUserWorkingPath()
             # self.preferences.general.userWorkingPath = directory[0]
@@ -1183,25 +1184,29 @@ class PreferencesPopup(CcpnDialog):
         dialog = FileDialog(self, text='Select Data File', directory=currentDataPath, fileMode=2, acceptMode=0,
                             preferences=self.preferences.general)
         directory = dialog.selectedFiles()
-        if len(directory) > 0:
+        if directory:
             self.auxiliaryFilesData.setText(directory[0])
             # self._setAuxiliaryFilesPath()
             # self.preferences.general.auxiliaryFilesPath = directory[0]
 
     @queueStateChange(_verifyApply)
-    def _queueSetValidateDataUrl(self, dataUrl, newUrl, dim):
+    def _queueSetValidateDataUrl(self, dataUrl, newUrl, urlValid, dim):
         """Set the new url in the dataUrl
         dim is required by the decorator to give a unique id for dataUrl row
         """
         if newUrl != dataUrl.url.path:
-            return partial(self._validatePreferencesDataUrl, dataUrl, newUrl, dim)
+            return partial(self._validatePreferencesDataUrl, dataUrl, newUrl, urlValid, dim)
 
-    def _validatePreferencesDataUrl(self, dataUrl, newUrl, dim):
+    def _validatePreferencesDataUrl(self, dataUrl, newUrl, urlValid, dim):
         """Put the new dataUrl into the dataUrl and the preferences.general.dataPath
+        Extra step incase urlValid needs to be checked
         """
         if dim == 0:
             # must be the first dataUrl for the preferences
-            self.preferences.general.dataPath = newUrl
+            # self.preferences.general.dataPath = newUrl
+            pass
+
+        # if urlValid:
         self._validateFrame.dataUrlFunc(dataUrl, newUrl)
 
     @queueStateChange(_verifyApply)

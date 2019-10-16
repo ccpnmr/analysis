@@ -871,16 +871,12 @@ class Project(AbstractWrapperObject):
         """Perform validate operation for setting dataUrl from preferences - to be called after loading
         """
 
-        getLogger().info('>>>validating...')
-
         # read the dataPath from the preferences of defined
         project = self
         general = self.application.preferences.general if self.application.preferences and self.application.preferences.general else None
         autoSet = general.autoSetDataPath if general.autoSetDataPath else False
 
-        # skip setting the path if autoSetDataPath is false
-        if not autoSet:
-            return
+        getLogger().info('>>>validating...')
 
         newDataUrlPath = newDataUrlPath if newDataUrlPath else general.dataPath \
             if general and general.dataPath else general.userWorkingPath \
@@ -904,6 +900,27 @@ class Project(AbstractWrapperObject):
         dataUrlData['alongsideData'] = _findDataUrl(project, 'alongsideData')
         dataUrlData['otherData'] = [dataUrl for store in project._wrappedData.memopsRoot.sortedDataLocationStores()
                                     for dataUrl in store.sortedDataUrls() if dataUrl.name not in ('insideData', 'alongsideData', 'remoteData')]
+
+        standardStore = self.project._wrappedData.memopsRoot.findFirstDataLocationStore(name='standard')
+        stores = [(store.name, store.url.dataLocation, url.path,) for store in standardStore.sortedDataUrls() for url in store.sortedDataStores()]
+        urls = [(store.dataUrl.name, store.dataUrl.url.dataLocation, store.path,) for store in standardStore.sortedDataStores()]
+
+        spectraStores = [spec._wrappedData.dataStore for spec in self.spectra]
+
+        bad = [url for store in standardStore.sortedDataUrls() for url in store.sortedDataStores() if url not in spectraStores]
+
+        for bb in bad:
+            print('>>>>>>DELETING', bb)
+            bb.delete()
+
+        for url in dataUrlData['otherData']:
+            if not url.dataStores:
+                print('>>>>>>DELETING', url)
+                url.delete()
+
+        # skip setting the path if autoSetDataPath is false
+        if not autoSet:
+            return
 
         # update dataUrl here to the value in preferences
         if dataUrlData['remoteData'] and len(dataUrlData['remoteData']) == 1:

@@ -178,9 +178,32 @@ def expandDollarFilePath(project: 'Project', spectrum, filePath: str) -> str:
 
     for prefix, dataUrlName in stdRepositoryNames.items():
         if filePath.startswith(prefix):
-            dataUrl = dataLocationStore.findFirstDataUrl(name=dataUrlName)
-            if dataUrl is not None:
-                return os.path.join(dataUrl.url.dataLocation, filePath[len(prefix):])
+
+            apiDataStore = spectrum._apiDataSource.dataStore
+            if not apiDataStore:
+                return filePath
+
+            elif apiDataStore.dataLocationStore.name == 'standard':
+
+                # this fails on the first loading of V2 projects - ordering issue?
+                spectrumDataUrlName = apiDataStore.dataUrl.name
+
+                if spectrumDataUrlName == dataUrlName:
+                    return os.path.join(apiDataStore.dataUrl.url.dataLocation, filePath[len(prefix):])
+
+                # if dataUrlName == 'insideData':
+                #     pathData.setText('$INSIDE/%s' % apiDataStore.path)
+                # elif dataUrlName == 'alongsideData':
+                #     pathData.setText('$ALONGSIDE/%s' % apiDataStore.path)
+                # elif dataUrlName == 'remoteData':
+                #     pathData.setText('$DATA/%s' % apiDataStore.path)
+            else:
+                # pathData.setText(apiDataStore.fullPath)
+                return filePath
+
+            # dataUrl = dataLocationStore.findFirstDataUrl(name=dataUrlName)
+            # if dataUrl is not None:
+            #     return os.path.join(dataUrl.url.dataLocation, filePath[len(prefix):])
 
     return filePath
 

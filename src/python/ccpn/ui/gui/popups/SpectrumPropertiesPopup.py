@@ -749,12 +749,19 @@ class GeneralTab(Widget):
         self.logger.info(command)
 
     @queueStateChange(_verifyApply)
-    def _queueSetValidateDataUrl(self, dataUrl, newUrl, dim):
+    def _queueSetValidateDataUrl(self, dataUrl, newUrl, urlValid, dim):
         """Set the new url in the dataUrl
         dim is required by the decorator to give a unique id for dataUrl row
         """
         if newUrl != dataUrl.url.path:
-            return partial(self._validateFrame.dataUrlFunc, dataUrl, newUrl)
+            return partial(self._validatePreferencesDataUrl, dataUrl, newUrl, urlValid, dim)
+
+    def _validatePreferencesDataUrl(self, dataUrl, newUrl, urlValid, dim):
+        """Put the new dataUrl into the dataUrl and the preferences.general.dataPath
+        Extra step incase urlValid needs to be checked
+        """
+        # if urlValid:
+        self._validateFrame.dataUrlFunc(dataUrl, newUrl)
 
     @queueStateChange(_verifyApply)
     def _queueSetValidateFilePath(self, spectrum, filePath, dim):

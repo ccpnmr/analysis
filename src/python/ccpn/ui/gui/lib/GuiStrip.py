@@ -127,7 +127,7 @@ class GuiStrip(Frame):
         self._fr = []
         self._sl = []
 
-        SHOWTESTWIDGETS = True
+        SHOWTESTWIDGETS = False
 
         if SHOWTESTWIDGETS:
             sp = Spacer(self, 1, 1, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding,

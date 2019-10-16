@@ -241,7 +241,7 @@ class ValidateSpectraFrameABC(Frame):
     _dataUrlCallback = None
     _matchDataUrlWidths = None
     _matchFilePathWidths = None
-    
+
     def __init__(self, parent, mainWindow=None, spectra=None, defaultSelected=None, **kwds):
         super().__init__(parent, **kwds)
 
@@ -760,84 +760,47 @@ class ValidateSpectraFrameABC(Frame):
     def resizeEvent(self, a0: QtGui.QResizeEvent) -> None:
         super().resizeEvent(a0)
 
+        def _getColWidths(layout):
+            """Get the colWidths from the parentWidget layout
+            """
+            colWidths = [None] * layout.columnCount()
+
+            for index in range(layout.count()):
+                row, column, cols, rows = layout.getItemPosition(index)
+                wid = layout.itemAt(index).widget()
+                if wid and not isinstance(wid, (ValidateSpectraForSpectrumPopup,
+                                                ValidateSpectraForPreferences,
+                                                ValidateSpectraForPopup,
+                                                ValidateSpectraPopup,
+                                                HLine)):
+                    colWidths[column] = max(wid.width(), colWidths[column] or 0)
+
+            return colWidths
+
         if self._matchDataUrlWidths and self.VIEWDATAURLS:
             parentLayout = self._matchDataUrlWidths.getLayout()
             dataUrlLayout = self.dataUrlScrollAreaWidgetContents.getLayout()
             dataUrlLayout.setSpacing(parentLayout.spacing())
 
             for urlData, urlButton, urlLabel in self.dataUrlData.values():
-
-                col0 = col1 = col2 = 0
-
-                for index in range(parentLayout.count()):
-
-                    row, column, cols, rows = parentLayout.getItemPosition(index)
-                    wid = parentLayout.itemAt(index).widget()
-
-                    if column == 0:
-                        if wid and not isinstance(wid, (ValidateSpectraForSpectrumPopup,
-                                                        ValidateSpectraForPreferences,
-                                                        ValidateSpectraForPopup,
-                                                        ValidateSpectraPopup,
-                                                        HLine)):
-
-                            # print('>>>wid', wid, row, column, cols, rows, wid.width())
-                            col0 = max(wid.width(), col0)
-
-                    elif column == 1:
-                        if wid:
-                            # print('>>>wid', wid, row, column, cols, rows, wid.width())
-                            col1 = max(wid.width(), col1)
-
-                    elif column == 2:
-                        if wid and wid.isVisible():
-                            # print('>>>wid', wid, row, column, cols, rows, wid.width())
-                            col2 = max(wid.width(), col2)
-
-                if urlLabel:
-                    urlLabel.setFixedWidth(col0)
-                if urlData:
-                    urlData.setFixedWidth(col1)
-                if urlButton:
-                    urlButton.setFixedWidth(col2)
+                colWidths = _getColWidths(parentLayout)
+                for widget, col in zip((urlLabel, urlData, urlButton), colWidths):
+                    if widget and col:
+                        widget.setFixedWidth(col)
 
         if self._matchFilePathWidths and self.spectra and self.VIEWSPECTRA:
             parentLayout = self._matchFilePathWidths.getLayout()
             spectrumLayout = self.spectrumScrollAreaWidgetContents.getLayout()
             spectrumLayout.setSpacing(parentLayout.spacing())
 
-            for spectrum in self.spectra[:1]:
+            for spectrum in self.spectra:
                 if spectrum and spectrum in self.spectrumData:
                     pathData, pathButton, pathLabel = self.spectrumData[spectrum]
 
-                    col0 = col1 = col2 = 0
-
-                    for index in range(parentLayout.count()):
-
-                        row, column, cols, rows = parentLayout.getItemPosition(index)
-                        wid = parentLayout.itemAt(index).widget()
-
-                        if column == 0:
-                            if wid and not isinstance(wid, ValidateSpectraForSpectrumPopup):
-                                # print('>>>wid', wid, row, column, cols, rows, wid.width())
-                                col0 = max(wid.width(), col0)
-
-                        elif column == 1:
-                            if wid:
-                                # print('>>>wid', wid, row, column, cols, rows, wid.width())
-                                col1 = max(wid.width(), col1)
-
-                        elif column == 2:
-                            if wid and wid.isVisible():
-                                # print('>>>wid', wid, row, column, cols, rows, wid.width())
-                                col2 = max(wid.width(), col2)
-
-                    if pathLabel:
-                        pathLabel.setFixedWidth(col0)
-                    if pathData:
-                        pathData.setFixedWidth(col1)
-                    if pathButton:
-                        pathButton.setFixedWidth(col2)
+                    colWidths = _getColWidths(parentLayout)
+                    for widget, col in zip((pathLabel, pathData, pathButton), colWidths):
+                        if widget and col:
+                            widget.setFixedWidth(col)
 
 
 class ValidateSpectraForPopup(ValidateSpectraFrameABC):
@@ -861,7 +824,7 @@ class ValidateSpectraForPreferences(ValidateSpectraFrameABC):
     """
 
     VIEWDATAURLS = True
-    VIEWSPECTRA = False
+    VIEWSPECTRA = True
     ENABLECLOSEBUTTON = False
     AUTOUPDATE = False
     USESCROLLFRAME = False

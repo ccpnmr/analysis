@@ -675,7 +675,8 @@ class PreferencesPopup(CcpnDialog):
         self.pymolPath.setText(self.preferences.externalPrograms.pymol)
 
     def _setspectrumTabWidgets(self, parent):
-        ''' Insert a widget in here to appear in the Spectrum Tab. Parent = the Frame obj where the widget should live'''
+        """Insert a widget in here to appear in the Spectrum Tab. Parent = the Frame obj where the widget should live
+        """
 
         row = 0
         # self.dataPathLabel = Label(parent, "User Data Path", grid=(row, 0), )
@@ -695,7 +696,7 @@ class PreferencesPopup(CcpnDialog):
         self._validateFrame._filePathCallback = self._queueSetValidateFilePath
         self._validateFrame._dataUrlCallback = self._queueSetValidateDataUrl
         self._validateFrame._matchDataUrlWidths = parent
-        # self._validateFrame._matchFilePathWidths = parent
+        self._validateFrame._matchFilePathWidths = parent
 
         # row += 1
         # self._dataUrlData = {}

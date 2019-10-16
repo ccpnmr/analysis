@@ -867,6 +867,44 @@ class Project(AbstractWrapperObject):
                     notifier(self)
 
     # Library functions
+    def _validateDataUrlAndFilePaths(self, newDataUrlPath=None):
+        """Perform validate operation for setting dataUrl from preferences - to be called after loading
+        """
+
+        getLogger().info('>>>validating...')
+
+        # read the dataPath from the preferences of defined
+        project = self
+        general = self.application.preferences.general if self.application.preferences and self.application.preferences.general else None
+
+        newDataUrlPath = newDataUrlPath if newDataUrlPath else general.dataPath \
+            if general and general.dataPath else general.userWorkingPath \
+            if general.userWorkingPath else os.path.expanduser('~')
+        newDataUrlPath = os.path.expanduser(newDataUrlPath)
+
+        def _findDataUrl(project, storeType):
+            """find the dataStores of the given type
+            """
+            dataUrl = project._apiNmrProject.root.findFirstDataLocationStore(
+                    name='standard').findFirstDataUrl(name=storeType)
+            if dataUrl:
+                return (dataUrl,)
+            else:
+                return ()
+
+        # get the dataPaths from the project
+        dataUrlData = {}
+        dataUrlData['remoteData'] = _findDataUrl(project, 'remoteData')
+        dataUrlData['insideData'] = _findDataUrl(project, 'insideData')
+        dataUrlData['alongsideData'] = _findDataUrl(project, 'alongsideData')
+        dataUrlData['otherData'] = [dataUrl for store in project._wrappedData.memopsRoot.sortedDataLocationStores()
+                                    for dataUrl in store.sortedDataUrls() if dataUrl.name not in ('insideData', 'alongsideData', 'remoteData')]
+
+        # update dataUrl here to the value in preferences
+        if dataUrlData['remoteData'] and len(dataUrlData['remoteData']) == 1:
+            # must only be one dataUrl
+            primaryDataUrl = dataUrlData['remoteData'][0]
+            primaryDataUrl.url = primaryDataUrl.url.clone(path=newDataUrlPath)
 
     @logCommand('project.')
     def exportNef(self, path: str = None,

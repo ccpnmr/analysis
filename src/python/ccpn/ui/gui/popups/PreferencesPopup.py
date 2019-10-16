@@ -1187,7 +1187,15 @@ class PreferencesPopup(CcpnDialog):
         dim is required by the decorator to give a unique id for dataUrl row
         """
         if newUrl != dataUrl.url.path:
-            return partial(self._validateFrame.dataUrlFunc, dataUrl, newUrl, dim)
+            return partial(self._validatePreferencesDataUrl, dataUrl, newUrl, dim)
+
+    def _validatePreferencesDataUrl(self, dataUrl, newUrl, dim):
+        """Put the new dataUrl into the dataUrl and the preferences.general.dataPath
+        """
+        if dim == 0:
+            # must be the first dataUrl for the preferences
+            self.preferences.general.dataPath = newUrl
+        self._validateFrame.dataUrlFunc(dataUrl, newUrl)
 
     @queueStateChange(_verifyApply)
     def _queueSetValidateFilePath(self, spectrum, filePath, dim):
@@ -1195,7 +1203,7 @@ class PreferencesPopup(CcpnDialog):
         dim is required by the decorator to give a unique id for filePath row
         """
         if filePath != spectrum.filePath:
-            return partial(self._validateFrame.filePathFunc, spectrum, filePath, dim)
+            return partial(self._validateFrame.filePathFunc, spectrum, filePath)
 
     @queueStateChange(_verifyApply)
     def _queueSetuserLayoutsPath(self):

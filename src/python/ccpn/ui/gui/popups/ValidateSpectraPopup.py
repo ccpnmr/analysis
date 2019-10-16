@@ -504,7 +504,7 @@ class ValidateSpectraFrameABC(Frame):
 
                     elif dataUrl.url.dataLocation != newUrl:
                         # define a function to clone the datUrl
-                        self.dataUrlFunc(dataUrl, newUrl, urlNum)
+                        self.dataUrlFunc(dataUrl, newUrl)
 
                     # dataUrl.url = dataUrl.url.clone(path=newUrl)
                     # set the widget text
@@ -529,7 +529,7 @@ class ValidateSpectraFrameABC(Frame):
 
                 elif dataUrl.url.dataLocation != newUrl:
                     # define a function to clone the datUrl
-                    self.dataUrlFunc(dataUrl, newUrl, urlNum)
+                    self.dataUrlFunc(dataUrl, newUrl)
 
                 # dataUrl.url = dataUrl.url.clone(path=newUrl)
                 # set the widget text
@@ -606,6 +606,7 @@ class ValidateSpectraFrameABC(Frame):
             with undoStackBlocking():
                 pathData, pathButton, pathLabel = self.spectrumData[spectrum]
 
+                # create a new temporary dataUrl to validate the path names
                 dataUrl = spectrum.project._wrappedData.root.fetchDataUrl(newFilePath)
 
                 # get the list of dataUrls
@@ -824,7 +825,7 @@ class ValidateSpectraForPreferences(ValidateSpectraFrameABC):
     """
 
     VIEWDATAURLS = True
-    VIEWSPECTRA = True
+    VIEWSPECTRA = False
     ENABLECLOSEBUTTON = False
     AUTOUPDATE = False
     USESCROLLFRAME = False

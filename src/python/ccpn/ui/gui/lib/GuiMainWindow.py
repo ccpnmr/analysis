@@ -482,8 +482,7 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
 
                 showWarning('Spectrum file paths',
                             '''Detected invalid Spectrum file path(s) for: 
-                            
-                            \t%s
+                            \n\t%s
                             
                             Use menu Spectrum-->Validate paths.. or "VP" shortcut to correct''' % '\n\t'.join(badSpectra)
                             )

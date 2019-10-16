@@ -754,7 +754,7 @@ class GeneralTab(Widget):
         dim is required by the decorator to give a unique id for dataUrl row
         """
         if newUrl != dataUrl.url.path:
-            return partial(self._validateFrame.dataUrlFunc, dataUrl, newUrl, dim)
+            return partial(self._validateFrame.dataUrlFunc, dataUrl, newUrl)
 
     @queueStateChange(_verifyApply)
     def _queueSetValidateFilePath(self, spectrum, filePath, dim):
@@ -762,7 +762,7 @@ class GeneralTab(Widget):
         dim is required by the decorator to give a unique id for filePath row
         """
         if filePath != spectrum.filePath:
-            return partial(self._validateFrame.filePathFunc, spectrum, filePath, dim)
+            return partial(self._validateFrame.filePathFunc, spectrum, filePath)
 
     @queueStateChange(_verifyApply)
     def _queueSpectrumNameChange(self, spectrum, value):
@@ -1222,16 +1222,20 @@ class DimensionsTab(Widget):
             self._spectrometerFrequenciesLabels[i].setText(str("%.3f" % (self.spectrum.spectrometerFrequencies[i] or 0.0)))
 
             value = self.spectrum.referenceValues[i]
-            self.spectralReferencingData[i].setValue(value)
+            if value:
+                self.spectralReferencingData[i].setValue(value)
 
             value = self.spectrum.referencePoints[i]
-            self.spectralReferencingDataPoints[i].setValue(value)
+            if value:
+                self.spectralReferencingDataPoints[i].setValue(value)
 
             value = self.spectrum.assignmentTolerances[i]
-            self.spectralAssignmentToleranceData[i].setValue(value)
+            if value:
+                self.spectralAssignmentToleranceData[i].setValue(value)
 
             value = self.spectrum.doubleCrosshairOffsets[i]
-            self.spectralDoubleCursorOffset[i].setValue(value)
+            if value:
+                self.spectralDoubleCursorOffset[i].setValue(value)
 
             if i == 0:
                 # hack just to show one

@@ -647,7 +647,7 @@ class Framework(NotifierBase):
     def applyPreferences(self, project):
         """Apply user preferences
 
-        NBNB project should be impliclt rather than a parameter (once reorganisation is finished)
+        NBNB project should be implicit rather than a parameter (once reorganisation is finished)
         """
         # Reset remoteData DataStores to match preferences setting
         dataPath = self.preferences.general.dataPath
@@ -1162,7 +1162,7 @@ class Framework(NotifierBase):
                         ("Restore last", self.restoreLastSavedLayout, [('enabled', True)]),
                         ("Restore from file...", self.restoreLayoutFromFile, [('enabled', True)]),
                         (),
-                        ("Open pre-defined",  ()),
+                        ("Open pre-defined", ()),
 
                         )),
             (),
@@ -1227,7 +1227,7 @@ class Framework(NotifierBase):
             (),
             ("Chemical Shift Mapping", self.showChemicalShiftMapping, [('shortcut', 'cm')]),
             ("Notes Editor", partial(self.showNotesEditor, selectFirstItem=True), [('shortcut', 'no'),
-                                                     ('icon', 'icons/null')]),
+                                                                                   ('icon', 'icons/null')]),
             (),
             # (),
             ###("Sequence Graph", self.showSequenceGraph, [('shortcut', 'sg')]),
@@ -1391,6 +1391,8 @@ class Framework(NotifierBase):
                 return None
 
         dataType, subType, usePath = ioFormats.analyseUrl(path)
+        project = None
+
         if dataType == 'Project' and subType in (ioFormats.CCPN,
                                                  ioFormats.NEF,
                                                  # ioFormats.NMRSTAR,
@@ -1423,6 +1425,9 @@ class Framework(NotifierBase):
                 sys.stderr.write('==> Loading %s Sparky project "%s"\n' % (subType, path))
                 project = self._loadSparkyProject(path, makeNewProject=True)  # RHF - new by default
                 project._resetUndo(debug=self.level <= Logging.DEBUG2, application=self)
+
+            getLogger().info('>>>VALIDATE DATAPATH HERE - application.loadProject')
+            project._validateDataUrlAndFilePaths()
 
             return project
 
@@ -1484,6 +1489,7 @@ class Framework(NotifierBase):
             if not path:
                 return
         from ccpn.ui.gui.popups.ImportStarPopup import StarImporterPopup
+
         relativePath = os.path.dirname(os.path.realpath(path))
         dataBlock = self.nefReader.getNMRStarData(path)
         self._importedStarDataBlock = dataBlock
@@ -1493,35 +1499,35 @@ class Framework(NotifierBase):
         popup.raise_()
 
     #     # FIXME Below is broken. This does not create a project! Looks like a copy-paste from NEF code.
-        # """Load Project from NEF file at path, and do necessary setup"""
-        #
-        # from ccpn.core.lib.ContextManagers import undoBlock, notificationEchoBlocking
-        #
-        # dataBlock = self.nefReader.getNMRStarData(path)
+    # """Load Project from NEF file at path, and do necessary setup"""
+    #
+    # from ccpn.core.lib.ContextManagers import undoBlock, notificationEchoBlocking
+    #
+    # dataBlock = self.nefReader.getNMRStarData(path)
 
-        # if makeNewProject:
-        #     if self.project is not None:
-        #         self._closeProject()
-        #     self.project = self.newProject(dataBlock.name)
-        #
-        # self.project._wrappedData.shiftAveraging = False
-        #
-        # # with suspendSideBarNotifications(project=self.project):
-        # with undoBlock():
-        #     with notificationEchoBlocking():
-        #         # with catchExceptions(application=self, errorStringTemplate='Error loading NMRStar file: %s'):
-        #             self.nefReader.importNewProject(self.project, dataBlock)
+    # if makeNewProject:
+    #     if self.project is not None:
+    #         self._closeProject()
+    #     self.project = self.newProject(dataBlock.name)
+    #
+    # self.project._wrappedData.shiftAveraging = False
+    #
+    # # with suspendSideBarNotifications(project=self.project):
+    # with undoBlock():
+    #     with notificationEchoBlocking():
+    #         # with catchExceptions(application=self, errorStringTemplate='Error loading NMRStar file: %s'):
+    #             self.nefReader.importNewProject(self.project, dataBlock)
 
-        # with undoBlock():
-        #     try:
-        #         self.nefReader.importNewNMRStarProject(self.project, dataBlock)
-        #     except Exception as es:
-        #         getLogger().warning('Error loading NMRStar file: %s' % str(es))
+    # with undoBlock():
+    #     try:
+    #         self.nefReader.importNewNMRStarProject(self.project, dataBlock)
+    #     except Exception as es:
+    #         getLogger().warning('Error loading NMRStar file: %s' % str(es))
 
-        # self.project._wrappedData.shiftAveraging = True
+    # self.project._wrappedData.shiftAveraging = True
 
-        # getLogger().info('==> Loaded NmrStar file: "%s"' % (path,))
-        # return self.project
+    # getLogger().info('==> Loaded NmrStar file: "%s"' % (path,))
+    # return self.project
 
     def _loadSparkyProject(self, path: str, makeNewProject=True) -> Project:
         """Load Project from Sparky file at path, and do necessary setup"""

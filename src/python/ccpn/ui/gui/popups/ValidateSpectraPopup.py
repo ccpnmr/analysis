@@ -861,7 +861,7 @@ class ValidateSpectraForPreferences(ValidateSpectraFrameABC):
     """
 
     VIEWDATAURLS = True
-    VIEWSPECTRA = True
+    VIEWSPECTRA = False
     ENABLECLOSEBUTTON = False
     AUTOUPDATE = False
     USESCROLLFRAME = False

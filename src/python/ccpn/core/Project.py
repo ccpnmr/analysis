@@ -905,9 +905,24 @@ class Project(AbstractWrapperObject):
         stores = [(store.name, store.url.dataLocation, url.path,) for store in standardStore.sortedDataUrls() for url in store.sortedDataStores()]
         urls = [(store.dataUrl.name, store.dataUrl.url.dataLocation, store.path,) for store in standardStore.sortedDataStores()]
 
-        spectraStores = [spec._wrappedData.dataStore for spec in self.spectra]
 
+        from ccpnmodel.ccpncore.lib._ccp.general.DataLocation.AbstractDataStore import changeDataStoreUrl
+
+        for spec in self.project.spectra:
+            apiDataStore = spec._wrappedData.dataStore
+            if apiDataStore is None:
+                raise ValueError("Spectrum is not stored, cannot change file path")
+
+            else:
+                # dataUrl = self._project._wrappedData.root.fetchDataUrl(value)
+                dataUrlName = apiDataStore.dataUrl.name
+                if dataUrlName == 'remoteData':
+
+                    changeDataStoreUrl(apiDataStore, '/Users/ejb66/Desktop/')
+
+        spectraStores = [spec._wrappedData.dataStore for spec in self.spectra]
         bad = [url for store in standardStore.sortedDataUrls() for url in store.sortedDataStores() if url not in spectraStores]
+        badStore = [store for store in standardStore.sortedDataUrls() if store.name == 'remoteData' if not store.dataStores]
 
         for bb in bad:
             print('>>>>>>DELETING', bb)
@@ -917,6 +932,29 @@ class Project(AbstractWrapperObject):
             if not url.dataStores:
                 print('>>>>>>DELETING', url)
                 url.delete()
+
+        for bb in badStore:
+            print('>>>>>>DELETING', bb)
+            bb.delete()
+
+        # from ccpnmodel.ccpncore.lib._ccp.general.DataLocation.AbstractDataStore import changeDataStoreUrl
+        #
+        # for spec in self.project.spectra:
+        #     apiDataStore = spec._wrappedData.dataStore
+        #     if apiDataStore is None:
+        #         raise ValueError("Spectrum is not stored, cannot change file path")
+        #
+        #     else:
+        #         # dataUrl = self._project._wrappedData.root.fetchDataUrl(value)
+        #         dataUrlName = apiDataStore.dataUrl.name
+        #         if dataUrlName == 'remoteData':
+        #
+        #             changeDataStoreUrl(apiDataStore, '/Users/ejb66/Desktop/')
+
+
+
+
+
 
         # skip setting the path if autoSetDataPath is false
         if not autoSet:

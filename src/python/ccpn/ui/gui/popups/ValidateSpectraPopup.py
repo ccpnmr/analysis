@@ -491,7 +491,7 @@ class ValidateSpectraFrameABC(Frame):
         # dataUrl.url = tempDataUrl.url
         # # pass
 
-        from ccpnmodel.ccpncore.lib._ccp.general.DataLocation.AbstractDataStore import changeDataStoreUrl
+        from ccpnmodel.ccpncore.lib._ccp.general.DataLocation.AbstractDataStore import forceChangeDataStoreUrl
 
         # oldUrl = dataUrl.url
         # dataUrl.url = dataUrl.url.clone(path=newUrl)
@@ -506,7 +506,7 @@ class ValidateSpectraFrameABC(Frame):
                 dataUrlName = apiDataStore.dataUrl.name
                 if dataUrlName == 'remoteData':
 
-                    changeDataStoreUrl(apiDataStore, newUrl)
+                    forceChangeDataStoreUrl(apiDataStore, newUrl)
 
                     # apiDataStore.repointToDataUrl(dataUrl)
                     # apiDataStore.path = apiDataStore.fullPath[len(dataUrl.url.path) + 1:]

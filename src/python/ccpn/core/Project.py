@@ -906,7 +906,7 @@ class Project(AbstractWrapperObject):
         urls = [(store.dataUrl.name, store.dataUrl.url.dataLocation, store.path,) for store in standardStore.sortedDataStores()]
 
 
-        from ccpnmodel.ccpncore.lib._ccp.general.DataLocation.AbstractDataStore import changeDataStoreUrl
+        from ccpnmodel.ccpncore.lib._ccp.general.DataLocation.AbstractDataStore import forceChangeDataStoreUrl
 
         for spec in self.project.spectra:
             apiDataStore = spec._wrappedData.dataStore
@@ -918,7 +918,7 @@ class Project(AbstractWrapperObject):
                 dataUrlName = apiDataStore.dataUrl.name
                 if dataUrlName == 'remoteData':
 
-                    changeDataStoreUrl(apiDataStore, '/Users/ejb66/Desktop/')
+                    forceChangeDataStoreUrl(apiDataStore, '/Users/ejb66/Desktop/')
 
         spectraStores = [spec._wrappedData.dataStore for spec in self.spectra]
         bad = [url for store in standardStore.sortedDataUrls() for url in store.sortedDataStores() if url not in spectraStores]
@@ -937,7 +937,7 @@ class Project(AbstractWrapperObject):
             print('>>>>>>DELETING', bb)
             bb.delete()
 
-        # from ccpnmodel.ccpncore.lib._ccp.general.DataLocation.AbstractDataStore import changeDataStoreUrl
+        # from ccpnmodel.ccpncore.lib._ccp.general.DataLocation.AbstractDataStore import forceChangeDataStoreUrl
         #
         # for spec in self.project.spectra:
         #     apiDataStore = spec._wrappedData.dataStore
@@ -949,7 +949,7 @@ class Project(AbstractWrapperObject):
         #         dataUrlName = apiDataStore.dataUrl.name
         #         if dataUrlName == 'remoteData':
         #
-        #             changeDataStoreUrl(apiDataStore, '/Users/ejb66/Desktop/')
+        #             forceChangeDataStoreUrl(apiDataStore, '/Users/ejb66/Desktop/')
 
 
 

@@ -918,7 +918,7 @@ class Project(AbstractWrapperObject):
                 dataUrlName = apiDataStore.dataUrl.name
                 if dataUrlName == 'remoteData':
 
-                    forceChangeDataStoreUrl(apiDataStore, '/Users/ejb66/Desktop/')
+                    forceChangeDataStoreUrl(apiDataStore, '/Users/ejb66')
 
         spectraStores = [spec._wrappedData.dataStore for spec in self.spectra]
         bad = [url for store in standardStore.sortedDataUrls() for url in store.sortedDataStores() if url not in spectraStores]

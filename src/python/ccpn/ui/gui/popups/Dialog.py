@@ -26,9 +26,12 @@ __date__ = "$Date: 2017-07-04 15:21:16 +0000 (Tue, July 04, 2017) $"
 #=========================================================================================
 
 from PyQt5 import QtWidgets
+from contextlib import contextmanager
 from ccpn.ui.gui.widgets.Base import Base
 from ccpn.util.Logging import getLogger
-from contextlib import contextmanager
+from ccpn.ui.gui.widgets.Frame import Frame
+from ccpn.ui.gui.widgets.ScrollArea import ScrollArea
+from ccpn.ui.gui.widgets.DialogButtonBox import DialogButtonBox
 
 
 def _updateGl(self, spectrumList):
@@ -41,6 +44,186 @@ def _updateGl(self, spectrumList):
 
     GLSignals = GLNotifier(parent=self)
     GLSignals.emitPaintEvent()
+
+
+HORIZONTAL = 'horizontal'
+VERTICAL = 'vertical'
+ORIENTATIONLIST = (HORIZONTAL, VERTICAL)
+
+
+class CcpnDialogMainWidget(QtWidgets.QDialog, Base):
+    """
+    Class to handle popup dialogs
+    """
+    RESETBUTTON = QtWidgets.QDialogButtonBox.Reset
+    CLOSEBUTTON = QtWidgets.QDialogButtonBox.Close
+    CANCELBUTTON = QtWidgets.QDialogButtonBox.Cancel
+    APPLYBUTTON = QtWidgets.QDialogButtonBox.Apply
+    OKBUTTON = QtWidgets.QDialogButtonBox.Ok
+    HELPBUTTON = QtWidgets.QDialogButtonBox.Help
+    DEFAULTBUTTON = CLOSEBUTTON
+
+    def __init__(self, parent=None, windowTitle='', setLayout=False,
+                 orientation=HORIZONTAL, size=None, **kwds):
+
+        super().__init__(parent)
+        Base._init(self, setLayout=setLayout, **kwds)
+
+        if orientation not in ORIENTATIONLIST:
+            raise TypeError('Error: orientation not in %s', ORIENTATIONLIST)
+
+        self.setWindowTitle(windowTitle)
+        self.setContentsMargins(15, 15, 15, 15)
+        self._orientation = orientation
+        self._size = size
+
+        # set up the mainWidget area
+        self.mainWidget = Frame(self, setLayout=True, showBorder=False, grid=(0, 0))
+        self.mainWidget.setAutoFillBackground(False)
+        self.mainWidget.setSizePolicy(QtWidgets.QSizePolicy.Ignored, QtWidgets.QSizePolicy.Ignored)
+
+        # set up a scroll area
+        self._scrollArea = ScrollArea(self, setLayout=True, grid=(0, 0))
+        self._scrollArea.setWidgetResizable(True)
+        self._scrollArea.setWidget(self.mainWidget)
+        self._scrollArea.setStyleSheet("""ScrollArea { border: 0px; }""")
+        self._scrollArea.setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.MinimumExpanding)
+
+        # HELPBUTTON = (self._helpClicked, 'Help', 'Help', 'icons/system-help', True, True)
+        # # add dialog buttons
+        # self.dialogButtons = DialogButtonBox(self, grid=(1, 2), orientation=self._orientation,
+        #                                      buttons=(QtWidgets.QDialogButtonBox.Reset,
+        #                                               QtWidgets.QDialogButtonBox.Close,
+        #                                               QtWidgets.QDialogButtonBox.Apply,
+        #                                               QtWidgets.QDialogButtonBox.Ok,
+        #                                               QtWidgets.QDialogButtonBox.Help),
+        #                                      callbacks=(self._revertClicked, self._closeClicked,
+        #                                                 self._applyClicked, self._okClicked),
+        #                                      texts=['Revert', None, None, None, ''],
+        #                                      tipTexts=['Revert - roll-back all applied changes',
+        #                                                'Close - keep all applied changes and close',
+        #                                                'Apply changes',
+        #                                                'Apply changes and close',
+        #                                                'Help'],
+        #                                      icons=['icons/undo', 'icons/window-close',
+        #                                             'icons/orange-apply', 'icons/dialog-apply.png',
+        #                                             'icons/system-help'],
+        #                                      enabledStates=[False, None, False, None, False],
+        #                                      visibleStates=[None],
+        #                                      defaultButton=QtWidgets.QDialogButtonBox.Close)
+        #
+        # self._applyButton = self.dialogButtons.button(QtWidgets.QDialogButtonBox.Apply)
+        # self._revertButton = self.dialogButtons.button(QtWidgets.QDialogButtonBox.Reset)
+
+        self._buttonOptions = {}
+        self.dialogButtons = None
+        self.setDefaultButton()
+
+    def __postInit__(self):
+        """post initialise functions
+        """
+        self._setButtons()
+        self.setFixedSize(self._size if self._size else self.sizeHint())
+
+    def setOkButton(self, callback=None, text=None,
+                    tipText='Apply changes and close',
+                    icon='icons/dialog-apply.png',
+                    enabled=True, visible=True):
+        """Add an Ok button to the dialog box
+        """
+        return self._addButton(buttons=self.OKBUTTON, callbacks=callback,
+                               texts=text, tipTexts=tipText, icons=icon,
+                               enabledStates=enabled, visibleStates=visible)
+
+    def setCloseButton(self, callback=None, text=None,
+                       tipText='Keep all applied changes and close',
+                       icon='icons/window-close',
+                       enabled=True, visible=True):
+        """Add a Close button to the dialog box
+        """
+        return self._addButton(buttons=self.CLOSEBUTTON, callbacks=callback,
+                               texts=text, tipTexts=tipText, icons=icon,
+                               enabledStates=enabled, visibleStates=visible)
+
+    def setCancelButton(self, callback=None, text=None,
+                        tipText='Roll-back all applied changes and close',
+                        icon='icons/window-close',
+                        enabled=True, visible=True):
+        """Add a Cancel button to the dialog box
+        """
+        return self._addButton(buttons=self.CANCELBUTTON, callbacks=callback,
+                               texts=text, tipTexts=tipText, icons=icon,
+                               enabledStates=enabled, visibleStates=visible)
+
+    def setRevertButton(self, callback=None, text='Revert',
+                        tipText='Roll-back all applied changes',
+                        icon='icons/undo',
+                        enabled=True, visible=True):
+        """Add a Revert button to the dialog box
+        """
+        return self._addButton(buttons=self.RESETBUTTON, callbacks=callback,
+                               texts=text, tipTexts=tipText, icons=icon,
+                               enabledStates=enabled, visibleStates=visible)
+
+    def setHelpButton(self, callback=None, text='',
+                        tipText='Help',
+                        icon='icons/system-help',
+                        enabled=True, visible=True):
+        """Add a Help button to the dialog box
+        """
+        return self._addButton(buttons=self.HELPBUTTON, callbacks=callback,
+                               texts=text, tipTexts=tipText, icons=icon,
+                               enabledStates=enabled, visibleStates=visible)
+
+    def setApplyButton(self, callback=None, text=None,
+                        tipText='Apply changes',
+                        icon='icons/orange-apply',
+                        enabled=True, visible=True):
+        """Add an Apply button to the dialog box
+        """
+        return self._addButton(buttons=self.APPLYBUTTON, callbacks=callback,
+                               texts=text, tipTexts=tipText, icons=icon,
+                               enabledStates=enabled, visibleStates=visible)
+
+    def _addButton(self, **kwds):
+        """Add button settings to the buttonList
+        """
+        if self.dialogButtons:
+            raise RuntimeError("Error: cannot add buttons after __init__")
+
+        for k, v in kwds.items():
+            if k not in self._buttonOptions:
+                self._buttonOptions[k] = (v,)
+            else:
+                self._buttonOptions[k] += (v,)
+
+    def _setButtons(self):
+        """Set the buttons for the dialog
+        """
+        grid=(1, 0) if self._orientation.startswith('h') else (0, 1)
+
+        self.dialogButtons = DialogButtonBox(self, grid=grid,
+                                             orientation=self._orientation,
+                                             defaultButton=self._defaultButton,
+                                             **self._buttonOptions)
+
+    def setDefaultButton(self, button=CLOSEBUTTON):
+        self._defaultButton = button
+
+    def fixedSize(self):
+        self.sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
+        self.sizePolicy.setHorizontalStretch(0)
+        self.sizePolicy.setVerticalStretch(0)
+        self.setSizePolicy(self.sizePolicy)
+        self.setFixedSize(self.maximumWidth(), self.maximumHeight())
+        self.setSizeGripEnabled(False)
+
+    # def setDefaultButton(self, button):
+    #     if isinstance(button, QtWidgets.QPushButton):
+    #         button.setDefault(True)
+    #         button.setAutoDefault(True)
+    #     else:
+    #         raise TypeError('%s is not a button' % str(button))
 
 
 class CcpnDialog(QtWidgets.QDialog, Base):

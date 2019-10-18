@@ -62,10 +62,10 @@ class MultipletListPropertiesPopup(PMIListPropertiesPopupABC):
 
         self.setFixedSize(self.sizeHint())
 
-    def _setAttributes(self):
+    def _setMeritAttributes(self):
         """set the attributes from the other widgets
         """
-        super()._setAttributes()
+        super()._setMeritAttributes()
 
         value = self.multipletAveraging.getSelectedText()
         self.ccpnList.multipletAveraging = value

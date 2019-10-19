@@ -1439,6 +1439,8 @@ class SideBar(QtWidgets.QTreeWidget, SideBarStructure, Base, NotifierBase):
         #         notifier = self._project.registerNotifier('AbstractWrapperObject', action, self._notify_pids_changed, onceOnly=True)
         #         self._searchNotifiers.append(notifier)
 
+        self._resultsList.adjustSize()
+
     def _notify_pids_changed(self, *args, **kwargs):
         self._searchWidgetCallback()
 

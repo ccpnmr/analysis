@@ -81,22 +81,24 @@ class MultipletListPropertiesPopup(PMIListPropertiesPopupABC):
 
         multipletAveraging = self.listViewSettings[MULTIPLETAVERAGING]
         self.multipletAveraging.setIndex(MULTIPLETAVERAGINGTYPES.index(multipletAveraging)
-                                         if multipletAveraging in MULTIPLETAVERAGINGTYPES else 0.0)
+                                         if multipletAveraging in MULTIPLETAVERAGINGTYPES else 0)
 
     def _setListViewFromWidgets(self):
         """Set listView object from the widgets
         """
         super()._setListViewFromWidgets()
 
-        multipletAveraging = self.multipletAveraging.get()
-        setattr(self.ccpnList, MULTIPLETAVERAGING, MULTIPLETAVERAGINGTYPES.index(multipletAveraging))
+        multipletAveraging = self.multipletAveraging.getIndex()
+        setattr(self.ccpnList, MULTIPLETAVERAGING, MULTIPLETAVERAGINGTYPES[multipletAveraging])
 
     def _setListViewFromSettings(self):
         """Set listView object from the original settings dict
         """
         super()._setListViewFromSettings()
 
-        setattr(self.ccpnList, MULTIPLETAVERAGING, self.listViewSettings[MULTIPLETAVERAGING])
+        multipletAveraging = self.listViewSettings[MULTIPLETAVERAGING]
+        if multipletAveraging is not None:
+            setattr(self.ccpnList, MULTIPLETAVERAGING, multipletAveraging)
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

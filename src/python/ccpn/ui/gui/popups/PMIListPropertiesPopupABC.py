@@ -142,8 +142,6 @@ class PMIListPropertiesPopupABC(CcpnDialogMainWidget):
         self._changes = {}
         self._currentNumApplies = 0
 
-        self.COMPARELIST = AttrDict(self.listViewSettings)
-
     def __postInit__(self):
         """post initialise functions - required as may need to insert more objects into dialog
         """
@@ -152,6 +150,8 @@ class PMIListPropertiesPopupABC(CcpnDialogMainWidget):
         self._cancelButton = self.dialogButtons.button(self.CANCELBUTTON)
         self._helpButton = self.dialogButtons.button(self.HELPBUTTON)
         self._revertButton = self.dialogButtons.button(self.RESETBUTTON)
+
+        self.COMPARELIST = AttrDict(self.listViewSettings)
 
         self.setFixedSize(self._size if self._size else self.sizeHint())
 

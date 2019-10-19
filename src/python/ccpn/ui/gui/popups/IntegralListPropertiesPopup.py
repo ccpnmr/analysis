@@ -46,6 +46,8 @@ class IntegralListPropertiesPopup(PMIListPropertiesPopupABC):
         super().__init__(parent=parent, mainWindow=mainWindow, ccpnList=integralList,
                          title='%s Properties' % self._baseClass.className, **kwds)
 
+        self.__postInit__()
+
     def _refreshGLItems(self):
         # emit a signal to rebuild all peaks and multiplets
         self.GLSignals.emitEvent(targets=[self.ccpnList], triggers=[GLNotifier.GLINTEGRALLISTS,

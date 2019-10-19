@@ -1050,8 +1050,7 @@ def ccpNmrV3CoreSetter():
 
 
 def queueStateChange(verify):
-    """A decorator wrap the property setters method in an undo block and triggering the
-    'change' notification
+    """A decorator to wrap a state change event with a verify function
     """
 
     @decorator.decorator

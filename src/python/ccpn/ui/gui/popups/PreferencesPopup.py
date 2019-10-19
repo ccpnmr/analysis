@@ -91,6 +91,9 @@ def _updateSettings(self, newPrefs, updateColourScheme):
     GLSignals.emitPaintEvent()
 
 
+def _refreshGLItems():
+    pass
+
 def _verifyApply(self, attributeName, value, *postArgs, **postKwds):
     """Change the state of the apply button based on the changes in the tabs
     """
@@ -110,12 +113,16 @@ def _verifyApply(self, attributeName, value, *postArgs, **postKwds):
         if value:
             # store in dict - overwrite as required
             self._changes[attributeName] = value
+
         else:
             if attributeName in self._changes:
                 # delete from dict - empty dict implies no changes
                 del self._changes[attributeName]
 
         print('>>>attrib', attributeName, self._changes[attributeName] if attributeName in self._changes else 'None')
+        if getattr(self, 'LIVEDIALOG', None):
+            print('>>>LIVEDIALOG')
+            self._changeSettings()
 
     if self:
         # set button state depending on number of changes

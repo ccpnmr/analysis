@@ -24,6 +24,7 @@ __date__ = "$Date$"
 #=========================================================================================
 
 import ccpn.util.Colour as Colour
+from functools import partial
 from ccpn.ui.gui.widgets.MessageDialog import MessageDialog
 from ccpn.ui.gui.widgets.Button import Button
 from ccpn.ui.gui.widgets.Label import Label
@@ -32,9 +33,11 @@ from ccpn.ui.gui.widgets.DoubleSpinbox import DoubleSpinbox
 from ccpn.ui.gui.widgets.CheckBox import CheckBox
 from ccpn.ui.gui.popups.Dialog import handleDialogApply, CcpnDialogMainWidget
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
-from ccpn.core.lib.ContextManagers import undoStackBlocking
+from ccpn.core.lib.ContextManagers import undoStackBlocking, queueStateChange
 from ccpn.core.PMIListABC import MERITENABLED, MERITTHRESHOLD, \
     SYMBOLCOLOUR, TEXTCOLOUR, LINECOLOUR, MERITCOLOUR
+from ccpn.ui.gui.popups.PreferencesPopup import _verifyApply
+from ccpn.util.AttrDict import AttrDict
 
 
 BUTTONOPTIONS1 = (SYMBOLCOLOUR, TEXTCOLOUR, LINECOLOUR, None)
@@ -53,6 +56,7 @@ class PMIListPropertiesPopupABC(CcpnDialogMainWidget):
     _lineColourOption = False
     _meritColourOption = False
     _meritOptions = False
+    LIVEDIALOG = True
 
     def __init__(self, parent=None, mainWindow=None, ccpnList=None, title=None, **kwds):
         super().__init__(parent, setLayout=True, windowTitle=title, **kwds)
@@ -73,20 +77,44 @@ class PMIListPropertiesPopupABC(CcpnDialogMainWidget):
             MessageDialog.showWarning(title, 'No %s Found' % self._baseClass.className)
             self.close()
 
-        else:
-            self.ccpnListViews = self._getListViews(ccpnList)
+        self.ccpnListViews = self._getListViews(ccpnList)
 
-            self._colourPulldowns = []
+        self._colourPulldowns = []
 
-            # NOTE: below is not sorted in any way, but if we change that, we also have to change loop in _fillColourPulldown
-            self.spectrumColourKeys = list(Colour.spectrumColours.keys())
+        # NOTE: below is not sorted in any way, but if we change that, we also have to change loop in _fillColourPulldown
+        self.spectrumColourKeys = list(Colour.spectrumColours.keys())
 
-            row = 0
-            self.ccpnListLabel = Label(self.mainWidget, "name ", grid=(row, 0))
-            self.ccpnListLabel = Label(self.mainWidget, ccpnList.id, grid=(row, 1))
+        row = 0
+        self.ccpnListLabel = Label(self.mainWidget, "name ", grid=(row, 0))
+        self.ccpnListLabel = Label(self.mainWidget, ccpnList.id, grid=(row, 1))
+
+        # set default colours if not defined
+        for colButton, enabled in zip(BUTTONOPTIONS1,
+                                      (self._symbolColourOption, self._textColourOption, self._lineColourOption, self._meritColourOption)):
+            if colButton and enabled:
+                if not getattr(self.ccpnList, colButton, None):
+                    setattr(self.ccpnList, colButton, self.spectrumColourKeys[0])
+
+                row += 1
+                self._addButtonOption(self._colourPulldowns, colButton, row)
+
+        if self._meritOptions:
+            row += 1
+            self.meritEnabledLabel = Label(self.mainWidget, text="Use Merit Threshold: ", grid=(row, 0))
+            self.meritEnabledBox = CheckBox(self.mainWidget, grid=(row, 1),
+                                            checked=getattr(self.ccpnList, MERITENABLED, False))
+            self.meritEnabledBox.toggled.connect(self._queueSetMeritEnabled)
+            # self.meritEnabledBox.toggled.connect(self._changeSettings)
+
+            row += 1
+            self.meritThresholdLabel = Label(self.mainWidget, text=MERITTHRESHOLD, grid=(row, 0))
+            self.meritThresholdData = DoubleSpinbox(self.mainWidget, grid=(row, 1), hAlign='l', decimals=2, step=0.01, min=0.0, max=1.0)
+            self.meritThresholdData.setValue(getattr(self.ccpnList, MERITTHRESHOLD, 0.0))
+            self.meritThresholdData.valueChanged.connect(self._queueSetMeritThreshold)
+            # self.meritThresholdData.valueChanged.connect(self._changeSettings)
 
             # set default colours if not defined
-            for colButton, enabled in zip(BUTTONOPTIONS1,
+            for colButton, enabled in zip(BUTTONOPTIONS2,
                                           (self._symbolColourOption, self._textColourOption, self._lineColourOption, self._meritColourOption)):
                 if colButton and enabled:
                     if not getattr(self.ccpnList, colButton, None):
@@ -95,46 +123,37 @@ class PMIListPropertiesPopupABC(CcpnDialogMainWidget):
                     row += 1
                     self._addButtonOption(self._colourPulldowns, colButton, row)
 
-            if self._meritOptions:
-                row += 1
-                self.meritEnabledLabel = Label(self.mainWidget, text="Use Merit Threshold: ", grid=(row, 0))
-                self.meritEnabledBox = CheckBox(self.mainWidget, grid=(row, 1),
-                                                checked=getattr(self.ccpnList, MERITENABLED) or False)
-                self.meritEnabledBox.toggled.connect(self._changeSettings)
+        # set the next available row for inserting new items from subclass
+        self._rowForNewItems = row + 1
 
-                row += 1
-                self.meritThresholdLabel = Label(self.mainWidget, text=MERITTHRESHOLD, grid=(row, 0))
-                self.meritThresholdData = DoubleSpinbox(self.mainWidget, grid=(row, 1), hAlign='l', decimals=2, step=0.01, min=0.0, max=1.0)
-                self.meritThresholdData.setValue(float('%.2f' % (getattr(self.ccpnList, MERITTHRESHOLD) or 0.0)))
-                self.meritThresholdData.valueChanged.connect(self._changeSettings)
-
-                # set default colours if not defined
-                for colButton, enabled in zip(BUTTONOPTIONS2,
-                                              (self._symbolColourOption, self._textColourOption, self._lineColourOption, self._meritColourOption)):
-                    if colButton and enabled:
-                        if not getattr(self.ccpnList, colButton, None):
-                            setattr(self.ccpnList, colButton, self.spectrumColourKeys[0])
-
-                        row += 1
-                        self._addButtonOption(self._colourPulldowns, colButton, row)
-
-            # set the next available row for inserting new items from subclass
-            self._rowForNewItems = row + 1
-
-            # row += 10
-            # self.closeButton = Button(self.mainWidget, text='Close', grid=(row, 1), callback=self._accept)
+        # row += 10
+        # self.closeButton = Button(self.mainWidget, text='Close', grid=(row, 1), callback=self._accept)
 
         self.GLSignals = GLNotifier(parent=self)
 
-        self._okButton = self.setOkButton(callback=self._okClicked)
-        self._cancelButton = self.setCancelButton(callback=self._cancelClicked)
-        self._helpButton = self.setHelpButton(callback=self._helpClicked)
-        self._revertButton = self.setRevertButton(callback=self._revertClicked)
+        self.setOkButton(callback=self._okClicked)
+        self.setCancelButton(callback=self._cancelClicked)
+        self.setHelpButton(callback=self._helpClicked, enabled=False)
+        self.setRevertButton(callback=self._revertClicked, enabled=False)
         self.setDefaultButton(CcpnDialogMainWidget.CANCELBUTTON)
 
         self._getSettings()
 
-        self.__postInit__()
+        self._changes = {}
+        self._currentNumApplies = 0
+
+        self.COMPARELIST = AttrDict(self.listViewSettings)
+
+    def __postInit__(self):
+        """post initialise functions - required as may need to insert more objects into dialog
+        """
+        self._setButtons()
+        self._okButton = self.dialogButtons.button(self.OKBUTTON)
+        self._cancelButton = self.dialogButtons.button(self.CANCELBUTTON)
+        self._helpButton = self.dialogButtons.button(self.HELPBUTTON)
+        self._revertButton = self.dialogButtons.button(self.RESETBUTTON)
+
+        self.setFixedSize(self._size if self._size else self.sizeHint())
 
     def _addButtonOption(self, pulldowns, attrib, row):
         """Add a labelled pulldown list for the selected attribute
@@ -154,9 +173,12 @@ class PMIListPropertiesPopupABC(CcpnDialogMainWidget):
                 Colour.fillColourPulldown(pl, allowAuto=True)
             Colour.selectPullDownColour(_colourPulldownList, c, allowAuto=True)
 
-        _colourPulldownList.activated.connect(self._changeSettings)
+        _colourPulldownList.activated.connect(partial(self._queueSetColour, _colourPulldownList, attrib, row))
+        # _colourPulldownList.activated.connect(self._changeSettings)
 
     def _getSettings(self):
+        """Fill the settings dict from the listView object
+        """
         self.listViewSettings = {}
         for item in self._colourPulldowns:
             _, _, attrib = item
@@ -165,9 +187,12 @@ class PMIListPropertiesPopupABC(CcpnDialogMainWidget):
             self.listViewSettings[attrib] = c
 
         self.listViewSettings[MERITENABLED] = getattr(self.ccpnList, MERITENABLED, False)
-        self.listViewSettings[MERITTHRESHOLD] = getattr(self.ccpnList, MERITTHRESHOLD, False)
+        self.listViewSettings[MERITTHRESHOLD] = getattr(self.ccpnList, MERITTHRESHOLD, 0.0)
 
-    def _setSettings(self):
+    def _setWidgetSettings(self):
+        """Populate the widgets from the settings dict
+        """
+        print('>>>_setWidgetSettings')
         for item in self._colourPulldowns:
             _, pl, attrib = item
 
@@ -181,10 +206,13 @@ class PMIListPropertiesPopupABC(CcpnDialogMainWidget):
                     Colour.fillColourPulldown(pl, allowAuto=True)
                 Colour.selectPullDownColour(pl, c, allowAuto=True)
 
-            self.meritEnabledBox.setChecked(self.listViewSettings[MERITENABLED])
-            self.meritThresholdData.setValue(float('%.2f' % (self.listViewSettings[MERITTHRESHOLD] or 0.0)))
+        self.meritEnabledBox.setChecked(self.listViewSettings[MERITENABLED] or False)
+        self.meritThresholdData.setValue(self.listViewSettings[MERITTHRESHOLD] or 0.0)
 
-    def _setSettingsFromWidgets(self):
+    def _setListViewFromWidgets(self):
+        """Set listView object from the widgets
+        """
+        print('>>>_setListViewFromWidgets')
         for item in self._colourPulldowns:
             _, pl, attrib = item
 
@@ -195,16 +223,38 @@ class PMIListPropertiesPopupABC(CcpnDialogMainWidget):
         meritEnabled = self.meritEnabledBox.isChecked()
         setattr(self.ccpnList, MERITENABLED, meritEnabled)
         meritThreshold = self.meritThresholdData.get()
-        setattr(self.ccpnList, MERITTHRESHOLD, float(meritThreshold))
+        setattr(self.ccpnList, MERITTHRESHOLD, meritThreshold)
+
+    def _setListViewFromSettings(self):
+        """Set listView object from the original settings dict
+        """
+        print('>>>_setListViewFromSettings')
+        for item in self._colourPulldowns:
+            _, pl, attrib = item
+
+            colour = self.listViewSettings[attrib]
+            setattr(self.ccpnList, attrib, colour)
+
+        setattr(self.ccpnList, MERITENABLED, self.listViewSettings[MERITENABLED])
+        setattr(self.ccpnList, MERITTHRESHOLD, self.listViewSettings[MERITTHRESHOLD])
+
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     def _changeSettings(self):
         """Widgets have been changed in the dialog
         """
+        print('>>>_changeSettings')
         with undoStackBlocking():
-            self._setSettingsFromWidgets()
+            self._setListViewFromWidgets()
 
         # redraw the items
         self._refreshGLItems()
+
+    def _applyAllChanges(self, changes):
+        """Execute the Apply/OK functions
+        """
+        for v in changes.values():
+            v()
 
     def _applyChanges(self):
         """The Apply/OK button has been clicked.
@@ -213,12 +263,17 @@ class PMIListPropertiesPopupABC(CcpnDialogMainWidget):
           If anything has been added to the undo queue then remove it with application.undo()
           repopulate the popup widgets
         """
+        # allChanges = True if self._changes else False
+        # if not allChanges:
+        #     return True
+
+        print('>>>_applyChanges')
         with handleDialogApply(self) as error:
             # add item here to redraw items
             with undoStackBlocking() as addUndoItem:
                 addUndoItem(undo=self._refreshGLItems)
 
-            self._setSettingsFromWidgets()
+            self._setListViewFromWidgets()
 
             # add item here to redraw items
             with undoStackBlocking() as addUndoItem:
@@ -244,8 +299,18 @@ class PMIListPropertiesPopupABC(CcpnDialogMainWidget):
     def _okClicked(self):
         """Accept the dialog and disconnect all signals
         """
-        for (_, pl, _) in self._colourPulldowns:
-            pl.activated.disconnect(self._changeSettings)
+        # for (_, pl, _) in self._colourPulldowns:
+        #     pl.activated.disconnect(self._changeSettings)
+
+        with undoStackBlocking():
+            # reset so the apply works correctly for undo/redo
+            self._setListViewFromSettings()
+
+        # # reset object to pre values - for ok to work
+        # with self.blockWidgetSignals():
+        #     # populate widgets from settings
+        #     self._setWidgetSettings()
+        #     self._setListViewFromWidgets()
 
         self._applyChanges()
         self.accept()
@@ -255,12 +320,52 @@ class PMIListPropertiesPopupABC(CcpnDialogMainWidget):
         self.reject()
 
     def _revertClicked(self):
+        print('>>>_revertClicked')
+        with undoStackBlocking():
+            self._setListViewFromSettings()
+
         with self.blockWidgetSignals():
             # populate widgets from settings
-            self._setSettings()
-            self._setSettingsFromWidgets()
+            self._setWidgetSettings()
 
-        self._applyChanges()
+        # redraw the items
+        self._refreshGLItems()
+        self._changes = {}
+
+        self._revertButton.setEnabled(False)
 
     def _helpClicked(self):
         pass
+
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    @queueStateChange(_verifyApply)
+    def _queueSetColour(self, pl, attrib, dim):
+        value = pl.currentText()
+        colour = Colour.getSpectrumColour(value, defaultReturn='#')
+        if colour != getattr(self.COMPARELIST, attrib, None):
+            return partial(self._setColour, attrib, colour)
+
+    def _setColour(self, attrib, value):
+        setattr(self.ccpnList, attrib, value)
+
+    @queueStateChange(_verifyApply)
+    def _queueSetMeritEnabled(self):
+        value = self.meritEnabledBox.get()
+        if value != getattr(self.COMPARELIST, MERITENABLED, False):
+            return partial(self._setMeritEnabled, value)
+
+    def _setMeritEnabled(self, value):
+        setattr(self.ccpnList, MERITENABLED, value)
+
+    @queueStateChange(_verifyApply)
+    def _queueSetMeritThreshold(self):
+        value = self.meritThresholdData.get()
+        # set the state of the other buttons
+        textFromValue = self.meritThresholdData.textFromValue
+        if textFromValue(value) != textFromValue(getattr(self.COMPARELIST, MERITTHRESHOLD, 0.0)):
+            return partial(self._setMeritThreshold, value)
+
+    def _setMeritThreshold(self, value):
+        setattr(self.ccpnList, MERITTHRESHOLD, value)
+

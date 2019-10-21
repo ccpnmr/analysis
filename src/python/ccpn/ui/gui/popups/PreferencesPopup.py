@@ -119,9 +119,8 @@ def _verifyApply(self, attributeName, value, *postArgs, **postKwds):
                 # delete from dict - empty dict implies no changes
                 del self._changes[attributeName]
 
-        print('>>>attrib', attributeName, self._changes[attributeName] if attributeName in self._changes else 'None')
+        getLogger().debug2('>>>attrib %s %s' % (attributeName, self._changes[attributeName] if attributeName in self._changes else 'None'))
         if getattr(self, 'LIVEDIALOG', None):
-            print('>>>LIVEDIALOG')
             self._changeSettings()
 
     if self:

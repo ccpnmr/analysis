@@ -31,7 +31,7 @@ import itertools
 import operator
 import typing
 from collections import OrderedDict
-
+from copy import deepcopy
 from ccpn.core import _importOrder
 # from ccpn.core.lib import CcpnSorting
 from ccpn.core.lib import Util as coreUtil
@@ -39,7 +39,7 @@ from ccpn.util import Common as commonUtil
 from ccpn.core.lib import Pid
 from ccpnmodel.ccpncore.api.memops import Implementation as ApiImplementation
 from ccpn.util.Logging import getLogger
-from ccpn.core.lib.ContextManagers import deleteObject, notificationBlanking
+from ccpn.core.lib.ContextManagers import deleteObject, notificationBlanking, undoStackBlocking
 from ccpn.core.lib.Notifiers import NotifierBase, Notifier
 
 
@@ -333,14 +333,15 @@ class AbstractWrapperObject(NotifierBase):
         return self.hasParameter(self.CCPNMR_NAMESPACE, parameterName)
 
     def setParameter(self, namespace:str, parameterName:str, value):
-        """Sets parameterName for namespace to value; value must be json seriliasable"""
-        data = self._ccpnInternalData
+        """Sets parameterName for namespace to value; value must be json serialisable"""
+        data = deepcopy(self._ccpnInternalData)
         space = data.setdefault(namespace, {})
         space[parameterName] = value
         # Explicit assignment to force saving
         # self._wrappedData.__dict__['isModfied'] = True
-        self._ccpnInternalData = {}
-        self._ccpnInternalData.update(data)
+        # self._ccpnInternalData = {}
+        # self._ccpnInternalData.update(data)
+        self._wrappedData.ccpnInternalData = data
 
     def getParameter(self, namespace:str, parameterName:str):
         """Returns value of parameterName for namespace; returns None if not present"""

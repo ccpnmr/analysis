@@ -57,7 +57,7 @@ class MultipletListPropertiesPopup(PMIListPropertiesPopupABC):
         multipletAveraging = self.ccpnList.multipletAveraging
         self.multipletAveraging = RadioButtons(self.mainWidget, texts=MULTIPLETAVERAGINGTYPES,
                                                selectedInd=MULTIPLETAVERAGINGTYPES.index(
-                                                   multipletAveraging) if multipletAveraging in MULTIPLETAVERAGINGTYPES else 0,
+                                                       multipletAveraging) if multipletAveraging in MULTIPLETAVERAGINGTYPES else 0,
                                                callback=self._queueSetMeritAveraging,
                                                direction='v',
                                                grid=(self._rowForNewItems, 1), hAlign='l',
@@ -72,7 +72,8 @@ class MultipletListPropertiesPopup(PMIListPropertiesPopupABC):
         super()._getSettings()
 
         # add the merit averaging
-        self.listViewSettings[MULTIPLETAVERAGING] = getattr(self.ccpnList, MULTIPLETAVERAGING, MULTIPLETAVERAGINGTYPES[0])
+        self.listViewSettings[MULTIPLETAVERAGING] = getattr(self.ccpnList, MULTIPLETAVERAGING, None) or \
+                                                    MULTIPLETAVERAGINGTYPES[0]
 
     def _setWidgetSettings(self):
         """Populate the widgets from the settings dict
@@ -124,4 +125,3 @@ class MultipletListPropertiesPopup(PMIListPropertiesPopupABC):
 
     def _setMeritAveraging(self, value):
         setattr(self.ccpnList, MULTIPLETAVERAGING, value)
-

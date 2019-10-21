@@ -93,7 +93,8 @@ class MultipletList(PMIListABC):
         """Multiplet averaging method
         """
         value = self.getParameter(MULTIPLETSETTINGS, MULTIPLETAVERAGING)
-        return MULTIPLETAVERAGINGTYPES[value] if value and 0 <= value < len(MULTIPLETAVERAGINGTYPES) else None
+        return MULTIPLETAVERAGINGTYPES[value] if value is not None and \
+                                                 0 <= value < len(MULTIPLETAVERAGINGTYPES) else None
 
     @multipletAveraging.setter
     def multipletAveraging(self, value: str):

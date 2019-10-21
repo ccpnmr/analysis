@@ -514,14 +514,14 @@ class ValidateSpectraFrameABC(Frame):
 
         self._validateSpectra()
 
-        print('>>>dataUrlFunc - clone dataUrl', dataUrl.url.dataLocation)
+        # print('>>>dataUrlFunc - clone dataUrl', dataUrl.url.dataLocation)
 
     def _getDataUrlDialog(self, dataUrl):
         """Get the path from the widget and call the open dialog.
         """
         if dataUrl and dataUrl in self.dataUrlData:
 
-            print('>>>>dataurlget', str(dataUrl))
+            # print('>>>>dataurlget', str(dataUrl))
 
             urlData, urlButton, urlLabel = self.dataUrlData[dataUrl]
             urlNum = list(self.dataUrlData.keys()).index(dataUrl)
@@ -556,11 +556,11 @@ class ValidateSpectraFrameABC(Frame):
     def _setDataUrlPath(self, dataUrl):
         """Set the path from the widget by pressing enter
         """
-        print('>>>>_setDataUrlPath pre', str(dataUrl))
+        # print('>>>>_setDataUrlPath pre', str(dataUrl))
 
         if dataUrl and dataUrl in self.dataUrlData:
 
-            print('>>>>_setDataUrlPath', str(dataUrl))
+            # print('>>>>_setDataUrlPath', str(dataUrl))
 
             urlData, urlButton, urlLabel = self.dataUrlData[dataUrl]
             urlNum = list(self.dataUrlData.keys()).index(dataUrl)
@@ -582,7 +582,7 @@ class ValidateSpectraFrameABC(Frame):
                     # define a function to clone the dataUrl
                     self.dataUrlFunc(dataUrl, newUrl)
 
-                print('>>>_setDataUrlPath post', dataUrl.url.dataLocation)
+                # print('>>>_setDataUrlPath post', dataUrl.url.dataLocation)
 
     def _setUrlData(self, dataUrl, newFilePath=None):
         """Set the urlData widgets from the dataUrl.
@@ -600,7 +600,7 @@ class ValidateSpectraFrameABC(Frame):
     def filePathFunc(self, spectrum, filePath):
         """Set the new filePath for the spectrum
         """
-        print('>>>filePathFunc - set filePath')
+        # print('>>>filePathFunc - set filePath')
         spectrum.filePath = filePath
         self._validateDataUrls()
 
@@ -775,7 +775,7 @@ class ValidateSpectraFrameABC(Frame):
             return ()
 
     def _validateDataUrls(self):
-        print('>>> _validateDataUrls')
+        # print('>>> _validateDataUrls')
         for url in self.allUrls:
             self._setUrlData(url)
             # _setUrlData(self, url, self.dataUrlData[url])
@@ -783,7 +783,7 @@ class ValidateSpectraFrameABC(Frame):
                 self._badUrls = True
 
     def _validateSpectra(self):
-        print('>>> _validateSpectra')
+        # print('>>> _validateSpectra')
         if self.spectra:
             for spectrum in self.spectra:
                 self._setPathData(spectrum)
@@ -791,7 +791,7 @@ class ValidateSpectraFrameABC(Frame):
     def _validateAll(self):
         """Validate all the objects as the dataUrls may have changed.
         """
-        print('>>> validateAll')
+        # print('>>> validateAll')
 
         self._validateDataUrls()
         self._validateSpectra()

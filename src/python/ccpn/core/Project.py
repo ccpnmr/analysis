@@ -918,23 +918,23 @@ class Project(AbstractWrapperObject):
                 dataUrlName = apiDataStore.dataUrl.name
                 if dataUrlName == 'remoteData':
 
-                    forceChangeDataStoreUrl(apiDataStore, '/Users/ejb66')
+                    forceChangeDataStoreUrl(apiDataStore, newDataUrlPath)
 
         spectraStores = [spec._wrappedData.dataStore for spec in self.spectra]
         bad = [url for store in standardStore.sortedDataUrls() for url in store.sortedDataStores() if url not in spectraStores]
         badStore = [store for store in standardStore.sortedDataUrls() if store.name == 'remoteData' if not store.dataStores]
 
         for bb in bad:
-            print('>>>>>>DELETING', bb)
+            getLogger().info('>>>validate cleanup urls: %s' % str(bb))
             bb.delete()
 
         for url in dataUrlData['otherData']:
             if not url.dataStores:
-                print('>>>>>>DELETING', url)
+                getLogger().info('>>>validate cleanup stores: %s' % str(url))
                 url.delete()
 
         for bb in badStore:
-            print('>>>>>>DELETING', bb)
+            getLogger().info('>>>validate cleanup stores: %s' % str(bb))
             bb.delete()
 
         # from ccpnmodel.ccpncore.lib._ccp.general.DataLocation.AbstractDataStore import forceChangeDataStoreUrl

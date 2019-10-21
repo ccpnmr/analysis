@@ -31,7 +31,7 @@ from itertools import permutations
 from ccpn.core.lib import Util as ccpnUtil
 from ccpn.core.Spectrum import MAXALIASINGRANGE
 from ccpn.ui.gui.widgets.Button import Button
-from ccpn.ui.gui.widgets.ButtonList import ButtonList
+from ccpn.ui.gui.widgets.ButtonList import ButtonBoxList
 from ccpn.ui.gui.widgets.CheckBox import CheckBox
 from ccpn.ui.gui.widgets.ColourDialog import ColourDialog
 from ccpn.ui.gui.widgets.DoubleSpinbox import DoubleSpinbox, ScientificDoubleSpinBox
@@ -115,7 +115,7 @@ class SpectrumPropertiesPopup(CcpnDialog):
         Spacer(self, 5, 5, QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.MinimumExpanding,
                grid=(3, 1), gridSpan=(1, 1))
 
-        self.applyButtons = ButtonList(self, texts=['Cancel', 'Apply', 'Ok'],
+        self.applyButtons = ButtonBoxList(self, texts=['Cancel', 'Apply', 'Ok'],
                                        callbacks=[self.reject, self._applyChanges, self._okButton],
                                        tipTexts=['', '', '', None], direction='h',
                                        hAlign='r', grid=(4, 1), gridSpan=(1, 4))
@@ -261,8 +261,12 @@ class GeneralTab(Widget):
 
         self.experimentTypes = spectrum._project._experimentTypeMap
 
-        self.layout().addItem(QtWidgets.QSpacerItem(0, 5), 0, 0)
-        row = 1
+        row = 0
+        self.layout().addItem(QtWidgets.QSpacerItem(row, 5), 0, 0)
+        #GST adds a correctly sized right margin
+        Spacer(self, 5, 1, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum,
+               grid=(row, 3))
+        row += 1
 
         Label(self, text="PID ", vAlign='t', hAlign='l', grid=(row, 0))
         # self.layout().addItem(QtWidgets.QSpacerItem(0, 5), 0, 0)
@@ -713,7 +717,7 @@ class GeneralTab(Widget):
 
 class DimensionsTab(Widget):
     def __init__(self, parent=None, mainWindow=None, spectrum=None, dimensions=None):
-        super().__init__(parent, setLayout=True)  # ejb
+        super().__init__(parent, setLayout=True, spacing=(5, 5))  # ejb
 
         self._parent = parent
         self.mainWindow = mainWindow
@@ -912,7 +916,8 @@ class DimensionsTab(Widget):
             self.minAliasingPullDowns[i].currentIndexChanged.connect(partial(self._queueSetMinAliasing, self.minAliasingPullDowns[i].getText, i))
 
         row += 1
-        HLine(self, grid=(row, 0), gridSpan=(1, dimensions + 1), colour=getColours()[DIVIDER], height=15)
+        #GST colour looks wrong should be 169,169,169 to match control borders
+        HLine(self, grid=(row, 0), gridSpan=(1, dimensions + 1), colour=getColours()[DIVIDER], height=15, lineWidth=1)
 
         row += 1
         self.preferredAxisOrderPulldown = PulldownListCompoundWidget(self, labelText="Preferred Axis Order",
@@ -1129,9 +1134,9 @@ class DimensionsTab(Widget):
 
 class ContoursTab(Widget):
 
-    def __init__(self, parent=None, mainWindow=None, spectrum=None):
+    def __init__(self, parent=None, mainWindow=None, spectrum=None, ):
 
-        super().__init__(parent, setLayout=True)  # ejb
+        super().__init__(parent, setLayout=True, spacing=(5, 5))  # ejb
 
         self._parent = parent
         self.mainWindow = mainWindow
@@ -1145,6 +1150,9 @@ class ContoursTab(Widget):
         self._changes = dict()
 
         row = 0
+        #GST adds a correctly sized right margin
+        Spacer(self, 5, 1, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum,
+               grid=(row, 3))
         self.layout().addItem(QtWidgets.QSpacerItem(0, 10), row, 0)
 
         row += 1
@@ -1485,7 +1493,7 @@ class SpectrumDisplayPropertiesPopupNd(CcpnDialog):
             self._contoursTab.append(ContoursTab(parent=self, mainWindow=self.mainWindow, spectrum=thisSpec))
             self.tabWidget.addTab(self._contoursTab[specNum], thisSpec.name)
 
-        self.applyButtons = ButtonList(self, texts=['Cancel', 'Apply', 'Ok'],
+        self.applyButtons = ButtonBoxList(self, texts=['Cancel', 'Apply', 'Ok'],
                                        callbacks=[self.reject, self._applyChanges, self._okButton],
                                        tipTexts=['', '', '', None], direction='h',
                                        hAlign='r', grid=(2, 1), gridSpan=(1, 4))
@@ -1597,7 +1605,7 @@ class SpectrumDisplayPropertiesPopup1d(CcpnDialog):
             self._generalTab.append(ColourTab(parent=self, mainWindow=self.mainWindow, spectrum=thisSpec))
             self.tabWidget.addTab(self._generalTab[specNum], thisSpec.name)
 
-        self.applyButtons = ButtonList(self, texts=['Cancel', 'Apply', 'Ok'],
+        self.applyButtons = ButtonBoxList(self, texts=['Cancel', 'Apply', 'Ok'],
                                        callbacks=[self.reject, self._applyChanges, self._okButton],
                                        tipTexts=['', '', '', None], direction='h',
                                        hAlign='r', grid=(2, 1), gridSpan=(1, 4))

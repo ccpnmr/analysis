@@ -80,6 +80,7 @@ from contextlib import contextmanager
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtCore import QPoint, QSize, Qt, pyqtSlot
 from PyQt5.QtWidgets import QApplication, QOpenGLWidget
+from PyQt5.QtGui import QSurfaceFormat
 from ccpn.util.Logging import getLogger
 from pyqtgraph import functions as fn
 from ccpn.core.PeakList import PeakList
@@ -185,10 +186,20 @@ class CcpnGLWidget(QOpenGLWidget):
     XAXES = GLDefs.XAXISUNITS
     YAXES = GLDefs.YAXISUNITS
 
-    def __init__(self, strip=None, mainWindow=None, stripIDLabel=None):
+    def __init__(self, strip=None, mainWindow=None, stripIDLabel=None, antiAlias =  4):
         # TODO:ED add documentation
 
         super().__init__(strip)
+
+
+        # GST add antiAliasing, no perceptable speed impact on my mac (intel iris graphics!)
+        if antiAlias is not None and antiAlias > 0  and antiAlias < 9 or (antiAlias %2) > 0:
+            fmt = QSurfaceFormat()
+            fmt.setSamples(8)
+            self.setFormat(fmt)
+        else:
+            if antiAlias is not None:
+                getLogger().warning('bad anti alias sample size %i, anti aliasing is off...' )
 
         # flag to display paintGL but keep an empty screen
         self._blankDisplay = False
@@ -2817,6 +2828,8 @@ class CcpnGLWidget(QOpenGLWidget):
 
         # draw the spectra, need to reset the viewport
         self.viewports.setViewport(self._currentView)
+
+
         self.drawSpectra()
 
         if not self._stackingMode:

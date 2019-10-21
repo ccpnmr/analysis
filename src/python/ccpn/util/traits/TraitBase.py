@@ -77,6 +77,19 @@ class TraitBase(HasTraits):
         """
         return self.has_trait(trait)
 
+    def getTrait(self, trait):
+        """Return the trait object corresponding to trait, or None if does not exists
+        """
+        return self.class_traits().get(trait)
+
+    def getItemTrait(self, trait):
+        """Return the trait object corresponding to trait for items of an iterable, i.e. used for validate_items
+        or None if does not exists
+        """
+        theTrait = self.getTrait(trait)
+        if theTrait is None: return None
+        return theTrait._trait
+
     def getAllTraitObjects(self, objectOnly=False, **metadata) -> dict :
         """Return a dict of (traitName,  trait object) key,value pairs, optionally filtering
         for metadata.

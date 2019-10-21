@@ -61,6 +61,7 @@ from ccpn.util.traits.TraitJsonHandlerBase import TraitJsonHandlerBase, Recursiv
 from ccpn.util.AttributeDict import AttributeDict
 from ccpn.util.Path import aPath, Path
 
+
 class _Ordered(object):
     "A class that maintains and sets trait-order"
 
@@ -126,6 +127,19 @@ class List(_List, _Ordered):
         _Ordered.__init__(self)
         if default_value is not None:
             self.default_value = default_value
+
+
+class CList(List, _Ordered):
+    "Casting list, any iterable"
+
+    def validate(self, obj, values):
+        from ccpn.util.Common import isIterable  # local import, because isotopeRecords in Common cause circular imports £%%$$GRr
+        if isinstance(values, list):
+            pass
+        elif isIterable(values):
+            values = [val for val in values]
+        values = self.validate_elements(obj, values)
+        return values
 
 
 class RecursiveList(List):
@@ -342,3 +356,56 @@ class CPath(TraitType, _Ordered):
     # end class
 # end class
 
+
+class CString(TraitType, _Ordered):
+    """A trait that defines a string object, casts from bytes object and is json serialisable
+    """
+    default_value = ''
+    info_text = "'an string'"
+
+    NONE_VALUE = '__CSTRING_NONE_VALUE__'
+
+    def __init__(self, default_value='', encoding='utf8', allow_none=False, read_only=None, **kwargs):
+        TraitType.__init__(self, default_value=default_value, allow_none=allow_none, read_only=read_only, **kwargs)
+        _Ordered.__init__(self)
+        self.encoding = encoding
+        if default_value is not None:
+            self.default_value = default_value
+
+    def asBytes(self, value):
+        "Return value encoded as a bytes object; encode None"
+        if value is None:
+            value = self.NONE_VALUE
+        return bytes(value, self.encoding)
+
+    def fromBytes(self, value):
+        "Return value decoded from bytes object; decode NONE_VALUE to None"
+        value = value.decode(self.encoding)
+        if value == self.NONE_VALUE:
+            value = None
+        return value
+
+    def validate(self, obj, value):
+        """Assure a str instance
+        """
+        if isinstance(value, str):
+            pass
+
+        elif isinstance(value, bytes):
+            value =  self.fromBytes(value)
+            # Test again if None is allowed, as this was missed if it was encoded as NONE_VALUE
+            if value is None and not self.allow_none:
+                self.error(obj, value)
+
+        else:
+            self.error(obj, value)
+
+        return value
+
+    # trait-specific json handler
+    class jsonHandler(TraitJsonHandlerBase):
+        """json compatible; all handeled by TraitJsonHandlerBase
+        """
+        pass
+
+# end class

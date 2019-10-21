@@ -30,7 +30,7 @@ from ccpn.util.Colour import hexToRgb
 
 
 class HLine(Widget):
-    def __init__(self, parent=None, style='SolidLine', colour=QtCore.Qt.black, height=10, **kwds):
+    def __init__(self, parent=None, style='SolidLine', colour=QtCore.Qt.black, height=10, lineWidth=2, divisor = 3, **kwds):
         """
         :param style: Options:
                               'SolidLine';
@@ -44,7 +44,8 @@ class HLine(Widget):
         self.style = style
         self.colour = colour
         self.height = height
-        self.lineHeight = int(height / 3)
+        self.divisor = divisor #int(height / divisor)
+        self.lineWidth=lineWidth
 
         self.styles = {
             'SolidLine'     : QtCore.Qt.SolidLine,
@@ -64,15 +65,19 @@ class HLine(Widget):
 
     def drawLine(self, qp, style=None, colour=None):
 
+        geomRect = self.geometry().marginsRemoved(self.contentsMargins())
+        geomHeight = geomRect.height() / self.divisor
+        lineHeight = geomHeight + self.contentsMargins().top()
+
         if style in self.styles:
             style = self.styles[style]
             try:
-                pen = QtGui.QPen(self.colour, 2, style)
+                pen = QtGui.QPen(self.colour, self.lineWidth, style)
             except:
-                pen = QtGui.QPen(QtGui.QColor(*hexToRgb(self.colour)), 2, style)
+                pen = QtGui.QPen(QtGui.QColor(*hexToRgb(self.colour)), self.lineWidth, style)
 
             qp.setPen(pen)
-            qp.drawLine(0, self.lineHeight, self.geometry().right(), self.lineHeight)
+            qp.drawLine(geomRect.left(), lineHeight, geomRect.right(), lineHeight)
 
 
 def main():

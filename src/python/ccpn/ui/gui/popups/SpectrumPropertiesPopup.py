@@ -26,7 +26,7 @@ __date__ = "$Date: 2017-03-30 11:28:58 +0100 (Thu, March 30, 2017) $"
 #=========================================================================================
 
 from functools import partial
-from PyQt5 import QtWidgets, QtCore
+from PyQt5 import QtWidgets, QtCore, QtGui
 from itertools import permutations
 from ccpn.core.lib import Util as ccpnUtil
 from ccpn.core.Spectrum import MAXALIASINGRANGE
@@ -916,8 +916,9 @@ class DimensionsTab(Widget):
             self.minAliasingPullDowns[i].currentIndexChanged.connect(partial(self._queueSetMinAliasing, self.minAliasingPullDowns[i].getText, i))
 
         row += 1
-        #GST colour looks wrong should be 169,169,169 to match control borders
-        HLine(self, grid=(row, 0), gridSpan=(1, dimensions + 1), colour=getColours()[DIVIDER], height=15, lineWidth=1)
+        # GST colour looks wrong should be 169,169,169 #a9a9a9 to match control borders text colour too dark...
+        hLine = HLine(self, grid=(row, 0), gridSpan=(1, dimensions + 1), colour=getColours()[DIVIDER], height=15, lineWidth=1, divisor=2)
+        hLine.setContentsMargins(5,0,0,0)
 
         row += 1
         self.preferredAxisOrderPulldown = PulldownListCompoundWidget(self, labelText="Preferred Axis Order",

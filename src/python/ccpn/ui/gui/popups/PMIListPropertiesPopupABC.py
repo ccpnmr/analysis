@@ -207,7 +207,7 @@ class PMIListPropertiesPopupABC(CcpnDialogMainWidget):
     def _setWidgetSettings(self):
         """Populate the widgets from the settings dict
         """
-        print('>>>_setWidgetSettings')
+        # print('>>>_setWidgetSettings')
         for item in self._colourPulldowns:
             _, pl, attrib = item
 
@@ -227,7 +227,7 @@ class PMIListPropertiesPopupABC(CcpnDialogMainWidget):
     def _setListViewFromWidgets(self):
         """Set listView object from the widgets
         """
-        print('>>>_setListViewFromWidgets')
+        # print('>>>_setListViewFromWidgets')
         for item in self._colourPulldowns:
             _, pl, attrib = item
 
@@ -243,7 +243,7 @@ class PMIListPropertiesPopupABC(CcpnDialogMainWidget):
     def _setListViewFromSettings(self):
         """Set listView object from the original settings dict
         """
-        print('>>>_setListViewFromSettings')
+        # print('>>>_setListViewFromSettings')
         for item in self._colourPulldowns:
             _, pl, attrib = item
 
@@ -258,7 +258,7 @@ class PMIListPropertiesPopupABC(CcpnDialogMainWidget):
     def _changeSettings(self):
         """Widgets have been changed in the dialog
         """
-        print('>>>_changeSettings')
+        # print('>>>_changeSettings')
         with undoStackBlocking():
             self._setListViewFromWidgets()
 
@@ -282,7 +282,7 @@ class PMIListPropertiesPopupABC(CcpnDialogMainWidget):
         # if not allChanges:
         #     return True
 
-        print('>>>_applyChanges')
+        # print('>>>_applyChanges')
         with handleDialogApply(self) as error:
             # add item here to redraw items
             with undoStackBlocking() as addUndoItem:
@@ -335,7 +335,7 @@ class PMIListPropertiesPopupABC(CcpnDialogMainWidget):
         self.reject()
 
     def _revertClicked(self):
-        print('>>>_revertClicked')
+        # print('>>>_revertClicked')
         with undoStackBlocking():
             self._setListViewFromSettings()
 

@@ -302,7 +302,8 @@ from ccpn.ui.gui.widgets.Frame import Frame
 class PlaneToolbar(Frame):
     #TODO: undocumented and needs refactoring ;
     # GWV: Does not work as a Widget!?
-    def __init__(self, qtParent, strip, callbacks, stripArrangement=None, **kwds):
+    def __init__(self, qtParent, strip, callbacks, stripArrangement=None,
+                 containers=None, **kwds):
 
         super(PlaneToolbar, self).__init__(parent=qtParent, setLayout=True, **kwds)
         # ToolBar.__init__(self, parent=qtParent, **kwds)
@@ -314,7 +315,19 @@ class PlaneToolbar(Frame):
         self.planeCounts = []
         row=0
         for i in range(len(strip.orderedAxes) - 2):
-            _toolbar = ToolBar(self, grid=(0, row))
+            if not containers:
+                _toolbar = ToolBar(self, grid=(0, row))
+            else:
+                cFrame, cWidgets = list(containers.items())[i]
+                _toolbar = ToolBar(cFrame, grid=(0, 3))
+
+                # add the new toolbar to the popup display
+                cWidgets += (_toolbar,)
+                cWidgets[2].setVisible(False)
+                cWidgets[3].setVisible(False)
+
+                # set the axisCode
+                cWidgets[0].setText(str(strip.axisCodes[i+2])+":")
 
             self.prevPlaneButton = Button(_toolbar, '<', callback=partial(callbacks[0], i))
             self.prevPlaneButton.setFixedWidth(19)

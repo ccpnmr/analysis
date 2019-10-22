@@ -124,10 +124,11 @@ class GuiStrip(Frame):
         self._CcpnGLWidget.setSizePolicy(QtWidgets.QSizePolicy.Expanding,
                                          QtWidgets.QSizePolicy.Expanding)
 
+        # frames holding the overlay widgets
         self._fr = []
-        self._sl = []
+        # self._sl = []
 
-        SHOWTESTWIDGETS = False
+        SHOWTESTWIDGETS = True
 
         if SHOWTESTWIDGETS:
             sp = Spacer(self, 1, 1, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding,
@@ -135,36 +136,7 @@ class GuiStrip(Frame):
 
             from ccpn.ui.gui.widgets.PlaneToolbar import _StripLabel
 
-            self._ts = OrderedDict([('StripHeader', (_StripLabel, (2, 1))),
-                                    ('More stripHeader settings', (_StripLabel, (3, 1))),
-                                    ('Some more text', (_StripLabel, (4, 1))),
-                                    ('And another bit of text', (_StripLabel, (5, 1))),
-                                    ('Extra Axis Code 1', (ActiveLabel, (6, 1))),
-                                    ('HIDDENWIDGETWITHOPTIONS1', (ActiveLabel, (6, 2))),
-                                    ('Extra Axis Code 2', (ActiveLabel, (7, 1))),
-                                    ('HIDDENWIDGETWITHOPTIONS2', (ActiveLabel, (7, 2)))
-                                    ])
-
-            self.addSpacer(10, 30, grid=(1, 0))
-
-            _lastFrame = None
-            # ED: the only way I could find to cure the mis-aligned header
-            for ii, (tl, (labelType, gridPos)) in enumerate(self._ts.items()):
-
-                fr = OpenGLOverlayFrame(self, setLayout=True, showBorder=False, grid=gridPos, backgroundColour=None)
-                fr.setSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum)
-
-                if labelType is _StripLabel:
-                    sl = _StripLabel(fr, self.mainWindow, self, text=tl, grid=(0, 0))
-                else:
-                    # if tl in ('HIDDENWIDGETWITHOPTIONS1', 'HIDDENWIDGETWITHOPTIONS2'):
-                    #     sl = ActiveLabel(_lastFrame, text=tl, grid=(0, 1))
-                    # else:
-                    sl = ActiveLabel(fr, text=tl, grid=(0, 0))
-
-                sl.setSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum)
-                sp = Spacer(fr, 1, 1, QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.Minimum, grid=(0, 2))
-
+            def _setStyle(sl):
                 sl.setStyleSheet('QLabel {'
                                  'padding: 0; '
                                  'margin: 0px 0px 0px 0px;'
@@ -178,30 +150,120 @@ class GuiStrip(Frame):
                                         'black',
                                         textFontLarge.fontName,
                                         textFontLarge.pointSize()))
+                sl.setSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum)
 
+            # self._ts = OrderedDict([('StripHeader', (_StripLabel, (2, 1))),
+            # ('More stripHeader settings', (_StripLabel, (3, 1))),
+            # ('Some more text', (_StripLabel, (4, 1))),
+            # ('And another bit of text', (_StripLabel, (5, 1))),
+            # ('axisCode1', (ActiveLabel, (6, 1))),
+            # ('HIDDENWIDGETWITHOPTIONS1', (ActiveLabel, (6, 2))),
+            # ('AxisCode2', (ActiveLabel, (7, 1))),
+            # ('HIDDENWIDGETWITHOPTIONS2', (ActiveLabel, (7, 2)))
+            # ])
+
+            self.addSpacer(10, 30, grid=(1, 0))
+
+            # add the header
+            sRow = 2
+            fr = OpenGLOverlayFrame(self, setLayout=True, showBorder=False, grid=(sRow, 1), backgroundColour=None)
+            fr.setSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum)
+            self._stripHeaderLabel = _StripLabel(fr, self.mainWindow, self, text='stripHeader', grid=(0, 0))
+            _setStyle(self._stripHeaderLabel)
+            sp = Spacer(fr, 1, 1, QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.Minimum, grid=(0, 2))
+            self._fr.append(fr)
+
+            # add the axisCodes
+            self._stripAxisCodes = OrderedDict()
+
+            for dim, axis in enumerate(self.spectrumDisplay.axisCodes[2:]):
+
+                sRow += 1
+                fr = OpenGLOverlayFrame(self, setLayout=True, showBorder=False, grid=(sRow, 1), backgroundColour=None)
+                fr.setSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum)
+
+                axisButtons = []
+                for ii, name in enumerate(['axis', 'value', 'planes']):
+                    sl = ActiveLabel(fr, text=name, grid=(0, ii))
+                    _setStyle(sl)
+                    axisButtons.append(sl)
+
+                sp = Spacer(fr, 1, 1, QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.Minimum, grid=(0, ii + 3))
+                self._stripAxisCodes[fr] = axisButtons
                 self._fr.append(fr)
-                self._sl.append(sl)
-                _lastFrame = fr
 
-            self._fr[4].getLayout().addWidget(self._sl[5], 0, 1)
-            self._fr[6].getLayout().addWidget(self._sl[7], 0, 1)
+                w0 = axisButtons[0]
+                w1 = axisButtons[1]
+                w2 = axisButtons[2]
 
-            keys = list(self._ts.keys())
-            self.w1 = self._sl[keys.index('Extra Axis Code 1')]
-            self.w2 = self._sl[keys.index('HIDDENWIDGETWITHOPTIONS1')]
-            self.w1.setSelectionCallback(partial(self._selectCallback, self.w1, self.w2))
+                # set the callbacks for the popup plane buttons
+                w0.setSelectionCallback(partial(self._selectCallback, axisButtons))
+                w1.setSelectionCallback(partial(self._selectCallback, axisButtons))
+                w2.setSelectionCallback(partial(self._selectCallback, axisButtons))
 
-            self.w2.hide()
-            self.w2.setEnterLeaveCallback(partial(self._enterCallback, self.w1, self.w2),
-                                          partial(self._leaveCallback, self.w1, self.w2))
+                # w2.setEnterLeaveCallback(partial(self._enterCallback, axisButtons),
+                #                          partial(self._leaveCallback, axisButtons))
 
-            self.w3 = self._sl[keys.index('Extra Axis Code 2')]
-            self.w4 = self._sl[keys.index('HIDDENWIDGETWITHOPTIONS2')]
-            self.w3.setSelectionCallback(partial(self._selectCallback, self.w3, self.w4))
+            self._resize()
 
-            self.w4.hide()
-            self.w4.setEnterLeaveCallback(partial(self._enterCallback, self.w3, self.w4),
-                                          partial(self._leaveCallback, self.w3, self.w4))
+            # sRow += 1
+            # self.addSpacer(sRow, 3, grid=(1, 0))
+            #
+            # _lastFrame = None
+            # # ED: the only way I could find to cure the mis-aligned header
+            # for ii, (tl, (labelType, gridPos)) in enumerate(self._ts.items()):
+            #
+            #     fr = OpenGLOverlayFrame(self, setLayout=True, showBorder=False, grid=gridPos, backgroundColour=None)
+            #     fr.setSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum)
+            #
+            #     if labelType is _StripLabel:
+            #         sl = _StripLabel(fr, self.mainWindow, self, text=tl, grid=(0, 0))
+            #     else:
+            #         # if tl in ('HIDDENWIDGETWITHOPTIONS1', 'HIDDENWIDGETWITHOPTIONS2'):
+            #         #     sl = ActiveLabel(_lastFrame, text=tl, grid=(0, 1))
+            #         # else:
+            #         sl = ActiveLabel(fr, text=tl, grid=(0, 0))
+            #
+            #     sl.setSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum)
+            #     sp = Spacer(fr, 1, 1, QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.Minimum, grid=(0, 2))
+            #
+            #     sl.setStyleSheet('QLabel {'
+            #                      'padding: 0; '
+            #                      'margin: 0px 0px 0px 0px;'
+            #                      'color:  %s;'
+            #                      # 'background-color: %s;'
+            #                      'border: 0 px;'
+            #                      'font-family: %s;'
+            #                      'font-size: %dpx;'
+            #                      'qproperty-alignment: AlignLeft;'
+            #                      '}' % ('white',
+            #                             # 'black',
+            #                             textFontLarge.fontName,
+            #                             textFontLarge.pointSize()))
+            #
+            #     self._fr.append(fr)
+            #     self._sl.append(sl)
+            #     _lastFrame = fr
+            #
+            # self._fr[4].getLayout().addWidget(self._sl[5], 0, 1)
+            # self._fr[6].getLayout().addWidget(self._sl[7], 0, 1)
+            #
+            # keys = list(self._ts.keys())
+            # self.w1 = self._sl[keys.index('Extra Axis Code 1')]
+            # self.w2 = self._sl[keys.index('HIDDENWIDGETWITHOPTIONS1')]
+            # self.w1.setSelectionCallback(partial(self._selectCallback, self.w1, self.w2))
+            #
+            # self.w2.hide()
+            # self.w2.setEnterLeaveCallback(partial(self._enterCallback, self.w1, self.w2),
+            #                               partial(self._leaveCallback, self.w1, self.w2))
+            #
+            # self.w3 = self._sl[keys.index('Extra Axis Code 2')]
+            # self.w4 = self._sl[keys.index('HIDDENWIDGETWITHOPTIONS2')]
+            # self.w3.setSelectionCallback(partial(self._selectCallback, self.w3, self.w4))
+            #
+            # self.w4.hide()
+            # self.w4.setEnterLeaveCallback(partial(self._enterCallback, self.w3, self.w4),
+            #                               partial(self._leaveCallback, self.w3, self.w4))
 
         self.header = StripHeader(parent=self, mainWindow=self.mainWindow, strip=self,
                                   grid=headerGrid, gridSpan=headerSpan, setLayout=True, spacing=(0, 0))
@@ -296,13 +358,35 @@ class GuiStrip(Frame):
         for fr in self._fr:
             fr._setMaskToChildren()
 
-    def _selectCallback(self, widget1, widget2):
+    def _selectCallback(self, widgets):
         # print('>>>select', widget1, widget2)
-        # widget1.hide()
-        if widget2.isVisible():
-            widget2.hide()
+        # if the first widget is clicked then toggle the planeToolbar buttons
+        if widgets[3].isVisible():
+            widgets[3].hide()
+            widgets[1].show()
         else:
-            widget2.show()
+            widgets[1].hide()
+            widgets[3].show()
+        self._resize()
+
+
+        class PopupNoAnimation(QtWidgets.QDialog):
+            def __init__(self, **kwargs):
+                super().__init__(**kwargs)
+
+            def dismiss(self, *largs, **kwargs):
+                if self._window is None:
+                    return
+                if self.dispatch('on_dismiss') is True:
+                    if kwargs.get('force', False) is not True:
+                        return
+
+                self._anim_alpha = 0
+                self._real_remove_widget()
+
+
+        self._dialog = PopupNoAnimation()
+        self._dialog.exec_()
 
     def _enterCallback(self, widget1, widget2):
         # print('>>>_enterCallback', widget1, widget2)
@@ -669,7 +753,6 @@ class GuiStrip(Frame):
 
         self._createMarkAtPosition(positions=pos, axisCodes=axes)
 
-
     def _addItemsToMarkInPeakMenu(self, peaks):
         """Adds item to mark peak position from context menu.
         """
@@ -760,7 +843,7 @@ class GuiStrip(Frame):
         for nm, ax in matchAttribs:
             self._addItemsToCopyAxisCodesFromMenues(ax, nm)
 
-    def _addItemsToCopyAxisFromMenues(self, copyAttribs):       #, axisNames, axisIdList):
+    def _addItemsToCopyAxisFromMenues(self, copyAttribs):  #, axisNames, axisIdList):
         """Copied from old viewbox. This function apparently take the current cursorPosition
          and uses to pan a selected display from the list of spectrumViews or the current cursor position.
         """
@@ -824,8 +907,8 @@ class GuiStrip(Frame):
             row += 1
 
         for ind in indices:
-            pos = [position[ind],]
-            axes = [self.axisCodes[ind],]
+            pos = [position[ind], ]
+            axes = [self.axisCodes[ind], ]
 
             toolTip = 'Mark %s axis code' % str(self.axisCodes[ind])
             axisName.addItem(text='Mark %s' % str(self.axisCodes[ind]),
@@ -858,7 +941,7 @@ class GuiStrip(Frame):
     #     self._addItemsToCopyAxisCodesFromMenues(0, [self.matchXAxisCodeToMenu2, self.matchYAxisCodeToMenu2])
     #     self._addItemsToCopyAxisCodesFromMenues(1, [self.matchXAxisCodeToMenu2, self.matchYAxisCodeToMenu2])
 
-    def _addItemsToCopyAxisCodesFromMenues(self, axisIndex, axisName):      #, axisList):
+    def _addItemsToCopyAxisCodesFromMenues(self, axisIndex, axisName):  #, axisList):
         """Copied from old viewbox. This function apparently take the current cursorPosition
          and uses to pan a selected display from the list of spectrumViews or the current cursor position.
         """

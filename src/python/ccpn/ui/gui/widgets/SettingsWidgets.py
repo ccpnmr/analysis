@@ -965,7 +965,7 @@ class SequenceGraphSettings(Widget):  #, _commonSettings):
         for vals in self.checkBoxes.values():
             if vals['item'] == item:
                 checkBoxItem.checkBox.stateChanged.disconnect(vals['signalFunc'])
-                print('>>>_checkInit removed')
+                # print('>>>_checkInit removed')
 
         # call the initialise function
         initFunc = data['_init']

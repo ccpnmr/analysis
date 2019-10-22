@@ -164,7 +164,10 @@ class GuiStripNd(GuiStrip):
         callbacks = [self.prevZPlane, self.nextZPlane, self._setZPlanePosition, self._changePlaneCount]
         self.planeToolbar = PlaneToolbar(self._stripToolBarWidget, strip=self, callbacks=callbacks,
                                          grid=(0, 0), hPolicy='minimum', hAlign='left', vAlign='center',
-                                         stripArrangement=getattr(self.spectrumDisplay, 'stripArrangement', None))
+                                         stripArrangement=getattr(self.spectrumDisplay, 'stripArrangement', None),
+                                         containers = self._stripAxisCodes)
+
+        self._resize()
 
         #self._stripToolBarWidget.addWidget(self.planeToolbar)
         #self.planeToolBar.hide()

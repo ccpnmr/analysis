@@ -124,7 +124,7 @@ def _fetchDataUrl(memopsRoot, nameStore, filePath):
     for store, dataUrl in stores:
         directoryPath = os.path.join(dataUrl.url.path, '')
 
-        print('>>>_fetchDataUrl', filePath, directoryPath)
+        # print('>>>_fetchDataUrl', filePath, directoryPath)
 
         if filePath.startswith(directoryPath):
             return store.fullPath

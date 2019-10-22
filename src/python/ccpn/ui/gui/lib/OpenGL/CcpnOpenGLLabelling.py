@@ -3404,6 +3404,8 @@ class GLintegralNdLabelling(GL1dLabelling, GLintegralListMethods, GLLabelling): 
 
         # get the correct coordinates based on the axisCodes
         p0 = [0.0] * 2  # len(self.axisOrder)
+        lims = obj.limits[0] if obj.limits else (0.0, 0.0)
+
         for ps, psCode in enumerate(self._GLParent.axisOrder[0:2]):
             for pp, ppCode in enumerate(obj.axisCodes):
 
@@ -3413,18 +3415,18 @@ class GLintegralNdLabelling(GL1dLabelling, GLintegralListMethods, GLLabelling): 
                         # need to put the position in here
 
                         if self._GLParent.INVERTXAXIS:
-                            p0[ps] = pos = max(obj.limits[0])  # obj.position[pp]
+                            p0[ps] = pos = max(lims)  # obj.position[pp]
                         else:
-                            p0[ps] = pos = min(obj.limits[0])  # obj.position[pp]
+                            p0[ps] = pos = min(lims)  # obj.position[pp]
                     else:
                         p0[ps] = 0.0  #obj.height
 
                 elif self._GLParent._preferences.matchAxisCode == 1:  # match full code
                     if ppCode == psCode:
                         if self._GLParent.INVERTXAXIS:
-                            p0[ps] = pos = max(obj.limits[0])  # obj.position[pp]
+                            p0[ps] = pos = max(lims)  # obj.position[pp]
                         else:
-                            p0[ps] = pos = min(obj.limits[0])  # obj.position[pp]
+                            p0[ps] = pos = min(lims)  # obj.position[pp]
                     else:
                         p0[ps] = 0.0  #obj.height
 

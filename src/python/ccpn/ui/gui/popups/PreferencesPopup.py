@@ -713,6 +713,8 @@ class PreferencesPopup(CcpnDialog):
         self._validateFrame._matchDataUrlWidths = parent
         self._validateFrame._matchFilePathWidths = parent
 
+        self._validateFrame.setVisible(False)
+
         # row += 1
         # self._dataUrlData = {}
         # self.userDataPathLabel = Label(parent, "$DATA (user datapath)", grid=(row, 0), )

@@ -895,46 +895,82 @@ class Project(AbstractWrapperObject):
 
         # get the dataPaths from the project
         dataUrlData = {}
+        # dataUrlData['remoteData'] = _findDataUrl(project, 'remoteData')
+
+        # # skip setting the path if autoSetDataPath is false
+        # if autoSet:
+        #
+        #     # update dataUrl here to the value in preferences
+        #     if dataUrlData['remoteData'] and len(dataUrlData['remoteData']) == 1:
+        #         # must only be one dataUrl
+        #         primaryDataUrl = dataUrlData['remoteData'][0]
+        #         primaryDataUrl.url = primaryDataUrl.url.clone(path=newDataUrlPath)
+
+        # reset the dataStores
         dataUrlData['remoteData'] = _findDataUrl(project, 'remoteData')
         dataUrlData['insideData'] = _findDataUrl(project, 'insideData')
         dataUrlData['alongsideData'] = _findDataUrl(project, 'alongsideData')
         dataUrlData['otherData'] = [dataUrl for store in project._wrappedData.memopsRoot.sortedDataLocationStores()
                                     for dataUrl in store.sortedDataUrls() if dataUrl.name not in ('insideData', 'alongsideData', 'remoteData')]
 
+        # standardStore = self.project._wrappedData.memopsRoot.findFirstDataLocationStore(name='standard')
+        # stores = [(store.name, store.url.dataLocation, url.path,) for store in standardStore.sortedDataUrls() for url in store.sortedDataStores()]
+        # urls = [(store.dataUrl.name, store.dataUrl.url.dataLocation, store.path,) for store in standardStore.sortedDataStores()]
+
+        self._validateCleanUrls()
+
+        if autoSet:
+            from ccpnmodel.ccpncore.lib._ccp.general.DataLocation.AbstractDataStore import forceChangeDataStoreUrl
+
+            # force the change of the dataUrl
+            for spec in self.project.spectra:
+                apiDataStore = spec._wrappedData.dataStore
+                if apiDataStore is None:
+                    getLogger().warning("Spectrum is not stored, cannot change file path")
+
+                else:
+                    # dataUrl = self._project._wrappedData.root.fetchDataUrl(value)
+                    dataUrlName = apiDataStore.dataUrl.name
+                    if dataUrlName == 'remoteData':
+                        forceChangeDataStoreUrl(apiDataStore, newDataUrlPath)
+
+        self._validateCleanUrls()
+
+        # # skip setting the path if autoSetDataPath is false
+        # if autoSet:
+        #
+        #     # update dataUrl here to the value in preferences
+        #     if dataUrlData['remoteData'] and len(dataUrlData['remoteData']) == 1:
+        #         # must only be one dataUrl
+        #         getLogger().info('>>>repointing dataUrl to %s...' % newDataUrlPath)
+        #
+        #         primaryDataUrl = dataUrlData['remoteData'][0]
+        #         primaryDataUrl.url = primaryDataUrl.url.clone(path=newDataUrlPath)
+
+    def _validateCleanUrls(self):
+
+        # update the pointers to the urls and delete the spares
         standardStore = self.project._wrappedData.memopsRoot.findFirstDataLocationStore(name='standard')
-        stores = [(store.name, store.url.dataLocation, url.path,) for store in standardStore.sortedDataUrls() for url in store.sortedDataStores()]
-        urls = [(store.dataUrl.name, store.dataUrl.url.dataLocation, store.path,) for store in standardStore.sortedDataStores()]
-
-
-        from ccpnmodel.ccpncore.lib._ccp.general.DataLocation.AbstractDataStore import forceChangeDataStoreUrl
-
-        for spec in self.project.spectra:
-            apiDataStore = spec._wrappedData.dataStore
-            if apiDataStore is None:
-                raise ValueError("Spectrum is not stored, cannot change file path")
-
-            else:
-                # dataUrl = self._project._wrappedData.root.fetchDataUrl(value)
-                dataUrlName = apiDataStore.dataUrl.name
-                if dataUrlName == 'remoteData':
-
-                    forceChangeDataStoreUrl(apiDataStore, newDataUrlPath)
 
         spectraStores = [spec._wrappedData.dataStore for spec in self.spectra]
-        bad = [url for store in standardStore.sortedDataUrls() for url in store.sortedDataStores() if url not in spectraStores]
-        badStore = [store for store in standardStore.sortedDataUrls() if store.name == 'remoteData' if not store.dataStores]
+        badUrls = [url for store in standardStore.sortedDataUrls() for url in store.sortedDataStores() if url not in spectraStores]
+        otherUrls = [dataUrl for store in self.project._wrappedData.memopsRoot.sortedDataLocationStores()
+                     for dataUrl in store.sortedDataUrls() if dataUrl.name not in ('insideData', 'alongsideData', 'remoteData')]
 
-        for bb in bad:
+        allRemoteStores = [store for store in standardStore.sortedDataUrls() if store.name == 'remoteData' if store.dataStores]
+        remoteStores = [store for store in standardStore.sortedDataUrls() if store.name == 'remoteData' if not store.dataStores]
+
+        for bb in badUrls:
             getLogger().info('>>>validate cleanup urls: %s' % str(bb))
             bb.delete()
 
-        for url in dataUrlData['otherData']:
+        for url in otherUrls:
             if not url.dataStores:
                 getLogger().info('>>>validate cleanup stores: %s' % str(url))
                 url.delete()
 
-        for bb in badStore:
-            getLogger().info('>>>validate cleanup stores: %s' % str(bb))
+        for bb in (allRemoteStores + remoteStores)[1:]:
+            getLogger().info('>>>validate cleanup remoteStores: %s' % str(bb))
             bb.delete()
 
         # from ccpnmodel.ccpncore.lib._ccp.general.DataLocation.AbstractDataStore import forceChangeDataStoreUrl
@@ -951,20 +987,15 @@ class Project(AbstractWrapperObject):
         #
         #             forceChangeDataStoreUrl(apiDataStore, '/Users/ejb66/Desktop/')
 
-
-
-
-
-
-        # skip setting the path if autoSetDataPath is false
-        if not autoSet:
-            return
-
-        # update dataUrl here to the value in preferences
-        if dataUrlData['remoteData'] and len(dataUrlData['remoteData']) == 1:
-            # must only be one dataUrl
-            primaryDataUrl = dataUrlData['remoteData'][0]
-            primaryDataUrl.url = primaryDataUrl.url.clone(path=newDataUrlPath)
+        # # skip setting the path if autoSetDataPath is false
+        # if not autoSet:
+        #     return
+        #
+        # # update dataUrl here to the value in preferences
+        # if dataUrlData['remoteData'] and len(dataUrlData['remoteData']) == 1:
+        #     # must only be one dataUrl
+        #     primaryDataUrl = dataUrlData['remoteData'][0]
+        #     primaryDataUrl.url = primaryDataUrl.url.clone(path=newDataUrlPath)
 
     @logCommand('project.')
     def exportNef(self, path: str = None,
@@ -1290,8 +1321,8 @@ class Project(AbstractWrapperObject):
 
         try:
             apiDataSource = self._wrappedData.loadDataSource(
-                            filePath=path, dataFileFormat=subType, name=name
-            )
+                    filePath=path, dataFileFormat=subType, name=name
+                    )
         except Exception as es:
             getLogger().warning(es)
             raise es

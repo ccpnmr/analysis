@@ -64,6 +64,7 @@ class MultipletListPropertiesPopup(PMIListPropertiesPopupABC):
                                                tipTexts=None,
                                                )
 
+        # self.multipletAveraging.setFixedHeight(36)
         self.__postInit__()
 
     def _getSettings(self):

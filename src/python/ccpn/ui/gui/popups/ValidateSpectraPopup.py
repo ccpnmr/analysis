@@ -262,6 +262,7 @@ class ValidateSpectraFrameABC(Frame):
 
         self.allUrls = []
         self.dataUrlData = OrderedDict()
+        self.dataIndexing = OrderedDict()
 
         if self.VIEWDATAURLS:
             # populate the widget with a list of spectrum buttons and filepath buttons
@@ -271,6 +272,7 @@ class ValidateSpectraFrameABC(Frame):
             stores = [(store.name, store.url.dataLocation, url.path,) for store in standardStore.sortedDataUrls() for url in store.sortedDataStores()]
             urls = [(store.dataUrl.name, store.dataUrl.url.dataLocation, store.path,) for store in standardStore.sortedDataStores()]
 
+            # all the urls except remoteData
             self.allUrls = [dataUrl for store in self.project._wrappedData.memopsRoot.sortedDataLocationStores()
                             for dataUrl in store.sortedDataUrls() if dataUrl.name not in ('insideData', 'alongsideData')]
 
@@ -296,10 +298,10 @@ class ValidateSpectraFrameABC(Frame):
                 scrollRow += 1
 
             if self.application._isInDebugMode:
-                otherUrls = [dataUrl for store in self.project._wrappedData.memopsRoot.sortedDataLocationStores()
+                self.otherUrls = [dataUrl for store in self.project._wrappedData.memopsRoot.sortedDataLocationStores()
                              for dataUrl in store.sortedDataUrls() if dataUrl.name not in ('insideData', 'alongsideData', 'remoteData')]
 
-                for url in otherUrls:
+                for url in self.otherUrls:
                     # only show the urls that contain spectra
                     if url.sortedDataStores():
                         self._addUrlWidget(self.dataUrlScrollAreaWidgetContents, url, urlList=self.dataUrlData, scrollRow=scrollRow, enabled=True)
@@ -446,7 +448,7 @@ class ValidateSpectraFrameABC(Frame):
         urlButton = Button(widget, grid=(scrollRow, 2), callback=partial(self._getDataUrlDialog, dataUrl),
                            icon='icons/directory')
 
-        urlList[dataUrl] = (urlData, None, urlLabel)
+        urlList[dataUrl] = (urlData, urlButton, urlLabel)
         self._setUrlData(dataUrl)
         # _setUrlData(self, dataUrl, self.dataUrlData[dataUrl])
         urlData.setEnabled(enabled)
@@ -457,6 +459,10 @@ class ValidateSpectraFrameABC(Frame):
         urlData.textEdited.connect(partial(self._setDataUrlPath, dataUrl))
 
         return urlLabel
+
+    def _updateUrlWidgets(self):
+        pass
+
 
     @staticmethod
     def _fetchDataUrl(self: 'MemopsRoot', fullPath: str) -> 'DataUrl':
@@ -491,26 +497,87 @@ class ValidateSpectraFrameABC(Frame):
         # dataUrl.url = tempDataUrl.url
         # # pass
 
-        from ccpnmodel.ccpncore.lib._ccp.general.DataLocation.AbstractDataStore import forceChangeDataStoreUrl
+        #
+        oldDataUrl = dataUrl
+        newDataUrl = None
 
-        # oldUrl = dataUrl.url
         # dataUrl.url = dataUrl.url.clone(path=newUrl)
+        # self._validateSpectra()
+        # return
+
+        self.project._validateCleanUrls()
+
+        from ccpnmodel.ccpncore.lib._ccp.general.DataLocation.AbstractDataStore import forceChangeDataStoreUrl
 
         for spec in self.project.spectra:
             apiDataStore = spec._wrappedData.dataStore
-            if apiDataStore is None:
-                raise ValueError("Spectrum is not stored, cannot change file path")
-
-            else:
+            if apiDataStore:# is None:
+                # getLogger().warning("Spectrum is not stored, cannot change file path")
+            #
+            # else:
                 # dataUrl = self._project._wrappedData.root.fetchDataUrl(value)
                 dataUrlName = apiDataStore.dataUrl.name
                 if dataUrlName == 'remoteData':
 
-                    forceChangeDataStoreUrl(apiDataStore, newUrl)
+                    lastDataUrl = newDataUrl
+                    newDataUrl = forceChangeDataStoreUrl(apiDataStore, newUrl)
+                    print('>>>validate cleanup urls: newDataUrl', oldDataUrl, newDataUrl)
+
+                    if lastDataUrl and newDataUrl and lastDataUrl != newDataUrl:
+                        print('>>>validate cleanup urls: Url conflict')
 
                     # apiDataStore.repointToDataUrl(dataUrl)
                     # apiDataStore.path = apiDataStore.fullPath[len(dataUrl.url.path) + 1:]
 
+        # update the links with the new dataUrl
+        for uu, (urlData, urlButton, urlLabel) in list(self.dataUrlData.items()):
+
+            if uu == oldDataUrl:
+                print('>>>validate update widgets')
+
+                self.dataUrlData[newDataUrl] = (urlData, urlButton, urlLabel)
+                urlButton.setCallback(partial(self._getDataUrlDialog, newDataUrl))
+                urlData.textEdited.disconnect()
+                urlData.textEdited.connect(partial(self._setDataUrlPath, newDataUrl))
+
+                # urlData.setValidator(DataUrlValidator(parent=urlData, dataUrl=newDataUrl))
+                urlData.validator().dataUrl = newDataUrl
+                del self.dataUrlData[oldDataUrl]
+
+                self.allUrls.append(newDataUrl)
+                self.allUrls.remove(oldDataUrl)
+
+
+        # # reset the dataStores
+        # localDataUrlData = {}
+        # localDataUrlData['remoteData'] = self._findDataUrl('remoteData')
+        # localDataUrlData['insideData'] = self._findDataUrl('insideData')
+        # localDataUrlData['alongsideData'] = self._findDataUrl('alongsideData')
+        # localDataUrlData['otherData'] = [dataUrl for store in self.project._wrappedData.memopsRoot.sortedDataLocationStores()
+        #                             for dataUrl in store.sortedDataUrls() if dataUrl.name not in ('insideData', 'alongsideData', 'remoteData')]
+        #
+        # standardStore = self.project._wrappedData.memopsRoot.findFirstDataLocationStore(name='standard')
+        #
+        # spectraStores = [spec._wrappedData.dataStore for spec in self.spectra]
+        # bad = [url for store in standardStore.sortedDataUrls() for url in store.sortedDataStores() if url not in spectraStores]
+        # badStore = [store for store in standardStore.sortedDataUrls() if store.name == 'remoteData' if not store.dataStores]
+        #
+        # for bb in bad:
+        #     print('>>>validate cleanup urls: %s' % str(bb))
+        #     bb.delete()
+        #
+        # for url in localDataUrlData['otherData']:
+        #     if not url.dataStores:
+        #         print('>>>validate cleanup stores: %s' % str(url))
+        #         url.delete()
+        #
+        # for bb in badStore[1:]:
+        #     print('>>>validate cleanup remoteStores: %s' % str(bb))
+        #     bb.delete()
+
+        # clean up the data urls links to the widgets
+
+        self.project._validateCleanUrls()
 
         self._validateSpectra()
 
@@ -521,7 +588,7 @@ class ValidateSpectraFrameABC(Frame):
         """
         if dataUrl and dataUrl in self.dataUrlData:
 
-            # print('>>>>dataurlget', str(dataUrl))
+            print('>>>>dataurlget', str(dataUrl))
 
             urlData, urlButton, urlLabel = self.dataUrlData[dataUrl]
             urlNum = list(self.dataUrlData.keys()).index(dataUrl)

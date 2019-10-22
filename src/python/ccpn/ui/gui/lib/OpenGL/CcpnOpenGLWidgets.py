@@ -360,7 +360,8 @@ class GLExternalRegion(GLVertexArray):
         self._regions = []
 
     def addIntegral(self, integral, integralListView, colour='blue', brush=None):
-        return self._addRegion(values=integral.limits[0], orientation='v', movable=True,
+        lims = integral.limits[0] if integral.limits else (0.0, 0.0)
+        return self._addRegion(values=lims, orientation='v', movable=True,
                                obj=integral, objectView=integralListView, colour=colour, brush=brush)
 
     def _removeRegion(self, region):
@@ -792,18 +793,19 @@ class GLIntegralRegion(GLExternalRegion):
                     if reg.axisCode == psCode:
                         axisIndex = ps
 
+            lims = reg._object.limits[0] if reg._object.limits else (0.0, 0.0)
             # TODO:ED check axis units - assume 'ppm' for the minute
             if axisIndex == 0:
                 # vertical ruler
-                pos0 = x0 = reg._object.limits[0][0]                # reg.values[0]
-                pos1 = x1 = reg._object.limits[0][1]                # reg.values[1]
+                pos0 = x0 = lims[0]                # reg.values[0]
+                pos1 = x1 = lims[1]                # reg.values[1]
                 reg._values = (pos0, pos1)                          # not nice, but feed back in to current _values
                 y0 = axisT + pixelY
                 y1 = axisB - pixelY
             else:
                 # horizontal ruler
-                pos0 = y0 = reg._object.limits[0][0]                # reg.values[0]
-                pos1 = y1 = reg._object.limits[0][1]                # reg.values[1]
+                pos0 = y0 = lims[0]                # reg.values[0]
+                pos1 = y1 = lims[1]                # reg.values[1]
                 reg._values = (pos0, pos1)                          # not nice, but feed back in to current _values
                 x0 = axisL - pixelX
                 x1 = axisR + pixelX

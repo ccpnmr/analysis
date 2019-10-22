@@ -80,40 +80,19 @@ class CcpnDialogMainWidget(QtWidgets.QDialog, Base):
         # set up the mainWidget area
         self.mainWidget = Frame(self, setLayout=True, showBorder=False, grid=(0, 0))
         self.mainWidget.setAutoFillBackground(False)
-        self.mainWidget.setSizePolicy(QtWidgets.QSizePolicy.Ignored, QtWidgets.QSizePolicy.Ignored)
+        # self.mainWidget.setSizePolicy(QtWidgets.QSizePolicy.Ignored, QtWidgets.QSizePolicy.Ignored)
+        # self.mainWidget.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
 
-        # set up a scroll area
-        self._scrollArea = ScrollArea(self, setLayout=True, grid=(0, 0))
-        self._scrollArea.setWidgetResizable(True)
-        self._scrollArea.setWidget(self.mainWidget)
-        self._scrollArea.setStyleSheet("""ScrollArea { border: 0px; }""")
-        self._scrollArea.setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.MinimumExpanding)
+        # # set up a scroll area
+        # self._scrollArea = ScrollArea(self, setLayout=True, grid=(0, 0))
+        # self._scrollArea.setWidgetResizable(True)
+        # self._scrollArea.setWidget(self.mainWidget)
+        # self._scrollArea.setStyleSheet("""ScrollArea { border: 0px; }""")
 
-        # HELPBUTTON = (self._helpClicked, 'Help', 'Help', 'icons/system-help', True, True)
-        # # add dialog buttons
-        # self.dialogButtons = DialogButtonBox(self, grid=(1, 2), orientation=self._orientation,
-        #                                      buttons=(QtWidgets.QDialogButtonBox.Reset,
-        #                                               QtWidgets.QDialogButtonBox.Close,
-        #                                               QtWidgets.QDialogButtonBox.Apply,
-        #                                               QtWidgets.QDialogButtonBox.Ok,
-        #                                               QtWidgets.QDialogButtonBox.Help),
-        #                                      callbacks=(self._revertClicked, self._closeClicked,
-        #                                                 self._applyClicked, self._okClicked),
-        #                                      texts=['Revert', None, None, None, ''],
-        #                                      tipTexts=['Revert - roll-back all applied changes',
-        #                                                'Close - keep all applied changes and close',
-        #                                                'Apply changes',
-        #                                                'Apply changes and close',
-        #                                                'Help'],
-        #                                      icons=['icons/undo', 'icons/window-close',
-        #                                             'icons/orange-apply', 'icons/dialog-apply.png',
-        #                                             'icons/system-help'],
-        #                                      enabledStates=[False, None, False, None, False],
-        #                                      visibleStates=[None],
-        #                                      defaultButton=QtWidgets.QDialogButtonBox.Close)
-        #
-        # self._applyButton = self.dialogButtons.button(QtWidgets.QDialogButtonBox.Apply)
-        # self._revertButton = self.dialogButtons.button(QtWidgets.QDialogButtonBox.Reset)
+        # self.mainWidget.setSizePolicy(QtWidgets.QSizePolicy.Ignored, QtWidgets.QSizePolicy.Ignored)
+        self.mainWidget.setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.MinimumExpanding)
+        # self._scrollArea.setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.MinimumExpanding)
+        # self._scrollArea.setSizePolicy(QtWidgets.QSizePolicy.Ignored, QtWidgets.QSizePolicy.Ignored)
 
         self._buttonOptions = {}
         self.dialogButtons = None

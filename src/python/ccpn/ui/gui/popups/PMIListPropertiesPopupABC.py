@@ -23,6 +23,7 @@ __date__ = "$Date$"
 # Start of code
 #=========================================================================================
 
+from PyQt5 import QtWidgets, QtGui
 import ccpn.util.Colour as Colour
 from functools import partial
 from ccpn.ui.gui.widgets.MessageDialog import MessageDialog
@@ -31,6 +32,7 @@ from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
 from ccpn.ui.gui.widgets.DoubleSpinbox import DoubleSpinbox
 from ccpn.ui.gui.widgets.CheckBox import CheckBox
+from ccpn.ui.gui.widgets.Spacer import Spacer
 from ccpn.ui.gui.popups.Dialog import handleDialogApply, CcpnDialogMainWidget
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
 from ccpn.core.lib.ContextManagers import undoStackBlocking, queueStateChange
@@ -145,6 +147,12 @@ class PMIListPropertiesPopupABC(CcpnDialogMainWidget):
     def __postInit__(self):
         """post initialise functions - required as may need to insert more objects into dialog
         """
+        # add spacer to stop columns changing width
+        self._rowForNewItems += 1
+        Spacer(self.mainWidget, 2, 2,
+               QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.MinimumExpanding,
+               grid=(self._rowForNewItems, 3), gridSpan=(1, 1))
+
         self._setButtons()
         self._okButton = self.dialogButtons.button(self.OKBUTTON)
         self._cancelButton = self.dialogButtons.button(self.CANCELBUTTON)
@@ -153,7 +161,14 @@ class PMIListPropertiesPopupABC(CcpnDialogMainWidget):
 
         self.COMPARELIST = AttrDict(self.listViewSettings)
 
+        # self.adjustSize()
         self.setFixedSize(self._size if self._size else self.sizeHint())
+
+    # def resizeEvent(self, a0: QtGui.QResizeEvent) -> None:
+    #     super().resizeEvent(a0)
+    #
+    #     # self.adjustSize()
+    #     self.setFixedSize(self._size if self._size else self.sizeHint())
 
     def _addButtonOption(self, pulldowns, attrib, row):
         """Add a labelled pulldown list for the selected attribute

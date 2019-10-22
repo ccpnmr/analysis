@@ -59,7 +59,7 @@ class GuiSpectrumView1d(GuiSpectrumView):
         self._application = self.strip.spectrumDisplay.mainWindow.application
 
         self.data = self.spectrum.positions, self.spectrum.intensities
-        print('>>>filePath', self.spectrum.filePath, self.spectrum.positions, self.spectrum.intensities)
+        # print('>>>filePath', self.spectrum.filePath, self.spectrum.positions, self.spectrum.intensities)
 
         # for strip in self.strips:
         if self.spectrum.sliceColour is None:

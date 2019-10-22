@@ -201,7 +201,7 @@ class CcpnGLWidget(QOpenGLWidget):
 
             samples = self.format().samples() # GST a use for the walrus
             if samples != antiAlias:
-                getLogger().warning('hardware chnaged antialias expected %i got %i...' (samples,antiAlias))
+                getLogger().warning('hardware changed antialias level, expected %i got %i...' (samples,antiAlias))
         except Exception as e:
             getLogger().warning('error during anti aliasing setup %s, anti aliasing disabled...' %  e.str())
 

@@ -207,6 +207,11 @@ class PreferencesPopup(CcpnDialog):
         self.useNativeBox.toggled.connect(partial(self._toggleGeneralOptions, 'useNative'))
 
         row += 1
+        self.useNativeLabel = Label(parent, text="Use Native Menus (requires restart): ", grid=(row, 0))
+        self.useNativeMenus = CheckBox(parent, grid=(row, 1), checked=self.preferences.general.useNativeMenus)
+        self.useNativeMenus.toggled.connect(partial(self._toggleGeneralOptions, 'useNativeMenus'))
+
+        row += 1
         self.useNativeLabel = Label(parent, text="Use Native Web Browser: ", grid=(row, 0))
         self.useNativeBox = CheckBox(parent, grid=(row, 1), checked=self.preferences.general.useNativeWebbrowser)
         self.useNativeBox.toggled.connect(partial(self._toggleGeneralOptions, 'useNativeWebbrowser'))
@@ -214,6 +219,7 @@ class PreferencesPopup(CcpnDialog):
         self._toggleGeneralOptions('useNativeWebbrowser', True)
         self.useNativeLabel.setEnabled(False)
         self.useNativeBox.setEnabled(False)
+        self.useNativeMenus.setEnabled(True)
 
         row += 1
         self.autoSaveLayoutOnQuitLabel = Label(parent, text="Auto Save Layout On Quit: ", grid=(row, 0))

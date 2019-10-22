@@ -1036,13 +1036,13 @@ class Framework(NotifierBase):
             # We have a UI with no mainWindow - nothing to do.
             return
 
-        topMenu = mainWindow.menuBar().findChildren(QtWidgets.QMenu)[0]
+
         topActionDict = {}
-        for topAction in topMenu.actions():
+        for topMenu in mainWindow.menuBar().findChildren(QtWidgets.QMenu):#topMenu.actions():
             mainActionDict = {}
-            for mainAction in topAction.menu().actions():
+            for mainAction in topMenu.actions():
                 mainActionDict[mainAction.text()] = mainAction
-            topActionDict[topAction.text()] = mainActionDict
+            topActionDict[topMenu.title()] = mainActionDict
 
         openModuleKeys = set(mainWindow.moduleArea.modules.keys())
         for key, topActionText, mainActionText in (('SEQUENCE', 'Molecules', 'Show Sequence'),

@@ -377,11 +377,10 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
         separated, Framework should be able to call a method to set the menus.
         """
 
-        self._menuBar = MenuBar(self)
+        self._menuBar = self.menuBar()
         for m in self.application._menuSpec:
             self._createMenu(m)
-        self.setMenuBar(self._menuBar)
-        self._menuBar.setNativeMenuBar(False)
+        self._menuBar.setNativeMenuBar(self.application.preferences.general.useNativeMenus)
 
         self._fillRecentProjectsMenu()
         self._fillPredefinedLayoutMenu()

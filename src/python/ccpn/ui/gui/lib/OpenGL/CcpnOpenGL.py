@@ -193,13 +193,17 @@ class CcpnGLWidget(QOpenGLWidget):
 
 
         # GST add antiAliasing, no perceptable speed impact on my mac (intel iris graphics!)
-        if antiAlias is not None and antiAlias > 0  and antiAlias < 9 or (antiAlias %2) > 0:
+        # samples = 4 is good enough but 8 also works well in terms of speed...
+        try:
             fmt = QSurfaceFormat()
-            fmt.setSamples(8)
+            fmt.setSamples(antiAlias)
             self.setFormat(fmt)
-        else:
-            if antiAlias is not None:
-                getLogger().warning('bad anti alias sample size %i, anti aliasing is off...' )
+
+            samples = self.format().samples() # GST a use for the walrus
+            if samples != antiAlias:
+                getLogger().warning('hardware chnaged antialias expected %i got %i...' (samples,antiAlias))
+        except Exception as e:
+            getLogger().warning('error during anti aliasing setup %s, anti aliasing disabled...' %  e.str())
 
         # flag to display paintGL but keep an empty screen
         self._blankDisplay = False

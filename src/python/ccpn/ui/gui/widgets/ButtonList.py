@@ -80,7 +80,7 @@ class ButtonListMixin:
 class ButtonBoxList(QtWidgets.QDialogButtonBox,Base, ButtonListMixin):
 
     def __init__(self, parent=None, texts=None, callbacks=None, icons=None,
-                 tipTexts=None, direction='h', commands=None, ok='Ok', cancel='cancel', destructive=(),
+                 tipTexts=None, direction='h', commands=None, ok='OK', cancel='cancel', destructive=("Discard","Don't Save"),
                  images=None,**kwargs):
 
         super().__init__(parent)  # ejb - added setLayout

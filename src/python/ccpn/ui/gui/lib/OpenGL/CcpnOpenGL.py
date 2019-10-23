@@ -186,7 +186,7 @@ class CcpnGLWidget(QOpenGLWidget):
     XAXES = GLDefs.XAXISUNITS
     YAXES = GLDefs.YAXISUNITS
 
-    def __init__(self, strip=None, mainWindow=None, stripIDLabel=None, antiAlias =  4):
+    def __init__(self, strip=None, mainWindow=None, stripIDLabel=None, antiAlias = 4):
         # TODO:ED add documentation
 
         super().__init__(strip)

@@ -59,6 +59,8 @@ GlyphPY0 = 'py0'
 GlyphPX1 = 'px1'
 GlyphPY1 = 'py1'
 
+FONT_FILE = 0
+FULL_FONT_NAME = 1
 
 class CcpnGLFont():
     def __init__(self, fileName=None, base=0, fontTransparency=None, activeTexture=0):
@@ -66,22 +68,19 @@ class CcpnGLFont():
         self.fontGlyph = [None] * 256
         self.base = base
 
+        print('open font', fileName)
         with open(fileName, 'r') as op:
             self.fontInfo = op.read().split('\n')
 
         # no checking yet
-        self.fontFile = self.fontInfo[0].replace('textures: ', '')
+        self.fontFile = self.fontInfo[FONT_FILE].replace('textures: ', '')
         self.fontPNG = imread(os.path.join(os.path.dirname(fileName), self.fontFile))
-        self.fontName = self.fontInfo[1].split()[0]
 
-        fontInfo = self.fontInfo[1].split()
-        fiLen = len(fontInfo)
-        fontSize = fontInfo[fiLen-1]
-        fsLen = len(fontSize)
-        self.fontSize = int(fontSize[:(fsLen-2)])
+        fullFontNameString = self.fontInfo[FULL_FONT_NAME]
+        fontSizeString = fullFontNameString.split()[-1]
 
-        # fontSize = self.fontInfo[1].split()[-1]
-        # self.fontSize = int(fontSize[:-2])
+        self.fontName = fullFontNameString.replace(fontSizeString,'').strip()
+        self.fontSize = int(fontSizeString.replace('pt',''))
 
         self.width = 0
         self.height = 0
@@ -213,12 +212,18 @@ class CcpnGLFont():
         # GL.glGenerateMipmap( GL.GL_TEXTURE_2D )
         GL.glDisable(GL.GL_TEXTURE_2D)
 
+        print(self)
     def get_kerning(self, fromChar, prevChar):
         if self.fontGlyph[ord(fromChar)]:
             if prevChar and ord(prevChar) in self.fontGlyph[ord(fromChar)][GlyphKerns]:
                 return self.fontGlyph[ord(fromChar)][GlyphKerns][ord(prevChar)]
 
         return 0
+
+    def __str__(self):
+        string = super().__str__()
+        string = '%s name = %s size = %i file = %s ' % (string, self.fontName, self.fontSize, self.fontFile)
+        return string
 
 
 class GLString(GLVertexArray):
@@ -232,7 +237,7 @@ class GLString(GLVertexArray):
                          dimension=2, clearArrays=clearArrays)
         if text is None:
             text = ''
-
+        # print('text', text, font)
         self.text = text
         self.font = font
         self.object = obj

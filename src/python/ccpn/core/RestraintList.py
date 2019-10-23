@@ -252,18 +252,17 @@ class RestraintList(AbstractWrapperObject):
         """get wrappedData - all ConstraintList children of parent NmrConstraintStore"""
         return parent._wrappedData.sortedConstraintLists()
 
+    @renameObject()
     @logCommand(get='self')
     def rename(self, value: str):
         """Rename RestraintList, changing its name and Pid.
         """
         self._validateName(value=value, allowWhitespace=False)
 
-        with renameObject(self) as addUndoItem:
-            oldName = self.name
-            self._wrappedData.name = value
-
-            addUndoItem(undo=partial(self.rename, oldName),
-                        redo=partial(self.rename, value))
+        # rename functions from here
+        oldName = self.name
+        self._wrappedData.name = value
+        return (oldName,)
 
     #=========================================================================================
     # CCPN functions

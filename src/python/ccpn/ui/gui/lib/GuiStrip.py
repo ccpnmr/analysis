@@ -369,24 +369,30 @@ class GuiStrip(Frame):
             widgets[3].show()
         self._resize()
 
+        # class PopupNoAnimation(QtWidgets.QMainWindow):
+        #     def __init__(self, mainWindow=None, **kwargs):
+        #         super().__init__(**kwargs)
+        #
+        #         self.mainWindow = mainWindow
+        #         self.mainWindow.setAttribute(QtCore.Qt.WA_TransparentForMouseEvents)
+        #
+        #         self.setWindowFlags(QtCore.Qt.FramelessWindowHint | QtCore.Qt.WindowStaysOnTopHint | QtCore.Qt.NoDropShadowWindowHint)
+        #         self.setBaseSize(self.sizeHint())
+        #
+        #     def leaveEvent(self, a0: QtCore.QEvent) -> None:
+        #         self.close()
 
-        class PopupNoAnimation(QtWidgets.QDialog):
-            def __init__(self, **kwargs):
-                super().__init__(**kwargs)
+        # self._dialog = PopupNoAnimation(self.mainWindow)
+        # self._dialog.setWindowModality(QtCore.Qt.ApplicationModal)
+        # self._dialog.show()
+        #
+        # QtWidgets.QApplication.setActiveWindow(self)
+        # print('>>>after window')
+        # self._dialog.show()
 
-            def dismiss(self, *largs, **kwargs):
-                if self._window is None:
-                    return
-                if self.dispatch('on_dismiss') is True:
-                    if kwargs.get('force', False) is not True:
-                        return
-
-                self._anim_alpha = 0
-                self._real_remove_widget()
-
-
-        self._dialog = PopupNoAnimation()
-        self._dialog.exec_()
+        # self._dialog = QtWidgets.QFrame()
+        # self.mainWindow.moduleArea.layout.addWidget(self._dialog)
+        # self._dialog.setFixedSize(QtCore.QSize(100, 50))
 
     def _enterCallback(self, widget1, widget2):
         # print('>>>_enterCallback', widget1, widget2)

@@ -27,11 +27,13 @@ __date__ = "$Date: 2017-07-04 15:21:16 +0000 (Tue, July 04, 2017) $"
 
 from PyQt5 import QtWidgets
 from contextlib import contextmanager
+from functools import partial
 from ccpn.ui.gui.widgets.Base import Base
 from ccpn.util.Logging import getLogger
 from ccpn.ui.gui.widgets.Frame import Frame
 from ccpn.ui.gui.widgets.ScrollArea import ScrollArea
 from ccpn.ui.gui.widgets.DialogButtonBox import DialogButtonBox
+from ccpn.core.lib.ContextManagers import undoStackBlocking
 
 
 def _updateGl(self, spectrumList):
@@ -63,6 +65,8 @@ class CcpnDialogMainWidget(QtWidgets.QDialog, Base):
     HELPBUTTON = QtWidgets.QDialogButtonBox.Help
     DEFAULTBUTTON = CLOSEBUTTON
 
+    USESCROLLWIDGET = False
+
     def __init__(self, parent=None, windowTitle='', setLayout=False,
                  orientation=HORIZONTAL, size=None, **kwds):
 
@@ -80,14 +84,18 @@ class CcpnDialogMainWidget(QtWidgets.QDialog, Base):
         # set up the mainWidget area
         self.mainWidget = Frame(self, setLayout=True, showBorder=False, grid=(0, 0))
         self.mainWidget.setAutoFillBackground(False)
-        # self.mainWidget.setSizePolicy(QtWidgets.QSizePolicy.Ignored, QtWidgets.QSizePolicy.Ignored)
-        # self.mainWidget.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
 
-        # # set up a scroll area
-        # self._scrollArea = ScrollArea(self, setLayout=True, grid=(0, 0))
-        # self._scrollArea.setWidgetResizable(True)
-        # self._scrollArea.setWidget(self.mainWidget)
-        # self._scrollArea.setStyleSheet("""ScrollArea { border: 0px; }""")
+        if self.USESCROLLWIDGET:
+            # not resizing correctly on first show
+
+            # self.mainWidget.setSizePolicy(QtWidgets.QSizePolicy.Ignored, QtWidgets.QSizePolicy.Ignored)
+            # self.mainWidget.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
+
+            # set up a scroll area
+            self._scrollArea = ScrollArea(self, setLayout=True, grid=(0, 0))
+            self._scrollArea.setWidgetResizable(True)
+            self._scrollArea.setWidget(self.mainWidget)
+            self._scrollArea.setStyleSheet("""ScrollArea { border: 0px; }""")
 
         # self.mainWidget.setSizePolicy(QtWidgets.QSizePolicy.Ignored, QtWidgets.QSizePolicy.Ignored)
         self.mainWidget.setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.MinimumExpanding)
@@ -96,6 +104,7 @@ class CcpnDialogMainWidget(QtWidgets.QDialog, Base):
 
         self._buttonOptions = {}
         self.dialogButtons = None
+        self._currentNumApplies = 0
         self.setDefaultButton()
 
     def __postInit__(self):
@@ -145,9 +154,9 @@ class CcpnDialogMainWidget(QtWidgets.QDialog, Base):
                                enabledStates=enabled, visibleStates=visible)
 
     def setHelpButton(self, callback=None, text='',
-                        tipText='Help',
-                        icon='icons/system-help',
-                        enabled=True, visible=True):
+                      tipText='Help',
+                      icon='icons/system-help',
+                      enabled=True, visible=True):
         """Add a Help button to the dialog box
         """
         return self._addButton(buttons=self.HELPBUTTON, callbacks=callback,
@@ -155,9 +164,9 @@ class CcpnDialogMainWidget(QtWidgets.QDialog, Base):
                                enabledStates=enabled, visibleStates=visible)
 
     def setApplyButton(self, callback=None, text=None,
-                        tipText='Apply changes',
-                        icon='icons/orange-apply',
-                        enabled=True, visible=True):
+                       tipText='Apply changes',
+                       icon='icons/orange-apply',
+                       enabled=True, visible=True):
         """Add an Apply button to the dialog box
         """
         return self._addButton(buttons=self.APPLYBUTTON, callbacks=callback,
@@ -179,12 +188,13 @@ class CcpnDialogMainWidget(QtWidgets.QDialog, Base):
     def _setButtons(self):
         """Set the buttons for the dialog
         """
-        grid=(1, 0) if self._orientation.startswith('h') else (0, 1)
+        grid = (1, 0) if self._orientation.startswith('h') else (0, 1)
 
         self.dialogButtons = DialogButtonBox(self, grid=grid,
                                              orientation=self._orientation,
                                              defaultButton=self._defaultButton,
                                              **self._buttonOptions)
+        self.dialogButtons.setContentsMargins(0, 10, 0, 0)
 
     def setDefaultButton(self, button=CLOSEBUTTON):
         self._defaultButton = button
@@ -197,12 +207,97 @@ class CcpnDialogMainWidget(QtWidgets.QDialog, Base):
         self.setFixedSize(self.maximumWidth(), self.maximumHeight())
         self.setSizeGripEnabled(False)
 
-    # def setDefaultButton(self, button):
-    #     if isinstance(button, QtWidgets.QPushButton):
-    #         button.setDefault(True)
-    #         button.setAutoDefault(True)
-    #     else:
-    #         raise TypeError('%s is not a button' % str(button))
+    def _revertClicked(self):
+        """Revert button signal comes here
+        Revert (roll-back) the state of the project to before the popup was opened
+        """
+        if self.project and self.project._undo:
+            for undos in range(self._currentNumApplies):
+                self.project._undo.undo()
+
+        self._populate()
+        if self.dialogButtons.button(self.APPLYBUTTON):
+            self.dialogButtons.button(self.APPLYBUTTON).setEnabled(False)
+        if self.dialogButtons.button(self.RESETBUTTON):
+            self.dialogButtons.button(self.RESETBUTTON).setEnabled(False)
+
+    def _cancelClicked(self):
+        """Cancel button signal comes here
+        """
+        self._revertClicked()
+        self.reject()
+
+    def _closeClicked(self):
+        """Close button signal comes here
+        """
+        self.reject()
+
+    def _applyClicked(self):
+        """Apply button signal comes here
+        """
+        self._applyChanges()
+
+    def _okClicked(self):
+        """OK button signal comes here
+        """
+        if self._applyChanges() is True:
+            self.accept()
+
+    def _helpClicked(self):
+        """Help button signal comes here
+        """
+        pass
+
+    def _applyAllChanges(self, changes):
+        """Execute the Apply/OK functions
+        """
+        for v in changes.values():
+            v()
+
+    def _applyChanges(self):
+        """
+        The apply button has been clicked
+        Define an undo block for setting the properties of the object
+        If there is an error setting any values then generate an error message
+          If anything has been added to the undo queue then remove it with application.undo()
+          repopulate the popup widgets
+
+        This is controlled by a series of dicts that contain change functions - operations that are scheduled
+        by changing items in the popup. These functions are executed when the Apply or OK buttons are clicked
+
+        Return True unless any errors occurred
+        """
+
+        # get the list of widgets that have been changed - exit if all empty
+        allChanges = True if self._changes else False
+        if not allChanges:
+            return True
+
+        # handle clicking of the Apply/OK button
+        with handleDialogApply(self) as error:
+
+            # apply all functions to the object
+            changes = self._changes
+            if changes:
+                self._applyAllChanges(changes)
+
+        # everything has happened - disable the apply button
+        if self.dialogButtons.button(self.APPLYBUTTON):
+            self.dialogButtons.button(self.APPLYBUTTON).setEnabled(False)
+
+        # check for any errors
+        if error.errorValue:
+            # repopulate popup on an error
+            self._populate()
+            return False
+
+        # remove all changes
+        self._changes = {}
+
+        self._currentNumApplies += 1
+        if self.dialogButtons.button(self.RESETBUTTON):
+            self.dialogButtons.button(self.RESETBUTTON).setEnabled(True)
+        return True
 
 
 class CcpnDialog(QtWidgets.QDialog, Base):

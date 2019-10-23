@@ -359,6 +359,8 @@ class Peak(AbstractWrapperObject):
                                          % (ii + 1, isotopeCode))
                 dimResonances.append(resonances)
 
+        # fixme:ED this creates a new chemicalShift that is not caught by the undo stack
+            # caught be the modified ccpNmrV3CoreSetter
         apiPeak.assignByDimensions(dimResonances)
 
         # insert the new attached nmrAtoms - deleted and new will be included so tables can update with deleted peaks/nmrAtoms
@@ -529,6 +531,7 @@ class Peak(AbstractWrapperObject):
             # NOTE:ED does integral need to be notified? - and reverse notifiers in multiplet/integral
 
         if action in ['change']:
+
             # check whether the peak aliasing has changed and notify containing spectrum
             if getattr(self, ALIASINGCHANGED, None):
                 self._aliasingChanged = False

@@ -329,6 +329,7 @@ class NmrChain(AbstractWrapperObject):
         """get wrappedData (Nmr.NmrChains) for all NmrChain children of parent Project"""
         return parent._wrappedData.sortedNmrChains()
 
+    @renameObject()
     @logCommand(get='self')
     def rename(self, value: str):
         """Rename NmrChain, changing its shortName and Pid.
@@ -346,12 +347,10 @@ class NmrChain(AbstractWrapperObject):
 
         self._validateName(value=value, allowWhitespace=False)
 
-        with renameObject(self) as addUndoItem:
-            oldName = self.shortName
-            wrappedData.code = value
-
-            addUndoItem(undo=partial(self.rename, oldName),
-                        redo=partial(self.rename, value))
+        # rename functions from here
+        oldName = self.shortName
+        wrappedData.code = value
+        return (oldName,)
 
     def _finaliseAction(self, action):
         if action in ['delete']:

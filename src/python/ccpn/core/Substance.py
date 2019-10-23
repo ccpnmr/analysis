@@ -575,6 +575,7 @@ class Substance(AbstractWrapperObject):
         except Exception as es:
             raise RuntimeError('Error _finalising Substance.spectrumHits: %s' % str(es))
 
+    @renameObject()
     @logCommand(get='self')
     def rename(self, name: str = None, labelling: str = None):
         """Rename Substance, changing its name and/or labelling and Pid, and rename
@@ -597,36 +598,29 @@ class Substance(AbstractWrapperObject):
         self._validateName(value=labelling, attribName='Labelling',
                            allowWhitespace=False, allowEmpty=True, allowNone=True)
 
-        with renameObject(self) as addUndoItem:
-            # renamedObjects = [self]
-            for sampleComponent in self.sampleComponents:
-                for spectrumHit in sampleComponent.spectrumHits:
-                    coreUtil._resetParentLink(spectrumHit._wrappedData, 'spectrumHits',
-                                              OrderedDict((('substanceName', name),
-                                                           ('sampledDimension', spectrumHit.pseudoDimensionNumber),
-                                                           ('sampledPoint', spectrumHit.pointNumber)))
-                                              )
-                    # renamedObjects.append(spectrumHit)
-
-                # NB this must be done AFTER the spectrumHit loop to avoid breaking links
-                coreUtil._resetParentLink(sampleComponent._wrappedData, 'sampleComponents',
-                                          OrderedDict((('name', name), ('labeling', apiLabeling)))
+        # rename functions from here
+        for sampleComponent in self.sampleComponents:
+            for spectrumHit in sampleComponent.spectrumHits:
+                coreUtil._resetParentLink(spectrumHit._wrappedData, 'spectrumHits',
+                                          OrderedDict((('substanceName', name),
+                                                       ('sampledDimension', spectrumHit.pseudoDimensionNumber),
+                                                       ('sampledPoint', spectrumHit.pointNumber)))
                                           )
-                # renamedObjects.append(sampleComponent)
+                # renamedObjects.append(spectrumHit)
 
-            # NB this must be done AFTER the sampleComponent loop to avoid breaking links
-            coreUtil._resetParentLink(self._wrappedData, 'components',
+            # NB this must be done AFTER the spectrumHit loop to avoid breaking links
+            coreUtil._resetParentLink(sampleComponent._wrappedData, 'sampleComponents',
                                       OrderedDict((('name', name), ('labeling', apiLabeling)))
-
                                       )
+            # renamedObjects.append(sampleComponent)
 
-            # now processed by the _finaliseAction above
-            # for obj in renamedObjects:
-            #     obj._finaliseAction('rename')
-            #     obj._finaliseAction('change')
+        # NB this must be done AFTER the sampleComponent loop to avoid breaking links
+        coreUtil._resetParentLink(self._wrappedData, 'components',
+                                  OrderedDict((('name', name), ('labeling', apiLabeling)))
 
-            addUndoItem(undo=partial(self.rename, oldName, oldLabelling),
-                        redo=partial(self.rename, name, labelling))
+                                  )
+
+        return (oldName, oldLabelling,)
 
     #=========================================================================================
     # CCPN functions

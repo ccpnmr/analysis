@@ -27,6 +27,7 @@ __date__ = "$Date: 2018-12-20 15:44:35 +0000 (Thu, December 20, 2018) $"
 
 import sys
 import numpy as np
+from itertools import zip_longest
 from PyQt5 import QtWidgets
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import CcpnGLWidget, GLVertexArray, GLRENDERMODE_DRAW, \
     GLRENDERMODE_REBUILD, GLRENDERMODE_RESCALE
@@ -190,9 +191,11 @@ class GuiNdWidget(CcpnGLWidget):
 
         minList = [self._spectrumSettings[sp][SPECTRUM_VALUEPERPOINT] for sp in self._ordering if sp in self._spectrumSettings]
         minimumValuePerPoint = None
+
+        # check the length of the min values, may have lower dimension spectra overlaid
         for val in minList:
             if minimumValuePerPoint and val is not None:
-                minimumValuePerPoint = [min(ii, jj) for ii, jj in zip(minimumValuePerPoint, val)]
+                minimumValuePerPoint = [min(ii, jj) for ii, jj in zip_longest(minimumValuePerPoint, val, fillvalue=0.0)]
             elif minimumValuePerPoint:
                 # val is None so ignore
                 pass

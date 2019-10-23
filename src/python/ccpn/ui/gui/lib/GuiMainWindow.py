@@ -168,23 +168,6 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
         #
         #   return False
 
-        #     self.installEventFilter(self)
-        #
-        # def eventFilter(self, obj, event):
-        #     if event.type() == QtCore.QEvent.ShortcutOverride:
-        #         # Stop obj from treating the event itself
-        #         print('>>>', chr(event.key()))
-        #
-        #     elif event.type() == QtCore.QEvent.KeyPress:
-        #         # Stop obj from treating the event itself
-        #         print('>>>key', chr(event.key()))
-        #
-        #     elif event.type() == QtCore.QEvent.Shortcut:
-        #         # Stop obj from treating the event itself
-        #         print('>>>shortcut')
-        #
-        #     return False
-
         # install handler to resize when moving between displays
         self.window().windowHandle().screenChanged.connect(self._screenChangedEvent)
 

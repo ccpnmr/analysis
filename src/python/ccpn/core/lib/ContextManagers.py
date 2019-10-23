@@ -919,7 +919,6 @@ def deleteObject():
     GWV first try
     EJB 20181130: modified
     """
-    from ccpn.core.lib import Undo
 
     @decorator.decorator
     def theDecorator(*args, **kwds):
@@ -952,8 +951,39 @@ def deleteObject():
     return theDecorator
 
 
+def renameObject():
+    """ A decorator to wrap the rename(self) method of the V3 core classes
+    calls self._finaliseAction('rename') after the rename
+
+    EJB 20191023: modified original contextManager to be decorator to match new/delete
+    """
+
+    @decorator.decorator
+    def theDecorator(*args, **kwds):
+        func = args[0]
+        args = args[1:]  # Optional 'self' is now args[0]
+        self = args[0]
+        application = getApplication()  # pass it in to reduce overhead
+
+        with notificationBlanking(application=application):
+            with undoStackBlocking(application=application) as addUndoItem:
+
+                # call the wrapped rename function
+                result = func(*args, **kwds)
+
+                addUndoItem(undo=BlankedPartial(func, self, 'rename', False, self, *result),
+                            redo=BlankedPartial(func, self, 'rename', False, *args, **kwds)
+                            )
+
+        self._finaliseAction('rename')
+
+        return True
+
+    return theDecorator
+
+
 @contextmanager
-def renameObject(self):
+def renameObjectContextManager(self):
     """ A decorator to wrap the rename(self) method of the V3 core classes
     calls self._finaliseAction('rename', 'change') after the rename
     """
@@ -998,8 +1028,9 @@ class BlankedPartial(object):
     optionally trigger the notification of obj, either pre- or post execution.
     """
 
-    def __init__(self, func, obj=None, trigger=None, preExecution=False, **kwds):
+    def __init__(self, func, obj=None, trigger=None, preExecution=False, *args, **kwds):
         self._func = func
+        self._args = args
         self._kwds = kwds
         self._obj = obj
         self._trigger = trigger
@@ -1013,7 +1044,7 @@ class BlankedPartial(object):
             self._obj._finaliseAction(self._trigger)
 
         with notificationBlanking():
-            self._func(**self._kwds)
+            self._func(*self._args, **self._kwds)
 
         if self._postExecution:
             # call the notification
@@ -1036,13 +1067,15 @@ def ccpNmrV3CoreSetter():
         oldValue = getattr(self, func.__name__)
 
         with notificationBlanking(application=application):
-            with undoStackBlocking(application=application) as addUndoItem:
+            with undoBlock():            #undoStackBlocking(application=application) as addUndoItem:
+
                 # call the wrapped function
                 result = func(*args, **kwds)
 
-                addUndoItem(undo=partial(func, self, oldValue),
-                            redo=partial(func, self, args[1])
-                            )
+                # addUndoItem(undo=partial(func, self, oldValue),
+                #             redo=partial(func, self, args[1])
+                #             )
+
         self._finaliseAction('change')
         return result
 

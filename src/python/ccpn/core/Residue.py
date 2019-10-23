@@ -415,40 +415,40 @@ class Residue(AbstractWrapperObject):
         # for substances
         return parent._apiChain.sortedResidues()
 
+    @renameObject()
     @logCommand(get='self')
     def rename(self, sequenceCode: str = None):
         """Reset Residue.sequenceCode (residueType is immutable).
         Renaming to None sets the sequence code to the seqId (serial number equivalent)
         """
-        with renameObject(self) as addUndoItem:
-            apiResidue = self._wrappedData
+        # rename functions from here
+        apiResidue = self._wrappedData
 
-            if sequenceCode is None:
-                seqCode = apiResidue.seqId
-                seqInsertCode = ' '
+        if sequenceCode is None:
+            seqCode = apiResidue.seqId
+            seqInsertCode = ' '
 
-            else:
-                # Parse values from sequenceCode
-                code, ss, offset = commonUtil.parseSequenceCode(sequenceCode)
-                if code is None or offset is not None:
-                    raise ValueError("Illegal value for Residue.sequenceCode: %s" % sequenceCode)
-                seqCode = code
-                seqInsertCode = ss or ' '
+        else:
+            # Parse values from sequenceCode
+            code, ss, offset = commonUtil.parseSequenceCode(sequenceCode)
+            if code is None or offset is not None:
+                raise ValueError("Illegal value for Residue.sequenceCode: %s" % sequenceCode)
+            seqCode = code
+            seqInsertCode = ss or ' '
 
-            previous = apiResidue.chain.findFirstResidue(seqCode=seqCode, seqInsertCode=seqInsertCode)
-            if (previous not in (None, apiResidue)):
-                raise ValueError("New sequenceCode %s clashes with existing Residue %s"
-                                 % (sequenceCode, self._project._data2Obj.get(previous)))
+        previous = apiResidue.chain.findFirstResidue(seqCode=seqCode, seqInsertCode=seqInsertCode)
+        if (previous not in (None, apiResidue)):
+            raise ValueError("New sequenceCode %s clashes with existing Residue %s"
+                             % (sequenceCode, self._project._data2Obj.get(previous)))
 
-            if apiResidue.seqInsertCode and apiResidue.seqInsertCode != ' ':
-                oldSequenceCode = '.'.join((str(apiResidue.seqCode), apiResidue.seqInsertCode))
-            else:
-                oldSequenceCode = str(apiResidue.seqCode)
-            apiResidue.seqCode = seqCode
-            apiResidue.seqInsertCode = seqInsertCode
+        if apiResidue.seqInsertCode and apiResidue.seqInsertCode != ' ':
+            oldSequenceCode = '.'.join((str(apiResidue.seqCode), apiResidue.seqInsertCode))
+        else:
+            oldSequenceCode = str(apiResidue.seqCode)
+        apiResidue.seqCode = seqCode
+        apiResidue.seqInsertCode = seqInsertCode
 
-            addUndoItem(undo=partial(self.rename, oldSequenceCode),
-                        redo=partial(self.rename, sequenceCode))
+        return (oldSequenceCode,)
 
     #===========================================================================================
     # new'Object' and other methods

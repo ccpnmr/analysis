@@ -212,7 +212,7 @@ class CcpnGLFont():
         # GL.glGenerateMipmap( GL.GL_TEXTURE_2D )
         GL.glDisable(GL.GL_TEXTURE_2D)
 
-        print(self)
+
     def get_kerning(self, fromChar, prevChar):
         if self.fontGlyph[ord(fromChar)]:
             if prevChar and ord(prevChar) in self.fontGlyph[ord(fromChar)][GlyphKerns]:

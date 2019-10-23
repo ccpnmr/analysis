@@ -37,9 +37,13 @@ from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLShader import ShaderProgram
 DEFAULTFONT = 'OpenSans-Regular'
 SUBSTITUTEFONT = 'OpenSans-Regular'
 DEFAULTFONTSIZE = '13'
-FONTLIST = (('glFont13.fnt', DEFAULTFONT, 13),
-            ('glFont14.fnt', DEFAULTFONT, 14),
-            ('glFont16.fnt', DEFAULTFONT, 16))
+FONT_SIZES = [13,14,16]
+fontList = []
+for size in FONT_SIZES:
+    fontList.append(('glFont%i.fnt' % size, DEFAULTFONT,size))
+    fontList.append(('glFont%i.fnt' % (size*2), DEFAULTFONT,size*2))  # double size for retina displays...
+FONTLIST = tuple(fontList)
+print(FONTLIST)
 FONTTRANSPARENT = 'Transparent'
 FONTPATH = 'Fonts'
 

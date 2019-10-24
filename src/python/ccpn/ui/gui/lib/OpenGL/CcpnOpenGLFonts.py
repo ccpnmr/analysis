@@ -344,8 +344,8 @@ class GLString(GLVertexArray):
 
                 # occasional strange - RuntimeWarning: invalid value encountered in add
                 # self.vertices[:, 1] += font.height
-                self.vertices[1::2] += font.height
-                self.height += font.height
+                self.vertices[1::2] += font.height / self.scale
+                self.height += font.height / self.scale
 
             elif (c == 9):  # tab
                 penX = penX + 4 * font.width

@@ -60,7 +60,7 @@ from ccpn.ui.gui.popups.ValidateSpectraPopup import ValidateSpectraForSpectrumPo
 
 SPECTRA = ['1H', 'STD', 'Relaxation Filtered', 'Water LOGSY']
 DEFAULTSPACING = (3, 3)
-TABMARGINS = (1, 10, 1, 5)     # l, t, r, b
+TABMARGINS = (1, 10, 1, 5)  # l, t, r, b
 
 
 def _updateGl(self, spectrumList):

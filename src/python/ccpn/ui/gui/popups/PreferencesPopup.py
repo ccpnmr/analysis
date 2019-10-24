@@ -71,8 +71,8 @@ PulldownListsMinimumWidth = 200
 LineEditsMinimumWidth = 195
 NotImplementedTipText = 'This option has not been implemented yet'
 DEFAULTSPACING = (3, 3)
-TABMARGINS = (1, 10, 10, 1)         # l, t, r, b
-ZEROMARGINS = (0, 0, 0, 0)         # l, t, r, b
+TABMARGINS = (1, 10, 10, 1)  # l, t, r, b
+ZEROMARGINS = (0, 0, 0, 0)  # l, t, r, b
 
 
 def _updateSettings(self, newPrefs, updateColourScheme):
@@ -291,7 +291,6 @@ class PreferencesPopup(CcpnDialogMainWidget):
         for (tabFunc, tabName) in ((self._setGeneralTabWidgets, 'General'),
                                    (self._setSpectrumTabWidgets, 'Spectrum'),
                                    (self._setExternalProgramsTabWidgets, 'External Programs')):
-
             fr = Frame(self, setLayout=True, spacing=DEFAULTSPACING)
             fr.setSizePolicy(QtWidgets.QSizePolicy.Ignored, QtWidgets.QSizePolicy.MinimumExpanding)
             fr.setAutoFillBackground(False)

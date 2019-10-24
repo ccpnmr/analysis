@@ -96,7 +96,7 @@ class PMIListPropertiesPopupABC(CcpnDialogMainWidget):
         if self._meritOptions:
             row += 1
             self.meritEnabledLabel = Label(self.mainWidget, text="Use Merit Threshold: ", grid=(row, 0))
-            self.meritEnabledBox = CheckBox(self.mainWidget, grid=(row, 1),)
+            self.meritEnabledBox = CheckBox(self.mainWidget, grid=(row, 1), )
             self.meritEnabledBox.toggled.connect(self._queueSetMeritEnabled)
 
             row += 1
@@ -303,4 +303,3 @@ class PMIListPropertiesPopupABC(CcpnDialogMainWidget):
 
     def _setMeritThreshold(self, value):
         setattr(self.ccpnList, MERITTHRESHOLD, value)
-

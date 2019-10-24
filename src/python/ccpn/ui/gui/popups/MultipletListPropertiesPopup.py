@@ -42,6 +42,7 @@ class MultipletListPropertiesPopup(PMIListPropertiesPopupABC):
     """
     Popup to handle changing parameters in multipletLists
     """
+
     # class of lists handled by popup
     _baseClass = MultipletList
     _symbolColourOption = True
@@ -65,7 +66,6 @@ class MultipletListPropertiesPopup(PMIListPropertiesPopupABC):
                                                tipTexts=None,
                                                )
 
-        # self.multipletAveraging.setFixedHeight(36)
         self.__postInit__()
 
     def _getSettings(self):

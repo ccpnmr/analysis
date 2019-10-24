@@ -60,6 +60,7 @@ from ccpn.ui.gui.popups.ValidateSpectraPopup import ValidateSpectraForSpectrumPo
 
 SPECTRA = ['1H', 'STD', 'Relaxation Filtered', 'Water LOGSY']
 DEFAULTSPACING = (3, 3)
+TABMARGINS = (1, 10, 1, 5)     # l, t, r, b
 
 
 def _updateGl(self, spectrumList):
@@ -286,6 +287,7 @@ class SpectrumDisplayPropertiesPopupNd(SpectrumPropertiesPopupABC):
         for specNum, thisSpec in enumerate(self.orderedSpectra):
             contoursTab = ContoursTab(parent=self, mainWindow=self.mainWindow, spectrum=thisSpec)
             self.tabWidget.addTab(contoursTab, thisSpec.name)
+            contoursTab.setContentsMargins(*TABMARGINS)
 
         self.tabWidget.setFixedWidth(self.MINIMUM_WIDTH)
 
@@ -324,6 +326,7 @@ class SpectrumDisplayPropertiesPopup1d(SpectrumPropertiesPopupABC):
         for specNum, thisSpec in enumerate(self.orderedSpectra):
             colourTab = ColourTab(parent=self, mainWindow=self.mainWindow, spectrum=thisSpec)
             self.tabWidget.addTab(colourTab, thisSpec.name)
+            colourTab.setContentsMargins(*TABMARGINS)
 
         self.tabWidget.setFixedWidth(self.MINIMUM_WIDTH)
 

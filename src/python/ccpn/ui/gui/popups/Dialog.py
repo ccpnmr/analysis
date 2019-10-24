@@ -320,10 +320,21 @@ class CcpnDialogMainWidget(QtWidgets.QDialog, Base):
         # handle clicking of the Apply/OK button
         with handleDialogApply(self) as error:
 
+            # add item here to redraw items
+            with undoStackBlocking() as addUndoItem:
+                addUndoItem(undo=self._refreshGLItems)
+
             # apply all functions to the object
             changes = self._changes
             if changes:
                 self._applyAllChanges(changes)
+
+            # add item here to redraw items
+            with undoStackBlocking() as addUndoItem:
+                addUndoItem(redo=self._refreshGLItems)
+
+            # redraw the items
+            self._refreshGLItems()
 
         # everything has happened - disable the apply button
         if self.dialogButtons.button(self.APPLYBUTTON):
@@ -342,6 +353,12 @@ class CcpnDialogMainWidget(QtWidgets.QDialog, Base):
         if self.dialogButtons.button(self.RESETBUTTON):
             self.dialogButtons.button(self.RESETBUTTON).setEnabled(True)
         return True
+
+    def _refreshGLItems(self):
+        """emit a signal to rebuild any required GL items
+        """
+        # MUST BE SUBCLASSED
+        raise NotImplementedError("Code error: function not implemented")
 
 
 class CcpnDialog(QtWidgets.QDialog, Base):

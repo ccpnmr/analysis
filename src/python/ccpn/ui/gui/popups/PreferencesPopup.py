@@ -71,6 +71,8 @@ PulldownListsMinimumWidth = 200
 LineEditsMinimumWidth = 195
 NotImplementedTipText = 'This option has not been implemented yet'
 DEFAULTSPACING = (3, 3)
+TABMARGINS = (1, 10, 10, 1)         # l, t, r, b
+ZEROMARGINS = (0, 0, 0, 0)         # l, t, r, b
 
 
 def _updateSettings(self, newPrefs, updateColourScheme):
@@ -283,7 +285,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
          Tabs are displayed by the order how appear here. """
 
         self.tabWidget = Tabs(self.mainWidget, grid=(0, 0), gridSpan=(1, 3))
-        self.tabWidget.setContentsMargins(0, 0, 0, 0)
+        self.tabWidget.setContentsMargins(*ZEROMARGINS)
         # self.tabWidget.getLayout().setSpacing(0)
 
         for (tabFunc, tabName) in ((self._setGeneralTabWidgets, 'General'),
@@ -293,7 +295,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
             fr = Frame(self, setLayout=True, spacing=DEFAULTSPACING)
             fr.setSizePolicy(QtWidgets.QSizePolicy.Ignored, QtWidgets.QSizePolicy.MinimumExpanding)
             fr.setAutoFillBackground(False)
-            fr.setContentsMargins(1, 10, 10, 1)  # l,t,r,b
+            fr.setContentsMargins(*TABMARGINS)
 
             sc = ScrollArea(self, setLayout=True)
             sc.setWidgetResizable(True)

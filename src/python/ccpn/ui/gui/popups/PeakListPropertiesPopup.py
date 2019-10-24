@@ -34,6 +34,7 @@ class PeakListPropertiesPopup(PMIListPropertiesPopupABC):
     """
     Popup to handle changing parameters in peakLists
     """
+
     # class of lists handled by popup
     _baseClass = PeakList
     _symbolColourOption = True

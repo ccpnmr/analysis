@@ -735,6 +735,11 @@ def addNewColour(newColour):
     spectrumColours[newColour.name()] = 'Colour %s' % newIndex
 
 
+def isSpectrumColour(colourString):
+    """Return true if the colourString is in the list
+    """
+    return colourString in list(spectrumColours.keys())
+
 def addNewColourString(colourString):
     """Add a new Hex colour to the colourlist
     New colour has the name 'Colour <n>' where n is the next free number

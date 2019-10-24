@@ -34,6 +34,7 @@ class IntegralListPropertiesPopup(PMIListPropertiesPopupABC):
     """
     Popup to handle changing parameters in multipletLists
     """
+
     # class of lists handled by popup
     _baseClass = IntegralList
     _symbolColourOption = True

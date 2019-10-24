@@ -36,6 +36,7 @@ from ccpn.ui.gui.widgets.Label import Label, VerticalLabel
 from ccpn.ui.gui.widgets.Spinbox import Spinbox
 from ccpn.ui.gui.widgets.ToolBar import ToolBar
 from ccpn.ui.gui.widgets.Widget import Widget
+from ccpn.ui.gui.widgets.Frame import Frame
 from ccpn.ui.gui.guiSettings import textFont, getColours, STRIPHEADER_BACKGROUND, \
     STRIPHEADER_FOREGROUND, GUINMRRESIDUE, CCPNGLWIDGET_BACKGROUND, textFontLarge
 from ccpn.ui.gui.widgets.DropBase import DropBase
@@ -297,7 +298,6 @@ class PlaneSelectorWidget(Widget):
                                                )
         self.planeCountSpinBox.setFixedHeight(height)
 
-from ccpn.ui.gui.widgets.Frame import Frame
 
 class PlaneToolbar(Frame):
     #TODO: undocumented and needs refactoring ;
@@ -305,10 +305,7 @@ class PlaneToolbar(Frame):
     def __init__(self, qtParent, strip, callbacks, stripArrangement=None,
                  containers=None, **kwds):
 
-        super(PlaneToolbar, self).__init__(parent=qtParent, setLayout=True, **kwds)
-        # ToolBar.__init__(self, parent=qtParent, **kwds)
-
-        # self.setOrientation(QtCore.Qt.Vertical if stripArrangement == 'X' else QtCore.Qt.Horizontal)
+        super().__init__(parent=qtParent, setLayout=True, **kwds)
 
         self.strip = strip
         self.planeLabels = []

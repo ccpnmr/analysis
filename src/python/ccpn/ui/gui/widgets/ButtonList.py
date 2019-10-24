@@ -29,17 +29,177 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 
 from ccpn.framework.PathsAndUrls import ccpnUrl
 
-from ccpn.ui.gui.widgets.Base import Base
+from ccpn.ui.gui.widgets.Base import Base, FOCUS_DICT
 from ccpn.ui.gui.widgets.Icon import Icon
-from ccpn.ui.gui.widgets.BasePopup import BasePopup
 from ccpn.ui.gui.widgets.Button import Button
 from ccpn.ui.gui.widgets.WebBrowser import WebBrowser
 from ccpn.ui.gui.widgets.Widget import Widget
 from ccpn.util.Logging import getLogger
 
+class ButtonListMixin:
+    def getButton(self, buttonName: str):
+        """
+        Return the button with the given name or return None
+        :param buttonName(str) - name of the button:
+        """
+        if buttonName in self.buttonNames.keys():
+            return self.buttons[self.buttonNames[buttonName]]
 
-class ButtonList(Widget):
+        else:
+            getLogger().warning('Button %s not found in the list' % buttonName)
 
+    def setButtonEnabled(self, buttonName: str, enable: bool = True):
+        """
+        Enable/Disable a button by name
+        :param buttonName(str) - name of the button:
+        :param enable(bool) - True or False:
+        """
+        if buttonName in self.buttonNames.keys():
+            self.buttons[self.buttonNames[buttonName]].setEnabled(enable)
+        else:
+            getLogger().warning('Button %s not found in the list' % buttonName)
+
+    def setButtonVisible(self, buttonName: str, visible: bool = True):
+        """
+        Show/hide a button by name
+        :param buttonName(str) - name of the button:
+        :param visible(bool) - True or False:
+        """
+        if buttonName in self.buttonNames.keys():
+            if visible:
+                self.buttons[self.buttonNames[buttonName]].show()
+            else:
+                self.buttons[self.buttonNames[buttonName]].hide()
+        else:
+            getLogger().warning('Button %s not found in the list' % buttonName)
+
+    def _insertSpacer(self, index):
+        from ccpn.ui.gui.widgets.Spacer import Spacer
+
+        if not (0 <= index < len(self.buttons)):
+            raise ValueError('Insert position out of range')
+
+        j = len(self.buttons)
+        for i, button in enumerate(self.buttons):
+            pos = (i + (1 if i >= index else 0))
+            if 'h' in self.direction:
+                grid = (0, pos)
+            else:
+                grid = (pos, 0)
+
+            self.getLayout().addWidget(self.buttons[i], *grid)
+
+        if 'h' in self.direction:
+            spacerGrid = (0, index)
+            xExpand = QtWidgets.QSizePolicy.Expanding
+            yExpand = QtWidgets.QSizePolicy.Fixed
+        else:
+            spacerGrid = (index, 0)
+            xExpand = QtWidgets.QSizePolicy.Fixed
+            yExpand = QtWidgets.QSizePolicy.Expanding
+
+        Spacer(self, 25, 5, xExpand, yExpand, grid=spacerGrid)
+
+
+# GST This uses the builtin Qt ButtonBox to make buttons for dialogs behave nicely
+# e.g. select correct layout & behaviour for ok / cancel and dangerous buttons
+# ButtonList should be treated as deprecated?
+class ButtonBoxList(QtWidgets.QDialogButtonBox, Base, ButtonListMixin):
+
+    def __init__(self, parent=None, texts=None, callbacks=None, icons=None,
+                 tipTexts=None, direction='h', commands=None, ok='OK', cancel='cancel', destructive=("Discard","Don't Save"),
+                 images=None,**kwargs):
+
+        super().__init__(parent)  # ejb - added setLayout
+        Base._init(self,**kwargs)
+
+        self._ok = ok.lower()
+        self._cancel = cancel.lower()
+        self._destructive =  [item.lower() for item in destructive]
+        self.buttonNames = {}
+
+        if commands:
+            print("qtgui.ButtonList.commands is deprecated; use .callbacks")
+            callbacks = commands
+
+        if images:
+            print("qtgui.ButtonList.images is deprecated; use .icons")
+            icons = images
+
+        if texts is None:
+            texts = []
+
+        if callbacks is None:
+            callbacks = []
+
+        assert len(texts) == len(callbacks)
+
+        direction = direction.lower()
+        self.direction = direction
+
+        if tipTexts is None:
+            tipTexts = []
+
+        if icons is None:
+            icons = []
+
+        while len(tipTexts) < len(texts):
+            tipTexts.append(None)
+
+        while len(icons) < len(texts):
+            icons.append(None)
+
+        self.buttons = []
+        self.addButtons(texts, callbacks, icons, tipTexts)
+
+        # set focus always on the last button (which is usually the ok, or run button)
+        if len(self.buttons) > 0:
+            lastButton = self.buttons[-1]
+            lastButton.setFocus()
+
+    def addButtons(self, texts, callbacks, icons=None, tipTexts=None):
+
+        if tipTexts is None:
+            tipTexts = []
+
+        if icons is None:
+            icons = []
+
+        while len(tipTexts) < len(texts):
+            tipTexts.append(None)
+
+        while len(icons) < len(texts):
+            icons.append(None)
+
+        j = len(self.buttons)
+
+        for i, text in enumerate(texts):
+            button = Button(self, text, callbacks[i], icons[i],
+                            tipText=tipTexts[i])
+
+            extraWidth = button.fontMetrics().boundingRect('W'*2).width()
+            width = button.fontMetrics().boundingRect(text).width()
+            height  = button.fontMetrics().boundingRect(text).height()+8
+            button.setMinimumWidth(width + extraWidth)
+            button.setMinimumHeight(height)
+            button.setFocusPolicy(FOCUS_DICT['tab'])
+
+            role = QtWidgets.QDialogButtonBox.ActionRole
+            lowerText = text.lower()
+            if lowerText == self._ok:
+                role = QtWidgets.QDialogButtonBox.AcceptRole
+            elif lowerText == self._cancel:
+                role = QtWidgets.QDialogButtonBox.RejectRole
+            elif lowerText in self._destructive:
+                role = QtWidgets.QDialogButtonBox.DestructiveRole
+
+            self.addButton(button,role)
+            self.buttons.append(button)
+            self.buttonNames[text] = i + j
+
+# this should be treated as deprecated?
+# see ButtonBoxList above
+class ButtonList(Widget, ButtonListMixin):
     def __init__(self, parent=None, texts=None, callbacks=None, icons=None,
                  tipTexts=None, direction='h', commands=None, images=None, **kwds):
 
@@ -110,77 +270,12 @@ class ButtonList(Widget):
 
             button = Button(self, text, callbacks[i], icons[i],
                             tipText=tipTexts[i], grid=grid)
-            # button.setMinimumWidth(20)
 
             width = button.fontMetrics().boundingRect(text).width() + 7
             button.setMinimumWidth(width * 1.5)
 
             self.buttons.append(button)
             self.buttonNames[text] = i + j
-
-    def getButton(self, buttonName: str):
-        """
-        Return the button with the given name or return None
-        :param buttonName(str) - name of the button:
-        """
-        if buttonName in self.buttonNames.keys():
-            return self.buttons[self.buttonNames[buttonName]]
-
-        else:
-            getLogger().warning('Button %s not found in the list' % buttonName)
-
-    def setButtonEnabled(self, buttonName: str, enable: bool = True):
-        """
-        Enable/Disable a button by name
-        :param buttonName(str) - name of the button:
-        :param enable(bool) - True or False:
-        """
-        if buttonName in self.buttonNames.keys():
-            self.buttons[self.buttonNames[buttonName]].setEnabled(enable)
-        else:
-            getLogger().warning('Button %s not found in the list' % buttonName)
-
-    def setButtonVisible(self, buttonName: str, visible: bool = True):
-        """
-        Show/hide a button by name
-        :param buttonName(str) - name of the button:
-        :param visible(bool) - True or False:
-        """
-        if buttonName in self.buttonNames.keys():
-            if visible:
-                self.buttons[self.buttonNames[buttonName]].show()
-            else:
-                self.buttons[self.buttonNames[buttonName]].hide()
-        else:
-            getLogger().warning('Button %s not found in the list' % buttonName)
-
-    def _insertSpacer(self, index):
-        from ccpn.ui.gui.widgets.Spacer import Spacer
-
-        if not (0 <= index < len(self.buttons)):
-            raise ValueError('Insert position out of range')
-
-        j = len(self.buttons)
-        for i, button in enumerate(self.buttons):
-            pos = (i + (1 if i >= index else 0))
-            if 'h' in self.direction:
-                grid = (0, pos)
-            else:
-                grid = (pos, 0)
-
-            self.getLayout().addWidget(self.buttons[i], *grid)
-
-        if 'h' in self.direction:
-            spacerGrid = (0, index)
-            xExpand = QtWidgets.QSizePolicy.Expanding
-            yExpand = QtWidgets.QSizePolicy.Fixed
-        else:
-            spacerGrid = (index, 0)
-            xExpand = QtWidgets.QSizePolicy.Fixed
-            yExpand = QtWidgets.QSizePolicy.Expanding
-
-        Spacer(self, 25, 5, xExpand, yExpand, grid=spacerGrid)
-
 
 class UtilityButtonList(ButtonList):
 
@@ -192,7 +287,7 @@ class UtilityButtonList(ButtonList):
                  cloneTip='Duplicate window', helpTip='Show help', closeTip='Close window',
                  *args, **kwds):
 
-        ButtonList.__init__(self, parent, *args, **kwds)
+        ButtonList.__init__(self, parent)
 
         self.helpUrl = helpUrl
         self.helpMsg = helpMsg

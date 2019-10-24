@@ -258,7 +258,7 @@ colourSchemes = {
         GUISTRIP_PIVOT                   : MARISHINO,
 
         LABEL_FOREGROUND                 : TEXT_COLOUR,
-        DIVIDER                          : TEXT_COLOUR,
+        DIVIDER                          : '#a9a9a9', # could be could CCPN_WIDGET_BORDER_COLOUR, was TEXT_COLOUR
         SOFTDIVIDER                      : SOFT_DIVIDER_COLOUR,
         LABEL_SELECTEDBACKGROUND         : 'mediumseagreen',
         LABEL_SELECTEDFOREGROUND         : 'black',

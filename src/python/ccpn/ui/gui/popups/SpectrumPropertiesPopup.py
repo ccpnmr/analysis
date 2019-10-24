@@ -26,13 +26,13 @@ __date__ = "$Date: 2017-03-30 11:28:58 +0100 (Thu, March 30, 2017) $"
 #=========================================================================================
 
 from functools import partial
-from PyQt5 import QtWidgets, QtCore
+from PyQt5 import QtWidgets, QtCore, QtGui
 from itertools import permutations
 from collections import OrderedDict
 from ccpn.core.lib import Util as ccpnUtil
 from ccpn.core.Spectrum import MAXALIASINGRANGE
 from ccpn.ui.gui.widgets.Button import Button
-from ccpn.ui.gui.widgets.ButtonList import ButtonList
+from ccpn.ui.gui.widgets.ButtonList import ButtonBoxList
 from ccpn.ui.gui.widgets.CheckBox import CheckBox
 from ccpn.ui.gui.widgets.ColourDialog import ColourDialog
 from ccpn.ui.gui.widgets.DoubleSpinbox import DoubleSpinbox, ScientificDoubleSpinBox
@@ -448,8 +448,12 @@ class GeneralTab(Widget):
 
         self.experimentTypes = spectrum._project._experimentTypeMap
 
-        self.layout().addItem(QtWidgets.QSpacerItem(0, 5), 0, 0)
-        row = 1
+        row = 0
+        self.layout().addItem(QtWidgets.QSpacerItem(row, 5), 0, 0)
+        #GST adds a correctly sized right margin
+        Spacer(self, 5, 1, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum,
+               grid=(row, 3))
+        row += 1
 
         Label(self, text="PID ", vAlign='t', hAlign='l', grid=(row, 0))
         # self.layout().addItem(QtWidgets.QSpacerItem(0, 5), 0, 0)
@@ -940,7 +944,7 @@ class GeneralTab(Widget):
 
 class DimensionsTab(Widget):
     def __init__(self, parent=None, mainWindow=None, spectrum=None, dimensions=None):
-        super().__init__(parent, setLayout=True)
+        super().__init__(parent, setLayout=True, spacing=(5, 5))
 
         self._parent = parent
         self.mainWindow = mainWindow
@@ -1137,7 +1141,9 @@ class DimensionsTab(Widget):
             self.minAliasingPullDowns[i].activated.connect(partial(self._queueSetMinAliasing, spectrum, self.minAliasingPullDowns[i].getText, i))
 
         row += 1
-        HLine(self, grid=(row, 0), gridSpan=(1, dimensions + 1), colour=getColours()[DIVIDER], height=15)
+        # GST colour looks wrong should be 169,169,169 #a9a9a9 to match control borders text colour too dark...
+        hLine = HLine(self, grid=(row, 0), gridSpan=(1, dimensions + 1), colour=getColours()[DIVIDER], height=15, lineWidth=1, divisor=2)
+        hLine.setContentsMargins(5,0,0,0)
 
         row += 1
         self.preferredAxisOrderPulldown = PulldownListCompoundWidget(self, labelText="Preferred Axis Order",
@@ -1436,7 +1442,7 @@ class ContoursTab(Widget):
 
     def __init__(self, parent=None, mainWindow=None, spectrum=None):
 
-        super().__init__(parent, setLayout=True)  # ejb
+        super().__init__(parent, setLayout=True, spacing=(5, 5))
 
         self._parent = parent
         self.mainWindow = mainWindow
@@ -1450,6 +1456,9 @@ class ContoursTab(Widget):
         self._changes = dict()
 
         row = 0
+        #GST adds a correctly sized right margin
+        Spacer(self, 5, 1, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum,
+               grid=(row, 3))
         self.layout().addItem(QtWidgets.QSpacerItem(0, 10), row, 0)
 
         row += 1

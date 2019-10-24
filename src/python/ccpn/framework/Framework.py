@@ -1040,13 +1040,12 @@ class Framework(NotifierBase):
         if not menuChildren:
             return
 
-        topMenu = menuChildren[0]
         topActionDict = {}
-        for topAction in topMenu.actions():
+        for topMenu in menuChildren:
             mainActionDict = {}
-            for mainAction in topAction.menu().actions():
+            for mainAction in topMenu.actions():
                 mainActionDict[mainAction.text()] = mainAction
-            topActionDict[topAction.text()] = mainActionDict
+            topActionDict[topMenu.title()] = mainActionDict
 
         openModuleKeys = set(mainWindow.moduleArea.modules.keys())
         for key, topActionText, mainActionText in (('SEQUENCE', 'Molecules', 'Show Sequence'),
@@ -1499,35 +1498,35 @@ class Framework(NotifierBase):
         popup.raise_()
 
     #     # FIXME Below is broken. This does not create a project! Looks like a copy-paste from NEF code.
-    # """Load Project from NEF file at path, and do necessary setup"""
-    #
-    # from ccpn.core.lib.ContextManagers import undoBlock, notificationEchoBlocking
-    #
-    # dataBlock = self.nefReader.getNMRStarData(path)
+        # """Load Project from NEF file at path, and do necessary setup"""
+        #
+        # from ccpn.core.lib.ContextManagers import undoBlock, notificationEchoBlocking
+        #
+        # dataBlock = self.nefReader.getNMRStarData(path)
 
-    # if makeNewProject:
-    #     if self.project is not None:
-    #         self._closeProject()
-    #     self.project = self.newProject(dataBlock.name)
-    #
-    # self.project._wrappedData.shiftAveraging = False
-    #
-    # # with suspendSideBarNotifications(project=self.project):
-    # with undoBlock():
-    #     with notificationEchoBlocking():
-    #         # with catchExceptions(application=self, errorStringTemplate='Error loading NMRStar file: %s'):
-    #             self.nefReader.importNewProject(self.project, dataBlock)
+        # if makeNewProject:
+        #     if self.project is not None:
+        #         self._closeProject()
+        #     self.project = self.newProject(dataBlock.name)
+        #
+        # self.project._wrappedData.shiftAveraging = False
+        #
+        # # with suspendSideBarNotifications(project=self.project):
+        # with undoBlock():
+        #     with notificationEchoBlocking():
+        #         # with catchExceptions(application=self, errorStringTemplate='Error loading NMRStar file: %s'):
+        #             self.nefReader.importNewProject(self.project, dataBlock)
 
-    # with undoBlock():
-    #     try:
-    #         self.nefReader.importNewNMRStarProject(self.project, dataBlock)
-    #     except Exception as es:
-    #         getLogger().warning('Error loading NMRStar file: %s' % str(es))
+        # with undoBlock():
+        #     try:
+        #         self.nefReader.importNewNMRStarProject(self.project, dataBlock)
+        #     except Exception as es:
+        #         getLogger().warning('Error loading NMRStar file: %s' % str(es))
 
-    # self.project._wrappedData.shiftAveraging = True
+        # self.project._wrappedData.shiftAveraging = True
 
-    # getLogger().info('==> Loaded NmrStar file: "%s"' % (path,))
-    # return self.project
+        # getLogger().info('==> Loaded NmrStar file: "%s"' % (path,))
+        # return self.project
 
     def _loadSparkyProject(self, path: str, makeNewProject=True) -> Project:
         """Load Project from Sparky file at path, and do necessary setup"""
@@ -2181,8 +2180,12 @@ class Framework(NotifierBase):
             MessageDialog.showWarning('Project contains no spectra.', 'Spectrum groups cannot be displayed')
         else:
             from ccpn.ui.gui.popups.SpectrumGroupEditor import SpectrumGroupEditor
-
-            SpectrumGroupEditor(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow, editMode=True).exec_()
+            if not self.project.spectrumGroups:
+                #GST This seems to have probles MessageDialog wraps it which looks bad...
+                MessageDialog.showWarning('Project has no Spectrum Groups.',
+                                          'Create them using:\nSidebar → SpectrumGroups → <New SpectrumGroup>\n ')
+            else:
+                SpectrumGroupEditor(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow, editMode=True).exec_()
 
     def showProjectionPopup(self):
         if not self.project.spectra:

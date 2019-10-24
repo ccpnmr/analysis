@@ -35,6 +35,7 @@ from functools import partial
 
 from PyQt5 import QtWidgets, QtCore, QtGui
 from PyQt5.QtGui import QKeySequence
+from PyQt5.QtCore import QSize
 from ccpn.core.Project import Project
 from ccpn.core.lib.ContextManagers import catchExceptions
 from ccpn.ui.gui.widgets.MessageDialog import progressManager
@@ -339,6 +340,9 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
         # insert into the splitter
         self._sidebarSplitter.insertWidget(0, self.sideBar)
         self._sidebarSplitter.insertWidget(1, self.searchResultsContainer)
+        # GST resizing the splitter by hand causes problems so currently disable it!
+        for i in range( self._sidebarSplitter.count()):
+            self._sidebarSplitter.handle(i).setEnabled(False)
 
         # create a splitter to put the sidebar on the left
         self._horizontalSplitter = Splitter(horizontal=True)
@@ -356,11 +360,10 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
         separated, Framework should be able to call a method to set the menus.
         """
 
-        self._menuBar = MenuBar(self)
+        self._menuBar = self.menuBar()
         for m in self.application._menuSpec:
             self._createMenu(m)
-        self.setMenuBar(self._menuBar)
-        self._menuBar.setNativeMenuBar(False)
+        self._menuBar.setNativeMenuBar(self.application.preferences.general.useNativeMenus)
 
         self._fillRecentProjectsMenu()
         self._fillPredefinedLayoutMenu()

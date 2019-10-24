@@ -1113,6 +1113,10 @@ class SideBar(QtWidgets.QTreeWidget, SideBarStructure, Base, NotifierBase):
         self._resultsList.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
         self._resultsList.customContextMenuRequested.connect(self._resultsListMenuRequested)
 
+        # GST seems to be missing a border, why?
+        print(self._resultsList.__class__)
+        self._resultsList.setStyleSheet('ListView {border: 1px solid rgb(207,207,207)}')
+
         self._searchSelection = []
         self._searchNotifiers = []
 
@@ -1434,6 +1438,8 @@ class SideBar(QtWidgets.QTreeWidget, SideBarStructure, Base, NotifierBase):
         #     for action in ('create', 'delete', 'rename'):
         #         notifier = self._project.registerNotifier('AbstractWrapperObject', action, self._notify_pids_changed, onceOnly=True)
         #         self._searchNotifiers.append(notifier)
+
+        self._resultsList.adjustSize()
 
     def _notify_pids_changed(self, *args, **kwargs):
         self._searchWidgetCallback()

@@ -406,6 +406,11 @@ class PreferencesPopup(CcpnDialog):
         self.useNativeFileBox.toggled.connect(partial(self._queueToggleGeneralOptions, 'useNative'))
 
         row += 1
+        self.useNativeLabel = Label(parent, text="Use Native Menus (requires restart): ", grid=(row, 0))
+        self.useNativeMenus = CheckBox(parent, grid=(row, 1))           #, checked=self.preferences.general.useNativeMenus)
+        self.useNativeMenus.toggled.connect(partial(self._toggleGeneralOptions, 'useNativeMenus'))
+
+        row += 1
         self.useNativeWebLabel = Label(parent, text="Use Native Web Browser: ", grid=(row, 0))
         self.useNativeWebBox = CheckBox(parent, grid=(row, 1))         #, checked=self.preferences.general.useNativeWebbrowser)
         self.useNativeWebBox.toggled.connect(partial(self._queueToggleGeneralOptions, 'useNativeWebbrowser'))
@@ -413,6 +418,7 @@ class PreferencesPopup(CcpnDialog):
         # self._toggleGeneralOptions('useNativeWebbrowser', True)
         self.useNativeWebLabel.setEnabled(False)
         self.useNativeWebBox.setEnabled(False)
+        self.useNativeMenus.setEnabled(True)
 
         row += 1
         self.autoSaveLayoutOnQuitLabel = Label(parent, text="Auto Save Layout On Quit: ", grid=(row, 0))
@@ -445,7 +451,7 @@ class PreferencesPopup(CcpnDialog):
         self.userWorkingPathLabel = Label(parent, "User Working Path ", grid=(row, 0), )
         self.userWorkingPathData = PathEdit(parent, grid=(row, 1), hAlign='l')
         self.userWorkingPathData.setMinimumWidth(LineEditsMinimumWidth)
-        self.userWorkingPathButton = Button(parent, grid=(row, 2), callback=self._getUserWorkingPath, 
+        self.userWorkingPathButton = Button(parent, grid=(row, 2), callback=self._getUserWorkingPath,
                                             icon='icons/directory', hPolicy='fixed')
         # self.userLayoutsLe.setText(self.preferences.general.get('userLayoutsPath'))
         self.userWorkingPathData.textChanged.connect(self._queueSetUserWorkingPath)
@@ -581,13 +587,14 @@ class PreferencesPopup(CcpnDialog):
             self._populateGeneralTab()
             self._populateSpectrumTab()
             self._populateExternalProgramsTab()
-            
+
     def _populateGeneralTab(self):
         """Populate the widgets in the generalTab
         """
         self.languageBox.setCurrentIndex(self.languageBox.findText(self.preferences.general.language))
         self.colourSchemeBox.setCurrentIndex(self.colourSchemeBox.findText(self.preferences.general.colourScheme))
         self.useNativeFileBox.setChecked(self.preferences.general.useNative)
+        self.useNativeMenus.setChecked(self.preferences.general.useNativeMenus)
         self.useNativeWebBox.setChecked(self.preferences.general.useNativeWebbrowser)
 
         # TODO:ED disabled for testing

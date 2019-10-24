@@ -28,8 +28,7 @@ __date__ = "$Date: 2017-03-30 11:28:58 +0100 (Thu, March 30, 2017) $"
 from functools import partial
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.LineEdit import LineEdit
-from ccpn.ui.gui.popups.Dialog import CcpnDialogMainWidget
-from ccpn.ui.gui.popups.PreferencesPopup import _verifyApply
+from ccpn.ui.gui.popups.Dialog import CcpnDialogMainWidget, _verifyPopupApply
 from ccpn.core.lib.ContextManagers import queueStateChange
 
 
@@ -95,7 +94,7 @@ class SimpleAttributeEditorPopupABC(CcpnDialogMainWidget):
                 value = getFunction(self.obj, attr)
                 self.edits[attr].setText(str(value))
 
-    @queueStateChange(_verifyApply)
+    @queueStateChange(_verifyPopupApply)
     def _queueSetValue(self, attr, getFunction, setFunction, dim):
         """Queue the function for setting the attribute in the calling object
         """

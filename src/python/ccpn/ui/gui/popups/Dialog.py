@@ -25,7 +25,7 @@ __date__ = "$Date: 2017-07-04 15:21:16 +0000 (Tue, July 04, 2017) $"
 # Start of code
 #=========================================================================================
 
-from PyQt5 import QtWidgets
+from PyQt5 import QtWidgets, QtCore
 from contextlib import contextmanager
 from functools import partial
 from ccpn.ui.gui.widgets.Base import Base
@@ -51,6 +51,8 @@ def _updateGl(self, spectrumList):
 HORIZONTAL = 'horizontal'
 VERTICAL = 'vertical'
 ORIENTATIONLIST = (HORIZONTAL, VERTICAL)
+DEFAULTSPACING = 3
+DEFAULTMARGINS = (10, 10, 10, 10)
 
 
 class CcpnDialogMainWidget(QtWidgets.QDialog, Base):
@@ -66,6 +68,8 @@ class CcpnDialogMainWidget(QtWidgets.QDialog, Base):
     DEFAULTBUTTON = CLOSEBUTTON
 
     USESCROLLWIDGET = False
+    FIXEDWIDTH = True
+    FIXEDHEIGHT = True
 
     def __init__(self, parent=None, windowTitle='', setLayout=False,
                  orientation=HORIZONTAL, size=None, **kwds):
@@ -77,7 +81,9 @@ class CcpnDialogMainWidget(QtWidgets.QDialog, Base):
             raise TypeError('Error: orientation not in %s', ORIENTATIONLIST)
 
         self.setWindowTitle(windowTitle)
-        self.setContentsMargins(15, 15, 15, 15)
+        self.setContentsMargins(*DEFAULTMARGINS)
+        self.getLayout().setSpacing(0)
+
         self._orientation = orientation
         self._size = size
 
@@ -102,16 +108,47 @@ class CcpnDialogMainWidget(QtWidgets.QDialog, Base):
         # self._scrollArea.setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.MinimumExpanding)
         # self._scrollArea.setSizePolicy(QtWidgets.QSizePolicy.Ignored, QtWidgets.QSizePolicy.Ignored)
 
+        self.mainWidget.setContentsMargins(0, 0, 0, 0)
+        self.mainWidget.getLayout().setSpacing(DEFAULTSPACING)
+
         self._buttonOptions = {}
         self.dialogButtons = None
+
+        # keep a record of how many times the apply button has been pressed
         self._currentNumApplies = 0
+
+        # clear the changes list
+        self._changes = {}
+
         self.setDefaultButton()
 
     def __postInit__(self):
         """post initialise functions
         """
         self._setButtons()
-        self.setFixedSize(self._size if self._size else self.sizeHint())
+        self._setDialogSize()
+
+        if self.getButton(self.APPLYBUTTON):
+            self.getButton(self.APPLYBUTTON).setEnabled(False)
+        if self.getButton(self.RESETBUTTON):
+            self.getButton(self.RESETBUTTON).setEnabled(False)
+
+    def _setDialogSize(self):
+        """Set the fixed/free dialog size from size or sizeHint
+        """
+        size = None
+        if self._size is not None:
+            if not isinstance(self._size, (tuple, list, QtCore.QSize)):
+                raise TypeError('size is not defined correctly: %s' % str(self._size))
+            if isinstance(self._size, (tuple, list)) and len(self._size) != 2:
+                raise TypeError('size is not the correct length: %s' % str(self._size))
+
+            size = self._size if isinstance(self._size, QtCore.QSize) else QtCore.QSize(*self._size)
+
+        if self.FIXEDWIDTH:
+            self.setFixedWidth(size.width() if size else self.sizeHint().width())
+        if self.FIXEDHEIGHT:
+            self.setFixedHeight(size.height() if size else self.sizeHint().height())
 
     def setOkButton(self, callback=None, text=None,
                     tipText='Apply changes and close',
@@ -197,7 +234,14 @@ class CcpnDialogMainWidget(QtWidgets.QDialog, Base):
         self.dialogButtons.setContentsMargins(0, 10, 0, 0)
 
     def setDefaultButton(self, button=CLOSEBUTTON):
+        """Set the default dialog button
+        """
         self._defaultButton = button
+
+    def getButton(self, buttonName):
+        """Get the button from the buttonNames defined in the class
+        """
+        return self.dialogButtons.button(buttonName)
 
     def fixedSize(self):
         self.sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
@@ -403,3 +447,81 @@ def handleDialogApply(self):
         # re-raise the error if in debug mode
         if self.application._isInDebugMode:
             raise es
+
+
+def _verifyPopupApply(self, attributeName, value, *postArgs, **postKwds):
+    """Change the state of the apply button based on the changes in the tabs
+    """
+
+    # if attributeName is defined use as key to dict to store change functions
+    # append postFixes if need to differentiate partial functions
+    if attributeName:
+
+        for pf in postArgs:
+            if pf is not None:
+                attributeName += str(pf)
+        for k, pf in sorted(postKwds.items()):
+            if pf is not None:
+                attributeName += str(pf)
+        attributeName += str(id(self))
+
+        if value:
+            # store in dict - overwrite as required
+            self._changes[attributeName] = value
+
+        else:
+            if attributeName in self._changes:
+                # delete from dict - empty dict implies no changes
+                del self._changes[attributeName]
+
+        getLogger().debug2('>>>attrib %s %s' % (attributeName, self._changes[attributeName] if attributeName in self._changes else 'None'))
+        if getattr(self, 'LIVEDIALOG', None):
+            self._changeSettings()
+
+    if self:
+        # set button state depending on number of changes
+        allChanges = True if self._changes else False
+        _button = self.dialogButtons.button(QtWidgets.QDialogButtonBox.Apply)
+        if _button:
+            _button.setEnabled(allChanges)
+        _button = self.dialogButtons.button(QtWidgets.QDialogButtonBox.Reset)
+        if _button:
+            _button.setEnabled(allChanges or self._currentNumApplies)
+
+
+def _verifyPopupTabApply(self, attributeName, value, *postArgs, **postKwds):
+    """Change the state of the apply button based on the changes in the tabs
+    """
+    # self must be a tab in a tabWidget
+    popup = self._parent
+
+    # if attributeName is defined use as key to dict to store change functions
+    # append postFixes if need to differentiate partial functions
+    if attributeName:
+
+        for pf in postArgs:
+            if pf is not None:
+                attributeName += str(pf)
+        for k, pf in sorted(postKwds.items()):
+            if pf is not None:
+                attributeName += str(pf)
+        attributeName += str(id(self))
+
+        if value:
+            # store in dict - overwrite as required
+            self._changes[attributeName] = value
+        else:
+            if attributeName in self._changes:
+                # delete from dict - empty dict implies no changes
+                del self._changes[attributeName]
+
+    if popup:
+        # set button state depending on number of changes
+        tabs = tuple(popup.tabWidget.widget(ii) for ii in range(popup.tabWidget.count()))
+        allChanges = any(t._changes for t in tabs if t is not None)
+        _button = popup.dialogButtons.button(QtWidgets.QDialogButtonBox.Apply)
+        if _button:
+            _button.setEnabled(allChanges)
+        _button = popup.dialogButtons.button(QtWidgets.QDialogButtonBox.Reset)
+        if _button:
+            _button.setEnabled(allChanges or popup._currentNumApplies)

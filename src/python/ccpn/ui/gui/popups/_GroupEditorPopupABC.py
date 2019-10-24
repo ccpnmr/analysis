@@ -37,7 +37,7 @@ from ccpn.ui.gui.widgets.MessageDialog import showWarning
 from ccpn.ui.gui.widgets.Widget import Widget
 from ccpn.ui.gui.widgets.Frame import Frame
 from ccpn.ui.gui.widgets.Menu import Menu
-
+from ccpn.ui.gui.widgets.Icon import Icon
 from ccpn.core.lib.ContextManagers import undoBlock
 
 
@@ -456,7 +456,8 @@ class _GroupEditorPopupABC(CcpnDialog):
                             spacing=(5,5),  **kwds)
 
         # GST how to get the icon using a relative path?
-        self.errorIcon = QtGui.QPixmap('/Users/garythompson/Dropbox/git/ccpnmr/AnalysisV3/src/python/ccpn/ui/gui/widgets/icons/exclamation_small.png')
+        # self.errorIcon = QtGui.QPixmap('/Users/garythompson/Dropbox/git/ccpnmr/AnalysisV3/src/python/ccpn/ui/gui/widgets/icons/exclamation_small.png')
+        self.errorIcon = Icon('icons/warning')
 
         self.mainWindow = mainWindow
         self.application = mainWindow.application
@@ -944,7 +945,8 @@ class _GroupEditorPopupABC(CcpnDialog):
             for i,error in enumerate(self.errors):
                 label =  Label(self.errorFrame,error)
                 iconLabel = Label(self.errorFrame)
-                iconLabel.setPixmap(self.errorIcon) #.scaled(20,20,QtCore.Qt.KeepAspectRatio
+                # iconLabel.setPixmap(self.errorIcon) #.scaled(20,20,QtCore.Qt.KeepAspectRatio
+                iconLabel.setPixmap(self.errorIcon.pixmap(21, 21))
                 self.errorFrame.layout().addWidget(label,i,1)
                 self.errorFrame.layout().setAlignment(label,QtCore.Qt.AlignLeft)
                 self.errorFrame.layout().addWidget(iconLabel,i,0)

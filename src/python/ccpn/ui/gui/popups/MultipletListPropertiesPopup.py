@@ -30,7 +30,8 @@ from ccpn.ui.gui.widgets.RadioButtons import RadioButtons
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
 from ccpn.core.MultipletList import MULTIPLETAVERAGINGTYPES
-from ccpn.ui.gui.popups.PMIListPropertiesPopupABC import PMIListPropertiesPopupABC, _verifyApply, queueStateChange
+from ccpn.ui.gui.popups.PMIListPropertiesPopupABC import PMIListPropertiesPopupABC, queueStateChange
+from ccpn.ui.gui.popups.Dialog import _verifyPopupApply
 from ccpn.core.MultipletList import MultipletList
 
 
@@ -117,7 +118,7 @@ class MultipletListPropertiesPopup(PMIListPropertiesPopupABC):
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    @queueStateChange(_verifyApply)
+    @queueStateChange(_verifyPopupApply)
     def _queueSetMeritAveraging(self):
         value = MULTIPLETAVERAGINGTYPES[self.multipletAveraging.getIndex()]
         # set the state of the other buttons

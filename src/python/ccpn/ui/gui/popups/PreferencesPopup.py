@@ -30,13 +30,9 @@ from PyQt5 import QtWidgets, QtCore
 import os
 from functools import partial
 from copy import deepcopy
-from math import floor
-from ccpnmodel.ccpncore.api.memops import Implementation
-from ccpn.util.AttrDict import AttrDict
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.Frame import Frame
 from ccpn.ui.gui.widgets.Button import Button
-from ccpn.ui.gui.widgets.ButtonList import ButtonList
 from ccpn.ui.gui.widgets.FileDialog import FileDialog
 from ccpn.ui.gui.widgets.LineEdit import LineEdit, PasswordEdit
 from ccpn.ui.gui.widgets.DoubleSpinbox import DoubleSpinbox, ScientificDoubleSpinBox
@@ -46,14 +42,12 @@ from ccpn.ui.gui.widgets.CheckBox import CheckBox
 from ccpn.ui.gui.widgets.RadioButtons import RadioButtons
 from ccpn.ui.gui.guiSettings import COLOUR_SCHEMES, getColours, DIVIDER, setColourScheme
 from ccpn.framework.Translation import languages
-from ccpn.ui.gui.popups.Dialog import CcpnDialog, handleDialogApply
+from ccpn.ui.gui.popups.Dialog import handleDialogApply, _verifyPopupApply
 from ccpn.ui.gui.widgets import MessageDialog
 from ccpn.ui.gui.widgets.Tabs import Tabs
-from ccpn.ui.gui.widgets.Spacer import Spacer
 from ccpn.ui.gui.widgets.HLine import HLine
 from ccpn.util.Logging import getLogger
-from ccpn.util.Colour import spectrumColours, addNewColour, fillColourPulldown, addNewColourString, \
-    colourNameNoSpace, _setColourPulldown
+from ccpn.util.Colour import spectrumColours, addNewColour, fillColourPulldown, colourNameNoSpace, _setColourPulldown
 from ccpn.ui.gui.widgets.ColourDialog import ColourDialog
 from ccpn.ui.gui.widgets.ScrollArea import ScrollArea
 from ccpn.ui.gui.widgets.Spacer import Spacer
@@ -63,19 +57,20 @@ from ccpn.core.MultipletList import MULTIPLETAVERAGINGTYPES
 from ccpn.util.UserPreferences import UserPreferences
 from ccpn.ui.gui.lib.GuiPath import PathEdit
 from ccpn.ui.gui.popups.ValidateSpectraPopup import ValidateSpectraForPreferences
-from ccpn.ui.gui.popups.Dialog import CcpnDialog
+from ccpn.ui.gui.popups.Dialog import CcpnDialog, CcpnDialogMainWidget
 from ccpn.core.lib.ContextManagers import queueStateChange, undoStackBlocking
 
 
 PEAKFITTINGDEFAULTS = [PARABOLICMETHOD, GAUSSIANMETHOD]
 
-# FIXME separate pure GUI to project/preferences properites
+# FIXME separate pure GUI to project/preferences properties
 # The code sets Gui Parameters assuming that  Preference is not None and has a bunch of attributes.
 
 
 PulldownListsMinimumWidth = 200
 LineEditsMinimumWidth = 195
 NotImplementedTipText = 'This option has not been implemented yet'
+DEFAULTSPACING = (3, 3)
 
 
 def _updateSettings(self, newPrefs, updateColourScheme):
@@ -94,49 +89,13 @@ def _updateSettings(self, newPrefs, updateColourScheme):
 def _refreshGLItems():
     pass
 
-def _verifyApply(self, attributeName, value, *postArgs, **postKwds):
-    """Change the state of the apply button based on the changes in the tabs
-    """
 
-    # if attributeName is defined use as key to dict to store change functions
-    # append postFixes if need to differentiate partial functions
-    if attributeName:
+class PreferencesPopup(CcpnDialogMainWidget):
+    FIXEDHEIGHT = False
+    FIXEDWIDTH = True
 
-        for pf in postArgs:
-            if pf is not None:
-                attributeName += str(pf)
-        for k, pf in sorted(postKwds.items()):
-            if pf is not None:
-                attributeName += str(pf)
-        attributeName += str(id(self))
-
-        if value:
-            # store in dict - overwrite as required
-            self._changes[attributeName] = value
-
-        else:
-            if attributeName in self._changes:
-                # delete from dict - empty dict implies no changes
-                del self._changes[attributeName]
-
-        getLogger().debug2('>>>attrib %s %s' % (attributeName, self._changes[attributeName] if attributeName in self._changes else 'None'))
-        if getattr(self, 'LIVEDIALOG', None):
-            self._changeSettings()
-
-    if self:
-        # set button state depending on number of changes
-        allChanges = True if self._changes else False
-        _button = self.dialogButtons.button(QtWidgets.QDialogButtonBox.Apply)
-        if _button:
-            _button.setEnabled(allChanges)
-        _button = self.dialogButtons.button(QtWidgets.QDialogButtonBox.Reset)
-        if _button:
-            _button.setEnabled(allChanges or self._currentNumApplies)
-
-
-class PreferencesPopup(CcpnDialog):
     def __init__(self, parent=None, mainWindow=None, preferences=None, title='Preferences', **kwds):
-        CcpnDialog.__init__(self, parent, setLayout=True, windowTitle=title, size=(300, 100), **kwds)
+        super().__init__(parent, setLayout=True, windowTitle=title, size=None, **kwds)
 
         self.mainWindow = mainWindow
         if self.mainWindow:
@@ -160,40 +119,26 @@ class PreferencesPopup(CcpnDialog):
         # store the original values - needs to be recursive
         self._lastPrefs = deepcopy(self.preferences)
 
-        # keep a record of how many times the apply button has been pressed
-        self._currentNumApplies = 0
-        self._changes = {}
-
-        self.mainLayout = self.getLayout()
         self._setTabs()
 
-        self.dialogButtons = DialogButtonBox(self, grid=(1, 2), orientation='horizontal',
-                                             buttons=(QtWidgets.QDialogButtonBox.Reset,
-                                                      QtWidgets.QDialogButtonBox.Close,
-                                                      QtWidgets.QDialogButtonBox.Apply,
-                                                      QtWidgets.QDialogButtonBox.Ok,
-                                                      QtWidgets.QDialogButtonBox.Help),
-                                             callbacks=(self._revertClicked, self._closeClicked,
-                                                        self._applyClicked, self._okClicked),
-                                             texts=['Revert', None, None, None, ''],
-                                             tipTexts=['Revert - roll-back all applied changes',
-                                                       'Close - keep all applied changes and close',
-                                                       'Apply changes',
-                                                       'Apply changes and close',
-                                                       'Help'],
-                                             icons=['icons/undo', 'icons/window-close',
-                                                    'icons/orange-apply', 'icons/dialog-apply.png',
-                                                    'icons/system-help'],
-                                             enabledStates=[False, None, False, None, False],
-                                             visibleStates=[None],
-                                             defaultButton=QtWidgets.QDialogButtonBox.Close)
-
-        self._applyButton = self.dialogButtons.button(QtWidgets.QDialogButtonBox.Apply)
-        self._revertButton = self.dialogButtons.button(QtWidgets.QDialogButtonBox.Reset)
+        # enable the buttons
+        self.setOkButton(callback=self._okClicked)
+        self.setApplyButton(callback=self._applyClicked)
+        self.setCancelButton(callback=self._cancelClicked)
+        self.setHelpButton(callback=self._helpClicked, enabled=False)
+        self.setRevertButton(callback=self._revertClicked, enabled=False)
+        self.setDefaultButton(CcpnDialogMainWidget.CANCELBUTTON)
 
         self._populate()
 
-        self.setFixedWidth(self.sizeHint().width() + 24)
+        tabs = tuple(self.tabWidget.widget(ii) for ii in range(self.tabWidget.count()))
+        w = max(tab.sizeHint().width() for tab in tabs) + 20
+        h = max(tab.sizeHint().height() for tab in tabs)
+        self._size = QtCore.QSize(w, h)
+
+        self.__postInit__()
+        self._applyButton = self.getButton(self.APPLYBUTTON)
+        self._revertButton = self.getButton(self.RESETBUTTON)
 
     def _revertClicked(self):
         """Revert button signal comes here
@@ -214,27 +159,27 @@ class PreferencesPopup(CcpnDialog):
         self._applyButton.setEnabled(False)
         self._revertButton.setEnabled(False)
 
-    def _closeClicked(self):
-        """Close button signal comes here
-        """
-        self.reject()
-
-    def _applyClicked(self):
-        """Apply button signal comes here
-        """
-        self._applyChanges()
-
-    def _okClicked(self):
-        """OK button signal comes here
-        """
-        if self._applyChanges() is True:
-            self.accept()
-
-    def _applyAllChanges(self, changes):
-        """Execute the Apply/OK functions
-        """
-        for v in changes.values():
-            v()
+    # def _closeClicked(self):
+    #     """Close button signal comes here
+    #     """
+    #     self.reject()
+    #
+    # def _applyClicked(self):
+    #     """Apply button signal comes here
+    #     """
+    #     self._applyChanges()
+    #
+    # def _okClicked(self):
+    #     """OK button signal comes here
+    #     """
+    #     if self._applyChanges() is True:
+    #         self.accept()
+    #
+    # def _applyAllChanges(self, changes):
+    #     """Execute the Apply/OK functions
+    #     """
+    #     for v in changes.values():
+    #         v()
 
     def _updateDisplay(self, updateColourScheme):
 
@@ -337,49 +282,34 @@ class PreferencesPopup(CcpnDialog):
          Each frame will be the widgets parent.
          Tabs are displayed by the order how appear here. """
 
-        self.tabWidget = Tabs(self, grid=(0, 0), gridSpan=(1, 3))
+        self.tabWidget = Tabs(self.mainWidget, grid=(0, 0), gridSpan=(1, 3))
+        self.tabWidget.setContentsMargins(0, 0, 0, 0)
+        # self.tabWidget.getLayout().setSpacing(0)
 
-        ## 1 Tab
-        self.generalTabFrame = Frame(self, setLayout=True)
-        # self.generalTabFrame.getLayout().setAlignment(QtCore.Qt.AlignTop)
-        self.generalTabFrame.setContentsMargins(1, 10, 1, 10)
-        self._setGeneralTabWidgets(parent=self.generalTabFrame)
-        self.tabWidget.addTab(self.generalTabFrame, 'General')
-        # self.generalTabFrame.layout().setSpacing(2)
+        for (tabFunc, tabName) in ((self._setGeneralTabWidgets, 'General'),
+                                   (self._setSpectrumTabWidgets, 'Spectrum'),
+                                   (self._setExternalProgramsTabWidgets, 'External Programs')):
 
-        ## 2 Tab
-        self.spectrumTabFrame = Frame(self, setLayout=True)
+            fr = Frame(self, setLayout=True, spacing=DEFAULTSPACING)
+            fr.setSizePolicy(QtWidgets.QSizePolicy.Ignored, QtWidgets.QSizePolicy.MinimumExpanding)
+            fr.setAutoFillBackground(False)
+            fr.setContentsMargins(1, 10, 10, 1)  # l,t,r,b
 
-        # make a new scroll area for the frame
-        self._spectrumTabScrollArea = ScrollArea(self, setLayout=True)
-        self._spectrumTabScrollArea.setWidgetResizable(True)
-        self._spectrumTabScrollArea.setWidget(self.spectrumTabFrame)
-        self.spectrumTabFrame.setSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum)
-        self._spectrumTabScrollArea.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
-        # these are required to make the background of the tabs the visible
-        self._spectrumTabScrollArea.setStyleSheet('ScrollArea { border: 0px; background: transparent; }')
-        self.spectrumTabFrame.setAutoFillBackground(False)
+            sc = ScrollArea(self, setLayout=True)
+            sc.setWidgetResizable(True)
+            sc.setWidget(fr)
+            sc.setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.MinimumExpanding)
+            sc.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
+            sc.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarAsNeeded)
 
-        self.spectrumTabFrame.getLayout().setAlignment(QtCore.Qt.AlignTop)
-        self.spectrumTabFrame.setContentsMargins(1, 10, 1, 10)  # l,t,r,b
+            # these are required to make the background of the tabs the visible
+            sc.setStyleSheet('ScrollArea { border: 0px; background: transparent; }')
 
-        # populate the frame
-        self._setspectrumTabWidgets(parent=self.spectrumTabFrame)
-        # self.tabWidget.addTab(self.spectrumTabFrame, 'Spectrum')
-
-        # add the scroll area to the tabs
-        self.tabWidget.addTab(self._spectrumTabScrollArea, 'Spectrum')
-
-        # 3 Tab Disabled. # Keep the code for future additions
-        self.externalProgramsTabFrame = Frame(self, setLayout=True)
-        self.externalProgramsTabFrame.getLayout().setAlignment(QtCore.Qt.AlignTop)
-        self.externalProgramsTabFrame.setContentsMargins(1, 10, 1, 10)  # l,t,r,b
-        self._setExternalProgramsTabWidgets(parent=self.externalProgramsTabFrame)
-        self.tabWidget.addTab(self.externalProgramsTabFrame, 'External Programs')
-        # self.externalProgramsTabFrame.layout().setSpacing(2)
+            self.tabWidget.addTab(sc, tabName)
+            tabFunc(parent=fr)
 
     def _setGeneralTabWidgets(self, parent):
-        ''' Insert a widget in here to appear in the General Tab  '''
+        """ Insert a widget in here to appear in the General Tab  """
 
         row = 0
 
@@ -402,39 +332,38 @@ class PreferencesPopup(CcpnDialog):
 
         row += 1
         self.useNativeFileLabel = Label(parent, text="Use Native File Dialogs: ", grid=(row, 0))
-        self.useNativeFileBox = CheckBox(parent, grid=(row, 1))         #, checked=self.preferences.general.useNative)
+        self.useNativeFileBox = CheckBox(parent, grid=(row, 1))  #, checked=self.preferences.general.useNative)
         self.useNativeFileBox.toggled.connect(partial(self._queueToggleGeneralOptions, 'useNative'))
 
         row += 1
         self.useNativeLabel = Label(parent, text="Use Native Menus (requires restart): ", grid=(row, 0))
-        self.useNativeMenus = CheckBox(parent, grid=(row, 1))           #, checked=self.preferences.general.useNativeMenus)
-        self.useNativeMenus.toggled.connect(partial(self._toggleGeneralOptions, 'useNativeMenus'))
+        self.useNativeMenus = CheckBox(parent, grid=(row, 1))  #, checked=self.preferences.general.useNativeMenus)
+        self.useNativeMenus.toggled.connect(partial(self._queueToggleGeneralOptions, 'useNativeMenus'))
 
         row += 1
         self.useNativeWebLabel = Label(parent, text="Use Native Web Browser: ", grid=(row, 0))
-        self.useNativeWebBox = CheckBox(parent, grid=(row, 1))         #, checked=self.preferences.general.useNativeWebbrowser)
+        self.useNativeWebBox = CheckBox(parent, grid=(row, 1))  #, checked=self.preferences.general.useNativeWebbrowser)
         self.useNativeWebBox.toggled.connect(partial(self._queueToggleGeneralOptions, 'useNativeWebbrowser'))
 
         # self._toggleGeneralOptions('useNativeWebbrowser', True)
         self.useNativeWebLabel.setEnabled(False)
         self.useNativeWebBox.setEnabled(False)
-        self.useNativeMenus.setEnabled(True)
 
         row += 1
         self.autoSaveLayoutOnQuitLabel = Label(parent, text="Auto Save Layout On Quit: ", grid=(row, 0))
-        self.autoSaveLayoutOnQuitBox = CheckBox(parent, grid=(row, 1))#,
-                                                # checked=self.preferences.general.autoSaveLayoutOnQuit)
+        self.autoSaveLayoutOnQuitBox = CheckBox(parent, grid=(row, 1))  #,
+        # checked=self.preferences.general.autoSaveLayoutOnQuit)
         self.autoSaveLayoutOnQuitBox.toggled.connect(partial(self._queueToggleGeneralOptions, 'autoSaveLayoutOnQuit'))
 
         row += 1
         self.restoreLayoutOnOpeningLabel = Label(parent, text="Restore Layout On Opening: ", grid=(row, 0))
-        self.restoreLayoutOnOpeningBox = CheckBox(parent, grid=(row, 1))#,
-                                                  # checked=self.preferences.general.restoreLayoutOnOpening)
+        self.restoreLayoutOnOpeningBox = CheckBox(parent, grid=(row, 1))  #,
+        # checked=self.preferences.general.restoreLayoutOnOpening)
         self.restoreLayoutOnOpeningBox.toggled.connect(partial(self._queueToggleGeneralOptions, 'restoreLayoutOnOpening'))
 
         row += 1
         self.autoBackupEnabledLabel = Label(parent, text="Auto Backup On: ", grid=(row, 0))
-        self.autoBackupEnabledBox = CheckBox(parent, grid=(row, 1))#, checked=self.preferences.general.autoBackupEnabled)
+        self.autoBackupEnabledBox = CheckBox(parent, grid=(row, 1))  #, checked=self.preferences.general.autoBackupEnabled)
         self.autoBackupEnabledBox.toggled.connect(partial(self._queueToggleGeneralOptions, 'autoBackupEnabled'))
 
         row += 1
@@ -449,7 +378,7 @@ class PreferencesPopup(CcpnDialog):
 
         row += 1
         self.userWorkingPathLabel = Label(parent, "User Working Path ", grid=(row, 0), )
-        self.userWorkingPathData = PathEdit(parent, grid=(row, 1), hAlign='l')
+        self.userWorkingPathData = PathEdit(parent, grid=(row, 1), vAlign='t')
         self.userWorkingPathData.setMinimumWidth(LineEditsMinimumWidth)
         self.userWorkingPathButton = Button(parent, grid=(row, 2), callback=self._getUserWorkingPath,
                                             icon='icons/directory', hPolicy='fixed')
@@ -458,7 +387,7 @@ class PreferencesPopup(CcpnDialog):
 
         row += 1
         userLayouts = Label(parent, text="User Predefined Layouts ", grid=(row, 0))
-        self.userLayoutsLe = PathEdit(parent, grid=(row, 1), hAlign='l')
+        self.userLayoutsLe = PathEdit(parent, grid=(row, 1), vAlign='t')
         self.userLayoutsLe.setMinimumWidth(LineEditsMinimumWidth)
         self.userLayoutsLeButton = Button(parent, grid=(row, 2), callback=self._getUserLayoutsPath,
                                           icon='icons/directory', hPolicy='fixed')
@@ -467,7 +396,7 @@ class PreferencesPopup(CcpnDialog):
 
         row += 1
         self.auxiliaryFilesLabel = Label(parent, text="Auxiliary Files Path ", grid=(row, 0))
-        self.auxiliaryFilesData = PathEdit(parent, grid=(row, 1), hAlign='l')
+        self.auxiliaryFilesData = PathEdit(parent, grid=(row, 1), vAlign='t')
         self.auxiliaryFilesData.setMinimumWidth(LineEditsMinimumWidth)
         self.auxiliaryFilesDataButton = Button(parent, grid=(row, 2), callback=self._getAuxiliaryFilesPath,
                                                icon='icons/directory', hPolicy='fixed')
@@ -476,7 +405,7 @@ class PreferencesPopup(CcpnDialog):
 
         row += 1
         self.macroPathLabel = Label(parent, text="Macro Path", grid=(row, 0))
-        self.macroPathData = PathEdit(parent, grid=(row, 1), hAlign='l')
+        self.macroPathData = PathEdit(parent, grid=(row, 1), vAlign='t')
         self.macroPathData.setMinimumWidth(LineEditsMinimumWidth)
         # self.macroPathData.setText(self.preferences.general.userMacroPath)
         self.macroPathDataButton = Button(parent, grid=(row, 2), callback=self._getMacroFilesPath,
@@ -485,7 +414,7 @@ class PreferencesPopup(CcpnDialog):
 
         row += 1
         self.pluginPathLabel = Label(parent, text="Plugin Path", grid=(row, 0))
-        self.pluginPathData = PathEdit(parent, grid=(row, 1), hAlign='l', tipText=NotImplementedTipText)
+        self.pluginPathData = PathEdit(parent, grid=(row, 1), vAlign='t', tipText=NotImplementedTipText)
         self.pluginPathData.setMinimumWidth(LineEditsMinimumWidth)
         # self.pluginPathData.setText(self.preferences.general.userPluginPath)
         self.pluginPathDataButton = Button(parent, grid=(row, 2), callback=self._getPluginFilesPath,
@@ -498,7 +427,7 @@ class PreferencesPopup(CcpnDialog):
 
         row += 1
         self.pipesPathLabel = Label(parent, text="Pipes Path", grid=(row, 0), )
-        self.pipesPathData = PathEdit(parent, grid=(row, 1), hAlign='l', tipText=NotImplementedTipText)
+        self.pipesPathData = PathEdit(parent, grid=(row, 1), vAlign='t', tipText=NotImplementedTipText)
         self.pipesPathData.setMinimumWidth(LineEditsMinimumWidth)
         # self.pipesPathData.setText(self.preferences.general.userExtensionPath)
         self.pipesPathDataButton = Button(parent, grid=(row, 2), callback=self._getExtensionFilesPath,
@@ -528,7 +457,7 @@ class PreferencesPopup(CcpnDialog):
 
         row += 1
         self.useProxyLabel = Label(parent, text="Use Proxy Settings: ", grid=(row, 0))
-        self.useProxyBox = CheckBox(parent, grid=(row, 1))#, checked=self.preferences.proxySettings.useProxy)
+        self.useProxyBox = CheckBox(parent, grid=(row, 1))  #, checked=self.preferences.proxySettings.useProxy)
         self.useProxyBox.toggled.connect(self._queueSetUseProxy)
 
         # row += 1
@@ -552,7 +481,7 @@ class PreferencesPopup(CcpnDialog):
 
         row += 1
         self.useProxyPasswordLabel = Label(parent, text="   Proxy Server Requires Password: ", grid=(row, 0))
-        self.useProxyPasswordBox = CheckBox(parent, grid=(row, 1))#, checked=self.preferences.proxySettings.useProxyPassword)
+        self.useProxyPasswordBox = CheckBox(parent, grid=(row, 1))  #, checked=self.preferences.proxySettings.useProxyPassword)
         self.useProxyPasswordBox.toggled.connect(self._queueSetUseProxyPassword)
 
         row += 1
@@ -572,10 +501,10 @@ class PreferencesPopup(CcpnDialog):
         # set the enabled state of the proxy settings boxes
         # self._setProxyButtons()
 
-        # row += 1
-        Spacer(parent, row, 1,
-               QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding,
-               grid=(row, 0), gridSpan=(row, 1))
+        row += 1
+        Spacer(parent, 15, 2,
+               QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.MinimumExpanding,
+               grid=(row, 1), gridSpan=(row, 1))
 
     def _populate(self):
         """Populate the widgets in the tabs
@@ -692,13 +621,13 @@ class PreferencesPopup(CcpnDialog):
         """
         self.pymolPath.setText(self.preferences.externalPrograms.pymol)
 
-    def _setspectrumTabWidgets(self, parent):
+    def _setSpectrumTabWidgets(self, parent):
         """Insert a widget in here to appear in the Spectrum Tab. Parent = the Frame obj where the widget should live
         """
 
         row = 0
         self.autoSetDataPathLabel = Label(parent, text="Auto Set dataPath: ", grid=(row, 0))
-        self.autoSetDataPathBox = CheckBox(parent, grid=(row, 1))#, checked=self.preferences.general.autoSetDataPath)
+        self.autoSetDataPathBox = CheckBox(parent, grid=(row, 1))  #, checked=self.preferences.general.autoSetDataPath)
         self.autoSetDataPathBox.toggled.connect(partial(self._queueToggleGeneralOptions, 'autoSetDataPath'))
 
         row += 1
@@ -708,7 +637,7 @@ class PreferencesPopup(CcpnDialog):
         self.userDataPathText.textChanged.connect(self._queueSetUserDataPath)
         # self.userDataPathText.setText(self.preferences.general.dataPath)
         self.userDataPathButton = Button(parent, grid=(row, 2), callback=self._getUserDataPath, icon='icons/directory',
-                                     hPolicy='fixed')
+                                         hPolicy='fixed')
 
         # add validate frame
         row += 1
@@ -784,32 +713,32 @@ class PreferencesPopup(CcpnDialog):
 
         row += 1
         self.showToolbarLabel = Label(parent, text="Show ToolBar(s): ", grid=(row, 0))
-        self.showToolbarBox = CheckBox(parent, grid=(row, 1))#, checked=self.preferences.general.showToolbar)
+        self.showToolbarBox = CheckBox(parent, grid=(row, 1))  #, checked=self.preferences.general.showToolbar)
         self.showToolbarBox.toggled.connect(partial(self._queueToggleGeneralOptions, 'showToolbar'))
 
         row += 1
         self.spectrumBorderLabel = Label(parent, text="Show Spectrum Border: ", grid=(row, 0))
-        self.spectrumBorderBox = CheckBox(parent, grid=(row, 1))#, checked=self.preferences.general.showSpectrumBorder)
+        self.spectrumBorderBox = CheckBox(parent, grid=(row, 1))  #, checked=self.preferences.general.showSpectrumBorder)
         self.spectrumBorderBox.toggled.connect(partial(self._queueToggleGeneralOptions, 'showSpectrumBorder'))
 
         row += 1
         self.showGridLabel = Label(parent, text="Show Grids: ", grid=(row, 0))
-        self.showGridBox = CheckBox(parent, grid=(row, 1))#, checked=self.preferences.general.showGrid)
+        self.showGridBox = CheckBox(parent, grid=(row, 1))  #, checked=self.preferences.general.showGrid)
         self.showGridBox.toggled.connect(partial(self._queueToggleGeneralOptions, 'showGrid'))
 
         row += 1
         self.showCrosshairLabel = Label(parent, text="Show Crosshairs: ", grid=(row, 0))
-        self.showCrosshairBox = CheckBox(parent, grid=(row, 1))#, checked=self.preferences.general.showCrosshair)
+        self.showCrosshairBox = CheckBox(parent, grid=(row, 1))  #, checked=self.preferences.general.showCrosshair)
         self.showCrosshairBox.toggled.connect(partial(self._queueToggleGeneralOptions, 'showCrosshair'))
 
         row += 1
         self.showDoubleCrosshairLabel = Label(parent, text="    - and Double Crosshairs: ", grid=(row, 0))
-        self.showDoubleCrosshairBox = CheckBox(parent, grid=(row, 1))#, checked=self.preferences.general.showDoubleCrosshair)
+        self.showDoubleCrosshairBox = CheckBox(parent, grid=(row, 1))  #, checked=self.preferences.general.showDoubleCrosshair)
         self.showDoubleCrosshairBox.toggled.connect(partial(self._queueToggleGeneralOptions, 'showDoubleCrosshair'))
 
         row += 1
         self.showLastAxisOnlyLabel = Label(parent, text="Share Y Axis: ", grid=(row, 0))
-        self.showLastAxisOnlyBox = CheckBox(parent, grid=(row, 1))#, checked=self.preferences.general.lastAxisOnly)
+        self.showLastAxisOnlyBox = CheckBox(parent, grid=(row, 1))  #, checked=self.preferences.general.lastAxisOnly)
         self.showLastAxisOnlyBox.toggled.connect(partial(self._queueToggleGeneralOptions, 'lastAxisOnly'))
 
         row += 1
@@ -918,7 +847,7 @@ class PreferencesPopup(CcpnDialog):
 
         row += 1
         self.showZoomXLimitApplyLabel = Label(parent, text="Apply Zoom limit to X axis: ", grid=(row, 0))
-        self.showZoomXLimitApplyBox = CheckBox(parent, grid=(row, 1))#, checked=self.preferences.general.zoomXLimitApply)
+        self.showZoomXLimitApplyBox = CheckBox(parent, grid=(row, 1))  #, checked=self.preferences.general.zoomXLimitApply)
         self.showZoomXLimitApplyBox.toggled.connect(partial(self._queueToggleGeneralOptions, 'zoomXLimitApply'))
 
         # self._toggleGeneralOptions('zoomXLimitApply', True)
@@ -927,7 +856,7 @@ class PreferencesPopup(CcpnDialog):
 
         row += 1
         self.showZoomYLimitApplyLabel = Label(parent, text="Apply Zoom limit to Y axis: ", grid=(row, 0))
-        self.showZoomYLimitApplyBox = CheckBox(parent, grid=(row, 1))#, checked=self.preferences.general.zoomYLimitApply)
+        self.showZoomYLimitApplyBox = CheckBox(parent, grid=(row, 1))  #, checked=self.preferences.general.zoomYLimitApply)
         self.showZoomYLimitApplyBox.toggled.connect(partial(self._queueToggleGeneralOptions, 'zoomYLimitApply'))
 
         # self._toggleGeneralOptions('zoomYLimitApply', True)
@@ -1003,7 +932,7 @@ class PreferencesPopup(CcpnDialog):
 
         row += 1
         self.autoCorrectLabel = Label(parent, text="Autocorrect Colours: ", grid=(row, 0))
-        self.autoCorrectBox = CheckBox(parent, grid=(row, 1))#, checked=self.preferences.general.autoCorrectColours)
+        self.autoCorrectBox = CheckBox(parent, grid=(row, 1))  #, checked=self.preferences.general.autoCorrectColours)
         self.autoCorrectBox.toggled.connect(partial(self._queueToggleGeneralOptions, 'autoCorrectColours'))
 
         row += 1
@@ -1039,16 +968,16 @@ class PreferencesPopup(CcpnDialog):
 
         row += 1
         self.singleContoursLabel = Label(parent, text="Generate Single Contours\n   per Plane: ", grid=(row, 0))
-        self.singleContoursBox = CheckBox(parent, grid=(row, 1))#, checked=self.preferences.general.generateSinglePlaneContours)
+        self.singleContoursBox = CheckBox(parent, grid=(row, 1))  #, checked=self.preferences.general.generateSinglePlaneContours)
         self.singleContoursBox.toggled.connect(partial(self._queueToggleGeneralOptions, 'generateSinglePlaneContours'))
 
         # add spacer to stop columns changing width
         row += 1
-        Spacer(parent, 2, 2,
+        Spacer(parent, 15, 2,
                QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.MinimumExpanding,
-               grid=(row, 3), gridSpan=(1, 1))
+               grid=(row, 1), gridSpan=(1, 1))
 
-    @queueStateChange(_verifyApply)
+    @queueStateChange(_verifyPopupApply)
     def _queueChangeMarksColourIndex(self, value):
         if value >= 0 and list(spectrumColours.keys())[value] != self.preferences.general.defaultMarksColour:
             return partial(self._changeMarksColourIndex, value)
@@ -1077,7 +1006,7 @@ class PreferencesPopup(CcpnDialog):
 
         row = 0
         self.pymolPathLabel = Label(parent, "Pymol Path", grid=(row, 0), )
-        self.pymolPath = PathEdit(parent, grid=(row, 1), hAlign='l')
+        self.pymolPath = PathEdit(parent, grid=(row, 1), hAlign='t')
         self.pymolPath.setMinimumWidth(LineEditsMinimumWidth)
         self.pymolPath.textChanged.connect(self._queueSetPymolPath)
         # self.pymolPath.setText(self.preferences.externalPrograms.pymol)
@@ -1086,6 +1015,12 @@ class PreferencesPopup(CcpnDialog):
 
         self.testPymolPathButton = Button(parent, grid=(row, 3), callback=self._testPymol,
                                           text='test', hPolicy='fixed')
+
+        # add spacer to stop columns changing width
+        row += 1
+        Spacer(parent, 15, 2,
+               QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.MinimumExpanding,
+               grid=(row, 1), gridSpan=(1, 1))
 
     def _testPymol(self):
         program = self.pymolPath.get()
@@ -1135,7 +1070,7 @@ class PreferencesPopup(CcpnDialog):
     #                 name='standard').findFirstDataUrl(name='remoteData')
     #         dataUrl.url = Implementation.Url(path=newPath)
 
-    @queueStateChange(_verifyApply)
+    @queueStateChange(_verifyPopupApply)
     def _queueSetUserDataPath(self):
         value = self.userDataPathText.get()
         if value != self.preferences.general.dataPath:
@@ -1158,7 +1093,7 @@ class PreferencesPopup(CcpnDialog):
             # self._setUserDataPath()
             # self.preferences.general.dataPath = directory[0]
 
-    @queueStateChange(_verifyApply)
+    @queueStateChange(_verifyPopupApply)
     def _queueSetUserWorkingPath(self):
         value = self.userWorkingPathData.get()
         if value != self.preferences.general.userWorkingPath:
@@ -1181,7 +1116,7 @@ class PreferencesPopup(CcpnDialog):
             # self._setUserWorkingPath()
             # self.preferences.general.userWorkingPath = directory[0]
 
-    @queueStateChange(_verifyApply)
+    @queueStateChange(_verifyPopupApply)
     def _queueSetAuxiliaryFilesPath(self):
         value = self.auxiliaryFilesData.get()
         if value != self.preferences.general.auxiliaryFilesPath:
@@ -1204,7 +1139,7 @@ class PreferencesPopup(CcpnDialog):
             # self._setAuxiliaryFilesPath()
             # self.preferences.general.auxiliaryFilesPath = directory[0]
 
-    @queueStateChange(_verifyApply)
+    @queueStateChange(_verifyPopupApply)
     def _queueSetValidateDataUrl(self, dataUrl, newUrl, urlValid, dim):
         """Set the new url in the dataUrl
         dim is required by the decorator to give a unique id for dataUrl row
@@ -1224,7 +1159,7 @@ class PreferencesPopup(CcpnDialog):
         # if urlValid:
         self._validateFrame.dataUrlFunc(dataUrl, newUrl)
 
-    @queueStateChange(_verifyApply)
+    @queueStateChange(_verifyPopupApply)
     def _queueSetValidateFilePath(self, spectrum, filePath, dim):
         """Set the new filePath for the spectrum
         dim is required by the decorator to give a unique id for filePath row
@@ -1232,7 +1167,7 @@ class PreferencesPopup(CcpnDialog):
         if filePath != spectrum.filePath:
             return partial(self._validateFrame.filePathFunc, spectrum, filePath)
 
-    @queueStateChange(_verifyApply)
+    @queueStateChange(_verifyPopupApply)
     def _queueSetuserLayoutsPath(self):
         value = self.userLayoutsLe.get()
         if value != self.preferences.general.userLayoutsPath:
@@ -1255,7 +1190,7 @@ class PreferencesPopup(CcpnDialog):
             # self._setuserLayoutsPath()
             # self.preferences.general.userLayoutsPath = directory[0]
 
-    @queueStateChange(_verifyApply)
+    @queueStateChange(_verifyPopupApply)
     def _queueSetMacroFilesPath(self):
         value = self.macroPathData.get()
         if value != self.preferences.general.userMacroPath:
@@ -1278,7 +1213,7 @@ class PreferencesPopup(CcpnDialog):
             # self._setMacroFilesPath()
             # self.preferences.general.userMacroPath = directory[0]
 
-    @queueStateChange(_verifyApply)
+    @queueStateChange(_verifyPopupApply)
     def _queueSetPluginFilesPath(self):
         value = self.pluginPathData.get()
         if value != self.preferences.general.userPluginPath:
@@ -1301,7 +1236,7 @@ class PreferencesPopup(CcpnDialog):
             # self._setPluginFilesPath()
             # self.preferences.general.pluginMacroPath = directory[0]
 
-    @queueStateChange(_verifyApply)
+    @queueStateChange(_verifyPopupApply)
     def _queueSetPipesFilesPath(self):
         value = self.pipesPathData.get()
         if value != self.preferences.general.userExtensionPath:
@@ -1328,16 +1263,16 @@ class PreferencesPopup(CcpnDialog):
         # newPath = self.pipesPathData.text()
         self.preferences.general.userExtensionPath = value
 
-    @queueStateChange(_verifyApply)
+    @queueStateChange(_verifyPopupApply)
     def _queueChangeLanguage(self, value):
         value = languages[value]
         if value != self.preferences.general.language:
             return partial(self._changeLanguage, value)
 
     def _changeLanguage(self, value):
-        self.preferences.general.language = value       #(languages[value])
+        self.preferences.general.language = value  #(languages[value])
 
-    @queueStateChange(_verifyApply)
+    @queueStateChange(_verifyPopupApply)
     def _queueChangeColourScheme(self, value):
         value = COLOUR_SCHEMES[value]
         if value != self.preferences.general.colourScheme:
@@ -1345,9 +1280,9 @@ class PreferencesPopup(CcpnDialog):
 
     def _changeColourScheme(self, value):
         # self._oldColourScheme = self.preferences.general.colourScheme
-        self.preferences.general.colourScheme = value       #(COLOUR_SCHEMES[value])
+        self.preferences.general.colourScheme = value  #(COLOUR_SCHEMES[value])
 
-    @queueStateChange(_verifyApply)
+    @queueStateChange(_verifyPopupApply)
     def _queueToggleGeneralOptions(self, preference, checked):
         if checked != self.preferences.general[preference]:
             return partial(self._toggleGeneralOptions, preference, checked)
@@ -1364,7 +1299,7 @@ class PreferencesPopup(CcpnDialog):
         if preference == 'autoBackupEnabled':
             self.application.updateAutoBackup()
 
-    @queueStateChange(_verifyApply)
+    @queueStateChange(_verifyPopupApply)
     def _queueSetPymolPath(self):
         value = self.pymolPath.get()
         if 'externalPrograms' in self.preferences:
@@ -1387,7 +1322,7 @@ class PreferencesPopup(CcpnDialog):
             self.pymolPath.setText(file)
             # self._setPymolPath()
 
-    @queueStateChange(_verifyApply)
+    @queueStateChange(_verifyPopupApply)
     def _queueSetAutoBackupFrequency(self):
         textFromValue = self.autoBackupFrequencyData.textFromValue
         value = self.autoBackupFrequencyData.get()
@@ -1403,7 +1338,7 @@ class PreferencesPopup(CcpnDialog):
         self.preferences.general.autoBackupFrequency = value
         self.application.updateAutoBackup()
 
-    @queueStateChange(_verifyApply)
+    @queueStateChange(_verifyPopupApply)
     def _queueSetRegionPadding(self):
         textFromValue = self.regionPaddingData.textFromValue
         value = self.regionPaddingData.get()
@@ -1418,7 +1353,7 @@ class PreferencesPopup(CcpnDialog):
         #     return
         self.preferences.general.stripRegionPadding = value
 
-    @queueStateChange(_verifyApply)
+    @queueStateChange(_verifyPopupApply)
     def _queueSetDropFactor(self):
         textFromValue = self.dropFactorData.textFromValue
         value = self.dropFactorData.get()
@@ -1435,7 +1370,7 @@ class PreferencesPopup(CcpnDialog):
         #     return
         self.preferences.general.peakDropFactor = value
 
-    @queueStateChange(_verifyApply)
+    @queueStateChange(_verifyPopupApply)
     def _queueSetSymbolSizePixel(self):
         value = self.symbolSizePixelData.get()
         if value != self.preferences.general.symbolSizePixel:
@@ -1451,7 +1386,7 @@ class PreferencesPopup(CcpnDialog):
         #     return
         self.preferences.general.symbolSizePixel = value
 
-    @queueStateChange(_verifyApply)
+    @queueStateChange(_verifyPopupApply)
     def _queueSetSymbolThickness(self):
         value = self.symbolThicknessData.get()
         if value != self.preferences.general.symbolThickness:
@@ -1467,7 +1402,7 @@ class PreferencesPopup(CcpnDialog):
         #     return
         self.preferences.general.symbolThickness = value
 
-    @queueStateChange(_verifyApply)
+    @queueStateChange(_verifyPopupApply)
     def _queueSetContourThickness(self):
         value = self.contourThicknessData.get()
         if value != self.preferences.general.contourThickness:
@@ -1491,7 +1426,7 @@ class PreferencesPopup(CcpnDialog):
     # def _toggleSpectralOptions(self, preference, checked):
     #     self.preferences.spectra[preference] = str(checked)
 
-    @queueStateChange(_verifyApply)
+    @queueStateChange(_verifyPopupApply)
     def _queueSetAnnotations(self):
         value = self.annotationsData.getIndex()
         if value != self.preferences.general.annotationType:
@@ -1507,7 +1442,7 @@ class PreferencesPopup(CcpnDialog):
         #     return
         self.preferences.general.annotationType = value
 
-    @queueStateChange(_verifyApply)
+    @queueStateChange(_verifyPopupApply)
     def _queueSetSymbol(self):
         value = self.symbol.getIndex()
         if value != self.preferences.general.symbolType:
@@ -1523,7 +1458,7 @@ class PreferencesPopup(CcpnDialog):
         #     return
         self.preferences.general.symbolType = value
 
-    @queueStateChange(_verifyApply)
+    @queueStateChange(_verifyPopupApply)
     def _queueSetZoomCentre(self):
         value = self.zoomCentre.getIndex()
         if value != self.preferences.general.zoomCentreType:
@@ -1539,7 +1474,7 @@ class PreferencesPopup(CcpnDialog):
         #     return
         self.preferences.general.zoomCentreType = value
 
-    @queueStateChange(_verifyApply)
+    @queueStateChange(_verifyPopupApply)
     def _queueSetZoomPercent(self):
         textFromValue = self.zoomPercentData.textFromValue
         value = self.zoomPercentData.get()
@@ -1557,7 +1492,7 @@ class PreferencesPopup(CcpnDialog):
         #     return
         self.preferences.general.zoomPercent = value
 
-    @queueStateChange(_verifyApply)
+    @queueStateChange(_verifyPopupApply)
     def _queueSetStripWidthZoomPercent(self):
         textFromValue = self.stripWidthZoomPercentData.textFromValue
         value = self.stripWidthZoomPercentData.get()
@@ -1575,7 +1510,7 @@ class PreferencesPopup(CcpnDialog):
         #     return
         self.preferences.general.stripWidthZoomPercent = value
 
-    @queueStateChange(_verifyApply)
+    @queueStateChange(_verifyPopupApply)
     def _queueSetMatchAxisCode(self):
         value = self.matchAxisCode.getIndex()
         if value != self.preferences.general.matchAxisCode:
@@ -1591,7 +1526,7 @@ class PreferencesPopup(CcpnDialog):
         #     return
         self.preferences.general.matchAxisCode = value
 
-    @queueStateChange(_verifyApply)
+    @queueStateChange(_verifyPopupApply)
     def _queueSetAxisOrderingOptions(self):
         value = self.axisOrderingOptions.getIndex()
         if value != self.preferences.general.axisOrderingOptions:
@@ -1607,7 +1542,7 @@ class PreferencesPopup(CcpnDialog):
         #     return
         self.preferences.general.axisOrderingOptions = value
 
-    @queueStateChange(_verifyApply)
+    @queueStateChange(_verifyPopupApply)
     def _queueSetPeakFittingMethod(self):
         value = PEAKFITTINGDEFAULTS[self.peakFittingMethod.getIndex()]
         if value != self.preferences.general.peakFittingMethod:
@@ -1623,7 +1558,7 @@ class PreferencesPopup(CcpnDialog):
         #     return
         self.preferences.general.peakFittingMethod = value
 
-    @queueStateChange(_verifyApply)
+    @queueStateChange(_verifyPopupApply)
     def _queueSetAspect(self, aspect):
         textFromValue = self.aspectData[aspect].textFromValue
         value = self.aspectData[aspect].get()
@@ -1641,7 +1576,7 @@ class PreferencesPopup(CcpnDialog):
         #     return
         self.preferences.general.aspectRatios[aspect] = value
 
-    @queueStateChange(_verifyApply)
+    @queueStateChange(_verifyPopupApply)
     def _queueSetIntensityLimit(self):
         textFromValue = self.showIntensityLimitBox.textFromValue
         value = self.showIntensityLimitBox.get()
@@ -1659,7 +1594,7 @@ class PreferencesPopup(CcpnDialog):
         #     return
         self.preferences.general.intensityLimit = value
 
-    @queueStateChange(_verifyApply)
+    @queueStateChange(_verifyPopupApply)
     def _queueSetMultipletAveraging(self):
         value = self.multipletAveraging.getIndex()
         if value != self.preferences.general.multipletAveraging:
@@ -1675,7 +1610,7 @@ class PreferencesPopup(CcpnDialog):
         #     return
         self.preferences.general.multipletAveraging = value
 
-    @queueStateChange(_verifyApply)
+    @queueStateChange(_verifyPopupApply)
     def _queueSetVolumeIntegralLimit(self):
         textFromValue = self.volumeIntegralLimitData.textFromValue
         value = self.volumeIntegralLimitData.get()
@@ -1693,7 +1628,7 @@ class PreferencesPopup(CcpnDialog):
         #     return
         self.preferences.general.volumeIntegralLimit = value
 
-    @queueStateChange(_verifyApply)
+    @queueStateChange(_verifyPopupApply)
     def _queueSetUseProxy(self):
         value = self.useProxyBox.get()
         # set the state of the other buttons
@@ -1710,7 +1645,7 @@ class PreferencesPopup(CcpnDialog):
         # set the state of the other buttons
         # self._setProxyButtons()
 
-    @queueStateChange(_verifyApply)
+    @queueStateChange(_verifyPopupApply)
     def _queueUseSystemProxy(self):
         value = self.useSystemProxyBox.get()
         # set the state of the other buttons
@@ -1727,7 +1662,7 @@ class PreferencesPopup(CcpnDialog):
         # set the state of the other buttons
         # self._setProxyButtons()
 
-    @queueStateChange(_verifyApply)
+    @queueStateChange(_verifyPopupApply)
     def _queueSetProxyAddress(self):
         value = self.proxyAddressData.get()
         if value != self.preferences.proxySettings.proxyAddress:
@@ -1740,7 +1675,7 @@ class PreferencesPopup(CcpnDialog):
         #     return
         self.preferences.proxySettings.proxyAddress = value
 
-    @queueStateChange(_verifyApply)
+    @queueStateChange(_verifyPopupApply)
     def _queueSetProxyPort(self):
         value = self.proxyPortData.get()
         if value != self.preferences.proxySettings.proxyPort:
@@ -1753,7 +1688,7 @@ class PreferencesPopup(CcpnDialog):
         #     return
         self.preferences.proxySettings.proxyPort = value
 
-    @queueStateChange(_verifyApply)
+    @queueStateChange(_verifyPopupApply)
     def _queueSetUseProxyPassword(self):
         value = self.useProxyPasswordBox.get()
         # set the state of the other buttons
@@ -1770,7 +1705,7 @@ class PreferencesPopup(CcpnDialog):
         # set the state of the other buttons
         # self._setProxyButtons()
 
-    @queueStateChange(_verifyApply)
+    @queueStateChange(_verifyPopupApply)
     def _queueSetProxyUsername(self):
         value = self.proxyUsernameData.get()
         if value != self.preferences.proxySettings.proxyUsername:
@@ -1783,7 +1718,7 @@ class PreferencesPopup(CcpnDialog):
         #     return
         self.preferences.proxySettings.proxyUsername = value
 
-    @queueStateChange(_verifyApply)
+    @queueStateChange(_verifyPopupApply)
     def _queueSetProxyPassword(self):
         value = self._userPreferences.encodeValue(str(self.proxyPasswordData.get()))
         if value != self.preferences.proxySettings.proxyPassword:
@@ -1799,8 +1734,8 @@ class PreferencesPopup(CcpnDialog):
     def _setProxyButtons(self):
         """Enable/disable proxy widgets based on check boxes
         """
-        usePW = self.useProxyPasswordBox.get()          #self.preferences.proxySettings.useProxyPassword
-        useP = self.useProxyBox.get()                   #self.preferences.proxySettings.useProxy
+        usePW = self.useProxyPasswordBox.get()  #self.preferences.proxySettings.useProxyPassword
+        useP = self.useProxyBox.get()  #self.preferences.proxySettings.useProxy
         useSP = False
         usePEnabled = useP and not useSP
 

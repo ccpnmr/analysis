@@ -33,12 +33,11 @@ from ccpn.ui.gui.widgets.PulldownList import PulldownList
 from ccpn.ui.gui.widgets.DoubleSpinbox import DoubleSpinbox
 from ccpn.ui.gui.widgets.CheckBox import CheckBox
 from ccpn.ui.gui.widgets.Spacer import Spacer
-from ccpn.ui.gui.popups.Dialog import handleDialogApply, CcpnDialogMainWidget
+from ccpn.ui.gui.popups.Dialog import handleDialogApply, CcpnDialogMainWidget, _verifyPopupApply
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
 from ccpn.core.lib.ContextManagers import undoStackBlocking, queueStateChange
 from ccpn.core.PMIListABC import MERITENABLED, MERITTHRESHOLD, \
     SYMBOLCOLOUR, TEXTCOLOUR, LINECOLOUR, MERITCOLOUR
-from ccpn.ui.gui.popups.PreferencesPopup import _verifyApply
 from ccpn.util.AttrDict import AttrDict
 
 
@@ -153,22 +152,14 @@ class PMIListPropertiesPopupABC(CcpnDialogMainWidget):
                QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.MinimumExpanding,
                grid=(self._rowForNewItems, 3), gridSpan=(1, 1))
 
-        self._setButtons()
+        super().__postInit__()
+
         self._okButton = self.dialogButtons.button(self.OKBUTTON)
         self._cancelButton = self.dialogButtons.button(self.CANCELBUTTON)
         self._helpButton = self.dialogButtons.button(self.HELPBUTTON)
         self._revertButton = self.dialogButtons.button(self.RESETBUTTON)
 
         self.COMPARELIST = AttrDict(self.listViewSettings)
-
-        # self.adjustSize()
-        self.setFixedSize(self._size if self._size else self.sizeHint())
-
-    # def resizeEvent(self, a0: QtGui.QResizeEvent) -> None:
-    #     super().resizeEvent(a0)
-    #
-    #     # self.adjustSize()
-    #     self.setFixedSize(self._size if self._size else self.sizeHint())
 
     def _addButtonOption(self, pulldowns, attrib, row):
         """Add a labelled pulldown list for the selected attribute
@@ -354,7 +345,7 @@ class PMIListPropertiesPopupABC(CcpnDialogMainWidget):
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    @queueStateChange(_verifyApply)
+    @queueStateChange(_verifyPopupApply)
     def _queueSetColour(self, pl, attrib, dim):
         value = pl.currentText()
         colour = Colour.getSpectrumColour(value, defaultReturn='#')
@@ -364,7 +355,7 @@ class PMIListPropertiesPopupABC(CcpnDialogMainWidget):
     def _setColour(self, attrib, value):
         setattr(self.ccpnList, attrib, value)
 
-    @queueStateChange(_verifyApply)
+    @queueStateChange(_verifyPopupApply)
     def _queueSetMeritEnabled(self):
         value = self.meritEnabledBox.get()
         if value != getattr(self.COMPARELIST, MERITENABLED, False):
@@ -373,7 +364,7 @@ class PMIListPropertiesPopupABC(CcpnDialogMainWidget):
     def _setMeritEnabled(self, value):
         setattr(self.ccpnList, MERITENABLED, value)
 
-    @queueStateChange(_verifyApply)
+    @queueStateChange(_verifyPopupApply)
     def _queueSetMeritThreshold(self):
         value = self.meritThresholdData.get()
         # set the state of the other buttons

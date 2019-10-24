@@ -15,7 +15,7 @@
         "autoSetDataPath": false,
         "dataPath": "~",
         "useNative": false,
-        "useNativeMenus" : true,
+        "useNativeMenus" : false,
         "useNativeWebbrowser": false,
         "keepSpectraInsideProject": false,
         "showToolbar": true,

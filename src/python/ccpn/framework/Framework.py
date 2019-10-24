@@ -2030,7 +2030,8 @@ class Framework(NotifierBase):
         """
         from ccpn.ui.gui.popups.PreferencesPopup import PreferencesPopup
 
-        PreferencesPopup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow, preferences=self.preferences).exec_()
+        popup = PreferencesPopup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow, preferences=self.preferences)
+        popup.exec_()
 
     def getSavedLayoutPath(self):
         """Opens a saved Layout as dialog box and gets directory specified in the file dialog."""

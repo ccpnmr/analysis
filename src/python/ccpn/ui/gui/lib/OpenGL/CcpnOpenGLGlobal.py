@@ -36,8 +36,8 @@ from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLShader import ShaderProgram
 
 DEFAULTFONT = 'OpenSans-Regular'
 SUBSTITUTEFONT = 'OpenSans-Regular'
-DEFAULTFONTSIZE = '13'
-FONT_SIZES = [13,14,16]
+DEFAULTFONTSIZE = '26'
+FONT_SIZES = [13,14,16,26]
 fontList = []
 for size in FONT_SIZES:
     fontList.append(('glFont%i.fnt' % size, DEFAULTFONT,size))

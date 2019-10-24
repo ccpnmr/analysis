@@ -231,7 +231,7 @@ class GLString(GLVertexArray):
                  x=0.0, y=0.0,
                  ox=0.0, oy=0.0,
                  angle=0.0, width=None, height=None, GLContext=None, blendMode=True,
-                 clearArrays=False, serial=None):
+                 clearArrays=False, serial=None, scale=2):
         super().__init__(renderMode=GLRENDERMODE_DRAW, blendMode=blendMode,
                          GLContext=GLContext, drawMode=GL.GL_TRIANGLES,
                          dimension=2, clearArrays=clearArrays)
@@ -246,6 +246,7 @@ class GLString(GLVertexArray):
         self.colour = colour
         self._position = (x, y)
         self._offset = (ox, oy)
+        self.scale = scale
 
         self.buildString()
 
@@ -260,7 +261,7 @@ class GLString(GLVertexArray):
         self.pid = self.object.pid if hasattr(self.object, 'pid') else None
 
         # each object can have a unique serial number if required
-        self.height = font.height
+        self.height = font.height /self.scale
         self.width = 0
 
         lenText = len(text)
@@ -319,8 +320,8 @@ class GLString(GLVertexArray):
 
                 # attribs = [[x, y], [x, y], [x, y], [x, y]]
                 # offsets = [[x, y], [x, y], [x, y], [x, y]]
-
-                self.vertices[i8:i8 + 8] = (x0, y0, x0, y1, x1, y1, x1, y0)
+                self.vertices[i8:i8 + 8] = (x0/self.scale, y0/self.scale, x0/self.scale, y1/self.scale,
+                                            x1/self.scale, y1/self.scale, x1/self.scale, y0/self.scale)
                 self.indices[i6:i6 + 6] = (i4, i4 + 1, i4 + 2, i4, i4 + 2, i4 + 3)
                 self.texcoords[i8:i8 + 8] = (u0, v0, u0, v1, u1, v1, u1, v0)
                 self.colors[i16:i16 + 16] = colour * 4

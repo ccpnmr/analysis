@@ -63,11 +63,14 @@ FONT_FILE = 0
 FULL_FONT_NAME = 1
 
 class CcpnGLFont():
-    def __init__(self, fileName=None, base=0, fontTransparency=None, activeTexture=0):
+    def __init__(self, fileName=None, base=0, fontTransparency=None, activeTexture=0, scale=None):
         self.fontName = None
         self.fontGlyph = [None] * 256
         self.base = base
+        self.scale=scale
 
+        if scale == None:
+            raise Exception('scale must be defined for font %s ' % fileName)
         print('open font', fileName)
         with open(fileName, 'r') as op:
             self.fontInfo = op.read().split('\n')
@@ -80,7 +83,7 @@ class CcpnGLFont():
         fontSizeString = fullFontNameString.split()[-1]
 
         self.fontName = fullFontNameString.replace(fontSizeString,'').strip()
-        self.fontSize = int(fontSizeString.replace('pt',''))
+        self.fontSize = int(fontSizeString.replace('pt',''))/scale
 
         self.width = 0
         self.height = 0
@@ -151,12 +154,12 @@ class CcpnGLFont():
 
                             if chrNum == 65:
                                 # use 'A' for the referencing the tab size
-                                self.width = gw
-                                self.height = gh
+                                self.width = gw / self.scale
+                                self.height = gh /self.scale
 
                             if chrNum == 32:
                                 # store the width of the space character
-                                self.spaceWidth = gw
+                                self.spaceWidth = gw /self.scale
 
                     else:
                         exitDims = True
@@ -182,11 +185,17 @@ class CcpnGLFont():
                     exitKerns = True
                 row += 1
 
-        width, height, ascender, descender = 0, 0, 0, 0
-        for c in range(0, 256):
-            if chrNum < 256 and self.fontGlyph[chrNum]:
-                width = max(width, self.fontGlyph[chrNum][GlyphOrigW])
-                height = max(height, self.fontGlyph[chrNum][GlyphOrigH])
+        # GST Dead Code
+        # width, height, ascender, descender = 0, 0, 0, 0
+        # for c in range(0, 256):
+        #     if chrNum < 256 and self.fontGlyph[chrNum]:
+        #         width = max(width, self.fontGlyph[chrNum][GlyphOrigW])
+        #         height = max(height, self.fontGlyph[chrNum][GlyphOrigH])
+        #
+        # height = height / scale
+        # width =  width / scale
+        #
+        # width, height, ascender, descender = None, None, None, None
 
         self.textureId = GL.glGenTextures(1)
         # GL.glEnable(GL.GL_TEXTURE_2D)
@@ -237,7 +246,7 @@ class GLString(GLVertexArray):
                          dimension=2, clearArrays=clearArrays)
         if text is None:
             text = ''
-        # print('text', text, font)
+
         self.text = text
         self.font = font
         self.object = obj
@@ -261,7 +270,7 @@ class GLString(GLVertexArray):
         self.pid = self.object.pid if hasattr(self.object, 'pid') else None
 
         # each object can have a unique serial number if required
-        self.height = font.height /self.scale
+        self.height = font.height
         self.width = 0
 
         lenText = len(text)
@@ -333,8 +342,15 @@ class GLString(GLVertexArray):
                 self.width = max(self.width, penX)
 
             if (c == 32):  # space
+                # print('space width',font.spaceWidth)
+                # print(penX)
                 penX += font.spaceWidth
+                # print(font.spaceWidth)
+                # print(penX)
+                # print(self.width)
                 self.width = max(self.width, penX)
+                # print(self.width)
+                # print('end space')
 
             elif (c == 10):  # newline
                 penX = 0
@@ -344,8 +360,8 @@ class GLString(GLVertexArray):
 
                 # occasional strange - RuntimeWarning: invalid value encountered in add
                 # self.vertices[:, 1] += font.height
-                self.vertices[1::2] += font.height / self.scale
-                self.height += font.height / self.scale
+                self.vertices[1::2] += font.height
+                self.height += font.height
 
             elif (c == 9):  # tab
                 penX = penX + 4 * font.width
@@ -353,7 +369,7 @@ class GLString(GLVertexArray):
 
             # penY = penY + glyph[GlyphHeight]
             prev = charCode
-
+        # print(text,self.width, len(text))
         # set the offsets for the characters top the desired coordinates
         self.numVertices = len(self.vertices) // 2
         self.attribs = np.array((x + ox, y + oy) * self.numVertices, dtype=np.float32)

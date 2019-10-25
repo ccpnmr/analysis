@@ -181,32 +181,28 @@ class GuiStripNd(GuiStrip):
 
         from ccpn.ui.gui.widgets.Spacer import Spacer
 
-        self._fr = []
         self.planeAxisBars = ()
 
-        self._frameGuide = ScrollFrame(self, setLayout=True, spacing=(2, 2),
-                                       scrollBarPolicies=('never', 'never'), margins=(5, 5, 5, 5),
-                                       grid=(1, 0), gridSpan=(1, 1))
+        # a large(ish) unbound widget to contain the text - may need more rows
+        self._frameGuide = OpenGLOverlayFrame(self, setLayout=True)
+        self._frameGuide.setFixedSize(400, 400)
 
+        # add spacer to the top left corner
         self._frameGuide.addSpacer(10, 30, grid=(1, 0))
         ii = 0
         for ii, axis in enumerate(self.axisCodes[2:]):
             # add a plane widget for each dimension > 1
             fr = PlaneAxisWidget(qtParent=self._frameGuide, mainWindow=self.mainWindow, strip=self, axis=ii + 2,
                                  grid=(ii + 2, 1), gridSpan=(1, 1))
-            self._fr.append(fr)
+
+            # fill the widget
             fr._populate()
 
             self.planeAxisBars += (fr,)
 
         Spacer(self._frameGuide, 1, 1, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding, grid=(ii + 3, 2))
-        self._frameGuide.setVisible(False)
 
-        self.testFrame = OpenGLOverlayFrame(self, setLayout=True, grid=(1, 0), gridSpan=(4, 4))
-        self.testFrame._setMaskToChildren()
-
-        self._fr.append(self._frameGuide.scrollArea)
-
+        # NOTE make sure that the widget masks are set - not sure if required here
         self._resize()
 
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -214,25 +210,17 @@ class GuiStripNd(GuiStrip):
         if len(self.orderedAxes) < 3:  # hide if only 2D
             self._stripToolBarWidget.setFixedHeight(0)
 
-        #self.mouseDragEvent = self._mouseDragEvent
-        # self.updateRegion = self._updateRegion
-
-        # self.plotWidget.scene().sigMouseMoved.connect(self._mouseMoved)
-
         self.setMinimumWidth(150)
         self.setMinimumHeight(150)
 
         # self.planeToolbar.setSizePolicy(QtWidgets.QSizePolicy.Ignored, QtWidgets.QSizePolicy.MinimumExpanding)
 
-        # self._widgets = []
-        # while layout.count():  # clear the layout and store
-        #   self._widgets.append(layout.takeAt(0).widget())
-        # self._widgets.insert(currentIndex, self)
-
-        # self._printWidgets(self)
-
-        # self.plotWidget.setSizePolicy(QtWidgets.QSizePolicy.Ignored, QtWidgets.QSizePolicy.Preferred)
         self.setSizePolicy(QtWidgets.QSizePolicy.Ignored, QtWidgets.QSizePolicy.Preferred)
+
+    def _resize(self):
+        """Resize event to handle resizing of frames that overlay the OpenGL frame
+        """
+        self._frameGuide._setMaskToChildren()
 
     def _printWidgets(self, wid, level=0):
         try:
@@ -702,11 +690,6 @@ class GuiStripNd(GuiStrip):
                         return peakListView
 
         return None
-
-    def resizeEvent(self, event):
-        super(GuiStripNd, self).resizeEvent(event)
-        # call subclass _resize event
-        # self._resize()
 
         # if hasattr(self, 'spectrumViews'):
         #     for spectrumView in self.spectrumViews:

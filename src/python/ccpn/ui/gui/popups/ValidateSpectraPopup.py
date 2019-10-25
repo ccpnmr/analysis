@@ -900,8 +900,8 @@ class ValidateSpectraFrameABC(Frame):
             event.ignore()
             showWarning(str(self.windowTitle()), 'Project contains empty dataUrls')
 
-    def resizeEvent(self, a0: QtGui.QResizeEvent) -> None:
-        super().resizeEvent(a0)
+    def resizeEvent(self, ev) -> None:
+        super().resizeEvent(ev)
 
         def _getColWidths(layout):
             """Get the colWidths from the parentWidget layout

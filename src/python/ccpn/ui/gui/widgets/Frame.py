@@ -244,6 +244,9 @@ class ScrollableFrame2(Widget):
         return self._frame
 
 
+from ccpn.ui.gui.guiSettings import CCPNGLWIDGET_HEXFOREGROUND, CCPNGLWIDGET_HEXBACKGROUND, getColours
+
+
 class OpenGLOverlayFrame(Frame):
 
     def __init__(self, parent=None, showBorder=False, fShape=None, fShadow=None,
@@ -271,10 +274,10 @@ class OpenGLOverlayFrame(Frame):
             painter.end()
         super().paintEvent(ev)
 
-    def resizeEvent(self, a0: QtGui.QResizeEvent) -> None:
+    def resizeEvent(self, ev) -> None:
         """Resize event to handle resizing of frames that overlay the OpenGL frame
         """
-        super().resizeEvent(a0)
+        super().resizeEvent(ev)
         self._setMaskToChildren()
 
     def _resize(self):
@@ -294,8 +297,8 @@ class OpenGLOverlayFrame(Frame):
                              'font-family: %s;'
                              'font-size: %dpx;'
                              'qproperty-alignment: AlignLeft;'
-                             '}' % ('white',
-                                    'black',
+                             '}' % (getColours()[CCPNGLWIDGET_HEXFOREGROUND],
+                                    getColours()[CCPNGLWIDGET_HEXBACKGROUND],
                                     textFontLarge.fontName,
                                     textFontLarge.pointSize()))
         else:
@@ -303,13 +306,11 @@ class OpenGLOverlayFrame(Frame):
                              'padding: 0; '
                              'margin: 0px 0px 0px 0px;'
                              'color:  %s;'
-                             'background-color: %s;'
                              'border: 0 px;'
                              'font-family: %s;'
                              'font-size: %dpx;'
                              'qproperty-alignment: AlignLeft;'
-                             '}' % ('white',
-                                    'black',
+                             '}' % (getColours()[CCPNGLWIDGET_HEXFOREGROUND],
                                     textFontLarge.fontName,
                                     textFontLarge.pointSize()))
 
@@ -369,14 +370,6 @@ class ScrollFrame(OpenGLOverlayFrame):
         """Return the scrollbar widget; for external usage
         """
         return self._scrollArea
-
-    # def _setMaskToChildren(self):
-    #     """Set the mouse mask to only the children of the frame - required to make sections transparent
-    #     """
-    #     region = QtGui.QRegion(self.frameGeometry())
-    #     region -= QtGui.QRegion(self.geometry())
-    #     region += self.childrenRegion()
-    #     self.setMask(region)
 
 
 if __name__ == '__main__':

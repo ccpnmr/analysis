@@ -481,6 +481,7 @@ class _OpenGLFrameABC(OpenGLOverlayFrame):
             raise NotImplementedError("Code error: BUTTONS not implemented")
 
         # build the list of widgets in frame
+        col = 0
         for col, (widgetName, widgetType, initFunc, setFunc) in enumerate(self.BUTTONS):
             widget = widgetType(self, mainWindow=mainWindow, grid=(0, col), gridSpan=(1, 1))
             self._setStyle(widget)
@@ -491,6 +492,10 @@ class _OpenGLFrameABC(OpenGLOverlayFrame):
 
             # add the widget here
             setattr(self, widgetName, widget)
+
+        # add an expanding widget to the end of the row
+        Spacer(self, 2, 2, QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.Minimum,
+               grid=(0, col+1), gridSpan=(1, 1))
 
         # initialise the widgets
         for func, klass, widget in self._initFuncList:

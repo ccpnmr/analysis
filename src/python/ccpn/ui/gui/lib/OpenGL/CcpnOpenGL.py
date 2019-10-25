@@ -168,6 +168,9 @@ INTEGRALSELECT = Integral._pluralLinkName
 MULTIPLETSELECT = Multiplet._pluralLinkName
 SELECTOBJECTS = [PEAKSELECT, INTEGRALSELECT, MULTIPLETSELECT]
 
+CURSOR_SOURCE_NONE = None
+CURSOR_SOURCE_SELF = 'self'
+CURSOR_SOURCE_OTHER = 'other'
 
 class CcpnGLWidget(QOpenGLWidget):
     """Widget to handle all visible spectra/peaks/integrals/multiplets
@@ -303,6 +306,7 @@ class CcpnGLWidget(QOpenGLWidget):
         self._selectionMode = 0
         self._startCoordinate = None
         self._endCoordinate = None
+        self.cursorSource = CURSOR_SOURCE_NONE # can be CURSOR_SOURCE_NONE / CURSOR_SOURCE_SELF / CURSOR_SOURCE_OTHER
         self.cursorCoordinate = np.zeros((4,), dtype=np.float32)
         self.doubleCursorCoordinate = np.zeros((4,), dtype=np.float32)
 
@@ -2044,6 +2048,7 @@ class CcpnGLWidget(QOpenGLWidget):
         drag.exec_(QtCore.Qt.CopyAction)
 
     def mousePressIn1DArea(self, regions):
+        cursorCoordinate = self.getCurrentCursorCoordinate()
         for region in regions:
             if region._objectView and not region._objectView.isVisible():
                 continue
@@ -2072,7 +2077,7 @@ class CcpnGLWidget(QOpenGLWidget):
                     mid = np.median(thisRegion[1])
                     delta = (np.max(thisRegion[1]) - np.min(thisRegion[1])) / 2.0
                     inX = self._widthsChangedEnough((mid, 0.0),
-                                                    (self.cursorCoordinate[0], 0.0),
+                                                    (cursorCoordinate[0], 0.0),
                                                     tol=delta)
 
                     mx = np.max([thisRegion[0], np.max(thisRegion[2])])
@@ -2080,7 +2085,7 @@ class CcpnGLWidget(QOpenGLWidget):
                     mid = (mx + mn) / 2.0
                     delta = (mx - mn) / 2.0
                     inY = self._widthsChangedEnough((0.0, mid),
-                                                    (0.0, self.cursorCoordinate[1]),
+                                                    (0.0, cursorCoordinate[1]),
                                                     tol=delta)
                     if not inX and not inY:
                         self._dragRegions.add((region, 'v', 3))
@@ -2088,6 +2093,7 @@ class CcpnGLWidget(QOpenGLWidget):
         return self._dragRegions
 
     def mousePressInRegion(self, regions):
+        cursorCoordinate = self.getCurrentCursorCoordinate()
         for region in regions:
             if region._objectView and not region._objectView.isVisible():
                 continue
@@ -2095,13 +2101,13 @@ class CcpnGLWidget(QOpenGLWidget):
             if region.visible and region.movable:
                 if region.orientation == 'h':
                     if not self._widthsChangedEnough((0.0, region.values[0]),
-                                                     (0.0, self.cursorCoordinate[1]),
+                                                     (0.0, cursorCoordinate[1]),
                                                      tol=abs(3 * self.pixelY)):
                         self._dragRegions.add((region, 'h', 0))  # line 0 of h-region
                         # break
 
                     elif not self._widthsChangedEnough((0.0, region.values[1]),
-                                                       (0.0, self.cursorCoordinate[1]),
+                                                       (0.0, cursorCoordinate[1]),
                                                        tol=abs(3 * self.pixelY)):
                         self._dragRegions.add((region, 'h', 1))  # line 1 of h-region
                         # break
@@ -2109,20 +2115,20 @@ class CcpnGLWidget(QOpenGLWidget):
                         mid = (region.values[0] + region.values[1]) / 2.0
                         delta = abs(region.values[0] - region.values[1]) / 2.0
                         if not self._widthsChangedEnough((0.0, mid),
-                                                         (0.0, self.cursorCoordinate[1]),
+                                                         (0.0, cursorCoordinate[1]),
                                                          tol=delta):
                             self._dragRegions.add((region, 'h', 3))  # both lines of h-region
                             # break
 
                 elif region.orientation == 'v':
                     if not self._widthsChangedEnough((region.values[0], 0.0),
-                                                     (self.cursorCoordinate[0], 0.0),
+                                                     (cursorCoordinate[0], 0.0),
                                                      tol=abs(3 * self.pixelX)):
                         self._dragRegions.add((region, 'v', 0))  # line 0 of v-region
                         # break
 
                     elif not self._widthsChangedEnough((region.values[1], 0.0),
-                                                       (self.cursorCoordinate[0], 0.0),
+                                                       (cursorCoordinate[0], 0.0),
                                                        tol=abs(3 * self.pixelX)):
                         self._dragRegions.add((region, 'v', 1))  # line 1 of v-region
                         # break
@@ -2130,7 +2136,7 @@ class CcpnGLWidget(QOpenGLWidget):
                         mid = (region.values[0] + region.values[1]) / 2.0
                         delta = abs(region.values[0] - region.values[1]) / 2.0
                         if not self._widthsChangedEnough((mid, 0.0),
-                                                         (self.cursorCoordinate[0], 0.0),
+                                                         (cursorCoordinate[0], 0.0),
                                                          tol=delta):
                             self._dragRegions.add((region, 'v', 3))  # both lines of v-region
                             # break
@@ -2138,6 +2144,7 @@ class CcpnGLWidget(QOpenGLWidget):
         return self._dragRegions
 
     def mousePressInfiniteLine(self, regions):
+        cursorCoordinate = self.getCurrentCursorCoordinate()
         for region in regions:
             if region._objectView and not region._objectView.isVisible():
                 continue
@@ -2145,13 +2152,13 @@ class CcpnGLWidget(QOpenGLWidget):
             if region.visible and region.movable:
                 if region.orientation == 'h':
                     if not self._widthsChangedEnough((0.0, region.values),
-                                                     (0.0, self.cursorCoordinate[1]),
+                                                     (0.0, cursorCoordinate[1]),
                                                      tol=abs(3 * self.pixelY)):
                         self._dragRegions.add((region, 'h', 4))  # line 0 of h-region
 
                 elif region.orientation == 'v':
                     if not self._widthsChangedEnough((region.values, 0.0),
-                                                     (self.cursorCoordinate[0], 0.0),
+                                                     (cursorCoordinate[0], 0.0),
                                                      tol=abs(3 * self.pixelX)):
                         self._dragRegions.add((region, 'v', 4))  # line 0 of v-region
 
@@ -2204,6 +2211,7 @@ class CcpnGLWidget(QOpenGLWidget):
         self._draggingLabel = False
 
     def mousePressEvent(self, ev):
+        cursorCoordinate = self.getCurrentCursorCoordinate()
         self._mousePressed = True
         self.lastPos = ev.pos()
 
@@ -2227,13 +2235,13 @@ class CcpnGLWidget(QOpenGLWidget):
         if ev.buttons() & Qt.MiddleButton:
             if self._isSHIFT == '' and self._isCTRL == '' and self._isALT == '' and self._isMETA == '':
                 # drag a peak
-                xPosition = self.cursorCoordinate[0]  # self.mapSceneToView(event.pos()).x()
-                yPosition = self.cursorCoordinate[1]  #
+                xPosition = cursorCoordinate[0]  # self.mapSceneToView(event.pos()).x()
+                yPosition = cursorCoordinate[1]  #
                 objs = self._mouseInPeak(xPosition, yPosition, firstOnly=True)
                 if objs:
 
                     # move from the centre of the clicked peak
-                    self.getPeakPositionFromMouse(objs[0], self._startCoordinate, self.cursorCoordinate)
+                    self.getPeakPositionFromMouse(objs[0], self._startCoordinate, cursorCoordinate)
 
                     # set the flags for middle mouse dragging
                     self._startMiddleDrag = True
@@ -2415,24 +2423,10 @@ class CcpnGLWidget(QOpenGLWidget):
         super().leaveEvent(ev)
         self._clearAndUpdate()
 
-    def getMousePosition(self):
-        """Get the coordinates of the mouse in the window (in ppm) based on the current axes
-        """
-        point = self.mapFromGlobal(QtGui.QCursor.pos())
-
-        # calculate mouse coordinate within the mainView
-        _mouseX = point.x()
-        if self._drawBottomAxis:
-            _mouseY = self.height() - point.y() - self.AXIS_MARGINBOTTOM
-            _top = self.height() - self.AXIS_MARGINBOTTOM
-        else:
-            _mouseY = self.height() - point.y()
-            _top = self.height()
-
-        # translate from screen (0..w, 0..h) to NDC (-1..1, -1..1) to axes (axisL, axisR, axisT, axisB)
-        return self.mouseTransform.dot([_mouseX, _mouseY, 0.0, 1.0])
-
     def mouseMoveEvent(self, event):
+
+        self.cursorSource = CURSOR_SOURCE_SELF
+
         if self.strip.isDeleted:
             return
         if not self._ordering:  # strip.spectrumViews:
@@ -2443,28 +2437,16 @@ class CcpnGLWidget(QOpenGLWidget):
         if abs(self.axisL - self.axisR) < 1.0e-6 or abs(self.axisT - self.axisB) < 1.0e-6:
             return
 
-        dx = event.pos().x() - self.lastPos.x()
-        dy = event.pos().y() - self.lastPos.y()
-        self.lastPos = event.pos()
+        currentPos =  self.mapFromGlobal(QtGui.QCursor.pos())
 
-        # calculate mouse coordinate within the mainView
-        self._mouseX = event.pos().x()
-        if self._drawBottomAxis:
-            self._mouseY = self.height() - event.pos().y() - self.AXIS_MARGINBOTTOM
-            self._top = self.height() - self.AXIS_MARGINBOTTOM
-        else:
-            self._mouseY = self.height() - event.pos().y()
-            self._top = self.height()
+        dx = currentPos.x() - self.lastPos.x()
+        dy = currentPos.y() - self.lastPos.y()
+        self.lastPos = currentPos
 
-        # translate from screen (0..w, 0..h) to NDC (-1..1, -1..1) to axes (axisL, axisR, axisT, axisB)
-        self.cursorCoordinate = self.mouseTransform.dot([self._mouseX, self._mouseY, 0.0, 1.0])
 
-        # flip cursor about x=y to get double cursor
-        self.doubleCursorCoordinate[0:4] = [self.cursorCoordinate[1],
-                                            self.cursorCoordinate[0],
-                                            self.cursorCoordinate[2],
-                                            self.cursorCoordinate[3]
-                                            ]
+        cursorCoordinate = self.getCurrentCursorCoordinate()
+
+
 
         try:
             mouseMovedDict = self.current.mouseMovedDict
@@ -2484,17 +2466,17 @@ class CcpnGLWidget(QOpenGLWidget):
         activeOther = []
         for n, axisCode in enumerate(self._axisCodes):
             if n == 0:
-                xPos = pos = self.cursorCoordinate[0]
+                xPos = pos = cursorCoordinate[0]
                 activeX = axisCode  #[0]
 
                 # double cursor
-                dPos = self.cursorCoordinate[1]
+                dPos = cursorCoordinate[1]
             elif n == 1:
-                yPos = pos = self.cursorCoordinate[1]
+                yPos = pos = cursorCoordinate[1]
                 activeY = axisCode  #[0]
 
                 # double cursor
-                dPos = self.cursorCoordinate[0]
+                dPos = cursorCoordinate[0]
 
             else:
                 dPos = pos = self._orderedAxes[n].position  # if n in self._orderedAxes else 0
@@ -2519,21 +2501,21 @@ class CcpnGLWidget(QOpenGLWidget):
             if (self._key == Qt.Key_Control and self._isSHIFT == 'S') or \
                     (self._key == Qt.Key_Shift and self._isCTRL) == 'C':
 
-                self._endCoordinate = self.cursorCoordinate  #[event.pos().x(), self.height() - event.pos().y()]
+                self._endCoordinate = cursorCoordinate  #[event.pos().x(), self.height() - event.pos().y()]
                 self._selectionMode = 3
                 self._drawSelectionBox = True
                 self._drawDeltaOffset = True
 
             elif (self._key == Qt.Key_Shift) and (event.buttons() & Qt.LeftButton):
 
-                self._endCoordinate = self.cursorCoordinate  #[event.pos().x(), self.height() - event.pos().y()]
+                self._endCoordinate = cursorCoordinate  #[event.pos().x(), self.height() - event.pos().y()]
                 self._selectionMode = 1
                 self._drawSelectionBox = True
                 self._drawDeltaOffset = True
 
             elif (self._key == Qt.Key_Control) and (event.buttons() & Qt.LeftButton):
 
-                self._endCoordinate = self.cursorCoordinate  #[event.pos().x(), self.height() - event.pos().y()]
+                self._endCoordinate = cursorCoordinate  #[event.pos().x(), self.height() - event.pos().y()]
                 self._selectionMode = 2
                 self._drawSelectionBox = True
                 self._drawDeltaOffset = True
@@ -2598,11 +2580,11 @@ class CcpnGLWidget(QOpenGLWidget):
         elif event.buttons() & Qt.MiddleButton:
             if self._isSHIFT == '' and self._isCTRL == '' and self._isALT == '' and self._isMETA == '' and self._startMiddleDrag:
                 # drag a peak
-                self._endCoordinate = self.cursorCoordinate
+                self._endCoordinate = cursorCoordinate
                 self._drawMouseMoveLine = True
                 self._drawDeltaOffset = True
 
-        self.GLSignals._emitMouseMoved(source=self, coords=self.cursorCoordinate, mouseMovedDict=mouseMovedDict, mainWindow=self.mainWindow)
+        self.GLSignals._emitMouseMoved(source=self, coords=cursorCoordinate, mouseMovedDict=mouseMovedDict, mainWindow=self.mainWindow)
 
         # spawn rebuild/paint of traces
         if self._updateHTrace or self._updateVTrace:
@@ -3719,8 +3701,11 @@ class CcpnGLWidget(QOpenGLWidget):
             index = 0
 
             # map the cursor to the ratio coordinates - double cursor is flipped about the line x=y
-            newCoords = self._scaleAxisToRatio(self.cursorCoordinate[0:2])
-            doubleCoords = self._scaleAxisToRatio(self.doubleCursorCoordinate[0:2])
+
+            cursorCoordinate = self.getCurrentCursorCoordinate()
+
+            newCoords = self._scaleAxisToRatio(cursorCoordinate[0:2])
+            doubleCoords = self._scaleAxisToRatio(self.getCurrentDoubleCursorCoordinates()[0:2])
 
             if getCurrentMouseMode() == PICK and self.underMouse():
 
@@ -3777,6 +3762,42 @@ class CcpnGLWidget(QOpenGLWidget):
             # build and draw the VBO
             drawList.defineIndexVBO(enableVBO=True)
             drawList.drawIndexVBO(enableVBO=True)
+
+    def getCurrentCursorCoordinate(self):
+
+        if self.cursorSource == None or self.cursorSource == 'self':
+            currentPos = self.mapFromGlobal(QtGui.QCursor.pos())
+            # print('updated current pos', currentPos.x(),currentPos.y())
+
+            # calculate mouse coordinate within the mainView
+            _mouseX = currentPos.x()
+            if self._drawBottomAxis:
+                _mouseY = self.height() - currentPos.y() - self.AXIS_MARGINBOTTOM
+                _top = self.height() - self.AXIS_MARGINBOTTOM
+            else:
+                _mouseY = self.height() - currentPos.y()
+                _top = self.height()
+
+            # translate from screen (0..w, 0..h) to NDC (-1..1, -1..1) to axes (axisL, axisR, axisT, axisB)
+            result = self.mouseTransform.dot([_mouseX, _mouseY, 0.0, 1.0])
+        else:
+            result = self.cursorCoordinate
+
+        return result
+
+    def getCurrentDoubleCursorCoordinates(self):
+        if self.cursorSource in (CURSOR_SOURCE_NONE, CURSOR_SOURCE_SELF):
+            cursorCoordinate = self.getCurrentCursorCoordinate()
+
+            # flip cursor about x=y to get double cursor
+            result =   [cursorCoordinate[1],
+                        cursorCoordinate[0],
+                        cursorCoordinate[2],
+                        cursorCoordinate[3]]
+        else:
+            result =  self.doubleCursorCoordinate
+
+        return result
 
     def drawDottedCursor(self):
         # draw the cursors
@@ -4131,10 +4152,11 @@ class CcpnGLWidget(QOpenGLWidget):
         def valueToRatio(val, x0, x1):
             return (val - x0) / (x1 - x0)
 
-        if refresh or self._widthsChangedEnough(self.cursorCoordinate[:2], self._mouseCoords[:2], tol=1e-8):
+        cursorCoordinate = self.getCurrentCursorCoordinate()
+        if refresh or self._widthsChangedEnough(cursorCoordinate[:2], self._mouseCoords[:2], tol=1e-8):
 
             if not self._drawDeltaOffset:
-                self._startCoordinate = self.cursorCoordinate
+                self._startCoordinate = cursorCoordinate
 
             # get the list of visible spectrumViews, or the first in the list
             visibleSpectrumViews = [specView for specView in self._ordering if not specView.isDeleted and specView.isVisible()]
@@ -4146,7 +4168,7 @@ class CcpnGLWidget(QOpenGLWidget):
 
                 # generate different axes depending on units - X Axis
                 if self.XAXES[self._xUnits] == GLDefs.AXISUNITSPPM:
-                    cursorX = self.cursorCoordinate[0]
+                    cursorX = cursorCoordinate[0]
                     startX = self._startCoordinate[0]
                     # XMode = '%.3f'
 
@@ -4154,18 +4176,18 @@ class CcpnGLWidget(QOpenGLWidget):
                     if self._ordering:
 
                         if self.is1D:
-                            cursorX = self.cursorCoordinate[0] * thisSpec.spectrometerFrequencies[0]
-                            startX = self._startCoordinate[0] * thisSpec.spectrometerFrequencies[0]
+                            cursorX = cursorCoordinate[0] * thisSpec.spectrometerFrequencies[0]
+                            startX = cursorCoordinate[0] * thisSpec.spectrometerFrequencies[0]
 
                         else:
                             # get the axis ordering from the spectrumDisplay and map to the strip
                             indices = self._spectrumSettings[thisSpecView][GLDefs.SPECTRUM_POINTINDEX]
-                            cursorX = self.cursorCoordinate[0] * thisSpec.spectrometerFrequencies[indices[0]]
+                            cursorX = cursorCoordinate[0] * thisSpec.spectrometerFrequencies[indices[0]]
                             startX = self._startCoordinate[0] * thisSpec.spectrometerFrequencies[indices[0]]
 
                     else:
                         # error trap all spectra deleted
-                        cursorX = self.cursorCoordinate[0]
+                        cursorX = cursorCoordinate[0]
                         startX = self._startCoordinate[0]
                     # XMode = '%.3f'
 
@@ -4173,20 +4195,20 @@ class CcpnGLWidget(QOpenGLWidget):
                     if self._ordering:
 
                         if self.is1D:
-                            cursorX = thisSpec.mainSpectrumReferences[0].valueToPoint(self.cursorCoordinate[0])
-                            startX = thisSpec.mainSpectrumReferences[0].valueToPoint(self._startCoordinate[0])
+                            cursorX = thisSpec.mainSpectrumReferences[0].valueToPoint(cursorCoordinate[0])
+                            startX = thisSpec.mainSpectrumReferences[0].valueToPoint(cursorCoordinate[0])
 
                         else:
                             # get the axis ordering from the spectrumDisplay and map to the strip
                             indices = self._spectrumSettings[thisSpecView][GLDefs.SPECTRUM_POINTINDEX]
 
                             # map to a point
-                            cursorX = thisSpec.mainSpectrumReferences[indices[0]].valueToPoint(self.cursorCoordinate[0])
+                            cursorX = thisSpec.mainSpectrumReferences[indices[0]].valueToPoint(cursorCoordinate[0])
                             startX = thisSpec.mainSpectrumReferences[indices[0]].valueToPoint(self._startCoordinate[0])
 
                     else:
                         # error trap all spectra deleted
-                        cursorX = self.cursorCoordinate[0]
+                        cursorX = cursorCoordinate[0]
                         startX = self._startCoordinate[0]
 
                     # if self.modeDecimal[0]:
@@ -4196,12 +4218,12 @@ class CcpnGLWidget(QOpenGLWidget):
 
                 # generate different axes depending on units - Y Axis, always use first option for 1d
                 if self.is1D:
-                    cursorY = self.cursorCoordinate[1]
+                    cursorY = cursorCoordinate[1]
                     startY = self._startCoordinate[1]
                     # YMode = '%.6g'
 
                 elif self.YAXES[self._yUnits] == GLDefs.AXISUNITSPPM:
-                    cursorY = self.cursorCoordinate[1]
+                    cursorY = cursorCoordinate[1]
                     startY = self._startCoordinate[1]
                     # YMode = '%.3f'
 
@@ -4210,12 +4232,12 @@ class CcpnGLWidget(QOpenGLWidget):
 
                         # get the axis ordering from the spectrumDisplay and map to the strip
                         indices = self._spectrumSettings[thisSpecView][GLDefs.SPECTRUM_POINTINDEX]
-                        cursorY = self.cursorCoordinate[1] * thisSpec.spectrometerFrequencies[indices[1]]
+                        cursorY = cursorCoordinate[1] * thisSpec.spectrometerFrequencies[indices[1]]
                         startY = self._startCoordinate[1] * thisSpec.spectrometerFrequencies[indices[1]]
 
                     else:
                         # error trap all spectra deleted
-                        cursorY = self.cursorCoordinate[1]
+                        cursorY = cursorCoordinate[1]
                         startY = self._startCoordinate[1]
                     # YMode = '%.3f'
 
@@ -4226,12 +4248,12 @@ class CcpnGLWidget(QOpenGLWidget):
                         indices = self._spectrumSettings[thisSpecView][GLDefs.SPECTRUM_POINTINDEX]
 
                         # map to a point
-                        cursorY = thisSpec.mainSpectrumReferences[indices[1]].valueToPoint(self.cursorCoordinate[1])
+                        cursorY = thisSpec.mainSpectrumReferences[indices[1]].valueToPoint(cursorCoordinate[1])
                         startY = thisSpec.mainSpectrumReferences[indices[1]].valueToPoint(self._startCoordinate[1])
 
                     else:
                         # error trap all spectra deleted
-                        cursorY = self.cursorCoordinate[1]
+                        cursorY = cursorCoordinate[1]
                         startY = self._startCoordinate[1]
 
                 # if self.modeDecimal[1]:
@@ -4251,21 +4273,21 @@ class CcpnGLWidget(QOpenGLWidget):
 
             self.mouseString = GLString(text=newCoords,
                                         font=self.globalGL.glSmallFont,
-                                        x=valueToRatio(self.cursorCoordinate[0], self.axisL, self.axisR),
-                                        y=valueToRatio(self.cursorCoordinate[1], self.axisB, self.axisT),
+                                        x=valueToRatio(cursorCoordinate[0], self.axisL, self.axisR),
+                                        y=valueToRatio(cursorCoordinate[1], self.axisB, self.axisT),
                                         colour=self.foreground, GLContext=self,
                                         obj=None)
-            self._mouseCoords = (self.cursorCoordinate[0], self.cursorCoordinate[1])
+            self._mouseCoords = (cursorCoordinate[0], cursorCoordinate[1])
 
             # check that the string is actually visible, or constraint to the bounds of the strip
             _offset = self.pixelX * 80.0
-            _mouseOffsetR = valueToRatio(self.cursorCoordinate[0] + _offset, self.axisL, self.axisR)
-            _mouseOffsetL = valueToRatio(self.cursorCoordinate[0], self.axisL, self.axisR)
+            _mouseOffsetR = valueToRatio(cursorCoordinate[0] + _offset, self.axisL, self.axisR)
+            _mouseOffsetL = valueToRatio(cursorCoordinate[0], self.axisL, self.axisR)
             ox = -min(max(_mouseOffsetR-1.0, 0.0), _mouseOffsetL)
 
             _offset = self.pixelY * self.mouseString.height
-            _mouseOffsetT = valueToRatio(self.cursorCoordinate[1] + _offset, self.axisB, self.axisT)
-            _mouseOffsetB = valueToRatio(self.cursorCoordinate[1], self.axisB, self.axisT)
+            _mouseOffsetT = valueToRatio(cursorCoordinate[1] + _offset, self.axisB, self.axisT)
+            _mouseOffsetB = valueToRatio(cursorCoordinate[1], self.axisB, self.axisT)
             oy = -min(max(_mouseOffsetT-1.0, 0.0), _mouseOffsetB)
 
             self.mouseString.setStringOffset((ox, oy))
@@ -4279,8 +4301,8 @@ class CcpnGLWidget(QOpenGLWidget):
 
                 self.diffMouseString = GLString(text=diffCoords,
                                                 font=self.globalGL.glSmallFont,
-                                                x=valueToRatio(self.cursorCoordinate[0], self.axisL, self.axisR),
-                                                y=valueToRatio(self.cursorCoordinate[1], self.axisB, self.axisT) - (
+                                                x=valueToRatio(cursorCoordinate[0], self.axisL, self.axisR),
+                                                y=valueToRatio(cursorCoordinate[1], self.axisB, self.axisT) - (
                                                         self.globalGL.glSmallFont.height * 2.0 * self.deltaY),
                                                 colour=self.foreground, GLContext=self,
                                                 obj=None)
@@ -4338,8 +4360,9 @@ class CcpnGLWidget(QOpenGLWidget):
             GL.glColor4f(*self.mouseMoveLineColour)
             GL.glBegin(GL.GL_LINES)
 
+            cursorCoordinate = self.getCurrentCursorCoordinate()
             startCoord = self._scaleAxisToRatio(self._startCoordinate[0:2])
-            cursCoord = self._scaleAxisToRatio(self.cursorCoordinate[0:2])
+            cursCoord = self._scaleAxisToRatio(cursorCoordinate[0:2])
 
             GL.glVertex2d(startCoord[0], startCoord[1])
             GL.glVertex2d(cursCoord[0], cursCoord[1])
@@ -4604,9 +4627,11 @@ class CcpnGLWidget(QOpenGLWidget):
         """Check if traces need updating on _lastTracePoint, use spectrumView to see
         if cursor has moved sufficiently far to warrant an update of the traces
         """
+
+        cursorCoordinate = self.getCurrentCursorCoordinate()
         _tmp, point, xDataDim, xMinFrequency, xMaxFrequency, xNumPoints, \
         yDataDim, yMinFrequency, yMaxFrequency, yNumPoints \
-            = spectrumView._getTraceParams(self.cursorCoordinate)
+            = spectrumView._getTraceParams(cursorCoordinate)
 
         if spectrumView not in self._lastTracePoint:
             numDim = len(spectrumView.strip.axes)
@@ -4641,11 +4666,12 @@ class CcpnGLWidget(QOpenGLWidget):
         if self.strip.isDeleted:
             return
 
-        position = [self.cursorCoordinate[0], self.cursorCoordinate[1]]  #list(cursorPosition)
+        cursorCoordinate = self.getCurrentCursorCoordinate()
+        position = [cursorCoordinate[0], cursorCoordinate[1]]  #list(cursorPosition)
         for axis in self._orderedAxes[2:]:
             position.append(axis.position)
 
-        positionPixel = (self.cursorCoordinate[0], self.cursorCoordinate[1])
+        positionPixel = (cursorCoordinate[0], cursorCoordinate[1])
 
         for spectrumView in self._ordering:  # strip.spectrumViews:
             if spectrumView.isDeleted:
@@ -4698,7 +4724,8 @@ class CcpnGLWidget(QOpenGLWidget):
                                                yNumPoints, intPositionPixel, ph0, ph1, pivot)
 
     def newTrace(self, position=None):
-        position = position if position else [self.cursorCoordinate[0], self.cursorCoordinate[1]]  #list(cursorPosition)
+        cursorCoordinate = self.getCurrentCursorCoordinate()
+        position = position if position else [cursorCoordinate[0], cursorCoordinate[1]]  #list(cursorPosition)
 
         # add to the list of traces
         self._currentTraces.append(position)
@@ -5633,6 +5660,7 @@ class CcpnGLWidget(QOpenGLWidget):
                     if indices[n] is not None:
 
                         axis = mouseMovedDict[AXIS_ACTIVEAXES][indices[n]]
+                        self.cursorSource = CURSOR_SOURCE_OTHER
                         self.cursorCoordinate[n] = mouseMovedDict[AXIS_FULLATOMNAME][axis]
 
                         # coordinates have already been flipped
@@ -5640,6 +5668,7 @@ class CcpnGLWidget(QOpenGLWidget):
                         self.doubleCursorCoordinate[1-n] = self.cursorCoordinate[n]
 
                     else:
+                        self.cursorSource = CURSOR_SOURCE_OTHER
                         self.cursorCoordinate[n] = None
                         self.doubleCursorCoordinate[1-n] = None
 
@@ -5838,7 +5867,8 @@ class CcpnGLWidget(QOpenGLWidget):
         event.accept()
         self._resetBoxes()
 
-        mousePosition = (self.cursorCoordinate[0], self.cursorCoordinate[1])
+        cursorCoordinate = self.getCurrentCursorCoordinate()
+        mousePosition = (cursorCoordinate[0], cursorCoordinate[1])
         position = [mousePosition[0], mousePosition[1]]
         for orderedAxis in self._orderedAxes[2:]:
             position.append(orderedAxis.position)
@@ -5894,8 +5924,9 @@ class CcpnGLWidget(QOpenGLWidget):
         """handle the mouse click event
         """
         # self.current.strip = self.strip
-        xPosition = self.cursorCoordinate[0]  # self.mapSceneToView(event.pos()).x()
-        yPosition = self.cursorCoordinate[1]  # self.mapSceneToView(event.pos()).y()
+        cursorCoordinate = self.getCurrentCursorCoordinate()
+        xPosition = cursorCoordinate[0]  # self.mapSceneToView(event.pos()).x()
+        yPosition = cursorCoordinate[1]  # self.mapSceneToView(event.pos()).y()
         self.current.positions = [xPosition, yPosition]
 
         # This is the correct future style for cursorPosition handling
@@ -5933,10 +5964,10 @@ class CcpnGLWidget(QOpenGLWidget):
             event.accept()
             if self._successiveClicks is None:
                 self._resetBoxes()
-                self._successiveClicks = (self.cursorCoordinate[0], self.cursorCoordinate[1])
+                self._successiveClicks = (cursorCoordinate[0], cursorCoordinate[1])
             else:
 
-                if self._widthsChangedEnough((self.cursorCoordinate[0], self.cursorCoordinate[1]),
+                if self._widthsChangedEnough((cursorCoordinate[0], cursorCoordinate[1]),
                                              (self._successiveClicks[0], self._successiveClicks[1]),
                                              3 * max(abs(self.pixelX),
                                                      abs(self.pixelY))):
@@ -6222,6 +6253,7 @@ class CcpnGLWidget(QOpenGLWidget):
         self.current.multiplets = list(currentMultiplets | multiplets)
 
     def _mouseDragEvent(self, event: QtGui.QMouseEvent, axis=None):
+        cursorCoordinate = self.getCurrentCursorCoordinate()
         if controlShiftLeftMouse(event) or controlShiftRightMouse(event):
             # Control(Cmd)+shift+left drag: Peak-picking
             event.accept()
@@ -6261,8 +6293,8 @@ class CcpnGLWidget(QOpenGLWidget):
                 if not peaks:
                     return
 
-                deltaPosition = [self.cursorCoordinate[0] - self._startCoordinate[0],
-                                 self.cursorCoordinate[1] - self._startCoordinate[1]]
+                deltaPosition = [cursorCoordinate[0] - self._startCoordinate[0],
+                                 cursorCoordinate[1] - self._startCoordinate[1]]
                 for peak in peaks:
                     peak.startPosition = peak.position
 

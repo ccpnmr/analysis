@@ -67,7 +67,7 @@ class ScrollArea(QtWidgets.QScrollArea, Base):
         """
         region = QtGui.QRegion(self.frameGeometry())
         region -= QtGui.QRegion(self.geometry())
-        region += self.childrenRegion()
+        # region += self.childrenRegion()
         self.setMask(region)
 
     def _resize(self):

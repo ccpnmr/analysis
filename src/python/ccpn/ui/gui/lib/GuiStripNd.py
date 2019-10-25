@@ -186,9 +186,10 @@ class GuiStripNd(GuiStrip):
 
         self._frameGuide = ScrollFrame(self, setLayout=True, spacing=(2, 2),
                                        scrollBarPolicies=('never', 'never'), margins=(5, 5, 5, 5),
-                                       grid=(1, 0), gridSpan=(10, 4))
+                                       grid=(1, 0), gridSpan=(4, 4))
 
         self._frameGuide.addSpacer(10, 30, grid=(1, 0))
+        ii = 0
         for ii, axis in enumerate(self.axisCodes[2:]):
             # add a plane widget for each dimension > 1
             fr = PlaneAxisWidget(qtParent=self._frameGuide, mainWindow=self.mainWindow, strip=self, axis=ii + 2,

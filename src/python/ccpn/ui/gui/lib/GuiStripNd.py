@@ -48,7 +48,7 @@ from PyQt5 import QtWidgets
 import numpy
 from functools import partial
 from ccpn.core.PeakList import PeakList
-from ccpn.ui.gui.widgets.PlaneToolbar import PlaneToolbar  #, PlaneSelectorWidget
+from ccpn.ui.gui.widgets.PlaneToolbar import PlaneToolbar, PlaneAxisWidget  #, PlaneSelectorWidget
 from ccpn.util.Logging import getLogger
 from ccpn.util.decorators import logCommand
 from ccpn.core.lib.ContextManagers import undoBlock
@@ -56,6 +56,7 @@ from ccpn.ui.gui.lib.GuiStrip import GuiStrip, DefaultMenu, PeakMenu, IntegralMe
 from ccpn.ui.gui.lib.GuiStripContextMenus import _getNdPhasingMenu, _getNdDefaultMenu, _getNdPeakMenu, \
     _getNdIntegralMenu, _getNdMultipletMenu, _getNdAxisMenu
 from ccpn.ui.gui.lib.Strip import copyStripPosition
+from ccpn.ui.gui.widgets.Frame import Frame, OpenGLOverlayFrame, ScrollFrame
 from ccpn.util.Common import getAxisCodeMatchIndices
 
 
@@ -159,20 +160,51 @@ class GuiStripNd(GuiStrip):
         self.widgetIndex = 3  #start adding widgets from row 3
 
         self.planeToolbar = None
-        # TODO: this should be refactored; together with the 'Z-plane' mess: should general, to be used for other dimensions
-        # Adds the plane toolbar to the strip.
-        callbacks = [self.prevZPlane, self.nextZPlane, self._setZPlanePosition, self._changePlaneCount]
-        self.planeToolbar = PlaneToolbar(self._stripToolBarWidget, strip=self, callbacks=callbacks,
-                                         grid=(0, 0), hPolicy='minimum', hAlign='center', vAlign='center',
-                                         stripArrangement=getattr(self.spectrumDisplay, 'stripArrangement', None),
-                                         containers = self._stripAxisCodes)
 
-        self._resize()
+        # # TODO: this should be refactored; together with the 'Z-plane' mess: should general, to be used for other dimensions
+        # # Adds the plane toolbar to the strip.
+        # callbacks = [self.prevZPlane, self.nextZPlane, self._setZPlanePosition, self._changePlaneCount]
+        # self.planeToolbar = PlaneToolbar(self._stripToolBarWidget, strip=self, callbacks=callbacks,
+        #                                  grid=(0, 0), hPolicy='minimum', hAlign='center', vAlign='center',
+        #                                  stripArrangement=getattr(self.spectrumDisplay, 'stripArrangement', None),
+        #                                  containers=self._stripAxisCodes)
+        #
+        # self._resize()
 
         #self._stripToolBarWidget.addWidget(self.planeToolbar)
         #self.planeToolBar.hide()
         # test
         #PlaneSelectorWidget(qtParent=self._stripToolBarWidget, strip=self, axis=2, grid=(0,1))
+
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        # TEST: ED new plane widgets
+
+        from ccpn.ui.gui.widgets.Spacer import Spacer
+
+        self._fr = []
+        self.planeAxisBars = ()
+
+        self._frameGuide = ScrollFrame(self, setLayout=True, spacing=(2, 2),
+                                       scrollBarPolicies=('never', 'never'), margins=(5, 5, 5, 5),
+                                       grid=(1, 0), gridSpan=(10, 4))
+
+        self._frameGuide.addSpacer(10, 30, grid=(1, 0))
+        for ii, axis in enumerate(self.axisCodes[2:]):
+            # add a plane widget for each dimension > 1
+            fr = PlaneAxisWidget(qtParent=self._frameGuide, mainWindow=self.mainWindow, strip=self, axis=ii + 2,
+                                 grid=(ii + 2, 1), gridSpan=(1, 1))
+            self._fr.append(fr)
+            fr._populate()
+
+            self.planeAxisBars += (fr,)
+
+        Spacer(self._frameGuide, 1, 1, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding, grid=(ii + 3, 2))
+
+        self._fr.append(self._frameGuide.scrollArea)
+
+        self._resize()
+
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
         if len(self.orderedAxes) < 3:  # hide if only 2D
             self._stripToolBarWidget.setFixedHeight(0)
@@ -535,25 +567,27 @@ class GuiStripNd(GuiStrip):
                 # Necessary, otherwise it does not know what width it should have
                 zAxis.width = minZPlaneSize
 
-            planeLabel = self.planeToolbar.planeLabels[n]
+            self.planeAxisBars[n].setPlaneValues(minZPlaneSize, minAliasedFrequency, maxAliasedFrequency, zAxis.position)
 
-            planeLabel.setSingleStep(minZPlaneSize)
-
-            # have to do the following in order: maximum, value, minimum
-            # otherwise Qt will set bogus value to guarantee that minimum <= value <= maximum
-
-            if maxAliasedFrequency is not None:
-                planeLabel.setMaximum(maxAliasedFrequency)
-
-            planeLabel.setValue(zAxis.position)
-            # planeLabel.setValue(int(zAxis.position)-(zAxis.position % 1))
-
-            if minAliasedFrequency is not None:
-                planeLabel.setMinimum(minAliasedFrequency)
-
-            if not self.haveSetupZWidgets:
-                # have to set this up here, otherwise the callback is called too soon and messes up the position
-                planeLabel.editingFinished.connect(partial(self._setZPlanePosition, n, planeLabel.value()))
+            # planeLabel = self.planeToolbar.planeLabels[n]
+            #
+            # planeLabel.setSingleStep(minZPlaneSize)
+            #
+            # # have to do the following in order: maximum, value, minimum
+            # # otherwise Qt will set bogus value to guarantee that minimum <= value <= maximum
+            #
+            # if maxAliasedFrequency is not None:
+            #     planeLabel.setMaximum(maxAliasedFrequency)
+            #
+            # planeLabel.setValue(zAxis.position)
+            # # planeLabel.setValue(int(zAxis.position)-(zAxis.position % 1))
+            #
+            # if minAliasedFrequency is not None:
+            #     planeLabel.setMinimum(minAliasedFrequency)
+            #
+            # if not self.haveSetupZWidgets:
+            #     # have to set this up here, otherwise the callback is called too soon and messes up the position
+            #     planeLabel.editingFinished.connect(partial(self._setZPlanePosition, n, planeLabel.value()))
 
         self.haveSetupZWidgets = True
 
@@ -565,12 +599,14 @@ class GuiStripNd(GuiStrip):
         if self.isDeleted:
             return
 
-        zAxis = self.orderedAxes[n + 2]
-        planeLabel = self.planeToolbar.planeLabels[n]
-        planeSize = planeLabel.singleStep()
+        zAxis = self.orderedAxes[n]  # was + 2
+
+        planeMin, planeMax, planeSize, planePpmPosition, _ = self.planeAxisBars[n - 2].getPlaneValues()
+        # planeLabel = self.planeToolbar.planeLabels[n]
+        # planeSize = planeLabel.singleStep()
 
         # below is hack to prevent initial setting of value to 99.99 when dragging spectrum onto blank display
-        if planeLabel.minimum() == 0 and planeLabel.value() == 99.99 and planeLabel.maximum() == 99.99:
+        if planeMin == 0 and planePpmPosition == 99.99 and planeMax == 99.99:
             return
 
         if planeCount:
@@ -582,16 +618,16 @@ class GuiStripNd(GuiStrip):
             # #planeLabel.setValue(zAxis.position)
 
             # # wrap the zAxis position when incremented/decremented beyond limits
-            if position > planeLabel.maximum():
-                zAxis.position = planeLabel.minimum()
-            elif position < planeLabel.minimum():
-                zAxis.position = planeLabel.maximum()
+            if position > planeMax:
+                zAxis.position = planeMin
+            elif position < planeMin:
+                zAxis.position = planeMax
             else:
                 zAxis.position = position
             self.axisRegionChanged(zAxis)
 
         elif position is not None:  # should always be the case
-            if planeLabel.minimum() <= position <= planeLabel.maximum():
+            if planeMin <= position <= planeMax:
                 zAxis.position = position
                 self.pythonConsole.writeConsoleCommand("strip.changeZPlane(position=%f)" % position, strip=self)
                 getLogger().info("strip = application.getByGid('%s')\nstrip.changeZPlane(position=%f)" % (self.pid, position))
@@ -601,34 +637,34 @@ class GuiStripNd(GuiStrip):
             # else:
             #   print('position is outside spectrum bounds')
 
-    def _changePlaneCount(self, n: int = 0, value: int = 1):
-        """
-        Changes the number of planes displayed simultaneously.
-        """
-        zAxis = self.orderedAxes[n + 2]
-        planeLabel = self.planeToolbar.planeLabels[n]
-        zAxis.width = value * planeLabel.singleStep()
-        self._rebuildStripContours()
-
-    def nextZPlane(self, n: int = 0, *args):
-        """
-        Increases z ppm position by one plane
-        """
-        self.changeZPlane(n, planeCount=-1)  # -1 because ppm units are backwards
-        self._rebuildStripContours()
-
-        self.pythonConsole.writeConsoleCommand("strip.nextZPlane()", strip=self)
-        getLogger().info("application.getByGid(%r).nextZPlane()" % self.pid)
-
-    def prevZPlane(self, n: int = 0, *args):
-        """
-        Decreases z ppm position by one plane
-        """
-        self.changeZPlane(n, planeCount=1)
-        self._rebuildStripContours()
-
-        self.pythonConsole.writeConsoleCommand("strip.prevZPlane()", strip=self)
-        getLogger().info("application.getByGid(%r).prevZPlane()" % self.pid)
+    # def _changePlaneCount(self, n: int = 0, value: int = 1):
+    #     """
+    #     Changes the number of planes displayed simultaneously.
+    #     """
+    #     zAxis = self.orderedAxes[n + 2]
+    #     planeLabel = self.planeToolbar.planeLabels[n]
+    #     zAxis.width = value * planeLabel.singleStep()
+    #     self._rebuildStripContours()
+    #
+    # def nextZPlane(self, n: int = 0, *args):
+    #     """
+    #     Increases z ppm position by one plane
+    #     """
+    #     self.changeZPlane(n, planeCount=-1)  # -1 because ppm units are backwards
+    #     self._rebuildStripContours()
+    #
+    #     self.pythonConsole.writeConsoleCommand("strip.nextZPlane()", strip=self)
+    #     getLogger().info("application.getByGid(%r).nextZPlane()" % self.pid)
+    #
+    # def prevZPlane(self, n: int = 0, *args):
+    #     """
+    #     Decreases z ppm position by one plane
+    #     """
+    #     self.changeZPlane(n, planeCount=1)
+    #     self._rebuildStripContours()
+    #
+    #     self.pythonConsole.writeConsoleCommand("strip.prevZPlane()", strip=self)
+    #     getLogger().info("application.getByGid(%r).prevZPlane()" % self.pid)
 
     def _setZPlanePosition(self, n: int, value: float):
         """
@@ -665,7 +701,7 @@ class GuiStripNd(GuiStrip):
     def resizeEvent(self, event):
         super(GuiStripNd, self).resizeEvent(event)
         # call subclass _resize event
-        self._resize()
+        # self._resize()
 
         # if hasattr(self, 'spectrumViews'):
         #     for spectrumView in self.spectrumViews:

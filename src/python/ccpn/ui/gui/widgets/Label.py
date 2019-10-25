@@ -97,11 +97,13 @@ class Label(QtWidgets.QLabel, Base):
 
 class ActiveLabel(Label):
 
-    def __init__(self, parent=None, text='', textColour=None, textSize=12, bold=False,
+    def __init__(self, parent=None, mainWindow=None,
+                 text='', textColour=None, textSize=12, bold=False,
                  margins=[2, 1, 2, 1], selectionCallback=None, actionCallback=None, **kwds):
         super().__init__(parent=parent, text=text, textColour=textColour, textSize=textSize, bold=bold,
                          margins=margins, **kwds)
 
+        self.mainWindow = mainWindow
         self._selectionCallback = selectionCallback
         self._actionCallback = actionCallback
         self._enterCallback = None

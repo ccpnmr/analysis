@@ -1287,7 +1287,8 @@ class GuiSpectrumViewNd(GuiSpectrumView):
                 zPosition = orderedAxes[dim].position
 
                 # check as there could be more dimensions
-                planeCount = self.strip.planeToolbar.planeCounts[dim - 2].value()
+                # planeCount = self.strip.planeToolbar.planeCounts[dim - 2].value()
+                planeCount = self.strip.planeAxisBars[dim-2].planeCount     #   .planeToolbar.planeCounts[dim - 2].value()
 
                 # valuePerPoint, _, _, _, _ = useFirstVisible._getSpectrumViewParams(2)
                 # zRegionValue = (zPosition + 0.5 * (planeCount+2) * valuePerPoint, zPosition - 0.5 * (planeCount+2) * valuePerPoint)  # Note + and - (axis backwards)

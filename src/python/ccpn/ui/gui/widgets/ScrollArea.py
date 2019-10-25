@@ -61,3 +61,17 @@ class ScrollArea(QtWidgets.QScrollArea, Base):
         vp = SCROLLBAR_POLICY_DICT.get(scrollBarPolicies[1])
         self.setHorizontalScrollBarPolicy(hp)
         self.setVerticalScrollBarPolicy(vp)
+
+    def _setMaskToChildren(self):
+        """Set the mouse mask to only the children of the frame - required to make sections transparent
+        """
+        region = QtGui.QRegion(self.frameGeometry())
+        region -= QtGui.QRegion(self.geometry())
+        region += self.childrenRegion()
+        self.setMask(region)
+
+    def _resize(self):
+        """Resize event to handle resizing of frames that overlay the OpenGL frame
+        """
+        self._setMaskToChildren()
+        self.parent()._resize()

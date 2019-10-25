@@ -136,8 +136,8 @@ class ChemicalShift(AbstractWrapperObject):
     def _getAllWrappedData(cls, parent: ChemicalShiftList) -> list:
         """get wrappedData (ApiShift) for all ChemicalShift children of parent ChemicalShiftList"""
         # NB this is NOT the right sorting order, but sorting on atomId is not possible at the API level
-        return sorted(parent._wrappedData.measurements,
-                      key=operator.attrgetter('resonance.serial'))
+        measurements = [mm for mm in parent._wrappedData.measurements if mm.resonance is not None]
+        return sorted(measurements, key=operator.attrgetter('resonance.serial'))
 
     #=========================================================================================
     # CCPN functions

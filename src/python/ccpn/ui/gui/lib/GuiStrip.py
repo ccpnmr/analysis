@@ -128,8 +128,9 @@ class GuiStrip(Frame):
         self._fr = []
         # self._sl = []
 
-        SHOWTESTWIDGETS = True
+        SHOWTESTWIDGETS = False
 
+        self._stripAxisCodes = None
         if SHOWTESTWIDGETS:
             sp = Spacer(self, 1, 1, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding,
                         grid=(10, 4), gridSpan=(1, 1))
@@ -184,7 +185,7 @@ class GuiStrip(Frame):
 
                 axisButtons = []
                 for ii, name in enumerate(['axis', 'value', 'planes']):
-                    sl = ActiveLabel(fr, text=name, grid=(0, ii))
+                    sl = ActiveLabel(fr, mainWindow=self.mainWindow, text=name, grid=(0, ii))
                     _setStyle(sl)
                     axisButtons.append(sl)
 
@@ -352,11 +353,15 @@ class GuiStrip(Frame):
         # respond to values changed in the containing spectrumDisplay settings widget
         self.spectrumDisplay._spectrumDisplaySettings.symbolsChanged.connect(self._symbolsChangedInSettings)
 
+    def _setMaskToChildren(self):
+        """Set the mouse mask to only the children of the frame - required to make sections transparent
+        """
+        pass
+
     def _resize(self):
         """Resize event to handle resizing of frames that overlay the OpenGL frame
         """
-        for fr in self._fr:
-            fr._setMaskToChildren()
+        self._setMaskToChildren()
 
     def _selectCallback(self, widgets):
         # print('>>>select', widget1, widget2)
@@ -2043,10 +2048,15 @@ class GuiStrip(Frame):
             if len(strip.axisOrder) > 2:
                 n = index - 2
                 if n >= 0:
-                    planeLabel = strip.planeToolbar.planeLabels[n]
-                    planeSize = planeLabel.singleStep()
-                    planeLabel.setValue(position)
-                    strip.planeToolbar.planeCounts[n].setValue(width / planeSize)
+
+                    if strip.planeAxisBars and n < len(strip.planeAxisBars):
+                        # strip.planeAxisBars[n].setPosition(ppmPosition, ppmWidth)
+                        strip.planeAxisBars[n].updatePosition()
+
+                    # planeLabel = strip.planeToolbar.planeLabels[n]
+                    # planeSize = planeLabel.singleStep()
+                    # planeLabel.setValue(position)
+                    # strip.planeToolbar.planeCounts[n].setValue(width / planeSize)
 
         strip.beingUpdated = False
 
@@ -2236,10 +2246,15 @@ def _axisRegionChanged(cDict):
                 if len(strip.axisOrder) > 2:
                     n = index - 2
                     if n >= 0:
-                        planeLabel = strip.planeToolbar.planeLabels[n]
-                        planeSize = planeLabel.singleStep()
-                        planeLabel.setValue(position)
-                        strip.planeToolbar.planeCounts[n].setValue(width / planeSize)
+
+                        if strip.planeAxisBars and n < len(strip.planeAxisBars):
+                            # strip.planeAxisBars[n].setPosition(ppmPosition, ppmWidth)
+                            strip.planeAxisBars[n].updatePosition()
+
+                        # planeLabel = strip.planeToolbar.planeLabels[n]
+                        # planeSize = planeLabel.singleStep()
+                        # planeLabel.setValue(position)
+                        # strip.planeToolbar.planeCounts[n].setValue(width / planeSize)
 
         finally:
             strip.beingUpdated = False

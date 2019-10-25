@@ -31,7 +31,7 @@ import os
 from functools import partial
 from copy import deepcopy
 from ccpn.ui.gui.widgets.Label import Label
-from ccpn.ui.gui.widgets.Frame import Frame
+from ccpn.ui.gui.widgets.Frame import Frame, ScrollFrame
 from ccpn.ui.gui.widgets.Button import Button
 from ccpn.ui.gui.widgets.FileDialog import FileDialog
 from ccpn.ui.gui.widgets.LineEdit import LineEdit, PasswordEdit
@@ -291,22 +291,11 @@ class PreferencesPopup(CcpnDialogMainWidget):
         for (tabFunc, tabName) in ((self._setGeneralTabWidgets, 'General'),
                                    (self._setSpectrumTabWidgets, 'Spectrum'),
                                    (self._setExternalProgramsTabWidgets, 'External Programs')):
-            fr = Frame(self, setLayout=True, spacing=DEFAULTSPACING)
-            fr.setSizePolicy(QtWidgets.QSizePolicy.Ignored, QtWidgets.QSizePolicy.MinimumExpanding)
-            fr.setAutoFillBackground(False)
-            fr.setContentsMargins(*TABMARGINS)
 
-            sc = ScrollArea(self, setLayout=True)
-            sc.setWidgetResizable(True)
-            sc.setWidget(fr)
-            sc.setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.MinimumExpanding)
-            sc.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
-            sc.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarAsNeeded)
+            fr = ScrollFrame(self, setLayout=True, spacing=DEFAULTSPACING,
+                             scrollBarPolicies=('never', 'asNeeded'), margins=TABMARGINS)
 
-            # these are required to make the background of the tabs the visible
-            sc.setStyleSheet('ScrollArea { border: 0px; background: transparent; }')
-
-            self.tabWidget.addTab(sc, tabName)
+            self.tabWidget.addTab(fr.scrollArea, tabName)
             tabFunc(parent=fr)
 
     def _setGeneralTabWidgets(self, parent):

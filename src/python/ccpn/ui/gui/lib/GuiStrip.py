@@ -356,7 +356,7 @@ class GuiStrip(Frame):
     def _setMaskToChildren(self):
         """Set the mouse mask to only the children of the frame - required to make sections transparent
         """
-        pass
+        self.testFrame._setMaskToChildren()
 
     def _resize(self):
         """Resize event to handle resizing of frames that overlay the OpenGL frame

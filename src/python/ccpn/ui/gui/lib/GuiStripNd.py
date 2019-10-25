@@ -186,7 +186,7 @@ class GuiStripNd(GuiStrip):
 
         self._frameGuide = ScrollFrame(self, setLayout=True, spacing=(2, 2),
                                        scrollBarPolicies=('never', 'never'), margins=(5, 5, 5, 5),
-                                       grid=(1, 0), gridSpan=(4, 4))
+                                       grid=(1, 0), gridSpan=(1, 1))
 
         self._frameGuide.addSpacer(10, 30, grid=(1, 0))
         ii = 0
@@ -200,6 +200,10 @@ class GuiStripNd(GuiStrip):
             self.planeAxisBars += (fr,)
 
         Spacer(self._frameGuide, 1, 1, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding, grid=(ii + 3, 2))
+        self._frameGuide.setVisible(False)
+
+        self.testFrame = OpenGLOverlayFrame(self, setLayout=True, grid=(1, 0), gridSpan=(4, 4))
+        self.testFrame._setMaskToChildren()
 
         self._fr.append(self._frameGuide.scrollArea)
 

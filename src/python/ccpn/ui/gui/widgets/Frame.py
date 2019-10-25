@@ -258,7 +258,7 @@ class OpenGLOverlayFrame(Frame):
         """
         region = QtGui.QRegion(self.frameGeometry())
         region -= QtGui.QRegion(self.geometry())
-        # region += self.childrenRegion()
+        region += self.childrenRegion()
         self.setMask(region)
 
     def paintEvent(self, ev):
@@ -370,13 +370,13 @@ class ScrollFrame(OpenGLOverlayFrame):
         """
         return self._scrollArea
 
-    def _setMaskToChildren(self):
-        """Set the mouse mask to only the children of the frame - required to make sections transparent
-        """
-        region = QtGui.QRegion(self.frameGeometry())
-        region -= QtGui.QRegion(self.geometry())
-        # region += self.childrenRegion()
-        self.setMask(region)
+    # def _setMaskToChildren(self):
+    #     """Set the mouse mask to only the children of the frame - required to make sections transparent
+    #     """
+    #     region = QtGui.QRegion(self.frameGeometry())
+    #     region -= QtGui.QRegion(self.geometry())
+    #     region += self.childrenRegion()
+    #     self.setMask(region)
 
 
 if __name__ == '__main__':

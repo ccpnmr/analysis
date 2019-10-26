@@ -371,7 +371,7 @@ class ListWidget(QtWidgets.QListWidget, Base):
                     else:
                         event.accept()
 
-                        # ejb - tried to fix transfer of CopyAction, but intermittent
+            # ejb - tried to fix transfer of CopyAction, but intermittent
             # encodedData = event.mimeData().data(ccpnmrJsonData)
             # stream = QtCore.QDataStream(encodedData, QtCore.QIODevice.ReadOnly)
             # eventData = stream.readQVariantHash()

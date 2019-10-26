@@ -24,11 +24,8 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 
 import os
 from functools import reduce, partial
-
-from PyQt5 import QtGui, QtWidgets
-
-from ccpn.ui.gui.modules.CcpnModule import CcpnModule
-from ccpn.ui.gui.widgets.Frame import ScrollableFrame
+from PyQt5 import QtWidgets
+from ccpn.ui.gui.widgets.Frame import ScrollableFrame, ScrollFrame
 from ccpn.ui.gui.widgets.Button import Button
 from ccpn.ui.gui.widgets.ButtonList import ButtonList
 from ccpn.ui.gui.widgets.FileDialog import FileDialog
@@ -36,7 +33,7 @@ from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.LineEdit import LineEdit
 from ccpn.ui.gui.widgets.MessageDialog import showWarning
 from ccpn.ui.gui.widgets.ScrollArea import ScrollArea
-from ccpn.ui.gui.popups.Dialog import CcpnDialog  # ejb
+from ccpn.ui.gui.popups.Dialog import CcpnDialog
 from ccpn.util.Logging import getLogger
 
 
@@ -82,9 +79,8 @@ class ShortcutsPopup(CcpnDialog):
 
 class ShortcutWidget(ScrollableFrame):
 
-    # def __init__(self, parent, mainWindow, **kwds):
-    def __init__(self, mainWindow=None, setLayout=True):  # ejb
-        ScrollableFrame.__init__(self, setLayout=setLayout)
+    def __init__(self, mainWindow=None, setLayout=True):
+        super().__init__(setLayout=setLayout)
         from functools import partial
 
         self.mainWindow = mainWindow

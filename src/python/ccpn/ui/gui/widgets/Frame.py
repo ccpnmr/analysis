@@ -72,7 +72,8 @@ from PyQt5 import QtGui, QtWidgets
 from ccpn.ui.gui.widgets.Base import Base
 from ccpn.ui.gui.widgets.ScrollArea import ScrollArea
 from ccpn.ui.gui.widgets.Widget import Widget
-from ccpn.ui.gui.guiSettings import textFontLarge
+from ccpn.ui.gui.guiSettings import textFontLarge, \
+    CCPNGLWIDGET_HEXFOREGROUND, CCPNGLWIDGET_HEXBACKGROUND, getColours
 
 
 class Frame(QtWidgets.QFrame, Base):
@@ -105,7 +106,7 @@ class Frame(QtWidgets.QFrame, Base):
 
         self._thisparent = parent
 
-        #TODO: replace with proper stylesheet routines once inplemented
+        #TODO: replace with proper stylesheet routines once implemented
         styleSheet = ''
         if 'bgColor' in kwds:
             #rgb = QtGui.QColor(kwds["bgColor"]).getRgb()[:3]
@@ -140,13 +141,10 @@ class Frame(QtWidgets.QFrame, Base):
             #self.setLineWidth(3)
             self.setMidLineWidth(3)
 
-    # def dragMoveEvent(self, ev):
-    #     print('>>>dragMoveEvent Frame', repr(self))
-    #     # self._thisparent.dragMoveEvent(ev)
-
 
 class ScrollableFrame(Frame):
-    "A scrollable frame"
+    """A scrollable frame
+    """
 
     def __init__(self, parent=None,
                  setLayout=False, showBorder=False, fShape=None, fShadow=None,
@@ -192,59 +190,57 @@ class ScrollableFrame(Frame):
         return self.scrollArea
 
 
-class ScrollableFrame2(Widget):
-    "A scrollable frame"
-
-    def __init__(self, parent=None,
-                 setLayout=False, showBorder=False, fShape=None, fShadow=None,
-                 minimumSizes=(50, 50), scrollBarPolicies=('asNeeded', 'asNeeded'), **kwds):
-
-        # check kwds if these apply to gridding
-        kw1 = {}
-        for key in 'grid gridSpan stretch hAlign vAlign'.split():
-            if key in kwds:
-                kw1[key] = kwds[key]
-                del (kwds[key])
-
-        Widget.__init__(self, parent=parent, **kw1)
-
-        # define a scroll area;
-        self._scrollArea = ScrollArea(parent=self, setLayout=True,
-                                      scrollBarPolicies=scrollBarPolicies, minimumSizes=minimumSizes,
-                                      )
-
-        # initialise a frame
-        self._frame = Frame(parent=self._scrollArea, setLayout=setLayout, grid=(0, 0),
-                            showBorder=showBorder, fShape=fShape, fShadow=fShadow,
-                            **kwds
-                            )
-
-        print('>>', self._frame)
-        # add it to the _sequenceGraphScrollArea
-        self._scrollArea.setWidget(self._frame)
-        # self._settingsScrollArea.setWidgetResizable(True)
-
-        # configure the scroll area to allow all available space without margins
-        self._scrollArea.setContentsMargins(0, 0, 0, 0)
-        self._scrollArea.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
-        self.setScrollBarPolicies(scrollBarPolicies)
-        # self._sequenceGraphScrollArea.ensureWidgetVisible(self, xMargin=200, yMargin=200)
-        #self.show()
-
-    def setScrollBarPolicies(self, scrollBarPolicies=('asNeeded', 'asNeeded')):
-        "Set the scrolbar policy: always, never, asNeeded"
-        self._scrollArea.setScrollBarPolicies(scrollBarPolicies)
-
-    def getScrollArea(self):
-        "Return the scrollbar widget; for external usage"
-        return self._scrollArea
-
-    def getFrame(self):
-        "Return the frame widget; for external usage"
-        return self._frame
-
-
-from ccpn.ui.gui.guiSettings import CCPNGLWIDGET_HEXFOREGROUND, CCPNGLWIDGET_HEXBACKGROUND, getColours
+# class ScrollableFrame2(Widget):
+#     """A scrollable frame
+#     """
+#
+#     def __init__(self, parent=None,
+#                  setLayout=False, showBorder=False, fShape=None, fShadow=None,
+#                  minimumSizes=(50, 50), scrollBarPolicies=('asNeeded', 'asNeeded'), **kwds):
+#
+#         # check kwds if these apply to gridding
+#         kw1 = {}
+#         for key in 'grid gridSpan stretch hAlign vAlign'.split():
+#             if key in kwds:
+#                 kw1[key] = kwds[key]
+#                 del (kwds[key])
+#
+#         Widget.__init__(self, parent=parent, **kw1)
+#
+#         # define a scroll area;
+#         self._scrollArea = ScrollArea(parent=self, setLayout=True,
+#                                       scrollBarPolicies=scrollBarPolicies, minimumSizes=minimumSizes,
+#                                       )
+#
+#         # initialise a frame
+#         self._frame = Frame(parent=self._scrollArea, setLayout=setLayout, grid=(0, 0),
+#                             showBorder=showBorder, fShape=fShape, fShadow=fShadow,
+#                             **kwds
+#                             )
+#
+#         print('>>', self._frame)
+#         # add it to the _sequenceGraphScrollArea
+#         self._scrollArea.setWidget(self._frame)
+#         # self._settingsScrollArea.setWidgetResizable(True)
+#
+#         # configure the scroll area to allow all available space without margins
+#         self._scrollArea.setContentsMargins(0, 0, 0, 0)
+#         self._scrollArea.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
+#         self.setScrollBarPolicies(scrollBarPolicies)
+#         # self._sequenceGraphScrollArea.ensureWidgetVisible(self, xMargin=200, yMargin=200)
+#         #self.show()
+#
+#     def setScrollBarPolicies(self, scrollBarPolicies=('asNeeded', 'asNeeded')):
+#         "Set the scrolbar policy: always, never, asNeeded"
+#         self._scrollArea.setScrollBarPolicies(scrollBarPolicies)
+#
+#     def getScrollArea(self):
+#         "Return the scrollbar widget; for external usage"
+#         return self._scrollArea
+#
+#     def getFrame(self):
+#         "Return the frame widget; for external usage"
+#         return self._frame
 
 
 class OpenGLOverlayFrame(Frame):
@@ -327,7 +323,7 @@ class ScrollFrame(OpenGLOverlayFrame):
                  minimumSizes=(50, 50), scrollBarPolicies=('asNeeded', 'asNeeded'),
                  margins=(0, 0, 0, 0), **kwds):
 
-        # define a scroll area; check kwds if these apply to gridding
+        # define a scroll area; check kwds if these apply to grid
         kw1 = {}
         for key in 'grid gridSpan stretch hAlign vAlign'.split():
             if key in kwds:

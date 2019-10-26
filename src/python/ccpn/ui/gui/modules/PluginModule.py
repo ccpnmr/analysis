@@ -200,7 +200,7 @@ class TestQt:
         pgDockArea = DockArea()
         self.qtMainWindow.setCentralWidget(pgDockArea)
 
-        # layout = QtWidgets.QGridLayout()      # ejb
+        # layout = QtWidgets.QGridLayout()
         # layout.setContentsMargins(15,15,15,15)
         # self.qtMainWindow.setLayout(layout)
 

@@ -46,9 +46,8 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 
 from PyQt5 import QtWidgets
 import numpy
-from functools import partial
 from ccpn.core.PeakList import PeakList
-from ccpn.ui.gui.widgets.PlaneToolbar import PlaneToolbar, PlaneAxisWidget  #, PlaneSelectorWidget
+from ccpn.ui.gui.widgets.PlaneToolbar import PlaneAxisWidget
 from ccpn.util.Logging import getLogger
 from ccpn.util.decorators import logCommand
 from ccpn.core.lib.ContextManagers import undoBlock
@@ -56,7 +55,8 @@ from ccpn.ui.gui.lib.GuiStrip import GuiStrip, DefaultMenu, PeakMenu, IntegralMe
 from ccpn.ui.gui.lib.GuiStripContextMenus import _getNdPhasingMenu, _getNdDefaultMenu, _getNdPeakMenu, \
     _getNdIntegralMenu, _getNdMultipletMenu, _getNdAxisMenu
 from ccpn.ui.gui.lib.Strip import copyStripPosition
-from ccpn.ui.gui.widgets.Frame import Frame, OpenGLOverlayFrame, ScrollFrame
+from ccpn.ui.gui.widgets.Spacer import Spacer
+from ccpn.ui.gui.widgets.Frame import OpenGLOverlayFrame
 from ccpn.util.Common import getAxisCodeMatchIndices
 
 
@@ -179,8 +179,6 @@ class GuiStripNd(GuiStrip):
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~
         # TEST: ED new plane widgets
 
-        from ccpn.ui.gui.widgets.Spacer import Spacer
-
         self.planeAxisBars = ()
 
         # a large(ish) unbound widget to contain the text - may need more rows
@@ -202,10 +200,7 @@ class GuiStripNd(GuiStrip):
 
         Spacer(self._frameGuide, 1, 1, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding, grid=(ii + 3, 2))
 
-        # NOTE make sure that the widget masks are set - not sure if required here
-        self._resize()
-
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
         if len(self.orderedAxes) < 3:  # hide if only 2D
             self._stripToolBarWidget.setFixedHeight(0)

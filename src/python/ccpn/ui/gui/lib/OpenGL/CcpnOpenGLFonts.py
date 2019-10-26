@@ -59,29 +59,31 @@ GlyphPY0 = 'py0'
 GlyphPX1 = 'px1'
 GlyphPY1 = 'py1'
 
+FONT_FILE = 0
+FULL_FONT_NAME = 1
 
 class CcpnGLFont():
-    def __init__(self, fileName=None, base=0, fontTransparency=None, activeTexture=0):
+    def __init__(self, fileName=None, base=0, fontTransparency=None, activeTexture=0, scale=None):
         self.fontName = None
         self.fontGlyph = [None] * 256
         self.base = base
+        self.scale=scale
 
+        if scale == None:
+            raise Exception('scale must be defined for font %s ' % fileName)
+        print('open font', fileName)
         with open(fileName, 'r') as op:
             self.fontInfo = op.read().split('\n')
 
         # no checking yet
-        self.fontFile = self.fontInfo[0].replace('textures: ', '')
+        self.fontFile = self.fontInfo[FONT_FILE].replace('textures: ', '')
         self.fontPNG = imread(os.path.join(os.path.dirname(fileName), self.fontFile))
-        self.fontName = self.fontInfo[1].split()[0]
 
-        fontInfo = self.fontInfo[1].split()
-        fiLen = len(fontInfo)
-        fontSize = fontInfo[fiLen-1]
-        fsLen = len(fontSize)
-        self.fontSize = int(fontSize[:(fsLen-2)])
+        fullFontNameString = self.fontInfo[FULL_FONT_NAME]
+        fontSizeString = fullFontNameString.split()[-1]
 
-        # fontSize = self.fontInfo[1].split()[-1]
-        # self.fontSize = int(fontSize[:-2])
+        self.fontName = fullFontNameString.replace(fontSizeString,'').strip()
+        self.fontSize = int(fontSizeString.replace('pt',''))/scale
 
         self.width = 0
         self.height = 0
@@ -152,12 +154,12 @@ class CcpnGLFont():
 
                             if chrNum == 65:
                                 # use 'A' for the referencing the tab size
-                                self.width = gw
-                                self.height = gh
+                                self.width = gw / self.scale
+                                self.height = gh /self.scale
 
                             if chrNum == 32:
                                 # store the width of the space character
-                                self.spaceWidth = gw
+                                self.spaceWidth = gw /self.scale
 
                     else:
                         exitDims = True
@@ -183,11 +185,17 @@ class CcpnGLFont():
                     exitKerns = True
                 row += 1
 
-        width, height, ascender, descender = 0, 0, 0, 0
-        for c in range(0, 256):
-            if chrNum < 256 and self.fontGlyph[chrNum]:
-                width = max(width, self.fontGlyph[chrNum][GlyphOrigW])
-                height = max(height, self.fontGlyph[chrNum][GlyphOrigH])
+        # GST Dead Code
+        # width, height, ascender, descender = 0, 0, 0, 0
+        # for c in range(0, 256):
+        #     if chrNum < 256 and self.fontGlyph[chrNum]:
+        #         width = max(width, self.fontGlyph[chrNum][GlyphOrigW])
+        #         height = max(height, self.fontGlyph[chrNum][GlyphOrigH])
+        #
+        # height = height / scale
+        # width =  width / scale
+        #
+        # width, height, ascender, descender = None, None, None, None
 
         self.textureId = GL.glGenTextures(1)
         # GL.glEnable(GL.GL_TEXTURE_2D)
@@ -213,6 +221,7 @@ class CcpnGLFont():
         # GL.glGenerateMipmap( GL.GL_TEXTURE_2D )
         GL.glDisable(GL.GL_TEXTURE_2D)
 
+
     def get_kerning(self, fromChar, prevChar):
         if self.fontGlyph[ord(fromChar)]:
             if prevChar and ord(prevChar) in self.fontGlyph[ord(fromChar)][GlyphKerns]:
@@ -220,13 +229,18 @@ class CcpnGLFont():
 
         return 0
 
+    def __str__(self):
+        string = super().__str__()
+        string = '%s name = %s size = %i file = %s ' % (string, self.fontName, self.fontSize, self.fontFile)
+        return string
+
 
 class GLString(GLVertexArray):
     def __init__(self, text=None, font=None, obj=None, colour=(1.0, 1.0, 1.0, 1.0),
                  x=0.0, y=0.0,
                  ox=0.0, oy=0.0,
                  angle=0.0, width=None, height=None, GLContext=None, blendMode=True,
-                 clearArrays=False, serial=None):
+                 clearArrays=False, serial=None, scale=2):
         super().__init__(renderMode=GLRENDERMODE_DRAW, blendMode=blendMode,
                          GLContext=GLContext, drawMode=GL.GL_TRIANGLES,
                          dimension=2, clearArrays=clearArrays)
@@ -241,6 +255,7 @@ class GLString(GLVertexArray):
         self.colour = colour
         self._position = (x, y)
         self._offset = (ox, oy)
+        self.scale = scale
 
         self.buildString()
 
@@ -314,8 +329,8 @@ class GLString(GLVertexArray):
 
                 # attribs = [[x, y], [x, y], [x, y], [x, y]]
                 # offsets = [[x, y], [x, y], [x, y], [x, y]]
-
-                self.vertices[i8:i8 + 8] = (x0, y0, x0, y1, x1, y1, x1, y0)
+                self.vertices[i8:i8 + 8] = (x0/self.scale, y0/self.scale, x0/self.scale, y1/self.scale,
+                                            x1/self.scale, y1/self.scale, x1/self.scale, y0/self.scale)
                 self.indices[i6:i6 + 6] = (i4, i4 + 1, i4 + 2, i4, i4 + 2, i4 + 3)
                 self.texcoords[i8:i8 + 8] = (u0, v0, u0, v1, u1, v1, u1, v0)
                 self.colors[i16:i16 + 16] = colour * 4
@@ -327,8 +342,15 @@ class GLString(GLVertexArray):
                 self.width = max(self.width, penX)
 
             if (c == 32):  # space
+                # print('space width',font.spaceWidth)
+                # print(penX)
                 penX += font.spaceWidth
+                # print(font.spaceWidth)
+                # print(penX)
+                # print(self.width)
                 self.width = max(self.width, penX)
+                # print(self.width)
+                # print('end space')
 
             elif (c == 10):  # newline
                 penX = 0
@@ -347,7 +369,7 @@ class GLString(GLVertexArray):
 
             # penY = penY + glyph[GlyphHeight]
             prev = charCode
-
+        # print(text,self.width, len(text))
         # set the offsets for the characters top the desired coordinates
         self.numVertices = len(self.vertices) // 2
         self.attribs = np.array((x + ox, y + oy) * self.numVertices, dtype=np.float32)

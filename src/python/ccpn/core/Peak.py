@@ -36,7 +36,8 @@ from ccpn.core.NmrAtom import NmrAtom
 from ccpnmodel.ccpncore.api.ccp.nmr import Nmr
 from ccpn.core.lib.peakUtils import snapToExtremum as peakUtilsSnapToExtremum
 from ccpn.util.decorators import logCommand
-from ccpn.core.lib.ContextManagers import newObject, deleteObject, ccpNmrV3CoreSetter, undoBlock
+from ccpn.core.lib.ContextManagers import newObject, \
+    ccpNmrV3CoreSetter, ccpNmrV3CoreUndoBlock, undoBlock
 from ccpn.util.Logging import getLogger
 from ccpn.util.Common import makeIterableList
 
@@ -324,7 +325,9 @@ class Peak(AbstractWrapperObject):
 
     @dimensionNmrAtoms.setter
     @logCommand(get='self', isProperty=True)
-    @ccpNmrV3CoreSetter()
+    # TODO:ED Check this decorator
+    # @ccpNmrV3CoreSetter()
+    @ccpNmrV3CoreUndoBlock()
     def dimensionNmrAtoms(self, value: Sequence):
 
         if not isinstance(value, Sequence):
@@ -360,7 +363,8 @@ class Peak(AbstractWrapperObject):
                 dimResonances.append(resonances)
 
         # fixme:ED this creates a new chemicalShift that is not caught by the undo stack
-            # caught be the modified ccpNmrV3CoreSetter
+        # caught be the new decorator ccpNmrV3CoreUndoBlock
+        # original misses creation of api chemicalShift
         apiPeak.assignByDimensions(dimResonances)
 
         # insert the new attached nmrAtoms - deleted and new will be included so tables can update with deleted peaks/nmrAtoms

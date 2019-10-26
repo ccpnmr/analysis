@@ -1067,14 +1067,39 @@ def ccpNmrV3CoreSetter():
         oldValue = getattr(self, func.__name__)
 
         with notificationBlanking(application=application):
-            with undoBlock():            #undoStackBlocking(application=application) as addUndoItem:
+            with undoStackBlocking(application=application) as addUndoItem:
 
                 # call the wrapped function
                 result = func(*args, **kwds)
 
-                # addUndoItem(undo=partial(func, self, oldValue),
-                #             redo=partial(func, self, args[1])
-                #             )
+                addUndoItem(undo=partial(func, self, oldValue),
+                            redo=partial(func, self, args[1])
+                            )
+
+        self._finaliseAction('change')
+        return result
+
+    return theDecorator
+
+
+def ccpNmrV3CoreUndoBlock():
+    """A decorator wrap the property setters method in an undo block and triggering the
+    'change' notification
+    """
+
+    @decorator.decorator
+    def theDecorator(*args, **kwds):
+        func = args[0]
+        args = args[1:]  # Optional 'self' is now args[0]
+        self = args[0]
+
+        application = getApplication()  # pass it in to reduce overhead
+
+        with notificationBlanking(application=application):
+            with undoBlock():
+
+                # call the wrapped function
+                result = func(*args, **kwds)
 
         self._finaliseAction('change')
         return result

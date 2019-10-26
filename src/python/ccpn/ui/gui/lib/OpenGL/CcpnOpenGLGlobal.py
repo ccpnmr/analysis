@@ -44,7 +44,8 @@ for size in FONT_SIZES:
     # fontList.append(('glFont%i.fnt' % size/scale, DEFAULTFONT, size, scale)
     fontList.append(('glFont%i.fnt' % (size*scale), DEFAULTFONT, size, scale))  # double size for retina displays...
 FONTLIST = tuple(fontList)
-print(FONTLIST)
+# print(FONTLIST)
+
 FONTTRANSPARENT = 'Transparent'
 FONTPATH = 'Fonts'
 

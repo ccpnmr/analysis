@@ -457,7 +457,7 @@ class _GroupEditorPopupABC(CcpnDialog):
 
         # GST how to get the icon using a relative path?
         # self.errorIcon = QtGui.QPixmap('/Users/garythompson/Dropbox/git/ccpnmr/AnalysisV3/src/python/ccpn/ui/gui/widgets/icons/exclamation_small.png')
-        self.errorIcon = Icon('icons/warning')
+        self.errorIcon = Icon('icons/exclamation_small')
 
         self.mainWindow = mainWindow
         self.application = mainWindow.application

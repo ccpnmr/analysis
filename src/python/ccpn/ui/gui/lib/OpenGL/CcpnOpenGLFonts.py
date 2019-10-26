@@ -71,7 +71,8 @@ class CcpnGLFont():
 
         if scale == None:
             raise Exception('scale must be defined for font %s ' % fileName)
-        print('open font', fileName)
+        # print('open font', fileName)
+
         with open(fileName, 'r') as op:
             self.fontInfo = op.read().split('\n')
 

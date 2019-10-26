@@ -331,50 +331,56 @@ class PlaneSelectorWidget(Frame):
 
         self.spinBox.setToolTip(str(self.strip.axisCodes[self.axis]))
 
-        # set the values for the attached widgets
+    def setCallbacks(self, callbacks):
+        self._callbacks = callbacks
 
     def _planeCountChanged(self, value: int = 1):
         """
         Changes the number of planes displayed simultaneously.
         """
         if self.strip:
-            zAxis = self.strip.orderedAxes[self.axis]
-            zAxis.width = value * self.planeCountSpinBox.singleStep()
-            self.strip._rebuildStripContours()
+            self._callbacks[3](value)
+            # zAxis = self.strip.orderedAxes[self.axis]
+            # zAxis.width = value * self.spinBox.singleStep()
+            # self.strip.axisRegionChanged(self.strip.orderedAxes[self.axis])
+            # self.strip._rebuildStripContours()
 
     def _nextPlane(self, *args):
         """
         Increases axis ppm position by one plane
         """
         if self.strip:
-            self.strip.changeZPlane(self.axis, planeCount=-1)  # -1 because ppm units are backwards
-            self.strip._rebuildStripContours()
-
-            self.strip.pythonConsole.writeConsoleCommand("strip.nextZPlane()", strip=self.strip)
-            getLogger().info("application.getByGid(%r).nextZPlane()" % self.strip.pid)
+            self._callbacks[2]()
+            # self.strip.changeZPlane(self.axis, planeCount=-1)  # -1 because ppm units are backwards
+            # self.strip._rebuildStripContours()
+            #
+            # self.strip.pythonConsole.writeConsoleCommand("strip.nextZPlane()", strip=self.strip)
+            # getLogger().info("application.getByGid(%r).nextZPlane()" % self.strip.pid)
 
     def _previousPlane(self, *args):
         """
         Decreases axis ppm position by one plane
         """
         if self.strip:
-            self.strip.changeZPlane(self.axis, planeCount=1)
-            self.strip._rebuildStripContours()
-
-            self.strip.pythonConsole.writeConsoleCommand("strip.prevZPlane()", strip=self.strip)
-            getLogger().info("application.getByGid(%r).prevZPlane()" % self.strip.pid)
+            self._callbacks[0]()
+            # self.strip.changeZPlane(self.axis, planeCount=1)
+            # self.strip._rebuildStripContours()
+            #
+            # self.strip.pythonConsole.writeConsoleCommand("strip.prevZPlane()", strip=self.strip)
+            # getLogger().info("application.getByGid(%r).prevZPlane()" % self.strip.pid)
 
     def _spinBoxChanged(self, value: float):
         """
         Sets the value of the axis plane position box if the specified value is within the displayable limits.
         """
         if self.strip:
-            planeLabel = self.spinBox
-            value = self.spinBox.value()
-
-            if planeLabel.minimum() <= value <= planeLabel.maximum():
-                self.strip.changeZPlane(self.axis, position=value)
-                self.strip._rebuildStripContours()
+            self._callbacks[1]()
+            # planeLabel = self.spinBox
+            # value = self.spinBox.value()
+            #
+            # if planeLabel.minimum() <= value <= planeLabel.maximum():
+            #     self.strip.changeZPlane(self.axis, position=value)
+            #     self.strip._rebuildStripContours()
 
     def _wheelEvent(self, event):
         if event.angleDelta().y() > 0:
@@ -399,9 +405,11 @@ class PlaneSelectorWidget(Frame):
     def setPosition(self, ppmPosition, ppmWidth):
         """Set the new ppmPosition/ppmWidth
         """
-        planeSize = self.spinBox.singleStep()
-        self.spinBox.setValue(ppmPosition)
-        self.planeCountSpinBox.setValue(ppmWidth / planeSize)
+        with self.blockWidgetSignals():
+
+            planeSize = self.spinBox.singleStep()
+            self.spinBox.setValue(ppmPosition)
+            # self.planeCountSpinBox.setValue(ppmWidth / planeSize)
 
     def setPlaneValues(self, minZPlaneSize=None, minAliasedFrequency=None, maxAliasedFrequency=None, ppmPosition=None):
         """Set new values for the plane selector
@@ -525,7 +533,7 @@ class PlaneAxisWidget(_OpenGLFrameABC):
 
     """
     BUTTONS = (('_axisLabel', ActiveLabel, _initAxisCode, _setAxisCode),
-               ('_axisValue', ActiveLabel, _initAxisPosition, _setAxisPosition),
+               ('_axisPpmPosition', ActiveLabel, _initAxisPosition, _setAxisPosition),
                ('_axisPlaneCount', ActiveLabel, _initPlaneCount, _setPlaneCount),
                ('_axisSelector', PlaneSelectorWidget, _initPlaneSelection, _setPlaneSelection)
                )
@@ -536,13 +544,13 @@ class PlaneAxisWidget(_OpenGLFrameABC):
         self.strip = strip
         self.axis = axis
 
-        axisButtons = (self._axisLabel, self._axisValue, self._axisPlaneCount, self._axisSelector)
+        axisButtons = (self._axisLabel, self._axisPpmPosition, self._axisPlaneCount, self._axisSelector)
 
         for button in axisButtons[:3]:
             button.setSelectionCallback(partial(self._selectCallback, axisButtons))
 
         self._axisLabel.setVisible(True)
-        self._axisValue.setVisible(True)
+        self._axisPpmPosition.setVisible(True)
         self._axisPlaneCount.setVisible(True)
         self._axisSelector.setVisible(False)
 
@@ -553,6 +561,12 @@ class PlaneAxisWidget(_OpenGLFrameABC):
         self._axisSelector._initialise(strip, axis)
         self._axisLabel.setText(strip.axisCodes[axis] + ':')
         self._axisLabel.setToolTip(strip.axisCodes[axis])
+        self._axisSelector.setCallbacks((self._previousPlane,
+                                         self._spinBoxChanged,
+                                         self._nextPlane,
+                                         self._planeCountChanged,
+                                         self._wheelEvent
+                                         ))
 
     def _selectCallback(self, widgets):
         # if the first widget is clicked then toggle the planeToolbar buttons
@@ -569,12 +583,20 @@ class PlaneAxisWidget(_OpenGLFrameABC):
     def updatePosition(self):
         """Set new axis position
         """
-        self._axisSelector.updatePosition()
+        axis = self.strip.orderedAxes[self.axis]
+        ppmPosition = axis.position
+        ppmWidth = axis.width
+
+        self.setPosition(ppmPosition, ppmWidth)
 
     def setPosition(self, ppmPosition, ppmWidth):
         """Set the new ppmPosition/ppmWidth
         """
         self._axisSelector.setPosition(ppmPosition, ppmWidth)
+        self._axisPpmPosition.setText('%.3f' % ppmPosition)
+
+        # value = int(ppmWidth / self._axisSelector.spinBox.singleStep())
+        # self._axisPlaneCount.setText('['+str(value)+']')
 
     def getPlaneValues(self):
         """Return the current settings for this axis
@@ -588,12 +610,69 @@ class PlaneAxisWidget(_OpenGLFrameABC):
         planeBox = self._axisSelector
         planeBox.setPlaneValues(minZPlaneSize, minAliasedFrequency, maxAliasedFrequency, ppmPosition)
 
-        self._axisValue.setText('%.3f' % ppmPosition)
+        self._axisPpmPosition.setText('%.3f' % ppmPosition)
         self._axisPlaneCount.setText('['+str(planeBox.planeCount)+']')
 
     @property
     def planeCount(self) -> int:
         return self._axisSelector.planeCount
+
+    def _planeCountChanged(self, value: int = 1):
+        """
+        Changes the number of planes displayed simultaneously.
+        """
+        if self.strip:
+            zAxis = self.strip.orderedAxes[self.axis]
+            zAxis.width = value * self._axisSelector.spinBox.singleStep()
+
+            # value = int(ppmWidth / self._axisSelector.spinBox.singleStep())
+            self._axisPlaneCount.setText('[' + str(value) + ']')
+
+            self.strip._rebuildStripContours()
+
+    def _nextPlane(self, *args):
+        """
+        Increases axis ppm position by one plane
+        """
+        if self.strip:
+            self.strip.changeZPlane(self.axis, planeCount=-1)  # -1 because ppm units are backwards
+            self.strip._rebuildStripContours()
+
+            self.strip.pythonConsole.writeConsoleCommand("strip.nextZPlane()", strip=self.strip)
+            getLogger().info("application.getByGid(%r).nextZPlane()" % self.strip.pid)
+
+    def _previousPlane(self, *args):
+        """
+        Decreases axis ppm position by one plane
+        """
+        if self.strip:
+            self.strip.changeZPlane(self.axis, planeCount=1)
+            self.strip._rebuildStripContours()
+
+            self.strip.pythonConsole.writeConsoleCommand("strip.prevZPlane()", strip=self.strip)
+            getLogger().info("application.getByGid(%r).prevZPlane()" % self.strip.pid)
+
+    def _spinBoxChanged(self, *args):
+        """
+        Sets the value of the axis plane position box if the specified value is within the displayable limits.
+        """
+        if self.strip:
+            planeLabel = self._axisSelector.spinBox
+            value = planeLabel.value()
+
+            if planeLabel.minimum() <= value <= planeLabel.maximum():
+                self.strip.changeZPlane(self.axis, position=value)
+                self.strip._rebuildStripContours()
+
+    def _wheelEvent(self, event):
+        if event.angleDelta().y() > 0:
+            if self.strip.prevPlaneCallback:
+                self.strip.prevPlaneCallback(self.axis)
+        else:
+            if self.strip.nextPlaneCallback:
+                self.strip.nextPlaneCallback(self.axis)
+
+        self.strip._rebuildStripContours()
 
 
 class PlaneToolbar(Frame):

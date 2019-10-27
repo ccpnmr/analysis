@@ -109,6 +109,14 @@ class MessageDialog(QtWidgets.QMessageBox):
                       - self.frameGeometry().center()
                       + self.frameGeometry().topLeft())
 
+    def keyPressEvent(self,keyEvent):
+        if keyEvent.key() != Qt.Key_Escape:
+            super().keyPressEvent(keyEvent)
+        else:
+            self.reject()
+
+
+
 
 def showInfo(title, message, parent=None, iconPath=None):
     """Display an info message
@@ -214,23 +222,54 @@ def showYesNoWarning(title, message, parent=None, iconPath=None):
     return dialog.exec_() == Yes
 
 
-def showMulti(title, message, texts, objects=None, parent=None, iconPath=None):
+def showMulti(title, message, texts, objects=None, parent=None, iconPath=None, okText='OK', cancelText='Cancel', destructive=()):
     if objects:
         assert len(objects) == len(texts)
 
     dialog = MessageDialog('Query', title, message, Question, iconPath, parent)
 
+    lower_texts = [item.strip().lower() for item in texts]
+
+
+    if okText in lower_texts and lower_texts[0] != okText.lower():
+        print('Warning: Ok button should be far righthand button')
+
+    role = QtWidgets.QMessageBox.ActionRole
+
     for text in texts:
-        dialog.addButton(text, QtWidgets.QMessageBox.AcceptRole)
+
+        lower_text = text.strip().lower()
+        if lower_text == 'cancel' or lower_text == cancelText.strip().lower():
+            role = QtWidgets.QMessageBox.RejectRole
+
+        if not isinstance(destructive, str):
+            destructive = [item.strip().lower() for item in destructive]
+        else:
+            destructive = destructive.strip().lower()
+        if lower_text in destructive:
+            role = QtWidgets.QMessageBox.DestructiveRole
+
+        if lower_text == 'ok' or lower_text == okText.strip().lower():
+            role = QtWidgets.QMessageBox.AcceptRole
+
+        button = dialog.addButton(text, role)
+
+        if lower_text == 'ok' or lower_text == okText.strip().lower():
+            dialog.setDefaultButton(button)
 
     dialog.raise_()
     index = dialog.exec_()
 
-    if objects:
-        return objects[index]
 
-    else:
-        return texts[index]
+    result = ''
+    if dialog.clickedButton() != None:
+        if objects:
+            result = objects[index]
+
+        else:
+            result = texts[index]
+
+    return result
 
 
 def showError(title, message, parent=None, iconPath=None):

@@ -938,11 +938,11 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
 
         if disableCancel:
             reply = MessageDialog.showMulti("Quit Program", "Do you want to save changes before quitting?",
-                                            ['Save and Quit', 'Quit without Saving'],
+                                            ['Save and Quit', 'Quit without Saving'],destructive='Quit without Saving'
                                             )
         else:
             reply = MessageDialog.showMulti("Quit Program", "Do you want to save changes before quitting?",
-                                            ['Save and Quit', 'Quit without Saving', 'Cancel'],
+                                            ['Save and Quit', 'Quit without Saving', 'Cancel'], destructive='Quit without Saving'
                                             )
 
         if reply == 'Save and Quit':

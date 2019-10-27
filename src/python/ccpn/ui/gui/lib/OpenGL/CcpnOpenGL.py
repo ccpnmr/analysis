@@ -1859,13 +1859,13 @@ class CcpnGLWidget(QOpenGLWidget):
         # self.viewports.addViewport(GLDefs.AXISCORNER, self, (-self.AXIS_MARGINRIGHT, 'w'), (0, 'a'), (0, 'w'), (self.AXIS_MARGINBOTTOM, 'a'))
 
         # set strings for the overlay text
-        self._lockStringFalse = GLString(text=GLDefs.LOCKSTRING, font=self.globalGL.glSmallFont, x=0, y=0,
+        self._lockStringFalse = GLString(text=GLDefs.LOCKSTRING, font=self.getSmallFont(), x=0, y=0,
                                          colour=(0.5, 0.5, 0.5, 1.0), GLContext=self)
-        self._lockStringTrue = GLString(text=GLDefs.LOCKSTRING, font=self.globalGL.glSmallFont, x=0, y=0,
+        self._lockStringTrue = GLString(text=GLDefs.LOCKSTRING, font=self.getSmallFont(), x=0, y=0,
                                         colour=self.highlightColour, GLContext=self)
-        self._useDefaultStringFalse = GLString(text=GLDefs.USEDEFAULTASPECTSTRING, font=self.globalGL.glSmallFont, x=0, y=0,
+        self._useDefaultStringFalse = GLString(text=GLDefs.USEDEFAULTASPECTSTRING, font=self.getSmallFont(), x=0, y=0,
                                                colour=(0.5, 0.5, 0.5, 1.0), GLContext=self)
-        self._useDefaultStringTrue = GLString(text=GLDefs.USEDEFAULTASPECTSTRING, font=self.globalGL.glSmallFont, x=0, y=0,
+        self._useDefaultStringTrue = GLString(text=GLDefs.USEDEFAULTASPECTSTRING, font=self.getSmallFont(), x=0, y=0,
                                               colour=self.highlightColour, GLContext=self)
 
         cornerButtons = ((self._lockStringTrue, self._toggleAxisLocked),
@@ -1878,7 +1878,7 @@ class CcpnGLWidget(QOpenGLWidget):
             # define a slightly wider, lower box
             self._buttonCentres += ((w + 2, h - 2, w, h - 3, callBack),)
 
-        self.stripIDString = GLString(text='', font=self.globalGL.glSmallFont, x=0, y=0, GLContext=self, obj=None)
+        self.stripIDString = GLString(text='', font=self.getSmallFont(), x=0, y=0, GLContext=self, obj=None)
 
         # This is the correct blend function to ignore stray surface blending functions
         GL.glBlendFuncSeparate(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA, GL.GL_ONE, GL.GL_ONE)
@@ -1893,6 +1893,18 @@ class CcpnGLWidget(QOpenGLWidget):
 
         # check that the screen device pixel ratio is correct
         self.refreshDevicePixelRatio()
+
+    def getSmallFont(self, transparent=False):
+        # GST tried this, it wrong sometimes, also sometimes its a float?
+        # scale =  int(self.viewports._devicePixelRatio)
+        scale = self.devicePixelRatio()
+
+        fontName = self.globalGL.glSmallTransparentFont if transparent else self.globalGL.glSmallFont
+
+        size = self.globalGL.glSmallFontSize
+        font = '%s-%i' %(fontName,size)
+
+        return self.globalGL.fonts[font,scale]
 
     def _setColourScheme(self):
         """Update colours from colourScheme
@@ -1923,12 +1935,12 @@ class CcpnGLWidget(QOpenGLWidget):
         self._setColourScheme()
 
         # change the colour of the selected 'Lock' string
-        self._lockStringTrue = GLString(text=GLDefs.LOCKSTRING, font=self.globalGL.glSmallFont, x=0, y=0,
+        self._lockStringTrue = GLString(text=GLDefs.LOCKSTRING, font=self.getSmallFont(), x=0, y=0,
                                         colour=self.highlightColour, GLContext=self)
 
         # change the colour of the selected 'Fixed' string
-        self._useDefaultStringTrue = GLString(text=GLDefs.USEDEFAULTASPECTSTRING, font=self.globalGL.glSmallFont, x=0, y=0,
-                                              colour=self.highlightColour, GLContext=self)
+        self._useDefaultStringTrue = GLString(text=GLDefs.USEDEFAULTASPECTSTRING, font=self.getSmallFont(), x=0, y=0,
+                                            colour=self.highlightColour, GLContext=self)
 
         # set the new limits
         self._applyXLimit = self._preferences.zoomXLimitApply
@@ -2011,10 +2023,10 @@ class CcpnGLWidget(QOpenGLWidget):
     def mousePressInLabel(self, mx, my, ty):
         """Check if the mouse has been pressed in the stripIDlabel
         """
-        buttons = (((GLDefs.TITLEXOFFSET + 0.5 * len(self.stripIDLabel)) * self.globalGL.glSmallFont.width,
-                    ty - ((GLDefs.TITLEYOFFSET - 0.5) * self.globalGL.glSmallFont.height),
-                    0.5 * len(self.stripIDLabel) * self.globalGL.glSmallFont.width,
-                    0.4 * self.globalGL.glSmallFont.height),)
+        buttons = (((GLDefs.TITLEXOFFSET + 0.5 * len(self.stripIDLabel)) * self.getSmallFont().width,
+                    ty - ((GLDefs.TITLEYOFFSET - 0.5) * self.getSmallFont().height),
+                    0.5 * len(self.stripIDLabel) * self.getSmallFont().width,
+                    0.4 * self.getSmallFont().height),)
 
         for button in buttons:
             minDiff = abs(mx - button[0])
@@ -2427,6 +2439,23 @@ class CcpnGLWidget(QOpenGLWidget):
         super().leaveEvent(ev)
         self._clearAndUpdate()
 
+    def getMousePosition(self):
+        """Get the coordinates of the mouse in the window (in ppm) based on the current axes
+        """
+        point = self.mapFromGlobal(QtGui.QCursor.pos())
+
+        # calculate mouse coordinate within the mainView
+        _mouseX = point.x()
+        if self._drawBottomAxis:
+            _mouseY = self.height() - point.y() - self.AXIS_MARGINBOTTOM
+            _top = self.height() - self.AXIS_MARGINBOTTOM
+        else:
+            _mouseY = self.height() - point.y()
+            _top = self.height()
+
+        # translate from screen (0..w, 0..h) to NDC (-1..1, -1..1) to axes (axisL, axisR, axisT, axisB)
+        return self.mouseTransform.dot([_mouseX, _mouseY, 0.0, 1.0])
+
     def mouseMoveEvent(self, event):
 
         self.cursorSource = CURSOR_SOURCE_SELF
@@ -2608,8 +2637,8 @@ class CcpnGLWidget(QOpenGLWidget):
 
             # offsets = [self.axisL + (GLDefs.TITLEXOFFSET * self.globalGL.glSmallFont.width * self.pixelX),
             #            self.axisT - (GLDefs.TITLEYOFFSET * self.globalGL.glSmallFont.height * self.pixelY)]
-            offsets = [GLDefs.TITLEXOFFSET * self.globalGL.glSmallFont.width * self.deltaX,
-                       1.0 - (GLDefs.TITLEYOFFSET * self.globalGL.glSmallFont.height * self.deltaY)]
+            offsets = [GLDefs.TITLEXOFFSET * self.getSmallFont().width * self.deltaX,
+                       1.0 - (GLDefs.TITLEYOFFSET * self.getSmallFont().height * self.deltaY)]
 
             for pp in range(0, 2 * vertices, 2):
                 self.stripIDString.attribs[pp:pp + 2] = offsets
@@ -2960,9 +2989,9 @@ class CcpnGLWidget(QOpenGLWidget):
         # GL.glBindTexture(GL.GL_TEXTURE_2D, self.globalGL.glSmallFont.textureId)
 
         GL.glActiveTexture(GL.GL_TEXTURE0)
-        GL.glBindTexture(GL.GL_TEXTURE_2D, self.globalGL.glSmallFont.textureId)
+        GL.glBindTexture(GL.GL_TEXTURE_2D, self.getSmallFont().textureId)
         GL.glActiveTexture(GL.GL_TEXTURE1)
-        GL.glBindTexture(GL.GL_TEXTURE_2D, self.globalGL.glSmallTransparentFont.textureId)
+        GL.glBindTexture(GL.GL_TEXTURE_2D, self.getSmallFont(transparent=True).textureId)
 
         # # specific blend function for text overlay
         # GL.glBlendFuncSeparate(GL.GL_SRC_ALPHA, GL.GL_DST_COLOR, GL.GL_ONE, GL.GL_ONE)
@@ -3348,6 +3377,8 @@ class CcpnGLWidget(QOpenGLWidget):
             else:
                 labelColour = self.foreground
 
+            smallFont = self.getSmallFont()
+
             if self._drawBottomAxis:
                 # create the X axis labelling
                 for axLabel in self.axisLabelling['0']:
@@ -3358,27 +3389,27 @@ class CcpnGLWidget(QOpenGLWidget):
                     axisXText = self._intFormat(axisXLabel) if axLabel[4] >= 1 else self.XMode(axisXLabel)
 
                     self._axisXLabelling.append(GLString(text=axisXText,
-                                                         font=self.globalGL.glSmallFont,
-                                                         x=axisX - (0.4 * self.globalGL.glSmallFont.width * self.deltaX * len(
+                                                         font=smallFont,
+                                                         x=axisX - (0.4 * smallFont.width * self.deltaX * len(
                                                                  axisXText)),
-                                                         y=self.AXIS_MARGINBOTTOM - GLDefs.TITLEYOFFSET * self.globalGL.glSmallFont.height,
+                                                         y=self.AXIS_MARGINBOTTOM - GLDefs.TITLEYOFFSET * smallFont.height,
 
                                                          colour=labelColour, GLContext=self,
                                                          obj=None))
 
                 # append the axisCode
                 self._axisXLabelling.append(GLString(text=self.axisCodes[0],
-                                                     font=self.globalGL.glSmallFont,
+                                                     font=smallFont,
                                                      x=GLDefs.AXISTEXTXOFFSET * self.deltaX,
-                                                     y=self.AXIS_MARGINBOTTOM - GLDefs.TITLEYOFFSET * self.globalGL.glSmallFont.height,
+                                                     y=self.AXIS_MARGINBOTTOM - GLDefs.TITLEYOFFSET * smallFont.height,
                                                      colour=labelColour, GLContext=self,
                                                      obj=None))
                 # and the axis dimensions
                 xUnitsLabels = self.XAXES[self._xUnits]
                 self._axisXLabelling.append(GLString(text=xUnitsLabels,
-                                                     font=self.globalGL.glSmallFont,
-                                                     x=1.0 - (self.deltaX * len(xUnitsLabels) * self.globalGL.glSmallFont.width),
-                                                     y=self.AXIS_MARGINBOTTOM - GLDefs.TITLEYOFFSET * self.globalGL.glSmallFont.height,
+                                                     font=smallFont,
+                                                     x=1.0 - (self.deltaX * len(xUnitsLabels) * smallFont.width),
+                                                     y=self.AXIS_MARGINBOTTOM - GLDefs.TITLEYOFFSET * smallFont.height,
                                                      colour=labelColour, GLContext=self,
                                                      obj=None))
 
@@ -3397,7 +3428,7 @@ class CcpnGLWidget(QOpenGLWidget):
                         axisYText = self._intFormat(axisYLabel) if ayLabel[4] >= 1 else self.YMode(axisYLabel)
 
                     self._axisYLabelling.append(GLString(text=axisYText,
-                                                         font=self.globalGL.glSmallFont,
+                                                         font=smallFont,
                                                          x=self.AXIS_OFFSET,
                                                          # y=axisY - (GLDefs.AXISTEXTYOFFSET * self.pixelY),
                                                          y=axisY - (GLDefs.AXISTEXTYOFFSET * self.deltaY),
@@ -3406,16 +3437,16 @@ class CcpnGLWidget(QOpenGLWidget):
 
                 # append the axisCode
                 self._axisYLabelling.append(GLString(text=self.axisCodes[1],
-                                                     font=self.globalGL.glSmallFont,
+                                                     font=smallFont,
                                                      x=self.AXIS_OFFSET,
                                                      # y=self.axisT - (GLDefs.TITLEYOFFSET * self.globalGL.glSmallFont.height * self.pixelY),
-                                                     y=1.0 - (GLDefs.TITLEYOFFSET * self.globalGL.glSmallFont.height * self.deltaY),
+                                                     y=1.0 - (GLDefs.TITLEYOFFSET * smallFont.height * self.deltaY),
                                                      colour=labelColour, GLContext=self,
                                                      obj=None))
                 # and the axis dimensions
                 yUnitsLabels = self.YAXES[self._yUnits]
                 self._axisYLabelling.append(GLString(text=yUnitsLabels,
-                                                     font=self.globalGL.glSmallFont,
+                                                     font=smallFont,
                                                      x=self.AXIS_OFFSET,
                                                      y=1.0 * self.deltaY,
                                                      colour=labelColour, GLContext=self,
@@ -3668,7 +3699,7 @@ class CcpnGLWidget(QOpenGLWidget):
                         label = rr.label if rr.label else rr.axisCode
 
                         newMarkString = GLString(text=label,
-                                                 font=self.globalGL.glSmallFont,
+                                                 font=self.getSmallFont(),
                                                  x=textX,
                                                  y=textY,
                                                  colour=(colR, colG, colB, 1.0),
@@ -3909,11 +3940,11 @@ class CcpnGLWidget(QOpenGLWidget):
                 colour = self.foreground
 
             self.stripIDString = GLString(text=self.stripIDLabel,
-                                          font=self.globalGL.glSmallFont,
+                                          font=self.getSmallFont(),
                                           # x=self.axisL + (GLDefs.TITLEXOFFSET * self.globalGL.glSmallFont.width * self.pixelX),
                                           # y=self.axisT - (GLDefs.TITLEYOFFSET * self.globalGL.glSmallFont.height * self.pixelY),
-                                          x=GLDefs.TITLEXOFFSET * self.globalGL.glSmallFont.width * self.deltaX,
-                                          y=1.0 - (GLDefs.TITLEYOFFSET * self.globalGL.glSmallFont.height * self.deltaY),
+                                          x=GLDefs.TITLEXOFFSET * self.getSmallFont().width * self.deltaX,
+                                          y=1.0 - (GLDefs.TITLEYOFFSET * self.getSmallFont().height * self.deltaY),
                                           colour=colour, GLContext=self,
                                           obj=None, blendMode=False)
 
@@ -4323,7 +4354,7 @@ class CcpnGLWidget(QOpenGLWidget):
                                               self._axisOrder[1], self.YMode(cursorY))
 
             self.mouseString = GLString(text=newCoords,
-                                        font=self.globalGL.glSmallFont,
+                                        font=self.getSmallFont(),
                                         x=valueToRatio(cursorCoordinate[0], self.axisL, self.axisR),
                                         y=valueToRatio(cursorCoordinate[1], self.axisB, self.axisT),
                                         colour=self.foreground, GLContext=self,
@@ -4351,10 +4382,10 @@ class CcpnGLWidget(QOpenGLWidget):
                                                      self._axisOrder[1], self.YMode(cursorY - startY))
 
                 self.diffMouseString = GLString(text=diffCoords,
-                                                font=self.globalGL.glSmallFont,
+                                                font=self.getSmallFont(),
                                                 x=valueToRatio(cursorCoordinate[0], self.axisL, self.axisR),
                                                 y=valueToRatio(cursorCoordinate[1], self.axisB, self.axisT) - (
-                                                        self.globalGL.glSmallFont.height * 2.0 * self.deltaY),
+                                                        self.getSmallFont().height * 2.0 * self.deltaY),
                                                 colour=self.foreground, GLContext=self,
                                                 obj=None)
 

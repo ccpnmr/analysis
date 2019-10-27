@@ -311,7 +311,7 @@ class GLLabelling():
             text = self.getLabelling(obj, self._GLParent._symbolLabelling)
 
             newString = GLString(text=text,
-                                 font=self._GLParent.globalGL.glSmallFont,  # if _isInPlane else self._GLParent.globalGL.glSmallTransparentFont,
+                                 font=self._GLParent.getSmallFont(),  # if _isInPlane else self._GLParent.globalGL.glSmallTransparentFont,
                                  x=p0[0], y=p0[1],
                                  ox=r * np.sign(self._GLParent.pixelX), oy=w * np.sign(self._GLParent.pixelY),
                                  # ox=r, oy=w,
@@ -389,7 +389,7 @@ class GLLabelling():
             text = self.getLabelling(obj, self._GLParent._symbolLabelling)
 
             outString = GLString(text=text,
-                                 font=self._GLParent.globalGL.glSmallFont,  # if _isInPlane else self._GLParent.globalGL.glSmallTransparentFont,
+                                 font=self._GLParent.getSmallFont(),  # if _isInPlane else self._GLParent.globalGL.glSmallTransparentFont,
                                  x=p0[0], y=p0[1],
                                  ox=r * np.sign(self._GLParent.pixelX), oy=w * np.sign(self._GLParent.pixelY),
                                  colour=(*listCol, fade),
@@ -2446,7 +2446,7 @@ class GL1dLabelling():
         text = self.getLabelling(obj, self._GLParent._symbolLabelling)
 
         newString = GLString(text=text,
-                             font=self._GLParent.globalGL.glSmallFont,
+                             font=self._GLParent.getSmallFont(),
                              x=p0[0], y=p0[1],
                              ox=r * np.sign(self._GLParent.pixelX), oy=w * np.sign(self._GLParent.pixelY),
                              # ox=symbolWidth, oy=symbolWidth,
@@ -3461,7 +3461,7 @@ class GLintegralNdLabelling(GL1dLabelling, GLintegralListMethods, GLLabelling): 
         textY = self._GLParent.axisT - (36.0 * self._GLParent.pixelY)
 
         newString = GLString(text=text,
-                             font=self._GLParent.globalGL.glSmallFont,
+                             font=self._GLParent.getSmallFont(),
                              # x=p0[0], y=p0[1],
                              x=textX,
                              y=textY,

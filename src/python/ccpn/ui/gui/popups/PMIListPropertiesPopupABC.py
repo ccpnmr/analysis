@@ -206,7 +206,8 @@ class PMIListPropertiesPopupABC(CcpnDialogMainWidget):
 
             value = pl.currentText()
             colour = Colour.getSpectrumColour(value, defaultReturn='#')
-            setattr(self.ccpnList, attrib, colour)
+            if colour is not None:
+                setattr(self.ccpnList, attrib, colour)
 
         meritEnabled = self.meritEnabledBox.isChecked()
         setattr(self.ccpnList, MERITENABLED, meritEnabled)
@@ -220,7 +221,8 @@ class PMIListPropertiesPopupABC(CcpnDialogMainWidget):
             _, pl, attrib = item
 
             colour = self.listViewSettings[attrib]
-            setattr(self.ccpnList, attrib, colour)
+            if colour is not None:
+                setattr(self.ccpnList, attrib, colour)
 
         if self.listViewSettings[MERITENABLED] is not None:
             setattr(self.ccpnList, MERITENABLED, self.listViewSettings[MERITENABLED])

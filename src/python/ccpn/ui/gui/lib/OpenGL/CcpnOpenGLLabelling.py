@@ -1726,8 +1726,8 @@ class GLLabelling():
                 continue
 
             # for peakListView in spectrumView.peakListViews:
-            for objListView in self.listViews(spectrumView):
 
+            for objListView in self.listViews(spectrumView):
                 if objListView.isDeleted:
                     continue
 

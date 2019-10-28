@@ -278,7 +278,7 @@ class OpenGLOverlayFrame(Frame):
         """Resize event to handle resizing of frames that overlay the OpenGL frame
         """
         super().resizeEvent(ev)
-        self._setMaskToChildren()
+        # self._setMaskToChildren()
 
     def _resize(self):
         """Resize event to handle resizing of frames that overlay the OpenGL frame

@@ -396,12 +396,14 @@ def navigateToNmrResidueInDisplay(nmrResidue, display, stripIndex=0, widths=None
             # add connection tags to start/end sequential strips - may later allow insertion of nmrResidues
             if allNmrResidues.index(nr) == 0:
                 # enable dropping onto the left arrow
-                strips[ii].header.setLabelText(position='l', text='<<<')
+                # strips[ii].header.setLabelText(position='l', text='<<<')
+                strips[ii].header.setLabelText(position='l', text='')
                 strips[ii].header.setLabelObject(position='c', obj=nr)
 
             if allNmrResidues.index(nr) == len(allNmrResidues) - 1:
                 # enable dropping onto the right label
-                strips[ii].header.setLabelText(position='r', text='>>>')
+                # strips[ii].header.setLabelText(position='r', text='>>>')
+                strips[ii].header.setLabelText(position='r', text='')
                 strips[ii].header.setLabelObject(position='c', obj=nr)
 
     else:
@@ -417,8 +419,10 @@ def navigateToNmrResidueInDisplay(nmrResidue, display, stripIndex=0, widths=None
         strips.append(display.strips[stripIndex])
 
         # add connection tags to non-sequential strips
-        strips[0].header.setLabelText(position='l', text='<<<')
-        strips[0].header.setLabelText(position='r', text='>>>')
+        # strips[0].header.setLabelText(position='l', text='<<<')
+        # strips[0].header.setLabelText(position='r', text='>>>')
+        strips[0].header.setLabelText(position='l', text='')
+        strips[0].header.setLabelText(position='r', text='')
         # set the object for the centre label
         strips[0].header.setLabelObject(position='c', obj=nmrResidue)
 

@@ -838,15 +838,13 @@ class StripHeaderWidget(_OpenGLFrameABC):
                     [GuiNotifier.DROPEVENT], [DropBase.TEXT],
                     self._processDroppedLabel,
                     toLabel=self._stripDirection,
-                    plusChain=False)
+                    plusChain=True)
 
         self._resize()
 
     def _processDroppedLabel(self, data, toLabel=None, plusChain=None):
-        from ccpn.AnalysisAssign.modules.BackboneAssignmentModule import BackboneAssignmentModule
-
-        print('>>>>>>drop nmrResidue from label', data, toLabel, plusChain)
-
+        """Not a very elegant way of running backboneAssignment code from the strip headers
+        """
         if toLabel and toLabel.text():
             dest = toLabel.text()
             nmrResidue = self.project.getByPid(dest)
@@ -854,10 +852,8 @@ class StripHeaderWidget(_OpenGLFrameABC):
             if nmrResidue:
 
                 guiModules = self.mainWindow.modules
-                print('>>>checking modules')
                 for guiModule in guiModules:
                     if guiModule.className == 'BackboneAssignmentModule':
-                        print('>>>module', guiModule)
                         guiModule._processDroppedNmrResidue(data, nmrResidue=nmrResidue, plusChain=plusChain)
 
 
@@ -911,8 +907,8 @@ class StripHeaderWidget(_OpenGLFrameABC):
 
             self._labels[stripPos].obj = headerObject
             self._labels[stripPos]._connectDir = headerConnect
-            self._labels[stripPos].setFixedHeight(24)
-            # self._labels[stripPos].setAlignment(QtCore.Qt.AlignAbsolute)
+            # self._labels[stripPos].setFixedHeight(24)
+            # self._labels[stripPos].setAlignment(QtCore.Qt.AlignBottom)
 
             # self._labels[stripPos].setVisible(headerVisible)
             # labelsVisible = labelsVisible or headerVisible
@@ -979,9 +975,11 @@ class StripHeaderWidget(_OpenGLFrameABC):
                 # Could ignore here, so that needs doubleClick in backboneAssignment to restart
                 if isinstance(value, str):
                     if 'MINUS' in value:
-                        value = '<<<'
+                        # value = '<<<'
+                        value = ''
                     elif 'PLUS' in value:
-                        value = '>>>'
+                        # value = '>>>'
+                        value = ''
 
                 return value
 

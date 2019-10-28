@@ -3248,18 +3248,8 @@ class GLintegralNdLabelling(GL1dLabelling, GLintegralListMethods, GLLabelling): 
         self._spectrumSettings = spectrumSettings
         self.buildSymbols()
 
-        # # loop through the attached integralListViews to the strip
-        # for spectrumView in self._GLParent._ordering:  #self._ordering:         # strip.spectrumViews:
-        #         if spectrumView.isDeleted:
-        #             continue
-        #     for integralListView in spectrumView.integralListViews:
-        #         if spectrumView.isVisible() and integralListView.isVisible():
-
         for integralListView, specView in self._visibleListViews:
             if not integralListView.isDeleted and integralListView in self._GLSymbols.keys():
-
-                # draw the boxes around the highlighted integral areas
-                self._GLSymbols[integralListView].drawIndexVBO(enableVBO=True)
 
                 # draw the integralAreas if they exist
                 for integralArea in self._GLSymbols[integralListView]._regions:
@@ -3274,6 +3264,21 @@ class GLintegralNdLabelling(GL1dLabelling, GLintegralListMethods, GLLabelling): 
 
                         # draw the actual integral areas
                         integralArea._integralArea.drawVertexColorVBO(enableVBO=True)
+
+        self._GLParent.globalGL._shaderProgram1.setGLUniformMatrix4fv('mvMatrix', 1, GL.GL_FALSE, self._GLParent._IMatrix)
+
+    def drawSymbolRegions(self, spectrumSettings):
+        if self.strip.isDeleted:
+            return
+
+        self._spectrumSettings = spectrumSettings
+        self.buildSymbols()
+
+        for integralListView, specView in self._visibleListViews:
+            if not integralListView.isDeleted and integralListView in self._GLSymbols.keys():
+
+                # draw the boxes around the highlighted integral areas - multisampling not required here
+                self._GLSymbols[integralListView].drawIndexVBO(enableVBO=True)
 
         self._GLParent.globalGL._shaderProgram1.setGLUniformMatrix4fv('mvMatrix', 1, GL.GL_FALSE, self._GLParent._IMatrix)
 

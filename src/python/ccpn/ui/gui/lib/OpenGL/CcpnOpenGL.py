@@ -2160,6 +2160,10 @@ class CcpnGLWidget(QOpenGLWidget):
     def mousePressInIntegralLists(self):
         """Check whether the mouse has been pressed in an integral
         """
+
+        # check moved to 1D class
+        # if not self._stackingMode and not(self.is1D and self.strip._isPhasingOn):
+
         # for reg in self._GLIntegralLists.values():
         for reg in self._GLIntegrals._GLSymbols.values():
             if not reg.integralListView.isVisible() or \
@@ -2861,7 +2865,11 @@ class CcpnGLWidget(QOpenGLWidget):
         if not self._stackingMode:
             self._GLPeaks.drawSymbols(self._spectrumSettings)
             self._GLMultiplets.drawSymbols(self._spectrumSettings)
-            self._GLIntegrals.drawSymbols(self._spectrumSettings)
+
+            if not (self.is1D and self.strip._isPhasingOn):                 # other mouse buttons checeks needed here
+                self._GLIntegrals.drawSymbols(self._spectrumSettings)
+                with self._disableGLAliasing():
+                    self._GLIntegrals.drawSymbolRegions(self._spectrumSettings)
 
             with self._disableGLAliasing():
                 self.drawMarksRulers()
@@ -2883,7 +2891,10 @@ class CcpnGLWidget(QOpenGLWidget):
 
             self._GLPeaks.drawLabels(self._spectrumSettings)
             self._GLMultiplets.drawLabels(self._spectrumSettings)
-            self._GLIntegrals.drawLabels(self._spectrumSettings)
+
+            if not (self.is1D and self.strip._isPhasingOn):
+                self._GLIntegrals.drawLabels(self._spectrumSettings)
+
             self.drawMarksAxisCodes()
 
         else:

@@ -32,7 +32,7 @@ from ccpn.util.decorators import singleton
 from ccpn.util.Logging import getLogger
 from ccpn.util.Colour import allColours, hexToRgbRatio, autoCorrectHexColour, \
     spectrumHexDarkColours, spectrumHexLightColours, spectrumHexMediumColours, \
-    spectrumHexDefaultLightColours, spectrumHexDefaultDarkColours
+    spectrumHexDefaultLightColours, spectrumHexDefaultDarkColours, rgbRatioToHex
 
 
 # fonts
@@ -141,6 +141,7 @@ CCPNMODULELABEL_BORDER_ACTIVE = 'CCPNMODULELABEL_BORDER_ACTIVE'
 # Spectrum GL base class
 CCPNGLWIDGET_HEXFOREGROUND = 'CCPNGLWIDGET_HEXFOREGROUND'
 CCPNGLWIDGET_HEXBACKGROUND = 'CCPNGLWIDGET_HEXBACKGROUND'
+CCPNGLWIDGET_HEXHIGHLIGHT = 'CCPNGLWIDGET_HEXHIGHLIGHT'
 CCPNGLWIDGET_FOREGROUND = 'CCPNGLWIDGET_FOREGROUND'
 CCPNGLWIDGET_BACKGROUND = 'CCPNGLWIDGET_BACKGROUND'
 
@@ -222,6 +223,8 @@ colourSchemes = {
 
         CCPNGLWIDGET_HEXFOREGROUND       : '#070707',
         CCPNGLWIDGET_HEXBACKGROUND       : '#FFFFFF',
+        CCPNGLWIDGET_HEXHIGHLIGHT        : rgbRatioToHex(0.23, 0.23, 1.0),
+
         CCPNGLWIDGET_FOREGROUND          : (0.05, 0.05, 0.05, 1.0),  #'#080000'
         CCPNGLWIDGET_BACKGROUND          : (1.0, 1.0, 1.0, 1.0),
 
@@ -262,7 +265,7 @@ colourSchemes = {
         GUISTRIP_PIVOT                   : MARISHINO,
 
         LABEL_FOREGROUND                 : TEXT_COLOUR,
-        DIVIDER                          : '#a9a9a9', # could be could CCPN_WIDGET_BORDER_COLOUR, was TEXT_COLOUR
+        DIVIDER                          : '#a9a9a9',  # could be could CCPN_WIDGET_BORDER_COLOUR, was TEXT_COLOUR
         SOFTDIVIDER                      : SOFT_DIVIDER_COLOUR,
         LABEL_SELECTEDBACKGROUND         : 'mediumseagreen',
         LABEL_SELECTEDFOREGROUND         : 'black',
@@ -294,6 +297,8 @@ colourSchemes = {
 
         CCPNGLWIDGET_HEXFOREGROUND: '#F0FFFF',
         CCPNGLWIDGET_HEXBACKGROUND: '#0F0F0F',
+        CCPNGLWIDGET_HEXHIGHLIGHT : rgbRatioToHex(0.2, 1.0, 0.3),
+
         CCPNGLWIDGET_FOREGROUND   : (0.9, 1.0, 1.0, 1.0),  #'#f0ffff'
         CCPNGLWIDGET_BACKGROUND   : (0.1, 0.1, 0.1, 1.0),
 
@@ -309,9 +314,9 @@ colourSchemes = {
         SPECTRUM_HEXMEDIUMCOLOURS : spectrumHexMediumColours,
         SPECTRUM_HEXDEFAULTCOLOURS: spectrumHexDefaultLightColours,
 
-        LABEL_SELECTEDBACKGROUND         : 'mediumseagreen',
-        LABEL_SELECTEDFOREGROUND         : 'black',
-        LABEL_HIGHLIGHT                  : 'palegreen',
+        LABEL_SELECTEDBACKGROUND  : 'mediumseagreen',
+        LABEL_SELECTEDFOREGROUND  : 'black',
+        LABEL_HIGHLIGHT           : 'palegreen',
         },
 
     # Overridden for light colour scheme

@@ -29,6 +29,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 
 from functools import partial
+from PyQt5.QtCore import pyqtSignal, pyqtSlot
 import json
 from ccpn.ui.gui.widgets.Button import Button
 from ccpn.ui.gui.widgets.DoubleSpinbox import DoubleSpinbox
@@ -38,7 +39,8 @@ from ccpn.ui.gui.widgets.ToolBar import ToolBar
 from ccpn.ui.gui.widgets.Widget import Widget
 from ccpn.ui.gui.widgets.Frame import Frame, OpenGLOverlayFrame
 from ccpn.ui.gui.guiSettings import textFont, getColours, STRIPHEADER_BACKGROUND, \
-    STRIPHEADER_FOREGROUND, GUINMRRESIDUE, CCPNGLWIDGET_BACKGROUND, textFontLarge
+    STRIPHEADER_FOREGROUND, GUINMRRESIDUE, CCPNGLWIDGET_BACKGROUND, textFontLarge, \
+    CCPNGLWIDGET_HEXHIGHLIGHT, CCPNGLWIDGET_HEXFOREGROUND
 from ccpn.ui.gui.widgets.DropBase import DropBase
 from ccpn.ui.gui.lib.mouseEvents import getMouseEventDict
 from PyQt5 import QtGui, QtWidgets, QtCore
@@ -386,7 +388,6 @@ class PlaneSelectorWidget(Frame):
         """Set the new ppmPosition/ppmWidth
         """
         with self.blockWidgetSignals():
-
             self.spinBox.setValue(ppmPosition)
 
     def setPlaneValues(self, minZPlaneSize=None, minAliasedFrequency=None, maxAliasedFrequency=None, ppmPosition=None):
@@ -481,7 +482,7 @@ class _OpenGLFrameABC(OpenGLOverlayFrame):
 
         # add an expanding widget to the end of the row
         Spacer(self, 2, 2, QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.Minimum,
-               grid=(0, col+1), gridSpan=(1, 1))
+               grid=(0, col + 1), gridSpan=(1, 1))
 
         # initialise the widgets
         for func, klass, widget in self._initFuncList:
@@ -524,13 +525,17 @@ class PlaneAxisWidget(_OpenGLFrameABC):
 
         axisButtons = (self._axisLabel, self._axisPpmPosition, self._axisPlaneCount, self._axisSelector)
 
-        for button in axisButtons[:3]:
-            button.setSelectionCallback(partial(self._selectCallback, axisButtons))
+        axisButtons[0].setSelectionCallback(partial(self._selectAxisCallback, axisButtons))
+        for button in axisButtons[1:3]:
+            button.setSelectionCallback(partial(self._selectPositionCallback, axisButtons))
 
         self._axisLabel.setVisible(True)
         self._axisPpmPosition.setVisible(True)
         self._axisPlaneCount.setVisible(True)
         self._axisSelector.setVisible(False)
+
+        # connect strip changed events to here
+        self.strip.optionsChanged.connect(self._optionsChanged)
 
     def __postInit__(self, widget, strip, axis):
         """Seems an awkward way of getting a generic post init function but can't think of anything else yet
@@ -545,9 +550,42 @@ class PlaneAxisWidget(_OpenGLFrameABC):
                                          self._planeCountChanged,
                                          self._wheelEvent
                                          ))
+        self._resize()
 
-    def _selectCallback(self, widgets):
-        # if the first widget is clicked then toggle the planeToolbar buttons
+    @pyqtSlot(dict)
+    def _optionsChanged(self, aDict):
+        """Respond to signals from other frames in the strip
+        """
+        # may be required to select/de-select rows
+        source = aDict.get('source')
+        if source and source != self:
+            # change settings here
+            self._setLabelBorder(False)
+
+            # set the axis in the strip for modifying with the wheelMouse event - not implemented yet
+            self.strip.activePlaneAxis = self.axis
+
+    def _setLabelBorder(self, value):
+        for label in (self._axisLabel, self._axisPpmPosition, self._axisPlaneCount):
+            if value:
+                self._setStyle(label, foregroundColour=CCPNGLWIDGET_HEXHIGHLIGHT)
+            else:
+                self._setStyle(label, foregroundColour=CCPNGLWIDGET_HEXFOREGROUND)
+
+    def _selectAxisCallback(self, widgets):
+        # if the first widget is clicked then change the selected axis
+        if widgets[3].isVisible():
+            widgets[3].hide()
+            widgets[2].show()
+            widgets[1].show()
+
+        self._setLabelBorder(True)
+        self.strip.optionsChanged.emit({'source' : self,
+                                        'clicked': True})
+        self._resize()
+
+    def _selectPositionCallback(self, widgets):
+        # if the other widgets are clicked then toggle the planeToolbar buttons
         if widgets[3].isVisible():
             widgets[3].hide()
             widgets[2].show()
@@ -556,6 +594,10 @@ class PlaneAxisWidget(_OpenGLFrameABC):
             widgets[1].hide()
             widgets[2].hide()
             widgets[3].show()
+
+        self._setLabelBorder(True)
+        self.strip.optionsChanged.emit({'source' : self,
+                                        'clicked': True})
         self._resize()
 
     def updatePosition(self):
@@ -586,7 +628,7 @@ class PlaneAxisWidget(_OpenGLFrameABC):
         planeBox.setPlaneValues(minZPlaneSize, minAliasedFrequency, maxAliasedFrequency, ppmPosition)
 
         self._axisPpmPosition.setText('%.3f' % ppmPosition)
-        self._axisPlaneCount.setText('['+str(planeBox.planeCount)+']')
+        self._axisPlaneCount.setText('[' + str(planeBox.planeCount) + ']')
 
     @property
     def planeCount(self) -> int:

@@ -284,16 +284,18 @@ class Gui1dWidget(CcpnGLWidget):
         If firstOnly is true, return only the first item, else an empty list
         """
         integrals = []
-        for reg in self._GLIntegrals._GLSymbols.values():
-            if not reg.integralListView.isVisible() or not reg.spectrumView.isVisible():
-                continue
-            integralPressed = self.mousePressIn1DArea(reg._regions)
-            if integralPressed:
-                for ilp in integralPressed:
-                    obj = ilp[0]._object
-                    integrals.append(obj)
-                    if firstOnly:
-                        return integrals if obj in self.current.integrals else []
+
+        if not self._stackingMode and not(self.is1D and self.strip._isPhasingOn):
+            for reg in self._GLIntegrals._GLSymbols.values():
+                if not reg.integralListView.isVisible() or not reg.spectrumView.isVisible():
+                    continue
+                integralPressed = self.mousePressIn1DArea(reg._regions)
+                if integralPressed:
+                    for ilp in integralPressed:
+                        obj = ilp[0]._object
+                        integrals.append(obj)
+                        if firstOnly:
+                            return integrals if obj in self.current.integrals else []
 
         return integrals
 

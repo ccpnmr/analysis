@@ -282,7 +282,7 @@ class OpenGLOverlayFrame(Frame):
         self._setMaskToChildren()
         self.parent()._resize()
 
-    def _setStyle(self, sl):
+    def _setStyle(self, sl, foregroundColour=CCPNGLWIDGET_HEXFOREGROUND, backgroundColour=CCPNGLWIDGET_HEXBACKGROUND):
         if self._backgroundColour is not None:
             sl.setStyleSheet('QLabel {'
                              'padding: 0; '
@@ -293,8 +293,8 @@ class OpenGLOverlayFrame(Frame):
                              'font-family: %s;'
                              'font-size: %dpx;'
                              'qproperty-alignment: AlignLeft;'
-                             '}' % (getColours()[CCPNGLWIDGET_HEXFOREGROUND],
-                                    getColours()[CCPNGLWIDGET_HEXBACKGROUND],
+                             '}' % (getColours()[foregroundColour],
+                                    getColours()[backgroundColour],
                                     textFontLarge.fontName,
                                     textFontLarge.pointSize()))
         else:
@@ -306,7 +306,7 @@ class OpenGLOverlayFrame(Frame):
                              'font-family: %s;'
                              'font-size: %dpx;'
                              'qproperty-alignment: AlignLeft;'
-                             '}' % (getColours()[CCPNGLWIDGET_HEXFOREGROUND],
+                             '}' % (getColours()[foregroundColour],
                                     textFontLarge.fontName,
                                     textFontLarge.pointSize()))
 

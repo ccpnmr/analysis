@@ -69,6 +69,8 @@ PhasingMenu = 'PhasingMenu'
 class GuiStrip(Frame):
     # inherits NotifierBase
 
+    optionsChanged = QtCore.pyqtSignal(dict)
+
     MAXPEAKLABELTYPES = 4
     MAXPEAKSYMBOLTYPES = 3
 

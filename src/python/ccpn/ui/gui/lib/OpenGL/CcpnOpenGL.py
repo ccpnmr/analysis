@@ -258,6 +258,8 @@ class CcpnGLWidget(QOpenGLWidget):
         self.GLSignals.glAxisUnitsChanged.connect(self._glAxisUnitsChanged)
         self.GLSignals.glKeyEvent.connect(self._glKeyEvent)
 
+        self.lastPixelRatio = None
+
     def _initialiseAll(self):
         """Initialise all attributes for the display
         """
@@ -346,7 +348,7 @@ class CcpnGLWidget(QOpenGLWidget):
         self._useFixedAspect = False
         self._fixedAspectX = 1.0
         self._fixedAspectY = 1.0
-        
+
         self._showSpectraOnPhasing = False
         self._xUnits = 0
         self._yUnits = 0
@@ -865,8 +867,19 @@ class CcpnGLWidget(QOpenGLWidget):
         """refresh the devicePixelRatio for the viewports
         """
         # control for changing screens has now been moved to mainWindow so only one signal is needed
-        self.viewports._devicePixelRatio = self.devicePixelRatio()
-        self.update()
+        # GST this most probably ought to be deferred until the drag completes...
+        # possibly via an event...
+        newPixelRatio = self.devicePixelRatio()
+        if newPixelRatio != self.lastPixelRatio:
+            self.lastPixelRatio = newPixelRatio
+            self.viewports._devicePixelRatio = newPixelRatio
+            self.buildOverlayStrings()
+            for spectrumView in self._ordering:
+                for listView in spectrumView.peakListViews:
+                    listView.buildLabels = True
+            self.buildMarks = True
+            self.buildSpectra()
+            self.update()
 
     def _getValidAspectRatio(self, axisCode):
         va = [ax for ax in self._preferences.aspectRatios.keys() if ax.upper()[0] == axisCode.upper()[0]]
@@ -1114,7 +1127,7 @@ class CcpnGLWidget(QOpenGLWidget):
             else:
                 ax0 = self.pixelX
                 ax1 = self.pixelY
-                
+
             width = (self.w - self.AXIS_MARGINRIGHT) if self._drawRightAxis else self.w
             height = (self.h - self.AXIS_MARGINBOTTOM) if self._drawBottomAxis else self.h
 
@@ -1830,26 +1843,7 @@ class CcpnGLWidget(QOpenGLWidget):
         # self.viewports.addViewport(GLDefs.AXISCORNER, self, (-self.AXIS_MARGINRIGHT, 'w'), (0, 'a'), (0, 'w'), (self.AXIS_MARGINBOTTOM, 'a'))
 
         # set strings for the overlay text
-        self._lockStringFalse = GLString(text=GLDefs.LOCKSTRING, font=self.getSmallFont(), x=0, y=0,
-                                         colour=(0.5, 0.5, 0.5, 1.0), GLContext=self)
-        self._lockStringTrue = GLString(text=GLDefs.LOCKSTRING, font=self.getSmallFont(), x=0, y=0,
-                                        colour=self.highlightColour, GLContext=self)
-        self._useFixedStringFalse = GLString(text=GLDefs.USEFIXEDASPECTSTRING, font=self.getSmallFont(), x=0, y=0,
-                                         colour=(0.5, 0.5, 0.5, 1.0), GLContext=self)
-        self._useFixedStringTrue = GLString(text=GLDefs.USEFIXEDASPECTSTRING, font=self.getSmallFont(), x=0, y=0,
-                                        colour=self.highlightColour, GLContext=self)
-
-        cornerButtons = ((self._lockStringTrue, self._toggleAxisLocked),
-                         (self._useFixedStringTrue, self._toggleUseFixedAspect))
-
-        self._buttonCentres = ()
-        for button, callBack in cornerButtons:
-            w = (button.width / 2)
-            h = (button.height / 2)
-            # define a slightly wider, lower box
-            self._buttonCentres += ((w + 2, h - 2, w, h - 3, callBack),)
-
-        self.stripIDString = GLString(text='', font=self.getSmallFont(), x=0, y=0, GLContext=self, obj=None)
+        self.buildOverlayStrings()
 
         # This is the correct blend function to ignore stray surface blending functions
         GL.glBlendFuncSeparate(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA, GL.GL_ONE, GL.GL_ONE)
@@ -1864,6 +1858,25 @@ class CcpnGLWidget(QOpenGLWidget):
 
         # check that the screen device pixel ratio is correct
         self.refreshDevicePixelRatio()
+
+    def buildOverlayStrings(self):
+        self._lockStringFalse = GLString(text=GLDefs.LOCKSTRING, font=self.getSmallFont(), x=0, y=0,
+                                         colour=(0.5, 0.5, 0.5, 1.0), GLContext=self)
+        self._lockStringTrue = GLString(text=GLDefs.LOCKSTRING, font=self.getSmallFont(), x=0, y=0,
+                                        colour=self.highlightColour, GLContext=self)
+        self._useFixedStringFalse = GLString(text=GLDefs.USEFIXEDASPECTSTRING, font=self.getSmallFont(), x=0, y=0,
+                                             colour=(0.5, 0.5, 0.5, 1.0), GLContext=self)
+        self._useFixedStringTrue = GLString(text=GLDefs.USEFIXEDASPECTSTRING, font=self.getSmallFont(), x=0, y=0,
+                                            colour=self.highlightColour, GLContext=self)
+        cornerButtons = ((self._lockStringTrue, self._toggleAxisLocked),
+                         (self._useFixedStringTrue, self._toggleUseFixedAspect))
+        self._buttonCentres = ()
+        for button, callBack in cornerButtons:
+            w = (button.width / 2)
+            h = (button.height / 2)
+            # define a slightly wider, lower box
+            self._buttonCentres += ((w + 2, h - 2, w, h - 3, callBack),)
+        self.stripIDString = GLString(text='', font=self.getSmallFont(), x=0, y=0, GLContext=self, obj=None)
 
     def getSmallFont(self, transparent=False):
         # GST tried this, it wrong sometimes, also sometimes its a float?

@@ -828,16 +828,19 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
         # set the active window to mainWindow so that the quit popup centres correctly.
         QtWidgets.QApplication.setActiveWindow(self)
 
+        QUIT = 'Quit Program'
+        CANCEL = 'Cancel'
+        SAVE_DATA = 'Save data'
         if disableCancel:
-            reply = MessageDialog.showMulti("Quit Program", "Do you want to save changes before quitting?",
-                                            ['Save and Quit', 'Quit without Saving'],destructive='Quit without Saving'
+            reply = MessageDialog.showMulti(QUIT, "Do you want to save changes before quitting?",
+                                            [QUIT],checkbox=SAVE_DATA,okText=QUIT,checked=True
                                             )
         else:
             reply = MessageDialog.showMulti("Quit Program", "Do you want to save changes before quitting?",
-                                            ['Save and Quit', 'Quit without Saving', 'Cancel'], destructive='Quit without Saving'
+                                            [QUIT,CANCEL], checkbox=SAVE_DATA,okText=QUIT,checked=True
                                             )
 
-        if reply == 'Save and Quit':
+        if QUIT in reply and SAVE_DATA in reply:
             if event:
                 event.accept()
             # prefFile = open(userPreferencesPath, 'w+')
@@ -857,7 +860,7 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
                 if event:  # ejb - don't close the project
                     event.ignore()
 
-        elif reply == 'Quit without Saving':
+        elif QUIT in reply and SAVE_DATA not in reply:
             if event:
                 event.accept()
             # prefFile = open(userPreferencesPath, 'w+')

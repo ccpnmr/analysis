@@ -80,7 +80,7 @@ class MessageDialog(QtWidgets.QMessageBox):
         if item:
             widget = item.widget()
             # GWV: Estimating minimumwidth
-            widget.setMinimumWidth(max(len(message) * 5, 200))
+            widget.setMinimumWidth(max(len(message) * 7, 200))
             widget.setFont(messageFont)
 
         # textEdit = self.findChild(QtGui.QTextEdit)
@@ -109,11 +109,21 @@ class MessageDialog(QtWidgets.QMessageBox):
                       - self.frameGeometry().center()
                       + self.frameGeometry().topLeft())
 
-    def keyPressEvent(self,keyEvent):
-        if keyEvent.key() != Qt.Key_Escape:
-            super().keyPressEvent(keyEvent)
-        else:
-            self.reject()
+    # def keyReleaseEvent(self,keyEvent):
+    #     print(keyEvent.key(),Qt.Key_Space)
+    #     modifiers = QtGui.QApplication.keyboardModifiers()
+    #
+    #     if keyEvent.key() == Qt.Key_Space and modifiers == QtCore.Qt.ControlModifier:
+    #         for child in self.children():
+    #             if isinstance(child,QtWidgets.QCheckBox):
+    #                 child.toggle()
+    #                 self.accept()
+    #     elif keyEvent.key() == Qt.Key_Escape:
+    #         self.reject()
+    #     else:
+    #         super().keyPressEvent(keyEvent)
+
+
 
 
 
@@ -222,7 +232,7 @@ def showYesNoWarning(title, message, parent=None, iconPath=None):
     return dialog.exec_() == Yes
 
 
-def showMulti(title, message, texts, objects=None, parent=None, iconPath=None, okText='OK', cancelText='Cancel', destructive=()):
+def showMulti(title, message, texts, objects=None, parent=None, iconPath=None, okText='OK', cancelText='Cancel', destructive=(), checkbox=None, checked=True):
     if objects:
         assert len(objects) == len(texts)
 
@@ -234,28 +244,45 @@ def showMulti(title, message, texts, objects=None, parent=None, iconPath=None, o
     if okText in lower_texts and lower_texts[0] != okText.lower():
         print('Warning: Ok button should be far righthand button')
 
-    role = QtWidgets.QMessageBox.ActionRole
+    _checkbox = None
 
     for text in texts:
-
         lower_text = text.strip().lower()
-        if lower_text == 'cancel' or lower_text == cancelText.strip().lower():
-            role = QtWidgets.QMessageBox.RejectRole
 
-        if not isinstance(destructive, str):
-            destructive = [item.strip().lower() for item in destructive]
+
+        if lower_text in checkbox or checkbox in lower_text:
+            raise Exception('Checkboxes and buttons cannot have the same name!')
         else:
-            destructive = destructive.strip().lower()
-        if lower_text in destructive:
-            role = QtWidgets.QMessageBox.DestructiveRole
+            role = QtWidgets.QMessageBox.ActionRole
 
-        if lower_text == 'ok' or lower_text == okText.strip().lower():
-            role = QtWidgets.QMessageBox.AcceptRole
+            if lower_text == 'cancel' or lower_text == cancelText.strip().lower():
+                role = QtWidgets.QMessageBox.RejectRole
+                print(lower_text,'reject')
 
-        button = dialog.addButton(text, role)
+            if not isinstance(destructive, str):
+                destructive = [item.strip().lower() for item in destructive]
+            else:
+                destructive = destructive.strip().lower()
+            if lower_text in destructive:
+                role = QtWidgets.QMessageBox.DestructiveRole
+                print(lower_text,'destructive')
 
-        if lower_text == 'ok' or lower_text == okText.strip().lower():
-            dialog.setDefaultButton(button)
+            if lower_text == 'ok' or lower_text == okText.strip().lower():
+                role = QtWidgets.QMessageBox.AcceptRole
+                print(lower_text,'accept')
+
+            button = dialog.addButton(text, role)
+
+            if lower_text == 'ok' or lower_text == okText.strip().lower():
+                dialog.setDefaultButton(button)
+
+        if checkbox != None:
+            _checkbox = QtWidgets.QCheckBox(checkbox, parent=dialog)
+            _checkbox.setChecked(checked)
+            dialog.setCheckBox(_checkbox)
+
+    if _checkbox != None:
+        _checkbox.setFocus()
 
     dialog.raise_()
     index = dialog.exec_()
@@ -268,6 +295,10 @@ def showMulti(title, message, texts, objects=None, parent=None, iconPath=None, o
 
         else:
             result = texts[index]
+
+    if checkbox != None:
+        if _checkbox.isChecked():
+            result = ' %s %s ' % (result, checkbox)
 
     return result
 

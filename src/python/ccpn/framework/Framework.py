@@ -1253,7 +1253,7 @@ class Framework(NotifierBase):
                 ("None", None, [('checkable', True),
                                 ('checked', False)])
                 ])),
-            ("Python Console", self._toggleConsole, [('shortcut', '  '),
+            ("Python Console", self._toggleConsole, [('shortcut', 'pr'),
                                                      ('checkable', True),
                                                      ('checked', False)])
             ]

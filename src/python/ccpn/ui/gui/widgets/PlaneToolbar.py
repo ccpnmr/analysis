@@ -50,6 +50,7 @@ from ccpn.core.lib.Notifiers import Notifier
 from ccpn.ui.gui.lib.GuiNotifier import GuiNotifier
 from ccpn.ui.gui.widgets.Menu import Menu
 from ccpn.ui.gui.widgets.Spacer import Spacer
+from ccpn.ui.gui.widgets.Icon import Icon
 from ccpn.util.Logging import getLogger
 
 
@@ -59,7 +60,7 @@ SINGLECLICK = 'click'
 DOUBLECLICK = 'doubleClick'
 
 
-class _StripLabel(VerticalLabel):  #  VerticalLabel): could use Vertical label so that the strips can flip
+class _StripLabel(ActiveLabel):  #  VerticalLabel): could use Vertical label so that the strips can flip
     """
     Specific Label to be used in Strip displays
     """
@@ -68,14 +69,14 @@ class _StripLabel(VerticalLabel):  #  VerticalLabel): could use Vertical label s
     # without any clashes between events, and creating a dragged item
     DOUBLECLICKENABLED = False
 
-    def __init__(self, parent, mainWindow, strip, text, dragKey=DropBase.PIDS, stripArrangement=None, **kwds):
+    def __init__(self, parent, mainWindow, strip=None, text=None, dragKey=DropBase.PIDS, stripArrangement=None, **kwds):
 
         super().__init__(parent, text, **kwds)
         # The text of the label can be dragged; it will be passed on in the dict under key dragKey
 
         self._parent = parent
         self.strip = strip
-        self.spectrumDisplay = self.strip.spectrumDisplay
+        self.spectrumDisplay = self.strip.spectrumDisplay if strip else None
         self.mainWindow = mainWindow
         self.application = mainWindow.application
         self.project = mainWindow.project
@@ -87,7 +88,7 @@ class _StripLabel(VerticalLabel):  #  VerticalLabel): could use Vertical label s
         self._lastClick = None
         self._mousePressed = False
         self.stripArrangement = stripArrangement
-        self.setOrientation('vertical' if stripArrangement == 'X' else 'horizontal')
+        # self.setOrientation('vertical' if stripArrangement == 'X' else 'horizontal')
 
         # disable any drop event callback's until explicitly defined later
         self.setDropEventCallback(None)
@@ -772,10 +773,12 @@ STRIPCONNECT_RIGHT = 'isRight'
 STRIPCONNECT_NONE = 'noneConnect'
 STRIPCONNECT_DIRS = (STRIPCONNECT_NONE, STRIPCONNECT_LEFT, STRIPCONNECT_RIGHT)
 
+STRIPPOSITION_MINUS = 'minus'
+STRIPPOSITION_PLUS = 'plus'
 STRIPPOSITION_LEFT = 'l'
 STRIPPOSITION_CENTRE = 'c'
 STRIPPOSITION_RIGHT = 'r'
-STRIPPOSITIONS = (STRIPPOSITION_LEFT, STRIPPOSITION_CENTRE, STRIPPOSITION_RIGHT)
+STRIPPOSITIONS = (STRIPPOSITION_MINUS, STRIPPOSITION_PLUS, STRIPPOSITION_LEFT, STRIPPOSITION_CENTRE, STRIPPOSITION_RIGHT)
 
 STRIPDICT = 'stripHeaderDict'
 STRIPTEXT = 'stripText'
@@ -790,16 +793,89 @@ STRIPHEADERVISIBLE = 'stripHeaderVisible'
 STRIPHANDLE = 'stripHandle'
 
 
-class StripHeader(Widget):
-    def __init__(self, parent, mainWindow, strip, stripArrangement=None, **kwds):
-        super().__init__(parent=parent, **kwds)
+def _initIcon(self, widget, strip):
+    self.__postIconInit__(widget, strip)
 
-        self._parent = parent
+
+def _initStripHeader(self, widget, strip):
+    self.__postHeaderInit__(widget, strip)
+
+
+class StripHeaderWidget(_OpenGLFrameABC):
+
+    BUTTONS = (('_nmrChainLeft', _StripLabel, None, None),
+               ('_nmrChainRight', _StripLabel, _initIcon, None),
+               ('_stripDirection', _StripLabel, None, None),
+               ('_stripLabel', _StripLabel, None, None),
+               ('_stripPercent', _StripLabel, _initStripHeader, None),
+               )
+
+    # def __init__(self, qtParent, mainWindow, strip, **kwds):
+    #     super().__init__(qtParent, mainWindow, strip, **kwds)
+    #
+    #     self.strip = strip
+
+    def __postIconInit__(self, widget, strip):
+        """Seems an awkward way of getting a generic post init function but can't think of anything else yet
+        """
+        # assume that nothing has been set yet
+        self._nmrChainLeft.setPixmap(Icon('icons/down-left').pixmap(24, 24))
+        self._nmrChainRight.setPixmap(Icon('icons/down-right').pixmap(24, 24))
+
+    def __postHeaderInit__(self, widget, strip):
+        """Seems an awkward way of getting a generic post init function but can't think of anything else yet
+        """
+        # assume that nothing has been set yet
+
+        # add gui notifiers here instead of in backboneAssignment?
+        GuiNotifier(self._nmrChainLeft,
+                    [GuiNotifier.DROPEVENT], [DropBase.TEXT],
+                    self._processDroppedLabel,
+                    toLabel=self._stripDirection,
+                    plusChain=False)
+
+        GuiNotifier(self._nmrChainRight,
+                    [GuiNotifier.DROPEVENT], [DropBase.TEXT],
+                    self._processDroppedLabel,
+                    toLabel=self._stripDirection,
+                    plusChain=False)
+
+        self._resize()
+
+    def _processDroppedLabel(self, data, toLabel=None, plusChain=None):
+        from ccpn.AnalysisAssign.modules.BackboneAssignmentModule import BackboneAssignmentModule
+
+        print('>>>>>>drop nmrResidue from label', data, toLabel, plusChain)
+
+        if toLabel and toLabel.text():
+            dest = toLabel.text()
+            nmrResidue = self.project.getByPid(dest)
+
+            if nmrResidue:
+
+                guiModules = self.mainWindow.modules
+                print('>>>checking modules')
+                for guiModule in guiModules:
+                    if guiModule.className == 'BackboneAssignmentModule':
+                        print('>>>module', guiModule)
+                        guiModule._processDroppedNmrResidue(data, nmrResidue=nmrResidue, plusChain=plusChain)
+
+
+# class StripHeader(Widget):
+#     def __init__(self, parent, mainWindow, strip, stripArrangement=None, **kwds):
+#         super().__init__(parent=parent, **kwds)
+
+    def __init__(self, qtParent, mainWindow, strip, stripArrangement=None, **kwds):
+        super().__init__(qtParent, mainWindow, strip, **kwds)
+
+        self._parent = qtParent
         self.mainWindow = mainWindow
         self.strip = strip
         self.setAutoFillBackground(False)
 
-        self._labels = {}
+        self._labels = dict((strip, widget) for strip, widget in
+                            zip(STRIPPOSITIONS,
+                            (self._nmrChainLeft, self._nmrChainRight, self._stripLabel, self._stripDirection, self._stripPercent)))
 
         labelsVisible = False
         for stripPos in STRIPPOSITIONS:
@@ -811,54 +887,54 @@ class StripHeader(Widget):
             headerVisible = self._getPositionParameter(stripPos, STRIPVISIBLE, False)
             headerEnabled = self._getPositionParameter(stripPos, STRIPENABLED, True)
 
-            # gridPos = (STRIPPOSITIONS.index(stripPos), 0) if stripArrangement == 'X' else (0, STRIPPOSITIONS.index(stripPos))
-            gridPos = (0, STRIPPOSITIONS.index(stripPos) * 2)
-
-            self._labels[stripPos] = _StripLabel(parent=self, mainWindow=mainWindow, strip=strip,
-                                                 text=headerText, spacing=(0, 0),
-                                                 grid=gridPos, stripArrangement=stripArrangement)
-
-            # ED: the only way I could find to cure the mis-aligned header
-            self._labels[stripPos].setStyleSheet('QLabel {'
-                                                 'padding: 0; '
-                                                 'margin: 0px 0px 0px 0px;'
-                                                 'color:  %s;'
-                                                 'background-color: %s;'
-                                                 'border: 0 px;'
-                                                 'font-family: %s;'
-                                                 'font-size: %dpx;'
-                                                 'qproperty-alignment: AlignCenter;'
-                                                 '}' % (getColours()[STRIPHEADER_FOREGROUND],
-                                                        getColours()[STRIPHEADER_BACKGROUND],
-                                                        textFont.fontName,
-                                                        textFont.pointSize()))
+            # # gridPos = (STRIPPOSITIONS.index(stripPos), 0) if stripArrangement == 'X' else (0, STRIPPOSITIONS.index(stripPos))
+            # gridPos = (0, STRIPPOSITIONS.index(stripPos) * 2)
+            #
+            # self._labels[stripPos] = _StripLabel(parent=self, mainWindow=mainWindow, strip=strip,
+            #                                      text=headerText, spacing=(0, 0),
+            #                                      grid=gridPos, stripArrangement=stripArrangement)
+            #
+            # # ED: the only way I could find to cure the mis-aligned header
+            # self._labels[stripPos].setStyleSheet('QLabel {'
+            #                                      'padding: 0; '
+            #                                      'margin: 0px 0px 0px 0px;'
+            #                                      'color:  %s;'
+            #                                      'background-color: %s;'
+            #                                      'border: 0 px;'
+            #                                      'font-family: %s;'
+            #                                      'font-size: %dpx;'
+            #                                      'qproperty-alignment: AlignCenter;'
+            #                                      '}' % (getColours()[STRIPHEADER_FOREGROUND],
+            #                                             getColours()[STRIPHEADER_BACKGROUND],
+            #                                             textFont.fontName,
+            #                                             textFont.pointSize()))
 
             self._labels[stripPos].obj = headerObject
             self._labels[stripPos]._connectDir = headerConnect
             self._labels[stripPos].setFixedHeight(24)
-            self._labels[stripPos].setAlignment(QtCore.Qt.AlignAbsolute)
+            # self._labels[stripPos].setAlignment(QtCore.Qt.AlignAbsolute)
 
-            self._labels[stripPos].setVisible(headerVisible)
-            labelsVisible = labelsVisible or headerVisible
-            self._labels[stripPos].setEnabled(headerEnabled)
+            # self._labels[stripPos].setVisible(headerVisible)
+            # labelsVisible = labelsVisible or headerVisible
+            # self._labels[stripPos].setEnabled(headerEnabled)
 
-        Spacer(self, 2, 2, QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.Minimum,
-               grid=(0, 1), gridSpan=(1, 1))
-        Spacer(self, 2, 2, QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.Minimum,
-               grid=(0, 3), gridSpan=(1, 1))
+        # Spacer(self, 2, 2, QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.Minimum,
+        #        grid=(0, 1), gridSpan=(1, 1))
+        # Spacer(self, 2, 2, QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.Minimum,
+        #        grid=(0, 3), gridSpan=(1, 1))
 
         # get the visible state of the header
         headerVisible = self.strip.getParameter(STRIPDICT, STRIPHEADERVISIBLE)
-        self.setVisible(headerVisible if headerVisible is not None else labelsVisible)
+        self.setVisible(True)       # headerVisible if headerVisible is not None else labelsVisible)
 
         # guiNotifiers are attached to the backboneAssignment module, not active on loading of project
         # currently needs a doubleClick in the backboneAssignment table to start
 
-        self._labels[STRIPPOSITION_LEFT].setSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum)
-        self._labels[STRIPPOSITION_CENTRE].setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.Minimum)
-        self._labels[STRIPPOSITION_RIGHT].setSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum)
+        # self._labels[STRIPPOSITION_LEFT].setSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum)
+        # self._labels[STRIPPOSITION_CENTRE].setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.Minimum)
+        # self._labels[STRIPPOSITION_RIGHT].setSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum)
 
-        self.setFixedHeight(16)
+        # self.setFixedHeight(16)
         # self.eventFilter = self._eventFilter
         # self.installEventFilter(self)
 
@@ -932,6 +1008,7 @@ class StripHeader(Widget):
             self.strip.setParameter(STRIPDICT, stripPos, params)
         self.strip.setParameter(STRIPDICT, STRIPHANDLE, None)
         self.strip.setParameter(STRIPDICT, STRIPHEADERVISIBLE, False)
+        self._resize()
 
     def setLabelObject(self, obj=None, position=STRIPPOSITION_CENTRE):
         """Set the object attached to the header label at the given position and store its pid
@@ -945,6 +1022,8 @@ class StripHeader(Widget):
                 self._setPositionParameter(position, STRIPOBJECT, str(obj.pid))
         else:
             raise ValueError('Error: %s is not a valid position' % str(position))
+
+        self._resize()
 
     def getLabelObject(self, position=STRIPPOSITION_CENTRE):
         """Return the object attached to the header label at the given position
@@ -963,6 +1042,8 @@ class StripHeader(Widget):
             self._setPositionParameter(position, STRIPTEXT, str(text))
         else:
             raise ValueError('Error: %s is not a valid position' % str(position))
+
+        self._resize()
 
     def getLabelText(self, position=STRIPPOSITION_CENTRE):
         """Return the text for header label at the given position
@@ -993,6 +1074,8 @@ class StripHeader(Widget):
         else:
             raise ValueError('Error: %s is not a valid position' % str(position))
 
+        self._resize()
+
     def getLabelVisible(self, position=STRIPPOSITION_CENTRE):
         """Return if the widget at the given position is visible
         """
@@ -1010,6 +1093,8 @@ class StripHeader(Widget):
         else:
             raise ValueError('Error: %s is not a valid position' % str(position))
 
+        self._resize()
+
     def getLabelEnabled(self, position=STRIPPOSITION_CENTRE):
         """Return if the widget at the given position is enabled
         """
@@ -1026,6 +1111,8 @@ class StripHeader(Widget):
             self._setPositionParameter(position, STRIPCONNECT, connectDir)
         else:
             raise ValueError('Error: %s is not a valid position' % str(position))
+
+        self._resize()
 
     def getLabelConnectDir(self, position=STRIPPOSITION_CENTRE):
         """Return the connectDir attribute of the header label at the given position
@@ -1061,6 +1148,7 @@ class StripHeader(Widget):
     def headerVisible(self, visible):
         self.setVisible(visible)
         self.strip.setParameter(STRIPDICT, STRIPHEADERVISIBLE, visible)
+        self._resize()
 
     @property
     def handle(self):
@@ -1069,7 +1157,7 @@ class StripHeader(Widget):
     @handle.setter
     def handle(self, handle):
         self.strip.setParameter(STRIPDICT, STRIPHANDLE, handle)
-
+        self._resize()
 
 class TestPopup(Frame):
     def __init__(self):

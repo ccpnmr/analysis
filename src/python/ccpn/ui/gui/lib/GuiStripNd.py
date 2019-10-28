@@ -47,7 +47,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 from PyQt5 import QtWidgets
 import numpy
 from ccpn.core.PeakList import PeakList
-from ccpn.ui.gui.widgets.PlaneToolbar import PlaneAxisWidget
+from ccpn.ui.gui.widgets.PlaneToolbar import StripHeaderWidget, PlaneAxisWidget
 from ccpn.util.Logging import getLogger
 from ccpn.util.decorators import logCommand
 from ccpn.core.lib.ContextManagers import undoBlock
@@ -187,18 +187,23 @@ class GuiStripNd(GuiStrip):
 
         # add spacer to the top left corner
         self._frameGuide.addSpacer(10, 30, grid=(1, 0))
-        ii = 0
+        row = 2
+
+        self.header = StripHeaderWidget(qtParent=self._frameGuide, mainWindow=self.mainWindow, strip=self, grid=(row, 1), gridSpan=(1, 1))
+        row += 1
+
         for ii, axis in enumerate(self.axisCodes[2:]):
             # add a plane widget for each dimension > 1
             fr = PlaneAxisWidget(qtParent=self._frameGuide, mainWindow=self.mainWindow, strip=self, axis=ii + 2,
-                                 grid=(ii + 2, 1), gridSpan=(1, 1))
+                                 grid=(row, 1), gridSpan=(1, 1))
+            row += 1
 
             # fill the widget
             fr._populate()
 
             self.planeAxisBars += (fr,)
 
-        Spacer(self._frameGuide, 1, 1, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding, grid=(ii + 3, 2))
+        Spacer(self._frameGuide, 1, 1, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding, grid=(row, 2))
 
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

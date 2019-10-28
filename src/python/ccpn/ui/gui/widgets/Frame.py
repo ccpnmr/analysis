@@ -245,6 +245,8 @@ class ScrollableFrame(Frame):
 
 class OpenGLOverlayFrame(Frame):
 
+    AUTOFILLBACKGROUND = True
+
     def __init__(self, parent=None, showBorder=False, fShape=None, fShadow=None,
                  setLayout=False, backgroundColour=None, **kwds):
         super(OpenGLOverlayFrame, self).__init__(parent=parent, showBorder=showBorder, fShape=fShape, fShadow=fShadow,
@@ -255,20 +257,22 @@ class OpenGLOverlayFrame(Frame):
     def _setMaskToChildren(self):
         """Set the mouse mask to only the children of the frame - required to make sections transparent
         """
+        self.adjustSize()
+
         region = QtGui.QRegion(self.frameGeometry())
         region -= QtGui.QRegion(self.geometry())
         region += self.childrenRegion()
         self.setMask(region)
 
-    def paintEvent(self, ev):
-        """Paint the region of the frame to the desired background colour, required when overlaying a GL widget
-        """
-        if self._backgroundColour is not None:
-            painter = QtGui.QPainter(self)
-            painter.setCompositionMode(painter.CompositionMode_SourceOver)
-            painter.fillRect(self.rect(), QtGui.QColor(*self._backgroundColour))
-            painter.end()
-        super().paintEvent(ev)
+    # def paintEvent(self, ev):
+    #     """Paint the region of the frame to the desired background colour, required when overlaying a GL widget
+    #     """
+    #     if self._backgroundColour is not None:
+    #         painter = QtGui.QPainter(self)
+    #         painter.setCompositionMode(painter.CompositionMode_SourceOver)
+    #         painter.fillRect(self.rect(), QtGui.QColor(*self._backgroundColour))
+    #         painter.end()
+    #     super().paintEvent(ev)
 
     def resizeEvent(self, ev) -> None:
         """Resize event to handle resizing of frames that overlay the OpenGL frame
@@ -283,7 +287,7 @@ class OpenGLOverlayFrame(Frame):
         self.parent()._resize()
 
     def _setStyle(self, sl, foregroundColour=CCPNGLWIDGET_HEXFOREGROUND, backgroundColour=CCPNGLWIDGET_HEXBACKGROUND):
-        if self._backgroundColour is not None:
+        if self._backgroundColour is not None or self.AUTOFILLBACKGROUND:
             sl.setStyleSheet('QLabel {'
                              'padding: 0; '
                              'margin: 0px 0px 0px 0px;'

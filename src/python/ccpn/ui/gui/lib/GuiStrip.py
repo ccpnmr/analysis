@@ -32,7 +32,7 @@ from ccpn.core.Project import Project
 from ccpn.core.Peak import Peak
 from ccpn.core.lib.Notifiers import Notifier
 from ccpn.ui.gui.guiSettings import getColours, GUISTRIP_PIVOT
-from ccpn.ui.gui.widgets.PlaneToolbar import StripHeader
+# from ccpn.ui.gui.widgets.PlaneToolbar import StripHeader
 from ccpn.ui.gui.widgets.Frame import Frame, OpenGLOverlayFrame
 from ccpn.ui.gui.widgets.Widget import Widget
 from ccpn.ui.gui.widgets.Label import Label, ActiveLabel
@@ -126,8 +126,8 @@ class GuiStrip(Frame):
         self._CcpnGLWidget.setSizePolicy(QtWidgets.QSizePolicy.Expanding,
                                          QtWidgets.QSizePolicy.Expanding)
 
-        self.header = StripHeader(parent=self, mainWindow=self.mainWindow, strip=self,
-                                  grid=headerGrid, gridSpan=headerSpan, setLayout=True, spacing=(0, 0))
+        self.header = None      #StripHeader(parent=self, mainWindow=self.mainWindow, strip=self,
+                                 # grid=headerGrid, gridSpan=headerSpan, setLayout=True, spacing=(0, 0))
 
         # set the ID label in the new widget
         self._CcpnGLWidget.setStripID('.'.join(self.id.split('.')))
@@ -351,7 +351,8 @@ class GuiStrip(Frame):
     def _updateStripLabel(self, callbackDict):
         """Update the striplabel if it represented a NmrResidue that has changed its id.
         """
-        self.header.processNotifier(callbackDict)
+        # self.header.processNotifier(callbackDict)
+        pass
 
     def createMark(self):
         """Sets the marks at current position

@@ -220,8 +220,6 @@ def showMulti(title, message, texts, objects=None, parent=None, iconPath=None, o
 
     dialog = MessageDialog('Query', title, message, Question, iconPath, parent)
 
-    lower_texts = [item.strip().lower() for item in texts]
-
     _checkbox = None
 
     for text in texts:

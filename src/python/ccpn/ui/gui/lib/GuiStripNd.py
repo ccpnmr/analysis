@@ -207,6 +207,14 @@ class GuiStripNd(GuiStrip):
 
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+        # set the axis controlled by the wheelMouse events (no implemented yet)
+        self.activePlaneAxis = None
+
+        if self.planeAxisBars:
+            self.planeAxisBars[0]._setLabelBorder(False)
+            # set the axis in the strip for modifying with the wheelMouse event - not implemented yet
+            self.activePlaneAxis = self.planeAxisBars[0].axis
+
         if len(self.orderedAxes) < 3:  # hide if only 2D
             self._stripToolBarWidget.setFixedHeight(0)
 

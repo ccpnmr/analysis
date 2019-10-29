@@ -295,7 +295,7 @@ class PlaneSelectorWidget(Frame):
 
         self.spinBox = DoubleSpinbox(parent=self, showButtons=False, grid=(0, 1),
                                      callback=self._spinBoxChanged, objectName='PlaneSelectorWidget_planeDepth')
-        self.spinBox.setFixedWidth(48)
+        self.spinBox.setFixedWidth(60)
         self.spinBox.setFixedHeight(height)
         self.spinBox.setSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum)
 
@@ -307,7 +307,7 @@ class PlaneSelectorWidget(Frame):
         self.planeCountSpinBox = Spinbox(parent=self, showButtons=False, grid=(0, 3), min=1, max=1000,
                                          objectName='PlaneSelectorWidget_planeCount'
                                          )
-        self.planeCountSpinBox.setFixedWidth(48)
+        self.planeCountSpinBox.setFixedWidth(32)
         self.planeCountSpinBox.setFixedHeight(height)
         self.planeCountSpinBox.setSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum)
 
@@ -452,6 +452,21 @@ def _initPlaneSelection(self, widget, strip, axis):
 class _OpenGLFrameABC(OpenGLOverlayFrame):
     """
     OpenGL ABC for items to overlay the GL frame (until a nicer way can by found)
+
+    BUTTONS is a tuple of tuples of the form:
+
+        ((attributeName, widgetType, init function, set attrib function)
+         ...
+         )
+
+        attributeName is a string defining the attribute in the container
+        widgetType is the type of widget, e.g. see PlaneAxisWidget
+        init functions are called after instantiation of widgets
+            - typically static functions of the form <name>(self, widget, ...)
+                self is the container class, widget is the widget object
+        attrib functions are called from _populate to populate the widgets after changes
+            (or possibly revert - not fully implemented yet)
+
     """
     BUTTONS = tuple()
 
@@ -469,17 +484,31 @@ class _OpenGLFrameABC(OpenGLOverlayFrame):
             raise NotImplementedError("Code error: BUTTONS not implemented")
 
         # build the list of widgets in frame
-        col = 0
-        for col, (widgetName, widgetType, initFunc, setFunc) in enumerate(self.BUTTONS):
-            widget = widgetType(self, mainWindow=mainWindow, grid=(0, col), gridSpan=(1, 1))
-            self._setStyle(widget)
-            if initFunc:
-                self._initFuncList += ((initFunc, self, widget),)
-            if setFunc:
-                self._setFuncList += ((setFunc, self, widget),)
+        row = col = 0
+        for buttonDef in self.BUTTONS:
 
-            # add the widget here
-            setattr(self, widgetName, widget)
+            if buttonDef:
+                widgetName, widgetType, initFunc, setFunc = buttonDef
+
+                if not widgetType:
+                    raise TypeError('Error: button widget not defined')
+
+                # if widget is given then add to the container
+                widget = widgetType(self, mainWindow=mainWindow, grid=(row, col), gridSpan=(1, 1))
+                self._setStyle(widget)
+                if initFunc:
+                    self._initFuncList += ((initFunc, self, widget),)
+                if setFunc:
+                    self._setFuncList += ((setFunc, self, widget),)
+
+                # add the widget here
+                setattr(self, widgetName, widget)
+                col += 1
+            else:
+
+                # else, move to the next row (simple newLine)
+                row += 1
+                col = 0
 
         # add an expanding widget to the end of the row
         Spacer(self, 2, 2, QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.Minimum,
@@ -810,11 +839,6 @@ class StripHeaderWidget(_OpenGLFrameABC):
                ('_stripPercent', _StripLabel, _initStripHeader, None),
                )
 
-    # def __init__(self, qtParent, mainWindow, strip, **kwds):
-    #     super().__init__(qtParent, mainWindow, strip, **kwds)
-    #
-    #     self.strip = strip
-
     def __postIconInit__(self, widget, strip):
         """Seems an awkward way of getting a generic post init function but can't think of anything else yet
         """
@@ -856,11 +880,6 @@ class StripHeaderWidget(_OpenGLFrameABC):
                     if guiModule.className == 'BackboneAssignmentModule':
                         guiModule._processDroppedNmrResidue(data, nmrResidue=nmrResidue, plusChain=plusChain)
 
-
-# class StripHeader(Widget):
-#     def __init__(self, parent, mainWindow, strip, stripArrangement=None, **kwds):
-#         super().__init__(parent=parent, **kwds)
-
     def __init__(self, qtParent, mainWindow, strip, stripArrangement=None, **kwds):
         super().__init__(qtParent, mainWindow, strip, **kwds)
 
@@ -871,7 +890,7 @@ class StripHeaderWidget(_OpenGLFrameABC):
 
         self._labels = dict((strip, widget) for strip, widget in
                             zip(STRIPPOSITIONS,
-                            (self._nmrChainLeft, self._nmrChainRight, self._stripLabel, self._stripDirection, self._stripPercent)))
+                                (self._nmrChainLeft, self._nmrChainRight, self._stripLabel, self._stripDirection, self._stripPercent)))
 
         labelsVisible = False
         for stripPos in STRIPPOSITIONS:
@@ -921,7 +940,7 @@ class StripHeaderWidget(_OpenGLFrameABC):
 
         # get the visible state of the header
         headerVisible = self.strip.getParameter(STRIPDICT, STRIPHEADERVISIBLE)
-        self.setVisible(True)       # headerVisible if headerVisible is not None else labelsVisible)
+        self.setVisible(True)  # headerVisible if headerVisible is not None else labelsVisible)
 
         # guiNotifiers are attached to the backboneAssignment module, not active on loading of project
         # currently needs a doubleClick in the backboneAssignment table to start
@@ -1156,6 +1175,7 @@ class StripHeaderWidget(_OpenGLFrameABC):
     def handle(self, handle):
         self.strip.setParameter(STRIPDICT, STRIPHANDLE, handle)
         self._resize()
+
 
 class TestPopup(Frame):
     def __init__(self):

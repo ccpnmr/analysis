@@ -109,24 +109,6 @@ class MessageDialog(QtWidgets.QMessageBox):
                       - self.frameGeometry().center()
                       + self.frameGeometry().topLeft())
 
-    # def keyReleaseEvent(self,keyEvent):
-    #     print(keyEvent.key(),Qt.Key_Space)
-    #     modifiers = QtGui.QApplication.keyboardModifiers()
-    #
-    #     if keyEvent.key() == Qt.Key_Space and modifiers == QtCore.Qt.ControlModifier:
-    #         for child in self.children():
-    #             if isinstance(child,QtWidgets.QCheckBox):
-    #                 child.toggle()
-    #                 self.accept()
-    #     elif keyEvent.key() == Qt.Key_Escape:
-    #         self.reject()
-    #     else:
-    #         super().keyPressEvent(keyEvent)
-
-
-
-
-
 
 def showInfo(title, message, parent=None, iconPath=None):
     """Display an info message

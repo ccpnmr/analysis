@@ -868,6 +868,8 @@ class StripHeaderWidget(_OpenGLFrameABC):
 
     def _processDroppedLabel(self, data, toLabel=None, plusChain=None):
         """Not a very elegant way of running backboneAssignment code from the strip headers
+
+        Should be de-coupled from the backboneAssignment module
         """
         if toLabel and toLabel.text():
             dest = toLabel.text()
@@ -902,28 +904,6 @@ class StripHeaderWidget(_OpenGLFrameABC):
             headerVisible = self._getPositionParameter(stripPos, STRIPVISIBLE, False)
             headerEnabled = self._getPositionParameter(stripPos, STRIPENABLED, True)
 
-            # # gridPos = (STRIPPOSITIONS.index(stripPos), 0) if stripArrangement == 'X' else (0, STRIPPOSITIONS.index(stripPos))
-            # gridPos = (0, STRIPPOSITIONS.index(stripPos) * 2)
-            #
-            # self._labels[stripPos] = _StripLabel(parent=self, mainWindow=mainWindow, strip=strip,
-            #                                      text=headerText, spacing=(0, 0),
-            #                                      grid=gridPos, stripArrangement=stripArrangement)
-            #
-            # # ED: the only way I could find to cure the mis-aligned header
-            # self._labels[stripPos].setStyleSheet('QLabel {'
-            #                                      'padding: 0; '
-            #                                      'margin: 0px 0px 0px 0px;'
-            #                                      'color:  %s;'
-            #                                      'background-color: %s;'
-            #                                      'border: 0 px;'
-            #                                      'font-family: %s;'
-            #                                      'font-size: %dpx;'
-            #                                      'qproperty-alignment: AlignCenter;'
-            #                                      '}' % (getColours()[STRIPHEADER_FOREGROUND],
-            #                                             getColours()[STRIPHEADER_BACKGROUND],
-            #                                             textFont.fontName,
-            #                                             textFont.pointSize()))
-
             self._labels[stripPos].obj = headerObject
             self._labels[stripPos]._connectDir = headerConnect
             # self._labels[stripPos].setFixedHeight(24)
@@ -933,36 +913,15 @@ class StripHeaderWidget(_OpenGLFrameABC):
             # labelsVisible = labelsVisible or headerVisible
             # self._labels[stripPos].setEnabled(headerEnabled)
 
-        # Spacer(self, 2, 2, QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.Minimum,
-        #        grid=(0, 1), gridSpan=(1, 1))
-        # Spacer(self, 2, 2, QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.Minimum,
-        #        grid=(0, 3), gridSpan=(1, 1))
-
         # get the visible state of the header
         headerVisible = self.strip.getParameter(STRIPDICT, STRIPHEADERVISIBLE)
         self.setVisible(True)  # headerVisible if headerVisible is not None else labelsVisible)
 
-        # guiNotifiers are attached to the backboneAssignment module, not active on loading of project
-        # currently needs a doubleClick in the backboneAssignment table to start
+    def setEnabledLeftDrop(self, value):
+        self._nmrChainLeft.setVisible(value)
 
-        # self._labels[STRIPPOSITION_LEFT].setSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum)
-        # self._labels[STRIPPOSITION_CENTRE].setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.Minimum)
-        # self._labels[STRIPPOSITION_RIGHT].setSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum)
-
-        # self.setFixedHeight(16)
-        # self.eventFilter = self._eventFilter
-        # self.installEventFilter(self)
-
-        # self.reset()          # reset if backboneAssignment controls all headers
-
-    # def enterEvent(self, a0: QtCore.QEvent) -> None:
-    #     print('>>>enter')
-    #     super(StripHeader, self).enterEvent(a0)
-    #     TestPopup()
-    #
-    # def leaveEvent(self, a0: QtCore.QEvent) -> None:
-    #     print('>>>leave')
-    #     super(StripHeader, self).leaveEvent(a0)
+    def setEnabledRightDrop(self, value):
+        self._nmrChainRight.setVisible(value)
 
     def _setPositionParameter(self, stripPos, subParameterName, value):
         """Set the item in the position dict
@@ -1025,6 +984,9 @@ class StripHeaderWidget(_OpenGLFrameABC):
             self.strip.setParameter(STRIPDICT, stripPos, params)
         self.strip.setParameter(STRIPDICT, STRIPHANDLE, None)
         self.strip.setParameter(STRIPDICT, STRIPHEADERVISIBLE, False)
+
+        self._nmrChainLeft.setVisible(False)
+        self._nmrChainRight.setVisible(False)
         self._resize()
 
     def setLabelObject(self, obj=None, position=STRIPPOSITION_CENTRE):

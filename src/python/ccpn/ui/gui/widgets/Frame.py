@@ -245,7 +245,7 @@ class ScrollableFrame(Frame):
 
 class OpenGLOverlayFrame(Frame):
 
-    AUTOFILLBACKGROUND = True
+    AUTOFILLBACKGROUND = False
 
     def __init__(self, parent=None, showBorder=False, fShape=None, fShadow=None,
                  setLayout=False, backgroundColour=None, **kwds):
@@ -258,7 +258,9 @@ class OpenGLOverlayFrame(Frame):
         """Set the mouse mask to only the children of the frame - required to make sections transparent
         """
         self.adjustSize()
+        self._setMask()
 
+    def _setMask(self):
         region = QtGui.QRegion(self.frameGeometry())
         region -= QtGui.QRegion(self.geometry())
         region += self.childrenRegion()
@@ -278,7 +280,7 @@ class OpenGLOverlayFrame(Frame):
         """Resize event to handle resizing of frames that overlay the OpenGL frame
         """
         super().resizeEvent(ev)
-        # self._setMaskToChildren()
+        self._setMask()
 
     def _resize(self):
         """Resize event to handle resizing of frames that overlay the OpenGL frame

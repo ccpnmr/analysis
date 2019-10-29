@@ -400,11 +400,15 @@ def navigateToNmrResidueInDisplay(nmrResidue, display, stripIndex=0, widths=None
                 strips[ii].header.setLabelText(position='l', text='')
                 strips[ii].header.setLabelObject(position='c', obj=nr)
 
+                strips[ii].header.setEnabledLeftDrop(True)
+
             if allNmrResidues.index(nr) == len(allNmrResidues) - 1:
                 # enable dropping onto the right label
                 # strips[ii].header.setLabelText(position='r', text='>>>')
                 strips[ii].header.setLabelText(position='r', text='')
                 strips[ii].header.setLabelObject(position='c', obj=nr)
+
+                strips[ii].header.setEnabledRightDrop(True)
 
     else:
         # not showing sequential strips
@@ -425,5 +429,8 @@ def navigateToNmrResidueInDisplay(nmrResidue, display, stripIndex=0, widths=None
         strips[0].header.setLabelText(position='r', text='')
         # set the object for the centre label
         strips[0].header.setLabelObject(position='c', obj=nmrResidue)
+
+        strips[0].header.setEnabledLeftDrop(True)
+        strips[0].header.setEnabledRightDrop(True)
 
     return strips

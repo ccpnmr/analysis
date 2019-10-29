@@ -222,10 +222,6 @@ def showMulti(title, message, texts, objects=None, parent=None, iconPath=None, o
 
     lower_texts = [item.strip().lower() for item in texts]
 
-
-    if okText in lower_texts and lower_texts[0] != okText.lower():
-        print('Warning: Ok button should be far righthand button')
-
     _checkbox = None
 
     for text in texts:
@@ -239,7 +235,6 @@ def showMulti(title, message, texts, objects=None, parent=None, iconPath=None, o
 
             if lower_text == 'cancel' or lower_text == cancelText.strip().lower():
                 role = QtWidgets.QMessageBox.RejectRole
-                print(lower_text,'reject')
 
             if not isinstance(destructive, str):
                 destructive = [item.strip().lower() for item in destructive]
@@ -247,11 +242,9 @@ def showMulti(title, message, texts, objects=None, parent=None, iconPath=None, o
                 destructive = destructive.strip().lower()
             if lower_text in destructive:
                 role = QtWidgets.QMessageBox.DestructiveRole
-                print(lower_text,'destructive')
 
             if lower_text == 'ok' or lower_text == okText.strip().lower():
                 role = QtWidgets.QMessageBox.AcceptRole
-                print(lower_text,'accept')
 
             button = dialog.addButton(text, role)
 

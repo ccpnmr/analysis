@@ -232,7 +232,7 @@ def showMulti(title, message, texts, objects=None, parent=None, iconPath=None, o
         lower_text = text.strip().lower()
 
 
-        if lower_text in checkbox or checkbox in lower_text:
+        if checkbox and (lower_text in checkbox or checkbox in lower_text):
             raise Exception('Checkboxes and buttons cannot have the same name!')
         else:
             role = QtWidgets.QMessageBox.ActionRole

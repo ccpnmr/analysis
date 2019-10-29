@@ -107,3 +107,9 @@ class SimpleAttributeEditorPopupABC(CcpnDialogMainWidget):
         """Function for setting the attribute, called by _applyAllChanges
         """
         setFunction(self.obj, attr, value)
+
+    def _refreshGLItems(self):
+        """emit a signal to rebuild any required GL items
+        Not required here
+        """
+        pass

@@ -159,6 +159,9 @@ class GuiStripNd(GuiStrip):
         self.calibrateYNDWidgets = None
         self.widgetIndex = 3  #start adding widgets from row 3
 
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        # TEST: ED new plane widgets
+
         self.planeToolbar = None
 
         # # TODO: this should be refactored; together with the 'Z-plane' mess: should general, to be used for other dimensions
@@ -175,9 +178,6 @@ class GuiStripNd(GuiStrip):
         #self.planeToolBar.hide()
         # test
         #PlaneSelectorWidget(qtParent=self._stripToolBarWidget, strip=self, axis=2, grid=(0,1))
-
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        # TEST: ED new plane widgets
 
         self.planeAxisBars = ()
 

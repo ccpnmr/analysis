@@ -24,8 +24,7 @@ __date__ = "$Date: 2017-04-18 15:19:30 +0100 (Tue, April 18, 2017) $"
 
 from PyQt5 import QtGui, QtWidgets, QtCore
 from functools import partial
-from contextlib import contextmanager
-
+from ccpn.ui.gui.widgets.Base import SignalBlocking
 from ccpn.ui.gui.widgets.Base import Base
 from ccpn.ui.gui.widgets.Button import Button
 from ccpn.ui.gui.widgets.ButtonList import ButtonList
@@ -380,19 +379,33 @@ class PulldownListCompoundWidget(CompoundBaseWidget):
 
     def select(self, item, blockSignals=False):
         "Convenience: Set item in Pulldown; works with text or item"
+
         if blockSignals:
-            self.pulldownList.blockSignals(True)
-        self.pulldownList.select(item)
-        if blockSignals:
-            self.pulldownList.blockSignals(False)
+            with self.blockWidgetSignals():
+                self.pulldownList.select(item)
+        else:
+            self.pulldownList.select(item)
+
+        # if blockSignals:
+        #     self.pulldownList.blockSignals(True)
+        # self.pulldownList.select(item)
+        # if blockSignals:
+        #     self.pulldownList.blockSignals(False)
 
     def setIndex(self, index, blockSignals=False):
         "Convenience: set item in Pulldown by index"
+
         if blockSignals:
-            self.pulldownList.blockSignals(True)
-        self.pulldownList.setIndex(index)
-        if blockSignals:
-            self.pulldownList.blockSignals(False)
+            with self.blockWidgetSignals():
+                self.pulldownList.setIndex(index)
+        else:
+            self.pulldownList.setIndex(index)
+
+        # if blockSignals:
+        #     self.pulldownList.blockSignals(True)
+        # self.pulldownList.setIndex(index)
+        # if blockSignals:
+        #     self.pulldownList.blockSignals(False)
 
     def modifyTexts(self, texts):
         "Modify the pulldown texts, retaining the current selection"

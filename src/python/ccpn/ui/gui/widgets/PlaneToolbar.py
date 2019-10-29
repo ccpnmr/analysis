@@ -488,13 +488,13 @@ class _OpenGLFrameABC(OpenGLOverlayFrame):
         for buttonDef in self.BUTTONS:
 
             if buttonDef:
-                widgetName, widgetType, initFunc, setFunc = buttonDef
+                widgetName, widgetType, initFunc, setFunc, grid, gridSpan = buttonDef
 
                 if not widgetType:
                     raise TypeError('Error: button widget not defined')
 
                 # if widget is given then add to the container
-                widget = widgetType(self, mainWindow=mainWindow, grid=(row, col), gridSpan=(1, 1))
+                widget = widgetType(self, mainWindow=mainWindow, grid=grid, gridSpan=gridSpan)        #grid=(row, col), gridSpan=(1, 1))
                 self._setStyle(widget)
                 if initFunc:
                     self._initFuncList += ((initFunc, self, widget),)
@@ -541,10 +541,10 @@ class PlaneAxisWidget(_OpenGLFrameABC):
                 planes box
 
     """
-    BUTTONS = (('_axisLabel', ActiveLabel, _initAxisCode, _setAxisCode),
-               ('_axisPpmPosition', ActiveLabel, _initAxisPosition, _setAxisPosition),
-               ('_axisPlaneCount', ActiveLabel, _initPlaneCount, _setPlaneCount),
-               ('_axisSelector', PlaneSelectorWidget, _initPlaneSelection, _setPlaneSelection)
+    BUTTONS = (('_axisLabel', ActiveLabel, _initAxisCode, _setAxisCode, (0, 0), (1, 1)),
+               ('_axisPpmPosition', ActiveLabel, _initAxisPosition, _setAxisPosition, (0, 1), (1, 1)),
+               ('_axisPlaneCount', ActiveLabel, _initPlaneCount, _setPlaneCount, (0, 2), (1, 1)),
+               ('_axisSelector', PlaneSelectorWidget, _initPlaneSelection, _setPlaneSelection, (0, 3), (1, 1))
                )
 
     def __init__(self, qtParent, mainWindow, strip, axis, **kwds):
@@ -832,19 +832,21 @@ def _initStripHeader(self, widget, strip):
 
 class StripHeaderWidget(_OpenGLFrameABC):
 
-    BUTTONS = (('_nmrChainLeft', _StripLabel, None, None),
-               ('_nmrChainRight', _StripLabel, _initIcon, None),
-               ('_stripDirection', _StripLabel, None, None),
-               ('_stripLabel', _StripLabel, None, None),
-               ('_stripPercent', _StripLabel, _initStripHeader, None),
+    BUTTONS = (('_nmrChainLeft', _StripLabel, None, None, (0, 0), (2, 1)),
+               ('_nmrChainRight', _StripLabel, _initIcon, None, (0, 4), (2, 1)),
+               ('_stripDirection', _StripLabel, None, None, (0, 2), (1, 2)),
+               ('_stripLabel', _StripLabel, None, None, (1, 2), (1, 1)),
+               ('_stripPercent', _StripLabel, _initStripHeader, None, (1, 3), (1, 1)),
                )
 
     def __postIconInit__(self, widget, strip):
         """Seems an awkward way of getting a generic post init function but can't think of anything else yet
         """
         # assume that nothing has been set yet
-        self._nmrChainLeft.setPixmap(Icon('icons/down-left').pixmap(24, 24))
-        self._nmrChainRight.setPixmap(Icon('icons/down-right').pixmap(24, 24))
+        self._nmrChainLeft.setPixmap(Icon('icons/down-left').pixmap(18, 18))
+        self._nmrChainRight.setPixmap(Icon('icons/down-right').pixmap(18, 18))
+        self._nmrChainLeft.setVisible(False)
+        self._nmrChainRight.setVisible(False)
 
     def __postHeaderInit__(self, widget, strip):
         """Seems an awkward way of getting a generic post init function but can't think of anything else yet
@@ -919,9 +921,11 @@ class StripHeaderWidget(_OpenGLFrameABC):
 
     def setEnabledLeftDrop(self, value):
         self._nmrChainLeft.setVisible(value)
+        self._resize()
 
     def setEnabledRightDrop(self, value):
         self._nmrChainRight.setVisible(value)
+        self._resize()
 
     def _setPositionParameter(self, stripPos, subParameterName, value):
         """Set the item in the position dict
@@ -971,20 +975,21 @@ class StripHeaderWidget(_OpenGLFrameABC):
             self.setLabelText(text='', position=stripPos)
             self._labels[stripPos].obj = None
             self._labels[stripPos]._connectDir = STRIPCONNECT_NONE
-            self._labels[stripPos].setVisible(True)
+            self._labels[stripPos].setVisible(False)            #True)
             self._labels[stripPos].setEnabled(True)
 
             # clear the header store
             params = {STRIPTEXT   : '',
                       STRIPOBJECT : None,
                       STRIPCONNECT: STRIPCONNECT_NONE,
-                      STRIPVISIBLE: True,
+                      STRIPVISIBLE: False,                      #True,
                       STRIPENABLED: True
                       }
             self.strip.setParameter(STRIPDICT, stripPos, params)
         self.strip.setParameter(STRIPDICT, STRIPHANDLE, None)
         self.strip.setParameter(STRIPDICT, STRIPHEADERVISIBLE, False)
 
+        self.setVisible(False)                      # new
         self._nmrChainLeft.setVisible(False)
         self._nmrChainRight.setVisible(False)
         self._resize()
@@ -992,6 +997,7 @@ class StripHeaderWidget(_OpenGLFrameABC):
     def setLabelObject(self, obj=None, position=STRIPPOSITION_CENTRE):
         """Set the object attached to the header label at the given position and store its pid
         """
+        # NOTE:ED not sure I need this now - cbheck rename nmrResidue, etc.
         self.show()
         if position in STRIPPOSITIONS:
             self._labels[position].obj = obj
@@ -1019,6 +1025,8 @@ class StripHeaderWidget(_OpenGLFrameABC):
         if position in STRIPPOSITIONS:
             self._labels[position].setText(str(text))
             self._setPositionParameter(position, STRIPTEXT, str(text))
+
+            self._labels[position].setVisible(True if text else False)
         else:
             raise ValueError('Error: %s is not a valid position' % str(position))
 

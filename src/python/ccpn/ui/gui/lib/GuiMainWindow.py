@@ -191,7 +191,7 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
         if not self._isTemporaryProject():
             self.setWindowFilePath(self.application.project.path)
         else:
-            self.setWindowFilePath(None)
+            self.setWindowFilePath("")
 
         if self._isTemporaryProject():
             self.setWindowIcon(QtGui.QIcon())
@@ -972,22 +972,29 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
         # json.dump(self.application.preferences, prefFile, sort_keys=True, indent=4, separators=(',', ': '))
         # prefFile.close()
 
+        undos = self.application.project._undo
+
         # set the active window to mainWindow so that the quit popup centres correctly.
         QtWidgets.QApplication.setActiveWindow(self)
 
         QUIT = 'Quit Program'
+        MESSAGE = QUIT
         CANCEL = 'Cancel'
+        QUIT_WITHOUT_SAVING =  'Quit without saving'
         SAVE_DATA = 'Save changes'
-        if disableCancel:
-            reply = MessageDialog.showMulti(QUIT, "Do you want to save changes before quitting?",
-                                            [QUIT],checkbox=SAVE_DATA,okText=QUIT,checked=True
-                                            )
-        else:
-            reply = MessageDialog.showMulti("Quit Program", "Do you want to save changes before quitting?",
-                                            [QUIT,CANCEL], checkbox=SAVE_DATA,okText=QUIT,checked=True
-                                            )
+        DETAIL = "Do you want to save changes before quitting?"
 
-        if QUIT in reply and SAVE_DATA in reply:
+        if disableCancel:
+            reply = MessageDialog.showMulti(MESSAGE, DETAIL, [QUIT],checkbox=SAVE_DATA,okText=QUIT,
+                                            checked=True)
+        else:
+            if undos.isDirty():
+                reply = MessageDialog.showMulti(MESSAGE, DETAIL, [QUIT,CANCEL], checkbox=SAVE_DATA,okText=QUIT,
+                                                checked=True)
+            else:
+                reply = QUIT_WITHOUT_SAVING
+
+        if (QUIT in reply) and (SAVE_DATA in reply):
             if event:
                 event.accept()
             # prefFile = open(userPreferencesPath, 'w+')
@@ -1007,7 +1014,7 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
                 if event:  # ejb - don't close the project
                     event.ignore()
 
-        elif QUIT in reply and SAVE_DATA not in reply or reply == QUIT_WITHOUT_SAVING:
+        elif (QUIT in reply and SAVE_DATA not in reply) or (reply == QUIT_WITHOUT_SAVING):
             if event:
                 event.accept()
             # prefFile = open(userPreferencesPath, 'w+')

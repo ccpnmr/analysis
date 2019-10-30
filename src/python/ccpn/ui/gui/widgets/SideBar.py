@@ -85,7 +85,7 @@ from ccpn.ui.gui.lib.GuiNotifier import GuiNotifier
 from ccpn.ui.gui.lib.MenuActions import _createNewDataSet, _createNewPeakList, _createNewChemicalShiftList, _createNewMultipletList, _createNewNmrResidue, \
     _createNewNmrAtom, \
     _createNewNote, _createNewIntegralList, _createNewSample, _createNewStructureEnsemble, _raiseNewChainPopup, _raiseChainPopup, _raiseComplexEditorPopup, \
-    _raiseDataSetPopup, _raiseChemicalShifListPopup, _raisePeakListPopup, _raiseMultipletListPopup, _raiseCreateNmrChainPopup, _raiseNmrChainPopup, \
+    _raiseDataSetPopup, _raiseChemicalShiftListPopup, _raisePeakListPopup, _raiseMultipletListPopup, _raiseCreateNmrChainPopup, _raiseNmrChainPopup, \
     _raiseNmrResiduePopup, _raiseNmrAtomPopup, _raiseNotePopup, _raiseIntegralListPopup, _raiseRestraintListPopup, _raiseSamplePopup, \
     _raiseSampleComponentPopup, _raiseSpectrumPopup, _raiseSpectrumGroupEditorPopup, _raiseStructureEnsemblePopup, _raiseSubstancePopup
 
@@ -821,8 +821,8 @@ class SideBarStructure(object):
 
             #------ ChemicalShiftLists ------
             SidebarTree('ChemicalShiftLists', closed=True, children=[
-                SidebarItem('<New ChemicalShiftList>', callback=_createNewChemicalShiftList()),
-                SidebarClassTreeItems(klass=ChemicalShiftList, callback=_raiseChemicalShifListPopup(),
+                SidebarItem('<New ChemicalShiftList>', callback=_raiseChemicalShiftListPopup(useNone=True, editMode=False)),
+                SidebarClassTreeItems(klass=ChemicalShiftList, callback=_raiseChemicalShiftListPopup(editMode=True),
                                       menuAction=_openItemChemicalShiftListTable(position='left', relativeTo=None), isDraggable=True),
                 ]),
 

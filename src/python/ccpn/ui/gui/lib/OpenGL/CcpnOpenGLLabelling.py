@@ -44,7 +44,6 @@ from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLArrays import GLRENDERMODE_DRAW, GLRENDERM
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLWidgets import GLIntegralRegion
 import ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs as GLDefs
 
-
 try:
     from OpenGL import GL, GLU, GLUT
 except ImportError:
@@ -2731,10 +2730,10 @@ class GLmultipletListMethods():
                 drawList.indices = np.append(drawList.indices, np.array((index, index + 1, index + 2, index + 3,
                                                                          index, index + 2, index + 2, index + 1,
                                                                          index, index + 3, index + 3, index + 1,) + circleVertices,
-                                                                         dtype=np.uint32))
+                                                                        dtype=np.uint32))
             else:
                 drawList.indices = np.append(drawList.indices, np.array((index, index + 1, index + 2, index + 3,) + circleVertices,
-                                                                         dtype=np.uint32))
+                                                                        dtype=np.uint32))
 
         return _selected
 
@@ -3276,7 +3275,6 @@ class GLintegralNdLabelling(GL1dLabelling, GLintegralListMethods, GLLabelling): 
 
         for integralListView, specView in self._visibleListViews:
             if not integralListView.isDeleted and integralListView in self._GLSymbols.keys():
-
                 # draw the boxes around the highlighted integral areas - multisampling not required here
                 self._GLSymbols[integralListView].drawIndexVBO(enableVBO=True)
 

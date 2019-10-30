@@ -43,7 +43,7 @@ from ccpn.ui.gui.widgets.MessageDialog import showInfo, showWarning
 from ccpn.core.lib.ContextManagers import undoBlock
 
 from ccpn.ui.gui.popups.ChainPopup import ChainPopup
-from ccpn.ui.gui.popups.ChemicalShiftListPopup import ChemicalShiftListPopup
+from ccpn.ui.gui.popups.ChemicalShiftListPopup import ChemicalShiftListEditor
 from ccpn.ui.gui.popups.ComplexEditorPopup import ComplexEditorPopup
 from ccpn.ui.gui.popups.CreateChainPopup import CreateChainPopup
 from ccpn.ui.gui.popups.CreateNmrChainPopup import CreateNmrChainPopup
@@ -206,9 +206,9 @@ class _raiseDataSetPopup(RaisePopupABC):
     # objectArgumentName = 'obj'
 
 
-class _raiseChemicalShifListPopup(RaisePopupABC):
-    popupClass = ChemicalShiftListPopup
-    objectArgumentName = 'chemicalShiftList'
+class _raiseChemicalShiftListPopup(RaisePopupABC):
+    popupClass = ChemicalShiftListEditor
+    # objectArgumentName = 'chemicalShiftList'
 
 
 class _raisePeakListPopup(RaisePopupABC):

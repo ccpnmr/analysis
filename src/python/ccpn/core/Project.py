@@ -1918,21 +1918,15 @@ class Project(AbstractWrapperObject):
         return _newComplex(self, name=name, chains=chains, **kwds)
 
     @logCommand('project.')
-    def newChemicalShiftList(self, name: str = None, unit: str = 'ppm', autoUpdate: bool = True,
-                             isSimulated: bool = False, comment: str = None, **kwds):
+    def newChemicalShiftList(self, name: str = None, spectra=(), **kwds):
         """Create new ChemicalShiftList.
 
         See the ChemicalShiftList class for details.
 
         :param name:
-        :param unit:
-        :param autoUpdate:
-        :param isSimulated:
-        :param comment:
-        :param serial: optional serial number.
+        :param spectra:
         :return: a new ChemicalShiftList instance.
         """
         from ccpn.core.ChemicalShiftList import _newChemicalShiftList
 
-        return _newChemicalShiftList(self, name=name, unit=unit, autoUpdate=autoUpdate,
-                                     isSimulated=isSimulated, comment=comment, **kwds)
+        return _newChemicalShiftList(self, name=name, spectra=spectra, **kwds)

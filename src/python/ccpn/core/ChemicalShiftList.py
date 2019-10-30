@@ -27,6 +27,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 from typing import Tuple, Sequence, List
 from functools import partial
 from ccpn.util import Common as commonUtil
+from ccpn.util.OrderedSet import OrderedSet
 from ccpn.core.PeakList import PeakList
 from ccpn.core.Project import Project
 from ccpn.core.Spectrum import Spectrum
@@ -238,7 +239,8 @@ del setter
 
 @newObject(ChemicalShiftList)
 def _newChemicalShiftList(self: Project, name: str = None, unit: str = 'ppm', autoUpdate: bool = True,
-                          isSimulated: bool = False, serial: int = None, comment: str = None) -> ChemicalShiftList:
+                          isSimulated: bool = False, serial: int = None, comment: str = None,
+                          spectra=()) -> ChemicalShiftList:
     """Create new ChemicalShiftList.
 
     See the ChemicalShiftList class for details.
@@ -261,6 +263,10 @@ def _newChemicalShiftList(self: Project, name: str = None, unit: str = 'ppm', au
     #     name = commonUtil.incrementName(name)
     #     found = (self.getChemicalShiftList(name) is not None)
 
+    if spectra:
+        getByPid = self._project.getByPid
+        spectra = [getByPid(x) if isinstance(x, str) else x for x in spectra]
+
     if not name:
         # Make default name
         nextNumber = len(self.chemicalShiftLists)
@@ -277,6 +283,8 @@ def _newChemicalShiftList(self: Project, name: str = None, unit: str = 'ppm', au
 
     dd = {'name': name, 'unit': unit, 'autoUpdate': autoUpdate, 'isSimulated': isSimulated,
           'details': comment}
+    if spectra:
+        dd.update({'experiments': OrderedSet([spec._wrappedData.experiment for spec in spectra])})
 
     apiChemicalShiftList = self._wrappedData.newShiftList(**dd)
     result = self._data2Obj.get(apiChemicalShiftList)

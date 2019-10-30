@@ -340,6 +340,7 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
         # insert into the splitter
         self._sidebarSplitter.insertWidget(0, self.sideBar)
         self._sidebarSplitter.insertWidget(1, self.searchResultsContainer)
+
         # GST resizing the splitter by hand causes problems so currently disable it!
         for i in range( self._sidebarSplitter.count()):
             self._sidebarSplitter.handle(i).setEnabled(False)

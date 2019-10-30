@@ -65,8 +65,6 @@ class TempAreaWindow(GuiWindow, MainWindow):
         self.application = mainWindow.application
         self.project = mainWindow.application.project
         self.current = mainWindow.application.current
-        # self._startCommandEchoBlock = self.project._startCommandEchoBlock
-        # self._endCommandEchoBlock = self.project._endCommandEchoBlock
 
         self._setShortcuts()
         self.setMouseMode(SELECT)
@@ -91,15 +89,17 @@ class TempAreaWindow(GuiWindow, MainWindow):
             module._closeModule()
         if self.tempModuleArea in self.mainModuleArea.tempAreas:
             self.mainModuleArea.tempAreas.remove(self.tempModuleArea)
+
+        # minimise event required here to notify Qt to exit from fullscreen mode
+        self.showNormal()
         self.close()
-        # MainWindow.closeEvent(self, *args, **kwargs)
 
 
-class CcpnModuleArea(ModuleArea, DropBase):  #, DropBase):
+class CcpnModuleArea(ModuleArea, DropBase):
 
     def __init__(self, mainWindow, **kwargs):
 
-        ModuleArea.__init__(self, mainWindow, **kwargs)
+        super().__init__(mainWindow, **kwargs)
         DropBase._init(self, acceptDrops=True)
 
         self.mainWindow = mainWindow  # a link back to the parent MainWindow
@@ -124,21 +124,6 @@ class CcpnModuleArea(ModuleArea, DropBase):  #, DropBase):
             for i in self.children():
                 if isinstance(i, Container):
                     self._container = i
-
-        # self.label.sigDragEntered.connect(self._dragEntered)
-
-    # def _dragEntered(self, module):
-    #   # print('>>>sigDragEntered from:', module)
-    #   # for mod in self.modules.values():
-    #   #   mod.setWidgetTransparency(True)
-    #
-    #   self.update()
-    #
-    # def _dragFinished(self, ev):
-    #   # print('>>>sigDragFinished', self)
-    #   # for mod in self.modules.values():
-    #   #   mod.setWidgetTransparency(False)
-    #   pass
 
     def dropEvent(self, event, *args):
         data = self.parseEvent(event)

@@ -1064,7 +1064,7 @@ class SideBar(QtWidgets.QTreeWidget, SideBarStructure, Base, NotifierBase):
         self._searchResultsContainer = searchResultsContainer
 
         self.setFont(sidebarFont)
-        # self.header().hide()
+        self.header().hide()
         self.setDragEnabled(True)
         self.setExpandsOnDoubleClick(False)
         self.setMinimumWidth(200)

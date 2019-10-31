@@ -36,6 +36,7 @@ from ccpn.ui.gui.widgets.Label import Label, VerticalLabel
 from ccpn.ui.gui.widgets.Spinbox import Spinbox
 from ccpn.ui.gui.widgets.ToolBar import ToolBar
 from ccpn.ui.gui.widgets.Widget import Widget
+from ccpn.ui.gui.widgets.Frame import Frame
 from ccpn.ui.gui.guiSettings import textFont, getColours, STRIPHEADER_BACKGROUND, \
     STRIPHEADER_FOREGROUND, GUINMRRESIDUE, CCPNGLWIDGET_BACKGROUND, textFontLarge
 from ccpn.ui.gui.widgets.DropBase import DropBase
@@ -55,7 +56,7 @@ SINGLECLICK = 'click'
 DOUBLECLICK = 'doubleClick'
 
 
-class _StripLabel(VerticalLabel):           #  VerticalLabel): could use Vertical label so that the strips can flip
+class _StripLabel(Label):
     """
     Specific Label to be used in Strip displays
     """
@@ -83,7 +84,7 @@ class _StripLabel(VerticalLabel):           #  VerticalLabel): could use Vertica
         self._lastClick = None
         self._mousePressed = False
         self.stripArrangement = stripArrangement
-        self.setOrientation('vertical' if stripArrangement == 'X' else 'horizontal')
+        # self.setOrientation('vertical' if stripArrangement == 'X' else 'horizontal')
 
         # disable any drop event callback's until explicitly defined later
         self.setDropEventCallback(None)
@@ -297,15 +298,14 @@ class PlaneSelectorWidget(Widget):
                                                )
         self.planeCountSpinBox.setFixedHeight(height)
 
-from ccpn.ui.gui.widgets.Frame import Frame
 
-class PlaneToolbar(Frame):
+class PlaneToolbar(ToolBar):
     #TODO: undocumented and needs refactoring ;
     # GWV: Does not work as a Widget!?
     def __init__(self, qtParent, strip, callbacks, stripArrangement=None, **kwds):
 
-        super(PlaneToolbar, self).__init__(parent=qtParent, setLayout=True, **kwds)
-        # ToolBar.__init__(self, parent=qtParent, **kwds)
+        # super().__init__(parent=qtParent, setLayout=True, **kwds)
+        ToolBar.__init__(self, parent=qtParent, **kwds)
 
         # self.setOrientation(QtCore.Qt.Vertical if stripArrangement == 'X' else QtCore.Qt.Horizontal)
 
@@ -314,12 +314,12 @@ class PlaneToolbar(Frame):
         self.planeCounts = []
         row=0
         for i in range(len(strip.orderedAxes) - 2):
-            _toolbar = ToolBar(self, grid=(0, row))
+            # _toolbar = ToolBar(self, grid=(0, row))
 
-            self.prevPlaneButton = Button(_toolbar, '<', callback=partial(callbacks[0], i))
+            self.prevPlaneButton = Button(self, '<', callback=partial(callbacks[0], i))
             self.prevPlaneButton.setFixedWidth(19)
             self.prevPlaneButton.setFixedHeight(19)
-            planeLabel = DoubleSpinbox(_toolbar, showButtons=False, objectName="PlaneToolbar_planeLabel" + str(i),
+            planeLabel = DoubleSpinbox(self, showButtons=False, objectName="PlaneToolbar_planeLabel" + str(i),
                                        )
             planeLabel.setToolTip(str(strip.axisCodes[i+2]))
 
@@ -337,10 +337,10 @@ class PlaneToolbar(Frame):
                 planeLabel.wheelEvent = partial(self._wheelEvent, i)
                 self.prevPlaneCallback = callbacks[0]
                 self.nextPlaneCallback = callbacks[1]
-            self.nextPlaneButton = Button(_toolbar, '>', callback=partial(callbacks[1], i))
+            self.nextPlaneButton = Button(self, '>', callback=partial(callbacks[1], i))
             self.nextPlaneButton.setFixedWidth(19)
             self.nextPlaneButton.setFixedHeight(19)
-            planeCount = Spinbox(_toolbar, showButtons=False, hAlign='c')
+            planeCount = Spinbox(self, showButtons=False, hAlign='c')
             planeCount.setMinimum(1)
             planeCount.setMaximum(1000)
             planeCount.setValue(1)
@@ -348,10 +348,10 @@ class PlaneToolbar(Frame):
             planeCount.returnPressed.connect(partial(callbacks[3], i))
             planeCount.wheelChanged.connect(partial(callbacks[3], i))
 
-            _toolbar.addWidget(self.prevPlaneButton)
-            _toolbar.addWidget(planeLabel)
-            _toolbar.addWidget(self.nextPlaneButton)
-            _toolbar.addWidget(planeCount)
+            self.addWidget(self.prevPlaneButton)
+            self.addWidget(planeLabel)
+            self.addWidget(self.nextPlaneButton)
+            self.addWidget(planeCount)
             self.planeLabels.append(planeLabel)
             self.planeCounts.append(planeCount)
             row += 1

@@ -94,6 +94,9 @@ def assignAlphas(nmrResidue: NmrResidue, peaks: typing.List[Peak], axisCode='C')
     a height greater than the other, e.g. in an HNCA or HNCACB experiment.
     """
     if len(peaks) > 1:
+        lowestP = [i for i in peaks if i.height == min([j.height for j in peaks])]
+        highestP = [i for i in peaks if i.height == max([j.height for j in peaks])]
+        peaks = lowestP+highestP
         chain = nmrResidue.nmrChain
         newNmrResidue = chain.fetchNmrResidue(nmrResidue.sequenceCode + '-1')
         a3 = newNmrResidue.fetchNmrAtom(name='CA')
@@ -113,6 +116,9 @@ def assignBetas(nmrResidue: NmrResidue, peaks: typing.List[Peak], axisCode='C'):
     Assigns CB and CB-1 NmrAtoms to dimensions of specified peaks.
     """
     if len(peaks) > 1:
+        lowestP = [i for i in peaks if i.height == min([j.height for j in peaks])]
+        highestP = [i for i in peaks if i.height == max([j.height for j in peaks])]
+        peaks = lowestP + highestP
         chain = nmrResidue.nmrChain
         newNmrResidue = chain.fetchNmrResidue(nmrResidue.sequenceCode + '-1')
         a3 = newNmrResidue.fetchNmrAtom(name='CB')

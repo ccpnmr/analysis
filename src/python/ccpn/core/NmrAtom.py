@@ -35,7 +35,7 @@ from ccpnmodel.ccpncore.api.ccp.nmr import Nmr
 from ccpnmodel.ccpncore.lib import Constants
 from ccpn.util.Common import name2IsotopeCode
 from ccpn.util.decorators import logCommand
-from ccpn.core.lib.ContextManagers import newObject, renameObject, undoBlock
+from ccpn.core.lib.ContextManagers import newObject, renameObject, undoBlock, renameObjectContextManager
 from ccpn.util.Logging import getLogger
 
 
@@ -325,8 +325,9 @@ class NmrAtom(AbstractWrapperObject):
         """Subclassed to handle associated ChemicalShift instances
         """
         super()._finaliseAction(action=action)
+
         # propagate the rename to associated ChemicalShift instances
-        if action in ['rename', 'change']:
+        if action in ['rename', 'delete', 'change']:
             for cs in self.chemicalShifts:
                 cs._finaliseAction(action=action)
 
@@ -345,7 +346,7 @@ class NmrAtom(AbstractWrapperObject):
         # - API code and notifiers will take care of resetting id and Pid
         self._validateName(value=value, allowWhitespace=False, allowNone=True)
 
-        with renameObject(self) as addUndoItem:
+        with renameObjectContextManager(self) as addUndoItem:
             oldName = self.name
 
             if value is None:

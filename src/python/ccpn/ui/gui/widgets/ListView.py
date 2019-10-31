@@ -25,14 +25,14 @@ __date__ = "$Date$"
 
 import json
 from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.QtCore import pyqtSignal, pyqtSlot
+from PyQt5.QtCore import pyqtSignal, pyqtSlot, QSize
 from ccpn.ui.gui.widgets.Base import Base
 from ccpn.ui.gui.widgets.Menu import Menu
 from ccpn.util.Constants import ccpnmrJsonData
 
 
 HEADERHEIGHT = 24
-DEFAULTROWS = 15
+MIN_ROWS = 4
 
 
 class ListView(QtWidgets.QListView, Base):
@@ -45,7 +45,7 @@ class ListView(QtWidgets.QListView, Base):
         e.g. listViewContainer.setSizePolicy(QtWidgets.QSizePolicy.Ignored, QtWidgets.QSizePolicy.Ignored)
     """
     def __init__(self, parent=None, mainWindow=None, fitToContents=False, listViewContainer=None,
-                 maxmimumRows=DEFAULTROWS, **kwds):
+                 maxmimumRows=200, headerHeight=None, minRowCount = None, **kwds):
         """Initialise the class
         """
         super().__init__(parent)
@@ -70,21 +70,43 @@ class ListView(QtWidgets.QListView, Base):
         self.setDragEnabled(True)
         self.setDragDropMode(self.DragDrop)
 
+        self._headerHeight = HEADERHEIGHT if headerHeight is None else headerHeight
+        self._minRowCount = MIN_ROWS if minRowCount is None else minRowCount
+
+
+
     def _minRows(self, rc):
         """Return the number of rows to show
         """
-        return min(rc, self._maximumRows)
+        #GST actually it appears maximum rows is effectivey ignored as long as its large...
+        result = min(rc, self._maximumRows)
+        if result > 0 and result <= self._minRowCount:
+            result = self._minRowCount
+        return result
 
     def resizeEvent(self, ev: QtGui.QResizeEvent) -> None:
-        """Resize the listview to its contents or a maximum of DEFAULTROWS
+        """Resize the listview to its contents
         """
         if self._fitToContents:
             rc = self.model().rowCount()
-            rh = self.sizeHintForRow(0) if rc else 0
+            if rc > 0:
+                rc  = self._minRowCount if rc < self._minRowCount else rc
+            rh = self.sizeHintForRow(0)
+            fh = self.frameWidth() * 2
 
-            self.setMaximumHeight(self._minRows(rc) * rh)
+            maxListHeight = (self._minRows(rc) * rh) + fh
+            maxContainerHeight = maxListHeight + self._headerHeight
+
+            # GST 4 rows is a good height as it gves a sensible scrollbar
+            # left in for future improvments: user adjustable results size
+            # minListHeight = (self._minRowCount * rh) + fh
+            # minContainerHeight = minListHeight + self._headerHeight
+
+
             if self._listViewContainer:
-                self._listViewContainer.setMaximumHeight((self._minRows(rc) * rh) + HEADERHEIGHT if rc else HEADERHEIGHT)
+                self._listViewContainer.setMaximumHeight(maxContainerHeight if rc else 0)
+                # GST currently disabled due to bugs
+                # self._listViewContainer.setMinimumHeight(minContainerHeight if rc else 0)
 
         super(ListView, self).resizeEvent(ev)
 

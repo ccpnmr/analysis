@@ -262,18 +262,17 @@ class Sample(AbstractWrapperObject):
         Set sampleStore to default if not set"""
         return parent._wrappedData.sampleStore.sortedSamples()
 
+    @renameObject()
     @logCommand(get='self')
     def rename(self, value: str):
         """Rename Sample, changing its name and Pid.
         """
         self._validateName(value=value, allowWhitespace=False)
 
-        with renameObject(self) as addUndoItem:
-            oldName = self.name
-            self._wrappedData.__dict__['name'] = value
-
-            addUndoItem(undo=partial(self.rename, oldName),
-                        redo=partial(self.rename, value))
+        # rename functions from here
+        oldName = self.name
+        self._wrappedData.__dict__['name'] = value
+        return (oldName,)
 
     #=========================================================================================
     # CCPN functions

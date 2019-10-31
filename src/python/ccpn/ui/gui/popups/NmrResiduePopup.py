@@ -29,6 +29,7 @@ from ccpn.ui.gui.widgets.CompoundWidgets import EntryCompoundWidget, PulldownLis
 from ccpn.ui.gui.widgets.PulldownListsForObjects import NmrChainPulldown
 from ccpn.ui.gui.popups.Dialog import CcpnDialog
 from ccpn.ui.gui.widgets.MessageDialog import showWarning
+from ccpn.util.OrderedSet import OrderedSet
 
 
 REMOVEPERCENT = '( ?\d+.?\d* ?%)+'
@@ -101,9 +102,11 @@ class NmrResiduePopup(CcpnDialog):
 
         if self.project.chemicalShiftLists and len(self.project.chemicalShiftLists) > 0:
             predictions = getNmrResiduePrediction(currentNmrResidue, self.project.chemicalShiftLists[0])
-            preds1 = [' '.join([x[0].upper(), x[1]]) for x in predictions if not currentNmrResidue.residueType]
-            predictedTypes = [x[0] for x in predictions]
-            remainingResidues = [x for x in CCP_CODES_SORTED if x not in predictedTypes and not currentNmrResidue.residueType]
+            preds1 = [' '.join([x[0].upper(), x[1]]) for x in predictions]  # if not currentNmrResidue.residueType]
+            preds1 = list(OrderedSet(preds1))
+            predictedTypes = [x[0].upper() for x in predictions]
+            # remainingResidues = [x for x in CCP_CODES_SORTED if x not in predictedTypes and not currentNmrResidue.residueType]
+            remainingResidues = list(CCP_CODES_SORTED)
             possibilities = [currentNmrResidue.residueType] + preds1 + remainingResidues
         else:
             possibilities = ('',) + CCP_CODES_SORTED
@@ -113,7 +116,11 @@ class NmrResiduePopup(CcpnDialog):
         """Check the new pulldown item and strip bad characters
         """
         # Check the correct characters for residueType - need to remove spaceNumberPercent
+        print('>>>check value')
         value = re.sub(REMOVEPERCENT, '', value)
+        if value not in self.residueType.pulldownList.texts:
+            # add modified value if not in the pulldown
+            self.residueType.pulldownList.addItem(value)
         self.residueType.pulldownList.set(value)
 
     def _applyChanges(self):

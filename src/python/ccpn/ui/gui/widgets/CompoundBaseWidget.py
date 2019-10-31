@@ -29,18 +29,18 @@ __date__ = "$Date: 2017-04-18 15:19:30 +0100 (Tue, April 18, 2017) $"
 from PyQt5 import QtCore
 from ccpn.ui.gui.widgets.Frame import Frame
 from ccpn.core.lib.Notifiers import Notifier
-
+from ccpn.ui.gui.widgets.Base import SignalBlocking
 from ccpn.util.Logging import getLogger
-from ccpn.ui.gui.widgets.CheckBox import CheckBox
-from ccpn.ui.gui.widgets.ColourDialog import ColourDialog
-from ccpn.ui.gui.widgets.LineEdit import LineEdit
-from ccpn.ui.gui.widgets.PulldownList import PulldownList
-from ccpn.ui.gui.widgets.DoubleSpinbox import DoubleSpinbox
-from ccpn.ui.gui.widgets.RadioButton import RadioButton
-from ccpn.ui.gui.widgets.RadioButtons import RadioButtons
-from ccpn.ui.gui.widgets.Slider import Slider
-from ccpn.ui.gui.widgets.Spinbox import Spinbox
-from ccpn.ui.gui.widgets.TextEditor import TextEditor
+# from ccpn.ui.gui.widgets.CheckBox import CheckBox
+# from ccpn.ui.gui.widgets.ColourDialog import ColourDialog
+# from ccpn.ui.gui.widgets.LineEdit import LineEdit
+# from ccpn.ui.gui.widgets.PulldownList import PulldownList
+# from ccpn.ui.gui.widgets.DoubleSpinbox import DoubleSpinbox
+# from ccpn.ui.gui.widgets.RadioButton import RadioButton
+# from ccpn.ui.gui.widgets.RadioButtons import RadioButtons
+# from ccpn.ui.gui.widgets.Slider import Slider
+# from ccpn.ui.gui.widgets.Spinbox import Spinbox
+# from ccpn.ui.gui.widgets.TextEditor import TextEditor
 
 
 NULL = object()
@@ -48,7 +48,7 @@ NULL = object()
 NOTIFIERS = '_notifiers'
 
 
-class CompoundBaseWidget(Frame):
+class CompoundBaseWidget(Frame, SignalBlocking):
     """
     Base widget for Compound classes; inherits from Frame (and hence Base)
     Implements the addNotifier and deleteNotifiers methods

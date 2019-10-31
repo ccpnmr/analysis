@@ -155,6 +155,7 @@ class StructureEnsemble(AbstractWrapperObject):
         """get wrappedData for all NmrConstraintStores linked to NmrProject"""
         return parent._wrappedData.molSystem.sortedStructureEnsembles()
 
+    @renameObject()
     @logCommand(get='self')
     def rename(self, value: str):
         """Rename StructureEnsemble, changing its name and Pid.
@@ -162,12 +163,10 @@ class StructureEnsemble(AbstractWrapperObject):
         """
         self._validateName(value=value, allowWhitespace=False)
 
-        with renameObject(self) as addUndoItem:
-            oldName = self.name
-            self._wrappedData.name = value
-
-            addUndoItem(undo=partial(self.rename, oldName),
-                        redo=partial(self.rename, value))
+        # rename functions from here
+        oldName = self.name
+        self._wrappedData.name = value
+        return (oldName,)
 
     #=========================================================================================
     # CCPN functions

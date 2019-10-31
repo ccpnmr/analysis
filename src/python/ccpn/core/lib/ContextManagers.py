@@ -27,6 +27,7 @@ __date__ = "$Date: 2018-12-20 15:44:34 +0000 (Thu, December 20, 2018) $"
 
 import sys
 import decorator
+import inspect
 from contextlib import contextmanager
 from collections import Iterable
 from functools import partial
@@ -918,7 +919,6 @@ def deleteObject():
     GWV first try
     EJB 20181130: modified
     """
-    from ccpn.core.lib import Undo
 
     @decorator.decorator
     def theDecorator(*args, **kwds):
@@ -951,8 +951,39 @@ def deleteObject():
     return theDecorator
 
 
+def renameObject():
+    """ A decorator to wrap the rename(self) method of the V3 core classes
+    calls self._finaliseAction('rename') after the rename
+
+    EJB 20191023: modified original contextManager to be decorator to match new/delete
+    """
+
+    @decorator.decorator
+    def theDecorator(*args, **kwds):
+        func = args[0]
+        args = args[1:]  # Optional 'self' is now args[0]
+        self = args[0]
+        application = getApplication()  # pass it in to reduce overhead
+
+        with notificationBlanking(application=application):
+            with undoStackBlocking(application=application) as addUndoItem:
+
+                # call the wrapped rename function
+                result = func(*args, **kwds)
+
+                addUndoItem(undo=BlankedPartial(func, self, 'rename', False, self, *result),
+                            redo=BlankedPartial(func, self, 'rename', False, *args, **kwds)
+                            )
+
+        self._finaliseAction('rename')
+
+        return True
+
+    return theDecorator
+
+
 @contextmanager
-def renameObject(self):
+def renameObjectContextManager(self):
     """ A decorator to wrap the rename(self) method of the V3 core classes
     calls self._finaliseAction('rename', 'change') after the rename
     """
@@ -997,8 +1028,9 @@ class BlankedPartial(object):
     optionally trigger the notification of obj, either pre- or post execution.
     """
 
-    def __init__(self, func, obj=None, trigger=None, preExecution=False, **kwds):
+    def __init__(self, func, obj=None, trigger=None, preExecution=False, *args, **kwds):
         self._func = func
+        self._args = args
         self._kwds = kwds
         self._obj = obj
         self._trigger = trigger
@@ -1012,7 +1044,7 @@ class BlankedPartial(object):
             self._obj._finaliseAction(self._trigger)
 
         with notificationBlanking():
-            self._func(**self._kwds)
+            self._func(*self._args, **self._kwds)
 
         if self._postExecution:
             # call the notification
@@ -1036,19 +1068,21 @@ def ccpNmrV3CoreSetter():
 
         with notificationBlanking(application=application):
             with undoStackBlocking(application=application) as addUndoItem:
+
                 # call the wrapped function
                 result = func(*args, **kwds)
 
                 addUndoItem(undo=partial(func, self, oldValue),
                             redo=partial(func, self, args[1])
                             )
+
         self._finaliseAction('change')
         return result
 
     return theDecorator
 
 
-def queueStateChange(verify=None, attributeName=None):
+def ccpNmrV3CoreUndoBlock():
     """A decorator wrap the property setters method in an undo block and triggering the
     'change' notification
     """
@@ -1059,19 +1093,45 @@ def queueStateChange(verify=None, attributeName=None):
         args = args[1:]  # Optional 'self' is now args[0]
         self = args[0]
 
-        result = func(*args, **kwds)
+        application = getApplication()  # pass it in to reduce overhead
 
-        import inspect
+        with notificationBlanking(application=application):
+            with undoBlock():
+
+                # call the wrapped function
+                result = func(*args, **kwds)
+
+        self._finaliseAction('change')
+        return result
+
+    return theDecorator
+
+
+def queueStateChange(verify):
+    """A decorator to wrap a state change event with a verify function
+    """
+
+    @decorator.decorator
+    def theDecorator(*args, **kwds):
+        func = args[0]
+        args = args[1:]  # Optional 'self' is now args[0]
+        self = args[0]
+
         # get the signature
         sig = inspect.signature(func)
         # fill in the missing parameters
         ba = sig.bind(*args, **kwds)
         ba.apply_defaults()
-        dim = ba.arguments.get('dim')
 
-        # call the verify function for the decorator
-        if verify:
-            verify(self, func.__name__, result, dim)
+        # get specific arguments - cannot just grab all as may contain variants
+        dim = ba.arguments.get('dim')
+        option = ba.arguments.get('option')
+
+        # call the function - should return None if returning to unmodified state
+        result = func(*args, **kwds)
+
+        # call the verify function to update the _changes dict
+        verify(self, func.__name__, result, dim, option)
 
         return result
 

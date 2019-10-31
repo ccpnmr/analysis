@@ -28,27 +28,20 @@ __date__ = "$Date: 2016-07-09 14:17:30 +0100 (Sat, 09 Jul 2016) $"
 
 from ccpn.util import Logging
 from ccpn.util.Logging import getLogger
-from weakref import ref
-from contextlib import contextmanager
 import itertools
 import collections
 from functools import partial
-
 from pyqtgraph.dockarea.Container import Container
 from pyqtgraph.dockarea.DockDrop import DockDrop
 from pyqtgraph.dockarea.Dock import DockLabel, Dock
-from pyqtgraph.dockarea.DockArea import TempAreaWindow
-
 from PyQt5 import QtCore, QtGui, QtWidgets
 from ccpn.ui.gui.widgets.DropBase import DropBase
 from ccpn.ui.gui.widgets.CheckBox import CheckBox
 from ccpn.ui.gui.widgets.Menu import Menu
-
 from ccpn.ui.gui.guiSettings import getColours, CCPNMODULELABEL_BACKGROUND, CCPNMODULELABEL_FOREGROUND, \
     CCPNMODULELABEL_BACKGROUND_ACTIVE, CCPNMODULELABEL_FOREGROUND_ACTIVE, CCPNMODULELABEL_BORDER, CCPNMODULELABEL_BORDER_ACTIVE
 from ccpn.ui.gui.widgets.ColourDialog import ColourDialog
 from ccpn.ui.gui.widgets.DoubleSpinbox import DoubleSpinbox
-from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.LineEdit import LineEdit
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
 from ccpn.ui.gui.widgets.RadioButton import RadioButton
@@ -57,27 +50,21 @@ from ccpn.ui.gui.widgets.Slider import Slider
 from ccpn.ui.gui.widgets.Spinbox import Spinbox
 from ccpn.ui.gui.widgets.TextEditor import TextEditor
 from ccpn.ui.gui.widgets.FileDialog import LineEditButtonDialog
-from ccpn.ui.gui.popups.PickPeaks1DPopup import ExcludeRegions
 from ccpn.ui.gui.widgets.GLLinearRegionsPlot import GLTargetButtonSpinBoxes
 from ccpn.ui.gui.widgets.ScrollArea import ScrollArea
 from ccpn.ui.gui.widgets.Splitter import Splitter
-from ccpn.ui.gui.lib.MenuActions import _openItemObject
 from ccpn.ui.gui.widgets.ToolButton import ToolButton
 from ccpn.ui.gui.widgets.Icon import Icon
 from ccpn.ui.gui.guiSettings import moduleLabelFont
 from ccpn.ui.gui.widgets.Widget import Widget
-from ccpn.ui.gui.widgets.SideBar import SideBar  #,SideBar
+from ccpn.ui.gui.widgets.SideBar import SideBar
 from ccpn.ui.gui.widgets.PythonEditor import QCodeEditor
-
-from ccpn.ui.gui.widgets.Frame import ScrollableFrame, Frame
+from ccpn.ui.gui.widgets.Frame import Frame
 from ccpn.ui.gui.widgets.CompoundWidgets import PulldownListCompoundWidget, CheckBoxCompoundWidget, \
     DoubleSpinBoxCompoundWidget, SelectorWidget, InputPulldown, \
     ColourSelectionWidget, LineEditPopup, ListCompoundWidget
 from ccpn.ui.gui.widgets.PulldownListsForObjects import _PulldownABC
-
-from ccpn.core.lib.Notifiers import Notifier, NotifierBase
-from ccpn.ui.gui.lib.GuiNotifier import GuiNotifier
-from ccpn.core.lib.ContextManagers import undoBlock
+from ccpn.core.lib.Notifiers import NotifierBase
 
 
 CommonWidgets = {

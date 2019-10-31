@@ -37,9 +37,15 @@ from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLShader import ShaderProgram
 DEFAULTFONT = 'OpenSans-Regular'
 SUBSTITUTEFONT = 'OpenSans-Regular'
 DEFAULTFONTSIZE = '13'
-FONTLIST = (('glFont13.fnt', DEFAULTFONT, 13),
-            ('glFont14.fnt', DEFAULTFONT, 14),
-            ('glFont16.fnt', DEFAULTFONT, 16))
+scale = 2
+FONT_SIZES = [13] #,14,16,26]
+fontList = []
+for size in FONT_SIZES:
+    # fontList.append(('glFont%i.fnt' % size/scale, DEFAULTFONT, size, scale)
+    fontList.append(('glFont%i.fnt' % (size*scale), DEFAULTFONT, size, scale))  # double size for retina displays...
+FONTLIST = tuple(fontList)
+# print(FONTLIST)
+
 FONTTRANSPARENT = 'Transparent'
 FONTPATH = 'Fonts'
 
@@ -64,12 +70,13 @@ class GLGlobalData(QtWidgets.QWidget):
     def loadFonts(self):
         for fontFile in FONTLIST:
             normalName = fontFile[1] + str(fontFile[2])
+            scale = fontFile[3]
             transparentName = fontFile[1] + FONTTRANSPARENT + str(fontFile[2])
 
             self.fonts[normalName] = CcpnGLFont(os.path.join(fontsPath, FONTPATH, fontFile[0]),
-                                                activeTexture=0)
+                                                activeTexture=0, scale=scale)
             self.fonts[transparentName] = CcpnGLFont(os.path.join(fontsPath, FONTPATH, fontFile[0]),
-                                                     fontTransparency=0.5, activeTexture=1)
+                                                     fontTransparency=0.5, activeTexture=1, scale=scale)
 
         self.glSmallFont = self.fonts[DEFAULTFONT + DEFAULTFONTSIZE]
         self.glSmallTransparentFont = self.fonts[DEFAULTFONT + FONTTRANSPARENT + DEFAULTFONTSIZE]

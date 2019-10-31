@@ -35,6 +35,7 @@ from functools import partial
 
 from PyQt5 import QtWidgets, QtCore, QtGui
 from PyQt5.QtGui import QKeySequence
+from PyQt5.QtCore import QSize
 from ccpn.core.Project import Project
 from ccpn.core.lib.ContextManagers import catchExceptions
 from ccpn.ui.gui.widgets.MessageDialog import progressManager
@@ -167,23 +168,6 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
         #     return True
         #
         #   return False
-
-        #     self.installEventFilter(self)
-        #
-        # def eventFilter(self, obj, event):
-        #     if event.type() == QtCore.QEvent.ShortcutOverride:
-        #         # Stop obj from treating the event itself
-        #         print('>>>', chr(event.key()))
-        #
-        #     elif event.type() == QtCore.QEvent.KeyPress:
-        #         # Stop obj from treating the event itself
-        #         print('>>>key', chr(event.key()))
-        #
-        #     elif event.type() == QtCore.QEvent.Shortcut:
-        #         # Stop obj from treating the event itself
-        #         print('>>>shortcut')
-        #
-        #     return False
 
         # install handler to resize when moving between displays
         self.window().windowHandle().screenChanged.connect(self._screenChangedEvent)
@@ -357,6 +341,10 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
         self._sidebarSplitter.insertWidget(0, self.sideBar)
         self._sidebarSplitter.insertWidget(1, self.searchResultsContainer)
 
+        # GST resizing the splitter by hand causes problems so currently disable it!
+        for i in range( self._sidebarSplitter.count()):
+            self._sidebarSplitter.handle(i).setEnabled(False)
+
         # create a splitter to put the sidebar on the left
         self._horizontalSplitter = Splitter(horizontal=True)
 
@@ -373,11 +361,10 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
         separated, Framework should be able to call a method to set the menus.
         """
 
-        self._menuBar = MenuBar(self)
+        self._menuBar = self.menuBar()
         for m in self.application._menuSpec:
             self._createMenu(m)
-        self.setMenuBar(self._menuBar)
-        self._menuBar.setNativeMenuBar(False)
+        self._menuBar.setNativeMenuBar(self.application.preferences.general.useNativeMenus)
 
         self._fillRecentProjectsMenu()
         self._fillPredefinedLayoutMenu()
@@ -476,14 +463,24 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
             QtWidgets.QApplication.setActiveWindow(project._mainWindow)
 
             # if the new project contains invalid spectra then open the popup to see them
-            badSpectra = [str(spectrum) for spectrum in project.spectra if not spectrum.isValidPath]
+            # badSpectra = [str(spectrum) for spectrum in project.spectra if not spectrum.isValidPath]
+            badSpectra = []
+            for spectrum in project.spectra:
+                valid = False
+                try:
+                    valid = spectrum.isValidPath        # can raise error if None
+                except:
+                    pass
+                finally:
+                    if not valid:
+                        badSpectra.append(str(spectrum))
+
             if badSpectra:
                 from ccpn.ui.gui.widgets.MessageDialog import showWarning
 
                 showWarning('Spectrum file paths',
                             '''Detected invalid Spectrum file path(s) for: 
-                            
-                            \t%s
+                            \n\t%s
                             
                             Use menu Spectrum-->Validate paths.. or "VP" shortcut to correct''' % '\n\t'.join(badSpectra)
                             )

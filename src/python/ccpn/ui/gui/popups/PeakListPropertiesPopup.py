@@ -34,6 +34,7 @@ class PeakListPropertiesPopup(PMIListPropertiesPopupABC):
     """
     Popup to handle changing parameters in peakLists
     """
+
     # class of lists handled by popup
     _baseClass = PeakList
     _symbolColourOption = True
@@ -45,6 +46,8 @@ class PeakListPropertiesPopup(PMIListPropertiesPopupABC):
     def __init__(self, parent=None, mainWindow=None, peakList=None, title=None, **kwds):
         super().__init__(parent=parent, mainWindow=mainWindow, ccpnList=peakList,
                          title='%s Properties' % self._baseClass.className, **kwds)
+
+        self.__postInit__()
 
     def _refreshGLItems(self):
         # emit a signal to rebuild all peaks and multiplets

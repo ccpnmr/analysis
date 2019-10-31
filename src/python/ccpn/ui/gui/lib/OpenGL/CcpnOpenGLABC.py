@@ -146,7 +146,7 @@ class CcpnGLWidgetABC(QOpenGLWidget):
     """Widget to handle all visible spectra/peaks/integrals/multiplets
     """
     AXIS_MARGINRIGHT = 50
-    AXIS_MARGINBOTTOM = 25
+    AXIS_MARGINBOTTOM = 24
     AXIS_LINE = 7
     AXIS_OFFSET = 3
     YAXISUSEEFORMAT = False

@@ -85,7 +85,7 @@ from ccpn.ui.gui.lib.GuiNotifier import GuiNotifier
 from ccpn.ui.gui.lib.MenuActions import _createNewDataSet, _createNewPeakList, _createNewChemicalShiftList, _createNewMultipletList, _createNewNmrResidue, \
     _createNewNmrAtom, \
     _createNewNote, _createNewIntegralList, _createNewSample, _createNewStructureEnsemble, _raiseNewChainPopup, _raiseChainPopup, _raiseComplexEditorPopup, \
-    _raiseDataSetPopup, _raiseChemicalShifListPopup, _raisePeakListPopup, _raiseMultipletListPopup, _raiseCreateNmrChainPopup, _raiseNmrChainPopup, \
+    _raiseDataSetPopup, _raiseChemicalShiftListPopup, _raisePeakListPopup, _raiseMultipletListPopup, _raiseCreateNmrChainPopup, _raiseNmrChainPopup, \
     _raiseNmrResiduePopup, _raiseNmrAtomPopup, _raiseNotePopup, _raiseIntegralListPopup, _raiseRestraintListPopup, _raiseSamplePopup, \
     _raiseSampleComponentPopup, _raiseSpectrumPopup, _raiseSpectrumGroupEditorPopup, _raiseStructureEnsemblePopup, _raiseSubstancePopup
 
@@ -821,8 +821,8 @@ class SideBarStructure(object):
 
             #------ ChemicalShiftLists ------
             SidebarTree('ChemicalShiftLists', closed=True, children=[
-                SidebarItem('<New ChemicalShiftList>', callback=_createNewChemicalShiftList()),
-                SidebarClassTreeItems(klass=ChemicalShiftList, callback=_raiseChemicalShifListPopup(),
+                SidebarItem('<New ChemicalShiftList>', callback=_raiseChemicalShiftListPopup(useNone=True, editMode=False)),
+                SidebarClassTreeItems(klass=ChemicalShiftList, callback=_raiseChemicalShiftListPopup(editMode=True),
                                       menuAction=_openItemChemicalShiftListTable(position='left', relativeTo=None), isDraggable=True),
                 ]),
 
@@ -1112,6 +1112,10 @@ class SideBar(QtWidgets.QTreeWidget, SideBarStructure, Base, NotifierBase):
         self._resultsList.selectionModel().selectionChanged.connect(self._resultsListSelection)
         self._resultsList.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
         self._resultsList.customContextMenuRequested.connect(self._resultsListMenuRequested)
+
+        # GST seems to be missing a border, why?
+        # print(self._resultsList.__class__)
+        self._resultsList.setStyleSheet('ListView {border: 1px solid rgb(207,207,207)}')
 
         self._searchSelection = []
         self._searchNotifiers = []
@@ -1434,6 +1438,8 @@ class SideBar(QtWidgets.QTreeWidget, SideBarStructure, Base, NotifierBase):
         #     for action in ('create', 'delete', 'rename'):
         #         notifier = self._project.registerNotifier('AbstractWrapperObject', action, self._notify_pids_changed, onceOnly=True)
         #         self._searchNotifiers.append(notifier)
+
+        self._resultsList.adjustSize()
 
     def _notify_pids_changed(self, *args, **kwargs):
         self._searchWidgetCallback()

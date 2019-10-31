@@ -32,7 +32,7 @@ from ccpn.core.Project import Project
 from ccpn.core.Peak import Peak
 from ccpn.core.lib.Notifiers import Notifier
 from ccpn.ui.gui.guiSettings import getColours, GUISTRIP_PIVOT
-from ccpn.ui.gui.widgets.PlaneToolbar import StripHeader
+# from ccpn.ui.gui.widgets.PlaneToolbar import StripHeader
 from ccpn.ui.gui.widgets.Frame import Frame, OpenGLOverlayFrame
 from ccpn.ui.gui.widgets.Widget import Widget
 from ccpn.ui.gui.widgets.Label import Label, ActiveLabel
@@ -58,9 +58,6 @@ STRIPLABEL_ISPLUS = 'stripLabel_isPlus'
 STRIPMINIMUMWIDTH = 100
 STRIPPLOTMINIMUMWIDTH = 100
 
-MAXPEAKLABELTYPES = 4
-MAXPEAKSYMBOLTYPES = 3
-
 DefaultMenu = 'DefaultMenu'
 PeakMenu = 'PeakMenu'
 IntegralMenu = 'IntegralMenu'
@@ -71,6 +68,11 @@ PhasingMenu = 'PhasingMenu'
 
 class GuiStrip(Frame):
     # inherits NotifierBase
+
+    optionsChanged = QtCore.pyqtSignal(dict)
+
+    MAXPEAKLABELTYPES = 4
+    MAXPEAKSYMBOLTYPES = 3
 
     def __init__(self, spectrumDisplay):
         """
@@ -124,79 +126,8 @@ class GuiStrip(Frame):
         self._CcpnGLWidget.setSizePolicy(QtWidgets.QSizePolicy.Expanding,
                                          QtWidgets.QSizePolicy.Expanding)
 
-        self._fr = []
-        self._sl = []
-
-        SHOWTESTWIDGETS = False
-
-        if SHOWTESTWIDGETS:
-            sp = Spacer(self, 1, 1, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding,
-                        grid=(10, 4), gridSpan=(1, 1))
-
-            from ccpn.ui.gui.widgets.PlaneToolbar import _StripLabel
-
-            self._ts = OrderedDict([('StripHeader', (_StripLabel, (2, 1))),
-                                    ('More stripHeader settings', (_StripLabel, (3, 1))),
-                                    ('Some more text', (_StripLabel, (4, 1))),
-                                    ('And another bit of text', (_StripLabel, (5, 1))),
-                                    ('Extra Axis Code 1', (ActiveLabel, (6, 1))),
-                                    ('HIDDENWIDGETWITHOPTIONS1', (ActiveLabel, (7, 1))),
-                                    ('Extra Axis Code 2', (ActiveLabel, (8, 1))),
-                                    ('HIDDENWIDGETWITHOPTIONS2', (ActiveLabel, (9, 1)))
-                                    ])
-
-            self.addSpacer(10, 30, grid=(1, 0))
-
-            # ED: the only way I could find to cure the mis-aligned header
-            for ii, (tl, (labelType, gridPos)) in enumerate(self._ts.items()):
-
-                fr = OpenGLOverlayFrame(self, setLayout=True, showBorder=False, grid=gridPos, backgroundColour=None)
-                fr.setSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum)
-
-                if labelType is _StripLabel:
-                    sl = _StripLabel(fr, self.mainWindow, self, text=tl, grid=(0, 0))
-                else:
-                    sl = ActiveLabel(fr, text=tl, grid=(0, 0))
-
-                sl.setSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum)
-                sp = Spacer(fr, 1, 1, QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.Minimum, grid=(0, 1))
-
-                sl.setStyleSheet('QLabel {'
-                                 'padding: 0; '
-                                 'margin: 0px 0px 0px 0px;'
-                                 'color:  %s;'
-                                 'background-color: %s;'
-                                 'border: 0 px;'
-                                 'font-family: %s;'
-                                 'font-size: %dpx;'
-                                 'qproperty-alignment: AlignLeft;'
-                                 '}' % ('white',
-                                        'black',
-                                        textFontLarge.fontName,
-                                        textFontLarge.pointSize()))
-
-                self._fr.append(fr)
-                self._sl.append(sl)
-
-            keys = list(self._ts.keys())
-            self.w1 = self._sl[keys.index('Extra Axis Code 1')]
-            self.w2 = self._sl[keys.index('HIDDENWIDGETWITHOPTIONS1')]
-            self.w1.setSelectionCallback(partial(self._selectCallback, self.w1, self.w2))
-
-            self.w2.hide()
-            self.w2.setEnterLeaveCallback(partial(self._enterCallback, self.w1, self.w2),
-                                          partial(self._leaveCallback, self.w1, self.w2))
-
-            self.w3 = self._sl[keys.index('Extra Axis Code 2')]
-            self.w4 = self._sl[keys.index('HIDDENWIDGETWITHOPTIONS2')]
-            self.w3.setSelectionCallback(partial(self._selectCallback, self.w3, self.w4))
-
-            self.w4.hide()
-            self.w4.setEnterLeaveCallback(partial(self._enterCallback, self.w3, self.w4),
-                                          partial(self._leaveCallback, self.w3, self.w4))
-
-        self.header = StripHeader(parent=self, mainWindow=self.mainWindow, strip=self,
-                                  grid=headerGrid, gridSpan=headerSpan, setLayout=True, spacing=(0, 0))
+        self.header = None      #StripHeader(parent=self, mainWindow=self.mainWindow, strip=self,
+                                 # grid=headerGrid, gridSpan=headerSpan, setLayout=True, spacing=(0, 0))
 
         # set the ID label in the new widget
         self._CcpnGLWidget.setStripID('.'.join(self.id.split('.')))
@@ -235,8 +166,9 @@ class GuiStrip(Frame):
         if len(spectrumDisplay.strips) > 1:
 
             # copy the values form the first strip
-            self.peakLabelling = spectrumDisplay.strips[0].peakLabelling
-            self.symbolType = spectrumDisplay.strips[0].symbolType
+            self.peakLabelling = min(spectrumDisplay.strips[0].peakLabelling, self.MAXPEAKLABELTYPES - 1)
+            self.symbolType = min(spectrumDisplay.strips[0].symbolType, self.MAXPEAKSYMBOLTYPES - 1)
+
             self._symbolSize = spectrumDisplay.strips[0].symbolSize
             self._symbolThickness = spectrumDisplay.strips[0].symbolThickness
             self.gridVisible = spectrumDisplay.strips[0].gridVisible
@@ -249,10 +181,10 @@ class GuiStrip(Frame):
         else:
 
             # get the values from the preferences
-            self.peakLabelling = self._preferences.annotationType
-            self.symbolType = self._preferences.symbolType
-            self._symbolSize = self._preferences.symbolSizePixel
+            self.peakLabelling = min(self._preferences.annotationType, self.MAXPEAKLABELTYPES - 1)
+            self.symbolType = min(self._preferences.symbolType, self.MAXPEAKSYMBOLTYPES - 1)
 
+            self._symbolSize = self._preferences.symbolSizePixel
             self._symbolThickness = self._preferences.symbolThickness
             self.gridVisible = self._preferences.showGrid
             self.crosshairVisible = self._preferences.showCrosshair
@@ -281,16 +213,26 @@ class GuiStrip(Frame):
         # respond to values changed in the containing spectrumDisplay settings widget
         self.spectrumDisplay._spectrumDisplaySettings.symbolsChanged.connect(self._symbolsChangedInSettings)
 
+    def resizeEvent(self, ev):
+        super().resizeEvent(ev)
+        # call subclass _resize event
+        self._resize()
+
     def _resize(self):
         """Resize event to handle resizing of frames that overlay the OpenGL frame
         """
-        for fr in self._fr:
-            fr._setMaskToChildren()
+        pass
 
-    def _selectCallback(self, widget1, widget2):
+    def _selectCallback(self, widgets):
         # print('>>>select', widget1, widget2)
-        widget1.hide()
-        widget2.show()
+        # if the first widget is clicked then toggle the planeToolbar buttons
+        if widgets[3].isVisible():
+            widgets[3].hide()
+            widgets[1].show()
+        else:
+            widgets[1].hide()
+            widgets[3].show()
+        self._resize()
 
     def _enterCallback(self, widget1, widget2):
         # print('>>>_enterCallback', widget1, widget2)
@@ -298,7 +240,7 @@ class GuiStrip(Frame):
 
     def _leaveCallback(self, widget1, widget2):
         # print('>>>_leaveCallback', widget1, widget2)
-        widget2.hide()
+        # widget2.hide()
         widget1.show()
 
     def setStripNotifiers(self):
@@ -409,7 +351,8 @@ class GuiStrip(Frame):
     def _updateStripLabel(self, callbackDict):
         """Update the striplabel if it represented a NmrResidue that has changed its id.
         """
-        self.header.processNotifier(callbackDict)
+        # self.header.processNotifier(callbackDict)
+        pass
 
     def createMark(self):
         """Sets the marks at current position
@@ -657,7 +600,6 @@ class GuiStrip(Frame):
 
         self._createMarkAtPosition(positions=pos, axisCodes=axes)
 
-
     def _addItemsToMarkInPeakMenu(self, peaks):
         """Adds item to mark peak position from context menu.
         """
@@ -748,7 +690,7 @@ class GuiStrip(Frame):
         for nm, ax in matchAttribs:
             self._addItemsToCopyAxisCodesFromMenues(ax, nm)
 
-    def _addItemsToCopyAxisFromMenues(self, copyAttribs):       #, axisNames, axisIdList):
+    def _addItemsToCopyAxisFromMenues(self, copyAttribs):  #, axisNames, axisIdList):
         """Copied from old viewbox. This function apparently take the current cursorPosition
          and uses to pan a selected display from the list of spectrumViews or the current cursor position.
         """
@@ -812,8 +754,8 @@ class GuiStrip(Frame):
             row += 1
 
         for ind in indices:
-            pos = [position[ind],]
-            axes = [self.axisCodes[ind],]
+            pos = [position[ind], ]
+            axes = [self.axisCodes[ind], ]
 
             toolTip = 'Mark %s axis code' % str(self.axisCodes[ind])
             axisName.addItem(text='Mark %s' % str(self.axisCodes[ind]),
@@ -846,7 +788,7 @@ class GuiStrip(Frame):
     #     self._addItemsToCopyAxisCodesFromMenues(0, [self.matchXAxisCodeToMenu2, self.matchYAxisCodeToMenu2])
     #     self._addItemsToCopyAxisCodesFromMenues(1, [self.matchXAxisCodeToMenu2, self.matchYAxisCodeToMenu2])
 
-    def _addItemsToCopyAxisCodesFromMenues(self, axisIndex, axisName):      #, axisList):
+    def _addItemsToCopyAxisCodesFromMenues(self, axisIndex, axisName):  #, axisList):
         """Copied from old viewbox. This function apparently take the current cursorPosition
          and uses to pan a selected display from the list of spectrumViews or the current cursor position.
         """
@@ -1263,7 +1205,7 @@ class GuiStrip(Frame):
         """Toggles whether peak labelling is minimal is visible in the strip.
         """
         self.peakLabelling += 1
-        if self.peakLabelling > MAXPEAKLABELTYPES:
+        if self.peakLabelling > self.MAXPEAKLABELTYPES:
             self.peakLabelling = 0
 
         self._setPeakLabelling()
@@ -1274,7 +1216,7 @@ class GuiStrip(Frame):
         """Toggles whether peak labelling is minimal is visible in the strip.
         """
         self.peakLabelling = labelling
-        if self.peakLabelling > MAXPEAKLABELTYPES:
+        if self.peakLabelling > self.MAXPEAKLABELTYPES:
             self.peakLabelling = 0
 
         self._setPeakLabelling()
@@ -1307,7 +1249,7 @@ class GuiStrip(Frame):
         """Cycle through peak symbol types.
         """
         self.symbolType += 1
-        if self.symbolType > MAXPEAKSYMBOLTYPES:
+        if self.symbolType > self.MAXPEAKSYMBOLTYPES:
             self.symbolType = 0
 
         self._setPeakSymbols()
@@ -1318,7 +1260,7 @@ class GuiStrip(Frame):
         """set the peak symbol type.
         """
         self.symbolType = symbolNum
-        if self.symbolType > MAXPEAKSYMBOLTYPES:
+        if self.symbolType > self.MAXPEAKSYMBOLTYPES:
             self.symbolType = 0
 
         self._setPeakSymbols()
@@ -1942,10 +1884,15 @@ class GuiStrip(Frame):
             if len(strip.axisOrder) > 2:
                 n = index - 2
                 if n >= 0:
-                    planeLabel = strip.planeToolbar.planeLabels[n]
-                    planeSize = planeLabel.singleStep()
-                    planeLabel.setValue(position)
-                    strip.planeToolbar.planeCounts[n].setValue(width / planeSize)
+
+                    if strip.planeAxisBars and n < len(strip.planeAxisBars):
+                        # strip.planeAxisBars[n].setPosition(ppmPosition, ppmWidth)
+                        strip.planeAxisBars[n].updatePosition()
+
+                    # planeLabel = strip.planeToolbar.planeLabels[n]
+                    # planeSize = planeLabel.singleStep()
+                    # planeLabel.setValue(position)
+                    # strip.planeToolbar.planeCounts[n].setValue(width / planeSize)
 
         strip.beingUpdated = False
 
@@ -2135,10 +2082,15 @@ def _axisRegionChanged(cDict):
                 if len(strip.axisOrder) > 2:
                     n = index - 2
                     if n >= 0:
-                        planeLabel = strip.planeToolbar.planeLabels[n]
-                        planeSize = planeLabel.singleStep()
-                        planeLabel.setValue(position)
-                        strip.planeToolbar.planeCounts[n].setValue(width / planeSize)
+
+                        if strip.planeAxisBars and n < len(strip.planeAxisBars):
+                            # strip.planeAxisBars[n].setPosition(ppmPosition, ppmWidth)
+                            strip.planeAxisBars[n].updatePosition()
+
+                        # planeLabel = strip.planeToolbar.planeLabels[n]
+                        # planeSize = planeLabel.singleStep()
+                        # planeLabel.setValue(position)
+                        # strip.planeToolbar.planeCounts[n].setValue(width / planeSize)
 
         finally:
             strip.beingUpdated = False

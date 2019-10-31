@@ -242,4 +242,4 @@ LOCKBOTTOM = 64
 LOCKAXIS = 128
 
 LOCKSTRING = 'Lock'
-USEFIXEDASPECTSTRING = '         Fixed'      # easier to overlay
+USEFIXEDASPECTSTRING = '                      Fixed'      # easier to overlay

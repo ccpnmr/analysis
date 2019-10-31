@@ -1287,7 +1287,8 @@ class GuiSpectrumViewNd(GuiSpectrumView):
                 zPosition = orderedAxes[dim].position
 
                 # check as there could be more dimensions
-                planeCount = self.strip.planeToolbar.planeCounts[dim - 2].value()
+                # planeCount = self.strip.planeToolbar.planeCounts[dim - 2].value()
+                planeCount = self.strip.planeAxisBars[dim-2].planeCount     #   .planeToolbar.planeCounts[dim - 2].value()
 
                 # valuePerPoint, _, _, _, _ = useFirstVisible._getSpectrumViewParams(2)
                 # zRegionValue = (zPosition + 0.5 * (planeCount+2) * valuePerPoint, zPosition - 0.5 * (planeCount+2) * valuePerPoint)  # Note + and - (axis backwards)
@@ -1298,6 +1299,7 @@ class GuiSpectrumViewNd(GuiSpectrumView):
                 # pass in a smaller valuePerPoint - if there are differences in the z-resolution, otherwise just use local valuePerPoint
                 minZWidth = 3 * valuePerPoint
                 zWidth = (planeCount + 2) * minimumValuePerPoint[dim - 2] if minimumValuePerPoint else (planeCount + 2) * valuePerPoint
+
                 zWidth = max(zWidth, minZWidth)
 
                 zRegionValue = (zPosition + 0.5 * zWidth, zPosition - 0.5 * zWidth)  # Note + and - (axis backwards)

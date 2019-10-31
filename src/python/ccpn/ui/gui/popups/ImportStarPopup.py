@@ -124,7 +124,7 @@ class TreeCheckBoxes(QtWidgets.QTreeWidget, Base):
         self.headerItem = QtWidgets.QTreeWidgetItem()
         self.item = QtWidgets.QTreeWidgetItem()
         self.orderedDataDict = orderedDataDict or {}
-        self.header().hide()
+        # self.header().hide()
         if self.orderedDataDict is not None:
             for name in self.checkList:
                 if name in self.orderedDataDict:

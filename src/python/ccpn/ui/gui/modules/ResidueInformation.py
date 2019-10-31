@@ -334,7 +334,8 @@ class ResidueInformation(CcpnModule):
                 for rr in range(int(self._residueWidth)):
                     if rr >= 0 and rr < len(checkResidues):
                         if checkResidues[rr] is not None:
-                            item = ActiveLabel(self, text=checkResidues[rr].id,
+                            item = ActiveLabel(self, mainWindow=self.mainWindow,
+                                               text=checkResidues[rr].id,
                                                hAlign='c')
                             item.setMaximumHeight(30)
                             item.setSelectionCallback(partial(self._residueClicked, checkResidues[rr]))

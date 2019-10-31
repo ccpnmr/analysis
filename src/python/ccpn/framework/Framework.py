@@ -647,7 +647,7 @@ class Framework(NotifierBase):
     def applyPreferences(self, project):
         """Apply user preferences
 
-        NBNB project should be impliclt rather than a parameter (once reorganisation is finished)
+        NBNB project should be implicit rather than a parameter (once reorganisation is finished)
         """
         # Reset remoteData DataStores to match preferences setting
         dataPath = self.preferences.general.dataPath
@@ -1040,13 +1040,12 @@ class Framework(NotifierBase):
         if not menuChildren:
             return
 
-        topMenu = menuChildren[0]
         topActionDict = {}
-        for topAction in topMenu.actions():
+        for topMenu in menuChildren:
             mainActionDict = {}
-            for mainAction in topAction.menu().actions():
+            for mainAction in topMenu.actions():
                 mainActionDict[mainAction.text()] = mainAction
-            topActionDict[topAction.text()] = mainActionDict
+            topActionDict[topMenu.title()] = mainActionDict
 
         openModuleKeys = set(mainWindow.moduleArea.modules.keys())
         for key, topActionText, mainActionText in (('SEQUENCE', 'Molecules', 'Show Sequence'),
@@ -1162,7 +1161,7 @@ class Framework(NotifierBase):
                         ("Restore last", self.restoreLastSavedLayout, [('enabled', True)]),
                         ("Restore from file...", self.restoreLayoutFromFile, [('enabled', True)]),
                         (),
-                        ("Open pre-defined",  ()),
+                        ("Open pre-defined", ()),
 
                         )),
             (),
@@ -1227,7 +1226,7 @@ class Framework(NotifierBase):
             (),
             ("Chemical Shift Mapping", self.showChemicalShiftMapping, [('shortcut', 'cm')]),
             ("Notes Editor", partial(self.showNotesEditor, selectFirstItem=True), [('shortcut', 'no'),
-                                                     ('icon', 'icons/null')]),
+                                                                                   ('icon', 'icons/null')]),
             (),
             # (),
             ###("Sequence Graph", self.showSequenceGraph, [('shortcut', 'sg')]),
@@ -1391,6 +1390,8 @@ class Framework(NotifierBase):
                 return None
 
         dataType, subType, usePath = ioFormats.analyseUrl(path)
+        project = None
+
         if dataType == 'Project' and subType in (ioFormats.CCPN,
                                                  ioFormats.NEF,
                                                  # ioFormats.NMRSTAR,
@@ -1423,6 +1424,9 @@ class Framework(NotifierBase):
                 sys.stderr.write('==> Loading %s Sparky project "%s"\n' % (subType, path))
                 project = self._loadSparkyProject(path, makeNewProject=True)  # RHF - new by default
                 project._resetUndo(debug=self.level <= Logging.DEBUG2, application=self)
+
+            getLogger().info('>>>VALIDATE DATAPATH HERE - application.loadProject')
+            project._validateDataUrlAndFilePaths()
 
             return project
 
@@ -1484,6 +1488,7 @@ class Framework(NotifierBase):
             if not path:
                 return
         from ccpn.ui.gui.popups.ImportStarPopup import StarImporterPopup
+
         relativePath = os.path.dirname(os.path.realpath(path))
         dataBlock = self.nefReader.getNMRStarData(path)
         self._importedStarDataBlock = dataBlock
@@ -2025,7 +2030,8 @@ class Framework(NotifierBase):
         """
         from ccpn.ui.gui.popups.PreferencesPopup import PreferencesPopup
 
-        PreferencesPopup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow, preferences=self.preferences).exec_()
+        popup = PreferencesPopup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow, preferences=self.preferences)
+        popup.exec_()
 
     def getSavedLayoutPath(self):
         """Opens a saved Layout as dialog box and gets directory specified in the file dialog."""
@@ -2175,8 +2181,12 @@ class Framework(NotifierBase):
             MessageDialog.showWarning('Project contains no spectra.', 'Spectrum groups cannot be displayed')
         else:
             from ccpn.ui.gui.popups.SpectrumGroupEditor import SpectrumGroupEditor
-
-            SpectrumGroupEditor(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow, editMode=True).exec_()
+            if not self.project.spectrumGroups:
+                #GST This seems to have probles MessageDialog wraps it which looks bad...
+                MessageDialog.showWarning('Project has no Spectrum Groups.',
+                                          'Create them using:\nSidebar → SpectrumGroups → <New SpectrumGroup>\n ')
+            else:
+                SpectrumGroupEditor(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow, editMode=True).exec_()
 
     def showProjectionPopup(self):
         if not self.project.spectra:
@@ -2201,7 +2211,7 @@ class Framework(NotifierBase):
             popup = ExperimentTypePopup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow)
             popup.exec_()
 
-    def showValidateSpectraPopup(self, spectra=None, defaultSelected='all'):
+    def showValidateSpectraPopup(self, spectra=None, defaultSelected=None):
         """
         Displays validate spectra popup.
         """

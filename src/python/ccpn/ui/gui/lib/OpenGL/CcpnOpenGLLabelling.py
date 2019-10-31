@@ -44,7 +44,6 @@ from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLArrays import GLRENDERMODE_DRAW, GLRENDERM
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLWidgets import GLIntegralRegion
 import ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs as GLDefs
 
-
 try:
     from OpenGL import GL, GLU, GLUT
 except ImportError:
@@ -2585,7 +2584,7 @@ class GLmultipletListMethods():
         """Calculate how many indices to add
         Returns the size of array needed to hold the indices, see insertExtraIndices
         """
-        return 2 * len(multiplet.peaks)
+        return 2 * len(multiplet.peaks) if multiplet.peaks else 0
 
     def extraVerticesCount(self, multiplet):
         """Calculate how many vertices to add
@@ -2731,10 +2730,10 @@ class GLmultipletListMethods():
                 drawList.indices = np.append(drawList.indices, np.array((index, index + 1, index + 2, index + 3,
                                                                          index, index + 2, index + 2, index + 1,
                                                                          index, index + 3, index + 3, index + 1,) + circleVertices,
-                                                                         dtype=np.uint32))
+                                                                        dtype=np.uint32))
             else:
                 drawList.indices = np.append(drawList.indices, np.array((index, index + 1, index + 2, index + 3,) + circleVertices,
-                                                                         dtype=np.uint32))
+                                                                        dtype=np.uint32))
 
         return _selected
 
@@ -3158,13 +3157,18 @@ class GLintegralListMethods():
         """
         return obj.id + '\n' + str(obj.value)
 
-    def extraIndicesCount(self, multiplet):
+    def extraIndicesCount(self, integral):
         """Calculate how many indices to add
         """
         return 0
 
     def appendExtraIndices(self, *args):
         """Add extra indices to the index list
+        """
+        return 0
+
+    def extraVerticesCount(self, integral):
+        """Calculate how many vertices to add
         """
         return 0
 
@@ -3243,18 +3247,8 @@ class GLintegralNdLabelling(GL1dLabelling, GLintegralListMethods, GLLabelling): 
         self._spectrumSettings = spectrumSettings
         self.buildSymbols()
 
-        # # loop through the attached integralListViews to the strip
-        # for spectrumView in self._GLParent._ordering:  #self._ordering:         # strip.spectrumViews:
-        #         if spectrumView.isDeleted:
-        #             continue
-        #     for integralListView in spectrumView.integralListViews:
-        #         if spectrumView.isVisible() and integralListView.isVisible():
-
         for integralListView, specView in self._visibleListViews:
             if not integralListView.isDeleted and integralListView in self._GLSymbols.keys():
-
-                # draw the boxes around the highlighted integral areas
-                self._GLSymbols[integralListView].drawIndexVBO(enableVBO=True)
 
                 # draw the integralAreas if they exist
                 for integralArea in self._GLSymbols[integralListView]._regions:
@@ -3269,6 +3263,20 @@ class GLintegralNdLabelling(GL1dLabelling, GLintegralListMethods, GLLabelling): 
 
                         # draw the actual integral areas
                         integralArea._integralArea.drawVertexColorVBO(enableVBO=True)
+
+        self._GLParent.globalGL._shaderProgram1.setGLUniformMatrix4fv('mvMatrix', 1, GL.GL_FALSE, self._GLParent._IMatrix)
+
+    def drawSymbolRegions(self, spectrumSettings):
+        if self.strip.isDeleted:
+            return
+
+        self._spectrumSettings = spectrumSettings
+        self.buildSymbols()
+
+        for integralListView, specView in self._visibleListViews:
+            if not integralListView.isDeleted and integralListView in self._GLSymbols.keys():
+                # draw the boxes around the highlighted integral areas - multisampling not required here
+                self._GLSymbols[integralListView].drawIndexVBO(enableVBO=True)
 
         self._GLParent.globalGL._shaderProgram1.setGLUniformMatrix4fv('mvMatrix', 1, GL.GL_FALSE, self._GLParent._IMatrix)
 
@@ -3399,6 +3407,8 @@ class GLintegralNdLabelling(GL1dLabelling, GLintegralListMethods, GLLabelling): 
 
         # get the correct coordinates based on the axisCodes
         p0 = [0.0] * 2  # len(self.axisOrder)
+        lims = obj.limits[0] if obj.limits else (0.0, 0.0)
+
         for ps, psCode in enumerate(self._GLParent.axisOrder[0:2]):
             for pp, ppCode in enumerate(obj.axisCodes):
 
@@ -3408,18 +3418,18 @@ class GLintegralNdLabelling(GL1dLabelling, GLintegralListMethods, GLLabelling): 
                         # need to put the position in here
 
                         if self._GLParent.INVERTXAXIS:
-                            p0[ps] = pos = max(obj.limits[0])  # obj.position[pp]
+                            p0[ps] = pos = max(lims)  # obj.position[pp]
                         else:
-                            p0[ps] = pos = min(obj.limits[0])  # obj.position[pp]
+                            p0[ps] = pos = min(lims)  # obj.position[pp]
                     else:
                         p0[ps] = 0.0  #obj.height
 
                 elif self._GLParent._preferences.matchAxisCode == 1:  # match full code
                     if ppCode == psCode:
                         if self._GLParent.INVERTXAXIS:
-                            p0[ps] = pos = max(obj.limits[0])  # obj.position[pp]
+                            p0[ps] = pos = max(lims)  # obj.position[pp]
                         else:
-                            p0[ps] = pos = min(obj.limits[0])  # obj.position[pp]
+                            p0[ps] = pos = min(lims)  # obj.position[pp]
                     else:
                         p0[ps] = 0.0  #obj.height
 

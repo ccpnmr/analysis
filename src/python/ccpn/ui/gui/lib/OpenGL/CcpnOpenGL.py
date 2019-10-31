@@ -80,6 +80,7 @@ from contextlib import contextmanager
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtCore import QPoint, QSize, Qt, pyqtSlot
 from PyQt5.QtWidgets import QApplication, QOpenGLWidget
+from PyQt5.QtGui import QSurfaceFormat
 from ccpn.util.Logging import getLogger
 from pyqtgraph import functions as fn
 from ccpn.core.PeakList import PeakList
@@ -185,10 +186,23 @@ class CcpnGLWidget(QOpenGLWidget):
     XAXES = GLDefs.XAXISUNITS
     YAXES = GLDefs.YAXISUNITS
 
-    def __init__(self, strip=None, mainWindow=None, stripIDLabel=None):
+    def __init__(self, strip=None, mainWindow=None, stripIDLabel=None, antiAlias=4):
         # TODO:ED add documentation
 
         super().__init__(strip)
+
+        # GST add antiAliasing, no perceptable speed impact on my mac (intel iris graphics!)
+        # samples = 4 is good enough but 8 also works well in terms of speed...
+        try:
+            fmt = QSurfaceFormat()
+            fmt.setSamples(antiAlias)
+            self.setFormat(fmt)
+
+            samples = self.format().samples() # GST a use for the walrus
+            if samples != antiAlias:
+                getLogger().warning('hardware changed antialias level, expected %i got %i...' % (samples,antiAlias))
+        except Exception as es:
+            getLogger().warning('error during anti aliasing setup %s, anti aliasing disabled...' % str(es))
 
         # flag to display paintGL but keep an empty screen
         self._blankDisplay = False
@@ -2146,6 +2160,10 @@ class CcpnGLWidget(QOpenGLWidget):
     def mousePressInIntegralLists(self):
         """Check whether the mouse has been pressed in an integral
         """
+
+        # check moved to 1D class
+        # if not self._stackingMode and not(self.is1D and self.strip._isPhasingOn):
+
         # for reg in self._GLIntegralLists.values():
         for reg in self._GLIntegrals._GLSymbols.values():
             if not reg.integralListView.isVisible() or \
@@ -2790,6 +2808,26 @@ class CcpnGLWidget(QOpenGLWidget):
 
         # print('>>>>>> _paintGL', self.strip, time.time()-tt)
 
+    @contextmanager
+    def _disableGLAliasing(self):
+        """Disable aliasing for the contained routines
+        """
+        try:
+            GL.glDisable(GL.GL_MULTISAMPLE)
+            yield
+        finally:
+            GL.glEnable(GL.GL_MULTISAMPLE)
+
+    @contextmanager
+    def _enableGLAliasing(self):
+        """Enable aliasing for the contained routines
+        """
+        try:
+            GL.glEnable(GL.GL_MULTISAMPLE)
+            yield
+        finally:
+            GL.glDisable(GL.GL_MULTISAMPLE)
+
     def _paintGL(self):
         w = self.w
         h = self.h
@@ -2801,14 +2839,17 @@ class CcpnGLWidget(QOpenGLWidget):
             self.setBackgroundColour(self.background, silent=True)
 
         GL.glClear(GL.GL_COLOR_BUFFER_BIT)
+        GL.glEnable(GL.GL_MULTISAMPLE)
+
         currentShader = self.globalGL._shaderProgram1.makeCurrent()
 
         # start with the grid mapped to (0..1, 0..1) to remove zoom errors here
         currentShader.setProjectionAxes(self._uPMatrix, 0.0, 1.0, 0.0, 1.0, -1.0, 1.0)
         currentShader.setGLUniformMatrix4fv('pMatrix', 1, GL.GL_FALSE, self._uPMatrix)
 
-        # draw the grid components
-        self.drawGrid()
+        with self._disableGLAliasing():
+            # draw the grid components
+            self.drawGrid()
 
         # set the scale to the axis limits, needs addressing correctly, possibly same as grid
         currentShader.setProjectionAxes(self._uPMatrix, self.axisL, self.axisR, self.axisB,
@@ -2818,15 +2859,21 @@ class CcpnGLWidget(QOpenGLWidget):
 
         # draw the spectra, need to reset the viewport
         self.viewports.setViewport(self._currentView)
+
         self.drawSpectra()
 
         if not self._stackingMode:
             self._GLPeaks.drawSymbols(self._spectrumSettings)
             self._GLMultiplets.drawSymbols(self._spectrumSettings)
-            self._GLIntegrals.drawSymbols(self._spectrumSettings)
 
-            self.drawMarksRulers()
-            self.drawRegions()
+            if not (self.is1D and self.strip._isPhasingOn):                 # other mouse buttons checeks needed here
+                self._GLIntegrals.drawSymbols(self._spectrumSettings)
+                with self._disableGLAliasing():
+                    self._GLIntegrals.drawSymbolRegions(self._spectrumSettings)
+
+            with self._disableGLAliasing():
+                self.drawMarksRulers()
+                self.drawRegions()
 
         # change to the text shader
         currentShader = self.globalGL._shaderProgramTex.makeCurrent()
@@ -2844,7 +2891,10 @@ class CcpnGLWidget(QOpenGLWidget):
 
             self._GLPeaks.drawLabels(self._spectrumSettings)
             self._GLMultiplets.drawLabels(self._spectrumSettings)
-            self._GLIntegrals.drawLabels(self._spectrumSettings)
+
+            if not (self.is1D and self.strip._isPhasingOn):
+                self._GLIntegrals.drawLabels(self._spectrumSettings)
+
             self.drawMarksAxisCodes()
 
         else:
@@ -2863,18 +2913,19 @@ class CcpnGLWidget(QOpenGLWidget):
         self.drawTraces()
         currentShader.setGLUniformMatrix4fv('mvMatrix', 1, GL.GL_FALSE, self._IMatrix)
 
-        self.drawInfiniteLines()
+        with self._disableGLAliasing():
+            self.drawInfiniteLines()
 
-        currentShader.setProjectionAxes(self._uPMatrix, 0.0, 1.0, 0.0, 1.0, -1.0, 1.0)
-        currentShader.setGLUniformMatrix4fv('pMatrix', 1, GL.GL_FALSE, self._uPMatrix)
+            currentShader.setProjectionAxes(self._uPMatrix, 0.0, 1.0, 0.0, 1.0, -1.0, 1.0)
+            currentShader.setGLUniformMatrix4fv('pMatrix', 1, GL.GL_FALSE, self._uPMatrix)
 
-        self.drawSelectionBox()
-        self.drawMouseMoveLine()
+            self.drawSelectionBox()
+            self.drawMouseMoveLine()
 
-        if self._successiveClicks:
-            self.drawDottedCursor()
+            if self._successiveClicks:
+                self.drawDottedCursor()
 
-        self.drawCursors()
+            self.drawCursors()
 
         currentShader = self.globalGL._shaderProgramTex.makeCurrent()
         self.enableTextClientState()
@@ -2909,19 +2960,20 @@ class CcpnGLWidget(QOpenGLWidget):
         else:
             colour = self.foreground
 
-        GL.glDisable(GL.GL_BLEND)
-        GL.glColor4f(*colour)
-        GL.glBegin(GL.GL_LINES)
+        with self._disableGLAliasing():
+            GL.glDisable(GL.GL_BLEND)
+            GL.glColor4f(*colour)
+            GL.glBegin(GL.GL_LINES)
 
-        if self._drawBottomAxis:
-            GL.glVertex2d(0, 0)
-            GL.glVertex2d(w - self.AXIS_MARGINRIGHT, 0)
+            if self._drawBottomAxis:
+                GL.glVertex2d(0, 0)
+                GL.glVertex2d(w - self.AXIS_MARGINRIGHT, 0)
 
-        if self._drawRightAxis:
-            GL.glVertex2d(w - self.AXIS_MARGINRIGHT, 0)
-            GL.glVertex2d(w - self.AXIS_MARGINRIGHT, h - self.AXIS_MARGINBOTTOM)
+            if self._drawRightAxis:
+                GL.glVertex2d(w - self.AXIS_MARGINRIGHT, 0)
+                GL.glVertex2d(w - self.AXIS_MARGINRIGHT, h - self.AXIS_MARGINBOTTOM)
 
-        GL.glEnd()
+            GL.glEnd()
 
     def enableTexture(self):
         GL.glEnable(GL.GL_BLEND)
@@ -3128,59 +3180,60 @@ class CcpnGLWidget(QOpenGLWidget):
         currentShader.setGLUniformMatrix4fv('mvMatrix', 1, GL.GL_FALSE, self._IMatrix)
 
         # draw the bounding boxes
-        GL.glEnable(GL.GL_BLEND)
-        if self._preferences.showSpectrumBorder:
-            for spectrumView in self._ordering:  #self._ordering:                             # strip.spectrumViews:
+        with self._disableGLAliasing():
+            GL.glEnable(GL.GL_BLEND)
+            if self._preferences.showSpectrumBorder:
+                for spectrumView in self._ordering:  #self._ordering:                             # strip.spectrumViews:
 
-                if spectrumView.isDeleted:
-                    continue
+                    if spectrumView.isDeleted:
+                        continue
 
-                if spectrumView.isVisible() and spectrumView.spectrum.dimensionCount > 1 and spectrumView in self._spectrumSettings.keys():
-                    specSettings = self._spectrumSettings[spectrumView]
+                    if spectrumView.isVisible() and spectrumView.spectrum.dimensionCount > 1 and spectrumView in self._spectrumSettings.keys():
+                        specSettings = self._spectrumSettings[spectrumView]
 
-                    fx0 = specSettings[GLDefs.SPECTRUM_MAXXALIAS]
-                    fx1 = specSettings[GLDefs.SPECTRUM_MINXALIAS]
-                    fy0 = specSettings[GLDefs.SPECTRUM_MAXYALIAS]
-                    fy1 = specSettings[GLDefs.SPECTRUM_MINYALIAS]
+                        fx0 = specSettings[GLDefs.SPECTRUM_MAXXALIAS]
+                        fx1 = specSettings[GLDefs.SPECTRUM_MINXALIAS]
+                        fy0 = specSettings[GLDefs.SPECTRUM_MAXYALIAS]
+                        fy1 = specSettings[GLDefs.SPECTRUM_MINYALIAS]
 
-                    # fx0, fx1 = self._spectrumValues[0].maxAliasedFrequency, self._spectrumValues[0].minAliasedFrequency
-                    #
-                    # self._spectrumValues = spectrumView._getValues()
-                    #
-                    # spectrumReferences = spectrumView.spectrum.spectrumReferences
-                    #
-                    # # get the bounding box of the spectra
-                    # fx0, fx1 = self._spectrumValues[0].maxAliasedFrequency, self._spectrumValues[0].minAliasedFrequency
-                    #
-                    # # totalPointCountX = spectrumView.spectrum.totalPointCounts[0]
-                    # # fx0, fx1 = spectrumReferences[0].pointToValue(1), spectrumReferences[0].pointToValue(totalPointCountX)
-                    # # fx0, fx1 = max(fx0, fx1), min(fx0, fx1)
-                    #
-                    # # if spectrumView.spectrum.dimensionCount > 1:
-                    # fy0, fy1 = self._spectrumValues[1].maxAliasedFrequency, self._spectrumValues[1].minAliasedFrequency
-                    #
-                    # # totalPointCountY = spectrumView.spectrum.totalPointCounts[1]
-                    # # fy0, fy1 = spectrumReferences[1].pointToValue(1), spectrumReferences[1].pointToValue(totalPointCountY)
-                    # # fy0, fy1 = max(fy0, fy1), min(fy0, fy1)
+                        # fx0, fx1 = self._spectrumValues[0].maxAliasedFrequency, self._spectrumValues[0].minAliasedFrequency
+                        #
+                        # self._spectrumValues = spectrumView._getValues()
+                        #
+                        # spectrumReferences = spectrumView.spectrum.spectrumReferences
+                        #
+                        # # get the bounding box of the spectra
+                        # fx0, fx1 = self._spectrumValues[0].maxAliasedFrequency, self._spectrumValues[0].minAliasedFrequency
+                        #
+                        # # totalPointCountX = spectrumView.spectrum.totalPointCounts[0]
+                        # # fx0, fx1 = spectrumReferences[0].pointToValue(1), spectrumReferences[0].pointToValue(totalPointCountX)
+                        # # fx0, fx1 = max(fx0, fx1), min(fx0, fx1)
+                        #
+                        # # if spectrumView.spectrum.dimensionCount > 1:
+                        # fy0, fy1 = self._spectrumValues[1].maxAliasedFrequency, self._spectrumValues[1].minAliasedFrequency
+                        #
+                        # # totalPointCountY = spectrumView.spectrum.totalPointCounts[1]
+                        # # fy0, fy1 = spectrumReferences[1].pointToValue(1), spectrumReferences[1].pointToValue(totalPointCountY)
+                        # # fy0, fy1 = max(fy0, fy1), min(fy0, fy1)
 
-                    GL.glColor4f(*spectrumView.posColour[0:3], 0.5)
+                        GL.glColor4f(*spectrumView.posColour[0:3], 0.5)
 
-                    # else:
-                    #     fy0, fy1 = np.max(spectrumView.spectrum.intensities), np.min(spectrumView.spectrum.intensities)
-                    #
-                    #     colour = spectrumView.sliceColour
-                    #     colR = int(colour.strip('# ')[0:2], 16) / 255.0
-                    #     colG = int(colour.strip('# ')[2:4], 16) / 255.0
-                    #     colB = int(colour.strip('# ')[4:6], 16) / 255.0
-                    #
-                    #     GL.glColor4f(colR, colG, colB, 0.5)
+                        # else:
+                        #     fy0, fy1 = np.max(spectrumView.spectrum.intensities), np.min(spectrumView.spectrum.intensities)
+                        #
+                        #     colour = spectrumView.sliceColour
+                        #     colR = int(colour.strip('# ')[0:2], 16) / 255.0
+                        #     colG = int(colour.strip('# ')[2:4], 16) / 255.0
+                        #     colB = int(colour.strip('# ')[4:6], 16) / 255.0
+                        #
+                        #     GL.glColor4f(colR, colG, colB, 0.5)
 
-                    GL.glBegin(GL.GL_LINE_LOOP)
-                    GL.glVertex2d(fx0, fy0)
-                    GL.glVertex2d(fx0, fy1)
-                    GL.glVertex2d(fx1, fy1)
-                    GL.glVertex2d(fx1, fy0)
-                    GL.glEnd()
+                        GL.glBegin(GL.GL_LINE_LOOP)
+                        GL.glVertex2d(fx0, fy0)
+                        GL.glVertex2d(fx0, fy1)
+                        GL.glVertex2d(fx1, fy1)
+                        GL.glVertex2d(fx1, fy0)
+                        GL.glEnd()
 
         # reset lineWidth
         GL.glLineWidth(1.0 * self.viewports._devicePixelRatio)

@@ -62,8 +62,6 @@ class SubmitMacroPopup(CcpnDialog):
         self.setContentsMargins(5, 5, 5, 5)
         self._registrationDict = Register.loadDict()
 
-        # frame = Frame(self, setLayout=True)     # ejb
-
         row = 0
         for key in ('name', 'organisation', 'email'):
             label = Label(self, text='%s: ' % metaUtil.upperFirst(key), grid=(row, 0))

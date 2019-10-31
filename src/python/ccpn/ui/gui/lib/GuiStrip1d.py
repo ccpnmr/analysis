@@ -26,18 +26,17 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 
 from PyQt5 import QtWidgets
-
 from ccpn.core.PeakList import PeakList
 from ccpn.util import Phasing
 from ccpn.ui.gui.lib.GuiStrip import GuiStrip, DefaultMenu, PeakMenu, \
-    IntegralMenu, MultipletMenu, PhasingMenu, AxisMenu, MAXPEAKLABELTYPES
-
-from ccpn.ui.gui.widgets.Icon import Icon
-from ccpn.ui.gui.widgets.Menu import Menu
+    IntegralMenu, MultipletMenu, PhasingMenu, AxisMenu
+from ccpn.ui.gui.widgets.PlaneToolbar import StripHeaderWidget
 import numpy as np
 from ccpn.util.Logging import getLogger
 from ccpn.ui.gui.lib.GuiStripContextMenus import _get1dPhasingMenu, _get1dDefaultMenu, \
     _get1dPeakMenu, _get1dIntegralMenu, _get1dMultipletMenu, _get1dAxisMenu
+from ccpn.ui.gui.widgets.Frame import OpenGLOverlayFrame
+from ccpn.ui.gui.widgets.Spacer import Spacer
 
 
 class GuiStrip1d(GuiStrip):
@@ -97,6 +96,9 @@ class GuiStrip1d(GuiStrip):
                           :return <Tuple>:(<Peak>, ...)
     """
 
+    MAXPEAKLABELTYPES = 1
+    MAXPEAKSYMBOLTYPES = 1
+
     def __init__(self, spectrumDisplay):
         """
         Initialise Nd spectra object
@@ -140,6 +142,27 @@ class GuiStrip1d(GuiStrip):
         self.offsetValue = (0.0, 0.0)
 
         self.widgetIndex = 3  #start adding widgets from row 3
+
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        # TEST: ED new plane widgets
+
+        self.planeToolbar = None
+
+        # a large(ish) unbound widget to contain the text - may need more rows
+        self._frameGuide = OpenGLOverlayFrame(self, setLayout=True)
+        self._frameGuide.setFixedSize(400, 400)
+
+        # add spacer to the top left corner
+        self._frameGuide.addSpacer(10, 30, grid=(1, 0))
+        row = 2
+
+        self.header = StripHeaderWidget(qtParent=self._frameGuide, mainWindow=self.mainWindow, strip=self, grid=(row, 1), gridSpan=(1, 1))
+        row += 1
+
+        Spacer(self._frameGuide, 1, 1, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding, grid=(row, 2))
+
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
         self.spectrumDisplay.phasingFrame.applyCallback = self._applyPhasing
         self.spectrumDisplay.phasingFrame.applyButton.setEnabled(True)
 

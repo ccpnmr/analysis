@@ -516,7 +516,7 @@ class GuiSpectrumDisplay(CcpnModule):
     def _toolbarAddSpectrum(self, data):
         """Respond to a new spectrum being added to the spectrumDisplay; add new toolbar Icon
         """
-        print('>>>_toolbarAddSpectrum')
+        # print('>>>_toolbarAddSpectrum')
 
         trigger = data[Notifier.TRIGGER]
         spectrum = data[Notifier.OBJECT]

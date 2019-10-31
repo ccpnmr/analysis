@@ -213,18 +213,18 @@ class DataSet(AbstractWrapperObject):
         """get wrappedData for all NmrConstraintStores linked to NmrProject"""
         return parent._wrappedData.sortedNmrConstraintStores()
 
+    @renameObject()
     @logCommand(get='self')
     def rename(self, value: str):
         """Rename DataSet, changing its name and Pid.
-        NB, the serial remains immutable."""
+        NB, the serial remains immutable.
+        """
         self._validateName(value=value, allowWhitespace=False)
 
-        with renameObject(self) as addUndoItem:
-            oldName = self.name
-            self._wrappedData.name = value
-
-            addUndoItem(undo=partial(self.rename, oldName),
-                        redo=partial(self.rename, value))
+        # rename functions from here
+        oldName = self.name
+        self._wrappedData.name = value
+        return (oldName,)
 
     #=========================================================================================
     # CCPN functions

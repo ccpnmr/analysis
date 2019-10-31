@@ -34,6 +34,7 @@ class IntegralListPropertiesPopup(PMIListPropertiesPopupABC):
     """
     Popup to handle changing parameters in multipletLists
     """
+
     # class of lists handled by popup
     _baseClass = IntegralList
     _symbolColourOption = True
@@ -45,6 +46,8 @@ class IntegralListPropertiesPopup(PMIListPropertiesPopupABC):
     def __init__(self, parent=None, mainWindow=None, integralList=None, title=None, **kwds):
         super().__init__(parent=parent, mainWindow=mainWindow, ccpnList=integralList,
                          title='%s Properties' % self._baseClass.className, **kwds)
+
+        self.__postInit__()
 
     def _refreshGLItems(self):
         # emit a signal to rebuild all peaks and multiplets

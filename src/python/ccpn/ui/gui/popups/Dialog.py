@@ -25,15 +25,15 @@ __date__ = "$Date: 2017-07-04 15:21:16 +0000 (Tue, July 04, 2017) $"
 # Start of code
 #=========================================================================================
 
-from PyQt5 import QtWidgets
+from PyQt5 import QtWidgets, QtCore
+from contextlib import contextmanager
+from functools import partial
 from ccpn.ui.gui.widgets.Base import Base
 from ccpn.util.Logging import getLogger
-from contextlib import contextmanager
-
-
-CANCELBUTTONTEXT = 'Cancel'
-APPLYBUTTONTEXT = 'Apply'
-OKBUTTONTEXT = 'OK'
+from ccpn.ui.gui.widgets.Frame import Frame
+from ccpn.ui.gui.widgets.ScrollArea import ScrollArea
+from ccpn.ui.gui.widgets.DialogButtonBox import DialogButtonBox
+from ccpn.core.lib.ContextManagers import undoStackBlocking
 
 
 def _updateGl(self, spectrumList):
@@ -48,7 +48,330 @@ def _updateGl(self, spectrumList):
     GLSignals.emitPaintEvent()
 
 
+HORIZONTAL = 'horizontal'
+VERTICAL = 'vertical'
+ORIENTATIONLIST = (HORIZONTAL, VERTICAL)
+DEFAULTSPACING = 3
+DEFAULTMARGINS = (10, 10, 10, 10)
+
+
+class CcpnDialogMainWidget(QtWidgets.QDialog, Base):
+    """
+    Class to handle popup dialogs
+    """
+    RESETBUTTON = QtWidgets.QDialogButtonBox.Reset
+    CLOSEBUTTON = QtWidgets.QDialogButtonBox.Close
+    CANCELBUTTON = QtWidgets.QDialogButtonBox.Cancel
+    APPLYBUTTON = QtWidgets.QDialogButtonBox.Apply
+    OKBUTTON = QtWidgets.QDialogButtonBox.Ok
+    HELPBUTTON = QtWidgets.QDialogButtonBox.Help
+    DEFAULTBUTTON = CLOSEBUTTON
+
+    USESCROLLWIDGET = False
+    FIXEDWIDTH = True
+    FIXEDHEIGHT = True
+
+    def __init__(self, parent=None, windowTitle='', setLayout=False,
+                 orientation=HORIZONTAL, size=None, **kwds):
+
+        super().__init__(parent)
+        Base._init(self, setLayout=setLayout, **kwds)
+
+        if orientation not in ORIENTATIONLIST:
+            raise TypeError('Error: orientation not in %s', ORIENTATIONLIST)
+
+        self.setWindowTitle(windowTitle)
+        self.setContentsMargins(*DEFAULTMARGINS)
+        self.getLayout().setSpacing(0)
+
+        self._orientation = orientation
+        self._size = size
+
+        # set up the mainWidget area
+        self.mainWidget = Frame(self, setLayout=True, showBorder=False, grid=(0, 0))
+        self.mainWidget.setAutoFillBackground(False)
+
+        if self.USESCROLLWIDGET:
+            # not resizing correctly on first show
+
+            # self.mainWidget.setSizePolicy(QtWidgets.QSizePolicy.Ignored, QtWidgets.QSizePolicy.Ignored)
+            # self.mainWidget.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
+
+            # set up a scroll area
+            self._scrollArea = ScrollArea(self, setLayout=True, grid=(0, 0))
+            self._scrollArea.setWidgetResizable(True)
+            self._scrollArea.setWidget(self.mainWidget)
+            self._scrollArea.setStyleSheet("""ScrollArea { border: 0px; }""")
+
+        # self.mainWidget.setSizePolicy(QtWidgets.QSizePolicy.Ignored, QtWidgets.QSizePolicy.Ignored)
+        self.mainWidget.setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.MinimumExpanding)
+        # self._scrollArea.setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.MinimumExpanding)
+        # self._scrollArea.setSizePolicy(QtWidgets.QSizePolicy.Ignored, QtWidgets.QSizePolicy.Ignored)
+
+        self.mainWidget.setContentsMargins(0, 0, 0, 0)
+        self.mainWidget.getLayout().setSpacing(DEFAULTSPACING)
+
+        self._buttonOptions = {}
+        self.dialogButtons = None
+
+        # keep a record of how many times the apply button has been pressed
+        self._currentNumApplies = 0
+
+        # clear the changes list
+        self._changes = {}
+
+        self.setDefaultButton()
+
+    def __postInit__(self):
+        """post initialise functions
+        """
+        self._setButtons()
+        self._setDialogSize()
+
+        if self.getButton(self.APPLYBUTTON):
+            self.getButton(self.APPLYBUTTON).setEnabled(False)
+        if self.getButton(self.RESETBUTTON):
+            self.getButton(self.RESETBUTTON).setEnabled(False)
+
+    def _setDialogSize(self):
+        """Set the fixed/free dialog size from size or sizeHint
+        """
+        size = None
+        if self._size is not None:
+            if not isinstance(self._size, (tuple, list, QtCore.QSize)):
+                raise TypeError('size is not defined correctly: %s' % str(self._size))
+            if isinstance(self._size, (tuple, list)) and len(self._size) != 2:
+                raise TypeError('size is not the correct length: %s' % str(self._size))
+
+            size = self._size if isinstance(self._size, QtCore.QSize) else QtCore.QSize(*self._size)
+
+        if self.FIXEDWIDTH:
+            self.setFixedWidth(size.width() if size else self.sizeHint().width())
+        if self.FIXEDHEIGHT:
+            self.setFixedHeight(size.height() if size else self.sizeHint().height())
+
+    def setOkButton(self, callback=None, text=None,
+                    tipText='Apply changes and close',
+                    icon='icons/dialog-apply.png',
+                    enabled=True, visible=True):
+        """Add an Ok button to the dialog box
+        """
+        return self._addButton(buttons=self.OKBUTTON, callbacks=callback,
+                               texts=text, tipTexts=tipText, icons=icon,
+                               enabledStates=enabled, visibleStates=visible)
+
+    def setCloseButton(self, callback=None, text=None,
+                       tipText='Keep all applied changes and close',
+                       icon='icons/window-close',
+                       enabled=True, visible=True):
+        """Add a Close button to the dialog box
+        """
+        return self._addButton(buttons=self.CLOSEBUTTON, callbacks=callback,
+                               texts=text, tipTexts=tipText, icons=icon,
+                               enabledStates=enabled, visibleStates=visible)
+
+    def setCancelButton(self, callback=None, text=None,
+                        tipText='Roll-back all applied changes and close',
+                        icon='icons/window-close',
+                        enabled=True, visible=True):
+        """Add a Cancel button to the dialog box
+        """
+        return self._addButton(buttons=self.CANCELBUTTON, callbacks=callback,
+                               texts=text, tipTexts=tipText, icons=icon,
+                               enabledStates=enabled, visibleStates=visible)
+
+    def setRevertButton(self, callback=None, text='Revert',
+                        tipText='Roll-back all applied changes',
+                        icon='icons/undo',
+                        enabled=True, visible=True):
+        """Add a Revert button to the dialog box
+        """
+        return self._addButton(buttons=self.RESETBUTTON, callbacks=callback,
+                               texts=text, tipTexts=tipText, icons=icon,
+                               enabledStates=enabled, visibleStates=visible)
+
+    def setHelpButton(self, callback=None, text='',
+                      tipText='Help',
+                      icon='icons/system-help',
+                      enabled=True, visible=True):
+        """Add a Help button to the dialog box
+        """
+        return self._addButton(buttons=self.HELPBUTTON, callbacks=callback,
+                               texts=text, tipTexts=tipText, icons=icon,
+                               enabledStates=enabled, visibleStates=visible)
+
+    def setApplyButton(self, callback=None, text=None,
+                       tipText='Apply changes',
+                       icon='icons/orange-apply',
+                       enabled=True, visible=True):
+        """Add an Apply button to the dialog box
+        """
+        return self._addButton(buttons=self.APPLYBUTTON, callbacks=callback,
+                               texts=text, tipTexts=tipText, icons=icon,
+                               enabledStates=enabled, visibleStates=visible)
+
+    def _addButton(self, **kwds):
+        """Add button settings to the buttonList
+        """
+        if self.dialogButtons:
+            raise RuntimeError("Error: cannot add buttons after __init__")
+
+        for k, v in kwds.items():
+            if k not in self._buttonOptions:
+                self._buttonOptions[k] = (v,)
+            else:
+                self._buttonOptions[k] += (v,)
+
+    def _setButtons(self):
+        """Set the buttons for the dialog
+        """
+        grid = (1, 0) if self._orientation.startswith('h') else (0, 1)
+
+        self.dialogButtons = DialogButtonBox(self, grid=grid,
+                                             orientation=self._orientation,
+                                             defaultButton=self._defaultButton,
+                                             **self._buttonOptions)
+        self.dialogButtons.setContentsMargins(0, 10, 0, 0)
+
+    def setDefaultButton(self, button=CLOSEBUTTON):
+        """Set the default dialog button
+        """
+        self._defaultButton = button
+
+    def getButton(self, buttonName):
+        """Get the button from the buttonNames defined in the class
+        """
+        return self.dialogButtons.button(buttonName)
+
+    def fixedSize(self):
+        self.sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
+        self.sizePolicy.setHorizontalStretch(0)
+        self.sizePolicy.setVerticalStretch(0)
+        self.setSizePolicy(self.sizePolicy)
+        self.setFixedSize(self.maximumWidth(), self.maximumHeight())
+        self.setSizeGripEnabled(False)
+
+    def _revertClicked(self):
+        """Revert button signal comes here
+        Revert (roll-back) the state of the project to before the popup was opened
+        """
+        if self.project and self.project._undo:
+            for undos in range(self._currentNumApplies):
+                self.project._undo.undo()
+
+        self._populate()
+        if self.dialogButtons.button(self.APPLYBUTTON):
+            self.dialogButtons.button(self.APPLYBUTTON).setEnabled(False)
+        if self.dialogButtons.button(self.RESETBUTTON):
+            self.dialogButtons.button(self.RESETBUTTON).setEnabled(False)
+
+    def _cancelClicked(self):
+        """Cancel button signal comes here
+        """
+        self._revertClicked()
+        self.reject()
+
+    def _closeClicked(self):
+        """Close button signal comes here
+        """
+        self.reject()
+
+    def _applyClicked(self):
+        """Apply button signal comes here
+        """
+        self._applyChanges()
+
+    def _okClicked(self):
+        """OK button signal comes here
+        """
+        if self._applyChanges() is True:
+            self.accept()
+
+    def _helpClicked(self):
+        """Help button signal comes here
+        """
+        pass
+
+    def _applyAllChanges(self, changes):
+        """Execute the Apply/OK functions
+        """
+        for v in changes.values():
+            v()
+
+    def _applyChanges(self):
+        """
+        The apply button has been clicked
+        Define an undo block for setting the properties of the object
+        If there is an error setting any values then generate an error message
+          If anything has been added to the undo queue then remove it with application.undo()
+          repopulate the popup widgets
+
+        This is controlled by a series of dicts that contain change functions - operations that are scheduled
+        by changing items in the popup. These functions are executed when the Apply or OK buttons are clicked
+
+        Return True unless any errors occurred
+        """
+
+        # get the list of widgets that have been changed - exit if all empty
+        allChanges = True if self._changes else False
+        if not allChanges:
+            return True
+
+        # handle clicking of the Apply/OK button
+        with handleDialogApply(self) as error:
+
+            # add item here to redraw items
+            with undoStackBlocking() as addUndoItem:
+                addUndoItem(undo=self._refreshGLItems)
+
+            # apply all functions to the object
+            changes = self._changes
+            if changes:
+                self._applyAllChanges(changes)
+
+            # add item here to redraw items
+            with undoStackBlocking() as addUndoItem:
+                addUndoItem(redo=self._refreshGLItems)
+
+            # redraw the items
+            self._refreshGLItems()
+
+        # everything has happened - disable the apply button
+        if self.dialogButtons.button(self.APPLYBUTTON):
+            self.dialogButtons.button(self.APPLYBUTTON).setEnabled(False)
+
+        # check for any errors
+        if error.errorValue:
+            # repopulate popup on an error
+            self._populate()
+            return False
+
+        # remove all changes
+        self._changes = {}
+
+        self._currentNumApplies += 1
+        if self.dialogButtons.button(self.RESETBUTTON):
+            self.dialogButtons.button(self.RESETBUTTON).setEnabled(True)
+        return True
+
+    def _refreshGLItems(self):
+        """emit a signal to rebuild any required GL items
+        """
+        # MUST BE SUBCLASSED
+        raise NotImplementedError("Code error: function not implemented")
+
+
 class CcpnDialog(QtWidgets.QDialog, Base):
+    """
+    Class to handle popup dialogs
+    """
+
+    REVERTBUTTONTEXT = 'Revert'
+    CANCELBUTTONTEXT = 'Cancel'
+    CLOSEBUTTONTEXT = 'Close'
+    APPLYBUTTONTEXT = 'Apply'
+    OKBUTTONTEXT = 'OK'
+
     def __init__(self, parent=None, windowTitle='', setLayout=False, size=(300, 100), **kwds):
 
         super().__init__(parent)
@@ -114,12 +437,15 @@ def handleDialogApply(self):
     """
 
     from ccpn.core.lib.ContextManagers import undoBlock
+
     undo = self.project._undo
+
 
     # object to hold the error value
     class errorContent():
         def __init__(self):
             self.errorValue = None
+
 
     try:
         # add an undoBlock
@@ -139,3 +465,80 @@ def handleDialogApply(self):
         if self.application._isInDebugMode:
             raise es
 
+
+def _verifyPopupApply(self, attributeName, value, *postArgs, **postKwds):
+    """Change the state of the apply button based on the changes in the tabs
+    """
+
+    # if attributeName is defined use as key to dict to store change functions
+    # append postFixes if need to differentiate partial functions
+    if attributeName:
+
+        for pf in postArgs:
+            if pf is not None:
+                attributeName += str(pf)
+        for k, pf in sorted(postKwds.items()):
+            if pf is not None:
+                attributeName += str(pf)
+        attributeName += str(id(self))
+
+        if value:
+            # store in dict - overwrite as required
+            self._changes[attributeName] = value
+
+        else:
+            if attributeName in self._changes:
+                # delete from dict - empty dict implies no changes
+                del self._changes[attributeName]
+
+        getLogger().debug2('>>>attrib %s %s' % (attributeName, self._changes[attributeName] if attributeName in self._changes else 'None'))
+        if getattr(self, 'LIVEDIALOG', None):
+            self._changeSettings()
+
+    if self:
+        # set button state depending on number of changes
+        allChanges = True if self._changes else False
+        _button = self.dialogButtons.button(QtWidgets.QDialogButtonBox.Apply)
+        if _button:
+            _button.setEnabled(allChanges)
+        _button = self.dialogButtons.button(QtWidgets.QDialogButtonBox.Reset)
+        if _button:
+            _button.setEnabled(allChanges or self._currentNumApplies)
+
+
+def _verifyPopupTabApply(self, attributeName, value, *postArgs, **postKwds):
+    """Change the state of the apply button based on the changes in the tabs
+    """
+    # self must be a tab in a tabWidget
+    popup = self._parent
+
+    # if attributeName is defined use as key to dict to store change functions
+    # append postFixes if need to differentiate partial functions
+    if attributeName:
+
+        for pf in postArgs:
+            if pf is not None:
+                attributeName += str(pf)
+        for k, pf in sorted(postKwds.items()):
+            if pf is not None:
+                attributeName += str(pf)
+        attributeName += str(id(self))
+
+        if value:
+            # store in dict - overwrite as required
+            self._changes[attributeName] = value
+        else:
+            if attributeName in self._changes:
+                # delete from dict - empty dict implies no changes
+                del self._changes[attributeName]
+
+    if popup:
+        # set button state depending on number of changes
+        tabs = tuple(popup.tabWidget.widget(ii) for ii in range(popup.tabWidget.count()))
+        allChanges = any(t._changes for t in tabs if t is not None)
+        _button = popup.dialogButtons.button(QtWidgets.QDialogButtonBox.Apply)
+        if _button:
+            _button.setEnabled(allChanges)
+        _button = popup.dialogButtons.button(QtWidgets.QDialogButtonBox.Reset)
+        if _button:
+            _button.setEnabled(allChanges or popup._currentNumApplies)

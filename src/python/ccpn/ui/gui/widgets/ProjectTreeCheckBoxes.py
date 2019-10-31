@@ -105,7 +105,7 @@ class ProjectTreeCheckBoxes(QtWidgets.QTreeWidget, Base):
         self.headerItem = self.invisibleRootItem()  # QtWidgets.QTreeWidgetItem()
         self.projectItem = None
         self.project = project
-        self.header().hide()
+        # self.header().hide()
         if self.project is not None:
 
             if includeProject:

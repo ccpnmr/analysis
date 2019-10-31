@@ -735,6 +735,11 @@ def addNewColour(newColour):
     spectrumColours[newColour.name()] = 'Colour %s' % newIndex
 
 
+def isSpectrumColour(colourString):
+    """Return true if the colourString is in the list
+    """
+    return colourString in list(spectrumColours.keys())
+
 def addNewColourString(colourString):
     """Add a new Hex colour to the colourlist
     New colour has the name 'Colour <n>' where n is the next free number
@@ -797,7 +802,7 @@ def fillColourPulldown(pulldown, allowAuto=False):
     currText = pulldown.currentText()
     # currIndex = pulldown.currentIndex()
     # print ('>>>', currText, currIndex)
-    with pulldown._blockSignals():
+    with pulldown.blockWidgetSignals():
         pulldown.clear()
         if allowAuto:
             pulldown.addItem(text='<auto>')
@@ -814,6 +819,22 @@ def fillColourPulldown(pulldown, allowAuto=False):
                 pulldown.addItem(text=colName)
 
         pulldown.setCurrentText(currText)
+
+
+def _setColourPulldown(pulldown, attrib):
+    """Populate colour pulldown and set to the current colour
+    """
+    spectrumColourKeys = list(spectrumColours.keys())
+    fillColourPulldown(pulldown, allowAuto=False)
+    c = attrib
+    if c in spectrumColourKeys:
+        col = spectrumColours[c]
+        pulldown.setCurrentText(col)
+    else:
+        addNewColourString(c)
+        fillColourPulldown(pulldown, allowAuto=False)
+        col = spectrumColours[c]
+        pulldown.setCurrentText(col)
 
 
 def getSpectrumColour(colourName, defaultReturn=None):

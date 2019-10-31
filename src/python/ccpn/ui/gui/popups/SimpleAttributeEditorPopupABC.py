@@ -25,32 +25,29 @@ __date__ = "$Date: 2017-03-30 11:28:58 +0100 (Thu, March 30, 2017) $"
 # Start of code
 #=========================================================================================
 
-from PyQt5 import QtWidgets
-
-from ccpn.ui.gui.widgets.ButtonList import ButtonList
+from functools import partial
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.LineEdit import LineEdit
-from ccpn.ui.gui.popups.Dialog import CcpnDialog
-from ccpn.ui.gui.widgets.MessageDialog import showWarning
-
-from ccpn.util.Logging import getLogger
+from ccpn.ui.gui.popups.Dialog import CcpnDialogMainWidget, _verifyPopupApply
+from ccpn.core.lib.ContextManagers import queueStateChange
 
 
-class SimpleAttributeEditorPopupABC(CcpnDialog):
+class SimpleAttributeEditorPopupABC(CcpnDialogMainWidget):
     """Abstract base class to implement a popup for editing simple properties
     """
     klass = None  # The class whose properties are edited/displayed
     attributes = []  # A list of (attributeName, getFunction, setFunction, kwds) tuples;
-                     # get/set-Function have getattr, setattr profile
-                     # if setFunction is None: display attribute value without option to change value
-                     # kwds: optional kwds passed to LineEdit constructor
+
+    # get/set-Function have getattr, setattr profile
+    # if setFunction is None: display attribute value without option to change value
+    # kwds: optional kwds passed to LineEdit constructor
 
     def __init__(self, parent=None, mainWindow=None, obj=None, **kwds):
         """
         Initialise the widget
         """
-        CcpnDialog.__init__(self, parent, setLayout=True,
-                            windowTitle='Edit ' + self.klass.className, **kwds)
+        super().__init__(parent, setLayout=True,
+                         windowTitle='Edit ' + self.klass.className, **kwds)
 
         self.mainWindow = mainWindow
         self.application = mainWindow.application
@@ -60,49 +57,59 @@ class SimpleAttributeEditorPopupABC(CcpnDialog):
         self.obj = obj
 
         row = 0
-        self.labels = {}  # An (attributeName, Label-widget) dict
-        self.edits = {}  # An (attributeName, LineEdit-widget) dict
+        self.labels = {}    # An (attributeName, Label-widget) dict
+        self.edits = {}     # An (attributeName, LineEdit-widget) dict
 
         for attr, getFunction, setFunction, kwds in self.attributes:
             value = getFunction(self.obj, attr)
             readOnly = setFunction is None
-            self.labels[attr] = Label(self, attr, grid=(row, 0))
-            self.edits[attr] = LineEdit(self, text=str(value), textAlignment='left', readOnly=readOnly,
-                                              vAlign = 't', grid=(row, 1), **kwds)
+            self.labels[attr] = Label(self.mainWidget, attr, grid=(row, 0))
+            self.edits[attr] = LineEdit(self.mainWidget, textAlignment='left', readOnly=readOnly,
+                                        vAlign='t', grid=(row, 1), **kwds)
+
+            self.edits[attr].textChanged.connect(partial(self._queueSetValue, attr, getFunction, setFunction, row))
+
             row += 1
 
-        self.addSpacer(0, 10, grid=(row, 0))
-        row += 1
+        # set up the required buttons for the dialog
+        self.setOkButton(callback=self._okClicked)
+        self.setCancelButton(callback=self._cancelClicked)
+        self.setHelpButton(callback=self._helpClicked, enabled=False)
+        self.setRevertButton(callback=self._revertClicked, enabled=False)
+        self.setDefaultButton(CcpnDialogMainWidget.CANCELBUTTON)
 
-        ButtonList(self, ['Cancel', 'OK'], [self.reject, self._okButton], grid=(row, 0), gridSpan=(1,2))
+        # clear the changes list
+        self._changes = {}
 
-    def _applyChanges(self):
+        # make the buttons appear
+        self._setButtons()
+
+        # populate the widgets
+        self._populate()
+        self.setFixedSize(self._size if self._size else self.sizeHint())
+
+    def _populate(self):
+        for attr, getFunction, _, _ in self.attributes:
+            if attr in self.edits:
+                value = getFunction(self.obj, attr)
+                self.edits[attr].setText(str(value))
+
+    @queueStateChange(_verifyPopupApply)
+    def _queueSetValue(self, attr, getFunction, setFunction, dim):
+        """Queue the function for setting the attribute in the calling object
         """
-        The apply button has been clicked
-        Define an undo block for setting the properties of the object
+        value = self.edits[attr].text()
+        oldValue = str(getFunction(self.obj, attr))
+        if value != oldValue:
+            return partial(self._setValue, attr, setFunction, value)
+
+    def _setValue(self, attr, setFunction, value):
+        """Function for setting the attribute, called by _applyAllChanges
         """
+        setFunction(self.obj, attr, value)
 
-        from ccpn.core.lib.ContextManagers import undoBlock
-
-        with undoBlock():
-            try:
-                for attr, getFunction, setFunction, _tmp in self.attributes:
-                    if setFunction is not None:
-                        # not a readonly attribute
-                        value = str(getFunction(self.obj, attr))
-                        newValue = self.edits[attr].text()
-                        if newValue != value:
-                            setFunction(self.obj, attr, newValue)
-
-            except Exception as es:
-                showWarning(str(self.windowTitle()), str(es))
-                if self.application._isInDebugMode:
-                    raise es
-                return False
-
-            return True
-
-    def _okButton(self):
-        if self._applyChanges() is True:
-            self.accept()
-
+    def _refreshGLItems(self):
+        """emit a signal to rebuild any required GL items
+        Not required here
+        """
+        pass

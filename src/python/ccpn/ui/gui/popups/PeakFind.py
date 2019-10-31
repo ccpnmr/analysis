@@ -58,7 +58,8 @@ class PeakFindPopup(CcpnDialog):
 
         if self.current.strip:
             if not self.current.strip.spectra[-1].peakLists:
-                # ejb - if there is no peaklist then create a new one
+
+                # if there is no peaklist then create a new one
                 self.current.strip.spectra[0].newPeakList()
                 showInfo(str(self.windowTitle()), "Current selected spectrum '%s' has no peakList:"
                                                   "New peakList '%s' inserted"

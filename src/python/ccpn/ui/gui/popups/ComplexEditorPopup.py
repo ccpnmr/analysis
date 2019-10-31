@@ -35,7 +35,7 @@ from ccpn.util.Logging import getLogger
 
 class ComplexEditorPopup(_GroupEditorPopupABC):
     """
-    A popup to create and manage Complex
+    A popup to create and manage Complexes
     """
     KLASS = Complex
     KLASS_ITEM_ATTRIBUTE = 'chains' # Attribute in KLASS containing items
@@ -43,3 +43,10 @@ class ComplexEditorPopup(_GroupEditorPopupABC):
 
     PROJECT_NEW_METHOD = 'newComplex'  # Method of Project to create new KLASS instance
     PROJECT_ITEM_ATTRIBUTE = 'chains'  # Attribute of Project containing items
+
+    PLURAL_GROUPED_NAME = 'Complexes'
+    SINGULAR_GROUP_NAME = 'Complex'
+
+    ITEM_PID_KEY='MC'
+    GROUP_PID_KEY= 'MX'
+

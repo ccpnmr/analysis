@@ -63,9 +63,11 @@ class DeleteItemsPopup(CcpnDialog):
             newCheckBox = CheckBoxCompoundWidget(self,
                                                  grid=(row, 0), vAlign='top', stretch=(0, 0), hAlign='left',
                                                  orientation='right',
-                                                 labelText=itemName,
+                                                 labelText='%i %s' % (len(values), itemName),
                                                  checked=True if itemName in ['peaks', 'Peaks'] else False
                                                  )
+            newCheckBox.setToolTip('\n'.join([str(obj.pid) for obj in values]))
+
             self.deleteList.append((itemName, values, newCheckBox))
 
         row += 1

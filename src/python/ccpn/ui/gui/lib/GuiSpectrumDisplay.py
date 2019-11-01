@@ -270,8 +270,9 @@ class GuiSpectrumDisplay(CcpnModule):
                                 acceptDrops=True)
         # self.stripFrame.layout().setContentsMargins(0, 0, 0, 0)
 
-        self._newAxisRight = Gui1dWidgetAxis(self.qtParent, spectrumDisplay=self, mainWindow=self.mainWindow)
-        self.qtParent.getLayout().addWidget(self._newAxisRight, stripRow, 1, 1, 7)
+        # if self.is1D:
+        #     self._newAxisRight = Gui1dWidgetAxis(self.qtParent, spectrumDisplay=self, mainWindow=self.mainWindow)
+        #     self.qtParent.getLayout().addWidget(self._newAxisRight, stripRow, 1, 1, 7)
 
         if useScrollArea:
             # scroll area for strips

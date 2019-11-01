@@ -4,9 +4,6 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLGlobal import GLGlobalData
-
-
 __copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
@@ -30,13 +27,14 @@ __date__ = "$Date: 2018-12-20 15:44:35 +0000 (Thu, December 20, 2018) $"
 
 import sys
 import time
+import math
 import numpy as np
 from contextlib import contextmanager
 from itertools import zip_longest
 from PyQt5 import QtWidgets, QtGui, QtCore
-from PyQt5.QtCore import pyqtSignal, pyqtSlot
+from PyQt5.QtCore import Qt, pyqtSignal, pyqtSlot
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import CcpnGLWidget, GLVertexArray, GLRENDERMODE_DRAW, \
-    GLRENDERMODE_REBUILD, GLRENDERMODE_RESCALE, ZOOMHISTORYSTORE
+    GLRENDERMODE_REBUILD, GLRENDERMODE_RESCALE, ZOOMHISTORYSTORE, ZOOMTIMERDELAY
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs import YAXISUNITS1D, SPECTRUM_VALUEPERPOINT
 import ccpn.util.Phasing as Phasing
 from ccpn.util.Common import getAxisCodeMatchIndices
@@ -64,6 +62,7 @@ from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLFonts import GLString
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLSimpleLabels import GLSimpleStrings
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLViewports import GLViewports
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLWidgets import GLExternalRegion
+from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLGlobal import GLGlobalData
 
 
 class GuiNdWidget(CcpnGLWidget):
@@ -578,19 +577,21 @@ class Gui1dWidget(CcpnGLWidget):
 
 class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
 
+    is1D = True
     AXIS_MARGINRIGHT = 50
     AXIS_MARGINBOTTOM = 25
     AXIS_LINE = 7
     AXIS_OFFSET = 3
-    YAXISUSEEFORMAT = False
+    YAXISUSEEFORMAT = True
     INVERTXAXIS = True
     INVERTYAXIS = True
-    AXISLOCKEDBUTTON = True
+    AXISLOCKEDBUTTON = False
     SPECTRUMXZOOM = 1.0e1
     SPECTRUMYZOOM = 1.0e1
-    SHOWSPECTRUMONPHASING = True
+    SHOWSPECTRUMONPHASING = False
     XAXES = GLDefs.XAXISUNITS
     YAXES = GLDefs.YAXISUNITS
+    AXISMODE = 1
 
     def __init__(self, parent, spectrumDisplay=None, mainWindow=None, antiAlias=4):
 
@@ -664,6 +665,15 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
         if self.spectrumDisplay.isDeleted:
             return
 
+        # check whether the visible spectra list needs updating
+        if self._visibleSpectrumViewsChange:
+            self._visibleSpectrumViewsChange = False
+            self._updateVisibleSpectrumViews()
+
+        # if there are no spectra then skip the paintGL event
+        if not self._ordering:
+            return
+
         with self.glBlocking():
             self._buildGL()
             self._paintGL()
@@ -682,8 +692,43 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
             self.application._decreaseNotificationBlocking()
             self.project.unblankNotification()
 
+    def _round_sig(self, x, sig=6, small_value=1.0e-9):
+        return 0 if x == 0 else round(x, sig - int(math.floor(math.log10(max(abs(x), abs(small_value))))) - 1)
+
     def between(self, val, l, r):
         return (l - val) * (r - val) <= 0
+
+    def _floatFormat(self, f=0.0, prec=3):
+        """return a float string, remove trailing zeros after decimal
+        """
+        return (('%.' + str(prec) + 'f') % f).rstrip('0').rstrip('.')
+
+    def _intFormat(self, ii=0, prec=0):
+        """return an integer string
+        """
+        return self._floatFormat(ii, 1)
+        # return '%i' % ii
+
+    def _eFormat(self, f=0.0, prec=4):
+        """return an exponential with trailing zeroes removed
+        """
+        s = '%.*e' % (prec, f)
+        if 'e' in s:
+            mantissa, exp = s.split('e')
+            mantissa = mantissa.rstrip('0')
+            if mantissa.endswith('.'):
+                mantissa += '0'
+            exp = exp.lstrip('0+')
+            if exp:
+                if exp.startswith('-'):
+                    return '%se%d' % (mantissa, int(exp))
+                else:
+                    return '%se+%d' % (mantissa, int(exp))
+            else:
+                return '%s' % mantissa
+
+        else:
+            return ''
 
     def _buildAxes(self, gridGLList, axisList=None, scaleGrid=None, r=0.0, g=0.0, b=0.0, transparency=256.0,
                    _includeDiagonal=False, _diagonalList=None):
@@ -1040,9 +1085,6 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
             for gr in self.gridList:
                 gr.defineIndexVBO(enableVBO=True)
 
-            # buffer the diagonal GL line
-            self.diagonalGLList.defineIndexVBO(enableVBO=True)
-
     def drawGrid(self):
         # set to the mainView and draw the grid
         # self.buildGrid()
@@ -1054,13 +1096,6 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
         if self._gridVisible:
             self.viewports.setViewport(self._currentView)
             self.gridList[0].drawIndexVBO(enableVBO=True)
-
-        # draw the diagonal line - independent of viewing the grid
-        if self._matchingIsotopeCodes and self.diagonalGLList:
-            # viewport above may not be set
-            if not self._gridVisible:
-                self.viewports.setViewport(self._currentView)
-            self.diagonalGLList.drawIndexVBO(enableVBO=True)
 
         # draw the axes tick marks (effectively the same grid in smaller viewport)
         if self._axesVisible:
@@ -1092,6 +1127,12 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
         GL.glEnable(GL.GL_MULTISAMPLE)
 
         currentShader = self.globalGL._shaderProgramTex.makeCurrent()
+
+        self._axisScale[0:4] = [self.pixelX, self.pixelY, 1.0, 1.0]
+        currentShader.setGLUniform4fv('axisScale', 1, self._axisScale)
+
+        # draw the text to the screen
+        self.enableTexture()
         self.enableTextClientState()
         self._setViewPortFontScale()
 
@@ -1453,6 +1494,9 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
         if self.spectrumDisplay.isDeleted:
             return
 
+        # update the list of visible spectra
+        self._updateVisibleSpectrumViews()
+
         if aDict[GLNotifier.GLSOURCE] != self and aDict[GLNotifier.GLSPECTRUMDISPLAY] == self.spectrumDisplay:
 
             # read values from dataDict and set units
@@ -1482,6 +1526,14 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
                 for gr in self.gridList:
                     gr.renderMode = GLRENDERMODE_REBUILD
             self.update()
+
+    def _widthsChangedEnough(self, r1, r2, tol=1e-5):
+        if len(r1) != len(r2):
+            raise ValueError('WidthsChanged must be the same length')
+
+        for ii in zip(r1, r2):
+            if abs(ii[0] - ii[1]) > tol:
+                return True
 
     @pyqtSlot(dict)
     def _glYAxisChanged(self, aDict):
@@ -1559,10 +1611,8 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
 
             if self._crosshairVisible:  # or self._updateVTrace or self._updateHTrace:
 
-                # print('>>>>>>', self.strip, time.time())
-
                 exactMatch = (self._preferences.matchAxisCode == AXIS_FULLATOMNAME)
-                indices = getAxisCodeMatchIndices(self._axisCodes[:2], mouseMovedDict[AXIS_ACTIVEAXES], exactMatch=exactMatch)
+                indices = getAxisCodeMatchIndices(self.spectrumDisplay.axisCodes[:2], mouseMovedDict[AXIS_ACTIVEAXES], exactMatch=exactMatch)
 
                 for n in range(2):
                     if indices[n] is not None:
@@ -1854,6 +1904,440 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
 
                 for lb in self._axisYLabelling:
                     lb.drawTextArrayVBO(enableVBO=True)
+
+    def enableTexture(self):
+        GL.glEnable(GL.GL_BLEND)
+        # GL.glEnable(GL.GL_TEXTURE_2D)
+        # GL.glBindTexture(GL.GL_TEXTURE_2D, self.globalGL.glSmallFont.textureId)
+
+        GL.glActiveTexture(GL.GL_TEXTURE0)
+        GL.glBindTexture(GL.GL_TEXTURE_2D, self.globalGL.glSmallFont.textureId)
+        GL.glActiveTexture(GL.GL_TEXTURE1)
+        GL.glBindTexture(GL.GL_TEXTURE_2D, self.globalGL.glSmallTransparentFont.textureId)
+
+        # # specific blend function for text overlay
+        # GL.glBlendFuncSeparate(GL.GL_SRC_ALPHA, GL.GL_DST_COLOR, GL.GL_ONE, GL.GL_ONE)
+
+    def disableTexture(self):
+        GL.glDisable(GL.GL_BLEND)
+
+        # # reset blend function
+        # GL.glBlendFuncSeparate(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA, GL.GL_ONE, GL.GL_ONE)
+
+    def _testAxisLimits(self, setLimits=False):
+        xRange = abs(self.axisL - self.axisR) / 3.0
+        yRange = abs(self.axisT - self.axisB) / 3.0
+        self._minXReached = False
+        self._minYReached = False
+        self._maxXReached = False
+        self._maxYReached = False
+
+        if xRange < self._minXRange and self._rangeXDefined and self._applyXLimit:
+            if setLimits:
+                xMid = (self.axisR + self.axisL) / 2.0
+                self.axisL = xMid - self._minXRange * np.sign(self.pixelX)
+                self.axisR = xMid + self._minXRange * np.sign(self.pixelX)
+            self._minXReached = True
+
+        if yRange < self._minYRange and self._rangeYDefined and self._applyYLimit:
+            if setLimits:
+                yMid = (self.axisT + self.axisB) / 2.0
+                self.axisT = yMid + self._minYRange * np.sign(self.pixelY)
+                self.axisB = yMid - self._minYRange * np.sign(self.pixelY)
+            self._minYReached = True
+
+        if xRange > self._maxXRange and self._rangeXDefined and self._applyXLimit:
+            if setLimits:
+                xMid = (self.axisR + self.axisL) / 2.0
+                self.axisL = xMid - self._maxXRange * np.sign(self.pixelX)
+                self.axisR = xMid + self._maxXRange * np.sign(self.pixelX)
+            self._maxXReached = True
+
+        if yRange > self._maxYRange and self._rangeYDefined and self._applyYLimit:
+            if setLimits:
+                yMid = (self.axisT + self.axisB) / 2.0
+                self.axisT = yMid + self._maxYRange * np.sign(self.pixelY)
+                self.axisB = yMid - self._maxYRange * np.sign(self.pixelY)
+            self._maxYReached = True
+
+        self._minReached = self._minXReached or self._minYReached
+        self._maxReached = self._maxXReached or self._maxYReached
+
+    def _rescaleAllAxes(self, update=True):
+        self._testAxisLimits()
+
+        # spawn rebuild event for the grid
+        self._updateAxes = True
+        for gr in self.gridList:
+            gr.renderMode = GLRENDERMODE_REBUILD
+        if update:
+            self.update()
+
+    def _rescaleXAxis(self, update=True):
+        self._testAxisLimits()
+        self.rescale(rescaleStaticHTraces=False)
+
+        # spawn rebuild event for the grid
+        self._updateAxes = True
+        if self.gridList:
+            for gr in self.gridList:
+                gr.renderMode = GLRENDERMODE_REBUILD
+
+        if update:
+            self.update()
+
+    def _rescaleYAxis(self, update=True):
+        self._testAxisLimits()
+        self.rescale(rescaleStaticVTraces=False)
+
+        # spawn rebuild event for the grid
+        self._updateAxes = True
+        if self.gridList:
+            for gr in self.gridList:
+                gr.renderMode = GLRENDERMODE_REBUILD
+
+        if update:
+            self.update()
+
+    def _storeZoomHistory(self):
+        """Store the current axis state to the zoom history
+        """
+        currentAxis = (self.axisL, self.axisR, self.axisB, self.axisT)
+
+        # store the current value if current zoom has not been set
+        if self._zoomHistory[self._zoomHistoryHead] is None:
+            self._zoomHistory[self._zoomHistoryHead] = currentAxis
+
+        if self._widthsChangedEnough(currentAxis, self._zoomHistory[self._zoomHistoryHead], tol=1e-8):
+
+            for stored in self.storedZooms:
+                if not self._widthsChangedEnough(currentAxis, self._zoomHistory[self._zoomHistoryHead], tol=1e-8):
+                    break
+            else:
+                currentTime = time.time()
+                if currentTime - self._zoomTimerLast < ZOOMTIMERDELAY:
+
+                    # still on the current zoom item - write new value
+                    self._zoomHistory[self._zoomHistoryHead] = currentAxis
+
+                else:
+
+                    # increment the head of the zoom history
+                    self._zoomHistoryHead = (self._zoomHistoryHead + 1) % len(self._zoomHistory)
+                    self._zoomHistory[self._zoomHistoryHead] = currentAxis
+                    self._zoomHistoryCurrent = self._zoomHistoryHead
+
+                # reset the timer so you have to wait another 5 seconds
+                self._zoomTimerLast = currentTime
+
+    def mouseMoveEvent(self, event):
+        if self.spectrumDisplay.isDeleted:
+            return
+        if self._draggingLabel:
+            return
+
+        if abs(self.axisL - self.axisR) < 1.0e-6 or abs(self.axisT - self.axisB) < 1.0e-6:
+            return
+
+        dx = event.pos().x() - self.lastPos.x()
+        dy = event.pos().y() - self.lastPos.y()
+        self.lastPos = event.pos()
+
+        # calculate mouse coordinate within the mainView
+        self._mouseX = event.pos().x()
+        if self._drawBottomAxis:
+            self._mouseY = self.height() - event.pos().y() - self.AXIS_MARGINBOTTOM
+            self._top = self.height() - self.AXIS_MARGINBOTTOM
+        else:
+            self._mouseY = self.height() - event.pos().y()
+            self._top = self.height()
+
+        # translate from screen (0..w, 0..h) to NDC (-1..1, -1..1) to axes (axisL, axisR, axisT, axisB)
+        self.cursorCoordinate = self.mouseTransform.dot([self._mouseX, self._mouseY, 0.0, 1.0])
+
+        # flip cursor about x=y to get double cursor
+        self.doubleCursorCoordinate[0:4] = [self.cursorCoordinate[1],
+                                            self.cursorCoordinate[0],
+                                            self.cursorCoordinate[2],
+                                            self.cursorCoordinate[3]
+                                            ]
+
+        try:
+            mouseMovedDict = self.current.mouseMovedDict
+        except:
+            # initialise a new mouse moved dict
+            mouseMovedDict = {MOUSEDICTSTRIP          : None,
+                              AXIS_MATCHATOMTYPE      : {},
+                              AXIS_FULLATOMNAME       : {},
+                              AXIS_ACTIVEAXES         : (),
+                              DOUBLEAXIS_MATCHATOMTYPE: {},
+                              DOUBLEAXIS_FULLATOMNAME : {},
+                              DOUBLEAXIS_ACTIVEAXES   : ()
+                              }
+
+        xPos = yPos = 0
+        dxPos = dyPos = dPos = 0
+        activeOther = []
+        for n, axisCode in enumerate(self.spectrumDisplay.axisCodes):
+            if n == 0:
+                xPos = pos = self.cursorCoordinate[0]
+                activeX = axisCode  #[0]
+
+                # double cursor
+                dPos = self.cursorCoordinate[1]
+            elif n == 1:
+                yPos = pos = self.cursorCoordinate[1]
+                activeY = axisCode  #[0]
+
+                # double cursor
+                dPos = self.cursorCoordinate[0]
+
+            else:
+                dPos = pos = self._orderedAxes[n].position  # if n in self._orderedAxes else 0
+                activeOther.append(axisCode)  #[0])
+
+            # populate the mouse moved dict
+            mouseMovedDict[AXIS_MATCHATOMTYPE][axisCode[0]] = pos
+            mouseMovedDict[AXIS_FULLATOMNAME][axisCode] = pos
+            mouseMovedDict[DOUBLEAXIS_MATCHATOMTYPE][axisCode[0]] = dPos
+            mouseMovedDict[DOUBLEAXIS_FULLATOMNAME][axisCode] = dPos
+
+        mouseMovedDict[AXIS_ACTIVEAXES] = (activeX, activeY) + tuple(activeOther)  # changed to full axisCodes
+        mouseMovedDict[DOUBLEAXIS_ACTIVEAXES] = (activeY, activeX) + tuple(activeOther)
+
+        self.current.cursorPosition = (xPos, yPos)
+        self.current.mouseMovedDict = mouseMovedDict
+
+        if event.buttons() & (Qt.LeftButton | Qt.RightButton):
+
+            # Main mouse drag event - handle moving the axes with the mouse
+            self.axisL -= dx * self.pixelX
+            self.axisR -= dx * self.pixelX
+            self.axisT += dy * self.pixelY
+            self.axisB += dy * self.pixelY
+            self.GLSignals._emitAllAxesChanged(source=self, strip=None,
+                                               axisB=self.axisB, axisT=self.axisT,
+                                               axisL=self.axisL, axisR=self.axisR)
+            self._selectionMode = 0
+            self._rescaleAllAxes()
+            self._storeZoomHistory()
+
+        self.GLSignals._emitMouseMoved(source=self, coords=self.cursorCoordinate, mouseMovedDict=mouseMovedDict, mainWindow=self.mainWindow)
+        self.update()
+
+    def _resizeGL(self, w, h):
+        self.w = w
+        self.h = h
+
+        if self._axisLocked:
+
+            # check which is the primary axis and update the opposite axis - similar to wheelEvent
+            if self.spectrumDisplay.stripArrangement == 'Y':
+
+                # strips are arranged in a row
+                self._scaleToYAxis(rescale=False)
+
+            elif self.spectrumDisplay.stripArrangement == 'X':
+
+                # strips are arranged in a column
+                self._scaleToXAxis(rescale=False)
+
+        self.rescale()
+
+        # put stuff in here that will change on a resize
+        self._updateAxes = True
+        for gr in self.gridList:
+            gr.renderMode = GLRENDERMODE_REBUILD
+        self.update()
+
+    def _scaleToXAxis(self, rescale=True):
+        if self._axisLocked:
+            mby = 0.5 * (self.axisT + self.axisB)
+
+            if self._useFixedAspect:
+                ax0 = self._getValidAspectRatio(self._axisCodes[0])
+                ax1 = self._getValidAspectRatio(self._axisCodes[1])
+            else:
+                ax0 = self.pixelX
+                ax1 = self.pixelY
+
+            width = (self.w - self.AXIS_MARGINRIGHT) if self._drawRightAxis else self.w
+            height = (self.h - self.AXIS_MARGINBOTTOM) if self._drawBottomAxis else self.h
+
+            ratio = (height / width) * 0.5 * abs((self.axisL - self.axisR) * ax1 / ax0)
+            self.axisB = mby + ratio * self.sign(self.axisB - mby)
+            self.axisT = mby - ratio * self.sign(mby - self.axisT)
+
+        if rescale:
+            self._rescaleAllAxes()
+
+    def _scaleToYAxis(self, rescale=True):
+        if self._axisLocked:
+            mbx = 0.5 * (self.axisR + self.axisL)
+
+            if self._useFixedAspect:
+                ax0 = self._getValidAspectRatio(self._axisCodes[0])
+                ax1 = self._getValidAspectRatio(self._axisCodes[1])
+            else:
+                ax0 = self.pixelX
+                ax1 = self.pixelY
+
+            width = (self.w - self.AXIS_MARGINRIGHT) if self._drawRightAxis else self.w
+            height = (self.h - self.AXIS_MARGINBOTTOM) if self._drawBottomAxis else self.h
+
+            ratio = (width / height) * 0.5 * abs((self.axisT - self.axisB) * ax0 / ax1)
+            self.axisL = mbx + ratio * self.sign(self.axisL - mbx)
+            self.axisR = mbx - ratio * self.sign(mbx - self.axisR)
+
+        if rescale:
+            self._rescaleAllAxes()
+
+    def _getValidAspectRatio(self, axisCode):
+        va = [ax for ax in self._preferences.aspectRatios.keys() if ax.upper()[0] == axisCode.upper()[0]]
+        return self._preferences.aspectRatios[va[0]]
+
+    def resizeGL(self, w, h):
+        # must be set here to catch the change of screen
+        self.refreshDevicePixelRatio()
+        self._resizeGL(w, h)
+
+    def rescale(self, rescaleOverlayText=True, rescaleMarksRulers=True,
+                rescaleIntegralLists=True, rescaleRegions=True,
+                rescaleSpectra=True, rescaleStaticHTraces=True,
+                rescaleStaticVTraces=True, rescaleSpectrumLabels=True,
+                rescaleLegend=True):
+        """Change to axes of the view, axis visibility, scale and rebuild matrices when necessary
+        to improve display speed
+        """
+        if self.spectrumDisplay.isDeleted or not self.globalGL:
+            return
+
+        # use the updated size
+        w = self.w
+        h = self.h
+
+        currentShader = self.globalGL._shaderProgram1.makeCurrent()
+
+        # set projection to axis coordinates
+        currentShader.setProjectionAxes(self._uPMatrix, self.axisL, self.axisR, self.axisB,
+                                        self.axisT, -1.0, 1.0)
+        currentShader.setGLUniformMatrix4fv('pMatrix', 1, GL.GL_FALSE, self._uPMatrix)
+
+        # needs to be offset from (0,0) for mouse scaling
+        if self._drawRightAxis and self._drawBottomAxis:
+
+            self._currentView = GLDefs.MAINVIEW
+            self._currentRightAxisView = GLDefs.RIGHTAXIS
+            self._currentRightAxisBarView = GLDefs.RIGHTAXISBAR
+            self._currentBottomAxisView = GLDefs.BOTTOMAXIS
+            self._currentBottomAxisBarView = GLDefs.BOTTOMAXISBAR
+
+            currentShader.setViewportMatrix(self._uVMatrix, 0, w - self.AXIS_MARGINRIGHT, 0, h - self.AXIS_MARGINBOTTOM,
+                                            -1.0, 1.0)
+            self.pixelX = (self.axisR - self.axisL) / (w - self.AXIS_MARGINRIGHT)
+            self.pixelY = (self.axisT - self.axisB) / (h - self.AXIS_MARGINBOTTOM)
+            self.deltaX = 1.0 / (w - self.AXIS_MARGINRIGHT)
+            self.deltaY = 1.0 / (h - self.AXIS_MARGINBOTTOM)
+
+        elif self._drawRightAxis and not self._drawBottomAxis:
+
+            self._currentView = GLDefs.MAINVIEWFULLHEIGHT
+            self._currentRightAxisView = GLDefs.FULLRIGHTAXIS
+            self._currentRightAxisBarView = GLDefs.FULLRIGHTAXISBAR
+
+            currentShader.setViewportMatrix(self._uVMatrix, 0, w - self.AXIS_MARGINRIGHT, 0, h, -1.0, 1.0)
+            self.pixelX = (self.axisR - self.axisL) / (w - self.AXIS_MARGINRIGHT)
+            self.pixelY = (self.axisT - self.axisB) / h
+            self.deltaX = 1.0 / (w - self.AXIS_MARGINRIGHT)
+            self.deltaY = 1.0 / h
+
+        elif not self._drawRightAxis and self._drawBottomAxis:
+
+            self._currentView = GLDefs.MAINVIEWFULLWIDTH
+            self._currentBottomAxisView = GLDefs.FULLBOTTOMAXIS
+            self._currentBottomAxisBarView = GLDefs.FULLBOTTOMAXISBAR
+
+            currentShader.setViewportMatrix(self._uVMatrix, 0, w, 0, h - self.AXIS_MARGINBOTTOM, -1.0, 1.0)
+            self.pixelX = (self.axisR - self.axisL) / w
+            self.pixelY = (self.axisT - self.axisB) / (h - self.AXIS_MARGINBOTTOM)
+            self.deltaX = 1.0 / w
+            self.deltaY = 1.0 / (h - self.AXIS_MARGINBOTTOM)
+
+        else:
+
+            self._currentView = GLDefs.FULLVIEW
+
+            currentShader.setViewportMatrix(self._uVMatrix, 0, w, 0, h, -1.0, 1.0)
+            self.pixelX = (self.axisR - self.axisL) / w
+            self.pixelY = (self.axisT - self.axisB) / h
+            self.deltaX = 1.0 / w
+            self.deltaY = 1.0 / h
+
+        self._dataMatrix[0:16] = [self.axisL, self.axisR, self.axisT, self.axisB,
+                                  self.pixelX, self.pixelY, w, h,
+                                  0.2, 1.0, 0.4, 1.0,
+                                  0.3, 0.1, 1.0, 1.0]
+        currentShader.setGLUniformMatrix4fv('dataMatrix', 1, GL.GL_FALSE, self._dataMatrix)
+        currentShader.setGLUniformMatrix4fv('mvMatrix', 1, GL.GL_FALSE, self._IMatrix)
+
+        # map mouse coordinates to world coordinates - only needs to change on resize, move soon
+        currentShader.setViewportMatrix(self._aMatrix, self.axisL, self.axisR, self.axisB,
+                                        self.axisT, -1.0, 1.0)
+
+        # calculate the screen to axes transform
+        self.vInv = np.linalg.inv(self._uVMatrix.reshape((4, 4)))
+        self.mouseTransform = np.matmul(self._aMatrix.reshape((4, 4)), self.vInv)
+
+        self.modelViewMatrix = (GL.GLdouble * 16)()
+        self.projectionMatrix = (GL.GLdouble * 16)()
+        self.viewport = (GL.GLint * 4)()
+
+        # change to the text shader
+        currentShader = self.globalGL._shaderProgramTex.makeCurrent()
+
+        currentShader.setProjectionAxes(self._uPMatrix, self.axisL, self.axisR, self.axisB, self.axisT, -1.0, 1.0)
+        currentShader.setGLUniformMatrix4fv('pTexMatrix', 1, GL.GL_FALSE, self._uPMatrix)
+
+        self._axisScale[0:4] = [self.pixelX, self.pixelY, 1.0, 1.0]
+        self._view[0:4] = [w - self.AXIS_MARGINRIGHT, h - self.AXIS_MARGINBOTTOM, 1.0, 1.0]
+
+        # self._axisScale[0:4] = [1.0/(self.axisR-self.axisL), 1.0/(self.axisT-self.axisB), 1.0, 1.0]
+        currentShader.setGLUniform4fv('axisScale', 1, self._axisScale)
+        currentShader.setGLUniform4fv('viewport', 1, self._view)
+
+    def _updateVisibleSpectrumViews(self):
+        """Update the list of visible spectrumViews when change occurs
+        """
+
+        # make the list of ordered spectrumViews
+        self._ordering = self.spectrumDisplay.orderedSpectrumViews(self.spectrumDisplay.strips[0].spectrumViews)
+
+        self._ordering = [specView for specView in self._ordering]
+
+        for specView in tuple(self._spectrumSettings.keys()):
+            if specView not in self._ordering:
+                # print('>>>_updateVisibleSpectrumViews delete', specView, id(specView))
+                # print('>>>', [id(spec) for spec in self._ordering])
+                del self._spectrumSettings[specView]
+
+                # delete the 1d string relating to the spectrumView
+                self._spectrumLabelling.removeString(specView)
+
+        # make a list of the visible and not-deleted spectrumViews
+        visibleSpectra = [specView.spectrum for specView in self._ordering if not specView.isDeleted and specView.isVisible()]
+        visibleSpectrumViews = [specView for specView in self._ordering if not specView.isDeleted and specView.isVisible()]
+
+        self._visibleOrdering = visibleSpectrumViews
+
+        # set the first visible, or the first in the ordered list
+        self._firstVisible = visibleSpectrumViews[0] if visibleSpectrumViews else self._ordering[0] if self._ordering and not self._ordering[
+            0].isDeleted else None
+
+    def updateVisibleSpectrumViews(self):
+        self._visibleSpectrumViewsChange = True
+        self.update()
+
+
 
 class GuiNdWidgetAxis(Gui1dWidgetAxis):
     """Testing a widget that only contains a right axis

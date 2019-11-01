@@ -212,7 +212,6 @@ class CcpnGLWidget(QOpenGLWidget):
 
         self.strip = strip
         self.spectrumDisplay = strip.spectrumDisplay
-        # self.spectrumDisplay = getattr(strip, 'spectrumDisplay', None)
 
         self.mainWindow = mainWindow
         if mainWindow:
@@ -2766,13 +2765,9 @@ class CcpnGLWidget(QOpenGLWidget):
         if not self._ordering:
             return
 
-        # tt = time.time()
-
         with self.glBlocking():
             self._buildGL()
             self._paintGL()
-
-        # print('>>>>>> _paintGL', self.strip, time.time()-tt)
 
     @contextmanager
     def _disableGLAliasing(self):

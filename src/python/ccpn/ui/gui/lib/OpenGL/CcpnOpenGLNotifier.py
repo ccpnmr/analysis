@@ -133,7 +133,7 @@ class GLNotifier(QtWidgets.QWidget):
                             axisB=None, axisT=None, axisL=None, axisR=None):
         aDict = {GLNotifier.GLSOURCE         : source,
                  GLNotifier.GLSTRIP          : strip,
-                 GLNotifier.GLSPECTRUMDISPLAY: strip.spectrumDisplay,
+                 GLNotifier.GLSPECTRUMDISPLAY: strip.spectrumDisplay if strip else None,
                  GLNotifier.GLAXISVALUES     : {GLNotifier.GLBOTTOMAXISVALUE: axisB,
                                                 GLNotifier.GLTOPAXISVALUE   : axisT,
                                                 GLNotifier.GLLEFTAXISVALUE  : axisL,
@@ -145,7 +145,7 @@ class GLNotifier(QtWidgets.QWidget):
                           axisB=None, axisT=None, axisL=None, axisR=None):
         aDict = {GLNotifier.GLSOURCE         : source,
                  GLNotifier.GLSTRIP          : strip,
-                 GLNotifier.GLSPECTRUMDISPLAY: strip.spectrumDisplay,
+                 GLNotifier.GLSPECTRUMDISPLAY: strip.spectrumDisplay if strip else None,
                  GLNotifier.GLAXISVALUES     : {GLNotifier.GLBOTTOMAXISVALUE: axisB,
                                                 GLNotifier.GLTOPAXISVALUE   : axisT,
                                                 GLNotifier.GLLEFTAXISVALUE  : axisL,
@@ -170,7 +170,7 @@ class GLNotifier(QtWidgets.QWidget):
                           axisB=None, axisT=None, axisL=None, axisR=None):
         aDict = {GLNotifier.GLSOURCE         : source,
                  GLNotifier.GLSTRIP          : strip,
-                 GLNotifier.GLSPECTRUMDISPLAY: strip.spectrumDisplay,
+                 GLNotifier.GLSPECTRUMDISPLAY: strip.spectrumDisplay if strip else None,
                  GLNotifier.GLAXISVALUES     : {GLNotifier.GLBOTTOMAXISVALUE: axisB,
                                                 GLNotifier.GLTOPAXISVALUE   : axisT,
                                                 GLNotifier.GLLEFTAXISVALUE  : axisL,
@@ -181,7 +181,7 @@ class GLNotifier(QtWidgets.QWidget):
     def _emitAxisLockChanged(self, source=None, strip=None, lockValues=None):
         aDict = {GLNotifier.GLSOURCE         : source,
                  GLNotifier.GLSTRIP          : strip,
-                 GLNotifier.GLSPECTRUMDISPLAY: strip.spectrumDisplay,
+                 GLNotifier.GLSPECTRUMDISPLAY: strip.spectrumDisplay if strip else None,
                  GLNotifier.GLVALUES         : lockValues,
                  }
         self.glAxisLockChanged.emit(aDict)
@@ -189,7 +189,7 @@ class GLNotifier(QtWidgets.QWidget):
     def _emitAxisUnitsChanged(self, source=None, strip=None, dataDict={}):
         aDict = {GLNotifier.GLSOURCE         : source,
                  GLNotifier.GLSTRIP          : strip,
-                 GLNotifier.GLSPECTRUMDISPLAY: strip.spectrumDisplay,
+                 GLNotifier.GLSPECTRUMDISPLAY: strip.spectrumDisplay if strip else None,
                  GLNotifier.GLVALUES         : dataDict
                  }
         self.glAxisUnitsChanged.emit(aDict)
@@ -197,7 +197,7 @@ class GLNotifier(QtWidgets.QWidget):
     def _emitSymbolsChanged(self, source=None, strip=None, symbolDict={}):
         aDict = {GLNotifier.GLSOURCE         : source,
                  GLNotifier.GLSTRIP          : strip,
-                 GLNotifier.GLSPECTRUMDISPLAY: strip.spectrumDisplay,
+                 GLNotifier.GLSPECTRUMDISPLAY: strip.spectrumDisplay if strip else None,
                  GLNotifier.GLVALUES         : symbolDict
                  }
         self.glSymbolsChanged.emit(aDict)

@@ -52,10 +52,11 @@ FONTPATH = 'Fonts'
 
 @singleton
 class GLGlobalData(QtWidgets.QWidget):
-    def __init__(self, parent=None, strip=None):
+    def __init__(self, parent=None, strip=None, spectrumDisplay=None):
         super(GLGlobalData, self).__init__()
         self._parent = parent
         self.strip = strip
+        self._spectrumDisplay = spectrumDisplay
 
         self.fonts = {}
         self.loadFonts()

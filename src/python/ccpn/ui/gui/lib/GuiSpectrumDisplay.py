@@ -61,6 +61,7 @@ from ccpn.core.lib.AssignmentLib import _assignNmrAtomsToPeaks, _assignNmrResidu
 from ccpn.util.Constants import MOUSEDICTSTRIP
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import PEAKSELECT, MULTIPLETSELECT
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import CcpnGLWidget
+from ccpn.ui.gui.widgets.GLWidgets import Gui1dWidgetAxis
 from ccpn.util.Logging import getLogger
 from ccpn.core.NmrAtom import NmrAtom
 from ccpn.core.NmrResidue import NmrResidue
@@ -268,6 +269,9 @@ class GuiSpectrumDisplay(CcpnModule):
         self.stripFrame = Frame(setLayout=True, showBorder=False, spacing=(5, 0), stretch=(1, 1), margins=(0, 0, 0, 0),
                                 acceptDrops=True)
         # self.stripFrame.layout().setContentsMargins(0, 0, 0, 0)
+
+        self._newAxisRight = Gui1dWidgetAxis(self.qtParent, spectrumDisplay=self, mainWindow=self.mainWindow)
+        self.qtParent.getLayout().addWidget(self._newAxisRight, stripRow, 1, 1, 7)
 
         if useScrollArea:
             # scroll area for strips

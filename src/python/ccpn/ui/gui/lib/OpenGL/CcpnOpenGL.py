@@ -140,8 +140,6 @@ from ccpn.util.Common import getAxisCodeMatch, getAxisCodeMatchIndices
 from typing import Tuple
 from ccpn.util.Constants import AXIS_FULLATOMNAME, AXIS_MATCHATOMTYPE, AXIS_ACTIVEAXES, \
     DOUBLEAXIS_ACTIVEAXES, DOUBLEAXIS_FULLATOMNAME, DOUBLEAXIS_MATCHATOMTYPE, MOUSEDICTSTRIP
-from ccpn.ui.gui.guiSettings import textFont, getColours, STRIPHEADER_BACKGROUND, \
-    STRIPHEADER_FOREGROUND, GUINMRRESIDUE
 
 from ccpn.ui.gui.widgets.DropBase import DropBase
 from ccpn.ui.gui.lib.mouseEvents import getMouseEventDict
@@ -192,7 +190,7 @@ class CcpnGLWidget(QOpenGLWidget):
 
         super().__init__(strip)
 
-        # GST add antiAliasing, no perceptable speed impact on my mac (intel iris graphics!)
+        # GST add antiAliasing, no perceptible speed impact on my mac (intel iris graphics!)
         # samples = 4 is good enough but 8 also works well in terms of speed...
         try:
             fmt = QSurfaceFormat()
@@ -214,6 +212,7 @@ class CcpnGLWidget(QOpenGLWidget):
 
         self.strip = strip
         self.spectrumDisplay = strip.spectrumDisplay
+        # self.spectrumDisplay = getattr(strip, 'spectrumDisplay', None)
 
         self.mainWindow = mainWindow
         if mainWindow:

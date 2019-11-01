@@ -578,7 +578,7 @@ class Gui1dWidget(CcpnGLWidget):
 class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
 
     is1D = True
-    AXIS_MARGINRIGHT = 50
+    AXIS_MARGINRIGHT = 80
     AXIS_MARGINBOTTOM = 25
     AXIS_LINE = 7
     AXIS_OFFSET = 3
@@ -590,8 +590,7 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
     SPECTRUMYZOOM = 1.0e1
     SHOWSPECTRUMONPHASING = False
     XAXES = GLDefs.XAXISUNITS
-    YAXES = GLDefs.YAXISUNITS
-    AXISMODE = 1
+    YAXES = YAXISUNITS1D
 
     def __init__(self, parent, spectrumDisplay=None, mainWindow=None, antiAlias=4):
 

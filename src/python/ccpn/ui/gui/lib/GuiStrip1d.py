@@ -30,7 +30,7 @@ from ccpn.core.PeakList import PeakList
 from ccpn.util import Phasing
 from ccpn.ui.gui.lib.GuiStrip import GuiStrip, DefaultMenu, PeakMenu, \
     IntegralMenu, MultipletMenu, PhasingMenu, AxisMenu
-from ccpn.ui.gui.widgets.PlaneToolbar import StripHeaderWidget
+from ccpn.ui.gui.widgets.PlaneToolbar import StripHeaderWidget, StripLabelWidget
 import numpy as np
 from ccpn.util.Logging import getLogger
 from ccpn.ui.gui.lib.GuiStripContextMenus import _get1dPhasingMenu, _get1dDefaultMenu, \
@@ -153,8 +153,13 @@ class GuiStrip1d(GuiStrip):
         self._frameGuide.setFixedSize(400, 400)
 
         # add spacer to the top left corner
-        self._frameGuide.addSpacer(10, 30, grid=(1, 0))
+        self._frameGuide.addSpacer(8, 8, grid=(1, 0))
         row = 2
+
+        self.stripLabel = StripLabelWidget(qtParent=self._frameGuide, mainWindow=self.mainWindow, strip=self, grid=(row, 1), gridSpan=(1, 1))
+        row += 1
+        # set the ID label in the new widget
+        self.stripLabel._populate()
 
         self.header = StripHeaderWidget(qtParent=self._frameGuide, mainWindow=self.mainWindow, strip=self, grid=(row, 1), gridSpan=(1, 1))
         row += 1
@@ -165,6 +170,11 @@ class GuiStrip1d(GuiStrip):
 
         self.spectrumDisplay.phasingFrame.applyCallback = self._applyPhasing
         self.spectrumDisplay.phasingFrame.applyButton.setEnabled(True)
+
+    def _resize(self):
+        """Resize event to handle resizing of frames that overlay the OpenGL frame
+        """
+        self._frameGuide._setMaskToChildren()
 
     def _checkMenuItems(self):
         """Update the menu check boxes from the strip

@@ -240,3 +240,46 @@ def getMouseEventDict(event: QtGui.QMouseEvent):
         ]:
         mouseModeDict[key] = func(event)
     return mouseModeDict
+
+
+import json
+from ccpn.ui.gui.widgets.DropBase import DropBase
+from ccpn.ui.gui.guiSettings import textFontLarge, getColours, LABEL_FOREGROUND
+
+
+def makeDragEvent(self, dataDict, text, action=QtCore.Qt.CopyAction):
+    itemData = json.dumps(dataDict)
+
+    mimeData = QtCore.QMimeData()
+
+    # ejb - added so that itemData works with PyQt5
+    tempData = QtCore.QByteArray()
+    stream = QtCore.QDataStream(tempData, QtCore.QIODevice.WriteOnly)
+    stream.writeQString(text)
+    mimeData.setData(DropBase.JSONDATA, tempData)
+
+    # mimeData.setData(DropBase.JSONDATA, self.text())
+    mimeData.setText(itemData)
+    drag = QtGui.QDrag(self)
+    drag.setMimeData(mimeData)
+
+    # create a new temporary label the the dragged pixmap
+    # fixes labels that are very big with small text
+    dragLabel = QtWidgets.QLabel()
+    dragLabel.setText(text)
+    dragLabel.setFont(textFontLarge)
+    dragLabel.setStyleSheet('color: %s' % (getColours()[LABEL_FOREGROUND]))
+
+    # set the pixmap
+    pixmap = dragLabel.grab()
+
+    # make the label slightly transparent
+    painter = QtGui.QPainter(pixmap)
+    painter.setCompositionMode(painter.CompositionMode_DestinationIn)
+    painter.fillRect(pixmap.rect(), QtGui.QColor(0, 0, 0, 240))
+    painter.end()
+    drag.setPixmap(pixmap)
+
+    drag.setHotSpot(QtCore.QPoint(dragLabel.width() // 2, dragLabel.height() // 2))
+
+    drag.exec_(action)

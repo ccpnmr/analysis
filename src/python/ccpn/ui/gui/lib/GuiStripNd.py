@@ -47,7 +47,8 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 from PyQt5 import QtWidgets
 import numpy
 from ccpn.core.PeakList import PeakList
-from ccpn.ui.gui.widgets.PlaneToolbar import StripHeaderWidget, PlaneAxisWidget
+from ccpn.ui.gui.widgets.PlaneToolbar import StripHeaderWidget, PlaneAxisWidget, StripLabelWidget, \
+    EMITSOURCE, EMITCLICKED, EMITIGNORESOURCE
 from ccpn.util.Logging import getLogger
 from ccpn.util.decorators import logCommand
 from ccpn.core.lib.ContextManagers import undoBlock
@@ -186,8 +187,13 @@ class GuiStripNd(GuiStrip):
         self._frameGuide.setFixedSize(400, 400)
 
         # add spacer to the top left corner
-        self._frameGuide.addSpacer(10, 30, grid=(1, 0))
+        self._frameGuide.addSpacer(8, 8, grid=(1, 0))
         row = 2
+
+        self.stripLabel = StripLabelWidget(qtParent=self._frameGuide, mainWindow=self.mainWindow, strip=self, grid=(row, 1), gridSpan=(1, 1))
+        row += 1
+        # set the ID label in the new widget
+        self.stripLabel._populate()
 
         self.header = StripHeaderWidget(qtParent=self._frameGuide, mainWindow=self.mainWindow, strip=self, grid=(row, 1), gridSpan=(1, 1))
         row += 1
@@ -214,6 +220,11 @@ class GuiStripNd(GuiStrip):
             self.planeAxisBars[0]._setLabelBorder(False)
             # set the axis in the strip for modifying with the wheelMouse event - not implemented yet
             self.activePlaneAxis = self.planeAxisBars[0].axis
+
+            # set tghe active axis to the first available planeAxisBar
+            self.optionsChanged.emit({EMITSOURCE      : self.planeAxisBars[0],
+                                      EMITCLICKED     : True,
+                                      EMITIGNORESOURCE: False})
 
         if len(self.orderedAxes) < 3:  # hide if only 2D
             self._stripToolBarWidget.setFixedHeight(0)

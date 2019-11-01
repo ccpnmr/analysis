@@ -105,7 +105,8 @@ from ccpn.ui.gui.guiSettings import CCPNGLWIDGET_BACKGROUND, CCPNGLWIDGET_FOREGR
 import ccpn.util.Phasing as Phasing
 from ccpn.ui.gui.lib.mouseEvents import \
     leftMouse, shiftLeftMouse, controlLeftMouse, controlShiftLeftMouse, controlShiftRightMouse, \
-    middleMouse, shiftMiddleMouse, rightMouse, shiftRightMouse, controlRightMouse, PICK
+    middleMouse, shiftMiddleMouse, rightMouse, shiftRightMouse, controlRightMouse, PICK, \
+    makeDragEvent
 
 try:
     # used to test whether all the arrays are defined correctly
@@ -2006,42 +2007,8 @@ class CcpnGLWidget(QOpenGLWidget):
 
         # update the dataDict with all mouseEvents﻿{"controlRightMouse": false, "text": "NR:@-.@27.", "leftMouse": true, "controlShiftMiddleMouse": false, "middleMouse": false, "controlMiddleMouse": false, "controlShiftLeftMouse": false, "controlShiftRightMouse": false, "shiftMiddleMouse": false, "_connectDir": "isRight", "controlLeftMouse": false, "rightMouse": false, "shiftLeftMouse": false, "shiftRightMouse": false}
         dataDict.update(mouseDict)
-        # convert into json
-        itemData = json.dumps(dataDict)
 
-        # ejb - added so that itemData works with PyQt5
-        tempData = QtCore.QByteArray()
-        stream = QtCore.QDataStream(tempData, QtCore.QIODevice.WriteOnly)
-        stream.writeQString(self.stripIDLabel)
-        mimeData.setData(DropBase.JSONDATA, tempData)
-
-        # mimeData.setData(DropBase.JSONDATA, self.text())
-        mimeData.setText(itemData)
-        drag = QtGui.QDrag(self)
-        drag.setMimeData(mimeData)
-
-        # create a new temporary label the the dragged pixmap
-        # fixes labels that are very big with small text
-        dragLabel = QtWidgets.QLabel()
-        dragLabel.setText(self.stripIDLabel)
-        dragLabel.setFont(textFont)
-        dragLabel.setStyleSheet('color : %s' % (getColours()[GUINMRRESIDUE]))
-
-        # set the pixmap
-        pixmap = dragLabel.grab()
-
-        # make the label slightly transparent
-        painter = QtGui.QPainter(pixmap)
-        painter.setCompositionMode(painter.CompositionMode_DestinationIn)
-        painter.fillRect(pixmap.rect(), QtGui.QColor(0, 0, 0, 240))
-        painter.end()
-        drag.setPixmap(pixmap)
-
-        # drag.setHotSpot(event.pos())
-        drag.setHotSpot(QtCore.QPoint(dragLabel.width() // 2, dragLabel.height() // 2))
-
-        # drag.targetChanged.connect(self._targetChanged)
-        drag.exec_(QtCore.Qt.CopyAction)
+        makeDragEvent(self, dataDict, self.stripIDLabel)
 
     def mousePressIn1DArea(self, regions):
         for region in regions:

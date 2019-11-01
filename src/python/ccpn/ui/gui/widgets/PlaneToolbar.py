@@ -52,6 +52,7 @@ from ccpn.ui.gui.widgets.Menu import Menu
 from ccpn.ui.gui.widgets.Spacer import Spacer
 from ccpn.ui.gui.widgets.Icon import Icon
 from ccpn.util.Logging import getLogger
+from ccpn.ui.gui.lib.mouseEvents import makeDragEvent
 
 
 STRIPLABEL_CONNECTDIR = '_connectDir'
@@ -93,13 +94,14 @@ class _StripLabel(ActiveLabel):  #  VerticalLabel): could use Vertical label so 
         # disable any drop event callback's until explicitly defined later
         self.setDropEventCallback(None)
 
-    def _createDragEvent(self, mouseDict):  # event: QtGui.QMouseEvent):
+    def _createDragEvent(self, mouseDict):
         """
         Re-implementation of the mouse press event to enable a NmrResidue label to be dragged as a json object
         containing its id and a modifier key to encode the direction to drop the strip.
         """
         if not self.project.getByPid(self.text()):
             # label does not point to an object
+            getLogger().warning('%s is not a draggable object' % self.text())
             return
 
         mimeData = QtCore.QMimeData()
@@ -112,42 +114,8 @@ class _StripLabel(ActiveLabel):  #  VerticalLabel): could use Vertical label so 
 
         # update the dataDict with all mouseEvents﻿{"controlRightMouse": false, "text": "NR:@-.@27.", "leftMouse": true, "controlShiftMiddleMouse": false, "middleMouse": false, "controlMiddleMouse": false, "controlShiftLeftMouse": false, "controlShiftRightMouse": false, "shiftMiddleMouse": false, "_connectDir": "isRight", "controlLeftMouse": false, "rightMouse": false, "shiftLeftMouse": false, "shiftRightMouse": false}
         dataDict.update(mouseDict)
-        # convert to json
-        itemData = json.dumps(dataDict)
 
-        # ejb - added so that itemData works with PyQt5
-        tempData = QtCore.QByteArray()
-        stream = QtCore.QDataStream(tempData, QtCore.QIODevice.WriteOnly)
-        stream.writeQString(self.text())
-        mimeData.setData(DropBase.JSONDATA, tempData)
-
-        # mimeData.setData(DropBase.JSONDATA, self.text())
-        mimeData.setText(itemData)
-        drag = QtGui.QDrag(self)
-        drag.setMimeData(mimeData)
-
-        # create a new temporary label the the dragged pixmap
-        # fixes labels that are very big with small text
-        dragLabel = QtWidgets.QLabel()
-        dragLabel.setText(self.text())
-        dragLabel.setFont(textFont)
-        dragLabel.setStyleSheet('color : %s' % (getColours()[GUINMRRESIDUE]))
-
-        # set the pixmap
-        pixmap = dragLabel.grab()
-
-        # make the label slightly transparent
-        painter = QtGui.QPainter(pixmap)
-        painter.setCompositionMode(painter.CompositionMode_DestinationIn)
-        painter.fillRect(pixmap.rect(), QtGui.QColor(0, 0, 0, 240))
-        painter.end()
-        drag.setPixmap(pixmap)
-
-        # drag.setHotSpot(event.pos())
-        drag.setHotSpot(QtCore.QPoint(dragLabel.width() // 2, dragLabel.height() // 2))
-
-        # drag.targetChanged.connect(self._targetChanged)
-        drag.exec_(QtCore.Qt.CopyAction)
+        makeDragEvent(self, dataDict, self.text())
 
     def event(self, event):
         """
@@ -469,6 +437,7 @@ class _OpenGLFrameABC(OpenGLOverlayFrame):
 
     """
     BUTTONS = tuple()
+    AUTOFILLBACKGROUND = True
 
     def __init__(self, qtParent, mainWindow, *args, **kwds):
 
@@ -525,6 +494,11 @@ class _OpenGLFrameABC(OpenGLOverlayFrame):
             pp(self, klass, widget)
 
 
+EMITSOURCE = 'source'
+EMITCLICKED = 'clicked'
+EMITIGNORESOURCE = 'ignoreSource'
+
+
 class PlaneAxisWidget(_OpenGLFrameABC):
     """
     Need Frame:
@@ -544,7 +518,7 @@ class PlaneAxisWidget(_OpenGLFrameABC):
     BUTTONS = (('_axisLabel', ActiveLabel, _initAxisCode, _setAxisCode, (0, 0), (1, 1)),
                ('_axisPpmPosition', ActiveLabel, _initAxisPosition, _setAxisPosition, (0, 1), (1, 1)),
                ('_axisPlaneCount', ActiveLabel, _initPlaneCount, _setPlaneCount, (0, 2), (1, 1)),
-               ('_axisSelector', PlaneSelectorWidget, _initPlaneSelection, _setPlaneSelection, (0, 3), (1, 1))
+               ('_axisSelector', PlaneSelectorWidget, _initPlaneSelection, _setPlaneSelection, (0, 3), (2, 1))
                )
 
     def __init__(self, qtParent, mainWindow, strip, axis, **kwds):
@@ -587,10 +561,11 @@ class PlaneAxisWidget(_OpenGLFrameABC):
         """Respond to signals from other frames in the strip
         """
         # may be required to select/de-select rows
-        source = aDict.get('source')
-        if source and source != self:
+        source = aDict.get(EMITSOURCE)
+        ignore = aDict.get(EMITIGNORESOURCE)
+        if source and not ((source == self) and ignore):
             # change settings here
-            self._setLabelBorder(False)
+            self._setLabelBorder(source == self)
 
             # set the axis in the strip for modifying with the wheelMouse event - not implemented yet
             self.strip.activePlaneAxis = self.axis
@@ -610,8 +585,9 @@ class PlaneAxisWidget(_OpenGLFrameABC):
             widgets[1].show()
 
         self._setLabelBorder(True)
-        self.strip.optionsChanged.emit({'source' : self,
-                                        'clicked': True})
+        self.strip.optionsChanged.emit({EMITSOURCE      : self,
+                                        EMITCLICKED     : True,
+                                        EMITIGNORESOURCE: True})
         self._resize()
 
     def _selectPositionCallback(self, widgets):
@@ -626,8 +602,9 @@ class PlaneAxisWidget(_OpenGLFrameABC):
             widgets[3].show()
 
         self._setLabelBorder(True)
-        self.strip.optionsChanged.emit({'source' : self,
-                                        'clicked': True})
+        self.strip.optionsChanged.emit({EMITSOURCE      : self,
+                                        EMITCLICKED     : True,
+                                        EMITIGNORESOURCE: True})
         self._resize()
 
     def updatePosition(self):
@@ -811,6 +788,8 @@ STRIPPOSITIONS = (STRIPPOSITION_MINUS, STRIPPOSITION_PLUS, STRIPPOSITION_LEFT, S
 
 STRIPDICT = 'stripHeaderDict'
 STRIPTEXT = 'stripText'
+STRIPCOLOUR = 'stripColour'
+STRIPLABELPOS = 'StripLabelPos'
 STRIPICONNAME = 'stripIconName'
 STRIPICONSIZE = 'stripIconSize'
 STRIPOBJECT = 'stripObject'
@@ -822,6 +801,7 @@ STRIPFALSE = 0
 STRIPSTOREINDEX = [STRIPTEXT, STRIPOBJECT, STRIPCONNECT, STRIPVISIBLE, STRIPENABLED]
 STRIPHEADERVISIBLE = 'stripHeaderVisible'
 STRIPHANDLE = 'stripHandle'
+DEFAULTCOLOUR = CCPNGLWIDGET_HEXFOREGROUND
 
 
 def _initIcon(self, widget, strip):
@@ -834,10 +814,10 @@ def _initStripHeader(self, widget, strip):
 
 class StripHeaderWidget(_OpenGLFrameABC):
     BUTTONS = (('_nmrChainLeft', _StripLabel, None, None, (0, 0), (2, 1)),
-               ('_nmrChainRight', _StripLabel, _initIcon, None, (0, 4), (2, 1)),
+               ('_nmrChainRight', _StripLabel, _initIcon, None, (0, 5), (2, 1)),
                ('_stripDirection', _StripLabel, None, None, (0, 2), (1, 2)),
                ('_stripLabel', _StripLabel, None, None, (1, 2), (1, 1)),
-               ('_stripPercent', _StripLabel, _initStripHeader, None, (1, 3), (1, 1)),
+               ('_stripPercent', _StripLabel, _initStripHeader, None, (1, 3), (1, 2)),
                )
 
     def __postIconInit__(self, widget, strip):
@@ -1022,7 +1002,7 @@ class StripHeaderWidget(_OpenGLFrameABC):
     def setLabelObject(self, obj=None, position=STRIPPOSITION_CENTRE):
         """Set the object attached to the header label at the given position and store its pid
         """
-        # NOTE:ED not sure I need this now - cbheck rename nmrResidue, etc.
+        # NOTE:ED not sure I need this now - check rename nmrResidue, etc.
         self.show()
         if position in STRIPPOSITIONS:
             self._labels[position].obj = obj
@@ -1191,6 +1171,98 @@ class StripHeaderWidget(_OpenGLFrameABC):
     @handle.setter
     def handle(self, handle):
         self.strip.setParameter(STRIPDICT, STRIPHANDLE, handle)
+        self._resize()
+
+
+def _setStripLabel(self, *args):
+    """Set the label of the strip, called from _populate
+    """
+    # self.setLabelText('.'.join(self.strip.id.split('.')))
+    self.setLabelText(self.strip.pid if self.strip else '<None>')
+    self._resize()
+
+
+class StripLabelWidget(_OpenGLFrameABC):
+    BUTTONS = (('_stripLabel', _StripLabel, None, _setStripLabel, (0, 0), (1, 1)),
+               )
+
+    def _processDroppedLabel(self, data, toLabel=None, plusChain=None):
+        """Not a very elegant way of running backboneAssignment code from the strip headers
+
+        Should be de-coupled from the backboneAssignment module
+        """
+        pass
+
+    def __init__(self, qtParent, mainWindow, strip, **kwds):
+        super().__init__(qtParent, mainWindow, strip, **kwds)
+
+        self._parent = qtParent
+        self.mainWindow = mainWindow
+        self.strip = strip
+        self.setAutoFillBackground(False)
+
+        # read the current strip header values
+        headerText = self._getPositionParameter(STRIPTEXT, '')
+        headerColour = self._getPositionParameter(STRIPCOLOUR, DEFAULTCOLOUR)
+        self.setLabel(headerText, headerColour)
+
+        # get the visible state of the header
+        self.setVisible(True)
+        self._resize()
+
+    def _setPositionParameter(self, subParameterName, value):
+        """Set the item in the position dict
+        """
+        params = self.strip.getParameter(STRIPDICT, STRIPLABELPOS)
+        if not params:
+            params = {}
+
+        # currently writes directly into _ccpnInternal
+        params.update({subParameterName: value})
+        self.strip.setParameter(STRIPDICT, STRIPLABELPOS, params)
+
+    def _getPositionParameter(self, subParameterName, default):
+        """Return the item from the position dict
+        """
+        params = self.strip.getParameter(STRIPDICT, STRIPLABELPOS)
+        if params:
+            if subParameterName in params:
+                value = params.get(subParameterName)
+                return value
+
+        return default
+
+    def reset(self):
+        """Clear stripLabel
+        """
+        # clear the store
+        params = {STRIPTEXT: '',
+                  }
+        self.strip.setParameter(STRIPDICT, STRIPLABELPOS, params)
+        self._resize()
+
+    def setLabel(self, text='', colour=DEFAULTCOLOUR):
+        """Set the text for stripLabel
+        """
+        self.show()
+        self._stripLabel.setText(str(text))
+        self._setStyle(self._stripLabel, foregroundColour=colour)
+        self._setPositionParameter(STRIPTEXT, str(text))
+        self._setPositionParameter(STRIPCOLOUR, colour)
+        self._resize()
+
+    def setLabelText(self, text=None):
+        """Set the text for stripLabel
+        """
+        self.show()
+        self._stripLabel.setText(str(text))
+        self._setPositionParameter(STRIPTEXT, str(text))
+        self._resize()
+
+    def setLabelColour(self, colour=DEFAULTCOLOUR):
+        self.show()
+        self._setStyle(self._stripLabel, foregroundColour=colour)
+        self._setPositionParameter(STRIPCOLOUR, colour)
         self._resize()
 
 

@@ -26,32 +26,26 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 
 import typing
-from collections import OrderedDict
 from PyQt5 import QtWidgets, QtCore, QtGui
 from ccpn.core.Project import Project
 from ccpn.core.Peak import Peak
 from ccpn.core.lib.Notifiers import Notifier
-from ccpn.ui.gui.guiSettings import getColours, GUISTRIP_PIVOT
-# from ccpn.ui.gui.widgets.PlaneToolbar import StripHeader
-from ccpn.ui.gui.widgets.Frame import Frame, OpenGLOverlayFrame
+from ccpn.ui.gui.guiSettings import GUISTRIP_PIVOT
+from ccpn.ui.gui.widgets.Frame import Frame
 from ccpn.ui.gui.widgets.Widget import Widget
-from ccpn.ui.gui.widgets.Label import Label, ActiveLabel
-from ccpn.ui.gui.widgets.LineEdit import LineEdit
-from ccpn.ui.gui.widgets.Spacer import Spacer
 from ccpn.ui.gui.lib.GuiNotifier import GuiNotifier
 from ccpn.ui.gui.widgets.DropBase import DropBase
 from ccpn.ui.gui.widgets import MessageDialog
 from ccpn.util.Logging import getLogger
-from ccpn.util.Constants import AXIS_MATCHATOMTYPE, AXIS_FULLATOMNAME, AXIS_ACTIVEAXES, DOUBLEAXIS_FULLATOMNAME
+from ccpn.util.Constants import AXIS_MATCHATOMTYPE, AXIS_FULLATOMNAME, DOUBLEAXIS_FULLATOMNAME
 from functools import partial
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs import AXISXUNITS, AXISYUNITS, AXISLOCKASPECTRATIO, \
     SYMBOLTYPES, ANNOTATIONTYPES, SYMBOLSIZE, SYMBOLTHICKNESS, AXISUSEFIXEDASPECTRATIO, \
-    MAINVIEW, BOTTOMAXIS, RIGHTAXIS, AXISCORNER
+    BOTTOMAXIS, RIGHTAXIS
 from ccpn.core.lib.ContextManagers import undoStackBlocking, undoBlock, \
     notificationBlanking, undoBlockWithoutSideBar
 from ccpn.util.decorators import logCommand
-from ccpn.ui.gui.guiSettings import textFont, getColours, STRIPHEADER_BACKGROUND, \
-    STRIPHEADER_FOREGROUND, GUINMRRESIDUE, CCPNGLWIDGET_BACKGROUND, textFontLarge
+from ccpn.ui.gui.guiSettings import getColours, CCPNGLWIDGET_HEXHIGHLIGHT, CCPNGLWIDGET_HEXFOREGROUND
 
 
 STRIPLABEL_ISPLUS = 'stripLabel_isPlus'
@@ -126,11 +120,13 @@ class GuiStrip(Frame):
         self._CcpnGLWidget.setSizePolicy(QtWidgets.QSizePolicy.Expanding,
                                          QtWidgets.QSizePolicy.Expanding)
 
+        self.stripLabel = None
         self.header = None      #StripHeader(parent=self, mainWindow=self.mainWindow, strip=self,
                                  # grid=headerGrid, gridSpan=headerSpan, setLayout=True, spacing=(0, 0))
 
         # set the ID label in the new widget
-        self._CcpnGLWidget.setStripID('.'.join(self.id.split('.')))
+        # self._CcpnGLWidget.setStripID('.'.join(self.id.split('.')))
+        self._CcpnGLWidget.setStripID('')
 
         # Widgets for toolbar; items will be added by GuiStripNd (eg. the Z/A-plane boxes)
         # and GuiStrip1d; will be hidden for 2D's by GuiSpectrumView
@@ -246,6 +242,7 @@ class GuiStrip(Frame):
     def setStripNotifiers(self):
         """Set the notifiers for the strip.
         """
+        # GWV 20181127: moved to GuiMainWindow
         # GWV 20181127: moved to GuiMainWindow
         # notifier for highlighting the strip
         # self._stripNotifier = Notifier(self.current, [Notifier.CURRENT], 'strip', self._highlightCurrentStrip)
@@ -883,6 +880,8 @@ class GuiStrip(Frame):
         CCPNINTERNAL: used in GuiMainWindow
         """
         self._CcpnGLWidget.highlightCurrentStrip(flag)
+        if self.stripLabel:
+            self.stripLabel.setLabelColour(CCPNGLWIDGET_HEXHIGHLIGHT if flag else CCPNGLWIDGET_HEXFOREGROUND)
 
     # GWV 20181127: moved to a single notifier in GuiMainWindow
     # def _highlightCurrentStrip(self, data):

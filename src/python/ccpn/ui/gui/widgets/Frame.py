@@ -253,6 +253,7 @@ class OpenGLOverlayFrame(Frame):
                                                  setLayout=setLayout, **kwds)
 
         self._backgroundColour = backgroundColour
+        self.getLayout().setSpacing(0)
 
     def _setMaskToChildren(self):
         """Set the mouse mask to only the children of the frame - required to make sections transparent
@@ -293,7 +294,7 @@ class OpenGLOverlayFrame(Frame):
             sl.setStyleSheet('QLabel {'
                              'padding: 0; '
                              'margin: 0px 0px 0px 0px;'
-                             'color:  %s;'
+                             'color: %s;'
                              'background-color: %s;'
                              'border: 0 px;'
                              'font-family: %s;'
@@ -307,7 +308,7 @@ class OpenGLOverlayFrame(Frame):
             sl.setStyleSheet('QLabel {'
                              'padding: 0; '
                              'margin: 0px 0px 0px 0px;'
-                             'color:  %s;'
+                             'color: %s;'
                              'border: 0 px;'
                              'font-family: %s;'
                              'font-size: %dpx;'

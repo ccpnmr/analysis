@@ -28,12 +28,12 @@ __date__ = "$Date: 9/05/2017 $"
 from ccpn.ui.gui.widgets.ButtonList import ButtonList
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.CompoundWidgets import CheckBoxCompoundWidget
-from ccpn.ui.gui.popups.Dialog import CcpnDialog, handleDialogApply
+from ccpn.ui.gui.popups.Dialog import CcpnDialog, handleDialogApply, CcpnDialogMainWidget
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
 from ccpn.core.lib.ContextManagers import undoStackBlocking
 
 
-class DeleteItemsPopup(CcpnDialog):
+class DeleteItemsPopup(CcpnDialogMainWidget):
     """
     Open a small popup to allow deletion of selected 'current' items
     Items is a tuple of tuples: indexed by the name of the items, containing a list of the items for deletion
@@ -44,7 +44,7 @@ class DeleteItemsPopup(CcpnDialog):
         """
         Initialise the widget
         """
-        CcpnDialog.__init__(self, parent, setLayout=True, windowTitle=title, **kwds)
+        super().__init__(parent, setLayout=True, windowTitle=title, **kwds)
 
         self.mainWindow = mainWindow
         self.application = mainWindow.application
@@ -52,7 +52,7 @@ class DeleteItemsPopup(CcpnDialog):
         self.current = mainWindow.application.current
 
         row = 0
-        self.noteLabel = Label(self, "Delete selected items: ", grid=(row, 0))
+        self.noteLabel = Label(self.mainWidget, "Delete selected items: ", grid=(row, 0))
 
         self.deleteList = []
         for item in items:
@@ -60,7 +60,7 @@ class DeleteItemsPopup(CcpnDialog):
 
             row += 1
             # add a check box for each item
-            newCheckBox = CheckBoxCompoundWidget(self,
+            newCheckBox = CheckBoxCompoundWidget(self.mainWidget,
                                                  grid=(row, 0), vAlign='top', stretch=(0, 0), hAlign='left',
                                                  orientation='right',
                                                  labelText='%i %s' % (len(values), itemName),
@@ -70,18 +70,19 @@ class DeleteItemsPopup(CcpnDialog):
 
             self.deleteList.append((itemName, values, newCheckBox))
 
-        row += 1
-        # add close buttons at the bottom
-        self.buttonList = ButtonList(self, ['Cancel', 'OK'], [self.reject, self._okButton], grid=(row, 1))
-        self.buttonList.buttons[1].setFocus()
+        self.setOkButton(callback=self._okClicked, tipText='Delete and close')
+        self.setCloseButton(callback=self.reject, tipText='Close')
 
         self.GLSignals = GLNotifier(parent=self)
+
+        # set the buttons and the size
+        self.__postInit__()
 
     def _refreshGLItems(self):
         # emit a signal to rebuild all peaks and multiplets
         self.GLSignals.emitEvent(triggers=[GLNotifier.GLALLPEAKS, GLNotifier.GLALLINTEGRALS, GLNotifier.GLALLMULTIPLETS])
 
-    def _okButton(self):
+    def _okClicked(self):
         """
         When ok button pressed: delete and exit
         """

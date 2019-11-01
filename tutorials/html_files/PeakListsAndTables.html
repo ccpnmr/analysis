@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Peak Lists and Tables</title>
+    <style >.action {color: #803594; font-weight:bold;}</style>
+</head>
+<body>
+</h2><Peak Lists and Tables></h2>
+    <h3>Displaying/hiding peak lists</h3>
+    <p>Each spectrum always has at least one peak list associated with it. But you can have multiple peak lists per spectrum if you wish. When you first open a spectrum in a Spectrum Display all peak lists are shown by default. You can hide or show peak lists by <span class="action">right-clicking</span> on the spectrum in the Spectrum Toolbar and going to the <span class="action">Peak List</span> submenu.</p>
+    <h3>Changing the colours of peak symbols and labels</h3>
+    <p>In order to differentiate your peak lists more easily, you can change the colour of the peak symbols and peak labels of each peak list. <span class="action">Double-click</span> on a peak list in the sidebar to bring up the <span class="action">Peak List Properties</span> dialog box and select your preferred colours.</p>
+    <h3>Peak tables</h3>
+    <p>You can <span class="action">drag</span> a peak list from the sidebar into the drop area in order to open it as a <span class="action">Peak Table</span>. Alternatively, you can open a Peak Table module by going to  <span class="action">View / Peak Table</span> or typing <span class="action">PT</span>. You can change the peak list shown in the table using the drop-down menu at the top. Selecting a peak in the table will also select it in any Spectrum Display where the peak is shown. Similarly, peaks selected in a spectrum will be shown as selected in the Peak Table. Use <span class="action">Ctrl</span> (<span class="action">Cmd</span> on a Mac) to select multiple peaks in a table using the mouse, or <span class="action">Shift</span> to select sequential peaks. <span class="action">Ctrl/Cmd + A</span> will select all peaks. <span class="action">Double-clicking</span> on a peak in the table will centre all Spectrum Displays containing the peak on that peak.</p>
+    <h3>Line widths and volumes</h3>
+    <p>When placing peaks manually, there is no line width associated with them in the peak table. Snapping peaks to the nearest extremum using the <span class="action">SE</span> shortcut will add a line width based on a parabolic fit. Re-fitting a peak with <span class="action">RP</span> (or re-fitting several peaks together using <span class="action">RG</span>) executes a Gaussian fitting procedure and also provides line widths. When you pick peaks by <span class="action">left-dragging</span> the mouse while holding down <span class="action">Shift + Ctrl/Cmd</span> you can choose whether to use the parabolic or gaussian fitting procedure in <span class="action">Project / Preferences</span> (<span class="action">Ctrl/Cmd+,</span>). Volumes can be added by estimating the volumes of peaks with <span class="action">EV</span>.</p>
+    <h3>Merit values</h3>
+    <p>Each peak has a <span class="action">Merit</span> value associated with it. This can take on any value between 0 and 1. It effectively acts as a weighting value for the calculation of chemical shifts. (Chemical shifts are reported as averages over all peaks contributing to the chemical shift of that nucleus). Peaks with a Merit value of 0 will not contribute to the chemical shift at all, those with Merit 0.5 only half as much as peaks with a Merit value of 1 etc. In addition, it is possible to set a threshold value below which peaks are coloured in a different colour. <span class="action">Double-click</span> on a peak list in the sidebar to bring up the <span class="action">Peak List Properties</span> dialog box. Select <span class="action">Use Merit Threshold</span>, set the threshold value and choose a peak colour for the peak symbols and labels. This can be a useful way of marking peaks such as MAS side-band peaks.</p>
+</body>
+</html>

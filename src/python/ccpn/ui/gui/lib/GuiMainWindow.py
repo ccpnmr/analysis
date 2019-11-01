@@ -1014,9 +1014,9 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
         "Callback on current to highlight the strip"
         previousStrip = data[Notifier.PREVIOUSVALUE]
         currentStrip = data[Notifier.VALUE]
-        if previousStrip:
+        if previousStrip and not previousStrip.isDeleted:
             previousStrip._highlightStrip(False)
-        if currentStrip:
+        if currentStrip and not currentStrip.isDeleted:
             currentStrip._highlightStrip(True)
 
     def printToFile(self):

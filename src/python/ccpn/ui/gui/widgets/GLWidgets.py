@@ -1693,6 +1693,13 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
         # check that the screen device pixel ratio is correct
         self.refreshDevicePixelRatio()
 
+    def refreshDevicePixelRatio(self):
+        """refresh the devicePixelRatio for the viewports
+        """
+        # control for changing screens has now been moved to mainWindow so only one signal is needed
+        self.viewports._devicePixelRatio = self.devicePixelRatio()
+        self.update()
+
     def setBackgroundColour(self, col, silent=False):
         """
         set all background colours in the shaders
@@ -1708,6 +1715,145 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
         if not silent:
             self.update()
 
+    def enableTextClientState(self):
+        GL.glEnableClientState(GL.GL_VERTEX_ARRAY)
+        GL.glEnableClientState(GL.GL_COLOR_ARRAY)
+        GL.glEnableClientState(GL.GL_TEXTURE_COORD_ARRAY)
+        GL.glEnableVertexAttribArray(self._glClientIndex)
+
+    def disableTextClientState(self):
+        GL.glDisableClientState(GL.GL_TEXTURE_COORD_ARRAY)
+        GL.glDisableClientState(GL.GL_VERTEX_ARRAY)
+        GL.glDisableClientState(GL.GL_COLOR_ARRAY)
+        GL.glDisableVertexAttribArray(self._glClientIndex)
+
+    def _setViewPortFontScale(self):
+        # set the scale for drawing the overlay text correctly
+        self._axisScale[0:4] = [self.deltaX, self.deltaY, 1.0, 1.0]
+        self.globalGL._shaderProgramTex.setGLUniform4fv('axisScale', 1, self._axisScale)
+        self.globalGL._shaderProgramTex.setProjectionAxes(self._uPMatrix, 0.0, 1.0, 0, 1.0, -1.0, 1.0)
+        self.globalGL._shaderProgramTex.setGLUniformMatrix4fv('pTexMatrix', 1, GL.GL_FALSE, self._uPMatrix)
+
+    def buildAxisLabels(self, refresh=False):
+        # build axes labelling
+        if refresh or self.axesChanged:
+
+            self._axisXLabelling = []
+            self._axisScaleLabelling = []
+
+            if self.highlighted:
+                labelColour = self.highlightColour
+            else:
+                labelColour = self.foreground
+
+            if self._drawBottomAxis:
+                # create the X axis labelling
+                for axLabel in self.axisLabelling['0']:
+                    axisX = axLabel[2]
+                    axisXLabel = axLabel[3]
+
+                    # axisXText = str(int(axisXLabel)) if axLabel[4] >= 1 else str(axisXLabel)
+                    axisXText = self._intFormat(axisXLabel) if axLabel[4] >= 1 else self.XMode(axisXLabel)
+
+                    self._axisXLabelling.append(GLString(text=axisXText,
+                                                         font=self.globalGL.glSmallFont,
+                                                         x=axisX - (0.4 * self.globalGL.glSmallFont.width * self.deltaX * len(
+                                                                 axisXText)),
+                                                         y=self.AXIS_MARGINBOTTOM - GLDefs.TITLEYOFFSET * self.globalGL.glSmallFont.height,
+
+                                                         colour=labelColour, GLContext=self,
+                                                         obj=None))
+
+                # append the axisCode
+                self._axisXLabelling.append(GLString(text=self.axisCodes[0],
+                                                     font=self.globalGL.glSmallFont,
+                                                     x=GLDefs.AXISTEXTXOFFSET * self.deltaX,
+                                                     y=self.AXIS_MARGINBOTTOM - GLDefs.TITLEYOFFSET * self.globalGL.glSmallFont.height,
+                                                     colour=labelColour, GLContext=self,
+                                                     obj=None))
+                # and the axis dimensions
+                xUnitsLabels = self.XAXES[self._xUnits]
+                self._axisXLabelling.append(GLString(text=xUnitsLabels,
+                                                     font=self.globalGL.glSmallFont,
+                                                     x=1.0 - (self.deltaX * len(xUnitsLabels) * self.globalGL.glSmallFont.width),
+                                                     y=self.AXIS_MARGINBOTTOM - GLDefs.TITLEYOFFSET * self.globalGL.glSmallFont.height,
+                                                     colour=labelColour, GLContext=self,
+                                                     obj=None))
+
+            self._axisYLabelling = []
+
+            if self._drawRightAxis:
+                # create the Y axis labelling
+                for xx, ayLabel in enumerate(self.axisLabelling['1']):
+                    axisY = ayLabel[2]
+                    axisYLabel = ayLabel[3]
+
+                    if self.YAXISUSEEFORMAT:
+                        axisYText = self.YMode(axisYLabel)
+                    else:
+                        # axisYText = str(int(axisYLabel)) if ayLabel[4] >= 1 else str(axisYLabel)
+                        axisYText = self._intFormat(axisYLabel) if ayLabel[4] >= 1 else self.YMode(axisYLabel)
+
+                    self._axisYLabelling.append(GLString(text=axisYText,
+                                                         font=self.globalGL.glSmallFont,
+                                                         x=self.AXIS_OFFSET,
+                                                         # y=axisY - (GLDefs.AXISTEXTYOFFSET * self.pixelY),
+                                                         y=axisY - (GLDefs.AXISTEXTYOFFSET * self.deltaY),
+                                                         colour=labelColour, GLContext=self,
+                                                         obj=None))
+
+                # append the axisCode
+                self._axisYLabelling.append(GLString(text=self.axisCodes[1],
+                                                     font=self.globalGL.glSmallFont,
+                                                     x=self.AXIS_OFFSET,
+                                                     # y=self.axisT - (GLDefs.TITLEYOFFSET * self.globalGL.glSmallFont.height * self.pixelY),
+                                                     y=1.0 - (GLDefs.TITLEYOFFSET * self.globalGL.glSmallFont.height * self.deltaY),
+                                                     colour=labelColour, GLContext=self,
+                                                     obj=None))
+                # and the axis dimensions
+                yUnitsLabels = self.YAXES[self._yUnits]
+                self._axisYLabelling.append(GLString(text=yUnitsLabels,
+                                                     font=self.globalGL.glSmallFont,
+                                                     x=self.AXIS_OFFSET,
+                                                     y=1.0 * self.deltaY,
+                                                     colour=labelColour, GLContext=self,
+                                                     obj=None))
+
+    def drawAxisLabels(self):
+        # draw axes labelling
+
+        if self._axesVisible:
+            self.buildAxisLabels()
+
+            if self._drawBottomAxis:
+                # put the axis labels into the bottom bar
+                self.viewports.setViewport(self._currentBottomAxisBarView)
+
+                # self._axisScale[0:4] = [self.pixelX, 1.0, 1.0, 1.0]
+                self._axisScale[0:4] = [self.deltaX, 1.0, 1.0, 1.0]
+
+                self.globalGL._shaderProgramTex.setGLUniform4fv('axisScale', 1, self._axisScale)
+                self.globalGL._shaderProgramTex.setProjectionAxes(self._uPMatrix, 0.0, 1.0, 0,
+                                                                  self.AXIS_MARGINBOTTOM, -1.0, 1.0)
+                self.globalGL._shaderProgramTex.setGLUniformMatrix4fv('pTexMatrix', 1, GL.GL_FALSE, self._uPMatrix)
+
+                for lb in self._axisXLabelling:
+                    lb.drawTextArrayVBO(enableVBO=True)
+
+            if self._drawRightAxis:
+                # put the axis labels into the right bar
+                self.viewports.setViewport(self._currentRightAxisBarView)
+
+                # self._axisScale[0:4] = [1.0, self.pixelY, 1.0, 1.0]
+                self._axisScale[0:4] = [1.0, self.deltaY, 1.0, 1.0]
+
+                self.globalGL._shaderProgramTex.setGLUniform4fv('axisScale', 1, self._axisScale)
+                self.globalGL._shaderProgramTex.setProjectionAxes(self._uPMatrix, 0, self.AXIS_MARGINRIGHT,
+                                                                  0.0, 1.0, -1.0, 1.0)
+                self.globalGL._shaderProgramTex.setGLUniformMatrix4fv('pTexMatrix', 1, GL.GL_FALSE, self._uPMatrix)
+
+                for lb in self._axisYLabelling:
+                    lb.drawTextArrayVBO(enableVBO=True)
 
 class GuiNdWidgetAxis(Gui1dWidgetAxis):
     """Testing a widget that only contains a right axis

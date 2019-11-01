@@ -714,14 +714,14 @@ class GuiStripNd(GuiStrip):
         #     for spectrumView in self.spectrumViews:
         #         spectrumView.updateGeometryChange()
 
-    def _addCalibrateXNDSpectrumWidget(self):
+    def _addCalibrateXNDSpectrumWidget(self, enableClose=True):
         """add a new widget for calibrateX
         """
         from ccpn.ui.gui.widgets.CalibrateXSpectrumNDWidget import CalibrateXNDWidgets
 
         sdWid = self.spectrumDisplay.mainWidget
         self.widgetIndex += 1
-        self.calibrateXNDWidgets = CalibrateXNDWidgets(sdWid, mainWindow=self.mainWindow, strip=self,
+        self.calibrateXNDWidgets = CalibrateXNDWidgets(sdWid, mainWindow=self.mainWindow, strip=self, enableClose=enableClose,
                                                        grid=(self.widgetIndex, 0), gridSpan=(1, 7))
 
     def toggleCalibrateX(self):
@@ -763,7 +763,7 @@ class GuiStripNd(GuiStrip):
         """
         if self.calibrateXYAction.isChecked():
             if self.calibrateXNDWidgets is None:
-                self._addCalibrateXNDSpectrumWidget()
+                self._addCalibrateXNDSpectrumWidget(enableClose=False)
             self.calibrateXNDWidgets.setVisible(True)
             self.calibrateXNDWidgets._toggleLines()
             # self.calibrateXNDWidgets.resetUndos()

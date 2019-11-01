@@ -25,19 +25,15 @@ __date__ = "$Date: 2017-07-25 11:28:58 +0100 (Tue, July 25, 2017) $"
 # Start of code
 #=========================================================================================
 
-# import os
-# from ccpn.util import Path
-from PyQt5 import QtGui, QtWidgets, QtCore
+from PyQt5 import QtGui, QtWidgets
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.Frame import Frame
 from ccpn.ui.gui.widgets.ButtonList import ButtonList
 from ccpn.ui.gui.widgets.DoubleSpinbox import ScientificDoubleSpinBox
+from ccpn.ui.gui.widgets.Spacer import Spacer
 from ccpn.core.lib.SpectrumLib import _calibrateX1D
-# import pyqtgraph as pg
 from ccpn.util.Logging import getLogger
-from ccpn.ui.gui.widgets.MessageDialog import showWarning
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
-from ccpn.core.lib.ContextManagers import undoBlock
 from ccpn.ui.gui.popups.Dialog import handleDialogApply
 from ccpn.core.lib.ContextManagers import undoStackBlocking
 from functools import partial
@@ -52,7 +48,11 @@ ToolTip = 'Click the line to select. Hold left click and drag. Release the mouse
 
 
 class CalibrateX1DWidgets(Frame):
-    def __init__(self, parent=None, mainWindow=None, strip=None, **kwds):
+
+    APPLYLABEL = 'Apply'
+    CLOSELABEL = 'Close X'
+
+    def __init__(self, parent=None, mainWindow=None, strip=None, enableClose=True, **kwds):
         super().__init__(parent, setLayout=True, **kwds)
 
         if mainWindow is None:  # This allows opening the popup for graphical tests
@@ -87,8 +87,19 @@ class CalibrateX1DWidgets(Frame):
         i += 1
         self.boxDelta = ScientificDoubleSpinBox(self, step=0.001, decimals=3, grid=(0, i))
         i += 1
-        self.okButtons = ButtonList(self, ['Apply', 'Close'], callbacks=[self._apply, self._close],
+
+        if enableClose:
+            self.okButtons = ButtonList(self, [self.APPLYLABEL, self.CLOSELABEL], callbacks=[self._apply, self._close],
                                     grid=(0, i))
+        else:
+            self.okButtons = ButtonList(self, [self.APPLYLABEL], callbacks=[self._apply],
+                                    grid=(0, i))
+
+            # add a spacer to align the buttons to the left, should line up with Y widget Apply button
+            Spacer(self.okButtons, 0, 0, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum,
+                   grid=(0, 2), gridSpan=(1, 1))
+        self.okButtons.setFixedWidth(90)
+        self.okButtons.getButton(self.APPLYLABEL).setFixedWidth(45)
 
         self.labelOriginalPosition.setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.Minimum)
         self.boxOriginalPosition.setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.Minimum)

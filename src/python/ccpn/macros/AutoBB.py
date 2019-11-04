@@ -14,12 +14,9 @@ Searches for "i-1"s which are present in same spectra but missing and expected i
 Deletes weaker peaks which are assigned to same nmrAtoms CA and CB i-1.
 Deletes unassigned peaks
 
-
 Modify as you need and share it!
 
 """
-
-
 
 ##################################################################################################
 #####################################    User's  Parameters  #####################################
@@ -190,7 +187,6 @@ def _copyPeakFromOtherExpType(tobeCopiedPeak, targetPeakList, nmrAtomLabel = 'CA
     return missingPeak
 
 def _pickAndAssign_HNCA(hsqc_nmrAtoms,nmrResidue,m1nmrAtomCA,positionCodeDict):
-    # hnca
     hncaPeaks = hnca.peakLists[-1].restrictedPick(positionCodeDict, doPos=True, doNeg=False)
     _assignNmrAtomsToPeaks(hncaPeaks, hsqc_nmrAtoms)
     _assignByHeights(nmrResidue, hncaPeaks, label=CA)
@@ -209,7 +205,6 @@ def _pickAndAssign_HNCOCA(hsqc_nmrAtoms,nmrResidue,m1nmrAtomCA,positionCodeDict,
     return hncocaPeaks, _CAm1Peak
 
 def _pickAndAssign_CBCACONH(hsqc_nmrAtoms,nmrResidue, m1nmrAtomCB,positionCodeDict, hncocaPeaks):
-
     cbcaconhPeaks = cbcaconh.peakLists[-1].restrictedPick(positionCodeDict, doPos=True, doNeg=False)
     _assignNmrAtomsToPeaks(cbcaconhPeaks, hsqc_nmrAtoms + [m1nmrAtomCB])  # assign first CB
     for hncocaPeak in hncocaPeaks:  # assign CA from hncoca Peak
@@ -237,8 +232,6 @@ def _pickAndAssign_HNCACB(hsqc_nmrAtoms,nmrResidue, m1nmrAtomCB,m1nmrAtomCA,hnco
         _CBm1Peak = _copyPeakFromOtherExpType(hncacbCBm1Peak, cbcaconh.peakLists[-1], 'CB-1')
     return hncacbPeaks
 
-
-
 def pickRestrictedPeaksAndAddLabels():
     hsqcPeaks = hsqc.peakLists[-1].peaks
     allPeaks = []
@@ -262,79 +255,9 @@ def pickRestrictedPeaksAndAddLabels():
                 hncacbPeaks = _pickAndAssign_HNCACB(hsqc_nmrAtoms, nmrResidue, m1nmrAtomCB, m1nmrAtomCA, _CAm1Peak,
                                       _CBm1Peak, positionCodeDict)
                 allPeaks.extend(hncacbPeaks)
-            toBeDeleted = [p for p in allPeaks if not p.isFullyAssigned()]
-            project.deleteObjects(*toBeDeleted)
+            toBeDeleted3DsPeaks = [p for p in allPeaks if not p.isFullyAssigned()]
+            project.deleteObjects(*toBeDeleted3DsPeaks)
     return allPeaks
-
-
-
-def _pickRestrictedPeaksAndAddLabels():
-    hsqcPeaks = hsqc.peakLists[-1].peaks
-    allPeaks = []
-    with notificationEchoBlocking():
-        with undoBlockWithoutSideBar():
-            for peak in _stoppableProgressBar(hsqcPeaks, title='Labelling 3Ds...(2/3)'):
-                _CAm1Peak = None
-                _CBm1Peak = None
-                # hsqc nmrAtoms
-                hsqc_nmrAtoms = makeIterableList(peak.assignedNmrAtoms)
-                nmrResidue = hsqc_nmrAtoms[-1].nmrResidue
-                m1nmrResidue = nmrChain.fetchNmrResidue(nmrResidue.sequenceCode + OFFSET)
-                m1nmrAtomCA = m1nmrResidue.fetchNmrAtom(CA)
-                m1nmrAtomCB = m1nmrResidue.fetchNmrAtom(CB)
-                positionCodeDict = {H:peak.position[0], N:peak.position[1]}
-                # hnca
-                hncaPeaks = hnca.peakLists[-1].restrictedPick(positionCodeDict, doPos=True, doNeg=False)
-                _assignNmrAtomsToPeaks(hncaPeaks, hsqc_nmrAtoms)
-                _assignByHeights(nmrResidue, hncaPeaks, label=CA)
-                hncaCAm1Peak =  _getPeakForNmrAtom(hncaPeaks, m1nmrAtomCA)
-                _CAm1Peak = hncaCAm1Peak
-                allPeaks.extend(hncaPeaks)
-                # hncoca
-                hncocaPeaks = hncoca.peakLists[-1].restrictedPick(positionCodeDict, doPos=True, doNeg=False)
-                _assignNmrAtomsToPeaks(hncocaPeaks, hsqc_nmrAtoms + [m1nmrAtomCA])
-                hncocaCAm1Peak = _getPeakForNmrAtom(hncocaPeaks, m1nmrAtomCA)
-                if hncaCAm1Peak is None and hncocaCAm1Peak:
-                    missingHncaPeak = hncocaCAm1Peak.copyTo(hnca.peakLists[-1])
-                    missingHncaPeak.comment = 'CA-1 Copied from hncoca. Inspect it'
-                    _CAm1Peak = hncocaCAm1Peak
-                if hncocaCAm1Peak is None and hncaCAm1Peak:
-                    missinghncocaPeak = hncaCAm1Peak.copyTo(hncoca.peakLists[-1])
-                    missinghncocaPeak.comment = 'CA-1 Copied from hnca. Inspect it'
-                allPeaks.extend(hncocaPeaks)
-                # cbcaconh CAs are propagated from hncoca if peaks within tollerances
-                cbcaconhPeaks = cbcaconh.peakLists[-1].restrictedPick(positionCodeDict, doPos=True, doNeg=False)
-                _assignNmrAtomsToPeaks(cbcaconhPeaks, hsqc_nmrAtoms + [m1nmrAtomCB]) # assign first CB
-                for hncocaPeak in hncocaPeaks: # assign CA from hncoca Peak
-                    for cbcaconhPeak in cbcaconhPeaks:
-                        isWT = _isPeakWithinTollerances(hncocaPeak, cbcaconhPeak, CBCACONH_tolerances)
-                        if isWT:
-                            tbPropagated = makeIterableList(hncocaPeak.assignedNmrAtoms)
-                            _assignNmrAtomsToPeaks([cbcaconhPeak], tbPropagated)
-                cbcaconhCBm1Peak = _getPeakForNmrAtom(cbcaconhPeaks, m1nmrAtomCB)
-                _CBm1Peak = cbcaconhCBm1Peak
-                allPeaks.extend(cbcaconhPeaks)
-                # hncacb
-                hncacbPeaks = hncacb.peakLists[-1].restrictedPick(positionCodeDict, doPos=True, doNeg=True)
-                _assignNmrAtomsToPeaks(hncacbPeaks, hsqc_nmrAtoms)
-                _assignByHeights(nmrResidue, [p for p in hncacbPeaks if p.height > 0], CA, hsqc_nmrAtoms)
-                _assignByHeights(nmrResidue, [p for p in hncacbPeaks if p.height < 0], CB, hsqc_nmrAtoms)
-                hncacbCAm1Peak = _getPeakForNmrAtom(hncacbPeaks, m1nmrAtomCA)
-                hncacbCBm1Peak = _getPeakForNmrAtom(hncacbPeaks, m1nmrAtomCB)
-                if hncacbCAm1Peak is None and hncocaCAm1Peak:
-                    missingHncacbPeak = hncocaCAm1Peak.copyTo(hncacb.peakLists[-1])
-                    missingHncacbPeak.comment = 'CA-1 Copied from hncoca. Inspect it'
-                if hncacbCBm1Peak is None and cbcaconhCBm1Peak:
-                    missingHncacbCBm1Peak = cbcaconhCBm1Peak.copyTo(hncacb.peakLists[-1])
-                    missingHncacbCBm1Peak.comment = 'CB-1 Copied from cbcaconh. Inspect it'
-                if cbcaconhCBm1Peak is None and hncacbCBm1Peak:
-                    missingCbcaconhCBm1Peak = hncacbCBm1Peak.copyTo(cbcaconh.peakLists[-1])
-                    missingCbcaconhCBm1Peak.comment = 'CB-1 Copied from hncacb. Inspect it'
-                allPeaks.extend(hncacbPeaks)
-
-        toBeDeleted = [p for p in allPeaks if not p.isFullyAssigned()]
-        project.deleteObjects(*toBeDeleted)
-        return allPeaks
 
 def findPeaksAssignedOnlyToHSQC():
     peaks = []
@@ -367,16 +290,15 @@ def _deleteDuplicatedCACBm1():
                                 for pl, peak in d.items(): # make a dict with key the peakList and as value a list of all peak belonging to that peakList
                                     dd[pl].append(peak)
                             for pl, peaks in dd.items():
-                                peakHs = [abs(peak.height) for peak in peaks]
-                                maxHeight = max(peakHs)
-                                tobeDeletedPeaks.extend([peak for peak in peaks if abs(peak.height)!= maxHeight])
+                                tobeDeletedPeaks.extend([peak for peak in peaks if abs(peak.height)!= max([abs(peak.height) for peak in peaks])])
             project.deleteObjects(*tobeDeletedPeaks)
 
-
+# run it
 pickPeaksHSQC()
 addLabelsHSQC()
 pickRestrictedPeaksAndAddLabels()
 unAssigned = findPeaksAssignedOnlyToHSQC()
+# project.deleteObjects(*unAssigned)
 _deleteDuplicatedCACBm1()
 
 

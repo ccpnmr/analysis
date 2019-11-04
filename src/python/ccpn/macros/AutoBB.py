@@ -273,7 +273,7 @@ def findPeaksAssignedOnlyToHSQC():
     project.deleteObjects(*unAssignedNmrResidues) # not assigned to any peak. No point in keeping it for now
     return peaks
 
-def _deleteDuplicatedCACBm1():
+def deleteDuplicatedCACBm1():
     """
     Removes weaker peaks which are assigned to the same nmrAtoms in the same peakList.
     """
@@ -299,4 +299,4 @@ addLabelsHSQC()
 pickRestrictedPeaksAndAddLabels()
 unAssigned = findPeaksAssignedOnlyToHSQC()
 # project.deleteObjects(*unAssigned)
-_deleteDuplicatedCACBm1()
+deleteDuplicatedCACBm1()

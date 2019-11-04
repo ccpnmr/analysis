@@ -129,6 +129,8 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
 
         logger.debug('GuiMainWindow.moduleArea: layout: %s' % self.moduleArea.layout)  ## pyqtgraph object
         self.moduleArea.setGeometry(0, 0, 1000, 800)
+        # GST can't seem to do this with style sheets...
+        self.moduleArea.setContentsMargins(0, 2, 2, 0)
         self.setCentralWidget(self.moduleArea)
         self._shortcutsDict = {}
         self.recordingMacro = False

@@ -315,6 +315,10 @@ class NmrResidueTable(GuiTable):
         parent.getLayout().setHorizontalSpacing(0)
         self._widgetScrollArea = ScrollArea(parent=parent, scrollBarPolicies=('never', 'never'), **kwds)
         self._widgetScrollArea.setWidgetResizable(True)
+        self._widgetScrollArea.setStyleSheet('''
+                                    margin-left : 2px;
+                                    margin-right : 2px;
+                                    padding : 2px''')
         self._widget = Widget(parent=self._widgetScrollArea, setLayout=True)
         self._widgetScrollArea.setWidget(self._widget)
         self._widget.setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.Expanding)

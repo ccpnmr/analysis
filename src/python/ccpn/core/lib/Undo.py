@@ -32,6 +32,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 from functools import partial, update_wrapper
 from collections import deque
 from ccpn.util.Logging import getLogger
+from enum import Enum
 
 MAXUNDOWAYPOINTS = 25
 MAXUNDOOPERATIONS = 10000
@@ -92,6 +93,32 @@ def resetUndo(memopsRoot, maxWaypoints=MAXUNDOWAYPOINTS, maxOperations=MAXUNDOOP
     else:
         memopsRoot._undo = None
 
+class UndoEvents(Enum):
+    UNDO_UNDO=1
+    UNDO_REDO=2
+    UNDO_CLEAR=3
+    UNDO_ADD=4
+    UNDO_MARK_SAVE=5
+    UNDO_MARK_CLEAN=6
+
+class Observer():
+
+    def __init__(self):
+        self._callbacks = set()
+
+    def add(self,callback):
+        self._callbacks.add(callback)
+
+    def clear(self):
+        self._callbacks.clear()
+
+    def remove(self,callback):
+        if callback in self._callbacks:
+            self._callbacks.remove(callback)
+
+    def call(self,action):
+        for callback in self._callbacks:
+            action(callback)
 
 class Undo(deque):
     """Implementation of an undo and redo stack, with possibility of waypoints.
@@ -113,6 +140,10 @@ class Undo(deque):
         self._undoItemBlockingLevel = 0  # Blocking level - modify with increase/decreaseBlocking only
         self._waypointBlockingLevel = 0  # Waypoint blocking - modify with increase/decreaseWaypointBlocking/ only
         self._newItemCount = 0  # the number of new items that have been added since the last new waypoint
+        self._itemAtLastSave = None
+        self._stackCleared =  False
+        self._lastEventMarkClean = False
+        self.undoChanged =  Observer()
 
         if maxWaypoints:
             self.newWaypoint()  # DO NOT CHANGE THIS ONE
@@ -139,6 +170,35 @@ class Undo(deque):
 
         # needed for a single occurrence in api
         return self._undoItemBlockingLevel
+
+    #GST to ejb is this a good way to do it?
+    def markSave(self):
+        if len(self) > 0:
+            lastItem = self.nextIndex-1
+            self._itemAtLastSave =  self[lastItem]
+        self._stackCleared = False
+        self._lastEventMarkClean = True
+        self.undoChanged.call(lambda x : x(UndoEvents.UNDO_MARK_SAVE))
+
+    def isDirty(self):
+        result = False
+
+        lastItem = self.nextIndex-1
+
+        if self._stackCleared:
+            result = True
+        elif len(self) > 0 and (self._itemAtLastSave == None):
+            result = True
+        elif len(self) > 0 and lastItem > 0 and (self[lastItem] != self._itemAtLastSave):
+            result = True
+            result = True
+        return result
+
+    def markClean(self):
+        self._itemAtSave = None
+        self._stackCleared = False
+        self._lastEventMarkClean = True
+        self.undoChanged.call(lambda x : x(UndoEvents.UNDO_MARK_CLEAN))
 
     def increaseBlocking(self):
         """Set one more level of blocking"""
@@ -267,6 +327,9 @@ class Undo(deque):
         else:
             self.nextIndex += 1
 
+        self._lastEventMarkClean = False
+        self.undoChanged.call(lambda x : x(UndoEvents.UNDO_ADD))
+
     def newItem(self, undoMethod, redoMethod, undoArgs=None, undoKwargs=None,
                 redoArgs=None, redoKwargs=None):
         """Add item to the undo stack.
@@ -300,7 +363,8 @@ class Undo(deque):
             redoCall = self._wrappedPartial(redoMethod, *redoArgs, **redoKwargs)
 
         # add new undo/redo methods to the deque - keep a count
-        self.append((undoCall, redoCall))
+        newItem = (undoCall, redoCall)
+        self.append(newItem)
         self._newItemCount += 1
 
         # fix waypoints:
@@ -319,6 +383,20 @@ class Undo(deque):
                     del ll[0]
         else:
             self.nextIndex += 1
+
+
+        #GST hack to get round bug
+        #GST when extra
+        #badKeys = ('includePositiveContours', 'includeNegativeContours', 'spectrumAliasing')
+        #badKeys = tuple(sorted(badKeys))
+
+        #testKeys = undoArgs[0].keys()
+        #testKeys = tuple(sorted(testKeys))
+        if self._lastEventMarkClean: #and testKeys != badKeys:
+            self.undoChanged.call(lambda x : x(UndoEvents.UNDO_ADD))
+        else:
+            self.markSave()
+
 
     def undo(self):
         """Undo one operation - or one waypoint if waypoints are set
@@ -363,10 +441,13 @@ class Undo(deque):
             if self._debug:
                 print("UNDO DEBUG: error in undo. Last undo function was:", undoCall)
                 raise
+            self._stackCleared()
             self.clear()
         finally:
             # Added by Rasmus March 2015. Surely we need to reset self._blocked?
             self._blocked = False
+
+        self.undoChanged.call(lambda x : x(UndoEvents.UNDO_UNDO))
 
     def redo(self):
         """Redo one waypoint - or one operation if waypoints are not set.
@@ -408,10 +489,13 @@ class Undo(deque):
             if self._debug:
                 print("REDO DEBUG: error in redo. Last redo call was:", redoCall)
                 raise
+            self._stackCleared()
             self.clear()
         finally:
             # Added by Rasmus March 2015. Surely we need to reset self._blocked?
             self._blocked = False
+
+        self.undoChanged.call(lambda x : x(UndoEvents.UNDO_REDO))
 
     def clear(self):
         """Clear and reset undo object
@@ -421,6 +505,8 @@ class Undo(deque):
         self._blocked = False
         self._undoItemBlockingLevel = 0
         deque.clear(self)
+        self.markClean()
+        self.undoChanged.call(lambda x : x(UndoEvents.UNDO_CLEAR))
 
     def canUndo(self) -> bool:
         """True if an undo operation can be performed

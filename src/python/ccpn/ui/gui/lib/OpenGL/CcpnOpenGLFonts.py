@@ -71,8 +71,6 @@ class CcpnGLFont():
 
         if scale == None:
             raise Exception('scale must be defined for font %s ' % fileName)
-        # print('open font', fileName)
-
         with open(fileName, 'r') as op:
             self.fontInfo = op.read().split('\n')
 
@@ -107,7 +105,6 @@ class CcpnGLFont():
 
         while exitDims is False and row < len(self.fontInfo):
             line = self.fontInfo[row]
-            # print (line)
             if line.startswith('kerning'):
                 exitDims = True
             else:
@@ -174,7 +171,6 @@ class CcpnGLFont():
             exitKerns = False
             while exitKerns is False and row < len(self.fontInfo):
                 line = self.fontInfo[row]
-                # print(line)
 
                 try:
                     lineVals = [int(ll) for ll in line.split()]
@@ -214,12 +210,12 @@ class CcpnGLFont():
                         GL.GL_RGBA, GL.GL_UNSIGNED_BYTE, self.fontPNG.data)
 
         # generate a MipMap to cope with smaller text (may not be needed soon)
-        # GL.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MAG_FILTER, GL.GL_NEAREST)
-        # GL.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MIN_FILTER, GL.GL_NEAREST)
+        GL.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MAG_FILTER, GL.GL_NEAREST)
+        GL.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MIN_FILTER, GL.GL_NEAREST)
 
-        # the following 2 lines generate a multitexture mipmap - improves fonts for retina/non-retina displays
-        GL.glTexParameteri( GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MIN_FILTER, GL.GL_LINEAR_MIPMAP_LINEAR)
-        GL.glGenerateMipmap( GL.GL_TEXTURE_2D )
+        # the following 2 lines generate a multitexture mipmap - shouldn't need here
+        # GL.glTexParameteri( GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MIN_FILTER, GL.GL_LINEAR_MIPMAP_LINEAR )
+        # GL.glGenerateMipmap( GL.GL_TEXTURE_2D )
         GL.glDisable(GL.GL_TEXTURE_2D)
 
 
@@ -241,13 +237,12 @@ class GLString(GLVertexArray):
                  x=0.0, y=0.0,
                  ox=0.0, oy=0.0,
                  angle=0.0, width=None, height=None, GLContext=None, blendMode=True,
-                 clearArrays=False, serial=None, scale=2):
+                 clearArrays=False, serial=None):
         super().__init__(renderMode=GLRENDERMODE_DRAW, blendMode=blendMode,
                          GLContext=GLContext, drawMode=GL.GL_TRIANGLES,
                          dimension=2, clearArrays=clearArrays)
         if text is None:
             text = ''
-
         self.text = text
         self.font = font
         self.object = obj
@@ -256,8 +251,8 @@ class GLString(GLVertexArray):
         self.colour = colour
         self._position = (x, y)
         self._offset = (ox, oy)
-        self.scale = scale
 
+        self.scale = font.scale
         self.buildString()
 
     def buildString(self):
@@ -330,8 +325,10 @@ class GLString(GLVertexArray):
 
                 # attribs = [[x, y], [x, y], [x, y], [x, y]]
                 # offsets = [[x, y], [x, y], [x, y], [x, y]]
+
                 self.vertices[i8:i8 + 8] = (x0/self.scale, y0/self.scale, x0/self.scale, y1/self.scale,
-                                            x1/self.scale, y1/self.scale, x1/self.scale, y0/self.scale)
+                                            x1/self.scale, y1/self.scale, x1/self.scale, y0/self.scale)               # pixel coordinates in string
+
                 self.indices[i6:i6 + 6] = (i4, i4 + 1, i4 + 2, i4, i4 + 2, i4 + 3)
                 self.texcoords[i8:i8 + 8] = (u0, v0, u0, v1, u1, v1, u1, v0)
                 self.colors[i16:i16 + 16] = colour * 4
@@ -343,15 +340,8 @@ class GLString(GLVertexArray):
                 self.width = max(self.width, penX)
 
             if (c == 32):  # space
-                # print('space width',font.spaceWidth)
-                # print(penX)
                 penX += font.spaceWidth
-                # print(font.spaceWidth)
-                # print(penX)
-                # print(self.width)
                 self.width = max(self.width, penX)
-                # print(self.width)
-                # print('end space')
 
             elif (c == 10):  # newline
                 penX = 0
@@ -370,7 +360,7 @@ class GLString(GLVertexArray):
 
             # penY = penY + glyph[GlyphHeight]
             prev = charCode
-        # print(text,self.width, len(text))
+
         # set the offsets for the characters top the desired coordinates
         self.numVertices = len(self.vertices) // 2
         self.attribs = np.array((x + ox, y + oy) * self.numVertices, dtype=np.float32)

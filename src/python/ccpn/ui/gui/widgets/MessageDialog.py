@@ -29,6 +29,8 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 
 from ccpn.ui.gui.guiSettings import messageFont, messageFontBold
 
+def _isDarwin():
+    return 'darwin' in QtCore.QSysInfo().kernelType().lower()
 
 Ok            = QtWidgets.QMessageBox.Ok
 Cancel        = QtWidgets.QMessageBox.Cancel
@@ -39,12 +41,17 @@ Ignore        = QtWidgets.QMessageBox.Ignore
 Abort         = QtWidgets.QMessageBox.Abort
 Close         = QtWidgets.QMessageBox.Close
 Information   = QtWidgets.QMessageBox.Information
-Question      = QtWidgets.QMessageBox.Question
 Warning       = QtWidgets.QMessageBox.Warning
+Question      = QtWidgets.QMessageBox.Question
 Critical      = QtWidgets.QMessageBox.Critical
 Save          = QtWidgets.QMessageBox.Save
 Discard       = QtWidgets.QMessageBox.Discard
 
+default_icons = (Information,Question,Warning,Critical)
+
+
+if _isDarwin():
+    Question = Warning
 
 class MessageDialog(QtWidgets.QMessageBox):
     """
@@ -80,7 +87,7 @@ class MessageDialog(QtWidgets.QMessageBox):
         if item:
             widget = item.widget()
             # GWV: Estimating minimumwidth
-            widget.setMinimumWidth(max(len(message) * 5, 200))
+            widget.setMinimumWidth(max(len(message) * 7, 200))
             widget.setFont(messageFont)
 
         # textEdit = self.findChild(QtGui.QTextEdit)
@@ -214,23 +221,66 @@ def showYesNoWarning(title, message, parent=None, iconPath=None):
     return dialog.exec_() == Yes
 
 
-def showMulti(title, message, texts, objects=None, parent=None, iconPath=None):
+def showMulti(title, message, texts, objects=None, parent=None, iconPath=None, okText='OK', cancelText='Cancel', destructive=(), checkbox=None, checked=True):
     if objects:
         assert len(objects) == len(texts)
 
     dialog = MessageDialog('Query', title, message, Question, iconPath, parent)
 
+    _checkbox = None
+
     for text in texts:
-        dialog.addButton(text, QtWidgets.QMessageBox.AcceptRole)
+        lower_text = text.strip().lower()
+
+
+        if checkbox and (lower_text in checkbox or checkbox in lower_text):
+            raise Exception('Checkboxes and buttons cannot have the same name!')
+        else:
+            role = QtWidgets.QMessageBox.ActionRole
+
+            if lower_text == 'cancel' or lower_text == cancelText.strip().lower():
+                role = QtWidgets.QMessageBox.RejectRole
+
+            if not isinstance(destructive, str):
+                destructive = [item.strip().lower() for item in destructive]
+            else:
+                destructive = destructive.strip().lower()
+            if lower_text in destructive:
+                role = QtWidgets.QMessageBox.DestructiveRole
+
+            if lower_text == 'ok' or lower_text == okText.strip().lower():
+                role = QtWidgets.QMessageBox.AcceptRole
+
+            button = dialog.addButton(text, role)
+
+            if lower_text == 'ok' or lower_text == okText.strip().lower():
+                dialog.setDefaultButton(button)
+
+        if checkbox != None:
+            _checkbox = QtWidgets.QCheckBox(checkbox, parent=dialog)
+            _checkbox.setChecked(checked)
+            dialog.setCheckBox(_checkbox)
+
+    if _checkbox != None:
+        _checkbox.setFocus()
 
     dialog.raise_()
     index = dialog.exec_()
 
-    if objects:
-        return objects[index]
 
-    else:
-        return texts[index]
+    result = ''
+    if dialog.clickedButton() != None:
+        if objects:
+            result = objects[index]
+
+        else:
+            result = texts[index]
+
+    if checkbox != None:
+        if _checkbox.isChecked():
+            result = ' %s %s ' % (result, checkbox)
+
+    return result
 
 
 def showError(title, message, parent=None, iconPath=None):

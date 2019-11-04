@@ -280,7 +280,7 @@ def _deleteDuplicatedCACBm1():
     tobeDeletedPeaks = []
     with notificationEchoBlocking():
         with undoBlockWithoutSideBar():
-            for nmrResidue in project.nmrResidues:
+            for nmrResidue in _stoppableProgressBar(project.nmrResidues, title='Cleaning up...(3/3)'):
                 if nmrResidue.relativeOffset == -1:
                     for nmrAtom in nmrResidue.nmrAtoms:
                         if len(nmrAtom.assignedPeaks) > 0:
@@ -300,7 +300,3 @@ pickRestrictedPeaksAndAddLabels()
 unAssigned = findPeaksAssignedOnlyToHSQC()
 # project.deleteObjects(*unAssigned)
 _deleteDuplicatedCACBm1()
-
-
-
-# 128.9 8.54

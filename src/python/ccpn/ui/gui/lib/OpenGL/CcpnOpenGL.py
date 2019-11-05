@@ -327,10 +327,12 @@ class CcpnGLWidget(QOpenGLWidget):
         self._successiveClicks = None  # GWV: Store successive click events for zooming; None means first click not set
         self._dottedCursorCoordinate = None
         self._dottedCursorVisible = None
+        self._spectrumBordersVisible = True
 
         self.gridList = []
         self._gridVisible = self._preferences.showGrid
         self._crosshairVisible = self._preferences.showCrosshair
+        self._doubleCrosshairVisible = self._preferences.showDoubleCrosshair
 
         self.diagonalGLList = None
         self._updateAxes = True
@@ -401,7 +403,10 @@ class CcpnGLWidget(QOpenGLWidget):
         self._mouseCoords = [-1.0, -1.0]
         self.mouseString = None
         self.diffMouseString = None
-        self.peakLabelling = 0
+        self._symbolLabelling = 0
+        self._symbolType = 0
+        self._symbolSize = 0
+        self._symbolThickness = 0
 
         self._contourList = {}
 
@@ -546,8 +551,8 @@ class CcpnGLWidget(QOpenGLWidget):
             self.deltaX = 1.0 / w
             self.deltaY = 1.0 / h
 
-        self.symbolX = abs(self.strip.symbolSize * self.pixelX)
-        self.symbolY = abs(self.strip.symbolSize * self.pixelY)
+        self.symbolX = abs(self._symbolSize * self.pixelX)
+        self.symbolY = abs(self._symbolSize * self.pixelY)
 
         self._dataMatrix[0:16] = [self.axisL, self.axisR, self.axisT, self.axisB,
                                   self.pixelX, self.pixelY, w, h,
@@ -3143,7 +3148,9 @@ class CcpnGLWidget(QOpenGLWidget):
         # draw the bounding boxes
         with self._disableGLAliasing():
             GL.glEnable(GL.GL_BLEND)
-            if self._preferences.showSpectrumBorder:
+
+            # if self._preferences.showSpectrumBorder:
+            if self.strip.spectrumBordersVisible:
                 for spectrumView in self._ordering:  #self._ordering:                             # strip.spectrumViews:
 
                     if spectrumView.isDeleted:
@@ -3997,6 +4004,15 @@ class CcpnGLWidget(QOpenGLWidget):
         self._gridVisible = visible
         self.update()
 
+    @property
+    def spectrumBordersVisible(self):
+        return self._spectrumBordersVisible
+
+    @spectrumBordersVisible.setter
+    def spectrumBordersVisible(self, visible):
+        self._spectrumBordersVisible = visible
+        self.update()
+
     def toggleGrid(self):
         self._gridVisible = not self._gridVisible
         self.update()
@@ -4014,18 +4030,18 @@ class CcpnGLWidget(QOpenGLWidget):
         self._crosshairVisible = not self._crosshairVisible
         self.update()
 
-    # @property
-    # def doubleCrosshairVisible(self):
-    #     return self._doubleCrosshairVisible
-    #
-    # @doubleCrosshairVisible.setter
-    # def doubleCrosshairVisible(self, visible):
-    #     self._doubleCrosshairVisible = visible
-    #     self.update()
-    #
-    # def toggleDoubleCrosshair(self):
-    #     self._doubleCrosshairVisible = not self._doubleCrosshairVisible
-    #     self.update()
+    @property
+    def doubleCrosshairVisible(self):
+        return self._doubleCrosshairVisible
+
+    @doubleCrosshairVisible.setter
+    def doubleCrosshairVisible(self, visible):
+        self._doubleCrosshairVisible = visible
+        self.update()
+
+    def toggleDoubleCrosshair(self):
+        self._doubleCrosshairVisible = not self._doubleCrosshairVisible
+        self.update()
 
     @property
     def showSpectraOnPhasing(self):

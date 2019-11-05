@@ -65,11 +65,14 @@ class CcpnDialogMainWidget(QtWidgets.QDialog, Base):
     APPLYBUTTON = QtWidgets.QDialogButtonBox.Apply
     OKBUTTON = QtWidgets.QDialogButtonBox.Ok
     HELPBUTTON = QtWidgets.QDialogButtonBox.Help
+
     DEFAULTBUTTON = CLOSEBUTTON
 
     USESCROLLWIDGET = False
     FIXEDWIDTH = True
     FIXEDHEIGHT = True
+
+    ENABLEICONS = False
 
     def __init__(self, parent=None, windowTitle='', setLayout=False,
                  orientation=HORIZONTAL, size=None, **kwds):
@@ -190,7 +193,7 @@ class CcpnDialogMainWidget(QtWidgets.QDialog, Base):
                                texts=text, tipTexts=tipText, icons=icon,
                                enabledStates=enabled, visibleStates=visible)
 
-    def setHelpButton(self, callback=None, text='',
+    def setHelpButton(self, callback=None, text='?',
                       tipText='Help',
                       icon='icons/system-help',
                       enabled=True, visible=True):
@@ -204,6 +207,16 @@ class CcpnDialogMainWidget(QtWidgets.QDialog, Base):
                        tipText='Apply changes',
                        icon='icons/orange-apply',
                        enabled=True, visible=True):
+        """Add an Apply button to the dialog box
+        """
+        return self._addButton(buttons=self.APPLYBUTTON, callbacks=callback,
+                               texts=text, tipTexts=tipText, icons=icon,
+                               enabledStates=enabled, visibleStates=visible)
+
+    def setUserButton(self, callback=None, text=None,
+                      tipText='Apply changes to all spectra',
+                      icon='icons/orange-apply',
+                      enabled=True, visible=True):
         """Add an Apply button to the dialog box
         """
         return self._addButton(buttons=self.APPLYBUTTON, callbacks=callback,
@@ -230,6 +243,7 @@ class CcpnDialogMainWidget(QtWidgets.QDialog, Base):
         self.dialogButtons = DialogButtonBox(self, grid=grid,
                                              orientation=self._orientation,
                                              defaultButton=self._defaultButton,
+                                             enableIcons=self.ENABLEICONS,
                                              **self._buttonOptions)
         self.dialogButtons.setContentsMargins(0, 10, 0, 0)
 

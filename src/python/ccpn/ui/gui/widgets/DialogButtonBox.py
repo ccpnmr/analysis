@@ -33,7 +33,7 @@ from functools import reduce
 class DialogButtonBox(QtWidgets.QDialogButtonBox, Base):
 
     def __init__(self, parent=None, buttons=None, callbacks=None, texts=None, tipTexts=None,
-                 icons=None, enabledStates=None, visibleStates=None, defaultButton=None,
+                 icons=None, enabledStates=None, visibleStates=None, defaultButton=None, enableIcons=False,
                  orientation='horizontal', **kwds):
 
         super().__init__(parent)
@@ -105,12 +105,15 @@ class DialogButtonBox(QtWidgets.QDialogButtonBox, Base):
                         if not text:
                             # reduce the padding to give a better shape
                             thisButton.setStyleSheet('QPushButton { padding: 0px 2px 0px 2px; }')
+
                     if tipText is not None:
                         thisButton.setToolTip(tipText)
-                    if icon is not None:  # filename or pixmap
+
+                    if enableIcons and icon is not None:                                # filename or pixmap
                         thisButton.setIcon(Icon(icon))
                         # NOTE: sometimes this causes the button to reset its stylesheet
                         thisButton.setIconSize(QtCore.QSize(22, 22))
+
                     if enabledState is not None:
                         thisButton.setEnabled(enabledState)
                     if visibleState is not None:

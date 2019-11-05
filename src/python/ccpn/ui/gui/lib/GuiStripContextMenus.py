@@ -141,7 +141,7 @@ def _cyclePeakLabelsItem(strip):
     return _SCMitem(name='Cycle Peak Labels',
                     typeItem=ItemTypes.get(ITEM), icon='icons/preferences-desktop-font',
                     toolTip='Cycle Peak Labelling Types',
-                    callback=strip.cyclePeakLabelling, shortcut='PL', stripMethodName='')
+                    callback=strip.cycleSymbolLabelling, shortcut='PL', stripMethodName='')
 
 
 def _cyclePeakSymbolsItem(strip):

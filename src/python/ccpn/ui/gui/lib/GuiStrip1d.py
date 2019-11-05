@@ -389,7 +389,7 @@ class GuiStrip1d(GuiStrip):
         """
         pass
 
-    def cyclePeakLabelling(self):
+    def cycleSymbolLabelling(self):
         """Toggles whether peak labelling is minimal is visible in the strip.
         """
         pass

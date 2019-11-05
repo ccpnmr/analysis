@@ -65,8 +65,8 @@ class GuiStrip(Frame):
 
     optionsChanged = QtCore.pyqtSignal(dict)
 
-    MAXPEAKLABELTYPES = 4
-    MAXPEAKSYMBOLTYPES = 3
+    MAXPEAKLABELTYPES = 5
+    MAXPEAKSYMBOLTYPES = 4
 
     def __init__(self, spectrumDisplay):
         """
@@ -121,8 +121,8 @@ class GuiStrip(Frame):
                                          QtWidgets.QSizePolicy.Expanding)
 
         self.stripLabel = None
-        self.header = None      #StripHeader(parent=self, mainWindow=self.mainWindow, strip=self,
-                                 # grid=headerGrid, gridSpan=headerSpan, setLayout=True, spacing=(0, 0))
+        self.header = None  #StripHeader(parent=self, mainWindow=self.mainWindow, strip=self,
+        # grid=headerGrid, gridSpan=headerSpan, setLayout=True, spacing=(0, 0))
 
         # set the ID label in the new widget
         # self._CcpnGLWidget.setStripID('.'.join(self.id.split('.')))
@@ -157,35 +157,41 @@ class GuiStrip(Frame):
 
         self._preferences = self.application.preferences.general
 
-        # set peakLabelling to the default from preferences or strip to the left
+        # set symbolLabelling to the default from preferences or strip to the left
         settings = spectrumDisplay.getSettings()
         if len(spectrumDisplay.strips) > 1:
 
             # copy the values form the first strip
-            self.peakLabelling = min(spectrumDisplay.strips[0].peakLabelling, self.MAXPEAKLABELTYPES - 1)
+            self.symbolLabelling = min(spectrumDisplay.strips[0].symbolLabelling, self.MAXPEAKLABELTYPES - 1)
             self.symbolType = min(spectrumDisplay.strips[0].symbolType, self.MAXPEAKSYMBOLTYPES - 1)
+            self.symbolSize = spectrumDisplay.strips[0].symbolSize
+            self.symbolThickness = spectrumDisplay.strips[0].symbolThickness
 
-            self._symbolSize = spectrumDisplay.strips[0].symbolSize
-            self._symbolThickness = spectrumDisplay.strips[0].symbolThickness
             self.gridVisible = spectrumDisplay.strips[0].gridVisible
             self.crosshairVisible = spectrumDisplay.strips[0].crosshairVisible
+            self.doubleCrosshairVisible = spectrumDisplay.strips[0].doubleCrosshairVisible
+
             self.showSpectraOnPhasing = spectrumDisplay.strips[0].showSpectraOnPhasing
             self._contourThickness = spectrumDisplay.strips[0]._contourThickness
+            self._spectrumBordersVisible = spectrumDisplay.strips[0]._spectrumBordersVisible
 
             self._CcpnGLWidget._axisLocked = spectrumDisplay.strips[0]._CcpnGLWidget._axisLocked
 
         else:
 
             # get the values from the preferences
-            self.peakLabelling = min(self._preferences.annotationType, self.MAXPEAKLABELTYPES - 1)
+            self.symbolLabelling = min(self._preferences.annotationType, self.MAXPEAKLABELTYPES - 1)
             self.symbolType = min(self._preferences.symbolType, self.MAXPEAKSYMBOLTYPES - 1)
+            self.symbolSize = self._preferences.symbolSizePixel
+            self.symbolThickness = self._preferences.symbolThickness
 
-            self._symbolSize = self._preferences.symbolSizePixel
-            self._symbolThickness = self._preferences.symbolThickness
             self.gridVisible = self._preferences.showGrid
             self.crosshairVisible = self._preferences.showCrosshair
+            self.doubleCrosshairVisible = self._preferences.showDoubleCrosshair
+
             self.showSpectraOnPhasing = self._preferences.showSpectraOnPhasing
             self._contourThickness = self._preferences.contourThickness
+            self._spectrumBordersVisible = self._preferences.showSpectrumBorder
 
         self._storedPhasingData = [[0.0, 0.0, 0.0], [0.0, 0.0, 0.0]]
         self.showActivePhaseTrace = True
@@ -197,7 +203,7 @@ class GuiStrip(Frame):
         self._CcpnGLWidget.yUnits = settings[AXISYUNITS]
         self._CcpnGLWidget.axisLocked = settings[AXISLOCKASPECTRATIO]
         self._CcpnGLWidget.fixedAspect = settings[AXISUSEFIXEDASPECTRATIO]
-        self._CcpnGLWidget._doubleCrosshairVisible = self._preferences.showDoubleCrosshair
+        # self._CcpnGLWidget._doubleCrosshairVisible = self._preferences.showDoubleCrosshair
 
         # initialise the notifiers
         self.setStripNotifiers()
@@ -285,9 +291,23 @@ class GuiStrip(Frame):
     def gridVisible(self, visible):
         """set the grid visibility
         """
-        self._CcpnGLWidget.gridVisible = visible
         if hasattr(self, 'gridAction'):
             self.gridAction.setChecked(visible)
+        self._CcpnGLWidget.gridVisible = visible
+
+    @property
+    def spectrumBordersVisible(self):
+        """True if spectrumBorders are visible.
+        """
+        return self._CcpnGLWidget.spectrumBordersVisible
+
+    @spectrumBordersVisible.setter
+    def spectrumBordersVisible(self, visible):
+        """set the spectrumBorders visibility
+        """
+        if hasattr(self, 'spectrumBordersAction'):
+            self.spectrumBordersAction.setChecked(visible)
+        self._CcpnGLWidget.spectrumBordersVisible = visible
 
     def toggleGrid(self):
         """Toggles whether grid is visible in the strip.
@@ -305,9 +325,9 @@ class GuiStrip(Frame):
     def crosshairVisible(self, visible):
         """set the crosshairVisible visibility
         """
-        self._CcpnGLWidget.crosshairVisible = visible
         if hasattr(self, 'crosshairAction'):
             self.crosshairAction.setChecked(visible)
+        self._CcpnGLWidget.crosshairVisible = visible
 
     def _toggleCrosshair(self):
         """Toggles whether crosshair is visible.
@@ -332,6 +352,26 @@ class GuiStrip(Frame):
         TBD: the naive approach below should be improved
         """
         return axisCode  #if axisCode[0].isupper() else axisCode
+
+    @property
+    def doubleCrosshairVisible(self):
+        """True if doubleCrosshair is visible.
+        """
+        return self._CcpnGLWidget.doubleCrosshairVisible
+
+    @doubleCrosshairVisible.setter
+    def doubleCrosshairVisible(self, visible):
+        """set the doubleCrosshairVisible visibility
+        """
+        if hasattr(self, 'doubleCrosshairAction'):
+            self.doubleCrosshairAction.setChecked(visible)
+        self._CcpnGLWidget.doubleCrosshairVisible = visible
+
+    def _toggledoubleCrosshair(self):
+        """Toggles whether doubleCrosshair is visible.
+        """
+        self._CcpnGLWidget.doubleCrosshairVisible = not self._CcpnGLWidget.doubleCrosshairVisible
+        self.doubleCrosshairAction.setChecked(self._CcpnGLWidget.doubleCrosshairVisible)
 
     @property
     def pythonConsole(self):
@@ -1189,7 +1229,10 @@ class GuiStrip(Frame):
         except:
             getLogger().debugGL('OpenGL widget not instantiated')
 
-    def _setPeakLabelling(self):
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    # symbolLabelling
+
+    def _setSymbolLabelling(self):
         if self.spectrumViews:
             for sV in self.spectrumViews:
 
@@ -1200,36 +1243,47 @@ class GuiStrip(Frame):
             # spawn a redraw of the GL windows
             self._CcpnGLWidget.GLSignals.emitPaintEvent()
 
-    def cyclePeakLabelling(self):
+    @property
+    def symbolLabelling(self):
+        """Get the symbol labelling for the strip
+        """
+        return self._CcpnGLWidget._symbolLabelling
+
+    @symbolLabelling.setter
+    def symbolLabelling(self, value):
+        """Set the symbol labelling for the strip
+        """
+        if not isinstance(value, int):
+            raise TypeError('Error: symbolLabelling not an int')
+
+        oldValue = self._CcpnGLWidget._symbolLabelling
+        self._CcpnGLWidget._symbolLabelling = value if (value in range(self.MAXPEAKLABELTYPES)) else 0
+        if value != oldValue:
+            self._setSymbolLabelling()
+            if self.spectrumViews:
+                self._emitSymbolChanged()
+
+    def cycleSymbolLabelling(self):
         """Toggles whether peak labelling is minimal is visible in the strip.
         """
-        self.peakLabelling += 1
-        if self.peakLabelling > self.MAXPEAKLABELTYPES:
-            self.peakLabelling = 0
+        self.symbolLabelling += 1
 
-        self._setPeakLabelling()
-        if self.spectrumViews:
-            self._emitSymbolChanged()
-
-    def setPeakLabelling(self, labelling):
+    def setSymbolLabelling(self, value):
         """Toggles whether peak labelling is minimal is visible in the strip.
         """
-        self.peakLabelling = labelling
-        if self.peakLabelling > self.MAXPEAKLABELTYPES:
-            self.peakLabelling = 0
-
-        self._setPeakLabelling()
-        if self.spectrumViews:
-            self._emitSymbolChanged()
+        self.symbolLabelling = value
 
     def _emitSymbolChanged(self):
         # spawn a redraw of the GL windows
         self._CcpnGLWidget.GLSignals._emitSymbolsChanged(source=None, strip=self, symbolDict={SYMBOLTYPES    : self.symbolType,
-                                                                                              ANNOTATIONTYPES: self.peakLabelling,
+                                                                                              ANNOTATIONTYPES: self.symbolLabelling,
                                                                                               SYMBOLSIZE     : self.symbolSize,
                                                                                               SYMBOLTHICKNESS: self.symbolThickness})
 
-    def _setPeakSymbols(self):
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    # symbolTypes
+
+    def _setSymbolType(self):
         if self.spectrumViews:
             for sV in self.spectrumViews:
 
@@ -1244,27 +1298,35 @@ class GuiStrip(Frame):
             # spawn a redraw of the GL windows
             self._CcpnGLWidget.GLSignals.emitPaintEvent()
 
+    @property
+    def symbolType(self):
+        """Get the symbol type for the strip
+        """
+        return self._CcpnGLWidget._symbolType
+
+    @symbolType.setter
+    def symbolType(self, value):
+        """Set the symbol type for the strip
+        """
+        if not isinstance(value, int):
+            raise TypeError('Error: symbolType not an int')
+
+        oldValue = self._CcpnGLWidget._symbolType
+        self._CcpnGLWidget._symbolType = value if (value in range(self.MAXPEAKSYMBOLTYPES)) else 0
+        if value != oldValue:
+            self._setSymbolType()
+            if self.spectrumViews:
+                self._emitSymbolChanged()
+
     def cyclePeakSymbols(self):
         """Cycle through peak symbol types.
         """
         self.symbolType += 1
-        if self.symbolType > self.MAXPEAKSYMBOLTYPES:
-            self.symbolType = 0
 
-        self._setPeakSymbols()
-        if self.spectrumViews:
-            self._emitSymbolChanged()
-
-    def setPeakSymbols(self, symbolNum):
+    def setPeakSymbols(self, value):
         """set the peak symbol type.
         """
-        self.symbolType = symbolNum
-        if self.symbolType > self.MAXPEAKSYMBOLTYPES:
-            self.symbolType = 0
-
-        self._setPeakSymbols()
-        if self.spectrumViews:
-            self._emitSymbolChanged()
+        self.symbolType = value
 
     def _setSymbolsPaintEvent(self):
         # prompt the GLwidgets to update
@@ -1284,37 +1346,72 @@ class GuiStrip(Frame):
         if self.isDeleted:
             return
 
-        self.spectrumDisplay._spectrumDisplaySettings.blockSignals(True)
-        # update the current settings from the dict
-        if symbolType != self.symbolType:
-            self.setPeakSymbols(symbolType)
-        elif annotationsType != self.peakLabelling:
-            self.setPeakLabelling(annotationsType)
-        elif symbolSize != self.symbolSize:
-            self.symbolSize = symbolSize
-            self._setSymbolsPaintEvent()
-        elif symbolThickness != self.symbolThickness:
-            self.symbolThickness = symbolThickness
-            self._setSymbolsPaintEvent()
-        self.spectrumDisplay._spectrumDisplaySettings.blockSignals(False)
+        with self.spectrumDisplay._spectrumDisplaySettings.blockWidgetSignals():
+            # update the current settings from the dict
+            if symbolType != self.symbolType:
+                self.setPeakSymbols(symbolType)
+
+            elif annotationsType != self.symbolLabelling:
+                self.setSymbolLabelling(annotationsType)
+
+            elif symbolSize != self.symbolSize:
+                self.symbolSize = symbolSize
+                self._setSymbolsPaintEvent()
+
+            elif symbolThickness != self.symbolThickness:
+                self.symbolThickness = symbolThickness
+                self._setSymbolsPaintEvent()
+
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    # symbolSize
 
     @property
     def symbolSize(self):
-        return self._symbolSize
+        """Get the symbol size for the strip
+        """
+        return self._CcpnGLWidget._symbolSize
 
     @symbolSize.setter
     def symbolSize(self, value):
-        self._symbolSize = value
-        self._emitSymbolChanged()
+        """Set the symbol size for the strip
+        """
+        if not isinstance(value, (int, float)):
+            raise TypeError('Error: symbolSize not an (int, float)')
+        value = int(value)
+
+        oldValue = self._CcpnGLWidget._symbolSize
+        self._CcpnGLWidget._symbolSize = value if (value and value >= 0) else oldValue
+        if value != oldValue:
+            self._setSymbolLabelling()
+            if self.spectrumViews:
+                self._emitSymbolChanged()
+
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    # symbolThickness
 
     @property
     def symbolThickness(self):
-        return self._symbolThickness
+        """Get the symbol thickness for the strip
+        """
+        return self._CcpnGLWidget._symbolThickness
 
     @symbolThickness.setter
     def symbolThickness(self, value):
-        self._symbolThickness = value
-        self._emitSymbolChanged()
+        """Set the symbol thickness for the strip
+        """
+        if not isinstance(value, (int, float)):
+            raise TypeError('Error: symbolThickness not an (int, float)')
+        value = int(value)
+
+        oldValue = self._CcpnGLWidget._symbolThickness
+        self._CcpnGLWidget._symbolThickness = value if (value and value >= 0) else oldValue
+        if value != oldValue:
+            self._setSymbolLabelling()
+            if self.spectrumViews:
+                self._emitSymbolChanged()
+
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    # symbolTypes
 
     def _createMarkAtPosition(self, positions, axisCodes):
         try:
@@ -1381,9 +1478,12 @@ class GuiStrip(Frame):
                 axisCodes = [ax for ax in self.axisCodes[:2] if ax in mouseDict]
 
                 if axisIndex is not None:
-                    if (0 <= axisIndex < len(positions)):
-                        positions = (positions[axisIndex],)
-                        axisCodes = (axisCodes[axisIndex],)
+
+                    if (0 <= axisIndex < 2):
+                        # get the reflected axisCode and position
+                        doubleIndex = 1 - axisIndex
+                        positions = (positions[doubleIndex],)
+                        axisCodes = (axisCodes[doubleIndex],)
                         self._project.newMark(defaultColour, positions, axisCodes)
                 else:
                     self._project.newMark(defaultColour, positions, axisCodes)

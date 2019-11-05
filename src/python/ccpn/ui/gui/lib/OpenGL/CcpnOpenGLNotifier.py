@@ -202,6 +202,14 @@ class GLNotifier(QtWidgets.QWidget):
                  }
         self.glSymbolsChanged.emit(aDict)
 
+    def _emitSymbolsChanged(self, source=None, strip=None, symbolDict={}):
+        aDict = {GLNotifier.GLSOURCE         : source,
+                 GLNotifier.GLSTRIP          : strip,
+                 GLNotifier.GLSPECTRUMDISPLAY: strip.spectrumDisplay if strip else None,
+                 GLNotifier.GLVALUES         : symbolDict
+                 }
+        self.glSymbolsChanged.emit(aDict)
+
     def _emitKeyEvent(self, strip=None, key=None, modifier=None):
         aDict = {GLNotifier.GLSTRIP   : strip,
                  GLNotifier.GLKEY     : key,

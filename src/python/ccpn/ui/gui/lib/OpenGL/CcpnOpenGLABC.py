@@ -254,6 +254,7 @@ class CcpnGLWidgetABC(QOpenGLWidget):
         self.gridList = []
         self._gridVisible = True
         self._crosshairVisible = True
+        self._spectrumBordersVisible = True
         self._axesVisible = True
         self._axisLocked = False
         self._useFixedAspect = False
@@ -300,7 +301,7 @@ class CcpnGLWidgetABC(QOpenGLWidget):
         self._mouseCoords = [-1.0, -1.0]
         self.mouseString = None
         self.diffMouseString = None
-        self.peakLabelling = 0
+        self._symbolLabelling = 0
 
         self._contourList = {}
 

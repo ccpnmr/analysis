@@ -59,7 +59,8 @@
         "automaticNoiseContoursOnFirstShow" : true,
         "volumeIntegralLimit" : 2.0,
         "autoUpdateAliasing" : false,
-        "generateSinglePlaneContours" : true
+        "generateSinglePlaneContours" : true,
+        "applyToSpectrumDisplays" : true
     },
 
     "proxySettings": {

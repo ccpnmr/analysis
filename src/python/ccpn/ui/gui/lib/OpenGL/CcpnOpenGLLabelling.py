@@ -308,7 +308,7 @@ class GLLabelling():
                                                 self.autoColour,
                                                 getColours()[CCPNGLWIDGET_FOREGROUND])
 
-            text = self.getLabelling(obj, self.strip.peakLabelling)
+            text = self.getLabelling(obj, self._GLParent._symbolLabelling)
 
             newString = GLString(text=text,
                                  font=self._GLParent.globalGL.glSmallFont,  # if _isInPlane else self._GLParent.globalGL.glSmallTransparentFont,
@@ -386,7 +386,7 @@ class GLLabelling():
                                                 self.autoColour,
                                                 getColours()[CCPNGLWIDGET_FOREGROUND])
 
-            text = self.getLabelling(obj, self.strip.peakLabelling)
+            text = self.getLabelling(obj, self._GLParent._symbolLabelling)
 
             outString = GLString(text=text,
                                  font=self._GLParent.globalGL.glSmallFont,  # if _isInPlane else self._GLParent.globalGL.glSmallTransparentFont,
@@ -1226,8 +1226,8 @@ class GLLabelling():
         strip = self.strip
 
         symbolType = strip.symbolType
-        # symbolWidth = strip.symbolSize / 2.0
-        # lineThickness = strip.symbolThickness / 2.0
+        # symbolWidth = self._GLParent.symbolSize / 2.0
+        # lineThickness = self._GLParent.symbolThickness / 2.0
 
         drawList = self._GLSymbols[objListView]
         drawList.indices = np.empty(0, dtype=np.uint32)
@@ -1824,7 +1824,7 @@ class GLLabelling():
         # self._spectrumSettings = spectrumSettings
         # self.buildSymbols()
 
-        lineThickness = self.strip.symbolThickness
+        lineThickness = self._GLParent._symbolThickness
         GL.glLineWidth(lineThickness * self._GLParent.viewports._devicePixelRatio)
 
         # # loop through the attached objListViews to the strip
@@ -2072,8 +2072,8 @@ class GL1dLabelling():
         strip = self.strip
 
         symbolType = strip.symbolType
-        # symbolWidth = strip.symbolSize / 2.0
-        # lineThickness = strip.symbolThickness / 2.0
+        # symbolWidth = self._GLParent._symbolSize / 2.0
+        # lineThickness = self._GLParent._symbolThickness / 2.0
 
         drawList = self._GLSymbols[objListView]
         drawList.indices = np.array([], dtype=np.uint32)
@@ -2443,7 +2443,7 @@ class GL1dLabelling():
             else:
                 cols = listCol
 
-        text = self.getLabelling(obj, self.strip.peakLabelling)
+        text = self.getLabelling(obj, self._GLParent._symbolLabelling)
 
         newString = GLString(text=text,
                              font=self._GLParent.globalGL.glSmallFont,
@@ -3455,7 +3455,7 @@ class GLintegralNdLabelling(GL1dLabelling, GLintegralListMethods, GLLabelling): 
             else:
                 cols = listCol
 
-        text = self.getLabelling(obj, self.strip.peakLabelling)
+        text = self.getLabelling(obj, self._GLParent._symbolLabelling)
 
         textX = pos or 0.0 + (3.0 * self._GLParent.pixelX)
         textY = self._GLParent.axisT - (36.0 * self._GLParent.pixelY)

@@ -47,6 +47,7 @@ from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs import AXISXUNITS, AXISYUNITS, AXISLO
     SYMBOLTYPES, SYMBOLSIZE, SYMBOLTHICKNESS, ANNOTATIONTYPES, AXISUSEFIXEDASPECTRATIO
 from ccpn.ui.gui.widgets.Spinbox import Spinbox
 from ccpn.util.Common import getAxisCodeMatchIndices
+from ccpn.ui.gui.widgets.Base import SignalBlocking
 
 
 ALL = '<all>'
@@ -59,7 +60,7 @@ NO_STRIP = 'noStrip'
 LineEditsMinimumWidth = 195
 
 
-class SpectrumDisplaySettings(Widget):
+class SpectrumDisplaySettings(Widget, SignalBlocking):
     # signal for parentWidgets to respond to changes in the widget
     settingsChanged = pyqtSignal(dict)
     symbolsChanged = pyqtSignal(dict)

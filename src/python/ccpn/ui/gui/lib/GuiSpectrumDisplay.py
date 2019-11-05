@@ -1765,19 +1765,25 @@ class GuiSpectrumDisplay(CcpnModule):
         for strip in self.strips:
             strip._zoomOut()
 
-    def toggleCrosshair(self):
-        """Toggles whether cross hair is displayed in all strips of spectrum display.
-        """
-        for strip in self.strips:
-            strip._toggleCrosshair()
-
     def toggleGrid(self):
         """Toggles whether grid is displayed in all strips of spectrum display.
         """
         for strip in self.strips:
             strip.toggleGrid()
 
-    def _cyclePeakLabelling(self):
+    def toggleCrosshair(self):
+        """Toggles whether cross hair is displayed in all strips of spectrum display.
+        """
+        for strip in self.strips:
+            strip._toggleCrosshair()
+
+    def toggleDoubleCrosshair(self):
+        """Toggles whether double cross hairs are displayed in all strips of spectrum display.
+        """
+        for strip in self.strips:
+            strip._toggleDoubleCrosshair()
+
+    def _cycleSymbolLabelling(self):
         """Toggles peak labelling of current strip.
         """
         try:
@@ -1786,7 +1792,7 @@ class GuiSpectrumDisplay(CcpnModule):
                 return
 
             for strip in self.strips:
-                strip.cyclePeakLabelling()
+                strip.cycleSymbolLabelling()
 
         except:
             getLogger().warning('Error cycling peak labelling')

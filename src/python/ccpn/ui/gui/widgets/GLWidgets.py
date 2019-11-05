@@ -1344,7 +1344,7 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
         self._mouseCoords = [-1.0, -1.0]
         self.mouseString = None
         self.diffMouseString = None
-        self.peakLabelling = 0
+        self._symbolLabelling = 0
 
         self._contourList = {}
 

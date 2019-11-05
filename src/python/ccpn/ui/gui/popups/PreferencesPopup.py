@@ -59,6 +59,8 @@ from ccpn.ui.gui.lib.GuiPath import PathEdit
 from ccpn.ui.gui.popups.ValidateSpectraPopup import ValidateSpectraForPreferences
 from ccpn.ui.gui.popups.Dialog import CcpnDialog, CcpnDialogMainWidget
 from ccpn.core.lib.ContextManagers import queueStateChange, undoStackBlocking
+from ccpn.ui.gui.widgets.MessageDialog import showYesNo
+from ccpn.ui.gui.widgets.Base import SignalBlocking
 
 
 PEAKFITTINGDEFAULTS = [PARABOLICMETHOD, GAUSSIANMETHOD]
@@ -75,14 +77,14 @@ TABMARGINS = (1, 10, 10, 1)  # l, t, r, b
 ZEROMARGINS = (0, 0, 0, 0)  # l, t, r, b
 
 
-def _updateSettings(self, newPrefs, updateColourScheme):
+def _updateSettings(self, newPrefs, updateColourScheme, updateSpectrumDisplays):
     from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
 
     self.application.preferences = newPrefs
     # application preferences updated so re-save
     self.application._savePreferences()
 
-    self._updateDisplay(updateColourScheme)
+    self._updateDisplay(updateColourScheme, updateSpectrumDisplays)
 
     GLSignals = GLNotifier(parent=self)
     GLSignals.emitPaintEvent()
@@ -161,54 +163,38 @@ class PreferencesPopup(CcpnDialogMainWidget):
         self._applyButton.setEnabled(False)
         self._revertButton.setEnabled(False)
 
-    # def _closeClicked(self):
-    #     """Close button signal comes here
-    #     """
-    #     self.reject()
-    #
-    # def _applyClicked(self):
-    #     """Apply button signal comes here
-    #     """
-    #     self._applyChanges()
-    #
-    # def _okClicked(self):
-    #     """OK button signal comes here
-    #     """
-    #     if self._applyChanges() is True:
-    #         self.accept()
-    #
-    # def _applyAllChanges(self, changes):
-    #     """Execute the Apply/OK functions
-    #     """
-    #     for v in changes.values():
-    #         v()
+    def _updateSpectrumDisplays(self):
+        checked = self.application.preferences.general.showToolbar
+        for display in self.project.spectrumDisplays:
 
-    def _updateDisplay(self, updateColourScheme):
+            for strip in display.strips:
+                with strip.blockWidgetSignals():
+                    strip.symbolLabelling = self.application.preferences.general.annotationType
+                    strip.symbolType = self.application.preferences.general.symbolType
+                    strip.symbolSize = self.application.preferences.general.symbolSizePixel
 
-        # for display in self.project.spectrumDisplays:
-        #     for strip in display.strips:
-        #         strip.peakLabelling = self.preferences.general.annotationType
-        #         strip.symbolType = self.preferences.general.symbolType
-        #         strip.symbolSize = self.preferences.general.symbolSizePixel
-        #
-        #         strip.symbolThickness = self.preferences.general.symbolThickness
-        #         strip.gridVisible = self.preferences.general.showGrid
-        #         strip._contourThickness = self.preferences.general.contourThickness
-        #         strip.crosshairVisible = self.preferences.general.showCrosshair
+                    strip.symbolThickness = self.application.preferences.general.symbolThickness
+                    strip.gridVisible = self.application.preferences.general.showGrid
+                    strip._contourThickness = self.application.preferences.general.contourThickness
+                    strip.crosshairVisible = self.application.preferences.general.showCrosshair
+                    strip.doubleCrosshairVisible = self.application.preferences.general.showDoubleCrosshair
 
-        # checked = self.preferences.general['showToolbar']
-        # for spectrumDisplay in self.project.spectrumDisplays:
-        #     spectrumDisplay.spectrumUtilToolBar.setVisible(checked)
+                    strip.spectrumBordersVisible = self.application.preferences.general.showSpectrumBorder
 
+            print('>>>displayVisible', display, checked)
+            # display.spectrumUtilToolBar.setVisible(checked)     # TODO: this fires a refresh too soon
+
+    def _updateDisplay(self, updateColourScheme, updateSpectrumDisplays):
         if updateColourScheme:
             # change the colour theme
             setColourScheme(self.application.preferences.general.colourScheme)
             self.application.correctColours()
 
-            # colour theme has changed - flag displays to update
-            self._updateGui()
+        if updateSpectrumDisplays:
+            self._updateSpectrumDisplays()
 
-        # self.application._savePreferences()
+        # colour theme has changed - flag displays to update
+        self._updateGui()
 
     def _applyChanges(self):
         """
@@ -223,8 +209,12 @@ class PreferencesPopup(CcpnDialogMainWidget):
 
         Return True unless any errors occurred
         """
+        
+        # this will apply the immediate guiChanges with an undo block
+        applyToSDs = self.preferences.general.applyToSpectrumDisplays
+
         allChanges = True if self._changes else False
-        if not allChanges:
+        if not (allChanges and applyToSDs):
             return True
 
         # handle clicking of the Apply/OK button
@@ -241,15 +231,15 @@ class PreferencesPopup(CcpnDialogMainWidget):
 
             # add an undo item to update settings
             with undoStackBlocking() as addUndoItem:
-                addUndoItem(undo=partial(_updateSettings, self, lastPrefs, _changeColour))
+                addUndoItem(undo=partial(_updateSettings, self, lastPrefs, _changeColour, applyToSDs))
 
             # remember the new state - between addUndoItems because it may append to the undo stack
             newPrefs = deepcopy(self.preferences)
-            _updateSettings(self, newPrefs, _changeColour)
+            _updateSettings(self, newPrefs, _changeColour, applyToSDs)
 
             # add a redo item to update settings
             with undoStackBlocking() as addUndoItem:
-                addUndoItem(redo=partial(_updateSettings, self, newPrefs, _changeColour))
+                addUndoItem(redo=partial(_updateSettings, self, newPrefs, _changeColour, applyToSDs))
 
             # everything has happened - disable the apply button
             self._applyButton.setEnabled(False)
@@ -297,6 +287,10 @@ class PreferencesPopup(CcpnDialogMainWidget):
 
             self.tabWidget.addTab(fr.scrollArea, tabName)
             tabFunc(parent=fr)
+
+        self.useApplyToSpectrumDisplaysLabel = Label(self.mainWidget, text="Apply to All Spectrum Displays: ", grid=(1, 0))
+        self.useApplyToSpectrumDisplaysBox = CheckBox(self.mainWidget, grid=(1, 1))
+        self.useApplyToSpectrumDisplaysBox.toggled.connect(partial(self._queueToggleGeneralOptions, 'applyToSpectrumDisplays'))
 
     def _setGeneralTabWidgets(self, parent):
         """ Insert a widget in here to appear in the General Tab  """
@@ -503,6 +497,8 @@ class PreferencesPopup(CcpnDialogMainWidget):
             # clear all changes
             self._changes = {}
 
+            self.useApplyToSpectrumDisplaysBox.setChecked(self.preferences.general.applyToSpectrumDisplays)
+            
             self._populateGeneralTab()
             self._populateSpectrumTab()
             self._populateExternalProgramsTab()
@@ -707,7 +703,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
         self.showToolbarBox.toggled.connect(partial(self._queueToggleGeneralOptions, 'showToolbar'))
 
         row += 1
-        self.spectrumBorderLabel = Label(parent, text="Show Spectrum Border: ", grid=(row, 0))
+        self.spectrumBorderLabel = Label(parent, text="Show Spectrum Borders: ", grid=(row, 0))
         self.spectrumBorderBox = CheckBox(parent, grid=(row, 1))  #, checked=self.preferences.general.showSpectrumBorder)
         self.spectrumBorderBox.toggled.connect(partial(self._queueToggleGeneralOptions, 'showSpectrumBorder'))
 

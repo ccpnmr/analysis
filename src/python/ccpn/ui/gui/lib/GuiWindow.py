@@ -133,7 +133,7 @@ class GuiWindow():
 
         addShortCut("z, a", self, self.resetAllZoom, context=context)
 
-        addShortCut("p, l", self, self.cyclePeakLabelling, context=context)
+        addShortCut("p, l", self, self.cycleSymbolLabelling, context=context)
         addShortCut("p, s", self, self.cyclePeakSymbols, context=context)
         # addShortCut("Space, Space", self, self.toggleConsole, context=context) # this is not needed here, already set on Menus!!
         addShortCut("CTRL+a", self, self.selectAllPeaks, context=context)
@@ -513,13 +513,17 @@ class GuiWindow():
         """
         Toggles whether double crosshairs are displayed in all windows.
         """
-        self.application.preferences.general.showDoubleCrosshair = not self.application.preferences.general.showDoubleCrosshair
+        # toggle crosshairs for the spectrum displays in this window
+        for spectrumDisplay in self.spectrumDisplays:
+            spectrumDisplay.toggleDoubleCrosshair()
 
-        # repaint all windows
-        from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
-
-        GLSignals = GLNotifier(parent=self)
-        GLSignals.emitPaintEvent()
+        # self.application.preferences.general.showDoubleCrosshair = not self.application.preferences.general.showDoubleCrosshair
+        #
+        # # repaint all windows
+        # from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
+        #
+        # GLSignals = GLNotifier(parent=self)
+        # GLSignals.emitPaintEvent()
 
     def estimateNoise(self):
         """estimate the noise in the visible region of the current strip
@@ -763,12 +767,12 @@ class GuiWindow():
         else:
             getLogger().warning('No current strip. Select a strip first.')
 
-    def cyclePeakLabelling(self):
+    def cycleSymbolLabelling(self):
         """
         restore the zoom of the currently selected strip to the top item of the queue
         """
         if self.current.strip:
-            self.current.strip.spectrumDisplay._cyclePeakLabelling()
+            self.current.strip.spectrumDisplay._cycleSymbolLabelling()
         else:
             getLogger().warning('No current strip. Select a strip first.')
 

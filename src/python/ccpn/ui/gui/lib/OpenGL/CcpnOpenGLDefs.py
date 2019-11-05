@@ -213,10 +213,17 @@ AXISXUNITS = 'xUnits'
 AXISYUNITS = 'yUnits'
 AXISLOCKASPECTRATIO = 'lockAspectRatio'
 AXISUSEFIXEDASPECTRATIO = 'useFixedAspectRatio'
-SYMBOLTYPES = 'symbolTypes'
+
 ANNOTATIONTYPES = 'annotationTypes'
+SYMBOLTYPES = 'symbolTypes'
 SYMBOLSIZE = 'symbolSize'
 SYMBOLTHICKNESS = 'symbolThickness'
+STRIPGRID = 'stripGrid'
+STRIPCONTOURS = 'stripContours'
+STRIPCURSOR = 'stripCursor'
+STRIPDOUBLECURSOR = 'stripDoubleCursor'
+SPECTRUMBORDERS = 'spectrumBorders'
+DISPLAYTOOLBARS = 'displayToolbars'
 
 STRINGSCALE = 0.7
 

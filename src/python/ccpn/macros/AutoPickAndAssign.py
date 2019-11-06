@@ -41,6 +41,7 @@ Deletes unassigned peaks
 
 User Parameters are in the section "User's  Parameters", read comments for descriptions... 
 
+This macro is not optimised for speed and tested only using spectra from Sec5part1 tutorial.
 Modify as you need and share your macros on the forum!
 
 """

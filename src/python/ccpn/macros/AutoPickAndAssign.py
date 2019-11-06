@@ -81,9 +81,9 @@ from collections import OrderedDict as od # Ignore this line as User's option, r
 HSQC_limits = od(((H, [6,11]),  (N, [100,134]) )) # ppm limits where to find the signal on HSQC
 #_________________________________________________________________________________________________
 
-# regions of search on 3D
+# regions of search on 3D. Crucial if picking too little or too much!
 # H and N limits +/- to the HSQC position for restricted  peak picking
-# C: the actual region of search. All in ppm
+# C: the actual region of search. All in ppm.
 HNCA_limits   =   od(((H, [0.05, 0.05]),   (N, [1, 1]), (C, [40,80])))
 HNCOCA_limits =   od(((H, [0.05, 0.05]),   (N, [1, 1]), (C, [40,80])))
 HNCACB_limits =   od(((H, [0.05, 0.05]),   (N, [1, 1]), (C, [10,80])))

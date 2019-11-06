@@ -67,7 +67,7 @@ from ccpnmodel.ccpncore.lib.Io import Formats as ioFormats
 from ccpnmodel.ccpncore.memops.metamodel import Util as metaUtil
 from ccpn.util.decorators import logCommand
 from ccpn.core.lib.ContextManagers import catchExceptions
-
+from ccpn.ui.gui.widgets.Menu import SHOWMODULESMENU, CCPNMACROSMENU, TUTORIALSMENU
 
 # from functools import partial
 
@@ -285,6 +285,7 @@ class Framework(NotifierBase):
 
         # Blocking level for command echo and logging
         self._echoBlocking = 0
+        self._enableLoggingToConsole = True
 
         # NEF reader
         self.nefReader = CcpnNefIo.CcpnNefReader(self)
@@ -1137,6 +1138,7 @@ class Framework(NotifierBase):
 
         ms.append(('Project', [
             ("New", self.createNewProject, [('shortcut', '⌃n')]),  # Unicode U+2303, NOT the carrot on your keyboard.
+            (),
             ("Open...", self.openProject, [('shortcut', '⌃o')]),  # Unicode U+2303, NOT the carrot on your keyboard.
             ("Open Recent", ()),
 
@@ -1249,7 +1251,7 @@ class Framework(NotifierBase):
                          ("Copy with Axes Flipped...", self.flipArbitraryAxis, [('shortcut', 'fa')]),
                          )),
             (),
-            ("Show/hide Modules", ([
+            (SHOWMODULESMENU, ([
                 ("None", None, [('checkable', True),
                                 ('checked', False)])
                 ])),
@@ -1260,28 +1262,40 @@ class Framework(NotifierBase):
                    ))
 
         ms.append(('Macro', [
-            ("New Macro Editor", self.showMacroEditor),
-            ("New from Console", self.newMacroFromConsole, [('enabled', False)]),  #Not available yet
-            ("New from Log", None, [('enabled', False)]),  #Not available yet
+            ("New", self.showMacroEditor),
+            # ("New from Console", self.newMacroFromConsole, [('enabled', False)]),  #Not available yet
+            # ("New from Log", None, [('enabled', False)]),  #Not available yet
             (),
             ("Open...", self.openMacroOnEditor),
+            (),
             ("Run...", self.runMacro),
             ("Run Recent", ()),
+            (CCPNMACROSMENU, ([
+                ("None", None, [('checkable', True),
+                                ('checked', False)])
+                ])),
             (),
-            ("Define User Shortcuts...", self.defineUserShortcuts, [('shortcut', 'du')])
+            ("Define Macro Shortcuts...", self.defineUserShortcuts, [('shortcut', 'du')]),
+            ("Submit Macro...", self.showSubmitMacroPopup)
             ]
                    ))
 
         ms.append(('Plugins', ()))
 
         ms.append(('Help', [
-            ("Tutorials", ([
-                # Submenu
-                ("Beginners Tutorial", self.showBeginnersTutorial),
-                ("Backbone Tutorial", self.showBackboneTutorial),
-                ("CSP Tutorial", self.showCSPtutorial),
-                ("More...", self.showTutorials)
+            (TUTORIALSMENU, ([
+
+                ("None", None, [('checkable', True),
+                                ('checked', False)])
                 ])),
+
+                # # Submenu
+                # ("Beginners Tutorial", self.showBeginnersTutorial),
+                # ("Backbone Tutorial", self.showBackboneTutorial),
+                # ("CSP Tutorial", self.showCSPtutorial),
+                # ("More...", self.showTutorials)
+                # ])),
+
             ("Show Shortcuts", self.showShortcuts),
             ("Show CcpNmr V3 Documentation", self.showVersion3Documentation),
             (),
@@ -1296,7 +1310,7 @@ class Framework(NotifierBase):
             ("Register...", self.showRegisterPopup),
             (),
             ("Submit Feedback...", self.showFeedbackPopup),
-            ("Submit Macro...", self.showSubmitMacroPopup)
+            # ("Submit Macro...", self.showSubmitMacroPopup)
             ]
                    ))
 
@@ -2864,10 +2878,10 @@ class Framework(NotifierBase):
         webbrowser.open(ccpnIssuesUrl)
 
     def showTutorials(self):
-        from ccpn.framework.PathsAndUrls import tutorials
+        from ccpn.framework.PathsAndUrls import ccpnTutorials
         import webbrowser
 
-        webbrowser.open(tutorials)
+        webbrowser.open(ccpnTutorials)
 
     def showUpdatePopup(self):
         """Open the update popup

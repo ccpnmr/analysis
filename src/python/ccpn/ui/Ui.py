@@ -120,7 +120,7 @@ class Ui(NotifierBase):
 
     def echoCommands(self, commands: typing.List[str]):
         """Echo commands strings, one by one, to logger.
-        Overwritten in subclasses to handle e.g. console putput
+        Overwritten in subclasses to handle e.g. console output
         """
         logger = getLogger()
         for command in commands:

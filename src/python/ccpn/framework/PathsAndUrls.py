@@ -32,10 +32,11 @@ from ccpn.util import Path
 ccpnUrl                         = 'http://www.ccpn.ac.uk'
 ccpn2Url                        = 'http://www.ccpn.ac.uk'
 ccpnLicenceUrl                  = 'http://www.ccpn.ac.uk/v3-software/licences'
-tutorials                       = 'https://www.ccpn.ac.uk/v3-software/tutorials'
+ccpnTutorials                   = 'https://www.ccpn.ac.uk/v3-software/tutorials'
+ccpnForum                       = 'https://www.ccpn.ac.uk/v3-software/v3-forum'
+ccpnVideos                      = 'https://www.ccpn.ac.uk/v3-software/v3-video-tutorials'
 oldCcpnIssuesUrl                = 'https://sourceforge.net/p/ccpn/bugs/'
 ccpnIssuesUrl                   = 'https://bitbucket.org/ccpnmr/issue-tracker/issues?status=new&status=open'
-
 
 # CCPN code
 ccpnCodePath                    = Path.getTopDirectory()
@@ -54,10 +55,12 @@ fontsPath                       = os.path.join(ccpnPythonPath, 'ui', 'gui', 'wid
 
 # Program tutorials and documentation
 shortcutsPath                   = os.path.join(ccpnCodePath, 'doc', 'static', 'AnalysisShortcuts.pdf')
+tutorialsPath                   = os.path.join(ccpnCodePath, 'tutorials')
 beginnersTutorialPath           = os.path.join(ccpnCodePath, 'tutorials', 'BeginnersTutorial.pdf')
 backboneAssignmentTutorialPath  = os.path.join(ccpnCodePath, 'tutorials', 'BackboneAssignmentTutorial.pdf')
 screenTutorialPath              = os.path.join(ccpnCodePath, 'tutorials', 'CcpNmr_AnalysisScreen_Tutorial_Beta2Release.pdf')
 cspTutorialPath                 = os.path.join(ccpnCodePath, 'tutorials', 'CSPtutorial.pdf')
+solidStateTutorialPath          = os.path.join(ccpnCodePath, 'tutorials', 'SolidStateAssignmentTutorial.pdf')
 
 documentationPath               = os.path.join(ccpnCodePath, 'doc', 'build', 'html', 'index.html')
 licensePath                     = os.path.join(ccpnCodePath, 'LICENSE.txt')

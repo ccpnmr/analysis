@@ -54,7 +54,7 @@ from ccpn.ui.gui.widgets import MessageDialog
 from ccpn.ui.gui.widgets.Action import Action
 from ccpn.ui.gui.widgets.FileDialog import FileDialog
 from ccpn.ui.gui.widgets.IpythonConsole import IpythonConsole
-from ccpn.ui.gui.widgets.Menu import Menu, MenuBar
+from ccpn.ui.gui.widgets.Menu import Menu, MenuBar, SHOWMODULESMENU, CCPNMACROSMENU, TUTORIALSMENU
 from ccpn.ui.gui.widgets.SideBar import SideBar  #,SideBar
 from ccpn.ui.gui.widgets.Frame import Frame
 from ccpn.ui.gui.widgets.CcpnModuleArea import CcpnModuleArea
@@ -342,7 +342,7 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
         # create a splitter for the sidebar
         self._sidebarSplitter = Splitter(self._sideBarFrame, horizontal=False)
         self._sidebarSplitter.setContentsMargins(0, 0, 0, 0)
-        self._sideBarFrame.getLayout().addWidget(self._sidebarSplitter, 0, 0)   # must be inserted this way
+        self._sideBarFrame.getLayout().addWidget(self._sidebarSplitter, 0, 0)  # must be inserted this way
 
         # create 2 more containers for the search bar and the results
         self.searchWidgetContainer = Frame(self._sideBarFrame, setLayout=True, grid=(1, 0))  # in this frame is inserted the search widget
@@ -384,14 +384,28 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
         self._fillRecentMacrosMenu()
         #TODO:ED needs fixing
         self._fillPluginsMenu()  # ejb - nothing to show, and crash anyway
+
         self._attachModulesMenuAction()
+        self._attachCCPNMacrosMenuAction()
+        self._attachTutorialsMenuAction()
 
     def _attachModulesMenuAction(self):
         # add a connect to call _fillModulesMenu when the menu item is about to show
-        # so it is always uptodate
-        modulesMenu = self.searchMenuAction('Show/hide Modules')
-        # modulesMenu = self.getMenuAction('Show/hide Modules')
+        # so it is always up-to-date
+        modulesMenu = self.searchMenuAction(SHOWMODULESMENU)
         modulesMenu.aboutToShow.connect(self._fillModulesMenu)
+
+    def _attachCCPNMacrosMenuAction(self):
+        # add a connect to call _fillCCPNMacrosMenu when the menu item is about to show
+        # so it is always up-to-date
+        modulesMenu = self.searchMenuAction(CCPNMACROSMENU)
+        modulesMenu.aboutToShow.connect(self._fillCCPNMacrosMenu)
+
+    def _attachTutorialsMenuAction(self):
+        # add a connect to call _fillTutorialsMenu when the menu item is about to show
+        # so it is always up-to-date
+        modulesMenu = self.searchMenuAction(TUTORIALSMENU)
+        modulesMenu.aboutToShow.connect(self._fillTutorialsMenu)
 
     def _createMenu(self, spec, targetMenu=None):
         menu = self._addMenu(spec[0], targetMenu)
@@ -409,7 +423,7 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
 
     def _storeShortcut(self, twoLetters, thecallable):
         if twoLetters is not None:
-            twoLetters = twoLetters.replace(', ','')
+            twoLetters = twoLetters.replace(', ', '')
             if twoLetters not in self._shortcutsDict:
                 self._shortcutsDict[twoLetters] = thecallable
             else:
@@ -678,7 +692,7 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
         targetMenu.addAction(action)
 
     def _fillModulesMenu(self):
-        modulesMenu = self.searchMenuAction('Show/hide Modules')
+        modulesMenu = self.searchMenuAction(SHOWMODULESMENU)
         modulesMenu.clear()
 
         moduleSize = self.sideBar.size()
@@ -708,6 +722,96 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
                     module.setStretch(1, 1)
         except Exception as es:
             Logging.getLogger().warning('Error expanding module: %s', module.name())
+
+    def _fillCCPNMacrosMenu(self):
+        modulesMenu = self.searchMenuAction(CCPNMACROSMENU)
+        modulesMenu.clear()
+
+        from ccpn.framework.PathsAndUrls import macroPath
+        from os import walk
+
+        # read the macros file directory - only top level
+        macroFiles = []
+        for (dirpath, dirnames, filenames) in walk(os.path.expanduser(macroPath)):
+            macroFiles.extend([os.path.join(dirpath, filename) for filename in filenames])
+            break
+
+        for file in macroFiles:
+            filename, fileExt = os.path.splitext(file)
+
+            if fileExt == '.py':
+                modulesMenu.addAction(Action(modulesMenu, text=os.path.basename(filename),
+                                             callback=partial(self._runCCPNMacro, file, self)))
+
+    def _runCCPNMacro(self, filename, modulesMenu):
+        """Run a CCPN macro from the populated menu
+        """
+        try:
+            self.application.runMacro(filename)
+
+        except Exception as es:
+            Logging.getLogger().warning('Error running CCPN Macro: %s' % str(filename))
+
+    def _fillTutorialsMenu(self):
+        modulesMenu = self.searchMenuAction(TUTORIALSMENU)
+        modulesMenu.clear()
+
+        from ccpn.framework.PathsAndUrls import tutorialsPath, beginnersTutorialPath, \
+            backboneAssignmentTutorialPath, cspTutorialPath, solidStateTutorialPath
+
+        from os import walk
+
+        importantList = (('Beginners Tutorial', beginnersTutorialPath),
+                         ('Backbone Tutorial', backboneAssignmentTutorialPath),
+                         ('CSP Tutorial', cspTutorialPath),
+                         ('Solid State Tutorial', solidStateTutorialPath))
+
+        # add link to website videos
+        modulesMenu.addAction(Action(modulesMenu, text='Video Tutorials',
+                                     callback=self._showCCPNTutorials))
+        modulesMenu.addSeparator()
+
+        # add priority list for the important ones
+        # and solid State
+
+        # read the tutorials file directory - only top level
+        tutorialsFiles = []
+        for (dirpath, dirnames, filenames) in walk(os.path.expanduser(tutorialsPath)):
+            tutorialsFiles.extend([os.path.join(dirpath, filename) for filename in filenames])
+            break
+
+        # add the main tutorials
+        for text, file in importantList:
+            filename, fileExt = os.path.splitext(file)
+
+            if os.path.exists(file) and fileExt == '.pdf':
+                modulesMenu.addAction(Action(modulesMenu, text=text,
+                                             callback=partial(self._showTutorial, file, self)))
+
+        modulesMenu.addSeparator()
+
+        # add the remaining tutorials
+        for file in sorted(tutorialsFiles, key=lambda ff: os.path.basename(ff)):
+            filename, fileExt = os.path.splitext(file)
+
+            if file not in [ff[1] for ff in importantList] and fileExt == '.pdf':
+                modulesMenu.addAction(Action(modulesMenu, text=os.path.basename(filename),
+                                             callback=partial(self._showTutorial, file, self)))
+
+    def _showCCPNTutorials(self):
+        from ccpn.framework.PathsAndUrls import ccpnVideos
+        import webbrowser
+
+        webbrowser.open(ccpnVideos)
+
+    def _showTutorial(self, filename, modulesMenu):
+        """Run a CCPN macro from the populated menu
+        """
+        try:
+            self.application._systemOpen(filename)
+
+        except Exception as es:
+            Logging.getLogger().warning('Error opening tutorial: %s' % str(filename))
 
     def _showSideBarModule(self, module, modulesMenu, visible):
         try:

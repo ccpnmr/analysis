@@ -31,6 +31,11 @@ from ccpn.ui.gui.widgets.Base import Base
 from ccpn.ui.gui.guiSettings import menuFont
 from ccpn.framework.Translation import translator
 
+SHOWMODULESMENU = 'Show/hide Modules'
+MACROSMENU = 'User Macros'
+CCPNMACROSMENU = 'CCPN Macros'
+TUTORIALSMENU = 'Tutorials'
+
 
 class Menu(QtWidgets.QMenu, Base):
     def __init__(self, title, parent, isFloatWidget=False, **kwds):

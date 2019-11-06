@@ -29,19 +29,11 @@ import base64
 import difflib
 import hashlib
 import os
-import re
 import shutil
 import sys
-import ssl
-import time
-import urllib
-from urllib.parse import urlencode, quote
-from urllib.request import urlopen
-import urllib3.contrib.pyopenssl
-import certifi
 
 from datetime import datetime
-from ccpn.util.Update import isBinaryData
+from ccpn.util.Update import isBinaryData, DELETEHASHCODE
 from ccpn.framework.PathsAndUrls import ccpn2Url
 
 from ccpn.util import Path
@@ -67,7 +59,6 @@ PATH_SEP = '__sep_'
 ###VERSION_RE = re.compile('^[.\d]+$')
 
 BAD_DOWNLOAD = 'Exception: '
-DELETEHASHCODE = '<DELETE>'
 
 
 def lastModifiedTime(filePath):
@@ -249,6 +240,14 @@ class UpdateFile:
                 os.makedirs(directory)
         with open(fullFilePath, 'w') as fp:
             fp.write(data)
+
+    def installDeleteUpdate(self):
+        """Remove file as update action
+        """
+        # not sure if required in this module
+        fullFilePath = self.fullFilePath
+        if os.path.isfile(fullFilePath):
+            os.remove(fullFilePath)
 
     def commitUpdate(self, serverUser, serverPassword):
 

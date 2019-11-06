@@ -57,6 +57,7 @@ WHITESPACE_AND_NULL = {'\x00', '\t', '\n', '\r', '\x0b', '\x0c'}
 ###VERSION_RE = re.compile('^[.\d]+$')
 
 BAD_DOWNLOAD = 'Exception: '
+DELETEHASHCODE = '<DELETE>'
 
 
 def lastModifiedTime(filePath):
@@ -224,7 +225,8 @@ class UpdateFile:
         self.fileDir = os.path.dirname(filePath)
 
     def installUpdate(self):
-
+        """Install updated file
+        """
         data = downloadFile(self.serverDownloadScript, self.serverDbRoot, self.fileStoredAs)
 
         fullFilePath = self.fullFilePath
@@ -245,6 +247,13 @@ class UpdateFile:
                     fp.write(data)
         except Exception as es:
             pass
+
+    def installDeleteUpdate(self):
+        """Remove file as update action
+        """
+        fullFilePath = self.fullFilePath
+        if os.path.isfile(fullFilePath):
+            os.remove(fullFilePath)
 
     # def commitUpdate(self, serverUser, serverPassword):
     #
@@ -323,7 +332,21 @@ class UpdateAgent(object):
                 line = line.rstrip()
                 if line:
                     (filePath, fileTime, fileStoredAs, fileHashCode) = line.split(FIELD_SEP)
-                    if self.serverUser or self.isUpdateDifferent(filePath, fileHashCode):
+
+                    if fileHashCode == DELETEHASHCODE:
+                        # delete file
+                        if os.path.exists(filePath):
+
+                            # if still exists then need to add to update list
+                            updateFile = UpdateFile(self.installLocation, self.serverDbRoot, filePath, fileTime,
+                                                    fileStoredAs, fileHashCode, serverDownloadScript=serverDownloadScript,
+                                                    serverUploadScript=serverUploadScript)
+                            updateFiles.append(updateFile)
+                            updateFileDict[filePath] = updateFile
+
+                    elif self.serverUser or self.isUpdateDifferent(filePath, fileHashCode):
+
+                        # file exists, is modified and needs updating
                         updateFile = UpdateFile(self.installLocation, self.serverDbRoot, filePath, fileTime,
                                                 fileStoredAs, fileHashCode, serverDownloadScript=serverDownloadScript,
                                                 serverUploadScript=serverUploadScript)
@@ -468,8 +491,13 @@ class UpdateAgent(object):
             for updateFile in updateFiles:
                 try:
                     if not self._dryRun:
-                        self.showInfo('Install Updates', 'Installing %s' % (updateFile.fullFilePath))
-                        updateFile.installUpdate()
+                        if updateFile.fileHashCode == DELETEHASHCODE:
+                            self.showInfo('Install Updates', 'Removing %s' % (updateFile.fullFilePath))
+                            updateFile.installDeleteUpdate()
+
+                        else:
+                            self.showInfo('Install Updates', 'Installing %s' % (updateFile.fullFilePath))
+                            updateFile.installUpdate()
                     else:
                         self.showInfo('Install Updates', 'dry-run %s' % (updateFile.fullFilePath))
 

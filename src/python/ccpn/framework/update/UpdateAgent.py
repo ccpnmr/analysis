@@ -381,6 +381,14 @@ class UpdateAgent(object):
                         updateFiles.append(updateFile)
                         updateFileDict[filePath] = updateFile
 
+                    elif fileTime in [0, '0', '0.0']:
+
+                        # file exists, is modified and needs updating
+                        updateFile = UpdateFile(self.installLocation, self.serverDbRoot, filePath, fileTime, fileStoredAs, fileHashCode,
+                                                serverDownloadScript=serverDownloadScript, serverUploadScript=serverUploadScript)
+                        updateFiles.append(updateFile)
+                        updateFileDict[filePath] = updateFile
+
     def isUpdateDifferent(self, filePath, fileHashCode):
         """See if local file is different from server file."""
 

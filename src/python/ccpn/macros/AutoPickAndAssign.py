@@ -19,7 +19,8 @@ __version__ = "$Revision: 3.0.0 $"
 __author__ = "$Author: LucaM $"
 __date__ = "$Date: 2019-10-31 16:32:32 +0100 (Thu, Oct 31, 2019) $"
 #=========================================================================================
-
+__title__ = "Auto pick and assign for triple resonance backbone assignment"
+#=========================================================================================
 
 
 """
@@ -27,11 +28,11 @@ __date__ = "$Date: 2019-10-31 16:32:32 +0100 (Thu, Oct 31, 2019) $"
 This macro doesn't want to be an automated Backbone assignment and is aimed only to add initial labels to a project containing:
  15N-HSQC,  HNCA,  HNCOCA,  HNCACB,  CBCACONH, which will be carefully inspected manually and amended as needed it.
 
-However can be run also if at least a 15N-HSQC and a HNCACB are present.
+However can be run also if a 15N-HSQC and a HNCACB are present.
 
 The macro uses the picking peak routines present in 3.0.0 to pick the HSQC first and label with incremental numbered nmrResidues.
 Then picks restricted peak for all the 3Ds.
-It guesses the "i-1" and "i" by peak heights for HNCA and HNCACB
+It guesses the "i-1" and "i" by peak heights for HNCA and HNCACB based on the strongest peaks (absolute height).
 It cannot guess for CBCACONH so an NmrAtom C is given, Ca i-1 and CB i-1 are propagated from the HNCACB if the two spectral peaks are within tollerances
 
 Searches for "i-1"s which are present in same spectra but missing and expected in others and copies them. 
@@ -39,14 +40,13 @@ Deletes obsolete peaks assigned to C if properly reassigned to CA or/and CB i-1
 Deletes unassigned peaks
 
 User Parameters needed:
- - spectra names (mandatory for 15N-HSQC and  HNCACB,  
- - picking limits (defaults given)
- - tolerances (defaults given)
+ - spectra names (mandatory for 15N-HSQC and  HNCACB)  
+ - optionals, read comments below for descriptions... 
 
 Modify as you need and share your macros on the forum!
 
 """
-from collections import OrderedDict as od # rest of import are set further down
+
 
 ##################################################################################################
 #####################################    User's  Parameters  #####################################
@@ -58,24 +58,29 @@ HNCACB_spectrumName = 'hncacb'
 HNCA_spectrumName = 'hnca'
 HNCOCA_spectrumName = 'hncoca'
 CBCACONH_spectrumName = 'cbcaconh'
-
+##################################################################################################
 
 # labels used to create nmrAtoms, NB on the current version 3.0.0 changing H to Hn and N to Nh
 # might break the assignment prediction for sequential matches! It could work on other labelling eg 13C but not tested)
+    # Note, assignement can be made only if compatible axis codes. Eg nmrAtom H to one axisCode H(+anyLetter),
+    #  if two axes starting with H in the same spectrum then will fail
 H  = 'H'
 N  = 'N'
 CA = 'CA'
 CB = 'CB'
 C  = 'C'
 CH = 'CH'
+##################################################################################################
 
-OFFSET = '-1' # implemented only for -1 at the moment!
 nmrChainName = '@-' # use the default. Change this name to create a different one
+##################################################################################################
 
 # Picking parameters: HSQC
 minDropFactor = 0.01  # (1%) # pick more then less, unlabeled peaks will be deleted afterwards
 HSQC_limits = od(((H, [6,11]),  (N, [100,134]) )) # ppm limits where to find the signal on HSQC
+##################################################################################################
 
+from collections import OrderedDict as od # rest of import are set further down
 # regions of search on 3D
 # H and N limits +/- to the HSQC position for restricted  peak picking
 # C: the actual region of search. All in ppm
@@ -86,15 +91,21 @@ CBCACONH_limits = od(((H, [0.05, 0.05]),   (N, [1, 1]), (C, [10,80])))
 
 # tolerances in ppm for matching peaks across different Experiment types. Used when propagating assignments.
 tolerances   =   od(((H, 0.1),  (N, 2), (C, 4)))
+##################################################################################################
 
 # Contours, in case you don't want set it manually from display ...
-setContours = False # set False if not needed
+setContours       =   False # set False if not needed
 hsqcContours      =  (64194.19080018526, -64194.19080018526) # positive and negative Contours values
 hncaContours      =  (5835252.217157302, -5835252.217157302)
 hncocaContours    =  (15051295.29692141, -15051295.29692142)
 hncacbContours    =  (13094258.00380035, -13094258.00380035)
 cbcaconhContours  =  (8161392.113049264, -8161392.113049264)
-
+##################################################################################################
+HSQC_alreadyAssigned = False             # True if you already picked and assigned nmrAtoms on the HSQC. Peaks need to be in the last peakList.
+CA_in_HNCACB_isPositive = True           # Assign CA i-1 to positive peaks in the HNCACB, False Assign CB i-1 to positive
+Propagate_HNCACB_to_CBCACONH = True      # Replace assignment from C to CA and CB (i-1 nmrAtom) from the HNCACB to CBCACONH if relative peaks within tollerances
+CopyExpectedPeaksFromOtherSpectra = True # Try to find missing Ca i-1 and Cb i-1 from other spectra if one or more are missing and propagate peak and assignment accross.
+Correct_CBCACONH_assignments = True      # Guess missing NmrAtom. eg. if CA and C are present but not CB, swap the C with CB and vice-versa  for CA.
 
 ##################################################################################################
 #######################################  start of the code #######################################
@@ -255,8 +266,12 @@ def _pickAndAssign_HNCACB(hncacb, hsqcPosition, hsqc_nmrAtoms, nmrResidue , expe
     negPeaks = [p for p in hncacbPeaks if p.height < 0]
     sortedPosPeaks = _orderPeaksByHeight(posPeaks)
     sortednegPeaks = _orderPeaksByHeight(negPeaks)
-    _assignByHeights(nmrResidue, sortedPosPeaks[:int(expectedPeakCount/2)], CA, hsqc_nmrAtoms)
-    _assignByHeights(nmrResidue, sortednegPeaks[:int(expectedPeakCount/2)], CB, hsqc_nmrAtoms)
+    if CA_in_HNCACB_isPositive:
+        _assignByHeights(nmrResidue, sortedPosPeaks[:int(expectedPeakCount/2)], CA, hsqc_nmrAtoms)
+        _assignByHeights(nmrResidue, sortednegPeaks[:int(expectedPeakCount/2)], CB, hsqc_nmrAtoms)
+    else:
+        _assignByHeights(nmrResidue, sortedPosPeaks[:int(expectedPeakCount / 2)], CB, hsqc_nmrAtoms)
+        _assignByHeights(nmrResidue, sortednegPeaks[:int(expectedPeakCount / 2)], CA, hsqc_nmrAtoms)
     return hncacbPeaks
 
 def pickRestrictedPeaksAndAddLabels():
@@ -271,7 +286,7 @@ def pickRestrictedPeaksAndAddLabels():
                 hsqcPosition = peak.position
                 hsqc_nmrAtoms = makeIterableList(peak.assignedNmrAtoms)
                 nmrResidue = hsqc_nmrAtoms[-1].nmrResidue
-                m1nmrResidue = nmrChain.fetchNmrResidue(nmrResidue.sequenceCode + OFFSET)
+                m1nmrResidue = nmrChain.fetchNmrResidue(nmrResidue.sequenceCode + '-1')
 
                 if hncacb:
                     hncacbPeaks = _pickAndAssign_HNCACB(hncacb, hsqcPosition, hsqc_nmrAtoms, nmrResidue)
@@ -367,16 +382,16 @@ def _copyPeaksToOthePeakList(originPeakList, targetPeakList, nmrAtomLabel=CA):
                             tobeCopied.append(peak)
                 newPeak =_copyPeakFromOtherExpType(peak, targetPeakList, nmrAtomLabel)
 
-def checkNmrAtomCount():
+def copyExpectedPeaksFromOtherSpectra():
     with notificationEchoBlocking():
         with undoBlockWithoutSideBar():
-            for nr in  _stoppableProgressBar(project.nmrResidues, title='Copying missing NmrAtoms...'):
+            for nr in  _stoppableProgressBar(project.nmrResidues, title='Copying missing Peaks/NmrAtoms...'):
                 if nr.relativeOffset == -1:
                     caIm1 = nr.getNmrAtom(CA)
                     cbIm1 = nr.getNmrAtom(CB)
 
                     if cbIm1:
-                        cbIm1Peaks = makeIterableList(caIm1.assignedPeaks)
+                        cbIm1Peaks = makeIterableList(cbIm1.assignedPeaks)
                         cbIm1Dict = od()
                         for cbIm1Peak in cbIm1Peaks:
                             cbIm1Dict[cbIm1Peak.peakList.spectrum] = cbIm1Peak
@@ -425,31 +440,38 @@ def checkNmrAtomCount():
                                         break
                                     break
 
-
 def removeObsoletePeaks():
     tobedelpeaks =[]
-    for nr in  _stoppableProgressBar(project.nmrResidues, title='removing  obsolete C NmrAtoms...'):
-        if nr.relativeOffset == -1:
+    with notificationEchoBlocking():
+        with undoBlockWithoutSideBar():
+            for peak in  _stoppableProgressBar(cbcaconh.peakLists[-1].peaks, title='removing  obsolete C NmrAtoms...'):
+                nmrAtoms = makeIterableList(peak.assignedNmrAtoms)
+                names = [na.name for na in nmrAtoms]
+                if names == [C, CA, CB]: # C is Obsolete
+                    for nmrAtom in nmrAtoms:
+                        if nmrAtom.name == C:
+                            tobedelpeaks.append(peak)
+                if Correct_CBCACONH_assignments:
+                    if C and CA and not CB in names: # missing CB, assume C is instead of CB, so swap it! this could just add mistake.
+                        newNmrAtoms = []
+                        for nmrAtom in nmrAtoms:
+                            if nmrAtom.name == C:
+                                bIm1 = nmrAtom.nmrResidue.fetchNmrAtom(CB)
+                                newNmrAtoms.append(bIm1)
+                            else:
+                                newNmrAtoms.append(nmrAtom)
+                        _assignNmrAtomsToPeaks([peak], newNmrAtoms)
 
-            cIm1 = nr.getNmrAtom(C)
-            caIm1 = nr.getNmrAtom(CA)
-            cbIm1 = nr.getNmrAtom(CB)
-            if caIm1 and cbIm1:
-                pks = makeIterableList(cIm1.assignedPeaks)
-                tobedelpeaks.extend(pks)
-            if caIm1 and cIm1 :
-                pks = makeIterableList(cIm1.assignedPeaks)
-                if len(pks) == 1: # then is maybe CB
-                    _assignNmrAtomsToPeaks(pks,[nr.fetchNmrAtom(CB)])
-            if cbIm1 and cIm1:
-                pks = makeIterableList(cIm1.assignedPeaks)
-                if len(pks) == 1:  # then is maybe CA
-                    _assignNmrAtomsToPeaks(pks, [nr.fetchNmrAtom(CA)])
-
+                    if C and CB and not CA in names: # missing CA, assume C is instead of CA, so swap it! this could just add mistake.
+                        newNmrAtoms = []
+                        for nmrAtom in nmrAtoms:
+                            if nmrAtom.name == C:
+                                caIm1 = nmrAtom.nmrResidue.fetchNmrAtom(CA)
+                                newNmrAtoms.append(caIm1)
+                            else:
+                                newNmrAtoms.append(nmrAtom)
+                        _assignNmrAtomsToPeaks([peak], newNmrAtoms)
     project.deleteObjects(*tobedelpeaks)
-
-
-
 
 def _propagate_HNCACB_to_CBCACONH():
     caPeaks= []
@@ -478,15 +500,19 @@ def _propagate_HNCACB_to_CBCACONH():
                                 tbPropagated = makeIterableList(cbPeak.assignedNmrAtoms)
                                 _assignNmrAtomsToPeaks([cPeak], tbPropagated)
 
+##################################################################################################
+#####################################         Run Macro      #####################################
+##################################################################################################
 
-
-# run it
-pickPeaksHSQC()
-addLabelsHSQC()
+if not HSQC_alreadyAssigned:
+    pickPeaksHSQC()
+    addLabelsHSQC()
 pickRestrictedPeaksAndAddLabels()
 unAssigned = findPeaksAssignedOnlyToHSQC()
-_propagate_HNCACB_to_CBCACONH()
-checkNmrAtomCount()
+if Propagate_HNCACB_to_CBCACONH:
+    _propagate_HNCACB_to_CBCACONH()
+if CopyExpectedPeaksFromOtherSpectra:
+    copyExpectedPeaksFromOtherSpectra()
 removeObsoletePeaks()
 
 

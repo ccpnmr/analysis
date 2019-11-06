@@ -335,7 +335,7 @@ class UpdateAgent(object):
 
                     if fileHashCode == DELETEHASHCODE:
                         # delete file
-                        if os.path.exists(filePath):
+                        if os.path.exists(os.path.join(self.installLocation, filePath)):
 
                             # if still exists then need to add to update list
                             updateFile = UpdateFile(self.installLocation, self.serverDbRoot, filePath, fileTime,

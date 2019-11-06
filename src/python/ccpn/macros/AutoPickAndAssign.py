@@ -39,9 +39,7 @@ Searches for "i-1"s which are present in same spectra but missing and expected i
 Deletes obsolete peaks assigned to C if properly reassigned to CA or/and CB i-1 
 Deletes unassigned peaks
 
-User Parameters needed:
- - spectra names (mandatory for 15N-HSQC and  HNCACB)  
- - optionals, read comments below for descriptions... 
+User Parameters are in the section "User's  Parameters", read comments for descriptions... 
 
 Modify as you need and share your macros on the forum!
 
@@ -53,34 +51,35 @@ Modify as you need and share your macros on the forum!
 ##################################################################################################
 
 # Replace with your spectra names. Leave empty quotes '' if don't have
-HSQC_spectrumName = 'hsqc' # mandatory
+HSQC_spectrumName = 'hsqc'
 HNCACB_spectrumName = 'hncacb'
 HNCA_spectrumName = 'hnca'
 HNCOCA_spectrumName = 'hncoca'
 CBCACONH_spectrumName = 'cbcaconh'
-##################################################################################################
+#_________________________________________________________________________________________________
 
+# NB: Not recommended changing these labels. Used throughout the code for several operations not only for labeling the peaks on display
 # labels used to create nmrAtoms, NB on the current version 3.0.0 changing H to Hn and N to Nh
 # might break the assignment prediction for sequential matches! It could work on other labelling eg 13C but not tested)
-    # Note, assignement can be made only if compatible axis codes. Eg nmrAtom H to one axisCode H(+anyLetter),
-    #  if two axes starting with H in the same spectrum then will fail
+    #- Assignement can be made only if compatible axis codes. Eg nmrAtom H to one axisCode H(+anyLetter),
+    #- if two axes starting with H in the same spectrum then will fail
 H  = 'H'
 N  = 'N'
 CA = 'CA'
 CB = 'CB'
 C  = 'C'
 CH = 'CH'
-##################################################################################################
+#_________________________________________________________________________________________________
 
 nmrChainName = '@-' # use the default. Change this name to create a different one
-##################################################################################################
+#_________________________________________________________________________________________________
 
 # Picking parameters: HSQC
 minDropFactor = 0.01  # (1%) # pick more then less, unlabeled peaks will be deleted afterwards
+from collections import OrderedDict as od # Ignore this line as User's option, rest of import are set further down
 HSQC_limits = od(((H, [6,11]),  (N, [100,134]) )) # ppm limits where to find the signal on HSQC
-##################################################################################################
+#_________________________________________________________________________________________________
 
-from collections import OrderedDict as od # rest of import are set further down
 # regions of search on 3D
 # H and N limits +/- to the HSQC position for restricted  peak picking
 # C: the actual region of search. All in ppm
@@ -91,7 +90,7 @@ CBCACONH_limits = od(((H, [0.05, 0.05]),   (N, [1, 1]), (C, [10,80])))
 
 # tolerances in ppm for matching peaks across different Experiment types. Used when propagating assignments.
 tolerances   =   od(((H, 0.1),  (N, 2), (C, 4)))
-##################################################################################################
+#_________________________________________________________________________________________________
 
 # Contours, in case you don't want set it manually from display ...
 setContours       =   False # set False if not needed
@@ -100,7 +99,8 @@ hncaContours      =  (5835252.217157302, -5835252.217157302)
 hncocaContours    =  (15051295.29692141, -15051295.29692142)
 hncacbContours    =  (13094258.00380035, -13094258.00380035)
 cbcaconhContours  =  (8161392.113049264, -8161392.113049264)
-##################################################################################################
+#_________________________________________________________________________________________________
+
 HSQC_alreadyAssigned = False             # True if you already picked and assigned nmrAtoms on the HSQC. Peaks need to be in the last peakList.
 CA_in_HNCACB_isPositive = True           # Assign CA i-1 to positive peaks in the HNCACB, False Assign CB i-1 to positive
 Propagate_HNCACB_to_CBCACONH = True      # Replace assignment from C to CA and CB (i-1 nmrAtom) from the HNCACB to CBCACONH if relative peaks within tollerances

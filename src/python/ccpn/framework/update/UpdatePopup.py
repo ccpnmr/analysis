@@ -49,7 +49,7 @@ class UpdatePopup(CcpnDialog, UpdateAgent):
         self.mainWindow = mainWindow
 
         version = QtCore.QCoreApplication.applicationVersion()
-        UpdateAgent.__init__(self, version)
+        UpdateAgent.__init__(self, version, dryRun=False)
 
         self.setWindowTitle(title)
 

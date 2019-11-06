@@ -67,6 +67,7 @@ PATH_SEP = '__sep_'
 ###VERSION_RE = re.compile('^[.\d]+$')
 
 BAD_DOWNLOAD = 'Exception: '
+DELETEHASHCODE = '<DELETE>'
 
 
 def lastModifiedTime(filePath):
@@ -181,6 +182,20 @@ def uploadFile(serverUser, serverPassword, serverScript, fileName, serverDbRoot,
         return uploadData(serverUser, serverPassword, serverScript, fileData, serverDbRoot, fileStoredAs)
 
 
+def uploadFileForDelete(serverUser, serverPassword, serverScript, fileName, serverDbRoot, fileStoredAs):
+    """Upload a file to the server
+    """
+    try:
+        fileData = DELETEHASHCODE
+
+    except Exception as es:
+        getLogger().warning('error reading file,', str(es))
+        fileData = ''
+
+    if fileData:
+        return uploadData(serverUser, serverPassword, serverScript, fileData, serverDbRoot, fileStoredAs)
+
+
 class UpdateFile:
 
     def __init__(self, installLocation, serverDbRoot, filePath, fileServerTime=None,
@@ -239,6 +254,11 @@ class UpdateFile:
 
         uploadFile(serverUser, serverPassword, self.serverUploadScript, self.fullFilePath, self.serverDbRoot, self.fileStoredAs)
         self.fileHashCode = calcHashCode(self.fullFilePath)
+
+    def commitDeleteUpdate(self, serverUser, serverPassword):
+
+        uploadFileForDelete(serverUser, serverPassword, self.serverUploadScript, self.fullFilePath, self.serverDbRoot, self.fileStoredAs)
+        self.fileHashCode = DELETEHASHCODE
 
 
 class UpdateAgent(object):
@@ -435,9 +455,17 @@ class UpdateAgent(object):
         n = 0
         for updateFile in updateFiles:
             try:
-                print('Committing %s' % (updateFile.fullFilePath))
-                updateFile.commitUpdate(self.serverUser, serverPassword)
+                if os.path.exists(updateFile.fullFilePath):
+                    print('Committing %s' % (updateFile.fullFilePath))
+                    updateFile.commitUpdate(self.serverUser, serverPassword)
+
+                else:
+                    # file is to be deleted - add empty file
+                    print('Committing file to be deleted %s' % (updateFile.fullFilePath))
+                    updateFile.commitDeleteUpdate(self.serverUser, serverPassword)
+
                 n += 1
+
             except Exception as e:
                 raise
                 # seem to need str(e) below because o/w HTTPError (from bad pwd) not printed out

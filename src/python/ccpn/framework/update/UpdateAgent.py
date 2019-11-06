@@ -325,7 +325,21 @@ class UpdateAgent(object):
                 line = line.rstrip()
                 if line:
                     (filePath, fileTime, fileStoredAs, fileHashCode) = line.split(FIELD_SEP)
-                    if self.serverUser or self.isUpdateDifferent(filePath, fileHashCode):
+
+                    if fileHashCode == DELETEHASHCODE:
+                        # delete file
+                        if os.path.exists(filePath):
+
+                            # if still exists then need to add to update list
+                            updateFile = UpdateFile(self.installLocation, self.serverDbRoot, filePath, fileTime,
+                                                    fileStoredAs, fileHashCode, serverDownloadScript=serverDownloadScript,
+                                                    serverUploadScript=serverUploadScript)
+                            updateFiles.append(updateFile)
+                            updateFileDict[filePath] = updateFile
+
+                    elif self.serverUser or self.isUpdateDifferent(filePath, fileHashCode):
+
+                        # file exists, is modified and needs updating
                         updateFile = UpdateFile(self.installLocation, self.serverDbRoot, filePath, fileTime, fileStoredAs, fileHashCode,
                                                 serverDownloadScript=serverDownloadScript, serverUploadScript=serverUploadScript)
                         updateFiles.append(updateFile)

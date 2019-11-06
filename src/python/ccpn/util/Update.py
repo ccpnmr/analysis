@@ -180,7 +180,7 @@ def downloadFile(serverScript, serverDbRoot, fileName):
         print('Error downloading file from server.')
 
 
-def installUpdates(version, dryRun=False):
+def installUpdates(version, dryRun=True):
     updateAgent = UpdateAgent(version, dryRun=dryRun)
     updateAgent.resetFromServer()
     updateAgent.installUpdates()

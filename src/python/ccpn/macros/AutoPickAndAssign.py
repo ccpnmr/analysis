@@ -31,7 +31,7 @@ This macro doesn't want to be an automated Backbone assignment and is aimed only
 However can be run also if a 15N-HSQC and a HNCACB are present.
 
 The macro uses the picking peak routines present in 3.0.0 to pick the HSQC first and label with incremental numbered nmrResidues.
-Then picks restricted peak for all the 3Ds.
+Then picks restricted peak for all the 3Ds. This step is currently the weakest point, as peaks can be wrongly picked or missed completely. 
 It guesses the "i-1" and "i" by peak heights for HNCA and HNCACB based on the strongest peaks (absolute height).
 It cannot guess for CBCACONH so an NmrAtom C is given, Ca i-1 and CB i-1 are propagated from the HNCACB if the two spectral peaks are within tollerances
 
@@ -161,7 +161,7 @@ def addLabelsHSQC():
     hsqcPeaks = hsqc.peakLists[-1].peaks
     with notificationEchoBlocking():
         with undoBlockWithoutSideBar():
-            for peak in _stoppableProgressBar(hsqcPeaks, title='Labelling HSQC... (1/2)'):
+            for peak in _stoppableProgressBar(hsqcPeaks, title='Labelling HSQC...'):
                 nmrResidue = nmrChain.fetchNmrResidue()
                 hNmrAtom = nmrResidue.fetchNmrAtom(name=H)
                 nNmrAtom = nmrResidue.fetchNmrAtom(name=N)
@@ -280,7 +280,7 @@ def pickRestrictedPeaksAndAddLabels():
     allPeaks = []
     with notificationEchoBlocking():
         with undoBlockWithoutSideBar():
-            for peak in _stoppableProgressBar(hsqcPeaks, title='Labelling 3Ds...(2/2)'):
+            for peak in _stoppableProgressBar(hsqcPeaks, title='Labelling 3Ds...'):
                 _CAm1Peak = None
                 _CBm1Peak = None
                 # hsqc nmrAtoms
@@ -317,7 +317,7 @@ def deleteDuplicatedCACBm1():
     tobeDeletedPeaks = []
     with notificationEchoBlocking():
         with undoBlockWithoutSideBar():
-            for nmrResidue in _stoppableProgressBar(project.nmrResidues, title='Cleaning up...(3/3)'):
+            for nmrResidue in _stoppableProgressBar(project.nmrResidues, title='Cleaning up...'):
                 if nmrResidue.relativeOffset == -1:
                     for nmrAtom in nmrResidue.nmrAtoms:
                         if len(nmrAtom.assignedPeaks) > 0:
@@ -386,7 +386,7 @@ def _copyPeaksToOthePeakList(originPeakList, targetPeakList, nmrAtomLabel=CA):
 def copyExpectedPeaksFromOtherSpectra():
     with notificationEchoBlocking():
         with undoBlockWithoutSideBar():
-            for nr in  _stoppableProgressBar(project.nmrResidues, title='Copying missing Peaks/NmrAtoms...'):
+            for nr in _stoppableProgressBar(project.nmrResidues, title='Copying missing Peaks/NmrAtoms...'):
                 if nr.relativeOffset == -1:
                     caIm1 = nr.getNmrAtom(CA)
                     cbIm1 = nr.getNmrAtom(CB)
@@ -478,7 +478,7 @@ def _propagate_HNCACB_to_CBCACONH():
     caPeaks= []
     cbPeaks = []
     cPeaks = []
-    for nr in project.nmrResidues:
+    for nr in _stoppableProgressBar(project.nmrResidues, title='Propagating NmrAtoms from HNCACB to CBCACONH...'):
             if nr.relativeOffset == -1:
                 caNa = nr.getNmrAtom(CA)
                 cbNa = nr.getNmrAtom(CB)

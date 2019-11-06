@@ -425,10 +425,17 @@ class UpdateAgent(object):
             for updateFile in updateFiles:
                 try:
                     if not self._dryRun:
-                        print('Installing %s' % (updateFile.fullFilePath))
-                        updateFile.installUpdate()
+                        if updateFile.fileHashCode == DELETEHASHCODE:
+                            print('Install Updates: Removing %s' % (updateFile.fullFilePath))
+                            updateFile.installDeleteUpdate()
+                        else:
+                            print('Install Updates: Installing %s' % (updateFile.fullFilePath))
+                            updateFile.installUpdate()
                     else:
-                        print('dry-run %s' % (updateFile.fullFilePath))
+                        if updateFile.fileHashCode == DELETEHASHCODE:
+                            print('Install Updates: dry-run Removing %s' % (updateFile.fullFilePath))
+                        else:
+                            print('Install Updates: dry-run Installing %s' % (updateFile.fullFilePath))
 
                     n += 1
 

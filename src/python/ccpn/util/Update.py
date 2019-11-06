@@ -499,7 +499,10 @@ class UpdateAgent(object):
                             self.showInfo('Install Updates', 'Installing %s' % (updateFile.fullFilePath))
                             updateFile.installUpdate()
                     else:
-                        self.showInfo('Install Updates', 'dry-run %s' % (updateFile.fullFilePath))
+                        if updateFile.fileHashCode == DELETEHASHCODE:
+                            self.showInfo('Install Updates', 'dry-run Removing %s' % (updateFile.fullFilePath))
+                        else:
+                            self.showInfo('Install Updates', 'dry-run Installing %s' % (updateFile.fullFilePath))
 
                     n += 1
                     updateFilesInstalled.append(updateFile)

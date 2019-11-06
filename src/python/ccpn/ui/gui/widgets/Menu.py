@@ -35,7 +35,6 @@ SHOWMODULESMENU = 'Show/hide Modules'
 MACROSMENU = 'User Macros'
 CCPNMACROSMENU = 'CCPN Macros'
 TUTORIALSMENU = 'Tutorials'
-TESTMENU = 'testMenu'
 
 
 class Menu(QtWidgets.QMenu, Base):

@@ -187,6 +187,24 @@ def uploadFileForDelete(serverUser, serverPassword, serverScript, fileName, serv
         return uploadData(serverUser, serverPassword, serverScript, fileData, serverDbRoot, fileStoredAs)
 
 
+def isBinaryData(data):
+    """Check whether the byte-string is binary
+    """
+    if data:
+        # check the first 1024 bytes of the file
+        firstData = data[0:max(1024, len(data))]
+        try:
+            firstData = bytearray(firstData)
+        except:
+            firstData = bytearray(firstData, encoding='utf-8')
+
+        # remove all characters that are considered as text
+        textchars = bytearray({7, 8, 9, 10, 12, 13, 27} | set(range(0x20, 0x100)) - {0x7f})
+        isBinary = bool(firstData.translate(None, textchars))
+
+        return isBinary
+
+
 class UpdateFile:
 
     def __init__(self, installLocation, serverDbRoot, filePath, fileServerTime=None,
@@ -238,16 +256,34 @@ class UpdateFile:
             directory = os.path.dirname(fullFilePath)
             if not os.path.exists(directory):
                 os.makedirs(directory)
-        with open(fullFilePath, 'w') as fp:
-            fp.write(data)
+        # with open(fullFilePath, 'w') as fp:
+        #     fp.write(data)
+
+        if isBinaryData(data):
+            # always write binary files
+            with open(fullFilePath, 'wb') as fp:
+                fp.write(data)
+        else:
+            # backwards compatible check for half-updated - file contains DELETEHASHCODE as text
+            if data and data.startswith(DELETEHASHCODE):
+                try:
+                    os.remove(fullFilePath)
+                except OSError:
+                    pass
+            else:
+                with open(fullFilePath, 'w', encoding='utf-8') as fp:
+                    fp.write(data)
+
 
     def installDeleteUpdate(self):
         """Remove file as update action
         """
         # not sure if required in this module
         fullFilePath = self.fullFilePath
-        if os.path.isfile(fullFilePath):
+        try:
             os.remove(fullFilePath)
+        except OSError:
+            pass
 
     def commitUpdate(self, serverUser, serverPassword):
 

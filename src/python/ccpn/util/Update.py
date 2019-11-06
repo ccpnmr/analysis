@@ -229,6 +229,9 @@ class UpdateFile:
         """
         data = downloadFile(self.serverDownloadScript, self.serverDbRoot, self.fileStoredAs)
 
+        if not data:
+            return
+
         fullFilePath = self.fullFilePath
         if os.path.isfile(fullFilePath):
             # backup what is there just in case
@@ -240,11 +243,20 @@ class UpdateFile:
 
         try:
             if isBinaryData(data):
+                # always write binary files
                 with open(fullFilePath, 'wb') as fp:
                     fp.write(data)
             else:
-                with open(fullFilePath, 'w', encoding='utf-8') as fp:
-                    fp.write(data)
+                # backwards compatible check for half-updated - file contains DELETEHASHCODE as text
+                if data and data.startswith(DELETEHASHCODE):
+                    try:
+                        os.remove(fullFilePath)
+                    except OSError:
+                        pass
+                else:
+                    with open(fullFilePath, 'w', encoding='utf-8') as fp:
+                        fp.write(data)
+
         except Exception as es:
             pass
 
@@ -252,8 +264,10 @@ class UpdateFile:
         """Remove file as update action
         """
         fullFilePath = self.fullFilePath
-        if os.path.isfile(fullFilePath):
+        try:
             os.remove(fullFilePath)
+        except OSError:
+            pass
 
     # def commitUpdate(self, serverUser, serverPassword):
     #

@@ -335,8 +335,8 @@ class UpdateAgent(object):
         return len(self.updateFiles)
 
     def fetchUpdateDb(self):
-        """Fetch list of updates from server."""
-
+        """Fetch list of updates from server. Specificallly for updateAdmin
+        """
         self.updateFiles = updateFiles = []
         self.updateFileDict = updateFileDict = {}
         serverDownloadScript = '%s%s' % (self.server, self.serverDownloadScript)
@@ -362,32 +362,34 @@ class UpdateAgent(object):
                 if line:
                     (filePath, fileTime, fileStoredAs, fileHashCode) = line.split(FIELD_SEP)
 
-                    if fileHashCode == DELETEHASHCODE:
-                        # delete file
-                        if os.path.exists(os.path.join(self.installLocation, filePath)):
+                    # specifically fro updateAdmin, so show ALL files in the list
 
-                            # if still exists then need to add to update list
-                            updateFile = UpdateFile(self.installLocation, self.serverDbRoot, filePath, fileTime,
-                                                    fileStoredAs, fileHashCode, serverDownloadScript=serverDownloadScript,
-                                                    serverUploadScript=serverUploadScript)
-                            updateFiles.append(updateFile)
-                            updateFileDict[filePath] = updateFile
-
-                    elif self.serverUser or self.isUpdateDifferent(filePath, fileHashCode):
-
-                        # file exists, is modified and needs updating
-                        updateFile = UpdateFile(self.installLocation, self.serverDbRoot, filePath, fileTime, fileStoredAs, fileHashCode,
-                                                serverDownloadScript=serverDownloadScript, serverUploadScript=serverUploadScript)
-                        updateFiles.append(updateFile)
-                        updateFileDict[filePath] = updateFile
-
-                    elif fileTime in [0, '0', '0.0']:
-
-                        # file exists, is modified and needs updating
-                        updateFile = UpdateFile(self.installLocation, self.serverDbRoot, filePath, fileTime, fileStoredAs, fileHashCode,
-                                                serverDownloadScript=serverDownloadScript, serverUploadScript=serverUploadScript)
-                        updateFiles.append(updateFile)
-                        updateFileDict[filePath] = updateFile
+                    # if fileHashCode == DELETEHASHCODE:
+                    #     # delete file
+                    #     if os.path.exists(os.path.join(self.installLocation, filePath)) or fileTime in [0, '0', '0.0']:
+                    #
+                    #         # if still exists then need to add to update list
+                    #         updateFile = UpdateFile(self.installLocation, self.serverDbRoot, filePath, fileTime,
+                    #                                 fileStoredAs, fileHashCode, serverDownloadScript=serverDownloadScript,
+                    #                                 serverUploadScript=serverUploadScript)
+                    #         updateFiles.append(updateFile)
+                    #         updateFileDict[filePath] = updateFile
+                    #
+                    # elif self.serverUser or self.isUpdateDifferent(filePath, fileHashCode):
+                    #
+                    #     # file exists, is modified and needs updating
+                    #     updateFile = UpdateFile(self.installLocation, self.serverDbRoot, filePath, fileTime, fileStoredAs, fileHashCode,
+                    #                             serverDownloadScript=serverDownloadScript, serverUploadScript=serverUploadScript)
+                    #     updateFiles.append(updateFile)
+                    #     updateFileDict[filePath] = updateFile
+                    #
+                    # elif fileTime in [0, '0', '0.0']:
+                    #   file exists, is modified and needs updating
+                    #
+                    updateFile = UpdateFile(self.installLocation, self.serverDbRoot, filePath, fileTime, fileStoredAs, fileHashCode,
+                                            serverDownloadScript=serverDownloadScript, serverUploadScript=serverUploadScript)
+                    updateFiles.append(updateFile)
+                    updateFileDict[filePath] = updateFile
 
     def isUpdateDifferent(self, filePath, fileHashCode):
         """See if local file is different from server file."""

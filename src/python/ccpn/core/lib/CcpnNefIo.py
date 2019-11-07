@@ -1183,9 +1183,9 @@ class CcpnNefWriter:
                     substance = sampleComponent.substance
                     if substance is not None:
                         substanceSet.add(substance)
-                    chain = sampleComponent.chain
-                    if chain is not None:
-                        chainSet.add(chain)
+                    # chain = sampleComponent.chain
+                    # if chain is not None:
+                    #     chainSet.add(chain)
             substances = sorted(substanceSet)
 
             # Substances and Chains

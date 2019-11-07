@@ -30,8 +30,8 @@ CCP_CODES = ('Ala', 'Cys', 'Asp', 'Glu', 'Phe', 'Gly', 'His', 'Ile', 'Lys', 'Leu
              'Pro', 'Gln', 'Arg', 'Ser', 'Thr', 'Val', 'Trp', 'Tyr')
 
 # sorted by 3-letter code
-CCP_CODES_SORTED = ('Ala', 'Arg', 'Asn', 'Asp', 'Cys', 'Gln', 'Glu', 'Gly', 'His', 'Ile', 'Leu',
-                    'Lys', 'Met', 'Phe', 'Pro', 'Ser', 'Thr', 'Trp', 'Tyr', 'Val')
+CCP_CODES_SORTED = ('ALA', 'ARG', 'ASN', 'ASP', 'CYS', 'GLN', 'GLU', 'GLY', 'HIS', 'ILE', 'LEU',
+                    'LYS', 'MET', 'PHE', 'PRO', 'SER', 'THR', 'TRP', 'TYR', 'VAL')
 
 ATOM_NAMES = {'13C': ['C', 'CA', 'HB3', 'HD*', 'HD1', 'HD1*', 'HD2', 'HD2*', 'HD3', 'HE', 'HE*', 'HE1',
                       'HE22', 'HE3', 'HG', 'CD1', 'CD2', 'CE', 'CE*', 'CE1', 'CE2', 'CE3',
@@ -46,6 +46,17 @@ ATOM_NAMES = {'13C': ['C', 'CA', 'HB3', 'HD*', 'HD1', 'HD1*', 'HD2', 'HD2*', 'HD
 
               '15N': ['N', 'ND1', 'NE', 'NE1', 'NE2', 'NH1', 'NH2', 'NZ']
               }
+
+NEF_ATOM_NAMES = {'13C': ['C', 'CA', 'CB', 'CG', 'CG1', 'CG2', 'CGx', 'CGy',
+                          'CD', 'CD1', 'CD2', 'CDx', 'CDy', 'CE', 'CE1', 'CE2', 'CE3',
+                          'CEx', 'CEy', 'CZ', 'CZ2', 'CZ3', 'CH2'],
+                  '15N': ['N', 'ND1', 'ND2', 'NE', 'NE1', 'NE2', 'NZ', 'NH1', 'NH2', 'NHx', 'NHy'],
+                  '1H' : ['H', 'HA', 'HA2', 'HA3', 'HAx', 'HAy', 'HB', 'HB2', 'HB3', 'HBx', 'HBy',
+                          'HB%', 'HG', 'HG1', 'HG12', 'HG13', 'HG1x', 'HG1y', 'HG1%', 'HG2', 'HG2%',
+                          'HG3', 'HGx', 'HGx%', 'HGy', 'HGy%', 'HD1', 'HD1%', 'HD2', 'HD21', 'HD22',
+                          'HD2x', 'HD2y', 'HD2%', 'HD3', 'HDx', 'HDx%', 'HDy%', 'HE', 'HE1', 'HE2',
+                          'HE21', 'HE22', 'HE2x', 'HE2y', 'HE3', 'HEx', 'HEy', 'HE%', 'HZ', 'HZ2', 'HZ3', 'HZ%',
+                          'HH', 'HH11', 'HH12', 'HH1x', 'HH1y', 'HH2', 'HH21', 'HH22', 'HH2x', 'HH2y']}
 
 from ccpn.util import Common as commonUtil, Constants
 from typing import Sequence

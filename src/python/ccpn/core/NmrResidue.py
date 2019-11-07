@@ -1186,7 +1186,7 @@ class NmrResidue(AbstractWrapperObject):
         except Exception as es:
             raise es
 
-
+    @renameObject()
     @logCommand(get='self')
     def rename(self, value: str = None):
         """Rename NmrResidue. changing its sequenceCode, residueType, or both.
@@ -1219,13 +1219,10 @@ class NmrResidue(AbstractWrapperObject):
 
         oldName = '.'.join((apiResonanceGroup.sequenceCode, apiResonanceGroup.residueType or ''))
 
-        with renameObject(self) as addUndoItem:
-        # with renameObjectNoBlanking(self) as addUndoItem:
-            apiResonanceGroup.sequenceCode = sequenceCode
-            apiResonanceGroup.resetResidueType(residueType)
-
-            addUndoItem(undo=partial(self.rename, oldName),
-                        redo=partial(self.rename, value))
+        # rename functions from here
+        apiResonanceGroup.sequenceCode = sequenceCode
+        apiResonanceGroup.resetResidueType(residueType)
+        return (oldName,)
 
     #=========================================================================================
     # CCPN functions

@@ -169,18 +169,17 @@ class Data(AbstractWrapperObject):
         """get wrappedData - all Data children of parent NmrConstraintStore"""
         return parent._wrappedData.sortedData()
 
+    @renameObject()
     @logCommand(get='self')
     def rename(self, value: str):
         """Rename Data, changing its name and Pid.
         """
         self._validateName(value=value, allowWhitespace=False)
 
-        with renameObject(self) as addUndoItem:
-            oldName = self.name
-            coreUtil._resetParentLink(self._wrappedData, 'data', {'name': value})
-
-            addUndoItem(undo=partial(self.rename, oldName),
-                        redo=partial(self.rename, value))
+        # rename functions from here
+        oldName = self.name
+        coreUtil._resetParentLink(self._wrappedData, 'data', {'name': value})
+        return (oldName,)
 
     #=========================================================================================
     # CCPN functions

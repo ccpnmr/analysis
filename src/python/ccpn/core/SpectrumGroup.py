@@ -174,18 +174,17 @@ class SpectrumGroup(AbstractWrapperObject):
         """get wrappedData for all SpectrumGroups linked to NmrProject"""
         return parent._wrappedData.sortedSpectrumGroups()
 
+    @renameObject()
     @logCommand(get='self')
     def rename(self, value: str):
         """Rename SpectrumGroup, changing its name and Pid.
         """
         self._validateName(value=value, allowWhitespace=False)
 
-        with renameObject(self) as addUndoItem:
-            oldName = self.name
-            self._wrappedData.__dict__['name'] = value
-
-            addUndoItem(undo=partial(self.rename, oldName),
-                        redo=partial(self.rename, value))
+        # rename functions from here
+        oldName = self.name
+        self._wrappedData.__dict__['name'] = value
+        return (oldName,)
 
     def _finaliseAction(self, action: str):
         """Subclassed to handle associated seriesValues instances

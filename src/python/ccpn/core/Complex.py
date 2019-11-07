@@ -113,18 +113,17 @@ class Complex(AbstractWrapperObject):
         else:
             return molSystem.sortedChainGroups()
 
+    @renameObject()
     @logCommand(get='self')
     def rename(self, value: str):
         """Rename Complex, changing its name and Pid.
         """
         self._validateName(value=value, allowWhitespace=False)
 
-        with renameObject(self) as addUndoItem:
-            oldName = self.name
-            self._wrappedData.__dict__['name'] = value
-
-            addUndoItem(undo=partial(self.rename, oldName),
-                        redo=partial(self.rename, value))
+        # rename functions from here
+        oldName = self.name
+        self._wrappedData.__dict__['name'] = value
+        return (oldName,)
 
     #=========================================================================================
     # CCPN functions

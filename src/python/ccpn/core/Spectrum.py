@@ -2696,18 +2696,17 @@ assignmentTolerances
         """get wrappedData (Nmr.DataSources) for all Spectrum children of parent Project"""
         return list(x for y in parent._wrappedData.sortedExperiments() for x in y.sortedDataSources())
 
+    @renameObject()
     @logCommand(get='self')
     def rename(self, value: str):
         """Rename Spectrum, changing its name and Pid.
         """
         self._validateName(value=value, allowWhitespace=False)
 
-        with renameObject(self) as addUndoItem:
-            oldName = self.name
-            self._wrappedData.name = value
-
-            addUndoItem(undo=partial(self.rename, oldName),
-                        redo=partial(self.rename, value))
+        # rename functions from here
+        oldName = self.name
+        self._wrappedData.name = value
+        return (oldName,)
 
     def _finaliseAction(self, action: str):
         """Subclassed to handle associated spectrumViews instances

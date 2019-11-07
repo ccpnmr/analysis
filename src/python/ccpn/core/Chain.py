@@ -293,18 +293,17 @@ class Chain(AbstractWrapperObject):
         else:
             return molSystem.sortedChains()
 
+    @renameObject()
     @logCommand(get='self')
     def rename(self, value: str):
         """Rename Chain, changing its shortName and Pid.
         """
         self._validateName(value=value, allowWhitespace=False)
 
-        with renameObject(self) as addUndoItem:
-            oldName = self.shortName
-            self._apiChain.renameChain(value)
-
-            addUndoItem(undo=partial(self.rename, oldName),
-                        redo=partial(self.rename, value))
+        # rename functions from here
+        oldName = self.shortName
+        self._apiChain.renameChain(value)
+        return (oldName,)
 
     # def delete(self):
     #     print('>>>deleting - need to delete apiMolecules')

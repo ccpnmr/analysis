@@ -271,8 +271,8 @@ class GuiStrip(Frame):
         # Notifier for change of stripLabel
         self.setNotifier(self.project, [Notifier.RENAME], 'Spectrum', self._updateSpectrumLabels)
 
-        # Notifier for change of stripLabel
-        self.setNotifier(self.project, [Notifier.RENAME], 'NmrResidue', self._updateStripLabel)
+        # # Notifier for change of stripLabel
+        # self.setNotifier(self.project, [Notifier.RENAME], 'NmrResidue', self._updateStripLabel)
 
         # For now, all dropEvents are not strip specific, use spectrumDisplay's handling
         self.setGuiNotifier(self, [GuiNotifier.DROPEVENT], [DropBase.URLS, DropBase.PIDS],

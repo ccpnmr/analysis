@@ -1457,8 +1457,8 @@ class GuiSpectrumDisplay(CcpnModule):
                 result._finaliseAction('create')
 
                 # copy the strip Header if needed
-                result.header.headerVisible = copyVisible if copyVisible is not None else False
-                result.header.setLabelVisible(visible=copyVisible if copyVisible is not None else False)
+                # result.header.headerVisible = copyVisible if copyVisible is not None else False
+                # result.header.setLabelVisible(visible=copyVisible if copyVisible is not None else False)
 
                 # retrieve list of created items from the api
                 # strangely, this modifies _wrappedData.orderedStrips

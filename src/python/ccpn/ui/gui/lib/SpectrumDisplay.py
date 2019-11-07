@@ -145,7 +145,7 @@ def navigateToPeakInStrip(spectrumDisplay: GuiSpectrumDisplay, strip, peak, widt
     navigateToPositionInStrip(strip, pos, spCodes, widths=newWidths)
     strip.header.reset()
     strip.header.setLabelText(position='c', text=peak.pid)
-    strip.header.headerVisible = True
+    # strip.header.headerVisible = True
 
 
 def navigateToNmrResidueInStrip(spectrumDisplay: GuiSpectrumDisplay, strip, nmrResidue, widths=None, markPositions=False):
@@ -168,6 +168,6 @@ def navigateToNmrResidueInStrip(spectrumDisplay: GuiSpectrumDisplay, strip, nmrR
 
     strip.header.reset()
     strip.header.setLabelText(position='c', text=nmrResidue.pid)
-    strip.header.headerVisible = True
+    # strip.header.headerVisible = True
 
 

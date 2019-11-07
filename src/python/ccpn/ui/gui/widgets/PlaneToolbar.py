@@ -824,15 +824,6 @@ class StripHeaderWidget(_OpenGLFrameABC):
         """Seems an awkward way of getting a generic post init function but can't think of anything else yet
         """
         # assume that nothing has been set yet
-        # self._nmrChainLeft.setPixmap(Icon('icons/down-left').pixmap(18, 18))
-        # self._nmrChainRight.setPixmap(Icon('icons/down-right').pixmap(18, 18))
-        # self._nmrChainLeft.setVisible(False)
-        # self._nmrChainRight.setVisible(False)
-
-        # self.setLabelIcon('icons/down-left', (18, 18), STRIPPOSITION_MINUS)
-        # self.setLabelIcon('icons/down-right', (18, 18), STRIPPOSITION_PLUS)
-        # self.setEnabledLeftDrop(False)
-        # self.setEnabledRightDrop(False)
         pass
 
     def __postHeaderInit__(self, widget, strip):
@@ -883,7 +874,11 @@ class StripHeaderWidget(_OpenGLFrameABC):
                             zip(STRIPPOSITIONS,
                                 (self._nmrChainLeft, self._nmrChainRight, self._stripLabel, self._stripDirection, self._stripPercent)))
 
-        labelsVisible = False
+        # set the visible state of the header
+        self.strip.setParameter(STRIPDICT, STRIPHEADERVISIBLE, False)
+        self.setVisible(False)
+
+        # labelsVisible = False
         for stripPos in STRIPPOSITIONS:
             # read the current strip header values
             headerText = self._getPositionParameter(stripPos, STRIPTEXT, '')
@@ -894,27 +889,32 @@ class StripHeaderWidget(_OpenGLFrameABC):
             # not sure this is required
             headerObject = self.strip.project.getByPid(self._getPositionParameter(stripPos, STRIPOBJECT, None))
             headerConnect = self._getPositionParameter(stripPos, STRIPCONNECT, STRIPCONNECT_NONE)
-            headerVisible = self._getPositionParameter(stripPos, STRIPVISIBLE, False)
-            headerEnabled = self._getPositionParameter(stripPos, STRIPENABLED, True)
+
+            # headerVisible = self._getPositionParameter(stripPos, STRIPVISIBLE, False)
+            # headerEnabled = self._getPositionParameter(stripPos, STRIPENABLED, True)
 
             self._labels[stripPos].obj = headerObject
             self._labels[stripPos]._connectDir = headerConnect
 
-            self._labels[stripPos].setVisible(True if headerText else False)
+            # self._labels[stripPos].setVisible(True if headerText else False)
+            # self._labels[stripPos].setVisible(headerVisible)
 
-            self._labels[stripPos].setVisible(headerVisible)
-            labelsVisible = labelsVisible or headerVisible
-            self._labels[stripPos].setEnabled(headerEnabled)
+            # labelsVisible = labelsVisible or headerVisible
+            # self._labels[stripPos].setEnabled(headerEnabled)
 
             if headerIconName:
                 self.setLabelIcon(headerIconName, headerIconSize, stripPos)
-            elif headerText:
+            else:
                 self.setLabelText(headerText, stripPos)
 
-        # get the visible state of the header
-        headerVisible = self.strip.getParameter(STRIPDICT, STRIPHEADERVISIBLE)
-        self.setVisible(True)  # headerVisible if headerVisible is not None else labelsVisible)
         self._resize()
+
+        # Notifier for change of stripLabel
+        self._nmrResidueNotifier = Notifier(self.project,
+                                            [Notifier.RENAME],
+                                            'NmrResidue',
+                                            self._processNotifier,
+                                            onceOnly=True)
 
     def setEnabledLeftDrop(self, value):
 
@@ -923,7 +923,6 @@ class StripHeaderWidget(_OpenGLFrameABC):
         if value and not iconLeft:
             self.setLabelIcon('icons/down-left', (18, 18), STRIPPOSITION_MINUS)
 
-        self.setLabelVisible(STRIPPOSITION_MINUS, value)
         self._resize()
 
     def setEnabledRightDrop(self, value):
@@ -933,7 +932,6 @@ class StripHeaderWidget(_OpenGLFrameABC):
         if value and not iconRight:
             self.setLabelIcon('icons/down-right', (18, 18), STRIPPOSITION_PLUS)
 
-        self.setLabelVisible(STRIPPOSITION_PLUS, value)
         self._resize()
 
     def _setPositionParameter(self, stripPos, subParameterName, value):
@@ -979,12 +977,12 @@ class StripHeaderWidget(_OpenGLFrameABC):
     def reset(self):
         """Clear all header labels
         """
-        self.setVisible(False)
+        # self.setVisible(False)
         for stripPos in STRIPPOSITIONS:
             self._labels[stripPos].obj = None
             self._labels[stripPos]._connectDir = STRIPCONNECT_NONE
-            self._labels[stripPos].setVisible(False)
             self._labels[stripPos].setEnabled(True)
+            self.setLabelVisible(stripPos, False)
 
             # clear the header store
             params = {STRIPTEXT    : '',
@@ -996,8 +994,15 @@ class StripHeaderWidget(_OpenGLFrameABC):
                       }
             self.strip.setParameter(STRIPDICT, stripPos, params)
         self.strip.setParameter(STRIPDICT, STRIPHANDLE, None)
-        self.strip.setParameter(STRIPDICT, STRIPHEADERVISIBLE, False)
         self._resize()
+
+    def getLabelObject(self, position=STRIPPOSITION_CENTRE):
+        """Return the object attached to the header label at the given position
+        """
+        if position in STRIPPOSITIONS:
+            return self._labels[position].obj
+        else:
+            raise ValueError('Error: %s is not a valid position' % str(position))
 
     def setLabelObject(self, obj=None, position=STRIPPOSITION_CENTRE):
         """Set the object attached to the header label at the given position and store its pid
@@ -1015,11 +1020,11 @@ class StripHeaderWidget(_OpenGLFrameABC):
 
         self._resize()
 
-    def getLabelObject(self, position=STRIPPOSITION_CENTRE):
-        """Return the object attached to the header label at the given position
+    def getLabelText(self, position=STRIPPOSITION_CENTRE):
+        """Return the text for header label at the given position
         """
         if position in STRIPPOSITIONS:
-            return self._labels[position].obj
+            return self._labels[position].text()
         else:
             raise ValueError('Error: %s is not a valid position' % str(position))
 
@@ -1030,20 +1035,11 @@ class StripHeaderWidget(_OpenGLFrameABC):
         if position in STRIPPOSITIONS:
             self._labels[position].setText(str(text))
             self._setPositionParameter(position, STRIPTEXT, str(text))
-
-            self._labels[position].setVisible(True if text else False)
+            self.setLabelVisible(position, True if text else False)
         else:
             raise ValueError('Error: %s is not a valid position' % str(position))
 
         self._resize()
-
-    def getLabelText(self, position=STRIPPOSITION_CENTRE):
-        """Return the text for header label at the given position
-        """
-        if position in STRIPPOSITIONS:
-            return self._labels[position].text()
-        else:
-            raise ValueError('Error: %s is not a valid position' % str(position))
 
     def getLabel(self, position=STRIPPOSITION_CENTRE):
         """Return the header label widget at the given position
@@ -1053,21 +1049,6 @@ class StripHeaderWidget(_OpenGLFrameABC):
         else:
             raise ValueError('Error: %s is not a valid position' % str(position))
 
-    def setLabelVisible(self, position=STRIPPOSITION_CENTRE, visible: bool = True):
-        """show/hide the header label at the given position
-        """
-        if position in STRIPPOSITIONS:
-            if visible:
-                self.show()
-            else:
-                self.hide()
-            self._labels[position].setVisible(visible)
-            self._setPositionParameter(position, STRIPVISIBLE, visible)
-        else:
-            raise ValueError('Error: %s is not a valid position' % str(position))
-
-        self._resize()
-
     def getLabelVisible(self, position=STRIPPOSITION_CENTRE):
         """Return if the widget at the given position is visible
         """
@@ -1075,6 +1056,26 @@ class StripHeaderWidget(_OpenGLFrameABC):
             return self._labels[position].isVisible()
         else:
             raise ValueError('Error: %s is not a valid position' % str(position))
+
+    def setLabelVisible(self, position=STRIPPOSITION_CENTRE, visible: bool = True):
+        """show/hide the header label at the given position
+        """
+        if position in STRIPPOSITIONS:
+            # if visible:
+            #     self.show()
+            # else:
+            #     self.hide()
+            self._labels[position].setVisible(visible)
+            self._setPositionParameter(position, STRIPVISIBLE, visible)
+
+        else:
+            raise ValueError('Error: %s is not a valid position' % str(position))
+
+        lv = [self._getPositionParameter(pp, STRIPVISIBLE, False) for pp in STRIPPOSITIONS]
+        headerVisible = any(lv)
+        self.strip.setParameter(STRIPDICT, STRIPHEADERVISIBLE, headerVisible)
+        self.setVisible(headerVisible)
+        self._resize()
 
     def setLabelEnabled(self, position=STRIPPOSITION_CENTRE, enable: bool = True):
         """Enable/disable the header label at the given position
@@ -1095,6 +1096,14 @@ class StripHeaderWidget(_OpenGLFrameABC):
         else:
             raise ValueError('Error: %s is not a valid position' % str(position))
 
+    def getLabelConnectDir(self, position=STRIPPOSITION_CENTRE):
+        """Return the connectDir attribute of the header label at the given position
+        """
+        if position in STRIPPOSITIONS:
+            return self._labels[position]._connectDir
+        else:
+            raise ValueError('Error: %s is not a valid position' % str(position))
+
     def setLabelConnectDir(self, position=STRIPPOSITION_CENTRE, connectDir: str = STRIPCONNECT_NONE):
         """set the connectDir attribute of the header label at the given position
         """
@@ -1106,14 +1115,6 @@ class StripHeaderWidget(_OpenGLFrameABC):
 
         self._resize()
 
-    def getLabelConnectDir(self, position=STRIPPOSITION_CENTRE):
-        """Return the connectDir attribute of the header label at the given position
-        """
-        if position in STRIPPOSITIONS:
-            return self._labels[position]._connectDir
-        else:
-            raise ValueError('Error: %s is not a valid position' % str(position))
-
     def setLabelIcon(self, iconName=None, iconSize=(18, 18), position=STRIPPOSITION_CENTRE):
         """Set the text for header label at the given position
         """
@@ -1121,22 +1122,13 @@ class StripHeaderWidget(_OpenGLFrameABC):
         if position in STRIPPOSITIONS:
             self._labels[position].setPixmap(Icon(iconName).pixmap(*iconSize))
             self._setPositionParameter(position, STRIPICONNAME, str(iconName))
-
-            self._labels[position].setVisible(True if iconName else False)
+            self.setLabelVisible(position, True if iconName else False)
         else:
             raise ValueError('Error: %s is not a valid position' % str(position))
 
         self._resize()
 
-    # def getLabelIcon(self, position=STRIPPOSITION_CENTRE):
-    #     """Return the text for header label at the given position
-    #     """
-    #     if position in STRIPPOSITIONS:
-    #         return self._labels[position].text()
-    #     else:
-    #         raise ValueError('Error: %s is not a valid position' % str(position))
-
-    def processNotifier(self, data):
+    def _processNotifier(self, data):
         """Process the notifiers for the strip header
         """
         trigger = data[Notifier.TRIGGER]
@@ -1160,8 +1152,8 @@ class StripHeaderWidget(_OpenGLFrameABC):
 
     @headerVisible.setter
     def headerVisible(self, visible):
-        self.setVisible(visible)
         self.strip.setParameter(STRIPDICT, STRIPHEADERVISIBLE, visible)
+        self.setVisible(visible)
         self._resize()
 
     @property
@@ -1177,8 +1169,7 @@ class StripHeaderWidget(_OpenGLFrameABC):
 def _setStripLabel(self, *args):
     """Set the label of the strip, called from _populate
     """
-    # self.setLabelText('.'.join(self.strip.id.split('.')))
-    self.setLabelText(self.strip.pid if self.strip else '<None>')
+    self.setLabelText(self.strip.pid if self.strip else '')
     self._resize()
 
 
@@ -1249,6 +1240,7 @@ class StripLabelWidget(_OpenGLFrameABC):
         self._setStyle(self._stripLabel, foregroundColour=colour)
         self._setPositionParameter(STRIPTEXT, str(text))
         self._setPositionParameter(STRIPCOLOUR, colour)
+        self._stripLabel.setVisible(True if text else False)
         self._resize()
 
     def setLabelText(self, text=None):
@@ -1257,6 +1249,7 @@ class StripLabelWidget(_OpenGLFrameABC):
         self.show()
         self._stripLabel.setText(str(text))
         self._setPositionParameter(STRIPTEXT, str(text))
+        self._stripLabel.setVisible(True if text else False)
         self._resize()
 
     def setLabelColour(self, colour=DEFAULTCOLOUR):

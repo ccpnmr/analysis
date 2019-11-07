@@ -40,7 +40,7 @@ __version__ = "$Revision: 3.0.0 $"
 __author__ = "$Author: Luca M $"
 __date__ = "$Date: 2019-06-12 10:28:40 +0000 (Wed, Jun 12, 2019) $"
 #=========================================================================================
-# Start of code
+__title__ = "BMRB Chemical Shift List Importer from NMR-STAR v3.1"
 #=========================================================================================
 
 _UI = True  # Default opens a popup for selecting the input and run the macro

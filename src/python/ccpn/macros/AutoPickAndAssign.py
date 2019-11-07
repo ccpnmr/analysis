@@ -1,3 +1,25 @@
+"""
+
+This macro doesn't want to be an automated Backbone assignment and is aimed only to add initial labels to a project containing:
+ 15N-HSQC,  HNCA,  HNCOCA,  HNCACB,  CBCACONH, which will be carefully inspected manually and amended as needed it.
+
+However can be run also if a 15N-HSQC and a HNCACB are present.
+
+The macro uses the picking peak routines present in 3.0.0 to pick the HSQC first and label with incremental numbered nmrResidues.
+Then picks restricted peak for all the 3Ds. This step is currently the weakest point, as peaks can be wrongly picked or missed completely.
+It guesses the "i-1" and "i" by peak heights for HNCA and HNCACB based on the strongest peaks (absolute height).
+It cannot guess for CBCACONH so an NmrAtom C is given, Ca i-1 and CB i-1 are propagated from the HNCACB if the two spectral peaks are within tollerances
+
+Searches for "i-1"s which are present in same spectra but missing and expected in others and copies them.
+Deletes obsolete peaks assigned to C if properly reassigned to CA or/and CB i-1
+Deletes unassigned peaks
+
+User Parameters are in the section "User's  Parameters", read comments for descriptions...
+
+This macro is not optimised for speed and tested only using spectra from Sec5part1 tutorial.
+Modify as you need and share your macros on the forum!
+
+"""
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
@@ -21,30 +43,6 @@ __date__ = "$Date: 2019-10-31 16:32:32 +0100 (Thu, Oct 31, 2019) $"
 #=========================================================================================
 __title__ = "Auto pick and assign for triple resonance backbone assignment"
 #=========================================================================================
-
-
-"""
-
-This macro doesn't want to be an automated Backbone assignment and is aimed only to add initial labels to a project containing:
- 15N-HSQC,  HNCA,  HNCOCA,  HNCACB,  CBCACONH, which will be carefully inspected manually and amended as needed it.
-
-However can be run also if a 15N-HSQC and a HNCACB are present.
-
-The macro uses the picking peak routines present in 3.0.0 to pick the HSQC first and label with incremental numbered nmrResidues.
-Then picks restricted peak for all the 3Ds. This step is currently the weakest point, as peaks can be wrongly picked or missed completely. 
-It guesses the "i-1" and "i" by peak heights for HNCA and HNCACB based on the strongest peaks (absolute height).
-It cannot guess for CBCACONH so an NmrAtom C is given, Ca i-1 and CB i-1 are propagated from the HNCACB if the two spectral peaks are within tollerances
-
-Searches for "i-1"s which are present in same spectra but missing and expected in others and copies them. 
-Deletes obsolete peaks assigned to C if properly reassigned to CA or/and CB i-1 
-Deletes unassigned peaks
-
-User Parameters are in the section "User's  Parameters", read comments for descriptions... 
-
-This macro is not optimised for speed and tested only using spectra from Sec5part1 tutorial.
-Modify as you need and share your macros on the forum!
-
-"""
 
 
 ##################################################################################################

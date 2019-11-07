@@ -58,19 +58,31 @@ class PythonConsoleModule(CcpnModule):
         if self._menuAction:
             self._menuAction.setChecked(True)
 
-        self.settingsEditorCheckBox = CheckBox(self.settingsWidget, checked=True, text='Log Display', callback=self._toggleTextEditor,
-                                               grid=(0, 0))
+        row = 0
+        self.settingsEditorCheckBox = CheckBox(self.settingsWidget, checked=True, text='Show logging window', callback=self._toggleTextEditor,
+                                               grid=(row, 0))
         self._toggleTextEditor(False)
+
+        row += 1
+        self.settingsLoggingCheckBox = CheckBox(self.settingsWidget, checked=True, text='Enable logging', callback=self._toggleLogging,
+                                               grid=(row, 0))
 
         # make the widget visible, it is hidden when first instantiated
         self.pythonConsoleWidget.show()
         self.pythonConsoleWidget.textEditor.show()
 
     def _toggleTextEditor(self, value):
+        """Show/hide the logging window in the python console
+        """
         if value:
             self.pythonConsoleWidget.textEditor.show()
         else:
             self.pythonConsoleWidget.textEditor.hide()
+
+    def _toggleLogging(self, value):
+        """Enable/disable logging to the logging window of the python console
+        """
+        self.application._enableLoggingToConsole = value
 
     def _closeModule(self):
         # self.pythonConsoleWidget._stopChannels()

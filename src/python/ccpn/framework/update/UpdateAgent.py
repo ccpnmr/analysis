@@ -29,19 +29,11 @@ import base64
 import difflib
 import hashlib
 import os
-import re
 import shutil
 import sys
-import ssl
-import time
-import urllib
-from urllib.parse import urlencode, quote
-from urllib.request import urlopen
-import urllib3.contrib.pyopenssl
-import certifi
 
 from datetime import datetime
-from ccpn.util.Update import isBinaryData
+from ccpn.util.Update import isBinaryData, DELETEHASHCODE
 from ccpn.framework.PathsAndUrls import ccpn2Url
 
 from ccpn.util import Path
@@ -181,6 +173,38 @@ def uploadFile(serverUser, serverPassword, serverScript, fileName, serverDbRoot,
         return uploadData(serverUser, serverPassword, serverScript, fileData, serverDbRoot, fileStoredAs)
 
 
+def uploadFileForDelete(serverUser, serverPassword, serverScript, fileName, serverDbRoot, fileStoredAs):
+    """Upload a file to the server
+    """
+    try:
+        fileData = DELETEHASHCODE
+
+    except Exception as es:
+        getLogger().warning('error reading file,', str(es))
+        fileData = ''
+
+    if fileData:
+        return uploadData(serverUser, serverPassword, serverScript, fileData, serverDbRoot, fileStoredAs)
+
+
+def isBinaryData(data):
+    """Check whether the byte-string is binary
+    """
+    if data:
+        # check the first 1024 bytes of the file
+        firstData = data[0:max(1024, len(data))]
+        try:
+            firstData = bytearray(firstData)
+        except:
+            firstData = bytearray(firstData, encoding='utf-8')
+
+        # remove all characters that are considered as text
+        textchars = bytearray({7, 8, 9, 10, 12, 13, 27} | set(range(0x20, 0x100)) - {0x7f})
+        isBinary = bool(firstData.translate(None, textchars))
+
+        return isBinary
+
+
 class UpdateFile:
 
     def __init__(self, installLocation, serverDbRoot, filePath, fileServerTime=None,
@@ -232,13 +256,44 @@ class UpdateFile:
             directory = os.path.dirname(fullFilePath)
             if not os.path.exists(directory):
                 os.makedirs(directory)
-        with open(fullFilePath, 'w') as fp:
-            fp.write(data)
+        # with open(fullFilePath, 'w') as fp:
+        #     fp.write(data)
+
+        if isBinaryData(data):
+            # always write binary files
+            with open(fullFilePath, 'wb') as fp:
+                fp.write(data)
+        else:
+            # backwards compatible check for half-updated - file contains DELETEHASHCODE as text
+            if data and data.startswith(DELETEHASHCODE):
+                try:
+                    os.remove(fullFilePath)
+                except OSError:
+                    pass
+            else:
+                with open(fullFilePath, 'w', encoding='utf-8') as fp:
+                    fp.write(data)
+
+
+    def installDeleteUpdate(self):
+        """Remove file as update action
+        """
+        # not sure if required in this module
+        fullFilePath = self.fullFilePath
+        try:
+            os.remove(fullFilePath)
+        except OSError:
+            pass
 
     def commitUpdate(self, serverUser, serverPassword):
 
         uploadFile(serverUser, serverPassword, self.serverUploadScript, self.fullFilePath, self.serverDbRoot, self.fileStoredAs)
         self.fileHashCode = calcHashCode(self.fullFilePath)
+
+    def commitDeleteUpdate(self, serverUser, serverPassword):
+
+        uploadFileForDelete(serverUser, serverPassword, self.serverUploadScript, self.fullFilePath, self.serverDbRoot, self.fileStoredAs)
+        self.fileHashCode = DELETEHASHCODE
 
 
 class UpdateAgent(object):
@@ -280,8 +335,8 @@ class UpdateAgent(object):
         return len(self.updateFiles)
 
     def fetchUpdateDb(self):
-        """Fetch list of updates from server."""
-
+        """Fetch list of updates from server. Specificallly for updateAdmin
+        """
         self.updateFiles = updateFiles = []
         self.updateFileDict = updateFileDict = {}
         serverDownloadScript = '%s%s' % (self.server, self.serverDownloadScript)
@@ -306,11 +361,35 @@ class UpdateAgent(object):
                 line = line.rstrip()
                 if line:
                     (filePath, fileTime, fileStoredAs, fileHashCode) = line.split(FIELD_SEP)
-                    if self.serverUser or self.isUpdateDifferent(filePath, fileHashCode):
-                        updateFile = UpdateFile(self.installLocation, self.serverDbRoot, filePath, fileTime, fileStoredAs, fileHashCode,
-                                                serverDownloadScript=serverDownloadScript, serverUploadScript=serverUploadScript)
-                        updateFiles.append(updateFile)
-                        updateFileDict[filePath] = updateFile
+
+                    # specifically fro updateAdmin, so show ALL files in the list
+
+                    # if fileHashCode == DELETEHASHCODE:
+                    #     # delete file
+                    #     if os.path.exists(os.path.join(self.installLocation, filePath)) or fileTime in [0, '0', '0.0']:
+                    #
+                    #         # if still exists then need to add to update list
+                    #         updateFile = UpdateFile(self.installLocation, self.serverDbRoot, filePath, fileTime,
+                    #                                 fileStoredAs, fileHashCode, serverDownloadScript=serverDownloadScript,
+                    #                                 serverUploadScript=serverUploadScript)
+                    #         updateFiles.append(updateFile)
+                    #         updateFileDict[filePath] = updateFile
+                    #
+                    # elif self.serverUser or self.isUpdateDifferent(filePath, fileHashCode):
+                    #
+                    #     # file exists, is modified and needs updating
+                    #     updateFile = UpdateFile(self.installLocation, self.serverDbRoot, filePath, fileTime, fileStoredAs, fileHashCode,
+                    #                             serverDownloadScript=serverDownloadScript, serverUploadScript=serverUploadScript)
+                    #     updateFiles.append(updateFile)
+                    #     updateFileDict[filePath] = updateFile
+                    #
+                    # elif fileTime in [0, '0', '0.0']:
+                    #   file exists, is modified and needs updating
+                    #
+                    updateFile = UpdateFile(self.installLocation, self.serverDbRoot, filePath, fileTime, fileStoredAs, fileHashCode,
+                                            serverDownloadScript=serverDownloadScript, serverUploadScript=serverUploadScript)
+                    updateFiles.append(updateFile)
+                    updateFileDict[filePath] = updateFile
 
     def isUpdateDifferent(self, filePath, fileHashCode):
         """See if local file is different from server file."""
@@ -392,10 +471,17 @@ class UpdateAgent(object):
             for updateFile in updateFiles:
                 try:
                     if not self._dryRun:
-                        print('Installing %s' % (updateFile.fullFilePath))
-                        updateFile.installUpdate()
+                        if updateFile.fileHashCode == DELETEHASHCODE:
+                            print('Install Updates: Removing %s' % (updateFile.fullFilePath))
+                            updateFile.installDeleteUpdate()
+                        else:
+                            print('Install Updates: Installing %s' % (updateFile.fullFilePath))
+                            updateFile.installUpdate()
                     else:
-                        print('dry-run %s' % (updateFile.fullFilePath))
+                        if updateFile.fileHashCode == DELETEHASHCODE:
+                            print('Install Updates: dry-run Removing %s' % (updateFile.fullFilePath))
+                        else:
+                            print('Install Updates: dry-run Installing %s' % (updateFile.fullFilePath))
 
                     n += 1
 
@@ -435,9 +521,17 @@ class UpdateAgent(object):
         n = 0
         for updateFile in updateFiles:
             try:
-                print('Committing %s' % (updateFile.fullFilePath))
-                updateFile.commitUpdate(self.serverUser, serverPassword)
+                if os.path.exists(updateFile.fullFilePath):
+                    print('Committing %s' % (updateFile.fullFilePath))
+                    updateFile.commitUpdate(self.serverUser, serverPassword)
+
+                else:
+                    # file is to be deleted - add empty file
+                    print('Committing file to be deleted %s' % (updateFile.fullFilePath))
+                    updateFile.commitDeleteUpdate(self.serverUser, serverPassword)
+
                 n += 1
+
             except Exception as e:
                 raise
                 # seem to need str(e) below because o/w HTTPError (from bad pwd) not printed out

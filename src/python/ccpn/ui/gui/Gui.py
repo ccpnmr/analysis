@@ -277,7 +277,11 @@ class Gui(Ui):
         logger = self.application.project._logger
 
         for command in commands:
-            console._write(command + '\n')
+
+            # only write to the console if enabled in framework
+            if self.application._enableLoggingToConsole:
+                console._write(command + '\n')
+
             logger.info(command)
 
     #TODO:RASMUS: should discuss how application should deal with it

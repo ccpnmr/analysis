@@ -148,7 +148,7 @@ class _NmrAtomsSelection(CcpnDialog):
         showInfo('NmrAtom info',text)
 
     def _apply(self):
-        print( self.getRelativeContribuitions())
+        # print( self.getRelativeContribuitions())
         if self.parent is not None:
             self.parent.relativeContribuitions = self.getRelativeContribuitions()
             self.parent.selectedNmrAtomNames = self.getNmrAtomNames()

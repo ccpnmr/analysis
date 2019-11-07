@@ -585,8 +585,10 @@ class ViewBox(pg.ViewBox):
                     peak.position = oldPosition + deltaPosition
                     peak._finaliseAction('change')
                     self.setMouseEnabled(True, True)
-                    self.strip.spectrumDisplay.mainWindow.application.ui.echoCommands(
-                            ("project.getByPid(%s).position = %s" % (peak.pid, peak.position),))
+
+                    app = self.strip.spectrumDisplay.mainWindow.application
+                    app.ui.echoCommands(("project.getByPid(%s).position = %s" % (peak.pid, peak.position),))
+
                 self.current.peaks = peaks
             else:  #this is when is being dragged
                 pass

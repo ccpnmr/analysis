@@ -57,6 +57,7 @@ WHITESPACE_AND_NULL = {'\x00', '\t', '\n', '\r', '\x0b', '\x0c'}
 ###VERSION_RE = re.compile('^[.\d]+$')
 
 BAD_DOWNLOAD = 'Exception: '
+DELETEHASHCODE = '<DELETE>'
 TERMSANDCONDITIONS = 'termsConditions'
 
 
@@ -225,8 +226,12 @@ class UpdateFile:
         self.fileDir = os.path.dirname(filePath)
 
     def installUpdate(self):
-
+        """Install updated file
+        """
         data = downloadFile(self.serverDownloadScript, self.serverDbRoot, self.fileStoredAs)
+
+        if not data:
+            return
 
         fullFilePath = self.fullFilePath
         if os.path.isfile(fullFilePath):
@@ -239,12 +244,30 @@ class UpdateFile:
 
         try:
             if isBinaryData(data):
+                # always write binary files
                 with open(fullFilePath, 'wb') as fp:
                     fp.write(data)
             else:
-                with open(fullFilePath, 'w', encoding='utf-8') as fp:
-                    fp.write(data)
+                # backwards compatible check for half-updated - file contains DELETEHASHCODE as text
+                if data and data.startswith(DELETEHASHCODE):
+                    try:
+                        os.remove(fullFilePath)
+                    except OSError:
+                        pass
+                else:
+                    with open(fullFilePath, 'w', encoding='utf-8') as fp:
+                        fp.write(data)
+
         except Exception as es:
+            pass
+
+    def installDeleteUpdate(self):
+        """Remove file as update action
+        """
+        fullFilePath = self.fullFilePath
+        try:
+            os.remove(fullFilePath)
+        except OSError:
             pass
 
     # def commitUpdate(self, serverUser, serverPassword):
@@ -324,7 +347,30 @@ class UpdateAgent(object):
                 line = line.rstrip()
                 if line:
                     (filePath, fileTime, fileStoredAs, fileHashCode) = line.split(FIELD_SEP)
-                    if self.serverUser or self.isUpdateDifferent(filePath, fileHashCode):
+
+                    if fileHashCode == DELETEHASHCODE:
+                        # delete file
+                        if os.path.exists(os.path.join(self.installLocation, filePath)):
+
+                            # if still exists then need to add to update list
+                            updateFile = UpdateFile(self.installLocation, self.serverDbRoot, filePath, fileTime,
+                                                    fileStoredAs, fileHashCode, serverDownloadScript=serverDownloadScript,
+                                                    serverUploadScript=serverUploadScript)
+                            updateFiles.append(updateFile)
+                            updateFileDict[filePath] = updateFile
+
+                    elif self.serverUser or self.isUpdateDifferent(filePath, fileHashCode):
+
+                        # file exists, is modified and needs updating
+                        updateFile = UpdateFile(self.installLocation, self.serverDbRoot, filePath, fileTime,
+                                                fileStoredAs, fileHashCode, serverDownloadScript=serverDownloadScript,
+                                                serverUploadScript=serverUploadScript)
+                        updateFiles.append(updateFile)
+                        updateFileDict[filePath] = updateFile
+
+                    elif fileTime in [0, '0', '0.0']:
+
+                        # file exists, is modified and needs updating
                         updateFile = UpdateFile(self.installLocation, self.serverDbRoot, filePath, fileTime,
                                                 fileStoredAs, fileHashCode, serverDownloadScript=serverDownloadScript,
                                                 serverUploadScript=serverUploadScript)
@@ -469,10 +515,18 @@ class UpdateAgent(object):
             for updateFile in updateFiles:
                 try:
                     if not self._dryRun:
-                        self.showInfo('Install Updates', 'Installing %s' % (updateFile.fullFilePath))
-                        updateFile.installUpdate()
+                        if updateFile.fileHashCode == DELETEHASHCODE:
+                            self.showInfo('Install Updates', 'Removing %s' % (updateFile.fullFilePath))
+                            updateFile.installDeleteUpdate()
+
+                        else:
+                            self.showInfo('Install Updates', 'Installing %s' % (updateFile.fullFilePath))
+                            updateFile.installUpdate()
                     else:
-                        self.showInfo('Install Updates', 'dry-run %s' % (updateFile.fullFilePath))
+                        if updateFile.fileHashCode == DELETEHASHCODE:
+                            self.showInfo('Install Updates', 'dry-run Removing %s' % (updateFile.fullFilePath))
+                        else:
+                            self.showInfo('Install Updates', 'dry-run Installing %s' % (updateFile.fullFilePath))
 
                     n += 1
                     updateFilesInstalled.append(updateFile)

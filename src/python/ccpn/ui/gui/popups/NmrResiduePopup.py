@@ -116,7 +116,7 @@ class NmrResiduePopup(CcpnDialog):
         """Check the new pulldown item and strip bad characters
         """
         # Check the correct characters for residueType - need to remove spaceNumberPercent
-        print('>>>check value')
+        # print('>>>check value')
         value = re.sub(REMOVEPERCENT, '', value)
         if value not in self.residueType.pulldownList.texts:
             # add modified value if not in the pulldown

@@ -78,6 +78,7 @@ class Gui(Ui):
         # it will come out as the executable you are running (e.g. "python3")
 
         # # QtCore.QCoreApplication.setAttribute(QtCore.Qt.AA_EnableHighDpiScaling, True)
+        QtCore.QCoreApplication.setAttribute(QtCore.Qt.AA_UseHighDpiPixmaps, True)
         # QtCore.QCoreApplication.setAttribute(QtCore.Qt.AA_ShareOpenGLContexts, True)
         # viewportFormat = QtGui.QSurfaceFormat()
         # viewportFormat.setSwapInterval(0)  #disable VSync

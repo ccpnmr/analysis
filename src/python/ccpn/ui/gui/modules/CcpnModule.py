@@ -170,7 +170,7 @@ class CcpnModule(Dock, DropBase, NotifierBase):
                   }"""
         self.vStyle = """
                   Dock > QWidget {
-                      border: 0px solid #000;
+                      border: 1px solid #000;
                       border-radius: 0px;
                       border-top-left-radius: 0px;
                       border-bottom-left-radius: 0px;
@@ -733,12 +733,18 @@ class CcpnModuleLabel(DockLabel):
     """
 
     labelSize = 16
+    TOP_LEFT =  'TOP_LEFT'
+    TOP_RIGHT =  'TOP_RIGHT'
 
     # TODO:GEERTEN check colours handling
     # defined here, as the updateStyle routine is called from the
     # DockLabel instanciation; changed later on
 
     sigDragEntered = QtCore.Signal(object, object)
+
+    def getMaxIconSize(self,icon):
+        iconSizes = [max((size.height(),size.width())) for size in icon.availableSizes()]
+        return max(iconSizes)
 
     def __init__(self, name, module, showCloseButton=True, closeCallback=None, showSettingsButton=False, settingsCallback=None):
         super(CcpnModuleLabel, self).__init__(name, module, showCloseButton=showCloseButton)
@@ -747,11 +753,15 @@ class CcpnModuleLabel(DockLabel):
         self.fixedWidth = True
         self.setFont(moduleLabelFont)
         self.setAlignment(QtCore.Qt.AlignVCenter | QtCore.Qt.AlignHCenter)
-        self.closeButton.setStyleSheet('''border: 0px solid #a9a9a9;
-                                          border-radius: 1px;
-                                          background-color: transparent; ''')
 
-        # self.setStyleSheet('margin : 2')
+        layout = QtWidgets.QGridLayout(self)
+        layout.setContentsMargins(0,0,0,0)
+        self.setLineWidth(0)
+
+        self.buttonBorderWidth = 1
+        self.buttonIconMargin = 1
+        self.buttonCornerRadius = 3
+        self.labelRadius
 
         if showCloseButton:
             # button is already there because of the DockLabel init
@@ -761,15 +771,13 @@ class CcpnModuleLabel(DockLabel):
                 raise RuntimeError('Requested closeButton without callback')
             else:
                 self.closeButton.clicked.connect(closeCallback)
+            self.setupLabelButton(self.closeButton,  'close_cross', CcpnModuleLabel.TOP_RIGHT)
 
         # Settings
         if showSettingsButton:
             self.settingsButton = ToolButton(self)
-            self.settingsButton.setIcon(Icon('icons/settings'))
-            self.settingsButton.setIconSize(QtCore.QSize(self.labelSize - 5, self.labelSize - 5))  # GWV hack to make it work
-            self.settingsButton.setStyleSheet('''border: 0px solid #a9a9a9;
-                                          border-radius: 1px;
-                                          background-color: transparent; ''')
+            self.setupLabelButton(self.settingsButton, 'settings_cog', CcpnModuleLabel.TOP_LEFT)
+
             if settingsCallback is None:
                 raise RuntimeError('Requested settingsButton without callback')
             else:
@@ -780,34 +788,58 @@ class CcpnModuleLabel(DockLabel):
         # flag to disable dragMoveEvent during a doubleClick
         self._inDoubleClick = False
 
+
+    def setupLabelButton(self, button, iconName, position):
+        icon = Icon('icons/%s' % iconName)
+
+        button.setIcon(icon)
+        retinaIconSize = self.getMaxIconSize(icon) // 2
+        button.setIconSize(QtCore.QSize(retinaIconSize, retinaIconSize))
+
+        if position == CcpnModuleLabel.TOP_RIGHT:
+            styleInfo = (self.buttonBorderWidth, 0, self.buttonCornerRadius)
+        elif position == CcpnModuleLabel.TOP_LEFT:
+            styleInfo = (self.buttonBorderWidth, self.buttonCornerRadius, 0)
+        else:
+            raise Exception('button position must be one of %s' % ', '.join(CcpnModule.TOP_LEFT, CcpnModule.TOP_RIGHT))
+
+        # GST colours are hard coded... help please I need  a central source for
+        # these presumably a color palette or scheme
+        button.setStyleSheet(''' border: %ipx solid #a9a9a9 ;
+                                 border-top-left-radius: %ipx;
+                                 border-top-right-radius: %ipx;
+                                 border-bottom-left-radius: 0px;
+                                 border-bottom-right-radius: 0px;
+                                 background-color: #ececec ;  ''' % styleInfo)
+        buttonSize = retinaIconSize + (self.buttonBorderWidth * 2) + (self.buttonIconMargin * 2)
+        button.setMinimumSize(QtCore.QSize(buttonSize, buttonSize))
+        button.setMaximumSize(QtCore.QSize(buttonSize, buttonSize))
+        button.setSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
+
     def setModuleHighlight(self, hightlighted=False):
         self.setDim(hightlighted)
 
     def updateStyle(self):
-        r = '3px'
+
         # get the colours from the colourScheme
         if self.dim:
-            fg = getColours()[CCPNMODULELABEL_FOREGROUND_ACTIVE]
-            bg = getColours()[CCPNMODULELABEL_BACKGROUND_ACTIVE]
-            border = getColours()[CCPNMODULELABEL_BORDER_ACTIVE]
-        else:
             fg = getColours()[CCPNMODULELABEL_FOREGROUND]
             bg = getColours()[CCPNMODULELABEL_BACKGROUND]
             border = getColours()[CCPNMODULELABEL_BORDER]
+        else:
+            fg = getColours()[CCPNMODULELABEL_FOREGROUND_ACTIVE]
+            bg = getColours()[CCPNMODULELABEL_BACKGROUND_ACTIVE]
+            border = getColours()[CCPNMODULELABEL_BORDER_ACTIVE]
 
         if self.orientation == 'vertical':
             self.vStyle = """DockLabel {
                 background-color : %s;
                 color : %s;
-                border-top-right-radius: 2px;
+                border-top-right-radius: 0px;
                 border-top-left-radius: %s;
-                border-bottom-right-radius: 2px;
+                border-bottom-right-radius: 0px;
                 border-bottom-left-radius: %s;
-                border-width: 0px;
-                border-right: 2px solid %s;
-                padding-top: 3px;
-                padding-bottom: 3px;
-            }""" % (bg, fg, r, r, border)
+            }""" % (bg, fg, self.labelRadius, self.labelRadius)
             self.setStyleSheet(self.vStyle)
         else:
             self.hStyle = """DockLabel {
@@ -817,20 +849,16 @@ class CcpnModuleLabel(DockLabel):
                 border-top-left-radius: %s;
                 border-bottom-right-radius: 0px;
                 border-bottom-left-radius: 0px;
-                border-width: 0px;
-                border-bottom: 2px solid %s;
-                padding-left: 3px;
-                padding-right: 3px;
-            }""" % (bg, fg, r, r, border)
+            }""" % (bg, fg, self.labelRadius, self.labelRadius)
             self.setStyleSheet(self.hStyle)
 
     def _createContextMenu(self):
 
         contextMenu = Menu('', self, isFloatWidget=True)
-        close = contextMenu.addAction('Close', self.module._closeModule)
+        contextMenu.addAction('Close', self.module._closeModule)
         if len(self.module.mainWindow.moduleArea.ccpnModules) > 1:
-            closeOthers = contextMenu.addAction('Close Others', partial(self.module.mainWindow.moduleArea._closeOthers, self.module))
-            closeAllModules = contextMenu.addAction('Close All', self.module.mainWindow.moduleArea._closeAll)
+            contextMenu.addAction('Close Others', partial(self.module.mainWindow.moduleArea._closeOthers, self.module))
+            contextMenu.addAction('Close All', self.module.mainWindow.moduleArea._closeAll)
 
         return contextMenu
 
@@ -914,6 +942,22 @@ class CcpnModuleLabel(DockLabel):
         """reset the double click flag
         """
         self._inDoubleClick = False
+
+    def resizeEvent (self, ev):
+        if self.closeButton:
+            if self.orientation == 'vertical':
+                self.layout().addWidget(self.closeButton,0,0, alignment=QtCore.Qt.AlignTop)
+            else:
+                self.layout().addWidget(self.closeButton,0,3, alignment=QtCore.Qt.AlignRight)
+
+        if self.settingsButton:
+            if self.orientation == 'vertical':
+                self.layout().addWidget(self.settingsButton,0,0,alignment=QtCore.Qt.AlignBottom)
+            else:
+                self.layout().addWidget(self.settingsButton,0,0, alignment=QtCore.Qt.AlignLeft)
+
+
+        super(DockLabel,self).resizeEvent(ev)
 
 
 class DropAreaSelectedOverlay(QtWidgets.QWidget):

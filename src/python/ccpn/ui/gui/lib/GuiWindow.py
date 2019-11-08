@@ -90,7 +90,7 @@ class GuiWindow():
 
         addShortCut("a, m", self, self.addMultiplet, context=context)
         addShortCut("i, 1", self, self.add1DIntegral, context=context)
-        addShortCut("w, 1", self, self.getCurrentPositionAndStrip, context=context)
+        addShortCut("g, p", self, self.getCurrentPositionAndStrip, context=context)
         addShortCut("r, p", self, partial(self.refitCurrentPeaks, singularMode=True), context=context)
         addShortCut("r, g", self, partial(self.refitCurrentPeaks, singularMode=False), context=context)
 

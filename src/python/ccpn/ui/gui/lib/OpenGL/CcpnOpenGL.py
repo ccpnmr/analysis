@@ -2209,7 +2209,7 @@ class CcpnGLWidget(QOpenGLWidget):
 
         self._endCoordinate = self._startCoordinate
 
-        if ev.buttons() & Qt.MiddleButton:
+        if ev.buttons() & (Qt.MiddleButton | Qt.RightButton):
             if self._isSHIFT == '' and self._isCTRL == '' and self._isALT == '' and self._isMETA == '':
                 # drag a peak
                 xPosition = self.cursorCoordinate[0]  # self.mapSceneToView(event.pos()).x()
@@ -2497,7 +2497,7 @@ class CcpnGLWidget(QOpenGLWidget):
         self.current.cursorPosition = (xPos, yPos)
         self.current.mouseMovedDict = mouseMovedDict
 
-        if event.buttons() & (Qt.LeftButton | Qt.RightButton):
+        if event.buttons() & Qt.LeftButton:
             # do the complicated keypresses first
             # other keys are: Key_Alt, Key_Meta, and _isALT, _isMETA
 
@@ -6235,7 +6235,7 @@ class CcpnGLWidget(QOpenGLWidget):
             self._selectMultipletsInRegion(xPositions, yPositions, zPositions)
             self._selectPeaksInRegion(xPositions, yPositions, zPositions)
 
-        elif middleMouse(event):
+        elif middleMouse(event) or rightMouse(event):
             # middle drag: moves selected peaks
             event.accept()
 

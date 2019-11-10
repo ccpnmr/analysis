@@ -747,6 +747,12 @@ class CcpnModuleLabel(DockLabel):
         return max(iconSizes)
 
     def __init__(self, name, module, showCloseButton=True, closeCallback=None, showSettingsButton=False, settingsCallback=None):
+
+        self.buttonBorderWidth = 1
+        self.buttonIconMargin = 1
+        self.buttonCornerRadius = 3
+        self.labelRadius = 3
+
         super(CcpnModuleLabel, self).__init__(name, module, showCloseButton=showCloseButton)
 
         self.module = module
@@ -758,10 +764,6 @@ class CcpnModuleLabel(DockLabel):
         layout.setContentsMargins(0,0,0,0)
         self.setLineWidth(0)
 
-        self.buttonBorderWidth = 1
-        self.buttonIconMargin = 1
-        self.buttonCornerRadius = 3
-        self.labelRadius
 
         if showCloseButton:
             # button is already there because of the DockLabel init

@@ -443,14 +443,7 @@ class _GroupEditorPopupABC(CcpnDialog):
         CcpnDialog.__init__(self, parent=parent, windowTitle=title, setLayout=True, margins=(0, 0, 0, 0),
                             spacing=(5, 5), **kwds)
 
-        # GST its less than obvious that
-        # 1. Icon adds ICON_DIR to the path if the icon doesn' exists in the path
-        # 2. to get an icon with a devicePixelRatio of 2 on retina files you need
-        #    a file of the form icon/<name>@2x.png and icon/<name> doesn't work!
-        # 3. Icon.loadFile doesn't look for a file in ICON_DIR if the file doesn't exist...
-        # messy!
-        self.errorIcon = Icon('icons/exclamation_small.png')
-
+        self.errorIcon = Icon('icons/exclamation_small')
 
         self.mainWindow = mainWindow
         self.application = mainWindow.application

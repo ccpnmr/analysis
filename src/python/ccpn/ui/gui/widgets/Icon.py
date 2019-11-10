@@ -71,10 +71,24 @@ class Icon(QtGui.QIcon):
             painter.end()
 
         elif not isinstance(image, QtGui.QIcon):
-            if not os.path.exists(image):
-                image = os.path.join(ICON_DIR, image)
+            image = self._get_image_name(image)
 
         super().__init__(image)
+
+    def _get_image_name(self, image):
+        if not os.path.exists(image):
+            image = os.path.join(ICON_DIR, image)
+        png_file = '%s.png' % image
+        png_file_a2x = '%s@2x.png' % image
+        if os.path.exists(png_file) or os.path.exists(png_file_a2x):
+            image = '%s.png' % image
+        return image
+
+    def addFile(self, fileName: str, **kwargs):
+        fileName = self._get_image_name(fileName)
+        return super().addFile(fileName)
+
+
 
 
 if __name__ == '__main__':

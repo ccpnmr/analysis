@@ -104,7 +104,7 @@ class CcpnDialogMainWidget(QtWidgets.QDialog, Base):
             self._scrollArea = ScrollArea(self, setLayout=True, grid=(0, 0))
             self._scrollArea.setWidgetResizable(True)
             self._scrollArea.setWidget(self.mainWidget)
-            self._scrollArea.setStyleSheet("""ScrollArea { border: 0px; }""")
+            self._scrollArea.setStyleSheet("""ScrollArea { border: 0px; background: transparent; }""")
 
         # self.mainWidget.setSizePolicy(QtWidgets.QSizePolicy.Ignored, QtWidgets.QSizePolicy.Ignored)
         self.mainWidget.setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.MinimumExpanding)
@@ -140,6 +140,8 @@ class CcpnDialogMainWidget(QtWidgets.QDialog, Base):
         """Set the fixed/free dialog size from size or sizeHint
         """
         size = None
+
+        # check whether the size has been defined
         if self._size is not None:
             if not isinstance(self._size, (tuple, list, QtCore.QSize)):
                 raise TypeError('size is not defined correctly: %s' % str(self._size))
@@ -148,10 +150,14 @@ class CcpnDialogMainWidget(QtWidgets.QDialog, Base):
 
             size = self._size if isinstance(self._size, QtCore.QSize) else QtCore.QSize(*self._size)
 
+        # set the fixed sized policies as requird
         if self.FIXEDWIDTH:
             self.setFixedWidth(size.width() if size else self.sizeHint().width())
         if self.FIXEDHEIGHT:
             self.setFixedHeight(size.height() if size else self.sizeHint().height())
+
+        self.mainWidget.setSizePolicy(QtWidgets.QSizePolicy.Fixed if self.FIXEDWIDTH else QtWidgets.QSizePolicy.Preferred,
+                                      QtWidgets.QSizePolicy.Fixed if self.FIXEDHEIGHT else QtWidgets.QSizePolicy.Preferred, )
 
     def setOkButton(self, callback=None, text=None,
                     tipText='Apply changes and close',
@@ -193,7 +199,7 @@ class CcpnDialogMainWidget(QtWidgets.QDialog, Base):
                                texts=text, tipTexts=tipText, icons=icon,
                                enabledStates=enabled, visibleStates=visible)
 
-    def setHelpButton(self, callback=None, text='?',
+    def setHelpButton(self, callback=None, text=None,
                       tipText='Help',
                       icon='icons/system-help',
                       enabled=True, visible=True):
@@ -488,6 +494,8 @@ def _verifyPopupApply(self, attributeName, value, *postArgs, **postKwds):
     # append postFixes if need to differentiate partial functions
     if attributeName:
 
+        # append the extra parameters to the end of attributeName to give a unique
+        # identifier into _changes dict, to differentiate same-name partial functions
         for pf in postArgs:
             if pf is not None:
                 attributeName += str(pf)
@@ -530,6 +538,8 @@ def _verifyPopupTabApply(self, attributeName, value, *postArgs, **postKwds):
     # append postFixes if need to differentiate partial functions
     if attributeName:
 
+        # append the extra parameters to the end of attributeName to give a unique
+        # identifier into _changes dict, to differentiate same-name partial functions
         for pf in postArgs:
             if pf is not None:
                 attributeName += str(pf)

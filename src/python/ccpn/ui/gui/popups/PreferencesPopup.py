@@ -211,7 +211,10 @@ class PreferencesPopup(CcpnDialogMainWidget):
         """
         
         # this will apply the immediate guiChanges with an undo block
-        applyToSDs = self.preferences.general.applyToSpectrumDisplays
+        # applyToSDs = self.preferences.general.applyToSpectrumDisplays
+
+        # need to get from the checkBox, otherwise out-of-sync
+        applyToSDs = self.useApplyToSpectrumDisplaysBox.isChecked()
 
         allChanges = True if self._changes else False
         if not (allChanges and applyToSDs):
@@ -282,7 +285,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
                                    (self._setSpectrumTabWidgets, 'Spectrum'),
                                    (self._setExternalProgramsTabWidgets, 'External Programs')):
 
-            fr = ScrollFrame(self, setLayout=True, spacing=DEFAULTSPACING,
+            fr = ScrollFrame(self.mainWidget, setLayout=True, spacing=DEFAULTSPACING,
                              scrollBarPolicies=('never', 'asNeeded'), margins=TABMARGINS)
 
             self.tabWidget.addTab(fr.scrollArea, tabName)
@@ -290,7 +293,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
 
         self.useApplyToSpectrumDisplaysLabel = Label(self.mainWidget, text="Apply to All Spectrum Displays: ", grid=(1, 0))
         self.useApplyToSpectrumDisplaysBox = CheckBox(self.mainWidget, grid=(1, 1))
-        self.useApplyToSpectrumDisplaysBox.toggled.connect(partial(self._queueToggleGeneralOptions, 'applyToSpectrumDisplays'))
+        self.useApplyToSpectrumDisplaysBox.toggled.connect(partial(self._queueApplyToSpectrumDisplays, 'applyToSpectrumDisplays'))
 
     def _setGeneralTabWidgets(self, parent):
         """ Insert a widget in here to appear in the General Tab  """
@@ -1269,9 +1272,13 @@ class PreferencesPopup(CcpnDialogMainWidget):
         self.preferences.general.colourScheme = value  #(COLOUR_SCHEMES[value])
 
     @queueStateChange(_verifyPopupApply)
-    def _queueToggleGeneralOptions(self, preference, checked):
-        if checked != self.preferences.general[preference]:
-            return partial(self._toggleGeneralOptions, preference, checked)
+    def _queueToggleGeneralOptions(self, option, checked):
+        """Toggle a general checkbox option in the preferences
+        Requires the parameter to be called 'option' so that the decorator gives it a unique name
+        in the internal updates dict
+        """
+        if checked != self.preferences.general[option]:
+            return partial(self._toggleGeneralOptions, option, checked)
 
     def _toggleGeneralOptions(self, preference, checked):
         self.preferences.general[preference] = checked
@@ -1731,3 +1738,13 @@ class PreferencesPopup(CcpnDialogMainWidget):
         self.useProxyPasswordBox.setEnabled(usePEnabled)
         self.proxyUsernameData.setEnabled(usePEnabled and usePW)
         self.proxyPasswordData.setEnabled(usePEnabled and usePW)
+
+    @queueStateChange(_verifyPopupApply)
+    def _queueApplyToSpectrumDisplays(self, option, checked):
+        """Toggle a general checkbox option in the preferences
+        Requires the parameter to be called 'option' so that the decorator gives it a unique name
+        in the internal updates dict
+        - not sure whether needed now
+        """
+        if checked != self.preferences.general[option]:
+            return partial(self._toggleGeneralOptions, option, checked)

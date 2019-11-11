@@ -41,7 +41,7 @@ from ccpn.util.Constants import AXIS_MATCHATOMTYPE, AXIS_FULLATOMNAME, DOUBLEAXI
 from functools import partial
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs import AXISXUNITS, AXISYUNITS, AXISLOCKASPECTRATIO, \
     SYMBOLTYPES, ANNOTATIONTYPES, SYMBOLSIZE, SYMBOLTHICKNESS, AXISUSEFIXEDASPECTRATIO, \
-    BOTTOMAXIS, RIGHTAXIS
+    GRIDVISIBLE, CROSSHAIRVISIBLE, DOUBLECROSSHAIRVISIBLE, BOTTOMAXIS, RIGHTAXIS
 from ccpn.core.lib.ContextManagers import undoStackBlocking, undoBlock, \
     notificationBlanking, undoBlockWithoutSideBar
 from ccpn.util.decorators import logCommand
@@ -285,7 +285,7 @@ class GuiStrip(Frame):
     def gridVisible(self):
         """True if grid is visible.
         """
-        return self._CcpnGLWidget.gridVisible
+        return self._CcpnGLWidget._gridVisible
 
     @gridVisible.setter
     def gridVisible(self, visible):
@@ -293,13 +293,16 @@ class GuiStrip(Frame):
         """
         if hasattr(self, 'gridAction'):
             self.gridAction.setChecked(visible)
-        self._CcpnGLWidget.gridVisible = visible
+        self._CcpnGLWidget._gridVisible = visible
+
+        # spawn a redraw of the GL windows
+        self._CcpnGLWidget.GLSignals.emitPaintEvent()
 
     @property
     def spectrumBordersVisible(self):
         """True if spectrumBorders are visible.
         """
-        return self._CcpnGLWidget.spectrumBordersVisible
+        return self._CcpnGLWidget._spectrumBordersVisible
 
     @spectrumBordersVisible.setter
     def spectrumBordersVisible(self, visible):
@@ -307,19 +310,21 @@ class GuiStrip(Frame):
         """
         if hasattr(self, 'spectrumBordersAction'):
             self.spectrumBordersAction.setChecked(visible)
-        self._CcpnGLWidget.spectrumBordersVisible = visible
+        self._CcpnGLWidget._spectrumBordersVisible = visible
+
+        # spawn a redraw of the GL windows
+        self._CcpnGLWidget.GLSignals.emitPaintEvent()
 
     def toggleGrid(self):
         """Toggles whether grid is visible in the strip.
         """
-        self._CcpnGLWidget.gridVisible = not self._CcpnGLWidget.gridVisible
-        self.gridAction.setChecked(self._CcpnGLWidget.gridVisible)
+        self.gridVisible = not self._CcpnGLWidget._gridVisible
 
     @property
     def crosshairVisible(self):
         """True if crosshair is visible.
         """
-        return self._CcpnGLWidget.crosshairVisible
+        return self._CcpnGLWidget._crosshairVisible
 
     @crosshairVisible.setter
     def crosshairVisible(self, visible):
@@ -327,25 +332,25 @@ class GuiStrip(Frame):
         """
         if hasattr(self, 'crosshairAction'):
             self.crosshairAction.setChecked(visible)
-        self._CcpnGLWidget.crosshairVisible = visible
+        self._CcpnGLWidget._crosshairVisible = visible
+
+        # spawn a redraw of the GL windows
+        self._CcpnGLWidget.GLSignals.emitPaintEvent()
 
     def _toggleCrosshair(self):
         """Toggles whether crosshair is visible.
         """
-        self._CcpnGLWidget.crosshairVisible = not self._CcpnGLWidget.crosshairVisible
-        self.crosshairAction.setChecked(self._CcpnGLWidget.crosshairVisible)
+        self.crosshairVisible = not self._CcpnGLWidget._crosshairVisible
 
     def _showCrosshair(self):
         """Displays crosshair in strip.
         """
-        self._CcpnGLWidget.crosshairVisible = True
-        self.crosshairAction.setChecked(True)
+        self.crosshairVisible = True
 
     def _hideCrosshair(self):
         """Hides crosshair in strip.
         """
-        self._CcpnGLWidget.crosshairVisible = False
-        self.crosshairAction.setChecked(False)
+        self.crosshairVisible = False
 
     def _crosshairCode(self, axisCode):
         """Determines what axisCodes are compatible as far as drawing crosshair is concerned
@@ -357,7 +362,7 @@ class GuiStrip(Frame):
     def doubleCrosshairVisible(self):
         """True if doubleCrosshair is visible.
         """
-        return self._CcpnGLWidget.doubleCrosshairVisible
+        return self._CcpnGLWidget._doubleCrosshairVisible
 
     @doubleCrosshairVisible.setter
     def doubleCrosshairVisible(self, visible):
@@ -365,13 +370,15 @@ class GuiStrip(Frame):
         """
         if hasattr(self, 'doubleCrosshairAction'):
             self.doubleCrosshairAction.setChecked(visible)
-        self._CcpnGLWidget.doubleCrosshairVisible = visible
+        self._CcpnGLWidget._doubleCrosshairVisible = visible
 
-    def _toggledoubleCrosshair(self):
+        # spawn a redraw of the GL windows
+        self._CcpnGLWidget.GLSignals.emitPaintEvent()
+
+    def _toggleDoubleCrosshair(self):
         """Toggles whether doubleCrosshair is visible.
         """
-        self._CcpnGLWidget.doubleCrosshairVisible = not self._CcpnGLWidget.doubleCrosshairVisible
-        self.doubleCrosshairAction.setChecked(self._CcpnGLWidget.doubleCrosshairVisible)
+        self.doubleCrosshairVisible = not self._CcpnGLWidget._doubleCrosshairVisible
 
     @property
     def pythonConsole(self):
@@ -1275,10 +1282,15 @@ class GuiStrip(Frame):
 
     def _emitSymbolChanged(self):
         # spawn a redraw of the GL windows
-        self._CcpnGLWidget.GLSignals._emitSymbolsChanged(source=None, strip=self, symbolDict={SYMBOLTYPES    : self.symbolType,
-                                                                                              ANNOTATIONTYPES: self.symbolLabelling,
-                                                                                              SYMBOLSIZE     : self.symbolSize,
-                                                                                              SYMBOLTHICKNESS: self.symbolThickness})
+        self._CcpnGLWidget.GLSignals._emitSymbolsChanged(source=None, strip=self,
+                                                         symbolDict={SYMBOLTYPES           : self.symbolType,
+                                                                     ANNOTATIONTYPES       : self.symbolLabelling,
+                                                                     SYMBOLSIZE            : self.symbolSize,
+                                                                     SYMBOLTHICKNESS       : self.symbolThickness,
+                                                                     # GRIDVISIBLE           : self.gridVisible,
+                                                                     # CROSSHAIRVISIBLE      : self.crosshairVisible,
+                                                                     # DOUBLECROSSHAIRVISIBLE: self.doubleCrosshairVisible,
+                                                                     })
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     # symbolTypes

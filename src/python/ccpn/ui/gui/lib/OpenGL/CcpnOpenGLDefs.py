@@ -224,6 +224,9 @@ STRIPCURSOR = 'stripCursor'
 STRIPDOUBLECURSOR = 'stripDoubleCursor'
 SPECTRUMBORDERS = 'spectrumBorders'
 DISPLAYTOOLBARS = 'displayToolbars'
+GRIDVISIBLE = 'gridVisible'
+CROSSHAIRVISIBLE = 'crosshairVisible'
+DOUBLECROSSHAIRVISIBLE = 'doubleCrosshairVisible'
 
 STRINGSCALE = 0.7
 

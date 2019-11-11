@@ -25,7 +25,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
-from PyQt5 import QtWidgets, QtCore
+from PyQt5 import QtWidgets, QtCore, QtGui
 from ccpn.ui.gui.widgets.Base import Base
 
 
@@ -60,4 +60,3 @@ class ScrollArea(QtWidgets.QScrollArea, Base):
         vp = SCROLLBAR_POLICY_DICT.get(scrollBarPolicies[1])
         self.setHorizontalScrollBarPolicy(hp)
         self.setVerticalScrollBarPolicy(vp)
-

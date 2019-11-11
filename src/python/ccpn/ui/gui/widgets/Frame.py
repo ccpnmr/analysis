@@ -338,24 +338,20 @@ class ScrollFrame(OpenGLOverlayFrame):
                 del (kwds[key])
         kw1['setLayout'] = True  ## always assure a layout for the scrollarea
 
-        self._scrollArea = ScrollArea(parent=parent,
-                                      scrollBarPolicies=scrollBarPolicies, minimumSizes=minimumSizes,
-                                      **kw1
-                                      )
-
         # initialise the frame
-        super().__init__(parent=self._scrollArea, setLayout=setLayout,
+        super().__init__(parent=parent, setLayout=setLayout,
                          showBorder=showBorder, fShape=fShape, fShadow=fShadow,
                          **kwds
                          )
 
+        # make a new scrollArea
+        self._scrollArea = ScrollArea(parent=parent,
+                                      scrollBarPolicies=scrollBarPolicies, minimumSizes=minimumSizes,
+                                      **kw1
+                                      )
+        self._scrollArea.setWidget(self)
         self._scrollArea.setWidgetResizable(True)
-        self._scrollArea.setWidget(self)
         self._scrollArea.setStyleSheet('ScrollArea { border: 0px; background: transparent; }')
-
-        # add it to the _sequenceGraphScrollArea
-        self._scrollArea.setWidget(self)
-        self._scrollArea.getLayout().addWidget(self)
 
         # configure the scroll area to allow all available space without margins
         self.setContentsMargins(*margins)

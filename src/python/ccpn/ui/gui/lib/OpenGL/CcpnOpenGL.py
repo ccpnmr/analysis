@@ -330,9 +330,9 @@ class CcpnGLWidget(QOpenGLWidget):
         self._spectrumBordersVisible = True
 
         self.gridList = []
-        self._gridVisible = self._preferences.showGrid
-        self._crosshairVisible = self._preferences.showCrosshair
-        self._doubleCrosshairVisible = self._preferences.showDoubleCrosshair
+        self._gridVisible = True            #self._preferences.showGrid
+        self._crosshairVisible = True            #self._preferences.showCrosshair
+        self._doubleCrosshairVisible = True            #self._preferences.showDoubleCrosshair
 
         self.diagonalGLList = None
         self._updateAxes = True
@@ -370,9 +370,9 @@ class CcpnGLWidget(QOpenGLWidget):
         self._lastTracePoint = {}  # [-1, -1]
         self.showActivePhaseTrace = True
 
-        self._applyXLimit = self._preferences.zoomXLimitApply
-        self._applyYLimit = self._preferences.zoomYLimitApply
-        self._intensityLimit = self._preferences.intensityLimit
+        self._applyXLimit = True            #.zoomXLimitApply
+        self._applyYLimit = True            #self._preferences.zoomYLimitApply
+        self._intensityLimit = True            #self._preferences.intensityLimit
 
         self._GLIntegralLists = {}
         self._GLIntegralLabels = {}
@@ -3753,7 +3753,8 @@ class CcpnGLWidget(QOpenGLWidget):
 
             phasingFrame = self.spectrumDisplay.phasingFrame
             if not phasingFrame.isVisible():
-                _drawDouble = self._preferences.showDoubleCrosshair  # any([specView.spectrum.showDoubleCrosshair == True for specView in self._ordering])
+                # _drawDouble = self._preferences.showDoubleCrosshair  # any([specView.spectrum.showDoubleCrosshair == True for specView in self._ordering])
+                _drawDouble = self._doubleCrosshairVisible  # any([specView.spectrum.showDoubleCrosshair == True for specView in self._ordering])
 
                 if not self._updateVTrace and newCoords[0] is not None:
                     vertices.extend([newCoords[0], 1.0, newCoords[0], 0.0])
@@ -3995,53 +3996,53 @@ class CcpnGLWidget(QOpenGLWidget):
         self._axesVisible = not self._axesVisible
         self.update()
 
-    @property
-    def gridVisible(self):
-        return self._gridVisible
+    # @property
+    # def gridVisible(self):
+    #     return self._gridVisible
+    #
+    # @gridVisible.setter
+    # def gridVisible(self, visible):
+    #     self._gridVisible = visible
+    #     self.update()
+    #
+    # def toggleGrid(self):
+    #     self._gridVisible = not self._gridVisible
+    #     self.update()
 
-    @gridVisible.setter
-    def gridVisible(self, visible):
-        self._gridVisible = visible
-        self.update()
+    # @property
+    # def spectrumBordersVisible(self):
+    #     return self._spectrumBordersVisible
+    #
+    # @spectrumBordersVisible.setter
+    # def spectrumBordersVisible(self, visible):
+    #     self._spectrumBordersVisible = visible
+    #     self.update()
 
-    @property
-    def spectrumBordersVisible(self):
-        return self._spectrumBordersVisible
-
-    @spectrumBordersVisible.setter
-    def spectrumBordersVisible(self, visible):
-        self._spectrumBordersVisible = visible
-        self.update()
-
-    def toggleGrid(self):
-        self._gridVisible = not self._gridVisible
-        self.update()
-
-    @property
-    def crosshairVisible(self):
-        return self._crosshairVisible
-
-    @crosshairVisible.setter
-    def crosshairVisible(self, visible):
-        self._crosshairVisible = visible
-        self.update()
-
-    def toggleCrosshair(self):
-        self._crosshairVisible = not self._crosshairVisible
-        self.update()
-
-    @property
-    def doubleCrosshairVisible(self):
-        return self._doubleCrosshairVisible
-
-    @doubleCrosshairVisible.setter
-    def doubleCrosshairVisible(self, visible):
-        self._doubleCrosshairVisible = visible
-        self.update()
-
-    def toggleDoubleCrosshair(self):
-        self._doubleCrosshairVisible = not self._doubleCrosshairVisible
-        self.update()
+    # @property
+    # def crosshairVisible(self):
+    #     return self._crosshairVisible
+    #
+    # @crosshairVisible.setter
+    # def crosshairVisible(self, visible):
+    #     self._crosshairVisible = visible
+    #     self.update()
+    #
+    # def toggleCrosshair(self):
+    #     self._crosshairVisible = not self._crosshairVisible
+    #     self.update()
+    #
+    # @property
+    # def doubleCrosshairVisible(self):
+    #     return self._doubleCrosshairVisible
+    #
+    # @doubleCrosshairVisible.setter
+    # def doubleCrosshairVisible(self, visible):
+    #     self._doubleCrosshairVisible = visible
+    #     self.update()
+    #
+    # def toggleDoubleCrosshair(self):
+    #     self._doubleCrosshairVisible = not self._doubleCrosshairVisible
+    #     self.update()
 
     @property
     def showSpectraOnPhasing(self):
@@ -6121,7 +6122,8 @@ class CcpnGLWidget(QOpenGLWidget):
         strip.toolbarAction.setChecked(strip.spectrumDisplay.spectrumUtilToolBar.isVisible())
         strip.crosshairAction.setChecked(self._crosshairVisible)
         if hasattr(strip, 'doubleCrosshairAction'):
-            strip.doubleCrosshairAction.setChecked(self._preferences.showDoubleCrosshair)
+            # strip.doubleCrosshairAction.setChecked(self._preferences.showDoubleCrosshair)
+            strip.doubleCrosshairAction.setChecked(self._doubleCrosshairVisible)
 
         strip.gridAction.setChecked(self._gridVisible)
         if hasattr(strip, 'lastAxisOnlyCheckBox'):

@@ -43,8 +43,6 @@ SpectrumViewParams = collections.namedtuple('SpectrumViewParams', ('valuePerPoin
                                                                    'maxAliasedFrequency',
                                                                    'dataDim'))
 
-WIDGET = 'widget'
-
 class GuiSpectrumView(QtWidgets.QGraphicsObject):
 
     #def __init__(self, guiSpectrumDisplay, apiSpectrumView, dimMapping=None):
@@ -199,7 +197,6 @@ def _spectrumViewHasChanged(data):
     NB SpectrumView change notifiers are triggered when either DataSource or ApiSpectrumView change.
     """
     self = data[Notifier.OBJECT]
-    widget = data[WIDGET]
 
     if self.isDeleted:
         return
@@ -210,7 +207,7 @@ def _spectrumViewHasChanged(data):
     # Update action icol colour
     action = spectrumDisplay.spectrumActionDict.get(apiDataSource)
     if action:
-        pix = QtGui.QPixmap(QtCore.QSize(60/widget.devicePixelRatio(), 10/widget.devicePixelRatio()))
+        pix = QtGui.QPixmap(QtCore.QSize(60/spectrumDisplay.devicePixelRatio(), 10/spectrumDisplay.devicePixelRatio()))
         if self._showContours:
             if spectrumDisplay.is1D:
                 pix.fill(QtGui.QColor(self.sliceColour))

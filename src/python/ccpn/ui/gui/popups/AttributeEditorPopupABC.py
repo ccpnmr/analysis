@@ -25,6 +25,7 @@ __date__ = "$Date: 2017-03-30 11:28:58 +0100 (Thu, March 30, 2017) $"
 # Start of code
 #=========================================================================================
 
+from string import whitespace
 from functools import partial
 from ccpn.ui.gui.popups.Dialog import CcpnDialogMainWidget, _verifyPopupApply
 from ccpn.core.lib.ContextManagers import queueStateChange
@@ -74,6 +75,9 @@ class AttributeEditorPopupABC(CcpnDialogMainWidget):
             newWidget = attrType(self.mainWidget, mainWindow=mainWindow, labelText=attr, editable=editable,
                                  grid=(row, 0), fixedWidths=(self.hWidth, None), **kwds)
 
+            # remove whitespaces to give the attribute name in the class
+            attr = attr.translate({ord(c): None for c in whitespace})
+
             # connect the signal
             if attrType and attrType.__name__ in CommonWidgetsEdits:
                 attrSignalTypes = CommonWidgetsEdits[attrType.__name__][ATTRSIGNAL]
@@ -95,6 +99,7 @@ class AttributeEditorPopupABC(CcpnDialogMainWidget):
                     newWidget.setCallback(callback=partial(callback, self))
 
             self.edits[attr] = newWidget
+
             setattr(self, attr, newWidget)
             row += 1
 
@@ -121,18 +126,22 @@ class AttributeEditorPopupABC(CcpnDialogMainWidget):
         from ccpn.ui.gui.modules.CcpnModule import CommonWidgetsEdits
 
         for attr, attrType, getFunction, _, _presetFunction, _, _ in self.attributes:
+            # remove whitespaces to give the attribute name in the class
+            attr = attr.translate({ord(c): None for c in whitespace})
+
             # populate the widget
             if attr in self.edits and attrType and attrType.__name__ in CommonWidgetsEdits:
                 thisEdit = CommonWidgetsEdits[attrType.__name__]
                 attrSetter = thisEdit[ATTRSETTER]
 
-                # call the preset function for the widget (e.g. populate pulldowns with modified list)
                 if _presetFunction:
+                    # call the preset function for the widget (e.g. populate pulldowns with modified list)
                     _presetFunction(self, self.obj)
 
-                # set the current value
-                value = getFunction(self.obj, attr)
-                attrSetter(self.edits[attr], value)
+                if getFunction:
+                    # set the current value
+                    value = getFunction(self.obj, attr)
+                    attrSetter(self.edits[attr], value)
 
     @queueStateChange(_verifyPopupApply)
     def _queueSetValue(self, attr, attrType, getFunction, setFunction, presetFunction, callback, dim):

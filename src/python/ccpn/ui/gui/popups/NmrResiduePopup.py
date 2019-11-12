@@ -24,12 +24,12 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 
 import re
 from ccpn.core.lib.AssignmentLib import CCP_CODES_SORTED, getNmrResiduePrediction
-from ccpn.ui.gui.widgets.ButtonList import ButtonList
+# from ccpn.ui.gui.widgets.ButtonList import ButtonList
 from ccpn.ui.gui.widgets.CompoundWidgets import EntryCompoundWidget, PulldownListCompoundWidget
 from ccpn.ui.gui.widgets.PulldownListsForObjects import NmrChainPulldown
-from ccpn.ui.gui.popups.Dialog import CcpnDialog
+# from ccpn.ui.gui.popups.Dialog import CcpnDialog
 from ccpn.ui.gui.popups.AttributeEditorPopupABC import AttributeEditorPopupABC
-from ccpn.ui.gui.widgets.MessageDialog import showWarning
+# from ccpn.ui.gui.widgets.MessageDialog import showWarning
 from ccpn.util.OrderedSet import OrderedSet
 from ccpn.core.NmrResidue import NmrResidue
 
@@ -38,7 +38,9 @@ REMOVEPERCENT = '( ?\d+.?\d* ?%)+'
 
 
 class NmrResiduePopup(AttributeEditorPopupABC):
-    """Chain attributes editor popup"""
+    """
+    NmrResidue attributes editor popup
+    """
 
     def _getResidueTypeProb(self, currentNmrResidue):
         """Get the probabilities of the residueTypes

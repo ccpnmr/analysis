@@ -35,7 +35,7 @@ from ccpn.ui.gui.widgets.Widget import Widget
 
 class CheckBox(QtWidgets.QCheckBox, Base):
 
-    def __init__(self, parent=None, checked=False, text='', callback=None, **kwds):
+    def __init__(self, parent=None, checked=False, text='', callback=None, checkable=True, **kwds):
 
         super().__init__(parent)
         Base._init(self, **kwds)

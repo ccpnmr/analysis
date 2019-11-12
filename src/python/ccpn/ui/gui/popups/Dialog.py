@@ -52,7 +52,7 @@ HORIZONTAL = 'horizontal'
 VERTICAL = 'vertical'
 ORIENTATIONLIST = (HORIZONTAL, VERTICAL)
 DEFAULTSPACING = 3
-DEFAULTMARGINS = (10, 10, 10, 10)
+DEFAULTMARGINS = (24, 8, 24, 18)
 
 
 class CcpnDialogMainWidget(QtWidgets.QDialog, Base):
@@ -235,7 +235,7 @@ class CcpnDialogMainWidget(QtWidgets.QDialog, Base):
                                              orientation=self._orientation,
                                              defaultButton=self._defaultButton,
                                              **self._buttonOptions)
-        self.dialogButtons.setContentsMargins(0, 10, 0, 0)
+        self.dialogButtons.setContentsMargins(0, 18, 0, 0)
 
     def setDefaultButton(self, button=CLOSEBUTTON):
         """Set the default dialog button

@@ -137,7 +137,7 @@ class ResidueInformation(CcpnModule):
         # chainPulldown.setData(chainPulldownData)
 
         self.chainPulldown = ChainPulldown(parent=self._pulldownFrame,
-                                           project=self.project, default=None,  #first Chain in project (if present)
+                                           mainWindow=self.mainWindow, default=None,  #first Chain in project (if present)
                                            grid=(0, 0), gridSpan=(1, 1), minimumWidths=(0, 100),
                                            showSelectName=True,
                                            sizeAdjustPolicy=QtWidgets.QComboBox.AdjustToContents,

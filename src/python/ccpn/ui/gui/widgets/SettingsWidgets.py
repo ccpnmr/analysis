@@ -689,7 +689,7 @@ class StripPlot(Widget, _commonSettings):
             row += 1
 
             self.ncWidget = NmrChainPulldown(parent=self,
-                                             project=self.project, default=None,  #first NmrChain in project (if present)
+                                             mainWindow=self.mainWindow, default=None,  #first NmrChain in project (if present)
                                              grid=(row, 0), gridSpan=(1, 1), minimumWidths=(0, 100),
                                              showSelectName=True,
                                              sizeAdjustPolicy=QtWidgets.QComboBox.AdjustToContents,
@@ -709,7 +709,7 @@ class StripPlot(Widget, _commonSettings):
 
             # add a new pullDown to select the active spectrumDisplay
             self.spectrumDisplayPulldown = SpectrumDisplayPulldown(parent=self.spectrumDisplayOptionsFrame,
-                                                                   project=self.project, default=None,
+                                                                   mainWindow=self.mainWindow, default=None,
                                                                    grid=(1, 1), gridSpan=(1, 1),
                                                                    minimumWidths=(0, 100),
                                                                    showSelectName=True,

@@ -1192,6 +1192,8 @@ def ccpNmrV3CoreUndoBlock():
     return theDecorator
 
 
+DEFINEDPARAMETERS = ('option', 'attr', 'parameter', 'dim')
+
 def queueStateChange(verify):
     """A decorator to wrap a state change event with a verify function
     """
@@ -1209,14 +1211,13 @@ def queueStateChange(verify):
         ba.apply_defaults()
 
         # get specific arguments - cannot just grab all as may contain variants
-        dim = ba.arguments.get('dim')
-        option = ba.arguments.get('option')
+        pars = [ba.arguments.get(par) for par in DEFINEDPARAMETERS]
 
         # call the function - should return None if returning to unmodified state
         result = func(*args, **kwds)
 
         # call the verify function to update the _changes dict
-        verify(self, func.__name__, result, dim, option)
+        verify(self, func.__name__, result, *pars)
 
         return result
 

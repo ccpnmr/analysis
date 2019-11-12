@@ -191,7 +191,7 @@ class IntegralTable(GuiTable):
                              QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed,
                              grid=(0, 0), gridSpan=(1, 1))
         self.itWidget = IntegralListPulldown(parent=self._widget,
-                                             project=self.project, default=None,
+                                             mainWindow=self.mainWindow, default=None,
                                              grid=(1, 0), gridSpan=(1, 1), minimumWidths=(0, 100),
                                              showSelectName=True,
                                              sizeAdjustPolicy=QtWidgets.QComboBox.AdjustToContents,

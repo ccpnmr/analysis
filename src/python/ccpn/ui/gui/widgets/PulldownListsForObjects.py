@@ -51,7 +51,8 @@ class _PulldownABC(PulldownListCompoundWidget):
     _attributeName = None
     _currentAttributeName = None
 
-    def __init__(self, parent, project,
+    def __init__(self, parent,
+                 mainWindow=None,
                  showBorder=False, orientation='left',
                  minimumWidths=(100, 150), maximumWidths=None, fixedWidths=None,
                  labelText=None,
@@ -92,8 +93,16 @@ class _PulldownABC(PulldownListCompoundWidget):
         if self._attributeName is None:
             raise RuntimeError('%s: _attributeName needs to be defined for proper functioning' % self.__class__.__name__)
 
-        self.project = project
-        self.current = self.project.application.current
+
+        self.mainWindow = mainWindow
+        if self.mainWindow:
+            self.application = mainWindow.application
+            project = self.project = mainWindow.application.project
+            self.current = mainWindow.application.current
+        else:
+            self.application = None
+            project = self.project = None
+            self.current = None
 
         self._showSelectName = showSelectName
         self._selectNoneText = selectNoneText

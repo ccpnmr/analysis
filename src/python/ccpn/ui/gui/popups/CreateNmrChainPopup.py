@@ -93,26 +93,26 @@ class CreateNmrChainPopup(CcpnDialog):
                                                )
         vGrid += 1
 
-        self.availableChainsPD = ChainPulldown(self, self.project, showSelectName=True, callback=self._populateWidgets, labelText='', tipText=CHAINTipText,
+        self.availableChainsPD = ChainPulldown(self, self.mainWindow, showSelectName=True, callback=self._populateWidgets, labelText='', tipText=CHAINTipText,
                                                grid=(vGrid, 1), )
         self.availableChainsPD.label.hide()
         self.availableChainsPD.hide()
         vGrid += 1
 
-        self.availableNmrChainsPD = NmrChainPulldown(self, self.project, showSelectName=True, callback=self._populateWidgets, labelText='',
+        self.availableNmrChainsPD = NmrChainPulldown(self, self.mainWindow, showSelectName=True, callback=self._populateWidgets, labelText='',
                                                      tipText=NMRCHAINTipText, grid=(vGrid, 1))
         self.availableNmrChainsPD.label.hide()
         self.availableNmrChainsPD.hide()
         vGrid += 1
 
-        self.availableComplexesPD = ComplexPulldown(self, self.project, showSelectName=True,
+        self.availableComplexesPD = ComplexPulldown(self, self.mainWindow, showSelectName=True,
                                                     callback=self._populateWidgets, labelText='', tipText=COMPLEXTipText, grid=(vGrid, 1))
         self.availableComplexesPD.label.hide()
         self.availableComplexesPD.hide()
         vGrid += 1
 
         tipText = SUBSTANCETipText
-        self.availableSubstancesPD = SubstancePulldown(self, self.project, showSelectName=True,
+        self.availableSubstancesPD = SubstancePulldown(self, self.mainWindow, showSelectName=True,
                                                        callback=self._populateWidgets, labelText='', tipText=tipText, grid=(vGrid, 1))
         self.availableSubstancesPD.label.hide()
         self.availableSubstancesPD.hide()

@@ -46,7 +46,7 @@ TextAlignment = {
 class LineEdit(QtWidgets.QLineEdit, Base):
 
     def __init__(self, parent, text='', textAlignment='c', backgroundText=None,
-                 minimumWidth=100, textColor=None, readOnly=False, **kwds):
+                 minimumWidth=100, textColor=None, editable=True, **kwds):
         """
 
         :param parent:
@@ -74,7 +74,7 @@ class LineEdit(QtWidgets.QLineEdit, Base):
         self.setAlignment(TextAlignment[textAlignment])
         self.setMinimumWidth(minimumWidth)
         self.setFixedHeight(25)
-        if readOnly:
+        if not editable:
             self.setReadOnly(True)
             self.setEnabled(False)
             self.setFont(helveticaItalic12)
@@ -152,12 +152,12 @@ class PasswordEdit(LineEdit):
     """Subclass of LineEdit to handle passwords to be shown as **
     """
     def __init__(self, parent, text='', textAlignment='c', backgroundText=None,
-                 minimumWidth=100, textColor=None, readOnly=False, **kwds):
+                 minimumWidth=100, textColor=None, editable=True, **kwds):
         """
         Initialise the lineEdit to password mode
         """
         super().__init__(parent, text=text, textAlignment=textAlignment, backgroundText=backgroundText,
-                         minimumWidth=minimumWidth, textColor=textColor, readOnly=readOnly, **kwds)
+                         minimumWidth=minimumWidth, textColor=textColor, editable=editable, **kwds)
         Base._init(self, **kwds)
 
         # set password mode

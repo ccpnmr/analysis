@@ -65,6 +65,9 @@ from ccpn.ui.gui.widgets.CompoundWidgets import PulldownListCompoundWidget, Chec
     ColourSelectionWidget, LineEditPopup, ListCompoundWidget
 from ccpn.ui.gui.widgets.PulldownListsForObjects import _PulldownABC
 from ccpn.core.lib.Notifiers import NotifierBase
+from ccpn.ui.gui.widgets.CompoundWidgets import EntryCompoundWidget
+from ccpn.ui.gui.widgets.PulldownListsForObjects import NmrChainPulldown
+from ccpn.ui.gui.widgets.Entry import Entry
 
 
 CommonWidgets = {
@@ -91,11 +94,52 @@ CommonWidgets = {
     InputPulldown.__name__              : (InputPulldown.currentText, InputPulldown.set),  #PulldownList
     ColourSelectionWidget.__name__      : (ColourSelectionWidget.currentText, ColourSelectionWidget.setColour),  #PulldownList
     LineEditPopup.__name__              : (LineEditPopup.get, LineEditPopup.set),
-    QCodeEditor.__name__                : (QCodeEditor.get, QCodeEditor.set)
+    QCodeEditor.__name__                : (QCodeEditor.get, QCodeEditor.set),
+
+    EntryCompoundWidget.__name__        : (EntryCompoundWidget.getText, EntryCompoundWidget.setText),
+    NmrChainPulldown.__name__           : (NmrChainPulldown.getText, NmrChainPulldown.select),
 
     # ADD TABLES
     # ADD Others
     }
+
+CommonWidgetsEdits = {
+    CheckBox.__name__                   : (CheckBox.get, CheckBox.setChecked, None),
+    ColourDialog.__name__               : (ColourDialog.getColor, ColourDialog.setColour, None),
+    DoubleSpinbox.__name__              : (DoubleSpinbox.value, DoubleSpinbox.setValue, None),
+    # Label.__name__:                   (Label.get,                   Label.setText),
+    LineEdit.__name__                   : (LineEdit.get, LineEdit.setText, None),
+    LineEditButtonDialog.__name__       : (LineEditButtonDialog.get, LineEditButtonDialog.setText, None),
+    PulldownList.__name__               : (PulldownList.currentText, PulldownList.set, None),
+    RadioButtons.__name__               : (RadioButtons.get, RadioButtons.set, None),
+    RadioButton.__name__                : (RadioButton.isChecked, RadioButton.setChecked, None),
+
+    Slider.__name__                     : (Slider.get, Slider.setValue, None),
+    Spinbox.__name__                    : (Spinbox.value, Spinbox.set, None),
+    TextEditor.__name__                 : (TextEditor.get, TextEditor.setText, None),
+    GLTargetButtonSpinBoxes.__name__    : (GLTargetButtonSpinBoxes.get, GLTargetButtonSpinBoxes.setValues, None),
+
+    PulldownListCompoundWidget.__name__ : (PulldownListCompoundWidget.getText, PulldownListCompoundWidget.select,
+                                           ('pulldownList.activated', 'pulldownList.pulldownTextEdited')),  #PulldownList
+
+    ListCompoundWidget.__name__         : (ListCompoundWidget.getTexts, ListCompoundWidget.setTexts, None),  #PulldownList based
+    CheckBoxCompoundWidget.__name__     : (CheckBoxCompoundWidget.get, CheckBoxCompoundWidget.set, None),
+    DoubleSpinBoxCompoundWidget.__name__: (DoubleSpinBoxCompoundWidget.getValue, DoubleSpinBoxCompoundWidget.setValue, None),  #D oubleSpinbox
+    SelectorWidget.__name__             : (SelectorWidget.getText, SelectorWidget.select, None),  #PulldownList
+    InputPulldown.__name__              : (InputPulldown.currentText, InputPulldown.set, None),  #PulldownList
+    ColourSelectionWidget.__name__      : (ColourSelectionWidget.currentText, ColourSelectionWidget.setColour, None),  #PulldownList
+    LineEditPopup.__name__              : (LineEditPopup.get, LineEditPopup.set, None),
+    QCodeEditor.__name__                : (QCodeEditor.get, QCodeEditor.set, None),
+
+    EntryCompoundWidget.__name__        : (EntryCompoundWidget.getText, EntryCompoundWidget.setText, 'entry.textEdited'),
+    NmrChainPulldown.__name__           : (NmrChainPulldown.getText, NmrChainPulldown.select, 'pulldownList.activated'),
+
+    # ADD TABLES
+    # ADD Others
+    }
+
+
+
 
 settingsWidgetPositions = {
     'top'   : {'settings': (0, 0), 'widget': (1, 0)},

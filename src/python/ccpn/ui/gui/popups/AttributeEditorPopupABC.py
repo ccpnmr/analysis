@@ -26,17 +26,25 @@ __date__ = "$Date: 2017-03-30 11:28:58 +0100 (Thu, March 30, 2017) $"
 #=========================================================================================
 
 from functools import partial
-from ccpn.ui.gui.widgets.Label import Label
-from ccpn.ui.gui.widgets.LineEdit import LineEdit
 from ccpn.ui.gui.popups.Dialog import CcpnDialogMainWidget, _verifyPopupApply
 from ccpn.core.lib.ContextManagers import queueStateChange
+from ccpn.util.Common import makeIterableList
 
 
-class SimpleAttributeEditorPopupABC(CcpnDialogMainWidget):
-    """Abstract base class to implement a popup for editing simple properties
+ATTRGETTER = 0
+ATTRSETTER = 1
+ATTRSIGNAL = 2
+ATTRPRESET = 3
+
+
+class AttributeEditorPopupABC(CcpnDialogMainWidget):
+    """Abstract base class to implement a popup for editing properties
     """
     klass = None  # The class whose properties are edited/displayed
     attributes = []  # A list of (attributeName, getFunction, setFunction, kwds) tuples;
+
+    # the width of the first column for compound widgets
+    hWidth = 100
 
     # get/set-Function have getattr, setattr profile
     # if setFunction is None: display attribute value without option to change value
@@ -46,6 +54,8 @@ class SimpleAttributeEditorPopupABC(CcpnDialogMainWidget):
         """
         Initialise the widget
         """
+        from ccpn.ui.gui.modules.CcpnModule import CommonWidgetsEdits
+
         super().__init__(parent, setLayout=True,
                          windowTitle='Edit ' + self.klass.className, **kwds)
 
@@ -57,18 +67,35 @@ class SimpleAttributeEditorPopupABC(CcpnDialogMainWidget):
         self.obj = obj
 
         row = 0
-        self.labels = {}    # An (attributeName, Label-widget) dict
-        self.edits = {}     # An (attributeName, LineEdit-widget) dict
+        self.edits = {}  # An (attributeName, widgetType) dict
 
-        for attr, getFunction, setFunction, kwds in self.attributes:
-            value = getFunction(self.obj, attr)
+        for attr, attrType, getFunction, setFunction, presetFunction, callback, kwds in self.attributes:
             editable = setFunction is not None
-            self.labels[attr] = Label(self.mainWidget, attr, grid=(row, 0))
-            self.edits[attr] = LineEdit(self.mainWidget, textAlignment='left', editable=editable,
-                                        vAlign='t', grid=(row, 1), **kwds)
+            newWidget = attrType(self.mainWidget, mainWindow=mainWindow, labelText=attr, editable=editable,
+                                 grid=(row, 0), fixedWidths=(self.hWidth, None), **kwds)
 
-            self.edits[attr].textChanged.connect(partial(self._queueSetValue, attr, getFunction, setFunction, row))
+            # connect the signal
+            if attrType and attrType.__name__ in CommonWidgetsEdits:
+                attrSignalTypes = CommonWidgetsEdits[attrType.__name__][ATTRSIGNAL]
 
+                for attrST in makeIterableList(attrSignalTypes):
+                    this = newWidget
+
+                    # iterate through the attributeName to get the signals to connect to (for compound widgets)
+                    if attrST:
+                        for th in attrST.split('.'):
+                            this = getattr(this, th, None)
+                            if this is None:
+                                break
+                        else:
+                            if this is not None:
+                                this.connect(partial(self._queueSetValue, attr, attrType, getFunction, setFunction, presetFunction, callback, row))
+
+                if callback:
+                    newWidget.setCallback(callback=partial(callback, self))
+
+            self.edits[attr] = newWidget
+            setattr(self, attr, newWidget)
             row += 1
 
         # set up the required buttons for the dialog
@@ -89,19 +116,37 @@ class SimpleAttributeEditorPopupABC(CcpnDialogMainWidget):
         self.setFixedSize(self._size if self._size else self.sizeHint())
 
     def _populate(self):
-        for attr, getFunction, _, _ in self.attributes:
-            if attr in self.edits:
+        """Populate the widgets in the popup
+        """
+        from ccpn.ui.gui.modules.CcpnModule import CommonWidgetsEdits
+
+        for attr, attrType, getFunction, _, _presetFunction, _, _ in self.attributes:
+            # populate the widget
+            if attr in self.edits and attrType and attrType.__name__ in CommonWidgetsEdits:
+                thisEdit = CommonWidgetsEdits[attrType.__name__]
+                attrSetter = thisEdit[ATTRSETTER]
+
+                # call the preset function for the widget (e.g. populate pulldowns with modified list)
+                if _presetFunction:
+                    _presetFunction(self, self.obj)
+
+                # set the current value
                 value = getFunction(self.obj, attr)
-                self.edits[attr].setText(str(value))
+                attrSetter(self.edits[attr], value)
 
     @queueStateChange(_verifyPopupApply)
-    def _queueSetValue(self, attr, getFunction, setFunction, dim):
-        """Queue the function for setting the attribute in the calling object
+    def _queueSetValue(self, attr, attrType, getFunction, setFunction, presetFunction, callback, dim):
+        """Queue the function for setting the attribute in the calling object (dim needs to stay for the decorator)
         """
-        value = self.edits[attr].text()
-        oldValue = str(getFunction(self.obj, attr))
-        if value != oldValue:
-            return partial(self._setValue, attr, setFunction, value)
+        from ccpn.ui.gui.modules.CcpnModule import CommonWidgetsEdits
+
+        if attrType and attrType.__name__ in CommonWidgetsEdits:
+            attrGetter = CommonWidgetsEdits[attrType.__name__][ATTRGETTER]
+            value = attrGetter(self.edits[attr])
+
+            oldValue = getFunction(self.obj, attr)
+            if value != oldValue:
+                return partial(self._setValue, attr, setFunction, value)
 
     def _setValue(self, attr, setFunction, value):
         """Function for setting the attribute, called by _applyAllChanges

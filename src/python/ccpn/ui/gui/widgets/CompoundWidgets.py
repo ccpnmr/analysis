@@ -492,9 +492,11 @@ class CheckBoxCompoundWidget(CompoundBaseWidget):
             bottom=[(1, 0), (0, 0)],
             )
 
-    def __init__(self, parent=None, showBorder=False, orientation='left',
+    def __init__(self, parent=None, mainWindow=None,
+                 showBorder=False, orientation='left',
                  minimumWidths=None, maximumWidths=None, fixedWidths=None,
-                 labelText='', text='', callback=None, checked=False, **kwds):
+                 labelText='', text='', callback=None, checked=False,
+                 editable=True, **kwds):
         """
         :param parent: parent widget
         :param showBorder: flag to display the border of Frame (True, False)
@@ -516,7 +518,7 @@ class CheckBoxCompoundWidget(CompoundBaseWidget):
         self._addWidget(self.label)
 
         hAlign = orientation if (orientation == 'left' or orientation == 'right') else 'center'
-        self.checkBox = CheckBox(parent=self, checked=checked, text=text, callback=callback, hAlign=hAlign)
+        self.checkBox = CheckBox(parent=self, checked=checked, text=text, callback=callback, hAlign=hAlign, checkable=editable)
         self.checkBox.setObjectName(labelText)
         self.setObjectName(labelText)
         self._addWidget(self.checkBox)

@@ -238,7 +238,7 @@ class _raiseNmrResiduePopup(RaisePopupABC):
 
 class _raiseNmrAtomPopup(RaisePopupABC):
     popupClass = NmrAtomPopup
-    objectArgumentName = 'nmrAtom'
+    # objectArgumentName = 'nmrAtom'
 
 
 class _raiseNotePopup(RaisePopupABC):

@@ -506,7 +506,7 @@ class _GroupEditorPopupABC(CcpnDialog):
         if self.editMode:
             self.leftPullDownLabel = Label(self, self.GROUP_NAME)
             self.leftPullDown = self.KLASS_PULLDOWN(parent=self.mainWindow,
-                                                    project=self.project,
+                                                    mainWindow=self.mainWindow,
                                                     showSelectName=False,
                                                     default=self.obj,
                                                     callback=self._leftPullDownCallback,
@@ -538,7 +538,7 @@ class _GroupEditorPopupABC(CcpnDialog):
 
         self.rightItemsLabel = Label(self, self.GROUP_NAME)
         self.rightPullDown = self.KLASS_PULLDOWN(parent=self.mainWindow,
-                                                 project=self.project,
+                                                 mainWindow=self.mainWindow,
                                                  showSelectName=True,
                                                  selectNoneText='none',
                                                  callback=self._rightPullDownCallback,

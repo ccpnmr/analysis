@@ -295,7 +295,7 @@ class NmrResidueTable(GuiTable):
             return None
 
     def __init__(self, parent=None, mainWindow=None, moduleParent=None, actionCallback=None, selectionCallback=None,
-                 checkBoxCallback=None, pulldownCallback=None, nmrChain=None, multiSelect=False,
+                 checkBoxCallback=None, _pulldownKwds=None, nmrChain=None, multiSelect=False,
                  **kwds):
         """
         Initialise the widgets for the module. kwds passed to the scrollArea widget
@@ -375,7 +375,7 @@ class NmrResidueTable(GuiTable):
                          actionCallback=actionCallback,
                          selectionCallback=selectionCallback,
                          checkBoxCallback=checkBoxCallback,
-                         pulldownCallback=pulldownCallback,
+                         _pulldownKwds=_pulldownKwds,
                          grid=(3, 0), gridSpan=(1, 6),
                          enableDelete=True
                          )

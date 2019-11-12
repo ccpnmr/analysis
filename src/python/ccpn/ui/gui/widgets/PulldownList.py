@@ -38,9 +38,11 @@ NULL = object()
 #TODO: clean various methods, removing 'depreciated' ones
 
 class PulldownList(QtWidgets.QComboBox, Base):
+    popupAboutToBeShown = QtCore.pyqtSignal()
 
     def __init__(self, parent, texts=None, objects=None,
-                 icons=None, callback=None, index=0,
+                 icons=None, callback=None,
+                 clickToShowCallback= None, index=0,
                  backgroundText=None, headerText=None,
                  headerEnabled=False, headerIcon=None,
                  editable=False, maxVisibleItems=16,
@@ -59,6 +61,7 @@ class PulldownList(QtWidgets.QComboBox, Base):
         :param headerText: text of first item of the pullDown. E.g. '-- Select Item --'
         :param headerEnabled: True to be selectable, False to disable and be grayed out
         :param editable: If True: allows for editing the value
+        :param clickToShowCallback: callback when click to open the pulldown. Used to populate pulldown only when clicked the first time
         :param kwds:
         """
         super().__init__(parent)
@@ -85,6 +88,10 @@ class PulldownList(QtWidgets.QComboBox, Base):
         PulldownList.setData(self, texts, objects, index, icons,
                              headerText=headerText, headerEnabled=headerEnabled, headerIcon=headerIcon)
         self.setCallback(callback)
+        self.clickToShowCallback = clickToShowCallback
+        if self.clickToShowCallback:
+            self.popupAboutToBeShown.connect(self.clickToShowCallback)
+
         self.setStyleSheet("""
     PulldownList {
       padding-top: 3px;
@@ -100,6 +107,7 @@ class PulldownList(QtWidgets.QComboBox, Base):
         self.currentIndexChanged.connect(self._callback)
 
     def showPopup(self):
+        self.popupAboutToBeShown.emit()
         super(PulldownList, self).showPopup()
 
     def currentObject(self):
@@ -351,7 +359,7 @@ class PulldownList(QtWidgets.QComboBox, Base):
 if __name__ == '__main__':
     from ccpn.ui.gui.widgets.Application import TestApplication
     from ccpn.ui.gui.popups.Dialog import CcpnDialog
-
+    from functools import partial
 
     app = TestApplication()
 
@@ -365,7 +373,15 @@ if __name__ == '__main__':
 
 
     def callback2(object):
+        print('HEY')
         print('callback2', object)
+
+    def callback21():
+        print('clciked')
+        print('callback2')
+
+    def abts(s):
+        print('s',s.texts)
 
 
     popup = CcpnDialog(windowTitle='Test PulldownList', setLayout=True)
@@ -384,13 +400,14 @@ if __name__ == '__main__':
     #policyDict = {}
 
     pulldownList = PulldownList(parent=popup, texts=texts, icons=icons,
-                                objects=objects, callback=callback, grid=(0, 0), **policyDict
+                                objects=objects, callback=callback, clickToShowCallback=callback21, grid=(0, 0), **policyDict
                                 )
+    pulldownList.popupAboutToBeShown.connect(partial(abts,pulldownList ))
     pulldownList.insertSeparator(2)
     pulldownList.clearEditText()
 
     pulldownList2 = PulldownList(parent=popup, texts=texts, editable=True,
-                                 callback=callback2, grid=(1, 0), **policyDict
+                                 callback=callback2, clickToShowCallback=callback21, grid=(1, 0), **policyDict
                                  )
     pulldownList.clearEditText()
 

@@ -25,7 +25,7 @@ __date__ = "$Date: 2017-07-04 15:21:16 +0000 (Tue, July 04, 2017) $"
 # Start of code
 #=========================================================================================
 
-from PyQt5 import QtWidgets, QtCore
+from PyQt5 import QtWidgets, QtCore, QtGui
 from contextlib import contextmanager
 from functools import partial
 from ccpn.ui.gui.widgets.Base import Base
@@ -121,6 +121,10 @@ class CcpnDialogMainWidget(QtWidgets.QDialog, Base):
         self._changes = {}
 
         self.setDefaultButton()
+
+        # GST stops a file icon being shown
+        self.setWindowFilePath('')
+        self.setWindowIcon(QtGui.QIcon())
 
     def __postInit__(self):
         """post initialise functions
@@ -380,6 +384,10 @@ class CcpnDialog(QtWidgets.QDialog, Base):
         self.setWindowTitle(windowTitle)
         self.setContentsMargins(15, 15, 15, 15)
         self.resize(*size)
+
+        # GST stops a file icon being shown
+        self.setWindowFilePath('')
+        self.setWindowIcon(QtGui.QIcon())
 
     def fixedSize(self):
         self.sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)

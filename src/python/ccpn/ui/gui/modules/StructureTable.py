@@ -418,7 +418,7 @@ class StructureTable(GuiTableStructure):
                              QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed,
                              grid=(0, 0), gridSpan=(1, 1))
         self.stWidget = StructureEnsemblePulldown(parent=self._widget,
-                                                  project=self._project, default=None,  # first Structure in project (if present),
+                                                  mainWindow=self._mainWindow, default=None,  # first Structure in project (if present),
                                                   grid=(1, 0), gridSpan=(1, 1), minimumWidths=(0, 100),
                                                   showSelectName=True,
                                                   sizeAdjustPolicy=QtWidgets.QComboBox.AdjustToContents,

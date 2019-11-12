@@ -47,7 +47,7 @@ INFINITY = float('Inf')
 class Entry(QtWidgets.QLineEdit, Base):
 
     def __init__(self, parent, text='', callback=None, maxLength=32,
-                 listener=None, stripEndWhitespace=True, readOnly=False, **kwds):
+                 listener=None, stripEndWhitespace=True, editable=True, **kwds):
 
         super().__init__(parent)
         Base._init(self, **kwds)
@@ -77,7 +77,7 @@ class Entry(QtWidgets.QLineEdit, Base):
 
         self.setFixedHeight(25)
 
-        if readOnly:
+        if not editable:
             self.setReadOnly(True)
             self.setEnabled(False)
             self.setFont(helveticaItalic12)

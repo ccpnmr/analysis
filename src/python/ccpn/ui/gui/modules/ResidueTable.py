@@ -192,7 +192,7 @@ class ResidueTable(GuiTable):
         selectionCallback = self._selectionCallback if selectionCallback is None else selectionCallback
 
         self.cWidget = ChainPulldown(parent=self._widget,
-                                         project=self.project, default=None,  #first Chain in project (if present)
+                                         mainWindow=self.mainWindow, default=None,  #first Chain in project (if present)
                                          grid=(1, 0), gridSpan=(1, 1), minimumWidths=(0, 100),
                                          showSelectName=True,
                                          sizeAdjustPolicy=QtWidgets.QComboBox.AdjustToContents,

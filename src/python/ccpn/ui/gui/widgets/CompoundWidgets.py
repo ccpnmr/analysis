@@ -237,9 +237,10 @@ class EntryCompoundWidget(CompoundBaseWidget):
             bottom=[(1, 0), (0, 0)],
             )
 
-    def __init__(self, parent=None, showBorder=False, orientation='left',
+    def __init__(self, parent=None, mainWindow=None,
+                 showBorder=False, orientation='left',
                  minimumWidths=None, maximumWidths=None, fixedWidths=None,
-                 labelText='', callback=None, default=None, readOnly=False,
+                 labelText='', callback=None, default=None, editable=True,
                  sizeAdjustPolicy=None, **kwds):
         """
         :param parent: parent widget
@@ -251,7 +252,7 @@ class EntryCompoundWidget(CompoundBaseWidget):
         :param labelText: Text for the Label
         :param callback: (optional) callback for the Entry
         :param default: (optional) initial text of the Entry
-        :param readOnly: (optional) set Entry to readOnly
+        :param editable: (optional) set Entry to editable
         :param kwds: (optional) keyword, value pairs for the gridding of Frame
         """
 
@@ -261,7 +262,7 @@ class EntryCompoundWidget(CompoundBaseWidget):
         self.label = Label(parent=self, text=labelText, vAlign='center')
         self._addWidget(self.label)
 
-        self.entry = Entry(parent=self, callback=callback, readOnly=readOnly)
+        self.entry = Entry(parent=self, callback=callback, editable=editable)
         self._addWidget(self.entry)
 
         if default is not None:
@@ -305,6 +306,7 @@ class PulldownListCompoundWidget(CompoundBaseWidget):
                         Label
 
     """
+
     layoutDict = dict(
             # grid positions for label and pulldown for the different orientations
             left=[(0, 0), (0, 1)],
@@ -313,7 +315,8 @@ class PulldownListCompoundWidget(CompoundBaseWidget):
             bottom=[(1, 0), (0, 0)],
             )
 
-    def __init__(self, parent=None, showBorder=False, orientation='left',
+    def __init__(self, parent=None, mainWindow=None,
+                 showBorder=False, orientation='left',
                  minimumWidths=None, maximumWidths=None, fixedWidths=None,
                  labelText='', texts=None, callback=None, default=None,
                  sizeAdjustPolicy=None, editable=False, **kwds):
@@ -417,6 +420,11 @@ class PulldownListCompoundWidget(CompoundBaseWidget):
         self.select(current, blockSignals=True)
         self.pulldownList.update()
         self.pulldownList.blockSignals(False)
+
+    def setCallback(self, callback):
+        """Set the callback for the doubleSpinBox
+        """
+        self.pulldownList.setCallback(callback)
 
     # def _blockEvents(self, blanking=False):
     #     """Block all updates/signals/notifiers in the widget.

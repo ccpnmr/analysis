@@ -69,7 +69,7 @@ class EstimateVolumes(CcpnDialog):
         """Create the widgets for the popup
         """
         row = 0
-        self.spectrumPullDown = SpectrumPulldown(self, self.project, grid=(row, 0), gridSpan=(1, 3),
+        self.spectrumPullDown = SpectrumPulldown(self, self.mainWindow, grid=(row, 0), gridSpan=(1, 3),
                                                  callback=self._changePeakLists,
                                                  filterFunction=self._filterToStrip)
 

@@ -176,7 +176,7 @@ class PeakListTableWidget(GuiTable):
         row += 1
         gridHPos = 0
         self.pLwidget = PeakListPulldown(parent=self._widget,
-                                         project=self.project,
+                                         mainWindow=self.mainWindow,
                                          grid=(row, gridHPos), gridSpan=(1, 1),
                                          showSelectName=True,
                                          minimumWidths=(0, 100),

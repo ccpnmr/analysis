@@ -40,6 +40,8 @@ NULL = object()
 class PulldownList(QtWidgets.QComboBox, Base):
     popupAboutToBeShown = QtCore.pyqtSignal()
 
+    pulldownTextEdited = QtCore.pyqtSignal()
+
     def __init__(self, parent, texts=None, objects=None,
                  icons=None, callback=None,
                  clickToShowCallback= None, index=0,
@@ -83,6 +85,8 @@ class PulldownList(QtWidgets.QComboBox, Base):
             self.setEditable(editable)
             if self.backgroundText:
                 self.lineEdit().setPlaceholderText(str(self.backgroundText))
+            self.lineEdit().textEdited.connect(self._emitPulldownTextEdited)
+
         # self.setIconSize(QtCore.QSize(22,22))
 
         PulldownList.setData(self, texts, objects, index, icons,
@@ -314,6 +318,10 @@ class PulldownList(QtWidgets.QComboBox, Base):
         # qt bug fix - maxVisible only works if the following is set in the stylesheet
         # self.setStyleSheet("combobox-popup: 0;")
         # This is currently set at the top but added here so I remember, Ed
+
+    @QtCore.pyqtSlot()
+    def _emitPulldownTextEdited(self):
+        self.pulldownTextEdited.emit()
 
     # def _blockEvents(self, blanking=False):
     #     """Block all updates/signals/notifiers in the widget.

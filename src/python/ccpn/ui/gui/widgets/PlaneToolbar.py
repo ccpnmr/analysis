@@ -385,38 +385,6 @@ class PlaneSelectorWidget(Frame):
         return self.planeCountSpinBox.value()
 
 
-def _setAxisCode(self, *args):
-    pass
-
-
-def _setAxisPosition(self, *args):
-    pass
-
-
-def _setPlaneCount(self, *args):
-    pass
-
-
-def _setPlaneSelection(self, *args):
-    pass
-
-
-def _initAxisCode(self, widget, strip, axis):
-    pass
-
-
-def _initAxisPosition(self, widget, strip, axis):
-    pass
-
-
-def _initPlaneCount(self, widget, strip, axis):
-    pass
-
-
-def _initPlaneSelection(self, widget, strip, axis):
-    self.__postInit__(widget, strip, axis)
-
-
 class _OpenGLFrameABC(OpenGLOverlayFrame):
     """
     OpenGL ABC for items to overlay the GL frame (until a nicer way can by found)
@@ -515,6 +483,32 @@ class PlaneAxisWidget(_OpenGLFrameABC):
                 planes box
 
     """
+
+    def _setAxisCode(self, *args):
+        pass
+
+    def _setAxisPosition(self, *args):
+        pass
+
+    def _setPlaneCount(self, *args):
+        pass
+
+    def _setPlaneSelection(self, *args):
+        pass
+
+    def _initAxisCode(self, widget, strip, axis):
+        pass
+
+    def _initAxisPosition(self, widget, strip, axis):
+        pass
+
+    def _initPlaneCount(self, widget, strip, axis):
+        pass
+
+    def _initPlaneSelection(self, widget, strip, axis):
+        self.__postInit__(widget, strip, axis)
+
+    # define the buttons for the Plane axis widget
     BUTTONS = (('_axisLabel', ActiveLabel, _initAxisCode, _setAxisCode, (0, 0), (1, 1)),
                ('_axisPpmPosition', ActiveLabel, _initAxisPosition, _setAxisPosition, (0, 1), (1, 1)),
                ('_axisPlaneCount', ActiveLabel, _initPlaneCount, _setPlaneCount, (0, 2), (1, 1)),
@@ -804,15 +798,14 @@ STRIPHANDLE = 'stripHandle'
 DEFAULTCOLOUR = CCPNGLWIDGET_HEXFOREGROUND
 
 
-def _initIcon(self, widget, strip):
-    self.__postIconInit__(widget, strip)
-
-
-def _initStripHeader(self, widget, strip):
-    self.__postHeaderInit__(widget, strip)
-
-
 class StripHeaderWidget(_OpenGLFrameABC):
+
+    def _initIcon(self, widget, strip):
+        self.__postIconInit__(widget, strip)
+
+    def _initStripHeader(self, widget, strip):
+        self.__postHeaderInit__(widget, strip)
+
     BUTTONS = (('_nmrChainLeft', _StripLabel, None, None, (0, 0), (2, 1)),
                ('_nmrChainRight', _StripLabel, _initIcon, None, (0, 5), (2, 1)),
                ('_stripDirection', _StripLabel, None, None, (0, 2), (1, 2)),
@@ -1166,14 +1159,14 @@ class StripHeaderWidget(_OpenGLFrameABC):
         self._resize()
 
 
-def _setStripLabel(self, *args):
-    """Set the label of the strip, called from _populate
-    """
-    self.setLabelText(self.strip.pid if self.strip else '')
-    self._resize()
-
-
 class StripLabelWidget(_OpenGLFrameABC):
+
+    def _setStripLabel(self, *args):
+        """Set the label of the strip, called from _populate
+        """
+        self.setLabelText(self.strip.pid if self.strip else '')
+        self._resize()
+
     BUTTONS = (('_stripLabel', _StripLabel, None, _setStripLabel, (0, 0), (1, 1)),
                )
 

@@ -35,11 +35,49 @@ from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
 from ccpn.ui.gui.popups.Dialog import CcpnDialog  # ejb
 from ccpn.ui.gui.widgets.MessageDialog import showWarning
-
+from ccpn.ui.gui.popups.AttributeEditorPopupABC import AttributeEditorPopupABC
+# from ccpn.ui.gui.widgets.MessageDialog import showWarning
+from ccpn.util.OrderedSet import OrderedSet
+from ccpn.core.RestraintList import RestraintList
+from ccpn.ui.gui.widgets.CompoundWidgets import EntryCompoundWidget, PulldownListCompoundWidget
 from ccpn.util.Logging import getLogger
 
 
-class RestraintListPopup(CcpnDialog):
+class RestraintListPopup(AttributeEditorPopupABC):
+
+    def _getRestraintTypes(self):
+        pass
+
+    klass = RestraintList
+    attributes = [('name', EntryCompoundWidget, getattr, None, None, None, {}),
+                  ('restraintType', PulldownListCompoundWidget, getattr, setattr, _getRestraintTypes, None, {}),
+                  ('comment', EntryCompoundWidget, getattr, setattr, None, None, {}),
+                  ]
+
+    def __init__(self, restraintList=None, dataSet=None, **kwds):
+        super().__init__(**kwds)
+
+        self.restraintList = restraintList
+        self.dataSet = dataSet
+
+    def _applyAllChanges(self, changes):
+        """Apply all changes - move nmrResidue to new chain
+        """
+        name = self.name.text()
+        if self.editMode:
+            if str(name) != self.obj.name:
+                self.restraintList.rename(name)
+        else:
+            restraintType = self.restraintType.getText()
+            self.dataSet.newRestraintList(name=name, restraintType=restraintType)
+
+    def _setValue(self, attr, setFunction, value):
+        """Not needed here - subclass so does no operation
+        """
+        pass
+
+
+class OLDRestraintListPopup(CcpnDialog):
 
     def __init__(self, parent=None, mainWindow=None, restraintList=None, dataSet=None, editMode=False, **kwds):
 

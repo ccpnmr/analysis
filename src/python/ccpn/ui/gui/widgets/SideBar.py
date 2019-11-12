@@ -877,7 +877,7 @@ class SideBarStructure(object):
 
             #------ Complexes ------
             SidebarTree('Complexes', closed=True, children=[
-                SidebarItem('<New Complex>', callback=_raiseComplexEditorPopup(editMode=False, useNone=True)),
+                SidebarItem('<New Complex>', callback=_raiseComplexEditorPopup(useNone=True, editMode=False)),
                 SidebarClassTreeItems(klass=Complex, rebuildOnRename='Complex-ClassTreeItems',
                                       callback=_raiseComplexEditorPopup(editMode=True),
                                       menuAction=_openItemComplexTable(position='bottom', relativeTo=None),

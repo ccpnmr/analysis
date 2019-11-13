@@ -89,7 +89,8 @@ class ListCompoundWidget(CompoundBaseWidget):
     def __init__(self, parent=None, showBorder=False, orientation='left',
                  minimumWidths=None, maximumWidths=None, fixedWidths=None,
                  labelText='', texts=None, callback=None,
-                 defaults=None, uniqueList=True, **kwds):
+                 defaults=None, uniqueList=True, compoundKwds=None,
+                 **kwds):
         """
         :param parent: parent widget
         :param showBorder: flag to display the border of Frame (True, False)
@@ -241,7 +242,8 @@ class EntryCompoundWidget(CompoundBaseWidget):
                  showBorder=False, orientation='left',
                  minimumWidths=None, maximumWidths=None, fixedWidths=None,
                  labelText='', callback=None, default=None, editable=True,
-                 sizeAdjustPolicy=None, **kwds):
+                 sizeAdjustPolicy=None, compoundKwds=None,
+                 **kwds):
         """
         :param parent: parent widget
         :param showBorder: flag to display the border of Frame (True, False)
@@ -262,7 +264,7 @@ class EntryCompoundWidget(CompoundBaseWidget):
         self.label = Label(parent=self, text=labelText, vAlign='center')
         self._addWidget(self.label)
 
-        self.entry = Entry(parent=self, callback=callback, editable=editable)
+        self.entry = Entry(parent=self, callback=callback, editable=editable, **compoundKwds)
         self._addWidget(self.entry)
 
         if default is not None:
@@ -319,7 +321,8 @@ class PulldownListCompoundWidget(CompoundBaseWidget):
                  showBorder=False, orientation='left',
                  minimumWidths=None, maximumWidths=None, fixedWidths=None,
                  labelText='', texts=None, callback=None, default=None,
-                 sizeAdjustPolicy=None, editable=False, **kwds):
+                 sizeAdjustPolicy=None, editable=False, compoundKwds=None,
+                 **kwds):
         """
         :param parent: parent widget
         :param showBorder: flag to display the border of Frame (True, False)
@@ -496,7 +499,8 @@ class CheckBoxCompoundWidget(CompoundBaseWidget):
                  showBorder=False, orientation='left',
                  minimumWidths=None, maximumWidths=None, fixedWidths=None,
                  labelText='', text='', callback=None, checked=False,
-                 editable=True, **kwds):
+                 editable=True, compoundKwds=None,
+                 **kwds):
         """
         :param parent: parent widget
         :param showBorder: flag to display the border of Frame (True, False)
@@ -571,7 +575,8 @@ class DoubleSpinBoxCompoundWidget(CompoundBaseWidget):
     def __init__(self, parent=None, showBorder=False, orientation='left',
                  minimumWidths=None, maximumWidths=None, fixedWidths=None,
                  labelText='', value=None, range=(None, None), step=None, showButtons=True,
-                 decimals=None, callback=None, **kwds):
+                 decimals=None, callback=None, compoundKwds=None,
+                 **kwds):
         """
         :param parent: parent widget
         :param showBorder: flag to display the border of Frame (True, False)

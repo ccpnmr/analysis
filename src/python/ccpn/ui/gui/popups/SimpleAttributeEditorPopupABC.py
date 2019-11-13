@@ -75,7 +75,8 @@ class SimpleAttributeEditorPopupABC(CcpnDialogMainWidget):
         self.setOkButton(callback=self._okClicked)
         self.setCancelButton(callback=self._cancelClicked)
         self.setHelpButton(callback=self._helpClicked, enabled=False)
-        self.setRevertButton(callback=self._revertClicked, enabled=False)
+        if self.EDITMODE:
+            self.setRevertButton(callback=self._revertClicked, enabled=False)
         self.setDefaultButton(CcpnDialogMainWidget.CANCELBUTTON)
 
         # clear the changes list

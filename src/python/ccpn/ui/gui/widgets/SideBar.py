@@ -86,7 +86,8 @@ from ccpn.ui.gui.lib.MenuActions import _createNewDataSet, _createNewPeakList, _
     _createNewNmrAtom, \
     _createNewNote, _createNewIntegralList, _createNewSample, _createNewStructureEnsemble, _raiseNewChainPopup, _raiseChainPopup, _raiseComplexEditorPopup, \
     _raiseDataSetPopup, _raiseChemicalShiftListPopup, _raisePeakListPopup, _raiseMultipletListPopup, _raiseCreateNmrChainPopup, _raiseNmrChainPopup, \
-    _raiseNmrResiduePopup, _raiseNmrAtomPopup, _raiseNotePopup, _raiseIntegralListPopup, _raiseRestraintListPopup, _raiseSamplePopup, \
+    _raiseNmrResiduePopup, _raiseNmrAtomPopup, _raiseNotePopup, _raiseIntegralListPopup, \
+    _raiseRestraintListEditPopup, _raiseRestraintListNewPopup, _raiseSamplePopup, \
     _raiseSampleComponentPopup, _raiseSpectrumPopup, _raiseSpectrumGroupEditorPopup, _raiseStructureEnsemblePopup, _raiseSubstancePopup
 
 from ccpn.ui.gui.lib.MenuActions import _openItemNoteTable, _openItemChemicalShiftListTable, \
@@ -897,9 +898,9 @@ class SideBarStructure(object):
                 SidebarClassTreeItems(klass=DataSet, rebuildOnRename='DataSet-ClassTreeItems',
                                       callback=_raiseDataSetPopup(),
                                       menuAction=_openItemDataSetTable(position='left', relativeTo=None), isDraggable=True, children=[
-                        SidebarItem('<New RestraintList>', callback=_raiseRestraintListPopup(editMode=False, useParent=True)),
+                        SidebarItem('<New RestraintList>', callback=_raiseRestraintListNewPopup(editMode=False, useParent=True)),
                         SidebarClassTreeItems(klass=RestraintList, rebuildOnRename='DataSet-ClassTreeItems',
-                                              callback=_raiseRestraintListPopup(editMode=True),
+                                              callback=_raiseRestraintListEditPopup(editMode=True),
                                               menuAction=_openItemRestraintListTable(position='left', relativeTo=None), isDraggable=True),
                         ]),
                 ]),

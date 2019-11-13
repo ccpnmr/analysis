@@ -70,7 +70,7 @@ class NmrResiduePopup(AttributeEditorPopupABC):
                   ('nmrChain', NmrChainPulldown, getattr, None, None, None, {}),
                   ('sequenceCode', EntryCompoundWidget, getattr, setattr, None, None, {}),
                   ('residueType', PulldownListCompoundWidget, getattr, setattr, _getResidueTypeProb, _checkNmrResidue, {}),
-                  ('comment', EntryCompoundWidget, getattr, setattr, None, None, {}),
+                  ('comment', EntryCompoundWidget, getattr, setattr, None, None, {'backgroundText': '> Optional <'}),
                   ]
 
     def _applyAllChanges(self, changes):

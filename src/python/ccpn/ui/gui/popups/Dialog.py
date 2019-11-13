@@ -65,14 +65,14 @@ class CcpnDialogMainWidget(QtWidgets.QDialog, Base):
     APPLYBUTTON = QtWidgets.QDialogButtonBox.Apply
     OKBUTTON = QtWidgets.QDialogButtonBox.Ok
     HELPBUTTON = QtWidgets.QDialogButtonBox.Help
-
     DEFAULTBUTTON = CLOSEBUTTON
 
     USESCROLLWIDGET = False
     FIXEDWIDTH = True
     FIXEDHEIGHT = True
-
     ENABLEICONS = False
+
+    EDITMODE = True
 
     def __init__(self, parent=None, windowTitle='', setLayout=False,
                  orientation=HORIZONTAL, size=None, **kwds):
@@ -332,10 +332,11 @@ class CcpnDialogMainWidget(QtWidgets.QDialog, Base):
         Return True unless any errors occurred
         """
 
-        # get the list of widgets that have been changed - exit if all empty
-        allChanges = True if self._changes else False
-        if not allChanges:
-            return True
+        if self.EDITMODE:
+            # get the list of widgets that have been changed - exit if all empty
+            allChanges = True if self._changes else False
+            if not allChanges:
+                return True
 
         # handle clicking of the Apply/OK button
         with handleDialogApply(self) as error:
@@ -346,7 +347,7 @@ class CcpnDialogMainWidget(QtWidgets.QDialog, Base):
 
             # apply all functions to the object
             changes = self._changes
-            if changes:
+            if changes or not self.EDITMODE:
                 self._applyAllChanges(changes)
 
             # add item here to redraw items

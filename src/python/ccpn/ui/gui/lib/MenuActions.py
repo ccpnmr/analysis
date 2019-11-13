@@ -55,7 +55,7 @@ from ccpn.ui.gui.popups.NmrChainPopup import NmrChainPopup
 from ccpn.ui.gui.popups.NmrResiduePopup import NmrResiduePopup
 from ccpn.ui.gui.popups.NotesPopup import NotesPopup
 from ccpn.ui.gui.popups.PeakListPropertiesPopup import PeakListPropertiesPopup
-from ccpn.ui.gui.popups.RestraintListPopup import RestraintListPopup
+from ccpn.ui.gui.popups.RestraintListPopup import RestraintListEditPopup, RestraintListNewPopup
 from ccpn.ui.gui.popups.SampleComponentPropertiesPopup import SampleComponentPopup
 from ccpn.ui.gui.popups.SamplePropertiesPopup import SamplePropertiesPopup
 from ccpn.ui.gui.popups.SpectrumPropertiesPopup import SpectrumPropertiesPopup
@@ -251,10 +251,14 @@ class _raiseIntegralListPopup(RaisePopupABC):
     objectArgumentName = 'integralList'
 
 
-class _raiseRestraintListPopup(RaisePopupABC):
-    popupClass = RestraintListPopup
-    objectArgumentName = 'restraintList'
+class _raiseRestraintListEditPopup(RaisePopupABC):
+    popupClass = RestraintListEditPopup
+    # objectArgumentName = 'restraintList'
     parentObjectArgumentName = 'dataSet'
+
+
+class _raiseRestraintListNewPopup(_raiseRestraintListEditPopup):
+    popupClass = RestraintListNewPopup
 
 
 class _raiseSamplePopup(RaisePopupABC):

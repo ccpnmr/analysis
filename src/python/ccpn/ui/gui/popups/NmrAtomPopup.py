@@ -76,7 +76,7 @@ class NmrAtomPopup(AttributeEditorPopupABC):
                   ('nmrAtom name', NmrResiduePulldown, getattr, None, _getNmrAtomTypes, None, {}),
                   ('nmrResidue', PulldownListCompoundWidget, getattr, setattr, _getNmrResidueTypes, None, {}),
                   ('Merge to Existing', CheckBoxCompoundWidget, None, None, None, None, {}),
-                  ('comment', EntryCompoundWidget, getattr, setattr, None, None, {}),
+                  ('comment', EntryCompoundWidget, getattr, setattr, None, None, {'backgroundText': '> Optional <'}),
                   ]
     hWidth = 130
 

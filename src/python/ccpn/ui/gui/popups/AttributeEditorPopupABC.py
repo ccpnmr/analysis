@@ -47,6 +47,8 @@ class AttributeEditorPopupABC(CcpnDialogMainWidget):
     # the width of the first column for compound widgets
     hWidth = 100
 
+    EDITMODE = True
+
     # get/set-Function have getattr, setattr profile
     # if setFunction is None: display attribute value without option to change value
     # kwds: optional kwds passed to LineEdit constructor
@@ -64,7 +66,6 @@ class AttributeEditorPopupABC(CcpnDialogMainWidget):
         self.application = mainWindow.application
         self.project = mainWindow.application.project
         self.current = mainWindow.application.current
-
         self.obj = obj
 
         row = 0
@@ -73,7 +74,7 @@ class AttributeEditorPopupABC(CcpnDialogMainWidget):
         for attr, attrType, getFunction, setFunction, presetFunction, callback, kwds in self.attributes:
             editable = setFunction is not None
             newWidget = attrType(self.mainWidget, mainWindow=mainWindow, labelText=attr, editable=editable,
-                                 grid=(row, 0), fixedWidths=(self.hWidth, None), **kwds)
+                                 grid=(row, 0), fixedWidths=(self.hWidth, None), compoundKwds=kwds)         #, **kwds)
 
             # remove whitespaces to give the attribute name in the class
             attr = attr.translate({ord(c): None for c in whitespace})
@@ -107,7 +108,9 @@ class AttributeEditorPopupABC(CcpnDialogMainWidget):
         self.setOkButton(callback=self._okClicked)
         self.setCancelButton(callback=self._cancelClicked)
         self.setHelpButton(callback=self._helpClicked, enabled=False)
-        self.setRevertButton(callback=self._revertClicked, enabled=False)
+        if self.EDITMODE:
+            self.setRevertButton(callback=self._revertClicked, enabled=False)
+
         self.setDefaultButton(CcpnDialogMainWidget.CANCELBUTTON)
 
         # clear the changes list
@@ -138,9 +141,9 @@ class AttributeEditorPopupABC(CcpnDialogMainWidget):
                     # call the preset function for the widget (e.g. populate pulldowns with modified list)
                     _presetFunction(self, self.obj)
 
-                if getFunction:
+                if getFunction and self.EDITMODE:
                     # set the current value
-                    value = getFunction(self.obj, attr)
+                    value = getFunction(self.obj, attr, None)
                     attrSetter(self.edits[attr], value)
 
     @queueStateChange(_verifyPopupApply)
@@ -153,9 +156,10 @@ class AttributeEditorPopupABC(CcpnDialogMainWidget):
             attrGetter = CommonWidgetsEdits[attrType.__name__][ATTRGETTER]
             value = attrGetter(self.edits[attr])
 
-            oldValue = getFunction(self.obj, attr)
-            if value != oldValue:
-                return partial(self._setValue, attr, setFunction, value)
+            if getFunction and self.EDITMODE:
+                oldValue = getFunction(self.obj, attr, None)
+                if value != oldValue:
+                    return partial(self._setValue, attr, setFunction, value)
 
     def _setValue(self, attr, setFunction, value):
         """Function for setting the attribute, called by _applyAllChanges

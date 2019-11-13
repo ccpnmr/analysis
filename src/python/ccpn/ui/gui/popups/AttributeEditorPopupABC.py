@@ -48,6 +48,7 @@ class AttributeEditorPopupABC(CcpnDialogMainWidget):
     hWidth = 100
 
     EDITMODE = True
+    WINDOWPREFIX = 'Edit '
 
     # get/set-Function have getattr, setattr profile
     # if setFunction is None: display attribute value without option to change value
@@ -60,7 +61,7 @@ class AttributeEditorPopupABC(CcpnDialogMainWidget):
         from ccpn.ui.gui.modules.CcpnModule import CommonWidgetsEdits
 
         super().__init__(parent, setLayout=True,
-                         windowTitle='Edit ' + self.klass.className, **kwds)
+                         windowTitle=self.WINDOWPREFIX + self.klass.className, **kwds)
 
         self.mainWindow = mainWindow
         self.application = mainWindow.application

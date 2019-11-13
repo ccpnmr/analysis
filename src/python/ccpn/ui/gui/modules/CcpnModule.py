@@ -138,9 +138,6 @@ CommonWidgetsEdits = {
     # ADD Others
     }
 
-
-
-
 settingsWidgetPositions = {
     'top'   : {'settings': (0, 0), 'widget': (1, 0)},
     'bottom': {'settings': (1, 0), 'widget': (0, 0)},

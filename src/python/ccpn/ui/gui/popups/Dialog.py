@@ -27,7 +27,6 @@ __date__ = "$Date: 2017-07-04 15:21:16 +0000 (Tue, July 04, 2017) $"
 
 from PyQt5 import QtWidgets, QtCore
 from contextlib import contextmanager
-from functools import partial
 from ccpn.ui.gui.widgets.Base import Base
 from ccpn.util.Logging import getLogger
 from ccpn.ui.gui.widgets.Frame import Frame

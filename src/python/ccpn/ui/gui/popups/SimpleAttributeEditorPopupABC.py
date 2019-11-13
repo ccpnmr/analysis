@@ -57,8 +57,8 @@ class SimpleAttributeEditorPopupABC(CcpnDialogMainWidget):
         self.obj = obj
 
         row = 0
-        self.labels = {}    # An (attributeName, Label-widget) dict
-        self.edits = {}     # An (attributeName, LineEdit-widget) dict
+        self.labels = {}  # An (attributeName, Label-widget) dict
+        self.edits = {}  # An (attributeName, LineEdit-widget) dict
 
         for attr, getFunction, setFunction, kwds in self.attributes:
             value = getFunction(self.obj, attr)

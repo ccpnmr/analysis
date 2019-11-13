@@ -26,10 +26,8 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 
 from PyQt5 import QtCore, QtGui, QtWidgets
-
 from ccpn.ui.gui.widgets.Base import Base
 from ccpn.ui.gui.guiSettings import helveticaItalic12
-
 from ccpn.ui.gui.widgets.Frame import Frame
 from ccpn.ui.gui.widgets.Label import Label
 
@@ -37,6 +35,7 @@ from ccpn.ui.gui.widgets.Label import Label
 # Allow setting of max lengh based on data model?
 
 import re
+
 
 SPLIT_REG_EXP = re.compile(',?\s*')
 SEPARATOR = ', '
@@ -293,6 +292,7 @@ class LabelledFloatEntry(LabelledEntry):
 if __name__ == '__main__':
     # from memops.qtgui.Application import Application
     from ccpn.ui.gui.widgets.Application import Application
+
 
     app = Application('test', 'test1')
 

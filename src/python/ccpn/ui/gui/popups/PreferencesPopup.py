@@ -49,18 +49,14 @@ from ccpn.ui.gui.widgets.HLine import HLine
 from ccpn.util.Logging import getLogger
 from ccpn.util.Colour import spectrumColours, addNewColour, fillColourPulldown, colourNameNoSpace, _setColourPulldown
 from ccpn.ui.gui.widgets.ColourDialog import ColourDialog
-from ccpn.ui.gui.widgets.ScrollArea import ScrollArea
 from ccpn.ui.gui.widgets.Spacer import Spacer
-from ccpn.ui.gui.widgets.DialogButtonBox import DialogButtonBox
 from ccpn.core.PeakList import GAUSSIANMETHOD, PARABOLICMETHOD
 from ccpn.core.MultipletList import MULTIPLETAVERAGINGTYPES
 from ccpn.util.UserPreferences import UserPreferences
 from ccpn.ui.gui.lib.GuiPath import PathEdit
 from ccpn.ui.gui.popups.ValidateSpectraPopup import ValidateSpectraForPreferences
-from ccpn.ui.gui.popups.Dialog import CcpnDialog, CcpnDialogMainWidget
+from ccpn.ui.gui.popups.Dialog import CcpnDialogMainWidget
 from ccpn.core.lib.ContextManagers import queueStateChange, undoStackBlocking
-from ccpn.ui.gui.widgets.MessageDialog import showYesNo
-from ccpn.ui.gui.widgets.Base import SignalBlocking
 
 
 PEAKFITTINGDEFAULTS = [PARABOLICMETHOD, GAUSSIANMETHOD]

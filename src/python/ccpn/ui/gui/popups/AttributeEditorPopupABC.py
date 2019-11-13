@@ -74,7 +74,7 @@ class AttributeEditorPopupABC(CcpnDialogMainWidget):
         for attr, attrType, getFunction, setFunction, presetFunction, callback, kwds in self.attributes:
             editable = setFunction is not None
             newWidget = attrType(self.mainWidget, mainWindow=mainWindow, labelText=attr, editable=editable,
-                                 grid=(row, 0), fixedWidths=(self.hWidth, None), compoundKwds=kwds)         #, **kwds)
+                                 grid=(row, 0), fixedWidths=(self.hWidth, None), compoundKwds=kwds)  #, **kwds)
 
             # remove whitespaces to give the attribute name in the class
             attr = attr.translate({ord(c): None for c in whitespace})

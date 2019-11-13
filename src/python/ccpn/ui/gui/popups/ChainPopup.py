@@ -27,17 +27,15 @@ __date__ = "$Date: 2017-03-30 11:28:58 +0100 (Thu, March 30, 2017) $"
 
 from ccpn.core.NmrChain import Chain
 from ccpn.ui.gui.popups.SimpleAttributeEditorPopupABC import SimpleAttributeEditorPopupABC
-from ccpn.util.Logging import getLogger
 
 
 class ChainPopup(SimpleAttributeEditorPopupABC):
     """Chain attributes editor popup"""
 
     klass = Chain
-    attributes = [('name',         getattr, setattr, {'backgroundText':'> Enter name <'}),
-                  ('comment',      getattr, setattr, {'backgroundText':'> Optional <'}),
+    attributes = [('name', getattr, setattr, {'backgroundText': '> Enter name <'}),
+                  ('comment', getattr, setattr, {'backgroundText': '> Optional <'}),
                   # ('compoundName', getattr, None,    {}),
                   # ('isCyclic',     getattr, None,    {}),
-                  ('nmrChain',     getattr, None,    {}),
+                  ('nmrChain', getattr, None, {}),
                   ]
-

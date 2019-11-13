@@ -505,7 +505,7 @@ class Gui1dWidget(CcpnGLWidget):
                 self._spectrumLabelling.removeString(specView)
 
         # make a list of the visible and not-deleted spectrumViews
-        visibleSpectra = [specView.spectrum for specView in self._ordering if not specView.isDeleted and specView.isVisible()]
+        # visibleSpectra = [specView.spectrum for specView in self._ordering if not specView.isDeleted and specView.isVisible()]
         visibleSpectrumViews = [specView for specView in self._ordering if not specView.isDeleted and specView.isVisible()]
 
         self._visibleOrdering = visibleSpectrumViews

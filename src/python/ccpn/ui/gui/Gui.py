@@ -443,12 +443,14 @@ class StripDisplay1d(coreClass, _SpectrumDisplay1d):
 
         _SpectrumDisplay1d.__init__(self, mainWindow=self.application.ui.mainWindow,
                                     name=self._longName('SpectrumDisplay'))
-        if not project._isNew:
-            # hack for now;  Needs to know this for restoring the GuiSpectrum Module. This has to be removed after decoupling Gui and Data!
-            # This is a normal guiModule that should be opened in module area from the position
-            # where is created. E.g. and not hardcoded on the "right" and coupled with api calls!
-            self.application.ui.mainWindow.moduleArea.addModule(self, position='right',
-                                                                relativeTo=self.application.ui.mainWindow.moduleArea)
+
+        # 20191113: ED moved to initGraphics
+        # if not project._isNew:
+        #     # hack for now;  Needs to know this for restoring the GuiSpectrum Module. This has to be removed after decoupling Gui and Data!
+        #     # This is a normal guiModule that should be opened in module area from the position
+        #     # where is created. E.g. and not hardcoded on the "right" and coupled with api calls!
+        #     self.application.ui.mainWindow.moduleArea.addModule(self, position='right',
+        #                                                         relativeTo=self.application.ui.mainWindow.moduleArea)
 
 
 from ccpn.ui.gui.modules.SpectrumDisplayNd import SpectrumDisplayNd as _SpectrumDisplayNd
@@ -475,14 +477,13 @@ class SpectrumDisplayNd(coreClass, _SpectrumDisplayNd):
         _SpectrumDisplayNd.__init__(self, mainWindow=self.application.ui.mainWindow,
                                     name=self._longName('SpectrumDisplay'))
 
-        if not project._isNew:
-            # hack for now;  Needs to know this for restoring the GuiSpectrum Module. This has to be removed after decoupling Gui and Data!
-            # This is a normal guiModule that should be opened in module area from the position
-            # where is created. E.g. and not hardcoded on the "right" and coupled with api calls!
-            self.application.ui.mainWindow.moduleArea.addModule(self, position='right',
-                                                                relativeTo=self.application.ui.mainWindow.moduleArea)
-        # else:
-        #     print('NOT OPENING SPECTRUMDISPLAY')
+        # 20191113: ED moved to initGraphics
+        # if not project._isNew:
+        #     # hack for now;  Needs to know this for restoring the GuiSpectrum Module. This has to be removed after decoupling Gui and Data!
+        #     # This is a normal guiModule that should be opened in module area from the position
+        #     # where is created. E.g. and not hardcoded on the "right" and coupled with api calls!
+        #     self.application.ui.mainWindow.moduleArea.addModule(self, position='right',
+        #                                                         relativeTo=self.application.ui.mainWindow.moduleArea)
 
 
 #old name

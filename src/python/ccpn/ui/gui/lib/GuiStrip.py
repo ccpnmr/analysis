@@ -215,15 +215,15 @@ class GuiStrip(Frame):
         # respond to values changed in the containing spectrumDisplay settings widget
         self.spectrumDisplay._spectrumDisplaySettings.symbolsChanged.connect(self._symbolsChangedInSettings)
 
-    def resizeEvent(self, ev):
-        super().resizeEvent(ev)
-        # call subclass _resize event
-        self._resize()
-
-    def _resize(self):
-        """Resize event to handle resizing of frames that overlay the OpenGL frame
-        """
-        pass
+    # def resizeEvent(self, ev):
+    #     super().resizeEvent(ev)
+    #     # call subclass _resize event
+    #     # self._resize()
+    #
+    # def _resize(self):
+    #     """Resize event to handle resizing of frames that overlay the OpenGL frame
+    #     """
+    #     pass
 
     def _selectCallback(self, widgets):
         # print('>>>select', widget1, widget2)

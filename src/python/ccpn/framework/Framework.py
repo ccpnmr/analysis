@@ -705,10 +705,20 @@ class Framework(NotifierBase):
                                                    getColours()[CCPNGLWIDGET_HEXBACKGROUND])
 
     def initGraphics(self):
-        """Set up graphics system after loading"""
+        """Set up graphics system after loading
+        """
         from ccpn.ui.gui.lib import GuiStrip
 
         project = self.project
+
+        # 20191113:ED Initial insertion of spectrumDisplays into the moduleArea
+        insertPoint = self.ui.mainWindow.moduleArea
+        for spectrumDisplay in project.spectrumDisplays:
+            self.ui.mainWindow.moduleArea.addModule(spectrumDisplay,
+                                                    position='right',
+                                                    relativeTo=insertPoint)
+            insertPoint = spectrumDisplay
+
         try:
             if self.preferences.general.restoreLayoutOnOpening:
                 layout = self._getUserLayout()

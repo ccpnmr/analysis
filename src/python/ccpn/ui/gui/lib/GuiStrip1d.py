@@ -174,7 +174,7 @@ class GuiStrip1d(GuiStrip):
     def _resize(self):
         """Resize event to handle resizing of frames that overlay the OpenGL frame
         """
-        self._frameGuide._setMaskToChildren()
+        self._frameGuide._resizeFrames()
 
     def _checkMenuItems(self):
         """Update the menu check boxes from the strip

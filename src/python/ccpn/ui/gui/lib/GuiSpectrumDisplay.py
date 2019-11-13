@@ -72,7 +72,8 @@ from ccpn.ui._implementation.IntegralListView import IntegralListView
 from ccpn.ui._implementation.MultipletListView import MultipletListView
 from ccpn.ui.gui.widgets.SettingsWidgets import SpectrumDisplaySettings
 from ccpn.ui._implementation.SpectrumView import SpectrumView
-from ccpn.core.lib.ContextManagers import undoStackBlocking, notificationBlanking, BlankedPartial, undoBlock, notificationEchoBlocking
+from ccpn.core.lib.ContextManagers import undoStackBlocking, notificationBlanking, \
+    BlankedPartial, undoBlock, notificationEchoBlocking, undoBlockWithoutSideBar
 from ccpn.util.decorators import logCommand
 from ccpn.util.Common import makeIterableList
 from ccpn.core.lib import Undo
@@ -536,7 +537,7 @@ class GuiSpectrumDisplay(CcpnModule):
 
             if data[Notifier.OBJECT] == self:
                 strips = data[Notifier.OBJECT].strips
-                if len(strips)>0:
+                if len(strips) > 0:
                     specViews = strips[0].spectrumViews
                     self.spectrumToolBar._toolbarChange(self.orderedSpectrumViews(specViews))
 
@@ -1012,6 +1013,55 @@ class GuiSpectrumDisplay(CcpnModule):
     #         strip._unDelete()
     #
     #         self.showAxes()
+    # def _deleteSpectrumDisplay(self):
+    #     with undoBlock():
+    #         with undoStackBlocking() as addUndoItem:
+    #             # retrieve list of created items from the api
+    #             # strangely, this modifies _wrappedData.orderedStrips, and 'removes' the boundStrip by changing the indexing
+    #             # if it is at the end of apiBoundStrips then it confuses the indexing
+    #             indexing = [st.stripIndex() for st in self.strips]
+    #
+    #             apiObjectsCreated = strip._getApiObjectTree()
+    #
+    #             # reset indexing again SHOULD now be okay; i.e. nothing has been 'removed' from apiBoundStrips yet
+    #             for ii, ind in enumerate(indexing):
+    #                 self.strips[ii]._setStripIndex(ind)
+    #
+    #             index = strip.stripIndex()
+    #
+    #             # add layout handling to the undo stack
+    #             addUndoItem(undo=partial(self._redrawAxes, index))
+    #             addUndoItem(undo=partial(self._restoreStripToLayout, self, strip, index),
+    #                         redo=partial(self._removeStripFromLayout, self, strip))
+    #             # add notifier handling for the strip
+    #             addUndoItem(undo=partial(strip.setBlankingAllNotifiers, False),
+    #                         redo=partial(strip.setBlankingAllNotifiers, True))
+    #
+    #             self._removeStripFromLayout(self, strip)
+    #             strip.setBlankingAllNotifiers(True)
+    #
+    #             #EJB 20181213: old style delete notifiers
+    #             # # add object delete/undelete to the undo stack
+    #             # addUndoItem(undo=partial(strip._wrappedData.root._unDelete,
+    #             #                          apiObjectsCreated, (strip._wrappedData.topObject,)),
+    #             #             redo=partial(strip._delete)
+    #             #             )
+    #             # # delete the strip
+    #             # strip._delete()
+    #
+    #             # add object delete/undelete to the undo stack
+    #             addUndoItem(undo=BlankedPartial(strip._wrappedData.root._unDelete,
+    #                                             topObjectsToCheck=(strip._wrappedData.topObject,),
+    #                                             obj=strip, trigger='create', preExecution=False,
+    #                                             objsToBeUnDeleted=apiObjectsCreated),
+    #                         redo=BlankedPartial(strip._delete,
+    #                                             obj=strip, trigger='delete', preExecution=True)
+    #                         )
+    #
+    #             # delete the strip
+    #             strip._finaliseAction('delete')
+    #             with notificationBlanking():
+    #                 strip._delete()
 
     def _removeIndexStrip(self, value):
         self.deleteStrip(self.strips[value])
@@ -1365,7 +1415,7 @@ class GuiSpectrumDisplay(CcpnModule):
         self.stripFrame.hide()
 
         strips = self.orderedStrips
-        newWidth = max(strips[0].width() * factor, STRIP_MINIMUMWIDTH)        # + (0 if self.lastAxisOnly else strips[0].getRightAxisWidth()))
+        newWidth = max(strips[0].width() * factor, STRIP_MINIMUMWIDTH)  # + (0 if self.lastAxisOnly else strips[0].getRightAxisWidth()))
         axisWidth = strips[0].getRightAxisWidth() if self.lastAxisOnly else 0
 
         if len(strips) > 1:
@@ -1397,7 +1447,7 @@ class GuiSpectrumDisplay(CcpnModule):
         self.stripFrame.hide()
 
         strips = self.orderedStrips
-        newHeight = max(strips[0].height() * factor, STRIP_MINIMUMHEIGHT)        # + (0 if self.lastAxisOnly else strips[0].getRightAxisWidth()))
+        newHeight = max(strips[0].height() * factor, STRIP_MINIMUMHEIGHT)  # + (0 if self.lastAxisOnly else strips[0].getRightAxisWidth()))
         axisHeight = strips[0].getBottomAxisHeight() if self.lastAxisOnly else 0
 
         if len(strips) > 1:
@@ -1929,6 +1979,30 @@ class GuiSpectrumDisplay(CcpnModule):
 
                 # repaint - not sure whether needed here
                 GLSignals.emitPaintEvent()
+
+    #===========================================================================================
+    # new'Object' and other methods
+    # Call appropriate routines in their respective locations
+    #===========================================================================================
+
+    # @logCommand('project.')
+    # def newSpectrumView(self, spectrumName: str = None,
+    #                     stripSerial: int = None, dataSource=None,
+    #                     dimensionOrdering=None,
+    #                     **kwds):
+    #     """Create new SpectrumView
+    #
+    #     See the SpectrumView class for details.
+    #
+    #     Optional keyword arguments can be passed in; see SpectrumView._newSpectrumView for details.
+    #
+    #     :return: a new SpectrumView instance.
+    #     """
+    #     from ccpn.ui._implementation.SpectrumView import _newSpectrumView
+    #
+    #     return _newSpectrumView(self, spectrumName=spectrumName,
+    #                                  stripSerial=stripSerial, dataSource=dataSource,
+    #                                  dimensionOrdering=dimensionOrdering, **kwds)
 
 
 #=========================================================================================

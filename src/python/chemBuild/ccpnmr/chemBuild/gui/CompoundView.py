@@ -1036,10 +1036,10 @@ class CompoundView(QGraphicsView):
 
       for item in items:
         item.hide()
-      
+
       for item in items:
         del item
-      
+
       self.resetCachedContent()
       self.variant = variant
       self.compound = variant.compound
@@ -1050,39 +1050,39 @@ class CompoundView(QGraphicsView):
       self.centerView()
 
   def updateAll(self):
-    
+
     var = self.variant
     scene = self.scene
-    
+
     if var:
       getView = self.atomViews.get
       bondItems = self.bondItems
       getBondItem = bondItems.get
       groupDict = self.groupItems
-      
+
       usedGroups = set(var.atomGroups)
       for group in usedGroups:
         if group in groupDict:
           groupDict[group].syncGroup()
-          
+
         elif group.groupType == EQUIVALENT:
           EquivItem(scene, self, group)
-        
+
         elif group.groupType == PROCHIRAL:
           ProchiralItem(scene, self, group)
-        
+
         elif group.groupType == AROMATIC:
           AromaticItem(scene, self, group)
-      
+
       zombieGroups = set(groupDict.keys()) - usedGroups
       for group in zombieGroups:
         groupItem = groupDict[group]
         del groupDict[group]
         del groupItem
-      
+
       for atom in var.varAtoms:
         atomView = getView(atom)
-     
+
         if atomView:
           atomView.syncToAtom()
         else:
@@ -1105,14 +1105,14 @@ class CompoundView(QGraphicsView):
       self.parent.updateVars()
     
   def addGraphicsItems(self):
-  
+
     if not self.variant:
       return
-   
+
     scene = self.scene
-         
+
     # Draw groups
-    
+
     for group in self.variant.atomGroups:
       if group.groupType == EQUIVALENT:
         EquivItem(scene, self, group)
@@ -1127,8 +1127,9 @@ class CompoundView(QGraphicsView):
     
     self.atomViews = {}
     for atom in self.variant.varAtoms:
-      AtomItem(scene, self, atom)
-  
+      a = AtomItem(scene, self, atom)
+      scene.addItem(a)
+
     # Draw bonds
     done = set()
     self.bondItems = bondDict = {}
@@ -1136,8 +1137,9 @@ class CompoundView(QGraphicsView):
       atoms = frozenset(bond.varAtoms)
       if atoms in done:
         pass
-        
+
       bondItem = BondItem(scene, self, bond)
+      scene.addItem(bondItem)
       done.add(atoms)
 
  

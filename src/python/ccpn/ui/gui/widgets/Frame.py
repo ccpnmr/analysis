@@ -255,6 +255,16 @@ class OpenGLOverlayFrame(Frame):
         self._backgroundColour = backgroundColour
         self.getLayout().setSpacing(0)
 
+    def paintEvent(self, ev):
+        """Paint the region of the frame to the desired background colour, required when overlaying a GL widget
+        """
+        if self._backgroundColour is not None:
+            painter = QtGui.QPainter(self)
+            painter.setCompositionMode(painter.CompositionMode_SourceOver)
+            painter.fillRect(self.rect(), QtGui.QColor(*self._backgroundColour))
+            painter.end()
+        super().paintEvent(ev)
+
     def _setMaskToChildren(self):
         """Set the mouse mask to only the children of the frame - required to make sections transparent
         """
@@ -267,27 +277,24 @@ class OpenGLOverlayFrame(Frame):
         region += self.childrenRegion()
         self.setMask(region)
 
-    def paintEvent(self, ev):
-        """Paint the region of the frame to the desired background colour, required when overlaying a GL widget
-        """
-        if self._backgroundColour is not None:
-            painter = QtGui.QPainter(self)
-            painter.setCompositionMode(painter.CompositionMode_SourceOver)
-            painter.fillRect(self.rect(), QtGui.QColor(*self._backgroundColour))
-            painter.end()
-        super().paintEvent(ev)
-
     def resizeEvent(self, ev) -> None:
         """Resize event to handle resizing of frames that overlay the OpenGL frame
         """
+        # not happy as I think is creating duplicate events
         super().resizeEvent(ev)
-        self._setMask()
+        self._setMaskToChildren()
 
     def _resize(self):
         """Resize event to handle resizing of frames that overlay the OpenGL frame
         """
-        self._setMaskToChildren()
         self.parent()._resize()
+
+    def _resizeFrames(self):
+        glFrames = self.findChildren(OpenGLOverlayFrame)
+        if glFrames:
+            for glF in glFrames:
+                glF._resizeFrames()
+            self._setMaskToChildren()
 
     def _setStyle(self, sl, foregroundColour=CCPNGLWIDGET_HEXFOREGROUND, backgroundColour=CCPNGLWIDGET_HEXBACKGROUND):
         if self._backgroundColour is not None or self.AUTOFILLBACKGROUND:

@@ -232,14 +232,13 @@ class GuiStripNd(GuiStrip):
         self.setMinimumWidth(150)
         self.setMinimumHeight(150)
 
-        # self.planeToolbar.setSizePolicy(QtWidgets.QSizePolicy.Ignored, QtWidgets.QSizePolicy.MinimumExpanding)
-
+        # self._frameGuide.setSizePolicy(QtWidgets.QSizePolicy.Ignored, QtWidgets.QSizePolicy.Ignored)
         self.setSizePolicy(QtWidgets.QSizePolicy.Ignored, QtWidgets.QSizePolicy.Preferred)
 
     def _resize(self):
         """Resize event to handle resizing of frames that overlay the OpenGL frame
         """
-        self._frameGuide._setMaskToChildren()
+        self._frameGuide._resizeFrames()
 
     def _printWidgets(self, wid, level=0):
         try:

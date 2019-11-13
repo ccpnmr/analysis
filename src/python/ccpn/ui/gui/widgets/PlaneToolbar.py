@@ -689,83 +689,95 @@ class PlaneAxisWidget(_OpenGLFrameABC):
 
         self.strip._rebuildStripContours()
 
+    def hideWidgets(self):
+        """Hide the planeToolbar if opened
+        """
+        axisButtons = (self._axisLabel, self._axisPpmPosition, self._axisPlaneCount, self._axisSelector)
 
-class PlaneToolbar(Frame):
-    #TODO: undocumented and needs refactoring ;
-    # GWV: Does not work as a Widget!?
-    def __init__(self, qtParent, strip, callbacks, stripArrangement=None,
-                 containers=None, **kwds):
+        # if the other widgets are clicked then toggle the planeToolbar buttons
+        if axisButtons[3].isVisible():
+            axisButtons[3].hide()
+            axisButtons[2].show()
+            axisButtons[1].show()
 
-        super().__init__(parent=qtParent, setLayout=True, **kwds)
+        self._resize()
 
-        self.strip = strip
-        self.planeLabels = []
-        self.planeCounts = []
-        row = 0
-        for i in range(len(strip.orderedAxes) - 2):
-            if not containers:
-                _toolbar = ToolBar(self, grid=(0, row))
-            else:
-                cFrame, cWidgets = list(containers.items())[i]
-                _toolbar = ToolBar(cFrame, grid=(0, 3))
-
-                # add the new toolbar to the popup display
-                cWidgets += (_toolbar,)
-                cWidgets[2].setVisible(False)
-                cWidgets[3].setVisible(False)
-
-                # set the axisCode
-                cWidgets[0].setText(str(strip.axisCodes[i + 2]) + ":")
-
-            self.prevPlaneButton = Button(_toolbar, '<', callback=partial(callbacks[0], i))
-            self.prevPlaneButton.setFixedWidth(19)
-            self.prevPlaneButton.setFixedHeight(19)
-            planeLabel = DoubleSpinbox(_toolbar, showButtons=False, objectName="PlaneToolbar_planeLabel" + str(i),
-                                       )
-            planeLabel.setToolTip(str(strip.axisCodes[i + 2]))
-
-            # planeLabel.setFixedHeight(19)
-
-            # force the minimum width of the planeLabel
-            planeLabel.setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding,
-                                     QtWidgets.QSizePolicy.MinimumExpanding)
-            planeLabel.setMinimumWidth(55)
-
-            # below does not work because it allows wheel events to behave but not manual text entry (some Qt stupidity)
-            # so instead use a wheelEvent to deal with the wheel events and editingFinished (in GuiStripNd) to do text
-            #planeLabel.valueChanged.connect(partial(callbacks[2], i))
-            if callbacks[2]:
-                planeLabel.wheelEvent = partial(self._wheelEvent, i)
-                self.prevPlaneCallback = callbacks[0]
-                self.nextPlaneCallback = callbacks[1]
-            self.nextPlaneButton = Button(_toolbar, '>', callback=partial(callbacks[1], i))
-            self.nextPlaneButton.setFixedWidth(19)
-            self.nextPlaneButton.setFixedHeight(19)
-            planeCount = Spinbox(_toolbar, showButtons=False, hAlign='c')
-            planeCount.setMinimum(1)
-            planeCount.setMaximum(1000)
-            planeCount.setValue(1)
-            planeCount.oldValue = 1
-            planeCount.returnPressed.connect(partial(callbacks[3], i))
-            planeCount.wheelChanged.connect(partial(callbacks[3], i))
-
-            _toolbar.addWidget(self.prevPlaneButton)
-            _toolbar.addWidget(planeLabel)
-            _toolbar.addWidget(self.nextPlaneButton)
-            _toolbar.addWidget(planeCount)
-            self.planeLabels.append(planeLabel)
-            self.planeCounts.append(planeCount)
-            row += 1
-
-    def _wheelEvent(self, n, event):
-        if event.angleDelta().y() > 0:  # note that in Qt5 this becomes angleDelta().y()
-            if self.prevPlaneCallback:
-                self.prevPlaneCallback(n)
-        else:
-            if self.nextPlaneCallback:
-                self.nextPlaneCallback(n)
-
-        self.strip._rebuildStripContours()
+# class PlaneToolbar(Frame):
+#     #TODO: undocumented and needs refactoring ;
+#     # GWV: Does not work as a Widget!?
+#     def __init__(self, qtParent, strip, callbacks, stripArrangement=None,
+#                  containers=None, **kwds):
+#
+#         super().__init__(parent=qtParent, setLayout=True, **kwds)
+#
+#         self.strip = strip
+#         self.planeLabels = []
+#         self.planeCounts = []
+#         row = 0
+#         for i in range(len(strip.orderedAxes) - 2):
+#             if not containers:
+#                 _toolbar = ToolBar(self, grid=(0, row))
+#             else:
+#                 cFrame, cWidgets = list(containers.items())[i]
+#                 _toolbar = ToolBar(cFrame, grid=(0, 3))
+#
+#                 # add the new toolbar to the popup display
+#                 cWidgets += (_toolbar,)
+#                 cWidgets[2].setVisible(False)
+#                 cWidgets[3].setVisible(False)
+#
+#                 # set the axisCode
+#                 cWidgets[0].setText(str(strip.axisCodes[i + 2]) + ":")
+#
+#             self.prevPlaneButton = Button(_toolbar, '<', callback=partial(callbacks[0], i))
+#             self.prevPlaneButton.setFixedWidth(19)
+#             self.prevPlaneButton.setFixedHeight(19)
+#             planeLabel = DoubleSpinbox(_toolbar, showButtons=False, objectName="PlaneToolbar_planeLabel" + str(i),
+#                                        )
+#             planeLabel.setToolTip(str(strip.axisCodes[i + 2]))
+#
+#             # planeLabel.setFixedHeight(19)
+#
+#             # force the minimum width of the planeLabel
+#             planeLabel.setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding,
+#                                      QtWidgets.QSizePolicy.MinimumExpanding)
+#             planeLabel.setMinimumWidth(55)
+#
+#             # below does not work because it allows wheel events to behave but not manual text entry (some Qt stupidity)
+#             # so instead use a wheelEvent to deal with the wheel events and editingFinished (in GuiStripNd) to do text
+#             #planeLabel.valueChanged.connect(partial(callbacks[2], i))
+#             if callbacks[2]:
+#                 planeLabel.wheelEvent = partial(self._wheelEvent, i)
+#                 self.prevPlaneCallback = callbacks[0]
+#                 self.nextPlaneCallback = callbacks[1]
+#             self.nextPlaneButton = Button(_toolbar, '>', callback=partial(callbacks[1], i))
+#             self.nextPlaneButton.setFixedWidth(19)
+#             self.nextPlaneButton.setFixedHeight(19)
+#             planeCount = Spinbox(_toolbar, showButtons=False, hAlign='c')
+#             planeCount.setMinimum(1)
+#             planeCount.setMaximum(1000)
+#             planeCount.setValue(1)
+#             planeCount.oldValue = 1
+#             planeCount.returnPressed.connect(partial(callbacks[3], i))
+#             planeCount.wheelChanged.connect(partial(callbacks[3], i))
+#
+#             _toolbar.addWidget(self.prevPlaneButton)
+#             _toolbar.addWidget(planeLabel)
+#             _toolbar.addWidget(self.nextPlaneButton)
+#             _toolbar.addWidget(planeCount)
+#             self.planeLabels.append(planeLabel)
+#             self.planeCounts.append(planeCount)
+#             row += 1
+#
+#     def _wheelEvent(self, n, event):
+#         if event.angleDelta().y() > 0:  # note that in Qt5 this becomes angleDelta().y()
+#             if self.prevPlaneCallback:
+#                 self.prevPlaneCallback(n)
+#         else:
+#             if self.nextPlaneCallback:
+#                 self.nextPlaneCallback(n)
+#
+#         self.strip._rebuildStripContours()
 
 
 STRIPCONNECT_LEFT = 'isLeft'
@@ -824,7 +836,8 @@ class StripHeaderWidget(_OpenGLFrameABC):
         """
         # assume that nothing has been set yet
 
-        # add gui notifiers here instead of in backboneAssignment?
+        # add gui notifiers here instead of in backboneAssignment
+        # NOTE:ED could replace this with buttons instead
         GuiNotifier(self._nmrChainLeft,
                     [GuiNotifier.DROPEVENT], [DropBase.TEXT],
                     self._processDroppedLabel,

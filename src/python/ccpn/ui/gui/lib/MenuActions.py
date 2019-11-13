@@ -61,7 +61,8 @@ from ccpn.ui.gui.popups.SamplePropertiesPopup import SamplePropertiesPopup
 from ccpn.ui.gui.popups.SpectrumPropertiesPopup import SpectrumPropertiesPopup
 from ccpn.ui.gui.popups.StructureEnsemblePopup import StructureEnsemblePopup
 from ccpn.ui.gui.popups.SubstancePropertiesPopup import SubstancePropertiesPopup
-from ccpn.core.lib.ContextManagers import undoBlock, notificationEchoBlocking, undoBlockWithoutSideBar
+from ccpn.core.lib.ContextManagers import undoBlock, notificationEchoBlocking, \
+    undoBlockWithoutSideBar, undoStackBlocking
 
 MAXITEMLOGGING = 2
 
@@ -534,6 +535,14 @@ class _openItemSampleDisplay(OpenItemABC):
     openItemDirectMethod = _openSampleSpectra
 
 
+# def _setSpectrumDisplayNotifiers(spectrumDisplay, value):
+#     """Blank all spectrumDisplay and contained strip notifiers
+#     """
+#     spectrumDisplay.setBlankingAllNotifiers(value)
+#     for strip in spectrumDisplay.strips:
+#         strip.setBlankingAllNotifiers(value)
+
+
 class _openItemSpectrumDisplay(OpenItemABC):
     openItemMethod = None
     useApplication = False
@@ -546,15 +555,30 @@ class _openItemSpectrumDisplay(OpenItemABC):
         from ccpn.ui.gui.popups.AxisOrderingPopup import checkSpectraToOpen
         checkSpectraToOpen(mainWindow, [spectrum])
 
-        spectrumDisplay = mainWindow.createSpectrumDisplay(spectrum)
+        # with undoBlockWithoutSideBar():
 
-        if len(spectrumDisplay.strips) > 0:
-            mainWindow.current.strip = spectrumDisplay.strips[0]
-            # if spectrum.dimensionCount == 1:
-            spectrumDisplay.autoRange()
-            # mainWindow.current.strip.plotWidget.autoRange()
+        spectrumDisplay = mainWindow.createSpectrumDisplay(spectrum, position=position, relativeTo=relativeTo)
 
-        mainWindow.moduleArea.addModule(spectrumDisplay, position=position, relativeTo=relativeTo)
+            # with undoStackBlocking() as addUndoItem:
+            #     # disable all notifiers in spectrumDisplays
+            #     addUndoItem(undo=partial(_setSpectrumDisplayNotifiers, spectrumDisplay, True))
+            #
+            # if len(spectrumDisplay.strips) > 0:
+            #     mainWindow.current.strip = spectrumDisplay.strips[0]
+            #     # if spectrum.dimensionCount == 1:
+            #     spectrumDisplay.autoRange()
+            #     # mainWindow.current.strip.plotWidget.autoRange()
+            #
+            # mainWindow.moduleArea.addModule(spectrumDisplay, position=position, relativeTo=relativeTo)
+            #
+            # with undoStackBlocking() as addUndoItem:
+            #     # disable all notifiers in spectrumDisplays
+            #     addUndoItem(redo=partial(_setSpectrumDisplayNotifiers, spectrumDisplay, False))
+            #
+            #     # add/remove spectrumDisplay from module Area
+            #     addUndoItem(undo=partial(mainWindow._hiddenModules.addModule, spectrumDisplay),
+            #                 redo=partial(mainWindow.moduleArea.addModule, spectrumDisplay, position=position, relativeTo=relativeTo))
+
 
         # # TODO:LUCA: the mainWindow.createSpectrumDisplay should do the reporting to console and log
         # # This routine can then be omitted and the call above replaced by the one remaining line

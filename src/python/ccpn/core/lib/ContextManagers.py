@@ -141,94 +141,9 @@ def undoBlockWithSideBar(application=None):
         getLogger().debug2('_exitUndoBlock: echoBlocking=%s' % application._echoBlocking)
 
 
-# @contextmanager
-# def undoBlock(application=None):
-#     """Wrap all the contained operations into a single undo/redo event.
-#     """
-#
-#     # get the current application
-#     if not application:
-#         application = getApplication()
-#     if application is None:
-#         raise RuntimeError('Error getting application')
-#
-#     getLogger().debug2('_enterUndoBlock')
-#
-#     # get the undo stack
-#     undo = application._getUndo()
-#
-#     if undo is not None:
-#         undo.newWaypoint()  # DO NOT CHANGE
-#         undo.increaseWaypointBlocking()
-#
-#     if application.ui and application.ui.mainWindow:
-#         sidebar = application.ui.mainWindow.sideBar
-#         sidebar.increaseSidebarBlocking()
-#
-#     application.project.suspendNotification()
-#
-#     try:
-#         # transfer control to the calling function
-#         yield
-#
-#     finally:
-#         _resumeNotification(application)
-#
-#         if application.ui and application.ui.mainWindow:
-#             sidebar = application.ui.mainWindow.sideBar
-#             sidebar.decreaseSidebarBlocking()
-#
-#         if undo is not None:
-#             undo.decreaseWaypointBlocking()
-#
-#         getLogger().debug2('_exitUndoBlock: echoBlocking=%s' % application._echoBlocking)
-
-@contextmanager
-def undoBlock(application=None):
-    """Wrap all the contained operations into a single undo/redo event. Do not rebuild sidebar
-    """
-
-    # get the current application
-    if not application:
-        application = getApplication()
-    if application is None:
-        raise RuntimeError('Error getting application')
-
-    getLogger().debug2('_enterUndoBlockWithoutSideBar')
-
-    # get the undo stack
-    undo = application._getUndo()
-    if undo is not None:
-        undo.newWaypoint()  # DO NOT CHANGE
-        undo.increaseWaypointBlocking()
-
-    # if not application.project._blockSideBar and not undo._blocked:
-    if application.ui and application.ui.mainWindow:
-        sidebar = application.ui.mainWindow.sideBar
-        sidebar.increaseSidebarBlocking(withSideBarUpdate=False)
-
-    application.project.suspendNotification()
-
-    try:
-        # transfer control to the calling function
-        yield
-
-    finally:
-        _resumeNotification(application)
-
-        # if not application.project._blockSideBar and not undo._blocked:
-        if application.ui and application.ui.mainWindow:
-            sidebar = application.ui.mainWindow.sideBar
-            sidebar.decreaseSidebarBlocking(withSideBarUpdate=False)
-
-        if undo is not None:
-            undo.decreaseWaypointBlocking()
-
-        getLogger().debug2('_enterUndoBlockWithoutSideBar: echoBlocking=%s' % application._echoBlocking)
-
 @contextmanager
 def undoBlockWithoutSideBar(application=None):
-    """Wrap all the contained operations into a single undo/redo event. To be depreciated. Use just undoBlock
+    """Wrap all the contained operations into a single undo/redo event. To be deprecated. Use just undoBlock
     """
 
     # get the current application
@@ -245,7 +160,6 @@ def undoBlockWithoutSideBar(application=None):
         undo.newWaypoint()  # DO NOT CHANGE
         undo.increaseWaypointBlocking()
 
-    # if not application.project._blockSideBar and not undo._blocked:
     if application.ui and application.ui.mainWindow:
         sidebar = application.ui.mainWindow.sideBar
         sidebar.increaseSidebarBlocking(withSideBarUpdate=False)
@@ -259,7 +173,6 @@ def undoBlockWithoutSideBar(application=None):
     finally:
         _resumeNotification(application)
 
-        # if not application.project._blockSideBar and not undo._blocked:
         if application.ui and application.ui.mainWindow:
             sidebar = application.ui.mainWindow.sideBar
             sidebar.decreaseSidebarBlocking(withSideBarUpdate=False)
@@ -268,6 +181,9 @@ def undoBlockWithoutSideBar(application=None):
             undo.decreaseWaypointBlocking()
 
         getLogger().debug2('_enterUndoBlockWithoutSideBar: echoBlocking=%s' % application._echoBlocking)
+
+
+undoBlock = undoBlockWithSideBar
 
 
 # @contextmanager
@@ -1052,7 +968,6 @@ def renameObject():
 
         with notificationBlanking(application=application):
             with undoStackBlocking(application=application) as addUndoItem:
-
                 # call the wrapped rename function
                 result = func(*args, **kwds)
 
@@ -1153,7 +1068,6 @@ def ccpNmrV3CoreSetter():
 
         with notificationBlanking(application=application):
             with undoStackBlocking(application=application) as addUndoItem:
-
                 # call the wrapped function
                 result = func(*args, **kwds)
 
@@ -1182,7 +1096,6 @@ def ccpNmrV3CoreUndoBlock():
 
         with notificationBlanking(application=application):
             with undoBlock():
-
                 # call the wrapped function
                 result = func(*args, **kwds)
 
@@ -1193,6 +1106,7 @@ def ccpNmrV3CoreUndoBlock():
 
 
 DEFINEDPARAMETERS = ('option', 'attr', 'parameter', 'dim')
+
 
 def queueStateChange(verify):
     """A decorator to wrap a state change event with a verify function
@@ -1222,7 +1136,6 @@ def queueStateChange(verify):
         return result
 
     return theDecorator
-
 
 # if __name__ == '__main__':
 #     # check that the undo mechanism is working with the new context managers

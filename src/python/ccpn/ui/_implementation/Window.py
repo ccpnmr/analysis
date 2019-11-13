@@ -25,13 +25,14 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
+from functools import partial
 from typing import Sequence, Tuple
 from ccpn.core.Project import Project
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core.lib import Pid
 from ccpnmodel.ccpncore.api.ccpnmr.gui.Window import Window as ApiWindow
 from ccpn.util.decorators import logCommand
-from ccpn.core.lib.ContextManagers import newObject
+from ccpn.core.lib.ContextManagers import newObject, undoBlockWithoutSideBar, undoStackBlocking
 from ccpn.util.Logging import getLogger
 
 
@@ -118,7 +119,9 @@ class Window(AbstractWrapperObject):
     def createSpectrumDisplay(self, spectrum, displayAxisCodes: Sequence[str] = (),
                               axisOrder: Sequence[str] = (), title: str = None, positions: Sequence[float] = (),
                               widths: Sequence[float] = (), units: Sequence[str] = (),
-                              stripDirection: str = 'Y', is1D: bool = False, **kwds):
+                              stripDirection: str = 'Y', is1D: bool = False,
+                              position='right', relativeTo=None,
+                              **kwds):
         """
         :param \*str, displayAxisCodes: display axis codes to use in display order - default to spectrum axisCodes in heuristic order
         :param \*str axisOrder: spectrum axis codes in display order - default to spectrum axisCodes in heuristic order
@@ -131,47 +134,37 @@ class Window(AbstractWrapperObject):
         """
         from ccpn.ui._implementation.SpectrumDisplay import _createSpectrumDisplay
 
-        # axisOrder = spectrum.getDefaultOrdering(axisOrder)
-        # if not axisOrder:
-        #     axisOption = self.application.preferences.general.axisOrderingOptions
-        #
-        #     preferredAxisOrder = spectrum.preferredAxisOrdering
-        #     if preferredAxisOrder is not None:
-        #
-        #         specAxisOrder = spectrum.axisCodes
-        #         axisOrder = [specAxisOrder[ii] for ii in preferredAxisOrder]
-        #
-        #     else:
-        #
-        #         # sets an Nd default to HCN (or possibly 2d to HC)
-        #         specAxisOrder = spectrum.axisCodes
-        #         pOrder = spectrum.searchAxisCodePermutations(('H', 'C', 'N'))
-        #         if pOrder:
-        #             spectrum.preferredAxisOrdering = pOrder
-        #             axisOrder = [specAxisOrder[ii] for ii in pOrder]
-        #             getLogger().debug('setting default axisOrdering: ', str(axisOrder))
-        #
-        #         else:
-        #
-        #             # just set to the normal ordering
-        #             spectrum.preferredAxisOrdering = tuple(ii for ii in range(spectrum.dimensionCount))
-        #             axisOrder = None
-        #
-        #             # # try permutations of repeated codes
-        #             # duplicates = [('H', 'H'), ('C', 'C'), ('N', 'N')]
-        #             # for dCode in duplicates:
-        #             #     pOrder = spectrum.searchAxisCodePermutations(dCode)
-        #             #     if pOrder:
-        #             #         spectrum.preferredAxisOrdering = pOrder
-        #             #         axisOrder = [specAxisOrder[ii] for ii in pOrder]
-        #             #         getLogger().debug('setting duplicate axisOrdering: ', str(axisOrder))
-        #             #         break
+        def _setSpectrumDisplayNotifiers(spectrumDisplay, value):
+            """Blank all spectrumDisplay and contained strip notifiers
+            """
+            spectrumDisplay.setBlankingAllNotifiers(value)
+            for strip in spectrumDisplay.strips:
+                strip.setBlankingAllNotifiers(value)
 
-        display = _createSpectrumDisplay(self, spectrum, displayAxisCodes=displayAxisCodes, axisOrder=axisOrder,
-                                         title=title, positions=positions, widths=widths, units=units,
-                                         stripDirection=stripDirection, is1D=is1D, **kwds)
-        if not positions and not widths:
-            display.autoRange()
+        with undoBlockWithoutSideBar():
+
+            # create the new spectrumDisplay
+            display = _createSpectrumDisplay(self, spectrum, displayAxisCodes=displayAxisCodes, axisOrder=axisOrder,
+                                             title=title, positions=positions, widths=widths, units=units,
+                                             stripDirection=stripDirection, is1D=is1D, **kwds)
+
+            with undoStackBlocking() as addUndoItem:
+                # disable all notifiers in spectrumDisplays
+                addUndoItem(undo=partial(_setSpectrumDisplayNotifiers, display, True))
+
+            self.moduleArea.addModule(display, position=position, relativeTo=relativeTo)
+
+            with undoStackBlocking() as addUndoItem:
+                # disable all notifiers in spectrumDisplays
+                addUndoItem(redo=partial(_setSpectrumDisplayNotifiers, display, False))
+
+                # add/remove spectrumDisplay from module Area
+                addUndoItem(undo=partial(self._hiddenModules.addModule, display),
+                            redo=partial(self.moduleArea.addModule, display, position=position, relativeTo=relativeTo))
+
+            if not positions and not widths:
+                display.autoRange()
+
         return display
 
 

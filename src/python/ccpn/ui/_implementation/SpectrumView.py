@@ -35,7 +35,7 @@ from ccpn.core.lib import Pid
 from ccpn.ui._implementation.Strip import Strip
 from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import SpectrumView as ApiSpectrumView
 from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import StripSpectrumView as ApiStripSpectrumView
-from ccpn.core.lib.ContextManagers import undoBlock, undoBlockWithoutSideBar
+from ccpn.core.lib.ContextManagers import undoBlock, undoBlockWithoutSideBar, newObject
 
 
 class SpectrumView(AbstractWrapperObject):
@@ -365,6 +365,27 @@ class SpectrumView(AbstractWrapperObject):
         """
         return sorted(parent._wrappedData.stripSpectrumViews,
                       key=operator.attrgetter('spectrumView.spectrumName'))
+
+#=========================================================================================
+# Connections to parents:
+#=========================================================================================
+
+@newObject(SpectrumView)
+def _newSpectrumView(display, spectrumName: str = None,
+                        stripSerial: int = None, dataSource=None,
+                        dimensionOrdering=None, **kwds):
+    """Create new SpectrumView
+    """
+    # 20191113:ED testing - doesn't work yet, _data2Obj not created in correct place
+    apiSpectrumView = display._wrappedData.newSpectrumView(spectrumName=spectrumName,
+                                                 stripSerial=stripSerial, dataSource=dataSource,
+                                                 dimensionOrdering=dimensionOrdering)
+
+    result = display.project._data2Obj.get(apiSpectrumView)
+    if result is None:
+        raise RuntimeError('Unable to generate new SpectrumView item')
+
+    return result
 
 #=========================================================================================
 # CCPN functions

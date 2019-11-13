@@ -238,7 +238,7 @@ class SpectrumDisplay(AbstractWrapperObject):
             self.setParameter(key, val)
 
     def _getSpectra(self):
-        if len(self.strips)>0: # strips
+        if len(self.strips) > 0:  # strips
             return [x.spectrum for x in self.orderedSpectrumViews(self.strips[-1].spectrumViews)]
 
     # #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -291,7 +291,6 @@ class SpectrumDisplay(AbstractWrapperObject):
             with undoStackBlocking() as addUndoItem:
                 addUndoItem(redo=self._rescaleSpectra)
 
-
     def _removeOrderedSpectrumViewIndex(self, index):
         # self.removeOrderedSpectrumView(index)
         pass
@@ -301,7 +300,7 @@ class SpectrumDisplay(AbstractWrapperObject):
         if not isinstance(ind, int):
             raise TypeError('ind %s is not of type Int' % str(ind))
 
-        index = ind #.spectrumViews.index(spectrumView)
+        index = ind  #.spectrumViews.index(spectrumView)
         with undoBlock():
 
             if not self._orderedSpectrumViews:
@@ -371,7 +370,6 @@ class SpectrumDisplay(AbstractWrapperObject):
                       parent._wrappedData.root.newGuiTask(nameSpace='user', name='View'))
         return [x for x in apiGuiTask.sortedModules() if isinstance(x, ApiBoundDisplay)]
 
-
     #=========================================================================================
     # CCPN functions
     #=========================================================================================
@@ -419,7 +417,7 @@ def _newSpectrumDisplay(self: Project, axisCodes: (str,), stripDirection: str = 
     displayPars = dict(
             stripDirection=stripDirection, window=window,
             details=comment, resonanceGroup=nmrResidue and nmrResidue._wrappedData
-    )
+            )
 
     # Add name, setting and insuring uniqueness if necessary
     if title is None:
@@ -481,7 +479,7 @@ def _newSpectrumDisplay(self: Project, axisCodes: (str,), stripDirection: str = 
         except ValueError:
             logger = getLogger()
             logger.warning("Could not reset serial of %s to %s - keeping original value"
-                                         % (result, serial))
+                           % (result, serial))
 
     return result
 
@@ -616,8 +614,8 @@ def _createSpectrumDisplay(window: Window, spectrum: Spectrum, displayAxisCodes:
     # Make spectrumView. NB We need notifiers on for these
     stripSerial = 1 if independentStrips else 0
     display._wrappedData.newSpectrumView(spectrumName=dataSource.name,
-                                         stripSerial=stripSerial, dataSource=dataSource,
-                                         dimensionOrdering=dimensionOrdering)
+                            stripSerial=stripSerial, dataSource=dataSource,
+                            dimensionOrdering=dimensionOrdering)
 
     try:
         display.strips[0]._CcpnGLWidget.initialiseAxes(strip=display.strips[0])
@@ -649,18 +647,18 @@ del getter
 Project._apiNotifiers.append(
         ('_modifiedLink', {'classNames': ('Window', 'SpectrumDisplay')},
          ApiBoundDisplay._metaclass.qualifiedName(), 'setWindow'),
-)
+        )
 Project._apiNotifiers.append(
         ('_modifiedLink', {'classNames': ('NmrResidue', 'SpectrumDisplay')},
          ApiBoundDisplay._metaclass.qualifiedName(), 'setResonanceGroup'),
-)
+        )
 className = ApiWindow._metaclass.qualifiedName()
 Project._apiNotifiers.extend(
         (('_modifiedLink', {'classNames': ('SpectrumDisplay', 'Window')}, className, 'addModule'),
          ('_modifiedLink', {'classNames': ('SpectrumDisplay', 'Window')}, className, 'removeModule'),
          ('_modifiedLink', {'classNames': ('SpectrumDisplay', 'Window')}, className, 'setModules'),
          )
-)
+        )
 
 # WARNING link notifiers for both Window <-> Module and Window<->SpectrumDisplay
 # are triggered together when  the change is on the Window side.
@@ -674,7 +672,7 @@ Project._apiNotifiers.extend(
          ('_modifiedLink', {'classNames': ('SpectrumDisplay', 'NmrResidue')}, className,
           'setSpectrumDisplays'),
          )
-)
+        )
 
 # Drag-n-drop functions:
 # SpectrumDisplay.processSpectrum = SpectrumDisplay.displaySpectrum     # ejb moved to GuiSpectrumDisplay

@@ -187,8 +187,11 @@ class GuiNdWidget(CcpnGLWidget):
         """Update the list of visible spectrumViews when change occurs
         """
 
-        # make the list of ordered spectrumViews
-        self._ordering = self.spectrumDisplay.orderedSpectrumViews(self.strip.spectrumViews)
+        try:
+            # make the list of ordered spectrumViews
+            self._ordering = self.spectrumDisplay.orderedSpectrumViews(self.strip.spectrumViews)
+        except Exception as es:
+            pass
 
         self._ordering = [specView for specView in self._ordering if specView.spectrum.isValidPath]
 

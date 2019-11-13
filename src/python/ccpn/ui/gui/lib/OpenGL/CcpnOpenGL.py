@@ -2181,6 +2181,10 @@ class CcpnGLWidget(QOpenGLWidget):
         self._mousePressed = True
         self.lastPos = ev.pos()
 
+        if self.strip:
+            for toolbar in self.strip.planeAxisBars:
+                toolbar.hideWidgets()
+
         mx = ev.pos().x()
         if self._drawBottomAxis:
             my = self.height() - ev.pos().y() - self.AXIS_MARGINBOTTOM
@@ -2369,11 +2373,16 @@ class CcpnGLWidget(QOpenGLWidget):
         self._clearAfterRelease(ev)
 
     def enterEvent(self, ev: QtCore.QEvent):
-        if (self.strip and not self.strip.isDeleted and self._preferences.currentStripFollowsMouse):
-            self.current.strip = self.strip
-            self.setFocus()
-        if self._preferences.focusFollowsMouse:
-            self.setFocus()
+        if self.strip and not self.strip.isDeleted:
+            if self._preferences.currentStripFollowsMouse and self.current.strip != self.strip:
+                self.current.strip = self.strip
+                self.application._focusStrip = self.strip
+                self.setFocus()
+
+            elif self._preferences.focusFollowsMouse and not self.hasFocus():
+                if getattr(self.application, '_focusStrip', None) != self.strip:
+                    self.application._focusStrip = self.strip
+                    self.setFocus()
         super().enterEvent(ev)
         self._clearAndUpdate()
 

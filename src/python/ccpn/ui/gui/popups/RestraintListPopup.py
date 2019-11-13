@@ -52,6 +52,7 @@ class RestraintListEditPopup(AttributeEditorPopupABC):
 
 class RestraintListNewPopup(RestraintListEditPopup):
     EDITMODE = False
+    WINDOWPREFIX = 'New '
 
     def _getRestraintTypes(self, obj=None):
         self.restraintType.modifyTexts(RestraintList.restraintTypes)

@@ -111,7 +111,7 @@ from ccpn.ui.gui.widgets.HLine import HLine
 from ccpn.ui.gui.widgets.Tabs import Tabs
 from ccpn.ui.gui.widgets.CustomExportDialog import CustomExportDialog
 from ccpn.ui.gui.lib.mouseEvents import leftMouse, controlLeftMouse
-from ccpn.ui.gui.guiSettings import CCPNGLWIDGET_HEXBACKGROUND,MEDIUM_BLUE, GUISTRIP_PIVOT, CCPNGLWIDGET_HIGHLIGHT
+from ccpn.ui.gui.guiSettings import CCPNGLWIDGET_HEXBACKGROUND,MEDIUM_BLUE, GUISTRIP_PIVOT, CCPNGLWIDGET_HIGHLIGHT,CCPNGLWIDGET_GRID,CCPNGLWIDGET_LABELLING
 from ccpn.ui.gui.widgets.BarGraphWidget import BarGraphWidget
 from ccpn.ui.gui.widgets import MessageDialog
 from ccpn.ui.gui.widgets.Splitter import Splitter
@@ -141,6 +141,7 @@ from ccpn.core.Peak import Peak
 from ccpn.core.NmrResidue import NmrResidue
 from ccpn.core.Project import Project
 from ccpn.core.lib.ContextManagers import undoBlock, undoBlockWithoutSideBar
+from ccpn.ui.gui.widgets.Font import Font
 
 # Default values on init
 DefaultConcentration = 0.0
@@ -167,7 +168,9 @@ OriginAxes = pg.functions.mkPen(hexToRgb(getColours()[GUISTRIP_PIVOT]), width=1,
 FittingLine = pg.functions.mkPen(hexToRgb(getColours()[DIVIDER]), width=0.5, style=QtCore.Qt.DashLine)
 SelectedPoint = pg.functions.mkPen(rgbaRatioToHex(*getColours()[CCPNGLWIDGET_HIGHLIGHT]), width=4)
 SelectedLabel = pg.functions.mkBrush(rgbaRatioToHex(*getColours()[CCPNGLWIDGET_HIGHLIGHT]), width=4)
-
+c =rgbaRatioToHex(*getColours()[CCPNGLWIDGET_LABELLING])
+GridPen = pg.functions.mkPen(c, width=2, style=QtCore.Qt.SolidLine)
+GridFont = Font('Helvetica', 16, bold=True)
 
 class ChemicalShiftsMapping(CcpnModule):
 
@@ -522,6 +525,10 @@ class ChemicalShiftsMapping(CcpnModule):
     self.barGraphWidget.xLine.sigPositionChangeFinished.connect(self._threshouldLineMoved)
     self.barGraphWidget.customViewBox.mouseClickEvent = self._viewboxMouseClickEvent
     self.barGraphWidget.customViewBox.selectAboveThreshold = self._selectNmrResiduesAboveThreshold
+    self.barGraphWidget.plotWidget.plotItem.getAxis('bottom').setPen(GridPen)
+    self.barGraphWidget.plotWidget.plotItem.getAxis('left').setPen(GridPen)
+    self.barGraphWidget.plotWidget.plotItem.getAxis('bottom').tickFont = GridFont
+    self.barGraphWidget.plotWidget.plotItem.getAxis('left').tickFont = GridFont
 
 
   def _viewboxMouseClickEvent(self, event):
@@ -612,6 +619,10 @@ class ChemicalShiftsMapping(CcpnModule):
     self.bindingPlot.setLabel('bottom', self._kDunit)
     self.bindingPlot.setLabel('left', DELTA+Delta)
     self.bindingPlot.setMenuEnabled(False)
+    self.bindingPlot.getAxis('bottom').setPen(GridPen)
+    self.bindingPlot.getAxis('left').setPen(GridPen)
+    self.bindingPlot.getAxis('bottom').tickFont = GridFont
+    self.bindingPlot.getAxis('left').tickFont = GridFont
     self._bindingPlotViewbox.addItem(self.bindingVLine)
     self._bindingPlotViewbox.addItem(self.bindingHLine)
     layoutParent.getLayout().addWidget(self._bindingPlotView)
@@ -828,6 +839,10 @@ class ChemicalShiftsMapping(CcpnModule):
     self._fittingPlotViewbox.addItem(self.atHalfFitLine)
 
     self.fittingPlot.setLimits(xMin=0, xMax=None, yMin=0, yMax=1)
+    self.fittingPlot.getAxis('bottom').setPen(GridPen)
+    self.fittingPlot.getAxis('left').setPen(GridPen)
+    self.fittingPlot.getAxis('bottom').tickFont = GridFont
+    self.fittingPlot.getAxis('left').tickFont = GridFont
 
     layoutParent.getLayout().addWidget(self._fittingPlotView)
 

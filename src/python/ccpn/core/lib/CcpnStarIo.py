@@ -204,10 +204,13 @@ def makeCSLfromDF(project, df, chemicalShiftListName=None):
         nmrResidue = nmrChain.fetchNmrResidue(residueType=row[Comp_ID], sequenceCode=row[Seq_ID])
         nmrAtom = nmrResidue.fetchNmrAtom(row[Atom_ID])
         if chemicalShiftList:
-            if row[Val] is not None:
-                cs = chemicalShiftList.newChemicalShift(value=float(row[Val]), nmrAtom=nmrAtom)
-                if row[Val_err] is not None:
-                    cs.valueError = float(row[Val_err])
+            try:
+                if row[Val] is not None:
+                    cs = chemicalShiftList.newChemicalShift(value=float(row[Val]), nmrAtom=nmrAtom)
+                    if row[Val_err] is not None:
+                        cs.valueError = float(row[Val_err])
+            except Exception as e:
+                print('Error in creating new shift.', e)
     return chemicalShiftList
 
 

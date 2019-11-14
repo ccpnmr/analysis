@@ -1191,13 +1191,13 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
                 self._yUnits = aDict[GLNotifier.GLVALUES][GLDefs.AXISYUNITS]
 
                 aL = aDict[GLNotifier.GLVALUES][GLDefs.AXISLOCKASPECTRATIO]
-                uFA = aDict[GLNotifier.GLVALUES][GLDefs.AXISUSEFIXEDASPECTRATIO]
-                if self._axisLocked != aL or self._useFixedAspect != uFA:
+                uFA = aDict[GLNotifier.GLVALUES][GLDefs.AXISUSEDEFAULTASPECTRATIO]
+                if self._axisLocked != aL or self._useDefaultAspect != uFA:
 
                     # self._xUnits = aDict[GLNotifier.GLVALUES][GLDefs.AXISXUNITS]
                     # self._yUnits = aDict[GLNotifier.GLVALUES][GLDefs.AXISYUNITS]
                     self._axisLocked = aL
-                    self._useFixedAspect = uFA
+                    self._useDefaultAspect = uFA
 
                     aDict = {GLNotifier.GLSOURCE         : None,
                              GLNotifier.GLSPECTRUMDISPLAY: self.spectrumDisplay,
@@ -1296,7 +1296,7 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
 
         self._axesVisible = True
         self._axisLocked = False
-        self._useFixedAspect = False
+        self._useDefaultAspect = False
         self._fixedAspectX = 1.0
         self._fixedAspectY = 1.0
 
@@ -1470,7 +1470,7 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
 
         if aDict[GLNotifier.GLSOURCE] != self and aDict[GLNotifier.GLSPECTRUMDISPLAY] == self.spectrumDisplay:
             self._axisLocked = aDict[GLNotifier.GLVALUES][0]
-            self._useFixedAspect = aDict[GLNotifier.GLVALUES][1]
+            self._useDefaultAspect = aDict[GLNotifier.GLVALUES][1]
 
             if self._axisLocked:
 
@@ -1505,13 +1505,13 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
                 self._yUnits = aDict[GLNotifier.GLVALUES][GLDefs.AXISYUNITS]
 
                 aL = aDict[GLNotifier.GLVALUES][GLDefs.AXISLOCKASPECTRATIO]
-                uFA = aDict[GLNotifier.GLVALUES][GLDefs.AXISUSEFIXEDASPECTRATIO]
-                if self._axisLocked != aL or self._useFixedAspect != uFA:
+                uFA = aDict[GLNotifier.GLVALUES][GLDefs.AXISUSEDEFAULTASPECTRATIO]
+                if self._axisLocked != aL or self._useDefaultAspect != uFA:
 
                     # self._xUnits = aDict[GLNotifier.GLVALUES][GLDefs.AXISXUNITS]
                     # self._yUnits = aDict[GLNotifier.GLVALUES][GLDefs.AXISYUNITS]
                     self._axisLocked = aL
-                    self._useFixedAspect = uFA
+                    self._useDefaultAspect = uFA
 
                     aDict = {GLNotifier.GLSOURCE         : None,
                              GLNotifier.GLSPECTRUMDISPLAY: self.spectrumDisplay,
@@ -2153,7 +2153,7 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
         if self._axisLocked:
             mby = 0.5 * (self.axisT + self.axisB)
 
-            if self._useFixedAspect:
+            if self._useDefaultAspect:
                 ax0 = self._getValidAspectRatio(self._axisCodes[0])
                 ax1 = self._getValidAspectRatio(self._axisCodes[1])
             else:
@@ -2174,7 +2174,7 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
         if self._axisLocked:
             mbx = 0.5 * (self.axisR + self.axisL)
 
-            if self._useFixedAspect:
+            if self._useDefaultAspect:
                 ax0 = self._getValidAspectRatio(self._axisCodes[0])
                 ax1 = self._getValidAspectRatio(self._axisCodes[1])
             else:

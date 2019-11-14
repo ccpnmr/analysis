@@ -36,6 +36,7 @@ from ccpn.ui.gui.widgets.CheckBoxes import CheckBoxes
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.Frame import Frame
 from ccpn.ui.gui.widgets.CompoundWidgets import CheckBoxCompoundWidget, DoubleSpinBoxCompoundWidget
+from ccpn.ui.gui.widgets.DoubleSpinbox import ScientificDoubleSpinBox
 from ccpn.ui.gui.guiSettings import getColours, DIVIDER, SOFTDIVIDER
 from ccpn.ui.gui.widgets.HLine import HLine
 from ccpn.ui.gui.widgets.PulldownListsForObjects import NmrChainPulldown, SpectrumDisplayPulldown
@@ -44,7 +45,7 @@ from ccpn.ui._implementation.SpectrumView import SpectrumView
 from functools import partial
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLNotifier import GLNotifier
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs import AXISXUNITS, AXISYUNITS, AXISLOCKASPECTRATIO, \
-    SYMBOLTYPES, SYMBOLSIZE, SYMBOLTHICKNESS, ANNOTATIONTYPES, AXISUSEFIXEDASPECTRATIO
+    SYMBOLTYPES, SYMBOLSIZE, SYMBOLTHICKNESS, ANNOTATIONTYPES, AXISUSEDEFAULTASPECTRATIO
 from ccpn.ui.gui.widgets.Spinbox import Spinbox
 from ccpn.util.Common import getAxisCodeMatchIndices
 from ccpn.ui.gui.widgets.Base import SignalBlocking
@@ -73,9 +74,11 @@ class SpectrumDisplaySettings(Widget, SignalBlocking):
                  xAxisUnits=0, xTexts=[], showXAxis=True,
                  yAxisUnits=0, yTexts=[], showYAxis=True,
                  lockAspectRatio=False,
-                 useFixedAspectRatio=False,
+                 useDefaultAspectRatio=False,
                  symbolType=0, annotationType=0, symbolSize=9, symbolThickness=2,
                  stripArrangement=0,
+                 _baseAspectRatioAxisCode='H',
+                 _aspectRatios={},
                  **kwds):
         super().__init__(parent, setLayout=True, **kwds)
 
@@ -133,15 +136,36 @@ class SpectrumDisplaySettings(Widget, SignalBlocking):
         self.yAxisUnitsButtons.setVisible(showYAxis)
 
         row += 1
-        self.lockAspect = Label(parent, text="Lock Aspect Ratio", grid=(row, 0))
+        self.lockAspect = Label(parent, text="Lock to Current Aspect Ratio", grid=(row, 0))
         self.lockAspectCheckBox = CheckBox(parent, grid=(row, 1), checked=lockAspectRatio, objectName='SDS_lockAspect')
         self.lockAspectCheckBox.clicked.connect(self._settingsChanged)
 
         row += 1
-        self.useFixedAspect = Label(parent, text="     - use Fixed Aspect Ratio", grid=(row, 0))
-        self.useFixedAspectCheckBox = CheckBox(parent, grid=(row, 1), checked=useFixedAspectRatio, objectName='SDS_useFixedAspect')
-        self.useFixedAspectCheckBox.clicked.connect(self._settingsUseFixedChanged)
-        # self.useFixedAspectCheckBox.setEnabled(lockAspectRatio)
+        self.useDefaultAspect = Label(parent, text="Use Default Aspect Ratio", grid=(row, 0))
+        self.useDefaultAspectCheckBox = CheckBox(parent, grid=(row, 1), checked=useDefaultAspectRatio, objectName='SDS_useDefaultAspect')
+        self.useDefaultAspectCheckBox.clicked.connect(self._settingsUseFixedChanged)
+
+        row += 1
+        self.aspectLabel = {}
+        self.aspectData = {}
+        self.aspectLabelFrame = Frame(parent, setLayout=True, showBorder=False, grid=(row, 0))
+        self.aspectDataFrame = Frame(parent, setLayout=True, showBorder=False, grid=(row, 1))
+
+        self.aspectLabel = {}
+        self.aspectData = {}
+        self._removeWidget(self.aspectLabelFrame)
+        self._removeWidget(self.aspectDataFrame)
+        for ii, aspect in enumerate(sorted(_aspectRatios.keys())):
+            aspectValue = _aspectRatios[aspect]
+            self.aspectLabel[aspect] = Label(self.aspectLabelFrame, text=aspect, grid=(ii, 0), hAlign='r')
+            self.aspectData[aspect] = ScientificDoubleSpinBox(self.aspectDataFrame, min=1, grid=(ii, 0), hAlign='l')
+            self.aspectData[aspect].setValue(aspectValue)
+            self.aspectData[aspect].setMinimumWidth(LineEditsMinimumWidth)
+            if aspect == _baseAspectRatioAxisCode:
+                self.aspectData[aspect].setEnabled(False)
+            else:
+                self.aspectData[aspect].setEnabled(True)
+                # self.aspectData[aspect].valueChanged.connect(partial(self._queueSetAspect, aspect))
 
         if not self._spectrumDisplay.is1D:
             row += 1
@@ -211,21 +235,21 @@ class SpectrumDisplaySettings(Widget, SignalBlocking):
     def getValues(self):
         """Return a dict containing the current settings
         """
-        return {AXISXUNITS             : self.xAxisUnitsButtons.getIndex(),
-                AXISYUNITS             : self.yAxisUnitsButtons.getIndex(),
-                AXISLOCKASPECTRATIO    : self.lockAspectCheckBox.isChecked(),
-                AXISUSEFIXEDASPECTRATIO: self.useFixedAspectCheckBox.isChecked(),
-                SYMBOLTYPES            : self.symbol.getIndex() if not self._spectrumDisplay.is1D else 0,
-                ANNOTATIONTYPES        : self.annotationsData.getIndex() if not self._spectrumDisplay.is1D else 0,
-                SYMBOLSIZE             : int(self.symbolSizePixelData.text()),
-                SYMBOLTHICKNESS        : int(self.symbolThicknessData.text())
+        return {AXISXUNITS               : self.xAxisUnitsButtons.getIndex(),
+                AXISYUNITS               : self.yAxisUnitsButtons.getIndex(),
+                AXISLOCKASPECTRATIO      : self.lockAspectCheckBox.isChecked(),
+                AXISUSEDEFAULTASPECTRATIO: self.useDefaultAspectCheckBox.isChecked(),
+                SYMBOLTYPES              : self.symbol.getIndex() if not self._spectrumDisplay.is1D else 0,
+                ANNOTATIONTYPES          : self.annotationsData.getIndex() if not self._spectrumDisplay.is1D else 0,
+                SYMBOLSIZE               : int(self.symbolSizePixelData.text()),
+                SYMBOLTHICKNESS          : int(self.symbolThicknessData.text())
                 }
 
     def _settingsUseFixedChanged(self):
         """If useFixed enabled and lock is disabled then enable lock
         """
         # aL = self.lockAspectCheckBox.isChecked()
-        # uFA = self.useFixedAspectCheckBox.isChecked()
+        # uFA = self.useDefaultAspectCheckBox.isChecked()
         #
         # # enable lockAspect
         # if uFA and not aL:
@@ -245,7 +269,7 @@ class SpectrumDisplaySettings(Widget, SignalBlocking):
         """
         if aDict[GLNotifier.GLSPECTRUMDISPLAY] == self._spectrumDisplay:
             self.lockAspectCheckBox.setChecked(aDict[GLNotifier.GLVALUES][0])
-            self.useFixedAspectCheckBox.setChecked(aDict[GLNotifier.GLVALUES][1])
+            self.useDefaultAspectCheckBox.setChecked(aDict[GLNotifier.GLVALUES][1])
 
     @pyqtSlot()
     def _symbolsChanged(self):

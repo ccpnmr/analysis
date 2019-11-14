@@ -257,7 +257,7 @@ class CcpnGLWidgetABC(QOpenGLWidget):
         self._spectrumBordersVisible = True
         self._axesVisible = True
         self._axisLocked = False
-        self._useFixedAspect = False
+        self._useDefaultAspect = False
         self._showSpectraOnPhasing = False
         self._xUnits = 0
         self._yUnits = 0

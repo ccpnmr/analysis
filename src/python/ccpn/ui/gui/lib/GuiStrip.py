@@ -40,7 +40,7 @@ from ccpn.util.Logging import getLogger
 from ccpn.util.Constants import AXIS_MATCHATOMTYPE, AXIS_FULLATOMNAME, DOUBLEAXIS_FULLATOMNAME
 from functools import partial
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs import AXISXUNITS, AXISYUNITS, AXISLOCKASPECTRATIO, \
-    SYMBOLTYPES, ANNOTATIONTYPES, SYMBOLSIZE, SYMBOLTHICKNESS, AXISUSEFIXEDASPECTRATIO, \
+    SYMBOLTYPES, ANNOTATIONTYPES, SYMBOLSIZE, SYMBOLTHICKNESS, AXISUSEDEFAULTASPECTRATIO, \
     GRIDVISIBLE, CROSSHAIRVISIBLE, DOUBLECROSSHAIRVISIBLE, BOTTOMAXIS, RIGHTAXIS
 from ccpn.core.lib.ContextManagers import undoStackBlocking, undoBlock, \
     notificationBlanking, undoBlockWithoutSideBar
@@ -203,7 +203,7 @@ class GuiStrip(Frame):
         self._CcpnGLWidget.xUnits = settings[AXISXUNITS]
         self._CcpnGLWidget.yUnits = settings[AXISYUNITS]
         self._CcpnGLWidget.axisLocked = settings[AXISLOCKASPECTRATIO]
-        self._CcpnGLWidget.fixedAspect = settings[AXISUSEFIXEDASPECTRATIO]
+        self._CcpnGLWidget.fixedAspect = settings[AXISUSEDEFAULTASPECTRATIO]
         # self._CcpnGLWidget._doubleCrosshairVisible = self._preferences.showDoubleCrosshair
 
         # initialise the notifiers

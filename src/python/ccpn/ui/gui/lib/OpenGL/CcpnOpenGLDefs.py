@@ -212,7 +212,7 @@ YAXISUNITS1D = [AXISUNITSINTENSITY]
 AXISXUNITS = 'xUnits'
 AXISYUNITS = 'yUnits'
 AXISLOCKASPECTRATIO = 'lockAspectRatio'
-AXISUSEFIXEDASPECTRATIO = 'useFixedAspectRatio'
+AXISUSEDEFAULTASPECTRATIO = 'useDefaultAspectRatio'
 
 ANNOTATIONTYPES = 'annotationTypes'
 SYMBOLTYPES = 'symbolTypes'
@@ -252,4 +252,4 @@ LOCKBOTTOM = 64
 LOCKAXIS = 128
 
 LOCKSTRING = 'Lock'
-USEFIXEDASPECTSTRING = '                      Fixed'      # easier to overlay
+UseDefaultAspectSTRING = '                  Default'      # easier to overlay

@@ -196,13 +196,17 @@ class GuiSpectrumDisplay(CcpnModule):
             self._spectrumDisplaySettings = SpectrumDisplaySettings(parent=self.settingsWidget,
                                                                     mainWindow=self.mainWindow, spectrumDisplay=self,
                                                                     grid=(0, 0),
-                                                                    xTexts=AXISUNITS, yTexts=AXISUNITS)
+                                                                    xTexts=AXISUNITS, yTexts=AXISUNITS,
+                                                                    _baseAspectRatioAxisCode=self.application.preferences.general._baseAspectRatioAxisCode,
+                                                                    _aspectRatios=self.application.preferences.general.aspectRatios.copy())
         else:
             self._spectrumDisplaySettings = SpectrumDisplaySettings(parent=self.settingsWidget,
                                                                     mainWindow=self.mainWindow, spectrumDisplay=self,
                                                                     grid=(0, 0),
                                                                     xTexts=AXISUNITS, yTexts=[''],
-                                                                    showYAxis=False)
+                                                                    showYAxis=False,
+                                                                    _baseAspectRatioAxisCode=self.application.preferences.general._baseAspectRatioAxisCode,
+                                                                    _aspectRatios=self.application.preferences.general.aspectRatios.copy())
 
         self._spectrumDisplaySettings.settingsChanged.connect(self._settingsChanged)
 

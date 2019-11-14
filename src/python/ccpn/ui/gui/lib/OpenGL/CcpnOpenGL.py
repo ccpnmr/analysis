@@ -3884,8 +3884,9 @@ class CcpnGLWidget(QOpenGLWidget):
 
             self._oldStripIDLabel = self.stripIDLabel
 
-        # draw the strip ID to the screen
-        self.stripIDString.drawTextArrayVBO(enableVBO=True)
+        # Don't draw for the minute, but keep for print strip
+        # # draw the strip ID to the screen
+        # self.stripIDString.drawTextArrayVBO(enableVBO=True)
 
         if self.AXISLOCKEDBUTTON:
             if self._useFixedAspect:

@@ -760,6 +760,19 @@ class CcpnModule(Dock, DropBase, NotifierBase):
         self._selectedOverlay._resize()
         super().resizeEvent(ev)
 
+    #=========================================================================================
+    # CCPN Properties
+    #=========================================================================================
+
+    def __repr__(self):
+        return "<Module:%s>" % self.name()
+
+    @property
+    def pid(self) -> str:
+        """Identifier for the object, unique within the project - added to give label to ccpnModules
+        """
+        return "Module:%s" % self.name()
+
 
 class CcpnModuleLabel(DockLabel):
     """

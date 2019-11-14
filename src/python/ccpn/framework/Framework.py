@@ -844,7 +844,12 @@ class Framework(NotifierBase):
 
     def getByPid(self, pid):
         "Convenience"
-        return self.project.getByPid(pid)
+        obj = self.project.getByPid(pid)
+        if obj:
+            return obj
+        else:
+            modules = [module for module in self.ui.mainWindow.modules if module.pid == pid] if isinstance(self.ui, Gui) else None
+            return modules[0] if modules else None
 
     def getByGid(self, gid):
         "Convenience"

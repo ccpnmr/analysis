@@ -991,20 +991,22 @@ class GuiSpectrumDisplay(CcpnModule):
         CCPN-INTERNAL: used to close the module
         Closes spectrum display and deletes it from the project.
         """
-        try:
-            if self.current.strip in self.strips:
-                self.current.strip = None
-            for strip in self.strips:
-                getLogger().debug2('unregistering strip: %s' % strip)
-                strip.close()
-                # strip._unregisterStrip()
-            # self.droppedNotifier.unRegister()
-            # self._toolbarNotifier.unRegister()
-            # self._unRegisterNotifiers()
+        self.mainWindow._deleteSpectrumDisplay(self)
 
-        finally:
-            super()._closeModule()
-            self.delete()
+        # try:
+        #     if self.current.strip in self.strips:
+        #         self.current.strip = None
+        #     for strip in self.strips:
+        #         getLogger().debug2('unregistering strip: %s' % strip)
+        #         strip.close()
+        #         # strip._unregisterStrip()
+        #     # self.droppedNotifier.unRegister()
+        #     # self._toolbarNotifier.unRegister()
+        #     # self._unRegisterNotifiers()
+        #
+        # finally:
+        #     super()._closeModule()
+        #     self.delete()
 
     # def _unDelete(self, strip):
     #     """unDelete the strip
@@ -1013,55 +1015,6 @@ class GuiSpectrumDisplay(CcpnModule):
     #         strip._unDelete()
     #
     #         self.showAxes()
-    # def _deleteSpectrumDisplay(self):
-    #     with undoBlock():
-    #         with undoStackBlocking() as addUndoItem:
-    #             # retrieve list of created items from the api
-    #             # strangely, this modifies _wrappedData.orderedStrips, and 'removes' the boundStrip by changing the indexing
-    #             # if it is at the end of apiBoundStrips then it confuses the indexing
-    #             indexing = [st.stripIndex() for st in self.strips]
-    #
-    #             apiObjectsCreated = strip._getApiObjectTree()
-    #
-    #             # reset indexing again SHOULD now be okay; i.e. nothing has been 'removed' from apiBoundStrips yet
-    #             for ii, ind in enumerate(indexing):
-    #                 self.strips[ii]._setStripIndex(ind)
-    #
-    #             index = strip.stripIndex()
-    #
-    #             # add layout handling to the undo stack
-    #             addUndoItem(undo=partial(self._redrawAxes, index))
-    #             addUndoItem(undo=partial(self._restoreStripToLayout, self, strip, index),
-    #                         redo=partial(self._removeStripFromLayout, self, strip))
-    #             # add notifier handling for the strip
-    #             addUndoItem(undo=partial(strip.setBlankingAllNotifiers, False),
-    #                         redo=partial(strip.setBlankingAllNotifiers, True))
-    #
-    #             self._removeStripFromLayout(self, strip)
-    #             strip.setBlankingAllNotifiers(True)
-    #
-    #             #EJB 20181213: old style delete notifiers
-    #             # # add object delete/undelete to the undo stack
-    #             # addUndoItem(undo=partial(strip._wrappedData.root._unDelete,
-    #             #                          apiObjectsCreated, (strip._wrappedData.topObject,)),
-    #             #             redo=partial(strip._delete)
-    #             #             )
-    #             # # delete the strip
-    #             # strip._delete()
-    #
-    #             # add object delete/undelete to the undo stack
-    #             addUndoItem(undo=BlankedPartial(strip._wrappedData.root._unDelete,
-    #                                             topObjectsToCheck=(strip._wrappedData.topObject,),
-    #                                             obj=strip, trigger='create', preExecution=False,
-    #                                             objsToBeUnDeleted=apiObjectsCreated),
-    #                         redo=BlankedPartial(strip._delete,
-    #                                             obj=strip, trigger='delete', preExecution=True)
-    #                         )
-    #
-    #             # delete the strip
-    #             strip._finaliseAction('delete')
-    #             with notificationBlanking():
-    #                 strip._delete()
 
     def _removeIndexStrip(self, value):
         self.deleteStrip(self.strips[value])

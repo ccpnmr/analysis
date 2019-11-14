@@ -148,7 +148,7 @@ class GLExporter():
                 self.strip = strip
                 self._parent = strip._CcpnGLWidget
 
-                self._buildPage()
+                self._buildPage(singleStrip=False)
                 self._buildStrip()
                 self._addDrawingToStory()
         else:
@@ -159,7 +159,7 @@ class GLExporter():
             self.strip = self.params[GLSTRIP]
             self._parent = self.strip._CcpnGLWidget
 
-            self._buildPage()
+            self._buildPage(singleStrip=True)
             self._buildStrip()
             self._addDrawingToStory()
 
@@ -180,7 +180,7 @@ class GLExporter():
         # set a default fontName
         self.fontName = self._parent.globalGL.glSmallFont.fontName
 
-    def _buildPage(self):
+    def _buildPage(self, singleStrip=True):
         """Build the main sections of the pdf file from a drawing object
         and add the drawing object to a reportlab document
         """
@@ -195,7 +195,11 @@ class GLExporter():
         self.rAxis = self._parent._drawRightAxis
         self.bAxis = self._parent._drawBottomAxis
 
-        frame = self.strip.spectrumDisplay.stripFrame
+        if singleStrip:
+            frame = self.strip
+        else:
+            frame = self.strip.spectrumDisplay.stripFrame
+
         if self.params[GLSTRIPDIRECTION] == 'Y':
             docHeight = self._report.doc.height - (2 * FRAMEPADDING)
             docWidth = self._report.doc.width - (2 * FRAMEPADDING)
@@ -755,6 +759,9 @@ class GLExporter():
             for peakListView in validPeakListViews:  # spectrumView.peakListViews:
                 for drawString in self._parent._GLPeaks._GLLabels[peakListView].stringList:
 
+                    if drawString.vertices is None or drawString.vertices.size == 0:
+                        continue
+
                     col = drawString.colors[0]
                     if not isinstance(col, Iterable):
                         col = drawString.colors[0:4]
@@ -800,6 +807,9 @@ class GLExporter():
 
             for integralListView in validIntegralListViews:  # spectrumView.integralListViews:
                 for drawString in self._parent._GLIntegrals._GLLabels[integralListView].stringList:
+
+                    if drawString.vertices is None or drawString.vertices.size == 0:
+                        continue
 
                     col = drawString.colors[0]
                     if not isinstance(col, Iterable):
@@ -847,6 +857,9 @@ class GLExporter():
             for multipletListView in validMultipletListViews:  # spectrumView.multipletListViews:
                 for drawString in self._parent._GLMultiplets._GLLabels[multipletListView].stringList:
 
+                    if drawString.vertices is None or drawString.vertices.size == 0:
+                        continue
+
                     col = drawString.colors[0]
                     if not isinstance(col, Iterable):
                         col = drawString.colors[0:4]
@@ -881,7 +894,9 @@ class GLExporter():
         """
         colourGroups = OrderedDict()
         for drawString in self._parent._marksAxisCodes:
-            # drawString.drawTextArrayVBO(enableVBO=True)
+
+            if drawString.vertices is None or drawString.vertices.size == 0:
+                continue
 
             col = drawString.colors[0]
             if not isinstance(col, Iterable):
@@ -912,7 +927,9 @@ class GLExporter():
             return
 
         for drawString in self._parent._spectrumLabelling.strings.values():
-            # drawString.drawTextArrayVBO(enableVBO=True)
+
+            if drawString.vertices is None or drawString.vertices.size == 0:
+                continue
 
             col = drawString.colors[0]
             if not isinstance(col, Iterable):
@@ -1018,29 +1035,28 @@ class GLExporter():
         colourGroups = OrderedDict()
         drawString = self._parent.stripIDString
 
-        if drawString.vertices is not None and drawString.vertices.size != 0:
-            colour = self.foregroundColour
-            colourPath = 'overlayText%s%s%s%s' % (colour.red, colour.green, colour.blue, colour.alpha)
+        if drawString.vertices is None or drawString.vertices.size == 0:
+            return
 
-            # newLine = [drawString.attribs[0], drawString.attribs[1]]
-            # newLine = self._scaleRatioToWindow(drawString.attribs[0:2])
+        colour = self.foregroundColour
+        colourPath = 'overlayText%s%s%s%s' % (colour.red, colour.green, colour.blue, colour.alpha)
 
-            newLine = self._scaleRatioToWindow([drawString.attribs[0] + (self.fontXOffset * self._parent.deltaX),
-                                                drawString.attribs[1] + (self.fontYOffset * self._parent.deltaY)])
+        newLine = self._scaleRatioToWindow([drawString.attribs[0] + (self.fontXOffset * self._parent.deltaX),
+                                            drawString.attribs[1] + (self.fontYOffset * self._parent.deltaY)])
 
-            if self._parent.pointVisible(newLine,
-                                         x=self.displayScale * self.mainL,
-                                         y=self.displayScale * self.mainB,
-                                         width=self.displayScale * self.mainW,
-                                         height=self.displayScale * self.mainH):
-                pass
+        if self._parent.pointVisible(newLine,
+                                     x=self.displayScale * self.mainL,
+                                     y=self.displayScale * self.mainB,
+                                     width=self.displayScale * self.mainW,
+                                     height=self.displayScale * self.mainH):
+            pass
 
-            if colourPath not in colourGroups:
-                colourGroups[colourPath] = Group()
-            self._addString(colourGroups, colourPath, drawString, newLine, colour, boxed=True)
+        if colourPath not in colourGroups:
+            colourGroups[colourPath] = Group()
+        self._addString(colourGroups, colourPath, drawString, newLine, colour, boxed=True)
 
-            for colourGroup in colourGroups.values():
-                self._mainPlot.add(colourGroup)
+        for colourGroup in colourGroups.values():
+            self._mainPlot.add(colourGroup)
 
     def _addAxisMask(self):
         """

@@ -134,6 +134,12 @@ class Window(AbstractWrapperObject):
         """
         from ccpn.ui._implementation.SpectrumDisplay import _createSpectrumDisplay
 
+        if isinstance(relativeTo, str):
+            modules = [module for module in self.modules if module.pid == relativeTo]
+            if len(modules) > 1:
+                raise ValueError("Error, not a unique module")
+            relativeTo = modules[0] if modules else None
+
         def _setBlankingSpectrumDisplayNotifiers(spectrumDisplay, value):
             """Blank all spectrumDisplay and contained strip notifiers
             """

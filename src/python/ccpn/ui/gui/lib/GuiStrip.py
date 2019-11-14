@@ -125,8 +125,8 @@ class GuiStrip(Frame):
         # grid=headerGrid, gridSpan=headerSpan, setLayout=True, spacing=(0, 0))
 
         # set the ID label in the new widget
-        # self._CcpnGLWidget.setStripID('.'.join(self.id.split('.')))
-        self._CcpnGLWidget.setStripID('')
+        self._CcpnGLWidget.setStripID('.'.join(self.id.split('.')))
+        # self._CcpnGLWidget.setStripID('')
 
         # Widgets for toolbar; items will be added by GuiStripNd (eg. the Z/A-plane boxes)
         # and GuiStrip1d; will be hidden for 2D's by GuiSpectrumView
@@ -137,6 +137,7 @@ class GuiStrip(Frame):
         self.viewStripMenu = None
         self.storedZooms = []
         self.beingUpdated = False
+        self.planeAxisBars = ()
 
         # need to keep track of mouse position because Qt shortcuts don't provide
         # the widget or the position of where the cursor is
@@ -215,15 +216,16 @@ class GuiStrip(Frame):
         # respond to values changed in the containing spectrumDisplay settings widget
         self.spectrumDisplay._spectrumDisplaySettings.symbolsChanged.connect(self._symbolsChangedInSettings)
 
-    # def resizeEvent(self, ev):
-    #     super().resizeEvent(ev)
-    #     # call subclass _resize event
-    #     # self._resize()
-    #
-    # def _resize(self):
-    #     """Resize event to handle resizing of frames that overlay the OpenGL frame
-    #     """
-    #     pass
+    def resizeEvent(self, ev):
+        super().resizeEvent(ev)
+        # call subclass _resize event
+        self._resize()
+
+    def _resize(self):
+        """Resize event to handle resizing of frames that overlay the OpenGL frame
+        """
+        # MUST BE SUBCLASSED
+        raise NotImplementedError("Code error: function not implemented")
 
     def _selectCallback(self, widgets):
         # print('>>>select', widget1, widget2)

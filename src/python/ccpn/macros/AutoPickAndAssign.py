@@ -1,23 +1,29 @@
 """
 
-This macro doesn't want to be an automated Backbone assignment and is aimed only to add initial labels to a project containing:
- 15N-HSQC,  HNCA,  HNCOCA,  HNCACB,  CBCACONH, which will be carefully inspected manually and amended as needed it.
+This macro isn't an automated Backbone Assignment routine. It simply adds the initial NmrAtom labels to a project containing:
+15N-HSQC and HNCACB spectra (optionally also CBCACONH, HNCA and HNCOCA spectra).
+The results should be carefully inspected afterwards and amended as needed.
 
-However can be run also if a 15N-HSQC and a HNCACB are present.
+The macro uses the picking peak routines present in CcpNmr AnalysisAssign V3 to peak pick the HSQC first and
+label it with incremental numbered NmrResidues.
+It then picks restricted peaks for all the 3Ds. This step is currently the weakest point, as peaks can be wrongly picked
+or missed completely - how well this works will mainly depend on your restricted pick tolerances/limits and the
+contour level at which you pick the peaks. This macro is best suited to spectra with relatively uniform peak intensities.
+Spectra which have some very intense and some very weak strips will inevitably pick too many peaks in some strips and
+too few in others.
+The macro guesses the "i-1" and "i" assignments from the peak heights in the HNCACB or HNCA specta based on the
+strongest peaks (absolute height).
+It does not take the CBCACONH into consideration. The CAi-1 and CB i-1 carbon NmrAtoms are simply propagated to the
+CBCACONH from the HNCACB if the two spectral peaks are within certain tolerances.
 
-The macro uses the picking peak routines present in 3.0.0 to pick the HSQC first and label with incremental numbered nmrResidues.
-Then picks restricted peak for all the 3Ds. This step is currently the weakest point, as peaks can be wrongly picked or missed completely.
-It guesses the "i-1" and "i" by peak heights for HNCA and HNCACB based on the strongest peaks (absolute height).
-It cannot guess for CBCACONH so an NmrAtom C is given, Ca i-1 and CB i-1 are propagated from the HNCACB if the two spectral peaks are within tollerances
+The macro then searches for "i-1"s which are present in same spectra but missing and expected in others and copies them.
+It deletes obsolete peaks assigned to carbon if properly reassigned to CA or/and CB i-1
+Finally, unassigned peaks are deleted.
 
-Searches for "i-1"s which are present in same spectra but missing and expected in others and copies them.
-Deletes obsolete peaks assigned to C if properly reassigned to CA or/and CB i-1
-Deletes unassigned peaks
+Users can set certain parameters in the "User's  Parameters" section. Read the comments for descriptions.
 
-User Parameters are in the section "User's  Parameters", read comments for descriptions...
-
-This macro is not optimised for speed and tested only using spectra from Sec5part1 tutorial.
-Modify as you need and share your macros on the forum!
+This macro is not optimised for speed and tested only using spectra from the CCPN Sec5 Backbone Assignment tutorial.
+Modify as you need and share your macros on the forum: https://www.ccpn.ac.uk/forums
 
 """
 #=========================================================================================
@@ -91,8 +97,8 @@ CBCACONH_limits = od(((H, [0.05, 0.05]),   (N, [1, 1]), (C, [10,80])))
 tolerances   =   od(((H, 0.1),  (N, 2), (C, 4)))
 #_________________________________________________________________________________________________
 
-# Contours, in case you don't want set it manually from display ...
-setContours       =   False # set False if not needed
+# Contours, in case you don't want them set from display ...
+setContours       =   False # set False if not needed, else True
 hsqcContours      =  (64194.19080018526, -64194.19080018526) # positive and negative Contours values
 hncaContours      =  (5835252.217157302, -5835252.217157302)
 hncocaContours    =  (15051295.29692141, -15051295.29692142)
@@ -102,9 +108,9 @@ cbcaconhContours  =  (8161392.113049264, -8161392.113049264)
 
 HSQC_alreadyAssigned = False             # True if you already picked and assigned nmrAtoms on the HSQC. Peaks need to be in the last peakList.
 CA_in_HNCACB_isPositive = True           # Assign CA i-1 to positive peaks in the HNCACB, False Assign CB i-1 to positive
-Propagate_HNCACB_to_CBCACONH = True      # Replace assignment from C to CA and CB (i-1 nmrAtom) from the HNCACB to CBCACONH if relative peaks within tollerances
-CopyExpectedPeaksFromOtherSpectra = True # Try to find missing Ca i-1 and Cb i-1 from other spectra if one or more are missing and propagate peak and assignment accross.
-Correct_CBCACONH_assignments = True      # Guess missing NmrAtom. eg. if CA and C are present but not CB, swap the C with CB and vice-versa  for CA.
+Propagate_HNCACB_to_CBCACONH = True      # Replace assignment from C to CA and CB (i-1 nmrAtom) from the HNCACB to CBCACONH if relative peaks within tolerances
+CopyExpectedPeaksFromOtherSpectra = True # Try to find missing Ca i-1 and Cb i-1 from other spectra if one or more are missing and propagate peak and assignment across.
+Correct_CBCACONH_assignments = True      # Guess missing NmrAtom. eg. if CA and C are present but not CB, swap the C with CB and vice-versa for CA.
 
 ##################################################################################################
 #######################################  start of the code #######################################

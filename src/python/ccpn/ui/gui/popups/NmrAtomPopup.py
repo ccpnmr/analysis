@@ -64,7 +64,7 @@ class NmrAtomPopup(AttributeEditorPopupABC):
 
     klass = NmrAtom
     attributes = [('pid', EntryCompoundWidget, getattr, None, None, None, {}),
-                  ('nmrAtom name', NmrResiduePulldown, getattr, None, _getNmrAtomTypes, None, {}),
+                  ('nmrAtom name', PulldownListCompoundWidget, getattr, None, _getNmrAtomTypes, None, {}),
                   ('nmrResidue', PulldownListCompoundWidget, getattr, setattr, _getNmrResidueTypes, None, {}),
                   ('Merge to Existing', CheckBoxCompoundWidget, None, None, None, None, {}),
                   ('comment', EntryCompoundWidget, getattr, setattr, None, None, {'backgroundText': '> Optional <'}),

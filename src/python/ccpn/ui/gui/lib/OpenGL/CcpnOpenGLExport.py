@@ -1018,28 +1018,29 @@ class GLExporter():
         colourGroups = OrderedDict()
         drawString = self._parent.stripIDString
 
-        colour = self.foregroundColour
-        colourPath = 'overlayText%s%s%s%s' % (colour.red, colour.green, colour.blue, colour.alpha)
+        if drawString.vertices is not None and drawString.vertices.size != 0:
+            colour = self.foregroundColour
+            colourPath = 'overlayText%s%s%s%s' % (colour.red, colour.green, colour.blue, colour.alpha)
 
-        # newLine = [drawString.attribs[0], drawString.attribs[1]]
-        # newLine = self._scaleRatioToWindow(drawString.attribs[0:2])
+            # newLine = [drawString.attribs[0], drawString.attribs[1]]
+            # newLine = self._scaleRatioToWindow(drawString.attribs[0:2])
 
-        newLine = self._scaleRatioToWindow([drawString.attribs[0] + (self.fontXOffset * self._parent.deltaX),
-                                            drawString.attribs[1] + (self.fontYOffset * self._parent.deltaY)])
+            newLine = self._scaleRatioToWindow([drawString.attribs[0] + (self.fontXOffset * self._parent.deltaX),
+                                                drawString.attribs[1] + (self.fontYOffset * self._parent.deltaY)])
 
-        if self._parent.pointVisible(newLine,
-                                     x=self.displayScale * self.mainL,
-                                     y=self.displayScale * self.mainB,
-                                     width=self.displayScale * self.mainW,
-                                     height=self.displayScale * self.mainH):
-            pass
+            if self._parent.pointVisible(newLine,
+                                         x=self.displayScale * self.mainL,
+                                         y=self.displayScale * self.mainB,
+                                         width=self.displayScale * self.mainW,
+                                         height=self.displayScale * self.mainH):
+                pass
 
-        if colourPath not in colourGroups:
-            colourGroups[colourPath] = Group()
-        self._addString(colourGroups, colourPath, drawString, newLine, colour, boxed=True)
+            if colourPath not in colourGroups:
+                colourGroups[colourPath] = Group()
+            self._addString(colourGroups, colourPath, drawString, newLine, colour, boxed=True)
 
-        for colourGroup in colourGroups.values():
-            self._mainPlot.add(colourGroup)
+            for colourGroup in colourGroups.values():
+                self._mainPlot.add(colourGroup)
 
     def _addAxisMask(self):
         """

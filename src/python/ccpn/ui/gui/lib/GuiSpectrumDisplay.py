@@ -993,29 +993,6 @@ class GuiSpectrumDisplay(CcpnModule):
         """
         self.mainWindow._deleteSpectrumDisplay(self)
 
-        # try:
-        #     if self.current.strip in self.strips:
-        #         self.current.strip = None
-        #     for strip in self.strips:
-        #         getLogger().debug2('unregistering strip: %s' % strip)
-        #         strip.close()
-        #         # strip._unregisterStrip()
-        #     # self.droppedNotifier.unRegister()
-        #     # self._toolbarNotifier.unRegister()
-        #     # self._unRegisterNotifiers()
-        #
-        # finally:
-        #     super()._closeModule()
-        #     self.delete()
-
-    # def _unDelete(self, strip):
-    #     """unDelete the strip
-    #     """
-    #     with undoBlockManager():
-    #         strip._unDelete()
-    #
-    #         self.showAxes()
-
     def _removeIndexStrip(self, value):
         self.deleteStrip(self.strips[value])
 

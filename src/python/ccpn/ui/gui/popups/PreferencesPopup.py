@@ -584,7 +584,11 @@ class PreferencesPopup(CcpnDialogMainWidget):
             self.aspectData[aspect] = ScientificDoubleSpinBox(self.aspectDataFrame, min=1, grid=(ii, 0), hAlign='l')
             self.aspectData[aspect].setValue(aspectValue)
             self.aspectData[aspect].setMinimumWidth(LineEditsMinimumWidth)
-            self.aspectData[aspect].valueChanged.connect(partial(self._queueSetAspect, aspect))
+            if aspect == self.preferences.general._baseAspectRatioAxisCode:
+                self.aspectData[aspect].setEnabled(False)
+            else:
+                self.aspectData[aspect].setEnabled(True)
+                self.aspectData[aspect].valueChanged.connect(partial(self._queueSetAspect, aspect))
 
         self.showZoomXLimitApplyBox.setChecked(self.preferences.general.zoomXLimitApply)
         self.showZoomYLimitApplyBox.setChecked(self.preferences.general.zoomYLimitApply)

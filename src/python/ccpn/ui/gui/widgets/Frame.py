@@ -282,7 +282,7 @@ class OpenGLOverlayFrame(Frame):
         """
         # not happy as I think is creating duplicate events
         super().resizeEvent(ev)
-        self._setMaskToChildren()
+        self._resizeFrames()
 
     def _resize(self):
         """Resize event to handle resizing of frames that overlay the OpenGL frame
@@ -295,6 +295,13 @@ class OpenGLOverlayFrame(Frame):
             for glF in glFrames:
                 glF._resizeFrames()
             self._setMaskToChildren()
+
+    def _resizeMasks(self):
+        glFrames = self.findChildren(OpenGLOverlayFrame)
+        if glFrames:
+            for glF in glFrames:
+                glF._resizeMasks()
+            self._setMask()
 
     def _setStyle(self, sl, foregroundColour=CCPNGLWIDGET_HEXFOREGROUND, backgroundColour=CCPNGLWIDGET_HEXBACKGROUND):
         if self._backgroundColour is not None or self.AUTOFILLBACKGROUND:

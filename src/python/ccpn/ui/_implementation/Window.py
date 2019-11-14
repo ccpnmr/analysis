@@ -134,7 +134,7 @@ class Window(AbstractWrapperObject):
         """
         from ccpn.ui._implementation.SpectrumDisplay import _createSpectrumDisplay
 
-        def _setSpectrumDisplayNotifiers(spectrumDisplay, value):
+        def _setBlankingSpectrumDisplayNotifiers(spectrumDisplay, value):
             """Blank all spectrumDisplay and contained strip notifiers
             """
             spectrumDisplay.setBlankingAllNotifiers(value)
@@ -148,15 +148,12 @@ class Window(AbstractWrapperObject):
                                              title=title, positions=positions, widths=widths, units=units,
                                              stripDirection=stripDirection, is1D=is1D, **kwds)
 
-            with undoStackBlocking() as addUndoItem:
-                # disable all notifiers in spectrumDisplays
-                addUndoItem(undo=partial(_setSpectrumDisplayNotifiers, display, True))
-
             self.moduleArea.addModule(display, position=position, relativeTo=relativeTo)
 
             with undoStackBlocking() as addUndoItem:
                 # disable all notifiers in spectrumDisplays
-                addUndoItem(redo=partial(_setSpectrumDisplayNotifiers, display, False))
+                addUndoItem(undo=partial(_setBlankingSpectrumDisplayNotifiers, display, True),
+                            redo=partial(_setBlankingSpectrumDisplayNotifiers, display, False))
 
                 # add/remove spectrumDisplay from module Area
                 addUndoItem(undo=partial(self._hiddenModules.addModule, display),
@@ -166,6 +163,69 @@ class Window(AbstractWrapperObject):
                 display.autoRange()
 
         return display
+
+    @logCommand('mainWindow.')
+    def _deleteSpectrumDisplay(self, display):
+
+        def _recoverSpectrumToolbar(display, specViewList):
+            """Re-insert the spectra into the spectrumToolbar
+            """
+            for specView, selected in specViewList:
+                action = display.spectrumToolBar._addSpectrumViewToolButtons(specView)
+                if action:
+                    action.setChecked(selected)
+
+        def _setBlankingSpectrumDisplayNotifiers(spectrumDisplay, value):
+            """Blank all spectrumDisplay and contained strip notifiers
+            """
+            spectrumDisplay.setBlankingAllNotifiers(value)
+            for strip in spectrumDisplay.strips:
+                strip.setBlankingAllNotifiers(value)
+
+        with undoBlockWithoutSideBar():
+
+            # find where to return the module to
+            container = display.container()
+            position = 'top'
+            relativeTo = None
+            if container.count() > 1:
+                for ii in range(container.count()):
+                    if container.widget(ii) == display:
+                        iiAdjacent = (ii-1) if ii else (ii+1)
+                        typ = container.type()
+                        if typ == 'vertical':
+                            position = 'below' if ii else 'above'
+                        elif typ == 'horizontal':
+                            position = 'right' if ii else 'left'
+                        elif typ == 'tab':
+                            position = 'top'
+                        relativeTo = container.widget(iiAdjacent)
+                        break
+                else:
+                    raise RuntimeError("Error: container does not contain widget.")
+
+            specViewList = [(specView, action.isChecked()) for specView in display.spectrumViews
+                            for action in display.spectrumToolBar.actions()
+                            if action.objectName() == specView.spectrum.pid]
+
+            with undoStackBlocking() as addUndoItem:
+                # re-insert spectrumToolbar
+                addUndoItem(undo=partial(_recoverSpectrumToolbar, display, specViewList),)
+
+                # disable all notifiers in spectrumDisplays
+                addUndoItem(undo=partial(_setBlankingSpectrumDisplayNotifiers, display, False),
+                            redo=partial(_setBlankingSpectrumDisplayNotifiers, display, True))
+
+                # add/remove spectrumDisplay from module Area
+                addUndoItem(undo=partial(self.moduleArea.addModule, display, position=position, relativeTo=relativeTo),
+                            redo=partial(self._hiddenModules.addModule, display),)
+
+            _setBlankingSpectrumDisplayNotifiers(display, True)
+            # move to the hidden module area
+            self._hiddenModules.addModule(display)
+
+            # delete the spectrumDisplay
+            display.delete()
 
 
 #=========================================================================================

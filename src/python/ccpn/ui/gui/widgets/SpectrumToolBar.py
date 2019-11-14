@@ -428,6 +428,7 @@ class SpectrumToolBar(ToolBar):
         spectrumDisplay = spectrumView.strip.spectrumDisplay
         if spectrumDisplay.isGrouped:
             return
+
         with self.spectrumToolBarBlocking():
             spectrumDisplay = spectrumView.strip.spectrumDisplay
             spectrum = spectrumView.spectrum
@@ -482,6 +483,7 @@ class SpectrumToolBar(ToolBar):
         # if spectrumDisplay.is1D:
         #     action.toggled.connect(spectrumView.plot.setVisible)
         action.toggled.connect(spectrumView.setVisible)
+        return action
 
     def _setSizes(self, action):
 

@@ -39,7 +39,7 @@ from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import BoundDisplay as ApiBoundDispl
 from ccpn.core.lib.OrderedSpectrumViews import OrderedSpectrumViews
 from ccpn.util.OrderedSet import OrderedSet
 from ccpn.util.decorators import logCommand
-from ccpn.core.lib.ContextManagers import newObject, undoStackBlocking, undoBlock
+from ccpn.core.lib.ContextManagers import newObject, undoStackBlocking, undoBlock, deleteObject
 from ccpn.util.Logging import getLogger
 
 
@@ -369,6 +369,12 @@ class SpectrumDisplay(AbstractWrapperObject):
         apiGuiTask = (parent._wrappedData.findFirstGuiTask(nameSpace='user', name='View') or
                       parent._wrappedData.root.newGuiTask(nameSpace='user', name='View'))
         return [x for x in apiGuiTask.sortedModules() if isinstance(x, ApiBoundDisplay)]
+
+    @deleteObject()
+    def delete(self):
+        """Delete object, with all contained objects and underlying data.
+        """
+        self._wrappedData.delete()
 
     #=========================================================================================
     # CCPN functions

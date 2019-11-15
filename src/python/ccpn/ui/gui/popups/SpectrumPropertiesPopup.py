@@ -1202,7 +1202,7 @@ class DimensionsTab(Widget):
 
     @queueStateChange(_verifyPopupTabApply)
     def _queueSetAssignmentTolerances(self, spectrum, dim, textFromValue, value):
-        specValue = textFromValue(spectrum.assignmentTolerances[dim])
+        specValue = textFromValue(spectrum.assignmentTolerances[dim] or 0.0)            # this mean they are not being set
         if textFromValue(value) != specValue:
             return partial(self._setAssignmentTolerances, spectrum, dim, value)
 

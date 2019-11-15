@@ -609,8 +609,7 @@ class _openItemSpectrumGroupDisplay(OpenItemABC):
             from ccpn.ui.gui.popups.AxisOrderingPopup import checkSpectraToOpen
             checkSpectraToOpen(mainWindow, [spectrumGroup])
 
-            spectrumDisplay = mainWindow.createSpectrumDisplay(spectrumGroup.spectra[0])
-            # mainWindow.moduleArea.addModule(spectrumDisplay, position=position, relativeTo=relativeTo)
+            spectrumDisplay = mainWindow.createSpectrumDisplay(spectrumGroup.spectra[0], position=position, relativeTo=relativeTo)
 
             with undoBlockWithoutSideBar():
                 with notificationEchoBlocking():

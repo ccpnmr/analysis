@@ -1836,13 +1836,13 @@ class CcpnGLWidget(QOpenGLWidget):
                                          colour=(0.5, 0.5, 0.5, 1.0), GLContext=self)
         self._lockStringTrue = GLString(text=GLDefs.LOCKSTRING, font=self.globalGL.glSmallFont, x=0, y=0,
                                         colour=self.highlightColour, GLContext=self)
-        self._useFixedStringFalse = GLString(text=GLDefs.UseDefaultAspectSTRING, font=self.globalGL.glSmallFont, x=0, y=0,
-                                         colour=(0.5, 0.5, 0.5, 1.0), GLContext=self)
-        self._useFixedStringTrue = GLString(text=GLDefs.UseDefaultAspectSTRING, font=self.globalGL.glSmallFont, x=0, y=0,
-                                        colour=self.highlightColour, GLContext=self)
+        self._useDefaultStringFalse = GLString(text=GLDefs.USEDEFAULTASPECTSTRING, font=self.globalGL.glSmallFont, x=0, y=0,
+                                               colour=(0.5, 0.5, 0.5, 1.0), GLContext=self)
+        self._useDefaultStringTrue = GLString(text=GLDefs.USEDEFAULTASPECTSTRING, font=self.globalGL.glSmallFont, x=0, y=0,
+                                              colour=self.highlightColour, GLContext=self)
 
         cornerButtons = ((self._lockStringTrue, self._toggleAxisLocked),
-                         (self._useFixedStringTrue, self._toggleUseDefaultAspect))
+                         (self._useDefaultStringTrue, self._toggleUseDefaultAspect))
 
         self._buttonCentres = ()
         for button, callBack in cornerButtons:
@@ -1900,8 +1900,8 @@ class CcpnGLWidget(QOpenGLWidget):
                                         colour=self.highlightColour, GLContext=self)
 
         # change the colour of the selected 'Fixed' string
-        self._useFixedStringTrue = GLString(text=GLDefs.UseDefaultAspectSTRING, font=self.globalGL.glSmallFont, x=0, y=0,
-                                        colour=self.highlightColour, GLContext=self)
+        self._useDefaultStringTrue = GLString(text=GLDefs.USEDEFAULTASPECTSTRING, font=self.globalGL.glSmallFont, x=0, y=0,
+                                              colour=self.highlightColour, GLContext=self)
 
         # set the new limits
         self._applyXLimit = self._preferences.zoomXLimitApply
@@ -1945,6 +1945,7 @@ class CcpnGLWidget(QOpenGLWidget):
         """Toggle the axis locked button
         """
         self._axisLocked = not self._axisLocked
+        self._useDefaultAspect = False
 
         # create a dict and event to update this strip first
         aDict = {GLNotifier.GLSOURCE : None,
@@ -1958,10 +1959,7 @@ class CcpnGLWidget(QOpenGLWidget):
         """Toggle the use fixed aspect button
         """
         self._useDefaultAspect = not self._useDefaultAspect
-
-        # turn on axis locking if enabling fixedAspect
-        # if self._useDefaultAspect and not self._axisLocked:
-        #     self._axisLocked = True
+        self._axisLocked = False
 
         # create a dict and event to update this strip first
         aDict = {GLNotifier.GLSOURCE : None,
@@ -3893,10 +3891,10 @@ class CcpnGLWidget(QOpenGLWidget):
         if self.AXISLOCKEDBUTTON:
             if self._useDefaultAspect:
                 # self._lockStringTrue.setStringOffset((self.axisL, self.axisB))
-                self._useFixedStringTrue.drawTextArrayVBO(enableVBO=True)
+                self._useDefaultStringTrue.drawTextArrayVBO(enableVBO=True)
             else:
                 # self._lockStringFalse.setStringOffset((self.axisL, self.axisB))
-                self._useFixedStringFalse.drawTextArrayVBO(enableVBO=True)
+                self._useDefaultStringFalse.drawTextArrayVBO(enableVBO=True)
 
             if self._axisLocked:
                 # self._lockStringTrue.setStringOffset((self.axisL, self.axisB))

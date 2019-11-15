@@ -138,12 +138,12 @@ class SpectrumDisplaySettings(Widget, SignalBlocking):
         row += 1
         self.lockAspect = Label(parent, text="Lock to Current Aspect Ratio", grid=(row, 0))
         self.lockAspectCheckBox = CheckBox(parent, grid=(row, 1), checked=lockAspectRatio, objectName='SDS_lockAspect')
-        self.lockAspectCheckBox.clicked.connect(self._settingsChanged)
+        self.lockAspectCheckBox.clicked.connect(self._settingsUseLockChanged)
 
         row += 1
         self.useDefaultAspect = Label(parent, text="Use Default Aspect Ratio", grid=(row, 0))
         self.useDefaultAspectCheckBox = CheckBox(parent, grid=(row, 1), checked=useDefaultAspectRatio, objectName='SDS_useDefaultAspect')
-        self.useDefaultAspectCheckBox.clicked.connect(self._settingsUseFixedChanged)
+        self.useDefaultAspectCheckBox.clicked.connect(self._settingsUseDefaultChanged)
 
         row += 1
         self.aspectLabel = {}
@@ -245,16 +245,26 @@ class SpectrumDisplaySettings(Widget, SignalBlocking):
                 SYMBOLTHICKNESS          : int(self.symbolThicknessData.text())
                 }
 
-    def _settingsUseFixedChanged(self):
-        """If useFixed enabled and lock is disabled then enable lock
+    def _settingsUseLockChanged(self):
+        """If useDefault enabled and lock is disabled then enable lock
         """
         # aL = self.lockAspectCheckBox.isChecked()
         # uFA = self.useDefaultAspectCheckBox.isChecked()
         #
         # # enable lockAspect
         # if uFA and not aL:
-        #     self.lockAspectCheckBox.setChecked(True)
+        self.useDefaultAspectCheckBox.setChecked(False)
+        self._settingsChanged()
 
+    def _settingsUseDefaultChanged(self):
+        """If useDefault enabled and lock is disabled then enable lock
+        """
+        # aL = self.lockAspectCheckBox.isChecked()
+        # uFA = self.useDefaultAspectCheckBox.isChecked()
+        #
+        # # enable lockAspect
+        # if uFA and not aL:
+        self.lockAspectCheckBox.setChecked(False)
         self._settingsChanged()
 
     @pyqtSlot()

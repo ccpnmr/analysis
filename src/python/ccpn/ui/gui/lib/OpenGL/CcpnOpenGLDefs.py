@@ -213,6 +213,7 @@ AXISXUNITS = 'xUnits'
 AXISYUNITS = 'yUnits'
 AXISLOCKASPECTRATIO = 'lockAspectRatio'
 AXISUSEDEFAULTASPECTRATIO = 'useDefaultAspectRatio'
+AXISASPECTRATIOS = 'aspectRatios'
 
 ANNOTATIONTYPES = 'annotationTypes'
 SYMBOLTYPES = 'symbolTypes'

@@ -198,7 +198,9 @@ class GuiSpectrumDisplay(CcpnModule):
                                                                     grid=(0, 0),
                                                                     xTexts=AXISUNITS, yTexts=AXISUNITS,
                                                                     _baseAspectRatioAxisCode=self.application.preferences.general._baseAspectRatioAxisCode,
-                                                                    _aspectRatios=self.application.preferences.general.aspectRatios.copy())
+                                                                    _aspectRatios=self.application.preferences.general.aspectRatios.copy(),
+                                                                    _useLockedAspectRatio=self.application.preferences.general.useLockedAspectRatio,
+                                                                    _useDefaultAspectRatio=self.application.preferences.general.useDefaultAspectRatio)
         else:
             self._spectrumDisplaySettings = SpectrumDisplaySettings(parent=self.settingsWidget,
                                                                     mainWindow=self.mainWindow, spectrumDisplay=self,
@@ -206,7 +208,9 @@ class GuiSpectrumDisplay(CcpnModule):
                                                                     xTexts=AXISUNITS, yTexts=[''],
                                                                     showYAxis=False,
                                                                     _baseAspectRatioAxisCode=self.application.preferences.general._baseAspectRatioAxisCode,
-                                                                    _aspectRatios=self.application.preferences.general.aspectRatios.copy())
+                                                                    _aspectRatios=self.application.preferences.general.aspectRatios.copy(),
+                                                                    _useLockedAspectRatio=self.application.preferences.general.useLockedAspectRatio,
+                                                                    _useDefaultAspectRatio=self.application.preferences.general.useDefaultAspectRatio)
 
         self._spectrumDisplaySettings.settingsChanged.connect(self._settingsChanged)
 

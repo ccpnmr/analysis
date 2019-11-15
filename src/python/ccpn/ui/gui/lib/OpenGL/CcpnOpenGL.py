@@ -108,6 +108,7 @@ from ccpn.ui.gui.lib.mouseEvents import \
     middleMouse, shiftMiddleMouse, rightMouse, shiftRightMouse, controlRightMouse, PICK, \
     makeDragEvent
 
+
 try:
     # used to test whether all the arrays are defined correctly
     # os.environ.update({'PYOPENGL_ERROR_ON_COPY': 'true'})
@@ -197,9 +198,9 @@ class CcpnGLWidget(QOpenGLWidget):
             fmt.setSamples(antiAlias)
             self.setFormat(fmt)
 
-            samples = self.format().samples() # GST a use for the walrus
+            samples = self.format().samples()  # GST a use for the walrus
             if samples != antiAlias:
-                getLogger().warning('hardware changed antialias level, expected %i got %i...' % (samples,antiAlias))
+                getLogger().warning('hardware changed antialias level, expected %i got %i...' % (samples, antiAlias))
         except Exception as es:
             getLogger().warning('error during anti aliasing setup %s, anti aliasing disabled...' % str(es))
 
@@ -330,21 +331,21 @@ class CcpnGLWidget(QOpenGLWidget):
         self._spectrumBordersVisible = True
 
         self.gridList = []
-        self._gridVisible = True            #self._preferences.showGrid
-        self._crosshairVisible = True            #self._preferences.showCrosshair
-        self._doubleCrosshairVisible = True            #self._preferences.showDoubleCrosshair
+        self._gridVisible = True  #self._preferences.showGrid
+        self._crosshairVisible = True  #self._preferences.showCrosshair
+        self._doubleCrosshairVisible = True  #self._preferences.showDoubleCrosshair
 
         self.diagonalGLList = None
         self._updateAxes = True
 
         self._axesVisible = True
-        self._axisLocked = False
+        self._useLockedAspect = False
         self._useDefaultAspect = False
         self._aspectRatios = {}
 
         self._fixedAspectX = 1.0
         self._fixedAspectY = 1.0
-        
+
         self._showSpectraOnPhasing = False
         self._xUnits = 0
         self._yUnits = 0
@@ -372,9 +373,9 @@ class CcpnGLWidget(QOpenGLWidget):
         self._lastTracePoint = {}  # [-1, -1]
         self.showActivePhaseTrace = True
 
-        self._applyXLimit = True            #.zoomXLimitApply
-        self._applyYLimit = True            #self._preferences.zoomYLimitApply
-        self._intensityLimit = True            #self._preferences.intensityLimit
+        self._applyXLimit = True  #.zoomXLimitApply
+        self._applyYLimit = True  #self._preferences.zoomYLimitApply
+        self._intensityLimit = True  #self._preferences.intensityLimit
 
         self._GLIntegralLists = {}
         self._GLIntegralLabels = {}
@@ -871,8 +872,8 @@ class CcpnGLWidget(QOpenGLWidget):
         self.update()
 
     def _getValidAspectRatio(self, axisCode):
-        va = [ax for ax in self._preferences.aspectRatios.keys() if ax.upper()[0] == axisCode.upper()[0]]
-        return self._preferences.aspectRatios[va[0]]
+        va = [ax for ax in self._aspectRatios.keys() if ax.upper()[0] == axisCode.upper()[0]]
+        return self._aspectRatios[va[0]]
 
     def resizeGL(self, w, h):
         # must be set here to catch the change of screen
@@ -883,30 +884,7 @@ class CcpnGLWidget(QOpenGLWidget):
         self.w = w
         self.h = h
 
-        if self._axisLocked:
-
-            # check which is the primary axis and update the opposite axis - similar to wheelEvent
-            if self.spectrumDisplay.stripArrangement == 'Y':
-
-                # strips are arranged in a row
-                self._scaleToYAxis(rescale=False)
-
-            elif self.spectrumDisplay.stripArrangement == 'X':
-
-                # strips are arranged in a column
-                self._scaleToXAxis(rescale=False)
-
-        self.rescale()
-
-        # put stuff in here that will change on a resize
-        self._updateAxes = True
-        for gr in self.gridList:
-            gr.renderMode = GLRENDERMODE_REBUILD
-        self._GLPeaks.rescale()
-        self._GLMultiplets.rescale()
-
-        self._clearAndUpdate(clearKeys=True)
-        self.update()
+        self._rescaleAllZoom(False)
 
     def viewRange(self):
         return ((self.axisL, self.axisR),
@@ -952,8 +930,8 @@ class CcpnGLWidget(QOpenGLWidget):
             return
 
         # test whether the limits have been reached in either axis
-        if (scrollDirection > 0 and self._minReached and self._axisLocked) or \
-                (scrollDirection < 0 and self._maxReached and self._axisLocked):
+        if (scrollDirection > 0 and self._minReached and (self._useLockedAspect or self._useDefaultAspect)) or \
+                (scrollDirection < 0 and self._maxReached and (self._useLockedAspect or self._useDefaultAspect)):
             event.accept()
             return
 
@@ -1047,7 +1025,7 @@ class CcpnGLWidget(QOpenGLWidget):
                 self.axisL = mbx + zoomOut * (self.axisL - mbx)
                 self.axisR = mbx - zoomOut * (mbx - self.axisR)
 
-            if not self._axisLocked:
+            if not (self._useLockedAspect or self._useDefaultAspect):
                 self.GLSignals._emitXAxisChanged(source=self, strip=self.strip,
                                                  axisB=self.axisB, axisT=self.axisT,
                                                  axisL=self.axisL, axisR=self.axisR)
@@ -1087,7 +1065,7 @@ class CcpnGLWidget(QOpenGLWidget):
                 self.axisB = mby + zoomOut * (self.axisB - mby)
                 self.axisT = mby - zoomOut * (mby - self.axisT)
 
-            if not self._axisLocked:
+            if not (self._useLockedAspect or self._useDefaultAspect):
                 self.GLSignals._emitYAxisChanged(source=self, strip=self.strip,
                                                  axisB=self.axisB, axisT=self.axisT,
                                                  axisL=self.axisL, axisR=self.axisR)
@@ -1107,7 +1085,7 @@ class CcpnGLWidget(QOpenGLWidget):
         event.accept()
 
     def _scaleToXAxis(self, rescale=True):
-        if self._axisLocked:
+        if (self._useLockedAspect or self._useDefaultAspect):
             mby = 0.5 * (self.axisT + self.axisB)
 
             if self._useDefaultAspect:
@@ -1116,7 +1094,7 @@ class CcpnGLWidget(QOpenGLWidget):
             else:
                 ax0 = self.pixelX
                 ax1 = self.pixelY
-                
+
             width = (self.w - self.AXIS_MARGINRIGHT) if self._drawRightAxis else self.w
             height = (self.h - self.AXIS_MARGINBOTTOM) if self._drawBottomAxis else self.h
 
@@ -1128,7 +1106,7 @@ class CcpnGLWidget(QOpenGLWidget):
             self._rescaleAllAxes()
 
     def _scaleToYAxis(self, rescale=True):
-        if self._axisLocked:
+        if (self._useLockedAspect or self._useDefaultAspect):
             mbx = 0.5 * (self.axisR + self.axisL)
 
             if self._useDefaultAspect:
@@ -1248,6 +1226,34 @@ class CcpnGLWidget(QOpenGLWidget):
         self._minReached = self._minXReached or self._minYReached
         self._maxReached = self._maxXReached or self._maxYReached
 
+    def _rescaleAllZoom(self, rescale=True):
+        """Reset the zoomto fit the spectra, including aspect checking
+        """
+        if (self._useLockedAspect or self._useDefaultAspect):
+
+            # check which is the primary axis and update the opposite axis - similar to wheelEvent
+            if self.spectrumDisplay.stripArrangement == 'Y':
+
+                # strips are arranged in a row
+                self._scaleToYAxis(rescale=rescale)
+
+            elif self.spectrumDisplay.stripArrangement == 'X':
+
+                # strips are arranged in a column
+                self._scaleToXAxis(rescale=rescale)
+
+        self.rescale()
+
+        # put stuff in here that will change on a resize
+        self._updateAxes = True
+        for gr in self.gridList:
+            gr.renderMode = GLRENDERMODE_REBUILD
+        self._GLPeaks.rescale()
+        self._GLMultiplets.rescale()
+
+        self._clearAndUpdate(clearKeys=True)
+        self.update()
+
     def _rescaleAllAxes(self, update=True):
         self._testAxisLimits()
         self.rescale(rescaleStaticHTraces=True, rescaleStaticVTraces=True)
@@ -1257,7 +1263,7 @@ class CcpnGLWidget(QOpenGLWidget):
         for gr in self.gridList:
             gr.renderMode = GLRENDERMODE_REBUILD
 
-        # if self._axisLocked:
+        # if (self._useLockedAspect or self._useDefaultAspect):
         # ratios have changed so rescale the peak/multiplet symbols
         self._GLPeaks.rescale()
         self._GLMultiplets.rescale()
@@ -1596,8 +1602,7 @@ class CcpnGLWidget(QOpenGLWidget):
         """Restore zoom to the last stored zoom
         zoomState = (axisL, axisR, axisB, axisT)
         """
-        if zoomState and len(zoomState)==4:
-
+        if zoomState and len(zoomState) == 4:
             # store the zoom state from when layouts are restored
             # self._restoreZoomHistoryFromState(zoomState)
             # if self._currentZoom < ZOOMMAXSTORE:
@@ -1707,6 +1712,8 @@ class CcpnGLWidget(QOpenGLWidget):
                     self.axisB, self.axisT = axisLimits[2:4]
                 else:
                     self.axisT, self.axisB = axisLimits[2:4]
+
+        self._rescaleAllZoom(rescale=False)
 
     def initializeGL(self):
         # GLversionFunctions = self.context().versionFunctions()
@@ -1944,30 +1951,30 @@ class CcpnGLWidget(QOpenGLWidget):
     def _toggleAxisLocked(self):
         """Toggle the axis locked button
         """
-        self._axisLocked = not self._axisLocked
+        self._useLockedAspect = not self._useLockedAspect
         self._useDefaultAspect = False
 
         # create a dict and event to update this strip first
-        aDict = {GLNotifier.GLSOURCE : None,
-                 GLNotifier.GLSPECTRUMDISPLAY : self.spectrumDisplay,
-                 GLNotifier.GLVALUES : (self._axisLocked, self._useDefaultAspect)
+        aDict = {GLNotifier.GLSOURCE         : None,
+                 GLNotifier.GLSPECTRUMDISPLAY: self.spectrumDisplay,
+                 GLNotifier.GLVALUES         : (self._useLockedAspect, self._useDefaultAspect)
                  }
         self._glAxisLockChanged(aDict)
-        self.GLSignals._emitAxisLockChanged(source=self, strip=self.strip, lockValues=(self._axisLocked, self._useDefaultAspect))
+        self.GLSignals._emitAxisLockChanged(source=self, strip=self.strip, lockValues=(self._useLockedAspect, self._useDefaultAspect))
 
     def _toggleUseDefaultAspect(self):
         """Toggle the use fixed aspect button
         """
         self._useDefaultAspect = not self._useDefaultAspect
-        self._axisLocked = False
+        self._useLockedAspect = False
 
         # create a dict and event to update this strip first
-        aDict = {GLNotifier.GLSOURCE : None,
-                 GLNotifier.GLSPECTRUMDISPLAY : self.spectrumDisplay,
-                 GLNotifier.GLVALUES : (self._axisLocked, self._useDefaultAspect)
+        aDict = {GLNotifier.GLSOURCE         : None,
+                 GLNotifier.GLSPECTRUMDISPLAY: self.spectrumDisplay,
+                 GLNotifier.GLVALUES         : (self._useLockedAspect, self._useDefaultAspect)
                  }
         self._glAxisLockChanged(aDict)
-        self.GLSignals._emitAxisLockChanged(source=self, strip=self.strip, lockValues=(self._axisLocked, self._useDefaultAspect))
+        self.GLSignals._emitAxisLockChanged(source=self, strip=self.strip, lockValues=(self._useLockedAspect, self._useDefaultAspect))
 
     def mousePressInCornerButtons(self, mx, my):
         """Check if the mouse has been pressed in the lock button
@@ -2209,7 +2216,6 @@ class CcpnGLWidget(QOpenGLWidget):
                 yPosition = self.cursorCoordinate[1]  #
                 objs = self._mouseInPeak(xPosition, yPosition, firstOnly=True)
                 if objs:
-
                     # move from the centre of the clicked peak
                     self.getPeakPositionFromMouse(objs[0], self._startCoordinate, self.cursorCoordinate)
 
@@ -2841,7 +2847,7 @@ class CcpnGLWidget(QOpenGLWidget):
             self._GLPeaks.drawSymbols(self._spectrumSettings)
             self._GLMultiplets.drawSymbols(self._spectrumSettings)
 
-            if not (self.is1D and self.strip._isPhasingOn):                 # other mouse buttons checeks needed here
+            if not (self.is1D and self.strip._isPhasingOn):  # other mouse buttons checeks needed here
                 self._GLIntegrals.drawSymbols(self._spectrumSettings)
                 with self._disableGLAliasing():
                     self._GLIntegrals.drawSymbolRegions(self._spectrumSettings)
@@ -3246,13 +3252,13 @@ class CcpnGLWidget(QOpenGLWidget):
 
         # build the axes
         self.axisLabelling, self.axesChanged = self._buildAxes(self.gridList[0], axisList=[0, 1],
-                                                                 scaleGrid=[1, 0],
-                                                                 r=self.foreground[0],
-                                                                 g=self.foreground[1],
-                                                                 b=self.foreground[2],
-                                                                 transparency=300.0,
-                                                                 _includeDiagonal=self._matchingIsotopeCodes,
-                                                                 _diagonalList=self.diagonalGLList)
+                                                               scaleGrid=[1, 0],
+                                                               r=self.foreground[0],
+                                                               g=self.foreground[1],
+                                                               b=self.foreground[2],
+                                                               transparency=300.0,
+                                                               _includeDiagonal=self._matchingIsotopeCodes,
+                                                               _diagonalList=self.diagonalGLList)
 
         if self.axesChanged:
             if self.highlighted:
@@ -3896,7 +3902,7 @@ class CcpnGLWidget(QOpenGLWidget):
                 # self._lockStringFalse.setStringOffset((self.axisL, self.axisB))
                 self._useDefaultStringFalse.drawTextArrayVBO(enableVBO=True)
 
-            if self._axisLocked:
+            if self._useLockedAspect:
                 # self._lockStringTrue.setStringOffset((self.axisL, self.axisB))
                 self._lockStringTrue.drawTextArrayVBO(enableVBO=True)
             else:
@@ -4102,21 +4108,30 @@ class CcpnGLWidget(QOpenGLWidget):
         self._rescaleAllAxes()
 
     @property
-    def axisLocked(self):
-        return self._axisLocked
+    def lockedAspect(self):
+        return self._useLockedAspect
 
-    @axisLocked.setter
-    def axisLocked(self, axisLocked):
-        self._axisLocked = axisLocked
+    @lockedAspect.setter
+    def lockedAspect(self, value):
+        self._useLockedAspect = value
         self._rescaleAllAxes()
 
     @property
-    def fixedAspect(self):
+    def defaultAspect(self):
         return self._useDefaultAspect
 
-    @fixedAspect.setter
-    def fixedAspect(self, useDefaultAspect):
-        self._useDefaultAspect = useDefaultAspect
+    @defaultAspect.setter
+    def defaultAspect(self, value):
+        self._useDefaultAspect = value
+        self._rescaleAllAxes()
+
+    @property
+    def aspectRatios(self):
+        return self._aspectRatios
+
+    @aspectRatios.setter
+    def aspectRatios(self, value):
+        self._aspectRatios = value
         self._rescaleAllAxes()
 
     @property
@@ -4289,12 +4304,12 @@ class CcpnGLWidget(QOpenGLWidget):
             _offset = self.pixelX * 80.0
             _mouseOffsetR = valueToRatio(self.cursorCoordinate[0] + _offset, self.axisL, self.axisR)
             _mouseOffsetL = valueToRatio(self.cursorCoordinate[0], self.axisL, self.axisR)
-            ox = -min(max(_mouseOffsetR-1.0, 0.0), _mouseOffsetL)
+            ox = -min(max(_mouseOffsetR - 1.0, 0.0), _mouseOffsetL)
 
             _offset = self.pixelY * self.mouseString.height
             _mouseOffsetT = valueToRatio(self.cursorCoordinate[1] + _offset, self.axisB, self.axisT)
             _mouseOffsetB = valueToRatio(self.cursorCoordinate[1], self.axisB, self.axisT)
-            oy = -min(max(_mouseOffsetT-1.0, 0.0), _mouseOffsetB)
+            oy = -min(max(_mouseOffsetT - 1.0, 0.0), _mouseOffsetB)
 
             self.mouseString.setStringOffset((ox, oy))
             self.mouseString.updateTextArrayVBOAttribs(enableVBO=True)
@@ -5301,9 +5316,9 @@ class CcpnGLWidget(QOpenGLWidget):
                                 d[1] = self._round_sig(d[1], sig=4)
 
                                 if ax == 0:
-                                    includeGrid = not (self.XMode == self._intFormat and d[0] < 1 and abs(p1[0]-int(p1[0])) > d[0]/2.0)
+                                    includeGrid = not (self.XMode == self._intFormat and d[0] < 1 and abs(p1[0] - int(p1[0])) > d[0] / 2.0)
                                 else:
-                                    includeGrid = not (self.YMode == self._intFormat and d[1] < 1 and abs(p1[1]-int(p1[1])) > d[1]/2.0)
+                                    includeGrid = not (self.YMode == self._intFormat and d[1] < 1 and abs(p1[1] - int(p1[1])) > d[1] / 2.0)
                                 # includeGrid = True
 
                                 if includeGrid:
@@ -5454,10 +5469,10 @@ class CcpnGLWidget(QOpenGLWidget):
             return
 
         if aDict[GLNotifier.GLSOURCE] != self and aDict[GLNotifier.GLSPECTRUMDISPLAY] == self.spectrumDisplay:
-            self._axisLocked = aDict[GLNotifier.GLVALUES][0]
+            self._useLockedAspect = aDict[GLNotifier.GLVALUES][0]
             self._useDefaultAspect = aDict[GLNotifier.GLVALUES][1]
 
-            if self._axisLocked:
+            if (self._useLockedAspect or self._useDefaultAspect):
 
                 # check which is the primary axis and update the opposite axis - similar to wheelEvent
                 if self.spectrumDisplay.stripArrangement == 'Y':
@@ -5484,25 +5499,28 @@ class CcpnGLWidget(QOpenGLWidget):
         if aDict[GLNotifier.GLSOURCE] != self and aDict[GLNotifier.GLSPECTRUMDISPLAY] == self.spectrumDisplay:
 
             # read values from dataDict and set units
-            if aDict[GLNotifier.GLVALUES]:      # and aDict[GLNotifier.GLVALUES][GLDefs.AXISLOCKASPECTRATIO]:
+            if aDict[GLNotifier.GLVALUES]:  # and aDict[GLNotifier.GLVALUES][GLDefs.AXISLOCKASPECTRATIO]:
 
                 self._xUnits = aDict[GLNotifier.GLVALUES][GLDefs.AXISXUNITS]
                 self._yUnits = aDict[GLNotifier.GLVALUES][GLDefs.AXISYUNITS]
 
                 aL = aDict[GLNotifier.GLVALUES][GLDefs.AXISLOCKASPECTRATIO]
                 uFA = aDict[GLNotifier.GLVALUES][GLDefs.AXISUSEDEFAULTASPECTRATIO]
-                if self._axisLocked != aL or self._useDefaultAspect != uFA:
-
+                if self._useLockedAspect != aL or self._useDefaultAspect != uFA:
                     # self._xUnits = aDict[GLNotifier.GLVALUES][GLDefs.AXISXUNITS]
                     # self._yUnits = aDict[GLNotifier.GLVALUES][GLDefs.AXISYUNITS]
-                    self._axisLocked = aL
+                    self._useLockedAspect = aL
                     self._useDefaultAspect = uFA
 
-                    aDict = {GLNotifier.GLSOURCE         : None,
-                             GLNotifier.GLSPECTRUMDISPLAY: self.spectrumDisplay,
-                             GLNotifier.GLVALUES         : (aL, uFA)
-                             }
-                    self._glAxisLockChanged(aDict)
+                    changeDict = {GLNotifier.GLSOURCE         : None,
+                                  GLNotifier.GLSPECTRUMDISPLAY: self.spectrumDisplay,
+                                  GLNotifier.GLVALUES         : (aL, uFA)
+                                  }
+                    self._glAxisLockChanged(changeDict)
+
+                self._aspectRatios.update(aDict[GLNotifier.GLVALUES][GLDefs.AXISASPECTRATIOS])
+                if uFA:
+                    self._rescaleAllZoom(rescale=True)
 
             # spawn rebuild event for the grid
             self._updateAxes = True
@@ -5665,11 +5683,11 @@ class CcpnGLWidget(QOpenGLWidget):
 
                         # coordinates have already been flipped
                         # self.doubleCursorCoordinate[n] = mouseMovedDict[DOUBLEAXIS_FULLATOMNAME][axis]
-                        self.doubleCursorCoordinate[1-n] = self.cursorCoordinate[n]
+                        self.doubleCursorCoordinate[1 - n] = self.cursorCoordinate[n]
 
                     else:
                         self.cursorCoordinate[n] = None
-                        self.doubleCursorCoordinate[1-n] = None
+                        self.doubleCursorCoordinate[1 - n] = None
 
                 self.current.cursorPosition = (self.cursorCoordinate[0], self.cursorCoordinate[1])
 
@@ -5888,6 +5906,7 @@ class CcpnGLWidget(QOpenGLWidget):
         Current objects returned are: peaks, integrals, multiplets
         :return: dict of objects
         """
+
         def _addObjects(objDict, attrName):
             """Add the selected objects to the dict
             """

@@ -814,7 +814,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
         # self.showLastAxisOnlyBox.toggled.connect(partial(self._queueToggleGeneralOptions, 'lastAxisOnly'))
 
         row += 1
-        self.lockAspectRatioLabel = Label(parent, text="Aspect Ratios: ", grid=(row, 0))
+        self.lockAspectRatioLabel = Label(parent, text="Default Aspect Ratios: ", grid=(row, 0))
         # self.lockAspectRatioBox = CheckBox(parent, grid=(row, 1), checked=self.preferences.general.lockAspectRatio)
         # self.lockAspectRatioBox.toggled.connect(partial(self._queueToggleGeneralOptions, 'lockAspectRatio'))
 

@@ -40,7 +40,7 @@ from ccpn.util.Logging import getLogger
 from ccpn.util.Constants import AXIS_MATCHATOMTYPE, AXIS_FULLATOMNAME, DOUBLEAXIS_FULLATOMNAME
 from functools import partial
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs import AXISXUNITS, AXISYUNITS, AXISLOCKASPECTRATIO, \
-    SYMBOLTYPES, ANNOTATIONTYPES, SYMBOLSIZE, SYMBOLTHICKNESS, AXISUSEDEFAULTASPECTRATIO, \
+    SYMBOLTYPES, ANNOTATIONTYPES, SYMBOLSIZE, SYMBOLTHICKNESS, AXISUSEDEFAULTASPECTRATIO, AXISASPECTRATIOS, \
     GRIDVISIBLE, CROSSHAIRVISIBLE, DOUBLECROSSHAIRVISIBLE, BOTTOMAXIS, RIGHTAXIS
 from ccpn.core.lib.ContextManagers import undoStackBlocking, undoBlock, \
     notificationBlanking, undoBlockWithoutSideBar
@@ -176,7 +176,7 @@ class GuiStrip(Frame):
             self._contourThickness = spectrumDisplay.strips[0]._contourThickness
             self._spectrumBordersVisible = spectrumDisplay.strips[0]._spectrumBordersVisible
 
-            self._CcpnGLWidget._axisLocked = spectrumDisplay.strips[0]._CcpnGLWidget._axisLocked
+            # self._CcpnGLWidget._useLockedAspect = spectrumDisplay.strips[0]._CcpnGLWidget._useLockedAspect
 
         else:
 
@@ -202,8 +202,10 @@ class GuiStrip(Frame):
         # set the axis units from the current settings
         self._CcpnGLWidget.xUnits = settings[AXISXUNITS]
         self._CcpnGLWidget.yUnits = settings[AXISYUNITS]
-        self._CcpnGLWidget.axisLocked = settings[AXISLOCKASPECTRATIO]
-        self._CcpnGLWidget.fixedAspect = settings[AXISUSEDEFAULTASPECTRATIO]
+        self._CcpnGLWidget.lockedAspect = settings[AXISLOCKASPECTRATIO]
+        self._CcpnGLWidget.defaultAspect = settings[AXISUSEDEFAULTASPECTRATIO]
+        self._CcpnGLWidget.aspectRatios = settings[AXISASPECTRATIOS]
+
         # self._CcpnGLWidget._doubleCrosshairVisible = self._preferences.showDoubleCrosshair
 
         # initialise the notifiers

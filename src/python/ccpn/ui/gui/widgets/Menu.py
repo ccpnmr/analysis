@@ -33,7 +33,7 @@ from ccpn.framework.Translation import translator
 
 SHOWMODULESMENU = 'Show/hide Modules'
 MACROSMENU = 'User Macros'
-CCPNMACROSMENU = 'CCPN Macros'
+CCPNMACROSMENU = 'Run CCPN Macros'
 TUTORIALSMENU = 'Tutorials'
 
 

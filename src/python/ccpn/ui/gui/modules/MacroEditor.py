@@ -22,23 +22,20 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
-from PyQt5 import QtGui, QtWidgets
-
+import datetime
+import os
 from ccpn.ui.gui.modules.CcpnModule import CcpnModule
-from ccpn.ui.gui.widgets.Button import Button
 from ccpn.ui.gui.widgets.ButtonList import ButtonList
 from ccpn.ui.gui.widgets.FileDialog import FileDialog
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.LineEdit import LineEdit
-from ccpn.ui.gui.widgets.TextEditor import TextEditor
 from ccpn.ui.gui.widgets.IpythonConsole import IpythonConsole
 from ccpn.ui.gui.widgets import MessageDialog
 from ccpn.ui.gui.lib.GuiNotifier import GuiNotifier
 from ccpn.ui.gui.widgets.DropBase import DropBase
 from ccpn.util.Logging import getLogger
 from ccpn.ui.gui.widgets.PythonEditor import QCodeEditor
-import datetime
-import os
+from ccpn.framework.PathsAndUrls import macroPath
 
 
 class MacroEditor(CcpnModule):
@@ -56,7 +53,7 @@ class MacroEditor(CcpnModule):
     includeSettingsWidget = False
     className = 'MacroEditor'
 
-    def __init__(self, mainWindow=None, name='Macro Editor', filePath=None):
+    def __init__(self, mainWindow=None, name='Macro Editor', filePath=None, useCcpnMacros=False):
         CcpnModule.__init__(self, mainWindow=mainWindow, name=name)
 
         self.mainWindow = mainWindow
@@ -67,7 +64,12 @@ class MacroEditor(CcpnModule):
         self._pythonConsole = self.mainWindow.pythonConsole
         if self._pythonConsole is None:
             self._pythonConsole = IpythonConsole(self.mainWindow)
-        self.macroPath = self.preferences.general.userMacroPath
+
+        if useCcpnMacros:
+            self.macroPath = macroPath
+        else:
+            self.macroPath = self.preferences.general.userMacroPath
+
         self._isTempMacro = True
         self._originalOpenedFile = None
 

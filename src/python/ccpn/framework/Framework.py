@@ -1289,6 +1289,7 @@ class Framework(NotifierBase):
             (),
             ("Run...", self.runMacro),
             ("Run Recent", ()),
+            ("Open CCPN Macros...", self.openCcpnMacroOnEditor),
             (CCPNMACROSMENU, ([
                 ("None", None, [('checkable', True),
                                 ('checked', False)])
@@ -2764,6 +2765,17 @@ class Framework(NotifierBase):
         """
         mainWindow = self.ui.mainWindow
         self.editor = MacroEditor(mainWindow=mainWindow)
+        mainWindow.moduleArea.addModule(self.editor, position='top', relativeTo=mainWindow.moduleArea)
+        self.editor._openMacroFile()
+        # mainWindow.pythonConsole.writeConsoleCommand("application.showMacroEditor()")
+        # getLogger().info("application.showMacroEditor()")
+
+    def openCcpnMacroOnEditor(self):
+        """
+        Displays macro editor.
+        """
+        mainWindow = self.ui.mainWindow
+        self.editor = MacroEditor(mainWindow=mainWindow, useCcpnMacros=True)
         mainWindow.moduleArea.addModule(self.editor, position='top', relativeTo=mainWindow.moduleArea)
         self.editor._openMacroFile()
         # mainWindow.pythonConsole.writeConsoleCommand("application.showMacroEditor()")

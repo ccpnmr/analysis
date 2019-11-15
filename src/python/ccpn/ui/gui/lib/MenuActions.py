@@ -610,11 +610,11 @@ class _openItemSpectrumGroupDisplay(OpenItemABC):
             checkSpectraToOpen(mainWindow, [spectrumGroup])
 
             spectrumDisplay = mainWindow.createSpectrumDisplay(spectrumGroup.spectra[0])
-            mainWindow.moduleArea.addModule(spectrumDisplay, position=position, relativeTo=relativeTo)
+            # mainWindow.moduleArea.addModule(spectrumDisplay, position=position, relativeTo=relativeTo)
 
             with undoBlockWithoutSideBar():
-                with notificationEchoBlocking:
-                    for spectrum in spectrumGroup.spectra:  # Add the other spectra
+                with notificationEchoBlocking():
+                    for spectrum in spectrumGroup.spectra[1:]:  # Add the other spectra
                         spectrumDisplay.displaySpectrum(spectrum)
 
                     spectrumDisplay.isGrouped = True

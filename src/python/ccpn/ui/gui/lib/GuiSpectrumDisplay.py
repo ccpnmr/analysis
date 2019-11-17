@@ -93,6 +93,40 @@ STRIPARRANGEMENT = 'stripArrangement'
 
 MAXITEMLOGGING = 4
 
+# GST All this complication is added because the scroll frame appears to have a lower margin added by some part of Qt
+#     that we can't control in PyQt. Specifically even if you overide setContentsMargins on ScrollArea it is never
+#     called but at the same time ScrollArea gets a lower contents margin of 1 pixel that we didn't ask for... ;-(
+def styleSheetPredicate(target):
+    children  = [child for child in target.children() if isinstance(child,QtGui.QWidget)]
+
+    return len(children) < 2
+
+def styleSheetMutator(styleSheetTemplate, predicate, clazz):
+
+    if predicate:
+        styleSheet = styleSheetTemplate % (clazz.__class__.__name__, '')
+    else:
+        styleSheet = styleSheetTemplate % (clazz.__class__.__name__, 'background-color: #191919;')
+
+    return styleSheet
+
+class ScrollAreaWithPredicateStylesheet(ScrollArea):
+
+    def __init__(self, styleSheetTemplate, predicate, mutator,  *args, **kwds):
+        self.styleSheetTemplate = styleSheetTemplate
+        self.predicate = predicate
+        self.mutator = mutator
+        super().__init__(*args, **kwds)
+
+    def checkPredicate(self):
+        return self.predicate(self)
+
+    def modifyStyleSheet(self, predicate):
+        self.setStyleSheet(self.mutator(self.styleSheetTemplate, predicate, self))
+
+    def resizeEvent(self,e):
+        self.modifyStyleSheet(self.checkPredicate())
+        return super().resizeEvent(e)
 
 class GuiSpectrumDisplay(CcpnModule):
     """
@@ -277,18 +311,21 @@ class GuiSpectrumDisplay(CcpnModule):
                                 acceptDrops=True)
         # self.stripFrame.layout().setContentsMargins(0, 0, 0, 0)
 
-        frameStyleSheetTemplate = ''' %s { border-left: 1px solid #a9a9a9;
+        frameStyleSheetTemplate = ''' .%s { border-left: 1px solid #a9a9a9;
                                       border-right: 1px solid #a9a9a9;
                                       border-bottom: 1px solid #a9a9a9;
                                       border-bottom-right-radius: 2px;
                                       border-bottom-left-radius: 2px;
+                                      %s
                                       }'''
 
         if useScrollArea:
             # scroll area for strips
             # This took a lot of sorting-out; better leave as is or test thoroughly
-            self._stripFrameScrollArea = ScrollArea(parent=self.qtParent, setLayout=True,
-                                                    acceptDrops=False,  # True
+            self._stripFrameScrollArea = ScrollAreaWithPredicateStylesheet(parent=self.qtParent,
+                                                    styleSheetTemplate = frameStyleSheetTemplate,
+                                                    predicate=styleSheetPredicate, mutator=styleSheetMutator,
+                                                    setLayout=True, acceptDrops=False,
                                                     scrollBarPolicies=('asNeeded', 'never'))
             self._stripFrameScrollArea.setWidget(self.stripFrame)
             self._stripFrameScrollArea.setWidgetResizable(True)
@@ -298,11 +335,10 @@ class GuiSpectrumDisplay(CcpnModule):
             self.stripFrame.setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding,
                                           QtWidgets.QSizePolicy.Expanding)
 
-            self._stripFrameScrollArea.setStyleSheet(frameStyleSheetTemplate % '.ScrollArea')
         else:
             self._stripFrameScrollArea = None
             self.qtParent.getLayout().addWidget(self.stripFrame, stripRow, 0, 1, 7)
-            self.stripFrame.setStyleSheet(frameStyleSheetTemplate % '.Frame')
+            self.stripFrame.setStyleSheet(frameStyleSheetTemplate % ('Frame', ''))
 
         includeDirection = not self.is1D
         self.phasingFrame = PhasingFrame(parent=self.qtParent,

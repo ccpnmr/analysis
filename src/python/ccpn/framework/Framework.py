@@ -520,7 +520,7 @@ class Framework(NotifierBase):
                 additions = fp.read()
 
             styleSheet += additions
-        return styleSheet
+        return ''  # GST for debug this should not be comitted! styleSheet
 
     def _getUserPrefs(self):
         # user preferences

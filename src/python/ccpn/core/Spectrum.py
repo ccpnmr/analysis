@@ -865,57 +865,57 @@ assignmentTolerances
     # @dimensionTypes.setter
     # def dimensionTypes(self, value: Sequence):
     #
-    #     apiDataSource = self._wrappedData
-    #     if len(value) == apiDataSource.numDim:
+    #     if len(value) != self.dimensionCount:
+    #         raise ValueError("DimensionTypes must have length %s, was %s" % (self.dimensionCount, value))
     #
-    #         for dimValue in value:
-    #             if dimValue not in DIMENSION_TYPES:
-    #                 raise ValueError("DimensionType %s not recognised" % dimValue)
+    #     for dimType in value:
+    #         if dimType not in DIMENSIONTYPES:
+    #             raise ValueError("DimensionType %s not recognised" % dimType)
     #
-    #         for n, dataDimVal in enumerate(self._wrappedData.sortedDataDims()):
-    #             pass
+    #     values = [i for i in zip(self.pointCounts, self.pointOffsets, self.isComplex, self.valuesPerPoint)]
     #
-    #         # from NMR.Experiment - createDataSource
-    #
-    #         # self: 'Experiment', name: str, numPoints: Sequence[int], sw: Sequence[float],
-    #         # refppm: Sequence[float], refpt: Sequence[float], dataStore: 'DataStore' = None,
-    #         # scale: float = 1.0, details:str = None, numPointsOrig:Sequence[int] = None,
-    #         # pointOffset: Sequence[int] = None, isComplex:Sequence[bool] = None,
-    #         # sampledValues: Sequence[Sequence[float]] = None,
-    #         # sampledErrors: Sequence[Sequence[float]] = None,
-    #         # ** additionalParameters) -> 'DataSource':
-    #
-    #         # if not numPointsOrig:
-    #         #     numPointsOrig = numPoints
-    #         #
-    #         # if not pointOffset:
-    #         #     pointOffset = (0,) * numDim
-    #         #
-    #         # if not isComplex:
-    #         #     isComplex = (False,) * numDim
-    #         #
-    #         # for n, expDim in enumerate(self.sortedExpDims()):
-    #         #
-    #         #     numPointsOrig = expDim.numPointsOrig
-    #         #     pointOffset = expDim
-    #         #     values = sampledValues[n] if sampledValues else None
-    #         #     if values:
-    #         #         errors = sampledErrors[n] if sampledErrors else None
-    #         #         sampledDataDim = spectrum.newSampledDataDim(dim=n + 1, numPoints=numPoints[n], expDim=expDim,
-    #         #                                                     isComplex=isComplex[n], pointValues=values, pointErrors=errors)
-    #         #     else:
-    #         #         freqDataDim = spectrum.newFreqDataDim(dim=n + 1, numPoints=numPoints[n],
-    #         #                                               isComplex=isComplex[n], numPointsOrig=numPointsOrig[n],
-    #         #                                               pointOffset=pointOffset[n],
-    #         #                                               valuePerPoint=sw[n] / float(numPoints[n]), expDim=expDim)
-    #         #         expDimRef = (expDim.findFirstExpDimRef(measurementType='Shift') or expDim.findFirstExpDimRef())
-    #         #         if expDimRef:
-    #         #             freqDataDim.newDataDimRef(refPoint=refpt[n], refValue=refppm[n], expDimRef=expDimRef)
-    #
-    #
-    #             # dataDim classnames are FidDataDim, FreqDataDim, SampledDataDim
-    #     else:
-    #         raise ValueError("DimensionTypes must have length %s, was %s" % (apiDataSource.numDim, value))
+    #     for n, dataDimVal in enumerate(self._wrappedData.sortedDataDims()):
+    #         pass
+
+        # from NMR.Experiment - createDataSource
+
+        # self: 'Experiment', name: str, numPoints: Sequence[int], sw: Sequence[float],
+        # refppm: Sequence[float], refpt: Sequence[float], dataStore: 'DataStore' = None,
+        # scale: float = 1.0, details:str = None, numPointsOrig:Sequence[int] = None,
+        # pointOffset: Sequence[int] = None, isComplex:Sequence[bool] = None,
+        # sampledValues: Sequence[Sequence[float]] = None,
+        # sampledErrors: Sequence[Sequence[float]] = None,
+        # ** additionalParameters) -> 'DataSource':
+
+        # if not numPointsOrig:
+        #     numPointsOrig = numPoints
+        #
+        # if not pointOffset:
+        #     pointOffset = (0,) * numDim
+        #
+        # if not isComplex:
+        #     isComplex = (False,) * numDim
+        #
+        # for n, expDim in enumerate(self.sortedExpDims()):
+        #
+        #     numPointsOrig = expDim.numPointsOrig
+        #     pointOffset = expDim
+        #     values = sampledValues[n] if sampledValues else None
+        #     if values:
+        #         errors = sampledErrors[n] if sampledErrors else None
+        #         sampledDataDim = spectrum.newSampledDataDim(dim=n + 1, numPoints=numPoints[n], expDim=expDim,
+        #                                                     isComplex=isComplex[n], pointValues=values, pointErrors=errors)
+        #     else:
+        #         freqDataDim = spectrum.newFreqDataDim(dim=n + 1, numPoints=numPoints[n],
+        #                                               isComplex=isComplex[n], numPointsOrig=numPointsOrig[n],
+        #                                               pointOffset=pointOffset[n],
+        #                                               valuePerPoint=sw[n] / float(numPoints[n]), expDim=expDim)
+        #         expDimRef = (expDim.findFirstExpDimRef(measurementType='Shift') or expDim.findFirstExpDimRef())
+        #         if expDimRef:
+        #             freqDataDim.newDataDimRef(refPoint=refpt[n], refValue=refppm[n], expDimRef=expDimRef)
+
+
+                # dataDim classnames are FidDataDim, FreqDataDim, SampledDataDim
 
     @property
     @_includeInDimensionalCopy

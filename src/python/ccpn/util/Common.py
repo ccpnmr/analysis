@@ -219,6 +219,24 @@ def uniquify(sequence):
     return [x for x in sequence if x not in seen and not seen_add(x)]
 
 
+#from typing import Iterable
+from collections import Iterable                            # < py38
+
+def flatten(items):
+    """Yield items from any nested iterable; see Reference.
+    Here is a general approach that applies to numbers, strings, nested lists and mixed containers.
+    From: https://stackoverflow.com/questions/952914/how-to-make-a-flat-list-out-of-list-of-lists/952952#952952
+    ref: This solution is modified from a recipe in Beazley, D. and B. Jones. Recipe 4.14, Python Cookbook 3rd
+         Ed., O'Reilly Media Inc. Sebastopol, CA: 2013.
+    """
+    for x in items:
+        if isinstance(x, Iterable) and not isinstance(x, (str, bytes)):
+            for sub_x in flatten(x):
+                yield sub_x
+        else:
+            yield x
+
+
 def isClose(a, b, relTolerance=1e-05, absTolerance=1e-08):
     """Are a and b identical within reasonable floating point tolerance?
     Uses sum of relative (relTolerance) and absolute (absTolerance) difference

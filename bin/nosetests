@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
-export CCPNMR_TOP_DIR="$(cd $(dirname "$0")/..; pwd)"
-#echo ">>> CCPNMR_TOP_DIR=${CCPNMR_TOP_DIR}"
+export CCPNMR_TOP_DIR="$(cd "$(dirname "$0")/.." || exit; pwd)"
+NOSETESTS="${ANACONDA3}"/bin/nosetests
 
 source "${CCPNMR_TOP_DIR}"/bin/paths.sh
 
@@ -10,5 +10,5 @@ FILENAME=${FILENAME##*/};FILENAME=${FILENAME%.*}
 STAMP="$(date +%Y%m%d_%H%M%S)"
 
 # execute nosetests and redirect all output to file 'TESTOUT_<timestamp>.txt'
-"${ANACONDA3}"/bin/nosetests -vs $* > TESTOUT_$STAMP.txt 2>&1
+"${NOSETESTS}" -vs $* > TESTOUT_${STAMP}.txt 2>&1
 

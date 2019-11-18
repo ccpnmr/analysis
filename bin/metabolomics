@@ -1,10 +1,7 @@
 #!/usr/bin/env bash
 
-export CCPNMR_TOP_DIR="$(cd $(dirname "$0")/..; pwd)"
-#echo ">>> CCPNMR_TOP_DIR=${CCPNMR_TOP_DIR}"
-
+export CCPNMR_TOP_DIR="$(cd "$(dirname "$0")/.." || exit; pwd)"
 ANALYSIS="${CCPNMR_TOP_DIR}"/src/python/ccpn/AnalysisMetabolomics
-#echo ">>> ANALYSIS=${ANALYSIS}"
 
 source "${CCPNMR_TOP_DIR}"/bin/paths.sh
 "${ANACONDA3}"/bin/python -W ignore::DeprecationWarning "${ANALYSIS}" $*

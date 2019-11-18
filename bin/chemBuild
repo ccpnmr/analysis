@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 
-export CCPNMR_TOP_DIR="$(cd $(dirname "$0")/..; pwd)"
-
+export CCPNMR_TOP_DIR="$(cd "$(dirname "$0")/.." || exit; pwd)"
 CHEMBUILD="${CCPNMR_TOP_DIR}"/src/python/chemBuild/ccpnmr/chemBuild/ChemBuild.py
 
 source "${CCPNMR_TOP_DIR}"/bin/paths.sh

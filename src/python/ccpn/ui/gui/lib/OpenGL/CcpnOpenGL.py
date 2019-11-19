@@ -899,6 +899,30 @@ class CcpnGLWidget(QOpenGLWidget):
             event.accept()
             return
 
+        if self._isSHIFT or self._isCTRL:
+
+            # process wheel with buttons here
+            # transfer even to the correct widget for changing the plane OR raising base contour level...
+
+            if self._isSHIFT:
+                # raise/lower base contour level
+                print('>>>SHIFT')
+
+            elif self._isCTRL:
+                # scroll through planes
+                print('>>>CONTROL')
+
+                pT = self.strip.planeToolbar if hasattr(self.strip, 'planeToolbar') else None
+                if pT and hasattr(pT, 'planeLabels'):
+                    if pT.planeLabels:
+                        pT = self.strip.planeToolbar.planeLabels[0]
+
+                        pT.wheelEvent(event)
+
+            event.accept()
+            return
+
+
         numPixels = event.pixelDelta()
         numDegrees = event.angleDelta()
         zoomCentre = self._preferences.zoomCentreType
@@ -2323,11 +2347,11 @@ class CcpnGLWidget(QOpenGLWidget):
         if keyMod == Qt.ShiftModifier or key == QtCore.Qt.Key_Shift:
             self._isSHIFT = 'S'
             self.shift = True
-        if keyMod == Qt.ControlModifier:
+        if keyMod == Qt.ControlModifier or key == QtCore.Qt.Key_Control:
             self._isCTRL = 'C'
-        if keyMod == Qt.AltModifier:
+        if keyMod == Qt.AltModifier or key == QtCore.Qt.Key_Alt:
             self._isALT = 'A'
-        if keyMod == Qt.MetaModifier:
+        if keyMod == Qt.MetaModifier or key == QtCore.Qt.Key_Meta:
             self._isMETA = 'M'
 
     def glKeyPressEvent(self, aDict):

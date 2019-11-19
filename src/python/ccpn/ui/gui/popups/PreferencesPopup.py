@@ -526,9 +526,9 @@ class PreferencesPopup(CcpnDialogMainWidget):
         self.macroPathData.setText(self.preferences.general.userMacroPath)
         self.pluginPathData.setText(self.preferences.general.userPluginPath)
 
-        # TODO enable plugin PathData
-        self.pluginPathData.setDisabled(True)
-        self.pluginPathDataButton.setDisabled(True)
+        # # TODO enable plugin PathData
+        # self.pluginPathData.setDisabled(True)
+        # self.pluginPathDataButton.setDisabled(True)
 
         self.pipesPathData.setText(self.preferences.general.userExtensionPath)
 
@@ -1174,7 +1174,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
         dialog = FileDialog(self, text='Select Data File', directory=currentDataPath, fileMode=2, acceptMode=0,
                             preferences=self.preferences.general)
         directory = dialog.selectedFiles()
-        if len(directory) > 0:
+        if directory and len(directory) > 0:
             self.userLayoutsLe.setText(directory[0])
             # self._setuserLayoutsPath()
             # self.preferences.general.userLayoutsPath = directory[0]
@@ -1197,7 +1197,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
         dialog = FileDialog(self, text='Select Data File', directory=currentDataPath, fileMode=2, acceptMode=0,
                             preferences=self.preferences.general)
         directory = dialog.selectedFiles()
-        if len(directory) > 0:
+        if directory and len(directory) > 0:
             self.macroPathData.setText(directory[0])
             # self._setMacroFilesPath()
             # self.preferences.general.userMacroPath = directory[0]
@@ -1220,7 +1220,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
         dialog = FileDialog(self, text='Select Data File', directory=currentDataPath, fileMode=2, acceptMode=0,
                             preferences=self.preferences.general)
         directory = dialog.selectedFiles()
-        if len(directory) > 0:
+        if directory and len(directory) > 0:
             self.pluginPathData.setText(directory[0])
             # self._setPluginFilesPath()
             # self.preferences.general.pluginMacroPath = directory[0]
@@ -1243,7 +1243,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
         dialog = FileDialog(self, text='Select Data File', directory=currentDataPath, fileMode=2, acceptMode=0,
                             preferences=self.preferences.general)
         directory = dialog.selectedFiles()
-        if len(directory) > 0:
+        if directory and len(directory) > 0:
             self.pipesPathData.setText(directory[0])
             # self._setPipesFilesPath()
             # self.preferences.general.userExtensionPath = directory[0]

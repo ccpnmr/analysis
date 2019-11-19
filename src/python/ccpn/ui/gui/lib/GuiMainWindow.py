@@ -55,7 +55,7 @@ from ccpn.ui.gui.widgets import MessageDialog
 from ccpn.ui.gui.widgets.Action import Action
 from ccpn.ui.gui.widgets.FileDialog import FileDialog
 from ccpn.ui.gui.widgets.IpythonConsole import IpythonConsole
-from ccpn.ui.gui.widgets.Menu import Menu, MenuBar, SHOWMODULESMENU, CCPNMACROSMENU, TUTORIALSMENU
+from ccpn.ui.gui.widgets.Menu import Menu, MenuBar, SHOWMODULESMENU, CCPNMACROSMENU, TUTORIALSMENU, PLUGINSMENU, CCPNPLUGINSMENU
 from ccpn.ui.gui.widgets.SideBar import SideBar  #,SideBar
 from ccpn.ui.gui.widgets.Frame import Frame
 from ccpn.ui.gui.widgets.CcpnModuleArea import CcpnModuleArea
@@ -679,7 +679,7 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
                                           callback=self.application.clearRecentMacros))
 
     def _addPluginSubMenu(self, Plugin):
-        targetMenu = pluginsMenu = self.getMenuAction('Plugins')
+        targetMenu = pluginsMenu = self.searchMenuAction(CCPNPLUGINSMENU)
         if '...' in Plugin.PLUGINNAME:
             package, name = Plugin.PLUGINNAME.split('...')
             try:
@@ -837,7 +837,7 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
 
         from ccpn.plugins import loadedPlugins
 
-        pluginsMenu = self.getMenuAction('Plugins')
+        pluginsMenu = self.searchMenuAction(CCPNPLUGINSMENU)
         pluginsMenu.clear()
         for Plugin in loadedPlugins:
             self._addPluginSubMenu(Plugin)

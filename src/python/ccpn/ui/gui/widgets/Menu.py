@@ -35,6 +35,8 @@ SHOWMODULESMENU = 'Show/hide Modules'
 MACROSMENU = 'User Macros'
 CCPNMACROSMENU = 'Run CCPN Macros'
 TUTORIALSMENU = 'Tutorials'
+PLUGINSMENU = 'User Plugins'
+CCPNPLUGINSMENU = 'CCPN Macros'
 
 
 class Menu(QtWidgets.QMenu, Base):

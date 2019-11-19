@@ -67,7 +67,8 @@ from ccpnmodel.ccpncore.lib.Io import Formats as ioFormats
 from ccpnmodel.ccpncore.memops.metamodel import Util as metaUtil
 from ccpn.util.decorators import logCommand
 from ccpn.core.lib.ContextManagers import catchExceptions
-from ccpn.ui.gui.widgets.Menu import SHOWMODULESMENU, CCPNMACROSMENU, TUTORIALSMENU
+from ccpn.ui.gui.widgets.Menu import SHOWMODULESMENU, CCPNMACROSMENU, TUTORIALSMENU, PLUGINSMENU, CCPNPLUGINSMENU
+
 
 # from functools import partial
 
@@ -1300,7 +1301,11 @@ class Framework(NotifierBase):
             ]
                    ))
 
-        ms.append(('Plugins', ()))
+        ms.append(('Plugins', [
+            # (PLUGINSMENU, ()),
+            (CCPNPLUGINSMENU, ()),
+            ]
+                   ))
 
         ms.append(('Help', [
             (TUTORIALSMENU, ([
@@ -1309,12 +1314,12 @@ class Framework(NotifierBase):
                                 ('checked', False)])
                 ])),
 
-                # # Submenu
-                # ("Beginners Tutorial", self.showBeginnersTutorial),
-                # ("Backbone Tutorial", self.showBackboneTutorial),
-                # ("CSP Tutorial", self.showCSPtutorial),
-                # ("More...", self.showTutorials)
-                # ])),
+            # # Submenu
+            # ("Beginners Tutorial", self.showBeginnersTutorial),
+            # ("Backbone Tutorial", self.showBackboneTutorial),
+            # ("CSP Tutorial", self.showCSPtutorial),
+            # ("More...", self.showTutorials)
+            # ])),
 
             ("Show Shortcuts", self.showShortcuts),
             ("Show CcpNmr V3 Documentation", self.showVersion3Documentation),
@@ -1528,35 +1533,35 @@ class Framework(NotifierBase):
         popup.raise_()
 
     #     # FIXME Below is broken. This does not create a project! Looks like a copy-paste from NEF code.
-        # """Load Project from NEF file at path, and do necessary setup"""
-        #
-        # from ccpn.core.lib.ContextManagers import undoBlock, notificationEchoBlocking
-        #
-        # dataBlock = self.nefReader.getNMRStarData(path)
+    # """Load Project from NEF file at path, and do necessary setup"""
+    #
+    # from ccpn.core.lib.ContextManagers import undoBlock, notificationEchoBlocking
+    #
+    # dataBlock = self.nefReader.getNMRStarData(path)
 
-        # if makeNewProject:
-        #     if self.project is not None:
-        #         self._closeProject()
-        #     self.project = self.newProject(dataBlock.name)
-        #
-        # self.project._wrappedData.shiftAveraging = False
-        #
-        # # with suspendSideBarNotifications(project=self.project):
-        # with undoBlock():
-        #     with notificationEchoBlocking():
-        #         # with catchExceptions(application=self, errorStringTemplate='Error loading NMRStar file: %s'):
-        #             self.nefReader.importNewProject(self.project, dataBlock)
+    # if makeNewProject:
+    #     if self.project is not None:
+    #         self._closeProject()
+    #     self.project = self.newProject(dataBlock.name)
+    #
+    # self.project._wrappedData.shiftAveraging = False
+    #
+    # # with suspendSideBarNotifications(project=self.project):
+    # with undoBlock():
+    #     with notificationEchoBlocking():
+    #         # with catchExceptions(application=self, errorStringTemplate='Error loading NMRStar file: %s'):
+    #             self.nefReader.importNewProject(self.project, dataBlock)
 
-        # with undoBlock():
-        #     try:
-        #         self.nefReader.importNewNMRStarProject(self.project, dataBlock)
-        #     except Exception as es:
-        #         getLogger().warning('Error loading NMRStar file: %s' % str(es))
+    # with undoBlock():
+    #     try:
+    #         self.nefReader.importNewNMRStarProject(self.project, dataBlock)
+    #     except Exception as es:
+    #         getLogger().warning('Error loading NMRStar file: %s' % str(es))
 
-        # self.project._wrappedData.shiftAveraging = True
+    # self.project._wrappedData.shiftAveraging = True
 
-        # getLogger().info('==> Loaded NmrStar file: "%s"' % (path,))
-        # return self.project
+    # getLogger().info('==> Loaded NmrStar file: "%s"' % (path,))
+    # return self.project
 
     def _loadSparkyProject(self, path: str, makeNewProject=True) -> Project:
         """Load Project from Sparky file at path, and do necessary setup"""
@@ -2211,6 +2216,7 @@ class Framework(NotifierBase):
             MessageDialog.showWarning('Project contains no spectra.', 'Spectrum groups cannot be displayed')
         else:
             from ccpn.ui.gui.popups.SpectrumGroupEditor import SpectrumGroupEditor
+
             if not self.project.spectrumGroups:
                 #GST This seems to have probles MessageDialog wraps it which looks bad...
                 MessageDialog.showWarning('Project has no Spectrum Groups.',

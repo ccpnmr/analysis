@@ -162,8 +162,8 @@ class Window(AbstractWrapperObject):
                             redo=partial(_setBlankingSpectrumDisplayNotifiers, display, False))
 
                 # add/remove spectrumDisplay from module Area
-                addUndoItem(undo=partial(self._hiddenModules.addModule, display),
-                            redo=partial(self.moduleArea.addModule, display, position=position, relativeTo=relativeTo))
+                addUndoItem(undo=partial(self._hiddenModules.moveDock, display, position='top', neighbor=None),
+                            redo=partial(self.moduleArea.moveDock, display, position=position, neighbor=relativeTo))
 
             if not positions and not widths:
                 display.autoRange()
@@ -200,11 +200,9 @@ class Window(AbstractWrapperObject):
                         iiAdjacent = (ii-1) if ii else (ii+1)
                         typ = container.type()
                         if typ == 'vertical':
-                            position = 'below' if ii else 'above'
+                            position = 'bottom' if ii else 'top'
                         elif typ == 'horizontal':
                             position = 'right' if ii else 'left'
-                        elif typ == 'tab':
-                            position = 'top'
                         relativeTo = container.widget(iiAdjacent)
                         break
                 else:
@@ -223,12 +221,12 @@ class Window(AbstractWrapperObject):
                             redo=partial(_setBlankingSpectrumDisplayNotifiers, display, True))
 
                 # add/remove spectrumDisplay from module Area
-                addUndoItem(undo=partial(self.moduleArea.addModule, display, position=position, relativeTo=relativeTo),
-                            redo=partial(self._hiddenModules.addModule, display),)
+                addUndoItem(undo=partial(self.moduleArea.moveDock, display, position=position, neighbor=relativeTo),
+                            redo=partial(self._hiddenModules.moveDock, display, position='top', neighbor=None),)
 
             _setBlankingSpectrumDisplayNotifiers(display, True)
             # move to the hidden module area
-            self._hiddenModules.addModule(display)
+            self._hiddenModules.moveDock(display, position='top', neighbor=None)
 
             # delete the spectrumDisplay
             display.delete()

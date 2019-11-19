@@ -375,7 +375,6 @@ class PlaneToolbar(ToolBar):
         """
         if event.type() in [QtCore.QEvent.Wheel, QtCore.QEvent.KeyPress, QtCore.QEvent.FocusIn]:
             self.strip._activePlane = source._activePlaneNum
-            print('>>>activePlaneFilter ', source._activePlaneNum)
         return False
 
 

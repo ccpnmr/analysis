@@ -950,7 +950,7 @@ class CcpnGLWidget(QOpenGLWidget):
                 pT = self.strip.planeToolbar if hasattr(self.strip, 'planeToolbar') else None
                 if pT and hasattr(pT, 'planeLabels'):
                     activePlane = self.strip._activePlane
-                    if pT.planeLabels and activePlane < len(pT.planeLabels):
+                    if pT.planeLabels and activePlane is not None and activePlane < len(pT.planeLabels):
                         pT = self.strip.planeToolbar.planeLabels[activePlane]
 
                         # pass the event to the correct double spinbox

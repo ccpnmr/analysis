@@ -803,5 +803,5 @@ class StructureFromNmrDataPlugin(Plugin):
         print('Running calculation', kwargs)
 
 
-StructureFromNmrDataPlugin.register()  # Registers the pipe in the pluginList
+# StructureFromNmrDataPlugin.register()  # Registers the pipe in the pluginList
 # Set tolerances from project.spectrum.tolerances by default

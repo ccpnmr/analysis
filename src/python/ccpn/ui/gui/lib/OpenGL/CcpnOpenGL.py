@@ -899,39 +899,18 @@ class CcpnGLWidget(QOpenGLWidget):
             event.accept()
             return
 
-        if self._isSHIFT or self._isCTRL:
-
-            # process wheel with buttons here
-            # transfer even to the correct widget for changing the plane OR raising base contour level...
-
-            if self._isSHIFT:
-                # raise/lower base contour level
-                print('>>>SHIFT')
-
-            elif self._isCTRL:
-                # scroll through planes
-                print('>>>CONTROL')
-
-                pT = self.strip.planeToolbar if hasattr(self.strip, 'planeToolbar') else None
-                if pT and hasattr(pT, 'planeLabels'):
-                    if pT.planeLabels:
-                        pT = self.strip.planeToolbar.planeLabels[0]
-
-                        pT.wheelEvent(event)
-
-            event.accept()
-            return
-
-
+        # check the movement of the wheel first
         numPixels = event.pixelDelta()
         numDegrees = event.angleDelta()
         zoomCentre = self._preferences.zoomCentreType
 
         zoomScale = 0.0
+        scrollDirection = 0
         if numPixels:
 
             # always seems to be numPixels - check with Linux
-            scrollDirection = numPixels.y()
+            # the Shift key automatically returns the x-axis
+            scrollDirection = numPixels.x() if self._isSHIFT else numPixels.y()
             zoomScale = 8.0
 
             # stop the very sensitive movements
@@ -942,7 +921,7 @@ class CcpnGLWidget(QOpenGLWidget):
         elif numDegrees:
 
             # this may work when using Linux
-            scrollDirection = numDegrees.y() / 4
+            scrollDirection = (numDegrees.x() / 4) if self._isSHIFT else (numDegrees.y() / 4)
             zoomScale = 8.0
 
             # stop the very sensitive movements
@@ -952,6 +931,32 @@ class CcpnGLWidget(QOpenGLWidget):
 
         else:
             event.ignore()
+            return
+
+        if self._isSHIFT or self._isCTRL:
+
+            # process wheel with buttons here
+            # transfer event to the correct widget for changing the plane OR raising base contour level...
+
+            if self._isSHIFT:
+                # raise/lower base contour level - should be strip I think
+                if scrollDirection > 0:
+                    self.strip.spectrumDisplay.raiseContourBase()
+                else:
+                    self.strip.spectrumDisplay.lowerContourBase()
+
+            elif self._isCTRL:
+                # scroll through planes
+                pT = self.strip.planeToolbar if hasattr(self.strip, 'planeToolbar') else None
+                if pT and hasattr(pT, 'planeLabels'):
+                    activePlane = self.strip._activePlane
+                    if pT.planeLabels and activePlane < len(pT.planeLabels):
+                        pT = self.strip.planeToolbar.planeLabels[activePlane]
+
+                        # pass the event to the correct double spinbox
+                        pT.wheelEvent(event)
+
+            event.accept()
             return
 
         # test whether the limits have been reached in either axis

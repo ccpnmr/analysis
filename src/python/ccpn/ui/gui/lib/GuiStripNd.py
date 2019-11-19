@@ -166,6 +166,7 @@ class GuiStripNd(GuiStrip):
         self.planeToolbar = PlaneToolbar(self._stripToolBarWidget, strip=self, callbacks=callbacks,
                                          grid=(0, 0), hPolicy='minimum', hAlign='center', vAlign='center',
                                          stripArrangement=getattr(self.spectrumDisplay, 'stripArrangement', None))
+        self._activePlane = 0
 
         #self._stripToolBarWidget.addWidget(self.planeToolbar)
         #self.planeToolBar.hide()

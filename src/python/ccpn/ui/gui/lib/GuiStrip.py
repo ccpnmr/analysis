@@ -132,7 +132,7 @@ class GuiStrip(Frame):
         #        _StripLabel(self, self.mainWindow, self, text='And another bit of text')]
 
         self._fr = []
-
+        self._activePlane = None
 
         # sp = Spacer(self, 1, 1, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding,
         #             grid=(10, 4), gridSpan=(1, 1))

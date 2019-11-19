@@ -337,6 +337,10 @@ class PlaneToolbar(ToolBar):
                 planeLabel.wheelEvent = partial(self._wheelEvent, i)
                 self.prevPlaneCallback = callbacks[0]
                 self.nextPlaneCallback = callbacks[1]
+
+                planeLabel._activePlaneNum = i
+                planeLabel.installEventFilter(self)
+
             self.nextPlaneButton = Button(self, '>', callback=partial(callbacks[1], i))
             self.nextPlaneButton.setFixedWidth(19)
             self.nextPlaneButton.setFixedHeight(19)
@@ -365,6 +369,14 @@ class PlaneToolbar(ToolBar):
                 self.nextPlaneCallback(n)
 
         self.strip._rebuildStripContours()
+
+    def eventFilter(self, source, event):
+        """Filter to get wheel mousepress events to set the current activePlane
+        """
+        if event.type() in [QtCore.QEvent.Wheel, QtCore.QEvent.KeyPress, QtCore.QEvent.FocusIn]:
+            self.strip._activePlane = source._activePlaneNum
+            print('>>>activePlaneFilter ', source._activePlaneNum)
+        return False
 
 
 STRIPCONNECT_LEFT = 'isLeft'

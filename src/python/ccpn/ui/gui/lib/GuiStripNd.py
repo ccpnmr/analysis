@@ -213,7 +213,7 @@ class GuiStripNd(GuiStrip):
 
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-        # set the axis controlled by the wheelMouse events (no implemented yet)
+        # set the axis controlled by the wheelMouse events
         self.activePlaneAxis = None
 
         if self.planeAxisBars:

@@ -900,7 +900,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
 
         row += 1
         self.symbolThicknessLabel = Label(parent, text="Symbol Thickness (points)", grid=(row, 0))
-        self.symbolThicknessData = Spinbox(parent, step=1,
+        self.symbolThicknessData = DoubleSpinbox(parent, decimals=0, step=1,
                                            min=1, max=20, grid=(row, 1), hAlign='l')
         self.symbolThicknessData.setMinimumWidth(LineEditsMinimumWidth)
         # symbolThickness = self.preferences.general.symbolThickness
@@ -909,7 +909,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
 
         row += 1
         self.contourThicknessLabel = Label(parent, text="Contour Thickness (points)", grid=(row, 0))
-        self.contourThicknessData = Spinbox(parent, step=1,
+        self.contourThicknessData = DoubleSpinbox(parent, decimals=0, step=1,
                                             min=1, max=20, grid=(row, 1), hAlign='l')
         self.contourThicknessData.setMinimumWidth(LineEditsMinimumWidth)
         # contourThickness = self.preferences.general.contourThickness

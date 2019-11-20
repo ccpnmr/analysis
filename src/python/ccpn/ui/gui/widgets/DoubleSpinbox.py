@@ -27,7 +27,9 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 
 import sys
 import re
+from contextlib import contextmanager
 from PyQt5 import QtGui, QtWidgets, QtCore
+from PyQt5.QtCore import pyqtSignal
 from ccpn.ui.gui.widgets.Base import Base
 from math import floor, log10
 
@@ -47,6 +49,8 @@ class DoubleSpinbox(QtWidgets.QDoubleSpinBox, Base):
     #   background-color: #e4e15b;
     # }
     # """
+    returnPressed = pyqtSignal(int)
+    wheelChanged = pyqtSignal(int)
 
     defaultMinimumSizes = (0, 20)
 
@@ -105,6 +109,43 @@ class DoubleSpinbox(QtWidgets.QDoubleSpinBox, Base):
         if value is not None:
             value = value
             self.setValue(value)
+
+        lineEdit = self.lineEdit()
+        lineEdit.returnPressed.connect(self._keyPressed)
+
+        self._internalWheelEvent = True
+        # change focusPolicy so that spinboxes don't grab focus unless selected
+        self.setFocusPolicy(QtCore.Qt.StrongFocus)
+
+    def wheelEvent(self, event: QtGui.QWheelEvent) -> None:
+        if self.hasFocus() or not self._internalWheelEvent:
+            super().wheelEvent(event)
+            self.wheelChanged.emit(self.value())
+        else:
+            event.ignore()
+
+    @contextmanager
+    def _useExternalWheelEvent(self):
+        try:
+            self._internalWheelEvent = False
+            yield
+        finally:
+            self._internalWheelEvent = True
+
+    def _externalWheelEvent(self, event):
+        with self._useExternalWheelEvent():
+            self.wheelEvent(event)
+
+    def stepBy(self, steps: int) -> None:
+        if self._internalWheelEvent:
+            super(DoubleSpinbox, self).stepBy(steps)
+        else:
+            super(DoubleSpinbox, self).stepBy(1 if steps > 0 else -1 if steps < 0 else steps)
+
+    def _keyPressed(self, *args):
+        """emit the value when return has been pressed
+        """
+        self.returnPressed.emit(self.value())
 
     def get(self):
         return self.value()

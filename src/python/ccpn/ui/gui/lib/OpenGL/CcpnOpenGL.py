@@ -946,14 +946,11 @@ class CcpnGLWidget(QOpenGLWidget):
 
             elif self._isCTRL:
                 # scroll through planes
-                pT = self.strip.planeToolbar if hasattr(self.strip, 'planeToolbar') else None
-                if pT and hasattr(pT, 'planeLabels'):
-                    activePlane = self.strip._activePlane
-                    if pT.planeLabels and activePlane is not None and activePlane < len(pT.planeLabels):
-                        pT = self.strip.planeToolbar.planeLabels[activePlane]
-
-                        # pass the event to the correct double spinbox
-                        pT.wheelEvent(event)
+                pT = self.strip.planeAxisBars if hasattr(self.strip, 'planeAxisBars') else None
+                activePlaneAxis = self.strip.activePlaneAxis
+                if pT and activePlaneAxis is not None and (activePlaneAxis - 2) < len(pT):
+                    # pass the event to the correct double spinbox
+                    pT[activePlaneAxis - 2].scrollPpmPosition(event)
 
             event.accept()
             return

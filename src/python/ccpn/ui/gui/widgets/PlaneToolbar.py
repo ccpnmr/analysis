@@ -532,7 +532,7 @@ class PlaneAxisWidget(_OpenGLFrameABC):
         self._axisPlaneCount.setVisible(True)
         self._axisSelector.setVisible(False)
 
-        self._axisPpmPosition.installEventFilter(self)
+        # self._axisSelector.spinBox.installEventFilter(self)
 
         # connect strip changed events to here
         self.strip.optionsChanged.connect(self._optionsChanged)
@@ -553,12 +553,17 @@ class PlaneAxisWidget(_OpenGLFrameABC):
 
         self._resize()
 
-    def eventFilter(self, source, event):
-        """Filter to get wheel mousepress events to set the current activePlane
+    # def eventFilter(self, source, event):
+    #     """Filter to get wheel mousepress events to set the current activePlane
+    #     """
+    #     if event.type() in [QtCore.QEvent.Wheel, QtCore.QEvent.KeyPress, QtCore.QEvent.FocusIn]:
+    #         self.strip._activePlane = source.parent().axis
+    #     return False
+
+    def scrollPpmPosition(self, event):
+        """Pass the wheel mouse event to the ppmPosition widget
         """
-        if event.type() in [QtCore.QEvent.Wheel, QtCore.QEvent.KeyPress, QtCore.QEvent.FocusIn]:
-            self.strip._activePlane = source.parent().axis
-        return False
+        self._axisSelector.spinBox._externalWheelEvent(event)
 
     @pyqtSlot(dict)
     def _optionsChanged(self, aDict):
@@ -570,9 +575,6 @@ class PlaneAxisWidget(_OpenGLFrameABC):
         if source and not ((source == self) and ignore):
             # change settings here
             self._setLabelBorder(source == self)
-
-            # set the axis in the strip for modifying with the wheelMouse event - not implemented yet
-            self.strip.activePlaneAxis = self.axis
 
     def _setLabelBorder(self, value):
         for label in (self._axisLabel, self._axisPpmPosition, self._axisPlaneCount):
@@ -589,6 +591,7 @@ class PlaneAxisWidget(_OpenGLFrameABC):
             widgets[1].show()
 
         self._setLabelBorder(True)
+        self.strip.activePlaneAxis = self.axis
         self.strip.optionsChanged.emit({EMITSOURCE      : self,
                                         EMITCLICKED     : True,
                                         EMITIGNORESOURCE: True})
@@ -606,6 +609,7 @@ class PlaneAxisWidget(_OpenGLFrameABC):
             widgets[3].show()
 
         self._setLabelBorder(True)
+        self.strip.activePlaneAxis = self.axis
         self.strip.optionsChanged.emit({EMITSOURCE      : self,
                                         EMITCLICKED     : True,
                                         EMITIGNORESOURCE: True})
@@ -711,6 +715,7 @@ class PlaneAxisWidget(_OpenGLFrameABC):
             axisButtons[1].show()
 
         self._resize()
+
 
 # class PlaneToolbar(Frame):
 #     #TODO: undocumented and needs refactoring ;

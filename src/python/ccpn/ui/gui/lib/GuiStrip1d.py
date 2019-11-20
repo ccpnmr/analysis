@@ -147,6 +147,8 @@ class GuiStrip1d(GuiStrip):
         # TEST: ED new plane widgets
 
         self.planeToolbar = None
+        # set the axis controlled by the wheelMouse events
+        self.activePlaneAxis = None
 
         # a large(ish) unbound widget to contain the text - may need more rows
         self._frameGuide = OpenGLOverlayFrame(self, setLayout=True)

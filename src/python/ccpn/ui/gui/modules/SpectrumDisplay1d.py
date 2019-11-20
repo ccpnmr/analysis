@@ -144,6 +144,21 @@ class SpectrumDisplay1d(GuiSpectrumDisplay):
         popup.exec_()
         popup.raise_()
 
+    def raiseContourBase(self):
+        """
+        Increases contour base level for all spectra visible in the display.
+        """
+        # Currently not implemented
+        pass
+
+    def lowerContourBase(self):
+        """
+        Decreases contour base level for all spectra visible in the display.
+        """
+        # Currently not implemented
+        pass
+
+
 # Functions for notifiers
 
 # def _updateSpectrumPlotColour(project:Project, apiDataSource:ApiDataSource):

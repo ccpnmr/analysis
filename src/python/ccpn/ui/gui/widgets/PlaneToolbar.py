@@ -532,6 +532,8 @@ class PlaneAxisWidget(_OpenGLFrameABC):
         self._axisPlaneCount.setVisible(True)
         self._axisSelector.setVisible(False)
 
+        self._axisPpmPosition.installEventFilter(self)
+
         # connect strip changed events to here
         self.strip.optionsChanged.connect(self._optionsChanged)
 
@@ -548,7 +550,15 @@ class PlaneAxisWidget(_OpenGLFrameABC):
                                          self._planeCountChanged,
                                          self._wheelEvent
                                          ))
+
         self._resize()
+
+    def eventFilter(self, source, event):
+        """Filter to get wheel mousepress events to set the current activePlane
+        """
+        if event.type() in [QtCore.QEvent.Wheel, QtCore.QEvent.KeyPress, QtCore.QEvent.FocusIn]:
+            self.strip._activePlane = source.parent().axis
+        return False
 
     @pyqtSlot(dict)
     def _optionsChanged(self, aDict):

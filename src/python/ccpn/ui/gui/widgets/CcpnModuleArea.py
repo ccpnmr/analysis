@@ -302,19 +302,16 @@ class CcpnModuleArea(ModuleArea, DropBase):
             container = self.addContainer(neededContainer, self.topContainer)
 
         else:
-            try:
-                if neededContainer != container.type() and container.type() == 'tab':
-                    neighbor = container
-                    container = container.container()
+            if neededContainer != container.type() and container.type() == 'tab':
+                neighbor = container
+                container = container.container()
 
-                if neededContainer != container.type():
+            if neededContainer != container.type():
 
-                    if neighbor is None:
-                        container = self.addContainer(neededContainer, self.topContainer)
-                    else:
-                        container = self.addContainer(neededContainer, neighbor)
-            except Exception as es:
-                pass
+                if neighbor is None:
+                    container = self.addContainer(neededContainer, self.topContainer)
+                else:
+                    container = self.addContainer(neededContainer, neighbor)
 
         insertPos = {
             'bottom': 'after',

@@ -933,12 +933,12 @@ class CcpnGLWidget(QOpenGLWidget):
             event.ignore()
             return
 
-        if self._isSHIFT or self._isCTRL:
+        if self._isALT or self._isCTRL:
 
             # process wheel with buttons here
             # transfer event to the correct widget for changing the plane OR raising base contour level...
 
-            if self._isSHIFT:
+            if self._isALT:
                 # raise/lower base contour level - should be strip I think
                 if scrollDirection > 0:
                     self.strip.spectrumDisplay.raiseContourBase()
@@ -1284,16 +1284,6 @@ class CcpnGLWidget(QOpenGLWidget):
 
         except Exception as es:
             getLogger().debug('error setting viewing window XY-range')
-
-    def eventFilter(self, obj, event):
-        self._key = '_'
-        if type(event) == QtGui.QKeyEvent and event.key() == Qt.Key_A:
-            self._key = 'A'
-            # event.accept()
-            return True
-
-        return False
-        # return super().eventFilter(obj, event)
 
     def _movePeaks(self, direction: str = 'up'):
         """Move the peaks with the cursor keys
@@ -2351,7 +2341,6 @@ class CcpnGLWidget(QOpenGLWidget):
 
         if keyMod == Qt.ShiftModifier or key == QtCore.Qt.Key_Shift:
             self._isSHIFT = 'S'
-            self.shift = True
         if keyMod == Qt.ControlModifier or key == QtCore.Qt.Key_Control:
             self._isCTRL = 'C'
         if keyMod == Qt.AltModifier or key == QtCore.Qt.Key_Alt:
@@ -2382,14 +2371,14 @@ class CcpnGLWidget(QOpenGLWidget):
             elif not self._preferences.currentStripFollowsMouse:
                 self.GLSignals._emitKeyEvent(strip=self.strip, key=event.key(), modifier=self._isSHIFT)
 
-    def _clearAfterRelease(self, ev):
-        key = ev.key()
-        if key == QtCore.Qt.Key_Shift:
-            self._isSHIFT = ''
+    # def _clearAfterRelease(self, ev):
+    #     key = ev.key()
+    #     if key == QtCore.Qt.Key_Shift:
+    #         self._isSHIFT = ''
 
     def _clearKeys(self):
         self._key = ''
-        # self._isSHIFT = ''
+        self._isSHIFT = ''
         self._isCTRL = ''
         self._isALT = ''
         self._isMETA = ''
@@ -2406,7 +2395,7 @@ class CcpnGLWidget(QOpenGLWidget):
     def keyReleaseEvent(self, ev: QtGui.QKeyEvent):
         super().keyReleaseEvent(ev)
         self._clearAndUpdate(clearKeys=True)
-        self._clearAfterRelease(ev)
+        # self._clearAfterRelease(ev)
 
     def enterEvent(self, ev: QtCore.QEvent):
         if (self.strip and not self.strip.isDeleted and self._preferences.currentStripFollowsMouse):

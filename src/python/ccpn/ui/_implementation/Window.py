@@ -193,16 +193,19 @@ class Window(AbstractWrapperObject):
                 if widget in cntrsDict:
                     _insertWidgets(widget, cntrsDict[widget])
 
-        _setContainerWidget(self.moduleArea.topContainer)
+        _setContainerWidget(moduleArea.topContainer)
         insertsDict[nodes[0]] = ('top', None)
-        _insertWidgets(self.moduleArea.topContainer, None)
+        _insertWidgets(moduleArea.topContainer, None)
         return insertsDict
 
     def _restoreModules(self, moduleList):
         """Recover modules to their original positions
         """
         # NOTE:ED currently recovers all modules, not just spectrumDisplays
+        # needs to handel different moduleAreas
         for mods, (pos, rel) in moduleList.items():
+
+            # may need to have a dock.float() in here somewhere if from deleted a moduleArea
             self.moduleArea.moveDock(mods, pos, rel)
             # recover sizes?
 
@@ -295,7 +298,7 @@ class Window(AbstractWrapperObject):
         with undoBlockWithoutSideBar():
 
             # get the current state of the layout
-            _list = self._getModuleInsertList()
+            _list = self._getModuleInsertList(moduleArea=display.area)
 
             # get the list of spectra currently displayed in the spectrumDisplay
             specViewList = [(specView, action.isChecked()) for specView in display.spectrumViews

@@ -264,6 +264,7 @@ class Window(AbstractWrapperObject):
                 """Recover modules to their original positions"""
                 for mods, (pos, rel) in moduleList.items():
                     self.moduleArea.moveDock(mods, pos, rel)
+                    # recover sizes?
 
             # find where to return the module to
             _list = _getInserts()

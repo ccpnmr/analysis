@@ -253,4 +253,4 @@ LOCKBOTTOM = 64
 LOCKAXIS = 128
 
 LOCKSTRING = 'Lock'
-USEDEFAULTASPECTSTRING = '                  Default'      # easier to overlay
+USEDEFAULTASPECTSTRING = '                Default'      # easier to overlay

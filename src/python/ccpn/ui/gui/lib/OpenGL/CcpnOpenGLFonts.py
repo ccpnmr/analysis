@@ -340,7 +340,7 @@ class GLString(GLVertexArray):
                 # self.offsets[i * 4:i * 4 + 4] = offsets
 
                 penX = penX + glyph[GlyphOrigW] + kerning
-                self.width = max(self.width, penX)
+                self.width = max(self.width, penX/self.scale)
 
             if (c == 32):  # space
                 # print('space width',font.spaceWidth)
@@ -349,7 +349,7 @@ class GLString(GLVertexArray):
                 # print(font.spaceWidth)
                 # print(penX)
                 # print(self.width)
-                self.width = max(self.width, penX)
+                self.width = max(self.width, penX/self.scale)
                 # print(self.width)
                 # print('end space')
 
@@ -366,7 +366,7 @@ class GLString(GLVertexArray):
 
             elif (c == 9):  # tab
                 penX = penX + 4 * font.width
-                self.width = max(self.width, penX)
+                self.width = max(self.width, penX/self.scale)
 
             # penY = penY + glyph[GlyphHeight]
             prev = charCode

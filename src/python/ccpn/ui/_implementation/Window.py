@@ -102,6 +102,126 @@ class Window(AbstractWrapperObject):
         self._wrappedData.size = value
 
     #=========================================================================================
+    # CCPN Routines
+    #=========================================================================================
+
+    def _getModuleInsertList(self, moduleArea):
+        """Generate the list of .moveDock instructions that are required to move all modules back to their
+        original positions in the layout
+        """
+        from collections import OrderedDict
+
+        # initialise lists
+        cntrsDict = OrderedDict()
+        cntrsDict[moduleArea.topContainer] = None
+        nodes = []
+        insertsDict = OrderedDict()
+
+        def _setContainerWidget(cntr):
+            """Label the containers with the attached display
+
+                   A/\
+                   /  \
+                  /    \            Tree traversed from left-right, i.e. iterating through widget(ii) of containers
+                 /      \           items will always be either to the right, or below previous modules
+               A/        \C
+               /\        /\         A found first, and propagated up to the containers which
+              /  \      /  \            are located at the forks
+             /    \E   /    \G      E propagated up, but only one fork not allocated
+            A     /\  C     /\      F has nothing
+                 /  \      /  \     C propagated up, but only one fork not allocated
+                /    \    /    \    G&H nothing to set
+               E     F   G     H
+
+            """
+            count = cntr.count()
+            for ww in range(count):
+                widget = cntr.widget(ww)
+
+                if not hasattr(widget, 'type'):
+                    # widget is a module, add to list
+                    nodes.append(widget)
+
+                    # find the chain of containers to the topContainer/moduleArea that have not been set
+                    # and set to the current module
+                    parentContainer = cntr
+                    while parentContainer is not moduleArea:
+                        if parentContainer not in cntrsDict:
+                            cntrsDict[parentContainer] = None
+
+                        if cntrsDict[parentContainer] is None:
+                            cntrsDict[parentContainer] = widget
+                            parentContainer = parentContainer.container()
+                        else:
+                            break
+                else:
+                    _setContainerWidget(widget)
+
+        def _insertWidgets(cntr, root=None):
+            """Get the ordering for inserting the new containers
+            Iterate through the modue structure of containers and modules
+
+            If a container found (a fork shown above) then add to the list
+                position will always be to the right, below or 'top' if the first item
+                relativeTo will be the node labelled at the fork, or
+                    None if the first item - all following items will be referenced to this
+
+            If a module found then and to the list
+                position will always be to the right or below
+                relativeTo will be the node labelled at the fork.
+            """
+            count = cntr.count()
+            reorderedWidgets = [cntr.widget(0)] + [cntr.widget(ii) for ii in range(count - 1, 0, -1)]
+
+            for ww in range(count):
+                widget = reorderedWidgets[ww]
+
+                vv = cntrsDict[widget] if widget in cntrsDict else widget
+                if vv not in insertsDict:
+                    parent = cntrsDict[cntr]
+                    typ = cntr.type()
+                    if typ == 'vertical':
+                        position = 'bottom'
+                    else:
+                        position = 'right'  # assume no 'tab' yet
+                    insertsDict[vv] = (position, parent)
+
+            # go through the next depth
+            for ww in range(count):
+                widget = cntr.widget(ww)
+
+                if widget in cntrsDict:
+                    _insertWidgets(widget, cntrsDict[widget])
+
+        _setContainerWidget(self.moduleArea.topContainer)
+        insertsDict[nodes[0]] = ('top', None)
+        _insertWidgets(self.moduleArea.topContainer, None)
+        return insertsDict
+
+    def _restoreModules(self, moduleList):
+        """Recover modules to their original positions
+        """
+        # NOTE:ED currently recovers all modules, not just spectrumDisplays
+        for mods, (pos, rel) in moduleList.items():
+            self.moduleArea.moveDock(mods, pos, rel)
+            # recover sizes?
+
+    def _recoverSpectrumToolbar(self, display, specViewList):
+        """Re-insert the spectra into the spectrumToolbar
+        """
+        for specView, selected in specViewList:
+            action = display.spectrumToolBar._addSpectrumViewToolButtons(specView)
+            if action:
+                action.setChecked(selected)
+
+    def _setBlankingSpectrumDisplayNotifiers(self, display, value):
+        """Blank all spectrumDisplay and contained strip notifiers
+        """
+        display.setBlankingAllNotifiers(value)
+        for strip in display.strips:
+            strip.setBlankingAllNotifiers(value)
+
+    #=========================================================================================
     # Implementation functions
     #=========================================================================================
 
@@ -134,18 +254,12 @@ class Window(AbstractWrapperObject):
         """
         from ccpn.ui._implementation.SpectrumDisplay import _createSpectrumDisplay
 
+        # change string names to objects
         if isinstance(relativeTo, str):
             modules = [module for module in self.modules if module.pid == relativeTo]
             if len(modules) > 1:
                 raise ValueError("Error, not a unique module")
             relativeTo = modules[0] if modules else None
-
-        def _setBlankingSpectrumDisplayNotifiers(spectrumDisplay, value):
-            """Blank all spectrumDisplay and contained strip notifiers
-            """
-            spectrumDisplay.setBlankingAllNotifiers(value)
-            for strip in spectrumDisplay.strips:
-                strip.setBlankingAllNotifiers(value)
 
         with undoBlockWithoutSideBar():
 
@@ -154,15 +268,16 @@ class Window(AbstractWrapperObject):
                                              title=title, positions=positions, widths=widths, units=units,
                                              stripDirection=stripDirection, is1D=is1D, **kwds)
 
+            # add the new module to mainWindow at the required position
             self.moduleArea.addModule(display, position=position, relativeTo=relativeTo)
             display._insertPosition = (position, relativeTo)
 
             with undoStackBlocking() as addUndoItem:
                 # disable all notifiers in spectrumDisplays
-                addUndoItem(undo=partial(_setBlankingSpectrumDisplayNotifiers, display, True),
-                            redo=partial(_setBlankingSpectrumDisplayNotifiers, display, False))
+                addUndoItem(undo=partial(self._setBlankingSpectrumDisplayNotifiers, display, True),
+                            redo=partial(self._setBlankingSpectrumDisplayNotifiers, display, False))
 
-                # add/remove spectrumDisplay from module Area
+                # add/remove spectrumDisplay from module Area - use moveDock not addModule, otherwise introduces extra splitters
                 addUndoItem(undo=partial(self._hiddenModules.moveDock, display, position='top', neighbor=None),
                             redo=partial(self.moduleArea.moveDock, display, position=position, neighbor=relativeTo))
 
@@ -173,122 +288,35 @@ class Window(AbstractWrapperObject):
 
     @logCommand('mainWindow.')
     def _deleteSpectrumDisplay(self, display):
-
-        def _recoverSpectrumToolbar(display, specViewList):
-            """Re-insert the spectra into the spectrumToolbar
-            """
-            for specView, selected in specViewList:
-                action = display.spectrumToolBar._addSpectrumViewToolButtons(specView)
-                if action:
-                    action.setChecked(selected)
-
-        def _setBlankingSpectrumDisplayNotifiers(spectrumDisplay, value):
-            """Blank all spectrumDisplay and contained strip notifiers
-            """
-            spectrumDisplay.setBlankingAllNotifiers(value)
-            for strip in spectrumDisplay.strips:
-                strip.setBlankingAllNotifiers(value)
-
+        """Delete a spectrumDisplay from the moduleArea
+        Removes the display to a hidden moduleArea of mainWindow, deletes the _wrappedData, and disables all notifiers
+        Object is recovered through the deleteObject decorator
+        """
         with undoBlockWithoutSideBar():
 
-            # start with container
+            # get the current state of the layout
+            _list = self._getModuleInsertList()
 
-            # get parent container - this will always stay constant (unless external change - move windows needs undo)
-
-            # start with non-containers, and then containers - nested
-
-            # start from moduleArea, relativeTo = none
-            # for widget in container.widgets
-
-            def _getInserts():
-                from collections import OrderedDict
-
-                cntrsDict = OrderedDict()
-                cntrsDict[self.moduleArea.topContainer] = None
-                nodes = []
-                insertsDict = OrderedDict()
-
-                def _setContainerWidget(cntr):
-                    """Label the containers with the attached display"""
-                    count = cntr.count()
-                    for ww in range(count):
-                        widget = cntr.widget(ww)
-
-                        if not hasattr(widget, 'type'):
-                            nodes.append(widget)
-
-                            parentContainer = cntr
-                            while parentContainer is not self.moduleArea:
-                                if parentContainer not in cntrsDict:
-                                    cntrsDict[parentContainer] = None
-
-                                if cntrsDict[parentContainer] is None:
-                                    cntrsDict[parentContainer] = widget
-                                    parentContainer = parentContainer.container()
-                                else:
-                                    break
-                        else:
-                            _setContainerWidget(widget)
-
-                def _insertWidgets(cntr, root=None):
-                    """Get the ordering for inserting the new containers"""
-                    count = cntr.count()
-                    reorderedWidgets = [cntr.widget(0)] + [cntr.widget(ii) for ii in range(count - 1, 0, -1)]
-
-                    for ww in range(count):
-                        widget = reorderedWidgets[ww]
-
-                        vv = cntrsDict[widget] if widget in cntrsDict else widget
-                        if vv not in insertsDict:
-                            parent = cntrsDict[cntr]
-                            typ = cntr.type()
-                            if typ == 'vertical':
-                                position = 'bottom'
-                            else:
-                                position = 'right'  # assume no 'tab' yet
-                            insertsDict[vv] = (position, parent)
-
-                    # go through the next depth
-                    for ww in range(count):
-                        widget = cntr.widget(ww)
-
-                        if widget in cntrsDict:
-                            _insertWidgets(widget, cntrsDict[widget])
-
-                _setContainerWidget(self.moduleArea.topContainer)
-                insertsDict[nodes[0]] = ('top', None)
-                _insertWidgets(self.moduleArea.topContainer, None)
-                return insertsDict
-
-            def _restoreModules(moduleList):
-                """Recover modules to their original positions"""
-                for mods, (pos, rel) in moduleList.items():
-                    self.moduleArea.moveDock(mods, pos, rel)
-                    # recover sizes?
-
-            # find where to return the module to
-            _list = _getInserts()
+            # get the list of spectra currently displayed in the spectrumDisplay
             specViewList = [(specView, action.isChecked()) for specView in display.spectrumViews
                             for action in display.spectrumToolBar.actions()
                             if action.objectName() == specView.spectrum.pid]
 
             with undoStackBlocking() as addUndoItem:
                 # re-insert spectrumToolbar
-                addUndoItem(undo=partial(_recoverSpectrumToolbar, display, specViewList), )
+                addUndoItem(undo=partial(self._recoverSpectrumToolbar, display, specViewList), )
 
                 # disable all notifiers in spectrumDisplays
-                addUndoItem(undo=partial(_setBlankingSpectrumDisplayNotifiers, display, False),
-                            redo=partial(_setBlankingSpectrumDisplayNotifiers, display, True))
+                addUndoItem(undo=partial(self._setBlankingSpectrumDisplayNotifiers, display, False),
+                            redo=partial(self._setBlankingSpectrumDisplayNotifiers, display, True))
 
-                # # add/remove spectrumDisplay from module Area
-                # addUndoItem(undo=partial(self.moduleArea.moveDock, display, position=position, neighbor=relativeTo or None),
-                #             redo=partial(self._hiddenModules.moveDock, display, position='top', neighbor=None), )
-
-                # add/remove spectrumDisplay from module Area
-                addUndoItem(undo=partial(_restoreModules, _list),
+                # add/remove spectrumDisplay from module Area - using moveDock method
+                addUndoItem(undo=partial(self._restoreModules, _list),
                             redo=partial(self._hiddenModules.moveDock, display, position='top', neighbor=None),)
 
-            _setBlankingSpectrumDisplayNotifiers(display, True)
+            # disable the spectrumDisplay notifiers
+            self._setBlankingSpectrumDisplayNotifiers(display, True)
+
             # move to the hidden module area
             self._hiddenModules.moveDock(display, position='top', neighbor=None)
 

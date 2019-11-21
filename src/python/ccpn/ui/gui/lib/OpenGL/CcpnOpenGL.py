@@ -933,12 +933,12 @@ class CcpnGLWidget(QOpenGLWidget):
             event.ignore()
             return
 
-        if self._isALT or self._isCTRL:
+        if self._isMETA or self._isCTRL:
 
             # process wheel with buttons here
             # transfer event to the correct widget for changing the plane OR raising base contour level...
 
-            if self._isALT:
+            if self._isMETA:
                 # raise/lower base contour level - should be strip I think
                 if scrollDirection > 0:
                     self.strip.spectrumDisplay.raiseContourBase()

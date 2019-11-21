@@ -933,12 +933,12 @@ class CcpnGLWidget(QOpenGLWidget):
             event.ignore()
             return
 
-        if self._isMETA or self._isCTRL:
+        if self._isSHIFT or self._isCTRL:
 
             # process wheel with buttons here
             # transfer event to the correct widget for changing the plane OR raising base contour level...
 
-            if self._isMETA:
+            if self._isSHIFT:
                 # raise/lower base contour level - should be strip I think
                 if scrollDirection > 0:
                     self.strip.spectrumDisplay.raiseContourBase()
@@ -2228,7 +2228,7 @@ class CcpnGLWidget(QOpenGLWidget):
 
         self._endCoordinate = self._startCoordinate
 
-        if ev.buttons() & (Qt.MiddleButton | Qt.RightButton):
+        if int(ev.buttons() & (Qt.MiddleButton | Qt.RightButton)):
             if self._isSHIFT == '' and self._isCTRL == '' and self._isALT == '' and self._isMETA == '':
                 # drag a peak
                 xPosition = self.cursorCoordinate[0]  # self.mapSceneToView(event.pos()).x()
@@ -2515,26 +2515,27 @@ class CcpnGLWidget(QOpenGLWidget):
         self.current.cursorPosition = (xPos, yPos)
         self.current.mouseMovedDict = mouseMovedDict
 
-        if event.buttons() & Qt.LeftButton:
+        if int(event.buttons() & Qt.LeftButton):
             # do the complicated keypresses first
             # other keys are: Key_Alt, Key_Meta, and _isALT, _isMETA
 
-            if (self._key == Qt.Key_Control and self._isSHIFT == 'S') or \
-                    (self._key == Qt.Key_Shift and self._isCTRL) == 'C':
+            if self._isSHIFT and self._isCTRL:
+            # if (self._key == Qt.Key_Control and self._isSHIFT == 'S') or \
+            #         (self._key == Qt.Key_Shift and self._isCTRL) == 'C':
 
                 self._endCoordinate = self.cursorCoordinate  #[event.pos().x(), self.height() - event.pos().y()]
                 self._selectionMode = 3
                 self._drawSelectionBox = True
                 self._drawDeltaOffset = True
 
-            elif (self._key == Qt.Key_Shift) and (event.buttons() & Qt.LeftButton):
+            elif (self._key == Qt.Key_Shift):
 
                 self._endCoordinate = self.cursorCoordinate  #[event.pos().x(), self.height() - event.pos().y()]
                 self._selectionMode = 1
                 self._drawSelectionBox = True
                 self._drawDeltaOffset = True
 
-            elif (self._key == Qt.Key_Control) and (event.buttons() & Qt.LeftButton):
+            elif (self._key == Qt.Key_Control):
 
                 self._endCoordinate = self.cursorCoordinate  #[event.pos().x(), self.height() - event.pos().y()]
                 self._selectionMode = 2
@@ -2799,19 +2800,13 @@ class CcpnGLWidget(QOpenGLWidget):
         if not self._ordering:
             return
 
-        # tt = time.time()
-
         with self.glBlocking():
             self._buildGL()
             self._paintGL()
 
-        # print('>>>>>> _paintGL', self.strip, time.time()-tt)
-
     def _paintGL(self):
         w = self.w
         h = self.h
-
-        # print('>>>>>> _paintGL', self.strip, time.time())
 
         if self._updateBackgroundColour:
             self._updateBackgroundColour = False
@@ -2868,9 +2863,6 @@ class CcpnGLWidget(QOpenGLWidget):
             # make the overlay/axis solid
             currentShader.setBlendEnabled(0)
             self._spectrumLabelling.drawStrings()
-
-            # not fully implemented yet
-            # self._legend.drawStrings()
             currentShader.setBlendEnabled(1)
 
         self.disableTextClientState()
@@ -2968,9 +2960,6 @@ class CcpnGLWidget(QOpenGLWidget):
         if self.strip.isDeleted:
             return
 
-        # printTime = False
-        # startTime = time.time()
-
         # self._spectrumSettings = {}
         rebuildFlag = False
         for spectrumView in self._ordering:  # strip.spectrumViews:
@@ -2978,8 +2967,6 @@ class CcpnGLWidget(QOpenGLWidget):
                 continue
 
             if spectrumView.buildContours or spectrumView.buildContoursOnly:
-
-                # printTime = True
 
                 # flag the peaks for rebuilding
                 if not spectrumView.buildContoursOnly:
@@ -3016,9 +3003,6 @@ class CcpnGLWidget(QOpenGLWidget):
         # rebuild the traces as the spectrum/plane may have changed
         if rebuildFlag:
             self.rebuildTraces()
-
-        # if printTime:
-        #     print('>>>>>>buildingContours', time.time()-startTime)
 
     def enableTextClientState(self):
         GL.glEnableClientState(GL.GL_VERTEX_ARRAY)
@@ -5625,8 +5609,6 @@ class CcpnGLWidget(QOpenGLWidget):
 
             if self._crosshairVisible:  # or self._updateVTrace or self._updateHTrace:
 
-                # print('>>>>>>', self.strip, time.time())
-
                 exactMatch = (self._preferences.matchAxisCode == AXIS_FULLATOMNAME)
                 indices = getAxisCodeMatchIndices(self._axisCodes[:2], mouseMovedDict[AXIS_ACTIVEAXES], exactMatch=exactMatch)
 
@@ -5637,7 +5619,6 @@ class CcpnGLWidget(QOpenGLWidget):
                         self.cursorCoordinate[n] = mouseMovedDict[AXIS_FULLATOMNAME][axis]
 
                         # coordinates have already been flipped
-                        # self.doubleCursorCoordinate[n] = mouseMovedDict[DOUBLEAXIS_FULLATOMNAME][axis]
                         self.doubleCursorCoordinate[1-n] = self.cursorCoordinate[n]
 
                     else:
@@ -5649,9 +5630,7 @@ class CcpnGLWidget(QOpenGLWidget):
                 # only need to redraw if we can see the cursor
                 # if self._updateVTrace or self._updateHTrace:
                 #   self.updateTraces()
-                # self.makeCurrent()
                 self.update()
-                # self.doneCurrent()
 
     @pyqtSlot(dict)
     def _glKeyEvent(self, aDict):

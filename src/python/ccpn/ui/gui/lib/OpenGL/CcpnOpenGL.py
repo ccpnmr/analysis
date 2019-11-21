@@ -2515,9 +2515,11 @@ class CcpnGLWidget(QOpenGLWidget):
         self.current.cursorPosition = (xPos, yPos)
         self.current.mouseMovedDict = mouseMovedDict
 
-        if int(event.buttons() & Qt.LeftButton):
+        if int(event.buttons() & (Qt.LeftButton | Qt.RightButton)):
             # do the complicated keypresses first
             # other keys are: Key_Alt, Key_Meta, and _isALT, _isMETA
+
+            # NOTE:ED I think that Linux is doing a strange button switch when you press shift/ctrl
 
             if self._isSHIFT and self._isCTRL:
             # if (self._key == Qt.Key_Control and self._isSHIFT == 'S') or \
@@ -2528,21 +2530,21 @@ class CcpnGLWidget(QOpenGLWidget):
                 self._drawSelectionBox = True
                 self._drawDeltaOffset = True
 
-            elif (self._key == Qt.Key_Shift):
+            elif (self._key == Qt.Key_Shift) and int(event.buttons() & Qt.LeftButton):
 
                 self._endCoordinate = self.cursorCoordinate  #[event.pos().x(), self.height() - event.pos().y()]
                 self._selectionMode = 1
                 self._drawSelectionBox = True
                 self._drawDeltaOffset = True
 
-            elif (self._key == Qt.Key_Control):
+            elif (self._key == Qt.Key_Control) and int(event.buttons() & Qt.LeftButton):
 
                 self._endCoordinate = self.cursorCoordinate  #[event.pos().x(), self.height() - event.pos().y()]
                 self._selectionMode = 2
                 self._drawSelectionBox = True
                 self._drawDeltaOffset = True
 
-            else:
+            elif int(event.buttons() & Qt.LeftButton):
 
                 if self._dragRegions:
                     for reg in self._dragRegions:

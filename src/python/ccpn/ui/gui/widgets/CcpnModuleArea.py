@@ -94,7 +94,6 @@ class TempAreaWindow(GuiWindow, MainWindow):
         self.showNormal()
         self.close()
 
-
 class CcpnModuleArea(ModuleArea, DropBase):
 
     def __init__(self, mainWindow, **kwargs):

@@ -200,186 +200,76 @@ class Window(AbstractWrapperObject):
             # start from moduleArea, relativeTo = none
             # for widget in container.widgets
 
-            moduleList = []
-            localList = []
+            def _getInserts():
+                from collections import OrderedDict
 
-            from collections import OrderedDict
+                cntrsDict = OrderedDict()
+                cntrsDict[self.moduleArea.topContainer] = None
+                nodes = []
+                insertsDict = OrderedDict()
 
-            cntrs = OrderedDict()
-            cntrs[self.moduleArea.topContainer] = None
-            nodes = []
+                def _setContainerWidget(cntr):
+                    """Label the containers with the attached display"""
+                    count = cntr.count()
+                    for ww in range(count):
+                        widget = cntr.widget(ww)
 
-            def _getContainers(cntr):
-                """Get a dict of all the containers in the tree"""
-                count = cntr.count()
-                for ww in range(count):
-                    widget = cntr.widget(ww)
+                        if not hasattr(widget, 'type'):
+                            nodes.append(widget)
 
-                    if hasattr(widget, 'type'):
-                        cntrs[widget] = None
-                        _getContainers(widget)
-                    else:
-                        nodes.append(widget)
+                            parentContainer = cntr
+                            while parentContainer is not self.moduleArea:
+                                if parentContainer not in cntrsDict:
+                                    cntrsDict[parentContainer] = None
 
-            _getContainers(self.moduleArea.topContainer)
-
-            def _setContainerWidget(cntr):
-                """Label the containers with the attached display"""
-                count = cntr.count()
-                for ww in range(count):
-                    widget = cntr.widget(ww)
-
-                    if not hasattr(widget, 'type'):
-                        parentContainer = cntr
-                        while parentContainer is not self.moduleArea:
-                            if cntrs[parentContainer] is None:
-                                cntrs[parentContainer] = widget
-                                parentContainer = parentContainer.container()
-                            else:
-                                break
-                    else:
-                        _setContainerWidget(widget)
-
-            _setContainerWidget(self.moduleArea.topContainer)
-
-            _inserts = OrderedDict()
-            _inserts[nodes[0]] = ('top', None)
-
-            def _insertWidgets(cntr, root=None):
-                """Get the ordering for inserting the new containers"""
-                count = cntr.count()
-
-                reorderedWidgets = [cntr.widget(0)] + [cntr.widget(ii) for ii in range(count - 1, 0, -1)]
-
-                for ww in range(count):
-                    # widget = cntr.widget(ww)
-                    widget = reorderedWidgets[ww]
-
-                    if widget in cntrs:
-                        # a container
-                        vv = cntrs[widget]
-
-                        typ = cntr.type()
-                        if typ == 'vertical':
-                            position = 'bottom'
+                                if cntrsDict[parentContainer] is None:
+                                    cntrsDict[parentContainer] = widget
+                                    parentContainer = parentContainer.container()
+                                else:
+                                    break
                         else:
-                            position = 'right'  # assume to 'tab' yet
+                            _setContainerWidget(widget)
 
-                        parent = cntrs[cntr]
-                        if vv not in _inserts:
-                            _inserts[vv] = (position, parent)
+                def _insertWidgets(cntr, root=None):
+                    """Get the ordering for inserting the new containers"""
+                    count = cntr.count()
+                    reorderedWidgets = [cntr.widget(0)] + [cntr.widget(ii) for ii in range(count - 1, 0, -1)]
 
-                    else:
-                        if widget not in _inserts:
-                            # a node
-                            parent = cntrs[cntr]
+                    for ww in range(count):
+                        widget = reorderedWidgets[ww]
 
+                        vv = cntrsDict[widget] if widget in cntrsDict else widget
+                        if vv not in insertsDict:
+                            parent = cntrsDict[cntr]
                             typ = cntr.type()
                             if typ == 'vertical':
                                 position = 'bottom'
                             else:
-                                position = 'right'  # assume to 'tab' yet
+                                position = 'right'  # assume no 'tab' yet
+                            insertsDict[vv] = (position, parent)
 
-                            _inserts[widget] = (position, parent)
+                    # go through the next depth
+                    for ww in range(count):
+                        widget = cntr.widget(ww)
 
-                # go through the next depth
-                for ww in range(count):
-                    widget = cntr.widget(ww)
+                        if widget in cntrsDict:
+                            _insertWidgets(widget, cntrsDict[widget])
 
-                    if widget in cntrs:
-                        _insertWidgets(widget, cntrs[widget])
+                _setContainerWidget(self.moduleArea.topContainer)
+                insertsDict[nodes[0]] = ('top', None)
+                _insertWidgets(self.moduleArea.topContainer, None)
+                return insertsDict
 
-            _insertWidgets(self.moduleArea.topContainer, None)
-
-            def _buildList(cntr, parentObj, depth):
-                count = cntr.count()
-                lastWidget = parentObj
-
-                # find nodes first
-
-                found = False
-                for ii in range(count):
-                    widget = cntr.widget(ii)
-
-                    if not hasattr(widget, 'type'):
-                        if widget in moduleList or widget in localList:
-                            pass
-                        else:
-                            print('>>>', widget, depth, parentObj)
-                            localList.append(widget)
-                            found = True
-                        break
-
-                # else:
-
-                if not found:
-                    # nothing found so recurse down branches
-                    for ii in range(count):
-                        widget = cntr.widget(ii)
-
-                        if hasattr(widget, 'type'):
-                            found = _buildList(widget, lastWidget, depth + 1)
-                            if found:
-                                break
-
-                return found
-
-            def _buildAll(localList):
-                for rep in localList:
-                    _buildList(rep.container(), rep, 0)
-
-            localList = []
-            _buildList(self.moduleArea.topContainer, None, 0)
-            moduleList.extend(localList)
-            tempList = localList.copy()
-            localList = []
-            _buildAll(tempList)
-
-            # else:
-            #     # traverse
-            #     _buildList(widget, cntr, depth+1)
-
-            # if not moduleList:
-            #     moduleList.append((widget, 'top', None))
-            # else:
-            #     typ = cntr.type()
-            #     if typ == 'vertical':
-            #         moduleList.append((widget, 'bottom', parentObj))
-            #     else:
-            #         moduleList.append((widget, 'right', parentObj))
-            # lastWidget = widget
-            # found = True
-            # break
-
-            # for ii in range(count):
-            #     widget = cntr.widget(ii)
-            #
-            #     if hasattr(widget, 'type'):
-            #         _buildList(widget, lastWidget)
+            def _restoreModules(moduleList):
+                """Recover modules to their original positions"""
+                for mods, (pos, rel) in moduleList.items():
+                    self.moduleArea.moveDock(mods, pos, rel)
 
             # find where to return the module to
-            container = display.container()
-            position = 'top'
-            relativeTo = None
-            if container.count() > 1:
-                for ii in range(container.count()):
-                    if container.widget(ii) == display:
-                        iiAdjacent = (ii - 1) if ii else (ii + 1)
-                        typ = container.type()
-                        if typ == 'vertical':
-                            position = 'bottom' if ii else 'top'
-                        elif typ == 'horizontal':
-                            position = 'right' if ii else 'left'
-                        relativeTo = container.widget(iiAdjacent)
-                        break
-                else:
-                    raise RuntimeError("Error: container does not contain widget.")
-
+            _list = _getInserts()
             specViewList = [(specView, action.isChecked()) for specView in display.spectrumViews
                             for action in display.spectrumToolBar.actions()
                             if action.objectName() == specView.spectrum.pid]
-
-            print('>>>moveDock', display, position, relativeTo)
 
             with undoStackBlocking() as addUndoItem:
                 # re-insert spectrumToolbar
@@ -389,13 +279,13 @@ class Window(AbstractWrapperObject):
                 addUndoItem(undo=partial(_setBlankingSpectrumDisplayNotifiers, display, False),
                             redo=partial(_setBlankingSpectrumDisplayNotifiers, display, True))
 
-                # add/remove spectrumDisplay from module Area
-                addUndoItem(undo=partial(self.moduleArea.moveDock, display, position=position, neighbor=relativeTo or None),
-                            redo=partial(self._hiddenModules.moveDock, display, position='top', neighbor=None), )
-
                 # # add/remove spectrumDisplay from module Area
-                # addUndoItem(undo=partial(self.moduleArea.restoreState, moduleState),
-                #             redo=partial(self._hiddenModules.moveDock, display, position='top', neighbor=None),)
+                # addUndoItem(undo=partial(self.moduleArea.moveDock, display, position=position, neighbor=relativeTo or None),
+                #             redo=partial(self._hiddenModules.moveDock, display, position='top', neighbor=None), )
+
+                # add/remove spectrumDisplay from module Area
+                addUndoItem(undo=partial(_restoreModules, _list),
+                            redo=partial(self._hiddenModules.moveDock, display, position='top', neighbor=None),)
 
             _setBlankingSpectrumDisplayNotifiers(display, True)
             # move to the hidden module area

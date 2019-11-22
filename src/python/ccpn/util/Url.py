@@ -34,6 +34,7 @@ def fetchHttpResponse(method, url, data=None, headers=None, proxySettings=None):
     import ssl
     import certifi
     import urllib
+    from urllib.request import getproxies
     import urllib3.contrib.pyopenssl
     from urllib.parse import urlencode, quote
 

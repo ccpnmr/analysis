@@ -51,8 +51,8 @@ class CopyPeakListPopup(CcpnDialogMainWidget):
 
         # enable the buttons
         self.setOkButton(callback=self._okClicked, tipText='Copy PeakList')
-        self.setCancelButton(callback=self._cancelClicked)
-        self.setDefaultButton(CcpnDialogMainWidget.CANCELBUTTON)
+        self.setCloseButton(callback=self.reject, tipText='Close popup')
+        self.setDefaultButton(CcpnDialogMainWidget.CLOSEBUTTON)
         self.__postInit__()
 
     def setWidgets(self):

@@ -558,7 +558,13 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
 
             if projectDir:
                 # try and load the new project
-                project = self._loadProjectLastValid(projectDir)
+                try:
+                    project = self._loadProjectLastValid(projectDir)
+
+                except Exception as es:
+                    MessageDialog.showError('loadProject', 'Fatal error loading project:\n%s' % str(projectDir))
+                    Logging.getLogger().warning('Fatal error loading project: %s' % str(projectDir))
+
                 # try:
                 #     project = self._loadProject(projectDir)
                 #
@@ -1188,12 +1194,17 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
                                                      ioFormats.NEF,
                                                      ioFormats.SPARKY):
 
-                okToContinue = self._queryCloseProject(title='Load %s project' % subType,
-                                                       phrase='create a new')
-                if okToContinue:
-                    with progressManager(self, 'Loading project... ' + url):
-                        obj = None
-                        obj = self._loadProjectLastValid(url)
+                try:
+                    okToContinue = self._queryCloseProject(title='Load %s project' % subType,
+                                                           phrase='create a new')
+                    if okToContinue:
+                        with progressManager(self, 'Loading project... ' + url):
+                            obj = None
+                            obj = self._loadProjectLastValid(url)
+
+                except Exception as es:
+                    MessageDialog.showError('Load Project', 'loadProject Error: %s' % str(es))
+                    getLogger().warning('loadProject Error: %s' % str(es))
 
             else:
                 # with progressManager(self.mainWindow, 'Loading data... ' + url):

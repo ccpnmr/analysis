@@ -31,6 +31,6 @@ try:
 except:
     revision = -1
 
-applicationVersion = '3.0.3'
+applicationVersion = '3.0.0'
 authors = __credits__
 projectName = 'CCPN'

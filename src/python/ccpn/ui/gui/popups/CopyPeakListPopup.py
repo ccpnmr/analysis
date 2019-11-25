@@ -25,57 +25,47 @@ __date__ = "$Date: 2017-03-30 11:28:58 +0100 (Thu, March 30, 2017) $"
 # Start of code
 #=========================================================================================
 
-from PyQt5 import QtGui, QtWidgets, QtCore
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
-from ccpn.ui.gui.widgets.ButtonList import ButtonList
-from ccpn.ui.gui.popups.Dialog import CcpnDialog
+from ccpn.ui.gui.popups.Dialog import CcpnDialogMainWidget
 from ccpn.util.Logging import getLogger
 from ccpn.ui.gui.widgets.MessageDialog import showWarning
 from ccpn.core.lib.ContextManagers import undoBlock
 
 
-class CopyPeakListPopup(CcpnDialog):
+class CopyPeakListPopup(CcpnDialogMainWidget):
     def __init__(self, parent=None, mainWindow=None, title='Copy PeakList', **kwds):
-        CcpnDialog.__init__(self, parent, setLayout=False, windowTitle=title, **kwds)
+        super().__init__(parent, setLayout=True, windowTitle=title, **kwds)
 
-        self.mainWindow = mainWindow
-        self.application = self.mainWindow.application
-        self.project = self.mainWindow.project
+        if mainWindow:
+            self.mainWindow = mainWindow
+            self.application = self.mainWindow.application
+            self.project = self.mainWindow.project
+        else:
+            self.mainWindow = None
+            self.application = None
+            self.project = None
 
-        self._setMainLayout()
         self.setWidgets()
-        self.addWidgetsToLayout()
+        self._populate()
 
-    def _setMainLayout(self):
-        self.mainLayout = QtWidgets.QGridLayout()
-        self.setLayout(self.mainLayout)
-        self.setWindowTitle("Copy PeakList")
-        self.mainLayout.setContentsMargins(20, 20, 20, 5)  # L,T,R,B
-        self.setFixedWidth(300)
-        self.setFixedHeight(130)
+        # enable the buttons
+        self.setOkButton(callback=self._okClicked, tipText='Copy PeakList')
+        self.setCancelButton(callback=self._cancelClicked)
+        self.setDefaultButton(CcpnDialogMainWidget.CANCELBUTTON)
+        self.__postInit__()
 
     def setWidgets(self):
-        self.sourcePeakListLabel = Label(self, 'Source PeakList')
-        self.sourcePeakListPullDown = PulldownList(self)
-        self._populateSourcePeakListPullDown()
+        self.sourcePeakListLabel = Label(self.mainWidget, 'Source PeakList', grid=(0, 0))
+        self.sourcePeakListPullDown = PulldownList(self.mainWidget, grid=(0, 1))
+        self.targetSpectraLabel = Label(self.mainWidget, 'Target Spectrum', grid=(1, 0))
+        self.targetSpectraPullDown = PulldownList(self.mainWidget, grid=(1, 1))
 
-        self.targetSpectraLabel = Label(self, 'Target Spectrum')
-        self.targetSpectraPullDown = PulldownList(self)
+    def _populate(self):
+        self._populateSourcePeakListPullDown()
         self._populateTargetSpectraPullDown()
 
-        self.okCancelButtons = ButtonList(self, texts=['Cancel', ' Ok '],
-                                          callbacks=[self.reject, self._okButton],
-                                          tipTexts=['Close Popup', 'Copy PeakList'])
-
-    def addWidgetsToLayout(self):
-        self.mainLayout.addWidget(self.sourcePeakListLabel, 0, 0)
-        self.mainLayout.addWidget(self.sourcePeakListPullDown, 0, 1)
-        self.mainLayout.addWidget(self.targetSpectraLabel, 1, 0)
-        self.mainLayout.addWidget(self.targetSpectraPullDown, 1, 1)
-        self.mainLayout.addWidget(self.okCancelButtons, 2, 1)
-
-    def _okButton(self):
+    def _okClicked(self):
         with undoBlock():
             self.sourcePeakList = self.project.getByPid(self.sourcePeakListPullDown.getText())
             self.targetSpectrum = self.project.getByPid(self.targetSpectraPullDown.getText())
@@ -93,7 +83,6 @@ class CopyPeakListPopup(CcpnDialog):
                 showWarning(str(self.windowTitle()), str(es))
                 if self.application._isInDebugMode:
                     raise es
-
 
     def _populateSourcePeakListPullDown(self):
         sourcePullDownData = []
@@ -143,7 +132,6 @@ class CopyPeakListPopup(CcpnDialog):
 
 if __name__ == '__main__':
     from ccpn.ui.gui.widgets.Application import TestApplication
-    from ccpn.ui.gui.popups.Dialog import CcpnDialog
     import ccpn.core.testing.WrapperTesting as WT
 
 

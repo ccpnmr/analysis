@@ -205,7 +205,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
 
         Return True unless any errors occurred
         """
-        
+
         # this will apply the immediate guiChanges with an undo block
         # applyToSDs = self.preferences.general.applyToSpectrumDisplays
 
@@ -280,7 +280,6 @@ class PreferencesPopup(CcpnDialogMainWidget):
         for (tabFunc, tabName) in ((self._setGeneralTabWidgets, 'General'),
                                    (self._setSpectrumTabWidgets, 'Spectrum'),
                                    (self._setExternalProgramsTabWidgets, 'External Programs')):
-
             fr = ScrollFrame(self.mainWidget, setLayout=True, spacing=DEFAULTSPACING,
                              scrollBarPolicies=('never', 'asNeeded'), margins=TABMARGINS)
 
@@ -497,7 +496,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
             self._changes = {}
 
             self.useApplyToSpectrumDisplaysBox.setChecked(self.preferences.general.applyToSpectrumDisplays)
-            
+
             self._populateGeneralTab()
             self._populateSpectrumTab()
             self._populateExternalProgramsTab()
@@ -891,8 +890,8 @@ class PreferencesPopup(CcpnDialogMainWidget):
 
         row += 1
         self.symbolSizePixelLabel = Label(parent, text="Symbol Size (pixels)", grid=(row, 0))
-        self.symbolSizePixelData = DoubleSpinbox(parent, decimals=0, step=1,
-                                                 min=2, max=50, grid=(row, 1), hAlign='l')
+        self.symbolSizePixelData = Spinbox(parent, step=1,
+                                           min=2, max=50, grid=(row, 1), hAlign='l')
         self.symbolSizePixelData.setMinimumWidth(LineEditsMinimumWidth)
         # symbolSizePixel = self.preferences.general.symbolSizePixel
         # self.symbolSizePixelData.setValue(float('%i' % symbolSizePixel))
@@ -900,7 +899,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
 
         row += 1
         self.symbolThicknessLabel = Label(parent, text="Symbol Thickness (points)", grid=(row, 0))
-        self.symbolThicknessData = DoubleSpinbox(parent, decimals=0, step=1,
+        self.symbolThicknessData = Spinbox(parent, step=1,
                                            min=1, max=20, grid=(row, 1), hAlign='l')
         self.symbolThicknessData.setMinimumWidth(LineEditsMinimumWidth)
         # symbolThickness = self.preferences.general.symbolThickness
@@ -909,7 +908,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
 
         row += 1
         self.contourThicknessLabel = Label(parent, text="Contour Thickness (points)", grid=(row, 0))
-        self.contourThicknessData = DoubleSpinbox(parent, decimals=0, step=1,
+        self.contourThicknessData = Spinbox(parent, step=1,
                                             min=1, max=20, grid=(row, 1), hAlign='l')
         self.contourThicknessData.setMinimumWidth(LineEditsMinimumWidth)
         # contourThickness = self.preferences.general.contourThickness

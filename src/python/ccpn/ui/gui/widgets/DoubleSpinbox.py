@@ -118,6 +118,9 @@ class DoubleSpinbox(QtWidgets.QDoubleSpinBox, Base):
         self.setFocusPolicy(QtCore.Qt.StrongFocus)
 
     def wheelEvent(self, event: QtGui.QWheelEvent) -> None:
+        """Process the wheelEvent for the doubleSpinBox
+        """
+        # emit the value when wheel event has occurred, only when hasFocus
         if self.hasFocus() or not self._internalWheelEvent:
             super().wheelEvent(event)
             self.wheelChanged.emit(self.value())

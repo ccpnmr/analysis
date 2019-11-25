@@ -25,6 +25,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
+from contextlib import contextmanager
 from PyQt5 import QtGui, QtWidgets, QtCore
 from PyQt5.QtCore import pyqtSignal
 from ccpn.ui.gui.widgets.Base import Base
@@ -56,17 +57,37 @@ class Spinbox(QtWidgets.QSpinBox, Base):
         lineEdit = self.lineEdit()
         lineEdit.returnPressed.connect(self._keyPressed)
 
+        self._internalWheelEvent = True
         # change focusPolicy so that spinboxes don't grab focus unless selected
         self.setFocusPolicy(QtCore.Qt.StrongFocus)
 
     def wheelEvent(self, event: QtGui.QWheelEvent) -> None:
-        """emit the value when wheel event has occurred, only when hasFocus
+        """Process the wheelEvent for the spinBox
         """
+        # emit the value when wheel event has occurred, only when hasFocus
         if self.hasFocus():
             super().wheelEvent(event)
             self.wheelChanged.emit(self.value())
         else:
             event.ignore()
+
+    @contextmanager
+    def _useExternalWheelEvent(self):
+        try:
+            self._internalWheelEvent = False
+            yield
+        finally:
+            self._internalWheelEvent = True
+
+    def _externalWheelEvent(self, event):
+        with self._useExternalWheelEvent():
+            self.wheelEvent(event)
+
+    def stepBy(self, steps: int) -> None:
+        if self._internalWheelEvent:
+            super().stepBy(steps)
+        else:
+            super().stepBy(1 if steps > 0 else -1 if steps < 0 else steps)
 
     def get(self):
         return self.value()

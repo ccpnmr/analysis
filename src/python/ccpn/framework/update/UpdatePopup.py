@@ -79,7 +79,7 @@ class UpdatePopup(CcpnDialog, UpdateAgent):
 
         row += 1
         texts = (REFRESHBUTTONTEXT, DOWNLOADBUTTONTEXT, self.CLOSEBUTTONTEXT)
-        callbacks = (self.resetFromServer, self._install, self._accept)
+        callbacks = (self._resetClicked, self._install, self._accept)
         tipTexts = ('Refresh the updates information by querying server and comparing with what is installed locally',
                     'Install the updates from the server',
                     'Close update dialog')
@@ -94,6 +94,15 @@ class UpdatePopup(CcpnDialog, UpdateAgent):
         self._numUpdatesInstalled = 0
         self._updateButton.setEnabled(self._check())
 
+        self._downloadButton = self.buttonList.getButton(DOWNLOADBUTTONTEXT)
+        self._downloadButton.setEnabled(True if (self.updateFiles and len(self.updateFiles) > 0) else False)
+
+    def _resetClicked(self):
+        """Reset button clicked,update the count and reset the download button
+        """
+        self.resetFromServer()
+        self._downloadButton.setEnabled(True if (self.updateFiles and len(self.updateFiles) > 0) else False)
+
     def _install(self):
         """The update button has been clicked. Install updates and flag that files have been changed
         """
@@ -101,6 +110,8 @@ class UpdatePopup(CcpnDialog, UpdateAgent):
         if updateFilesInstalled:
             self._numUpdatesInstalled += len(updateFilesInstalled)
             self.buttonList.getButton(self.CLOSEBUTTONTEXT).setText(CLOSEEXITBUTTONTEXT)
+
+        self._downloadButton.setEnabled(True if (self.updateFiles and len(self.updateFiles) > 0) else False)
 
     def _closeProgram(self):
         """Call the mainWindow close function giving user option to save, then close program

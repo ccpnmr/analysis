@@ -468,7 +468,16 @@ class UpdateAgent(object):
 
         if self.haveWriteAccess():
             n = 0
+
+            # check that the last file to be updated is the Version.py
+            _allowVersionUpdate = True if (len(updateFiles) == 1 and updateFiles[0].filePath == 'src/python/ccpn/framework/Version.py') else False
+
             for updateFile in updateFiles:
+
+                # double-check that it is the last file
+                if not _allowVersionUpdate and updateFile.filePath == 'src/python/ccpn/framework/Version.py':
+                    continue
+
                 try:
                     if not self._dryRun:
                         if updateFile.fileHashCode == DELETEHASHCODE:

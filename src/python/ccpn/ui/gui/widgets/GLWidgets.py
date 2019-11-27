@@ -210,7 +210,8 @@ class GuiNdWidget(CcpnGLWidget):
             0].isDeleted else None
         self.visiblePlaneList = {}
 
-        minList = [self._spectrumSettings[sp][SPECTRUM_VALUEPERPOINT] for sp in self._ordering if sp in self._spectrumSettings]
+        minList = [self._spectrumSettings[sp][SPECTRUM_VALUEPERPOINT] if SPECTRUM_VALUEPERPOINT in self._spectrumSettings[sp] else None
+                   for sp in self._ordering if sp in self._spectrumSettings]
         minimumValuePerPoint = None
 
         # check the length of the min values, may have lower dimension spectra overlaid

@@ -885,7 +885,7 @@ class CcpnGLWidget(QOpenGLWidget):
                 for listView in spectrumView.peakListViews:
                     listView.buildLabels = True
             self.buildMarks = True
-            self.buildSpectra()
+            # self.buildSpectra()           # shouldn't be called here
             self.update()
 
     def _getValidAspectRatio(self, axisCode):
@@ -1752,6 +1752,7 @@ class CcpnGLWidget(QOpenGLWidget):
         # GLversionFunctions = self.context().versionFunctions()
         # GLversionFunctions.initializeOpenGLFunctions()
         # self._GLVersion = GLversionFunctions.glGetString(GL.GL_VERSION)
+        print('>>>>>>initializeGL')
 
         # initialise a common to all OpenGL windows
         self.globalGL = GLGlobalData(parent=self, strip=self.strip)
@@ -1871,13 +1872,19 @@ class CcpnGLWidget(QOpenGLWidget):
         # # define the remaining corner
         # self.viewports.addViewport(GLDefs.AXISCORNER, self, (-self.AXIS_MARGINRIGHT, 'w'), (0, 'a'), (0, 'w'), (self.AXIS_MARGINBOTTOM, 'a'))
 
+        print('>>>>>>initializeGL - 1')
+
         # set strings for the overlay text
         self.buildOverlayStrings()
+
+        print('>>>>>>initializeGL - 2')
 
         # This is the correct blend function to ignore stray surface blending functions
         GL.glBlendFuncSeparate(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA, GL.GL_ONE, GL.GL_ONE)
         self.setBackgroundColour(self.background, silent=True)
         self.globalGL._shaderProgramTex.setBlendEnabled(0)
+
+        print('>>>>>>initializeGL - 3')
 
         if self.strip:
             self.updateVisibleSpectrumViews()
@@ -1885,8 +1892,12 @@ class CcpnGLWidget(QOpenGLWidget):
             self.initialiseAxes(self.strip)
             self.initialiseTraces()
 
+        print('>>>>>>initializeGL - 4')
+
         # check that the screen device pixel ratio is correct
         self.refreshDevicePixelRatio()
+
+        print('>>>>>>initializeGL - end')
 
     def buildOverlayStrings(self):
         self._lockStringFalse = GLString(text=GLDefs.LOCKSTRING, font=self.getSmallFont(), x=0, y=0,

@@ -526,7 +526,10 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
                             )
                 # project.application.showValidateSpectraPopup(defaultSelected='invalid')
                 # project.save(createFallback=False, overwriteExisting=True)
-            self._project._undo.markClean()
+
+            undo = self._project._undo
+            if undo is not  None:
+                undo.markClean()
             return project
 
         else:
@@ -541,7 +544,9 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
         # try and load the new project
         # try:
         project = self._loadProjectSingleTry(projectDir)
-        self._project._undo.markClean()
+        undo = self._project._undo
+        if undo is not None:
+            undo.markClean()
         return project
 
         # except Exception as es:
@@ -597,7 +602,10 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
                 #     except Exception as es:
                 #         MessageDialog.showError('loadProject', 'Fatal error loading previous project:\n%s' % str(lastValidProject))
                 #         Logging.getLogger().warning('Fatal error loading previous project: %s' % str(lastValidProject))
-        self._project._undo.markClean()
+
+        undo = self._project._undo
+        if undo is not None:
+            undo.markClean()
         return project
 
     def _fillRecentProjectsMenu(self):

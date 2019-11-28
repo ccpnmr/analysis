@@ -349,7 +349,13 @@ class Project(AbstractWrapperObject):
     @property
     def _undo(self):
         """undo stack for Project. Implementation attribute"""
-        return self._wrappedData.root._undo
+
+        try:
+            result = self._wrappedData.root._undo
+        except:
+            result = None
+
+        return result
 
     def _resetUndo(self, maxWaypoints: int = Undo.MAXUNDOWAYPOINTS,
                    maxOperations: int = Undo.MAXUNDOOPERATIONS,

@@ -1474,6 +1474,9 @@ class GuiStrip(Frame):
 
     def _createMarkAtCursorPosition(self, axisIndex=None):
         try:
+            if self.isDeleted or self._flaggedForDelete:
+                return
+
             defaultColour = self._preferences.defaultMarksColour
             mouseDict = self.current.mouseMovedDict[AXIS_FULLATOMNAME]
             positions = [mouseDict[ax] for ax in self.axisCodes if ax in mouseDict]
@@ -1488,7 +1491,7 @@ class GuiStrip(Frame):
                 self._project.newMark(defaultColour, positions, axisCodes)
 
             # add the marks for the double cursor - needs to be enabled in preferences
-            if self._preferences.showDoubleCrosshair and self._CcpnGLWidget._matchingIsotopeCodes:
+            if self.doubleCrosshairVisible and self._CcpnGLWidget._matchingIsotopeCodes:
                 mouseDict = self.current.mouseMovedDict[DOUBLEAXIS_FULLATOMNAME]
                 positions = [mouseDict[ax] for ax in self.axisCodes[:2] if ax in mouseDict]
                 axisCodes = [ax for ax in self.axisCodes[:2] if ax in mouseDict]

@@ -818,12 +818,12 @@ class CcpnGLWidget(QOpenGLWidget):
         self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_DYAF] = dyAF
         self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_XSCALE] = xScale
         self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_YSCALE] = yScale
+        self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_SPINNINGRATE] = spectrumView.spectrum.spinningRate
 
         # indices = getAxisCodeMatchIndices(spectrumView.spectrum.axisCodes, self.strip.axisCodes)
         indices = getAxisCodeMatchIndices(self.strip.axisCodes, spectrumView.spectrum.axisCodes)
 
         self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_POINTINDEX] = indices
-
         self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_YSCALE] = yScale
 
         if len(self._spectrumValues) > 2:
@@ -3229,6 +3229,10 @@ class CcpnGLWidget(QOpenGLWidget):
 
                     if spec.isotopeCodes[pIndex[0]] == spec.isotopeCodes[pIndex[1]]:
                         self._matchingIsotopeCodes = True
+
+                        # build the diagonal list here from the visible spectra - each may have a different spinning rate
+                        # remove from _build axe - not needed there
+                        self._buildDiagonals()
                         break
 
         # build the axes
@@ -5114,6 +5118,66 @@ class CcpnGLWidget(QOpenGLWidget):
             # set to self.foreground
 
         self.update()
+
+    def _buildDiagonals(self):
+        """Build a list containing the diagonal and the spinningRate lines for the sidebands
+        """
+        # get spectral width in X and Y
+        # get max number of diagonal lines to draw in each axis
+        # map to the valueToRatio screen
+        # zoom should take care in bounding to the viewport
+
+        for spectrumView in self._ordering:  # strip.spectrumViews:
+
+            if spectrumView.isDeleted:
+                continue
+
+            # only add phasing trace for the visible spectra
+            if spectrumView.isVisible():
+                pass
+
+                #     _diagIndexList = (0, 1)
+                #     _diagonalList.numVertices = 2
+                #     _diagonalList.vertices = np.array(_diagVertexList, dtype=np.float32)
+                #     _diagonalList.indices = np.array((0, 1), dtype=np.uint32)
+                #     _diagonalList.colors = np.array((r, g, b, alpha, r, g, b, alpha), dtype=np.float32)
+                #
+                # else:
+                #     _diagonalList.numVertices = 0
+                #     _diagonalList.indices = np.array((), dtype=np.uint32)
+                #     pass
+
+    def drawDiagonals(self):
+        # draw the diagonals for the visible spectra
+        with self._disableGLAliasing():
+            GL.glEnable(GL.GL_BLEND)
+
+            # if self._preferences.showSpectrumBorder:
+            if self.strip.spectrumBordersVisible:
+                for spectrumView in self._ordering:  #self._ordering:                             # strip.spectrumViews:
+
+                    if spectrumView.isDeleted:
+                        continue
+
+                    if spectrumView.isVisible() and spectrumView.spectrum.dimensionCount > 1 and spectrumView in self._spectrumSettings.keys():
+                        specSettings = self._spectrumSettings[spectrumView]
+
+                        fx0 = specSettings[GLDefs.SPECTRUM_MAXXALIAS]
+                        fx1 = specSettings[GLDefs.SPECTRUM_MINXALIAS]
+                        fy0 = specSettings[GLDefs.SPECTRUM_MAXYALIAS]
+                        fy1 = specSettings[GLDefs.SPECTRUM_MINYALIAS]
+                        GL.glColor4f(*spectrumView.posColour[0:3], 0.5)
+
+                        # NOTE:ED - needs to be a VBO at some point
+                        GL.glBegin(GL.GL_LINE_LOOP)
+                        GL.glVertex2d(fx0, fy0)
+                        GL.glVertex2d(fx0, fy1)
+                        GL.glVertex2d(fx1, fy1)
+                        GL.glVertex2d(fx1, fy0)
+                        GL.glEnd()
+
+        # reset lineWidth
+        GL.glLineWidth(1.0 * self.viewports._devicePixelRatio)
 
     def _buildAxes(self, gridGLList, axisList=None, scaleGrid=None, r=0.0, g=0.0, b=0.0, transparency=256.0,
                    _includeDiagonal=False, _diagonalList=None):

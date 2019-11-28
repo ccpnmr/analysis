@@ -1297,7 +1297,8 @@ assignmentTolerances
     def aliasingLimits(self) -> Tuple[Tuple[Optional[float], Optional[float]], ...]:
         """\- (*(float,float)*)\*dimensionCount
 
-        tuple of tuples of (lowerAliasingLimit, higherAliasingLimit) for spectrum """
+        tuple of tuples of (lowerAliasingLimit, higherAliasingLimit) for spectrum
+        """
         result = [(x and x.minAliasedFreq, x and x.maxAliasedFreq) for x in self._mainExpDimRefs()]
 
         if any(None in tt for tt in result):

@@ -229,11 +229,11 @@ class SpectrumReference(AbstractWrapperObject):
     @property
     def isAcquisition(self) -> bool:
         """True if this dimension is the acquisition dimension?"""
-        return self._wrappedData.dataDim.expDim.isAquisition
+        return self._wrappedData.dataDim.expDim.isAcquisition
 
     @isAcquisition.setter
     def isAcquisition(self, value):
-        self._wrappedData.dataDim.expDim.isAquisition = value
+        self._wrappedData.dataDim.expDim.isAcquisition = value
 
     def pointToValue(self, point: float) -> float:
         """Axis (ppm) value corresponding to point"""
@@ -247,6 +247,15 @@ class SpectrumReference(AbstractWrapperObject):
     def numPointsOrig(self) -> bool:
         """numPointsOrig"""
         return self._wrappedData.dataDim.numPointsOrig
+
+    @property
+    def assignmentTolerance(self) -> float:
+        """Assignment Tolerance"""
+        return self._wrappedData.assignmentTolerance
+
+    @assignmentTolerance.setter
+    def assignmentTolerance(self, value):
+        self._wrappedData.assignmentTolerance = value
 
     #=========================================================================================
     # Implementation functions

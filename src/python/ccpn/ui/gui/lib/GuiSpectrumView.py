@@ -31,17 +31,17 @@ from ccpn.util import Colour
 from PyQt5 import QtCore, QtGui, QtWidgets
 from ccpn.util.Logging import getLogger
 from ccpn.core.lib.Notifiers import Notifier
+from typing import Optional, Tuple
 
-#import pyqtgraph as pg
-
-#from ccpn.ui.gui.modules.spectrumPane.PeakListItem import PeakListItem
-#from ccpn.ui.gui.modules.spectrumPane.IntegralListItem import IntegralListItem
 
 SpectrumViewParams = collections.namedtuple('SpectrumViewParams', ('valuePerPoint',
                                                                    'totalPointCount',
                                                                    'minAliasedFrequency',
                                                                    'maxAliasedFrequency',
-                                                                   'dataDim'))
+                                                                   'dataDim',
+                                                                   'minSpectrumFrequency',
+                                                                   'maxSpectrumFrequency',
+                                                                   ))
 
 
 class GuiSpectrumView(QtWidgets.QGraphicsObject):
@@ -140,7 +140,7 @@ class GuiSpectrumView(QtWidgets.QGraphicsObject):
     #   self.xDim = xDim
     #   self.yDim = yDim
 
-    def _getSpectrumViewParams(self, axisDim: int) -> tuple:
+    def _getSpectrumViewParams(self, axisDim: int) -> Optional[Tuple]:
         """Get position, width, totalPointCount, minAliasedFrequency, maxAliasedFrequency
         for axisDimth axis (zero-origin)"""
 
@@ -156,9 +156,11 @@ class GuiSpectrumView(QtWidgets.QGraphicsObject):
             # Must be done this way as dataDim.dim may not be in order 1,2,3 (e.g. for projections)
             if dd is dataDim:
                 minAliasedFrequency, maxAliasedFrequency = (self.spectrum.aliasingLimits)[ii]
+                minSpectrumFrequency, maxSpectrumFrequency = (self.spectrum.spectrumLimits)[ii]
                 break
         else:
             minAliasedFrequency = maxAliasedFrequency = dataDim = None
+            minSpectrumFrequency = maxSpectrumFrequency = None
 
         if hasattr(dataDim, 'primaryDataDimRef'):
             # FreqDataDim - get ppm valuePerPoint
@@ -173,7 +175,8 @@ class GuiSpectrumView(QtWidgets.QGraphicsObject):
 
         # return axis.position, axis.width, totalPointCount, minAliasedFrequency, maxAliasedFrequency, dataDim
         return SpectrumViewParams(valuePerPoint, totalPointCount,
-                                  minAliasedFrequency, maxAliasedFrequency, dataDim)
+                                  minAliasedFrequency, maxAliasedFrequency, dataDim,
+                                  minSpectrumFrequency, maxSpectrumFrequency)
 
     def _getColour(self, colourAttr, defaultColour=None):
 

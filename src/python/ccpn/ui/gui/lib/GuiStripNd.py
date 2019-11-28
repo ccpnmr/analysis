@@ -539,21 +539,15 @@ class GuiStripNd(GuiStrip):
                         ignoreSpectrumView is spectrumView._wrappedData.spectrumView:
                     continue
 
-                # spectrum = spectrumView.spectrum
-                # zDim = spectrum.axisCodes.index(zAxis.code)
-
-                # position, width, totalPointCount, minFrequency, maxFrequency, dataDim = (
-                #   spectrumView._getSpectrumViewParams(n+2))
                 viewParams = spectrumView._getSpectrumViewParams(n + 2)
-
                 if not viewParams:
                     continue
 
                 indices = getAxisCodeMatchIndices(self.axisCodes, spectrumView.spectrum.axisCodes)
                 alais = spectrumView.spectrum.visibleAliasingRange
 
-                minFrequency = viewParams.minAliasedFrequency
-                maxFrequency = viewParams.maxAliasedFrequency
+                minFrequency = viewParams.minSpectrumFrequency
+                maxFrequency = viewParams.maxSpectrumFrequency
                 freqRange = maxFrequency - minFrequency
 
                 # sign is in the aliasingRange - wrong dim - check indices defined
@@ -579,26 +573,6 @@ class GuiStripNd(GuiStrip):
                 zAxis.width = minZPlaneSize
 
             self.planeAxisBars[n].setPlaneValues(minZPlaneSize, minAliasedFrequency, maxAliasedFrequency, zAxis.position)
-
-            # planeLabel = self.planeToolbar.planeLabels[n]
-            #
-            # planeLabel.setSingleStep(minZPlaneSize)
-            #
-            # # have to do the following in order: maximum, value, minimum
-            # # otherwise Qt will set bogus value to guarantee that minimum <= value <= maximum
-            #
-            # if maxAliasedFrequency is not None:
-            #     planeLabel.setMaximum(maxAliasedFrequency)
-            #
-            # planeLabel.setValue(zAxis.position)
-            # # planeLabel.setValue(int(zAxis.position)-(zAxis.position % 1))
-            #
-            # if minAliasedFrequency is not None:
-            #     planeLabel.setMinimum(minAliasedFrequency)
-            #
-            # if not self.haveSetupZWidgets:
-            #     # have to set this up here, otherwise the callback is called too soon and messes up the position
-            #     planeLabel.editingFinished.connect(partial(self._setZPlanePosition, n, planeLabel.value()))
 
         self.haveSetupZWidgets = True
 

@@ -557,9 +557,9 @@ class GLExporter():
                 self._spectrumValues = spectrumView._getValues(dimensionCount=2)
 
                 # get the bounding box of the spectra
-                fx0, fx1 = self._spectrumValues[0].maxAliasedFrequency, self._spectrumValues[0].minAliasedFrequency
+                fx0, fx1 = self._spectrumValues[0].maxSpectrumFrequency, self._spectrumValues[0].minSpectrumFrequency
                 if spectrumView.spectrum.dimensionCount > 1:
-                    fy0, fy1 = self._spectrumValues[1].maxAliasedFrequency, self._spectrumValues[1].minAliasedFrequency
+                    fy0, fy1 = self._spectrumValues[1].maxSpectrumFrequency, self._spectrumValues[1].minSpectrumFrequency
                     colour = colors.Color(*spectrumView.posColour[0:3], alpha=alphaClip(0.5))
                 else:
                     if spectrumView.spectrum.intensities is not None and spectrumView.spectrum.intensities.size != 0:

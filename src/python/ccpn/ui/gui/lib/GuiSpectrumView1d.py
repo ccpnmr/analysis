@@ -120,9 +120,10 @@ class GuiSpectrumView1d(GuiSpectrumView):
         if phasingFrame.isVisible() and not self.hPhaseTrace:
             if not self.strip.haveSetHPhasingPivot:
                 viewParams = self._getSpectrumViewParams(0)
-                # valuePerPoint, pointCount, minAliasedFrequency, maxAliasedFrequency, dataDim = self._getSpectrumViewParams(0)
-                self.strip.hPhasingPivot.setPos(0.5 * (viewParams.minAliasedFrequency +
-                                                       viewParams.maxAliasedFrequency))
+                # valuePerPoint, pointCount, minAliasedFrequency, maxAliasedFrequency, dataDim,
+                # minSpectrumFrequency, maxSpectrumFrequency = self._getSpectrumViewParams(0)
+                self.strip.hPhasingPivot.setPos(0.5 * (viewParams.minSpectrumFrequency +
+                                                       viewParams.maxSpectrumFrequency))
                 self.strip.hPhasingPivot.setVisible(True)
                 self.strip.haveSetHPhasingPivot = True
             trace = pg.PlotDataItem()
@@ -183,7 +184,9 @@ class GuiSpectrumView1d(GuiSpectrumView):
             if n != 1:
 
                 try:
-                    valuePerPoint, totalPointCount, minAliasedFrequency, maxAliasedFrequency, dataDim = self._getSpectrumViewParams(n)
+                    # valuePerPoint, totalPointCount, minAliasedFrequency, maxAliasedFrequency, dataDim,
+                    # minSpectrumFrequency, maxSpectrumFrequency = self._getSpectrumViewParams(n)
+                    valuePerPoint, totalPointCount, _, _, dataDim, minSpectrumFrequency, maxSpectrumFrequency = self._getSpectrumViewParams(n)
                 except:
                     # skip if the dimension doesn't exist
                     break
@@ -192,11 +195,11 @@ class GuiSpectrumView1d(GuiSpectrumView):
                     if n == 0:
                         xDataDim = dataDim
                         # -1 below because points start at 1 in data model
-                        xMinFrequency = int(dataDim.primaryDataDimRef.valueToPoint(maxAliasedFrequency) - 1)
-                        xMaxFrequency = int(dataDim.primaryDataDimRef.valueToPoint(minAliasedFrequency) - 1)
+                        xMinFrequency = int(dataDim.primaryDataDimRef.valueToPoint(maxSpectrumFrequency) - 1)
+                        xMaxFrequency = int(dataDim.primaryDataDimRef.valueToPoint(minSpectrumFrequency) - 1)
                         xNumPoints = totalPointCount
                     else:
-                        inRange = (minAliasedFrequency <= pos <= maxAliasedFrequency)
+                        inRange = (minSpectrumFrequency <= pos <= maxSpectrumFrequency)
                         if not inRange:
                             break
                     pnt = (dataDim.primaryDataDimRef.valueToPoint(pos) - 1) % totalPointCount

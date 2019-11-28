@@ -733,7 +733,7 @@ class CcpnGLWidget(QOpenGLWidget):
 
             # get the bounding box of the spectra
             dx = -1.0 if self.INVERTXAXIS else -1.0  # self.sign(self.axisR - self.axisL)
-            fx0, fx1 = self._spectrumValues[0].maxAliasedFrequency, self._spectrumValues[0].minAliasedFrequency
+            fx0, fx1 = self._spectrumValues[0].maxSpectrumFrequency, self._spectrumValues[0].minSpectrumFrequency
 
             # check tolerances
             if not self._widthsChangedEnough((fx0, 0.0), (fx1, 0.0), tol=1e-10):
@@ -744,7 +744,7 @@ class CcpnGLWidget(QOpenGLWidget):
 
             if spectrumView.spectrum.dimensionCount > 1:
                 dy = -1.0 if self.INVERTYAXIS else -1.0  # self.sign(self.axisT - self.axisB)
-                fy0, fy1 = self._spectrumValues[1].maxAliasedFrequency, self._spectrumValues[1].minAliasedFrequency
+                fy0, fy1 = self._spectrumValues[1].maxSpectrumFrequency, self._spectrumValues[1].minSpectrumFrequency
 
                 # check tolerances
                 if not self._widthsChangedEnough((fy0, 0.0), (fy1, 0.0), tol=1e-10):
@@ -1280,19 +1280,21 @@ class CcpnGLWidget(QOpenGLWidget):
         self._clearAndUpdate(clearKeys=True)
         self.update()
 
-    def _rescaleAllAxes(self, update=True):
+    def _rescaleAllAxes(self, mouseMoveOnly=False, update=True):
         self._testAxisLimits()
-        self.rescale(rescaleStaticHTraces=True, rescaleStaticVTraces=True)
+        self.rescale(rescaleStaticHTraces=True, rescaleStaticVTraces=True,
+                     rescaleSpectra=not mouseMoveOnly)
 
         # spawn rebuild event for the grid
         self._updateAxes = True
         for gr in self.gridList:
             gr.renderMode = GLRENDERMODE_REBUILD
 
-        # if (self._useLockedAspect or self._useDefaultAspect):
-        # ratios have changed so rescale the peak/multiplet symbols
-        self._GLPeaks.rescale()
-        self._GLMultiplets.rescale()
+        if not mouseMoveOnly:
+            # if (self._useLockedAspect or self._useDefaultAspect):
+            # ratios have changed so rescale the peak/multiplet symbols
+            self._GLPeaks.rescale()
+            self._GLMultiplets.rescale()
 
         self._rescaleOverlayText()
 
@@ -2599,7 +2601,7 @@ class CcpnGLWidget(QOpenGLWidget):
                                                        axisB=self.axisB, axisT=self.axisT,
                                                        axisL=self.axisL, axisR=self.axisR)
                     self._selectionMode = 0
-                    self._rescaleAllAxes()
+                    self._rescaleAllAxes(mouseMoveOnly=True)
                     self._storeZoomHistory()
 
         elif event.buttons() & Qt.MiddleButton:
@@ -3031,10 +3033,11 @@ class CcpnGLWidget(QOpenGLWidget):
                                                                     drawMode=GL.GL_LINES,
                                                                     dimension=2,
                                                                     GLContext=self)
+
+                self._buildSpectrumSetting(spectrumView=spectrumView)
                 spectrumView._buildGLContours(self._contourList[spectrumView],
                                               firstShow=self._preferences.automaticNoiseContoursOnFirstShow)
 
-                self._buildSpectrumSetting(spectrumView=spectrumView)
                 rebuildFlag = True
 
                 # define the VBOs to pass to the graphics card
@@ -3186,39 +3189,9 @@ class CcpnGLWidget(QOpenGLWidget):
                         fx1 = specSettings[GLDefs.SPECTRUM_MINXALIAS]
                         fy0 = specSettings[GLDefs.SPECTRUM_MAXYALIAS]
                         fy1 = specSettings[GLDefs.SPECTRUM_MINYALIAS]
-
-                        # fx0, fx1 = self._spectrumValues[0].maxAliasedFrequency, self._spectrumValues[0].minAliasedFrequency
-                        #
-                        # self._spectrumValues = spectrumView._getValues()
-                        #
-                        # spectrumReferences = spectrumView.spectrum.spectrumReferences
-                        #
-                        # # get the bounding box of the spectra
-                        # fx0, fx1 = self._spectrumValues[0].maxAliasedFrequency, self._spectrumValues[0].minAliasedFrequency
-                        #
-                        # # totalPointCountX = spectrumView.spectrum.totalPointCounts[0]
-                        # # fx0, fx1 = spectrumReferences[0].pointToValue(1), spectrumReferences[0].pointToValue(totalPointCountX)
-                        # # fx0, fx1 = max(fx0, fx1), min(fx0, fx1)
-                        #
-                        # # if spectrumView.spectrum.dimensionCount > 1:
-                        # fy0, fy1 = self._spectrumValues[1].maxAliasedFrequency, self._spectrumValues[1].minAliasedFrequency
-                        #
-                        # # totalPointCountY = spectrumView.spectrum.totalPointCounts[1]
-                        # # fy0, fy1 = spectrumReferences[1].pointToValue(1), spectrumReferences[1].pointToValue(totalPointCountY)
-                        # # fy0, fy1 = max(fy0, fy1), min(fy0, fy1)
-
                         GL.glColor4f(*spectrumView.posColour[0:3], 0.5)
 
-                        # else:
-                        #     fy0, fy1 = np.max(spectrumView.spectrum.intensities), np.min(spectrumView.spectrum.intensities)
-                        #
-                        #     colour = spectrumView.sliceColour
-                        #     colR = int(colour.strip('# ')[0:2], 16) / 255.0
-                        #     colG = int(colour.strip('# ')[2:4], 16) / 255.0
-                        #     colB = int(colour.strip('# ')[4:6], 16) / 255.0
-                        #
-                        #     GL.glColor4f(colR, colG, colB, 0.5)
-
+                        # NOTE:ED - needs to be a VBO at some point
                         GL.glBegin(GL.GL_LINE_LOOP)
                         GL.glVertex2d(fx0, fy0)
                         GL.glVertex2d(fx0, fy1)
@@ -4999,7 +4972,7 @@ class CcpnGLWidget(QOpenGLWidget):
 
             # get the bounding box of the spectra
             dx = self.sign(self.axisR - self.axisL)
-            fx0, fx1 = self._spectrumValues[0].maxAliasedFrequency, self._spectrumValues[0].minAliasedFrequency
+            fx0, fx1 = self._spectrumValues[0].maxSpectrumFrequency, self._spectrumValues[0].minSpectrumFrequency
 
             # check tolerances
             if not self._widthsChangedEnough((fx0, 0.0), (fx1, 0.0), tol=1e-10):
@@ -5010,7 +4983,7 @@ class CcpnGLWidget(QOpenGLWidget):
 
             if spectrumView.spectrum.dimensionCount > 1:
                 dy = self.sign(self.axisT - self.axisB)
-                fy0, fy1 = self._spectrumValues[1].maxAliasedFrequency, self._spectrumValues[1].minAliasedFrequency
+                fy0, fy1 = self._spectrumValues[1].maxSpectrumFrequency, self._spectrumValues[1].minSpectrumFrequency
 
                 # check tolerances
                 if not self._widthsChangedEnough((fy0, 0.0), (fy1, 0.0), tol=1e-10):

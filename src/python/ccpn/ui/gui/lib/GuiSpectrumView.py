@@ -36,6 +36,8 @@ from typing import Optional, Tuple
 
 SpectrumViewParams = collections.namedtuple('SpectrumViewParams', ('valuePerPoint',
                                                                    'totalPointCount',
+                                                                   'pointCount',
+                                                                   'numPoints',
                                                                    'minAliasedFrequency',
                                                                    'maxAliasedFrequency',
                                                                    'dataDim',
@@ -150,8 +152,12 @@ class GuiSpectrumView(QtWidgets.QGraphicsObject):
         if not dataDim:
             return
 
-        totalPointCount = (dataDim.numPointsOrig if hasattr(dataDim, "numPointsOrig")
+        totalPointCount = (dataDim.numPointsOrig if hasattr(dataDim, 'numPointsOrig')
                            else dataDim.numPoints)
+        pointCount = (dataDim.numPointsValid if hasattr(dataDim, 'numPointsValid')
+                      else dataDim.numPoints)
+        numPoints = dataDim.numPoints
+
         for ii, dd in enumerate(dataDim.dataSource.sortedDataDims()):
             # Must be done this way as dataDim.dim may not be in order 1,2,3 (e.g. for projections)
             if dd is dataDim:
@@ -174,7 +180,7 @@ class GuiSpectrumView(QtWidgets.QGraphicsObject):
             valuePerPoint = None
 
         # return axis.position, axis.width, totalPointCount, minAliasedFrequency, maxAliasedFrequency, dataDim
-        return SpectrumViewParams(valuePerPoint, totalPointCount,
+        return SpectrumViewParams(valuePerPoint, totalPointCount, pointCount, numPoints,
                                   minAliasedFrequency, maxAliasedFrequency, dataDim,
                                   minSpectrumFrequency, maxSpectrumFrequency)
 
@@ -194,6 +200,7 @@ class GuiSpectrumView(QtWidgets.QGraphicsObject):
     def refreshData(self):
 
         raise Exception('Needs to be implemented in subclass')
+
 
 def _spectrumViewHasChanged(data):
     """Change action icon colour and other changes when spectrumView changes.
@@ -224,6 +231,7 @@ def _spectrumViewHasChanged(data):
     # Update strip
     self.strip.update()
 
+
 def _createdSpectrumView(data):
     """Set up SpectrumDisplay when new StripSpectrumView is created - for notifiers.
     This function adds the spectra buttons to the spectrumToolBar.
@@ -239,15 +247,15 @@ def _createdSpectrumView(data):
 
     spectrumDisplay.spectrumToolBar._addSpectrumViewToolButtons(self)
 
-        # # TODO:ED check here - used to catch undelete of spectrumView
-        # if self.strip.plotWidget:
-        #     scene = self.strip.plotWidget.scene()
-        #     if self not in scene.items():  # This happens when you do an undo after deletion of spectrum(View)
-        #         scene.addItem(self)
-        #
-        #         # TODO:ED ERROR HERE shouldn't need this soon be check
-        #         # if spectrumDisplay.is1D:
-        #         #   strip.viewBox.addItem(self.plot)
+    # # TODO:ED check here - used to catch undelete of spectrumView
+    # if self.strip.plotWidget:
+    #     scene = self.strip.plotWidget.scene()
+    #     if self not in scene.items():  # This happens when you do an undo after deletion of spectrum(View)
+    #         scene.addItem(self)
+    #
+    #         # TODO:ED ERROR HERE shouldn't need this soon be check
+    #         # if spectrumDisplay.is1D:
+    #         #   strip.viewBox.addItem(self.plot)
 
     # def _deletedSpectrumView(self):
     #     """Update interface when a spectrumView is deleted"""
@@ -256,4 +264,3 @@ def _createdSpectrumView(data):
     #         scene.removeItem(self)
     #         if hasattr(self, 'plot'):  # 1d
     #             scene.removeItem(self.plot)
-

@@ -252,20 +252,20 @@ class GuiStripNd(GuiStrip):
         except Exception as es:
             pass
 
-    def _rebuildStripContours(self):
-        # self._rebuildContours()
-
-        self._CcpnGLWidget._updateVisibleSpectrumViews()
-
-        # redraw the contours
-        from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
-
-        GLSignals = GLNotifier(parent=self)
-
-        for specNum, thisSpecView in enumerate(self.spectrumViews):
-            thisSpecView.buildContours = True
-
-        GLSignals.emitPaintEvent()
+    # def _rebuildStripContours(self):
+    #     # self._rebuildContours()
+    #
+    #     self._CcpnGLWidget._updateVisibleSpectrumViews()
+    #
+    #     # redraw the contours
+    #     from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
+    #
+    #     GLSignals = GLNotifier(parent=self)
+    #
+    #     for specNum, thisSpecView in enumerate(self.spectrumViews):
+    #         thisSpecView.buildContours = True
+    #
+    #     GLSignals.emitPaintEvent()
 
     def showExportDialog(self):
         """show the export strip to file dialog
@@ -663,7 +663,7 @@ class GuiStripNd(GuiStrip):
 
         if planeLabel.minimum() <= value <= planeLabel.maximum():
             self.changeZPlane(n, position=value)
-            self._rebuildStripContours()
+            self.refresh()
 
     # def setPlaneCount(self, n:int=0, value:int=1):
     #   """

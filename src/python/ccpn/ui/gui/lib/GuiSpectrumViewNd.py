@@ -381,7 +381,7 @@ class GuiSpectrumViewNd(GuiSpectrumView):
             # spectrumPos, width, totalPointCount, minAliasedFrequency, maxAliasedFrequency, dataDim = self._getSpectrumViewParams(n)
 
             try:
-                valuePerPoint, totalPointCount, _, _, dataDim, minSpectrumFrequency, maxSpectrumFrequency = self._getSpectrumViewParams(n)
+                valuePerPoint, _, _, numPoints, _, _, dataDim, minSpectrumFrequency, maxSpectrumFrequency = self._getSpectrumViewParams(n)
             except:
                 # skip if the dimension doesn't exist
                 break
@@ -392,17 +392,17 @@ class GuiSpectrumViewNd(GuiSpectrumView):
                     # -1 below because points start at 1 in data model
                     xMinFrequency = int(dataDim.primaryDataDimRef.valueToPoint(maxSpectrumFrequency) - 1)
                     xMaxFrequency = int(dataDim.primaryDataDimRef.valueToPoint(minSpectrumFrequency) - 1)
-                    xNumPoints = totalPointCount
+                    xNumPoints = numPoints
                 elif n == 1:
                     yDataDim = dataDim
                     yMinFrequency = int(dataDim.primaryDataDimRef.valueToPoint(maxSpectrumFrequency) - 1)
                     yMaxFrequency = int(dataDim.primaryDataDimRef.valueToPoint(minSpectrumFrequency) - 1)
-                    yNumPoints = totalPointCount
+                    yNumPoints = numPoints
                 else:
                     inRange = (minSpectrumFrequency <= pos <= maxSpectrumFrequency)
                     if not inRange:
                         break
-                pnt = (dataDim.primaryDataDimRef.valueToPoint(pos) - 1) % totalPointCount
+                pnt = (dataDim.primaryDataDimRef.valueToPoint(pos) - 1) % numPoints
                 pnt += (dataDim.pointOffset if hasattr(dataDim, "pointOffset") else 0)
 
                 try:
@@ -1125,7 +1125,7 @@ class GuiSpectrumViewNd(GuiSpectrumView):
             # zDim = dataDims[2].dim - 1
             # zDataDim = dataDims[2]
             # zPosition, width, zTotalPointCount, minAliasedFrequency, maxAliasedFrequency, dataDim = self._getSpectrumViewParams(2)
-            valuePerPoint, zTotalPointCount, _, _, zDataDim, minSpectrumFrequency, maxSpectrumFrequency = self._getSpectrumViewParams(2)
+            valuePerPoint, _, _, zNumPoints, _, _, zDataDim, minSpectrumFrequency, maxSpectrumFrequency = self._getSpectrumViewParams(2)
             zPosition = orderedAxes[2].position
             width = orderedAxes[2].width
 
@@ -1149,14 +1149,14 @@ class GuiSpectrumViewNd(GuiSpectrumView):
                     zPoint1 += 1
 
             # ensures that the plane valueToPoint is always positive - but conflicts with aliasing in the zPlane
-            if (zPoint1 - zPoint0) >= zTotalPointCount:
+            if (zPoint1 - zPoint0) >= zNumPoints:
                 zPoint0 = 0
-                zPoint1 = zTotalPointCount
+                zPoint1 = zNumPoints
             else:
-                zPoint0 %= zTotalPointCount
-                zPoint1 %= zTotalPointCount
+                zPoint0 %= zNumPoints
+                zPoint1 %= zNumPoints
                 if zPoint1 < zPoint0:
-                    zPoint1 += zTotalPointCount
+                    zPoint1 += zNumPoints
 
             # zPointOffset = spectrum.pointOffsets[zDim]
             # zPointCount = spectrum.pointCounts[zDim]
@@ -1165,7 +1165,7 @@ class GuiSpectrumViewNd(GuiSpectrumView):
 
             position = dimensionCount * [1]
             for z in range(zPoint0, zPoint1):
-                zPosition = z % zTotalPointCount
+                zPosition = z % zPointCount
                 zPosition -= zPointOffset
                 if 0 <= zPosition < zPointCount:
                     position[dimIndices[2]] = zPosition + 1
@@ -1176,7 +1176,7 @@ class GuiSpectrumViewNd(GuiSpectrumView):
             # zDim = dataDims[2].dim - 1
             # zDataDim = dataDims[2]
             # zPosition, width, zTotalPointCount, minAliasedFrequency, maxAliasedFrequency, dataDim = self._getSpectrumViewParams(2)
-            valuePerPoint, zTotalPointCount, _, _, zDataDim, minSpectrumFrequency, maxSpectrumFrequency = self._getSpectrumViewParams(2)
+            valuePerPoint, _, _, zNumPoints, _, _, zDataDim, minSpectrumFrequency, maxSpectrumFrequency = self._getSpectrumViewParams(2)
             zPosition = orderedAxes[2].position
             width = orderedAxes[2].width
 
@@ -1199,14 +1199,14 @@ class GuiSpectrumViewNd(GuiSpectrumView):
                 else:
                     zPoint1 += 1
 
-            if (zPoint1 - zPoint0) >= zTotalPointCount:
+            if (zPoint1 - zPoint0) >= zNumPoints:
                 zPoint0 = 0
-                zPoint1 = zTotalPointCount
+                zPoint1 = zNumPoints
             else:
-                zPoint0 %= zTotalPointCount
-                zPoint1 %= zTotalPointCount
+                zPoint0 %= zNumPoints
+                zPoint1 %= zNumPoints
                 if zPoint1 < zPoint0:
-                    zPoint1 += zTotalPointCount
+                    zPoint1 += zNumPoints
 
             # zPointOffset = spectrum.pointOffsets[zDim]
             # zPointCount = spectrum.pointCounts[zDim]
@@ -1216,7 +1216,7 @@ class GuiSpectrumViewNd(GuiSpectrumView):
             # wDim = dataDims[3].dim - 1
             # wDataDim = dataDims[3]
             # wPosition, width, wTotalPointCount, minAliasedFrequency, maxAliasedFrequency, dataDim = self._getSpectrumViewParams(3)
-            valuePerPoint, wTotalPointCount, _, _, wDataDim, minSpectrumFrequency, maxSpectrumFrequency = self._getSpectrumViewParams(3)
+            valuePerPoint, _, _, wNumPoints, _, _, wDataDim, minSpectrumFrequency, maxSpectrumFrequency = self._getSpectrumViewParams(3)
             wPosition = orderedAxes[3].position
             width = orderedAxes[3].width
 
@@ -1237,14 +1237,14 @@ class GuiSpectrumViewNd(GuiSpectrumView):
                 else:
                     wPoint1 += 1
 
-            if (wPoint1 - wPoint0) >= wTotalPointCount:
+            if (wPoint1 - wPoint0) >= wNumPoints:
                 wPoint0 = 0
-                wPoint1 = wTotalPointCount
+                wPoint1 = wNumPoints
             else:
-                wPoint0 %= wTotalPointCount
-                wPoint1 %= wTotalPointCount
+                wPoint0 %= wNumPoints
+                wPoint1 %= wNumPoints
                 if wPoint1 < wPoint0:
-                    wPoint1 += wTotalPointCount
+                    wPoint1 += wNumPoints
 
             # wPointOffset = spectrum.pointOffsets[wDim]
             # wPointCount = spectrum.pointCounts[wDim]
@@ -1253,12 +1253,12 @@ class GuiSpectrumViewNd(GuiSpectrumView):
 
             position = dimensionCount * [1]
             for z in range(zPoint0, zPoint1):
-                zPosition = z % zTotalPointCount
+                zPosition = z % wNumPoints
                 zPosition -= zPointOffset
                 if 0 <= zPosition < zPointCount:
                     position[dimIndices[2]] = zPosition + 1
                     for w in range(wPoint0, wPoint1):
-                        wPosition = w % wTotalPointCount
+                        wPosition = w % wNumPoints
                         wPosition -= wPointOffset
                         if 0 <= wPosition < wPointCount:
                             position[dimIndices[3]] = wPosition + 1
@@ -1296,7 +1296,7 @@ class GuiSpectrumViewNd(GuiSpectrumView):
                 # zRegionValue = (zPosition + 0.5 * (planeCount+2) * valuePerPoint, zPosition - 0.5 * (planeCount+2) * valuePerPoint)  # Note + and - (axis backwards)
 
                 # now get the z bounds for this spectrum
-                valuePerPoint, zTotalPointCount, _, _, zDataDim, minSpectrumFrequency, maxSpectrumFrequency = self._getSpectrumViewParams(dim)
+                valuePerPoint, _, _, _, _, _, zDataDim, minSpectrumFrequency, maxSpectrumFrequency = self._getSpectrumViewParams(dim)
 
                 # pass in a smaller valuePerPoint - if there are differences in the z-resolution, otherwise just use local valuePerPoint
                 minZWidth = 3 * valuePerPoint

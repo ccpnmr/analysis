@@ -341,7 +341,7 @@ class PlaneSelectorWidget(Frame):
             if self.strip.nextPlaneCallback:
                 self.strip.nextPlaneCallback(self.axis)
 
-        self.strip._rebuildStripContours()
+        self.strip.refresh()
 
     def updatePosition(self):
         """Set new axis position
@@ -657,7 +657,7 @@ class PlaneAxisWidget(_OpenGLFrameABC):
             zAxis = self.strip.orderedAxes[self.axis]
             zAxis.width = value * self._axisSelector.spinBox.singleStep()
             self._axisPlaneCount.setText('[' + str(value) + ']')
-            self.strip._rebuildStripContours()
+            self.strip.refresh()
 
     def _nextPlane(self, *args):
         """
@@ -665,7 +665,7 @@ class PlaneAxisWidget(_OpenGLFrameABC):
         """
         if self.strip:
             self.strip.changeZPlane(self.axis, planeCount=-1)  # -1 because ppm units are backwards
-            self.strip._rebuildStripContours()
+            self.strip.refresh()
 
             self.strip.pythonConsole.writeConsoleCommand("strip.nextZPlane()", strip=self.strip)
             getLogger().info("application.getByGid(%r).nextZPlane()" % self.strip.pid)
@@ -676,7 +676,7 @@ class PlaneAxisWidget(_OpenGLFrameABC):
         """
         if self.strip:
             self.strip.changeZPlane(self.axis, planeCount=1)
-            self.strip._rebuildStripContours()
+            self.strip.refresh()
 
             self.strip.pythonConsole.writeConsoleCommand("strip.prevZPlane()", strip=self.strip)
             getLogger().info("application.getByGid(%r).prevZPlane()" % self.strip.pid)
@@ -691,7 +691,7 @@ class PlaneAxisWidget(_OpenGLFrameABC):
 
             if planeLabel.minimum() <= value <= planeLabel.maximum():
                 self.strip.changeZPlane(self.axis, position=value)
-                self.strip._rebuildStripContours()
+                self.strip.refresh()
 
     def _wheelEvent(self, event):
         if event.angleDelta().y() > 0:
@@ -701,7 +701,7 @@ class PlaneAxisWidget(_OpenGLFrameABC):
             if self.strip.nextPlaneCallback:
                 self.strip.nextPlaneCallback(self.axis)
 
-        self.strip._rebuildStripContours()
+        self.strip.refresh()
 
     def hideWidgets(self):
         """Hide the planeToolbar if opened

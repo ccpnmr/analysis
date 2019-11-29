@@ -186,7 +186,7 @@ class GuiSpectrumView1d(GuiSpectrumView):
                 try:
                     # valuePerPoint, totalPointCount, minAliasedFrequency, maxAliasedFrequency, dataDim,
                     # minSpectrumFrequency, maxSpectrumFrequency = self._getSpectrumViewParams(n)
-                    valuePerPoint, totalPointCount, _, _, dataDim, minSpectrumFrequency, maxSpectrumFrequency = self._getSpectrumViewParams(n)
+                    valuePerPoint, _, _, numPoints, _, _, dataDim, minSpectrumFrequency, maxSpectrumFrequency = self._getSpectrumViewParams(n)
                 except:
                     # skip if the dimension doesn't exist
                     break
@@ -197,12 +197,12 @@ class GuiSpectrumView1d(GuiSpectrumView):
                         # -1 below because points start at 1 in data model
                         xMinFrequency = int(dataDim.primaryDataDimRef.valueToPoint(maxSpectrumFrequency) - 1)
                         xMaxFrequency = int(dataDim.primaryDataDimRef.valueToPoint(minSpectrumFrequency) - 1)
-                        xNumPoints = totalPointCount
+                        xNumPoints = numPoints
                     else:
                         inRange = (minSpectrumFrequency <= pos <= maxSpectrumFrequency)
                         if not inRange:
                             break
-                    pnt = (dataDim.primaryDataDimRef.valueToPoint(pos) - 1) % totalPointCount
+                    pnt = (dataDim.primaryDataDimRef.valueToPoint(pos) - 1) % numPoints
                     pnt += (dataDim.pointOffset if hasattr(dataDim, "pointOffset") else 0)
                     point.append(pnt)
 

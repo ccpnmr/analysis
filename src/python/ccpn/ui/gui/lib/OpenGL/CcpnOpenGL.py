@@ -712,7 +712,7 @@ class CcpnGLWidget(QOpenGLWidget):
 
             # get the bounding box of the spectra
             dx = -1.0 if self.INVERTXAXIS else -1.0  # self.sign(self.axisR - self.axisL)
-            fx0, fx1 = self._spectrumValues[0].maxAliasedFrequency, self._spectrumValues[0].minAliasedFrequency
+            fx0, fx1 = self._spectrumValues[0].maxSpectrumFrequency, self._spectrumValues[0].minSpectrumFrequency
 
             # check tolerances
             if not self._widthsChangedEnough((fx0, 0.0), (fx1, 0.0), tol=1e-10):
@@ -723,7 +723,7 @@ class CcpnGLWidget(QOpenGLWidget):
 
             if spectrumView.spectrum.dimensionCount > 1:
                 dy = -1.0 if self.INVERTYAXIS else -1.0  # self.sign(self.axisT - self.axisB)
-                fy0, fy1 = self._spectrumValues[1].maxAliasedFrequency, self._spectrumValues[1].minAliasedFrequency
+                fy0, fy1 = self._spectrumValues[1].maxSpectrumFrequency, self._spectrumValues[1].minSpectrumFrequency
 
                 # check tolerances
                 if not self._widthsChangedEnough((fy0, 0.0), (fy1, 0.0), tol=1e-10):
@@ -4935,7 +4935,7 @@ class CcpnGLWidget(QOpenGLWidget):
 
             # get the bounding box of the spectra
             dx = self.sign(self.axisR - self.axisL)
-            fx0, fx1 = self._spectrumValues[0].maxAliasedFrequency, self._spectrumValues[0].minAliasedFrequency
+            fx0, fx1 = self._spectrumValues[0].maxSpectrumFrequency, self._spectrumValues[0].minSpectrumFrequency
 
             # check tolerances
             if not self._widthsChangedEnough((fx0, 0.0), (fx1, 0.0), tol=1e-10):
@@ -4946,7 +4946,7 @@ class CcpnGLWidget(QOpenGLWidget):
 
             if spectrumView.spectrum.dimensionCount > 1:
                 dy = self.sign(self.axisT - self.axisB)
-                fy0, fy1 = self._spectrumValues[1].maxAliasedFrequency, self._spectrumValues[1].minAliasedFrequency
+                fy0, fy1 = self._spectrumValues[1].maxSpectrumFrequency, self._spectrumValues[1].minSpectrumFrequency
 
                 # check tolerances
                 if not self._widthsChangedEnough((fy0, 0.0), (fy1, 0.0), tol=1e-10):

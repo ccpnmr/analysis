@@ -1880,14 +1880,18 @@ class CcpnGLWidget(QOpenGLWidget):
             self.viewports.addViewport(GLDefs.RIGHTAXIS, self, (-(self.AXIS_MARGINRIGHT + self.AXIS_LINE), 'w'),
                                        (self.AXIS_MARGINBOTTOM, 'a'),
                                        (self.AXIS_LINE, 'a'), (-self.AXIS_MARGINBOTTOM, 'h'))
+            self.viewports.addViewport(GLDefs.RIGHTAXISBAR, self, (-self.AXIS_MARGINRIGHT, 'w'),
+                                       (self.AXIS_MARGINBOTTOM, 'a'),
+                                       (0, 'w'), (-self.AXIS_MARGINBOTTOM, 'h'))
+
         else:
             self.viewports.addViewport(GLDefs.RIGHTAXIS, self, (-(self.AXIS_MARGINRIGHT + self.AXIS_LINE), 'w'),
                                        (self.AXIS_MARGINBOTTOM+self.AXIS_LINE, 'a'),
                                        (self.AXIS_LINE, 'a'), (-(self.AXIS_MARGINBOTTOM+self.AXIS_LINE), 'h'))
 
-        self.viewports.addViewport(GLDefs.RIGHTAXISBAR, self, (-self.AXIS_MARGINRIGHT, 'w'),
-                                   (self.AXIS_MARGINBOTTOM, 'a'),
-                                   (0, 'w'), (-self.AXIS_MARGINBOTTOM, 'h'))
+            self.viewports.addViewport(GLDefs.RIGHTAXISBAR, self, (-self.AXIS_MARGINRIGHT, 'w'),
+                                       (self.AXIS_MARGINBOTTOM+self.AXIS_LINE, 'a'),
+                                       (0, 'w'), (-(self.AXIS_MARGINBOTTOM+self.AXIS_LINE), 'h'))
 
         self.viewports.addViewport(GLDefs.FULLRIGHTAXIS, self, (-(self.AXIS_MARGINRIGHT + self.AXIS_LINE), 'w'),
                                    (0, 'a'),
@@ -1900,12 +1904,15 @@ class CcpnGLWidget(QOpenGLWidget):
         if self.AXIS_INSIDE:
             self.viewports.addViewport(GLDefs.BOTTOMAXIS, self, (0, 'a'), (self.AXIS_MARGINBOTTOM, 'a'),
                                        (-self.AXIS_MARGINRIGHT, 'w'), (self.AXIS_LINE, 'a'))
+
+            self.viewports.addViewport(GLDefs.BOTTOMAXISBAR, self, (0, 'a'), (0, 'a'),
+                                       (-self.AXIS_MARGINRIGHT, 'w'), (self.AXIS_MARGINBOTTOM, 'a'))
         else:
             self.viewports.addViewport(GLDefs.BOTTOMAXIS, self, (0, 'a'), (self.AXIS_MARGINBOTTOM, 'a'),
                                        (-(self.AXIS_MARGINRIGHT+self.AXIS_LINE), 'w'), (self.AXIS_LINE, 'a'))
 
-        self.viewports.addViewport(GLDefs.BOTTOMAXISBAR, self, (0, 'a'), (0, 'a'),
-                                   (-self.AXIS_MARGINRIGHT, 'w'), (self.AXIS_MARGINBOTTOM, 'a'))
+            self.viewports.addViewport(GLDefs.BOTTOMAXISBAR, self, (0, 'a'), (0, 'a'),
+                                       (-(self.AXIS_MARGINRIGHT+self.AXIS_LINE), 'w'), (self.AXIS_MARGINBOTTOM, 'a'))
 
         self.viewports.addViewport(GLDefs.FULLBOTTOMAXIS, self, (0, 'a'), (self.AXIS_MARGINBOTTOM, 'a'),
                                    (0, 'w'), (self.AXIS_LINE, 'a'))

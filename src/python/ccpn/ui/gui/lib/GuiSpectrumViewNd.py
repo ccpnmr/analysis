@@ -1165,7 +1165,7 @@ class GuiSpectrumViewNd(GuiSpectrumView):
 
             position = dimensionCount * [1]
             for z in range(zPoint0, zPoint1):
-                zPosition = z % zPointCount
+                zPosition = z % zNumPoints
                 zPosition -= zPointOffset
                 if 0 <= zPosition < zPointCount:
                     position[dimIndices[2]] = zPosition + 1
@@ -1253,7 +1253,7 @@ class GuiSpectrumViewNd(GuiSpectrumView):
 
             position = dimensionCount * [1]
             for z in range(zPoint0, zPoint1):
-                zPosition = z % wNumPoints
+                zPosition = z % zNumPoints
                 zPosition -= zPointOffset
                 if 0 <= zPosition < zPointCount:
                     position[dimIndices[2]] = zPosition + 1

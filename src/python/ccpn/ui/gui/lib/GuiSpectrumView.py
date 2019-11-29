@@ -246,21 +246,3 @@ def _createdSpectrumView(data):
         strip._setZWidgets()
 
     spectrumDisplay.spectrumToolBar._addSpectrumViewToolButtons(self)
-
-    # # TODO:ED check here - used to catch undelete of spectrumView
-    # if self.strip.plotWidget:
-    #     scene = self.strip.plotWidget.scene()
-    #     if self not in scene.items():  # This happens when you do an undo after deletion of spectrum(View)
-    #         scene.addItem(self)
-    #
-    #         # TODO:ED ERROR HERE shouldn't need this soon be check
-    #         # if spectrumDisplay.is1D:
-    #         #   strip.viewBox.addItem(self.plot)
-
-    # def _deletedSpectrumView(self):
-    #     """Update interface when a spectrumView is deleted"""
-    #     if self.strip.plotWidget:
-    #         scene = self.strip.plotWidget.scene()
-    #         scene.removeItem(self)
-    #         if hasattr(self, 'plot'):  # 1d
-    #             scene.removeItem(self.plot)

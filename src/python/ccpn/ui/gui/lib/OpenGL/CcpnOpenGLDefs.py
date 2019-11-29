@@ -128,6 +128,7 @@ GLMARKLINES = 'Mark Lines'
 GLMARKLABELS = 'Mark Labels'
 GLCURSORS = 'Show Cursors'
 GLTRACES = 'Traces'
+GLLIVETRACES = 'Live Traces'
 GLSHOWSPECTRAONPHASE = 'Spectra on Phasing'
 GLOTHERLINES = 'Other Lines'
 GLSTRIPLABELLING = 'Strip Labelling'
@@ -164,6 +165,7 @@ GLFULLLIST = (GLPEAKSYMBOLS,
               GLMARKLABELS,
               GLCURSORS,
               GLTRACES,
+              GLLIVETRACES,
               GLSHOWSPECTRAONPHASE,
               GLOTHERLINES,
               GLSTRIPLABELLING,
@@ -185,6 +187,7 @@ GLEXTENDEDLIST = (GLGRIDLINES,
                   GLMARKLABELS,
                   GLCURSORS,
                   GLTRACES,
+                  GLLIVETRACES,
                   GLSHOWSPECTRAONPHASE,
                   GLOTHERLINES,
                   GLSTRIPLABELLING,

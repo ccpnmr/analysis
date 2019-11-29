@@ -60,7 +60,7 @@ from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs import GLFILENAME, GLGRIDLINES, GLAXI
     GLINTEGRALLABELS, GLINTEGRALSYMBOLS, GLMARKLABELS, GLMARKLINES, GLMULTIPLETLABELS, GLREGIONS, \
     GLMULTIPLETSYMBOLS, GLOTHERLINES, GLPEAKLABELS, GLPEAKSYMBOLS, GLPRINTTYPE, GLSELECTEDPIDS, \
     GLSPECTRUMBORDERS, GLSPECTRUMCONTOURS, GLSPECTRUMLABELS, \
-    GLSTRIP, GLSTRIPLABELLING, GLTRACES, GLWIDGET, GLPLOTBORDER, \
+    GLSTRIP, GLSTRIPLABELLING, GLTRACES, GLLIVETRACES, GLWIDGET, GLPLOTBORDER, \
     GLPAGETYPE, GLSPECTRUMDISPLAY, GLAXISLINES, GLBACKGROUND, GLBASETHICKNESS, GLSYMBOLTHICKNESS, \
     GLCONTOURTHICKNESS, GLFOREGROUND, GLSHOWSPECTRAONPHASE, \
     GLAXISTITLES, GLAXISUNITS, GLAXISMARKSINSIDE, GLSTRIPDIRECTION, GLSTRIPPADDING, \
@@ -409,6 +409,7 @@ class GLExporter():
             if self.params[GLSPECTRUMLABELS]: self._addSpectrumLabels()
 
         if self.params[GLTRACES]: self._addTraces()
+        if self.params[GLLIVETRACES]: self._addLiveTraces()
 
         if not self._parent._stackingMode:
             if self.params[GLOTHERLINES]: self._addInfiniteLines()
@@ -950,48 +951,50 @@ class GLExporter():
         for colourGroup in colourGroups.values():
             self._mainPlot.add(colourGroup)
 
+    def _addSingleTrace(self, traceName, trace, spectrumView, colourGroups):
+        if spectrumView and not spectrumView.isDeleted and spectrumView.isVisible():
+            # drawVertexColor
+
+            if self._parent._stackingMode:
+                mat = np.transpose(self._parent._spectrumSettings[spectrumView][SPECTRUM_STACKEDMATRIX].reshape((4, 4)))
+            else:
+                mat = None
+
+            self._appendVertexLineGroup(indArray=trace,
+                                        colourGroups=colourGroups,
+                                        plotDim={PLOTLEFT  : self.displayScale * self.mainL,
+                                                 PLOTBOTTOM: self.displayScale * self.mainB,
+                                                 PLOTWIDTH : self.displayScale * self.mainW,
+                                                 PLOTHEIGHT: self.displayScale * self.mainH},
+                                        name='%s%s' % (traceName, spectrumView.pid),
+                                        includeLastVertex=not self._parent.is1D,
+                                        mat=mat)
+
     def _addTraces(self):
         """
         Add the traces to the main drawing area.
         """
         colourGroups = OrderedDict()
         for hTrace in self._parent._staticHTraces:
-            if hTrace.spectrumView and not hTrace.spectrumView.isDeleted and hTrace.spectrumView.isVisible():
-                # drawVertexColor
-
-                if self._parent._stackingMode:
-                    mat = np.transpose(self._parent._spectrumSettings[hTrace.spectrumView][SPECTRUM_STACKEDMATRIX].reshape((4, 4)))
-                else:
-                    mat = None
-
-                self._appendVertexLineGroup(indArray=hTrace,
-                                            colourGroups=colourGroups,
-                                            plotDim={PLOTLEFT  : self.displayScale * self.mainL,
-                                                     PLOTBOTTOM: self.displayScale * self.mainB,
-                                                     PLOTWIDTH : self.displayScale * self.mainW,
-                                                     PLOTHEIGHT: self.displayScale * self.mainH},
-                                            name='hTrace%s' % hTrace.spectrumView.pid,
-                                            includeLastVertex=not self._parent.is1D,
-                                            mat=mat)
-
+            self._addSingleTrace('hTrace', hTrace, hTrace.spectrumView, colourGroups)
         for vTrace in self._parent._staticVTraces:
-            if vTrace.spectrumView and not vTrace.spectrumView.isDeleted and vTrace.spectrumView.isVisible():
-                # drawVertexColor
+            self._addSingleTrace('vTrace', vTrace, vTrace.spectrumView, colourGroups)
 
-                if self._parent._stackingMode:
-                    mat = np.transpose(self._parent._spectrumSettings[vTrace.spectrumView][SPECTRUM_STACKEDMATRIX].reshape((4, 4)))
-                else:
-                    mat = None
+        self._appendGroup(drawing=self._mainPlot, colourGroups=colourGroups, name='traces')
 
-                self._appendVertexLineGroup(indArray=vTrace,
-                                            colourGroups=colourGroups,
-                                            plotDim={PLOTLEFT  : self.displayScale * self.mainL,
-                                                     PLOTBOTTOM: self.displayScale * self.mainB,
-                                                     PLOTWIDTH : self.displayScale * self.mainW,
-                                                     PLOTHEIGHT: self.displayScale * self.mainH},
-                                            name='vTrace%s' % vTrace.spectrumView.pid,
-                                            includeLastVertex=not self._parent.is1D,
-                                            mat=mat)
+    def _addLiveTraces(self):
+        """
+        Add the live traces to the main drawing area.
+        """
+        colourGroups = OrderedDict()
+        if self._parent.showActivePhaseTrace or not self._parent.spectrumDisplay.phasingFrame.isVisible():
+
+            if self._parent._updateHTrace:
+                for spectrumView, hTrace in self._parent._hTraces.items():
+                    self._addSingleTrace('hTrace', hTrace, spectrumView, colourGroups)
+            if self._parent._updateVTrace:
+                for spectrumView, vTrace in self._parent._vTraces.items():
+                    self._addSingleTrace('vTrace', vTrace, spectrumView, colourGroups)
 
         self._appendGroup(drawing=self._mainPlot, colourGroups=colourGroups, name='traces')
 

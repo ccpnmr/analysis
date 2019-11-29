@@ -467,6 +467,7 @@ class CcpnGLWidget(QOpenGLWidget):
         self._matchingIsotopeCodes = False
 
         self._glClientIndex = 0
+        self._menuActive = False
         self.glReady = True
 
     def close(self):
@@ -4679,7 +4680,7 @@ class CcpnGLWidget(QOpenGLWidget):
             if spectrumView.isDeleted:
                 continue
 
-            if self._tracesNeedUpdating(spectrumView):
+            if self.showActivePhaseTrace and self._tracesNeedUpdating(spectrumView):
 
                 phasingFrame = self.spectrumDisplay.phasingFrame
                 if phasingFrame.isVisible():
@@ -4925,8 +4926,8 @@ class CcpnGLWidget(QOpenGLWidget):
                                                                                 GLDefs.SPECTRUM_STACKEDMATRIX])
                     vTrace.drawVertexColorVBO(enableVBO=True)
 
-        # only paint if mouse is in the window
-        if self.underMouse():
+        # only paint if mouse is in the window, or menu has been raised in this strip
+        if self.underMouse() or self._menuActive:
             # self.updateTraces()
 
             # spawn rebuild/paint of traces
@@ -5939,6 +5940,17 @@ class CcpnGLWidget(QOpenGLWidget):
         self._dragRegions = set()
         self.update()
 
+    @contextmanager
+    def _mouseUnderMenu(self):
+        """Context manager to set the menu status to active
+        so that when the menu appears the live traces stay visible
+        """
+        self._menuActive = True
+        try:
+            yield
+        finally:
+            self._menuActive = False
+
     def getObjectsUnderMouse(self):
         """Return a list of objects under the mouse position as a dict
         dict is of the form: {object plural name: list, ...}
@@ -6117,7 +6129,8 @@ class CcpnGLWidget(QOpenGLWidget):
             else:
                 strip.viewStripMenu = self._getCanvasContextMenu()
 
-            strip._raiseContextMenu(event)
+            with self._mouseUnderMenu():
+                strip._raiseContextMenu(event)
 
         elif controlRightMouse(event) and axis is None:
             # control-right-mouse click: reset the zoom

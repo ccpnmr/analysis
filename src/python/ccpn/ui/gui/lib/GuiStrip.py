@@ -2129,7 +2129,7 @@ class GuiStrip(Frame):
         """
 
         position = event.screenPos()
-        self.viewStripMenu.popup(QtCore.QPoint(int(position.x()),
+        self.viewStripMenu.exec_(QtCore.QPoint(int(position.x()),
                                                int(position.y())))
         self.contextMenuPosition = self.current.cursorPosition
 

@@ -56,6 +56,7 @@ FULLBOTTOMAXIS = 'fullBottomAxis'
 FULLBOTTOMAXISBAR = 'fullBottomAxisBar'
 FULLVIEW = 'fullView'
 AXISCORNER = 'axisCorner'
+BLANKVIEW = 'blankView'
 
 GLLINE_STYLES = {
     'solid' : 0xFFFF,
@@ -155,7 +156,7 @@ GLFULLLIST = (GLPEAKSYMBOLS,
               GLAXISTITLES,
               GLAXISLINES,
               GLAXISMARKS,
-              GLAXISMARKSINSIDE,
+              # GLAXISMARKSINSIDE,
               GLAXISLABELS,
               GLAXISUNITS,
               GLSPECTRUMCONTOURS,
@@ -177,7 +178,7 @@ GLEXTENDEDLIST = (GLGRIDLINES,
                   GLAXISTITLES,
                   GLAXISLINES,
                   GLAXISMARKS,
-                  GLAXISMARKSINSIDE,
+                  # GLAXISMARKSINSIDE,
                   GLAXISLABELS,
                   GLAXISUNITS,
                   GLSPECTRUMCONTOURS,

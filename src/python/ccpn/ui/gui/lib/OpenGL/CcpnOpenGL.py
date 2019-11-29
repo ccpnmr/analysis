@@ -176,6 +176,7 @@ class CcpnGLWidget(QOpenGLWidget):
     AXIS_MARGINBOTTOM = 25
     AXIS_LINE = 7
     AXIS_OFFSET = 3
+    AXIS_INSIDE = True
     YAXISUSEEFORMAT = False
     INVERTXAXIS = True
     INVERTYAXIS = True
@@ -1811,51 +1812,7 @@ class CcpnGLWidget(QOpenGLWidget):
         #                                       colour="#FE64C6", alpha=0.75)
 
         self.viewports = GLViewports()
-
-        # define the main viewports
-        self.viewports.addViewport(GLDefs.MAINVIEW, self, (0, 'a'), (self.AXIS_MARGINBOTTOM, 'a'),
-                                   (-self.AXIS_MARGINRIGHT, 'w'), (-self.AXIS_MARGINBOTTOM, 'h'))
-
-        self.viewports.addViewport(GLDefs.MAINVIEWFULLWIDTH, self, (0, 'a'), (self.AXIS_MARGINBOTTOM, 'a'),
-                                   (0, 'w'), (-self.AXIS_MARGINBOTTOM, 'h'))
-
-        self.viewports.addViewport(GLDefs.MAINVIEWFULLHEIGHT, self, (0, 'a'), (0, 'a'),
-                                   (-self.AXIS_MARGINRIGHT, 'w'), (0, 'h'))
-
-        # define the viewports for the right axis bar
-        self.viewports.addViewport(GLDefs.RIGHTAXIS, self, (-(self.AXIS_MARGINRIGHT + self.AXIS_LINE), 'w'),
-                                   (self.AXIS_MARGINBOTTOM, 'a'),
-                                   (self.AXIS_LINE, 'a'), (-self.AXIS_MARGINBOTTOM, 'h'))
-
-        self.viewports.addViewport(GLDefs.RIGHTAXISBAR, self, (-self.AXIS_MARGINRIGHT, 'w'),
-                                   (self.AXIS_MARGINBOTTOM, 'a'),
-                                   (0, 'w'), (-self.AXIS_MARGINBOTTOM, 'h'))
-
-        self.viewports.addViewport(GLDefs.FULLRIGHTAXIS, self, (-(self.AXIS_MARGINRIGHT + self.AXIS_LINE), 'w'),
-                                   (0, 'a'),
-                                   (self.AXIS_LINE, 'a'), (0, 'h'))
-
-        self.viewports.addViewport(GLDefs.FULLRIGHTAXISBAR, self, (-self.AXIS_MARGINRIGHT, 'w'), (0, 'a'),
-                                   (0, 'w'), (0, 'h'))
-
-        # define the viewports for the bottom axis bar
-        self.viewports.addViewport(GLDefs.BOTTOMAXIS, self, (0, 'a'), (self.AXIS_MARGINBOTTOM, 'a'),
-                                   (-self.AXIS_MARGINRIGHT, 'w'), (self.AXIS_LINE, 'a'))
-
-        self.viewports.addViewport(GLDefs.BOTTOMAXISBAR, self, (0, 'a'), (0, 'a'),
-                                   (-self.AXIS_MARGINRIGHT, 'w'), (self.AXIS_MARGINBOTTOM, 'a'))
-
-        self.viewports.addViewport(GLDefs.FULLBOTTOMAXIS, self, (0, 'a'), (self.AXIS_MARGINBOTTOM, 'a'),
-                                   (0, 'w'), (self.AXIS_LINE, 'a'))
-
-        self.viewports.addViewport(GLDefs.FULLBOTTOMAXISBAR, self, (0, 'a'), (0, 'a'),
-                                   (0, 'w'), (self.AXIS_MARGINBOTTOM, 'a'))
-
-        # define the full viewport
-        self.viewports.addViewport(GLDefs.FULLVIEW, self, (0, 'a'), (0, 'a'), (0, 'w'), (0, 'h'))
-
-        # # define the remaining corner
-        # self.viewports.addViewport(GLDefs.AXISCORNER, self, (-self.AXIS_MARGINRIGHT, 'w'), (0, 'a'), (0, 'w'), (self.AXIS_MARGINBOTTOM, 'a'))
+        self._initialiseViewPorts()
 
         # set strings for the overlay text
         self._lockStringFalse = GLString(text=GLDefs.LOCKSTRING, font=self.globalGL.glSmallFont, x=0, y=0,
@@ -1892,6 +1849,78 @@ class CcpnGLWidget(QOpenGLWidget):
 
         # check that the screen device pixel ratio is correct
         self.refreshDevicePixelRatio()
+
+    def _initialiseViewPorts(self):
+        """Initialise all the viewports for the widget
+        """
+        self.viewports.clearViewports()
+
+        # define the main viewports
+        if self.AXIS_INSIDE:
+            self.viewports.addViewport(GLDefs.MAINVIEW, self, (0, 'a'), (self.AXIS_MARGINBOTTOM, 'a'),
+                                       (-self.AXIS_MARGINRIGHT, 'w'), (-self.AXIS_MARGINBOTTOM, 'h'))
+
+            self.viewports.addViewport(GLDefs.MAINVIEWFULLWIDTH, self, (0, 'a'), (self.AXIS_MARGINBOTTOM, 'a'),
+                                       (0, 'w'), (-self.AXIS_MARGINBOTTOM, 'h'))
+
+            self.viewports.addViewport(GLDefs.MAINVIEWFULLHEIGHT, self, (0, 'a'), (0, 'a'),
+                                       (-self.AXIS_MARGINRIGHT, 'w'), (0, 'h'))
+        else:
+            self.viewports.addViewport(GLDefs.MAINVIEW, self, (0, 'a'), (self.AXIS_MARGINBOTTOM+self.AXIS_LINE, 'a'),
+                                       (-(self.AXIS_MARGINRIGHT+self.AXIS_LINE), 'w'), (-(self.AXIS_MARGINBOTTOM+self.AXIS_LINE), 'h'))
+
+            self.viewports.addViewport(GLDefs.MAINVIEWFULLWIDTH, self, (0, 'a'), (self.AXIS_MARGINBOTTOM+self.AXIS_LINE, 'a'),
+                                       (0, 'w'), (-(self.AXIS_MARGINBOTTOM+self.AXIS_LINE), 'h'))
+
+            self.viewports.addViewport(GLDefs.MAINVIEWFULLHEIGHT, self, (0, 'a'), (0, 'a'),
+                                       (-(self.AXIS_MARGINRIGHT+self.AXIS_LINE), 'w'), (0, 'h'))
+
+        # define the viewports for the right axis bar
+        if self.AXIS_INSIDE:
+            self.viewports.addViewport(GLDefs.RIGHTAXIS, self, (-(self.AXIS_MARGINRIGHT + self.AXIS_LINE), 'w'),
+                                       (self.AXIS_MARGINBOTTOM, 'a'),
+                                       (self.AXIS_LINE, 'a'), (-self.AXIS_MARGINBOTTOM, 'h'))
+        else:
+            self.viewports.addViewport(GLDefs.RIGHTAXIS, self, (-(self.AXIS_MARGINRIGHT + self.AXIS_LINE), 'w'),
+                                       (self.AXIS_MARGINBOTTOM+self.AXIS_LINE, 'a'),
+                                       (self.AXIS_LINE, 'a'), (-(self.AXIS_MARGINBOTTOM+self.AXIS_LINE), 'h'))
+
+        self.viewports.addViewport(GLDefs.RIGHTAXISBAR, self, (-self.AXIS_MARGINRIGHT, 'w'),
+                                   (self.AXIS_MARGINBOTTOM, 'a'),
+                                   (0, 'w'), (-self.AXIS_MARGINBOTTOM, 'h'))
+
+        self.viewports.addViewport(GLDefs.FULLRIGHTAXIS, self, (-(self.AXIS_MARGINRIGHT + self.AXIS_LINE), 'w'),
+                                   (0, 'a'),
+                                   (self.AXIS_LINE, 'a'), (0, 'h'))
+
+        self.viewports.addViewport(GLDefs.FULLRIGHTAXISBAR, self, (-self.AXIS_MARGINRIGHT, 'w'), (0, 'a'),
+                                   (0, 'w'), (0, 'h'))
+
+        # define the viewports for the bottom axis bar
+        if self.AXIS_INSIDE:
+            self.viewports.addViewport(GLDefs.BOTTOMAXIS, self, (0, 'a'), (self.AXIS_MARGINBOTTOM, 'a'),
+                                       (-self.AXIS_MARGINRIGHT, 'w'), (self.AXIS_LINE, 'a'))
+        else:
+            self.viewports.addViewport(GLDefs.BOTTOMAXIS, self, (0, 'a'), (self.AXIS_MARGINBOTTOM, 'a'),
+                                       (-(self.AXIS_MARGINRIGHT+self.AXIS_LINE), 'w'), (self.AXIS_LINE, 'a'))
+
+        self.viewports.addViewport(GLDefs.BOTTOMAXISBAR, self, (0, 'a'), (0, 'a'),
+                                   (-self.AXIS_MARGINRIGHT, 'w'), (self.AXIS_MARGINBOTTOM, 'a'))
+
+        self.viewports.addViewport(GLDefs.FULLBOTTOMAXIS, self, (0, 'a'), (self.AXIS_MARGINBOTTOM, 'a'),
+                                   (0, 'w'), (self.AXIS_LINE, 'a'))
+
+        self.viewports.addViewport(GLDefs.FULLBOTTOMAXISBAR, self, (0, 'a'), (0, 'a'),
+                                   (0, 'w'), (self.AXIS_MARGINBOTTOM, 'a'))
+
+        # define the full viewport
+        self.viewports.addViewport(GLDefs.FULLVIEW, self, (0, 'a'), (0, 'a'), (0, 'w'), (0, 'h'))
+
+        # define the remaining corner
+        self.viewports.addViewport(GLDefs.AXISCORNER, self, (-self.AXIS_MARGINRIGHT, 'w'), (0, 'a'), (0, 'w'), (self.AXIS_MARGINBOTTOM, 'a'))
+
+        # define an empty view (for printing mainly)
+        self.viewports.addViewport(GLDefs.BLANKVIEW, self, (0, 'a'), (0, 'a'), (0, 'a'), (0, 'a'))
 
     def _setColourScheme(self):
         """Update colours from colourScheme

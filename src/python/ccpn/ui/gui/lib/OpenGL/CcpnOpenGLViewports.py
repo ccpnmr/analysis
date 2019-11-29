@@ -111,3 +111,32 @@ class GLViewports(object):
 
         else:
             raise RuntimeError('Error: viewport %s does not exist' % name)
+
+    def getViewportFromWH(self, name, width, height):
+        # change to the named viewport
+        def setVal(offsetType, w, h, leftOffset):
+            if offsetType[1] in 'alb':
+                return offsetType[0]
+            elif offsetType[1] == 'w':
+                return w + offsetType[0] - leftOffset
+            elif offsetType[1] == 'h':
+                return h + offsetType[0]
+
+        if name in self._views:
+            thisView = self._views[name]
+            w = width
+            h = height
+            l = setVal(thisView[1], w, h, 0)
+            b = setVal(thisView[2], w, h, 0)
+            wi = setVal(thisView[3], w, h, l)
+            he = setVal(thisView[4], w, h, 0)
+
+            return (l, b, wi, he)
+
+        else:
+            raise RuntimeError('Error: viewport %s does not exist' % name)
+
+    def clearViewports(self):
+        """Clear all the current viewports
+        """
+        self.views = {}

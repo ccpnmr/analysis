@@ -845,9 +845,9 @@ def getAxisCodeMatch(axisCodes, refAxisCodes, allMatches=False, exactMatch=False
 
 
 def getAxisCodeMatchIndices(axisCodes, refAxisCodes, exactMatch=False):
-    """Return a tuple containing the indices for mapping axisCodes into refAxisCodes
+    """Return a tuple containing the indices for each axis code in axisCodes in refAxisCodes
 
-    Only the best match is returned for each code
+    Only the best match is returned for each code, elements not found in refAxisCodes will be marked as 'None'
 
     e.g. for unique axis codes:
 

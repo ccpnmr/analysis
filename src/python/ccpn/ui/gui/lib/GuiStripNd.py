@@ -767,17 +767,45 @@ class GuiStripNd(GuiStrip):
         """
         try:
             defaultColour = self._preferences.defaultMarksColour
-            position = obj.ppmPositions
+            ppmPositions = obj.ppmPositions
             axisCodes = obj.axisCodes
 
-            if axisIndex is not None:
-                if (0 <= axisIndex < len(position)):
-                    position = (position[axisIndex],)
-                    axisCodes = (axisCodes[axisIndex],)
-                else:
-                    return
+            indices = getAxisCodeMatchIndices(self.axisCodes, obj.axisCodes)
 
-            self._project.newMark(defaultColour, position, axisCodes)
+            if axisIndex is not None:
+                objAxisIndex = indices[axisIndex]
+                if objAxisIndex is not None and (0 <= objAxisIndex < len(ppmPositions)):
+                    position = (ppmPositions[objAxisIndex],)
+                    axisCode = (axisCodes[objAxisIndex],)
+                    self._project.newMark(defaultColour, position, axisCode)
+            else:
+                self._project.newMark(defaultColour, ppmPositions, axisCodes)
+
+            # add the marks for the double cursor - needs to be enabled in preferences
+            if self.doubleCrosshairVisible and self._CcpnGLWidget._matchingIsotopeCodes:
+                ppmPositions = obj.ppmPositions
+                axisCodes = obj.axisCodes
+
+                if axisIndex is not None:
+
+                    if (0 <= axisIndex < 2):
+                        # get the same position in the opposite axisCode
+                        doubleIndex = 1 - axisIndex
+
+                        objAxisIndex = indices[axisIndex]
+                        objDoubleAxisIndex = indices[doubleIndex]
+
+                        if objAxisIndex is not None and objDoubleAxisIndex is not None:
+                            position = (ppmPositions[objAxisIndex],)
+                            axisCode = (axisCodes[objDoubleAxisIndex],)
+                            self._project.newMark(defaultColour, position, axisCode)
+                else:
+                    # flip the XY axes for the peak
+                    if None not in indices:
+                        ppmPositions = [ppmPositions[ii] for ii in indices]
+                        axisCodes = [axisCodes[ii] for ii in indices]
+                        ppmPositions = [ppmPositions[1], ppmPositions[0]] + ppmPositions[2:]
+                        self._project.newMark(defaultColour, ppmPositions, axisCodes)
 
         except Exception as es:
             getLogger().warning('Error setting mark at position')

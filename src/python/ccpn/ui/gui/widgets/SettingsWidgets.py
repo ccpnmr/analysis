@@ -78,7 +78,7 @@ class SpectrumDisplaySettings(Widget, SignalBlocking):
                  symbolType=0, annotationType=0, symbolSize=9, symbolThickness=2,
                  stripArrangement=0,
                  _baseAspectRatioAxisCode='H', _aspectRatios={},
-                 _useLockedAspectRatio=False, _useDefaultAspectRatio=True,
+                 _useLockedAspectRatio=False, _useDefaultAspectRatio=False,
                  **kwds):
         super().__init__(parent, setLayout=True, **kwds)
 
@@ -141,7 +141,7 @@ class SpectrumDisplaySettings(Widget, SignalBlocking):
         self.lockAspectCheckBox.clicked.connect(self._settingsUseLockChanged)
 
         row += 1
-        self.useDefaultAspect = Label(parent, text="Use Default Aspect Ratio", grid=(row, 0))
+        self.useDefaultAspect = Label(parent, text="Use Fixed Aspect Ratio", grid=(row, 0))
         self.useDefaultAspectCheckBox = CheckBox(parent, grid=(row, 1), checked=_useDefaultAspectRatio, objectName='SDS_useDefaultAspect')
         self.useDefaultAspectCheckBox.clicked.connect(self._settingsUseDefaultChanged)
 

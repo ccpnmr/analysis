@@ -42,7 +42,7 @@
         "showDoubleCrosshair"                  : false,
         "matchAxisCode"                        : 0,
         "restoreLayoutOnOpening"               : true,
-        "useDefaultAspectRatio"                : true,
+        "useDefaultAspectRatio"                : false,
         "useLockedAspectRatio"                 : false,
         "aspectRatios"                         : {
             "H"         : 1.0,

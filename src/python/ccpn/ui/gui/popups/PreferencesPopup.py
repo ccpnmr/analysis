@@ -571,6 +571,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
         self.zoomCentre.setIndex(self.preferences.general.zoomCentreType)
         self.zoomPercentData.setValue(int(self.preferences.general.zoomPercent))
         self.stripWidthZoomPercentData.setValue(int(self.preferences.general.stripWidthZoomPercent))
+        self.defaultAspectRatioBox.setChecked(self.preferences.general.useDefaultAspectRatio)
 
         # NOTE: ED this seems a little awkward
         self.aspectLabel = {}
@@ -813,9 +814,9 @@ class PreferencesPopup(CcpnDialogMainWidget):
         # self.showLastAxisOnlyBox.toggled.connect(partial(self._queueToggleGeneralOptions, 'lastAxisOnly'))
 
         row += 1
-        self.lockAspectRatioLabel = Label(parent, text="Default Aspect Ratios: ", grid=(row, 0))
-        # self.lockAspectRatioBox = CheckBox(parent, grid=(row, 1), checked=self.preferences.general.lockAspectRatio)
-        # self.lockAspectRatioBox.toggled.connect(partial(self._queueToggleGeneralOptions, 'lockAspectRatio'))
+        self.defaultAspectRatioLabel = Label(parent, text="Fixed Aspect Ratios: ", grid=(row, 0))
+        self.defaultAspectRatioBox = CheckBox(parent, grid=(row, 1))        #, checked=self.preferences.general.useDefaultAspectRatio)
+        self.defaultAspectRatioBox.toggled.connect(partial(self._queueToggleGeneralOptions, 'useDefaultAspectRatio'))
 
         row += 1
         self.aspectLabel = {}

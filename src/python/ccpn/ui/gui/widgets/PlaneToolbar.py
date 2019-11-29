@@ -368,7 +368,7 @@ class PlaneToolbar(ToolBar):
             if self.nextPlaneCallback:
                 self.nextPlaneCallback(n)
 
-        self.strip._rebuildStripContours()
+        self.strip.refresh()
 
     def eventFilter(self, source, event):
         """Filter to get wheel mousepress events to set the current activePlane

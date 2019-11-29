@@ -692,7 +692,7 @@ class CcpnGLWidget(QOpenGLWidget):
         self._spectrumValues = spectrumView._getValues()
 
         # set defaults for undefined spectra
-        if not self._spectrumValues[0].totalPointCount:
+        if not self._spectrumValues[0].numPoints:
             dx = -1.0 if self.INVERTXAXIS else -1.0
             fx0, fx1 = 1.0, -1.0
             dxAF = fx0 - fx1
@@ -719,7 +719,7 @@ class CcpnGLWidget(QOpenGLWidget):
                 fx0, fx1 = 1.0, -1.0
 
             dxAF = fx0 - fx1
-            xScale = dx * dxAF / self._spectrumValues[0].totalPointCount
+            xScale = dx * dxAF / self._spectrumValues[0].numPoints
 
             if spectrumView.spectrum.dimensionCount > 1:
                 dy = -1.0 if self.INVERTYAXIS else -1.0  # self.sign(self.axisT - self.axisB)
@@ -730,12 +730,12 @@ class CcpnGLWidget(QOpenGLWidget):
                     fy0, fy1 = 1.0, -1.0
 
                 dyAF = fy0 - fy1
-                yScale = dy * dyAF / self._spectrumValues[1].totalPointCount
+                yScale = dy * dyAF / self._spectrumValues[1].numPoints
 
                 # set to nD limits to twice the width of the spectrum and a few data points
-                self._minXRange = min(self._minXRange, GLDefs.RANGEMINSCALE * (fx0 - fx1) / self._spectrumValues[0].totalPointCount)
+                self._minXRange = min(self._minXRange, GLDefs.RANGEMINSCALE * (fx0 - fx1) / self._spectrumValues[0].numPoints)
                 self._maxXRange = max(self._maxXRange, (fx0 - fx1))
-                self._minYRange = min(self._minYRange, GLDefs.RANGEMINSCALE * (fy0 - fy1) / self._spectrumValues[1].totalPointCount)
+                self._minYRange = min(self._minYRange, GLDefs.RANGEMINSCALE * (fy0 - fy1) / self._spectrumValues[1].numPoints)
                 self._maxYRange = max(self._maxYRange, (fy0 - fy1))
 
             else:
@@ -754,7 +754,7 @@ class CcpnGLWidget(QOpenGLWidget):
                 yScale = dy * dyAF / 1.0
 
                 # set to 1D limits to twice the width of the spectrum and the intensity limit
-                self._minXRange = min(self._minXRange, GLDefs.RANGEMINSCALE * (fx0 - fx1) / max(self._spectrumValues[0].totalPointCount, self.SPECTRUMXZOOM))
+                self._minXRange = min(self._minXRange, GLDefs.RANGEMINSCALE * (fx0 - fx1) / max(self._spectrumValues[0].numPoints, self.SPECTRUMXZOOM))
                 self._maxXRange = max(self._maxXRange, (fx0 - fx1))
                 # self._minYRange = min(self._minYRange, 3.0 * (fy0 - fy1) / self.SPECTRUMYZOOM)
                 self._minYRange = min(self._minYRange, self._intensityLimit)
@@ -4942,7 +4942,7 @@ class CcpnGLWidget(QOpenGLWidget):
                 fx0, fx1 = 1.0, -1.0
 
             dxAF = fx0 - fx1
-            xScale = dx * dxAF / self._spectrumValues[0].totalPointCount
+            xScale = dx * dxAF / self._spectrumValues[0].numPoints
 
             if spectrumView.spectrum.dimensionCount > 1:
                 dy = self.sign(self.axisT - self.axisB)
@@ -4953,7 +4953,7 @@ class CcpnGLWidget(QOpenGLWidget):
                     fy0, fy1 = 1.0, -1.0
 
                 dyAF = fy0 - fy1
-                yScale = dy * dyAF / self._spectrumValues[1].totalPointCount
+                yScale = dy * dyAF / self._spectrumValues[1].numPoints
             else:
                 dy = self.sign(self.axisT - self.axisB)
                 if spectrumView.spectrum.intensities is not None and spectrumView.spectrum.intensities.size != 0:

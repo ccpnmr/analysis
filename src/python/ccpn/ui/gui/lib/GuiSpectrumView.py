@@ -31,17 +31,19 @@ from ccpn.util import Colour
 from PyQt5 import QtCore, QtGui, QtWidgets
 from ccpn.util.Logging import getLogger
 from ccpn.core.lib.Notifiers import Notifier
+from typing import Optional, Tuple
 
-#import pyqtgraph as pg
-
-#from ccpn.ui.gui.modules.spectrumPane.PeakListItem import PeakListItem
-#from ccpn.ui.gui.modules.spectrumPane.IntegralListItem import IntegralListItem
 
 SpectrumViewParams = collections.namedtuple('SpectrumViewParams', ('valuePerPoint',
                                                                    'totalPointCount',
+                                                                   'pointCount',
+                                                                   'numPoints',
                                                                    'minAliasedFrequency',
                                                                    'maxAliasedFrequency',
-                                                                   'dataDim'))
+                                                                   'dataDim',
+                                                                   'minSpectrumFrequency',
+                                                                   'maxSpectrumFrequency',
+                                                                   ))
 
 
 class GuiSpectrumView(QtWidgets.QGraphicsObject):
@@ -64,6 +66,8 @@ class GuiSpectrumView(QtWidgets.QGraphicsObject):
         action = self.strip.spectrumDisplay.spectrumActionDict.get(self._apiDataSource)
         if action and not action.isChecked():
             self.setVisible(False)
+
+        self._showContours = True
 
     # To write your own graphics item, you first create a subclass of QGraphicsItem, and
     # then start by implementing its two pure virtual public functions:
@@ -138,7 +142,7 @@ class GuiSpectrumView(QtWidgets.QGraphicsObject):
     #   self.xDim = xDim
     #   self.yDim = yDim
 
-    def _getSpectrumViewParams(self, axisDim: int) -> tuple:
+    def _getSpectrumViewParams(self, axisDim: int) -> Optional[Tuple]:
         """Get position, width, totalPointCount, minAliasedFrequency, maxAliasedFrequency
         for axisDimth axis (zero-origin)"""
 
@@ -148,15 +152,21 @@ class GuiSpectrumView(QtWidgets.QGraphicsObject):
         if not dataDim:
             return
 
-        totalPointCount = (dataDim.numPointsOrig if hasattr(dataDim, "numPointsOrig")
+        totalPointCount = (dataDim.numPointsOrig if hasattr(dataDim, 'numPointsOrig')
                            else dataDim.numPoints)
+        pointCount = (dataDim.numPointsValid if hasattr(dataDim, 'numPointsValid')
+                      else dataDim.numPoints)
+        numPoints = dataDim.numPoints
+
         for ii, dd in enumerate(dataDim.dataSource.sortedDataDims()):
             # Must be done this way as dataDim.dim may not be in order 1,2,3 (e.g. for projections)
             if dd is dataDim:
                 minAliasedFrequency, maxAliasedFrequency = (self.spectrum.aliasingLimits)[ii]
+                minSpectrumFrequency, maxSpectrumFrequency = (self.spectrum.spectrumLimits)[ii]
                 break
         else:
             minAliasedFrequency = maxAliasedFrequency = dataDim = None
+            minSpectrumFrequency = maxSpectrumFrequency = None
 
         if hasattr(dataDim, 'primaryDataDimRef'):
             # FreqDataDim - get ppm valuePerPoint
@@ -170,8 +180,9 @@ class GuiSpectrumView(QtWidgets.QGraphicsObject):
             valuePerPoint = None
 
         # return axis.position, axis.width, totalPointCount, minAliasedFrequency, maxAliasedFrequency, dataDim
-        return SpectrumViewParams(valuePerPoint, totalPointCount,
-                                  minAliasedFrequency, maxAliasedFrequency, dataDim)
+        return SpectrumViewParams(valuePerPoint, totalPointCount, pointCount, numPoints,
+                                  minAliasedFrequency, maxAliasedFrequency, dataDim,
+                                  minSpectrumFrequency, maxSpectrumFrequency)
 
     def _getColour(self, colourAttr, defaultColour=None):
 
@@ -190,6 +201,7 @@ class GuiSpectrumView(QtWidgets.QGraphicsObject):
 
         raise Exception('Needs to be implemented in subclass')
 
+
 def _spectrumViewHasChanged(data):
     """Change action icon colour and other changes when spectrumView changes.
 
@@ -207,14 +219,18 @@ def _spectrumViewHasChanged(data):
     action = spectrumDisplay.spectrumActionDict.get(apiDataSource)
     if action:
         pix = QtGui.QPixmap(QtCore.QSize(60, 10))
-        if spectrumDisplay.is1D:
-            pix.fill(QtGui.QColor(self.sliceColour))
+        if self._showContours:
+            if spectrumDisplay.is1D:
+                pix.fill(QtGui.QColor(self.sliceColour))
+            else:
+                pix.fill(QtGui.QColor(self.positiveContourColour))
         else:
-            pix.fill(QtGui.QColor(self.positiveContourColour))
+            pix.fill(QtGui.QColor('gray'))
         action.setIcon(QtGui.QIcon(pix))
 
     # Update strip
     self.strip.update()
+
 
 def _createdSpectrumView(data):
     """Set up SpectrumDisplay when new StripSpectrumView is created - for notifiers.
@@ -230,22 +246,3 @@ def _createdSpectrumView(data):
         strip._setZWidgets()
 
     spectrumDisplay.spectrumToolBar._addSpectrumViewToolButtons(self)
-
-        # # TODO:ED check here - used to catch undelete of spectrumView
-        # if self.strip.plotWidget:
-        #     scene = self.strip.plotWidget.scene()
-        #     if self not in scene.items():  # This happens when you do an undo after deletion of spectrum(View)
-        #         scene.addItem(self)
-        #
-        #         # TODO:ED ERROR HERE shouldn't need this soon be check
-        #         # if spectrumDisplay.is1D:
-        #         #   strip.viewBox.addItem(self.plot)
-
-    # def _deletedSpectrumView(self):
-    #     """Update interface when a spectrumView is deleted"""
-    #     if self.strip.plotWidget:
-    #         scene = self.strip.plotWidget.scene()
-    #         scene.removeItem(self)
-    #         if hasattr(self, 'plot'):  # 1d
-    #             scene.removeItem(self.plot)
-

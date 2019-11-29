@@ -119,9 +119,10 @@ class GuiSpectrumView1d(GuiSpectrumView):
         if phasingFrame.isVisible() and not self.hPhaseTrace:
             if not self.strip.haveSetHPhasingPivot:
                 viewParams = self._getSpectrumViewParams(0)
-                # valuePerPoint, pointCount, minAliasedFrequency, maxAliasedFrequency, dataDim = self._getSpectrumViewParams(0)
-                self.strip.hPhasingPivot.setPos(0.5 * (viewParams.minAliasedFrequency +
-                                                       viewParams.maxAliasedFrequency))
+                # valuePerPoint, pointCount, minAliasedFrequency, maxAliasedFrequency, dataDim,
+                # minSpectrumFrequency, maxSpectrumFrequency = self._getSpectrumViewParams(0)
+                self.strip.hPhasingPivot.setPos(0.5 * (viewParams.minSpectrumFrequency +
+                                                       viewParams.maxSpectrumFrequency))
                 self.strip.hPhasingPivot.setVisible(True)
                 self.strip.haveSetHPhasingPivot = True
             trace = pg.PlotDataItem()
@@ -182,7 +183,9 @@ class GuiSpectrumView1d(GuiSpectrumView):
             if n != 1:
 
                 try:
-                    valuePerPoint, totalPointCount, minAliasedFrequency, maxAliasedFrequency, dataDim = self._getSpectrumViewParams(n)
+                    # valuePerPoint, totalPointCount, minAliasedFrequency, maxAliasedFrequency, dataDim,
+                    # minSpectrumFrequency, maxSpectrumFrequency = self._getSpectrumViewParams(n)
+                    valuePerPoint, _, _, numPoints, _, _, dataDim, minSpectrumFrequency, maxSpectrumFrequency = self._getSpectrumViewParams(n)
                 except:
                     # skip if the dimension doesn't exist
                     break
@@ -191,14 +194,14 @@ class GuiSpectrumView1d(GuiSpectrumView):
                     if n == 0:
                         xDataDim = dataDim
                         # -1 below because points start at 1 in data model
-                        xMinFrequency = int(dataDim.primaryDataDimRef.valueToPoint(maxAliasedFrequency) - 1)
-                        xMaxFrequency = int(dataDim.primaryDataDimRef.valueToPoint(minAliasedFrequency) - 1)
-                        xNumPoints = totalPointCount
+                        xMinFrequency = int(dataDim.primaryDataDimRef.valueToPoint(maxSpectrumFrequency) - 1)
+                        xMaxFrequency = int(dataDim.primaryDataDimRef.valueToPoint(minSpectrumFrequency) - 1)
+                        xNumPoints = numPoints
                     else:
-                        inRange = (minAliasedFrequency <= pos <= maxAliasedFrequency)
+                        inRange = (minSpectrumFrequency <= pos <= maxSpectrumFrequency)
                         if not inRange:
                             break
-                    pnt = (dataDim.primaryDataDimRef.valueToPoint(pos) - 1) % totalPointCount
+                    pnt = (dataDim.primaryDataDimRef.valueToPoint(pos) - 1) % numPoints
                     pnt += (dataDim.pointOffset if hasattr(dataDim, "pointOffset") else 0)
                     point.append(pnt)
 
@@ -297,8 +300,13 @@ class GuiSpectrumView1d(GuiSpectrumView):
 
         glList.colors = np.array([colR, colG, colB, 1.0] * numVertices, dtype=np.float32)
         glList.vertices = np.zeros(numVertices * 2, dtype=np.float32)
-        glList.vertices[::2] = self.spectrum.positions
-        glList.vertices[1::2] = self.spectrum.intensities
+
+        try:
+            # may be empty
+            glList.vertices[::2] = self.spectrum.positions
+            glList.vertices[1::2] = self.spectrum.intensities
+        except:
+            pass
 
     def _paintContoursNoClip(self, plotHeight=0.0):
 

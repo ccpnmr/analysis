@@ -552,6 +552,21 @@ class GuiStrip(Frame):
         """
         self._CcpnGLWidget.refreshDevicePixelRatio()
 
+    def refresh(self):
+        """Refresh the display for strip and redraw contours
+        """
+        self._CcpnGLWidget._updateVisibleSpectrumViews()
+
+        # redraw the contours
+        from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
+
+        GLSignals = GLNotifier(parent=self)
+
+        for specNum, thisSpecView in enumerate(self.spectrumViews):
+            thisSpecView.buildContours = True
+
+        GLSignals.emitPaintEvent()
+
     def _checkMenuItems(self):
         """Update the menu check boxes from the strip
         Subclass if options needed, e.g. stackSpectra item

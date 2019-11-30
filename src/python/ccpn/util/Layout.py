@@ -348,6 +348,9 @@ def _traverse(o, tree_types=(list, tuple)):
         yield o
 
 
+# GST this should be part of the CcpnModuleArea code
+# as this and the ModuleArea serialisation code need to
+# be modified in parallel
 def _getModuleNamesFromState(layoutState):
     ''' '''
     names = []
@@ -355,18 +358,21 @@ def _getModuleNamesFromState(layoutState):
         return names
 
     lls = []
+    floatContainer = 'float'
+    if 'version' in layoutState:
+        floatContainer = 'floats'
     if 'main' in layoutState:
         mains = layoutState['main']
         lls += list(_traverse(mains))
-    if 'float' in layoutState:
-        flts = layoutState['float']
+    if floatContainer in layoutState:
+        flts = layoutState[floatContainer]
         lls += list(_traverse(flts))
         for i in list(_traverse(flts)):
             if isinstance(i, dict):
                 if 'main' in i:
                     lls += list(_traverse(i['main']))
 
-    excludingList = ['vertical', 'dock', 'horizontal', 'tab', 'main', 'sizes', 'float']
+    excludingList = ['vertical', 'dock', 'horizontal', 'tab', 'main', 'sizes', 'float', 'area']
     names = [i for i in lls if i not in excludingList if isinstance(i, str)]
 
     return names
@@ -433,7 +439,7 @@ def restoreLayout(mainWindow, layout, restoreSpectrumDisplay=False):
                             _openCcpnModule(mainWindow, ccpnModules, className, moduleName=guiModuleName)
 
                 except Exception as e:
-                    getLogger().debug2("Failed to restore Layout")
+                    getLogger().debug2("Failed to restore Layout %s" % str(e))
 
     if LayoutState in layout:
         # Very important step:

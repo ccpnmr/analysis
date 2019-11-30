@@ -364,35 +364,49 @@ class CcpnModuleArea(ModuleArea, DropBase):
         for module in self.ccpnModules:
             module._closeModule()
 
-    def saveState(self):
+    ## docksOnly is used for in memory save and restore for the module maximise save and restore system
+    ## if docksOnly we are saving state to memory and are maximising or restoring docks
+    def saveState(self,docksOnly=False):
         """
         Return a serialized (storable) representation of the state of
         all Docks in this DockArea."""
 
         state = {}
         try:
-            state = {'main': self.childState(self.topContainer), 'float': []}
+            getLogger().info('Saving V3.1 Layout')
+            state = {'main': ('area',self.childState(self.topContainer,docksOnly), {'id': id(self)}), 'floats': [],
+                     'version': "3.1", 'inMemory' : docksOnly}
+
             for a in self.tempAreas:
                 if a is not None:
                     geo = a.win.geometry()
                     geo = (geo.x(), geo.y(), geo.width(), geo.height())
-                    state['float'].append((a.saveState(), geo))
+                    areaState = ('area',self.childState(a.topContainer,docksOnly), {'geo' : geo, 'id': id(a)})
+                    state['floats'].append(areaState)
         except Exception as e:
             getLogger().warning('Impossible to save layout. %s' % e)
         return state
 
-    def childState(self, obj):
+    def childState(self, obj, docksOnly=False):
 
         if isinstance(obj, Dock):
-            return ('dock', obj.name(), obj.widgetsState)
+            # GST for maximise restore syste
+            # maximiseState = {'maximised' : obj.maximised, 'maximiseRestoreState' : obj.maximiseRestoreState, 'titleBarHidden' : obj.titleBarHidden}
+            maximiseState =  {}
+            # if docksOnly:
+            #     objWidgetsState = maximiseState
+            # else:
+            objWidgetsState = dict(obj.widgetsState, **maximiseState)
+            return ('dock', obj.name(), objWidgetsState)
         else:
             childs = []
             if obj is not None:
                 for i in range(obj.count()):
                     try:
                         widg = obj.widget(i)
-                        childList = self.childState(widg)
-                        childs.append(childList)
+                        if not docksOnly or (docksOnly and isinstance(widg,(Dock,Container))):
+                            childList = self.childState(widg, docksOnly)
+                            childs.append(childList)
                     except Exception as es:
                         getLogger().warning('Error accessing widget: %s - %s - %s' % (str(es), widg, obj))
 
@@ -422,26 +436,57 @@ class CcpnModuleArea(ModuleArea, DropBase):
         """
         modulesNames = [m.name() for m in self.ccpnModules]
 
+        version = "3.0"
+        floatContainer = 'float'
+        if 'version' in state:
+            version = state['version']
+            floatContainer='floats'
+            getLogger().info('Reading from V%s layout format.' % version )
+
         if 'main' in state:
             ## 1) make dict of all docks and list of existing containers
             containers, docks = self.findAll()
-            oldTemps = self.tempAreas[:]
+
+            # GST this appears to be important for the in memory save and restore code
+            if self.home is  None:
+                oldTemps = self.tempAreas[:]
+            else:
+                oldTemps = self.home.tempAreas[:]
+
             if state['main'] is not None:
                 # 2) create container structure, move docks into new containers
                 self._buildFromState(modulesNames, state['main'], docks, self)
 
             ## 3) create floating areas, populate
-            for s in state['float']:
-                a = self.addTempArea()
-                # a._buildFromState = self._buildFromState
-                a._buildFromState(modulesNames, s[0]['main'], docks, a)
-                a.win.setGeometry(*s[1])
+            for s in state[floatContainer]:
+                a = None
+
+
+                # for maximise and restore code
+                if version == "3.1":
+                    stateId = s[2]['id']
+
+                    if state['inMemory']:
+                        for temp in oldTemps:
+                            if id(temp) == stateId:
+                                a = temp
+                                oldTemps.remove(temp)
+                                break
+                if a is None:
+                    a = self.addTempArea()
+
+                # GST this indicates a new format file
+                if version == "3.1":
+                    a._buildFromState(modulesNames, s, docks, a)
+                    a.win.setGeometry(*s[2]['geo'])
+                else:
+                    a._buildFromState(modulesNames, s[0]['main'], docks, a)
+                    a.win.setGeometry(*s[1])
 
             ## 4) Add any remaining docks to the bottom
             for d in docks.values():
                 self.moveDock(d, 'below', None)
 
-            # print "\nKill old containers:"
             ## 5) kill old containers
             # if is not none  delete
             if state['main'] is not None:
@@ -460,7 +505,7 @@ class CcpnModuleArea(ModuleArea, DropBase):
 
     def _buildFromState(self, openedModulesNames, state, docks, root, depth=0):
         typ, contents, state = state
-        pfx = "  " * depth
+
         if typ == 'dock':
             # try:
             if contents in openedModulesNames:
@@ -474,17 +519,24 @@ class CcpnModuleArea(ModuleArea, DropBase):
                 obj.addWidget(label)
                 self.addModule(obj)
 
+        # GST only present in v 3.1 layouts
+        elif typ == 'area':
+            if contents is not None:
+                self._buildFromState(openedModulesNames,contents,docks,root,depth)
+            obj = None
+
+
             # except KeyError:
             #   raise Exception('Cannot restore dock state; no dock with name "%s"' % contents)
         else:
             obj = self.makeContainer(typ)
 
-        # if issubclass(root, Container):
-        if hasattr(root, 'type'):
-            root.insert(obj)
+        if obj is not None:
+            if hasattr(root, 'type'):
+                root.insert(obj)
 
-        if typ != 'dock':
-            for o in contents:
-                self._buildFromState(openedModulesNames, o, docks, obj, depth + 1)
-            obj.apoptose(propagate=False)
-            obj.restoreState(state)  ## this has to be done later?
+            if typ != 'dock':
+                for o in contents:
+                    self._buildFromState(openedModulesNames, o, docks, obj, depth + 1)
+                obj.apoptose(propagate=False)
+                obj.restoreState(state)  ## this has to be done later?

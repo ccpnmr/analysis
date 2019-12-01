@@ -118,17 +118,15 @@ class DropBase:
     # super().dragMoveEvent(event)
 
 
-    def isDragToMaximisedModule(self, event, parentModule=None):
+    def isDragToMaximisedModule(self, event):
         from ccpn.ui.gui.widgets.CcpnModuleArea import CcpnModule
 
         result = False
 
-        if parentModule == None:
-            parentModule = self._findModule()
+        parentModule = self._findModule()
 
-        if parentModule ==  None:
+        if parentModule is None:
             return result
-
 
         data = self.parseEvent(event)
 
@@ -380,6 +378,7 @@ class DropBase:
 
         par = self
         while par:
-            par = par.parent()  # getParent() may be used for CCPN widgets, not for other QWidgets
             if isinstance(par, CcpnModule):
                 return par
+            par = par.parent()  # getParent() may be used for CCPN widgets, not for other QWidgets
+

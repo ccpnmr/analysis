@@ -873,7 +873,8 @@ class CcpnGLWidget(QOpenGLWidget):
         newPixelRatio = self.devicePixelRatio()
         if newPixelRatio != self.lastPixelRatio:
             self.lastPixelRatio = newPixelRatio
-            self.viewports._devicePixelRatio = newPixelRatio
+            if hasattr(self,'viewports'):
+                self.viewports._devicePixelRatio = newPixelRatio
             self.buildOverlayStrings()
             for spectrumView in self._ordering:
                 for listView in spectrumView.peakListViews:

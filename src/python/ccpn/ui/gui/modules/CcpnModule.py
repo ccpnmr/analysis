@@ -915,16 +915,45 @@ class CcpnModule(Dock, DropBase, NotifierBase):
 
 
     def startDrag(self):
+
         self.drag = QtGui.QDrag(self)
         mime = QtCore.QMimeData()
         self.drag.setMimeData(mime)
-        self.widgetArea.setStyleSheet(self.dragStyle)
-        self.update()
+        dragPixmap  = self.grab()
+        self.drag.setPixmap(dragPixmap)
 
         self.drag.destroyed.connect(self._destroyed)
-        self._raiseSelectedOverlay()
-        action = self.drag.exec_()
-        self.updateStyle()
+
+        # GST  dosn't work in the current version but should work in 5.13
+        forbiddenCursorPixmap = QtGui.QCursor(QtCore.Qt.ForbiddenCursor).pixmap()
+        self.drag.setDragCursor(forbiddenCursorPixmap,QtCore.Qt.IgnoreAction)
+
+        dragResult = self.drag.exec_()
+        endPosition =  QtGui.QCursor.pos()
+
+
+        # GST we have to assume the drag succeeded currently as we don't get any events
+        # that report on whether the drag has failed. Indeed this effectivley a failed drag...
+        globalDockRect = self.getDockArea().frameGeometry()
+
+        targetWidget = QtWidgets.QApplication.instance().widgetAt(endPosition)
+        if (self.drag.target() is  None)  and (not globalDockRect.contains(endPosition)):
+            if targetWidget == None:
+                self.float()
+                window  = self.findWindow()
+                window.move(endPosition)
+
+                # this is because we could have have dragged into another application
+                # rhis may not work under windows
+                originalWindow = self.findWindow()
+                originalWindow.raise_()
+                originalWindow.show()
+                originalWindow.activateWindow()
+
+                window.raise_()
+                window.show()
+                window.activateWindow()
+
 
     def _destroyed(self, ev):
         self._selectedOverlay.setDropArea(None)

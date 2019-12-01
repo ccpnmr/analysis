@@ -34,6 +34,7 @@ from functools import partial
 from pyqtgraph.dockarea.Container import Container
 from pyqtgraph.dockarea.DockDrop import DockDrop
 from pyqtgraph.dockarea.Dock import DockLabel, Dock
+from pyqtgraph.dockarea.DockArea import DockArea
 from PyQt5 import QtCore, QtGui, QtWidgets
 from ccpn.ui.gui.widgets.DropBase import DropBase
 from ccpn.ui.gui.widgets.CheckBox import CheckBox
@@ -148,6 +149,10 @@ class CcpnModule(Dock, DropBase, NotifierBase):
     # _instances = set()
 
     def __init__(self, mainWindow, name, closable=True, closeFunc=None, **kwds):
+
+        self.maximised = False
+        self.maximiseRestoreState = None
+
 
         #TODO:GEERTEN: make mainWindow actually do something
         self.area = None
@@ -303,6 +308,154 @@ class CcpnModule(Dock, DropBase, NotifierBase):
     #         print('>>>Override')
     #     else:
     #         super(CcpnModule, self).event(event)
+
+    @property
+    def titleBarHidden(self):
+        return self.labelHidden
+
+    @titleBarHidden.setter
+    def titleBarHidden(self, hidden):
+        if hidden:
+            self.hideTitleBar()
+        else:
+            self.showTitleBar()
+
+    #GST super class show and hide titlebar have central as an allowed area we don't use it
+    #    so remove it as a choice
+    def hideTitleBar(self):
+        """
+        Hide the title bar for this Dock.
+        This will prevent the Dock being moved by the user.
+        """
+        self.label.hide()
+        self.labelHidden = True
+        self.updateStyle()
+
+    def showTitleBar(self):
+        """
+        Show the title bar for this Dock.
+        """
+        self.label.show()
+        self.labelHidden = False
+        self.updateStyle()
+
+    def getDockArea(self, target = None):
+        if target is None:
+            current = self
+        else:
+            current = target
+
+        while current.parent() != None:
+            if isinstance(current,DockArea):
+                break
+            current =  current.parent()
+        return current
+
+    def getDock(self, target = None):
+        if target is None:
+            current = self
+        else:
+            current = target
+
+        while current.parent() != None:
+            if isinstance(current,Dock):
+                break
+            current =  current.parent()
+
+        if not isinstance(current,Dock):
+            current = None
+        return current
+
+    def docksByDockArea(self):
+        result = {}
+        docks = list(self.area.docks.values())
+        for dock in docks:
+            parent = dock.getDockArea()
+            result.setdefault(parent,[]).append(dock)
+        return result
+
+    def float(self):
+        if self.maximised:
+            self.toggleMaximised()
+        super().float()
+
+
+    def mergeState(self,state):
+        result = self.getHome().saveState(docksOnly=True)
+
+        if state['main'] != None:
+            result['main'] = state['main']
+
+        if len(state['floats']) != 0:
+            toMerge = state['floats'][0]
+            mergeId = toMerge[2]['id']
+
+            for i,currentState in enumerate(result['floats']):
+                currentId = currentState[2]['id']
+
+                if currentId ==  mergeId:
+                    result['floats'][i] = toMerge
+
+        return result
+
+
+    def filterState(self, state, id_):
+
+        result = {'main' : None, 'floats' : []}
+
+        if state['main'][2]['id'] == id_:
+            result ['main'] =  state['main']
+
+        for float in state['floats']:
+            if float[2]['id'] == id_:
+                result['floats'].append(float)
+
+        return result
+
+    def getDocksInParentArea(self):
+        return self.docksByDockArea()[self.getDockArea()]
+
+    def getHome(self):
+        result = self.area
+        if self.area.home != None:
+            result =self.area.home
+        return result
+
+    def toggleMaximised(self):
+
+        docks = self.getDocksInParentArea()
+
+        if len(docks) < 2:
+            self.maximised = False
+            self.maximiseRestoreState = None
+        elif self.maximised:
+            dockArea = self.getDockArea()
+            dockAreaId = id(dockArea)
+            state = self.mergeState(self.maximiseRestoreState)
+            if (self.area.home):
+                self.area.home.restoreState(state)
+            else:
+                self.area.restoreState(state)
+            for dock in docks:
+                dock.showTitleBar()
+            self.maximised = False
+            self.maximiseRestoreState =  None
+        else:
+            state = self.getHome().saveState(docksOnly=True)
+            dockArea = self.getDockArea()
+            dockAreaId = id(dockArea)
+            state = self.filterState(state,dockAreaId)
+            self.maximiseRestoreState = state
+
+            docks = self.docksByDockArea()[self.getDockArea()]
+            docks.remove(self)
+            for dock in docks:
+                dock.hideTitleBar()
+                self.area.moveDock(dock, 'below', self)
+
+            self._container.raiseDock(self)
+
+            self.maximised = True
 
     def _findChildren(self, widget):
         for i in widget.children():
@@ -551,6 +704,10 @@ class CcpnModule(Dock, DropBase, NotifierBase):
         #     pass
 
         getLogger().debug('Closing %s' % str(self.container()))
+
+        if self.maximised:
+            self.toggleMaximised()
+
         if not self._container:
             area = self.mainWindow.moduleArea
             if area:
@@ -575,14 +732,26 @@ class CcpnModule(Dock, DropBase, NotifierBase):
         super().enterEvent(event)
 
     def dragMoveEvent(self, *args):
+        ev = args[0]
+        if self.isDragToMaximisedModule(ev):
+            self.handleDragToMaximisedModule(ev)
+            return
+
         DockDrop.dragMoveEvent(self, *args)
 
     def dragLeaveEvent(self, *args):
+        ev = args[0]
         DockDrop.dragLeaveEvent(self, *args)
 
     def dragEnterEvent(self, *args):
+        ev = args[0]
+
+        if self.isDragToMaximisedModule(ev):
+            self.handleDragToMaximisedModule(ev)
+            return
+
         if args:
-            ev = args[0]
+
             # print ('>>>', ev.source())
             data = self.parseEvent(ev)
             if DropBase.PIDS in data and isinstance(data['event'].source(), SideBar):  #(SideBar, SideBar)):
@@ -647,11 +816,16 @@ class CcpnModule(Dock, DropBase, NotifierBase):
                 DockDrop.dragEnterEvent(self, *args)
 
     def dropEvent(self, event):
+        if self.inDragToMaximisedModule:
+            return
 
         if event:
             source = event.source()
             data = self.parseEvent(event)
-            if DropBase.PIDS in data:
+            if hasattr(source, 'implements') and source.implements('dock'):
+                CcpnModule._lastActionWasDrop = True
+                DockDrop.dropEvent(self, event)
+            elif DropBase.PIDS in data and len(data[DropBase.PIDS]) > 0:
                 # process Pids
                 self.mainWindow._processPids(data, position=self.dropArea, relativeTo=self)
                 event.accept()
@@ -660,10 +834,6 @@ class CcpnModule(Dock, DropBase, NotifierBase):
                 self.dropArea = None
                 self.overlay.setDropArea(self.dropArea)
                 self._selectedOverlay.setDropArea(self.dropArea)
-
-            if hasattr(source, 'implements') and source.implements('dock'):
-                CcpnModule._lastActionWasDrop = True
-                DockDrop.dropEvent(self, event)
             else:
                 event.ignore()
                 return
@@ -702,6 +872,47 @@ class CcpnModule(Dock, DropBase, NotifierBase):
                       border: 0px;
                    }"""
         self.setStyleSheet(tempStyle)
+
+
+
+    def findWindow(self):
+        current =  self
+        while current.parent() != None:
+            current =  current.parent()
+        return current
+
+    def flashMessage(self, message):
+        def center(window, rect):
+        # https://wiki.qt.io/How_to_Center_a_Window_on_the_Screen
+
+            window.setGeometry(
+                QtWidgets.QStyle.alignedRect(
+                    QtCore.Qt.LeftToRight,
+                    QtCore.Qt.AlignCenter,
+                    window.size(),
+                    rect,
+                )
+            )
+
+        messageBox = QtWidgets.QMessageBox(self)
+        messageBox.setText(message)
+        messageBox.setWindowFlag(QtCore.Qt.FramelessWindowHint,True)
+        for button in messageBox.findChildren(QtWidgets.QDialogButtonBox):
+            button.setVisible(False)
+
+        messageBox.update()
+
+        globalRect = QtCore.QRect(self.mapToGlobal(self.rect().topLeft()), self.rect().size())
+        wrapper = partial(center, messageBox, globalRect)
+        QtCore.QTimer.singleShot(0, wrapper)
+
+        timer = QtCore.QTimer()
+        timer.setSingleShot(True)
+        timer.timeout.connect(messageBox.close)
+        timer.start(1500)
+
+        messageBox.exec()
+
 
     def startDrag(self):
         self.drag = QtGui.QDrag(self)
@@ -862,6 +1073,15 @@ class CcpnModuleLabel(DockLabel):
             contextMenu.addAction('Close Others', partial(self.module.mainWindow.moduleArea._closeOthers, self.module))
             contextMenu.addAction('Close All', self.module.mainWindow.moduleArea._closeAll)
 
+        numDocks = len(self.module.getDocksInParentArea())
+
+        if not self.module.maximised and  numDocks> 1:
+            contextMenu.addAction('Maximise', self.module.toggleMaximised)
+        elif self.module.maximised:
+            contextMenu.addAction('Restore', self.module.toggleMaximised)
+
+        contextMenu.addAction('Float', self.module.float)
+
         return contextMenu
 
     def _modulesMenu(self, menuName, module):
@@ -938,7 +1158,8 @@ class CcpnModuleLabel(DockLabel):
         QtCore.QTimer.singleShot(QtWidgets.QApplication.instance().doubleClickInterval() * 2,
                                  self._resetDoubleClick)
 
-        super(CcpnModuleLabel, self).mouseDoubleClickEvent(ev)
+        if ev.button() == QtCore.Qt.LeftButton:
+            self.dock.toggleMaximised()
 
     def _resetDoubleClick(self):
         """reset the double click flag

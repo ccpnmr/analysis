@@ -125,6 +125,20 @@ class CcpnModuleArea(ModuleArea, DropBase):
                 if isinstance(i, Container):
                     self._container = i
 
+    def moveDock(self, module, position, neighbor, initTime=False):
+        """
+        Move an existing Dock to a new location.
+        """
+
+        if not initTime:
+            previousArea =  module.getDockArea()
+            if previousArea != self:
+                if module.maximised:
+                    module.toggleMaximised()
+
+        super().moveDock(module,position,neighbor)
+
+
     def dropEvent(self, event, *args):
         data = self.parseEvent(event)
         source = event.source()
@@ -151,7 +165,29 @@ class CcpnModuleArea(ModuleArea, DropBase):
 
         event.accept()
 
+    def findMaximisedDock(self, event):
+        result = None
+        maximisedWidget = [widget for widget in self.findChildren(QtGui.QWidget) if hasattr(widget, 'maximised') and widget.maximised==True]
+        if len(maximisedWidget) > 0:
+            result = maximisedWidget[0]
+        return result
+
     def dragEnterEvent(self, *args):
+        event = args[0]
+        maximisedModule = self.findMaximisedDock(event)
+        if maximisedModule is not None:
+            source = event.source()
+            sourceParentModule = None
+            try:
+                sourceParentModule = source._findModule()
+            except:
+                pass
+
+            if sourceParentModule is not maximisedModule:
+                maximisedModule.handleDragToMaximisedModule(event)
+
+            return
+
         event = args[0]
         data = self.parseEvent(event)
 
@@ -167,10 +203,21 @@ class CcpnModuleArea(ModuleArea, DropBase):
 
     def dragLeaveEvent(self, *args):
         event = args[0]
+
+        maximisedWidget = self.findMaximisedDock(event)
+        if maximisedWidget is not None:
+            maximisedWidget.finishDragToMaximisedModule(event)
+
         DockArea.dragLeaveEvent(self, *args)
         event.accept()
 
     def dragMoveEvent(self, *args):
+        event = args[0]
+        maximisedWidget = self.findMaximisedDock(event)
+        if maximisedWidget is not None:
+            maximisedWidget.handleDragToMaximisedModule(event)
+            return
+
         event = args[0]
         DockArea.dragMoveEvent(self, *args)
         event.accept()
@@ -245,6 +292,14 @@ class CcpnModuleArea(ModuleArea, DropBase):
         """With these settings the user can close all the modules from the label 'close module' or pop up and
          when re-add a new module it makes sure there is a container available.
         """
+        wasMaximised = False
+
+        for oldModule in self.modules.values():
+            if oldModule.maximised:
+                oldModule.toggleMaximised()
+                wasMaximised=True
+
+
         self._updateModuleNames()
 
         if not module._restored:
@@ -337,7 +392,9 @@ class CcpnModuleArea(ModuleArea, DropBase):
         if self.mainWindow is not None:
             self.mainWindow.application.ccpnModules = self.ccpnModules
 
-        # module.label.sigDragEntered.connect(self._dragEntered)
+        #module.label.sigDragEntered.connect(self._dragEntered)
+        if wasMaximised:
+            module.toggleMaximised()
         return module
 
     def getContainer(self, obj):
@@ -485,7 +542,7 @@ class CcpnModuleArea(ModuleArea, DropBase):
 
             ## 4) Add any remaining docks to the bottom
             for d in docks.values():
-                self.moveDock(d, 'below', None)
+                self.moveDock(d, 'below', None, initTime=True)
 
             ## 5) kill old containers
             # if is not none  delete

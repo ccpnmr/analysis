@@ -60,7 +60,7 @@ from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs import GLFILENAME, GLGRIDLINES, GLAXI
     GLINTEGRALLABELS, GLINTEGRALSYMBOLS, GLMARKLABELS, GLMARKLINES, GLMULTIPLETLABELS, GLREGIONS, \
     GLMULTIPLETSYMBOLS, GLOTHERLINES, GLPEAKLABELS, GLPEAKSYMBOLS, GLPRINTTYPE, GLSELECTEDPIDS, \
     GLSPECTRUMBORDERS, GLSPECTRUMCONTOURS, GLSPECTRUMLABELS, \
-    GLSTRIP, GLSTRIPLABELLING, GLTRACES, GLLIVETRACES, GLWIDGET, GLPLOTBORDER, \
+    GLSTRIP, GLSTRIPLABELLING, GLTRACES, GLACTIVETRACES, GLWIDGET, GLPLOTBORDER, \
     GLPAGETYPE, GLSPECTRUMDISPLAY, GLAXISLINES, GLBACKGROUND, GLBASETHICKNESS, GLSYMBOLTHICKNESS, \
     GLCONTOURTHICKNESS, GLFOREGROUND, GLSHOWSPECTRAONPHASE, \
     GLAXISTITLES, GLAXISUNITS, GLAXISMARKSINSIDE, GLSTRIPDIRECTION, GLSTRIPPADDING, \
@@ -316,17 +316,15 @@ class GLExporter():
         # read the strip spacing form the params
         self.stripSpacing = self.params[GLSTRIPPADDING] * self.displayScale
 
-    def _buildStrip(self):
-        # create an object that can be added to a report
-        self._mainPlot = Drawing(self.pixWidth, self.pixHeight)
-
+    def _addBackgroundBox(self, thisPlot):
+        """Make a background box to cover the plot area
+        """
         gr = Group()
         # paint a background box
         ll = [0.0, 0.0,
               0.0, self.pixHeight,
               self.pixWidth, self.pixHeight,
               self.pixWidth, 0.0]
-
         if ll:
             pl = Path(fillColor=self.backgroundColour, stroke=None, strokeColor=None)
             pl.moveTo(ll[0], ll[1])
@@ -335,27 +333,68 @@ class GLExporter():
             pl.closePath()
             gr.add(pl)
 
-        # frame the top-left of the main plot area
+        # add to the drawing object
+        thisPlot.add(gr, name='mainPlotBox')
+
+        # gr = Group()
+        # # paint a background box
+        # ll = [0.0, 0.0,
+        #       0.0, self.pixHeight,
+        #       self.pixWidth, self.pixHeight,
+        #       self.pixWidth, 0.0]
+        # if ll:
+        #     pl = Path(fillColor=self.backgroundColour, stroke=None, strokeColor=None)
+        #     pl.moveTo(ll[0], ll[1])
+        #     for vv in range(2, len(ll), 2):
+        #         pl.lineTo(ll[vv], ll[vv + 1])
+        #     pl.closePath()
+        #     gr.add(pl)
+
+        # # frame the top-left of the main plot area
+        # ll = [self.displayScale * self.mainView.left, self.displayScale * self.mainView.bottom,
+        #       self.displayScale * self.mainView.left, self.pixHeight,
+        #       self.displayScale * self.mainView.width, self.pixHeight]
+        # # ll = [self.displayScale * self.mainL, self.displayScale * self.mainB,
+        # #       self.displayScale * self.mainL, self.pixHeight,
+        # #       self.displayScale * self.mainW, self.pixHeight]
+        #
+        # if ll and self.params[GLPLOTBORDER]:
+        #     pl = Path(strokeColor=self.foregroundColour, strokeWidth=0.5)
+        #     pl.moveTo(ll[0], ll[1])
+        #     for vv in range(2, len(ll), 2):
+        #         pl.lineTo(ll[vv], ll[vv + 1])
+        #     gr.add(pl)
+        # # add to the drawing object
+        # self._mainPlot.add(gr, name='mainPlotBox')
+
+    def _addPlotBorders(self, thisPlot):
+        """Add requires borders to the plot area
+        """
+        # frame the top-left of the main plot area - after other plotting
+        gr = Group()
         ll = [self.displayScale * self.mainView.left, self.displayScale * self.mainView.bottom,
               self.displayScale * self.mainView.left, self.pixHeight,
-              self.displayScale * self.mainView.width, self.pixHeight]
-        # ll = [self.displayScale * self.mainL, self.displayScale * self.mainB,
-        #       self.displayScale * self.mainL, self.pixHeight,
-        #       self.displayScale * self.mainW, self.pixHeight]
+              self.displayScale * self.mainView.width, self.pixHeight,]
+              # self.displayScale * self.mainView.width, self.displayScale * self.mainView.bottom,
+              # self.displayScale * self.mainView.left, self.displayScale * self.mainView.bottom]
 
         if ll and self.params[GLPLOTBORDER]:
-            pl = Path(strokeColor=self.foregroundColour, strokeWidth=0.5)
+            pl = Path(fillColor=None, strokeColor=self.foregroundColour if self.params[GLPLOTBORDER] else self.backgroundColour, strokeWidth=0.5)
             pl.moveTo(ll[0], ll[1])
             for vv in range(2, len(ll), 2):
                 pl.lineTo(ll[vv], ll[vv + 1])
             gr.add(pl)
+        thisPlot.add(gr, name='mainPlotBox')
 
-        # add to the drawing object
-        self._mainPlot.add(gr, name='mainPlotBox')
+    def _buildStrip(self):
+        # create an object that can be added to a report
+        self._mainPlot = Drawing(self.pixWidth, self.pixHeight)
+        self._addBackgroundBox(self._mainPlot)
 
+        # get the list of required spectra
         self._ordering = self.strip.spectrumDisplay.orderedSpectrumViews(self.strip.spectrumViews)
 
-        # print the objects
+        # print the grid objects
         if self.params[GLGRIDLINES]: self._addGridLines()
         if self.params[GLDIAGONALLINE]: self._addDiagonalLine()
 
@@ -384,30 +423,17 @@ class GLExporter():
             if self.params[GLSPECTRUMLABELS]: self._addSpectrumLabels()
 
         if self.params[GLTRACES]: self._addTraces()
-        if self.params[GLLIVETRACES]: self._addLiveTraces()
+        if self.params[GLACTIVETRACES]: self._addLiveTraces()
 
         if not self._parent._stackingMode:
             if self.params[GLOTHERLINES]: self._addInfiniteLines()
         if self.params[GLSTRIPLABELLING]: self._addOverlayText()
 
         # frame the top-left of the main plot area - after other plotting
-        gr = Group()
-        ll = [self.displayScale * self.mainView.left, self.displayScale * self.mainView.bottom,
-              self.displayScale * self.mainView.left, self.pixHeight,
-              self.displayScale * self.mainView.width, self.pixHeight,
-              self.displayScale * self.mainView.width, self.displayScale * self.mainView.bottom,
-              self.displayScale * self.mainView.left, self.displayScale * self.mainView.bottom]
-
-        if ll:      # and self.params[GLPLOTBORDER]:
-            pl = Path(fillColor=None, strokeColor=self.foregroundColour if self.params[GLPLOTBORDER] else self.backgroundColour, strokeWidth=0.5)
-            pl.moveTo(ll[0], ll[1])
-            for vv in range(2, len(ll), 2):
-                pl.lineTo(ll[vv], ll[vv + 1])
-            gr.add(pl)
-        self._mainPlot.add(gr, name='mainPlotBox')
+        self._addPlotBorders(self._mainPlot)
 
         # add the axis labels which requires a mask to clean the edges
-        self._addAxisMask()
+        # self._addAxisMask()
         self._addGridTickMarks()
         if self.params[GLCURSORS]: self._addCursors()
 
@@ -572,18 +598,21 @@ class GLExporter():
 
                 # generate the bounding box
                 newLine = [fx0, fy0, fx0, fy1, fx1, fy1, fx1, fy0, fx0, fy0]
-                newLine = self._parent.lineVisible(newLine,
-                                                   x=self.displayScale * self.mainView.left,
-                                                   y=self.displayScale * self.mainView.bottom,
-                                                   width=self.displayScale * self.mainView.width,
-                                                   height=self.displayScale * self.mainView.height)
-                if newLine:
-                    if colourPath not in colourGroups:
-                        colourGroups[colourPath] = {PDFLINES        : [],
-                                                    PDFSTROKEWIDTH  : 0.5 * self.baseThickness,
-                                                    PDFSTROKECOLOR  : colour,
-                                                    PDFSTROKELINECAP: 1, PDFCLOSEPATH: False}
-                    colourGroups[colourPath][PDFLINES].append(newLine)
+                for ii in range(0, len(newLine)-2, 2):
+                    thisLine = newLine[ii:ii+4]
+
+                    thisLine = self._parent.lineVisible(thisLine,
+                                                       x=self.displayScale * self.mainView.left,
+                                                       y=self.displayScale * self.mainView.bottom,
+                                                       width=self.displayScale * self.mainView.width,
+                                                       height=self.displayScale * self.mainView.height)
+                    if thisLine:
+                        if colourPath not in colourGroups:
+                            colourGroups[colourPath] = {PDFLINES        : [],
+                                                        PDFSTROKEWIDTH  : 0.5 * self.baseThickness,
+                                                        PDFSTROKECOLOR  : colour,
+                                                        PDFSTROKELINECAP: 1, PDFCLOSEPATH: False}
+                        colourGroups[colourPath][PDFLINES].append(thisLine)
 
         self._appendGroup(drawing=self._mainPlot, colourGroups=colourGroups, name='boundaries')
 
@@ -1533,10 +1562,14 @@ class GLExporter():
                 if len(ll) == 4:
                     pl.moveTo(ll[0], ll[1])
                     pl.lineTo(ll[2], ll[3])
-                else:
+                elif len(ll) > 4:
                     pl.moveTo(ll[0], ll[1])
                     for vv in range(2, len(ll), 2):
-                        pl.lineTo(ll[vv], ll[vv + 1])
+                        try:
+                            pl.lineTo(ll[vv], ll[vv + 1])
+                        except Exception as es:
+                            pass
+
                     if PDFCLOSEPATH not in colourItem or (PDFCLOSEPATH in colourItem and colourItem[PDFCLOSEPATH] == True):
                         pl.closePath()
             gr.add(pl)

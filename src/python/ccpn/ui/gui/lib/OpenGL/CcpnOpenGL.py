@@ -1113,10 +1113,11 @@ class CcpnGLWidget(QOpenGLWidget):
         event.accept()
 
     def _scaleToXAxis(self, rescale=True):
-        if (self._useLockedAspect or self._useDefaultAspect):
+        _useFirstDefault = getattr(self.strip.spectrumDisplay, '_useFirstDefault', False)
+        if (self._useLockedAspect or self._useDefaultAspect or _useFirstDefault):
             mby = 0.5 * (self.axisT + self.axisB)
 
-            if self._useDefaultAspect:
+            if self._useDefaultAspect or _useFirstDefault:
                 ax0 = self._getValidAspectRatio(self._axisCodes[0])
                 ax1 = self._getValidAspectRatio(self._axisCodes[1])
             else:
@@ -1134,10 +1135,11 @@ class CcpnGLWidget(QOpenGLWidget):
             self._rescaleAllAxes()
 
     def _scaleToYAxis(self, rescale=True):
-        if (self._useLockedAspect or self._useDefaultAspect):
+        _useFirstDefault = getattr(self.strip.spectrumDisplay, '_useFirstDefault', False)
+        if (self._useLockedAspect or self._useDefaultAspect or _useFirstDefault):
             mbx = 0.5 * (self.axisR + self.axisL)
 
-            if self._useDefaultAspect:
+            if self._useDefaultAspect or _useFirstDefault:
                 ax0 = self._getValidAspectRatio(self._axisCodes[0])
                 ax1 = self._getValidAspectRatio(self._axisCodes[1])
             else:
@@ -1257,7 +1259,8 @@ class CcpnGLWidget(QOpenGLWidget):
     def _rescaleAllZoom(self, rescale=True):
         """Reset the zoomto fit the spectra, including aspect checking
         """
-        if (self._useLockedAspect or self._useDefaultAspect):
+        _useFirstDefault = getattr(self.strip.spectrumDisplay, '_useFirstDefault', False)
+        if (self._useLockedAspect or self._useDefaultAspect or _useFirstDefault):
 
             # check which is the primary axis and update the opposite axis - similar to wheelEvent
             if self.spectrumDisplay.stripArrangement == 'Y':
@@ -2485,6 +2488,9 @@ class CcpnGLWidget(QOpenGLWidget):
 
         if abs(self.axisL - self.axisR) < 1.0e-6 or abs(self.axisT - self.axisB) < 1.0e-6:
             return
+
+        # reset on the first mouseMove - frees the locked/default axis
+        setattr(self.strip.spectrumDisplay, '_useFirstDefault', False)
 
         dx = event.pos().x() - self.lastPos.x()
         dy = event.pos().y() - self.lastPos.y()
@@ -6450,107 +6456,107 @@ class CcpnGLWidget(QOpenGLWidget):
     def exportToSVG(self, filename='default.svg', params=None):
         return GLExporter(self, self.strip, filename, params)
 
-    def cohenSutherlandClip(self, x0, y0, x1, y1):
-        """Implement Cohen-Sutherland clipping
-        :param x0, y0 - co-ordinates of first point:
-        :param x1, y1 - co-ordinates of second point:
-        :return None if not clipped else (xs, ys, xe, ye) - start, end of clipped line
-        """
-        INSIDE, LEFT, RIGHT, BOTTOM, TOP = 0, 1, 2, 4, 8
-
-        xMin = min([self.axisL, self.axisR])
-        xMax = max([self.axisL, self.axisR])
-        yMin = min([self.axisB, self.axisT])
-        yMax = max([self.axisB, self.axisT])
-
-        def computeCode(x, y):
-            """calculate region that point lies in
-            :param x, y - point:
-            :return code:
-            """
-            code = INSIDE
-            if x < xMin:  # to the left of rectangle
-                code |= LEFT
-            elif x > xMax:  # to the right of rectangle
-                code |= RIGHT
-            if y < yMin:  # below the rectangle
-                code |= BOTTOM
-            elif y > yMax:  # above the rectangle
-                code |= TOP
-            return code
-
-        code1 = computeCode(x0, y0)
-        code2 = computeCode(x1, y1)
-        accept = False
-
-        while not accept:
-
-            # If both endpoints lie within rectangle
-            if code1 == 0 and code2 == 0:
-                accept = True
-
-            # If both endpoints are outside rectangle
-            elif (code1 & code2) != 0:
-                return None
-
-            # Some segment lies within the rectangle
-            else:
-
-                # Line Needs clipping
-                # At least one of the points is outside,
-                # select it
-                x = 1.0
-                y = 1.0
-                if code1 != 0:
-                    code_out = code1
-                else:
-                    code_out = code2
-
-                # Find intersection point
-                # using formulas y = y0 + slope * (x - x0),
-                # x = x0 + (1 / slope) * (y - y0)
-                if code_out & TOP:
-
-                    # point is above the clip rectangle
-                    x = x0 + (x1 - x0) * \
-                        (yMax - y0) / (y1 - y0)
-                    y = yMax
-
-                elif code_out & BOTTOM:
-
-                    # point is below the clip rectangle
-                    x = x0 + (x1 - x0) * \
-                        (yMin - y0) / (y1 - y0)
-                    y = yMin
-
-                elif code_out & RIGHT:
-
-                    # point is to the right of the clip rectangle
-                    y = y0 + (y1 - y0) * \
-                        (xMax - x0) / (x1 - x0)
-                    x = xMax
-
-                elif code_out & LEFT:
-
-                    # point is to the left of the clip rectangle
-                    y = y0 + (y1 - y0) * \
-                        (xMin - x0) / (x1 - x0)
-                    x = xMin
-
-                # Now intersection point x,y is found
-                # We replace point outside clipping rectangle
-                # by intersection point
-                if code_out == code1:
-                    x0 = x
-                    y0 = y
-                    code1 = computeCode(x0, y0)
-
-                else:
-                    x1 = x
-                    y1 = y
-                    code2 = computeCode(x1, y1)
-
-        return [x0, y0, x1, y1]
+    # def cohenSutherlandClip(self, x0, y0, x1, y1):
+    #     """Implement Cohen-Sutherland clipping
+    #     :param x0, y0 - co-ordinates of first point:
+    #     :param x1, y1 - co-ordinates of second point:
+    #     :return None if not clipped else (xs, ys, xe, ye) - start, end of clipped line
+    #     """
+    #     INSIDE, LEFT, RIGHT, BOTTOM, TOP = 0, 1, 2, 4, 8
+    #
+    #     xMin = min([self.axisL, self.axisR])
+    #     xMax = max([self.axisL, self.axisR])
+    #     yMin = min([self.axisB, self.axisT])
+    #     yMax = max([self.axisB, self.axisT])
+    #
+    #     def computeCode(x, y):
+    #         """calculate region that point lies in
+    #         :param x, y - point:
+    #         :return code:
+    #         """
+    #         code = INSIDE
+    #         if x < xMin:  # to the left of rectangle
+    #             code |= LEFT
+    #         elif x > xMax:  # to the right of rectangle
+    #             code |= RIGHT
+    #         if y < yMin:  # below the rectangle
+    #             code |= BOTTOM
+    #         elif y > yMax:  # above the rectangle
+    #             code |= TOP
+    #         return code
+    #
+    #     code1 = computeCode(x0, y0)
+    #     code2 = computeCode(x1, y1)
+    #     accept = False
+    #
+    #     while not accept:
+    #
+    #         # If both endpoints lie within rectangle
+    #         if code1 == 0 and code2 == 0:
+    #             accept = True
+    #
+    #         # If both endpoints are outside rectangle
+    #         elif (code1 & code2) != 0:
+    #             return None
+    #
+    #         # Some segment lies within the rectangle
+    #         else:
+    #
+    #             # Line Needs clipping
+    #             # At least one of the points is outside,
+    #             # select it
+    #             x = 1.0
+    #             y = 1.0
+    #             if code1 != 0:
+    #                 code_out = code1
+    #             else:
+    #                 code_out = code2
+    #
+    #             # Find intersection point
+    #             # using formulas y = y0 + slope * (x - x0),
+    #             # x = x0 + (1 / slope) * (y - y0)
+    #             if code_out & TOP:
+    #
+    #                 # point is above the clip rectangle
+    #                 x = x0 + (x1 - x0) * \
+    #                     (yMax - y0) / (y1 - y0)
+    #                 y = yMax
+    #
+    #             elif code_out & BOTTOM:
+    #
+    #                 # point is below the clip rectangle
+    #                 x = x0 + (x1 - x0) * \
+    #                     (yMin - y0) / (y1 - y0)
+    #                 y = yMin
+    #
+    #             elif code_out & RIGHT:
+    #
+    #                 # point is to the right of the clip rectangle
+    #                 y = y0 + (y1 - y0) * \
+    #                     (xMax - x0) / (x1 - x0)
+    #                 x = xMax
+    #
+    #             elif code_out & LEFT:
+    #
+    #                 # point is to the left of the clip rectangle
+    #                 y = y0 + (y1 - y0) * \
+    #                     (xMin - x0) / (x1 - x0)
+    #                 x = xMin
+    #
+    #             # Now intersection point x,y is found
+    #             # We replace point outside clipping rectangle
+    #             # by intersection point
+    #             if code_out == code1:
+    #                 x0 = x
+    #                 y0 = y
+    #                 code1 = computeCode(x0, y0)
+    #
+    #             else:
+    #                 x1 = x
+    #                 y1 = y
+    #                 code2 = computeCode(x1, y1)
+    #
+    #     return [x0, y0, x1, y1]
 
     def pointVisible(self, lineList, x=0.0, y=0.0, width=0.0, height=0.0):
         """return true if the line has visible endpoints
@@ -6564,6 +6570,8 @@ class CcpnGLWidget(QOpenGLWidget):
     def lineVisible(self, lineList, x=0.0, y=0.0, width=0.0, height=0.0, checkIntegral=False):
         """return the list of visible lines
         """
+        # make into a listof tuples
+        newList = []
         newLine = [[lineList[ll], lineList[ll + 1]] for ll in range(0, len(lineList), 2)]
         if len(newLine) > 2:
             newList = self.clipPoly(newLine)
@@ -6571,9 +6579,9 @@ class CcpnGLWidget(QOpenGLWidget):
             newList = self.clipLine(newLine)
 
         try:
-            for pp in range(0, len(newList), 2):
-                newList[pp] = x + width * (newList[pp] - self.axisL) / (self.axisR - self.axisL)
-                newList[pp + 1] = y + height * (newList[pp + 1] - self.axisB) / (self.axisT - self.axisB)
+            if newList:
+                newList = [pp for outPoint in newList for pp in (x + width * (outPoint[0] - self.axisL) / (self.axisR - self.axisL),
+                            y + height * (outPoint[1] - self.axisB) / (self.axisT - self.axisB))]
         except Exception as es:
             pass
 
@@ -6596,13 +6604,18 @@ class CcpnGLWidget(QOpenGLWidget):
         def inside(p):
             return (cp2[0] - cp1[0]) * (p[1] - cp1[1]) > (cp2[1] - cp1[1]) * (p[0] - cp1[0])
 
-        def computeIntersection():
-            dc = [cp1[0] - cp2[0], cp1[1] - cp2[1]]
-            dp = [s[0] - e[0], s[1] - e[1]]
-            n1 = cp1[0] * cp2[1] - cp1[1] * cp2[0]
-            n2 = s[0] * e[1] - s[1] * e[0]
-            n3 = 1.0 / (dc[0] * dp[1] - dc[1] * dp[0])
-            return [(n1 * dp[0] - n2 * dc[0]) * n3, (n1 * dp[1] - n2 * dc[1]) * n3]
+        def get_intersect():
+            """Returns the point of intersection of the lines passing through a2,a1 and b2,b1.
+            """
+            pp = np.vstack([s, e, cp1, cp2])  # s for stacked
+
+            h = np.hstack((pp, np.ones((4, 1))))    # h for homogeneous
+            l1 = np.cross(h[0], h[1])               # get first line
+            l2 = np.cross(h[2], h[3])               # get second line
+            x, y, z = np.cross(l1, l2)              # point of intersection
+            if z == 0:                              # lines are parallel
+                return (float('inf'), float('inf'))
+            return (x / z, y / z)
 
         outputList = subjectPolygon
         cLen = len(clipPolygon)
@@ -6618,21 +6631,20 @@ class CcpnGLWidget(QOpenGLWidget):
             ilLen = len(inputList)
             s = inputList[ilLen - 1]
 
-            for subjectVertex in inputList:
-                e = subjectVertex
+            for e in inputList:
                 if inside(e):
                     if not inside(s):
-                        outputList.append(computeIntersection())
+                        outputList.append(get_intersect())
                     outputList.append(e)
                 elif inside(s):
-                    outputList.append(computeIntersection())
+                    outputList.append(get_intersect())
                 s = e
             cp1 = cp2
-        return [pp for ol in outputList for pp in ol]
+        return outputList
 
     def clipLine(self, subjectPolygon):
-        """Apply Sutherland-Hodgman algorithm for clipping polygons"""
-
+        """Apply Sutherland-Hodgman algorithm for clipping polygons
+        """
         if self.INVERTXAXIS != self.INVERTYAXIS:
             clipPolygon = [[self.axisL, self.axisB],
                            [self.axisL, self.axisT],
@@ -6647,13 +6659,18 @@ class CcpnGLWidget(QOpenGLWidget):
         def inside(p):
             return (cp2[0] - cp1[0]) * (p[1] - cp1[1]) > (cp2[1] - cp1[1]) * (p[0] - cp1[0])
 
-        def computeIntersection():
-            dc = [cp1[0] - cp2[0], cp1[1] - cp2[1]]
-            dp = [s[0] - e[0], s[1] - e[1]]
-            n1 = cp1[0] * cp2[1] - cp1[1] * cp2[0]
-            n2 = s[0] * e[1] - s[1] * e[0]
-            n3 = 1.0 / (dc[0] * dp[1] - dc[1] * dp[0])
-            return [(n1 * dp[0] - n2 * dc[0]) * n3, (n1 * dp[1] - n2 * dc[1]) * n3]
+        def get_intersect():
+            """Returns the point of intersection of the lines passing through a2,a1 and b2,b1.
+            """
+            pp = np.vstack([s, e, cp1, cp2])  # s for stacked
+
+            h = np.hstack((pp, np.ones((4, 1))))    # h for homogeneous
+            l1 = np.cross(h[0], h[1])               # get first line
+            l2 = np.cross(h[2], h[3])               # get second line
+            x, y, z = np.cross(l1, l2)              # point of intersection
+            if z == 0:                              # lines are parallel
+                return (float('inf'), float('inf'))
+            return (x / z, y / z)
 
         outputList = subjectPolygon
         cLen = len(clipPolygon)
@@ -6668,18 +6685,17 @@ class CcpnGLWidget(QOpenGLWidget):
 
             ilLen = len(inputList)
             s = inputList[ilLen - 1]
-            e = inputList[0]
-            if inside(e):
-                outputList.append(e)
-                if inside(s):
-                    outputList.append(s)
-                else:
-                    outputList.append(computeIntersection())
-            elif inside(s):
-                outputList.append(s)
-                outputList.append(computeIntersection())
+
+            for e in inputList:
+                if inside(e):
+                    if not inside(s):
+                        outputList.append(get_intersect())
+                    outputList.append(e)
+                elif inside(s):
+                    outputList.append(get_intersect())
+                s = e
             cp1 = cp2
-        return [pp for ol in outputList for pp in ol]
+        return outputList
 
     def lineFit(self, lineList, x=0.0, y=0.0, width=0.0, height=0.0, checkIntegral=False):
         for pp in range(0, len(lineList), 2):

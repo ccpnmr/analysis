@@ -617,6 +617,8 @@ def _createSpectrumDisplay(window: Window, spectrum: Spectrum, displayAxisCodes:
                 apiAxis.position = position
                 apiAxis.width = width
 
+        display._useFirstDefault = True
+
     # Make spectrumView. NB We need notifiers on for these
     stripSerial = 1 if independentStrips else 0
     display._wrappedData.newSpectrumView(spectrumName=dataSource.name,

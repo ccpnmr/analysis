@@ -1952,8 +1952,9 @@ class GuiStrip(Frame):
 
     @property
     def visibleSpectra(self):
-        "List of spectra currently visible in the strip. The order might not be as the toolBar"
-        return [sv.spectrum for sv in self.spectrumViews if sv.isVisible()]
+        """List of spectra currently visible in the strip. Ordered as in the spectrumDisplay
+        """
+        return [sv.spectrum for sv in self.spectrumDisplay.orderedSpectrumViews(self.spectrumViews) if sv.isVisible()]
 
     def _invertSelectedSpectra(self):
 

@@ -34,7 +34,7 @@ from ccpn.core.lib.ContextManagers import undoBlock
 
 
 class CopyPeakListPopup(CcpnDialogMainWidget):
-    def __init__(self, parent=None, mainWindow=None, title='Copy PeakList', **kwds):
+    def __init__(self, parent=None, mainWindow=None, title='Copy PeakList', spectrumDisplay=None, **kwds):
         super().__init__(parent, setLayout=True, windowTitle=title, **kwds)
 
         if mainWindow:
@@ -46,6 +46,7 @@ class CopyPeakListPopup(CcpnDialogMainWidget):
             self.application = None
             self.project = None
 
+        self.spectrumDisplay = spectrumDisplay
         self.setWidgets()
         self._populate()
 
@@ -85,6 +86,8 @@ class CopyPeakListPopup(CcpnDialogMainWidget):
                     raise es
 
     def _populateSourcePeakListPullDown(self):
+        """Populate the pulldown with the list of spectra in the project
+        """
         sourcePullDownData = []
         if len(self.project.peakLists) > 0:
             for pl in self.project.peakLists:
@@ -93,12 +96,21 @@ class CopyPeakListPopup(CcpnDialogMainWidget):
         self._selectDefaultPeakList()
 
     def _populateTargetSpectraPullDown(self):
-        targetPullDownData = []
-        if len(self.project.spectra) > 0:
-            for sp in self.project.spectra:
-                targetPullDownData.append(str(sp.pid))
-        self.targetSpectraPullDown.setData(targetPullDownData)
-        self._selectDefaultSpectrum()
+        """Populate the pulldown with the list of spectra on the selected spectrumDisplay and select the
+        first visible spectrum
+        """
+        if self.spectrumDisplay and self.spectrumDisplay.strips:
+            orderedSpectra = [sv.spectrum for sv in self.spectrumDisplay.orderedSpectrumViews(self.spectrumDisplay.strips[0].spectrumViews)]
+            visibleSpectra = self.spectrumDisplay.strips[0].visibleSpectra
+        else:
+            visibleSpectra = orderedSpectra = self.project.spectra
+
+        if orderedSpectra:
+            targetPullDownData = [str(sp.pid) for sp in orderedSpectra]
+            self.targetSpectraPullDown.setData(targetPullDownData)
+
+            if visibleSpectra:
+                self.targetSpectraPullDown.select(visibleSpectra[0].pid)
 
     def _selectDefaultPeakList(self):
         if self.application.current.peak is not None:
@@ -115,18 +127,6 @@ class CopyPeakListPopup(CcpnDialogMainWidget):
             defaultPeakList = self.project.spectra[0].peakLists[-1]
             self.sourcePeakListPullDown.select(defaultPeakList.pid)
             # print('Selected defaultPeakList: "self.project.spectra[0].peakLists[-1]" ', defaultPeakList) #Testing statement to be deleted
-            return
-
-    def _selectDefaultSpectrum(self):
-        if self.application.current.strip is not None:
-            defaultSpectrum = self.application.current.strip.spectra[-1]
-            self.targetSpectraPullDown.select(defaultSpectrum.pid)
-            # print('Selected defaultSpectrum: "current.strip.spectra[-1]" ', defaultSpectrum) #Testing statement to be deleted
-            return
-        else:
-            defaultSpectrum = self.project.spectra[-1]
-            self.targetSpectraPullDown.select(defaultSpectrum.pid)
-            # print('Selected defaultSpectrum: "self.project.spectra[-1]" ', defaultSpectrum) #Testing statement to be deleted
             return
 
 

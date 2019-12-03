@@ -1376,6 +1376,9 @@ class ChemicalShiftsMapping(CcpnModule):
     return False
 
   def _setupConcentrationsPopup(self):
+
+    # TODO:ED Change this to a mainWidget popup and add revert buttons..
+
     popup = CcpnDialog(windowTitle='Setup Concentrations', setLayout=True, size=(1000, 500))
 
     spectra = self.spectraSelectionWidget.getSelections()

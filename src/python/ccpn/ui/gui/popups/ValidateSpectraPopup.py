@@ -667,9 +667,9 @@ class ValidateSpectraFrameABC(Frame):
     def filePathFunc(self, spectrum, filePath):
         """Set the new filePath for the spectrum
         """
-        # print('>>>filePathFunc - set filePath')
-        spectrum.filePath = filePath
-        self._validateDataUrls()
+        if filePath:
+            spectrum.filePath = filePath
+            self._validateDataUrls()
 
     def _getSpectrumFile(self, spectrum):
         """Get the path from the widget and call the open dialog.

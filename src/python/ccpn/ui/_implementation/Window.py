@@ -193,19 +193,22 @@ class Window(AbstractWrapperObject):
                 if widget in cntrsDict:
                     _insertWidgets(widget, cntrsDict[widget])
 
-        _setContainerWidget(moduleArea.topContainer)
-        insertsDict[nodes[0]] = ('top', None)
-        _insertWidgets(moduleArea.topContainer, None)
-        return insertsDict
+        if moduleArea.topContainer:
+            _setContainerWidget(moduleArea.topContainer)
+            insertsDict[nodes[0]] = ('top', None)
+            _insertWidgets(moduleArea.topContainer, None)
+            return insertsDict
+
+        return {}
 
     def _restoreModules(self, moduleList):
         """Recover modules to their original positions
         """
         # NOTE:ED currently recovers all modules, not just spectrumDisplays
-        # needs to handel different moduleAreas
+        # needs to handle different moduleAreas
         for mods, (pos, rel) in moduleList.items():
 
-            # may need to have a dock.float() in here somewhere if from deleted a moduleArea
+            # may need to have a dock.float() in here somewhere if from a deleted moduleArea
             self.moduleArea.moveDock(mods, pos, rel)
             # recover sizes?
 

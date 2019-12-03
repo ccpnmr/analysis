@@ -40,7 +40,7 @@ from ccpn.util import Phasing
 class GuiSpectrumView1d(GuiSpectrumView):
 
     hPhaseTrace = None
-    buildContours = True  # trigger the first build
+    buildContours = True
     buildContoursOnly = False
 
     #def __init__(self, guiSpectrumDisplay, apiSpectrumView, dimMapping=None):
@@ -68,33 +68,11 @@ class GuiSpectrumView1d(GuiSpectrumView):
             else:
                 self.spectrum.sliceColour = list(spectrumColours.keys())[(len(self.strip.spectrumViews) % 12) - 1]
 
-        # have to add in two steps because simple plot() command draws all other data even if currently not visible
-        ##self.plot = self.strip.plotWidget.plot(self.data[0], self.data[1], pen=self.spectrum.sliceColour)
-        # self.plot = pg.PlotDataItem(x=self.data[0], y=self.data[1], pen=self.spectrum.sliceColour)
-        # self.plot.setObjectName(self.spectrum.pid)
-        # self.strip.viewBox.addItem(self.plot)
-
-        # self.plot.curve.setClickable(True)
-        # self.plot.sigClicked.connect(self._clicked)
-        # below causes a problem because wrapper not ready yet at this point
-        #for peakList in self.spectrum.peakLists:
-        #  self.strip.showPeaks(peakList)
-
         self.hPhaseTrace = None
-        self.buildContours = True  # trigger the first build
+        self.buildContours = True
         self.buildContoursOnly = False
-        # self.buildSymbols = True
-        # self.buildLabels = True
-        # self.buildSymbols = True
-        # self.buildLabels = True
-        # self.buildSymbols = True
-        # self.buildLabels = True
-
-        # self.strip.viewBox.autoRange()
-        # self.strip.zoomYAll()
 
     def _getValues(self, dimensionCount = None):
-        # ejb - get some spectrum information for scaling the display
         return [self._getSpectrumViewParams(0)]
 
     def _turnOnPhasing(self):
@@ -115,17 +93,15 @@ class GuiSpectrumView1d(GuiSpectrumView):
         """
         # CCPN INTERNAL - called in newPhasingTrace methods of GuiWindow and GuiStrip
         """
-        # print('>>>_newPhasingTrace')
         phasingFrame = self.strip.spectrumDisplay.phasingFrame
         if phasingFrame.isVisible() and not self.hPhaseTrace:
             if not self.strip.haveSetHPhasingPivot:
                 viewParams = self._getSpectrumViewParams(0)
-                # valuePerPoint, pointCount, minAliasedFrequency, maxAliasedFrequency, dataDim,
-                # minSpectrumFrequency, maxSpectrumFrequency = self._getSpectrumViewParams(0)
                 self.strip.hPhasingPivot.setPos(0.5 * (viewParams.minSpectrumFrequency +
                                                        viewParams.maxSpectrumFrequency))
                 self.strip.hPhasingPivot.setVisible(True)
                 self.strip.haveSetHPhasingPivot = True
+
             trace = pg.PlotDataItem()
             self.strip.plotWidget.addItem(trace)
             self.hPhaseTrace = trace
@@ -138,55 +114,18 @@ class GuiSpectrumView1d(GuiSpectrumView):
             self.strip.plotWidget.scene().removeItem(trace)
             self.hPhaseTrace = None
 
-    # def _updatePhasing(self):
-    #     # print('_updatePhasing 1D')
-    #     return
-    #
-    #     if not self.isVisible():
-    #         return
-    #
-    #     trace = self.hPhaseTrace
-    #     if not trace:
-    #         return
-    #
-    #     position = [axis.position for axis in self.strip.orderedAxes]
-    #
-    #     phasingFrame = self.strip.spectrumDisplay.phasingFrame
-    #     phasingFrame.applyCallback = self._applyPhasing
-    #
-    #     phasingFrame.applyButton.setEnabled(True)
-    #
-    #     ph0 = phasingFrame.slider0.value() if phasingFrame.isVisible() else 0
-    #     ph1 = phasingFrame.slider1.value() if phasingFrame.isVisible() else 0
-    #
-    #     hPhasingPivot = self.strip.hPhasingPivot
-    #     if hPhasingPivot.isVisible():
-    #         xAxisIndex = self._displayOrderSpectrumDimensionIndices[0]
-    #         pivot = self.spectrum.mainSpectrumReferences[xAxisIndex].valueToPoint(hPhasingPivot.getXPos())
-    #         # dataDim = self._apiStripSpectrumView.spectrumView.orderedDataDims[0]
-    #         # pivot = dataDim.primaryDataDimRef.valueToPoint(hPhasingPivot.getXPos())
-    #     else:
-    #         pivot = 1
-    #
-    #     positionPoint = QtCore.QPointF(position[0], 0.0)
-    #     positionPixel = self.strip.viewBox.mapViewToScene(positionPoint)
-    #     positionPixel = (positionPixel.x(), positionPixel.y())
-    #     inRange, point, xDataDim, xMinFrequency, xMaxFrequency, xNumPoints, = self._getTraceParams(position)
-    #     if inRange:
-    #         self._updateHTraceData(point, xDataDim, xMinFrequency, xMaxFrequency, xNumPoints, positionPixel, trace, ph0, ph1, pivot)
-
     def _getTraceParams(self, position):
         # position is in ppm (intensity in y)
 
         inRange = True
         point = []
+        xDataDim = xMinFrequency = xMaxFrequency = xPointCount = None
+
         for n, pos in enumerate(position):  # n = 0 is x, n = 1 is y, etc.
             if n != 1:
 
                 try:
-                    # valuePerPoint, totalPointCount, minAliasedFrequency, maxAliasedFrequency, dataDim,
-                    # minSpectrumFrequency, maxSpectrumFrequency = self._getSpectrumViewParams(n)
-                    valuePerPoint, _, _, numPoints, _, _, dataDim, minSpectrumFrequency, maxSpectrumFrequency = self._getSpectrumViewParams(n)
+                    valuePerPoint, _, pointCount, _, _, dataDim, minSpectrumFrequency, maxSpectrumFrequency = self._getSpectrumViewParams(n)
                 except:
                     # skip if the dimension doesn't exist
                     break
@@ -197,78 +136,16 @@ class GuiSpectrumView1d(GuiSpectrumView):
                         # -1 below because points start at 1 in data model
                         xMinFrequency = int(dataDim.primaryDataDimRef.valueToPoint(maxSpectrumFrequency) - 1)
                         xMaxFrequency = int(dataDim.primaryDataDimRef.valueToPoint(minSpectrumFrequency) - 1)
-                        xNumPoints = numPoints
+                        xPointCount = pointCount
                     else:
                         inRange = (minSpectrumFrequency <= pos <= maxSpectrumFrequency)
                         if not inRange:
                             break
-                    pnt = (dataDim.primaryDataDimRef.valueToPoint(pos) - 1) % numPoints
+                    pnt = (dataDim.primaryDataDimRef.valueToPoint(pos) - 1) % pointCount
                     pnt += (dataDim.pointOffset if hasattr(dataDim, "pointOffset") else 0)
                     point.append(pnt)
 
-        return inRange, point, xDataDim, xMinFrequency, xMaxFrequency, xNumPoints
-
-    # def _updateHTraceData(self, point, xDataDim, xMinFrequency, xMaxFrequency, xNumPoints, positionPixel, hTrace, ph0=None, ph1=None, pivot=None):
-    #     return
-    #
-    #     # unfortunately it looks like we have to work in pixels, not ppm, yuck
-    #     strip = self.strip
-    #     plotWidget = strip.plotWidget
-    #     plotItem = plotWidget.plotItem
-    #     viewBox = strip.viewBox
-    #     viewRegion = plotWidget.viewRange()
-    #
-    #     pointInt = [1 + int(pnt + 0.4999) for pnt in point]
-    #     data = self.spectrum.intensities
-    #     if ph0 is not None and ph1 is not None and pivot is not None:
-    #         data0 = np.array(data)
-    #         data = Phasing.phaseRealData(data, ph0, ph1, pivot)
-    #         data1 = np.array(data)
-    #     x = np.array([xDataDim.primaryDataDimRef.pointToValue(p + 1) for p in range(xMinFrequency, xMaxFrequency + 1)])
-    #     # scale from ppm to pixels
-    #     pixelViewBox0 = plotItem.getAxis('left').width()
-    #     pixelViewBox1 = pixelViewBox0 + viewBox.width()
-    #     region1, region0 = viewRegion[0]
-    #     x -= region0
-    #     x *= (pixelViewBox1 - pixelViewBox0) / (region1 - region0)
-    #     x += pixelViewBox0
-    #
-    #     pixelViewBox1 = plotItem.getAxis('bottom').height()
-    #     pixelViewBox0 = pixelViewBox1 + viewBox.height()
-    #
-    #     yintensity0, yintensity1 = viewRegion[1]
-    #     #v = positionPixel[1] - (pixelViewBox1-pixelViewBox0) * numpy.array([data[p % xNumPoints] for p in range(xMinFrequency, xMaxFrequency+1)])
-    #     v = pixelViewBox0 + (pixelViewBox1 - pixelViewBox0) * (
-    #                 np.array([data[p % xNumPoints] for p in range(xMinFrequency, xMaxFrequency + 1)]) - yintensity0) / (yintensity1 - yintensity0)
-    #
-    #     colour = '#e4e15b' if self._application.colourScheme == 'dark' else '#000000'
-    #     hTrace.setPen({'color': colour})
-    #     hTrace.setData(x, v)
-
-    #
-    # def _clicked(self):
-    #   print(self.plot.objectName())
-
-    # # TBD: should function below be removed???
-    # def getSliceData(self, spectrum=None):
-    #   """
-    #   Gets slice data for drawing 1d spectrum using specified spectrum.
-    #   """
-    #   if spectrum is None:
-    #     apiDataSource = self._apiDataSource
-    #   else:
-    #     apiDataSource = spectrum._apiDataSource
-    #   return apiDataSource.get1dSpectrumData()
-
-    # def _setBorderItemHidden(self, checked):
-    #     """
-    #     # CCPN INTERNAL - called by _toggleGeneralOptions method of PreferencesPopup.
-    #     """
-    #     pass
-    #     # self.borderItem.setVisible(self._application.preferences.general.showSpectrumBorder and self.isVisible())
-
-    # def update(self):
-    #     self.plot.curve.setData(self.data[0], self.data[1])
+        return inRange, point, xDataDim, xMinFrequency, xMaxFrequency, xPointCount
 
     def refreshData(self):
         # self.spectrum._intensities = None  # UGLY, but need to force data to be reloaded
@@ -280,10 +157,6 @@ class GuiSpectrumView1d(GuiSpectrumView):
 
         GLSignals = GLNotifier(parent=self)
         GLSignals.emitPaintEvent()
-        # self.update()
-
-    # def setSliceColour(self):
-    #     self.plot.curve.setPen(self.spectrum.sliceColour)
 
     def _buildGLContours(self, glList, firstShow=False):
         # build a glList for the spectrum
@@ -310,22 +183,5 @@ class GuiSpectrumView1d(GuiSpectrumView):
             pass
 
     def _paintContoursNoClip(self, plotHeight=0.0):
-
         # EJB not sure how to handle this
         pass
-
-        # # xTranslate, xScale, xTotalPointCount, xClipPoint0, xClipPoint1 = self._getTranslateScale(0)
-        # # yTranslate, yScale, yTotalPointCount, yClipPoint0, yClipPoint1 = self._getTranslateScale(1)
-        # #
-        # # GL.glPushMatrix()
-        # # # GL.glScale(1.0, -1.0, 1.0)
-        # # # GL.glTranslate(0.0, -plotHeight, 0.0)
-        # # GL.glTranslate(-xTranslate, -yTranslate, 0.0)
-        # # GL.glScale(xScale, yScale, 1.0)
-        # for (colour, levels, displayLists) in ((self.posColour, self.posLevels, self.posDisplayLists),
-        #                                        (self.negColour, self.negLevels, self.negDisplayLists)):
-        #   for n, level in enumerate(levels):
-        #     GL.glColor4f(*colour)
-        #     # TBD: scaling, translating, etc.
-        #     GL.glCallList(displayLists[n])
-        # # GL.glPopMatrix()

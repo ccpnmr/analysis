@@ -37,7 +37,6 @@ from typing import Optional, Tuple
 SpectrumViewParams = collections.namedtuple('SpectrumViewParams', ('valuePerPoint',
                                                                    'totalPointCount',
                                                                    'pointCount',
-                                                                   'numPoints',
                                                                    'minAliasedFrequency',
                                                                    'maxAliasedFrequency',
                                                                    'dataDim',
@@ -149,38 +148,47 @@ class GuiSpectrumView(QtWidgets.QGraphicsObject):
         # axis = self.strip.orderedAxes[axisDim]
         dataDim = self._apiStripSpectrumView.spectrumView.orderedDataDims[axisDim]
 
+
+        # map self.spectrum.axisCodes onto self.axisCodes
+
         if not dataDim:
             return
 
-        totalPointCount = (dataDim.numPointsOrig if hasattr(dataDim, 'numPointsOrig')
-                           else dataDim.numPoints)
-        pointCount = (dataDim.numPointsValid if hasattr(dataDim, 'numPointsValid')
-                      else dataDim.numPoints)
-        numPoints = dataDim.numPoints
+        # totalPointCount = (dataDim.numPointsOrig if hasattr(dataDim, 'numPointsOrig')
+        #                    else dataDim.numPoints)
+        # pointCount = (dataDim.numPointsValid if hasattr(dataDim, 'numPointsValid')
+        #               else dataDim.numPoints)
+        # numPoints = dataDim.numPoints
 
         for ii, dd in enumerate(dataDim.dataSource.sortedDataDims()):
             # Must be done this way as dataDim.dim may not be in order 1,2,3 (e.g. for projections)
             if dd is dataDim:
                 minAliasedFrequency, maxAliasedFrequency = (self.spectrum.aliasingLimits)[ii]
                 minSpectrumFrequency, maxSpectrumFrequency = (self.spectrum.spectrumLimits)[ii]
+                totalPointCount = (self.spectrum.totalPointCounts)[ii]
+                pointCount = (self.spectrum.pointCounts)[ii]
+                valuePerPoint = (self.spectrum.valuesPerPoint)[ii]
                 break
         else:
             minAliasedFrequency = maxAliasedFrequency = dataDim = None
             minSpectrumFrequency = maxSpectrumFrequency = None
-
-        if hasattr(dataDim, 'primaryDataDimRef'):
-            # FreqDataDim - get ppm valuePerPoint
-            ddr = dataDim.primaryDataDimRef
-            valuePerPoint = ddr and ddr.valuePerPoint
-        elif hasattr(dataDim, 'valuePerPoint'):
-            # FidDataDim - get time valuePerPoint
-            valuePerPoint = dataDim.valuePerPoint
-        else:
-            # Sampled DataDim - return None
+            totalPointCount = pointCount = None
             valuePerPoint = None
 
+
+        # if hasattr(dataDim, 'primaryDataDimRef'):
+        #     # FreqDataDim - get ppm valuePerPoint
+        #     ddr = dataDim.primaryDataDimRef
+        #     valuePerPoint = ddr and ddr.valuePerPoint
+        # elif hasattr(dataDim, 'valuePerPoint'):
+        #     # FidDataDim - get time valuePerPoint
+        #     valuePerPoint = dataDim.valuePerPoint
+        # else:
+        #     # Sampled DataDim - return None
+        #     valuePerPoint = None
+
         # return axis.position, axis.width, totalPointCount, minAliasedFrequency, maxAliasedFrequency, dataDim
-        return SpectrumViewParams(valuePerPoint, totalPointCount, pointCount, numPoints,
+        return SpectrumViewParams(valuePerPoint, totalPointCount, pointCount,
                                   minAliasedFrequency, maxAliasedFrequency, dataDim,
                                   minSpectrumFrequency, maxSpectrumFrequency)
 

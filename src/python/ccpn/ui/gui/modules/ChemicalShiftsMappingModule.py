@@ -62,17 +62,17 @@ Module Documentation
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2017"
-__credits__ = ("Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
-__licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license",
-               "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text")
-__reference__ = ("For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license",
-               "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019"
+__credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
+__licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
+__reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
+                 "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
+                 "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2017-07-07 16:32:46 +0100 (Fri, July 07, 2017) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2019-12-04 17:10:56 +0000 (Wed, December 04, 2019) $"
 __version__ = "$Revision: 3.0.0 $"
 #=========================================================================================
 # Created
@@ -121,7 +121,7 @@ from ccpn.ui.gui.widgets.Icon import Icon
 from ccpn.ui.gui.guiSettings import COLOUR_SCHEMES, getColours, DIVIDER
 from ccpn.ui.gui.modules.NmrResidueTable import _CSMNmrResidueTable, KD, Deltas
 from ccpn.ui.gui.widgets.ConcentrationsWidget import ConcentrationWidget
-from ccpn.ui.gui.popups.ConcentrationUnitsPopup import ConcentrationUnitsPopup2
+from ccpn.ui.gui.popups.ConcentrationUnitsPopup import ConcentrationUnitsPopup
 from ccpn.ui.gui.widgets.ButtonList import ButtonList
 from ccpn.ui.gui.popups.Dialog import CcpnDialog
 from ccpn.ui.gui.modules.PyMolUtil import _chemicalShiftMappingPymolTemplate
@@ -1377,8 +1377,9 @@ class ChemicalShiftsMapping(CcpnModule):
     spectra = self.spectraSelectionWidget.getSelections()
     names = [sp.name for sp in spectra]
     vs, u = self._getConcentrationsFromSpectra(spectra)
-    popup = ConcentrationUnitsPopup2(self, mainWindow=self.mainWindow, names=names, values=vs, unit=u)
-    popup.exec_()
+    popup = ConcentrationUnitsPopup(self, mainWindow=self.mainWindow, names=names, values=vs, unit=u)
+    popup.show()
+    popup.raise_()
 
     # # popup = CcpnDialog(windowTitle='Setup Concentrations', setLayout=True, size=(1000, 500))
     #
@@ -1396,17 +1397,17 @@ class ChemicalShiftsMapping(CcpnModule):
     # popup.show()
     # popup.raise_()
 
-  def _applyConcentrations(self, w):
-    spectra = self.spectraSelectionWidget.getSelections()
-    vs, u = w.getValues() , w.getUnit()
-    self._addConcentrationsFromSpectra(spectra, vs, u)
-    self._kDunit = u
-    self.bindingPlot.setLabel('bottom', self._kDunit)
-    self.fittingPlot.setLabel('bottom', self._kDunit)
+  # def _applyConcentrations(self, w):
+  #   spectra = self.spectraSelectionWidget.getSelections()
+  #   vs, u = w.getValues() , w.getUnit()
+  #   self._addConcentrationsFromSpectra(spectra, vs, u)
+  #   self._kDunit = u
+  #   self.bindingPlot.setLabel('bottom', self._kDunit)
+  #   self.fittingPlot.setLabel('bottom', self._kDunit)
 
-  def _closeConcentrationsPopup(self,popup, w):
-    self._applyConcentrations(w)
-    popup.accept()
+  # def _closeConcentrationsPopup(self,popup, w):
+  #   self._applyConcentrations(w)
+  #   popup.accept()
 
   def  _getConcentrationsFromSpectra(self, spectra):
 
@@ -1434,7 +1435,7 @@ class ChemicalShiftsMapping(CcpnModule):
 
   def _addConcentrationsFromSpectra(self, spectra, concentrationValues, concentrationUnit):
     """
-    # add concentrations. To be chaned with series from SpectrumGroups
+    # add concentrations. To be changed with series from SpectrumGroups
     """
 
     with undoBlockWithoutSideBar():

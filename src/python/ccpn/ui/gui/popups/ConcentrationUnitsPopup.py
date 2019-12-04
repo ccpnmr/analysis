@@ -4,48 +4,31 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = ""
-__credits__ = ""
-__licence__ = ("")
-__reference__ = ("")
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019"
+__credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
+__licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
+__reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
+                 "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
+                 "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
-# Last code modification:
+# Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified$"
-__version__ = "$Revision$"
+__dateModified__ = "$dateModified: 2019-12-04 17:10:56 +0000 (Wed, December 04, 2019) $"
+__version__ = "$Revision: 3.0.0 $"
 #=========================================================================================
-# Created:
+# Created
 #=========================================================================================
 __author__ = "$Author: Ed Brooksbank $"
-__date__ = "$Date$"
+__date__ = "$Date: 2019-12-04 12:29:28 +0000 (Wed, December 04, 2019) $"
 
 #=========================================================================================
 # Start of code
 #=========================================================================================
 
-from ccpn.ui.gui.popups.Dialog import CcpnDialogMainWidget
-from ccpn.ui.gui.widgets.ConcentrationsWidget import ConcentrationWidget
-from ccpn.util.Common import isIterable
-
-# import re
-# from ccpn.core.lib.AssignmentLib import CCP_CODES_SORTED, getNmrResiduePrediction
-# from ccpn.ui.gui.widgets.CompoundWidgets import EntryCompoundWidget, PulldownListCompoundWidget
-# from ccpn.ui.gui.widgets.PulldownListsForObjects import NmrChainPulldown
-# from ccpn.ui.gui.popups.AttributeEditorPopupABC import AttributeEditorPopupABC
-# from ccpn.util.OrderedSet import OrderedSet
-# from ccpn.core.NmrResidue import NmrResidue
-from ccpn.core.lib.ContextManagers import undoBlock, undoBlockWithoutSideBar
-#
-# class ConcentrationUnitsKlass():
-#     pass
-
-
 from ccpn.ui.gui.popups.AttributeEditorPopupABC import AttributeEditorPopupABC
-from ccpn.ui.gui.widgets.CompoundWidgets import RadioButtonsCompoundWidget, \
-    ScientificSpinBoxCompoundWidget, EntryCompoundWidget
+from ccpn.ui.gui.widgets.CompoundWidgets import RadioButtonsCompoundWidget, ScientificSpinBoxCompoundWidget
 from ccpn.util.Constants import concentrationUnits
-from ccpn.util.AttrDict import AttrDict
 
 
 class _ConcentrationUnitsObject():
@@ -57,7 +40,7 @@ class _ConcentrationUnitsObject():
         self.className = name
 
 
-class ConcentrationUnitsPopup2(AttributeEditorPopupABC):
+class ConcentrationUnitsPopup(AttributeEditorPopupABC):
     EDITMODE = True
     WINDOWPREFIX = 'Setup '
 
@@ -94,12 +77,13 @@ class ConcentrationUnitsPopup2(AttributeEditorPopupABC):
         # add attributes for each of the spectra
         for name, value in zip(names, values):
             self.attributes.append((name, ScientificSpinBoxCompoundWidget, getattr, setattr, None, None, {}))
-            setattr(self._obj, name, value)        #obj[name] = value
+            setattr(self._obj, name, value)  #obj[name] = value
 
         super().__init__(parent=parent, mainWindow=mainWindow, obj=self._obj, **kwds)
 
     def _applyAllChanges(self, changes):
         """Doesn't use the queued values but uses the mechanism for reverting to the pre-popup values
+        (should really check _changes and only update those values)
         """
         # call the super class to update the object
         super()._applyAllChanges(changes)
@@ -114,6 +98,19 @@ class ConcentrationUnitsPopup2(AttributeEditorPopupABC):
         self._parent.bindingPlot.setLabel('bottom', u)
         self._parent.fittingPlot.setLabel('bottom', u)
 
+
+from ccpn.ui.gui.popups.Dialog import CcpnDialogMainWidget
+from ccpn.ui.gui.widgets.ConcentrationsWidget import ConcentrationWidget
+from ccpn.util.Common import isIterable
+
+# import re
+# from ccpn.core.lib.AssignmentLib import CCP_CODES_SORTED, getNmrResiduePrediction
+# from ccpn.ui.gui.widgets.CompoundWidgets import EntryCompoundWidget, PulldownListCompoundWidget
+# from ccpn.ui.gui.widgets.PulldownListsForObjects import NmrChainPulldown
+# from ccpn.ui.gui.popups.AttributeEditorPopupABC import AttributeEditorPopupABC
+# from ccpn.util.OrderedSet import OrderedSet
+# from ccpn.core.NmrResidue import NmrResidue
+from ccpn.core.lib.ContextManagers import undoBlock, undoBlockWithoutSideBar
 
 # class ConcentrationUnitsPopup(CcpnDialogMainWidget):
 #

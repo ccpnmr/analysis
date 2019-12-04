@@ -121,7 +121,7 @@ from ccpn.ui.gui.widgets.Icon import Icon
 from ccpn.ui.gui.guiSettings import COLOUR_SCHEMES, getColours, DIVIDER
 from ccpn.ui.gui.modules.NmrResidueTable import _CSMNmrResidueTable, KD, Deltas
 from ccpn.ui.gui.widgets.ConcentrationsWidget import ConcentrationWidget
-from ccpn.ui.gui.popups.ConcentrationUnitsPopup import ConcentrationUnitsPopup, ConcentrationUnitsPopup2
+from ccpn.ui.gui.popups.ConcentrationUnitsPopup import ConcentrationUnitsPopup2
 from ccpn.ui.gui.widgets.ButtonList import ButtonList
 from ccpn.ui.gui.popups.Dialog import CcpnDialog
 from ccpn.ui.gui.modules.PyMolUtil import _chemicalShiftMappingPymolTemplate

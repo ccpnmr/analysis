@@ -66,34 +66,10 @@ class ConcentrationUnitsPopup2(AttributeEditorPopupABC):
 
     def __init__(self, parent=None, mainWindow=None, obj=None,
                  names=[], values=None, unit=None, **kwds):
+
         self.EDITMODE = True
 
-        # set up the widget klass and attributes here
-        # dummy object to hold the concentrations
-        obj = _ConcentrationUnitsObject()
-        obj.molType = concentrationUnits.index(unit)        #{'molType':0}
-
-        # add the first attribute for the molType
-        self.attributes = [('molType', RadioButtonsCompoundWidget, getattr, setattr, None, None, {'texts': concentrationUnits}), ]
-
-        # add attributes for each of the spectra
-        for name, value in zip(names, values):
-            self.attributes.append((name, ScientificSpinBoxCompoundWidget, getattr, setattr, None, None, {}))
-            setattr(obj, name, value)        #obj[name] = value
-
-        super().__init__(parent=parent, mainWindow=mainWindow, obj=obj, **kwds)
-
-
-class ConcentrationUnitsPopup(CcpnDialogMainWidget):
-
-    def __init__(self, parent=None, mainWindow=None,
-                 names=[], values=None, unit=None,
-                 title='Setup Concentrations', **kwds):
-
-        super().__init__(parent, setLayout=True, windowTitle=title, **kwds)
-
         self._parent = parent
-
         if not parent:
             raise TypeError('Error: ConcentrationUnitsPopup - parent not defined')
 
@@ -106,48 +82,103 @@ class ConcentrationUnitsPopup(CcpnDialogMainWidget):
         self._names = names
         self._values = values
         self._unit = unit
-        self.concentrationWidget = ConcentrationWidget(self.mainWidget, mainWindow=mainWindow,
-                                                       names=names, grid=(0, 0))
 
-        # enable the buttons
-        self.setOkButton(callback=self._okClicked)
-        self.setApplyButton(callback=self._applyClicked)
-        self.setCancelButton(callback=self._cancelClicked)
-        self.setRevertButton(callback=self._revertClicked)
-        self.setDefaultButton(CcpnDialogMainWidget.CANCELBUTTON)
-        self.__postInit__()
+        # set up the widget klass and attributes here
+        # dummy object to hold the concentrations
+        self._obj = _ConcentrationUnitsObject()
+        self._obj.molType = concentrationUnits.index(unit)
 
-    def __postInit__(self):
-        """post initialise functions - setting up buttons and populating the widgets
+        # add the first attribute for the molType
+        self.attributes = [('molType', RadioButtonsCompoundWidget, getattr, setattr, None, None, {'texts': concentrationUnits}), ]
+
+        # add attributes for each of the spectra
+        for name, value in zip(names, values):
+            self.attributes.append((name, ScientificSpinBoxCompoundWidget, getattr, setattr, None, None, {}))
+            setattr(self._obj, name, value)        #obj[name] = value
+
+        super().__init__(parent=parent, mainWindow=mainWindow, obj=self._obj, **kwds)
+
+    def _applyAllChanges(self, changes):
+        """Doesn't use the queued values but uses the mechanism for reverting to the pre-popup values
         """
-        super().__postInit__()
-        self._populate()
+        # call the super class to update the object
+        super()._applyAllChanges(changes)
 
-    def _populate(self):
-        if self._values and isIterable(self._values):
-            self.concentrationWidget.setValues(self._values)
-        self.concentrationWidget.setUnit(self._unit)
-
-    def _okClicked(self):
-        self._applyClicked()
-        self.accept()
-
-    def _applyClicked(self):
         # get the list of selected spectra
         spectra = self._parent.spectraSelectionWidget.getSelections()
-
-        # get the current values from the concentration widget spinboxes
-        vs, u = self.concentrationWidget.getValues(), self.concentrationWidget.getUnit()
+        vs, u = [getattr(self._obj, name, None) for name in self._names], concentrationUnits[self._obj.molType]
 
         # apply to the spectra
         self._parent._addConcentrationsFromSpectra(spectra, vs, u)
         self._parent._kDunit = u
-        self._parent.bindingPlot.setLabel('bottom', self._kDunit)
-        self._parent.fittingPlot.setLabel('bottom', self._kDunit)
+        self._parent.bindingPlot.setLabel('bottom', u)
+        self._parent.fittingPlot.setLabel('bottom', u)
 
-    def _cancelClicked(self):
-        self.reject()
 
-    def _revertClicked(self):
-        self._populate()
-        self._applyClicked()
+# class ConcentrationUnitsPopup(CcpnDialogMainWidget):
+#
+#     def __init__(self, parent=None, mainWindow=None,
+#                  names=[], values=None, unit=None,
+#                  title='Setup Concentrations', **kwds):
+#
+#         super().__init__(parent, setLayout=True, windowTitle=title, **kwds)
+#
+#         self._parent = parent
+#
+#         if not parent:
+#             raise TypeError('Error: ConcentrationUnitsPopup - parent not defined')
+#
+#         # check that the parent methods are defined
+#         _methodlist = ('_addConcentrationsFromSpectra', '_kDunit', 'bindingPlot', 'fittingPlot')
+#         for method in _methodlist:
+#             if not hasattr(self._parent, method):
+#                 raise TypeError('Error: ConcentrationUnitsPopup - parent does not contain %s' % str(method))
+#
+#         self._names = names
+#         self._values = values
+#         self._unit = unit
+#         self.concentrationWidget = ConcentrationWidget(self.mainWidget, mainWindow=mainWindow,
+#                                                        names=names, grid=(0, 0))
+#
+#         # enable the buttons
+#         self.setOkButton(callback=self._okClicked)
+#         self.setApplyButton(callback=self._applyClicked)
+#         self.setCancelButton(callback=self._cancelClicked)
+#         self.setRevertButton(callback=self._revertClicked)
+#         self.setDefaultButton(CcpnDialogMainWidget.CANCELBUTTON)
+#         self.__postInit__()
+#
+#     def __postInit__(self):
+#         """post initialise functions - setting up buttons and populating the widgets
+#         """
+#         super().__postInit__()
+#         self._populate()
+#
+#     def _populate(self):
+#         if self._values and isIterable(self._values):
+#             self.concentrationWidget.setValues(self._values)
+#         self.concentrationWidget.setUnit(self._unit)
+#
+#     def _okClicked(self):
+#         self._applyClicked()
+#         self.accept()
+#
+#     def _applyClicked(self):
+#         # get the list of selected spectra
+#         spectra = self._parent.spectraSelectionWidget.getSelections()
+#
+#         # get the current values from the concentration widget spinboxes
+#         vs, u = self.concentrationWidget.getValues(), self.concentrationWidget.getUnit()
+#
+#         # apply to the spectra
+#         self._parent._addConcentrationsFromSpectra(spectra, vs, u)
+#         self._parent._kDunit = u
+#         self._parent.bindingPlot.setLabel('bottom', self._kDunit)
+#         self._parent.fittingPlot.setLabel('bottom', self._kDunit)
+#
+#     def _cancelClicked(self):
+#         self.reject()
+#
+#     def _revertClicked(self):
+#         self._populate()
+#         self._applyClicked()

@@ -37,13 +37,17 @@ from ccpn.ui.gui.widgets.PulldownList import PulldownList
 from ccpn.ui.gui.widgets.ScrollArea import ScrollArea
 from ccpn.ui.gui.widgets.Spinbox import Spinbox
 from ccpn.ui.gui.widgets.Label import Label
-from ccpn.ui.gui.widgets.Frame import Frame
+from ccpn.ui.gui.widgets.Frame import Frame, ScrollableFrame
 from ccpn.ui.gui.widgets.Base import Base
 from ccpn.ui.gui.widgets.ButtonList import ButtonList
 from ccpn.ui.gui.widgets.RadioButtons import RadioButtons
 from collections import OrderedDict
 from ccpn.ui.gui.popups.Dialog import CcpnDialog  # ejb
 from ccpn.ui.gui.widgets.Widget import Widget
+
+DEFAULTSPACING = (5, 5)
+TABMARGINS = (1, 10, 10, 1)  # l, t, r, b
+ZEROMARGINS = (0, 0, 0, 0)  # l, t, r, b
 
 
 class SpectraSelectionWidget(Widget):
@@ -82,11 +86,10 @@ class SpectraSelectionWidget(Widget):
             i += 1
             if not self.current.strip:
                 self.selectAllButton.buttons[-1].setEnabled(False)
-            self.scrollArea = ScrollArea(self, setLayout=False, grid=(i, 0), )
-            self.scrollArea.setWidgetResizable(True)
-            self.scrollAreaWidgetContents = Frame(self, setLayout=True)
-            self.scrollArea.setWidget(self.scrollAreaWidgetContents)
-            self.scrollAreaWidgetContents.getLayout().setAlignment(QtCore.Qt.AlignTop)
+
+            self.scrollAreaWidgetContents = ScrollableFrame(self, setLayout=True, spacing=DEFAULTSPACING,
+                     scrollBarPolicies=('asNeeded', 'asNeeded'), margins=TABMARGINS, grid=(i, 0))
+
             self._addSpectrumCheckBoxes()
             self._addSpectrumGroupsCheckBoxes()
             self.showSpectraOption()

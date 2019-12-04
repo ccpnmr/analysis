@@ -25,7 +25,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 import os
 from functools import reduce, partial
 from PyQt5 import QtWidgets
-from ccpn.ui.gui.widgets.Frame import ScrollableFrame, ScrollFrame
+from ccpn.ui.gui.widgets.Frame import ScrollableFrame
 from ccpn.ui.gui.widgets.Button import Button
 from ccpn.ui.gui.widgets.ButtonList import ButtonList
 from ccpn.ui.gui.widgets.FileDialog import FileDialog

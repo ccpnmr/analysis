@@ -13,8 +13,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: CCPN $"
-__dateModified__ = "$dateModified: 2017-07-07 16:32:52 +0100 (Fri, July 07, 2017) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2019-12-04 18:52:42 +0000 (Wed, December 04, 2019) $"
 __version__ = "$Revision: 3.0.0 $"
 #=========================================================================================
 # Created
@@ -55,7 +55,7 @@ class DoubleSpinbox(QtWidgets.QDoubleSpinBox, Base):
     defaultMinimumSizes = (0, 20)
 
     def __init__(self, parent, value=None, min=None, max=None, step=None, prefix=None, suffix=None,
-                 showButtons=True, decimals=None, callback=None, **kwds):
+                 showButtons=True, decimals=None, callback=None, editable=True, **kwds):
         """
         From the QTdocumentation
         Constructs a spin box with a step value of 1.0 and a precision of 2 decimal places.

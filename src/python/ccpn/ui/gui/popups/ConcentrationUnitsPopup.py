@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2019-12-04 17:23:32 +0000 (Wed, December 04, 2019) $"
+__dateModified__ = "$dateModified: 2019-12-04 18:52:42 +0000 (Wed, December 04, 2019) $"
 __version__ = "$Revision: 3.0.0 $"
 #=========================================================================================
 # Created
@@ -75,7 +75,7 @@ class ConcentrationUnitsPopup(AttributeEditorPopupABC):
 
         # add attributes for each of the spectra
         for name, value in zip(names, values):
-            self.attributes.append((name, ScientificSpinBoxCompoundWidget, getattr, setattr, None, None, {}))
+            self.attributes.append((name, ScientificSpinBoxCompoundWidget, getattr, setattr, None, None, {'min': 0.0}))
             setattr(self._obj, name, value)  #obj[name] = value
 
         super().__init__(parent=parent, mainWindow=mainWindow, obj=self._obj, **kwds)

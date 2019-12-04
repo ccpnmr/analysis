@@ -10,15 +10,14 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: CCPN $"
-__dateModified__ = "$dateModified: 2017-07-07 16:32:52 +0100 (Fri, July 07, 2017) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2019-12-04 18:52:42 +0000 (Wed, December 04, 2019) $"
 __version__ = "$Revision: 3.0.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
 __author__ = "$Author: Geerten Vuister $"
 __date__ = "$Date: 2017-04-18 15:19:30 +0100 (Tue, April 18, 2017) $"
-
 #=========================================================================================
 # Start of code
 #=========================================================================================
@@ -690,10 +689,16 @@ class ScientificSpinBoxCompoundWidget(CompoundBaseWidget):
         hAlign = orientation if (orientation == 'left' or orientation == 'right') else 'center'
         minimumValue = range[0] if range[0] is not None else None
         maximumValue = range[1] if range[1] is not None else None
-        self.scientificSpinBox = ScientificDoubleSpinBox(parent=self, value=value, min=minimumValue, max=maximumValue,
-                                                         showButtons=showButtons, hAlign=hAlign,
-                                                         callback=callback
-                                                         )
+        scientificKwds = {'value'      : value,
+                          'min'        : minimumValue,
+                          'max'        : maximumValue,
+                          'showButtons': showButtons,
+                          'hAlign'     : hAlign,
+                          'editable'   : editable,
+                          'callback'   : callback,
+                          }
+        scientificKwds.update(compoundKwds)
+        self.scientificSpinBox = ScientificDoubleSpinBox(parent=self, **scientificKwds)
         self._addWidget(self.scientificSpinBox)
         self.scientificSpinBox.setObjectName(labelText)
 

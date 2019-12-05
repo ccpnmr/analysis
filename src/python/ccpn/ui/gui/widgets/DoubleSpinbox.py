@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2019-12-04 18:52:42 +0000 (Wed, December 04, 2019) $"
+__dateModified__ = "$dateModified: 2019-12-05 09:31:38 +0000 (Thu, December 05, 2019) $"
 __version__ = "$Revision: 3.0.0 $"
 #=========================================================================================
 # Created
@@ -32,6 +32,10 @@ from PyQt5 import QtGui, QtWidgets, QtCore
 from PyQt5.QtCore import pyqtSignal
 from ccpn.ui.gui.widgets.Base import Base
 from math import floor, log10
+
+
+DOUBLESPINBOXSTEP = 10
+SCIENTIFICSPINBOXSTEP = 5
 
 
 class DoubleSpinbox(QtWidgets.QDoubleSpinBox, Base):
@@ -141,9 +145,10 @@ class DoubleSpinbox(QtWidgets.QDoubleSpinBox, Base):
 
     def stepBy(self, steps: int) -> None:
         if self._internalWheelEvent:
-            super(DoubleSpinbox, self).stepBy(steps)
+            super().stepBy(min(steps, DOUBLESPINBOXSTEP) if steps > 0 else max(steps, -DOUBLESPINBOXSTEP))
         else:
-            super(DoubleSpinbox, self).stepBy(1 if steps > 0 else -1 if steps < 0 else steps)
+            # disable multiple stepping for wheelMouse events in a spectrumDisplay
+            super().stepBy(1 if steps > 0 else -1 if steps < 0 else steps)
 
     def _keyPressed(self, *args):
         """emit the value when return has been pressed
@@ -228,10 +233,12 @@ class ScientificDoubleSpinBox(DoubleSpinbox):
         """Increment the current value.
         Step if 1/10th of the current rounded value * step
         """
+        # clip number of steps to SCIENTIFICSPINBOXSTEP as 10* will go directly to zero from 1 when Ctrl/Cmd pressed
+        steps = min(steps, SCIENTIFICSPINBOXSTEP) if steps > 0 else max(steps, -SCIENTIFICSPINBOXSTEP)
+
         text = self.cleanText()
         groups = _float_re.search(text).groups()
         decimal = float(groups[1])
-        # decimal += steps
         decimal += steps * 10 ** fexp(decimal / 10)  #     (decimal / 10)
         new_string = '{:g}'.format(decimal) + (groups[3] if groups[3] else '')
 

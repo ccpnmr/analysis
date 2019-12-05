@@ -62,17 +62,17 @@ Module Documentation
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2017"
-__credits__ = ("Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
-__licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license",
-               "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text")
-__reference__ = ("For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license",
-               "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019"
+__credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
+__licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
+__reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
+                 "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
+                 "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2017-07-07 16:32:46 +0100 (Fri, July 07, 2017) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2019-12-05 09:40:39 +0000 (Thu, December 05, 2019) $"
 __version__ = "$Revision: 3.0.0 $"
 #=========================================================================================
 # Created
@@ -94,7 +94,7 @@ from PyQt5 import QtCore, QtWidgets, QtGui
 from ccpn.ui.gui.modules.CcpnModule import CcpnModule
 from ccpn.ui.gui.widgets.BarGraph import BarGraph
 from ccpn.ui.gui.widgets.Button import Button
-from ccpn.ui.gui.widgets.Frame import Frame
+from ccpn.ui.gui.widgets.Frame import Frame, ScrollableFrame
 from ccpn.ui.gui.widgets.DoubleSpinbox import DoubleSpinbox
 from ccpn.ui.gui.widgets.SpectraSelectionWidget import SpectraSelectionWidget
 from ccpn.ui.gui.widgets.CheckBox import CheckBox, EditableCheckBox
@@ -109,6 +109,7 @@ from ccpn.ui.gui.widgets.ScrollArea import ScrollArea
 from ccpn.ui.gui.widgets.FileDialog import LineEditButtonDialog
 from ccpn.ui.gui.widgets.HLine import HLine
 from ccpn.ui.gui.widgets.Tabs import Tabs
+from ccpn.ui.gui.widgets.Spacer import Spacer
 from ccpn.ui.gui.widgets.CustomExportDialog import CustomExportDialog
 from ccpn.ui.gui.lib.mouseEvents import leftMouse, controlLeftMouse
 from ccpn.ui.gui.guiSettings import CCPNGLWIDGET_HEXBACKGROUND,MEDIUM_BLUE, GUISTRIP_PIVOT, CCPNGLWIDGET_HIGHLIGHT
@@ -120,6 +121,7 @@ from ccpn.ui.gui.widgets.Icon import Icon
 from ccpn.ui.gui.guiSettings import COLOUR_SCHEMES, getColours, DIVIDER
 from ccpn.ui.gui.modules.NmrResidueTable import _CSMNmrResidueTable, KD, Deltas
 from ccpn.ui.gui.widgets.ConcentrationsWidget import ConcentrationWidget
+from ccpn.ui.gui.popups.ConcentrationUnitsPopup import ConcentrationUnitsPopup
 from ccpn.ui.gui.widgets.ButtonList import ButtonList
 from ccpn.ui.gui.popups.Dialog import CcpnDialog
 from ccpn.ui.gui.modules.PyMolUtil import _chemicalShiftMappingPymolTemplate
@@ -167,6 +169,10 @@ OriginAxes = pg.functions.mkPen(hexToRgb(getColours()[GUISTRIP_PIVOT]), width=1,
 FittingLine = pg.functions.mkPen(hexToRgb(getColours()[DIVIDER]), width=0.5, style=QtCore.Qt.DashLine)
 SelectedPoint = pg.functions.mkPen(rgbaRatioToHex(*getColours()[CCPNGLWIDGET_HIGHLIGHT]), width=4)
 SelectedLabel = pg.functions.mkBrush(rgbaRatioToHex(*getColours()[CCPNGLWIDGET_HIGHLIGHT]), width=4)
+
+DEFAULTSPACING = (5, 5)
+TABMARGINS = (1, 10, 10, 1)  # l, t, r, b
+ZEROMARGINS = (0, 0, 0, 0)  # l, t, r, b
 
 
 class ChemicalShiftsMapping(CcpnModule):
@@ -372,25 +378,14 @@ class ChemicalShiftsMapping(CcpnModule):
 
   def _initSettingsWidgets(self):
 
-    self.scrollArea = ScrollArea(self, setLayout=False, )
-    self.scrollArea.setWidgetResizable(True)
-    self.scrollAreaWidgetContents = Frame(self, setLayout=True, )
-    self.scrollArea.setWidget(self.scrollAreaWidgetContents)
-    self.scrollAreaWidgetContents.getLayout().setAlignment(QtCore.Qt.AlignLeft)
-    self.settingsWidget.getLayout().addWidget(self.scrollArea)
-    self.scrollArea.setContentsMargins(10, 10, 10, 15)  #l,t,r,b
-    self.scrollAreaWidgetContents.setContentsMargins(10, 10, 10, 15)  #l,t,r,b
-    # self.scrollAreaWidgetContents.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
-    self.scrollAreaWidgetContents.getLayout().setSpacing(10)
-    # self._splitter.setStretchFactor(1, 0)  #makes the setting space fully visible when opening
-    self.settingsWidget.setMinimumWidth(300)
-    self.settingsWidget.getLayout().setAlignment(QtCore.Qt.AlignTop)
+    self.scrollAreaWidgetContents = ScrollableFrame(self.settingsWidget, setLayout=True, spacing=DEFAULTSPACING,
+                     scrollBarPolicies=('asNeeded', 'asNeeded'), margins=TABMARGINS, grid=(0,0))
 
     i = 0
     self.inputLabel = Label(self.scrollAreaWidgetContents, text='Select input data', grid=(i, 0), vAlign='t')
     self.spectraSelectionWidget = SpectraSelectionWidget(self.scrollAreaWidgetContents, mainWindow=self.mainWindow,
                                                          grid=(i, 1), gridSpan=(1, 2))
-    self.spectraSelectionWidget.setMinimumHeight(500)
+    self.spectraSelectionWidget.setMinimumHeight(100)
     if len(self.project.spectra) > 0:
       self._addSettingsWAttr(self.spectraSelectionWidget.selectSpectraOption.radioButtons)
       self._addSettingsWAttr(self.spectraSelectionWidget.allSpectraCheckBoxes)
@@ -509,7 +504,9 @@ class ChemicalShiftsMapping(CcpnModule):
     self.updateButton = Button(self.scrollAreaWidgetContents, text='Update All', callback=self._updateModule,
                                grid=(i, 1))
 
-
+    i += 1
+    self._spacer = Spacer(self.scrollAreaWidgetContents, 5, 5,
+                          QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding, grid=(i, 3))
 
   #####################################################
   #################   Bar Graph        ################
@@ -1377,35 +1374,40 @@ class ChemicalShiftsMapping(CcpnModule):
 
   def _setupConcentrationsPopup(self):
 
-    # TODO:ED Change this to a mainWidget popup and add revert buttons..
-
-    popup = CcpnDialog(windowTitle='Setup Concentrations', setLayout=True, size=(1000, 500))
-
     spectra = self.spectraSelectionWidget.getSelections()
     names = [sp.name for sp in spectra]
-    w = ConcentrationWidget(popup, names=names, grid=(0,0))
     vs, u = self._getConcentrationsFromSpectra(spectra)
-    w.setValues(vs)
-    w.setUnit(u)
-
-    buttons = ButtonList(popup, texts=['Cancel', 'Apply', 'Ok'],
-                         callbacks=[popup.reject, partial(self._applyConcentrations,w),
-                                                                            partial(self._closeConcentrationsPopup,popup,w)],
-                         grid=(1,0))
+    popup = ConcentrationUnitsPopup(self, mainWindow=self.mainWindow, names=names, values=vs, unit=u)
     popup.show()
     popup.raise_()
 
-  def _applyConcentrations(self, w):
-    spectra = self.spectraSelectionWidget.getSelections()
-    vs, u = w.getValues() , w.getUnit()
-    self._addConcentrationsFromSpectra(spectra, vs, u)
-    self._kDunit = u
-    self.bindingPlot.setLabel('bottom', self._kDunit)
-    self.fittingPlot.setLabel('bottom', self._kDunit)
+    # # popup = CcpnDialog(windowTitle='Setup Concentrations', setLayout=True, size=(1000, 500))
+    #
+    # spectra = self.spectraSelectionWidget.getSelections()
+    # names = [sp.name for sp in spectra]
+    # w = ConcentrationWidget(popup, names=names, grid=(0,0))
+    # vs, u = self._getConcentrationsFromSpectra(spectra)
+    # w.setValues(vs)
+    # w.setUnit(u)
+    #
+    # buttons = ButtonList(popup, texts=['Cancel', 'Apply', 'Ok'],
+    #                      callbacks=[popup.reject, partial(self._applyConcentrations,w),
+    #                                                                         partial(self._closeConcentrationsPopup,popup,w)],
+    #                      grid=(1,0))
+    # popup.show()
+    # popup.raise_()
 
-  def _closeConcentrationsPopup(self,popup, w):
-    self._applyConcentrations(w)
-    popup.accept()
+  # def _applyConcentrations(self, w):
+  #   spectra = self.spectraSelectionWidget.getSelections()
+  #   vs, u = w.getValues() , w.getUnit()
+  #   self._addConcentrationsFromSpectra(spectra, vs, u)
+  #   self._kDunit = u
+  #   self.bindingPlot.setLabel('bottom', self._kDunit)
+  #   self.fittingPlot.setLabel('bottom', self._kDunit)
+
+  # def _closeConcentrationsPopup(self,popup, w):
+  #   self._applyConcentrations(w)
+  #   popup.accept()
 
   def  _getConcentrationsFromSpectra(self, spectra):
 
@@ -1433,7 +1435,7 @@ class ChemicalShiftsMapping(CcpnModule):
 
   def _addConcentrationsFromSpectra(self, spectra, concentrationValues, concentrationUnit):
     """
-    # add concentrations. To be chaned with series from SpectrumGroups
+    # add concentrations. To be changed with series from SpectrumGroups
     """
 
     with undoBlockWithoutSideBar():

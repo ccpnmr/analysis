@@ -13,8 +13,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: CCPN $"
-__dateModified__ = "$dateModified: 2017-07-07 16:32:49 +0100 (Fri, July 07, 2017) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2019-12-05 09:40:39 +0000 (Thu, December 05, 2019) $"
 __version__ = "$Revision: 3.0.0 $"
 #=========================================================================================
 # Created
@@ -31,7 +31,7 @@ import os
 from functools import partial
 from copy import deepcopy
 from ccpn.ui.gui.widgets.Label import Label
-from ccpn.ui.gui.widgets.Frame import Frame, ScrollFrame
+from ccpn.ui.gui.widgets.Frame import Frame, ScrollableFrame
 from ccpn.ui.gui.widgets.Button import Button
 from ccpn.ui.gui.widgets.FileDialog import FileDialog
 from ccpn.ui.gui.widgets.LineEdit import LineEdit, PasswordEdit
@@ -280,8 +280,8 @@ class PreferencesPopup(CcpnDialogMainWidget):
         for (tabFunc, tabName) in ((self._setGeneralTabWidgets, 'General'),
                                    (self._setSpectrumTabWidgets, 'Spectrum'),
                                    (self._setExternalProgramsTabWidgets, 'External Programs')):
-            fr = ScrollFrame(self.mainWidget, setLayout=True, spacing=DEFAULTSPACING,
-                             scrollBarPolicies=('never', 'asNeeded'), margins=TABMARGINS)
+            fr = ScrollableFrame(self.mainWidget, setLayout=True, spacing=DEFAULTSPACING,
+                                          scrollBarPolicies=('never', 'asNeeded'), margins=TABMARGINS)
 
             self.tabWidget.addTab(fr.scrollArea, tabName)
             tabFunc(parent=fr)

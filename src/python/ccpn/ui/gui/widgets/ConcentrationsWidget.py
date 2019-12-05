@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2017-07-07 16:32:26 +0100 (Fri, July 07, 2017) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2019-12-05 09:40:40 +0000 (Thu, December 05, 2019) $"
 __version__ = "$Revision: 3.0.0 $"
 #=========================================================================================
 # Created
@@ -32,22 +32,22 @@ import decimal
 from functools import partial
 from ccpn.ui.gui.widgets.Button import Button
 from ccpn.ui.gui.widgets.CheckBox import CheckBox
-from ccpn.ui.gui.widgets.DoubleSpinbox import DoubleSpinbox
+from ccpn.ui.gui.widgets.DoubleSpinbox import DoubleSpinbox, ScientificDoubleSpinBox
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
 from ccpn.ui.gui.widgets.ScrollArea import ScrollArea
 from ccpn.ui.gui.widgets.Spinbox import Spinbox
 from ccpn.ui.gui.widgets.Label import Label
-from ccpn.ui.gui.widgets.Frame import Frame
+from ccpn.ui.gui.widgets.Frame import Frame, ScrollableFrame
 from ccpn.ui.gui.widgets.LineEdit import LineEdit
 from ccpn.ui.gui.widgets.ButtonList import ButtonList
 from ccpn.ui.gui.widgets.RadioButtons import RadioButtons
 from collections import OrderedDict
-from ccpn.ui.gui.popups.Dialog import CcpnDialog  # ejb
+from ccpn.ui.gui.popups.Dialog import CcpnDialog
 from ccpn.ui.gui.widgets.Widget import Widget
 from ccpn.util.Constants import concentrationUnits
 
 
-class ConcentrationWidget(Widget):
+class ConcentrationWidget(ScrollableFrame):
 
     def __init__(self, parent, names, mainWindow=None, **kwds):
         super().__init__(parent, setLayout=True, **kwds)
@@ -67,19 +67,15 @@ class ConcentrationWidget(Widget):
         self._setWidgets()
 
     def _setWidgets(self):
-
-        self.scrollArea = ScrollArea(self, setLayout=False, grid=(0, 0), )
-        self.scrollArea.setWidgetResizable(True)
-        self.scrollAreaWidgetContents = Frame(self, setLayout=True)
-        self.scrollArea.setWidget(self.scrollAreaWidgetContents)
-        self.scrollAreaWidgetContents.getLayout().setAlignment(QtCore.Qt.AlignTop)
         i = 0
-        labelUnit = Label(self.scrollAreaWidgetContents, text="Unit", grid=(i, 0))
-        self.concentrationUnitsEditor = RadioButtons(self.scrollAreaWidgetContents, texts=concentrationUnits, grid=(i, 1))
+        labelUnit = Label(self, text="Unit", grid=(i, 0))
+        self.concentrationUnitsEditor = RadioButtons(self, texts=concentrationUnits, grid=(i, 1))
         i += 1
         for name in self.names:
-            label = Label(self.scrollAreaWidgetContents, text=name, grid=(i, 0))
-            concentrationEdit = DoubleSpinbox(self.scrollAreaWidgetContents, value=0.00, decimals=4, grid=(i, 1))
+            label = Label(self, text=name, grid=(i, 0))
+            concentrationEdit = ScientificDoubleSpinBox(self,
+                                                        value=0.00, decimals=4, min=0.0,
+                                                        grid=(i, 1))
             self.concentrationEditors.append(concentrationEdit)
             i += 1
 
@@ -112,6 +108,5 @@ if __name__ == '__main__':
     popup.setGeometry(200, 200, 200, 200)
 
     widget = ConcentrationWidget(popup, names=['a', 'b', 'c'], mainWindow=None, grid=(0, 0))
-    popup.show()
-    popup.raise_()
-    app.start()
+    popup.exec_()
+    # app.start()

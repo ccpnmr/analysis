@@ -13,8 +13,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: CCPN $"
-__dateModified__ = "$dateModified: 2017-07-07 16:32:53 +0100 (Fri, July 07, 2017) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2019-12-05 09:40:40 +0000 (Thu, December 05, 2019) $"
 __version__ = "$Revision: 3.0.0 $"
 #=========================================================================================
 # Created
@@ -334,8 +334,8 @@ class LineEditButtonDialog(Widget):
         self.lineEdit = LineEdit(self, text=self.textLineEdit, textAlignment='l', hAlign='l', minimumWidth=100,
                                  tipText=tipText, grid=(0, 0))
         self.lineEdit.setEnabled(False)
-        self.lineEdit.setSizePolicy(QtWidgets.QSizePolicy.Expanding,
-                                    QtWidgets.QSizePolicy.Expanding)
+        self.lineEdit.setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding,
+                                    QtWidgets.QSizePolicy.Minimum)
         button = Button(self, text='', icon=self.openPathIcon, callback=self._openFileDialog, grid=(0, 1), hAlign='c')
         button.setStyleSheet("border: 0px solid transparent")
 

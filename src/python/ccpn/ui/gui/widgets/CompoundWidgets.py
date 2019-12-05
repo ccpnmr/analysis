@@ -10,8 +10,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: CCPN $"
-__dateModified__ = "$dateModified: 2017-07-07 16:32:52 +0100 (Fri, July 07, 2017) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2019-12-05 09:40:40 +0000 (Thu, December 05, 2019) $"
 __version__ = "$Revision: 3.0.0 $"
 #=========================================================================================
 # Created
@@ -28,6 +28,7 @@ from ccpn.ui.gui.widgets.Base import SignalBlocking
 from ccpn.ui.gui.widgets.Base import Base
 from ccpn.ui.gui.widgets.Button import Button
 from ccpn.ui.gui.widgets.ButtonList import ButtonList
+from ccpn.ui.gui.widgets.RadioButtons import RadioButtons
 from ccpn.ui.gui.widgets.CheckBox import CheckBox
 from ccpn.ui.gui.widgets.ColourDialog import ColourDialog
 from ccpn.ui.gui.widgets.Entry import Entry
@@ -36,7 +37,7 @@ from ccpn.ui.gui.widgets.LineEdit import LineEdit
 from ccpn.ui.gui.widgets.ListWidget import ListWidget
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
 from ccpn.ui.gui.widgets.Widget import Widget
-from ccpn.ui.gui.widgets.DoubleSpinbox import DoubleSpinbox
+from ccpn.ui.gui.widgets.DoubleSpinbox import DoubleSpinbox, ScientificDoubleSpinBox
 from ccpn.ui.gui.widgets.CompoundBaseWidget import CompoundBaseWidget
 from ccpn.util.Colour import spectrumColours
 from ccpn.core.lib.Notifiers import Notifier
@@ -575,7 +576,7 @@ class DoubleSpinBoxCompoundWidget(CompoundBaseWidget):
     def __init__(self, parent=None, showBorder=False, orientation='left',
                  minimumWidths=None, maximumWidths=None, fixedWidths=None,
                  labelText='', value=None, range=(None, None), step=None, showButtons=True,
-                 decimals=None, callback=None, compoundKwds=None,
+                 decimals=None, callback=None, editable=False, compoundKwds=None,
                  **kwds):
         """
         :param parent: parent widget
@@ -623,13 +624,105 @@ class DoubleSpinBoxCompoundWidget(CompoundBaseWidget):
         return self.doubleSpinBox.value()
 
     def setValue(self, value: float):
-        "set the value from the DoubleSpinBox"
-        return self.doubleSpinBox.setValue(value)
+        "set the value in the DoubleSpinBox"
+        return self.doubleSpinBox.setValue(value if value is not None else 0)
 
     def setCallback(self, callback):
         """Set the callback for the doubleSpinBox
         """
         self.doubleSpinBox.setCallback(callback)
+
+
+class ScientificSpinBoxCompoundWidget(CompoundBaseWidget):
+    """
+    Compound class comprising a Label and a scientificSpinBox, combined in a CompoundBaseWidget (i.e. a Frame)
+
+      orientation       widget layout
+      ------------      ------------------------
+      left:             Label               ScientificSpinBox
+
+      right:            ScientificSpinBox   Label
+
+      top:              Label
+                        ScientificSpinBox
+
+      bottom:           ScientificSpinBox
+                        Label
+
+    """
+    layoutDict = dict(
+            # grid positions for label and checkBox for the different orientations
+            left=[(0, 0), (0, 1)],
+            right=[(0, 1), (0, 0)],
+            top=[(0, 0), (1, 0)],
+            bottom=[(1, 0), (0, 0)],
+            )
+
+    def __init__(self, parent=None, mainWindow=None,
+                 showBorder=False, orientation='left',
+                 minimumWidths=None, maximumWidths=None, fixedWidths=None,
+                 labelText='', value=None, range=(None, None), step=None, showButtons=True,
+                 decimals=None, callback=None, editable=False, compoundKwds=None,
+                 **kwds):
+        """
+        :param parent: parent widget
+        :param showBorder: flag to display the border of Frame (True, False)
+        :param orientation: flag to determine the orientation of the labelText relative to the scientificSpinBox widget.
+                            Allowed values: 'left', 'right', 'top', 'bottom'
+        :param minimumWidths: tuple of two values specifying the minimum width of the Label and scientificSpinBox widget, respectively
+        :param maximumWidths: tuple of two values specifying the maximum width of the Label and scientificSpinBox widget, respectively
+        :param labelText: Text for the Label
+        :param value: initial value for the scientificSpinBox
+        :param range: (minimumValue, maximumValue) tuple for the scientificSpinBox
+        :param step: initial step for the increment of the scientificSpinBox buttons
+        :param decimals: number of decimals the scientificSpinBox to display
+        :param showButtons: flag to display the scientificSpinBox buttons (True, False)
+        :param kwds: (optional) keyword, value pairs for the gridding of Frame
+        """
+
+        CompoundBaseWidget.__init__(self, parent=parent, layoutDict=self.layoutDict, orientation=orientation,
+                                    showBorder=showBorder, **kwds)
+
+        self.label = Label(parent=self, text=labelText, vAlign='center')
+        self._addWidget(self.label)
+
+        hAlign = orientation if (orientation == 'left' or orientation == 'right') else 'center'
+        minimumValue = range[0] if range[0] is not None else None
+        maximumValue = range[1] if range[1] is not None else None
+        scientificKwds = {'value'      : value,
+                          'min'        : minimumValue,
+                          'max'        : maximumValue,
+                          'showButtons': showButtons,
+                          'hAlign'     : hAlign,
+                          'editable'   : editable,
+                          'callback'   : callback,
+                          }
+        scientificKwds.update(compoundKwds)
+        self.scientificSpinBox = ScientificDoubleSpinBox(parent=self, **scientificKwds)
+        self._addWidget(self.scientificSpinBox)
+        self.scientificSpinBox.setObjectName(labelText)
+
+        if minimumWidths is not None:
+            self.setMinimumWidths(minimumWidths)
+
+        if maximumWidths is not None:
+            self.setMinimumWidths(maximumWidths)
+
+        if fixedWidths is not None:
+            self.setFixedWidths(fixedWidths)
+
+    def getValue(self) -> float:
+        "get the value from the scientificSpinBox"
+        return self.scientificSpinBox.value()
+
+    def setValue(self, value: float):
+        "set the value in the scientificSpinBox"
+        return self.scientificSpinBox.setValue(value if value is not None else 0.0)
+
+    def setCallback(self, callback):
+        """Set the callback for the scientificSpinBox
+        """
+        self.scientificSpinBox.setCallback(callback)
 
 
 class SelectorWidget(Widget):
@@ -734,6 +827,88 @@ class ColourSelectionWidget(Widget):
 
     def setColour(self, value):
         self.pulldownList.select(spectrumColours[value])
+
+
+class RadioButtonsCompoundWidget(CompoundBaseWidget):
+    """
+    Compound class comprising a Label and a RadioButtons box, combined in a CompoundBaseWidget (i.e. a Frame)
+
+      orientation       widget layout
+      ------------      ------------------------
+      left:             Label           RadioButtons
+
+      right:            RadioButtons    Label
+
+      top:              Label
+                        RadioButtons
+
+      bottom:           RadioButtons
+                        Label
+
+    """
+    layoutDict = dict(
+            # grid positions for label and checkBox for the different orientations
+            left=[(0, 0), (0, 1)],
+            right=[(0, 1), (0, 0)],
+            top=[(0, 0), (1, 0)],
+            bottom=[(1, 0), (0, 0)],
+            )
+
+    def __init__(self, parent=None, mainWindow=None,
+                 showBorder=False, orientation='left',
+                 minimumWidths=None, maximumWidths=None, fixedWidths=None,
+                 labelText='', texts=[], callback=None, selectedInd=0,
+                 editable=True, compoundKwds=None,
+                 **kwds):
+        """
+        :param parent: parent widget
+        :param showBorder: flag to display the border of Frame (True, False)
+        :param orientation: flag to determine the orientation of the labelText relative to the RadioButtons widget.
+                            Allowed values: 'left', 'right', 'top', 'bottom'
+        :param minimumWidths: tuple of two values specifying the minimum width of the Label and RadioButtons widget, respectively
+        :param maximumWidths: tuple of two values specifying the maximum width of the Label and RadioButtons widget, respectively
+        :param labelText: Text for the Label
+        :param text: (optional) text for the RadioButtons
+        :param callback: (optional) callback for the RadioButtons
+        :param checked: (optional) initial state of the RadioButtons
+        :param kwds: (optional) keyword, value pairs for the gridding of Frame
+        """
+
+        CompoundBaseWidget.__init__(self, parent=parent, layoutDict=self.layoutDict, orientation=orientation,
+                                    showBorder=showBorder, **kwds)
+
+        self.label = Label(parent=self, text=labelText, vAlign='center')
+        self._addWidget(self.label)
+
+        hAlign = orientation if (orientation == 'left' or orientation == 'right') else 'center'
+        self.radioButtons = RadioButtons(parent=self, callback=callback, **compoundKwds)
+        self.radioButtons.setObjectName(labelText)
+        self.setObjectName(labelText)
+        self._addWidget(self.radioButtons)
+
+        if minimumWidths is not None:
+            self.setMinimumWidths(minimumWidths)
+
+        if maximumWidths is not None:
+            self.setMaximumWidths(maximumWidths)
+
+        if fixedWidths is not None:
+            self.setFixedWidths(fixedWidths)
+
+    # def get(self):
+    #     """Convenience: get the radioButtons text
+    #     """
+    #     return self.radioButtons.get()
+
+    def getIndex(self):
+        """Convenience: get the radioButtons index
+        """
+        return self.radioButtons.getIndex()
+
+    def setIndex(self, index):
+        """Convenience: set the radioButtons index
+        """
+        self.radioButtons.setIndex(index if index else 0)
 
 
 if __name__ == '__main__':

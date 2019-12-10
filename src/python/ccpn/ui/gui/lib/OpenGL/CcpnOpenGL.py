@@ -55,7 +55,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2018-12-20 16:43:53 +0000 (Thu, December 20, 2018) $"
+__dateModified__ = "$dateModified: 2019-12-10 14:34:47 +0000 (Tue, December 10, 2019) $"
 __version__ = "$Revision: 3.0.0 $"
 #=========================================================================================
 # Created
@@ -3341,6 +3341,33 @@ class CcpnGLWidget(QOpenGLWidget):
                 # draw the grid marks for the bottom axis
                 self.viewports.setViewport(self._currentBottomAxisView)
                 self.gridList[2].drawIndexVBO(enableVBO=True)
+
+        # # pseudo-diagonals
+        # # TBD: assume for now that have ppm
+        # if xPanel.axisUnit.unit == yPanel.axisUnit.unit == 'ppm':
+        #     for view in allViews:
+        #         if view.isPosVisible or view.isNegVisible:
+        #             analysisSpectrum = view.analysisSpectrum
+        #             spectrum = analysisSpectrum.dataSource
+        #             experiment = spectrum.experiment
+        #             spinningRate = experiment.spinningRate
+        #             if spinningRate:
+        #                 dataDim = view.findFirstAxisMapping(label='x').analysisDataDim.dataDim
+        #                 dataDimRef = ExperimentBasic.getPrimaryDataDimRef(dataDim)
+        #                 expDimRef = dataDimRef.expDimRef
+        #                 spinningRate /= expDimRef.sf  # assumes y expDimRef would give the same
+        #                 nmin = int((y1 - x0) // spinningRate)
+        #                 nmax = - int((x1 - y0) // spinningRate)
+        #                 for n in range(nmin, nmax + 1):
+        #                     if n:  # n = 0 is normal diagonal
+        #                         self.drawDiagonal(handler, x0 + n * spinningRate, x1 + n * spinningRate, y0, y1, color, isDashed=True)
+        #
+        # # extra multiple-quantum diagonals
+        # if xaxisType.isotopeCodes == yaxisType.isotopeCodes:
+        #     if xaxisType.measurementType == 'MQShift' and yaxisType.measurementType == 'Shift':
+        #         self.drawDiagonal(handler, x0, x1, 2 * y0, 2 * y1, color)
+        #     elif xaxisType.measurementType == 'Shift' and yaxisType.measurementType == 'MQShift':
+        #         self.drawDiagonal(handler, 2 * x0, 2 * x1, y0, y1, color)
 
     def _floatFormat(self, f=0.0, prec=3):
         """return a float string, remove trailing zeros after decimal

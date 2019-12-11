@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>BMRB Import</title>
+    <style >.action {color: #803594; font-weight:bold;}</style>
+    <link rel="stylesheet" href="CcpnVideoTutorials.css">
+</head>
+<body>
+<h2>BMRB Import</h2>
+<p>You can import a Chemical Shift List from a BMRB file by <span class="action">dragging</span> an NmrStar file into your project (make sure the file ends in .str), going to <span class="action">Project / Import / NmrStar File</span> or typing <span class="action">BI</span>. A pop-up will appear showing whether the BMRB file contains an assigned chemical shift list or not. If it does, this will have a little tick beside it and you can click on <span class="action">Import</span> to import the assigned chemical shifts. This process may take a minute, especially for medium to large sized proteins. When it is finished, your project should contain a new chemical shift list and a new NmrChain containing the NmrResidues and NmrAtoms that are in the new chemical shift list.</p>
+<h3>Known Issues</h3>
+<p>Not all BMRB files are in the latest 3.2 NmrStar format. Some files are still in the 3.1.1 format which stops the assigned chemical shift lists from being recognised by CcpNmr Analysis. A fix for this is to make a couple of manual adjustments to the file following the examples below:</p>
+<p>Find the <span class="action">Assigned chemical shift lists</span> section of the file. Near the start of this section change the highlighted parts of following three lines from something like:</p>
+<p style="padding-left: 30px; "><i><span class="action">save_chemical_shift_assignment_data_set_one</span>
+<br>&nbsp;&nbsp;&nbsp;_Assigned_chem_shift_list.Sf_category &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;assigned_chemical_shifts
+<br>&nbsp;&nbsp;&nbsp;_Assigned_chem_shift_list.Sf_framecode &emsp;&emsp;&emsp;&emsp;&emsp;<span class="action">'chemical_shift_assignment_data_set_one'</span></i>
+</p>
+<p>to:</p>
+<p style="padding-left: 30px; "><i><span class="action">save_assigned_chem_shift_list_1</span>
+<br>&nbsp;&nbsp;&nbsp;_Assigned_chem_shift_list.Sf_category &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;assigned_chemical_shifts
+<br>&nbsp;&nbsp;&nbsp;_Assigned_chem_shift_list.Sf_framecode &emsp;&emsp;&emsp;&emsp;&emsp;<span class="action">assigned_chem_shift_list_1</span></i>
+</p>
+<p>Or they may look something like this:</p>
+<p style="padding-left: 30px; "><i><span class="action">save_chem_shift_list_1</span>
+<br>&nbsp;&nbsp;&nbsp;_Assigned_chem_shift_list.Sf_category &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;assigned_chemical_shifts
+<br>&nbsp;&nbsp;&nbsp;_Assigned_chem_shift_list.Sf_framecode &emsp;&emsp;&emsp;&emsp;&emsp;<span class="action">chem_shift_list_1</span></i>
+</p>
+<p>In which case, change them to:</p>
+<p style="padding-left: 30px; "><i><span class="action">save_assigned_chem_shift_list_1</span>
+<br>&nbsp;&nbsp;&nbsp;_Assigned_chem_shift_list.Sf_category &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;assigned_chemical_shifts
+<br>&nbsp;&nbsp;&nbsp;_Assigned_chem_shift_list.Sf_framecode &emsp;&emsp;&emsp;&emsp;&emsp;<span class="action">assigned_chem_shift_list_1</span></i>
+</p>
+<p>The chemical shift list import should now work.</p>
+</body>
+</html>

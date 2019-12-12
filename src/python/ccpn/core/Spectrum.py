@@ -51,8 +51,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: CCPN $"
-__dateModified__ = "$dateModified: 2017-07-07 16:32:30 +0100 (Fri, July 07, 2017) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2019-12-12 16:12:05 +0000 (Thu, December 12, 2019) $"
 __version__ = "$Revision: 3.0.0 $"
 #=========================================================================================
 # Created
@@ -661,7 +661,9 @@ assignmentTolerances
         """Return true if the spectrum currently points to an existent file.
         (contents of the file are not checked)
         """
-        return self.path.exists()
+        if self.filePath is None:
+            return False
+        return aPath(self.filePath).exists()
 
     @property
     def headerSize(self) -> Optional[int]:
@@ -672,8 +674,6 @@ assignmentTolerances
         else:
             return None
 
-    # NBNB TBD Should this be made modifiable? Would be a bit of work ...
-
     @property
     def numberType(self) -> Optional[str]:
         """Data type of numbers stored in data matrix ('int' or 'float')."""
@@ -683,18 +683,14 @@ assignmentTolerances
         else:
             return None
 
-    # NBNB TBD Should this be made modifiable? Would be a bit of work ...
-
     @property
-    def complexStoredBy(self) -> str:
+    def complexStoredBy(self) -> Optional[str]:
         """Hypercomplex numbers are stored by ('timepoint', 'quadrant', or 'dimension')."""
         xx = self._wrappedData.dataStore
         if xx:
             return xx.complexStoredBy
         else:
             return None
-
-    # NBNB TBD Should this be made modifiable? Would be a bit of work ...
 
     # Attributes belonging to AbstractDataDim
 

@@ -31,8 +31,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: CCPN $"
-__dateModified__ = "$dateModified: 2017-07-07 16:32:21 +0100 (Fri, July 07, 2017) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2019-12-18 11:43:19 +0000 (Wed, December 18, 2019) $"
 __version__ = "$Revision: 3.0.0 $"
 #=========================================================================================
 # Created
@@ -41,6 +41,7 @@ __author__ = "$Author: Luca M $"
 __date__ = "$Date: 2019-06-12 10:28:40 +0000 (Wed, Jun 12, 2019) $"
 #=========================================================================================
 __title__ = "BMRB Chemical Shift List Importer from NMR-STAR v3.1"
+# Start of code
 #=========================================================================================
 
 _UI = True  # Default opens a popup for selecting the input and run the macro

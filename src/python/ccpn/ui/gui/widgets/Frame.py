@@ -47,7 +47,7 @@ ScrollableFrame(parent=None, showBorder=False, fShape=None, fShadow=None,
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -57,7 +57,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2019-12-05 09:40:40 +0000 (Thu, December 05, 2019) $"
+__dateModified__ = "$dateModified: 2020-01-03 18:03:55 +0000 (Fri, January 03, 2020) $"
 __version__ = "$Revision: 3.0.0 $"
 #=========================================================================================
 # Created
@@ -285,6 +285,48 @@ class OpenGLOverlayFrame(Frame):
 
         sl.setSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum)
 
+    def _resetStyleBackground(self, sl, foregroundColour=CCPNGLWIDGET_HEXFOREGROUND, backgroundColour=CCPNGLWIDGET_HEXBACKGROUND):
+
+        sl.setStyleSheet('QLabel {'
+                         'padding: 0; '
+                         'margin: 0px 0px 0px 0px;'
+                         'color: %s;'
+                         'background-color: %s;'
+                         'border: 0 px;'
+                         'font-family: %s;'
+                         'font-size: %dpx;'
+                         'qproperty-alignment: AlignLeft;'
+                         '}' % (getColours()[foregroundColour],
+                                getColours()[backgroundColour],
+                                textFontLarge.fontName,
+                                textFontLarge.pointSize()))
+
+        sl.update()
+
+        # def _setWidgetColour(widget, colour):
+        #     """Set the colour for the widget
+        #     """
+        #     palette = widget.palette()
+        #     palette.setColor(QtGui.QPalette.Base, QtGui.QColor('lightpink'))
+        #     widget.setPalette(palette)
+        #
+        # _setWidgetColour(sl, getColours()[backgroundColour])
+        # sl.update()
+
+
+    def resetBackground(self):
+        myItems = self.findChildren(QtWidgets.QLabel)
+        print('>>>resetBackground', myItems)
+        for item in myItems:
+            # resetBackground
+            try:
+
+                # almost, but need to select required foreground colour as well
+
+                print('>>>item', item)
+                self._resetStyleBackground(item)
+            except Exception as es:
+                print('  >>>', str(es))
 
 class ScrollOpenGLOverlayFrame(OpenGLOverlayFrame):
     """

@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-01-03 16:43:29 +0000 (Fri, January 03, 2020) $"
+__dateModified__ = "$dateModified: 2020-01-03 18:03:55 +0000 (Fri, January 03, 2020) $"
 __version__ = "$Revision: 3.0.0 $"
 #=========================================================================================
 # Created
@@ -125,7 +125,7 @@ class GuiStrip(Frame):
         # grid=headerGrid, gridSpan=headerSpan, setLayout=True, spacing=(0, 0))
 
         # set the ID label in the new widget
-        self._CcpnGLWidget.setStripID('.'.join(self.id.split('.')))
+        self._CcpnGLWidget.setStripID('.'.join(self.pid.split('.')))
         # self._CcpnGLWidget.setStripID('')
 
         # Widgets for toolbar; items will be added by GuiStripNd (eg. the Z/A-plane boxes)

@@ -4,7 +4,7 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -13,8 +13,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: CCPN $"
-__dateModified__ = "$dateModified: 2018-12-20 15:53:23 +0000 (Thu, December 20, 2018) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2020-01-03 16:43:29 +0000 (Fri, January 03, 2020) $"
 __version__ = "$Revision: 3.0.0 $"
 #=========================================================================================
 # Created
@@ -1484,6 +1484,15 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
 
                     # strips are arranged in a column
                     self._scaleToXAxis()
+
+                elif self.spectrumDisplay.stripArrangement == 'T':
+
+                    # NOTE:ED - Tiled plots not fully implemented yet
+                    getLogger().warning('Tiled plots not implemented for spectrumDisplay: %s' % str(self.spectrumDisplay.pid))
+
+                else:
+                    getLogger().warning('Strip direction is not defined for spectrumDisplay: %s' % str(self.spectrumDisplay.pid))
+
             else:
                 # paint to update lock button colours
                 self.update()
@@ -1589,6 +1598,12 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
                     self.axisT = mid + diff
                     self.axisL = axisL
                     self.axisR = axisR
+
+                elif self.spectrumDisplay.stripArrangement == 'T':
+
+                    # NOTE:ED - Tiled plots not fully implemented yet
+                    # currently ignore - warnings will be logged elsewhere
+                    pass
 
                 else:
                     # currently ignore - warnings will be logged elsewhere
@@ -2140,6 +2155,14 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
 
                 # strips are arranged in a column
                 self._scaleToXAxis(rescale=False)
+
+            elif self.spectrumDisplay.stripArrangement == 'T':
+
+                # NOTE:ED - Tiled plots not fully implemented yet
+                getLogger().warning('Tiled plots not implemented for spectrumDisplay: %s' % str(self.spectrumDisplay.pid))
+
+            else:
+                getLogger().warning('Strip direction is not defined for spectrumDisplay: %s' % str(self.spectrumDisplay.pid))
 
         self.rescale()
 

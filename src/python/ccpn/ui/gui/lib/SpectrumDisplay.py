@@ -122,9 +122,9 @@ def navigateToPeakInStrip(spectrumDisplay: GuiSpectrumDisplay, strip, peak, widt
     spCodes = spectrumDisplay.axisCodes
     pos = [None] * len(spCodes)
     newWidths = ['full'] * len(spCodes)
+    index = 'YXT'.index(spectrumDisplay.stripArrangement)
 
-    index = 'YX'.index(spectrumDisplay.stripArrangement)
-    if widths == None:
+    if widths == None and index < 2:
         # set the width in case of nD (n>2)
         _widths = {'H': 0.3, 'C': 1.0, 'N': 1.0}
         # _ac = strip.axisCodes[0]
@@ -152,8 +152,9 @@ def navigateToNmrResidueInStrip(spectrumDisplay: GuiSpectrumDisplay, strip, nmrR
 
     spCodes = spectrumDisplay.axisCodes
     newWidths = ['full'] * len(spCodes)
-    index = 'YX'.index(spectrumDisplay.stripArrangement)
-    if widths == None:
+    index = 'YXT'.index(spectrumDisplay.stripArrangement)
+
+    if widths == None and index < 2:
         # set the width in case of nD (n>2)
         _widths = {'H': 0.3, 'C': 1.0, 'N': 1.0}
         _ac = spCodes[index]                                # primary axisCode based in stripArrangement

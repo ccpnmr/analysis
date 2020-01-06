@@ -4,7 +4,7 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -13,8 +13,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: CCPN $"
-__dateModified__ = "$dateModified: 2017-07-07 16:32:50 +0100 (Fri, July 07, 2017) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2020-01-06 17:16:09 +0000 (Mon, January 06, 2020) $"
 __version__ = "$Revision: 3.0.0 $"
 #=========================================================================================
 # Created
@@ -427,10 +427,11 @@ class GeneralTab(Widget):
         #     self.samplesPulldownList.select(spectrum.sample.name)
         # self.samplesPulldownList.activated[str].connect(partial(self._queueSampleChange, spectrum))
         self.samplesPulldownList.currentIndexChanged.connect(partial(self._queueSampleChange, spectrum))
+        row += 1
 
         if spectrum.dimensionCount == 1:
-            Label(self, text="Colour", vAlign='t', hAlign='l', grid=(7, 0))
-            self.colourBox = PulldownList(self, vAlign='t', grid=(7, 1))
+            Label(self, text="Colour", vAlign='t', hAlign='l', grid=(row, 0))
+            self.colourBox = PulldownList(self, vAlign='t', grid=(row, 1))
 
             # populate initial pulldown
             # spectrumColourKeys = list(spectrumColours.keys())
@@ -445,12 +446,13 @@ class GeneralTab(Widget):
             #     self.colourBox.setCurrentText(spectrumColours[c])
 
             self.colourBox.currentIndexChanged.connect(partial(self._queueChangeSliceComboIndex, spectrum))
-            colourButton = Button(self, vAlign='t', hAlign='l', grid=(7, 2), hPolicy='fixed',
+            colourButton = Button(self, vAlign='t', hAlign='l', grid=(row, 2), hPolicy='fixed',
                                   callback=partial(self._queueSetSpectrumColour, spectrum), icon='icons/colours')
+            row += 1
 
-            Label(self, text="Experiment Type ", vAlign='t', hAlign='l', grid=(8, 0))
-            self.spectrumType = FilteringPulldownList(self, vAlign='t', grid=(8, 1))
-            spButton = Button(self, grid=(8, 2),
+            Label(self, text="Experiment Type ", vAlign='t', hAlign='l', grid=(row, 0))
+            self.spectrumType = FilteringPulldownList(self, vAlign='t', grid=(row, 1))
+            spButton = Button(self, grid=(row, 2),
                               callback=partial(self._raiseExperimentFilterPopup, spectrum),
                               hPolicy='fixed', icon='icons/applications-system')
 
@@ -461,28 +463,32 @@ class GeneralTab(Widget):
             self.spectrumType.activated.connect(partial(self._queueSetSpectrumType, spectrum))
             # if spectrum.experimentType is not None:
             #     self.spectrumType.select(spectrum.experimentType)
+            row += 1
 
-            Label(self, text='Spectrum Scaling', vAlign='t', hAlign='l', grid=(9, 0))
-            self.spectrumScalingData = ScientificDoubleSpinBox(self, vAlign='t', grid=(9, 1), min=0.1, max=100.0)
+            Label(self, text='Spectrum Scaling', vAlign='t', hAlign='l', grid=(row, 0))
+            self.spectrumScalingData = ScientificDoubleSpinBox(self, vAlign='t', grid=(row, 1), min=0.1, max=100.0)
             # self.spectrumScalingData.setValue(spectrum.scale)
             self.spectrumScalingData.valueChanged.connect(partial(self._queueSpectrumScaleChange, spectrum, self.spectrumScalingData.textFromValue))
+            row += 1
 
-            Label(self, text="Date Recorded ", vAlign='t', hAlign='l', grid=(11, 0))
-            Label(self, text='n/a', vAlign='t', hAlign='l', grid=(11, 1))
+            Label(self, text="Date Recorded ", vAlign='t', hAlign='l', grid=(row, 0))
+            Label(self, text='n/a', vAlign='t', hAlign='l', grid=(row, 1))
+            row += 1
 
-            Label(self, text="Noise Level ", vAlign='t', hAlign='l', grid=(12, 0))
-            self.noiseLevelData = ScientificDoubleSpinBox(self, vAlign='t', hAlign='l', grid=(12, 1))
+            Label(self, text="Noise Level ", vAlign='t', hAlign='l', grid=(row, 0))
+            self.noiseLevelData = ScientificDoubleSpinBox(self, vAlign='t', hAlign='l', grid=(row, 1))
 
             # if spectrum.noiseLevel is not None:
             #     self.noiseLevelData.setValue(spectrum.noiseLevel)
             # else:
             #     self.noiseLevelData.setValue(0)
             self.noiseLevelData.valueChanged.connect(partial(self._queueNoiseLevelDataChange, spectrum, self.noiseLevelData.textFromValue))
+            row += 1
 
         else:
-            Label(self, text="Experiment Type ", vAlign='t', hAlign='l', grid=(7, 0))
-            self.spectrumType = FilteringPulldownList(self, vAlign='t', grid=(7, 1))
-            spButton = Button(self, grid=(7, 2),
+            Label(self, text="Experiment Type ", vAlign='t', hAlign='l', grid=(row, 0))
+            self.spectrumType = FilteringPulldownList(self, vAlign='t', grid=(row, 1))
+            spButton = Button(self, grid=(row, 2),
                               callback=partial(self._raiseExperimentFilterPopup, spectrum),
                               hPolicy='fixed', icon='icons/applications-system')
             # experimentTypes = _getExperimentTypes(spectrum.project, spectrum)
@@ -517,15 +523,17 @@ class GeneralTab(Widget):
             self.spectrumType.activated.connect(partial(self._queueSetSpectrumType, spectrum))
             # self.spectrumType.setMinimumWidth(self.pathData.width() * 1.95)
             # self.spectrumType.setFixedHeight(25)
+            row += 1
 
-            spectrumScalingLabel = Label(self, text='Spectrum Scaling', vAlign='t', grid=(9, 0))
-            self.spectrumScalingData = ScientificDoubleSpinBox(self, vAlign='t', grid=(9, 1), min=0.1, max=100.0)
+            spectrumScalingLabel = Label(self, text='Spectrum Scaling', vAlign='t', grid=(row, 0))
+            self.spectrumScalingData = ScientificDoubleSpinBox(self, vAlign='t', grid=(row, 1), min=0.1, max=100.0)
             # self.spectrumScalingData.setValue(spectrum.scale)
             self.spectrumScalingData.valueChanged.connect(partial(self._queueSpectrumScaleChange, spectrum, self.spectrumScalingData.textFromValue))
+            row += 1
 
-            noiseLevelLabel = Label(self, text="Noise Level ", vAlign='t', hAlign='l', grid=(10, 0))
-            self.noiseLevelData = ScientificDoubleSpinBox(self, vAlign='t', grid=(10, 1))
-
+            noiseLevelLabel = Label(self, text="Noise Level ", vAlign='t', hAlign='l', grid=(row, 0))
+            self.noiseLevelData = ScientificDoubleSpinBox(self, vAlign='t', grid=(row, 1))
+            row += 1
             # if spectrum.noiseLevel is None:
             #     self.noiseLevelData.setValue(spectrum.estimateNoise())
             # else:
@@ -535,7 +543,7 @@ class GeneralTab(Widget):
             self.layout().addItem(QtWidgets.QSpacerItem(0, 10), 0, 0)
 
         Spacer(self, 5, 5, QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.MinimumExpanding,
-               grid=(12, 1), gridSpan=(1, 1))
+               grid=(row, 1), gridSpan=(1, 1))
 
     # def _setPathDataFromUrl(self, spectrum, newFilePath):
     #     """Set the pathData widgets from the filePath
@@ -1062,6 +1070,15 @@ class DimensionsTab(Widget):
         hLine.setContentsMargins(5, 0, 0, 0)
 
         row += 1
+        Label(self, text="Spinning rate (Hz)", grid=(row, 0), hAlign='l')
+        self.spinningRateData = ScientificDoubleSpinBox(self, vAlign='t', grid=(row, 1), min=0.1, max=10000.0)
+        self.spinningRateData.valueChanged.connect(partial(self._queueSpinningRateChange, spectrum, self.spinningRateData.textFromValue))
+
+        row += 1
+        hLine = HLine(self, grid=(row, 0), gridSpan=(1, dimensions + 1), colour=getColours()[DIVIDER], height=15, divisor=2)
+        hLine.setContentsMargins(5, 0, 0, 0)
+
+        row += 1
         self.preferredAxisOrderPulldown = PulldownListCompoundWidget(self, labelText="Preferred Axis Order",
                                                                      grid=(row, 0), gridSpan=(1, dimensions + 1), vAlign='t')
         # self.preferredAxisOrderPulldown.setPreSelect(self._fillPreferredWidgetFromAxisTexts)
@@ -1194,6 +1211,9 @@ class DimensionsTab(Widget):
                 index = aliasMinRange.index(aliasLim[i][0])
                 self.minAliasingPullDowns[i].setIndex(index)
 
+        value = self.spectrum.spinningRate
+        if value:
+            self.spinningRateData.setValue(value)
         self.preferredAxisOrderPulldown.setPreSelect(self._fillPreferredWidgetFromAxisTexts)
 
     def _writeLoggingMessage(self, command):
@@ -1352,6 +1372,17 @@ class DimensionsTab(Widget):
 
         self.pythonConsole.writeConsoleCommand("spectrum.displayFoldedContours = {0}".format(spectrum.displayFoldedContours), spectrum=spectrum)
         self._writeLoggingMessage("spectrum.displayFoldedContours = {0}".format(spectrum.displayFoldedContours))
+
+    @queueStateChange(_verifyPopupTabApply)
+    def _queueSpinningRateChange(self, spectrum, textFromValue, value):
+        specValue = textFromValue(spectrum.scale)
+        if value >= 0 and textFromValue(value) != specValue:
+            return partial(self._setSpinningRate, spectrum, value)
+
+    def _setSpinningRate(self, spectrum, value):
+        spectrum.spinningRate = float(value)
+        self._writeLoggingMessage("spectrum.spinningRate = %s" % str(value))
+        self.pythonConsole.writeConsoleCommand("spectrum.spinningRate = %s" % value, spectrum=spectrum)
 
 
 class ContoursTab(Widget):

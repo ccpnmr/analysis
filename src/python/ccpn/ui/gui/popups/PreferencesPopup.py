@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-01-06 10:19:59 +0000 (Mon, January 06, 2020) $"
+__dateModified__ = "$dateModified: 2020-01-06 17:16:09 +0000 (Mon, January 06, 2020) $"
 __version__ = "$Revision: 3.0.0 $"
 #=========================================================================================
 # Created
@@ -600,6 +600,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
         self.contourThicknessData.setValue(int(self.preferences.general.contourThickness))
         self.autoCorrectBox.setChecked(self.preferences.general.autoCorrectColours)
         _setColourPulldown(self.marksDefaultColourBox, self.preferences.general.defaultMarksColour)
+        self.showSideBandsData.setValue(int(self.preferences.general.numSideBands))
 
         multipletAveraging = self.preferences.general.multipletAveraging
         self.multipletAveraging.setIndex(MULTIPLETAVERAGINGTYPES.index(multipletAveraging) if multipletAveraging in MULTIPLETAVERAGINGTYPES else 0)
@@ -860,6 +861,17 @@ class PreferencesPopup(CcpnDialogMainWidget):
         # self.showIntensityLimitBox.setValue(intensityLimit)
         self.showIntensityLimitBox.setMinimumWidth(LineEditsMinimumWidth)
         self.showIntensityLimitBox.valueChanged.connect(self._queueSetIntensityLimit)
+
+        row += 1
+        HLine(parent, grid=(row, 0), gridSpan=(1, 3), colour=getColours()[DIVIDER], height=15)
+
+        row += 1
+        # numSideBands = self.preferences.general.numSideBands
+        self.showSideBands = Label(parent, text='Number of Visible Sidebands:', grid=(row, 0), hAlign='r')
+        self.showSideBandsData = DoubleSpinbox(parent, step=1, min=0, max=5, grid=(row, 1), hAlign='l', decimals=0)
+        # self.showSideBandsData.setValue(int(numSideBands))
+        self.showSideBandsData.setMinimumWidth(LineEditsMinimumWidth)
+        self.showSideBandsData.valueChanged.connect(self._queueSetNumSideBands)
 
         row += 1
         HLine(parent, grid=(row, 0), gridSpan=(1, 3), colour=getColours()[DIVIDER], height=15)
@@ -1502,6 +1514,20 @@ class PreferencesPopup(CcpnDialogMainWidget):
         # except:
         #     return
         self.preferences.general.stripWidthZoomPercent = value
+
+    @queueStateChange(_verifyPopupApply)
+    def _queueSetNumSideBands(self):
+        textFromValue = self.showSideBandsData.textFromValue
+        value = self.showSideBandsData.get()
+        prefValue = textFromValue(self.preferences.general.numSideBands)
+        if value >= 0 and textFromValue(value) != prefValue:
+            return partial(self._setNumSideBands, value)
+
+    def _setNumSideBands(self, value):
+        """
+        Set the value for number of sideband gridlines to display
+        """
+        self.preferences.general.numSideBands = value
 
     @queueStateChange(_verifyPopupApply)
     def _queueSetMatchAxisCode(self):

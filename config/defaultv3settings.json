@@ -67,7 +67,8 @@
         "autoUpdateAliasing"                   : false,
         "generateSinglePlaneContours"          : true,
         "applyToSpectrumDisplays"              : true,
-        "enableAntiAliasing"                   : true
+        "enableAntiAliasing"                   : true,
+        "numSideBands"                         : 0
     },
     "proxySettings"    : {
         "useProxy"         : false,

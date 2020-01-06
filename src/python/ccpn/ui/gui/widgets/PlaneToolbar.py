@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-01-06 10:19:59 +0000 (Mon, January 06, 2020) $"
+__dateModified__ = "$dateModified: 2020-01-06 15:19:49 +0000 (Mon, January 06, 2020) $"
 __version__ = "$Revision: 3.0.0 $"
 #=========================================================================================
 # Created
@@ -169,7 +169,9 @@ class _StripLabel(ActiveLabel):  #  VerticalLabel): could use Vertical label so 
         """
         self._mousePressed = False
         if event.button() == QtCore.Qt.RightButton:
-            self._rightButtonPressed(event)
+            pass
+            # NOTE:ED - popup 'close headers' not required now
+            # self._rightButtonPressed(event)
 
     def _handleMouseClicked(self, mouseDict):
         """handle a single mouse event, but ignore double click events

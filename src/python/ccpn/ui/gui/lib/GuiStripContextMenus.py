@@ -8,7 +8,7 @@ To create a menu:
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -17,8 +17,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy:  Luca Mureddu $"
-__dateModified__ = "$dateModified: 2018-05-17 10:28:43 +0000 (Thu, May 17, 2018) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2020-01-06 15:19:49 +0000 (Mon, January 06, 2020) $"
 __version__ = "$Revision: 3.0.0 $"
 #=========================================================================================
 # Created
@@ -445,15 +445,15 @@ def _copyAllAxisRangeFromStripItem(strip):
 
 
 def _copyXAxisCodeRangeFromStripItem(strip):
-    return _SCMitem(name='Match %s Axis Range to:' % strip.axisCodes[0],
-                    typeItem=ItemTypes.get(MENU), toolTip='Match %s axis range to selected strip' % strip.axisCodes[0],
+    return _SCMitem(name='Copy Axis Range to %s from:' % strip.axisCodes[0],
+                    typeItem=ItemTypes.get(MENU), toolTip='Copy axis range to %s from selected strip' % strip.axisCodes[0],
                     stripMethodName='matchXAxisCodeToMenu',
                     callback=None)
 
 
 def _copyYAxisCodeRangeFromStripItem(strip):
-    return _SCMitem(name='Match %s Axis Range to:' % strip.axisCodes[1],
-                    typeItem=ItemTypes.get(MENU), toolTip='Match %s axis range to selected strip' % strip.axisCodes[1],
+    return _SCMitem(name='Copy Axis Range to %s from:' % strip.axisCodes[1],
+                    typeItem=ItemTypes.get(MENU), toolTip='Copy axis range to %s from selected strip' % strip.axisCodes[1],
                     stripMethodName='matchYAxisCodeToMenu',
                     callback=None)
 
@@ -485,15 +485,15 @@ def _copyAllAxisRangeFromStripItem2(strip):
 
 
 def _copyXAxisCodeRangeFromStripItem2(strip):
-    return _SCMitem(name='Match %s Axis Range to:' % strip.axisCodes[0],
-                    typeItem=ItemTypes.get(MENU), toolTip='Match %s axis range to selected strip' % strip.axisCodes[0],
+    return _SCMitem(name='Copy Axis Range to %s from:' % strip.axisCodes[0],
+                    typeItem=ItemTypes.get(MENU), toolTip='Copy axis range to %s from selected strip' % strip.axisCodes[0],
                     stripMethodName='matchXAxisCodeToMenu2',
                     callback=None)
 
 
 def _copyYAxisCodeRangeFromStripItem2(strip):
-    return _SCMitem(name='Match %s Axis Range to:' % strip.axisCodes[1],
-                    typeItem=ItemTypes.get(MENU), toolTip='Match %s axis range to selected strip' % strip.axisCodes[1],
+    return _SCMitem(name='Copy Axis Range to %s from:' % strip.axisCodes[1],
+                    typeItem=ItemTypes.get(MENU), toolTip='Copy axis range to %s from selected strip' % strip.axisCodes[1],
                     stripMethodName='matchYAxisCodeToMenu2',
                     callback=None)
 

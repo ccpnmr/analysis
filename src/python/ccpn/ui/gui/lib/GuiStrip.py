@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-01-03 18:03:55 +0000 (Fri, January 03, 2020) $"
+__dateModified__ = "$dateModified: 2020-01-06 10:19:59 +0000 (Mon, January 06, 2020) $"
 __version__ = "$Revision: 3.0.0 $"
 #=========================================================================================
 # Created
@@ -948,6 +948,7 @@ class GuiStrip(Frame):
         self._CcpnGLWidget.highlightCurrentStrip(flag)
         if self.stripLabel:
             self.stripLabel.setLabelColour(CCPNGLWIDGET_HEXHIGHLIGHT if flag else CCPNGLWIDGET_HEXFOREGROUND)
+            self.stripLabel.setHighlighted(flag)
 
     # GWV 20181127: moved to a single notifier in GuiMainWindow
     # def _highlightCurrentStrip(self, data):

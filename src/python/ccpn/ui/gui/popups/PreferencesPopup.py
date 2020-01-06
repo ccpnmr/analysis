@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-01-03 18:03:55 +0000 (Fri, January 03, 2020) $"
+__dateModified__ = "$dateModified: 2020-01-06 10:19:59 +0000 (Mon, January 06, 2020) $"
 __version__ = "$Revision: 3.0.0 $"
 #=========================================================================================
 # Created
@@ -178,12 +178,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
 
                     strip.spectrumBordersVisible = self.application.preferences.general.showSpectrumBorder
 
-                strip._frameGuide.resetBackground()
-                # strip.optionsChanged.emit({EMITSOURCE      : 'None',
-                #                            EMITIGNORESOURCE: True})
-
-            # print('>>>displayVisible', display, checked)
-            # display.spectrumUtilToolBar.setVisible(checked)     # TODO: this fires a refresh too soon
+                strip._frameGuide.resetColourTheme()
 
     def _updateDisplay(self, updateColourScheme, updateSpectrumDisplays):
         if updateColourScheme:

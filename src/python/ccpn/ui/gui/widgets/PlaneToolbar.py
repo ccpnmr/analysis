@@ -7,7 +7,7 @@ The NmrResidueLabel allows drag and drop of the ids displayed in them
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2017-07-07 16:32:55 +0100 (Fri, July 07, 2017) $"
+__dateModified__ = "$dateModified: 2020-01-06 10:19:59 +0000 (Mon, January 06, 2020) $"
 __version__ = "$Revision: 3.0.0 $"
 #=========================================================================================
 # Created
@@ -582,6 +582,7 @@ class PlaneAxisWidget(_OpenGLFrameABC):
                 self._setStyle(label, foregroundColour=CCPNGLWIDGET_HEXHIGHLIGHT)
             else:
                 self._setStyle(label, foregroundColour=CCPNGLWIDGET_HEXFOREGROUND)
+            label.highlighted = value
 
     def _selectAxisCallback(self, widgets):
         # if the first widget is clicked then change the selected axis
@@ -1278,6 +1279,9 @@ class StripLabelWidget(_OpenGLFrameABC):
         self._setStyle(self._stripLabel, foregroundColour=colour)
         self._setPositionParameter(STRIPCOLOUR, colour)
         self._resize()
+
+    def setHighlighted(self, value):
+        self._stripLabel.highlighted = value
 
 
 class TestPopup(Frame):

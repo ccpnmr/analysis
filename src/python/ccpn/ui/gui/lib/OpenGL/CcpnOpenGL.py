@@ -55,7 +55,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-01-03 16:43:29 +0000 (Fri, January 03, 2020) $"
+__dateModified__ = "$dateModified: 2020-01-07 10:53:17 +0000 (Tue, January 07, 2020) $"
 __version__ = "$Revision: 3.0.0 $"
 #=========================================================================================
 # Created
@@ -337,6 +337,7 @@ class CcpnGLWidget(QOpenGLWidget):
         self._doubleCrosshairVisible = True  #self._preferences.showDoubleCrosshair
 
         self.diagonalGLList = None
+        self.boundingBoxes = None
         self._updateAxes = True
 
         self._axesVisible = True
@@ -1772,6 +1773,13 @@ class CcpnGLWidget(QOpenGLWidget):
                                             dimension=2,
                                             GLContext=self)
 
+        self.boundingBoxes = GLVertexArray(numLists=1,
+                                            renderMode=GLRENDERMODE_REBUILD,
+                                            blendMode=False,
+                                            drawMode=GL.GL_LINES,
+                                            dimension=2,
+                                            GLContext=self)
+
         self._cursorList = GLVertexArray(numLists=1,
                                          renderMode=GLRENDERMODE_REBUILD,
                                          blendMode=False,
@@ -2911,6 +2919,7 @@ class CcpnGLWidget(QOpenGLWidget):
         self.viewports.setViewport(self._currentView)
 
         self.drawSpectra()
+        self.drawBoundingBoxes()
 
         if not self._stackingMode:
             self._GLPeaks.drawSymbols(self._spectrumSettings)
@@ -3219,39 +3228,65 @@ class CcpnGLWidget(QOpenGLWidget):
                 #
                 #   self._makeSpectrumArray(spectrumView, self._testSpectrum)
 
-        # set transform back to identity - ensures only the pMatrix is applied
+        # reset lineWidth
+        GL.glLineWidth(1.0 * self.viewports._devicePixelRatio)
+
+    def buildBoundingBoxes(self):
+        pass
+
+    def drawBoundingBoxes(self):
+        if self.strip.isDeleted:
+            return
+
+        currentShader = self.globalGL._shaderProgram1
+
+        # set transform to identity - ensures only the pMatrix is applied
         currentShader.setGLUniformMatrix4fv('mvMatrix', 1, GL.GL_FALSE, self._IMatrix)
 
-        # draw the bounding boxes
+        # build the bounding boxes
+        index = 0
+        drawList = self.boundingBoxes
+        drawList.clearArrays()
+
+        # if self._preferences.showSpectrumBorder:
+        if self.strip.spectrumBordersVisible:
+            for spectrumView in self._ordering:  #self._ordering:                             # strip.spectrumViews:
+
+                if spectrumView.isDeleted:
+                    continue
+
+                if spectrumView.isVisible() and spectrumView.spectrum.dimensionCount > 1 and spectrumView in self._spectrumSettings.keys():
+                    specSettings = self._spectrumSettings[spectrumView]
+
+                    fx0 = specSettings[GLDefs.SPECTRUM_MAXXALIAS]
+                    fx1 = specSettings[GLDefs.SPECTRUM_MINXALIAS]
+                    fy0 = specSettings[GLDefs.SPECTRUM_MAXYALIAS]
+                    fy1 = specSettings[GLDefs.SPECTRUM_MINYALIAS]
+
+                    col = (*spectrumView.posColour[0:3], 0.5)
+
+                    # add lines to drawList
+                    drawList.indices = np.append(drawList.indices, np.array((index, index + 1,
+                                                                             index + 1, index + 2,
+                                                                             index + 2, index + 3,
+                                                                             index + 3, index), dtype=np.uint32))
+                    drawList.vertices = np.append(drawList.vertices, np.array((fx0, fy0, fx0, fy1, fx1, fy1, fx1, fy0), dtype=np.float32))
+                    drawList.colors = np.append(drawList.colors, np.array(col * 4, dtype=np.float32))
+                    drawList.numVertices += 4
+                    index += 4
+
+            drawList.defineIndexVBO(enableVBO=True)
+
         with self._disableGLAliasing():
             GL.glEnable(GL.GL_BLEND)
 
-            # if self._preferences.showSpectrumBorder:
-            if self.strip.spectrumBordersVisible:
-                for spectrumView in self._ordering:  #self._ordering:                             # strip.spectrumViews:
+            # use the _devicePixelRatio for retina displays
+            GL.glLineWidth(self.strip._contourThickness * self.viewports._devicePixelRatio)
 
-                    if spectrumView.isDeleted:
-                        continue
+            drawList.drawIndexVBO(enableVBO=True)
 
-                    if spectrumView.isVisible() and spectrumView.spectrum.dimensionCount > 1 and spectrumView in self._spectrumSettings.keys():
-                        specSettings = self._spectrumSettings[spectrumView]
-
-                        fx0 = specSettings[GLDefs.SPECTRUM_MAXXALIAS]
-                        fx1 = specSettings[GLDefs.SPECTRUM_MINXALIAS]
-                        fy0 = specSettings[GLDefs.SPECTRUM_MAXYALIAS]
-                        fy1 = specSettings[GLDefs.SPECTRUM_MINYALIAS]
-                        GL.glColor4f(*spectrumView.posColour[0:3], 0.5)
-
-                        # NOTE:ED - needs to be a VBO at some point
-                        GL.glBegin(GL.GL_LINE_LOOP)
-                        GL.glVertex2d(fx0, fy0)
-                        GL.glVertex2d(fx0, fy1)
-                        GL.glVertex2d(fx1, fy1)
-                        GL.glVertex2d(fx1, fy0)
-                        GL.glEnd()
-
-        # reset lineWidth
-        GL.glLineWidth(1.0 * self.viewports._devicePixelRatio)
+            # reset lineWidth
+            GL.glLineWidth(1.0 * self.viewports._devicePixelRatio)
 
     def buildGrid(self):
         """Build the grids for the mainGrid and the bottom/right axes
@@ -3283,7 +3318,7 @@ class CcpnGLWidget(QOpenGLWidget):
 
                         # build the diagonal list here from the visible spectra - each may have a different spinning rate
                         # remove from _build axe - not needed there
-                        self._buildDiagonals()
+                        self.buildDiagonals()
                         break
 
         # build the axes
@@ -3350,25 +3385,55 @@ class CcpnGLWidget(QOpenGLWidget):
                 self.viewports.setViewport(self._currentBottomAxisView)
                 self.gridList[2].drawIndexVBO(enableVBO=True)
 
-        # # pseudo-diagonals
-        # # TBD: assume for now that have ppm
-        # if xPanel.axisUnit.unit == yPanel.axisUnit.unit == 'ppm':
+        # code taken from v2 :)
+
+        # (x0, x1) = self.findAxisRegion(xPanel, col)         # assume that this is the whole visible area?
+        # (y0, y1) = self.findAxisRegion(yPanel, row)
+        #
+        # if not self.hasValueAxis:
         #     for view in allViews:
-        #         if view.isPosVisible or view.isNegVisible:
-        #             analysisSpectrum = view.analysisSpectrum
-        #             spectrum = analysisSpectrum.dataSource
-        #             experiment = spectrum.experiment
-        #             spinningRate = experiment.spinningRate
-        #             if spinningRate:
-        #                 dataDim = view.findFirstAxisMapping(label='x').analysisDataDim.dataDim
-        #                 dataDimRef = ExperimentBasic.getPrimaryDataDimRef(dataDim)
-        #                 expDimRef = dataDimRef.expDimRef
-        #                 spinningRate /= expDimRef.sf  # assumes y expDimRef would give the same
-        #                 nmin = int((y1 - x0) // spinningRate)
-        #                 nmax = - int((x1 - y0) // spinningRate)
-        #                 for n in range(nmin, nmax + 1):
-        #                     if n:  # n = 0 is normal diagonal
-        #                         self.drawDiagonal(handler, x0 + n * spinningRate, x1 + n * spinningRate, y0, y1, color, isDashed=True)
+        #         analysisSpectrum = view.analysisSpectrum
+        #         spectrum = analysisSpectrum.dataSource
+        #         if spectrum.numDim >= 2:
+        #             if self.isViewVisible(view) and analysisSpectrum.useBoundingBox:
+        #                 self.drawViewBox(handler, view, x0, x1, y0, y1)
+        #
+        # # print 'doCanvas4'
+        # self.drawMarks(handler, x0, x1, y0, y1)
+        # self.drawRulers(handler, x0, x1, y0, y1)
+        #
+        # project = window.root
+        # profile = getAnalysisProfile(project)
+        # color = inverseGrey(profile.bgColor)
+        #
+        # self.drawDeltaMarker(handler, x0, x1, y0, y1, color)
+        #
+        # xaxisType = xPanel.axisType
+        # yaxisType = yPanel.axisType
+        #
+        # #print 'doCanvas5'
+        # if xaxisType == yaxisType:
+        #     self.drawDiagonal(handler, x0, x1, y0, y1, color)
+        #
+        #     # pseudo-diagonals
+        #     # TBD: assume for now that have ppm
+        #     if xPanel.axisUnit.unit == yPanel.axisUnit.unit == 'ppm':
+        #         for view in allViews:
+        #             if view.isPosVisible or view.isNegVisible:
+        #                 analysisSpectrum = view.analysisSpectrum
+        #                 spectrum = analysisSpectrum.dataSource
+        #                 experiment = spectrum.experiment
+        #                 spinningRate = experiment.spinningRate
+        #                 if spinningRate:
+        #                     dataDim = view.findFirstAxisMapping(label='x').analysisDataDim.dataDim
+        #                     dataDimRef = ExperimentBasic.getPrimaryDataDimRef(dataDim)
+        #                     expDimRef = dataDimRef.expDimRef
+        #                     spinningRate /= expDimRef.sf  # assumes y expDimRef would give the same
+        #                     nmin = int((y1 - x0) // spinningRate)
+        #                     nmax = - int((x1 - y0) // spinningRate)
+        #                     for n in range(nmin, nmax + 1):
+        #                         if n:  # n = 0 is normal diagonal
+        #                             self.drawDiagonal(handler, x0 + n * spinningRate, x1 + n * spinningRate, y0, y1, color, isDashed=True)
         #
         # # extra multiple-quantum diagonals
         # if xaxisType.isotopeCodes == yaxisType.isotopeCodes:
@@ -3376,6 +3441,10 @@ class CcpnGLWidget(QOpenGLWidget):
         #         self.drawDiagonal(handler, x0, x1, 2 * y0, 2 * y1, color)
         #     elif xaxisType.measurementType == 'Shift' and yaxisType.measurementType == 'MQShift':
         #         self.drawDiagonal(handler, 2 * x0, 2 * x1, y0, y1, color)
+        #
+        # #print 'doCanvas6'
+        # if self.hasValueAxis and window.isZeroLineShown:
+        #     self.drawZeroLine(handler, y0, y1, color)
 
     def _floatFormat(self, f=0.0, prec=3):
         """return a float string, remove trailing zeros after decimal
@@ -5197,7 +5266,7 @@ class CcpnGLWidget(QOpenGLWidget):
 
         self.update()
 
-    def _buildDiagonals(self):
+    def buildDiagonals(self):
         """Build a list containing the diagonal and the spinningRate lines for the sidebands
         """
         # get spectral width in X and Y

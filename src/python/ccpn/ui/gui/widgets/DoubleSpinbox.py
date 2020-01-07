@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-01-03 16:43:29 +0000 (Fri, January 03, 2020) $"
+__dateModified__ = "$dateModified: 2020-01-07 15:19:39 +0000 (Tue, January 07, 2020) $"
 __version__ = "$Revision: 3.0.0 $"
 #=========================================================================================
 # Created
@@ -227,13 +227,13 @@ class ScientificDoubleSpinBox(DoubleSpinbox):
         """Values in the spinbox are constrained to the correct sign if the min/max values are
         either both positive or both negative
         """
-        if self.minimum() < 0 and self.maximum() < 0:
+        if self.minimum() <= 0 and self.maximum() <= 0:
             # check for maximum
             val = min(-abs(float(text)), self.maximum())
             self.lineEdit().setText(self.textFromValue(val))
             return val
 
-        elif self.minimum() > 0 and self.maximum() > 0:
+        elif self.minimum() >= 0 and self.maximum() >= 0:
             # check for minimum
             val = max(abs(float(text)), self.minimum())
             self.lineEdit().setText(self.textFromValue(val))

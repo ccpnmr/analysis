@@ -55,7 +55,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-01-07 13:41:18 +0000 (Tue, January 07, 2020) $"
+__dateModified__ = "$dateModified: 2020-01-07 15:19:38 +0000 (Tue, January 07, 2020) $"
 __version__ = "$Revision: 3.0.0 $"
 #=========================================================================================
 # Created
@@ -1774,11 +1774,11 @@ class CcpnGLWidget(QOpenGLWidget):
                                             GLContext=self)
 
         self.boundingBoxes = GLVertexArray(numLists=1,
-                                            renderMode=GLRENDERMODE_REBUILD,
-                                            blendMode=False,
-                                            drawMode=GL.GL_LINES,
-                                            dimension=2,
-                                            GLContext=self)
+                                           renderMode=GLRENDERMODE_REBUILD,
+                                           blendMode=False,
+                                           drawMode=GL.GL_LINES,
+                                           dimension=2,
+                                           GLContext=self)
 
         self._cursorList = GLVertexArray(numLists=1,
                                          renderMode=GLRENDERMODE_REBUILD,
@@ -1885,14 +1885,14 @@ class CcpnGLWidget(QOpenGLWidget):
             self.viewports.addViewport(GLDefs.MAINVIEWFULLHEIGHT, self, (0, 'a'), (0, 'a'),
                                        (-self.AXIS_MARGINRIGHT, 'w'), (0, 'h'))
         else:
-            self.viewports.addViewport(GLDefs.MAINVIEW, self, (0, 'a'), (self.AXIS_MARGINBOTTOM+self.AXIS_LINE, 'a'),
-                                       (-(self.AXIS_MARGINRIGHT+self.AXIS_LINE), 'w'), (-(self.AXIS_MARGINBOTTOM+self.AXIS_LINE), 'h'))
+            self.viewports.addViewport(GLDefs.MAINVIEW, self, (0, 'a'), (self.AXIS_MARGINBOTTOM + self.AXIS_LINE, 'a'),
+                                       (-(self.AXIS_MARGINRIGHT + self.AXIS_LINE), 'w'), (-(self.AXIS_MARGINBOTTOM + self.AXIS_LINE), 'h'))
 
-            self.viewports.addViewport(GLDefs.MAINVIEWFULLWIDTH, self, (0, 'a'), (self.AXIS_MARGINBOTTOM+self.AXIS_LINE, 'a'),
-                                       (0, 'w'), (-(self.AXIS_MARGINBOTTOM+self.AXIS_LINE), 'h'))
+            self.viewports.addViewport(GLDefs.MAINVIEWFULLWIDTH, self, (0, 'a'), (self.AXIS_MARGINBOTTOM + self.AXIS_LINE, 'a'),
+                                       (0, 'w'), (-(self.AXIS_MARGINBOTTOM + self.AXIS_LINE), 'h'))
 
             self.viewports.addViewport(GLDefs.MAINVIEWFULLHEIGHT, self, (0, 'a'), (0, 'a'),
-                                       (-(self.AXIS_MARGINRIGHT+self.AXIS_LINE), 'w'), (0, 'h'))
+                                       (-(self.AXIS_MARGINRIGHT + self.AXIS_LINE), 'w'), (0, 'h'))
 
         # define the viewports for the right axis bar
         if self.AXIS_INSIDE:
@@ -1905,12 +1905,12 @@ class CcpnGLWidget(QOpenGLWidget):
 
         else:
             self.viewports.addViewport(GLDefs.RIGHTAXIS, self, (-(self.AXIS_MARGINRIGHT + self.AXIS_LINE), 'w'),
-                                       (self.AXIS_MARGINBOTTOM+self.AXIS_LINE, 'a'),
-                                       (self.AXIS_LINE, 'a'), (-(self.AXIS_MARGINBOTTOM+self.AXIS_LINE), 'h'))
+                                       (self.AXIS_MARGINBOTTOM + self.AXIS_LINE, 'a'),
+                                       (self.AXIS_LINE, 'a'), (-(self.AXIS_MARGINBOTTOM + self.AXIS_LINE), 'h'))
 
             self.viewports.addViewport(GLDefs.RIGHTAXISBAR, self, (-self.AXIS_MARGINRIGHT, 'w'),
-                                       (self.AXIS_MARGINBOTTOM+self.AXIS_LINE, 'a'),
-                                       (0, 'w'), (-(self.AXIS_MARGINBOTTOM+self.AXIS_LINE), 'h'))
+                                       (self.AXIS_MARGINBOTTOM + self.AXIS_LINE, 'a'),
+                                       (0, 'w'), (-(self.AXIS_MARGINBOTTOM + self.AXIS_LINE), 'h'))
 
         self.viewports.addViewport(GLDefs.FULLRIGHTAXIS, self, (-(self.AXIS_MARGINRIGHT + self.AXIS_LINE), 'w'),
                                    (0, 'a'),
@@ -1928,10 +1928,10 @@ class CcpnGLWidget(QOpenGLWidget):
                                        (-self.AXIS_MARGINRIGHT, 'w'), (self.AXIS_MARGINBOTTOM, 'a'))
         else:
             self.viewports.addViewport(GLDefs.BOTTOMAXIS, self, (0, 'a'), (self.AXIS_MARGINBOTTOM, 'a'),
-                                       (-(self.AXIS_MARGINRIGHT+self.AXIS_LINE), 'w'), (self.AXIS_LINE, 'a'))
+                                       (-(self.AXIS_MARGINRIGHT + self.AXIS_LINE), 'w'), (self.AXIS_LINE, 'a'))
 
             self.viewports.addViewport(GLDefs.BOTTOMAXISBAR, self, (0, 'a'), (0, 'a'),
-                                       (-(self.AXIS_MARGINRIGHT+self.AXIS_LINE), 'w'), (self.AXIS_MARGINBOTTOM, 'a'))
+                                       (-(self.AXIS_MARGINRIGHT + self.AXIS_LINE), 'w'), (self.AXIS_MARGINBOTTOM, 'a'))
 
         self.viewports.addViewport(GLDefs.FULLBOTTOMAXIS, self, (0, 'a'), (self.AXIS_MARGINBOTTOM, 'a'),
                                    (0, 'w'), (self.AXIS_LINE, 'a'))
@@ -2586,8 +2586,8 @@ class CcpnGLWidget(QOpenGLWidget):
             # NOTE:ED I think that Linux is doing a strange button switch when you press shift/ctrl
 
             if self._isSHIFT and self._isCTRL:
-            # if (self._key == Qt.Key_Control and self._isSHIFT == 'S') or \
-            #         (self._key == Qt.Key_Shift and self._isCTRL) == 'C':
+                # if (self._key == Qt.Key_Control and self._isSHIFT == 'S') or \
+                #         (self._key == Qt.Key_Shift and self._isCTRL) == 'C':
 
                 self._endCoordinate = self.cursorCoordinate  #[event.pos().x(), self.height() - event.pos().y()]
                 self._selectionMode = 3
@@ -3339,7 +3339,7 @@ class CcpnGLWidget(QOpenGLWidget):
                                                                b=self.foreground[2],
                                                                transparency=300.0,
                                                                _includeDiagonal=self._matchingIsotopeCodes,
-                                                               _diagonalList=None)                          #self.diagonalGLList)
+                                                               _diagonalList=None)  #self.diagonalGLList)
 
         if self.axesChanged:
             if self.highlighted:
@@ -3476,28 +3476,27 @@ class CcpnGLWidget(QOpenGLWidget):
                     if spec.isotopeCodes[pIndex[0]] == spec.isotopeCodes[pIndex[1]]:
                         self._matchingIsotopeCodes = True
 
-                        # build the diagonal list here from the visible spectra - each may have a different spinning rate
-                        # remove from _build axe - not needed there
-                        self._buildDiagonalList()
-                        break
+                    # build the diagonal list here from the visible spectra - each may have a different spinning rate
+                    # remove from _build axe - not needed there
+                    self._buildDiagonalList()
+                    break
 
     def _drawDiagonalLineV2(self, x0, x1, y0, y1):
-
-        # if not handler.makeCurrent():
-        #     return
-        #
-        # handler.mapRanges(0, 0, 1, 1, 0, 0, 1, 1)
-        # handler.setColor(hexToRgb(color))
-
+        """Generate a simple diagonal mapped to (0..1/0..1)
+        """
         yy0 = float(x0 - y0) / (y1 - y0)
         yy1 = float(x1 - y0) / (y1 - y0)
-        #print 'drawDiagonal', x0, x1, y0, y1, yy0, yy1
-        # if isDashed:
-        #     handler.drawDashLine(0, yy0, 1, yy1, 2, 2)
-        # else:
-        #     handler.drawLine(0, yy0, 1, yy1)
 
         return (0, yy0, 1, yy1)
+
+    def _addDiagonalLine(self, drawList, x0, x1, y0, y1, col):
+        """Add a diagonal line to the drawList
+        """
+        index = len(drawList.indices)
+        drawList.indices = np.append(drawList.indices, np.array((index, index + 1), dtype=np.uint32))
+        drawList.vertices = np.append(drawList.vertices, np.array(self._drawDiagonalLineV2(x0, x1, y0, y1), dtype=np.float32))
+        drawList.colors = np.append(drawList.colors, np.array(col * 2, dtype=np.float32))
+        drawList.numVertices += 2
 
     def _buildDiagonalList(self):
         """Build a list containing the diagonal and the spinningRate lines for the sidebands
@@ -3516,6 +3515,12 @@ class CcpnGLWidget(QOpenGLWidget):
         drawList = self.diagonalGLList
         drawList.clearArrays()
 
+        x0 = self.axisL
+        x1 = self.axisR
+        y0 = self.axisB
+        y1 = self.axisT
+        col = (0.5, 0.5, 0.5, 0.5)
+
         for spectrumView in self._ordering:  #self._ordering:                             # strip.spectrumViews:
 
             if spectrumView.isDeleted:
@@ -3523,76 +3528,51 @@ class CcpnGLWidget(QOpenGLWidget):
 
             if spectrumView.isVisible() and spectrumView.spectrum.dimensionCount > 1 and spectrumView in self._spectrumSettings.keys():
                 specSettings = self._spectrumSettings[spectrumView]
+                pIndex = specSettings[GLDefs.SPECTRUM_POINTINDEX]
 
-                fx0 = specSettings[GLDefs.SPECTRUM_MAXXALIAS]
-                fx1 = specSettings[GLDefs.SPECTRUM_MINXALIAS]
-                fy0 = specSettings[GLDefs.SPECTRUM_MAXYALIAS]
-                fy1 = specSettings[GLDefs.SPECTRUM_MINYALIAS]
-
-                # col = (*spectrumView.posColour[0:3], 0.5)
-                col = (0.5, 0.5, 0.5, 0.5)
                 # add lines to drawList
-                drawList.indices = np.append(drawList.indices, np.array((index, index + 1), dtype=np.uint32))
-                # drawList.vertices = np.append(drawList.vertices, np.array(self._drawDiagonalLineV2(fx0, fx1, fy0, fy1), dtype=np.float32))
-                drawList.vertices = np.append(drawList.vertices, np.array(self._drawDiagonalLineV2(self.axisL, self.axisR, self.axisB, self.axisT), dtype=np.float32))
-                drawList.colors = np.append(drawList.colors, np.array(col * 2, dtype=np.float32))
-                drawList.numVertices += 2
-                index += 2
-
-                # NOTE:ED - almost
-
-                #                   experiment = spectrum.experiment
-                #                 spinningRate = experiment.spinningRate
-                #                 if spinningRate:
-                #                     dataDim = view.findFirstAxisMapping(label='x').analysisDataDim.dataDim
-                #                     dataDimRef = ExperimentBasic.getPrimaryDataDimRef(dataDim)
-                #                     expDimRef = dataDimRef.expDimRef
-                #                     spinningRate /= expDimRef.sf  # assumes y expDimRef would give the same
-                #                     nmin = int((y1 - x0) // spinningRate)
-                #                     nmax = - int((x1 - y0) // spinningRate)
-                #                     for n in range(nmin, nmax + 1):
-                #                         if n:  # n = 0 is normal diagonal
-                #                             self.drawDiagonal(handler, x0 + n * spinningRate, x1 + n * spinningRate, y0, y1, color, isDashed=True)
+                self._addDiagonalLine(drawList, x0, x1, y0, y1, col)
 
                 spinningRate = spectrumView.spectrum.spinningRate
                 if spinningRate:
                     sFreqs = spectrumView.spectrum.spectrometerFrequencies
-                    spinningRate /= sFreqs[0]                                 # might need to pick the correct axis here
+                    spinningRate /= sFreqs[pIndex[0]]  # might need to pick the correct axis here
 
-                    nmin = max(int((self.axisT - self.axisL) // spinningRate), -int(self._preferences.numSideBands))
-                    nmax = min(-int((self.axisR - self.axisB) // spinningRate), int(self._preferences.numSideBands))
+                    nmin = max(int((y1 - x0) // spinningRate), -int(self._preferences.numSideBands))
+                    nmax = min(-int((x1 - y0) // spinningRate), int(self._preferences.numSideBands))
 
                     for n in range(nmin, nmax + 1):
                         if n:
                             # add lines to drawList
-                            drawList.indices = np.append(drawList.indices, np.array((index, index + 1), dtype=np.uint32))
-                            drawList.vertices = np.append(drawList.vertices,
-                                                          np.array(self._drawDiagonalLineV2(self.axisL + n * spinningRate,
-                                                                                            self.axisR + n * spinningRate,
-                                                                                            self.axisB,
-                                                                                            self.axisT), dtype=np.float32))
-                            drawList.colors = np.append(drawList.colors, np.array(col * 4, dtype=np.float32))
-                            drawList.numVertices += 2
-                            index += 2
+                            self._addDiagonalLine(drawList, x0 + n * spinningRate,
+                                                  x1 + n * spinningRate,
+                                                  y0,
+                                                  y1, col)
+
+                # extra multiple-quantum diagonals
+                if self._matchingIsotopeCodes:
+                    mTypes = spectrumView.spectrum.measurementTypes
+                    xaxisType = mTypes[pIndex[0]]
+                    yaxisType = mTypes[pIndex[1]]
+
+                    if xaxisType == 'MQShift' and yaxisType == 'Shift':
+                        self._addDiagonalLine(drawList, x0, x1, 2 * y0, 2 * y1, col)
+                    elif xaxisType == 'Shift' and yaxisType == 'MQShift':
+                        self._addDiagonalLine(drawList, 2 * x0, 2 * x1, y0, y1, col)
 
         drawList.defineIndexVBO(enableVBO=True)
 
-    def drawDiagonals(self):
-        with self._disableGLAliasing():
-            # GL.glEnable(GL.GL_BLEND)
-
-            # use the _devicePixelRatio for retina displays
-            GL.glLineWidth(self.strip._contourThickness * self.viewports._devicePixelRatio)
-
-            # currentShader = self.globalGL._shaderProgram1
-            #
-            # # set transform to identity - ensures only the pMatrix is applied
-            # currentShader.setGLUniformMatrix4fv('mvMatrix', 1, GL.GL_FALSE, self._IMatrix)
-
-            self.diagonalGLList.drawIndexVBO(enableVBO=True)
-
-            # reset lineWidth
-            GL.glLineWidth(1.0 * self.viewports._devicePixelRatio)
+    # def drawDiagonals(self):
+    #     with self._disableGLAliasing():
+    #         # GL.glEnable(GL.GL_BLEND)
+    #
+    #         # use the _devicePixelRatio for retina displays
+    #         GL.glLineWidth(self.strip._contourThickness * self.viewports._devicePixelRatio)
+    #
+    #         self.diagonalGLList.drawIndexVBO(enableVBO=True)
+    #
+    #         # reset lineWidth
+    #         GL.glLineWidth(1.0 * self.viewports._devicePixelRatio)
 
     def _floatFormat(self, f=0.0, prec=3):
         """return a float string, remove trailing zeros after decimal
@@ -6787,7 +6767,7 @@ class CcpnGLWidget(QOpenGLWidget):
         try:
             if newList:
                 newList = [pp for outPoint in newList for pp in (x + width * (outPoint[0] - self.axisL) / (self.axisR - self.axisL),
-                            y + height * (outPoint[1] - self.axisB) / (self.axisT - self.axisB))]
+                                                                 y + height * (outPoint[1] - self.axisB) / (self.axisT - self.axisB))]
         except Exception as es:
             pass
 
@@ -6815,11 +6795,11 @@ class CcpnGLWidget(QOpenGLWidget):
             """
             pp = np.vstack([s, e, cp1, cp2])  # s for stacked
 
-            h = np.hstack((pp, np.ones((4, 1))))    # h for homogeneous
-            l1 = np.cross(h[0], h[1])               # get first line
-            l2 = np.cross(h[2], h[3])               # get second line
-            x, y, z = np.cross(l1, l2)              # point of intersection
-            if z == 0:                              # lines are parallel
+            h = np.hstack((pp, np.ones((4, 1))))  # h for homogeneous
+            l1 = np.cross(h[0], h[1])  # get first line
+            l2 = np.cross(h[2], h[3])  # get second line
+            x, y, z = np.cross(l1, l2)  # point of intersection
+            if z == 0:  # lines are parallel
                 return (float('inf'), float('inf'))
             return (x / z, y / z)
 
@@ -6870,11 +6850,11 @@ class CcpnGLWidget(QOpenGLWidget):
             """
             pp = np.vstack([s, e, cp1, cp2])  # s for stacked
 
-            h = np.hstack((pp, np.ones((4, 1))))    # h for homogeneous
-            l1 = np.cross(h[0], h[1])               # get first line
-            l2 = np.cross(h[2], h[3])               # get second line
-            x, y, z = np.cross(l1, l2)              # point of intersection
-            if z == 0:                              # lines are parallel
+            h = np.hstack((pp, np.ones((4, 1))))  # h for homogeneous
+            l1 = np.cross(h[0], h[1])  # get first line
+            l2 = np.cross(h[2], h[3])  # get second line
+            x, y, z = np.cross(l1, l2)  # point of intersection
+            if z == 0:  # lines are parallel
                 return (float('inf'), float('inf'))
             return (x / z, y / z)
 

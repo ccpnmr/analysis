@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-01-06 17:16:09 +0000 (Mon, January 06, 2020) $"
+__dateModified__ = "$dateModified: 2020-01-07 15:19:39 +0000 (Tue, January 07, 2020) $"
 __version__ = "$Revision: 3.0.0 $"
 #=========================================================================================
 # Created
@@ -1071,7 +1071,7 @@ class DimensionsTab(Widget):
 
         row += 1
         Label(self, text="Spinning rate (Hz)", grid=(row, 0), hAlign='l')
-        self.spinningRateData = ScientificDoubleSpinBox(self, vAlign='t', grid=(row, 1), min=0.1, max=10000.0)
+        self.spinningRateData = ScientificDoubleSpinBox(self, vAlign='t', grid=(row, 1), min=0, max=100000.0)
         self.spinningRateData.valueChanged.connect(partial(self._queueSpinningRateChange, spectrum, self.spinningRateData.textFromValue))
 
         row += 1

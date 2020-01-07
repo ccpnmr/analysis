@@ -55,7 +55,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-01-07 15:19:38 +0000 (Tue, January 07, 2020) $"
+__dateModified__ = "$dateModified: 2020-01-07 17:45:43 +0000 (Tue, January 07, 2020) $"
 __version__ = "$Revision: 3.0.0 $"
 #=========================================================================================
 # Created
@@ -198,6 +198,7 @@ class CcpnGLWidget(QOpenGLWidget):
             fmt = QSurfaceFormat()
             fmt.setSamples(antiAlias)
             self.setFormat(fmt)
+            self.setUpdateBehavior(QtWidgets.QOpenGLWidget.PartialUpdate)
 
             samples = self.format().samples()  # GST a use for the walrus
             if samples != antiAlias:
@@ -2895,6 +2896,11 @@ class CcpnGLWidget(QOpenGLWidget):
             yield
         finally:
             GL.glDisable(GL.GL_MULTISAMPLE)
+
+    def _paintGLMouseOnly(self):
+        """paintGL event - paint only the mouse in Xor mode
+        """
+        pass
 
     def _paintGL(self):
         w = self.w
@@ -5931,6 +5937,66 @@ class CcpnGLWidget(QOpenGLWidget):
                 self._rescaleAllAxes()
                 self._storeZoomHistory()
 
+    def _renderCursorOnly(self):
+
+        # NOTE:ED - use partialUpdate
+        #           when the mouse is moving somewhere else then only render the mouse using XOR
+        #           without clearing the screen
+        #           normal paintGL should include GL.glClear(GL.GL_COLOR_BUFFER_BIT)
+
+        #           draw original mouse in Xor - OR replace vertical/horizontal columns as bitmap
+        #           update mouse coordinates
+        #            OR grab vertical/horizontal columns as bitmap
+        #           draw new mouse in Xor
+
+        self.makeCurrent()
+
+        if self._crosshairVisible:  # and (not self._updateHTrace or not self._updateVTrace):
+
+            drawList = self._cursorList
+
+            vertices = []
+            indices = []
+            index = 0
+
+            # map the cursor to the ratio coordinates - double cursor is flipped about the line x=y
+            newCoords = self._scaleAxisToRatio(self.cursorCoordinate[0:2])
+            doubleCoords = self._scaleAxisToRatio(self.doubleCursorCoordinate[0:2])
+
+            if getCurrentMouseMode() == PICK and self.underMouse():
+
+                x = self.deltaX * 8
+                y = self.deltaY * 8
+
+                vertices = [newCoords[0] - x, newCoords[1] - y,
+                            newCoords[0] + x, newCoords[1] - y,
+                            newCoords[0] + x, newCoords[1] - y,
+                            newCoords[0] + x, newCoords[1] + y,
+                            newCoords[0] + x, newCoords[1] + y,
+                            newCoords[0] - x, newCoords[1] + y,
+                            newCoords[0] - x, newCoords[1] + y,
+                            newCoords[0] - x, newCoords[1] - y
+                            ]
+                indices = [0, 1, 2, 3, 4, 5, 6, 7]
+                col = self.mousePickColour
+                index = 8
+
+            else:
+                col = self.foreground
+
+            drawList.vertices = np.array(vertices, dtype=np.float32)
+            drawList.indices = np.array(indices, dtype=np.int32)
+            drawList.numVertices = len(vertices) // 2
+            drawList.colors = np.array(col * drawList.numVertices, dtype=np.float32)
+
+            # build and draw the VBO
+            drawList.defineIndexVBO(enableVBO=True)
+
+            # GL.glDrawBuffer(GL.GL_FRONT)
+            drawList.drawIndexVBO(enableVBO=True)
+
+        self.doneCurrent()
+
     @pyqtSlot(dict)
     def _glMouseMoved(self, aDict):
         if self.strip.isDeleted:
@@ -5965,6 +6031,8 @@ class CcpnGLWidget(QOpenGLWidget):
                 # only need to redraw if we can see the cursor
                 # if self._updateVTrace or self._updateHTrace:
                 #   self.updateTraces()
+
+                # self._renderCursorOnly()
                 self.update()
 
     @pyqtSlot(dict)

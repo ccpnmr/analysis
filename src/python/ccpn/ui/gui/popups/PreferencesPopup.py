@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-01-06 17:16:09 +0000 (Mon, January 06, 2020) $"
+__dateModified__ = "$dateModified: 2020-01-07 13:41:18 +0000 (Tue, January 07, 2020) $"
 __version__ = "$Revision: 3.0.0 $"
 #=========================================================================================
 # Created
@@ -868,7 +868,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
         row += 1
         # numSideBands = self.preferences.general.numSideBands
         self.showSideBands = Label(parent, text='Number of Visible Sidebands:', grid=(row, 0), hAlign='r')
-        self.showSideBandsData = DoubleSpinbox(parent, step=1, min=0, max=5, grid=(row, 1), hAlign='l', decimals=0)
+        self.showSideBandsData = DoubleSpinbox(parent, step=1, min=0, max=25, grid=(row, 1), hAlign='l', decimals=0)
         # self.showSideBandsData.setValue(int(numSideBands))
         self.showSideBandsData.setMinimumWidth(LineEditsMinimumWidth)
         self.showSideBandsData.valueChanged.connect(self._queueSetNumSideBands)

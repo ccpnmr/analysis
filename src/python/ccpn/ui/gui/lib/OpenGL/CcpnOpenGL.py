@@ -55,7 +55,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-01-08 14:34:53 +0000 (Wed, January 08, 2020) $"
+__dateModified__ = "$dateModified: 2020-01-08 17:54:29 +0000 (Wed, January 08, 2020) $"
 __version__ = "$Revision: 3.0.0 $"
 #=========================================================================================
 # Created
@@ -501,6 +501,12 @@ class CcpnGLWidget(QOpenGLWidget):
     def threadUpdate(self):
         self.update()
 
+    def update(self, mode=PAINTMODES.PAINT_ALL):
+        """Update the glWidget with the correct refresh mode
+        """
+        self._paintMode = mode
+        super().update()
+
     def rescale(self, rescaleOverlayText=True, rescaleMarksRulers=True,
                 rescaleIntegralLists=True, rescaleRegions=True,
                 rescaleSpectra=True, rescaleStaticHTraces=True,
@@ -888,6 +894,8 @@ class CcpnGLWidget(QOpenGLWidget):
         """
         # control for changing screens has now been moved to mainWindow so only one signal is needed
         self.viewports._devicePixelRatio = self.devicePixelRatio()
+
+        self._paintMode = PAINTMODES.PAINT_ALL
         self.update()
 
     def _getValidAspectRatio(self, axisCode):
@@ -1480,9 +1488,8 @@ class CcpnGLWidget(QOpenGLWidget):
         self._rescaleAllAxes()
 
     def initialiseAxes(self, strip=None):
+        """setup the correct axis range and padding
         """
-    setup the correct axis range and padding
-    """
         self.orderedAxes = strip.axes
         self._axisCodes = strip.axisCodes
         self._axisOrder = strip.axisOrder
@@ -2554,7 +2561,6 @@ class CcpnGLWidget(QOpenGLWidget):
 
     def mouseMoveEvent(self, event):
 
-        self._paintMode = PAINTMODES.PAINT_ALL
         self.cursorSource = CURSOR_SOURCE_SELF
 
         if self.strip.isDeleted:
@@ -2716,7 +2722,8 @@ class CcpnGLWidget(QOpenGLWidget):
                 self._drawMouseMoveLine = True
                 self._drawDeltaOffset = True
 
-        self.GLSignals._emitMouseMoved(source=self, coords=cursorCoordinate, mouseMovedDict=mouseMovedDict, mainWindow=self.mainWindow)
+        if not event.buttons():
+            self.GLSignals._emitMouseMoved(source=self, coords=cursorCoordinate, mouseMovedDict=mouseMovedDict, mainWindow=self.mainWindow)
 
         # spawn rebuild/paint of traces
         if self._updateHTrace or self._updateVTrace:
@@ -2911,6 +2918,9 @@ class CcpnGLWidget(QOpenGLWidget):
         if self.strip.isDeleted:
             return
 
+        # NOTE:ED - testing, remove later
+        # self._paintMode = PAINTMODES.PAINT_ALL
+
         if self._paintMode == PAINTMODES.PAINT_NONE:
 
             # do nothing
@@ -2918,7 +2928,7 @@ class CcpnGLWidget(QOpenGLWidget):
 
         elif self._paintMode == PAINTMODES.PAINT_ALL:
 
-            # paint all content to the GL widget
+            # NOTE:ED - paint all content to the GL widget - need to work on this
             self._clearGLCursorQueue()
 
             # check whether the visible spectra list needs updating
@@ -6037,7 +6047,7 @@ class CcpnGLWidget(QOpenGLWidget):
         sDisplay = aDict[GLNotifier.GLSPECTRUMDISPLAY]
         source = aDict[GLNotifier.GLSOURCE]
 
-        if source != self and aDict[GLNotifier.GLSPECTRUMDISPLAY] == self.spectrumDisplay:
+        if source != self and sDisplay == self.spectrumDisplay:
 
             # match the values for the Y axis, and scale for the X axis
             axisB = aDict[GLNotifier.GLAXISVALUES][GLNotifier.GLBOTTOMAXISVALUE]
@@ -6181,7 +6191,7 @@ class CcpnGLWidget(QOpenGLWidget):
 
                 # force a redraw to only paint the cursor
                 # self._paintMode = PAINTMODES.PAINT_MOUSEONLY
-                self.update()
+                self.update(mode=PAINTMODES.PAINT_MOUSEONLY)
 
     @pyqtSlot(dict)
     def _glKeyEvent(self, aDict):

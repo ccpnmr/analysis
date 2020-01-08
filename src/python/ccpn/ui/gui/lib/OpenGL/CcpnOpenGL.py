@@ -55,7 +55,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-01-08 17:54:29 +0000 (Wed, January 08, 2020) $"
+__dateModified__ = "$dateModified: 2020-01-08 18:08:14 +0000 (Wed, January 08, 2020) $"
 __version__ = "$Revision: 3.0.0 $"
 #=========================================================================================
 # Created
@@ -895,7 +895,6 @@ class CcpnGLWidget(QOpenGLWidget):
         # control for changing screens has now been moved to mainWindow so only one signal is needed
         self.viewports._devicePixelRatio = self.devicePixelRatio()
 
-        self._paintMode = PAINTMODES.PAINT_ALL
         self.update()
 
     def _getValidAspectRatio(self, axisCode):
@@ -903,9 +902,6 @@ class CcpnGLWidget(QOpenGLWidget):
         return self._aspectRatios[va[0]]
 
     def resizeGL(self, w, h):
-        # paint all contents
-        self._paintMode = PAINTMODES.PAINT_ALL
-
         # must be set here to catch the change of screen
         self.refreshDevicePixelRatio()
         self._resizeGL(w, h)
@@ -1899,6 +1895,7 @@ class CcpnGLWidget(QOpenGLWidget):
 
         # set the painting mode
         self._paintMode = PAINTMODES.PAINT_ALL
+        self._paintLastFrame = True
 
         # check that the screen device pixel ratio is correct
         self.refreshDevicePixelRatio()
@@ -2945,9 +2942,12 @@ class CcpnGLWidget(QOpenGLWidget):
                 self._paintGL()
 
             # make all following paint events into mouse only
+            # so only paints a single frame from an update event
             self._paintMode = PAINTMODES.PAINT_MOUSEONLY
+            self._paintLastFrame = True
 
         elif self._paintMode == PAINTMODES.PAINT_MOUSEONLY:
+            self._paintLastFrame = False
 
             # only need to paint the mouse cursor
             self._paintGLMouseOnly()
@@ -2992,8 +2992,9 @@ class CcpnGLWidget(QOpenGLWidget):
             GL.glLogicOp(GL.GL_XOR)
 
             oldCursorDrawList = self._glCursorQueue.pop()
-            if oldCursorDrawList:
+            if oldCursorDrawList and not self._paintLastFrame:
                 oldCursorDrawList.drawIndexVBO(enableVBO=True)
+
             self.buildCursors()
             self._glCursorQueue.append(self._glCursor)
 
@@ -3098,7 +3099,10 @@ class CcpnGLWidget(QOpenGLWidget):
             if self._successiveClicks:
                 self.drawDottedCursor()
 
+            GL.glEnable(GL.GL_COLOR_LOGIC_OP)
+            GL.glLogicOp(GL.GL_XOR)
             self.drawCursors()
+            GL.glDisable(GL.GL_COLOR_LOGIC_OP)
 
         currentShader = self.globalGL._shaderProgramTex.makeCurrent()
         self.enableTextClientState()

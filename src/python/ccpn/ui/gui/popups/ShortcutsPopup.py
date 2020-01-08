@@ -1,7 +1,7 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -11,7 +11,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2019-12-05 09:40:39 +0000 (Thu, December 05, 2019) $"
+__dateModified__ = "$dateModified: 2020-01-08 14:37:27 +0000 (Wed, January 08, 2020) $"
 __version__ = "$Revision: 3.0.0 $"
 #=========================================================================================
 # Created
@@ -25,7 +25,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 import os
 from functools import reduce, partial
 from PyQt5 import QtWidgets
-from ccpn.ui.gui.widgets.Frame import ScrollableFrame
+from ccpn.ui.gui.widgets.Frame import ScrollableFrame, Frame
 from ccpn.ui.gui.widgets.Button import Button
 from ccpn.ui.gui.widgets.ButtonList import ButtonList
 from ccpn.ui.gui.widgets.FileDialog import FileDialog
@@ -33,37 +33,32 @@ from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.LineEdit import LineEdit
 from ccpn.ui.gui.widgets.MessageDialog import showWarning
 from ccpn.ui.gui.widgets.ScrollArea import ScrollArea
-from ccpn.ui.gui.popups.Dialog import CcpnDialog
+from ccpn.ui.gui.popups.Dialog import CcpnDialog, CcpnDialogMainWidget
 from ccpn.util.Logging import getLogger
 
 
-class ShortcutsPopup(CcpnDialog):
-    def __init__(self, parent=None, mainWindow=None, title='Define User Shortcuts', **kwds):
-        CcpnDialog.__init__(self, parent, setLayout=True, windowTitle=title, **kwds)
+class ShortcutsPopup(CcpnDialogMainWidget):
 
+    USESCROLLWIDGET = True
+
+    def __init__(self, parent=None, mainWindow=None, title='Define User Shortcuts', **kwds):
+        super().__init__(parent, setLayout=True, windowTitle=title, **kwds)
+
+        # define the common attributes
         self.mainWindow = mainWindow
         self.application = self.mainWindow.application
         self.preferences = self.application.preferences
 
-        # self.mainWindow.moduleArea.addModule(self)
-        self.rowCount = 0
-        # self.scrollArea = ScrollArea(self.mainWidget, grid=(0, 0), gridSpan=(1, 2))
-        self.scrollArea = ScrollArea(self, grid=(0, 0), gridSpan=(1, 2), setLayout=True)  # ejb
+        self.shortcutWidget = ShortcutWidget(self.mainWidget, mainWindow=mainWindow, setLayout=True, grid=(0, 0))  # ejb
 
-        # self.shortcutWidget = ShortcutWidget(self, mainWindow)
-        self.shortcutWidget = ShortcutWidget(mainWindow=mainWindow, setLayout=True)  # ejb
-        self.scrollArea.setWidgetResizable(True)
-        self.scrollArea.setWidget(self.shortcutWidget)
-        self.buttonList = ButtonList(self, grid=(1, 1),
-                                     texts=['Cancel', 'Save', 'Save and Close'],
-                                     callbacks=[self.close, self.save, self.saveAndQuit])
-
-        self.scrollArea.setStyleSheet('ScrollArea { border: 0px; background: transparent; }')
-
-        self.setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.MinimumExpanding)
         self.setMinimumSize(400, 400)
 
-        # self._sequenceGraphScrollArea.layout().addWidget(self.shortcutWidget)
+        # add a close button just for clarity
+        self.setCloseButton(callback=self.reject)
+        self.setDefaultButton(CcpnDialogMainWidget.CLOSEBUTTON)
+
+        # make the buttons appear
+        self._setButtons()
 
     def save(self):
         newShortcuts = self.shortcutWidget.getShortcuts()
@@ -77,10 +72,10 @@ class ShortcutsPopup(CcpnDialog):
         self.close()
 
 
-class ShortcutWidget(ScrollableFrame):
+class ShortcutWidget(Frame):
 
-    def __init__(self, mainWindow=None, setLayout=True):
-        super().__init__(setLayout=setLayout)
+    def __init__(self, parent, mainWindow=None, setLayout=True, **kwds):
+        super().__init__(parent, setLayout=setLayout, **kwds)
         from functools import partial
 
         self.mainWindow = mainWindow

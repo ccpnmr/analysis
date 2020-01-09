@@ -55,7 +55,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-01-08 18:08:14 +0000 (Wed, January 08, 2020) $"
+__dateModified__ = "$dateModified: 2020-01-09 09:38:11 +0000 (Thu, January 09, 2020) $"
 __version__ = "$Revision: 3.0.0 $"
 #=========================================================================================
 # Created
@@ -4705,46 +4705,55 @@ class CcpnGLWidget(QOpenGLWidget):
                 # no visible spectra
                 return
 
+            deltaOffset = 0
             # newCoords = self.mouseFormat % (self._axisOrder[0], cursorX,
             #                                 self._axisOrder[1], cursorY)
             newCoords = ' %s: %s\n %s: %s' % (self._axisOrder[0], self.XMode(cursorX),
                                               self._axisOrder[1], self.YMode(cursorY))
 
+            if self._drawDeltaOffset:
+                # diffCoords = self.diffMouseFormat % (self._axisOrder[0], (cursorX - startX),
+                #                                      self._axisOrder[1], (cursorY - startY))
+                newCoords += '\n d%s: %s\n d%s: %s' % (self._axisOrder[0], self.XMode(cursorX - startX),
+                                                     self._axisOrder[1], self.YMode(cursorY - startY))
+                deltaOffset = self.globalGL.glSmallFont.height * 2.0 * self.pixelY
+
+            mx, my = cursorCoordinate[0], cursorCoordinate[1]-deltaOffset
             self.mouseString = GLString(text=newCoords,
                                         font=self.globalGL.glSmallFont,
-                                        x=valueToRatio(cursorCoordinate[0], self.axisL, self.axisR),
-                                        y=valueToRatio(cursorCoordinate[1], self.axisB, self.axisT),
+                                        x=valueToRatio(mx, self.axisL, self.axisR),
+                                        y=valueToRatio(my, self.axisB, self.axisT),
                                         colour=self.foreground, GLContext=self,
                                         obj=None)
             self._mouseCoords = (cursorCoordinate[0], cursorCoordinate[1])
 
             # check that the string is actually visible, or constraint to the bounds of the strip
             _offset = self.pixelX * 80.0
-            _mouseOffsetR = valueToRatio(cursorCoordinate[0] + _offset, self.axisL, self.axisR)
-            _mouseOffsetL = valueToRatio(cursorCoordinate[0], self.axisL, self.axisR)
+            _mouseOffsetR = valueToRatio(mx + _offset, self.axisL, self.axisR)
+            _mouseOffsetL = valueToRatio(mx, self.axisL, self.axisR)
             ox = -min(max(_mouseOffsetR - 1.0, 0.0), _mouseOffsetL)
 
             _offset = self.pixelY * self.mouseString.height
-            _mouseOffsetT = valueToRatio(cursorCoordinate[1] + _offset, self.axisB, self.axisT)
-            _mouseOffsetB = valueToRatio(cursorCoordinate[1], self.axisB, self.axisT)
+            _mouseOffsetT = valueToRatio(my + _offset, self.axisB, self.axisT)
+            _mouseOffsetB = valueToRatio(my, self.axisB, self.axisT)
             oy = -min(max(_mouseOffsetT - 1.0, 0.0), _mouseOffsetB)
 
             self.mouseString.setStringOffset((ox, oy))
             self.mouseString.updateTextArrayVBOAttribs(enableVBO=True)
 
-            if self._drawDeltaOffset:
-                # diffCoords = self.diffMouseFormat % (self._axisOrder[0], (cursorX - startX),
-                #                                      self._axisOrder[1], (cursorY - startY))
-                diffCoords = ' d%s: %s\n d%s: %s' % (self._axisOrder[0], self.XMode(cursorX - startX),
-                                                     self._axisOrder[1], self.YMode(cursorY - startY))
-
-                self.diffMouseString = GLString(text=diffCoords,
-                                                font=self.globalGL.glSmallFont,
-                                                x=valueToRatio(cursorCoordinate[0], self.axisL, self.axisR),
-                                                y=valueToRatio(cursorCoordinate[1], self.axisB, self.axisT) - (
-                                                        self.globalGL.glSmallFont.height * 2.0 * self.deltaY),
-                                                colour=self.foreground, GLContext=self,
-                                                obj=None)
+            # if self._drawDeltaOffset:
+            #     # diffCoords = self.diffMouseFormat % (self._axisOrder[0], (cursorX - startX),
+            #     #                                      self._axisOrder[1], (cursorY - startY))
+            #     diffCoords = ' d%s: %s\n d%s: %s' % (self._axisOrder[0], self.XMode(cursorX - startX),
+            #                                          self._axisOrder[1], self.YMode(cursorY - startY))
+            #
+            #     self.diffMouseString = GLString(text=diffCoords,
+            #                                     font=self.globalGL.glSmallFont,
+            #                                     x=valueToRatio(cursorCoordinate[0], self.axisL, self.axisR),
+            #                                     y=valueToRatio(cursorCoordinate[1], self.axisB, self.axisT) - (
+            #                                             self.globalGL.glSmallFont.height * 2.0 * self.deltaY),
+            #                                     colour=self.foreground, GLContext=self,
+            #                                     obj=None)
 
     def drawMouseCoords(self):
         if self.underMouse():  # and self.mouseString:

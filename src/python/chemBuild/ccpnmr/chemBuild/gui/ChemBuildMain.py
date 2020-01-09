@@ -373,7 +373,8 @@ class ChemBuildMain(QtWidgets.QMainWindow):
 
       col = 0   
       for propText, icon, propType in properties:
-        button = Button(frame, '', lambda x=propType: self.addProperty(x), self.getIcon(icon),
+        # button = Button(frame, '', lambda x=propType: self.addProperty(x), self.getIcon(icon),
+        button=Button(frame, '', partial(self.addProperty, propType), self.getIcon(icon),
                tipText=propText, grid=(row,col))
         button.setIconSize(QtCore.QSize(28,28))
         col += 1
@@ -404,7 +405,8 @@ class ChemBuildMain(QtWidgets.QMainWindow):
          
       col = 0   
       for propText, icon, propType in properties:
-        button = Button(frame, '', lambda x=propType: self.addProperty(x), self.getIcon(icon),
+        # button = Button(frame, '', lambda x=propType: self.addProperty(x), self.getIcon(icon),
+        button = Button(frame, '', partial(self.addProperty, propType), self.getIcon(icon),
                         tipText=propText, grid=(row,col))
         button.setIconSize(QtCore.QSize(28,28))
         col += 1

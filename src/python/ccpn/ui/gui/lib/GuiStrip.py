@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-01-06 15:19:49 +0000 (Mon, January 06, 2020) $"
+__dateModified__ = "$dateModified: 2020-01-09 14:37:17 +0000 (Thu, January 09, 2020) $"
 __version__ = "$Revision: 3.0.0 $"
 #=========================================================================================
 # Created
@@ -41,7 +41,7 @@ from ccpn.util.Constants import AXIS_MATCHATOMTYPE, AXIS_FULLATOMNAME, DOUBLEAXI
 from functools import partial
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs import AXISXUNITS, AXISYUNITS, AXISLOCKASPECTRATIO, \
     SYMBOLTYPES, ANNOTATIONTYPES, SYMBOLSIZE, SYMBOLTHICKNESS, AXISUSEDEFAULTASPECTRATIO, AXISASPECTRATIOS, \
-    GRIDVISIBLE, CROSSHAIRVISIBLE, DOUBLECROSSHAIRVISIBLE, BOTTOMAXIS, RIGHTAXIS
+    GRIDVISIBLE, CROSSHAIRVISIBLE, DOUBLECROSSHAIRVISIBLE, BOTTOMAXIS, RIGHTAXIS, SIDEBANDSVISIBLE
 from ccpn.core.lib.ContextManagers import undoStackBlocking, undoBlock, \
     notificationBlanking, undoBlockWithoutSideBar
 from ccpn.util.decorators import logCommand
@@ -171,6 +171,7 @@ class GuiStrip(Frame):
             self.gridVisible = spectrumDisplay.strips[0].gridVisible
             self.crosshairVisible = spectrumDisplay.strips[0].crosshairVisible
             self.doubleCrosshairVisible = spectrumDisplay.strips[0].doubleCrosshairVisible
+            self.sideBandsVisible = spectrumDisplay.strips[0].sideBandsVisible
 
             self.showSpectraOnPhasing = spectrumDisplay.strips[0].showSpectraOnPhasing
             self._contourThickness = spectrumDisplay.strips[0]._contourThickness
@@ -189,6 +190,7 @@ class GuiStrip(Frame):
             self.gridVisible = self._preferences.showGrid
             self.crosshairVisible = self._preferences.showCrosshair
             self.doubleCrosshairVisible = self._preferences.showDoubleCrosshair
+            self.sideBandsVisible = self._preferences.showSideBands
 
             self.showSpectraOnPhasing = self._preferences.showSpectraOnPhasing
             self._contourThickness = self._preferences.contourThickness
@@ -303,6 +305,23 @@ class GuiStrip(Frame):
         self._CcpnGLWidget.GLSignals.emitPaintEvent()
 
     @property
+    def sideBandsVisible(self):
+        """True if sideBands are visible.
+        """
+        return self._CcpnGLWidget._sideBandsVisible
+
+    @sideBandsVisible.setter
+    def sideBandsVisible(self, visible):
+        """set the sideBands visibility
+        """
+        if hasattr(self, 'sideBandsAction'):
+            self.sideBandsAction.setChecked(visible)
+        self._CcpnGLWidget._sideBandsVisible = visible
+
+        # spawn a redraw of the GL windows
+        self._CcpnGLWidget.GLSignals.emitPaintEvent()
+
+    @property
     def spectrumBordersVisible(self):
         """True if spectrumBorders are visible.
         """
@@ -323,6 +342,11 @@ class GuiStrip(Frame):
         """Toggles whether grid is visible in the strip.
         """
         self.gridVisible = not self._CcpnGLWidget._gridVisible
+
+    def toggleSideBands(self):
+        """Toggles whether sideBands are visible in the strip.
+        """
+        self.sideBandsVisible = not self._CcpnGLWidget._sideBandsVisible
 
     @property
     def crosshairVisible(self):

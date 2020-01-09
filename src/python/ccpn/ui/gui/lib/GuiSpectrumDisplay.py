@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-01-03 16:43:28 +0000 (Fri, January 03, 2020) $"
+__dateModified__ = "$dateModified: 2020-01-09 14:37:17 +0000 (Thu, January 09, 2020) $"
 __version__ = "$Revision: 3.0.0 $"
 #=========================================================================================
 # Created
@@ -1815,6 +1815,12 @@ class GuiSpectrumDisplay(CcpnModule):
         """
         for strip in self.strips:
             strip.toggleGrid()
+
+    def toggleSideBands(self):
+        """Toggles whether sideBands are displayed in all strips of spectrum display.
+        """
+        for strip in self.strips:
+            strip.toggleSideBands()
 
     def toggleCrosshair(self):
         """Toggles whether cross hair is displayed in all strips of spectrum display.

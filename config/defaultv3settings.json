@@ -68,7 +68,8 @@
         "generateSinglePlaneContours"          : true,
         "applyToSpectrumDisplays"              : true,
         "enableAntiAliasing"                   : true,
-        "numSideBands"                         : 0
+        "numSideBands"                         : 2,
+        "showSideBands"                        : false
     },
     "proxySettings"    : {
         "useProxy"         : false,

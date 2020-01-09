@@ -55,7 +55,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-01-09 09:44:59 +0000 (Thu, January 09, 2020) $"
+__dateModified__ = "$dateModified: 2020-01-09 14:37:19 +0000 (Thu, January 09, 2020) $"
 __version__ = "$Revision: 3.0.0 $"
 #=========================================================================================
 # Created
@@ -253,6 +253,7 @@ class CcpnGLWidgetABC(QOpenGLWidget):
 
         self.gridList = []
         self._gridVisible = True
+        self._sideBandsVisible = True
         self._crosshairVisible = True
         self._spectrumBordersVisible = True
         self._axesVisible = True
@@ -281,6 +282,7 @@ class CcpnGLWidgetABC(QOpenGLWidget):
         self._setColourScheme()
 
         self._gridVisible = self._preferences.showGrid
+        self._sideBandsVisible = self._preferences.showSideBands
         self._updateHTrace = False
         self._updateVTrace = False
         self._lastTracePoint = {}  # [-1, -1]

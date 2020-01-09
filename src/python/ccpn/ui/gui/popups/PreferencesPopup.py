@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-01-07 15:47:39 +0000 (Tue, January 07, 2020) $"
+__dateModified__ = "$dateModified: 2020-01-09 14:37:19 +0000 (Thu, January 09, 2020) $"
 __version__ = "$Revision: 3.0.0 $"
 #=========================================================================================
 # Created
@@ -175,6 +175,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
                     strip._contourThickness = self.application.preferences.general.contourThickness
                     strip.crosshairVisible = self.application.preferences.general.showCrosshair
                     strip.doubleCrosshairVisible = self.application.preferences.general.showDoubleCrosshair
+                    strip.sideBandsVisible = self.application.preferences.general.showSideBands
 
                     strip.spectrumBordersVisible = self.application.preferences.general.showSpectrumBorder
 
@@ -727,6 +728,11 @@ class PreferencesPopup(CcpnDialogMainWidget):
         self.showDoubleCrosshairBox.toggled.connect(partial(self._queueToggleGeneralOptions, 'showDoubleCrosshair'))
 
         row += 1
+        self.showGridLabel = Label(parent, text="Show SpinningRate SideBands: ", grid=(row, 0))
+        self.showGridBox = CheckBox(parent, grid=(row, 1))  #, checked=self.preferences.general.showGrid)
+        self.showGridBox.toggled.connect(partial(self._queueToggleGeneralOptions, 'showSideBands'))
+
+        row += 1
         self.showLastAxisOnlyLabel = Label(parent, text="Share Y Axis: ", grid=(row, 0))
         self.showLastAxisOnlyBox = CheckBox(parent, grid=(row, 1))  #, checked=self.preferences.general.lastAxisOnly)
         self.showLastAxisOnlyBox.toggled.connect(partial(self._queueToggleGeneralOptions, 'lastAxisOnly'))
@@ -867,7 +873,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
 
         row += 1
         # numSideBands = self.preferences.general.numSideBands
-        self.showSideBands = Label(parent, text='Number of SpinningRate\n Interval gridlines (0 +/- n):', grid=(row, 0), hAlign='l')
+        self.showSideBands = Label(parent, text='Number of SpinningRate SideBands:', grid=(row, 0), hAlign='l')
         self.showSideBandsData = DoubleSpinbox(parent, step=1, min=0, max=25, grid=(row, 1), hAlign='l', decimals=0)
         # self.showSideBandsData.setValue(int(numSideBands))
         self.showSideBandsData.setMinimumWidth(LineEditsMinimumWidth)

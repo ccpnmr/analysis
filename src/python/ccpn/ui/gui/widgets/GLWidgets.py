@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-01-09 09:44:59 +0000 (Thu, January 09, 2020) $"
+__dateModified__ = "$dateModified: 2020-01-09 14:37:20 +0000 (Thu, January 09, 2020) $"
 __version__ = "$Revision: 3.0.0 $"
 #=========================================================================================
 # Created
@@ -1062,7 +1062,7 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
                                                                  b=self.foreground[2],
                                                                  transparency=300.0,
                                                                  _includeDiagonal=self._matchingIsotopeCodes,
-                                                                 _diagonalList=self.diagonalGLList)
+                                                                 _diagonalList=None)        # self.diagonalGLList)
 
         if self.axesChanged:
             if self.highlighted:
@@ -1290,8 +1290,10 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
         self.gridList = []
         self._gridVisible = self._preferences.showGrid
         self._crosshairVisible = self._preferences.showCrosshair
+        self._sideBandsVisible = self._preferences.showSideBands
 
         self.diagonalGLList = None
+        self.diagonalideBandsGLList = None
         self._updateAxes = True
 
         self._axesVisible = True

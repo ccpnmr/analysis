@@ -18,7 +18,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-01-06 15:19:49 +0000 (Mon, January 06, 2020) $"
+__dateModified__ = "$dateModified: 2020-01-09 14:37:18 +0000 (Thu, January 09, 2020) $"
 __version__ = "$Revision: 3.0.0 $"
 #=========================================================================================
 # Created
@@ -135,6 +135,12 @@ def _gridItem(strip):
     return _SCMitem(name='Grid',
                     typeItem=ItemTypes.get(ITEM), toolTip='Toggle Grid On/Off', callback=strip.spectrumDisplay.toggleGrid,
                     checkable=True, checked=True, shortcut='GS', stripMethodName='gridAction')
+
+
+def _sideBandsItem(strip):
+    return _SCMitem(name='SpinningRate sideBands',
+                    typeItem=ItemTypes.get(ITEM), toolTip='Toggle sideBands On/Off', callback=strip.spectrumDisplay.toggleSideBands,
+                    checkable=True, checked=True, stripMethodName='sideBandsAction')
 
 
 def _cyclePeakLabelsItem(strip):
@@ -743,6 +749,7 @@ def _getNdDefaultMenu(guiStripNd) -> Menu:
         _crosshairItem(guiStripNd),
         _doubleCrosshairItem(guiStripNd),
         _gridItem(guiStripNd),
+        _sideBandsItem(guiStripNd),
         _shareYAxisItem(guiStripNd),
         _cyclePeakLabelsItem(guiStripNd),
         _cyclePeakSymbolsItem(guiStripNd),

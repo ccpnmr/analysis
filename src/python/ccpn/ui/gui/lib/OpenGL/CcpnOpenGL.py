@@ -55,7 +55,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-01-09 09:44:59 +0000 (Thu, January 09, 2020) $"
+__dateModified__ = "$dateModified: 2020-01-09 14:37:18 +0000 (Thu, January 09, 2020) $"
 __version__ = "$Revision: 3.0.0 $"
 #=========================================================================================
 # Created
@@ -351,8 +351,10 @@ class CcpnGLWidget(QOpenGLWidget):
         self._gridVisible = True  #self._preferences.showGrid
         self._crosshairVisible = True  #self._preferences.showCrosshair
         self._doubleCrosshairVisible = True  #self._preferences.showDoubleCrosshair
+        self._sideBandsVisible = True
 
         self.diagonalGLList = None
+        self.diagonalSideBandsGLList = None
         self.boundingBoxes = None
         self._updateAxes = True
 
@@ -1795,6 +1797,13 @@ class CcpnGLWidget(QOpenGLWidget):
                                             dimension=2,
                                             GLContext=self)
 
+        self.diagonalSideBandsGLList = GLVertexArray(numLists=1,
+                                            renderMode=GLRENDERMODE_REBUILD,
+                                            blendMode=False,
+                                            drawMode=GL.GL_LINES,
+                                            dimension=2,
+                                            GLContext=self)
+
         self.boundingBoxes = GLVertexArray(numLists=1,
                                            renderMode=GLRENDERMODE_REBUILD,
                                            blendMode=False,
@@ -1896,6 +1905,7 @@ class CcpnGLWidget(QOpenGLWidget):
         # set the painting mode
         self._paintMode = PAINTMODES.PAINT_ALL
         self._paintLastFrame = True
+        self._leavingWidget = False
 
         # check that the screen device pixel ratio is correct
         self.refreshDevicePixelRatio()
@@ -2536,6 +2546,9 @@ class CcpnGLWidget(QOpenGLWidget):
         self._clearAndUpdate()
 
     def leaveEvent(self, ev: QtCore.QEvent):
+        # set a flag for leaving this widget
+        self._leavingWidget = True
+
         super().leaveEvent(ev)
         self._clearAndUpdate()
 
@@ -2923,7 +2936,7 @@ class CcpnGLWidget(QOpenGLWidget):
             # do nothing
             pass
 
-        elif self._paintMode == PAINTMODES.PAINT_ALL:
+        elif self._paintMode == PAINTMODES.PAINT_ALL or self._leavingWidget:
 
             # NOTE:ED - paint all content to the GL widget - need to work on this
             self._clearGLCursorQueue()
@@ -2945,9 +2958,11 @@ class CcpnGLWidget(QOpenGLWidget):
             # so only paints a single frame from an update event
             self._paintMode = PAINTMODES.PAINT_MOUSEONLY
             self._paintLastFrame = True
+            self._leavingWidget = False
 
         elif self._paintMode == PAINTMODES.PAINT_MOUSEONLY:
             self._paintLastFrame = False
+            self._leavingWidget = False
 
             # only need to paint the mouse cursor
             self._paintGLMouseOnly()
@@ -3487,11 +3502,14 @@ class CcpnGLWidget(QOpenGLWidget):
             self.gridList[0].drawIndexVBO(enableVBO=True)
 
         # draw the diagonal line - independent of viewing the grid
-        if self._matchingIsotopeCodes and self.diagonalGLList:
+        if self._matchingIsotopeCodes:                  # and self.diagonalGLList:
             # viewport above may not be set
             if not self._gridVisible:
                 self.viewports.setViewport(self._currentView)
-            self.diagonalGLList.drawIndexVBO(enableVBO=True)
+            if self.diagonalGLList:
+                self.diagonalGLList.drawIndexVBO(enableVBO=True)
+            if self.diagonalSideBandsGLList and self._sideBandsVisible:
+                self.diagonalSideBandsGLList.drawIndexVBO(enableVBO=True)
 
         # draw the axes tick marks (effectively the same grid in smaller viewport)
         if self._axesVisible:
@@ -3624,6 +3642,8 @@ class CcpnGLWidget(QOpenGLWidget):
         index = 0
         drawList = self.diagonalGLList
         drawList.clearArrays()
+        drawListSideBands = self.diagonalSideBandsGLList
+        drawListSideBands.clearArrays()
 
         x0 = self.axisL
         x1 = self.axisR
@@ -3631,6 +3651,7 @@ class CcpnGLWidget(QOpenGLWidget):
         y1 = self.axisT
         col = (0.5, 0.5, 0.5, 0.5)
 
+        diagonalCount = 0
         for spectrumView in self._ordering:  #self._ordering:                             # strip.spectrumViews:
 
             if spectrumView.isDeleted:
@@ -3640,8 +3661,10 @@ class CcpnGLWidget(QOpenGLWidget):
                 specSettings = self._spectrumSettings[spectrumView]
                 pIndex = specSettings[GLDefs.SPECTRUM_POINTINDEX]
 
-                # add lines to drawList
-                self._addDiagonalLine(drawList, x0, x1, y0, y1, col)
+                if not diagonalCount:
+                    # add lines to drawList
+                    self._addDiagonalLine(drawList, x0, x1, y0, y1, col)
+                    diagonalCount += 1
 
                 spinningRate = spectrumView.spectrum.spinningRate
                 if spinningRate:
@@ -3656,10 +3679,7 @@ class CcpnGLWidget(QOpenGLWidget):
                     for n in range(nmin, nmax + 1):
                         if n:
                             # add lines to drawList
-                            self._addDiagonalLine(drawList, x0 + n * spinningRate,
-                                                  x1 + n * spinningRate,
-                                                  y0,
-                                                  y1, col)
+                            self._addDiagonalLine(drawListSideBands, x0 + n * spinningRate, x1 + n * spinningRate, y0, y1, col)
 
                 # extra multiple-quantum diagonals
                 if self._matchingIsotopeCodes:
@@ -3668,11 +3688,12 @@ class CcpnGLWidget(QOpenGLWidget):
                     yaxisType = mTypes[pIndex[1]]
 
                     if xaxisType == 'MQShift' and yaxisType == 'Shift':
-                        self._addDiagonalLine(drawList, x0, x1, 2 * y0, 2 * y1, col)
+                        self._addDiagonalLine(drawListSideBands, x0, x1, 2 * y0, 2 * y1, col)
                     elif xaxisType == 'Shift' and yaxisType == 'MQShift':
-                        self._addDiagonalLine(drawList, 2 * x0, 2 * x1, y0, y1, col)
+                        self._addDiagonalLine(drawListSideBands, 2 * x0, 2 * x1, y0, y1, col)
 
         drawList.defineIndexVBO(enableVBO=True)
+        drawListSideBands.defineIndexVBO(enableVBO=True)
 
     # def drawDiagonals(self):
     #     with self._disableGLAliasing():
@@ -6681,6 +6702,8 @@ class CcpnGLWidget(QOpenGLWidget):
         strip.gridAction.setChecked(self._gridVisible)
         if hasattr(strip, 'lastAxisOnlyCheckBox'):
             strip.lastAxisOnlyCheckBox.setChecked(strip.spectrumDisplay.lastAxisOnly)
+
+        strip.sideBandsAction.setChecked(self._sideBandsVisible)
 
         if strip._isPhasingOn:
             menu = strip._contextMenus.get(PhasingMenu)

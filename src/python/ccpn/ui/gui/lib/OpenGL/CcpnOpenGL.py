@@ -55,7 +55,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-01-09 09:41:05 +0000 (Thu, January 09, 2020) $"
+__dateModified__ = "$dateModified: 2020-01-09 09:44:59 +0000 (Thu, January 09, 2020) $"
 __version__ = "$Revision: 3.0.0 $"
 #=========================================================================================
 # Created
@@ -423,7 +423,7 @@ class CcpnGLWidget(QOpenGLWidget):
         self._buildMouse = True
         self._mouseCoords = [-1.0, -1.0]
         self.mouseString = None
-        self.diffMouseString = None
+        # self.diffMouseString = None
         self._symbolLabelling = 0
         self._symbolType = 0
         self._symbolSize = 0

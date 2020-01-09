@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-01-03 16:43:29 +0000 (Fri, January 03, 2020) $"
+__dateModified__ = "$dateModified: 2020-01-09 09:44:59 +0000 (Thu, January 09, 2020) $"
 __version__ = "$Revision: 3.0.0 $"
 #=========================================================================================
 # Created
@@ -1343,7 +1343,7 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
         self._buildMouse = True
         self._mouseCoords = [-1.0, -1.0]
         self.mouseString = None
-        self.diffMouseString = None
+        # self.diffMouseString = None               # NOTE:ED - not required, can remove soon
         self._symbolLabelling = 0
 
         self._contourList = {}

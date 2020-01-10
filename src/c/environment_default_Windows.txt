@@ -47,7 +47,7 @@ LINK_FLAGS = $(WIN_FLAG) $(OPT_FLAG) $(FPIC_FLAG)
 COPY_LIBRARIES = copySharedObjs.bat
 
 # math
-MATH_LIB = /Lm
+MATH_LIB =
 
 # rest of Python
 PYTHON_VERSION = 37

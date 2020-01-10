@@ -3,7 +3,7 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -12,8 +12,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: CCPN $"
-__dateModified__ = "$dateModified: 2017-07-07 16:32:31 +0100 (Fri, July 07, 2017) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2020-01-10 11:21:54 +0000 (Fri, January 10, 2020) $"
 __version__ = "$Revision: 3.0.0 $"
 #=========================================================================================
 # Created
@@ -2894,7 +2894,7 @@ class CcpnNefReader:
 
     def load_nef_restraint_list(self, project: Project, saveFrame: StarIo.NmrSaveFrame):
         """Serves to load nef_distance_restraint_list, nef_dihedral_restraint_list,
-     nef_rdc_restraint_list and ccpn_restraint_list"""
+        nef_rdc_restraint_list and ccpn_restraint_list"""
 
         # Get ccpn-to-nef mapping for saveframe
         category = saveFrame['sf_category']
@@ -2977,7 +2977,7 @@ class CcpnNefReader:
     def load_nef_restraint(self, restraintList: RestraintList, loop: StarIo.NmrLoop,
                            itemLength: int = None):
         """Serves to load nef_distance_restraint, nef_dihedral_restraint,
-     nef_rdc_restraint and ccpn_restraint loops"""
+        nef_rdc_restraint and ccpn_restraint loops"""
 
         # NB Restraint.name - written out for dihedral restraints - is not read.
         # Which is probably OK, it is derived from the atoms.

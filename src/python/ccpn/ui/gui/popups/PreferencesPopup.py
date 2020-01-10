@@ -4,7 +4,7 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2019-12-05 09:40:39 +0000 (Thu, December 05, 2019) $"
+__dateModified__ = "$dateModified: 2020-01-10 11:21:55 +0000 (Fri, January 10, 2020) $"
 __version__ = "$Revision: 3.0.0 $"
 #=========================================================================================
 # Created
@@ -57,6 +57,7 @@ from ccpn.ui.gui.lib.GuiPath import PathEdit
 from ccpn.ui.gui.popups.ValidateSpectraPopup import ValidateSpectraForPreferences
 from ccpn.ui.gui.popups.Dialog import CcpnDialogMainWidget
 from ccpn.core.lib.ContextManagers import queueStateChange, undoStackBlocking
+from ccpn.ui.gui.widgets.PlaneToolbar import EMITSOURCE, EMITCLICKED, EMITIGNORESOURCE
 
 
 PEAKFITTINGDEFAULTS = [PARABOLICMETHOD, GAUSSIANMETHOD]
@@ -174,11 +175,11 @@ class PreferencesPopup(CcpnDialogMainWidget):
                     strip._contourThickness = self.application.preferences.general.contourThickness
                     strip.crosshairVisible = self.application.preferences.general.showCrosshair
                     strip.doubleCrosshairVisible = self.application.preferences.general.showDoubleCrosshair
+                    strip.sideBandsVisible = self.application.preferences.general.showSideBands
 
                     strip.spectrumBordersVisible = self.application.preferences.general.showSpectrumBorder
 
-            print('>>>displayVisible', display, checked)
-            # display.spectrumUtilToolBar.setVisible(checked)     # TODO: this fires a refresh too soon
+                strip._frameGuide.resetColourTheme()
 
     def _updateDisplay(self, updateColourScheme, updateSpectrumDisplays):
         if updateColourScheme:
@@ -600,6 +601,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
         self.contourThicknessData.setValue(int(self.preferences.general.contourThickness))
         self.autoCorrectBox.setChecked(self.preferences.general.autoCorrectColours)
         _setColourPulldown(self.marksDefaultColourBox, self.preferences.general.defaultMarksColour)
+        self.showSideBandsData.setValue(int(self.preferences.general.numSideBands))
 
         multipletAveraging = self.preferences.general.multipletAveraging
         self.multipletAveraging.setIndex(MULTIPLETAVERAGINGTYPES.index(multipletAveraging) if multipletAveraging in MULTIPLETAVERAGINGTYPES else 0)
@@ -724,6 +726,11 @@ class PreferencesPopup(CcpnDialogMainWidget):
         self.showDoubleCrosshairLabel = Label(parent, text="    - and Double Crosshairs: ", grid=(row, 0))
         self.showDoubleCrosshairBox = CheckBox(parent, grid=(row, 1))  #, checked=self.preferences.general.showDoubleCrosshair)
         self.showDoubleCrosshairBox.toggled.connect(partial(self._queueToggleGeneralOptions, 'showDoubleCrosshair'))
+
+        row += 1
+        self.showGridLabel = Label(parent, text="Show SpinningRate SideBands: ", grid=(row, 0))
+        self.showGridBox = CheckBox(parent, grid=(row, 1))  #, checked=self.preferences.general.showGrid)
+        self.showGridBox.toggled.connect(partial(self._queueToggleGeneralOptions, 'showSideBands'))
 
         row += 1
         self.showLastAxisOnlyLabel = Label(parent, text="Share Y Axis: ", grid=(row, 0))
@@ -860,6 +867,17 @@ class PreferencesPopup(CcpnDialogMainWidget):
         # self.showIntensityLimitBox.setValue(intensityLimit)
         self.showIntensityLimitBox.setMinimumWidth(LineEditsMinimumWidth)
         self.showIntensityLimitBox.valueChanged.connect(self._queueSetIntensityLimit)
+
+        row += 1
+        HLine(parent, grid=(row, 0), gridSpan=(1, 3), colour=getColours()[DIVIDER], height=15)
+
+        row += 1
+        # numSideBands = self.preferences.general.numSideBands
+        self.showSideBands = Label(parent, text='Number of SpinningRate SideBands:', grid=(row, 0), hAlign='l')
+        self.showSideBandsData = DoubleSpinbox(parent, step=1, min=0, max=25, grid=(row, 1), hAlign='l', decimals=0)
+        # self.showSideBandsData.setValue(int(numSideBands))
+        self.showSideBandsData.setMinimumWidth(LineEditsMinimumWidth)
+        self.showSideBandsData.valueChanged.connect(self._queueSetNumSideBands)
 
         row += 1
         HLine(parent, grid=(row, 0), gridSpan=(1, 3), colour=getColours()[DIVIDER], height=15)
@@ -1502,6 +1520,20 @@ class PreferencesPopup(CcpnDialogMainWidget):
         # except:
         #     return
         self.preferences.general.stripWidthZoomPercent = value
+
+    @queueStateChange(_verifyPopupApply)
+    def _queueSetNumSideBands(self):
+        textFromValue = self.showSideBandsData.textFromValue
+        value = self.showSideBandsData.get()
+        prefValue = textFromValue(self.preferences.general.numSideBands)
+        if value >= 0 and textFromValue(value) != prefValue:
+            return partial(self._setNumSideBands, value)
+
+    def _setNumSideBands(self, value):
+        """
+        Set the value for number of sideband gridlines to display
+        """
+        self.preferences.general.numSideBands = value
 
     @queueStateChange(_verifyPopupApply)
     def _queueSetMatchAxisCode(self):

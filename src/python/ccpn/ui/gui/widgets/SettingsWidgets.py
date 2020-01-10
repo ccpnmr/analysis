@@ -4,7 +4,7 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -13,8 +13,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: CCPN $"
-__dateModified__ = "$dateModified: 2017-07-07 16:32:54 +0100 (Fri, July 07, 2017) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2020-01-10 11:21:55 +0000 (Fri, January 10, 2020) $"
 __version__ = "$Revision: 3.0.0 $"
 #=========================================================================================
 # Created
@@ -208,17 +208,22 @@ class SpectrumDisplaySettings(Widget, SignalBlocking):
 
         row += 1
         self.stripArrangementLabel = Label(parent, text="Strip Arrangement", grid=(row, 0))
-        self.stripArrangementButtons = RadioButtons(parent, texts=['    ', '    '],
-                                                    objectNames=['stripSDS_Row', 'stripSDS_Column'],
+        self.stripArrangementButtons = RadioButtons(parent, texts=['    ', '    ', '    '],
+                                                    objectNames=['stripSDS_Row', 'stripSDS_Column', 'stripSDS_Tile'],
                                                     selectedInd=stripArrangement,
                                                     callback=self._stripArrangementChanged,
                                                     direction='horizontal',
                                                     grid=(row, 1), hAlign='l',
                                                     tipTexts=None,
                                                     icons=[('icons/strip-row', (24, 24)),
-                                                           ('icons/strip-column', (24, 24))
+                                                           ('icons/strip-column', (24, 24)),
+                                                           ('icons/strip-tile', (24, 24))
                                                            ],
                                                     )
+
+        # NOTE:ED - temporarily disable/hide the Tile button
+        self.stripArrangementButtons.radioButtons[2].setEnabled(False)
+        self.stripArrangementButtons.radioButtons[2].setVisible(False)
 
         row += 1
         self._spacer = Spacer(parent, 5, 5,

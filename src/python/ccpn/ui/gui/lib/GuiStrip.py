@@ -4,7 +4,7 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -13,8 +13,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Wayne Boucher $"
-__dateModified__ = "$dateModified: 2017-07-07 16:32:44 +0100 (Fri, July 07, 2017) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2020-01-10 11:21:54 +0000 (Fri, January 10, 2020) $"
 __version__ = "$Revision: 3.0.0 $"
 #=========================================================================================
 # Created
@@ -41,7 +41,7 @@ from ccpn.util.Constants import AXIS_MATCHATOMTYPE, AXIS_FULLATOMNAME, DOUBLEAXI
 from functools import partial
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs import AXISXUNITS, AXISYUNITS, AXISLOCKASPECTRATIO, \
     SYMBOLTYPES, ANNOTATIONTYPES, SYMBOLSIZE, SYMBOLTHICKNESS, AXISUSEDEFAULTASPECTRATIO, AXISASPECTRATIOS, \
-    GRIDVISIBLE, CROSSHAIRVISIBLE, DOUBLECROSSHAIRVISIBLE, BOTTOMAXIS, RIGHTAXIS
+    GRIDVISIBLE, CROSSHAIRVISIBLE, DOUBLECROSSHAIRVISIBLE, BOTTOMAXIS, RIGHTAXIS, SIDEBANDSVISIBLE
 from ccpn.core.lib.ContextManagers import undoStackBlocking, undoBlock, \
     notificationBlanking, undoBlockWithoutSideBar
 from ccpn.util.decorators import logCommand
@@ -125,7 +125,7 @@ class GuiStrip(Frame):
         # grid=headerGrid, gridSpan=headerSpan, setLayout=True, spacing=(0, 0))
 
         # set the ID label in the new widget
-        self._CcpnGLWidget.setStripID('.'.join(self.id.split('.')))
+        self._CcpnGLWidget.setStripID('.'.join(self.pid.split('.')))
         # self._CcpnGLWidget.setStripID('')
 
         # Widgets for toolbar; items will be added by GuiStripNd (eg. the Z/A-plane boxes)
@@ -171,6 +171,7 @@ class GuiStrip(Frame):
             self.gridVisible = spectrumDisplay.strips[0].gridVisible
             self.crosshairVisible = spectrumDisplay.strips[0].crosshairVisible
             self.doubleCrosshairVisible = spectrumDisplay.strips[0].doubleCrosshairVisible
+            self.sideBandsVisible = spectrumDisplay.strips[0].sideBandsVisible
 
             self.showSpectraOnPhasing = spectrumDisplay.strips[0].showSpectraOnPhasing
             self._contourThickness = spectrumDisplay.strips[0]._contourThickness
@@ -189,6 +190,7 @@ class GuiStrip(Frame):
             self.gridVisible = self._preferences.showGrid
             self.crosshairVisible = self._preferences.showCrosshair
             self.doubleCrosshairVisible = self._preferences.showDoubleCrosshair
+            self.sideBandsVisible = self._preferences.showSideBands
 
             self.showSpectraOnPhasing = self._preferences.showSpectraOnPhasing
             self._contourThickness = self._preferences.contourThickness
@@ -303,6 +305,23 @@ class GuiStrip(Frame):
         self._CcpnGLWidget.GLSignals.emitPaintEvent()
 
     @property
+    def sideBandsVisible(self):
+        """True if sideBands are visible.
+        """
+        return self._CcpnGLWidget._sideBandsVisible
+
+    @sideBandsVisible.setter
+    def sideBandsVisible(self, visible):
+        """set the sideBands visibility
+        """
+        if hasattr(self, 'sideBandsAction'):
+            self.sideBandsAction.setChecked(visible)
+        self._CcpnGLWidget._sideBandsVisible = visible
+
+        # spawn a redraw of the GL windows
+        self._CcpnGLWidget.GLSignals.emitPaintEvent()
+
+    @property
     def spectrumBordersVisible(self):
         """True if spectrumBorders are visible.
         """
@@ -323,6 +342,11 @@ class GuiStrip(Frame):
         """Toggles whether grid is visible in the strip.
         """
         self.gridVisible = not self._CcpnGLWidget._gridVisible
+
+    def toggleSideBands(self):
+        """Toggles whether sideBands are visible in the strip.
+        """
+        self.sideBandsVisible = not self._CcpnGLWidget._sideBandsVisible
 
     @property
     def crosshairVisible(self):
@@ -590,6 +614,10 @@ class GuiStrip(Frame):
         # TODO, merge the two menu (cursor and peak) in one single menu to avoid code duplication. Issues: when tried, only one menu at the time worked!
         from functools import partial
         from ccpn.ui.gui.lib.Strip import navigateToPositionInStrip
+        from ccpn.util.Common import getAxisCodeMatchIndices
+        from functools import partial
+        from itertools import product
+        from ccpn.ui.gui.lib.Strip import navigateToPositionInStrip
 
         if self.navigateToPeakMenu:
             self.navigateToPeakMenu.clear()
@@ -602,13 +630,38 @@ class GuiStrip(Frame):
                         for spectrumDisplay in self.current.project.spectrumDisplays:
                             for strip in spectrumDisplay.strips:
                                 if strip != currentStrip:
-                                    toolTip = 'Show cursor in strip %s at Peak position %s' % (str(strip.id), str([round(x, 3) for x in peaks[0].position]))
-                                    if len(list(set(strip.axisCodes) & set(currentStrip.axisCodes))) <= 4:
-                                        self.navigateToPeakMenu.addItem(text=strip.pid,
-                                                                        callback=partial(navigateToPositionInStrip, strip=strip,
-                                                                                         positions=peaks[0].position,
-                                                                                         axisCodes=peaks[0].axisCodes),
-                                                                        toolTip=toolTip)
+
+                                    # get a list of all isotope code matches for each axis code in 'strip'
+                                    indices = getAxisCodeMatchIndices(strip.axisCodes, peaks[0].axisCodes, allMatches=True)
+
+                                    # generate a permutation list of the axis codes that have unique indices
+                                    permutationList = [jj for jj in product(*indices) if len(set(jj)) == len(jj)]
+
+                                    # permutation list is list of tuples
+                                    # each element is list of indices to fetch from currentStrip and map to strip
+
+                                    for perm in permutationList:
+
+                                        pos = [peaks[0].position[ii] for ii in perm if ii is not None]  # permute to strip axis codes
+                                        axes = strip.axisCodes  # [currentStrip.axisCodes[ii] for ii in perm]
+
+                                        item = ', '.join([cc + ":" + str(round(x, 3)) for x, cc in zip(pos, axes)])
+                                        text = '%s (%s)' % (strip.pid, item)
+                                        toolTip = 'Show cursor in strip %s at Cursor position (%s)' % (str(strip.id), item)
+                                        if len(list(set(strip.axisCodes) & set(currentStrip.axisCodes))) <= 4:
+                                            self.navigateToPeakMenu.addItem(text=text,
+                                                                            callback=partial(navigateToPositionInStrip, strip=strip,
+                                                                                             positions=pos, axisCodes=axes, ),
+                                                                            toolTip=toolTip)
+
+                                    if not permutationList:
+                                        toolTip = 'Show cursor in strip %s at Peak position %s' % (str(strip.id), str([round(x, 3) for x in peaks[0].position]))
+                                        if len(list(set(strip.axisCodes) & set(currentStrip.axisCodes))) <= 4:
+                                            self.navigateToPeakMenu.addItem(text=strip.pid,
+                                                                            callback=partial(navigateToPositionInStrip, strip=strip,
+                                                                                             positions=peaks[0].position,
+                                                                                             axisCodes=peaks[0].axisCodes),
+                                                                            toolTip=toolTip)
                             self.navigateToPeakMenu.addSeparator()
                     else:
                         self.navigateToPeakMenu.setEnabled(False)
@@ -618,7 +671,13 @@ class GuiStrip(Frame):
          and uses to pan a selected display from the list of spectrumViews or the current cursor position.
         """
         # TODO needs clear documentation
+
+        # NOTE:ED - need to add permutations for matching isotopes codes, tooltip order is incorrect
+        # get count of isotopes for current strip
+
+        from ccpn.util.Common import getAxisCodeMatchIndices
         from functools import partial
+        from itertools import product
         from ccpn.ui.gui.lib.Strip import navigateToPositionInStrip
 
         if self.navigateCursorMenu:
@@ -638,12 +697,40 @@ class GuiStrip(Frame):
                     for spectrumDisplay in self.current.project.spectrumDisplays:
                         for strip in spectrumDisplay.strips:
                             if strip != currentStrip:
-                                toolTip = 'Show cursor in strip %s at Cursor position %s' % (str(strip.id), str([round(x, 3) for x in position]))
-                                if len(list(set(strip.axisCodes) & set(currentStrip.axisCodes))) <= 4:
-                                    self.navigateCursorMenu.addItem(text=strip.pid,
-                                                                    callback=partial(navigateToPositionInStrip, strip=strip,
-                                                                                     positions=position, axisCodes=currentStrip.axisCodes, ),
-                                                                    toolTip=toolTip)
+
+                                # get a list of all isotope code matches for each axis code in 'strip'
+                                indices = getAxisCodeMatchIndices(strip.axisCodes, currentStrip.axisCodes, allMatches=True)
+
+                                # generate a permutation list of the axis codes that have unique indices
+                                permutationList = [jj for jj in product(*indices) if len(set(jj)) == len(jj)]
+
+                                # permutation list is list of tuples
+                                # each element is list of indices to fetch from currentStrip and map to strip
+
+                                for perm in permutationList:
+
+                                    pos = [position[ii] for ii in perm if ii is not None]   # permute to strip axis codes
+                                    axes = strip.axisCodes                                  # [currentStrip.axisCodes[ii] for ii in perm]
+
+                                    item = ', '.join([cc+":"+str(round(x, 3)) for x, cc in zip(pos, axes)])
+                                    text = '%s (%s)' % (strip.pid, item)
+                                    toolTip = 'Show cursor in strip %s at Cursor position (%s)' % (str(strip.id), item)
+                                    if len(list(set(strip.axisCodes) & set(currentStrip.axisCodes))) <= 4:
+                                        self.navigateCursorMenu.addItem(text=text,
+                                                                        callback=partial(navigateToPositionInStrip, strip=strip,
+                                                                                         positions=pos, axisCodes=axes, ),
+                                                                        toolTip=toolTip)
+
+                                if not permutationList:
+                                    toolTip = 'Show cursor in strip %s at Cursor position %s' % (str(strip.id), str([round(x, 3) for x in position]))
+                                    if len(list(set(strip.axisCodes) & set(currentStrip.axisCodes))) <= 4:
+                                        self.navigateCursorMenu.addItem(text=strip.pid,
+                                                                        callback=partial(navigateToPositionInStrip, strip=strip,
+                                                                                         positions=position,
+                                                                                         axisCodes=currentStrip.axisCodes, ),
+                                                                        toolTip=toolTip)
+
+
                         self.navigateCursorMenu.addSeparator()
                 else:
                     self.navigateCursorMenu.setEnabled(False)
@@ -948,6 +1035,7 @@ class GuiStrip(Frame):
         self._CcpnGLWidget.highlightCurrentStrip(flag)
         if self.stripLabel:
             self.stripLabel.setLabelColour(CCPNGLWIDGET_HEXHIGHLIGHT if flag else CCPNGLWIDGET_HEXFOREGROUND)
+            self.stripLabel.setHighlighted(flag)
 
     # GWV 20181127: moved to a single notifier in GuiMainWindow
     # def _highlightCurrentStrip(self, data):
@@ -2106,6 +2194,14 @@ class GuiStrip(Frame):
             # vertical strip layout
             for m, widgStrip in enumerate(_widgets):
                 layout.addWidget(widgStrip, m, 0)
+
+        elif spectrumDisplay.stripArrangement == 'T':
+
+            # NOTE:ED - Tiled plots not fully implemented yet
+            getLogger().warning('Tiled plots not implemented for spectrumDisplay: %s' % str(spectrumDisplay.pid))
+
+        else:
+            getLogger().warning('Strip direction is not defined for spectrumDisplay: %s' % str(spectrumDisplay.pid))
 
         # rebuild the axes for strips
         spectrumDisplay.showAxes(stretchValue=True, widths=False)

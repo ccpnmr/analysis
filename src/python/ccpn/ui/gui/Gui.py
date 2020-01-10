@@ -4,7 +4,7 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -13,8 +13,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Wayne Boucher $"
-__dateModified__ = "$dateModified: 2017-07-07 16:32:41 +0100 (Fri, July 07, 2017) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2020-01-10 11:21:54 +0000 (Fri, January 10, 2020) $"
 __version__ = "$Revision: 3.0.0 $"
 #=========================================================================================
 # Created
@@ -534,6 +534,14 @@ class Strip1d(coreClass, _GuiStrip1d):
             # strips are arranged in a column
             self.spectrumDisplay.stripFrame.layout().addWidget(self, stripIndex, 0)
 
+        elif self.spectrumDisplay.stripArrangement == 'T':
+
+            # NOTE:ED - Tiled plots not fully implemented yet
+            Logging.getLogger().warning('Tiled plots not implemented for spectrumDisplay: %s' % str(self.spectrumDisplay.pid))
+
+        else:
+            Logging.getLogger().warning('Strip direction is not defined for spectrumDisplay: %s' % str(self.spectrumDisplay.pid))
+
 
 from ccpn.ui.gui.lib.GuiStripNd import GuiStripNd as _GuiStripNd
 
@@ -566,6 +574,14 @@ class StripNd(coreClass, _GuiStripNd):
 
             # strips are arranged in a column
             self.spectrumDisplay.stripFrame.layout().addWidget(self, stripIndex, 0)
+
+        elif self.spectrumDisplay.stripArrangement == 'T':
+
+            # NOTE:ED - Tiled plots not fully implemented yet
+            Logging.getLogger().warning('Tiled plots not implemented for spectrumDisplay: %s' % str(self.spectrumDisplay.pid))
+
+        else:
+            Logging.getLogger().warning('Strip direction is not defined for spectrumDisplay: %s' % str(self.spectrumDisplay.pid))
 
 
 def _factoryFunction(project: Project, wrappedData) -> coreClass:

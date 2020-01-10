@@ -4,7 +4,7 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -13,8 +13,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: CCPN $"
-__dateModified__ = "$dateModified: 2018-12-20 15:53:23 +0000 (Thu, December 20, 2018) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2020-01-10 11:21:55 +0000 (Fri, January 10, 2020) $"
 __version__ = "$Revision: 3.0.0 $"
 #=========================================================================================
 # Created
@@ -1062,7 +1062,7 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
                                                                  b=self.foreground[2],
                                                                  transparency=300.0,
                                                                  _includeDiagonal=self._matchingIsotopeCodes,
-                                                                 _diagonalList=self.diagonalGLList)
+                                                                 _diagonalList=None)        # self.diagonalGLList)
 
         if self.axesChanged:
             if self.highlighted:
@@ -1290,8 +1290,10 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
         self.gridList = []
         self._gridVisible = self._preferences.showGrid
         self._crosshairVisible = self._preferences.showCrosshair
+        self._sideBandsVisible = self._preferences.showSideBands
 
         self.diagonalGLList = None
+        self.diagonalideBandsGLList = None
         self._updateAxes = True
 
         self._axesVisible = True
@@ -1343,7 +1345,7 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
         self._buildMouse = True
         self._mouseCoords = [-1.0, -1.0]
         self.mouseString = None
-        self.diffMouseString = None
+        # self.diffMouseString = None               # NOTE:ED - not required, can remove soon
         self._symbolLabelling = 0
 
         self._contourList = {}
@@ -1484,6 +1486,15 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
 
                     # strips are arranged in a column
                     self._scaleToXAxis()
+
+                elif self.spectrumDisplay.stripArrangement == 'T':
+
+                    # NOTE:ED - Tiled plots not fully implemented yet
+                    getLogger().warning('Tiled plots not implemented for spectrumDisplay: %s' % str(self.spectrumDisplay.pid))
+
+                else:
+                    getLogger().warning('Strip direction is not defined for spectrumDisplay: %s' % str(self.spectrumDisplay.pid))
+
             else:
                 # paint to update lock button colours
                 self.update()
@@ -1589,6 +1600,12 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
                     self.axisT = mid + diff
                     self.axisL = axisL
                     self.axisR = axisR
+
+                elif self.spectrumDisplay.stripArrangement == 'T':
+
+                    # NOTE:ED - Tiled plots not fully implemented yet
+                    # currently ignore - warnings will be logged elsewhere
+                    pass
 
                 else:
                     # currently ignore - warnings will be logged elsewhere
@@ -2140,6 +2157,14 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
 
                 # strips are arranged in a column
                 self._scaleToXAxis(rescale=False)
+
+            elif self.spectrumDisplay.stripArrangement == 'T':
+
+                # NOTE:ED - Tiled plots not fully implemented yet
+                getLogger().warning('Tiled plots not implemented for spectrumDisplay: %s' % str(self.spectrumDisplay.pid))
+
+            else:
+                getLogger().warning('Strip direction is not defined for spectrumDisplay: %s' % str(self.spectrumDisplay.pid))
 
         self.rescale()
 

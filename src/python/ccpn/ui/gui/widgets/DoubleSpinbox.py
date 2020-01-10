@@ -4,7 +4,7 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2019-12-05 09:40:40 +0000 (Thu, December 05, 2019) $"
+__dateModified__ = "$dateModified: 2020-01-10 11:21:55 +0000 (Fri, January 10, 2020) $"
 __version__ = "$Revision: 3.0.0 $"
 #=========================================================================================
 # Created
@@ -224,6 +224,21 @@ class ScientificDoubleSpinBox(DoubleSpinbox):
         return self.validator.fixup(text)
 
     def valueFromText(self, text):
+        """Values in the spinbox are constrained to the correct sign if the min/max values are
+        either both positive or both negative
+        """
+        if self.minimum() <= 0 and self.maximum() <= 0:
+            # check for maximum
+            val = min(-abs(float(text)), self.maximum())
+            self.lineEdit().setText(self.textFromValue(val))
+            return val
+
+        elif self.minimum() >= 0 and self.maximum() >= 0:
+            # check for minimum
+            val = max(abs(float(text)), self.minimum())
+            self.lineEdit().setText(self.textFromValue(val))
+            return val
+
         return float(text)
 
     def textFromValue(self, value):

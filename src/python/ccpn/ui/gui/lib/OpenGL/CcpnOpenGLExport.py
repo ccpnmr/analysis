@@ -4,7 +4,7 @@ Code for exporting OpenGL stripDisplay to pdf and svg files.
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2018-12-20 16:42:44 +0000 (Thu, December 20, 2018) $"
+__dateModified__ = "$dateModified: 2020-01-10 11:21:55 +0000 (Fri, January 10, 2020) $"
 __version__ = "$Revision: 3.0.0 $"
 #=========================================================================================
 # Created
@@ -64,7 +64,7 @@ from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs import GLFILENAME, GLGRIDLINES, GLAXI
     GLPAGETYPE, GLSPECTRUMDISPLAY, GLAXISLINES, GLBACKGROUND, GLBASETHICKNESS, GLSYMBOLTHICKNESS, \
     GLCONTOURTHICKNESS, GLFOREGROUND, GLSHOWSPECTRAONPHASE, \
     GLAXISTITLES, GLAXISUNITS, GLAXISMARKSINSIDE, GLSTRIPDIRECTION, GLSTRIPPADDING, \
-    GLFULLLIST, GLEXTENDEDLIST, GLCURSORS, GLDIAGONALLINE, \
+    GLFULLLIST, GLEXTENDEDLIST, GLCURSORS, GLDIAGONALLINE, GLDIAGONALSIDEBANDS, \
     MAINVIEW, MAINVIEWFULLHEIGHT, MAINVIEWFULLWIDTH, \
     RIGHTAXIS, RIGHTAXISBAR, FULLRIGHTAXIS, FULLRIGHTAXISBAR, \
     BOTTOMAXIS, BOTTOMAXISBAR, FULLBOTTOMAXIS, FULLBOTTOMAXISBAR, FULLVIEW, BLANKVIEW
@@ -397,6 +397,7 @@ class GLExporter():
         # print the grid objects
         if self.params[GLGRIDLINES]: self._addGridLines()
         if self.params[GLDIAGONALLINE]: self._addDiagonalLine()
+        if self.params[GLDIAGONALSIDEBANDS]: self._addDiagonalSideBands()
 
         # check parameters to decide what to print
 
@@ -454,6 +455,22 @@ class GLExporter():
                                        name='grid',
                                        ratioLine=True)
             self._appendGroup(drawing=self._mainPlot, colourGroups=colourGroups, name='grid')
+
+    def _addDiagonalSideBands(self):
+        """
+        Add the diagonal sideBand lines to the main drawing area.
+        """
+        if self._parent.diagonalGLList:
+            colourGroups = OrderedDict()
+            self._appendIndexLineGroup(indArray=self._parent.diagonalSideBandsGLList,
+                                       colourGroups=colourGroups,
+                                       plotDim={PLOTLEFT  : self.displayScale * self.mainView.left,
+                                                PLOTBOTTOM: self.displayScale * self.mainView.bottom,
+                                                PLOTWIDTH : self.displayScale * self.mainView.width,
+                                                PLOTHEIGHT: self.displayScale * self.mainView.height},
+                                       name='diagonal',
+                                       ratioLine=True)
+            self._appendGroup(drawing=self._mainPlot, colourGroups=colourGroups, name='diagonal')
 
     def _addDiagonalLine(self):
         """

@@ -4,7 +4,7 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -13,8 +13,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: CCPN $"
-__dateModified__ = "$dateModified: 2017-07-07 16:32:44 +0100 (Fri, July 07, 2017) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2020-01-10 11:21:54 +0000 (Fri, January 10, 2020) $"
 __version__ = "$Revision: 3.0.0 $"
 #=========================================================================================
 # Created
@@ -89,7 +89,7 @@ AXISUNITS = ['ppm', 'Hz', 'points']
 SPECTRUMGROUPS = 'spectrumGroups'
 SPECTRUMISGROUPED = 'spectrumIsGrouped'
 SPECTRUMGROUPLIST = 'spectrumGroupList'
-STRIPDIRECTIONS = ['Y', 'X']
+STRIPDIRECTIONS = ['Y', 'X', 'T']
 SPECTRUMDISPLAY = 'spectrumDisplay'
 STRIPARRANGEMENT = 'stripArrangement'
 
@@ -472,7 +472,7 @@ class GuiSpectrumDisplay(CcpnModule):
 
     @property
     def stripArrangement(self):
-        """Strip axis direction ('X', 'Y', None) - None only for non-strip plots
+        """Strip axis direction ('X', 'Y', 'T', None) - None only for non-strip plots
         """
         # Using AbstractWrapperObject because there seems to already be a setParameter
         # belonging to spectrumDisplay
@@ -487,12 +487,12 @@ class GuiSpectrumDisplay(CcpnModule):
 
     @stripArrangement.setter
     def stripArrangement(self, value):
-        """Set the new strip direction ('X', 'Y', None) - None only for non-strip plots
+        """Set the new strip direction ('X', 'Y', 'T', None) - None only for non-strip plots
         """
         if not isinstance(value, str):
             raise TypeError('stripArrangement must be a string')
-        elif value not in ['X', 'Y']:
-            raise ValueError("stripArrangement must be either 'X' or 'Y'")
+        elif value not in ['X', 'Y', 'T']:
+            raise ValueError("stripArrangement must be either 'X', 'Y' or 'T'")
 
         AbstractWrapperObject.setParameter(self, SPECTRUMDISPLAY, STRIPARRANGEMENT, value)
         # leave the _wrappedData as it's initialised value
@@ -1042,6 +1042,14 @@ class GuiSpectrumDisplay(CcpnModule):
                 for m, widgStrip in enumerate(_widgets):
                     layout.addWidget(widgStrip, m, 0)
 
+            elif spectrumDisplay.stripArrangement == 'T':
+
+                # NOTE:ED - Tiled plots not fully implemented yet
+                getLogger().warning('Tiled plots not implemented for spectrumDisplay: %s' % str(spectrumDisplay.pid))
+
+            else:
+                getLogger().warning('Strip direction is not defined for spectrumDisplay: %s' % str(spectrumDisplay.pid))
+
             spectrumDisplay.stripFrame.setUpdatesEnabled(True)
             spectrumDisplay.stripFrame.blockSignals(False)
 
@@ -1091,6 +1099,14 @@ class GuiSpectrumDisplay(CcpnModule):
                 for m, widgStrip in enumerate(_widgets):
                     layout.addWidget(widgStrip, m, 0)
 
+            elif spectrumDisplay.stripArrangement == 'T':
+
+                # NOTE:ED - Tiled plots not fully implemented yet
+                getLogger().warning('Tiled plots not implemented for spectrumDisplay: %s' % str(spectrumDisplay.pid))
+
+            else:
+                getLogger().warning('Strip direction is not defined for spectrumDisplay: %s' % str(spectrumDisplay.pid))
+
             spectrumDisplay.stripFrame.setUpdatesEnabled(True)
             spectrumDisplay.stripFrame.blockSignals(False)
         else:
@@ -1136,6 +1152,14 @@ class GuiSpectrumDisplay(CcpnModule):
                 # vertical strip layout
                 for m, widgStrip in enumerate(_widgets):
                     layout.addWidget(widgStrip, m, 0)
+
+            elif spectrumDisplay.stripArrangement == 'T':
+
+                # NOTE:ED - Tiled plots not fully implemented yet
+                getLogger().warning('Tiled plots not implemented for spectrumDisplay: %s' % str(spectrumDisplay.pid))
+
+            else:
+                getLogger().warning('Strip direction is not defined for spectrumDisplay: %s' % str(spectrumDisplay.pid))
 
             # put ccpnStrip back into strips using the api
             # if self not in ccpnStrip.spectrumDisplay.strips:
@@ -1219,16 +1243,16 @@ class GuiSpectrumDisplay(CcpnModule):
                 with notificationBlanking():
                     strip._delete()
 
-                addUndoItem(redo=self._redrawAxes)
+                addUndoItem(redo=partial(self._redrawAxes, deletingStrip=True))
 
             # do axis redrawing
-            self._redrawAxes()
+            self._redrawAxes(deletingStrip=True)
 
-    def _redrawAxes(self, index=-1):
+    def _redrawAxes(self, index=-1, deletingStrip=False):
         """Redraw the axes for the stripFrame, and set the new current strip,
         will default to the last strip if not selected.
         """
-        self.showAxes(stretchValue=True)
+        self.showAxes(stretchValue=True, deletingStrip=deletingStrip)
         if self.strips:
             self.current.strip = self.strips[index]
 
@@ -1252,7 +1276,7 @@ class GuiSpectrumDisplay(CcpnModule):
     def setLastAxisOnly(self, lastAxisOnly: bool = True):
         self.lastAxisOnly = lastAxisOnly
 
-    def showAxes(self, strips=None, stretchValue=False, widths=True, minimumWidth=STRIP_MINIMUMWIDTH):
+    def showAxes(self, strips=None, stretchValue=False, widths=True, minimumWidth=STRIP_MINIMUMWIDTH, deletingStrip=False):
         # use the strips as they are ordered in the model
         currentStrips = self.orderedStrips
 
@@ -1284,10 +1308,15 @@ class GuiSpectrumDisplay(CcpnModule):
                     for ss in self.strips:
                         ss.setAxesVisible(rightAxisVisible=True, bottomAxisVisible=True)
 
-            else:
-                getLogger().warning('Strip direction is not defined for spectrumDisplay: %s' % str(self))
+            elif self.stripArrangement == 'T':
 
-            self.setColumnStretches(stretchValue=stretchValue, widths=widths, minimumWidth=minimumWidth)
+                # NOTE:ED - Tiled plots not fully implemented yet
+                getLogger().warning('Tiled plots not implemented for spectrumDisplay: %s' % str(self.pid))
+
+            else:
+                getLogger().warning('Strip direction is not defined for spectrumDisplay: %s' % str(self.pid))
+
+            self.setColumnStretches(stretchValue=stretchValue, widths=widths, minimumWidth=minimumWidth, deletingStrip=deletingStrip)
 
     def increaseTraceScale(self):
         # self.mainWindow.traceScaleUp(self.mainWindow)
@@ -1322,6 +1351,14 @@ class GuiSpectrumDisplay(CcpnModule):
             # strips are arranged in a column
             self._increaseStripHeight()
 
+        elif self.stripArrangement == 'T':
+
+            # NOTE:ED - Tiled plots not fully implemented yet
+            getLogger().warning('Tiled plots not implemented for spectrumDisplay: %s' % str(self.pid))
+
+        else:
+            getLogger().warning('Strip direction is not defined for spectrumDisplay: %s' % str(self.pid))
+
     def decreaseStripSize(self):
         """Decrease the width/height of the strips depending on the orientation
         """
@@ -1334,6 +1371,14 @@ class GuiSpectrumDisplay(CcpnModule):
 
             # strips are arranged in a column
             self._decreaseStripHeight()
+
+        elif self.stripArrangement == 'T':
+
+            # NOTE:ED - Tiled plots not fully implemented yet
+            getLogger().warning('Tiled plots not implemented for spectrumDisplay: %s' % str(self.pid))
+
+        else:
+            getLogger().warning('Strip direction is not defined for spectrumDisplay: %s' % str(self.pid))
 
     def _increaseStripWidth(self):
         """Increase the widths of the strips
@@ -1476,24 +1521,29 @@ class GuiSpectrumDisplay(CcpnModule):
 
         return result
 
-    def setColumnStretches(self, stretchValue=False, scaleFactor=1.0, widths=True, minimumWidth=None):
+    def setColumnStretches(self, stretchValue=False, scaleFactor=1.0, widths=True, minimumWidth=None, deletingStrip=False):
         """Set the column widths of the strips so that the last strip accommodates the axis bar
                 if necessary."""
 
         if self.stripArrangement == 'Y':
 
             # strips are arranged in a row
-            self._setColumnStretches(stretchValue=stretchValue, scaleFactor=scaleFactor, widths=widths, minimumWidth=minimumWidth)
+            self._setColumnStretches(stretchValue=stretchValue, scaleFactor=scaleFactor, widths=widths, minimumWidth=minimumWidth, deletingStrip=deletingStrip)
 
         elif self.stripArrangement == 'X':
 
             # strips are arranged in a column
-            self._setRowStretches(stretchValue=stretchValue, scaleFactor=scaleFactor, heights=widths, minimumHeight=minimumWidth)
+            self._setRowStretches(stretchValue=stretchValue, scaleFactor=scaleFactor, heights=widths, minimumHeight=minimumWidth, deletingStrip=deletingStrip)
+
+        elif self.stripArrangement == 'T':
+
+            # NOTE:ED - Tiled plots not fully implemented yet
+            getLogger().warning('Tiled plots not implemented for spectrumDisplay: %s' % str(self.pid))
 
         else:
-            getLogger().warning('Strip direction is not defined for spectrumDisplay: %s' % str(self))
+            getLogger().warning('Strip direction is not defined for spectrumDisplay: %s' % str(self.pid))
 
-    def _setColumnStretches(self, stretchValue=False, scaleFactor=1.0, widths=True, minimumWidth=STRIP_MINIMUMWIDTH):
+    def _setColumnStretches(self, stretchValue=False, scaleFactor=1.0, widths=True, minimumWidth=STRIP_MINIMUMWIDTH, deletingStrip=False):
         """Set the column widths of the strips so that the last strip accommodates the axis bar
         if necessary."""
         widgets = self.stripFrame.children()
@@ -1507,17 +1557,20 @@ class GuiSpectrumDisplay(CcpnModule):
             self._stripFrameScrollArea.setScrollBarPolicies(scrollBarPolicies=('asNeeded', 'never'))
 
         if widgets:
+
+            AXIS_WIDTH = 1
+            AXIS_PADDING = STRIP_SPACING
+
             thisLayout = self.stripFrame.layout()
-            # thisLayoutWidth = self._stripFrameScrollArea.width()
-            thisLayoutWidth = self.stripFrame.width()
+            thisLayoutWidth = self.stripFrame.width() - (2 * STRIP_SPACING)
+
+            if deletingStrip:
+                thisLayoutWidth *= (self.stripCount / (self.stripCount + 1))
 
             if not thisLayout.itemAt(0):
                 return
 
             self.stripFrame.hide()
-
-            AXIS_WIDTH = 1
-            AXIS_PADDING = STRIP_SPACING
 
             if self.strips:
                 AXIS_WIDTH = self.orderedStrips[0].getRightAxisWidth()
@@ -1581,7 +1634,7 @@ class GuiSpectrumDisplay(CcpnModule):
 
             self.stripFrame.show()
 
-    def _setRowStretches(self, stretchValue=False, scaleFactor=1.0, heights=True, minimumHeight=None):
+    def _setRowStretches(self, stretchValue=False, scaleFactor=1.0, heights=True, minimumHeight=None, deletingStrip=False):
         """Set the row heights of the strips so that the last strip accommodates the axis bar
         if necessary."""
         widgets = self.stripFrame.children()
@@ -1595,17 +1648,21 @@ class GuiSpectrumDisplay(CcpnModule):
             self._stripFrameScrollArea.setScrollBarPolicies(scrollBarPolicies=('never', 'asNeeded'))
 
         if widgets:
+
+            AXIS_HEIGHT = 1
+            AXIS_PADDING = STRIP_SPACING
+
             thisLayout = self.stripFrame.layout()
             # thisLayoutHeight = self._stripFrameScrollArea.height()
-            thisLayoutHeight = self.stripFrame.height()
+            thisLayoutHeight = self.stripFrame.height() - (2 * STRIP_SPACING)
+
+            if deletingStrip:
+                thisLayoutHeight *= (self.stripCount / (self.stripCount + 1))
 
             if not thisLayout.itemAt(0):
                 return
 
             self.stripFrame.hide()
-
-            AXIS_HEIGHT = 1
-            AXIS_PADDING = STRIP_SPACING
 
             if self.strips:
                 firstStripHeight = thisLayoutHeight / self.stripCount
@@ -1758,6 +1815,12 @@ class GuiSpectrumDisplay(CcpnModule):
         """
         for strip in self.strips:
             strip.toggleGrid()
+
+    def toggleSideBands(self):
+        """Toggles whether sideBands are displayed in all strips of spectrum display.
+        """
+        for strip in self.strips:
+            strip.toggleSideBands()
 
     def toggleCrosshair(self):
         """Toggles whether cross hair is displayed in all strips of spectrum display.

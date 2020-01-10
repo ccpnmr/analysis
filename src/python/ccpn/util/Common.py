@@ -11,7 +11,7 @@ from __future__ import unicode_literals
 # Licence, Reference and Credits
 #=========================================================================================
 
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -20,8 +20,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: CCPN $"
-__dateModified__ = "$dateModified: 2017-07-07 16:32:57 +0100 (Fri, July 07, 2017) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2020-01-10 11:21:56 +0000 (Fri, January 10, 2020) $"
 __version__ = "$Revision: 3.0.0 $"
 #=========================================================================================
 # Created
@@ -789,7 +789,7 @@ def _SortByMatch(item):
     return -item[2]  # sort from high to low
 
 
-def getAxisCodeMatch(axisCodes, refAxisCodes, allMatches=False, exactMatch=False) -> OrderedDict:
+def getAxisCodeMatch(axisCodes, refAxisCodes, exactMatch=False, allMatches=False) -> OrderedDict:
     """Return an OrderedDict containing the mapping from the refAxisCodes to axisCodes
 
     There may be multiple matches, or None for each axis code.
@@ -844,7 +844,7 @@ def getAxisCodeMatch(axisCodes, refAxisCodes, allMatches=False, exactMatch=False
     return found
 
 
-def getAxisCodeMatchIndices(axisCodes, refAxisCodes, exactMatch=False):
+def getAxisCodeMatchIndices(axisCodes, refAxisCodes, exactMatch=False, allMatches=False):
     """Return a tuple containing the indices for each axis code in axisCodes in refAxisCodes
 
     Only the best match is returned for each code, elements not found in refAxisCodes will be marked as 'None'
@@ -874,6 +874,9 @@ def getAxisCodeMatchIndices(axisCodes, refAxisCodes, exactMatch=False):
             if match:
                 foundCodes.append((code2, jj, match))
 
-        found.append(sorted(foundCodes, key=_SortByMatch)[0][1] if foundCodes else None)
+        if allMatches:
+            found.append(tuple(mm[1] for mm in sorted(foundCodes, key=_SortByMatch)))
+        else:
+            found.append(sorted(foundCodes, key=_SortByMatch)[0][1] if foundCodes else None)
 
     return tuple(found)

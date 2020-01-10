@@ -45,7 +45,7 @@ By Mouse button:
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -55,7 +55,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2018-12-20 14:07:59 +0000 (Thu, December 20, 2018) $"
+__dateModified__ = "$dateModified: 2020-01-10 11:21:55 +0000 (Fri, January 10, 2020) $"
 __version__ = "$Revision: 3.0.0 $"
 #=========================================================================================
 # Created
@@ -253,6 +253,7 @@ class CcpnGLWidgetABC(QOpenGLWidget):
 
         self.gridList = []
         self._gridVisible = True
+        self._sideBandsVisible = True
         self._crosshairVisible = True
         self._spectrumBordersVisible = True
         self._axesVisible = True
@@ -281,6 +282,7 @@ class CcpnGLWidgetABC(QOpenGLWidget):
         self._setColourScheme()
 
         self._gridVisible = self._preferences.showGrid
+        self._sideBandsVisible = self._preferences.showSideBands
         self._updateHTrace = False
         self._updateVTrace = False
         self._lastTracePoint = {}  # [-1, -1]
@@ -300,7 +302,7 @@ class CcpnGLWidgetABC(QOpenGLWidget):
         self._buildMouse = True
         self._mouseCoords = [-1.0, -1.0]
         self.mouseString = None
-        self.diffMouseString = None
+        # self.diffMouseString = None
         self._symbolLabelling = 0
 
         self._contourList = {}

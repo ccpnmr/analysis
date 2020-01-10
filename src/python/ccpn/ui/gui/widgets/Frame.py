@@ -47,7 +47,7 @@ ScrollableFrame(parent=None, showBorder=False, fShape=None, fShadow=None,
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -57,7 +57,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2019-12-05 09:40:40 +0000 (Thu, December 05, 2019) $"
+__dateModified__ = "$dateModified: 2020-01-10 11:21:55 +0000 (Fri, January 10, 2020) $"
 __version__ = "$Revision: 3.0.0 $"
 #=========================================================================================
 # Created
@@ -73,7 +73,7 @@ from ccpn.ui.gui.widgets.Base import Base
 from ccpn.ui.gui.widgets.ScrollArea import ScrollArea
 from ccpn.ui.gui.widgets.Widget import Widget
 from ccpn.ui.gui.guiSettings import textFontLarge, \
-    CCPNGLWIDGET_HEXFOREGROUND, CCPNGLWIDGET_HEXBACKGROUND, getColours
+    CCPNGLWIDGET_HEXFOREGROUND, CCPNGLWIDGET_HEXBACKGROUND, CCPNGLWIDGET_HEXHIGHLIGHT, getColours
 
 
 class Frame(QtWidgets.QFrame, Base):
@@ -285,6 +285,39 @@ class OpenGLOverlayFrame(Frame):
 
         sl.setSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum)
 
+    def _updateColourThemeStyle(self, sl,
+                                foregroundColour=CCPNGLWIDGET_HEXFOREGROUND, backgroundColour=CCPNGLWIDGET_HEXBACKGROUND,
+                                highlightColour=CCPNGLWIDGET_HEXHIGHLIGHT):
+        """Update the background colour when changing colour themes, keeping the same foreground highlighting
+        """
+        sl.setStyleSheet('QLabel {'
+                         'padding: 0; '
+                         'margin: 0px 0px 0px 0px;'
+                         'color: %s;'
+                         'background-color: %s;'
+                         'border: 0 px;'
+                         'font-family: %s;'
+                         'font-size: %dpx;'
+                         'qproperty-alignment: AlignLeft;'
+                         '}' % (getColours()[highlightColour if sl.highlighted else foregroundColour],
+                                getColours()[backgroundColour],
+                                textFontLarge.fontName,
+                                textFontLarge.pointSize()))
+
+        sl.update()
+
+    def resetColourTheme(self):
+        """Reset the colour theme
+        """
+        myItems = self.findChildren(QtWidgets.QLabel)
+        for item in myItems:
+            # resetBackground
+            try:
+                self._updateColourThemeStyle(item)
+            except Exception as es:
+
+                # just in case I've missed subclassing the above method
+                pass
 
 class ScrollOpenGLOverlayFrame(OpenGLOverlayFrame):
     """

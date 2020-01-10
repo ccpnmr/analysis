@@ -55,7 +55,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-01-09 14:37:18 +0000 (Thu, January 09, 2020) $"
+__dateModified__ = "$dateModified: 2020-01-10 11:10:48 +0000 (Fri, January 10, 2020) $"
 __version__ = "$Revision: 3.0.0 $"
 #=========================================================================================
 # Created
@@ -1811,9 +1811,17 @@ class CcpnGLWidget(QOpenGLWidget):
                                            dimension=2,
                                            GLContext=self)
 
-        # get the current buffering mode and set the required length
+        # get the current buffering mode and set the required length to the number of buffers
         format = self.format()
         self._numBuffers = int(format.swapBehavior())
+        self._glCursorQueue = ()
+        for buf in range(self._numBuffers):
+            self._glCursorQueue += (GLVertexArray(numLists=1,
+                                                  renderMode=GLRENDERMODE_REBUILD,
+                                                  blendMode=False,
+                                                  drawMode=GL.GL_LINES,
+                                                  dimension=2,
+                                                  GLContext=self),)
         self._clearGLCursorQueue()
 
         self._glCursor = GLVertexArray(numLists=1,
@@ -1911,17 +1919,16 @@ class CcpnGLWidget(QOpenGLWidget):
         self.refreshDevicePixelRatio()
 
     def _clearGLCursorQueue(self):
-        self._glCursorQueue = deque([None] * self._numBuffers)
+        for glBuf in self._glCursorQueue:
+            glBuf.clearArrays()
+        self._glCursorHead = 0
+        self._glCursorTail = (self._glCursorHead - 1) % self._numBuffers
 
-        # self._glCursorQueue = ()
-        # for buf in range(self._numBuffers):
-        #     self._glCursorQueue += (GLVertexArray(numLists=1,
-        #                                           renderMode=GLRENDERMODE_REBUILD,
-        #                                           blendMode=False,
-        #                                           drawMode=GL.GL_LINES,
-        #                                           dimension=2,
-        #                                           GLContext=self),)
-        # self._glCursorHead = 0
+    def _advanceGLCursor(self):
+        """Advance the pointers for the cursor glLists
+        """
+        self._glCursorHead = (self._glCursorHead + 1) % self._numBuffers
+        self._glCursorTail = (self._glCursorHead - 1) % self._numBuffers
 
     def _initialiseViewPorts(self):
         """Initialise all the viewports for the widget
@@ -2887,10 +2894,7 @@ class CcpnGLWidget(QOpenGLWidget):
             self.buildDiagonals()
             self._updateAxes = False
 
-        oldCursorDrawList = self._glCursorQueue.popleft()
         self.buildCursors()
-        self._glCursorQueue.append(self._glCursor)
-
         self.buildSpectra()
         self.buildBoundingBoxes()
 
@@ -3004,15 +3008,10 @@ class CcpnGLWidget(QOpenGLWidget):
             currentShader.setGLUniformMatrix4fv('pMatrix', 1, GL.GL_FALSE, self._uPMatrix)
 
             GL.glEnable(GL.GL_COLOR_LOGIC_OP)
-            GL.glLogicOp(GL.GL_XOR)
-
-            oldCursorDrawList = self._glCursorQueue.pop()
-            if oldCursorDrawList and not self._paintLastFrame:
-                oldCursorDrawList.drawIndexVBO(enableVBO=True)
+            GL.glLogicOp(GL.GL_INVERT)
 
             self.buildCursors()
-            self._glCursorQueue.append(self._glCursor)
-
+            self.drawLastCursors()
             self.drawCursors()
 
             GL.glDisable(GL.GL_COLOR_LOGIC_OP)
@@ -3115,7 +3114,7 @@ class CcpnGLWidget(QOpenGLWidget):
                 self.drawDottedCursor()
 
             GL.glEnable(GL.GL_COLOR_LOGIC_OP)
-            GL.glLogicOp(GL.GL_XOR)
+            GL.glLogicOp(GL.GL_INVERT)
             self.drawCursors()
             GL.glDisable(GL.GL_COLOR_LOGIC_OP)
 
@@ -4130,8 +4129,9 @@ class CcpnGLWidget(QOpenGLWidget):
         """
         if self._crosshairVisible:  # and (not self._updateHTrace or not self._updateVTrace):
 
-            drawList = self._glCursor
-
+            # get the next cursor drawList
+            self._advanceGLCursor()
+            drawList = self._glCursorQueue[self._glCursorHead]
             vertices = []
             indices = []
             index = 0
@@ -4175,7 +4175,7 @@ class CcpnGLWidget(QOpenGLWidget):
                     index += 2
 
                     # add the double cursor
-                    if _drawDouble and self._matchingIsotopeCodes:
+                    if _drawDouble and self._matchingIsotopeCodes and doubleCoords[0] is not None and abs(doubleCoords[0]-newCoords[0]) > self.deltaX:
                         vertices.extend([doubleCoords[0], 1.0, doubleCoords[0], 0.0])
                         indices.extend([index, index + 1])
                         index += 2
@@ -4186,7 +4186,7 @@ class CcpnGLWidget(QOpenGLWidget):
                     index += 2
 
                     # add the double cursor
-                    if _drawDouble and self._matchingIsotopeCodes:
+                    if _drawDouble and self._matchingIsotopeCodes and doubleCoords[1] is not None and abs(doubleCoords[1]-newCoords[1]) > self.deltaY:
                         vertices.extend([0.0, doubleCoords[1], 1.0, doubleCoords[1]])
                         indices.extend([index, index + 1])
                         index += 2
@@ -4199,10 +4199,19 @@ class CcpnGLWidget(QOpenGLWidget):
             # build and draw the VBO
             drawList.defineIndexVBO(enableVBO=True)
 
-    def drawCursors(self):
-        """Build and draw the cursors/doubleCursors
+    def drawLastCursors(self):
+        """Draw the cursors/doubleCursors
         """
-        self._glCursor.drawIndexVBO(enableVBO=True)
+        cursor = self._glCursorQueue[self._glCursorTail]
+        if cursor.indices.size:
+            cursor.drawIndexVBO(enableVBO=True)
+
+    def drawCursors(self):
+        """Draw the cursors/doubleCursors
+        """
+        cursor = self._glCursorQueue[self._glCursorHead]
+        if cursor.indices.size:
+            cursor.drawIndexVBO(enableVBO=True)
 
     def getCurrentCursorCoordinate(self):
 

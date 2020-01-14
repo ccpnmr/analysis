@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-01-10 11:21:54 +0000 (Fri, January 10, 2020) $"
+__dateModified__ = "$dateModified: 2020-01-14 11:49:07 +0000 (Tue, January 14, 2020) $"
 __version__ = "$Revision: 3.0.0 $"
 #=========================================================================================
 # Created
@@ -2936,6 +2936,9 @@ class CcpnNefReader:
 
         # Make main object
         dataSet = self.fetchDataSet(dataSetSerial)
+
+        # need to fix the names here... cannot contain '.'
+
         previous = dataSet.getRestraintList(name)
         if previous is not None:
             # NEF but NOT CCPN has separate namespaces for different restraint types

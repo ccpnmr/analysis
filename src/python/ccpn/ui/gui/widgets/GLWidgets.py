@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-01-10 11:21:55 +0000 (Fri, January 10, 2020) $"
+__dateModified__ = "$dateModified: 2020-01-14 11:49:07 +0000 (Tue, January 14, 2020) $"
 __version__ = "$Revision: 3.0.0 $"
 #=========================================================================================
 # Created
@@ -71,6 +71,7 @@ class GuiNdWidget(CcpnGLWidget):
     INVERTYAXIS = True
     SPECTRUMPOSCOLOUR = 'positiveContourColour'
     SPECTRUMNEGCOLOUR = 'negativeContourColour'
+    AXIS_INSIDE = True
 
     def __init__(self, strip=None, mainWindow=None, stripIDLabel=None):
         super().__init__(strip=strip, mainWindow=mainWindow, stripIDLabel=stripIDLabel)

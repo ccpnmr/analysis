@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-01-15 14:42:22 +0000 (Wed, January 15, 2020) $"
+__dateModified__ = "$dateModified: 2020-01-15 23:28:56 +0000 (Wed, January 15, 2020) $"
 __version__ = "$Revision: 3.0.0 $"
 #=========================================================================================
 # Created
@@ -432,7 +432,7 @@ class _GroupEditorPopupABC(CcpnDialogMainWidget):
 
     FIXEDWIDTH = False
     FIXEDHEIGHT = False
-    # FIXEDWIDTH = 120
+    _FIXEDWIDTH = 120
 
     def __init__(self, parent=None, mainWindow=None, editMode=True, obj=None, defaultItems=None, **kwds):
         """
@@ -491,8 +491,17 @@ class _GroupEditorPopupABC(CcpnDialogMainWidget):
         self._setLeftWidgets()
         self._setRightWidgets()
 
+        # enable the buttons
+        self.setApplyButton(callback=self._applyAndClose, text=self._acceptButtonText, tipText='Apply according to current settings and close')
+        self.setCancelButton(callback=self._cancel, text=self.BUTTON_CANCEL, tipText='Cancel the New/Edit operation')
+        self.setDefaultButton(CcpnDialogMainWidget.CANCELBUTTON)
+
+        self.__postInit__()
+        self._applyButton = self.getButton(self.APPLYBUTTON)
+        self._cancelButton = self.getButton(self.CANCELBUTTON)
+
         # self._setApplyButtons()
-        self._addWidgetsToLayout()
+        # self._addWidgetsToLayout()
         self._connectLists()
 
         # one cannot be a copy of the other unless its a deep copy...
@@ -505,16 +514,6 @@ class _GroupEditorPopupABC(CcpnDialogMainWidget):
 
         self.connectModels()
         self._updateStateOnSelection()
-
-        # enable the buttons
-        self.setApplyButton(callback=self._applyAndClose, text=self._acceptButtonText, tipText='Apply according to current settings and close')
-        self.setCancelButton(callback=self._cancel, text=self.BUTTON_CANCEL, tipText='Cancel the New/Edit operation')
-        self.setDefaultButton(CcpnDialogMainWidget.CANCELBUTTON)
-
-        self.__postInit__()
-        self._applyButton = self.getButton(self.APPLYBUTTON)
-        self._cancelButton = self.getButton(self.CANCELBUTTON)
-
 
     def _getPreviousState(self):
         result = {}
@@ -529,7 +528,7 @@ class _GroupEditorPopupABC(CcpnDialogMainWidget):
 
     def _setLeftWidgets(self):
 
-        self.leftTopLabel = Label(self._dialogWidget, '', bold=True, grid=(0, 0), gridSpan=(1, 3))
+        # self.leftTopLabel = Label(self._dialogWidget, '', bold=True, grid=(0, 0), gridSpan=(1, 3))
 
         if not self.editMode:
             labelName = 'New %s Name' % self.GROUP_NAME
@@ -540,7 +539,8 @@ class _GroupEditorPopupABC(CcpnDialogMainWidget):
         self.nameEdit = LineEdit(self._dialogWidget, backgroundText='%s Name' % self.GROUP_NAME, textAlignment='left', grid=(1, 1))
 
         # GST need something better than this..!
-        self.nameEdit.setFixedWidth(self.FIXEDWIDTH * 1.5)
+        self.nameEdit.setFixedWidth(self._FIXEDWIDTH * 1.5)
+        # self.nameEdit.setVisible(True)
 
         if self.editMode:
             self.leftPullDownLabel = Label(self._dialogWidget, self.GROUP_NAME, grid=(2, 0))
@@ -549,16 +549,17 @@ class _GroupEditorPopupABC(CcpnDialogMainWidget):
                                                     showSelectName=False,
                                                     default=self.obj,
                                                     callback=self._leftPullDownCallback,
-                                                    fixedWidths=[0, self.FIXEDWIDTH],
-                                                    grid=(2, 1),
+                                                    fixedWidths=[0, self._FIXEDWIDTH],
+                                                    hAlign='l', grid=(2, 1),
                                                     )
 
         self.selectionLabel = Label(self._dialogWidget, 'Selection', grid=(3, 0))
         self.leftItemsLabel = Label(self._dialogWidget, self.KLASS_ITEM_ATTRIBUTE.capitalize(), grid=(3, 1))
-        self.leftListFeedbackWidget = FeedbackFrame(self._dialogWidget, grid=(4, 1))
+        self.leftListFeedbackWidget = FeedbackFrame(self._dialogWidget, grid=(4, 2))
         self.leftListWidget = _ListWidget(self.leftListFeedbackWidget, feedbackWidget=self.leftListFeedbackWidget,
                                           grid=(0, 0), dragRole='right', acceptDrops=True, sortOnDrop=False, copyDrop=False,
                                           emptyText=self.LEFT_EMPTY_TEXT, rearrangeable=True, itemFactory=OrderedListWidgetItemFactory())
+        # self.leftListWidget.setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.Preferred)
 
     def connectModels(self):
         self.nameEdit.textChanged.connect(self._updateModelsOnEdit)
@@ -578,10 +579,11 @@ class _GroupEditorPopupABC(CcpnDialogMainWidget):
 
         self.rightItemsLabel = Label(self._dialogWidget, self.GROUP_NAME, grid=(3, 2))
 
-        self.rightListFeedbackWidget = FeedbackFrame(self._dialogWidget, grid=(4, 2))
+        self.rightListFeedbackWidget = FeedbackFrame(self._dialogWidget, grid=(4, 1))
         self.rightListWidget = _ListWidget(self.rightListFeedbackWidget, feedbackWidget=self.rightListFeedbackWidget,
                                            grid=(0, 0), dragRole='left', acceptDrops=True, sortOnDrop=False, copyDrop=False,
                                            emptyText=self.RIGHT_EMPTY_TEXT, sorted=True, itemFactory=OrderedListWidgetItemFactory())
+        # self.rightListWidget.setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.Preferred)
 
         # small frame for holding the pulldown list
         self.rightListFilterFrame = Frame(self._dialogWidget, setLayout=True, showBorder=False, grid=(5, 1), gridSpan=(1, 2))
@@ -591,10 +593,11 @@ class _GroupEditorPopupABC(CcpnDialogMainWidget):
                                                  showSelectName=True,
                                                  selectNoneText='none',
                                                  callback=self._rightPullDownCallback,
-                                                 fixedWidths=[0, self.FIXEDWIDTH],
+                                                 fixedWidths=[0, self._FIXEDWIDTH],
                                                  filterFunction=self._rightPullDownFilter,
                                                  hAlign='l', grid=(0, 1)
                                                  )
+        self.rightListFilterFrame.getLayout().setColumnStretch(2, 1)
 
         self.errorFrame = Frame(self._dialogWidget, setLayout=True, grid=(6, 1), gridSpan=(1, 2))
         # self.rightListWidget.setFixedWidth(2*self.FIXEDWIDTH)
@@ -604,84 +607,84 @@ class _GroupEditorPopupABC(CcpnDialogMainWidget):
             pids.remove(self._editedObject.pid)
         return pids
 
-    def _setApplyButtons(self):
-        self.applyButtons = ButtonBoxList(self._dialogWidget, texts=[self.BUTTON_CANCEL, self._acceptButtonText],
-                                          callbacks=[self._cancel, self._applyAndClose],
-                                          tipTexts=['Cancel the New/Edit operation',
-                                                    'Apply according to current settings and close'],
-                                          direction='h', hAlign='r', ok=self._acceptButtonText, cancel=self.BUTTON_CANCEL,
-                                          grid=(9, 1), gridSpan=(1, 2))
+    # def _setApplyButtons(self):
+    #     self.applyButtons = ButtonBoxList(self._dialogWidget, texts=[self.BUTTON_CANCEL, self._acceptButtonText],
+    #                                       callbacks=[self._cancel, self._applyAndClose],
+    #                                       tipTexts=['Cancel the New/Edit operation',
+    #                                                 'Apply according to current settings and close'],
+    #                                       direction='h', hAlign='r', ok=self._acceptButtonText, cancel=self.BUTTON_CANCEL,
+    #                                       grid=(9, 1), gridSpan=(1, 2))
 
-    def _addWidgetsToLayout(self):
-        # Add left Widgets on Main layout
-        layout = self._dialogWidget.getLayout()
-
-        label_column = 0
-        left_column = 1
-
-        layout.setColumnStretch(label_column, 0)
-        layout.setColumnStretch(left_column, 1000)
-
-        row = 0
-        if self.editMode:
-            layout.addWidget(self.leftPullDownLabel, row, label_column)
-            self.leftPullDownLabel.setSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Preferred)
-
-            layout.addWidget(self.leftPullDown, row, left_column, QtCore.Qt.AlignLeft)
-
-            row += 1  #2
-
-        layout.addWidget(self.nameLabel, row, label_column)
-        self.nameLabel.setSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Preferred)
-
-        self.nameEditBorder = Frame(self._dialogWidget, setLayout=True)
-        layout.addWidget(self.nameEditBorder, row, left_column)
-        self.nameEditBorder.layout().addWidget(self.nameEdit, 0, 0)
-        self.nameEditBorder.layout().setContentsMargins(2, 0, 0, 0)
-        self.nameEditBorder.layout().setAlignment(self.nameEdit, QtCore.Qt.AlignLeft)
-        self.nameEditBorder.setFocusProxy(self.nameEdit)
-        # layout.addWidget(self.nameEdit, row, left_column)
-        row += 1
-
-        self.addSpacer(0, 5, grid=(row, 0), gridSpan=(1, 3))
-
-        row += 1
-        layout.setRowStretch(row, 1000)
-        layout.addWidget(self.selectionLabel, row, label_column)
-        layout.setAlignment(self.selectionLabel, QtCore.Qt.AlignLeft | QtCore.Qt.AlignTop)
-
-        self._doublePane = Widget(self._dialogWidget, setLayout=True)
-        self._doublePane.setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.Preferred)
-
-        layout.addWidget(self._doublePane, row, left_column, 1, 1)
-        self.rightListWidget.setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.Preferred)
-        self._doublePane.getLayout().addWidget(self.leftItemsLabel, 0, 0)
-        layout.setAlignment(self.leftItemsLabel, QtCore.Qt.AlignLeft)
-        self._doublePane.getLayout().addWidget(self.rightItemsLabel, 0, 1)
-        layout.setAlignment(self.rightItemsLabel, QtCore.Qt.AlignLeft)
-        self._doublePane.getLayout().addWidget(self.rightListFeedbackWidget, 1, 0)
-        self._doublePane.getLayout().addWidget(self.leftListFeedbackWidget, 1, 1)
-        self._doublePane.getLayout().setRowStretch(1, 1000)
-        self.leftListWidget.setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.Preferred)
-
-        row += 2
-        self._selectionFrame = Widget(self._dialogWidget, setLayout=True, )
-        layout.addWidget(self._selectionFrame, row, left_column)
-        filterLayout = self._selectionFrame.getLayout()
-        # filterLayout.addWidget(self.rightRadioButtons, 0, 0)
-        filterLayout.addWidget(self.rightFilterLabel, 0, 0)
-        filterLayout.addWidget(self.rightPullDown, 0, 1)
-        filterLayout.setColumnStretch(2, 1)
-
-        row += 1
-
-        layout.addWidget(self.errorFrame, row, left_column, 1, 1)
-
-        row += 1
-        self.addSpacer(0, 10, grid=(row, 0), gridSpan=(1, 1))
-
-        row += 1
-        layout.addWidget(self.applyButtons, row, label_column, 1, 2, QtCore.Qt.AlignRight)
+    # def _addWidgetsToLayout(self):
+    #     # Add left Widgets on Main layout
+    #     layout = self._dialogWidget.getLayout()
+    #
+    #     label_column = 0
+    #     left_column = 1
+    #
+    #     layout.setColumnStretch(label_column, 0)
+    #     layout.setColumnStretch(left_column, 1000)
+    #
+    #     row = 0
+    #     if self.editMode:
+    #         layout.addWidget(self.leftPullDownLabel, row, label_column)
+    #         self.leftPullDownLabel.setSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Preferred)
+    #
+    #         layout.addWidget(self.leftPullDown, row, left_column, QtCore.Qt.AlignLeft)
+    #
+    #         row += 1  #2
+    #
+    #     layout.addWidget(self.nameLabel, row, label_column)
+    #     self.nameLabel.setSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Preferred)
+    #
+    #     self.nameEditBorder = Frame(self._dialogWidget, setLayout=True)
+    #     layout.addWidget(self.nameEditBorder, row, left_column)
+    #     self.nameEditBorder.layout().addWidget(self.nameEdit, 0, 0)
+    #     self.nameEditBorder.layout().setContentsMargins(2, 0, 0, 0)
+    #     self.nameEditBorder.layout().setAlignment(self.nameEdit, QtCore.Qt.AlignLeft)
+    #     self.nameEditBorder.setFocusProxy(self.nameEdit)
+    #     # layout.addWidget(self.nameEdit, row, left_column)
+    #     row += 1
+    #
+    #     self.addSpacer(0, 5, grid=(row, 0), gridSpan=(1, 3))
+    #
+    #     row += 1
+    #     layout.setRowStretch(row, 1000)
+    #     layout.addWidget(self.selectionLabel, row, label_column)
+    #     layout.setAlignment(self.selectionLabel, QtCore.Qt.AlignLeft | QtCore.Qt.AlignTop)
+    #
+    #     self._doublePane = Widget(self._dialogWidget, setLayout=True)
+    #     self._doublePane.setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.Preferred)
+    #
+    #     layout.addWidget(self._doublePane, row, left_column, 1, 1)
+    #     self.rightListWidget.setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.Preferred)
+    #     self._doublePane.getLayout().addWidget(self.leftItemsLabel, 0, 0)
+    #     layout.setAlignment(self.leftItemsLabel, QtCore.Qt.AlignLeft)
+    #     self._doublePane.getLayout().addWidget(self.rightItemsLabel, 0, 1)
+    #     layout.setAlignment(self.rightItemsLabel, QtCore.Qt.AlignLeft)
+    #     self._doublePane.getLayout().addWidget(self.rightListFeedbackWidget, 1, 0)
+    #     self._doublePane.getLayout().addWidget(self.leftListFeedbackWidget, 1, 1)
+    #     self._doublePane.getLayout().setRowStretch(1, 1000)
+    #     self.leftListWidget.setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.Preferred)
+    #
+    #     row += 2
+    #     self._selectionFrame = Widget(self._dialogWidget, setLayout=True, )
+    #     layout.addWidget(self._selectionFrame, row, left_column)
+    #     filterLayout = self._selectionFrame.getLayout()
+    #     # filterLayout.addWidget(self.rightRadioButtons, 0, 0)
+    #     filterLayout.addWidget(self.rightFilterLabel, 0, 0)
+    #     filterLayout.addWidget(self.rightPullDown, 0, 1)
+    #     filterLayout.setColumnStretch(2, 1)
+    #
+    #     row += 1
+    #
+    #     layout.addWidget(self.errorFrame, row, left_column, 1, 1)
+    #
+    #     row += 1
+    #     self.addSpacer(0, 10, grid=(row, 0), gridSpan=(1, 1))
+    #
+    #     row += 1
+    #     layout.addWidget(self.applyButtons, row, label_column, 1, 2, QtCore.Qt.AlignRight)
 
     def _connectLists(self):
         self.leftListWidget.setPartner(self.rightListWidget)
@@ -724,7 +727,8 @@ class _GroupEditorPopupABC(CcpnDialogMainWidget):
 
     def _setAcceptButtonState(self):
         if self.self.editMode and self._dirty:
-            self.applyButtons.setButtonEnabled(self._acceptButtonText, True)
+            # self.applyButtons.setButtonEnabled(self._acceptButtonText, True)
+            self._applyButton.setEnabled(True)
 
     def _currentEditorState(self):
         result = {}
@@ -955,7 +959,8 @@ class _GroupEditorPopupABC(CcpnDialogMainWidget):
                 enabled = False
                 self.errors.append(message)
 
-        self.applyButtons.setButtonEnabled(self._acceptButtonText, enabled)
+        # self.applyButtons.setButtonEnabled(self._acceptButtonText, enabled)
+        self._applyButton.setEnabled(enabled)
 
         self._emptyErrorFrame()
 

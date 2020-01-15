@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-01-15 14:42:22 +0000 (Wed, January 15, 2020) $"
+__dateModified__ = "$dateModified: 2020-01-15 23:28:55 +0000 (Wed, January 15, 2020) $"
 __version__ = "$Revision: 3.0.0 $"
 #=========================================================================================
 # Created
@@ -29,9 +29,6 @@ __date__ = "$Date: 2017-03-30 11:28:58 +0100 (Thu, March 30, 2017) $"
 from ccpn.core.SpectrumGroup import SpectrumGroup
 from ccpn.ui.gui.widgets.PulldownListsForObjects import SpectrumGroupPulldown
 from ccpn.ui.gui.popups._GroupEditorPopupABC import _GroupEditorPopupABC
-from ccpn.ui.gui.widgets.Tabs import Tabs
-from ccpn.ui.gui.widgets.Frame import ScrollableFrame
-from ccpn.util.Logging import getLogger
 
 
 class SpectrumGroupEditor(_GroupEditorPopupABC):
@@ -64,3 +61,14 @@ class SpectrumGroupEditor(_GroupEditorPopupABC):
     # make this a tabbed dialog, with the default widget going into tab 0
     USE_TAB = 0
     NUMBER_TABS = 3
+
+    TAB_NAMES = (SINGULAR_GROUP_NAME, 'Group Colour', 'Attributes')
+
+    def __init__(self, parent=None, mainWindow=None, editMode=True, obj=None, defaultItems=None, **kwds):
+        """
+        Initialise the widget, note defaultItems is only used for create
+        """
+        super().__init__(parent=parent, mainWindow=mainWindow, editMode=editMode, obj=obj, defaultItems=defaultItems, **kwds)
+
+        for tNum, tabName in enumerate(self.TAB_NAMES):
+            self._tabWidget.setTabText(tNum, tabName)

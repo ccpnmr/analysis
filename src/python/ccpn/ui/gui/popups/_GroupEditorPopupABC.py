@@ -4,7 +4,7 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -13,8 +13,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: CCPN $"
-__dateModified__ = "$dateModified: 2017-07-07 16:32:50 +0100 (Fri, July 07, 2017) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2020-01-15 14:42:22 +0000 (Wed, January 15, 2020) $"
 __version__ = "$Revision: 3.0.0 $"
 #=========================================================================================
 # Created
@@ -32,12 +32,13 @@ from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.ListWidget import ListWidget
 from ccpn.ui.gui.widgets.LineEdit import LineEdit
 from ccpn.ui.gui.widgets.ButtonList import ButtonBoxList
-from ccpn.ui.gui.popups.Dialog import CcpnDialog  # ejb
+from ccpn.ui.gui.popups.Dialog import CcpnDialogMainWidget
 from ccpn.ui.gui.widgets.MessageDialog import showWarning
 from ccpn.ui.gui.widgets.Widget import Widget
-from ccpn.ui.gui.widgets.Frame import Frame
+from ccpn.ui.gui.widgets.Frame import Frame, ScrollableFrame
 from ccpn.ui.gui.widgets.Menu import Menu
 from ccpn.ui.gui.widgets.Icon import Icon
+from ccpn.ui.gui.widgets.Tabs import Tabs
 from ccpn.core.lib.ContextManagers import undoBlock
 
 from re import finditer
@@ -45,6 +46,11 @@ from re import finditer
 from collections import Counter, OrderedDict
 from itertools import zip_longest
 import copy
+
+
+DEFAULTSPACING = (3, 3)
+TABMARGINS = (1, 10, 10, 1)  # l, t, r, b
+ZEROMARGINS = (0, 0, 0, 0)  # l, t, r, b
 
 
 def camelCaseSplit(identifier):
@@ -406,7 +412,7 @@ class _ListWidget(ListWidget):
             self._partner.addItem(item)
 
 
-class _GroupEditorPopupABC(CcpnDialog):
+class _GroupEditorPopupABC(CcpnDialogMainWidget):
     """
     An abstract base class to create and manage popups for KLASS
     """
@@ -421,7 +427,12 @@ class _GroupEditorPopupABC(CcpnDialog):
     BUTTON_FILTER = 'Filter by:'
     BUTTON_CANCEL = 'Cancel'
 
-    FIXEDWIDTH = 120
+    USE_TAB = None
+    NUMBER_TABS = 0
+
+    FIXEDWIDTH = False
+    FIXEDHEIGHT = False
+    # FIXEDWIDTH = 120
 
     def __init__(self, parent=None, mainWindow=None, editMode=True, obj=None, defaultItems=None, **kwds):
         """
@@ -440,8 +451,8 @@ class _GroupEditorPopupABC(CcpnDialog):
         else:
             self._acceptButtonText = 'Create %s' % self.GROUP_NAME
 
-        CcpnDialog.__init__(self, parent=parent, windowTitle=title, setLayout=True, margins=(0, 0, 0, 0),
-                            spacing=(5, 5), **kwds)
+        super().__init__(parent=parent, windowTitle=title, setLayout=True, margins=(0, 0, 0, 0),
+                         spacing=(5, 5), **kwds)
 
         # GST how to get the icon using a relative path?
         # self.errorIcon = QtGui.QPixmap('/Users/garythompson/Dropbox/git/ccpnmr/AnalysisV3/src/python/ccpn/ui/gui/widgets/icons/exclamation_small.png')
@@ -459,9 +470,28 @@ class _GroupEditorPopupABC(CcpnDialog):
         # assumes that defaultItems is a list of core objects (with pid)
         self.defaultItems = [itm.pid for itm in defaultItems] if defaultItems else None
 
+        if self.USE_TAB is None:
+            # define the destination for the widgets - Dialog has mainWidget, will change for tabbed widgets
+            self._dialogWidget = self.mainWidget
+        else:
+            self._tabWidget = Tabs(self.mainWidget, grid=(0, 0))
+
+            # define the new tab widget
+            self._tabWidget.setContentsMargins(*ZEROMARGINS)
+            for tabNum in range(self.NUMBER_TABS):
+                fr = ScrollableFrame(self.mainWidget, setLayout=True, spacing=DEFAULTSPACING,
+                                     scrollBarPolicies=('asNeeded', 'asNeeded'), margins=TABMARGINS)
+                self._tabWidget.addTab(fr.scrollArea, str(tabNum))
+
+            if isinstance(self.USE_TAB, int) and self.USE_TAB < self._tabWidget.count():
+                self._dialogWidget = (self._tabWidget.widget(self.USE_TAB))._scrollContents
+            else:
+                raise RuntimeError('self._tabWidget: invalid USE_TAB setting')
+
         self._setLeftWidgets()
         self._setRightWidgets()
-        self._setApplyButtons()
+
+        # self._setApplyButtons()
         self._addWidgetsToLayout()
         self._connectLists()
 
@@ -474,8 +504,17 @@ class _GroupEditorPopupABC(CcpnDialog):
         self._updatedNames = dict(self._previousNames)
 
         self.connectModels()
-
         self._updateStateOnSelection()
+
+        # enable the buttons
+        self.setApplyButton(callback=self._applyAndClose, text=self._acceptButtonText, tipText='Apply according to current settings and close')
+        self.setCancelButton(callback=self._cancel, text=self.BUTTON_CANCEL, tipText='Cancel the New/Edit operation')
+        self.setDefaultButton(CcpnDialogMainWidget.CANCELBUTTON)
+
+        self.__postInit__()
+        self._applyButton = self.getButton(self.APPLYBUTTON)
+        self._cancelButton = self.getButton(self.CANCELBUTTON)
+
 
     def _getPreviousState(self):
         result = {}
@@ -490,32 +529,33 @@ class _GroupEditorPopupABC(CcpnDialog):
 
     def _setLeftWidgets(self):
 
-        self.leftTopLabel = Label(self, '', bold=True)
+        self.leftTopLabel = Label(self._dialogWidget, '', bold=True, grid=(0, 0), gridSpan=(1, 3))
 
         if not self.editMode:
             labelName = 'New %s Name' % self.GROUP_NAME
         else:
             labelName = 'Name'
 
-        self.nameLabel = Label(self, labelName)
-        self.nameEdit = LineEdit(self, backgroundText='%s Name' % self.GROUP_NAME, textAlignment='left')
+        self.nameLabel = Label(self._dialogWidget, labelName, grid=(1, 0))
+        self.nameEdit = LineEdit(self._dialogWidget, backgroundText='%s Name' % self.GROUP_NAME, textAlignment='left', grid=(1, 1))
 
         # GST need something better than this..!
         self.nameEdit.setFixedWidth(self.FIXEDWIDTH * 1.5)
 
         if self.editMode:
-            self.leftPullDownLabel = Label(self, self.GROUP_NAME)
-            self.leftPullDown = self.KLASS_PULLDOWN(parent=self.mainWindow,
+            self.leftPullDownLabel = Label(self._dialogWidget, self.GROUP_NAME, grid=(2, 0))
+            self.leftPullDown = self.KLASS_PULLDOWN(parent=self._dialogWidget,
                                                     mainWindow=self.mainWindow,
                                                     showSelectName=False,
                                                     default=self.obj,
                                                     callback=self._leftPullDownCallback,
-                                                    fixedWidths=[0, self.FIXEDWIDTH]
+                                                    fixedWidths=[0, self.FIXEDWIDTH],
+                                                    grid=(2, 1),
                                                     )
 
-        self.selectionLabel = Label(self, 'Selection')
-        self.leftItemsLabel = Label(self, self.KLASS_ITEM_ATTRIBUTE.capitalize())
-        self.leftListFeedbackWidget = FeedbackFrame(self)
+        self.selectionLabel = Label(self._dialogWidget, 'Selection', grid=(3, 0))
+        self.leftItemsLabel = Label(self._dialogWidget, self.KLASS_ITEM_ATTRIBUTE.capitalize(), grid=(3, 1))
+        self.leftListFeedbackWidget = FeedbackFrame(self._dialogWidget, grid=(4, 1))
         self.leftListWidget = _ListWidget(self.leftListFeedbackWidget, feedbackWidget=self.leftListFeedbackWidget,
                                           grid=(0, 0), dragRole='right', acceptDrops=True, sortOnDrop=False, copyDrop=False,
                                           emptyText=self.LEFT_EMPTY_TEXT, rearrangeable=True, itemFactory=OrderedListWidgetItemFactory())
@@ -536,22 +576,27 @@ class _GroupEditorPopupABC(CcpnDialog):
 
     def _setRightWidgets(self):
 
-        self.rightItemsLabel = Label(self, self.GROUP_NAME)
-        self.rightPullDown = self.KLASS_PULLDOWN(parent=self.mainWindow,
+        self.rightItemsLabel = Label(self._dialogWidget, self.GROUP_NAME, grid=(3, 2))
+
+        self.rightListFeedbackWidget = FeedbackFrame(self._dialogWidget, grid=(4, 2))
+        self.rightListWidget = _ListWidget(self.rightListFeedbackWidget, feedbackWidget=self.rightListFeedbackWidget,
+                                           grid=(0, 0), dragRole='left', acceptDrops=True, sortOnDrop=False, copyDrop=False,
+                                           emptyText=self.RIGHT_EMPTY_TEXT, sorted=True, itemFactory=OrderedListWidgetItemFactory())
+
+        # small frame for holding the pulldown list
+        self.rightListFilterFrame = Frame(self._dialogWidget, setLayout=True, showBorder=False, grid=(5, 1), gridSpan=(1, 2))
+        self.rightFilterLabel = Label(self.rightListFilterFrame, self.BUTTON_FILTER, hAlign='l', grid=(0, 0))
+        self.rightPullDown = self.KLASS_PULLDOWN(parent=self.rightListFilterFrame,
                                                  mainWindow=self.mainWindow,
                                                  showSelectName=True,
                                                  selectNoneText='none',
                                                  callback=self._rightPullDownCallback,
                                                  fixedWidths=[0, self.FIXEDWIDTH],
-                                                 filterFunction=self._rightPullDownFilter
+                                                 filterFunction=self._rightPullDownFilter,
+                                                 hAlign='l', grid=(0, 1)
                                                  )
 
-        self.rightListFeedbackWidget = FeedbackFrame(self)
-        self.rightListWidget = _ListWidget(self.rightListFeedbackWidget, feedbackWidget=self.rightListFeedbackWidget,
-                                           grid=(0, 0), dragRole='left', acceptDrops=True, sortOnDrop=False, copyDrop=False,
-                                           emptyText=self.RIGHT_EMPTY_TEXT, sorted=True, itemFactory=OrderedListWidgetItemFactory())
-        self.rightFilterLabel = Label(self, self.BUTTON_FILTER)
-        self.errorFrame = Frame(self, setLayout=True)
+        self.errorFrame = Frame(self._dialogWidget, setLayout=True, grid=(6, 1), gridSpan=(1, 2))
         # self.rightListWidget.setFixedWidth(2*self.FIXEDWIDTH)
 
     def _rightPullDownFilter(self, pids):
@@ -560,15 +605,16 @@ class _GroupEditorPopupABC(CcpnDialog):
         return pids
 
     def _setApplyButtons(self):
-        self.applyButtons = ButtonBoxList(self, texts=[self.BUTTON_CANCEL, self._acceptButtonText],
+        self.applyButtons = ButtonBoxList(self._dialogWidget, texts=[self.BUTTON_CANCEL, self._acceptButtonText],
                                           callbacks=[self._cancel, self._applyAndClose],
                                           tipTexts=['Cancel the New/Edit operation',
                                                     'Apply according to current settings and close'],
-                                          direction='h', hAlign='r', ok=self._acceptButtonText, cancel=self.BUTTON_CANCEL)
+                                          direction='h', hAlign='r', ok=self._acceptButtonText, cancel=self.BUTTON_CANCEL,
+                                          grid=(9, 1), gridSpan=(1, 2))
 
     def _addWidgetsToLayout(self):
         # Add left Widgets on Main layout
-        layout = self.getLayout()
+        layout = self._dialogWidget.getLayout()
 
         label_column = 0
         left_column = 1
@@ -588,7 +634,7 @@ class _GroupEditorPopupABC(CcpnDialog):
         layout.addWidget(self.nameLabel, row, label_column)
         self.nameLabel.setSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Preferred)
 
-        self.nameEditBorder = Frame(self, setLayout=True)
+        self.nameEditBorder = Frame(self._dialogWidget, setLayout=True)
         layout.addWidget(self.nameEditBorder, row, left_column)
         self.nameEditBorder.layout().addWidget(self.nameEdit, 0, 0)
         self.nameEditBorder.layout().setContentsMargins(2, 0, 0, 0)
@@ -604,7 +650,7 @@ class _GroupEditorPopupABC(CcpnDialog):
         layout.addWidget(self.selectionLabel, row, label_column)
         layout.setAlignment(self.selectionLabel, QtCore.Qt.AlignLeft | QtCore.Qt.AlignTop)
 
-        self._doublePane = Widget(self, setLayout=True)
+        self._doublePane = Widget(self._dialogWidget, setLayout=True)
         self._doublePane.setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.Preferred)
 
         layout.addWidget(self._doublePane, row, left_column, 1, 1)
@@ -619,7 +665,7 @@ class _GroupEditorPopupABC(CcpnDialog):
         self.leftListWidget.setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.Preferred)
 
         row += 2
-        self._selectionFrame = Widget(self, setLayout=True, )
+        self._selectionFrame = Widget(self._dialogWidget, setLayout=True, )
         layout.addWidget(self._selectionFrame, row, left_column)
         filterLayout = self._selectionFrame.getLayout()
         # filterLayout.addWidget(self.rightRadioButtons, 0, 0)

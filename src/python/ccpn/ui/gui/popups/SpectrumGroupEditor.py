@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-01-15 23:28:55 +0000 (Wed, January 15, 2020) $"
+__dateModified__ = "$dateModified: 2020-01-21 10:40:46 +0000 (Tue, January 21, 2020) $"
 __version__ = "$Revision: 3.0.0 $"
 #=========================================================================================
 # Created
@@ -27,8 +27,14 @@ __date__ = "$Date: 2017-03-30 11:28:58 +0100 (Thu, March 30, 2017) $"
 
 
 from ccpn.core.SpectrumGroup import SpectrumGroup
+from ccpn.ui.gui.widgets.Tabs import Tabs
 from ccpn.ui.gui.widgets.PulldownListsForObjects import SpectrumGroupPulldown
 from ccpn.ui.gui.popups._GroupEditorPopupABC import _GroupEditorPopupABC
+from ccpn.ui.gui.popups.SpectrumPropertiesPopup import ColourTab, ContoursTab
+
+
+DEFAULTSPACING = (3, 3)
+TABMARGINS = (1, 10, 1, 5)  # l, t, r, b
 
 
 class SpectrumGroupEditor(_GroupEditorPopupABC):
@@ -60,9 +66,7 @@ class SpectrumGroupEditor(_GroupEditorPopupABC):
 
     # make this a tabbed dialog, with the default widget going into tab 0
     USE_TAB = 0
-    NUMBER_TABS = 3
-
-    TAB_NAMES = (SINGULAR_GROUP_NAME, 'Group Colour', 'Attributes')
+    NUMBER_TABS = 3  # create the first tab
 
     def __init__(self, parent=None, mainWindow=None, editMode=True, obj=None, defaultItems=None, **kwds):
         """
@@ -70,5 +74,67 @@ class SpectrumGroupEditor(_GroupEditorPopupABC):
         """
         super().__init__(parent=parent, mainWindow=mainWindow, editMode=editMode, obj=obj, defaultItems=defaultItems, **kwds)
 
-        for tNum, tabName in enumerate(self.TAB_NAMES):
+        self.TAB_NAMES = (('Spectra', self._initSpectraTab),
+                          ('General', self._initGeneralTab),
+                          ('Series', self._initSeriesTab))
+
+        self.spectraTab = self._tabWidget.widget(0)._scrollContents
+        self.generalTab = self._tabWidget.widget(1)._scrollContents
+        self.seriesTab = self._tabWidget.widget(2)._scrollContents
+
+        for tNum, (tabName, tabFunc) in enumerate(self.TAB_NAMES):
             self._tabWidget.setTabText(tNum, tabName)
+            if tabFunc:
+                tabFunc()
+
+        # TODO:ED set to the size of the first tab - or a fixed size so the first tab looks nice
+
+        self._populate()
+        self.setMinimumSize(600, 550)       # change to a calculation rather than a guess
+
+    def _initSpectraTab(self):
+        thisTab = self.spectraTab
+
+    def _initGeneralTab(self):
+        thisTab = self.generalTab
+        self._colourTabs = Tabs(thisTab, grid=(0, 0))
+
+        # TODO:ED need to get the list of spectra from the first tab
+
+        # self.orderedSpectrumViews = orderedSpectrumViews
+        # self.orderedSpectra = OrderedSet([spec.spectrum for spec in self.orderedSpectrumViews])
+        self.orderedSpectra = self.project.spectra
+
+        # remember the state when switching tabs
+        self.copyCheckBoxState = []
+
+        for specNum, thisSpec in enumerate(self.orderedSpectra):
+            contoursTab = ContoursTab(parent=self, mainWindow=self.mainWindow, spectrum=thisSpec,
+                                      showCopyOptions=True if len(self.orderedSpectra) > 1 else False,
+                                      copyToSpectra=self.orderedSpectra)
+            self._colourTabs.addTab(contoursTab, thisSpec.name)
+            contoursTab.setContentsMargins(*TABMARGINS)
+
+        self._colourTabs.setTabClickCallback(self._tabClicked)
+
+        # self.tabWidget.setFixedWidth(self.MINIMUM_WIDTH)
+
+    def _initSeriesTab(self):
+        thisTab = self.generalTab
+
+        # TODO:ED setup a pandas table for the spectra as the first column
+        pass
+
+    def _populate(self):
+        """Populate the widgets in the tabs
+        """
+        with self.blockWidgetSignals():
+            for aTab in tuple(self._colourTabs.widget(ii) for ii in range(self._colourTabs.count())):
+                aTab._populateColour()
+
+    def _tabClicked(self, index):
+        """Callback for clicking a tab - needed for refilling the checkboxes and populating the pulldown
+        """
+        aTabs = tuple(self._colourTabs.widget(ii) for ii in range(self._colourTabs.count()))
+        if hasattr(aTabs[index], '_populateCheckBoxes'):
+            aTabs[index]._populateCheckBoxes()

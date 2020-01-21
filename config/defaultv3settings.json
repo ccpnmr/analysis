@@ -69,7 +69,8 @@
         "applyToSpectrumDisplays"              : true,
         "enableAntiAliasing"                   : true,
         "numSideBands"                         : 2,
-        "showSideBands"                        : false
+        "showSideBands"                        : false,
+        "_copySpectraSettings"                 : null
     },
     "proxySettings"    : {
         "useProxy"         : false,

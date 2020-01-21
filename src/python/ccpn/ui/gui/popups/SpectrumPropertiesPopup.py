@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-01-10 11:21:55 +0000 (Fri, January 10, 2020) $"
+__dateModified__ = "$dateModified: 2020-01-21 10:40:46 +0000 (Tue, January 21, 2020) $"
 __version__ = "$Revision: 3.0.0 $"
 #=========================================================================================
 # Created
@@ -28,7 +28,8 @@ __date__ = "$Date: 2017-03-30 11:28:58 +0100 (Thu, March 30, 2017) $"
 from functools import partial
 from PyQt5 import QtWidgets, QtCore
 from itertools import permutations
-from ccpn.core.Spectrum import MAXALIASINGRANGE
+from collections import Iterable
+from ccpn.core.Spectrum import MAXALIASINGRANGE, Spectrum
 from ccpn.ui.gui.widgets.Button import Button
 from ccpn.ui.gui.widgets.CheckBox import CheckBox
 from ccpn.ui.gui.widgets.ColourDialog import ColourDialog
@@ -61,6 +62,7 @@ from ccpn.ui.gui.popups.ValidateSpectraPopup import ValidateSpectraForSpectrumPo
 SPECTRA = ['1H', 'STD', 'Relaxation Filtered', 'Water LOGSY']
 DEFAULTSPACING = (3, 3)
 TABMARGINS = (1, 10, 1, 5)  # l, t, r, b
+SELECTALL = '<All>'
 
 
 def _updateGl(self, spectrumList):
@@ -81,7 +83,7 @@ class SpectrumPropertiesPopupABC(CcpnDialogMainWidget):
     # in order to set the parameters.
 
     MINIMUM_WIDTH_PER_TAB = 120
-    MINIMUM_WIDTH = 400
+    MINIMUM_WIDTH = 500
 
     def __init__(self, parent=None, mainWindow=None, spectrum=None,
                  title='Spectrum Properties', **kwds):
@@ -239,7 +241,7 @@ class SpectrumPropertiesPopup(SpectrumPropertiesPopupABC):
             self._generalTab = GeneralTab(parent=self, mainWindow=self.mainWindow, spectrum=spectrum)
             self._dimensionsTab = DimensionsTab(parent=self, mainWindow=self.mainWindow,
                                                 spectrum=spectrum, dimensions=spectrum.dimensionCount)
-            self._contoursTab = ContoursTab(parent=self, mainWindow=self.mainWindow, spectrum=spectrum)
+            self._contoursTab = ContoursTab(parent=self, mainWindow=self.mainWindow, spectrum=spectrum, showCopyOptions=False)
 
             self.tabWidget.addTab(self._generalTab, "General")
             self.tabWidget.addTab(self._dimensionsTab, "Dimensions")
@@ -275,7 +277,6 @@ class SpectrumDisplayPropertiesPopupNd(SpectrumPropertiesPopupABC):
 
     def __init__(self, parent=None, mainWindow=None, spectrum=None, orderedSpectrumViews=None,
                  title='SpectrumDisplay Properties', **kwds):
-
         super().__init__(parent=parent, mainWindow=mainWindow,
                          spectrum=spectrum, title=title, **kwds)
 
@@ -285,11 +286,14 @@ class SpectrumDisplayPropertiesPopupNd(SpectrumPropertiesPopupABC):
         self.tabWidget.setFixedWidth(self.MINIMUM_WIDTH)
 
         for specNum, thisSpec in enumerate(self.orderedSpectra):
-            contoursTab = ContoursTab(parent=self, mainWindow=self.mainWindow, spectrum=thisSpec)
+            contoursTab = ContoursTab(parent=self, mainWindow=self.mainWindow, spectrum=thisSpec,
+                                      showCopyOptions=True if len(self.orderedSpectra) > 1 else False,
+                                      copyToSpectra=self.orderedSpectra)
             self.tabWidget.addTab(contoursTab, thisSpec.name)
             contoursTab.setContentsMargins(*TABMARGINS)
 
-        self.tabWidget.setFixedWidth(self.MINIMUM_WIDTH)
+        # self.tabWidget.setFixedWidth(self.MINIMUM_WIDTH)
+        self.tabWidget.setTabClickCallback(self._tabClicked)
 
         # don't forget to call postInit to finish initialise
         self.__postInit__()
@@ -306,6 +310,12 @@ class SpectrumDisplayPropertiesPopupNd(SpectrumPropertiesPopupABC):
         with self.blockWidgetSignals():
             for aTab in self.tabs:
                 aTab._populateColour()
+
+    def _tabClicked(self, index):
+        """Callback for clicking a tab - needed for refilling the checkboxes and populating the pulldown
+        """
+        if hasattr(self.tabs[index], '_populateCheckBoxes'):
+            self.tabs[index]._populateCheckBoxes()
 
 
 class SpectrumDisplayPropertiesPopup1d(SpectrumPropertiesPopupABC):
@@ -1412,13 +1422,33 @@ class DimensionsTab(Widget):
 
 class ContoursTab(Widget):
 
-    def __init__(self, parent=None, mainWindow=None, spectrum=None):
+    def __init__(self, parent=None, mainWindow=None, spectrum=None, showCopyOptions=False, copyToSpectra=None):
 
         super().__init__(parent, setLayout=True, spacing=DEFAULTSPACING)
 
         self._parent = parent
         self.mainWindow = mainWindow
-        self.spectrum = spectrum
+        self.application = mainWindow.application
+        self.preferences = self.application.preferences
+
+        # check that the spectrum and the copyToSpectra list are correctly defined
+        getByPid = self.application.project.getByPid
+        self.spectrum = getByPid(spectrum) if isinstance(spectrum, str) else spectrum
+        if not isinstance(spectrum, (Spectrum, type(None))):
+            raise TypeError('spectrum must be of type Spectrum or None')
+
+        if not isinstance(copyToSpectra, (Iterable, type(None))):
+            raise TypeError('copyToSpectra must be of type Iterable/None')
+        if copyToSpectra:
+            self._copyToSpectra = [getByPid(spectrum) if isinstance(spectrum, str) else spectrum for spectrum in copyToSpectra]
+            for spec in self._copyToSpectra:
+                if not isinstance(spec, (Spectrum, type(None))):
+                    raise TypeError('copyToSpectra is not defined correctly.')
+        else:
+            self._copyToSpectra = None
+
+        # store the options for which spectra to copy to when clicking the copy button (if active)
+        self._showCopyOptions = showCopyOptions
 
         self.pythonConsole = mainWindow.pythonConsole
         self.logger = getLogger()
@@ -1428,24 +1458,30 @@ class ContoursTab(Widget):
         self._changes = dict()
 
         row = 0
+        col = 1
+        self._checkBoxCol = 4
+
         #GST adds a correctly sized right margin
         Spacer(self, 5, 1, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum,
                grid=(row, 3))
-        self.layout().addItem(QtWidgets.QSpacerItem(0, 10), row, 0)
+        self.layout().addItem(QtWidgets.QSpacerItem(0, 10), row, col)
 
         row += 1
-        linkContoursLabel = Label(self, text="Link Contours", grid=(row, 0), vAlign='t', hAlign='l')
-        self.linkContoursCheckBox = CheckBox(self, grid=(row, 1), checked=True, vAlign='t', hAlign='l')
+        linkContoursLabel = Label(self, text="Link Contours", grid=(row, col), vAlign='t', hAlign='l')
+        self.linkContoursCheckBox = CheckBox(self, grid=(row, col + 1), checked=True, vAlign='t', hAlign='l')
+        if showCopyOptions:
+            copyLabel = Label(self, text="Copy Selected\nAttribute", grid=(row, self._checkBoxCol), vAlign='t', hAlign='l')
 
         row += 1
-        positiveContoursLabel = Label(self, text="Show Positive Contours", grid=(row, 0), vAlign='t', hAlign='l')
-        self.positiveContoursCheckBox = CheckBox(self, grid=(row, 1), vAlign='t', hAlign='l')
+        self._topRow = row
+        positiveContoursLabel = Label(self, text="Show Positive Contours", grid=(row, col), vAlign='t', hAlign='l')
+        self.positiveContoursCheckBox = CheckBox(self, grid=(row, col + 1), vAlign='t', hAlign='l')
         # self.positiveContoursCheckBox.setChecked(self.spectrum.includePositiveContours)
         self.positiveContoursCheckBox.stateChanged.connect(partial(self._queueChangePositiveContourDisplay, spectrum))
 
         row += 1
-        positiveContourBaseLabel = Label(self, text="Positive Base Level", grid=(row, 0), vAlign='c', hAlign='l')
-        self.positiveContourBaseData = ScientificDoubleSpinBox(self, grid=(row, 1), vAlign='t', min=0.1, max=1e12)
+        positiveContourBaseLabel = Label(self, text="Positive Base Level", grid=(row, col), vAlign='c', hAlign='l')
+        self.positiveContourBaseData = ScientificDoubleSpinBox(self, grid=(row, col + 1), vAlign='t', min=0.1, max=1e12)
         # self.positiveContourBaseData.setValue(self.spectrum.positiveContourBase)
         self.positiveContourBaseData.valueChanged.connect(partial(self._queueChangePositiveContourBase, spectrum, self.positiveContourBaseData.textFromValue))
 
@@ -1453,21 +1489,21 @@ class ContoursTab(Widget):
         self.positiveContourBaseData.setSingleStep(self.positiveContourBaseData.value() * 0.1)
 
         row += 1
-        positiveMultiplierLabel = Label(self, text="Positive Multiplier", grid=(row, 0), vAlign='c', hAlign='l')
-        self.positiveMultiplierData = DoubleSpinbox(self, grid=(row, 1), vAlign='t', min=0.0, decimals=3, step=0.1)
+        positiveMultiplierLabel = Label(self, text="Positive Multiplier", grid=(row, col), vAlign='c', hAlign='l')
+        self.positiveMultiplierData = DoubleSpinbox(self, grid=(row, col + 1), vAlign='t', min=0.0, decimals=3, step=0.1)
         # self.positiveMultiplierData.setValue(float(self.spectrum.positiveContourFactor))
         self.positiveMultiplierData.valueChanged.connect(partial(self._queueChangePositiveContourFactor, spectrum, self.positiveMultiplierData.textFromValue))
 
         row += 1
-        positiveContourCountLabel = Label(self, text="Number of positive contours", grid=(row, 0), vAlign='c', hAlign='l')
-        self.positiveContourCountData = Spinbox(self, grid=(row, 1), vAlign='t')
+        positiveContourCountLabel = Label(self, text="Number of positive contours", grid=(row, col), vAlign='c', hAlign='l')
+        self.positiveContourCountData = Spinbox(self, grid=(row, col + 1), vAlign='t')
         # self.positiveContourCountData.setValue(int(self.spectrum._apiDataSource.positiveContourCount))
         self.positiveContourCountData.valueChanged.connect(partial(self._queueChangePositiveContourCount, spectrum))
 
         row += 1
-        positiveContourColourLabel = Label(self, text="Positive Contour Colour", grid=(row, 0), vAlign='c', hAlign='l')
-        self.positiveColourBox = PulldownList(self, grid=(row, 1), vAlign='t')
-        self.negativeColourBox = PulldownList(self, grid=(row, 1), vAlign='t')
+        positiveContourColourLabel = Label(self, text="Positive Contour Colour", grid=(row, col), vAlign='c', hAlign='l')
+        self.positiveColourBox = PulldownList(self, grid=(row, col + 1), vAlign='t')
+        self.negativeColourBox = PulldownList(self, grid=(row, col + 1), vAlign='t')
 
         # populate initial pulldown
         spectrumColourKeys = list(spectrumColours.keys())
@@ -1486,19 +1522,19 @@ class ContoursTab(Widget):
         #     col = spectrumColours[c]
         #     self.positiveColourBox.setCurrentText(col)
 
-        self.positiveColourButton = Button(self, grid=(row, 2), vAlign='t', hAlign='l',
+        self.positiveColourButton = Button(self, grid=(row, col + 2), vAlign='t', hAlign='l',
                                            icon='icons/colours', hPolicy='fixed')
         self.positiveColourButton.clicked.connect(partial(self._queueChangePosSpectrumColour, spectrum))
 
         row += 1
-        negativeContoursLabel = Label(self, text="Show Negative Contours", grid=(row, 0), vAlign='c', hAlign='l')
-        self.negativeContoursCheckBox = CheckBox(self, grid=(row, 1), vAlign='t', hAlign='l')
+        negativeContoursLabel = Label(self, text="Show Negative Contours", grid=(row, col), vAlign='c', hAlign='l')
+        self.negativeContoursCheckBox = CheckBox(self, grid=(row, col + 1), vAlign='t', hAlign='l')
         # self.negativeContoursCheckBox.setChecked(self.spectrum.includeNegativeContours)
         self.negativeContoursCheckBox.stateChanged.connect(partial(self._queueChangeNegativeContourDisplay, spectrum))
 
         row += 1
-        negativeContourBaseLabel = Label(self, text="Negative Base Level", grid=(row, 0), vAlign='c', hAlign='l')
-        self.negativeContourBaseData = ScientificDoubleSpinBox(self, grid=(row, 1), vAlign='t', min=-1e12, max=-0.1)
+        negativeContourBaseLabel = Label(self, text="Negative Base Level", grid=(row, col), vAlign='c', hAlign='l')
+        self.negativeContourBaseData = ScientificDoubleSpinBox(self, grid=(row, col + 1), vAlign='t', min=-1e12, max=-0.1)
         # self.negativeContourBaseData.setValue(-abs(self.spectrum.negativeContourBase))
 
         self.negativeContourBaseData.valueChanged.connect(partial(self._queueChangeNegativeContourBase, spectrum, self.negativeContourBaseData.textFromValue))
@@ -1507,19 +1543,19 @@ class ContoursTab(Widget):
         self.negativeContourBaseData.setSingleStep((self.negativeContourBaseData.value() * -1) * 0.1)
 
         row += 1
-        negativeMultiplierLabel = Label(self, text="Negative Multiplier", grid=(row, 0), vAlign='c', hAlign='l')
-        self.negativeMultiplierData = DoubleSpinbox(self, grid=(row, 1), vAlign='t', min=0.0, decimals=3, step=0.1)
+        negativeMultiplierLabel = Label(self, text="Negative Multiplier", grid=(row, col), vAlign='c', hAlign='l')
+        self.negativeMultiplierData = DoubleSpinbox(self, grid=(row, col + 1), vAlign='t', min=0.0, decimals=3, step=0.1)
         # self.negativeMultiplierData.setValue(self.spectrum.negativeContourFactor)
         self.negativeMultiplierData.valueChanged.connect(partial(self._queueChangeNegativeContourFactor, spectrum, self.negativeMultiplierData.textFromValue))
 
         row += 1
-        negativeContourCountLabel = Label(self, text="Number of negative contours", grid=(row, 0), vAlign='c', hAlign='l')
-        self.negativeContourCountData = Spinbox(self, grid=(row, 1), vAlign='t')
+        negativeContourCountLabel = Label(self, text="Number of negative contours", grid=(row, col), vAlign='c', hAlign='l')
+        self.negativeContourCountData = Spinbox(self, grid=(row, col + 1), vAlign='t')
         # self.negativeContourCountData.setValue(self.spectrum.negativeContourCount)
         self.negativeContourCountData.valueChanged.connect(partial(self._queueChangeNegativeContourCount, spectrum))
 
         row += 1
-        negativeContourColourLabel = Label(self, text="Negative Contour Colour", grid=(row, 0), vAlign='c', hAlign='l')
+        negativeContourColourLabel = Label(self, text="Negative Contour Colour", grid=(row, col), vAlign='c', hAlign='l')
 
         # c = self.spectrum.negativeContourColour
         # if c in spectrumColourKeys:
@@ -1534,16 +1570,58 @@ class ContoursTab(Widget):
         self.positiveColourBox.currentIndexChanged.connect(partial(self._queueChangePosColourComboIndex, spectrum))
         self.negativeColourBox.currentIndexChanged.connect(partial(self._queueChangeNegColourComboIndex, spectrum))
 
-        self.negativeColourButton = Button(self, grid=(row, 2), icon='icons/colours', hPolicy='fixed',
+        self.negativeColourButton = Button(self, grid=(row, col + 2), icon='icons/colours', hPolicy='fixed',
                                            vAlign='t', hAlign='l')
         self.negativeColourButton.clicked.connect(partial(self._queueChangeNegSpectrumColour, spectrum))
 
         # move to the correct row
-        self.getLayout().addWidget(self.negativeColourBox, row, 1)
+        self.getLayout().addWidget(self.negativeColourBox, row, col + 1)
+
+        if showCopyOptions:
+            # add a column of checkBoxes on the left for copying across spectra
+
+            self._copyList = (self._copyShowPositive,
+                              self._copyPositiveBaseLevel,
+                              self._copyPositiveMultiplier,
+                              self._copyPositiveContours,
+                              self._copyPositiveContourColour,
+                              self._copyShowNegative,
+                              self._copyNegativeBaseLevel,
+                              self._copyNegativeMultiplier,
+                              self._copyNegativeContours,
+                              self._copyNegativeContourColour)
+
+            self._copyCheckBoxes = []
+
+            # add the checkboxes and keep a list of selected in the preferences (so it will be saved)
+            if self.preferences.general._copySpectraSettings and len(self.preferences.general._copySpectraSettings) == len(self._copyList):
+                # read existing settings
+                for rr, opt in enumerate(self._copyList):
+                    thisCheckBox = CheckBox(self, grid=(rr + self._topRow, self._checkBoxCol),
+                                            checkable=True, checked=self.preferences.general._copySpectraSettings[rr], hAlign='c')
+                    self._copyCheckBoxes.append(thisCheckBox)
+                    thisCheckBox.setCallback(partial(self._copyButtonClicked, thisCheckBox, rr))
+            else:
+                # create a new list in preferences
+                self.preferences.general._copySpectraSettings = [True] * len(self._copyList)
+                for rr, opt in enumerate(self._copyList):
+                    thisCheckBox = CheckBox(self, grid=(rr + self._topRow, self._checkBoxCol),
+                                            checkable=True, checked=True, hAlign='c')
+                    self._copyCheckBoxes.append(thisCheckBox)
+                    thisCheckBox.setCallback(partial(self._copyButtonClicked, thisCheckBox, rr))
+
+            # add the spectrum selection pulldown to the bottom and a copy action button
+            self._copyToSpectraPullDown = PulldownListCompoundWidget(self, labelText="Copy to",
+                                                                     grid=(len(self._copyList) + self._topRow, 0),
+                                                                     gridSpan=(1, self._checkBoxCol+1), vAlign='t', hAlign='r')
+            self._copyButton = Button(self, text='Copy', grid=(len(self._copyList) + self._topRow + 1, self._checkBoxCol), hAlign='r',
+                                      callback=self._copyAction)
+
+            # TODO:ED populate _copyToSpectraPullDown here or __init__
 
         row += 1
         Spacer(self, 5, 5, QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.MinimumExpanding,
-               grid=(row, 1), gridSpan=(1, 1))
+               grid=(row + 3, col + 1), gridSpan=(1, 1))
 
     def _setContourLevels(self):
         """Estimate the contour levels for the current spectrum
@@ -1587,6 +1665,24 @@ class ContoursTab(Widget):
         self.negativeMultiplierData.setValue(self.spectrum.negativeContourFactor)
         self.negativeContourCountData.setValue(self.spectrum.negativeContourCount)
         _setColourPulldown(self.negativeColourBox, self.spectrum.negativeContourColour)
+
+        if self._showCopyOptions:
+            self._populateCheckBoxes()
+
+    def _populateCheckBoxes(self):
+        """Populate the checkbox from preferences and fill the pullDown from the list of spectra
+        """
+        if not hasattr(self, '_copyCheckBoxes'):
+            return
+
+        checkBoxList = self.preferences.general._copySpectraSettings
+        if checkBoxList:
+            for cc, checkBox in enumerate(checkBoxList):
+                state = checkBoxList[cc]
+                self._copyCheckBoxes[cc].setChecked(state)
+        if self._copyToSpectra:
+            texts = ['<All>'] + [spectrum.pid for spectrum in self._copyToSpectra if spectrum != self.spectrum]
+            self._copyToSpectraPullDown.modifyTexts(texts)
 
     def _writeLoggingMessage(self, command):
         self.logger.info("spectrum = project.getByPid('%s')" % self.spectrum.pid)
@@ -1782,6 +1878,74 @@ class ContoursTab(Widget):
             self._writeLoggingMessage("spectrum.negativeContourColour = '%s'" % newColour)
             self.pythonConsole.writeConsoleCommand("spectrum.negativeContourColour = '%s'" % newColour, spectrum=spectrum)
 
+    # methods for copying the spectrum attributes to the others in the pulldown
+    # should be contained within the undo/revert mechanism
+
+    def _copyShowPositive(self, fromSpec, toSpec):
+        # copy the option by using the _queued methods above
+        print('>>>copy _copyShowPositive', fromSpec, toSpec)
+
+    def _copyPositiveBaseLevel(self, fromSpec, toSpec):
+        print('>>>copy _copyPositiveBaseLevel', fromSpec, toSpec)
+        pass
+
+    def _copyPositiveMultiplier(self, fromSpec, toSpec):
+        print('>>>copy _copyPositiveMultiplier', fromSpec, toSpec)
+        pass
+
+    def _copyPositiveContours(self, fromSpec, toSpec):
+        print('>>>copy _copyPositiveContours', fromSpec, toSpec)
+        pass
+
+    def _copyPositiveContourColour(self, fromSpec, toSpec):
+        print('>>>copy _copyPositiveContourColour', fromSpec, toSpec)
+        pass
+
+    def _copyShowNegative(self, fromSpec, toSpec):
+        print('>>>copy _copyShowNegative', fromSpec, toSpec)
+        pass
+
+    def _copyNegativeBaseLevel(self, fromSpec, toSpec):
+        print('>>>copy _copyNegativeBaseLevel', fromSpec, toSpec)
+        pass
+
+    def _copyNegativeMultiplier(self, fromSpec, toSpec):
+        print('>>>copy _copyNegativeMultiplier', fromSpec, toSpec)
+        pass
+
+    def _copyNegativeContours(self, fromSpec, toSpec):
+        print('>>>copy _copyNegativeContours', fromSpec, toSpec)
+        pass
+
+    def _copyNegativeContourColour(self, fromSpec, toSpec):
+        print('>>>copy _copyNegativeContourColour', fromSpec, toSpec)
+        pass
+
+    def _copyButtonClicked(self, checkBox, checkBoxIndex, state):
+        """Set the state of the checkBox in preferences
+        """
+        checkBoxList = self.preferences.general._copySpectraSettings
+        if checkBoxList and checkBoxIndex < len(checkBoxList):
+            checkBoxList[checkBoxIndex] = state
+
+    def _copyAction(self):
+        """Copy the attributes to the other spectra
+        """
+        if self._showCopyOptions:
+            checkBoxList = self.preferences.general._copySpectraSettings
+            if checkBoxList and len(checkBoxList) == len(self._copyList):
+                for cc, copyFunc in enumerate(self._copyList):
+                    # call the copy function if checked
+                    if checkBoxList[cc]:
+
+                        toSpectra = self._copyToSpectraPullDown.getText()
+                        if toSpectra == SELECTALL:
+                            for toSpectrum in [spectrum for spectrum in self._copyToSpectra if spectrum != self.spectrum]:
+                                copyFunc(self.spectrum, toSpectrum)
+                        else:
+                            toSpectrum = self.application.project.getByPid(toSpectra)
+                            if toSpectrum:
+                                copyFunc(self.spectrum, toSpectrum)
 
 class ColourTab(Widget):
     def __init__(self, parent=None, mainWindow=None, spectrum=None, item=None, colourOnly=False):

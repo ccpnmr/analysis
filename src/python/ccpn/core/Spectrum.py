@@ -42,7 +42,7 @@ HCACO                      Hca, CAh, CO    *(CA is treated as a separate type)*
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -52,7 +52,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2019-12-12 16:12:05 +0000 (Thu, December 12, 2019) $"
+__dateModified__ = "$dateModified: 2020-01-23 11:59:51 +0000 (Thu, January 23, 2020) $"
 __version__ = "$Revision: 3.0.0 $"
 #=========================================================================================
 # Created
@@ -84,7 +84,7 @@ from ccpn.core.lib.ContextManagers import newObject, deleteObject, \
     undoStackBlocking, renameObject, undoBlock, notificationBlanking, ccpNmrV3CoreSetter
 from ccpn.util.Common import getAxisCodeMatchIndices
 from ccpn.util.Path import Path, aPath
-from ccpn.util.Common import isIterable
+from ccpn.util.Common import isIterable, incrementName
 
 # 2019010:ED test new matching
 # from ccpn.util.Common import axisCodeMapping
@@ -643,9 +643,34 @@ assignmentTolerances
             raise ValueError("Spectrum file path cannot be set to None")
 
         else:
-            dataUrl = self._project._wrappedData.root.fetchDataUrl(value)
+            oldName = apiDataStore.dataUrl.name
+            newName = incrementName(oldName)
+
+            oldDataUrl = apiDataStore.dataUrl
+            dataUrl = self._project._wrappedData.root.fetchDataUrl(value, name=newName)
+            oldLen = len(dataUrl.url.path) + 1
+            print('>>>~~~')
+            print('>>>1   APICHANGE value', value)
+            print('>>>1   APICHANGE url  ', apiDataStore.dataUrl.url.path)
+            print('>>>1   APICHANGE path ', apiDataStore.path)
+            print('>>>1   APICHANGE path ', apiDataStore.dataUrl.url.path+'/'+apiDataStore.path)
             apiDataStore.repointToDataUrl(dataUrl)
-            apiDataStore.path = value[len(dataUrl.url.path) + 1:]
+            print('>>>2   APICHANGE url  ', apiDataStore.dataUrl.url.path)
+            print('>>>2   APICHANGE path ', apiDataStore.path)
+            print('>>>2   APICHANGE path ', apiDataStore.dataUrl.url.path+'/'+apiDataStore.path)
+            if oldDataUrl == dataUrl:
+                oldLen = len(dataUrl.url.path) + 1
+                apiDataStore.path = value[oldLen:]
+            else:
+                apiDataStore.path = value[oldLen:]
+            print('>>>    APICHANGE url  ', apiDataStore.dataUrl.url.path)
+            print('>>>    APICHANGE path ', apiDataStore.path)
+            print('>>>    APICHANGE path ', apiDataStore.dataUrl.url.path+'/'+apiDataStore.path)
+            print('>>>~~~')
+
+            # # numUrls = len(self.project._apiNmrProject.root.sorted)
+            # dataUrl.__dict__['name'] = newName
+
             self._clearCache()
 
     @property
@@ -663,7 +688,7 @@ assignmentTolerances
         """
         if self.filePath is None:
             return False
-        return aPath(self.filePath).exists()
+        return aPath(self.filePath).exists() and aPath(self.filePath).is_file()
 
     @property
     def headerSize(self) -> Optional[int]:

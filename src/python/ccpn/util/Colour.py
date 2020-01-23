@@ -4,7 +4,7 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -13,8 +13,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: CCPN $"
-__dateModified__ = "$dateModified: 2017-07-07 16:32:57 +0100 (Fri, July 07, 2017) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2020-01-23 11:59:51 +0000 (Thu, January 23, 2020) $"
 __version__ = "$Revision: 3.0.0 $"
 #=========================================================================================
 # Created
@@ -812,6 +812,8 @@ def fillColourPulldown(pulldown, allowAuto=False):
             colName = item[1]  # colourNameWithSpace(item[1])
 
             if item[0] != '#':
+                if not item[0].startswith('#'):
+                    pass
                 pix = QtGui.QPixmap(QtCore.QSize(20, 20))
                 pix.fill(QtGui.QColor(item[0]))
                 pulldown.addItem(icon=QtGui.QIcon(pix), text=colName)
@@ -826,7 +828,7 @@ def _setColourPulldown(pulldown, attrib):
     """
     spectrumColourKeys = list(spectrumColours.keys())
     fillColourPulldown(pulldown, allowAuto=False)
-    c = attrib
+    c = attrib.upper() if attrib.startswith('#') else attrib
     if c in spectrumColourKeys:
         col = spectrumColours[c]
         pulldown.setCurrentText(col)
@@ -845,7 +847,7 @@ def getSpectrumColour(colourName, defaultReturn=None):
         colName = colourName  # colourNameNoSpace(colourName)
 
         col = list(spectrumColours.keys())[list(spectrumColours.values()).index(colName)]
-        return col
+        return col.upper() if col.startswith('#') else col
     except:
         # colour not found in the list
         return defaultReturn

@@ -3,7 +3,7 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -12,8 +12,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: CCPN $"
-__dateModified__ = "$dateModified: 2017-07-07 16:32:29 +0100 (Fri, July 07, 2017) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2020-01-23 11:59:51 +0000 (Thu, January 23, 2020) $"
 __version__ = "$Revision: 3.0.0 $"
 #=========================================================================================
 # Created
@@ -919,8 +919,29 @@ class Project(AbstractWrapperObject):
 
         self._validateCleanUrls()
 
+        delList = set()
         if autoSet:
-            from ccpnmodel.ccpncore.lib._ccp.general.DataLocation.AbstractDataStore import forceChangeDataStoreUrl
+            from ccpnmodel.ccpncore.lib._ccp.general.DataLocation.AbstractDataStore import forceChangeDataStoreUrl, repointToDataUrl
+
+            # NOTE:ED - must remove all other dataUrls frist, otherwise the dataUrl rename won't work
+
+            # force the change of the other dataUrls
+            for spec in self.project.spectra:
+                apiDataStore = spec._wrappedData.dataStore
+                if apiDataStore is None:
+                    getLogger().warning("Spectrum is not stored, cannot change file path")
+
+                else:
+                    # dataUrl = self._project._wrappedData.root.fetchDataUrl(value)
+                    dataUrlName = apiDataStore.dataUrl.name
+                    print('>>>    dataUrlName', dataUrlName)
+                    if dataUrlName not in ('insideData', 'alongsideData', 'remoteData'):
+                        # move all other objects that are not in the correct remoteData
+                        # to the correct remoteData created above
+
+                        primaryDataUrl = dataUrlData['remoteData'][0]
+                        delList.add(apiDataStore.dataUrl)
+                        repointToDataUrl(apiDataStore, primaryDataUrl)
 
             # force the change of the dataUrl
             for spec in self.project.spectra:
@@ -931,8 +952,21 @@ class Project(AbstractWrapperObject):
                 else:
                     # dataUrl = self._project._wrappedData.root.fetchDataUrl(value)
                     dataUrlName = apiDataStore.dataUrl.name
+                    print('>>>    dataUrlName', dataUrlName, newDataUrlPath)
                     if dataUrlName == 'remoteData':
-                        forceChangeDataStoreUrl(apiDataStore, newDataUrlPath)
+                        # if dataUrlName not in ('insideData', 'alongsideData'):
+
+                        # force existing remoteData to the new location
+                        # a new remoteData in the correct place
+
+                        getLogger().info('>>>  validate autoset: %s' % str(apiDataStore))
+                        # delList.add(apiDataStore.dataUrl.url)
+                        apiDataStore.dataUrl.url = apiDataStore.dataUrl.url.clone(path=newDataUrlPath)
+                        # forceChangeDataStoreUrl(apiDataStore, newDataUrlPath)
+
+        for delObj in delList:
+            print('>>>    delete', delObj)
+            delObj.delete()
 
         self._validateCleanUrls()
 
@@ -952,13 +986,13 @@ class Project(AbstractWrapperObject):
         # update the pointers to the urls and delete the spares
         standardStore = self.project._wrappedData.memopsRoot.findFirstDataLocationStore(name='standard')
 
-        spectraStores = [spec._wrappedData.dataStore for spec in self.spectra]
+        spectraStores = [spec._wrappedData.dataStore for spec in self.project.spectra]
         badUrls = [url for store in standardStore.sortedDataUrls() for url in store.sortedDataStores() if url not in spectraStores]
         otherUrls = [dataUrl for store in self.project._wrappedData.memopsRoot.sortedDataLocationStores()
                      for dataUrl in store.sortedDataUrls() if dataUrl.name not in ('insideData', 'alongsideData', 'remoteData')]
 
-        allRemoteStores = [store for store in standardStore.sortedDataUrls() if store.name == 'remoteData' if store.dataStores]
-        remoteStores = [store for store in standardStore.sortedDataUrls() if store.name == 'remoteData' if not store.dataStores]
+        allRemoteUrls = [url for url in standardStore.sortedDataUrls() if url.name == 'remoteData' if url.dataStores]
+        remoteUrls = [url for url in standardStore.sortedDataUrls() if url.name == 'remoteData' if not url.dataStores]
 
         for bb in badUrls:
             getLogger().info('>>>validate cleanup urls: %s' % str(bb))
@@ -969,8 +1003,8 @@ class Project(AbstractWrapperObject):
                 getLogger().info('>>>validate cleanup stores: %s' % str(url))
                 url.delete()
 
-        for bb in (allRemoteStores + remoteStores)[1:]:
-            getLogger().info('>>>validate cleanup remoteStores: %s' % str(bb))
+        for bb in (allRemoteUrls + remoteUrls)[1:]:
+            getLogger().info('>>>validate cleanup remoteUrls: %s' % str(bb))
             bb.delete()
 
         # from ccpnmodel.ccpncore.lib._ccp.general.DataLocation.AbstractDataStore import forceChangeDataStoreUrl

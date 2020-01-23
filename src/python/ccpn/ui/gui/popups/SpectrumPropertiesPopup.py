@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-01-21 10:40:46 +0000 (Tue, January 21, 2020) $"
+__dateModified__ = "$dateModified: 2020-01-23 11:59:51 +0000 (Thu, January 23, 2020) $"
 __version__ = "$Revision: 3.0.0 $"
 #=========================================================================================
 # Created
@@ -41,7 +41,8 @@ from ccpn.ui.gui.widgets.PulldownList import PulldownList
 from ccpn.ui.gui.widgets.Spinbox import Spinbox
 from ccpn.ui.gui.widgets.Widget import Widget
 from ccpn.ui.gui.popups.ExperimentTypePopup import _getExperimentTypes
-from ccpn.util.Colour import spectrumColours, addNewColour, fillColourPulldown, colourNameNoSpace, _setColourPulldown
+from ccpn.util.Colour import spectrumColours, addNewColour, fillColourPulldown, \
+    colourNameNoSpace, _setColourPulldown, getSpectrumColour
 from ccpn.ui.gui.widgets.MessageDialog import showWarning
 from ccpn.ui.gui.widgets.Tabs import Tabs
 from ccpn.util.Logging import getLogger
@@ -217,6 +218,12 @@ class SpectrumPropertiesPopupABC(CcpnDialogMainWidget):
         self._revertButton.setEnabled(True)
         return True
 
+    def copySpectra(self, fromSpectrum, toSpectra):
+        """Copy the contents of tabs to other spectra
+        """
+        # MUST BE SUBCLASSED
+        raise NotImplementedError("Code error: function not implemented")
+
 
 class SpectrumPropertiesPopup(SpectrumPropertiesPopupABC):
     # The values on the 'General' and 'Dimensions' tabs are queued as partial functions when set.
@@ -316,6 +323,15 @@ class SpectrumDisplayPropertiesPopupNd(SpectrumPropertiesPopupABC):
         """
         if hasattr(self.tabs[index], '_populateCheckBoxes'):
             self.tabs[index]._populateCheckBoxes()
+
+    def copySpectra(self, fromSpectrum, toSpectra):
+        """Copy the contents of tabs to other spectra
+        """
+        for aTab in self.tabs:
+            if aTab.spectrum == fromSpectrum:
+                fromSpectrumTab = aTab
+                for aTab in [tab for tab in self.tabs if tab != fromSpectrumTab and tab.spectrum in toSpectra]:
+                    aTab._copySpectrumAttributes(fromSpectrumTab)
 
 
 class SpectrumDisplayPropertiesPopup1d(SpectrumPropertiesPopupABC):
@@ -1465,15 +1481,15 @@ class ContoursTab(Widget):
         Spacer(self, 5, 1, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum,
                grid=(row, 3))
         self.layout().addItem(QtWidgets.QSpacerItem(0, 10), row, col)
-
-        row += 1
-        linkContoursLabel = Label(self, text="Link Contours", grid=(row, col), vAlign='t', hAlign='l')
-        self.linkContoursCheckBox = CheckBox(self, grid=(row, col + 1), checked=True, vAlign='t', hAlign='l')
         if showCopyOptions:
             copyLabel = Label(self, text="Copy Selected\nAttribute", grid=(row, self._checkBoxCol), vAlign='t', hAlign='l')
 
         row += 1
         self._topRow = row
+        linkContoursLabel = Label(self, text="Link Contours", grid=(row, col), vAlign='t', hAlign='l')
+        self.linkContoursCheckBox = CheckBox(self, grid=(row, col + 1), checked=True, vAlign='t', hAlign='l')
+
+        row += 1
         positiveContoursLabel = Label(self, text="Show Positive Contours", grid=(row, col), vAlign='t', hAlign='l')
         self.positiveContoursCheckBox = CheckBox(self, grid=(row, col + 1), vAlign='t', hAlign='l')
         # self.positiveContoursCheckBox.setChecked(self.spectrum.includePositiveContours)
@@ -1580,7 +1596,8 @@ class ContoursTab(Widget):
         if showCopyOptions:
             # add a column of checkBoxes on the left for copying across spectra
 
-            self._copyList = (self._copyShowPositive,
+            self._copyList = (self._copyLinkContours,
+                              self._copyShowPositive,
                               self._copyPositiveBaseLevel,
                               self._copyPositiveMultiplier,
                               self._copyPositiveContours,
@@ -1613,9 +1630,9 @@ class ContoursTab(Widget):
             # add the spectrum selection pulldown to the bottom and a copy action button
             self._copyToSpectraPullDown = PulldownListCompoundWidget(self, labelText="Copy to",
                                                                      grid=(len(self._copyList) + self._topRow, 0),
-                                                                     gridSpan=(1, self._checkBoxCol+1), vAlign='t', hAlign='r')
+                                                                     gridSpan=(1, self._checkBoxCol + 1), vAlign='t', hAlign='r')
             self._copyButton = Button(self, text='Copy', grid=(len(self._copyList) + self._topRow + 1, self._checkBoxCol), hAlign='r',
-                                      callback=self._copyAction)
+                                      callback=self._copyActionClicked)
 
             # TODO:ED populate _copyToSpectraPullDown here or __init__
 
@@ -1881,45 +1898,51 @@ class ContoursTab(Widget):
     # methods for copying the spectrum attributes to the others in the pulldown
     # should be contained within the undo/revert mechanism
 
-    def _copyShowPositive(self, fromSpec, toSpec):
-        # copy the option by using the _queued methods above
-        print('>>>copy _copyShowPositive', fromSpec, toSpec)
+    def _copyLinkContours(self, fromSpectrumTab):
+        state = fromSpectrumTab.linkContoursCheckBox.get()
+        self.linkContoursCheckBox.set(state)
 
-    def _copyPositiveBaseLevel(self, fromSpec, toSpec):
-        print('>>>copy _copyPositiveBaseLevel', fromSpec, toSpec)
-        pass
+    def _copyShowPositive(self, fromSpectrumTab):
+        state = fromSpectrumTab.positiveContoursCheckBox.get()
+        self.positiveContoursCheckBox.set(state)
 
-    def _copyPositiveMultiplier(self, fromSpec, toSpec):
-        print('>>>copy _copyPositiveMultiplier', fromSpec, toSpec)
-        pass
+    def _copyPositiveBaseLevel(self, fromSpectrumTab):
+        value = fromSpectrumTab.positiveContourBaseData.get()
+        self.positiveContourBaseData.set(value)
 
-    def _copyPositiveContours(self, fromSpec, toSpec):
-        print('>>>copy _copyPositiveContours', fromSpec, toSpec)
-        pass
+    def _copyPositiveMultiplier(self, fromSpectrumTab):
+        value = fromSpectrumTab.positiveMultiplierData.get()
+        self.positiveMultiplierData.set(value)
 
-    def _copyPositiveContourColour(self, fromSpec, toSpec):
-        print('>>>copy _copyPositiveContourColour', fromSpec, toSpec)
-        pass
+    def _copyPositiveContours(self, fromSpectrumTab):
+        value = fromSpectrumTab.positiveContourCountData.get()
+        self.positiveContourCountData.set(value)
 
-    def _copyShowNegative(self, fromSpec, toSpec):
-        print('>>>copy _copyShowNegative', fromSpec, toSpec)
-        pass
+    def _copyPositiveContourColour(self, fromSpectrumTab):
+        name = fromSpectrumTab.positiveColourBox.currentText()
+        colour = getSpectrumColour(name, defaultReturn='#')
+        _setColourPulldown(self.positiveColourBox, colour)
 
-    def _copyNegativeBaseLevel(self, fromSpec, toSpec):
-        print('>>>copy _copyNegativeBaseLevel', fromSpec, toSpec)
-        pass
+    def _copyShowNegative(self, fromSpectrumTab):
+        state = fromSpectrumTab.negativeContoursCheckBox.get()
+        self.negativeContoursCheckBox.set(state)
 
-    def _copyNegativeMultiplier(self, fromSpec, toSpec):
-        print('>>>copy _copyNegativeMultiplier', fromSpec, toSpec)
-        pass
+    def _copyNegativeBaseLevel(self, fromSpectrumTab):
+        value = fromSpectrumTab.negativeContourBaseData.get()
+        self.negativeContourBaseData.set(value)
 
-    def _copyNegativeContours(self, fromSpec, toSpec):
-        print('>>>copy _copyNegativeContours', fromSpec, toSpec)
-        pass
+    def _copyNegativeMultiplier(self, fromSpectrumTab):
+        value = fromSpectrumTab.negativeMultiplierData.get()
+        self.negativeMultiplierData.set(value)
 
-    def _copyNegativeContourColour(self, fromSpec, toSpec):
-        print('>>>copy _copyNegativeContourColour', fromSpec, toSpec)
-        pass
+    def _copyNegativeContours(self, fromSpectrumTab):
+        value = fromSpectrumTab.negativeContourCountData.get()
+        self.negativeContourCountData.set(value)
+
+    def _copyNegativeContourColour(self, fromSpectrumTab):
+        name = fromSpectrumTab.negativeColourBox.currentText()
+        colour = getSpectrumColour(name, defaultReturn='#')
+        _setColourPulldown(self.negativeColourBox, colour)
 
     def _copyButtonClicked(self, checkBox, checkBoxIndex, state):
         """Set the state of the checkBox in preferences
@@ -1928,7 +1951,20 @@ class ContoursTab(Widget):
         if checkBoxList and checkBoxIndex < len(checkBoxList):
             checkBoxList[checkBoxIndex] = state
 
-    def _copyAction(self):
+    def _copyActionClicked(self):
+        """Copy action clicked - call the copy method from the parent Tab widget
+        """
+        if self._showCopyOptions:
+            toSpectraPids = self._copyToSpectraPullDown.getText()
+            if toSpectraPids == SELECTALL:
+                toSpectra = [spectrum for spectrum in self._copyToSpectra if spectrum != self.spectrum]
+            else:
+                toSpectra = [self.application.project.getByPid(toSpectraPids)]
+
+            # call the parent tab copy action
+            self._parent.copySpectra(self.spectrum, toSpectra)
+
+    def _copySpectrumAttributes(self, fromSpectrumTab):
         """Copy the attributes to the other spectra
         """
         if self._showCopyOptions:
@@ -1936,16 +1972,18 @@ class ContoursTab(Widget):
             if checkBoxList and len(checkBoxList) == len(self._copyList):
                 for cc, copyFunc in enumerate(self._copyList):
                     # call the copy function if checked
-                    if checkBoxList[cc]:
+                    if checkBoxList[cc] and self.spectrum and fromSpectrumTab.spectrum:
+                        copyFunc(fromSpectrumTab)
 
-                        toSpectra = self._copyToSpectraPullDown.getText()
-                        if toSpectra == SELECTALL:
-                            for toSpectrum in [spectrum for spectrum in self._copyToSpectra if spectrum != self.spectrum]:
-                                copyFunc(self.spectrum, toSpectrum)
-                        else:
-                            toSpectrum = self.application.project.getByPid(toSpectra)
-                            if toSpectrum:
-                                copyFunc(self.spectrum, toSpectrum)
+                    # toSpectraPids = self._copyToSpectraPullDown.getText()
+                    # if toSpectraPids == SELECTALL:
+                    #     for toSpectrum in [spectrum for spectrum in self._copyToSpectra if spectrum != self.spectrum]:
+                    #         copyFunc(self.spectrum, toSpectrum)
+                    # else:
+                    #     toSpectrum = self.application.project.getByPid(toSpectraPids)
+                    #     if toSpectrum:
+                    #         copyFunc(self.spectrum, toSpectrum)
+
 
 class ColourTab(Widget):
     def __init__(self, parent=None, mainWindow=None, spectrum=None, item=None, colourOnly=False):

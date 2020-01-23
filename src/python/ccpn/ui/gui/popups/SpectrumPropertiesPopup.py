@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-01-23 11:59:51 +0000 (Thu, January 23, 2020) $"
+__dateModified__ = "$dateModified: 2020-01-23 13:20:54 +0000 (Thu, January 23, 2020) $"
 __version__ = "$Revision: 3.0.0 $"
 #=========================================================================================
 # Created
@@ -1450,7 +1450,7 @@ class ContoursTab(Widget):
         # check that the spectrum and the copyToSpectra list are correctly defined
         getByPid = self.application.project.getByPid
         self.spectrum = getByPid(spectrum) if isinstance(spectrum, str) else spectrum
-        if not isinstance(spectrum, (Spectrum, type(None))):
+        if not isinstance(self.spectrum, (Spectrum, type(None))):
             raise TypeError('spectrum must be of type Spectrum or None')
 
         if not isinstance(copyToSpectra, (Iterable, type(None))):

@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-01-23 11:59:51 +0000 (Thu, January 23, 2020) $"
+__dateModified__ = "$dateModified: 2020-01-23 13:20:54 +0000 (Thu, January 23, 2020) $"
 __version__ = "$Revision: 3.0.0 $"
 #=========================================================================================
 # Created
@@ -812,8 +812,6 @@ def fillColourPulldown(pulldown, allowAuto=False):
             colName = item[1]  # colourNameWithSpace(item[1])
 
             if item[0] != '#':
-                if not item[0].startswith('#'):
-                    pass
                 pix = QtGui.QPixmap(QtCore.QSize(20, 20))
                 pix.fill(QtGui.QColor(item[0]))
                 pulldown.addItem(icon=QtGui.QIcon(pix), text=colName)

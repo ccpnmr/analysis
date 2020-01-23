@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-01-21 10:40:46 +0000 (Tue, January 21, 2020) $"
+__dateModified__ = "$dateModified: 2020-01-23 13:20:54 +0000 (Thu, January 23, 2020) $"
 __version__ = "$Revision: 3.0.0 $"
 #=========================================================================================
 # Created
@@ -27,7 +27,7 @@ __date__ = "$Date: 2017-03-30 11:28:58 +0100 (Thu, March 30, 2017) $"
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtCore import QDataStream, Qt, QVariant
-
+from PyQt5.QtCore import pyqtSignal, pyqtSlot
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.ListWidget import ListWidget
 from ccpn.ui.gui.widgets.LineEdit import LineEdit
@@ -433,6 +433,9 @@ class _GroupEditorPopupABC(CcpnDialogMainWidget):
     FIXEDWIDTH = False
     FIXEDHEIGHT = False
     _FIXEDWIDTH = 120
+
+    # leftListChanged = pyqtSignal(tuple)
+    # rightListChanged = pyqtSignal(tuple)
 
     def __init__(self, parent=None, mainWindow=None, editMode=True, obj=None, defaultItems=None, **kwds):
         """

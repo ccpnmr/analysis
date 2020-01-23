@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-01-21 10:40:46 +0000 (Tue, January 21, 2020) $"
+__dateModified__ = "$dateModified: 2020-01-23 13:20:54 +0000 (Thu, January 23, 2020) $"
 __version__ = "$Revision: 3.0.0 $"
 #=========================================================================================
 # Created
@@ -82,6 +82,8 @@ class SpectrumGroupEditor(_GroupEditorPopupABC):
         self.generalTab = self._tabWidget.widget(1)._scrollContents
         self.seriesTab = self._tabWidget.widget(2)._scrollContents
 
+        self.currentSpectra = self._getSpectraFromList()
+
         for tNum, (tabName, tabFunc) in enumerate(self.TAB_NAMES):
             self._tabWidget.setTabText(tNum, tabName)
             if tabFunc:
@@ -91,6 +93,15 @@ class SpectrumGroupEditor(_GroupEditorPopupABC):
 
         self._populate()
         self.setMinimumSize(600, 550)       # change to a calculation rather than a guess
+
+        self.connectSignals()
+
+    def connectSignals(self):
+        # connect to changes in the spectrumGroup
+        self.leftListWidget.model().dataChanged.connect(self._spectraChanged)
+        self.leftListWidget.model().rowsRemoved.connect(self._spectraChanged)
+        self.leftListWidget.model().rowsInserted.connect(self._spectraChanged)
+        self.leftListWidget.model().rowsMoved.connect(self._spectraChanged)
 
     def _initSpectraTab(self):
         thisTab = self.spectraTab
@@ -103,21 +114,18 @@ class SpectrumGroupEditor(_GroupEditorPopupABC):
 
         # self.orderedSpectrumViews = orderedSpectrumViews
         # self.orderedSpectra = OrderedSet([spec.spectrum for spec in self.orderedSpectrumViews])
-        self.orderedSpectra = self.project.spectra
 
         # remember the state when switching tabs
         self.copyCheckBoxState = []
 
-        for specNum, thisSpec in enumerate(self.orderedSpectra):
+        for specNum, thisSpec in enumerate(self.currentSpectra or []):
             contoursTab = ContoursTab(parent=self, mainWindow=self.mainWindow, spectrum=thisSpec,
-                                      showCopyOptions=True if len(self.orderedSpectra) > 1 else False,
-                                      copyToSpectra=self.orderedSpectra)
+                                      showCopyOptions=True if len(self.currentSpectra) > 1 else False,
+                                      copyToSpectra=self.currentSpectra)
             self._colourTabs.addTab(contoursTab, thisSpec.name)
             contoursTab.setContentsMargins(*TABMARGINS)
 
         self._colourTabs.setTabClickCallback(self._tabClicked)
-
-        # self.tabWidget.setFixedWidth(self.MINIMUM_WIDTH)
 
     def _initSeriesTab(self):
         thisTab = self.generalTab
@@ -138,3 +146,20 @@ class SpectrumGroupEditor(_GroupEditorPopupABC):
         aTabs = tuple(self._colourTabs.widget(ii) for ii in range(self._colourTabs.count()))
         if hasattr(aTabs[index], '_populateCheckBoxes'):
             aTabs[index]._populateCheckBoxes()
+
+    def _getSpectraFromList(self):
+        """Get the list of spectra from the list
+        """
+        return [spec for spec in [self.project.getByPid(spectrum) if isinstance(spectrum, str) else spectrum for spectrum in self._groupedObjects] if spec]
+
+    def _spectraChanged(self, *args):
+        """Respond to a change in the list of spectra to add the spectrumGroup
+        """
+        self._newSpectra = self._getSpectraFromList()
+
+        # TODO:ED remove tabs for spectra removed from list
+        #           add new tabs in correct place
+        #           remember to remove any _queue settings from updated colour tabs
+        #           populate new tabs
+
+

@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-01-23 13:20:54 +0000 (Thu, January 23, 2020) $"
+__dateModified__ = "$dateModified: 2020-01-27 19:23:40 +0000 (Mon, January 27, 2020) $"
 __version__ = "$Revision: 3.0.0 $"
 #=========================================================================================
 # Created
@@ -423,6 +423,7 @@ class _GroupEditorPopupABC(CcpnDialogMainWidget):
 
     PROJECT_NEW_METHOD = None  # e.g. 'newSpectrumGroup'  # Method of Project to create new KLASS instance
     PROJECT_ITEM_ATTRIBUTE = None  # e.g. 'spectra'  # Attribute of Project containing items
+    GROUPEDITOR_INIT_METHOD = None
 
     BUTTON_FILTER = 'Filter by:'
     BUTTON_CANCEL = 'Cancel'
@@ -567,14 +568,14 @@ class _GroupEditorPopupABC(CcpnDialogMainWidget):
         self.leftListWidget.setSizePolicy(QtWidgets.QSizePolicy.Ignored, QtWidgets.QSizePolicy.Ignored)
 
     def connectModels(self):
-        self.nameEdit.textChanged.connect(self._updateModelsOnEdit)
+        self.nameEdit.textChanged.connect(self._updateNameOnEdit)
         self.leftListWidget.model().dataChanged.connect(self._updateModelsOnEdit)
         self.leftListWidget.model().rowsRemoved.connect(self._updateModelsOnEdit)
         self.leftListWidget.model().rowsInserted.connect(self._updateModelsOnEdit)
         self.leftListWidget.model().rowsMoved.connect(self._updateModelsOnEdit)
 
     def disconnectModels(self):
-        self.nameEdit.textChanged.disconnect(self._updateModelsOnEdit)
+        self.nameEdit.textChanged.disconnect(self._updateNameOnEdit)
         self.leftListWidget.model().dataChanged.disconnect(self._updateModelsOnEdit)
         self.leftListWidget.model().rowsRemoved.disconnect(self._updateModelsOnEdit)
         self.leftListWidget.model().rowsInserted.disconnect(self._updateModelsOnEdit)
@@ -750,6 +751,15 @@ class _GroupEditorPopupABC(CcpnDialogMainWidget):
             result = {key: items}
 
         return result
+
+    def _updateNameOnEdit(self):
+        if self.editMode and self._editedObject != None:
+
+            editedObjectName = self._editedObject.name
+            newName = self.nameEdit.text()
+            self._updatedNames[editedObjectName] = newName
+
+        self._updateButton()
 
     def _updateModelsOnEdit(self, *args, **kwargs):
 
@@ -1129,14 +1139,22 @@ class _GroupEditorPopupABC(CcpnDialogMainWidget):
                         newName = renameList[name]
                         obj.rename(newName)
 
+                    # call the post init routine to populate any new values as necessary
+                    if self.GROUPEDITOR_INIT_METHOD:
+                        self.GROUPEDITOR_INIT_METHOD()
+
                 else:
                     # new mode
                     newState = self._currentEditorState()
-                    name = list(newState.keys())[0]
-                    items = list(newState.values())[0]
-                    func = getattr(self.project, self.PROJECT_NEW_METHOD)
-                    func(name, items)
+                    if newState:
+                        name = list(newState.keys())[0]
+                        items = list(newState.values())[0]
+                        func = getattr(self.project, self.PROJECT_NEW_METHOD)
+                        self.obj = func(name, items)
 
+                        # call the post init routine to populate any new values as necessary
+                        if self.GROUPEDITOR_INIT_METHOD:
+                            self.GROUPEDITOR_INIT_METHOD()
 
             except Exception as es:
                 showWarning(str(self.windowTitle()), str(es))
@@ -1160,3 +1178,9 @@ class _GroupEditorPopupABC(CcpnDialogMainWidget):
             self.rightPullDown.unRegister()
             self.disconnectModels()
             self.accept()
+
+    def _updateGl(self, spectra):
+        from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
+
+        GLSignals = GLNotifier(parent=self)
+        GLSignals.emitPaintEvent()

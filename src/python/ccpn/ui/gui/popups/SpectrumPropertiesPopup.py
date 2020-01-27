@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-01-23 13:20:54 +0000 (Thu, January 23, 2020) $"
+__dateModified__ = "$dateModified: 2020-01-27 19:23:39 +0000 (Mon, January 27, 2020) $"
 __version__ = "$Revision: 3.0.0 $"
 #=========================================================================================
 # Created
@@ -30,6 +30,7 @@ from PyQt5 import QtWidgets, QtCore
 from itertools import permutations
 from collections import Iterable
 from ccpn.core.Spectrum import MAXALIASINGRANGE, Spectrum
+from collections import OrderedDict
 from ccpn.ui.gui.widgets.Button import Button
 from ccpn.ui.gui.widgets.CheckBox import CheckBox
 from ccpn.ui.gui.widgets.ColourDialog import ColourDialog
@@ -333,6 +334,11 @@ class SpectrumDisplayPropertiesPopupNd(SpectrumPropertiesPopupABC):
                 for aTab in [tab for tab in self.tabs if tab != fromSpectrumTab and tab.spectrum in toSpectra]:
                     aTab._copySpectrumAttributes(fromSpectrumTab)
 
+    def getActiveTabList(self):
+        """Return the list of active tabs
+        """
+        return tuple(self.tabWidget.widget(ii) for ii in range(self.tabWidget.count()))
+
 
 class SpectrumDisplayPropertiesPopup1d(SpectrumPropertiesPopupABC):
     """All spectra in the current display are added as tabs
@@ -385,7 +391,7 @@ class GeneralTab(Widget):
 
         self.item = item
         self.spectrum = spectrum
-        self._changes = dict()
+        self._changes = OrderedDict()
         self.atomCodes = ()
 
         self.experimentTypes = spectrum._project._experimentTypeMap
@@ -665,7 +671,7 @@ class GeneralTab(Widget):
         from ccpnmodel.ccpncore.lib.spectrum.NmrExpPrototype import priorityNameRemapping
 
         # clear all changes
-        self._changes = {}
+        self._changes = OrderedDict()
 
         self._validateFrame._populate()
 
@@ -949,7 +955,7 @@ class DimensionsTab(Widget):
         self.mainWindow = mainWindow
         self.spectrum = spectrum
         self.dimensions = dimensions
-        self._changes = dict()
+        self._changes = OrderedDict()
 
         self.pythonConsole = mainWindow.pythonConsole
         self.logger = getLogger()
@@ -1217,7 +1223,7 @@ class DimensionsTab(Widget):
         Blocking to be performed by tab container
         """
         # clear all changes
-        self._changes = {}
+        self._changes = OrderedDict()
 
         for i in range(self.dimensions):
             value = self.spectrum.axisCodes[i]
@@ -1469,9 +1475,8 @@ class ContoursTab(Widget):
         self.pythonConsole = mainWindow.pythonConsole
         self.logger = getLogger()
 
-        # TODO self._changes looks unused, as do all the functions put in it
-        # Check if the lot can be removed
-        self._changes = dict()
+        self._changes = OrderedDict()
+        self._copyWidgetSet = set()
 
         row = 0
         col = 1
@@ -1481,8 +1486,10 @@ class ContoursTab(Widget):
         Spacer(self, 5, 1, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum,
                grid=(row, 3))
         self.layout().addItem(QtWidgets.QSpacerItem(0, 10), row, col)
-        if showCopyOptions:
-            copyLabel = Label(self, text="Copy Selected\nAttribute", grid=(row, self._checkBoxCol), vAlign='t', hAlign='l')
+
+        # if showCopyOptions:
+        copyLabel = Label(self, text="Copy Selected\nAttribute", grid=(row, self._checkBoxCol), vAlign='t', hAlign='l')
+        self._addToCopyWidgetSet(copyLabel)
 
         row += 1
         self._topRow = row
@@ -1593,52 +1600,69 @@ class ContoursTab(Widget):
         # move to the correct row
         self.getLayout().addWidget(self.negativeColourBox, row, col + 1)
 
-        if showCopyOptions:
-            # add a column of checkBoxes on the left for copying across spectra
+        # if showCopyOptions:
+        # add a column of checkBoxes on the left for copying across spectra
 
-            self._copyList = (self._copyLinkContours,
-                              self._copyShowPositive,
-                              self._copyPositiveBaseLevel,
-                              self._copyPositiveMultiplier,
-                              self._copyPositiveContours,
-                              self._copyPositiveContourColour,
-                              self._copyShowNegative,
-                              self._copyNegativeBaseLevel,
-                              self._copyNegativeMultiplier,
-                              self._copyNegativeContours,
-                              self._copyNegativeContourColour)
+        self._copyList = (self._copyLinkContours,
+                          self._copyShowPositive,
+                          self._copyPositiveBaseLevel,
+                          self._copyPositiveMultiplier,
+                          self._copyPositiveContours,
+                          self._copyPositiveContourColour,
+                          self._copyShowNegative,
+                          self._copyNegativeBaseLevel,
+                          self._copyNegativeMultiplier,
+                          self._copyNegativeContours,
+                          self._copyNegativeContourColour)
 
-            self._copyCheckBoxes = []
+        self._copyCheckBoxes = []
 
-            # add the checkboxes and keep a list of selected in the preferences (so it will be saved)
-            if self.preferences.general._copySpectraSettings and len(self.preferences.general._copySpectraSettings) == len(self._copyList):
-                # read existing settings
-                for rr, opt in enumerate(self._copyList):
-                    thisCheckBox = CheckBox(self, grid=(rr + self._topRow, self._checkBoxCol),
-                                            checkable=True, checked=self.preferences.general._copySpectraSettings[rr], hAlign='c')
-                    self._copyCheckBoxes.append(thisCheckBox)
-                    thisCheckBox.setCallback(partial(self._copyButtonClicked, thisCheckBox, rr))
-            else:
-                # create a new list in preferences
-                self.preferences.general._copySpectraSettings = [True] * len(self._copyList)
-                for rr, opt in enumerate(self._copyList):
-                    thisCheckBox = CheckBox(self, grid=(rr + self._topRow, self._checkBoxCol),
-                                            checkable=True, checked=True, hAlign='c')
-                    self._copyCheckBoxes.append(thisCheckBox)
-                    thisCheckBox.setCallback(partial(self._copyButtonClicked, thisCheckBox, rr))
+        # add the checkboxes and keep a list of selected in the preferences (so it will be saved)
+        if self.preferences.general._copySpectraSettings and len(self.preferences.general._copySpectraSettings) == len(self._copyList):
+            # read existing settings
+            for rr, opt in enumerate(self._copyList):
+                thisCheckBox = CheckBox(self, grid=(rr + self._topRow, self._checkBoxCol),
+                                        checkable=True, checked=self.preferences.general._copySpectraSettings[rr], hAlign='c')
+                self._copyCheckBoxes.append(thisCheckBox)
+                thisCheckBox.setCallback(partial(self._copyButtonClicked, thisCheckBox, rr))
 
-            # add the spectrum selection pulldown to the bottom and a copy action button
-            self._copyToSpectraPullDown = PulldownListCompoundWidget(self, labelText="Copy to",
-                                                                     grid=(len(self._copyList) + self._topRow, 0),
-                                                                     gridSpan=(1, self._checkBoxCol + 1), vAlign='t', hAlign='r')
-            self._copyButton = Button(self, text='Copy', grid=(len(self._copyList) + self._topRow + 1, self._checkBoxCol), hAlign='r',
-                                      callback=self._copyActionClicked)
+                self._addToCopyWidgetSet(thisCheckBox)
+        else:
+            # create a new list in preferences
+            self.preferences.general._copySpectraSettings = [True] * len(self._copyList)
+            for rr, opt in enumerate(self._copyList):
+                thisCheckBox = CheckBox(self, grid=(rr + self._topRow, self._checkBoxCol),
+                                        checkable=True, checked=True, hAlign='c')
+                self._copyCheckBoxes.append(thisCheckBox)
+                thisCheckBox.setCallback(partial(self._copyButtonClicked, thisCheckBox, rr))
 
-            # TODO:ED populate _copyToSpectraPullDown here or __init__
+                self._addToCopyWidgetSet(thisCheckBox)
+
+        # add the spectrum selection pulldown to the bottom and a copy action button
+        self._copyToSpectraPullDown = PulldownListCompoundWidget(self, labelText="Copy to",
+                                                                 grid=(len(self._copyList) + self._topRow, 0),
+                                                                 gridSpan=(1, self._checkBoxCol + 1), vAlign='t', hAlign='r')
+        self._copyButton = Button(self, text='Copy', grid=(len(self._copyList) + self._topRow + 1, self._checkBoxCol), hAlign='r',
+                                  callback=self._copyActionClicked)
+
+        self._addToCopyWidgetSet(self._copyToSpectraPullDown)
+        self._addToCopyWidgetSet(self._copyButton)
+
+        # end showCopyList widgets
+
+        # TODO:ED populate _copyToSpectraPullDown here or __init__
 
         row += 1
         Spacer(self, 5, 5, QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.MinimumExpanding,
                grid=(row + 3, col + 1), gridSpan=(1, 1))
+
+    def _addToCopyWidgetSet(self, widget):
+        """Add widgets to a set so that we can set visible/invisible at any time
+        """
+        if not self._copyWidgetSet:
+            self._copyWidgetSet = set()
+        self._copyWidgetSet.add(widget)
+        widget.setVisible(self._showCopyOptions)
 
     def _setContourLevels(self):
         """Estimate the contour levels for the current spectrum
@@ -1669,7 +1693,7 @@ class ContoursTab(Widget):
         Blocking to be performed by tab container
         """
         # clear all changes
-        self._changes = {}
+        self._changes = OrderedDict()
 
         self.positiveContoursCheckBox.setChecked(self.spectrum.includePositiveContours)
         self.positiveContourBaseData.setValue(self.spectrum.positiveContourBase)
@@ -1683,8 +1707,8 @@ class ContoursTab(Widget):
         self.negativeContourCountData.setValue(self.spectrum.negativeContourCount)
         _setColourPulldown(self.negativeColourBox, self.spectrum.negativeContourColour)
 
-        if self._showCopyOptions:
-            self._populateCheckBoxes()
+        # if self._showCopyOptions:
+        self._populateCheckBoxes()
 
     def _populateCheckBoxes(self):
         """Populate the checkbox from preferences and fill the pullDown from the list of spectra
@@ -1704,6 +1728,11 @@ class ContoursTab(Widget):
     def _writeLoggingMessage(self, command):
         self.logger.info("spectrum = project.getByPid('%s')" % self.spectrum.pid)
         self.logger.info(command)
+
+    def _cleanWidgetQueue(self):
+        """Clean the items from the stateChange queue
+        """
+        self._changes = OrderedDict()
 
     @queueStateChange(_verifyPopupTabApply)
     def _queueChangePositiveContourDisplay(self, spectrum, state):
@@ -1984,6 +2013,16 @@ class ContoursTab(Widget):
                     #     if toSpectrum:
                     #         copyFunc(self.spectrum, toSpectrum)
 
+    def setCopyOptionsVisible(self, value):
+        """Show/hide the copyOptions widgets
+        """
+        if not isinstance(value, bool):
+            raise TypeError('Error: value must be a boolean')
+
+        self._showCopyOptions = value
+        for widg in self._copyWidgetSet:
+            widg.setVisible(value)
+
 
 class ColourTab(Widget):
     def __init__(self, parent=None, mainWindow=None, spectrum=None, item=None, colourOnly=False):
@@ -1997,7 +2036,7 @@ class ColourTab(Widget):
 
         self.item = item
         self.spectrum = spectrum
-        self._changes = dict()
+        self._changes = OrderedDict()
         self.atomCodes = ()
 
         self.pythonConsole = mainWindow.pythonConsole
@@ -2020,7 +2059,7 @@ class ColourTab(Widget):
         Blocking to be performed by tab container
         """
         # clear all changes
-        self._changes = {}
+        self._changes = OrderedDict()
 
         _setColourPulldown(self.colourBox, self.spectrum.sliceColour)
 

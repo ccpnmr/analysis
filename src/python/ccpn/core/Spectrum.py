@@ -52,7 +52,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-01-23 11:59:51 +0000 (Thu, January 23, 2020) $"
+__dateModified__ = "$dateModified: 2020-01-27 19:23:39 +0000 (Mon, January 27, 2020) $"
 __version__ = "$Revision: 3.0.0 $"
 #=========================================================================================
 # Created
@@ -1743,12 +1743,42 @@ assignmentTolerances
         """rename the keys in the seriesItems to reflect the updated spectrumGroup name
         """
         seriesItems = self.getParameter(SPECTRUMSERIES, SPECTRUMSERIESITEMS)
-        if oldPid in seriesItems:
+        if oldPid in (seriesItems if seriesItems else ()):
 
             # insert new items with the new pid
             oldItems = seriesItems[oldPid]
             del seriesItems[oldPid]
             seriesItems[spectrumGroup.pid] = oldItems
+            self.setParameter(SPECTRUMSERIES, SPECTRUMSERIESITEMS, seriesItems)
+
+    def _getSeriesItemsById(self, id):
+        """Return the series item for the current spectrum by 'id'
+        CCPNINTERNAL: used in creating new spectrumGroups - not for external use
+        """
+        seriesItems = self.getParameter(SPECTRUMSERIES, SPECTRUMSERIESITEMS)
+        if seriesItems and id in seriesItems:
+            return seriesItems[id]
+
+    def _setSeriesItemsById(self, id, item):
+        """Set the series item for the current spectrum by 'id'
+        CCPNINTERNAL: used in creating new spectrumGroups - not for external use
+        """
+        seriesItems = self.getParameter(SPECTRUMSERIES, SPECTRUMSERIESITEMS)
+        if seriesItems:
+            seriesItems[id] = item
+        else:
+            seriesItems = {id: item}
+        self.setParameter(SPECTRUMSERIES, SPECTRUMSERIESITEMS, seriesItems)
+
+    def _removeSeriesItemsById(self, spectrumGroup, id):
+        """Remove the keys in the seriesItems allocated to 'id'
+        CCPNINTERNAL: used in creating new spectrumGroups - not for external use
+        """
+        # useful for storing an item
+        seriesItems = self.getParameter(SPECTRUMSERIES, SPECTRUMSERIESITEMS)
+        if id in seriesItems:
+
+            del seriesItems[id]
             self.setParameter(SPECTRUMSERIES, SPECTRUMSERIESITEMS, seriesItems)
 
     # @property

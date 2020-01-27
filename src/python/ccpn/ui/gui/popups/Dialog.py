@@ -4,7 +4,7 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -13,8 +13,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: CCPN $"
-__dateModified__ = "$dateModified: 2017-07-07 16:32:47 +0100 (Fri, July 07, 2017) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2020-01-27 19:23:39 +0000 (Mon, January 27, 2020) $"
 __version__ = "$Revision: 3.0.0 $"
 #=========================================================================================
 # Created
@@ -52,6 +52,7 @@ VERTICAL = 'vertical'
 ORIENTATIONLIST = (HORIZONTAL, VERTICAL)
 DEFAULTSPACING = 3
 DEFAULTMARGINS = (10, 10, 10, 10)
+GETCHANGESDICT = 'getChangesDict'
 
 
 class CcpnDialogMainWidget(QtWidgets.QDialog, Base):
@@ -380,6 +381,12 @@ class CcpnDialogMainWidget(QtWidgets.QDialog, Base):
         # MUST BE SUBCLASSED
         raise NotImplementedError("Code error: function not implemented")
 
+    def getActiveTabList(self):
+        """Get a list of tabs for calulating the changes to settings
+        """
+        # MUST BE SUBCLASSED
+        raise NotImplementedError("Code error: function not implemented")
+
 
 class CcpnDialog(QtWidgets.QDialog, Base):
     """
@@ -557,12 +564,65 @@ def _verifyPopupTabApply(self, attributeName, value, *postArgs, **postKwds):
                 del self._changes[attributeName]
 
     if popup:
-        # set button state depending on number of changes
-        tabs = tuple(popup.tabWidget.widget(ii) for ii in range(popup.tabWidget.count()))
-        allChanges = any(t._changes for t in tabs if t is not None)
-        _button = popup.dialogButtons.button(QtWidgets.QDialogButtonBox.Apply)
-        if _button:
-            _button.setEnabled(allChanges)
-        _button = popup.dialogButtons.button(QtWidgets.QDialogButtonBox.Reset)
-        if _button:
-            _button.setEnabled(allChanges or popup._currentNumApplies)
+        # check whether there is a list of tabs
+        tabs = popup.getActiveTabList()
+
+        if tabs:
+            # set button state depending on number of changes
+            # tabs = tuple(tabWidget.widget(ii) for ii in range(tabWidget.count()))
+
+            allChanges = any(t._changes for t in tabs if t is not None)
+            _button = popup.dialogButtons.button(QtWidgets.QDialogButtonBox.Apply)
+            if _button:
+                _button.setEnabled(allChanges)
+            _button = popup.dialogButtons.button(QtWidgets.QDialogButtonBox.Reset)
+            if _button:
+                _button.setEnabled(allChanges or popup._currentNumApplies)
+
+
+def _verifyPopupChangesApply(self, attributeName, value, *postArgs, **postKwds):
+    """Change the state of the apply button based on the changes in the tabs
+    """
+    # self must be a tab in a tabWidget
+    if not hasattr(self, GETCHANGESDICT):
+        raise RuntimeError('Error: widget must have changes defined')
+
+    popup, _changeDict, stateValue = self.getChangesDict()
+
+    # if attributeName is defined use as key to dict to store change functions
+    # append postFixes if need to differentiate partial functions
+    if attributeName:
+
+        # append the extra parameters to the end of attributeName to give a unique
+        # identifier into _changes dict, to differentiate same-name partial functions
+        for pf in postArgs:
+            if pf is not None:
+                attributeName += str(pf)
+        for k, pf in sorted(postKwds.items()):
+            if pf is not None:
+                attributeName += str(pf)
+        attributeName += str(id(self))
+
+        if value:
+            # store in dict - overwrite as required
+            _changeDict[attributeName] = value
+        else:
+            if attributeName in _changeDict:
+                # delete from dict - empty dict implies no changes
+                del _changeDict[attributeName]
+
+    if popup:
+        # check whether there is a list of tabs
+        tabs = popup.getActiveTabList()
+
+        if tabs:
+            # set button state depending on number of changes
+            # tabs = tuple(tabWidget.widget(ii) for ii in range(tabWidget.count()))
+
+            allChanges = any(t._changes for t in tabs if t is not None) and stateValue
+            _button = popup.dialogButtons.button(QtWidgets.QDialogButtonBox.Apply)
+            if _button:
+                _button.setEnabled(allChanges)
+            _button = popup.dialogButtons.button(QtWidgets.QDialogButtonBox.Reset)
+            if _button:
+                _button.setEnabled(allChanges or popup._currentNumApplies)

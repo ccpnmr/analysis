@@ -4,7 +4,7 @@ Abstract base class to easily implement a popup to edit attributes of V3 layer o
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -13,8 +13,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: CCPN $"
-__dateModified__ = "$dateModified: 2017-07-07 16:32:47 +0100 (Fri, July 07, 2017) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2020-01-27 19:23:39 +0000 (Mon, January 27, 2020) $"
 __version__ = "$Revision: 3.0.0 $"
 #=========================================================================================
 # Created
@@ -27,6 +27,7 @@ __date__ = "$Date: 2017-03-30 11:28:58 +0100 (Thu, March 30, 2017) $"
 
 from string import whitespace
 from functools import partial
+from collections import OrderedDict
 from ccpn.ui.gui.popups.Dialog import CcpnDialogMainWidget, _verifyPopupApply
 from ccpn.core.lib.ContextManagers import queueStateChange
 from ccpn.util.Common import makeIterableList
@@ -115,7 +116,7 @@ class AttributeEditorPopupABC(CcpnDialogMainWidget):
         self.setDefaultButton(CcpnDialogMainWidget.CANCELBUTTON)
 
         # clear the changes list
-        self._changes = {}
+        self._changes = OrderedDict()
 
         # make the buttons appear
         self._setButtons()

@@ -33,7 +33,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-01-21 10:40:46 +0000 (Tue, January 21, 2020) $"
+__dateModified__ = "$dateModified: 2020-01-27 19:23:40 +0000 (Mon, January 27, 2020) $"
 __version__ = "$Revision: 3.0.0 $"
 #=========================================================================================
 # Created
@@ -66,9 +66,7 @@ class Tabs(QtWidgets.QTabWidget, Base):
         self._tabBarClickCallback = None
 
     def _tabBarClicked(self, index):
-        print('>>>>tabClicked', index)
         if self._tabBarClickCallback and callable(self._tabBarClickCallback):
-            print('>>>>  tabClicked', index)
             self._tabBarClickCallback(index)
 
 

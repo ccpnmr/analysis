@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-01-15 14:42:22 +0000 (Wed, January 15, 2020) $"
+__dateModified__ = "$dateModified: 2020-01-27 19:23:40 +0000 (Mon, January 27, 2020) $"
 __version__ = "$Revision: 3.0.0 $"
 #=========================================================================================
 # Created
@@ -49,18 +49,21 @@ class ScrollArea(QtWidgets.QScrollArea, Base):
         self.setMinimumSizes(minimumSizes)
 
     def setMinimumSizes(self, minimumSizes):
-        "Set (minimumWidth, minimumHeight)"
+        """Set (minimumWidth, minimumHeight)
+        """
         self.setMinimumWidth(minimumSizes[0])
         self.setMinimumHeight(minimumSizes[1])
 
     def setScrollBarPolicies(self, scrollBarPolicies=('asNeeded', 'asNeeded')):
-        "Set the scrolbar policy: always, never, asNeeded"
-
+        """Set the scrollbar policy: always, never, asNeeded
+        """
         hp = SCROLLBAR_POLICY_DICT.get(scrollBarPolicies[0])
         vp = SCROLLBAR_POLICY_DICT.get(scrollBarPolicies[1])
         self.setHorizontalScrollBarPolicy(hp)
         self.setVerticalScrollBarPolicy(vp)
 
     def setWidget(self, widget):
+        """Set the scroll area contents
+        """
         super(ScrollArea, self).setWidget(widget)
         self._scrollContents = widget

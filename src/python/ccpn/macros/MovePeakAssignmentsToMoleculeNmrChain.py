@@ -31,7 +31,7 @@ and then remove all NmrChains other than 'molecule' and '@-'.
 Context:
 When importing a Sparky project with several peak lists, the V3 project may end up having
 separate NmrChains for each peak list and if the Sparky project contained a chemical shift list, 
-then there will also be an addition NmrChain called 'molecule'.
+then there will also be an additional NmrChain called 'molecule'.
 The result is that the assigments across different spectra won't be linked.
 This macro will tidy up the project and move all the peak assignments to an NmrChain called 'molecule'.
 It will then remove all the other NmrChains which are no longer needed.

@@ -11,7 +11,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-01-28 00:02:07 +0000 (Tue, January 28, 2020) $"
+__dateModified__ = "$dateModified: 2020-01-28 09:52:39 +0000 (Tue, January 28, 2020) $"
 __version__ = "$Revision: 3.0.0 $"
 #=========================================================================================
 # Created
@@ -1280,7 +1280,7 @@ class Framework(NotifierBase):
                 ("None", None, [('checkable', True),
                                 ('checked', False)])
                 ])),
-            ("Python Console", self._toggleConsole, [('shortcut', '  '),
+            ("Python Console", self._toggleConsole, [('shortcut', 'pr'),
                                                      ('checkable', True),
                                                      ('checked', False)])
             ]
@@ -1393,8 +1393,10 @@ class Framework(NotifierBase):
         project = coreIo.newProject(name=newName, useFileLogger=self.useFileLogger, level=self.level)
         project._isNew = True
         # Needs to know this for restoring the GuiSpectrum Module. Could be removed after decoupling Gui and Data!
-        self._initialiseProject(project)
+        # GST note change of order required for undo dirty system not consistent
+        # order in other place elsewhise
         project._resetUndo(debug=self.level <= Logging.DEBUG2, application=self)
+        self._initialiseProject(project)
 
         # 20190424:ED reset the flag so that spectrumDisplays open correctly again
         project._isNew = None
@@ -1754,6 +1756,7 @@ class Framework(NotifierBase):
             # MessageDialog.showMessage('Project saved', 'Project successfully saved!',
             #                            iconPath=saveIconPath)
 
+        self._getUndo().markSave()
         return successful
 
     def _importNef(self):

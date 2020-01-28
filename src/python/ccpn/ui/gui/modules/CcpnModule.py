@@ -5,7 +5,7 @@ modified by Geerten 1-12/12/2016
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2019-12-05 09:40:39 +0000 (Thu, December 05, 2019) $"
+__dateModified__ = "$dateModified: 2020-01-28 09:52:40 +0000 (Tue, January 28, 2020) $"
 __version__ = "$Revision: 3.0.0 $"
 #=========================================================================================
 # Created
@@ -207,9 +207,10 @@ class CcpnModule(Dock, DropBase, NotifierBase):
         DropBase._init(self, acceptDrops=True)
 
         self.hStyle = """
+                  
                   Dock > QWidget {
-                      border: 0px solid #000;
-                      border-radius: 0px;
+                      border: 1px solid #a9a9a9;
+                      border-radius: 2px;
                       border-top-left-radius: 0px;
                       border-top-right-radius: 0px;
                       border-top-width: 0px;
@@ -249,8 +250,14 @@ class CcpnModule(Dock, DropBase, NotifierBase):
 
         # remove old label, so it can be redefined
         self.topLayout.removeWidget(self.label)
+        # GST this wasn't deleting the widget it was leaving it still attached to the qt hierrchy which was causing all
+        # sorts of graphical hickups later on
+        self.label.deleteLater()
         del self.label
 
+        # GST other way to do this would be to
+        # 1. replace the super class init with our own and not call it 2. replace the methods of DockLabel we have
+        # problems with 3. ask the pyqtgraph guys to add a factory method...
         self.label = CcpnModuleLabel(name, self,
                                      showCloseButton=closable, closeCallback=self._closeModule,
                                      showSettingsButton=self.includeSettingsWidget,
@@ -800,6 +807,11 @@ class CcpnModuleLabel(DockLabel):
         self.fixedWidth = True
         self.setFont(moduleLabelFont)
         self.setAlignment(QtCore.Qt.AlignVCenter | QtCore.Qt.AlignHCenter)
+        self.closeButton.setStyleSheet('''border: 0px solid #a9a9a9;
+                                          border-radius: 1px;
+                                          background-color: transparent; ''')
+
+        # self.setStyleSheet('margin : 2')
 
         if showCloseButton:
             # button is already there because of the DockLabel init
@@ -815,7 +827,9 @@ class CcpnModuleLabel(DockLabel):
             self.settingsButton = ToolButton(self)
             self.settingsButton.setIcon(Icon('icons/settings'))
             self.settingsButton.setIconSize(QtCore.QSize(self.labelSize - 5, self.labelSize - 5))  # GWV hack to make it work
-
+            self.settingsButton.setStyleSheet('''border: 0px solid #a9a9a9;
+                                          border-radius: 1px;
+                                          background-color: transparent; ''')
             if settingsCallback is None:
                 raise RuntimeError('Requested settingsButton without callback')
             else:
@@ -845,9 +859,9 @@ class CcpnModuleLabel(DockLabel):
             self.vStyle = """DockLabel {
                 background-color : %s;
                 color : %s;
-                border-top-right-radius: 0px;
+                border-top-right-radius: 2px;
                 border-top-left-radius: %s;
-                border-bottom-right-radius: 0px;
+                border-bottom-right-radius: 2px;
                 border-bottom-left-radius: %s;
                 border-width: 0px;
                 border-right: 2px solid %s;

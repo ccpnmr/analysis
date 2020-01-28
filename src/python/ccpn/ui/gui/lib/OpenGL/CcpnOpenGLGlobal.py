@@ -4,7 +4,7 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2018-12-20 14:07:59 +0000 (Thu, December 20, 2018) $"
+__dateModified__ = "$dateModified: 2020-01-28 09:52:39 +0000 (Tue, January 28, 2020) $"
 __version__ = "$Revision: 3.0.0 $"
 #=========================================================================================
 # Created
@@ -36,18 +36,27 @@ from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLShader import ShaderProgram
 
 DEFAULTFONT = 'OpenSans-Regular'
 SUBSTITUTEFONT = 'OpenSans-Regular'
-DEFAULTFONTSIZE = '13'
-scale = 2
-FONT_SIZES = [13] #,14,16,26]
-fontList = []
-for size in FONT_SIZES:
-    # fontList.append(('glFont%i.fnt' % size/scale, DEFAULTFONT, size, scale)
-    fontList.append(('glFont%i.fnt' % (size*scale), DEFAULTFONT, size, scale))  # double size for retina displays...
-FONTLIST = tuple(fontList)
-# print(FONTLIST)
+DEFAULTFONTSIZE = 13
+DEFAULT_SCALE = 1
+FONT_SCALES  = (1,2)
+FONT_SIZES = [13,14,16]
+FONT_DICT = {}
+
+FONT_FILE = 0
+FONT_NAME = 1
+FONT_SIZE = 2
+FONT_SCALE = 3
 
 FONTTRANSPARENT = 'Transparent'
 FONTPATH = 'Fonts'
+
+TRANSPARENCIES = ('','-%s' % FONTTRANSPARENT)
+for size in FONT_SIZES:
+    for scale in FONT_SCALES:
+        for transparency in TRANSPARENCIES:
+            FONT_DICT['%s%s-%i' % (DEFAULTFONT, transparency, size), scale] = ('glFont%i.fnt' % (size * scale), DEFAULTFONT, size, scale, transparency) # some are double size for retina displays...
+
+
 
 
 @singleton
@@ -69,18 +78,21 @@ class GLGlobalData(QtWidgets.QWidget):
         return 1  #self._glClientIndex
 
     def loadFonts(self):
-        for fontFile in FONTLIST:
-            normalName = fontFile[1] + str(fontFile[2])
-            scale = fontFile[3]
-            transparentName = fontFile[1] + FONTTRANSPARENT + str(fontFile[2])
+        for key,fontInfo in FONT_DICT.items():
+            scale = fontInfo[FONT_SCALE]
+            transparentName = fontInfo[FONT_FILE] + FONTTRANSPARENT + str(fontInfo[2])
 
-            self.fonts[normalName] = CcpnGLFont(os.path.join(fontsPath, FONTPATH, fontFile[0]),
+            self.fonts[key] = CcpnGLFont(os.path.join(fontsPath, FONTPATH, fontInfo[0]),
                                                 activeTexture=0, scale=scale)
-            self.fonts[transparentName] = CcpnGLFont(os.path.join(fontsPath, FONTPATH, fontFile[0]),
+
+            key = transparentName,scale
+            self.fonts[key] = CcpnGLFont(os.path.join(fontsPath, FONTPATH, fontInfo[0]),
                                                      fontTransparency=0.5, activeTexture=1, scale=scale)
 
-        self.glSmallFont = self.fonts[DEFAULTFONT + DEFAULTFONTSIZE]
-        self.glSmallTransparentFont = self.fonts[DEFAULTFONT + FONTTRANSPARENT + DEFAULTFONTSIZE]
+        self.glSmallFont = DEFAULTFONT
+        self.glSmallTransparentFont = '%s-%s' % (DEFAULTFONT,  FONTTRANSPARENT)
+        self.glSmallFontSize = DEFAULTFONTSIZE
+
 
     def initialiseShaders(self):
         # simple shader for standard plotting of contours

@@ -10,7 +10,7 @@ Geerten 1-7/12/2016; 11/04/2017
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -19,8 +19,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: CCPN $"
-__dateModified__ = "$dateModified: 2017-07-07 16:32:45 +0100 (Fri, July 07, 2017) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2020-01-28 09:52:40 +0000 (Tue, January 28, 2020) $"
 __version__ = "$Revision: 3.0.0 $"
 #=========================================================================================
 # Created
@@ -315,6 +315,10 @@ class NmrResidueTable(GuiTable):
         parent.getLayout().setHorizontalSpacing(0)
         self._widgetScrollArea = ScrollArea(parent=parent, scrollBarPolicies=('never', 'never'), **kwds)
         self._widgetScrollArea.setWidgetResizable(True)
+        self._widgetScrollArea.setStyleSheet('''
+                                    margin-left : 2px;
+                                    margin-right : 2px;
+                                    padding : 2px''')
         self._widget = Widget(parent=self._widgetScrollArea, setLayout=True)
         self._widgetScrollArea.setWidget(self._widget)
         self._widget.setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.Expanding)

@@ -55,7 +55,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-01-10 11:21:55 +0000 (Fri, January 10, 2020) $"
+__dateModified__ = "$dateModified: 2020-01-28 09:52:39 +0000 (Tue, January 28, 2020) $"
 __version__ = "$Revision: 3.0.0 $"
 #=========================================================================================
 # Created
@@ -619,9 +619,9 @@ class CcpnGLWidgetABC(QOpenGLWidget):
         # GL.glBindTexture(GL.GL_TEXTURE_2D, self.globalGL.glSmallFont.textureId)
 
         GL.glActiveTexture(GL.GL_TEXTURE0)
-        GL.glBindTexture(GL.GL_TEXTURE_2D, self.globalGL.glSmallFont.textureId)
+        GL.glBindTexture(GL.GL_TEXTURE_2D, self.globalGL.getSmallFont().textureId)
         GL.glActiveTexture(GL.GL_TEXTURE1)
-        GL.glBindTexture(GL.GL_TEXTURE_2D, self.globalGL.glSmallTransparentFont.textureId)
+        GL.glBindTexture(GL.GL_TEXTURE_2D, self.globalGL.getSmallFont(transparent=True).textureId)
 
         # # specific blend function for text overlay
         # GL.glBlendFuncSeparate(GL.GL_SRC_ALPHA, GL.GL_DST_COLOR, GL.GL_ONE, GL.GL_ONE)

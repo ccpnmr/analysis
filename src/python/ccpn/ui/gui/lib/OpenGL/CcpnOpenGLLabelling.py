@@ -5,7 +5,7 @@ Currently this is peaks and multiplets
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2018-12-20 14:07:59 +0000 (Thu, December 20, 2018) $"
+__dateModified__ = "$dateModified: 2020-01-28 09:52:39 +0000 (Tue, January 28, 2020) $"
 __version__ = "$Revision: 3.0.0 $"
 #=========================================================================================
 # Created
@@ -311,7 +311,7 @@ class GLLabelling():
             text = self.getLabelling(obj, self._GLParent._symbolLabelling)
 
             newString = GLString(text=text,
-                                 font=self._GLParent.globalGL.glSmallFont,  # if _isInPlane else self._GLParent.globalGL.glSmallTransparentFont,
+                                 font=self._GLParent.getSmallFont(),  # if _isInPlane else self._GLParent.globalGL.glSmallTransparentFont,
                                  x=p0[0], y=p0[1],
                                  ox=r * np.sign(self._GLParent.pixelX), oy=w * np.sign(self._GLParent.pixelY),
                                  # ox=r, oy=w,
@@ -389,7 +389,7 @@ class GLLabelling():
             text = self.getLabelling(obj, self._GLParent._symbolLabelling)
 
             outString = GLString(text=text,
-                                 font=self._GLParent.globalGL.glSmallFont,  # if _isInPlane else self._GLParent.globalGL.glSmallTransparentFont,
+                                 font=self._GLParent.getSmallFont(),  # if _isInPlane else self._GLParent.globalGL.glSmallTransparentFont,
                                  x=p0[0], y=p0[1],
                                  ox=r * np.sign(self._GLParent.pixelX), oy=w * np.sign(self._GLParent.pixelY),
                                  colour=(*listCol, fade),
@@ -1726,8 +1726,8 @@ class GLLabelling():
                 continue
 
             # for peakListView in spectrumView.peakListViews:
-            for objListView in self.listViews(spectrumView):
 
+            for objListView in self.listViews(spectrumView):
                 if objListView.isDeleted:
                     continue
 
@@ -2446,7 +2446,7 @@ class GL1dLabelling():
         text = self.getLabelling(obj, self._GLParent._symbolLabelling)
 
         newString = GLString(text=text,
-                             font=self._GLParent.globalGL.glSmallFont,
+                             font=self._GLParent.getSmallFont(),
                              x=p0[0], y=p0[1],
                              ox=r * np.sign(self._GLParent.pixelX), oy=w * np.sign(self._GLParent.pixelY),
                              # ox=symbolWidth, oy=symbolWidth,
@@ -3461,7 +3461,7 @@ class GLintegralNdLabelling(GL1dLabelling, GLintegralListMethods, GLLabelling): 
         textY = self._GLParent.axisT - (36.0 * self._GLParent.pixelY)
 
         newString = GLString(text=text,
-                             font=self._GLParent.globalGL.glSmallFont,
+                             font=self._GLParent.getSmallFont(),
                              # x=p0[0], y=p0[1],
                              x=textX,
                              y=textY,

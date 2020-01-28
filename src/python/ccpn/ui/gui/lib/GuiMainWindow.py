@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-01-15 14:42:22 +0000 (Wed, January 15, 2020) $"
+__dateModified__ = "$dateModified: 2020-01-28 09:52:39 +0000 (Tue, January 28, 2020) $"
 __version__ = "$Revision: 3.0.0 $"
 #=========================================================================================
 # Created
@@ -129,6 +129,8 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
 
         logger.debug('GuiMainWindow.moduleArea: layout: %s' % self.moduleArea.layout)  ## pyqtgraph object
         self.moduleArea.setGeometry(0, 0, 1000, 800)
+        # GST can't seem to do this with style sheets...
+        self.moduleArea.setContentsMargins(0, 2, 2, 0)
         self.setCentralWidget(self.moduleArea)
         self._shortcutsDict = {}
         self.recordingMacro = False
@@ -143,12 +145,17 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
         self.feedbackPopup = None
         self.updatePopup = None
 
+        self.fileIcon = self.style().standardIcon(QtWidgets.QStyle.SP_FileIcon, None, self)
+        self.disabledFileIcon = self.makeDisabledFileIcon(self.fileIcon)
+
         # blank display opened later by the _initLayout if there is nothing to show otherwise
         # self.newBlankDisplay()
         self.pythonConsoleModule = None
         self.statusBar().showMessage('Ready')
         setCurrentMouseMode(SELECT)
         self.show()
+
+        self._project._undo.undoChanged.add(self._undoChangeCallback)
 
         #   QtWidgets.QShortcut.installEventFilter(self)
         #   # for action in self.actions():
@@ -174,6 +181,27 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
 
         # install handler to resize when moving between displays
         self.window().windowHandle().screenChanged.connect(self._screenChangedEvent)
+
+    def makeDisabledFileIcon(self, icon):
+        return icon
+
+    def _undoChangeCallback(self, message):
+
+        amDirty = self._project._undo.isDirty()
+        self.setWindowModified(amDirty)
+
+        if not self._isTemporaryProject():
+            self.setWindowFilePath(self.application.project.path)
+        else:
+            self.setWindowFilePath("")
+
+        if self._isTemporaryProject():
+            self.setWindowIcon(QtGui.QIcon())
+        elif amDirty:
+            self.setWindowIcon(self.disabledFileIcon)
+        else:
+            self.setWindowIcon(self.fileIcon)
+
 
     @pyqtSlot()
     def _screenChangedEvent(self, *args):
@@ -260,7 +288,19 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
         """
         #CCPN INTERNAL - called in saveProject method of Framework
         """
-        windowTitle = '{}, {}'.format(self.application.applicationName, self.application.applicationVersion)
+        applicationName = self.application.applicationName
+        version = self.application.applicationVersion
+
+        #GST certainly on osx i would even remove the app name as it should be in the menu
+        #GST switched order file name first its the most important info and on osx it
+        # appears next to the proxy icon
+        if not self._isTemporaryProject():
+            filename = self.application.project.name
+            windowTitle = '{} - {}[{}]'.format(filename, applicationName, version)
+        else:
+            windowTitle = '{}[{}]'.format(applicationName, version)
+
+
         self.setWindowTitle(windowTitle)
 
     def getMenuAction(self, menuString, topMenuAction=None):
@@ -506,7 +546,7 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
                             )
                 # project.application.showValidateSpectraPopup(defaultSelected='invalid')
                 # project.save(createFallback=False, overwriteExisting=True)
-
+            project._undo.markClean()
             return project
 
         else:
@@ -521,6 +561,7 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
         # try and load the new project
         # try:
         project = self._loadProjectSingleTry(projectDir)
+        project._undo.markClean()
         return project
 
         # except Exception as es:
@@ -582,7 +623,7 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
                 #     except Exception as es:
                 #         MessageDialog.showError('loadProject', 'Fatal error loading previous project:\n%s' % str(lastValidProject))
                 #         Logging.getLogger().warning('Fatal error loading previous project: %s' % str(lastValidProject))
-
+        project._undo.markClean()
         return project
 
     def _fillRecentProjectsMenu(self):
@@ -936,19 +977,29 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
         # json.dump(self.application.preferences, prefFile, sort_keys=True, indent=4, separators=(',', ': '))
         # prefFile.close()
 
+        undos = self.application.project._undo
+
         # set the active window to mainWindow so that the quit popup centres correctly.
         QtWidgets.QApplication.setActiveWindow(self)
 
-        if disableCancel:
-            reply = MessageDialog.showMulti("Quit Program", "Do you want to save changes before quitting?",
-                                            ['Save and Quit', 'Quit without Saving'],
-                                            )
-        else:
-            reply = MessageDialog.showMulti("Quit Program", "Do you want to save changes before quitting?",
-                                            ['Save and Quit', 'Quit without Saving', 'Cancel'],
-                                            )
+        QUIT = 'Quit Program'
+        MESSAGE = QUIT
+        CANCEL = 'Cancel'
+        QUIT_WITHOUT_SAVING =  'Quit without saving'
+        SAVE_DATA = 'Save changes'
+        DETAIL = "Do you want to save changes before quitting?"
 
-        if reply == 'Save and Quit':
+        if disableCancel:
+            reply = MessageDialog.showMulti(MESSAGE, DETAIL, [QUIT],checkbox=SAVE_DATA,okText=QUIT,
+                                            checked=True)
+        else:
+            if undos.isDirty():
+                reply = MessageDialog.showMulti(MESSAGE, DETAIL, [QUIT,CANCEL], checkbox=SAVE_DATA,okText=QUIT,
+                                                checked=True)
+            else:
+                reply = QUIT_WITHOUT_SAVING
+
+        if (QUIT in reply) and (SAVE_DATA in reply):
             if event:
                 event.accept()
             # prefFile = open(userPreferencesPath, 'w+')
@@ -968,7 +1019,7 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
                 if event:  # ejb - don't close the project
                     event.ignore()
 
-        elif reply == 'Quit without Saving':
+        elif (QUIT in reply and SAVE_DATA not in reply) or (reply == QUIT_WITHOUT_SAVING):
             if event:
                 event.accept()
             # prefFile = open(userPreferencesPath, 'w+')

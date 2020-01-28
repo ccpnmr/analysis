@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-01-28 03:30:44 +0000 (Tue, January 28, 2020) $"
+__dateModified__ = "$dateModified: 2020-01-28 03:43:33 +0000 (Tue, January 28, 2020) $"
 __version__ = "$Revision: 3.0.0 $"
 #=========================================================================================
 # Created
@@ -337,7 +337,11 @@ class SpectrumDisplayPropertiesPopupNd(SpectrumPropertiesPopupABC):
             if aTab.spectrum == fromSpectrum:
                 fromSpectrumTab = aTab
                 for aTab in [tab for tab in self.tabs if tab != fromSpectrumTab and tab.spectrum in toSpectra]:
-                    aTab._copySpectrumAttributes(fromSpectrumTab)
+                    try:
+                        aTab._copySpectrumAttributes(fromSpectrumTab)
+                    except Exception as es:
+                        pass
+
 
     def getActiveTabList(self):
         """Return the list of active tabs
@@ -399,7 +403,10 @@ class SpectrumDisplayPropertiesPopup1d(SpectrumPropertiesPopupABC):
             if aTab.spectrum == fromSpectrum:
                 fromSpectrumTab = aTab
                 for aTab in [tab for tab in self.tabs if tab != fromSpectrumTab and tab.spectrum in toSpectra]:
-                    aTab._copySpectrumAttributes(fromSpectrumTab)
+                    try:
+                        aTab._copySpectrumAttributes(fromSpectrumTab)
+                    except Exception as es:
+                        pass
 
     def getActiveTabList(self):
         """Return the list of active tabs
@@ -2100,11 +2107,11 @@ class ColourTab(Widget):
         self._addToCopyWidgetSet(copyLabel)
 
         Label(self, text="Colour", vAlign='t', hAlign='l', grid=(7, 0))
-        self.colourBox = PulldownList(self, vAlign='t', grid=(7, 1))
+        self.positiveColourBox = PulldownList(self, vAlign='t', grid=(7, 1))
 
         # populate initial pulldown
-        fillColourPulldown(self.colourBox, allowAuto=False)
-        self.colourBox.currentIndexChanged.connect(partial(self._queueChangeSliceComboIndex, spectrum))
+        fillColourPulldown(self.positiveColourBox, allowAuto=False)
+        self.positiveColourBox.currentIndexChanged.connect(partial(self._queueChangeSliceComboIndex, spectrum))
 
         # add a colour dialog button
         self.colourButton = Button(self, vAlign='t', hAlign='l', grid=(7, 2),
@@ -2154,7 +2161,7 @@ class ColourTab(Widget):
         # clear all changes
         self._changes = OrderedDict()
 
-        _setColourPulldown(self.colourBox, self.spectrum.sliceColour)
+        _setColourPulldown(self.positiveColourBox, self.spectrum.sliceColour)
 
         # if self._showCopyOptions:
         self._populateCheckBoxes()
@@ -2185,7 +2192,7 @@ class ColourTab(Widget):
         if newColour is not None:
             addNewColour(newColour)
             self._parent._fillPullDowns()
-            self.colourBox.setCurrentText(spectrumColours[newColour.name()])
+            self.positiveColourBox.setCurrentText(spectrumColours[newColour.name()])
 
     @queueStateChange(_verifyPopupTabApply)
     def _queueChangeSliceComboIndex(self, spectrum, value):
@@ -2194,16 +2201,16 @@ class ColourTab(Widget):
 
     def _changedSliceComboIndex(self, spectrum, value):
         # newColour = list(spectrumColours.keys())[value]
-        newColour = list(spectrumColours.keys())[list(spectrumColours.values()).index(colourNameNoSpace(self.colourBox.currentText()))]
+        newColour = list(spectrumColours.keys())[list(spectrumColours.values()).index(colourNameNoSpace(self.positiveColourBox.currentText()))]
         if newColour:
             spectrum.sliceColour = newColour
             self._writeLoggingMessage("spectrum.sliceColour = '%s'" % newColour)
             self.pythonConsole.writeConsoleCommand("spectrum.sliceColour '%s'" % newColour, spectrum=spectrum)
 
     def _copyPositiveContourColour(self, fromSpectrumTab):
-        name = fromSpectrumTab.colourBox.currentText()
+        name = fromSpectrumTab.positiveColourBox.currentText()
         colour = getSpectrumColour(name, defaultReturn='#')
-        _setColourPulldown(self.colourBox, colour)
+        _setColourPulldown(self.positiveColourBox, colour)
 
     def _copyButtonClicked(self, checkBox, checkBoxIndex, state):
         """Set the state of the checkBox in preferences

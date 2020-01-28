@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-01-23 11:59:51 +0000 (Thu, January 23, 2020) $"
+__dateModified__ = "$dateModified: 2020-01-28 00:02:07 +0000 (Tue, January 28, 2020) $"
 __version__ = "$Revision: 3.0.0 $"
 #=========================================================================================
 # Created
@@ -57,6 +57,8 @@ VALIDSTORENAMES = (('$DATA', REMOTEDATA),
                    ('$INSIDEDATA', INSIDEDATA),
                    ('ALONGSIDEDATA', ALONGSIDEDATA))
 DIRSEP = '/'
+SHOWDATAURLS = True
+
 
 def _checkStoreName(name):
     for checkName, remoteName in VALIDSTORENAMES:
@@ -304,6 +306,8 @@ class ValidateSpectraFrameABC(Frame):
         self.dataUrlData = OrderedDict()
         self.dataIndexing = OrderedDict()
 
+        self.project._validateCleanUrls()
+
         if self.VIEWDATAURLS:
             # populate the widget with a list of spectrum buttons and filepath buttons
             scrollRow = 0
@@ -337,7 +341,7 @@ class ValidateSpectraFrameABC(Frame):
                 label.setText('$ALONGSIDE')
                 scrollRow += 1
 
-            if self.application._isInDebugMode:
+            if self.application._isInDebugMode or SHOWDATAURLS:
                 self.otherUrls = [dataUrl for store in self.project._wrappedData.memopsRoot.sortedDataLocationStores()
                                   for dataUrl in store.sortedDataUrls() if dataUrl.name not in (INSIDEDATA, ALONGSIDEDATA, REMOTEDATA)]
 
@@ -414,12 +418,15 @@ class ValidateSpectraFrameABC(Frame):
                     # if not spectrum.isValidPath:
 
                     pathLabel = Label(self.spectrumScrollAreaWidgetContents, text=spectrum.pid, grid=(scrollRow, 0))
-                    pathData = LineEdit(self.spectrumScrollAreaWidgetContents, textAlignment='left', grid=(scrollRow, 1))
+                    pathUrlLabel = Label(self.spectrumScrollAreaWidgetContents, text='', grid=(scrollRow, 1))
+                    pathUrlLabel.setVisible(self.application._isInDebugMode)
+
+                    pathData = LineEdit(self.spectrumScrollAreaWidgetContents, textAlignment='left', grid=(scrollRow, 2))
                     pathData.setValidator(SpectrumValidator(parent=pathData, spectrum=spectrum))
-                    pathButton = Button(self.spectrumScrollAreaWidgetContents, grid=(scrollRow, 2), callback=partial(self._getSpectrumFile, spectrum),
+                    pathButton = Button(self.spectrumScrollAreaWidgetContents, grid=(scrollRow, 3), callback=partial(self._getSpectrumFile, spectrum),
                                         icon='icons/directory')
 
-                    self.spectrumData[spectrum] = (pathData, pathButton, pathLabel)
+                    self.spectrumData[spectrum] = (pathData, pathButton, pathLabel, pathUrlLabel)
                     self._populatePathData(spectrum)
 
                     # pathData.editingFinished.connect(partial(self._setSpectrumPath, spectrum))
@@ -430,7 +437,7 @@ class ValidateSpectraFrameABC(Frame):
             # finalise the spectrumScrollArea
             Spacer(self.spectrumScrollAreaWidgetContents, 0, 0,
                    QtWidgets.QSizePolicy.MinimumExpanding, self.VERTICALSIZEPOLICY,
-                   grid=(scrollRow, 1), gridSpan=(1, 1))
+                   grid=(scrollRow, 2), gridSpan=(1, 1))
 
             # self._spectrumFrame.addSpacer(5, 10, grid=(specRow, 0))
             # specRow += 1
@@ -468,8 +475,32 @@ class ValidateSpectraFrameABC(Frame):
         for spectrum in self.spectra:
             self._populatePathData(spectrum)
 
+    def _clearOldUrlWidgets(self):
+        """Clear the old dataUrl elements that are pointing to urls with no dataStores
+        """
+        self.otherUrls = [dataUrl for store in self.project._wrappedData.memopsRoot.sortedDataLocationStores()
+                          for dataUrl in store.sortedDataUrls() if dataUrl.name not in (INSIDEDATA, ALONGSIDEDATA, REMOTEDATA)]
+        self.project._validateCleanUrls()
+
+        for url in self.otherUrls:
+            # only show the urls that contain spectra
+            if url.sortedDataStores():
+                pass
+            else:
+                if url in self.dataUrlData:
+                    urlData, urlButton, urlLabel = self.dataUrlData[url]
+                    urlData.hide()
+                    urlButton.hide()
+                    urlLabel.hide()
+                    urlData.deleteLater()
+                    urlButton.deleteLater()
+                    urlLabel.deleteLater()
+                    del self.dataUrlData[url]
+                    # delete the dataUrl
+        # self.project._validateCleanUrls()
+
     def _addNewUrlWidgets(self):
-        if self.application._isInDebugMode:
+        if self.application._isInDebugMode or SHOWDATAURLS:
             self.otherUrls = [dataUrl for store in self.project._wrappedData.memopsRoot.sortedDataLocationStores()
                               for dataUrl in store.sortedDataUrls() if dataUrl.name not in (INSIDEDATA, ALONGSIDEDATA, REMOTEDATA)]
 
@@ -766,13 +797,14 @@ class ValidateSpectraFrameABC(Frame):
                 pass
 
             finally:
+                self._clearOldUrlWidgets()
                 self._validateDataUrls()
 
     def _getSpectrumFile(self, spectrum):
         """Get the path from the widget and call the open dialog.
         """
         if spectrum and spectrum in self.spectrumData:
-            pathData, pathButton, pathLabel = self.spectrumData[spectrum]
+            pathData, pathButton, pathLabel, pathUrlLabel = self.spectrumData[spectrum]
             specNum = list(self.spectrumData.keys()).index(spectrum)
 
             # filePath = ccpnUtil.expandDollarFilePath(self.project, spectrum, pathData.text().strip())
@@ -820,7 +852,7 @@ class ValidateSpectraFrameABC(Frame):
         """
         if spectrum and spectrum in self.spectrumData:
             with undoStackBlocking():
-                pathData, pathButton, pathLabel = self.spectrumData[spectrum]
+                pathData, pathButton, pathLabel, pathUrlLabel = self.spectrumData[spectrum]
 
                 # # create a new temporary dataUrl to validate the path names
                 # tempDataUrl = spectrum.project._wrappedData.root.fetchDataUrl(newFilePath)
@@ -834,9 +866,9 @@ class ValidateSpectraFrameABC(Frame):
 
                 apiDataStore = spectrum._wrappedData.dataStore
 
-                self._populatePathNamesInWidgets(apiDataStore, pathData)
+                self._populatePathNamesInWidgets(apiDataStore, pathData, pathUrlLabel)
 
-    def _populatePathNamesInWidgets(self, apiDataStore, pathData):
+    def _populatePathNamesInWidgets(self, apiDataStore, pathData, pathUrlLabel):
         if not apiDataStore:
             pathData.setText('<None>')
 
@@ -856,9 +888,10 @@ class ValidateSpectraFrameABC(Frame):
             # TODO:ED check this
             pathData.setText(apiDataStore.fullPath)
 
-        print('>>>   pathData', apiDataStore.dataUrl.name)
-        print('>>>   pathData', apiDataStore.dataUrl.url.path)
-        print('>>>   pathData', apiDataStore.path, apiDataStore.path == apiDataStore.fullPath)
+        pathUrlLabel.set(apiDataStore.dataUrl.name)
+        # print('>>>   pathData', apiDataStore.dataUrl.name)
+        # print('>>>   pathData', apiDataStore.dataUrl.url.path)
+        # print('>>>   pathData', apiDataStore.path, apiDataStore.path == apiDataStore.fullPath)
 
         pathData.validator().resetCheck()
 
@@ -866,10 +899,10 @@ class ValidateSpectraFrameABC(Frame):
         """Set the pathData widgets from the spectrum.
         """
         if spectrum and spectrum in self.spectrumData:
-            pathData, pathButton, pathLabel = self.spectrumData[spectrum]
+            pathData, pathButton, pathLabel, pathUrlLabel = self.spectrumData[spectrum]
 
             apiDataStore = spectrum._apiDataSource.dataStore
-            self._populatePathNamesInWidgets(apiDataStore, pathData)
+            self._populatePathNamesInWidgets(apiDataStore, pathData, pathUrlLabel)
 
     def _filePathConnect(self, spectrum):
         """CALLBACK FROM PATH WIDGET LINEEDIT by pressing enter/pressing a key
@@ -881,13 +914,13 @@ class ValidateSpectraFrameABC(Frame):
         """Set the spectrum path from the widget
         """
         if spectrum and spectrum in self.spectrumData:
-            pathData, pathButton, pathLabel = self.spectrumData[spectrum]
+            pathData, pathButton, pathLabel, pathUrlLabel = self.spectrumData[spectrum]
             specNum = list(self.spectrumData.keys()).index(spectrum)
 
             # newFilePath = ccpnUtil.expandDollarFilePath(self.project, spectrum, pathData.text().strip())
             newFilePath = _expandFilePath(self.project, spectrum, pathData.text())
 
-            print('>>> _setSpectrumPath', newFilePath)
+            # print('>>> _setSpectrumPath', newFilePath)
             # if spectrum.filePath != newFilePath:
 
             from ccpnmodel.ccpncore.lib.Io import Formats as ioFormats
@@ -906,7 +939,7 @@ class ValidateSpectraFrameABC(Frame):
                 self._validateDataUrls()
             else:
                 # define a function to update the filePath
-                print('>>>  filePath callback')
+                # print('>>>  filePath callback')
                 self.filePathFunc(spectrum, newFilePath)
 
             # dataUrl may have changed
@@ -914,6 +947,7 @@ class ValidateSpectraFrameABC(Frame):
             if (dataUrl != newDataUrl):
                 # add new dataPath to widget list and cleanup(later)
                 self._addNewUrlWidgets()
+                self._clearOldUrlWidgets()
 
             # else:
             #     getLogger().warning('Not a spectrum file: %s - (%s, %s)' % (newFilePath, dataType, subType))
@@ -925,7 +959,7 @@ class ValidateSpectraFrameABC(Frame):
             # print('>>> cursorPos', diffLen, dataUrl.name, newDataUrl.name)
 
             diffLen = len(dataUrl.url.path) - len(newDataUrl.url.path)
-            print('>>> cursorPos', diffLen, dataUrl.name, newDataUrl.name)
+            # print('>>> cursorPos', diffLen, dataUrl.name, newDataUrl.name)
 
             pathData.setCursorPosition(cursorPosition)
             # pathData.setCursorPosition(cursorPosition + (diffLen if cursorPosition > len(dataUrl.name) else 0))
@@ -1059,7 +1093,7 @@ class ValidateSpectraFrameABC(Frame):
 
             for spectrum in self.spectra:
                 if spectrum and spectrum in self.spectrumData:
-                    pathData, pathButton, pathLabel = self.spectrumData[spectrum]
+                    pathData, pathButton, pathLabel, pathUrlLabel = self.spectrumData[spectrum]
 
                     colWidths = _getColWidths(parentLayout)
                     for widget, col in zip((pathLabel, pathData, pathButton), colWidths):

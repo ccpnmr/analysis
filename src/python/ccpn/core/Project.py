@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-01-23 11:59:51 +0000 (Thu, January 23, 2020) $"
+__dateModified__ = "$dateModified: 2020-01-28 00:02:07 +0000 (Tue, January 28, 2020) $"
 __version__ = "$Revision: 3.0.0 $"
 #=========================================================================================
 # Created
@@ -876,7 +876,7 @@ class Project(AbstractWrapperObject):
         general = self.application.preferences.general if self.application.preferences and self.application.preferences.general else None
         autoSet = general.autoSetDataPath if general.autoSetDataPath else False
 
-        getLogger().info('>>>validating...')
+        getLogger().info('Validating dataUrls and filePaths')
 
         newDataUrlPath = newDataUrlPath if newDataUrlPath else general.dataPath \
             if general and general.dataPath else general.userWorkingPath \
@@ -923,7 +923,7 @@ class Project(AbstractWrapperObject):
         if autoSet:
             from ccpnmodel.ccpncore.lib._ccp.general.DataLocation.AbstractDataStore import forceChangeDataStoreUrl, repointToDataUrl
 
-            # NOTE:ED - must remove all other dataUrls frist, otherwise the dataUrl rename won't work
+            # NOTE:ED - must remove all other dataUrls first, otherwise the dataUrl rename won't work
 
             # force the change of the other dataUrls
             for spec in self.project.spectra:
@@ -934,7 +934,7 @@ class Project(AbstractWrapperObject):
                 else:
                     # dataUrl = self._project._wrappedData.root.fetchDataUrl(value)
                     dataUrlName = apiDataStore.dataUrl.name
-                    print('>>>    dataUrlName', dataUrlName)
+                    # print('>>>    dataUrlName', dataUrlName)
                     if dataUrlName not in ('insideData', 'alongsideData', 'remoteData'):
                         # move all other objects that are not in the correct remoteData
                         # to the correct remoteData created above
@@ -952,7 +952,7 @@ class Project(AbstractWrapperObject):
                 else:
                     # dataUrl = self._project._wrappedData.root.fetchDataUrl(value)
                     dataUrlName = apiDataStore.dataUrl.name
-                    print('>>>    dataUrlName', dataUrlName, newDataUrlPath)
+                    # print('>>>    dataUrlName', dataUrlName, newDataUrlPath)
                     if dataUrlName == 'remoteData':
                         # if dataUrlName not in ('insideData', 'alongsideData'):
 
@@ -965,7 +965,7 @@ class Project(AbstractWrapperObject):
                         # forceChangeDataStoreUrl(apiDataStore, newDataUrlPath)
 
         for delObj in delList:
-            print('>>>    delete', delObj)
+            # print('>>>    delete', delObj)
             delObj.delete()
 
         self._validateCleanUrls()
@@ -995,16 +995,16 @@ class Project(AbstractWrapperObject):
         remoteUrls = [url for url in standardStore.sortedDataUrls() if url.name == 'remoteData' if not url.dataStores]
 
         for bb in badUrls:
-            getLogger().info('>>>validate cleanup urls: %s' % str(bb))
+            getLogger().debug2('>>>validate cleanup urls: %s' % str(bb))
             bb.delete()
 
         for url in otherUrls:
             if not url.dataStores:
-                getLogger().info('>>>validate cleanup stores: %s' % str(url))
+                getLogger().debug2('>>>validate cleanup stores: %s' % str(url))
                 url.delete()
 
         for bb in (allRemoteUrls + remoteUrls)[1:]:
-            getLogger().info('>>>validate cleanup remoteUrls: %s' % str(bb))
+            getLogger().debug2('>>>validate cleanup remoteUrls: %s' % str(bb))
             bb.delete()
 
         # from ccpnmodel.ccpncore.lib._ccp.general.DataLocation.AbstractDataStore import forceChangeDataStoreUrl

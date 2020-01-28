@@ -52,7 +52,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-01-27 19:23:39 +0000 (Mon, January 27, 2020) $"
+__dateModified__ = "$dateModified: 2020-01-28 00:02:07 +0000 (Tue, January 28, 2020) $"
 __version__ = "$Revision: 3.0.0 $"
 #=========================================================================================
 # Created
@@ -649,24 +649,24 @@ assignmentTolerances
             oldDataUrl = apiDataStore.dataUrl
             dataUrl = self._project._wrappedData.root.fetchDataUrl(value, name=newName)
             oldLen = len(dataUrl.url.path) + 1
-            print('>>>~~~')
-            print('>>>1   APICHANGE value', value)
-            print('>>>1   APICHANGE url  ', apiDataStore.dataUrl.url.path)
-            print('>>>1   APICHANGE path ', apiDataStore.path)
-            print('>>>1   APICHANGE path ', apiDataStore.dataUrl.url.path+'/'+apiDataStore.path)
+            # print('>>>~~~')
+            # print('>>>1   APICHANGE value', value)
+            # print('>>>1   APICHANGE url  ', apiDataStore.dataUrl.url.path)
+            # print('>>>1   APICHANGE path ', apiDataStore.path)
+            # print('>>>1   APICHANGE path ', apiDataStore.dataUrl.url.path+'/'+apiDataStore.path)
             apiDataStore.repointToDataUrl(dataUrl)
-            print('>>>2   APICHANGE url  ', apiDataStore.dataUrl.url.path)
-            print('>>>2   APICHANGE path ', apiDataStore.path)
-            print('>>>2   APICHANGE path ', apiDataStore.dataUrl.url.path+'/'+apiDataStore.path)
+            # print('>>>2   APICHANGE url  ', apiDataStore.dataUrl.url.path)
+            # print('>>>2   APICHANGE path ', apiDataStore.path)
+            # print('>>>2   APICHANGE path ', apiDataStore.dataUrl.url.path+'/'+apiDataStore.path)
             if oldDataUrl == dataUrl:
                 oldLen = len(dataUrl.url.path) + 1
                 apiDataStore.path = value[oldLen:]
             else:
                 apiDataStore.path = value[oldLen:]
-            print('>>>    APICHANGE url  ', apiDataStore.dataUrl.url.path)
-            print('>>>    APICHANGE path ', apiDataStore.path)
-            print('>>>    APICHANGE path ', apiDataStore.dataUrl.url.path+'/'+apiDataStore.path)
-            print('>>>~~~')
+            # print('>>>    APICHANGE url  ', apiDataStore.dataUrl.url.path)
+            # print('>>>    APICHANGE path ', apiDataStore.path)
+            # print('>>>    APICHANGE path ', apiDataStore.dataUrl.url.path+'/'+apiDataStore.path)
+            # print('>>>~~~')
 
             # # numUrls = len(self.project._apiNmrProject.root.sorted)
             # dataUrl.__dict__['name'] = newName

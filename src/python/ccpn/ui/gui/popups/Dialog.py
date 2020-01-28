@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-01-27 19:23:39 +0000 (Mon, January 27, 2020) $"
+__dateModified__ = "$dateModified: 2020-01-28 10:04:26 +0000 (Tue, January 28, 2020) $"
 __version__ = "$Revision: 3.0.0 $"
 #=========================================================================================
 # Created
@@ -25,7 +25,7 @@ __date__ = "$Date: 2017-07-04 15:21:16 +0000 (Tue, July 04, 2017) $"
 # Start of code
 #=========================================================================================
 
-from PyQt5 import QtWidgets, QtCore
+from PyQt5 import QtWidgets, QtCore, QtGui
 from contextlib import contextmanager
 from ccpn.ui.gui.widgets.Base import Base
 from ccpn.util.Logging import getLogger
@@ -51,7 +51,7 @@ HORIZONTAL = 'horizontal'
 VERTICAL = 'vertical'
 ORIENTATIONLIST = (HORIZONTAL, VERTICAL)
 DEFAULTSPACING = 3
-DEFAULTMARGINS = (10, 10, 10, 10)
+DEFAULTMARGINS = (24, 8, 24, 18)
 GETCHANGESDICT = 'getChangesDict'
 
 
@@ -124,6 +124,10 @@ class CcpnDialogMainWidget(QtWidgets.QDialog, Base):
         self._changes = {}
 
         self.setDefaultButton()
+
+        # GST stops a file icon being shown
+        self.setWindowFilePath('')
+        self.setWindowIcon(QtGui.QIcon())
 
     def __postInit__(self):
         """post initialise functions
@@ -251,7 +255,7 @@ class CcpnDialogMainWidget(QtWidgets.QDialog, Base):
                                              defaultButton=self._defaultButton,
                                              enableIcons=self.ENABLEICONS,
                                              **self._buttonOptions)
-        self.dialogButtons.setContentsMargins(0, 10, 0, 0)
+        self.dialogButtons.setContentsMargins(0, 18, 0, 0)
 
     def setDefaultButton(self, button=CLOSEBUTTON):
         """Set the default dialog button
@@ -407,6 +411,10 @@ class CcpnDialog(QtWidgets.QDialog, Base):
         self.setWindowTitle(windowTitle)
         self.setContentsMargins(15, 15, 15, 15)
         self.resize(*size)
+
+        # GST stops a file icon being shown
+        self.setWindowFilePath('')
+        self.setWindowIcon(QtGui.QIcon())
 
     def fixedSize(self):
         self.sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)

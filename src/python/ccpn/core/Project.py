@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-01-28 00:02:07 +0000 (Tue, January 28, 2020) $"
+__dateModified__ = "$dateModified: 2020-01-28 10:04:26 +0000 (Tue, January 28, 2020) $"
 __version__ = "$Revision: 3.0.0 $"
 #=========================================================================================
 # Created
@@ -349,7 +349,13 @@ class Project(AbstractWrapperObject):
     @property
     def _undo(self):
         """undo stack for Project. Implementation attribute"""
-        return self._wrappedData.root._undo
+
+        try:
+            result = self._wrappedData.root._undo
+        except:
+            result = None
+
+        return result
 
     def _resetUndo(self, maxWaypoints: int = Undo.MAXUNDOWAYPOINTS,
                    maxOperations: int = Undo.MAXUNDOOPERATIONS,

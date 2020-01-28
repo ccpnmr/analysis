@@ -4,7 +4,7 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -13,8 +13,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: CCPN $"
-__dateModified__ = "$dateModified: 2017-07-07 16:32:44 +0100 (Fri, July 07, 2017) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2020-01-28 10:04:26 +0000 (Tue, January 28, 2020) $"
 __version__ = "$Revision: 3.0.0 $"
 #=========================================================================================
 # Created
@@ -43,7 +43,6 @@ SpectrumViewParams = collections.namedtuple('SpectrumViewParams', ('valuePerPoin
                                                                    'minSpectrumFrequency',
                                                                    'maxSpectrumFrequency',
                                                                    ))
-
 
 class GuiSpectrumView(QtWidgets.QGraphicsObject):
 
@@ -226,7 +225,7 @@ def _spectrumViewHasChanged(data):
     # Update action icol colour
     action = spectrumDisplay.spectrumActionDict.get(apiDataSource)
     if action:
-        pix = QtGui.QPixmap(QtCore.QSize(60, 10))
+        pix = QtGui.QPixmap(QtCore.QSize(60/spectrumDisplay.devicePixelRatio(), 10/spectrumDisplay.devicePixelRatio()))
         if self._showContours:
             if spectrumDisplay.is1D:
                 pix.fill(QtGui.QColor(self.sliceColour))

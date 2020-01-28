@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-01-10 11:21:54 +0000 (Fri, January 10, 2020) $"
+__dateModified__ = "$dateModified: 2020-01-28 10:04:26 +0000 (Tue, January 28, 2020) $"
 __version__ = "$Revision: 3.0.0 $"
 #=========================================================================================
 # Created
@@ -95,6 +95,40 @@ STRIPARRANGEMENT = 'stripArrangement'
 
 MAXITEMLOGGING = 4
 
+# GST All this complication is added because the scroll frame appears to have a lower margin added by some part of Qt
+#     that we can't control in PyQt. Specifically even if you overide setContentsMargins on ScrollArea it is never
+#     called but at the same time ScrollArea gets a lower contents margin of 1 pixel that we didn't ask for... ;-(
+def styleSheetPredicate(target):
+    children  = [child for child in target.children() if isinstance(child,QtGui.QWidget)]
+
+    return len(children) < 2
+
+def styleSheetMutator(styleSheetTemplate, predicate, clazz):
+
+    if predicate:
+        styleSheet = styleSheetTemplate % (clazz.__class__.__name__, '')
+    else:
+        styleSheet = styleSheetTemplate % (clazz.__class__.__name__, 'background-color: #191919;')
+
+    return styleSheet
+
+class ScrollAreaWithPredicateStylesheet(ScrollArea):
+
+    def __init__(self, styleSheetTemplate, predicate, mutator,  *args, **kwds):
+        self.styleSheetTemplate = styleSheetTemplate
+        self.predicate = predicate
+        self.mutator = mutator
+        super().__init__(*args, **kwds)
+
+    def checkPredicate(self):
+        return self.predicate(self)
+
+    def modifyStyleSheet(self, predicate):
+        self.setStyleSheet(self.mutator(self.styleSheetTemplate, predicate, self))
+
+    def resizeEvent(self,e):
+        self.modifyStyleSheet(self.checkPredicate())
+        return super().resizeEvent(e)
 
 class GuiSpectrumDisplay(CcpnModule):
     """
@@ -255,21 +289,29 @@ class GuiSpectrumDisplay(CcpnModule):
         #                          icon='icons/yellow-arrow-right')
         #
         #
-        self.spectrumToolBar = SpectrumToolBar(parent=self.qtParent, widget=self,
-                                               grid=(spectrumRow, 0), gridSpan=(1, 7))
-        self.spectrumToolBar.setFixedHeight(30)
 
-        # spectrumGroupsToolBar
-        self.spectrumGroupToolBar = SpectrumGroupToolBar(parent=self.qtParent, spectrumDisplay=self,
-                                                         grid=(spectrumRow, 0), gridSpan=(1, 7))
-        self.spectrumGroupToolBar.setFixedHeight(30)
-        self.spectrumGroupToolBar.hide()
+        self.toolBarFrame = Frame(parent=self.qtParent, grid=(spectrumRow, 0), gridSpan=(1, 7), setLayout=True,
+                                  hPolicy='minimal', hAlign='left')
+        self.toolBarFrame.setContentsMargins(4, 4, 4, 4)
+
+        TOOLBAR_HEIGHT = 30
 
         # Utilities Toolbar; filled in Nd/1d classes
-        self.spectrumUtilToolBar = ToolBar(parent=self.qtParent, iconSizes=(24, 24),
-                                           grid=(toolBarRow, 0), gridSpan=(1, 1),
-                                           hPolicy='minimal', hAlign='left')
-        self.spectrumUtilToolBar.setFixedHeight(self.spectrumToolBar.height())
+        self.spectrumUtilToolBar = ToolBar(parent=self.toolBarFrame, iconSizes=(24, 24),
+                                           grid=(0, 0), hPolicy='minimal', hAlign='left')
+        self.spectrumUtilToolBar.setFixedHeight(TOOLBAR_HEIGHT)
+
+        self.spectrumToolBar = SpectrumToolBar(parent=self.toolBarFrame, widget=self,
+                                               grid=(1, 0), hPolicy='minimal', hAlign='left')
+        self.spectrumToolBar.setFixedHeight(TOOLBAR_HEIGHT)
+
+        # spectrumGroupsToolBar
+        self.spectrumGroupToolBar = SpectrumGroupToolBar(parent=self.toolBarFrame, spectrumDisplay=self,
+                                                         grid=(2, 0), hPolicy='minimal', hAlign='left')
+
+        self.spectrumGroupToolBar.setFixedHeight(TOOLBAR_HEIGHT)
+        self.spectrumGroupToolBar.hide()
+
         if self.application.preferences.general.showToolbar:
             self.spectrumUtilToolBar.show()
         else:
@@ -279,15 +321,21 @@ class GuiSpectrumDisplay(CcpnModule):
                                 acceptDrops=True)
         # self.stripFrame.layout().setContentsMargins(0, 0, 0, 0)
 
-        # if self.is1D:
-        #     self._newAxisRight = Gui1dWidgetAxis(self.qtParent, spectrumDisplay=self, mainWindow=self.mainWindow)
-        #     self.qtParent.getLayout().addWidget(self._newAxisRight, stripRow, 1, 1, 7)
+        frameStyleSheetTemplate = ''' .%s { border-left: 1px solid #a9a9a9;
+                                      border-right: 1px solid #a9a9a9;
+                                      border-bottom: 1px solid #a9a9a9;
+                                      border-bottom-right-radius: 2px;
+                                      border-bottom-left-radius: 2px;
+                                      %s
+                                      }'''
 
         if useScrollArea:
             # scroll area for strips
             # This took a lot of sorting-out; better leave as is or test thoroughly
-            self._stripFrameScrollArea = ScrollArea(parent=self.qtParent, setLayout=True,
-                                                    acceptDrops=False,  # True
+            self._stripFrameScrollArea = ScrollAreaWithPredicateStylesheet(parent=self.qtParent,
+                                                    styleSheetTemplate = frameStyleSheetTemplate,
+                                                    predicate=styleSheetPredicate, mutator=styleSheetMutator,
+                                                    setLayout=True, acceptDrops=False,
                                                     scrollBarPolicies=('asNeeded', 'never'))
             self._stripFrameScrollArea.setWidget(self.stripFrame)
             self._stripFrameScrollArea.setWidgetResizable(True)
@@ -296,9 +344,11 @@ class GuiSpectrumDisplay(CcpnModule):
                                                      QtWidgets.QSizePolicy.Expanding)
             self.stripFrame.setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding,
                                           QtWidgets.QSizePolicy.Expanding)
+
         else:
             self._stripFrameScrollArea = None
             self.qtParent.getLayout().addWidget(self.stripFrame, stripRow, 0, 1, 7)
+            self.stripFrame.setStyleSheet(frameStyleSheetTemplate % ('Frame', ''))
 
         includeDirection = not self.is1D
         self.phasingFrame = PhasingFrame(parent=self.qtParent,

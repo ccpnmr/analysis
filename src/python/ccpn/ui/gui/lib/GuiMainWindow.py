@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-01-28 09:52:39 +0000 (Tue, January 28, 2020) $"
+__dateModified__ = "$dateModified: 2020-01-28 10:04:26 +0000 (Tue, January 28, 2020) $"
 __version__ = "$Revision: 3.0.0 $"
 #=========================================================================================
 # Created
@@ -546,7 +546,10 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
                             )
                 # project.application.showValidateSpectraPopup(defaultSelected='invalid')
                 # project.save(createFallback=False, overwriteExisting=True)
-            project._undo.markClean()
+
+            undo = self._project._undo
+            if undo is not None:
+                undo.markClean()
             return project
 
         else:
@@ -561,7 +564,9 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
         # try and load the new project
         # try:
         project = self._loadProjectSingleTry(projectDir)
-        project._undo.markClean()
+        undo = self._project._undo
+        if undo is not None:
+            undo.markClean()
         return project
 
         # except Exception as es:
@@ -623,7 +628,10 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
                 #     except Exception as es:
                 #         MessageDialog.showError('loadProject', 'Fatal error loading previous project:\n%s' % str(lastValidProject))
                 #         Logging.getLogger().warning('Fatal error loading previous project: %s' % str(lastValidProject))
-        project._undo.markClean()
+
+        undo = self._project._undo
+        if undo is not None:
+            undo.markClean()
         return project
 
     def _fillRecentProjectsMenu(self):

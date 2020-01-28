@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-01-27 19:23:40 +0000 (Mon, January 27, 2020) $"
+__dateModified__ = "$dateModified: 2020-01-28 10:04:26 +0000 (Tue, January 28, 2020) $"
 __version__ = "$Revision: 3.0.0 $"
 #=========================================================================================
 # Created
@@ -458,8 +458,6 @@ class _GroupEditorPopupABC(CcpnDialogMainWidget):
         super().__init__(parent=parent, windowTitle=title, setLayout=True, margins=(0, 0, 0, 0),
                          spacing=(5, 5), **kwds)
 
-        # GST how to get the icon using a relative path?
-        # self.errorIcon = QtGui.QPixmap('/Users/garythompson/Dropbox/git/ccpnmr/AnalysisV3/src/python/ccpn/ui/gui/widgets/icons/exclamation_small.png')
         self.errorIcon = Icon('icons/exclamation_small')
 
         self.mainWindow = mainWindow
@@ -987,8 +985,7 @@ class _GroupEditorPopupABC(CcpnDialogMainWidget):
             for i, error in enumerate(self.errors):
                 label = Label(self.errorFrame, error)
                 iconLabel = Label(self.errorFrame)
-                # iconLabel.setPixmap(self.errorIcon) #.scaled(20,20,QtCore.Qt.KeepAspectRatio
-                iconLabel.setPixmap(self.errorIcon.pixmap(21, 21))
+                iconLabel.setPixmap(self.errorIcon.pixmap(16, 16))
                 self.errorFrame.layout().addWidget(label, i, 1)
                 self.errorFrame.layout().setAlignment(label, QtCore.Qt.AlignLeft)
                 self.errorFrame.layout().addWidget(iconLabel, i, 0)

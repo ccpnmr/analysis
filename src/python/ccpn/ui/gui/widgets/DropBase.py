@@ -9,7 +9,7 @@ GWV April-2017: Drived from an earlier version of DropBase
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -18,8 +18,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: CCPN $"
-__dateModified__ = "$dateModified: 2017-07-07 16:32:53 +0100 (Fri, July 07, 2017) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2020-01-28 10:04:26 +0000 (Tue, January 28, 2020) $"
 __version__ = "$Revision: 3.0.0 $"
 #=========================================================================================
 # Created
@@ -33,8 +33,23 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 import json
 from ccpn.core.lib.Pid import Pid
 from ccpn.util.Logging import getLogger
-from PyQt5 import QtGui
+from PyQt5 import QtGui, QtCore
 
+# GST maybe this too high level but because of the way drag events are handled cooperativley
+# at the moment it needs to be here...
+#
+# so what should happen (from my reading of the omens / Qt 'Documentation') is all widgets should reject events they
+# can't handle, this will then cause the event to pecolate out through the visual hierachy till it finds a module and
+# then gets handled, Currently any widget that inherits drop base will pass all events upto drop base which is
+# then handling module events which ought i guess be handled by the module after visual hierarchy percolation
+#
+# This also appears to be leading to code being shared by ccpnModule and DragBase (see DragMoveEvent). Also it could
+# be argued that handling drag and drop overlays should be upto CcpnModuleArea not CcpnModule
+# we also have the joy of circular imports as well...
+#
+# if this analysis is wrong do tell me why, i am curious to understand whats going on
+
+from traceback import print_stack
 
 class DropBase:
     """
@@ -59,12 +74,23 @@ class DropBase:
         self._enterEventCallback = None
         self._dragMoveEventCallback = None
         self.setAcceptDrops(acceptDrops)
+        self.inDragToMaximisedModule = False
 
     def setDropEventCallback(self, callback):
         """Set the callback function for drop event."""
         self._dropEventCallback = callback
 
     def dragEnterEvent(self, event):
+
+        self.checkForBadDragEvent(event)
+
+        parentModule = self._findModule()
+
+        if parentModule:
+            if parentModule.isDragToMaximisedModule(event):
+                parentModule.handleDragToMaximisedModule(event)
+                return
+
         dataDict = self.parseEvent(event)
         if dataDict is not None and len(dataDict) > 1:
             event.accept()
@@ -91,11 +117,96 @@ class DropBase:
 
     # super().dragMoveEvent(event)
 
+
+    def isDragToMaximisedModule(self, event):
+        from ccpn.ui.gui.widgets.CcpnModuleArea import CcpnModule
+
+        result = False
+
+        parentModule = self._findModule()
+
+        if parentModule is None:
+            return result
+
+        data = self.parseEvent(event)
+
+        if not 'source' in data:
+            return result
+
+        source = data['source']
+
+        if source is None:
+            return result
+
+        if source is parentModule:
+            return result
+
+        if not isinstance(source, CcpnModule):
+            return result
+
+        result = parentModule.maximised
+
+        return result
+
+    def handleDragToMaximisedModule(self, ev):
+        class MyEventFilter(QtCore.QObject):
+            def __init__(self, target, statusBar):
+                super().__init__()
+                self._target = target
+                self._statusBar = statusBar
+
+            def eventFilter(self,obj,event):
+                try:
+                    if event.type() == QtCore.QEvent.DragLeave:
+                        self._target.inDragToMaximisedModule = False
+                        if self._statusBar is not None:
+                            self._statusBar.clearMessage()
+
+
+                        self._target.removeEventFilter(self)
+                        self._target.cleanupFilter =  None
+                        self.deleteLater()
+
+
+                except Exception as e:
+                    print('exception during event filter cleanup, deleting myself', e)
+                    self.deleteLater()
+
+                result = super().eventFilter(obj,event)
+                return result
+
+
+        parentModule =  self._findModule()
+
+        if not self.inDragToMaximisedModule and isinstance(ev, (QtGui.QDragEnterEvent, QtGui.QDragMoveEvent)):
+
+            message  = "Can't drag to a maximised window"
+
+            statusBar = parentModule.findWindow().statusBar()
+
+            if statusBar is not None:
+                statusBar.showMessage(message)
+            parentModule.flashMessage(message)
+
+            # GST this cleanup filter is because its is not guarunteed that the DragLeaveEvent will come via
+            # the same widget so this is safer
+            self.cleanupFilter = MyEventFilter(self, statusBar)
+            QtGui.QApplication.instance().installEventFilter(self.cleanupFilter)
+
+            ev.setDropAction(QtCore.Qt.IgnoreAction)
+            ev.ignore()
+            self.inDragToMaximisedModule = True
+
+
     def dropEvent(self, event):
         """
         Catch dropEvent and dispatch to processing callback
         'Native' treatment of CcpnModule instances
         """
+
+        if self.inDragToMaximisedModule:
+            return
+
         inModuleOverlay = self._callModuleDrop(event)
 
         if inModuleOverlay:
@@ -129,33 +240,67 @@ class DropBase:
           - (type, data) key,value pairs,
         """
         data = dict(
-                event=event,
-                source=event.source()
-                )
-        mimeData = event.mimeData()
+            event=event,
+            source=None
+        )
 
-        if mimeData.hasFormat(DropBase.JSONDATA):
-            data['isCcpnJson'] = True
-            jsonData = json.loads(mimeData.text())
-            if jsonData is not None and len(jsonData) > 0:
-                data.update(jsonData)
-            if self.PIDS in data:
-                newPids = [Pid(pid) for pid in data[self.PIDS]]
-                data[self.PIDS] = newPids
+        if hasattr(event,'source'):
+            data['source'] = event.source()
 
-        elif event.mimeData().hasUrls():
-            filePaths = [url.path() for url in event.mimeData().urls()]
-            data[self.URLS] = filePaths
 
-        elif event.mimeData().hasText():
-            data[self.TEXT] = event.mimeData().text()
+
+        if hasattr(event,'mimeData'):
+            mimeData = event.mimeData()
+
+            if mimeData.hasFormat(DropBase.JSONDATA):
+                data['isCcpnJson'] = True
+                jsonData = json.loads(mimeData.text())
+                if jsonData is not None and len(jsonData) > 0:
+                    data.update(jsonData)
+                if self.PIDS in data:
+                    newPids = [Pid(pid) for pid in data[self.PIDS]]
+                    data[self.PIDS] = newPids
+
+            elif event.mimeData().hasUrls():
+                filePaths = [url.path() for url in event.mimeData().urls()]
+                data[self.URLS] = filePaths
+
+            elif event.mimeData().hasText():
+                data[self.TEXT] = event.mimeData().text()
 
         return data
+
+    def checkForBadDragEvent(self,ev):
+
+        from ccpn.ui.gui.widgets.CcpnModuleArea import CcpnModule
+
+        parentModule = self._findModule()
+        if isinstance(ev.source(),CcpnModule) and self is not parentModule:
+            if not hasattr(self,'badDragEnter'):
+                className = self.__class__.__name__
+
+                eventType = ''
+                if isinstance(ev,QtGui.QDragMoveEvent):
+                    eventType =  'move'
+                elif isinstance(ev,QtGui.QDragEnterEvent):
+                    eventType ='enter'
+
+                getLogger().debug('recieved drag %s from %s which is not a module %i' % (eventType,className, id(self)))
+
+                self.badDragEnter = True
 
     def dragMoveEvent(self, ev):
         """drag move event that propagates through all the widgets
         """
+        self.checkForBadDragEvent(ev)
+
         parentModule = self._findModule()
+
+        if parentModule:
+            if parentModule.isDragToMaximisedModule(ev):
+                parentModule.handleDragToMaximisedModule(ev)
+                return
+
         if parentModule:
             data = self.parseEvent(ev)
 
@@ -224,6 +369,7 @@ class DropBase:
         par = self._findModule()
         if par:
             par.dragLeaveEvent(ev)
+        self.inDragToMaximisedModule = False
 
     def _findModule(self):
         """Find the CcpnModule containing this widget
@@ -232,6 +378,7 @@ class DropBase:
 
         par = self
         while par:
-            par = par.parent()  # getParent() may be used for CCPN widgets, not for other QWidgets
             if isinstance(par, CcpnModule):
                 return par
+            par = par.parent()  # getParent() may be used for CCPN widgets, not for other QWidgets
+

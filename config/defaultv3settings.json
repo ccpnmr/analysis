@@ -70,7 +70,8 @@
         "enableAntiAliasing"                   : true,
         "numSideBands"                         : 2,
         "showSideBands"                        : false,
-        "_copySpectraSettings"                 : null
+        "_copySpectraSettings1d"               : null,
+        "_copySpectraSettingsNd"               : null
     },
     "proxySettings"    : {
         "useProxy"         : false,

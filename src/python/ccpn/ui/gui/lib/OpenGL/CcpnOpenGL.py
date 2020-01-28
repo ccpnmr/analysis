@@ -55,7 +55,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-01-28 09:52:39 +0000 (Tue, January 28, 2020) $"
+__dateModified__ = "$dateModified: 2020-01-28 16:27:16 +0000 (Tue, January 28, 2020) $"
 __version__ = "$Revision: 3.0.0 $"
 #=========================================================================================
 # Created
@@ -907,8 +907,11 @@ class CcpnGLWidget(QOpenGLWidget):
             for spectrumView in self._ordering:
                 for listView in spectrumView.peakListViews:
                     listView.buildLabels = True
+                for listView in spectrumView.integralListViews:
+                    listView.buildLabels = True
+                for listView in spectrumView.multipletListViews:
+                    listView.buildLabels = True
             self.buildMarks = True
-            # self.buildSpectra()           # shouldn't be called here
             self.update()
 
     def _getValidAspectRatio(self, axisCode):
@@ -1810,11 +1813,11 @@ class CcpnGLWidget(QOpenGLWidget):
                                             GLContext=self)
 
         self.diagonalSideBandsGLList = GLVertexArray(numLists=1,
-                                            renderMode=GLRENDERMODE_REBUILD,
-                                            blendMode=False,
-                                            drawMode=GL.GL_LINES,
-                                            dimension=2,
-                                            GLContext=self)
+                                                     renderMode=GLRENDERMODE_REBUILD,
+                                                     blendMode=False,
+                                                     drawMode=GL.GL_LINES,
+                                                     dimension=2,
+                                                     GLContext=self)
 
         self.boundingBoxes = GLVertexArray(numLists=1,
                                            renderMode=GLRENDERMODE_REBUILD,
@@ -2024,14 +2027,16 @@ class CcpnGLWidget(QOpenGLWidget):
         self.viewports.addViewport(GLDefs.BLANKVIEW, self, (0, 'a'), (0, 'a'), (0, 'a'), (0, 'a'))
 
     def buildOverlayStrings(self):
-        self._lockStringFalse = GLString(text=GLDefs.LOCKSTRING, font=self.getSmallFont(), x=0, y=0,
+        smallFont = self.getSmallFont()
+
+        self._lockStringFalse = GLString(text=GLDefs.LOCKSTRING, font=smallFont, x=0, y=0,
                                          colour=(0.5, 0.5, 0.5, 1.0), GLContext=self)
-        self._lockStringTrue = GLString(text=GLDefs.LOCKSTRING, font=self.getSmallFont(), x=0, y=0,
+        self._lockStringTrue = GLString(text=GLDefs.LOCKSTRING, font=smallFont, x=0, y=0,
                                         colour=self.highlightColour, GLContext=self)
-        self._useDefaultStringFalse = GLString(text=GLDefs.USEDEFAULTASPECTSTRING, font=self.getSmallFont(), x=0, y=0,
-                                             colour=(0.5, 0.5, 0.5, 1.0), GLContext=self)
-        self._useDefaultStringTrue = GLString(text=GLDefs.USEDEFAULTASPECTSTRING, font=self.getSmallFont(), x=0, y=0,
-                                            colour=self.highlightColour, GLContext=self)
+        self._useDefaultStringFalse = GLString(text=GLDefs.USEDEFAULTASPECTSTRING, font=smallFont, x=0, y=0,
+                                               colour=(0.5, 0.5, 0.5, 1.0), GLContext=self)
+        self._useDefaultStringTrue = GLString(text=GLDefs.USEDEFAULTASPECTSTRING, font=smallFont, x=0, y=0,
+                                              colour=self.highlightColour, GLContext=self)
         cornerButtons = ((self._lockStringTrue, self._toggleAxisLocked),
                          (self._useDefaultStringTrue, self._toggleUseDefaultAspect))
         self._buttonCentres = ()
@@ -2040,7 +2045,7 @@ class CcpnGLWidget(QOpenGLWidget):
             h = (button.height / 2)
             # define a slightly wider, lower box
             self._buttonCentres += ((w + 2, h - 2, w, h - 3, callBack),)
-        self.stripIDString = GLString(text='', font=self.getSmallFont(), x=0, y=0, GLContext=self, obj=None)
+        self.stripIDString = GLString(text='', font=smallFont, x=0, y=0, GLContext=self, obj=None)
 
     def getSmallFont(self, transparent=False):
         # GST tried this, it wrong sometimes, also sometimes its a float?
@@ -2090,7 +2095,7 @@ class CcpnGLWidget(QOpenGLWidget):
 
         # change the colour of the selected 'Fixed' string
         self._useDefaultStringTrue = GLString(text=GLDefs.USEDEFAULTASPECTSTRING, font=self.getSmallFont(), x=0, y=0,
-                                            colour=self.highlightColour, GLContext=self)
+                                              colour=self.highlightColour, GLContext=self)
 
         # set the new limits
         self._applyXLimit = self._preferences.zoomXLimitApply
@@ -2788,10 +2793,11 @@ class CcpnGLWidget(QOpenGLWidget):
         if self.stripIDString:
             vertices = self.stripIDString.numVertices
 
+            smallFont = self.getSmallFont()
             # offsets = [self.axisL + (GLDefs.TITLEXOFFSET * self.globalGL.glSmallFont.width * self.pixelX),
             #            self.axisT - (GLDefs.TITLEYOFFSET * self.globalGL.glSmallFont.height * self.pixelY)]
-            offsets = [GLDefs.TITLEXOFFSET * self.getSmallFont().width * self.deltaX,
-                       1.0 - (GLDefs.TITLEYOFFSET * self.getSmallFont().height * self.deltaY)]
+            offsets = [GLDefs.TITLEXOFFSET * smallFont.width * self.deltaX,
+                       1.0 - (GLDefs.TITLEYOFFSET * smallFont.height * self.deltaY)]
 
             for pp in range(0, 2 * vertices, 2):
                 self.stripIDString.attribs[pp:pp + 2] = offsets
@@ -3534,7 +3540,7 @@ class CcpnGLWidget(QOpenGLWidget):
             self.gridList[0].drawIndexVBO(enableVBO=True)
 
         # draw the diagonal line - independent of viewing the grid
-        if self._matchingIsotopeCodes:                  # and self.diagonalGLList:
+        if self._matchingIsotopeCodes:  # and self.diagonalGLList:
             # viewport above may not be set
             if not self._gridVisible:
                 self.viewports.setViewport(self._currentView)
@@ -3784,6 +3790,7 @@ class CcpnGLWidget(QOpenGLWidget):
                 labelColour = self.foreground
 
             smallFont = self.getSmallFont()
+            fScale = smallFont.scale
 
             if self._drawBottomAxis:
                 # create the X axis labelling
@@ -3797,8 +3804,8 @@ class CcpnGLWidget(QOpenGLWidget):
                     self._axisXLabelling.append(GLString(text=axisXText,
                                                          font=smallFont,
                                                          x=axisX - (0.4 * smallFont.width * self.deltaX * len(
-                                                                 axisXText)),
-                                                         y=self.AXIS_MARGINBOTTOM - GLDefs.TITLEYOFFSET * smallFont.height,
+                                                                 axisXText) / fScale),
+                                                         y=self.AXIS_MARGINBOTTOM - GLDefs.TITLEYOFFSET * smallFont.height / fScale,
 
                                                          colour=labelColour, GLContext=self,
                                                          obj=None))
@@ -3807,15 +3814,15 @@ class CcpnGLWidget(QOpenGLWidget):
                 self._axisXLabelling.append(GLString(text=self.axisCodes[0],
                                                      font=smallFont,
                                                      x=GLDefs.AXISTEXTXOFFSET * self.deltaX,
-                                                     y=self.AXIS_MARGINBOTTOM - GLDefs.TITLEYOFFSET * smallFont.height,
+                                                     y=self.AXIS_MARGINBOTTOM - GLDefs.TITLEYOFFSET * smallFont.height / fScale,
                                                      colour=labelColour, GLContext=self,
                                                      obj=None))
                 # and the axis dimensions
                 xUnitsLabels = self.XAXES[self._xUnits]
                 self._axisXLabelling.append(GLString(text=xUnitsLabels,
                                                      font=smallFont,
-                                                     x=1.0 - (self.deltaX * len(xUnitsLabels) * smallFont.width),
-                                                     y=self.AXIS_MARGINBOTTOM - GLDefs.TITLEYOFFSET * smallFont.height,
+                                                     x=1.0 - (self.deltaX * len(xUnitsLabels) * smallFont.width / fScale),
+                                                     y=self.AXIS_MARGINBOTTOM - GLDefs.TITLEYOFFSET * smallFont.height / fScale,
                                                      colour=labelColour, GLContext=self,
                                                      obj=None))
 
@@ -3836,7 +3843,6 @@ class CcpnGLWidget(QOpenGLWidget):
                     self._axisYLabelling.append(GLString(text=axisYText,
                                                          font=smallFont,
                                                          x=self.AXIS_OFFSET,
-                                                         # y=axisY - (GLDefs.AXISTEXTYOFFSET * self.pixelY),
                                                          y=axisY - (GLDefs.AXISTEXTYOFFSET * self.deltaY),
                                                          colour=labelColour, GLContext=self,
                                                          obj=None))
@@ -3845,8 +3851,7 @@ class CcpnGLWidget(QOpenGLWidget):
                 self._axisYLabelling.append(GLString(text=self.axisCodes[1],
                                                      font=smallFont,
                                                      x=self.AXIS_OFFSET,
-                                                     # y=self.axisT - (GLDefs.TITLEYOFFSET * self.globalGL.glSmallFont.height * self.pixelY),
-                                                     y=1.0 - (GLDefs.TITLEYOFFSET * smallFont.height * self.deltaY),
+                                                     y=1.0 - (GLDefs.TITLEYOFFSET * smallFont.height * self.deltaY / fScale),
                                                      colour=labelColour, GLContext=self,
                                                      obj=None))
                 # and the axis dimensions
@@ -4207,7 +4212,7 @@ class CcpnGLWidget(QOpenGLWidget):
                     index += 2
 
                     # add the double cursor
-                    if _drawDouble and self._matchingIsotopeCodes and doubleCoords[0] is not None and abs(doubleCoords[0]-newCoords[0]) > self.deltaX:
+                    if _drawDouble and self._matchingIsotopeCodes and doubleCoords[0] is not None and abs(doubleCoords[0] - newCoords[0]) > self.deltaX:
                         vertices.extend([doubleCoords[0], 1.0, doubleCoords[0], 0.0])
                         indices.extend([index, index + 1])
                         index += 2
@@ -4218,7 +4223,7 @@ class CcpnGLWidget(QOpenGLWidget):
                     index += 2
 
                     # add the double cursor
-                    if _drawDouble and self._matchingIsotopeCodes and doubleCoords[1] is not None and abs(doubleCoords[1]-newCoords[1]) > self.deltaY:
+                    if _drawDouble and self._matchingIsotopeCodes and doubleCoords[1] is not None and abs(doubleCoords[1] - newCoords[1]) > self.deltaY:
                         vertices.extend([0.0, doubleCoords[1], 1.0, doubleCoords[1]])
                         indices.extend([index, index + 1])
                         index += 2
@@ -4358,12 +4363,13 @@ class CcpnGLWidget(QOpenGLWidget):
             else:
                 colour = self.foreground
 
+            smallFont = self.getSmallFont()
             self.stripIDString = GLString(text=self.stripIDLabel,
-                                          font=self.getSmallFont(),
+                                          font=smallFont,
                                           # x=self.axisL + (GLDefs.TITLEXOFFSET * self.globalGL.glSmallFont.width * self.pixelX),
                                           # y=self.axisT - (GLDefs.TITLEYOFFSET * self.globalGL.glSmallFont.height * self.pixelY),
-                                          x=GLDefs.TITLEXOFFSET * self.getSmallFont().width * self.deltaX,
-                                          y=1.0 - (GLDefs.TITLEYOFFSET * self.getSmallFont().height * self.deltaY),
+                                          x=GLDefs.TITLEXOFFSET * smallFont.width * self.deltaX,
+                                          y=1.0 - (GLDefs.TITLEYOFFSET * smallFont.height * self.deltaY),
                                           colour=colour, GLContext=self,
                                           obj=None, blendMode=False)
 
@@ -4773,16 +4779,18 @@ class CcpnGLWidget(QOpenGLWidget):
             newCoords = ' %s: %s\n %s: %s' % (self._axisOrder[0], self.XMode(cursorX),
                                               self._axisOrder[1], self.YMode(cursorY))
 
+            smallFont = self.getSmallFont()
+
             if self._drawDeltaOffset:
                 # diffCoords = self.diffMouseFormat % (self._axisOrder[0], (cursorX - startX),
                 #                                      self._axisOrder[1], (cursorY - startY))
                 newCoords += '\n d%s: %s\n d%s: %s' % (self._axisOrder[0], self.XMode(cursorX - startX),
-                                                     self._axisOrder[1], self.YMode(cursorY - startY))
-                deltaOffset = self.globalGL.glSmallFont.height * 2.0 * self.pixelY
+                                                       self._axisOrder[1], self.YMode(cursorY - startY))
+                deltaOffset = smallFont.height * 2.0 * self.pixelY
 
-            mx, my = cursorCoordinate[0], cursorCoordinate[1]-deltaOffset
+            mx, my = cursorCoordinate[0], cursorCoordinate[1] - deltaOffset
             self.mouseString = GLString(text=newCoords,
-                                        font=self.getSmallFont(),
+                                        font=smallFont,
                                         x=valueToRatio(mx, self.axisL, self.axisR),
                                         y=valueToRatio(my, self.axisB, self.axisT),
                                         colour=self.foreground, GLContext=self,
@@ -4810,10 +4818,10 @@ class CcpnGLWidget(QOpenGLWidget):
             #                                          self._axisOrder[1], self.YMode(cursorY - startY))
             #
             #     self.diffMouseString = GLString(text=diffCoords,
-            #                                     font=self.getSmallFont(),
+            #                                     font=smallFont,
             #                                     x=valueToRatio(cursorCoordinate[0], self.axisL, self.axisR),
             #                                     y=valueToRatio(cursorCoordinate[1], self.axisB, self.axisT) - (
-            #                                             self.getSmallFont().height * 2.0 * self.deltaY),
+            #                                             smallFont.height * 2.0 * self.deltaY),
             #                                     colour=self.foreground, GLContext=self,
             #                                     obj=None)
 

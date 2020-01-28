@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-01-28 03:43:33 +0000 (Tue, January 28, 2020) $"
+__dateModified__ = "$dateModified: 2020-01-28 16:27:17 +0000 (Tue, January 28, 2020) $"
 __version__ = "$Revision: 3.0.0 $"
 #=========================================================================================
 # Created
@@ -341,7 +341,6 @@ class SpectrumDisplayPropertiesPopupNd(SpectrumPropertiesPopupABC):
                         aTab._copySpectrumAttributes(fromSpectrumTab)
                     except Exception as es:
                         pass
-
 
     def getActiveTabList(self):
         """Return the list of active tabs
@@ -1654,18 +1653,18 @@ class ContoursTab(Widget):
         self._copyCheckBoxes = []
 
         # add the checkboxes and keep a list of selected in the preferences (so it will be saved)
-        if self.preferences.general._copySpectraSettings and len(self.preferences.general._copySpectraSettings) == len(self._copyList):
+        if self.preferences.general._copySpectraSettingsNd and len(self.preferences.general._copySpectraSettingsNd) == len(self._copyList):
             # read existing settings
             for rr, opt in enumerate(self._copyList):
                 thisCheckBox = CheckBox(self, grid=(rr + self._topRow, self._checkBoxCol),
-                                        checkable=True, checked=self.preferences.general._copySpectraSettings[rr], hAlign='c')
+                                        checkable=True, checked=self.preferences.general._copySpectraSettingsNd[rr], hAlign='c')
                 self._copyCheckBoxes.append(thisCheckBox)
                 thisCheckBox.setCallback(partial(self._copyButtonClicked, thisCheckBox, rr))
 
                 self._addToCopyWidgetSet(thisCheckBox)
         else:
             # create a new list in preferences
-            self.preferences.general._copySpectraSettings = [True] * len(self._copyList)
+            self.preferences.general._copySpectraSettingsNd = [True] * len(self._copyList)
             for rr, opt in enumerate(self._copyList):
                 thisCheckBox = CheckBox(self, grid=(rr + self._topRow, self._checkBoxCol),
                                         checkable=True, checked=True, hAlign='c')
@@ -1691,6 +1690,23 @@ class ContoursTab(Widget):
         row += 1
         Spacer(self, 5, 5, QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.MinimumExpanding,
                grid=(row + 3, col + 1), gridSpan=(1, 1))
+
+    def _updateSpectra(self, spectrum, copyToSpectra):
+        # check that the spectrum and the copyToSpectra list are correctly defined
+        getByPid = self.application.project.getByPid
+        self.spectrum = getByPid(spectrum) if isinstance(spectrum, str) else spectrum
+        if not isinstance(self.spectrum, (Spectrum, type(None))):
+            raise TypeError('spectrum must be of type Spectrum or None')
+
+        if not isinstance(copyToSpectra, (Iterable, type(None))):
+            raise TypeError('copyToSpectra must be of type Iterable/None')
+        if copyToSpectra:
+            self._copyToSpectra = [getByPid(spectrum) if isinstance(spectrum, str) else spectrum for spectrum in copyToSpectra]
+            for spec in self._copyToSpectra:
+                if not isinstance(spec, (Spectrum, type(None))):
+                    raise TypeError('copyToSpectra is not defined correctly.')
+        else:
+            self._copyToSpectra = None
 
     def _addToCopyWidgetSet(self, widget):
         """Add widgets to a set so that we can set visible/invisible at any time
@@ -1752,7 +1768,7 @@ class ContoursTab(Widget):
         if not hasattr(self, '_copyCheckBoxes'):
             return
 
-        checkBoxList = self.preferences.general._copySpectraSettings
+        checkBoxList = self.preferences.general._copySpectraSettingsNd
         if checkBoxList:
             for cc, checkBox in enumerate(checkBoxList):
                 state = checkBoxList[cc]
@@ -2012,7 +2028,7 @@ class ContoursTab(Widget):
     def _copyButtonClicked(self, checkBox, checkBoxIndex, state):
         """Set the state of the checkBox in preferences
         """
-        checkBoxList = self.preferences.general._copySpectraSettings
+        checkBoxList = self.preferences.general._copySpectraSettingsNd
         if checkBoxList and checkBoxIndex < len(checkBoxList):
             checkBoxList[checkBoxIndex] = state
 
@@ -2033,7 +2049,7 @@ class ContoursTab(Widget):
         """Copy the attributes to the other spectra
         """
         if self._showCopyOptions:
-            checkBoxList = self.preferences.general._copySpectraSettings
+            checkBoxList = self.preferences.general._copySpectraSettingsNd
             if checkBoxList and len(checkBoxList) == len(self._copyList):
                 for cc, copyFunc in enumerate(self._copyList):
                     # call the copy function if checked
@@ -2124,18 +2140,18 @@ class ColourTab(Widget):
         self._copyCheckBoxes = []
 
         # add the checkboxes and keep a list of selected in the preferences (so it will be saved)
-        if self.preferences.general._copySpectraSettings and len(self.preferences.general._copySpectraSettings) == len(self._copyList):
+        if self.preferences.general._copySpectraSettings1d and len(self.preferences.general._copySpectraSettings1d) == len(self._copyList):
             # read existing settings
             for rr, opt in enumerate(self._copyList):
                 thisCheckBox = CheckBox(self, grid=(rr + self._topRow, self._checkBoxCol),
-                                        checkable=True, checked=self.preferences.general._copySpectraSettings[rr], hAlign='c')
+                                        checkable=True, checked=self.preferences.general._copySpectraSettings1d[rr], hAlign='c')
                 self._copyCheckBoxes.append(thisCheckBox)
                 thisCheckBox.setCallback(partial(self._copyButtonClicked, thisCheckBox, rr))
 
                 self._addToCopyWidgetSet(thisCheckBox)
         else:
             # create a new list in preferences
-            self.preferences.general._copySpectraSettings = [True] * len(self._copyList)
+            self.preferences.general._copySpectraSettings1d = [True] * len(self._copyList)
             for rr, opt in enumerate(self._copyList):
                 thisCheckBox = CheckBox(self, grid=(rr + self._topRow, self._checkBoxCol),
                                         checkable=True, checked=True, hAlign='c')
@@ -2153,6 +2169,23 @@ class ColourTab(Widget):
 
         self._addToCopyWidgetSet(self._copyToSpectraPullDown)
         self._addToCopyWidgetSet(self._copyButton)
+
+    def _updateSpectra(self, spectrum, copyToSpectra):
+        # check that the spectrum and the copyToSpectra list are correctly defined
+        getByPid = self.application.project.getByPid
+        self.spectrum = getByPid(spectrum) if isinstance(spectrum, str) else spectrum
+        if not isinstance(self.spectrum, (Spectrum, type(None))):
+            raise TypeError('spectrum must be of type Spectrum or None')
+
+        if not isinstance(copyToSpectra, (Iterable, type(None))):
+            raise TypeError('copyToSpectra must be of type Iterable/None')
+        if copyToSpectra:
+            self._copyToSpectra = [getByPid(spectrum) if isinstance(spectrum, str) else spectrum for spectrum in copyToSpectra]
+            for spec in self._copyToSpectra:
+                if not isinstance(spec, (Spectrum, type(None))):
+                    raise TypeError('copyToSpectra is not defined correctly.')
+        else:
+            self._copyToSpectra = None
 
     def _populateColour(self):
         """Populate dimensions tab from self.spectrum
@@ -2172,11 +2205,15 @@ class ColourTab(Widget):
         if not hasattr(self, '_copyCheckBoxes'):
             return
 
-        checkBoxList = self.preferences.general._copySpectraSettings
+        checkBoxList = self.preferences.general._copySpectraSettings1d
         if checkBoxList:
             for cc, checkBox in enumerate(checkBoxList):
                 state = checkBoxList[cc]
-                self._copyCheckBoxes[cc].setChecked(state)
+                try:
+                    self._copyCheckBoxes[cc].setChecked(state)
+                except Exception as es:
+                    pass
+
         if self._copyToSpectra:
             texts = ['<All>'] + [spectrum.pid for spectrum in self._copyToSpectra if spectrum != self.spectrum]
             self._copyToSpectraPullDown.modifyTexts(texts)
@@ -2215,7 +2252,7 @@ class ColourTab(Widget):
     def _copyButtonClicked(self, checkBox, checkBoxIndex, state):
         """Set the state of the checkBox in preferences
         """
-        checkBoxList = self.preferences.general._copySpectraSettings
+        checkBoxList = self.preferences.general._copySpectraSettings1d
         if checkBoxList and checkBoxIndex < len(checkBoxList):
             checkBoxList[checkBoxIndex] = state
 
@@ -2236,7 +2273,7 @@ class ColourTab(Widget):
         """Copy the attributes to the other spectra
         """
         if self._showCopyOptions:
-            checkBoxList = self.preferences.general._copySpectraSettings
+            checkBoxList = self.preferences.general._copySpectraSettings1d
             if checkBoxList and len(checkBoxList) == len(self._copyList):
                 for cc, copyFunc in enumerate(self._copyList):
                     # call the copy function if checked

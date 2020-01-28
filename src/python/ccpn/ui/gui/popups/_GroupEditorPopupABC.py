@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-01-28 10:04:26 +0000 (Tue, January 28, 2020) $"
+__dateModified__ = "$dateModified: 2020-01-28 16:27:17 +0000 (Tue, January 28, 2020) $"
 __version__ = "$Revision: 3.0.0 $"
 #=========================================================================================
 # Created
@@ -995,6 +995,7 @@ class _GroupEditorPopupABC(CcpnDialogMainWidget):
         for child in self.errorFrame.findChildren(QtGui.QWidget):
             self.errorFrame.getLayout().removeWidget(child)
             child.setParent(None)
+            child.hide()
             del child
 
     def _updateStateOnSelection(self):

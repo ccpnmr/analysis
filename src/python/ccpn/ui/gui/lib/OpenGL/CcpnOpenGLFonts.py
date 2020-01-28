@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-01-28 10:04:26 +0000 (Tue, January 28, 2020) $"
+__dateModified__ = "$dateModified: 2020-01-28 16:27:16 +0000 (Tue, January 28, 2020) $"
 __version__ = "$Revision: 3.0.0 $"
 #=========================================================================================
 # Created
@@ -32,6 +32,7 @@ import numpy as np
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLArrays import GLVertexArray, GLRENDERMODE_DRAW
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs import LEFTBORDER, RIGHTBORDER, TOPBORDER, BOTTOMBORDER
 from ccpn.util.Colour import hexToRgbRatio
+
 
 try:
     from OpenGL import GL, GLU, GLUT
@@ -62,12 +63,13 @@ GlyphPY1 = 'py1'
 FONT_FILE = 0
 FULL_FONT_NAME = 1
 
+
 class CcpnGLFont():
     def __init__(self, fileName=None, base=0, fontTransparency=None, activeTexture=0, scale=None):
         self.fontName = None
         self.fontGlyph = [None] * 256
         self.base = base
-        self.scale=scale
+        self.scale = scale
 
         if scale == None:
             raise Exception('scale must be defined for font %s ' % fileName)
@@ -81,8 +83,8 @@ class CcpnGLFont():
         fullFontNameString = self.fontInfo[FULL_FONT_NAME]
         fontSizeString = fullFontNameString.split()[-1]
 
-        self.fontName = fullFontNameString.replace(fontSizeString,'').strip()
-        self.fontSize = int(fontSizeString.replace('pt',''))/scale
+        self.fontName = fullFontNameString.replace(fontSizeString, '').strip()
+        self.fontSize = int(fontSizeString.replace('pt', '')) / scale
 
         self.width = 0
         self.height = 0
@@ -152,12 +154,12 @@ class CcpnGLFont():
 
                             if chrNum == 65:
                                 # use 'A' for the referencing the tab size
-                                self.width = gw / self.scale
-                                self.height = gh /self.scale
+                                self.width = gw
+                                self.height = gh
 
                             if chrNum == 32:
                                 # store the width of the space character
-                                self.spaceWidth = gw /self.scale
+                                self.spaceWidth = gw
 
                     else:
                         exitDims = True
@@ -209,7 +211,7 @@ class CcpnGLFont():
                         0,
                         GL.GL_RGBA, GL.GL_UNSIGNED_BYTE, self.fontPNG.data)
 
-        # generate a MipMap to cope with smaller text (may not be needed soon)
+        # nearest is the quickest gl plotting and gives a slightly brighter image
         GL.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MAG_FILTER, GL.GL_NEAREST)
         GL.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MIN_FILTER, GL.GL_NEAREST)
 
@@ -217,7 +219,6 @@ class CcpnGLFont():
         # GL.glTexParameteri( GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MIN_FILTER, GL.GL_LINEAR_MIPMAP_LINEAR )
         # GL.glGenerateMipmap( GL.GL_TEXTURE_2D )
         GL.glDisable(GL.GL_TEXTURE_2D)
-
 
     def get_kerning(self, fromChar, prevChar):
         if self.fontGlyph[ord(fromChar)]:
@@ -266,7 +267,7 @@ class GLString(GLVertexArray):
         self.pid = self.object.pid if hasattr(self.object, 'pid') else None
 
         # each object can have a unique serial number if required
-        self.height = font.height
+        self.height = (font.height/self.scale)                  # NOTE:ED - not sure why I have to do this here
         self.width = 0
 
         lenText = len(text)
@@ -326,8 +327,8 @@ class GLString(GLVertexArray):
                 # attribs = [[x, y], [x, y], [x, y], [x, y]]
                 # offsets = [[x, y], [x, y], [x, y], [x, y]]
 
-                self.vertices[i8:i8 + 8] = (x0/self.scale, y0/self.scale, x0/self.scale, y1/self.scale,
-                                            x1/self.scale, y1/self.scale, x1/self.scale, y0/self.scale)               # pixel coordinates in string
+                self.vertices[i8:i8 + 8] = (x0 / self.scale, y0 / self.scale, x0 / self.scale, y1 / self.scale,
+                                            x1 / self.scale, y1 / self.scale, x1 / self.scale, y0 / self.scale)  # pixel coordinates in string
 
                 self.indices[i6:i6 + 6] = (i4, i4 + 1, i4 + 2, i4, i4 + 2, i4 + 3)
                 self.texcoords[i8:i8 + 8] = (u0, v0, u0, v1, u1, v1, u1, v0)
@@ -337,11 +338,11 @@ class GLString(GLVertexArray):
                 # self.offsets[i * 4:i * 4 + 4] = offsets
 
                 penX = penX + glyph[GlyphOrigW] + kerning
-                self.width = max(self.width, penX/self.scale)
+                self.width = max(self.width, penX / self.scale)
 
             if (c == 32):  # space
                 penX += font.spaceWidth
-                self.width = max(self.width, penX/self.scale)
+                self.width = max(self.width, penX / self.scale)
 
             elif (c == 10):  # newline
                 penX = 0
@@ -351,12 +352,12 @@ class GLString(GLVertexArray):
 
                 # occasional strange - RuntimeWarning: invalid value encountered in add
                 # self.vertices[:, 1] += font.height
-                self.vertices[1::2] += font.height
-                self.height += font.height
+                self.vertices[1::2] += (font.height/self.scale)
+                self.height += (font.height/self.scale)
 
             elif (c == 9):  # tab
-                penX = penX + 4 * font.width
-                self.width = max(self.width, penX/self.scale)
+                penX = penX + 4 * font.spaceWidth
+                self.width = max(self.width, penX / self.scale)
 
             # penY = penY + glyph[GlyphHeight]
             prev = charCode

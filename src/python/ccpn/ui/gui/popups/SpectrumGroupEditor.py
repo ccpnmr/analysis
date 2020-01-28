@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-01-28 03:30:44 +0000 (Tue, January 28, 2020) $"
+__dateModified__ = "$dateModified: 2020-01-28 16:27:16 +0000 (Tue, January 28, 2020) $"
 __version__ = "$Revision: 3.0.0 $"
 #=========================================================================================
 # Created
@@ -26,45 +26,15 @@ __date__ = "$Date: 2017-03-30 11:28:58 +0100 (Thu, March 30, 2017) $"
 #=========================================================================================
 
 from functools import partial
-from PyQt5 import QtWidgets, QtCore
-from itertools import permutations
-from collections import Iterable
-from ccpn.core.Spectrum import MAXALIASINGRANGE, Spectrum
-from collections import OrderedDict
-from ccpn.ui.gui.widgets.Button import Button
-from ccpn.ui.gui.widgets.CheckBox import CheckBox
-from ccpn.ui.gui.widgets.ColourDialog import ColourDialog
-from ccpn.ui.gui.widgets.DoubleSpinbox import DoubleSpinbox, ScientificDoubleSpinBox
-from ccpn.ui.gui.widgets.FilteringPulldownList import FilteringPulldownList
-from ccpn.ui.gui.widgets.Label import Label
-from ccpn.ui.gui.widgets.LineEdit import LineEdit
-from ccpn.ui.gui.widgets.PulldownList import PulldownList
-from ccpn.ui.gui.widgets.Spinbox import Spinbox
-from ccpn.ui.gui.widgets.Widget import Widget
-from ccpn.ui.gui.popups.ExperimentTypePopup import _getExperimentTypes
-from ccpn.util.Colour import spectrumColours, addNewColour, fillColourPulldown, \
-    colourNameNoSpace, _setColourPulldown, getSpectrumColour
-from ccpn.ui.gui.widgets.MessageDialog import showWarning
-from ccpn.ui.gui.widgets.Tabs import Tabs
-from ccpn.util.Logging import getLogger
-from ccpn.util.Constants import DEFAULT_ISOTOPE_DICT
-from ccpn.util.OrderedSet import OrderedSet
-from ccpn.ui.gui.guiSettings import getColours, DIVIDER
-from ccpn.ui.gui.widgets.HLine import HLine
-from ccpn.ui.gui.widgets.CompoundWidgets import PulldownListCompoundWidget
-from ccpn.ui.gui.widgets.Spacer import Spacer
-from ccpn.ui.gui.widgets.DialogButtonBox import DialogButtonBox
-from ccpn.ui.gui.popups.Dialog import CcpnDialogMainWidget, handleDialogApply, \
-    _verifyPopupApply, _verifyPopupTabApply, _verifyPopupChangesApply
-from ccpn.core.lib.ContextManagers import undoStackBlocking
-from ccpn.core.lib.SpectrumLib import getContourLevelsFromNoise
-from ccpn.core.lib.ContextManagers import queueStateChange
-from ccpn.ui.gui.popups.ValidateSpectraPopup import ValidateSpectraForSpectrumPopup
-
 from PyQt5 import QtWidgets, QtGui
 from ast import literal_eval
 from typing import Tuple, Any
 from collections import OrderedDict, Iterable
+from ccpn.ui.gui.widgets.LineEdit import LineEdit
+from ccpn.ui.gui.widgets.MessageDialog import showWarning
+from ccpn.ui.gui.popups.Dialog import handleDialogApply, _verifyPopupChangesApply
+from ccpn.core.lib.ContextManagers import undoStackBlocking
+from ccpn.core.lib.ContextManagers import queueStateChange
 from ccpn.core.Spectrum import Spectrum
 from ccpn.core.SpectrumGroup import SpectrumGroup
 from ccpn.ui.gui.widgets.Tabs import Tabs
@@ -73,7 +43,7 @@ from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.Frame import Frame
 from ccpn.ui.gui.widgets.PulldownListsForObjects import SpectrumGroupPulldown
 from ccpn.ui.gui.widgets.Spacer import Spacer
-from ccpn.ui.gui.widgets.TextEditor import TextEditor, PlainTextEditor
+from ccpn.ui.gui.widgets.TextEditor import PlainTextEditor
 from ccpn.ui.gui.popups._GroupEditorPopupABC import _GroupEditorPopupABC
 from ccpn.ui.gui.popups.SpectrumPropertiesPopup import ColourTab, ContoursTab
 from ccpn.util.AttrDict import AttrDict
@@ -82,6 +52,15 @@ from ccpn.util.AttrDict import AttrDict
 DEFAULTSPACING = (3, 3)
 TABMARGINS = (1, 10, 1, 5)  # l, t, r, b
 INVALIDROWCOLOUR = QtGui.QColor('lightpink')
+SPECTRATABNUM = 0
+GENERAL1DTABNUM = 1
+GENERALNDTABNUM = 2
+SERIESTABNUM = 3
+NUMTABS = 4
+SPECTRA_LABEL = 'Spectra'
+GENERALTAB1D_LABEL = 'General 1d'
+GENERALTABND_LABEL = 'General Nd'
+SERIES_LABEL = 'Series'
 
 
 class SpectrumGroupEditor(_GroupEditorPopupABC):
@@ -125,8 +104,9 @@ class SpectrumGroupEditor(_GroupEditorPopupABC):
         Return True unless any errors occurred
         """
 
-        _colourTabs = [self._colourTabs.widget(tt) for tt in range(self._colourTabs.count())]
-        if not _colourTabs:
+        _colourTabs1d = [self._colourTabs1d.widget(tt) for tt in range(self._colourTabs1d.count())]
+        _colourTabsNd = [self._colourTabsNd.widget(tt) for tt in range(self._colourTabsNd.count())]
+        if not (_colourTabs1d or _colourTabsNd):
             raise RuntimeError("Code error: tabs not implemented")
 
         _allTabs = self.getActiveTabList()
@@ -141,7 +121,7 @@ class SpectrumGroupEditor(_GroupEditorPopupABC):
 
             # get the list of spectra that have changed - for refreshing the displays
             spectrumList = []
-            for t in _colourTabs:
+            for t in (_colourTabs1d + _colourTabsNd):
                 if t is not None:
                     changes = t._changes
                     if changes:
@@ -174,7 +154,7 @@ class SpectrumGroupEditor(_GroupEditorPopupABC):
             return False
 
         # remove all changes
-        for tab in _colourTabs:
+        for tab in (_colourTabs1d + _colourTabsNd):
             tab._changes = {}
 
         # self._currentNumApplies += 1
@@ -186,8 +166,13 @@ class SpectrumGroupEditor(_GroupEditorPopupABC):
         if self.spectraTab._changes:
             self._applyAllChanges(self.spectraTab._changes)
 
-        for tt in range(self._colourTabs.count()):
-            _changes = self._colourTabs.widget(tt)._changes
+        for tt in range(self._colourTabs1d.count()):
+            _changes = self._colourTabs1d.widget(tt)._changes
+            if _changes:
+                self._applyAllChanges(_changes)
+
+        for tt in range(self._colourTabsNd.count()):
+            _changes = self._colourTabsNd.widget(tt)._changes
             if _changes:
                 self._applyAllChanges(_changes)
 
@@ -219,7 +204,7 @@ class SpectrumGroupEditor(_GroupEditorPopupABC):
 
     # make this a tabbed dialog, with the default widget going into tab 0
     USE_TAB = 0
-    NUMBER_TABS = 3  # create the first tab
+    NUMBER_TABS = 4  # create the first tab
 
     def __init__(self, parent=None, mainWindow=None, editMode=True, obj=None, defaultItems=None, **kwds):
         """
@@ -227,11 +212,10 @@ class SpectrumGroupEditor(_GroupEditorPopupABC):
         """
         super().__init__(parent=parent, mainWindow=mainWindow, editMode=editMode, obj=obj, defaultItems=defaultItems, **kwds)
 
-        self.TAB_NAMES = (('Spectra', self._initSpectraTab),
-                          ('General', self._initGeneralTab),
-                          ('Series', self._initSeriesTab))
-
-        # TODO:ED - order this a little better
+        self.TAB_NAMES = ((SPECTRA_LABEL, self._initSpectraTab),
+                          (GENERALTAB1D_LABEL, self._initGeneralTab1d),
+                          (GENERALTABND_LABEL, self._initGeneralTabNd),
+                          (SERIES_LABEL, self._initSeriesTab))
 
         if obj and editMode:
             defaultItems = obj.spectra
@@ -239,21 +223,27 @@ class SpectrumGroupEditor(_GroupEditorPopupABC):
         seriesTabContents = SeriesFrame(parent=self, mainWindow=self.mainWindow, spectrumGroup=obj, editMode=editMode,
                                         showCopyOptions=True if len(defaultItems) > 1 else False,
                                         defaultItems=defaultItems)
-        self._tabWidget.widget(2).setWidget(seriesTabContents)
+        self._tabWidget.widget(SERIESTABNUM).setWidget(seriesTabContents)
 
         # get pointers to the tabs
-        self.spectraTab = self._tabWidget.widget(0)._scrollContents
-        self.generalTab = self._tabWidget.widget(1)._scrollContents
-        self.seriesTab = self._tabWidget.widget(2)._scrollContents
+        self.spectraTab = self._tabWidget.widget(SPECTRATABNUM)._scrollContents
+        self.generalTab1d = self._tabWidget.widget(GENERAL1DTABNUM)._scrollContents
+        self.generalTabNd = self._tabWidget.widget(GENERALNDTABNUM)._scrollContents
+        self.seriesTab = self._tabWidget.widget(SERIESTABNUM)._scrollContents
+
+        self._generalTabWidget1d = self._tabWidget.widget(GENERAL1DTABNUM)
+        self._generalTabWidgetNd = self._tabWidget.widget(GENERALNDTABNUM)
 
         self.currentSpectra = self._getSpectraFromList()
 
+        # set the labels in the first pass
         for tNum, (tabName, tabFunc) in enumerate(self.TAB_NAMES):
             self._tabWidget.setTabText(tNum, tabName)
+
+        # call the tab initialise functions (may show/hide tabs)
+        for tNum, (tabName, tabFunc) in enumerate(self.TAB_NAMES):
             if tabFunc:
                 tabFunc()
-
-        # TODO:ED set to the size of the first tab - or a fixed size so the first tab looks nice
 
         self._populate()
         self.setMinimumSize(600, 550)  # change to a calculation rather than a guess
@@ -272,67 +262,97 @@ class SpectrumGroupEditor(_GroupEditorPopupABC):
         """Return the list of active tabs
         """
         # test the colour tabs for the moment
-        tabs = tuple(self._colourTabs.widget(ii) for ii in range(self._colourTabs.count())) + \
-               (self._tabWidget.widget(0)._scrollContents, self._tabWidget.widget(2)._scrollContents)
+        tabs = tuple(self._colourTabs1d.widget(ii) for ii in range(self._colourTabs1d.count())) + \
+               tuple(self._colourTabsNd.widget(ii) for ii in range(self._colourTabsNd.count())) + \
+               (self.spectraTab, self.seriesTab)
         return tabs
 
     def _initSpectraTab(self):
         thisTab = self.spectraTab
         thisTab._changes = OrderedDict()
 
-    def _initGeneralTab(self):
-        thisTab = self.generalTab
-        self._colourTabs = Tabs(thisTab, grid=(0, 0))
-
-        # TODO:ED need to get the list of spectra from the first tab
-
-        # self.orderedSpectrumViews = orderedSpectrumViews
-        # self.orderedSpectra = OrderedSet([spec.spectrum for spec in self.orderedSpectrumViews])
+    def _initGeneralTab1d(self):
+        thisTab = self.generalTab1d
+        self._colourTabs1d = Tabs(thisTab, grid=(0, 0))
 
         # remember the state when switching tabs
         self.copyCheckBoxState = []
 
-        for specNum, thisSpec in enumerate(self.currentSpectra or []):
+        spectra1d = [spec for spec in (self.currentSpectra or []) if spec.dimensionCount == 1]
+        for specNum, thisSpec in enumerate(spectra1d):
+
+            if thisSpec.dimensionCount == 1:
+                contoursTab = ColourTab(parent=self, mainWindow=self.mainWindow, spectrum=thisSpec,
+                                          showCopyOptions=True if len(spectra1d) > 1 else False,
+                                          copyToSpectra=spectra1d)
+
+                self._colourTabs1d.addTab(contoursTab, thisSpec.name)
+                contoursTab.setContentsMargins(*TABMARGINS)
+
+        self._colourTabs1d.setTabClickCallback(self._tabClicked1d)
+        self._colourTabs1d.tabCloseRequested.connect(self._closeColourTab1d)
+        self._oldTabs = OrderedDict()
+
+        index = self._tabWidget.indexOf(self._generalTabWidget1d)
+        if self._colourTabs1d.count() == 0:
+            if (0 <= index < NUMTABS):
+                self._tabWidget.removeTab(index)
+
+    def _initGeneralTabNd(self):
+        thisTab = self.generalTabNd
+        self._colourTabsNd = Tabs(thisTab, grid=(0, 0))
+
+        # remember the state when switching tabs
+        self.copyCheckBoxState = []
+
+        spectraNd = [spec for spec in (self.currentSpectra or []) if spec.dimensionCount > 1]
+        for specNum, thisSpec in enumerate(spectraNd):
 
             if thisSpec.dimensionCount > 1:
                 contoursTab = ContoursTab(parent=self, mainWindow=self.mainWindow, spectrum=thisSpec,
-                                          showCopyOptions=True if len(self.currentSpectra) > 1 else False,
-                                          copyToSpectra=self.currentSpectra)
-            else:
-                contoursTab = ColourTab(parent=self, mainWindow=self.mainWindow, spectrum=thisSpec,
-                                          showCopyOptions=True if len(self.currentSpectra) > 1 else False,
-                                          copyToSpectra=self.currentSpectra)
+                                          showCopyOptions=True if len(spectraNd) > 1 else False,
+                                          copyToSpectra=spectraNd)
 
-            self._colourTabs.addTab(contoursTab, thisSpec.name)
-            contoursTab.setContentsMargins(*TABMARGINS)
+                self._colourTabsNd.addTab(contoursTab, thisSpec.name)
+                contoursTab.setContentsMargins(*TABMARGINS)
 
-        self._colourTabs.setTabClickCallback(self._tabClicked)
-
-        # self._colourTabs.setTabsClosable(True)
-        self._colourTabs.tabCloseRequested.connect(self._closeColourTab)
+        self._colourTabsNd.setTabClickCallback(self._tabClickedNd)
+        self._colourTabsNd.tabCloseRequested.connect(self._closeColourTabNd)
         self._oldTabs = OrderedDict()
+
+        index = self._tabWidget.indexOf(self._generalTabWidgetNd)
+        if self._colourTabsNd.count() == 0:
+            if (0 <= index < NUMTABS):
+                self._tabWidget.removeTab(index)
 
     def _initSeriesTab(self):
         thisTab = self.seriesTab
         thisTab._changes = OrderedDict()
-
-        # TODO:ED setup a pandas table for the spectra as the first column
-        #       or another simple way to edit the spectrum seriesValue, textEditor?
         thisTab._populate()
 
     def _populate(self):
         """Populate the widgets in the tabs
         """
         with self.blockWidgetSignals():
-            for aTab in tuple(self._colourTabs.widget(ii) for ii in range(self._colourTabs.count())):
-                aTab._populateColour()
+            for colourTab in (self._colourTabs1d, self._colourTabsNd):
+                for aTab in tuple(colourTab.widget(ii) for ii in range(colourTab.count())):
+                    aTab._populateColour()
 
-    def _tabClicked(self, index):
+    def _tabClicked1d(self, index):
         """Callback for clicking a tab - needed for refilling the checkboxes and populating the pulldown
         """
-        aTabs = tuple(self._colourTabs.widget(ii) for ii in range(self._colourTabs.count()))
-        if hasattr(aTabs[index], '_populateCheckBoxes'):
-            aTabs[index]._populateCheckBoxes()
+        for colourTab in (self._colourTabs1d,):
+            aTabs = tuple(colourTab.widget(ii) for ii in range(colourTab.count()))
+            if aTabs and hasattr(aTabs[index], '_populateCheckBoxes'):
+                aTabs[index]._populateCheckBoxes()
+
+    def _tabClickedNd(self, index):
+        """Callback for clicking a tab - needed for refilling the checkboxes and populating the pulldown
+        """
+        for colourTab in (self._colourTabsNd,):
+            aTabs = tuple(colourTab.widget(ii) for ii in range(colourTab.count()))
+            if aTabs and hasattr(aTabs[index], '_populateCheckBoxes'):
+                aTabs[index]._populateCheckBoxes()
 
     def _getSpectraFromList(self):
         """Get the list of spectra from the list
@@ -343,36 +363,40 @@ class SpectrumGroupEditor(_GroupEditorPopupABC):
         """Remove the unwanted queue items from spectra reomved from the spectrumQueue
         """
         with self.blockWidgetSignals():
-            for aTab in tuple(self._colourTabs.widget(ii) for ii in range(self._colourTabs.count())):
-                if aTab.spectrum == spectrum:
-                    aTab._cleanWidgetQueue()
+            for colourTab in (self._colourTabs1d, self._colourTabsNd):
+                for aTab in tuple(colourTab.widget(ii) for ii in range(colourTab.count())):
+                    if aTab.spectrum == spectrum:
+                        aTab._cleanWidgetQueue()
 
     def _removeTab(self, spectrum):
         """Remove the unwanted queue items from spectra reomved from the spectrumQueue
         """
-        for aTab in tuple(self._colourTabs.widget(ii) for ii in range(self._colourTabs.count())):
-            if aTab.spectrum == spectrum:
-                pass
+        for colourTab in (self._colourTabs1d, self._colourTabsNd):
+            for aTab in tuple(colourTab.widget(ii) for ii in range(colourTab.count())):
+                if aTab.spectrum == spectrum:
+                    pass
 
-    def _closeColourTab(self, index):
-        tab = self._colourTabs.widget(index)
-        # tab.deleteLater()
-        self._colourTabs.removeTab(index)
-        pass
+    def _closeColourTab1d(self, index):
+        self._colourTabs1d.removeTab(index)
+
+    def _closeColourTabNd(self, index):
+        self._colourTabsNd.removeTab(index)
 
     def _spectraChanged(self, *args):
         """Respond to a change in the list of spectra to add the spectrumGroup
         """
-        self._newSpectra = self._getSpectraFromList()
+        self._spectraChanged1d()
+        self._spectraChangedNd()
 
-        # TODO:ED remove tabs for spectra removed from list
-        #           add new tabs in correct place
-        #           remember to remove any _queue settings from updated colour tabs
-        #           populate new tabs
-        #           POPULATE SERIES TAB
+    def _spectraChanged1d(self):
+        self._newSpectra = self._getSpectraFromList()
 
         deleteSet = (set(self.currentSpectra) - set(self._newSpectra))
         newSet = (set(self.currentSpectra) - set(self._newSpectra))
+
+        # only select the 1d spectra
+        deleteSet = [spec for spec in deleteSet if spec.dimensionCount == 1]
+        spectra1d = [spec for spec in self._newSpectra if spec.dimensionCount == 1]
 
         for spec in deleteSet:
             # remove tab widget
@@ -381,29 +405,93 @@ class SpectrumGroupEditor(_GroupEditorPopupABC):
                 del self.seriesTab._currentSeriesValues[spec]
 
         # remove all in reverse order, keep old ones
-        for ii in range(self._colourTabs.count() - 1, -1, -1):
-            tab = self._colourTabs.widget(ii)
+        for ii in range(self._colourTabs1d.count() - 1, -1, -1):
+            tab = self._colourTabs1d.widget(ii)
             self._oldTabs[tab.spectrum] = tab
-            self._colourTabs.removeTab(ii)
+            self._colourTabs1d.removeTab(ii)
 
-        for spec in self._newSpectra:
+        for spec in spectra1d:
             # add new tab widget here
             if spec in self._oldTabs:
-                self._colourTabs.addTab(self._oldTabs[spec], spec.name)
-                self._oldTabs[spec].setCopyOptionsVisible(True if len(self._newSpectra) > 1 else False)
+                self._colourTabs1d.addTab(self._oldTabs[spec], spec.name)
+                self._oldTabs[spec].setCopyOptionsVisible(True if len(spectra1d) > 1 else False)
+
+                # make sure the new spectrum lists are up-to-date
+                self._oldTabs[spec]._updateSpectra(spec, spectra1d)
+                self._oldTabs[spec]._populateColour()
+            else:
+                if spec.dimensionCount == 1:
+                    contoursTab = ColourTab(parent=self, mainWindow=self.mainWindow, spectrum=spec,
+                                              showCopyOptions=True if len(spectra1d) > 1 else False,
+                                              copyToSpectra=spectra1d)
+
+                self._colourTabs1d.addTab(contoursTab, spec.name)
+                contoursTab.setContentsMargins(*TABMARGINS)
+                contoursTab._populateColour()
+
+        # set the visibility of the general 1d tab
+        index = self._tabWidget.indexOf(self._generalTabWidget1d)
+        if self._colourTabs1d.count() == 0:
+            if (0 <= index < NUMTABS):
+                self._tabWidget.removeTab(index)
+        else:
+            if not (0 <= index < NUMTABS):
+                self._tabWidget.insertTab(1, self._generalTabWidget1d, GENERALTAB1D_LABEL)
+
+        self.seriesTab._fillSeriesFrame(self._newSpectra)
+
+        # update the current list
+        self.currentSpectra = self._newSpectra
+
+    def _spectraChangedNd(self):
+        self._newSpectra = self._getSpectraFromList()
+
+        deleteSet = (set(self.currentSpectra) - set(self._newSpectra))
+        newSet = (set(self.currentSpectra) - set(self._newSpectra))
+
+        # only select the 1d spectra
+        deleteSet = [spec for spec in deleteSet if spec.dimensionCount > 1]
+        spectraNd = [spec for spec in self._newSpectra if spec.dimensionCount > 1]
+
+        for spec in deleteSet:
+            # remove tab widget
+            self._cleanColourTab(spec)
+            if spec in self.seriesTab._currentSeriesValues:
+                del self.seriesTab._currentSeriesValues[spec]
+
+        # remove all in reverse order, keep old ones
+        for ii in range(self._colourTabsNd.count() - 1, -1, -1):
+            tab = self._colourTabsNd.widget(ii)
+            self._oldTabs[tab.spectrum] = tab
+            self._colourTabsNd.removeTab(ii)
+
+        for spec in spectraNd:
+            # add new tab widget here
+            if spec in self._oldTabs:
+                self._colourTabsNd.addTab(self._oldTabs[spec], spec.name)
+                self._oldTabs[spec].setCopyOptionsVisible(True if len(spectraNd) > 1 else False)
+
+                # make sure the new spectrum lists are up-to-date
+                self._oldTabs[spec]._updateSpectra(spec, spectraNd)
+                self._oldTabs[spec]._populateColour()
             else:
                 if spec.dimensionCount > 1:
                     contoursTab = ContoursTab(parent=self, mainWindow=self.mainWindow, spectrum=spec,
-                                              showCopyOptions=True if len(self._newSpectra) > 1 else False,
-                                              copyToSpectra=self._newSpectra)
-                else:
-                    contoursTab = ColourTab(parent=self, mainWindow=self.mainWindow, spectrum=spec,
-                                              showCopyOptions=True if len(self._newSpectra) > 1 else False,
-                                              copyToSpectra=self._newSpectra)
+                                              showCopyOptions=True if len(spectraNd) > 1 else False,
+                                              copyToSpectra=spectraNd)
 
-                self._colourTabs.addTab(contoursTab, spec.name)
+                self._colourTabsNd.addTab(contoursTab, spec.name)
                 contoursTab.setContentsMargins(*TABMARGINS)
                 contoursTab._populateColour()
+
+        # set the visibility of the general 1d tab
+        index = self._tabWidget.indexOf(self._generalTabWidgetNd)
+        if self._colourTabsNd.count() == 0:
+            if (0 <= index < NUMTABS):
+                self._tabWidget.removeTab(index)
+        else:
+            if not (0 <= index < NUMTABS):
+                self._tabWidget.insertTab(self._tabWidget.count()-1, self._generalTabWidgetNd, GENERALTABND_LABEL)
 
         self.seriesTab._fillSeriesFrame(self._newSpectra)
 
@@ -413,19 +501,13 @@ class SpectrumGroupEditor(_GroupEditorPopupABC):
     def copySpectra(self, fromSpectrum, toSpectra):
         """Copy the contents of tabs to other spectra
         """
-        colourTabs = [self._colourTabs.widget(ii) for ii in range(self._colourTabs.count())]
+        colourTabs = [self._colourTabs1d.widget(ii) for ii in range(self._colourTabs1d.count())] + \
+                    [self._colourTabsNd.widget(ii) for ii in range(self._colourTabsNd.count())]
         for aTab in colourTabs:
             if aTab.spectrum == fromSpectrum:
                 fromSpectrumTab = aTab
                 for aTab in [tab for tab in colourTabs if tab != fromSpectrumTab and tab.spectrum in toSpectra]:
                     aTab._copySpectrumAttributes(fromSpectrumTab)
-
-    # def getChangesDict(self):
-    #     """Define the required widgets with storing changes
-    #     returns Popup containing buttons
-    #             dict containing current changes
-    #     """
-    #     return self, self.seriesTab._changes
 
 
 class SeriesFrame(Widget):

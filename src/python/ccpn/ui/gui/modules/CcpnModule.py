@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-01-28 10:04:26 +0000 (Tue, January 28, 2020) $"
+__dateModified__ = "$dateModified: 2020-01-28 16:27:16 +0000 (Tue, January 28, 2020) $"
 __version__ = "$Revision: 3.0.0 $"
 #=========================================================================================
 # Created
@@ -139,7 +139,8 @@ CommonWidgetsEdits = {
 
     EntryCompoundWidget.__name__            : (EntryCompoundWidget.getText, EntryCompoundWidget.setText, 'entry.textEdited'),
     NmrChainPulldown.__name__               : (NmrChainPulldown.getText, NmrChainPulldown.select, 'pulldownList.activated'),
-    RadioButtonsCompoundWidget.__name__     : (RadioButtonsCompoundWidget.getIndex, RadioButtonsCompoundWidget.setIndex, 'radioButtons.buttonGroup.buttonClicked'),
+    RadioButtonsCompoundWidget.__name__     : (
+    RadioButtonsCompoundWidget.getIndex, RadioButtonsCompoundWidget.setIndex, 'radioButtons.buttonGroup.buttonClicked'),
 
     # ADD TABLES
     # ADD Others
@@ -199,7 +200,6 @@ class CcpnModule(Dock, DropBase, NotifierBase):
 
         self.maximised = False
         self.maximiseRestoreState = None
-
 
         #TODO:GEERTEN: make mainWindow actually do something
         self.area = None
@@ -386,30 +386,30 @@ class CcpnModule(Dock, DropBase, NotifierBase):
         self.labelHidden = False
         self.updateStyle()
 
-    def getDockArea(self, target = None):
+    def getDockArea(self, target=None):
         if target is None:
             current = self
         else:
             current = target
 
         while current.parent() != None:
-            if isinstance(current,DockArea):
+            if isinstance(current, DockArea):
                 break
-            current =  current.parent()
+            current = current.parent()
         return current
 
-    def getDock(self, target = None):
+    def getDock(self, target=None):
         if target is None:
             current = self
         else:
             current = target
 
         while current.parent() != None:
-            if isinstance(current,Dock):
+            if isinstance(current, Dock):
                 break
-            current =  current.parent()
+            current = current.parent()
 
-        if not isinstance(current,Dock):
+        if not isinstance(current, Dock):
             current = None
         return current
 
@@ -418,7 +418,7 @@ class CcpnModule(Dock, DropBase, NotifierBase):
         docks = list(self.area.docks.values())
         for dock in docks:
             parent = dock.getDockArea()
-            result.setdefault(parent,[]).append(dock)
+            result.setdefault(parent, []).append(dock)
         return result
 
     def float(self):
@@ -426,8 +426,7 @@ class CcpnModule(Dock, DropBase, NotifierBase):
             self.toggleMaximised()
         super().float()
 
-
-    def mergeState(self,state):
+    def mergeState(self, state):
         result = self.getHome().saveState(docksOnly=True)
 
         if state['main'] != None:
@@ -437,21 +436,20 @@ class CcpnModule(Dock, DropBase, NotifierBase):
             toMerge = state['floats'][0]
             mergeId = toMerge[2]['id']
 
-            for i,currentState in enumerate(result['floats']):
+            for i, currentState in enumerate(result['floats']):
                 currentId = currentState[2]['id']
 
-                if currentId ==  mergeId:
+                if currentId == mergeId:
                     result['floats'][i] = toMerge
 
         return result
 
-
     def filterState(self, state, id_):
 
-        result = {'main' : None, 'floats' : []}
+        result = {'main': None, 'floats': []}
 
         if state['main'][2]['id'] == id_:
-            result ['main'] =  state['main']
+            result['main'] = state['main']
 
         for float in state['floats']:
             if float[2]['id'] == id_:
@@ -465,7 +463,7 @@ class CcpnModule(Dock, DropBase, NotifierBase):
     def getHome(self):
         result = self.area
         if self.area.home != None:
-            result =self.area.home
+            result = self.area.home
         return result
 
     def toggleMaximised(self):
@@ -486,12 +484,12 @@ class CcpnModule(Dock, DropBase, NotifierBase):
             for dock in docks:
                 dock.showTitleBar()
             self.maximised = False
-            self.maximiseRestoreState =  None
+            self.maximiseRestoreState = None
         else:
             state = self.getHome().saveState(docksOnly=True)
             dockArea = self.getDockArea()
             dockAreaId = id(dockArea)
-            state = self.filterState(state,dockAreaId)
+            state = self.filterState(state, dockAreaId)
             self.maximiseRestoreState = state
 
             docks = self.docksByDockArea()[self.getDockArea()]
@@ -920,30 +918,28 @@ class CcpnModule(Dock, DropBase, NotifierBase):
                    }"""
         self.setStyleSheet(tempStyle)
 
-
-
     def findWindow(self):
-        current =  self
+        current = self
         while current.parent() != None:
-            current =  current.parent()
+            current = current.parent()
         return current
 
     def flashMessage(self, message):
         def center(window, rect):
-        # https://wiki.qt.io/How_to_Center_a_Window_on_the_Screen
+            # https://wiki.qt.io/How_to_Center_a_Window_on_the_Screen
 
             window.setGeometry(
-                QtWidgets.QStyle.alignedRect(
-                    QtCore.Qt.LeftToRight,
-                    QtCore.Qt.AlignCenter,
-                    window.size(),
-                    rect,
-                )
-            )
+                    QtWidgets.QStyle.alignedRect(
+                            QtCore.Qt.LeftToRight,
+                            QtCore.Qt.AlignCenter,
+                            window.size(),
+                            rect,
+                            )
+                    )
 
         messageBox = QtWidgets.QMessageBox(self)
         messageBox.setText(message)
-        messageBox.setWindowFlag(QtCore.Qt.FramelessWindowHint,True)
+        messageBox.setWindowFlag(QtCore.Qt.FramelessWindowHint, True)
         for button in messageBox.findChildren(QtWidgets.QDialogButtonBox):
             button.setVisible(False)
 
@@ -960,38 +956,42 @@ class CcpnModule(Dock, DropBase, NotifierBase):
 
         messageBox.exec()
 
-
     def startDrag(self):
 
         self.drag = QtGui.QDrag(self)
         mime = QtCore.QMimeData()
         self.drag.setMimeData(mime)
-        dragPixmap  = self.grab()
-        self.drag.setPixmap(dragPixmap)
+        dragPixmap = self.grab()
+        self.drag.setPixmap(dragPixmap.scaledToWidth(128) if dragPixmap.width() < dragPixmap.height() else dragPixmap.scaledToHeight(128))
+        self.widgetArea.setStyleSheet(self.dragStyle)
+        self._raiseSelectedOverlay()
+        self.updateStyle()
+        self.update()
 
         self.drag.destroyed.connect(self._destroyed)
 
-        # GST  dosn't work in the current version but should work in 5.13
+        # GST doesn't work in the current version but should work in 5.13
         forbiddenCursorPixmap = QtGui.QCursor(QtCore.Qt.ForbiddenCursor).pixmap()
-        self.drag.setDragCursor(forbiddenCursorPixmap,QtCore.Qt.IgnoreAction)
+        self.drag.setDragCursor(forbiddenCursorPixmap, QtCore.Qt.IgnoreAction)
 
         dragResult = self.drag.exec_()
-        endPosition =  QtGui.QCursor.pos()
+        endPosition = QtGui.QCursor.pos()
 
+        self.updateStyle()
 
         # GST we have to assume the drag succeeded currently as we don't get any events
         # that report on whether the drag has failed. Indeed this effectivley a failed drag...
         globalDockRect = self.getDockArea().frameGeometry()
 
         targetWidget = QtWidgets.QApplication.instance().widgetAt(endPosition)
-        if (self.drag.target() is  None)  and (not globalDockRect.contains(endPosition)):
+        if (self.drag.target() is None) and (not globalDockRect.contains(endPosition)):
             if targetWidget == None:
                 self.float()
-                window  = self.findWindow()
+                window = self.findWindow()
                 window.move(endPosition)
 
                 # this is because we could have have dragged into another application
-                # rhis may not work under windows
+                # this may not work under windows
                 originalWindow = self.findWindow()
                 originalWindow.raise_()
                 originalWindow.show()
@@ -1000,7 +1000,6 @@ class CcpnModule(Dock, DropBase, NotifierBase):
                 window.raise_()
                 window.show()
                 window.activateWindow()
-
 
     def _destroyed(self, ev):
         self._selectedOverlay.setDropArea(None)
@@ -1033,8 +1032,8 @@ class CcpnModuleLabel(DockLabel):
     """
 
     labelSize = 16
-    TOP_LEFT =  'TOP_LEFT'
-    TOP_RIGHT =  'TOP_RIGHT'
+    TOP_LEFT = 'TOP_LEFT'
+    TOP_RIGHT = 'TOP_RIGHT'
 
     # TODO:GEERTEN check colours handling
     # defined here, as the updateStyle routine is called from the
@@ -1042,8 +1041,8 @@ class CcpnModuleLabel(DockLabel):
 
     sigDragEntered = QtCore.Signal(object, object)
 
-    def getMaxIconSize(self,icon):
-        iconSizes = [max((size.height(),size.width())) for size in icon.availableSizes()]
+    def getMaxIconSize(self, icon):
+        iconSizes = [max((size.height(), size.width())) for size in icon.availableSizes()]
         return max(iconSizes)
 
     def __init__(self, name, module, showCloseButton=True, closeCallback=None, showSettingsButton=False, settingsCallback=None):
@@ -1066,9 +1065,8 @@ class CcpnModuleLabel(DockLabel):
         # self.setStyleSheet('margin : 2')
 
         layout = QtWidgets.QGridLayout(self)
-        layout.setContentsMargins(0,0,0,0)
+        layout.setContentsMargins(0, 0, 0, 0)
         self.setLineWidth(0)
-
 
         if showCloseButton:
             # button is already there because of the DockLabel init
@@ -1078,7 +1076,7 @@ class CcpnModuleLabel(DockLabel):
                 raise RuntimeError('Requested closeButton without callback')
             else:
                 self.closeButton.clicked.connect(closeCallback)
-            self.setupLabelButton(self.closeButton,  'close_cross', CcpnModuleLabel.TOP_RIGHT)
+            self.setupLabelButton(self.closeButton, 'close_cross', CcpnModuleLabel.TOP_RIGHT)
 
         # Settings
         if showSettingsButton:
@@ -1094,7 +1092,6 @@ class CcpnModuleLabel(DockLabel):
 
         # flag to disable dragMoveEvent during a doubleClick
         self._inDoubleClick = False
-
 
     def setupLabelButton(self, button, iconName, position):
         icon = Icon('icons/%s' % iconName)
@@ -1169,7 +1166,7 @@ class CcpnModuleLabel(DockLabel):
 
         numDocks = len(self.module.getDocksInParentArea())
 
-        if not self.module.maximised and  numDocks> 1:
+        if not self.module.maximised and numDocks > 1:
             contextMenu.addAction('Maximise', self.module.toggleMaximised)
         elif self.module.maximised:
             contextMenu.addAction('Restore', self.module.toggleMaximised)
@@ -1260,21 +1257,20 @@ class CcpnModuleLabel(DockLabel):
         """
         self._inDoubleClick = False
 
-    def resizeEvent (self, ev):
-        if self.closeButton:
+    def resizeEvent(self, ev):
+        if hasattr(self, 'closeButton') and self.closeButton:
             if self.orientation == 'vertical':
-                self.layout().addWidget(self.closeButton,0,0, alignment=QtCore.Qt.AlignTop)
+                self.layout().addWidget(self.closeButton, 0, 0, alignment=QtCore.Qt.AlignTop)
             else:
-                self.layout().addWidget(self.closeButton,0,3, alignment=QtCore.Qt.AlignRight)
+                self.layout().addWidget(self.closeButton, 0, 3, alignment=QtCore.Qt.AlignRight)
 
-        if self.settingsButton:
+        if hasattr(self, 'settingsButton') and self.settingsButton:
             if self.orientation == 'vertical':
-                self.layout().addWidget(self.settingsButton,0,0,alignment=QtCore.Qt.AlignBottom)
+                self.layout().addWidget(self.settingsButton, 0, 0, alignment=QtCore.Qt.AlignBottom)
             else:
-                self.layout().addWidget(self.settingsButton,0,0, alignment=QtCore.Qt.AlignLeft)
+                self.layout().addWidget(self.settingsButton, 0, 0, alignment=QtCore.Qt.AlignLeft)
 
-
-        super(DockLabel,self).resizeEvent(ev)
+        super(DockLabel, self).resizeEvent(ev)
 
 
 class DropAreaSelectedOverlay(QtWidgets.QWidget):

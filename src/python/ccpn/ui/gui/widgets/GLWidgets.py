@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-01-28 09:52:40 +0000 (Tue, January 28, 2020) $"
+__dateModified__ = "$dateModified: 2020-01-28 16:27:17 +0000 (Tue, January 28, 2020) $"
 __version__ = "$Revision: 3.0.0 $"
 #=========================================================================================
 # Created
@@ -1814,6 +1814,8 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
             else:
                 labelColour = self.foreground
 
+            smallFont = self.getSmallFont()
+
             if self._drawBottomAxis:
                 # create the X axis labelling
                 for axLabel in self.axisLabelling['0']:
@@ -1827,7 +1829,7 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
                                                          font=self.globalGL.glSmallFont,
                                                          x=axisX - (0.4 * self.globalGL.glSmallFont.width * self.deltaX * len(
                                                                  axisXText)),
-                                                         y=self.AXIS_MARGINBOTTOM - GLDefs.TITLEYOFFSET * self.globalGL.glSmallFont.height,
+                                                         y=self.AXIS_MARGINBOTTOM - GLDefs.TITLEYOFFSET * smallFont.height,
 
                                                          colour=labelColour, GLContext=self,
                                                          obj=None))
@@ -1836,15 +1838,15 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
                 self._axisXLabelling.append(GLString(text=self.axisCodes[0],
                                                      font=self.globalGL.glSmallFont,
                                                      x=GLDefs.AXISTEXTXOFFSET * self.deltaX,
-                                                     y=self.AXIS_MARGINBOTTOM - GLDefs.TITLEYOFFSET * self.globalGL.glSmallFont.height,
+                                                     y=self.AXIS_MARGINBOTTOM - GLDefs.TITLEYOFFSET * smallFont.height,
                                                      colour=labelColour, GLContext=self,
                                                      obj=None))
                 # and the axis dimensions
                 xUnitsLabels = self.XAXES[self._xUnits]
                 self._axisXLabelling.append(GLString(text=xUnitsLabels,
                                                      font=self.globalGL.glSmallFont,
-                                                     x=1.0 - (self.deltaX * len(xUnitsLabels) * self.globalGL.glSmallFont.width),
-                                                     y=self.AXIS_MARGINBOTTOM - GLDefs.TITLEYOFFSET * self.globalGL.glSmallFont.height,
+                                                     x=1.0 - (self.deltaX * len(xUnitsLabels) * smallFont.width),
+                                                     y=self.AXIS_MARGINBOTTOM - GLDefs.TITLEYOFFSET * smallFont.height,
                                                      colour=labelColour, GLContext=self,
                                                      obj=None))
 
@@ -1875,7 +1877,7 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
                                                      font=self.globalGL.glSmallFont,
                                                      x=self.AXIS_OFFSET,
                                                      # y=self.axisT - (GLDefs.TITLEYOFFSET * self.globalGL.glSmallFont.height * self.pixelY),
-                                                     y=1.0 - (GLDefs.TITLEYOFFSET * self.globalGL.glSmallFont.height * self.deltaY),
+                                                     y=1.0 - (GLDefs.TITLEYOFFSET * smallFont.height * self.deltaY),
                                                      colour=labelColour, GLContext=self,
                                                      obj=None))
                 # and the axis dimensions

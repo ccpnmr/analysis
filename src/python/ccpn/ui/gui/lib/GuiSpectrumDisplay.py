@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-01-28 10:04:26 +0000 (Tue, January 28, 2020) $"
+__dateModified__ = "$dateModified: 2020-01-28 16:27:16 +0000 (Tue, January 28, 2020) $"
 __version__ = "$Revision: 3.0.0 $"
 #=========================================================================================
 # Created
@@ -321,20 +321,21 @@ class GuiSpectrumDisplay(CcpnModule):
                                 acceptDrops=True)
         # self.stripFrame.layout().setContentsMargins(0, 0, 0, 0)
 
-        frameStyleSheetTemplate = ''' .%s { border-left: 1px solid #a9a9a9;
-                                      border-right: 1px solid #a9a9a9;
-                                      border-bottom: 1px solid #a9a9a9;
-                                      border-bottom-right-radius: 2px;
-                                      border-bottom-left-radius: 2px;
-                                      %s
-                                      }'''
+        # frameStyleSheetTemplate = ''' .%s { border-left: 1px solid #a9a9a9;
+        #                               border-right: 1px solid #a9a9a9;
+        #                               border-bottom: 1px solid #a9a9a9;
+        #                               border-bottom-right-radius: 2px;
+        #                               border-bottom-left-radius: 2px;
+        #                               %s
+        #                               }'''
 
         if useScrollArea:
             # scroll area for strips
             # This took a lot of sorting-out; better leave as is or test thoroughly
-            self._stripFrameScrollArea = ScrollAreaWithPredicateStylesheet(parent=self.qtParent,
-                                                    styleSheetTemplate = frameStyleSheetTemplate,
-                                                    predicate=styleSheetPredicate, mutator=styleSheetMutator,
+            # self._stripFrameScrollArea = ScrollAreaWithPredicateStylesheet(parent=self.qtParent,
+            self._stripFrameScrollArea = ScrollArea(parent=self.qtParent,
+                                                    # styleSheetTemplate = frameStyleSheetTemplate,
+                                                    # predicate=styleSheetPredicate, mutator=styleSheetMutator,
                                                     setLayout=True, acceptDrops=False,
                                                     scrollBarPolicies=('asNeeded', 'never'))
             self._stripFrameScrollArea.setWidget(self.stripFrame)
@@ -348,7 +349,7 @@ class GuiSpectrumDisplay(CcpnModule):
         else:
             self._stripFrameScrollArea = None
             self.qtParent.getLayout().addWidget(self.stripFrame, stripRow, 0, 1, 7)
-            self.stripFrame.setStyleSheet(frameStyleSheetTemplate % ('Frame', ''))
+            # self.stripFrame.setStyleSheet(frameStyleSheetTemplate % ('Frame', ''))
 
         includeDirection = not self.is1D
         self.phasingFrame = PhasingFrame(parent=self.qtParent,

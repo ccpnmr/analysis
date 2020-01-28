@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-01-28 03:15:19 +0000 (Tue, January 28, 2020) $"
+__dateModified__ = "$dateModified: 2020-01-28 03:30:44 +0000 (Tue, January 28, 2020) $"
 __version__ = "$Revision: 3.0.0 $"
 #=========================================================================================
 # Created
@@ -2253,3 +2253,8 @@ class ColourTab(Widget):
             self._copyWidgetSet = set()
         self._copyWidgetSet.add(widget)
         widget.setVisible(self._showCopyOptions)
+
+    def _cleanWidgetQueue(self):
+        """Clean the items from the stateChange queue
+        """
+        self._changes = OrderedDict()

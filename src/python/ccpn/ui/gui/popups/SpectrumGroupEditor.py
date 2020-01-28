@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-01-28 03:15:19 +0000 (Tue, January 28, 2020) $"
+__dateModified__ = "$dateModified: 2020-01-28 03:30:44 +0000 (Tue, January 28, 2020) $"
 __version__ = "$Revision: 3.0.0 $"
 #=========================================================================================
 # Created
@@ -293,9 +293,16 @@ class SpectrumGroupEditor(_GroupEditorPopupABC):
         self.copyCheckBoxState = []
 
         for specNum, thisSpec in enumerate(self.currentSpectra or []):
-            contoursTab = ContoursTab(parent=self, mainWindow=self.mainWindow, spectrum=thisSpec,
-                                      showCopyOptions=True if len(self.currentSpectra) > 1 else False,
-                                      copyToSpectra=self.currentSpectra)
+
+            if thisSpec.dimensionCount > 1:
+                contoursTab = ContoursTab(parent=self, mainWindow=self.mainWindow, spectrum=thisSpec,
+                                          showCopyOptions=True if len(self.currentSpectra) > 1 else False,
+                                          copyToSpectra=self.currentSpectra)
+            else:
+                contoursTab = ColourTab(parent=self, mainWindow=self.mainWindow, spectrum=thisSpec,
+                                          showCopyOptions=True if len(self.currentSpectra) > 1 else False,
+                                          copyToSpectra=self.currentSpectra)
+
             self._colourTabs.addTab(contoursTab, thisSpec.name)
             contoursTab.setContentsMargins(*TABMARGINS)
 
@@ -385,9 +392,15 @@ class SpectrumGroupEditor(_GroupEditorPopupABC):
                 self._colourTabs.addTab(self._oldTabs[spec], spec.name)
                 self._oldTabs[spec].setCopyOptionsVisible(True if len(self._newSpectra) > 1 else False)
             else:
-                contoursTab = ContoursTab(parent=self, mainWindow=self.mainWindow, spectrum=spec,
-                                          showCopyOptions=True if len(self._newSpectra) > 1 else False,
-                                          copyToSpectra=self._newSpectra)
+                if spec.dimensionCount > 1:
+                    contoursTab = ContoursTab(parent=self, mainWindow=self.mainWindow, spectrum=spec,
+                                              showCopyOptions=True if len(self._newSpectra) > 1 else False,
+                                              copyToSpectra=self._newSpectra)
+                else:
+                    contoursTab = ColourTab(parent=self, mainWindow=self.mainWindow, spectrum=spec,
+                                              showCopyOptions=True if len(self._newSpectra) > 1 else False,
+                                              copyToSpectra=self._newSpectra)
+
                 self._colourTabs.addTab(contoursTab, spec.name)
                 contoursTab.setContentsMargins(*TABMARGINS)
                 contoursTab._populateColour()

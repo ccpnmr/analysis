@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-01-27 19:23:39 +0000 (Mon, January 27, 2020) $"
+__dateModified__ = "$dateModified: 2020-01-28 03:15:19 +0000 (Tue, January 28, 2020) $"
 __version__ = "$Revision: 3.0.0 $"
 #=========================================================================================
 # Created
@@ -256,8 +256,7 @@ class SpectrumGroupEditor(_GroupEditorPopupABC):
         # TODO:ED set to the size of the first tab - or a fixed size so the first tab looks nice
 
         self._populate()
-        # self.setMinimumSize(600, 550)  # change to a calculation rather than a guess
-        self.setMinimumSize(60, 60)  # change to a calculation rather than a guess
+        self.setMinimumSize(600, 550)  # change to a calculation rather than a guess
 
         self.connectSignals()
         self.setSizeGripEnabled(False)
@@ -482,6 +481,9 @@ class SeriesFrame(Widget):
                grid=(row, col + 2))
         self.getLayout().setRowStretch(row, 10)
 
+        # get colours from the lineEdit and copy to the plainTextEdit
+        # yourWidget.palette().highlight().color().name()?
+
     def _fillSeriesFrame(self, defaultItems):
         """Reset the contents of the series frame for changed spectrum list
         """
@@ -507,6 +509,7 @@ class SeriesFrame(Widget):
             seriesLabel.setSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Fixed)
 
             seriesEditor = PlainTextEditor(self._seriesFrame, grid=(sRow, 1))
+            # seriesEditor._setFocusColour()
             seriesEditor.textChanged.connect(partial(self._queueChangeSpectrumSeriesValues,
                                                      seriesEditor, self.defaultObject,
                                                      spec, sRow))

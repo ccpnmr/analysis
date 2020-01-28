@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-01-28 00:02:07 +0000 (Tue, January 28, 2020) $"
+__dateModified__ = "$dateModified: 2020-01-28 03:15:19 +0000 (Tue, January 28, 2020) $"
 __version__ = "$Revision: 3.0.0 $"
 #=========================================================================================
 # Created
@@ -754,13 +754,13 @@ class ValidateSpectraFrameABC(Frame):
 
                 # NOTE:ED AUTOUPDATE
                 if not self.AUTOUPDATE and self._dataUrlCallback:
-                    print('>>>  dataUrl callback and validate')
+                    # print('>>>  dataUrl callback and validate')
                     self._dataUrlCallback(dataUrl, newUrl, urlValid, urlNum)
                     self._validateSpectra()
 
                 elif dataUrl.url.dataLocation != newUrl:
                     # define a function to clone the dataUrl
-                    print('>>>  dataUrl callback')
+                    # print('>>>  dataUrl callback')
                     self.dataUrlFunc(dataUrl, newUrl)
 
                 # print('>>>_setDataUrlPath post', dataUrl.url.dataLocation)
@@ -885,14 +885,9 @@ class ValidateSpectraFrameABC(Frame):
             # pathData.setText(apiDataStore.fullPath)
             pathData.setText(DIRSEP.join([apiDataStore.dataUrl.url.path, apiDataStore.path]))
         else:
-            # TODO:ED check this
             pathData.setText(apiDataStore.fullPath)
 
-        pathUrlLabel.set(apiDataStore.dataUrl.name)
-        # print('>>>   pathData', apiDataStore.dataUrl.name)
-        # print('>>>   pathData', apiDataStore.dataUrl.url.path)
-        # print('>>>   pathData', apiDataStore.path, apiDataStore.path == apiDataStore.fullPath)
-
+        pathUrlLabel.set('['+apiDataStore.dataUrl.name+']')
         pathData.validator().resetCheck()
 
     def _populatePathData(self, spectrum):

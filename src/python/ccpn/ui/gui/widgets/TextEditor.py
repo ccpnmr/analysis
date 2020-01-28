@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-01-27 19:23:40 +0000 (Mon, January 27, 2020) $"
+__dateModified__ = "$dateModified: 2020-01-28 03:15:20 +0000 (Tue, January 28, 2020) $"
 __version__ = "$Revision: 3.0.0 $"
 #=========================================================================================
 # Created
@@ -29,12 +29,12 @@ import sys
 import os
 from PyQt5 import QtGui, QtWidgets, QtCore, QtPrintSupport
 from ccpn.ui.gui.widgets.FileDialog import FileDialog
-
 from ccpn.ui.gui.widgets.Base import Base
 from ccpn.ui.gui.widgets.Action import Action
 from ccpn.ui.gui.guiSettings import fixedWidthFont
 from ccpn.ui.gui.widgets.Icon import Icon
 from ccpn.ui.gui.widgets.Label import Label
+from ccpn.ui.gui.guiSettings import getColours, BORDERFOCUS, BORDERNOFOCUS
 
 
 class TextEditor(QtWidgets.QTextEdit, Base):
@@ -158,6 +158,7 @@ class PlainTextEditor(QtWidgets.QPlainTextEdit, Base):
     receivedFocus = QtCore.pyqtSignal()
 
     def __init__(self, parent=None, filename=None, **kwds):
+
         super().__init__(parent)
         Base._init(self, **kwds)
 
@@ -172,6 +173,25 @@ class PlainTextEditor(QtWidgets.QPlainTextEdit, Base):
 
         palette = self.viewport().palette()
         self._background = palette.color(self.viewport().backgroundRole())
+
+        self._setFocusColour()
+        # self.setAttribute(QtCore.Qt.WA_MacShowFocusRect)
+
+    def _setFocusColour(self, focusColour=None, noFocusColour=None):
+        """Set the focus/noFocus colours for the widget
+        """
+        focusColour = getColours()[BORDERFOCUS]
+        noFocusColour = getColours()[BORDERNOFOCUS]
+        styleSheet = "QPlainTextEdit { " \
+                     "border: 1px solid;" \
+                     "border-radius: 2px;" \
+                     "border-color: %s;" \
+                     "} " \
+                     "QPlainTextEdit:focus { " \
+                     "border: 1px solid %s; " \
+                     "border-radius: 2px; " \
+                     "}" % (noFocusColour, focusColour)
+        self.setStyleSheet(styleSheet)
 
     def _addGrip(self):
         # an idea to add a grip handle - can't thing of any other way

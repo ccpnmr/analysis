@@ -5,7 +5,7 @@ Settings used in gui modules, widgets and popups
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: CCPN $"
-__dateModified__ = "$dateModified: 2017-07-07 16:32:41 +0100 (Fri, July 07, 2017) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2020-01-28 03:15:19 +0000 (Tue, January 28, 2020) $"
 __version__ = "$Revision: 3.0.0 $"
 #=========================================================================================
 # Created
@@ -200,6 +200,10 @@ GUITABLE_SELECTED_BACKGROUND = 'GUITABLE_SELECTED_BACKGROUND'
 STRIPHEADER_FOREGROUND = 'STRIPHEADER_FOREGROUND'
 STRIPHEADER_BACKGROUND = 'STRIPHEADER_BACKGROUND'
 
+# border for focus/noFocus - QPlainTextEdit
+BORDERNOFOCUS = 'BORDER_NOFOCUS'
+BORDERFOCUS = 'BORDER_FOCUS'
+
 # Colours
 TEXT_COLOUR = '#555D85'
 SOFT_DIVIDER_COLOUR = '#888DA5'
@@ -211,6 +215,9 @@ GREEN1 = '#009a00'
 WARNING_RED = '#e01010'
 FIREBRICK = hexToRgbRatio([k for k, v in allColours.items() if v == 'firebrick'][0])
 LIGHTCORAL = hexToRgbRatio([k for k, v in allColours.items() if v == 'lightcoral'][0])
+
+BORDERNOFOCUS_COLOUR = '#A9A9A9'
+BORDERFOCUS_COLOUR = '#4E86F6'
 
 # Shades
 CCPNGLWIDGET_REGIONSHADE = 0.30
@@ -285,6 +292,9 @@ colourSchemes = {
 
         STRIPHEADER_FOREGROUND           : TEXT_COLOUR,
         STRIPHEADER_BACKGROUND           : '#ebebeb',
+
+        BORDERFOCUS                      : BORDERFOCUS_COLOUR,
+        BORDERNOFOCUS                    : BORDERNOFOCUS_COLOUR,
 
         MARKS_COLOURS                    : MARK_LINE_COLOUR_DICT,
         SPECTRUM_HEXCOLOURS              : spectrumHexDarkColours,

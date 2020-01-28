@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-01-28 16:27:16 +0000 (Tue, January 28, 2020) $"
+__dateModified__ = "$dateModified: 2020-01-28 16:57:39 +0000 (Tue, January 28, 2020) $"
 __version__ = "$Revision: 3.0.0 $"
 #=========================================================================================
 # Created
@@ -724,17 +724,11 @@ class GuiSpectrumDisplay(CcpnModule):
         """Move a strip within a spectrumDisplay by dragging the strip label to another strip
         """
         if moveStrip.spectrumDisplay == self:
-            self.stripFrame.blockSignals(True)
-            self.stripFrame.setUpdatesEnabled(False)
-
             strips = self.orderedStrips
             stripInd = strips.index(dropStrip)
 
             if stripInd != strips.index(moveStrip):
                 moveStrip.moveTo(stripInd)
-
-            self.stripFrame.blockSignals(False)
-            self.stripFrame.setUpdatesEnabled(True)
 
     def _handlePeakList(self, peakList):
         """See if peaklist can be copied

@@ -55,7 +55,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-01-28 16:27:16 +0000 (Tue, January 28, 2020) $"
+__dateModified__ = "$dateModified: 2020-01-28 16:57:39 +0000 (Tue, January 28, 2020) $"
 __version__ = "$Revision: 3.0.0 $"
 #=========================================================================================
 # Created
@@ -2962,6 +2962,46 @@ class CcpnGLWidget(QOpenGLWidget):
         if phasingFrame.isVisible():
             self.buildStaticTraces()
 
+    from ccpn.util.decorators import profile
+    @profile
+    def _buildGLWithProfile(self):
+        """Separate the building of the display from the paint event; not sure that this is required
+        """
+        # only call if the axes have changed
+        if self._updateAxes:
+            self.buildGrid()
+            self.buildDiagonals()
+            self._updateAxes = False
+
+        self.buildCursors()
+        self.buildSpectra()
+        self.buildBoundingBoxes()
+
+        self._GLPeaks._spectrumSettings = self._spectrumSettings
+        self._GLMultiplets._spectrumSettings = self._spectrumSettings
+        self._GLIntegrals._spectrumSettings = self._spectrumSettings
+
+        if not self._stackingMode:
+            self._GLPeaks.buildSymbols()
+            self._GLMultiplets.buildSymbols()
+            self._GLIntegrals.buildSymbols()
+
+            if self.buildMarks:
+                self._marksList.renderMode = GLRENDERMODE_REBUILD
+                self.buildMarks = False
+            self.buildMarksRulers()
+
+            self.buildRegions()
+
+        if not self._stackingMode:
+            self._GLPeaks.buildLabels()
+            self._GLMultiplets.buildLabels()
+            self._GLIntegrals.buildLabels()
+
+        phasingFrame = self.spectrumDisplay.phasingFrame
+        if phasingFrame.isVisible():
+            self.buildStaticTraces()
+
     def paintGL(self):
         """Handle the GL painting
         """
@@ -2994,7 +3034,12 @@ class CcpnGLWidget(QOpenGLWidget):
                 return
 
             with self.glBlocking():
-                self._buildGL()
+                # simple profile of building all
+                if hasattr(self.project, '_buildWithProfile') and self.project._buildWithProfile is True:
+                    self.project._buildWithProfile = False
+                    self._buildGLWithProfile()
+                else:
+                    self._buildGL()
                 self._paintGL()
 
             # make all following paint events into mouse only

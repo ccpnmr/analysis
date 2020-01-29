@@ -55,7 +55,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-01-28 16:57:39 +0000 (Tue, January 28, 2020) $"
+__dateModified__ = "$dateModified: 2020-01-29 09:03:04 +0000 (Wed, January 29, 2020) $"
 __version__ = "$Revision: 3.0.0 $"
 #=========================================================================================
 # Created
@@ -485,6 +485,7 @@ class CcpnGLWidget(QOpenGLWidget):
         self._visibleOrdering = []
         self._firstVisible = None
         self.visiblePlaneList = {}
+        self.visiblePlaneListPointValues = {}
         self._visibleSpectrumViewsChange = False
         self._matchingIsotopeCodes = False
 
@@ -2902,6 +2903,7 @@ class CcpnGLWidget(QOpenGLWidget):
     #     # set the first visible, or the first in the ordered list
     #     self._firstVisible = visibleSpectrumViews[0] if visibleSpectrumViews else self._ordering[0] if self._ordering and not self._ordering[0].isDeleted else None
     #     self.visiblePlaneList = {}
+    #     self.visiblePlaneListPointValues = {}
     #     for visibleSpecView in self._ordering:
     #         self.visiblePlaneList[visibleSpecView] = visibleSpecView._getVisiblePlaneList(self._firstVisible)
     #

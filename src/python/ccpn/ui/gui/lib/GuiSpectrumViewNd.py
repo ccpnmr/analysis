@@ -4,7 +4,7 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -13,8 +13,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: CCPN $"
-__dateModified__ = "$dateModified: 2017-07-07 16:32:44 +0100 (Fri, July 07, 2017) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2020-01-29 09:03:03 +0000 (Wed, January 29, 2020) $"
 __version__ = "$Revision: 3.0.0 $"
 #=========================================================================================
 # Created
@@ -848,11 +848,13 @@ class GuiSpectrumViewNd(GuiSpectrumView):
         orderedAxes = self._apiStripSpectrumView.strip.orderedAxes
 
         if dimensionCount <= 2:
-            return
+            return None, None
 
         else:
 
             planeList = ()
+            planePointValues = ()
+
             for dim in range(2, dimensionCount):
 
                 # make sure there is always a spectrumView to base visibility on
@@ -883,8 +885,10 @@ class GuiSpectrumViewNd(GuiSpectrumView):
                 if hasattr(zDataDim, 'primaryDataDimRef'):
                     ddr = zDataDim.primaryDataDimRef
                     valueToPoint = ddr and ddr.valueToPoint
+                    pointToValue = ddr and ddr.pointToValue
                 else:
                     valueToPoint = zDataDim.valueToPoint
+                    pointToValue = zDataDim.pointToValue
 
                 # -1 below because points start at 1 in data model
                 zPointFloat0 = valueToPoint(zRegionValue[0]) - 1
@@ -914,8 +918,11 @@ class GuiSpectrumViewNd(GuiSpectrumView):
 
                 planeList = planeList + ((tuple(zz for zz in range(zPoint0, zPoint1)), zPointOffset, zPointCount),)
 
+                # need to add 0.5 for the indexing in the api
+                planePointValues = planePointValues + ((tuple(pointToValue(zz+0.5) for zz in range(zPoint0, zPoint1+1)), zPointOffset, zPointCount),)
+
             # return (tuple(zz for zz in range(zPoint0, zPoint1)), zPointOffset, zPointCount)
-            return planeList
+            return planeList, planePointValues
 
     def _getValues(self, dimensionCount=None):
         # ejb - get some spectrum information for scaling the display

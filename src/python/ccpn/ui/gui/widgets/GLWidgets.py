@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-01-28 16:27:17 +0000 (Tue, January 28, 2020) $"
+__dateModified__ = "$dateModified: 2020-01-29 09:03:04 +0000 (Wed, January 29, 2020) $"
 __version__ = "$Revision: 3.0.0 $"
 #=========================================================================================
 # Created
@@ -43,6 +43,7 @@ from ccpn.util.Constants import AXIS_FULLATOMNAME, AXIS_MATCHATOMTYPE, AXIS_ACTI
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
 from ccpn.ui.gui.lib.OpenGL import CcpnOpenGLDefs as GLDefs
 from ccpn.util.Logging import getLogger
+
 
 try:
     from OpenGL import GL, GLU, GLUT
@@ -210,6 +211,7 @@ class GuiNdWidget(CcpnGLWidget):
         self._firstVisible = visibleSpectrumViews[0] if visibleSpectrumViews else self._ordering[0] if self._ordering and not self._ordering[
             0].isDeleted else None
         self.visiblePlaneList = {}
+        self.visiblePlaneListPointValues = {}
 
         minList = [self._spectrumSettings[sp][SPECTRUM_VALUEPERPOINT] if SPECTRUM_VALUEPERPOINT in self._spectrumSettings[sp] else None
                    for sp in self._ordering if sp in self._spectrumSettings]
@@ -227,8 +229,9 @@ class GuiNdWidget(CcpnGLWidget):
                 minimumValuePerPoint = val
 
         for visibleSpecView in self._ordering:
-            self.visiblePlaneList[visibleSpecView] = visibleSpecView._getVisiblePlaneList(firstVisible=self._firstVisible,
-                                                                                          minimumValuePerPoint=minimumValuePerPoint)
+            self.visiblePlaneList[visibleSpecView], self.visiblePlaneListPointValues[visibleSpecView] = visibleSpecView._getVisiblePlaneList(
+                firstVisible=self._firstVisible,
+                minimumValuePerPoint=minimumValuePerPoint)
 
         # update the labelling lists
         self._GLPeaks.setListViews(self._ordering)
@@ -308,7 +311,7 @@ class Gui1dWidget(CcpnGLWidget):
         """
         integrals = []
 
-        if not self._stackingMode and not(self.is1D and self.strip._isPhasingOn):
+        if not self._stackingMode and not (self.is1D and self.strip._isPhasingOn):
             for reg in self._GLIntegrals._GLSymbols.values():
                 if not reg.integralListView.isVisible() or not reg.spectrumView.isVisible():
                     continue
@@ -572,13 +575,12 @@ class Gui1dWidget(CcpnGLWidget):
         if spectrum.intensities is not None and spectrum.intensities.size != 0:
             # need to interpolate between pp-1, and pp
             peak.height = spectrum.intensities[int(pp) - 1] + \
-                        frac * (spectrum.intensities[int(pp)] - spectrum.intensities[int(pp) - 1])
+                          frac * (spectrum.intensities[int(pp)] - spectrum.intensities[int(pp) - 1])
 
         peak.position = p0
 
 
 class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
-
     is1D = True
     AXIS_MARGINRIGHT = 80
     AXIS_MARGINBOTTOM = 25
@@ -605,9 +607,9 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
             fmt.setSamples(antiAlias)
             self.setFormat(fmt)
 
-            samples = self.format().samples() # GST a use for the walrus
+            samples = self.format().samples()  # GST a use for the walrus
             if samples != antiAlias:
-                getLogger().warning('hardware changed antialias level, expected %i got %i...' % (samples,antiAlias))
+                getLogger().warning('hardware changed antialias level, expected %i got %i...' % (samples, antiAlias))
         except Exception as es:
             getLogger().warning('error during anti aliasing setup %s, anti aliasing disabled...' % str(es))
 
@@ -913,9 +915,9 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
                                 d[1] = self._round_sig(d[1], sig=4)
 
                                 if ax == 0:
-                                    includeGrid = not (self.XMode == self._intFormat and d[0] < 1 and abs(p1[0]-int(p1[0])) > d[0]/2.0)
+                                    includeGrid = not (self.XMode == self._intFormat and d[0] < 1 and abs(p1[0] - int(p1[0])) > d[0] / 2.0)
                                 else:
-                                    includeGrid = not (self.YMode == self._intFormat and d[1] < 1 and abs(p1[1]-int(p1[1])) > d[1]/2.0)
+                                    includeGrid = not (self.YMode == self._intFormat and d[1] < 1 and abs(p1[1] - int(p1[1])) > d[1] / 2.0)
                                 # includeGrid = True
 
                                 if includeGrid:
@@ -1058,13 +1060,13 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
 
         # build the axes
         self.axisLabelling, self.axesChanged = self._buildAxes(self.gridList[0], axisList=[0, 1],
-                                                                 scaleGrid=[1, 0],
-                                                                 r=self.foreground[0],
-                                                                 g=self.foreground[1],
-                                                                 b=self.foreground[2],
-                                                                 transparency=300.0,
-                                                                 _includeDiagonal=self._matchingIsotopeCodes,
-                                                                 _diagonalList=None)        # self.diagonalGLList)
+                                                               scaleGrid=[1, 0],
+                                                               r=self.foreground[0],
+                                                               g=self.foreground[1],
+                                                               b=self.foreground[2],
+                                                               transparency=300.0,
+                                                               _includeDiagonal=self._matchingIsotopeCodes,
+                                                               _diagonalList=None)  # self.diagonalGLList)
 
         if self.axesChanged:
             if self.highlighted:
@@ -1114,7 +1116,6 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
         """Separate the building of the display from the paint event; not sure that this is required
         """
         self.buildGrid()
-
 
     def _paintGL(self):
         w = self.w
@@ -1187,7 +1188,7 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
         if aDict[GLNotifier.GLSOURCE] != self and aDict[GLNotifier.GLSPECTRUMDISPLAY] == self.spectrumDisplay:
 
             # read values from dataDict and set units
-            if aDict[GLNotifier.GLVALUES]:      # and aDict[GLNotifier.GLVALUES][GLDefs.AXISLOCKASPECTRATIO]:
+            if aDict[GLNotifier.GLVALUES]:  # and aDict[GLNotifier.GLVALUES][GLDefs.AXISLOCKASPECTRATIO]:
 
                 self._xUnits = aDict[GLNotifier.GLVALUES][GLDefs.AXISXUNITS]
                 self._yUnits = aDict[GLNotifier.GLVALUES][GLDefs.AXISYUNITS]
@@ -1195,7 +1196,6 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
                 aL = aDict[GLNotifier.GLVALUES][GLDefs.AXISLOCKASPECTRATIO]
                 uFA = aDict[GLNotifier.GLVALUES][GLDefs.AXISUSEDEFAULTASPECTRATIO]
                 if self._axisLocked != aL or self._useDefaultAspect != uFA:
-
                     # self._xUnits = aDict[GLNotifier.GLVALUES][GLDefs.AXISXUNITS]
                     # self._yUnits = aDict[GLNotifier.GLVALUES][GLDefs.AXISYUNITS]
                     self._axisLocked = aL
@@ -1402,6 +1402,7 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
         self._visibleOrdering = []
         self._firstVisible = None
         self.visiblePlaneList = {}
+        self.visiblePlaneListPointValues = {}
         self._visibleSpectrumViewsChange = False
         self._matchingIsotopeCodes = False
 
@@ -1512,7 +1513,7 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
         if aDict[GLNotifier.GLSOURCE] != self and aDict[GLNotifier.GLSPECTRUMDISPLAY] == self.spectrumDisplay:
 
             # read values from dataDict and set units
-            if aDict[GLNotifier.GLVALUES]:      # and aDict[GLNotifier.GLVALUES][GLDefs.AXISLOCKASPECTRATIO]:
+            if aDict[GLNotifier.GLVALUES]:  # and aDict[GLNotifier.GLVALUES][GLDefs.AXISLOCKASPECTRATIO]:
 
                 self._xUnits = aDict[GLNotifier.GLVALUES][GLDefs.AXISXUNITS]
                 self._yUnits = aDict[GLNotifier.GLVALUES][GLDefs.AXISYUNITS]
@@ -1520,7 +1521,6 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
                 aL = aDict[GLNotifier.GLVALUES][GLDefs.AXISLOCKASPECTRATIO]
                 uFA = aDict[GLNotifier.GLVALUES][GLDefs.AXISUSEDEFAULTASPECTRATIO]
                 if self._axisLocked != aL or self._useDefaultAspect != uFA:
-
                     # self._xUnits = aDict[GLNotifier.GLVALUES][GLDefs.AXISXUNITS]
                     # self._yUnits = aDict[GLNotifier.GLVALUES][GLDefs.AXISYUNITS]
                     self._axisLocked = aL
@@ -1640,11 +1640,11 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
 
                         # coordinates have already been flipped
                         # self.doubleCursorCoordinate[n] = mouseMovedDict[DOUBLEAXIS_FULLATOMNAME][axis]
-                        self.doubleCursorCoordinate[1-n] = self.cursorCoordinate[n]
+                        self.doubleCursorCoordinate[1 - n] = self.cursorCoordinate[n]
 
                     else:
                         self.cursorCoordinate[n] = None
-                        self.doubleCursorCoordinate[1-n] = None
+                        self.doubleCursorCoordinate[1 - n] = None
 
                 self.current.cursorPosition = (self.cursorCoordinate[0], self.cursorCoordinate[1])
 
@@ -1704,7 +1704,6 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
                                                dimension=2,
                                                GLContext=self))
 
-
         self.viewports = GLViewports()
 
         # define the main viewports
@@ -1751,7 +1750,6 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
 
         # # define the remaining corner
         # self.viewports.addViewport(GLDefs.AXISCORNER, self, (-self.AXIS_MARGINRIGHT, 'w'), (0, 'a'), (0, 'w'), (self.AXIS_MARGINBOTTOM, 'a'))
-
 
         # This is the correct blend function to ignore stray surface blending functions
         GL.glBlendFuncSeparate(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA, GL.GL_ONE, GL.GL_ONE)
@@ -2129,7 +2127,6 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
         self.current.mouseMovedDict = mouseMovedDict
 
         if event.buttons() & (Qt.LeftButton | Qt.RightButton):
-
             # Main mouse drag event - handle moving the axes with the mouse
             self.axisL -= dx * self.pixelX
             self.axisR -= dx * self.pixelX
@@ -2364,7 +2361,6 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
     def updateVisibleSpectrumViews(self):
         self._visibleSpectrumViewsChange = True
         self.update()
-
 
 
 class GuiNdWidgetAxis(Gui1dWidgetAxis):

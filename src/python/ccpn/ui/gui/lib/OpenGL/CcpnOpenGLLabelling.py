@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-01-28 09:52:39 +0000 (Tue, January 28, 2020) $"
+__dateModified__ = "$dateModified: 2020-01-29 09:03:04 +0000 (Wed, January 29, 2020) $"
 __version__ = "$Revision: 3.0.0 $"
 #=========================================================================================
 # Created
@@ -1920,15 +1920,64 @@ class GLpeakListMethods():
         inPlane = True
         endPlane = 0
 
+        # # settings = self._spectrumSettings[spectrumView]
+        # pos = peak.position
+        # thisVPL = self._GLParent.visiblePlaneListPointValues[spectrumView]
+        #
+        # for ii, displayIndex in enumerate(displayIndices[2:]):
+        #     if displayIndex is not None:
+        #
+        #         # If no axis matches the index may be None
+        #         zPosition = pos[displayIndex]
+        #         if not zPosition:
+        #             return False, False, 0, 1.0
+        #
+        #         if not thisVPL:
+        #             return False, False, 0, 1.0
+        #
+        #         planes = thisVPL[ii]
+        #         if not (planes and planes[0]):
+        #             return False, False, 0, 1.0
+        #
+        #         visiblePlaneListPointValues = planes[0]
+        #         vplLen = len(visiblePlaneListPointValues)
+        #
+        #         if visiblePlaneListPointValues[1] >= zPosition > visiblePlaneListPointValues[vplLen - 2]:
+        #             # return True, False, 0, 1.0
+        #             # in the visible region
+        #             pass
+        #
+        #         # exit if don't want to view outOfPlane peaks
+        #         elif not viewOutOfPlanePeaks:
+        #             return False, False, 0, 1.0
+        #
+        #         # elif actualPlane == visiblePlaneList[0]:
+        #         elif visiblePlaneListPointValues[0] >= zPosition > visiblePlaneListPointValues[1]:
+        #             # return False, True, 1, GLDefs.OUTOFPLANEFADE
+        #             inPlane = False
+        #             endPlane = 1
+        #
+        #         # elif actualPlane == visiblePlaneList[vplLen - 1]:
+        #         elif visiblePlaneListPointValues[vplLen-2] >= zPosition > visiblePlaneListPointValues[vplLen-1]:
+        #             # return False, True, 2, GLDefs.OUTOFPLANEFADE
+        #             inPlane = False
+        #             endPlane = 2
+        #
+        #         else:
+        #             # catch any stray conditions
+        #             return False, False, 0, 1.0
+
+        settings = self._spectrumSettings[spectrumView]
+        pos = peak.position
+
         for ii, displayIndex in enumerate(displayIndices[2:]):
             if displayIndex is not None:
 
                 # If no axis matches the index may be None
-                zPosition = peak.position[displayIndex]
+                zPosition = pos[displayIndex]
                 if not zPosition:
                     return False, False, 0, 1.0
 
-                settings = self._spectrumSettings[spectrumView]
                 zPointFloat0 = settings[GLDefs.SPECTRUM_VALUETOPOINT][ii](zPosition)
                 actualPlane = int(zPointFloat0 + 0.5) - (1 if zPointFloat0 >= 0 else 2)
 

@@ -11,7 +11,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-01-08 14:37:27 +0000 (Wed, January 08, 2020) $"
+__dateModified__ = "$dateModified: 2020-01-30 09:15:47 +0000 (Thu, January 30, 2020) $"
 __version__ = "$Revision: 3.0.0 $"
 #=========================================================================================
 # Created
@@ -38,7 +38,6 @@ from ccpn.util.Logging import getLogger
 
 
 class ShortcutsPopup(CcpnDialogMainWidget):
-
     USESCROLLWIDGET = True
 
     def __init__(self, parent=None, mainWindow=None, title='Define User Shortcuts', **kwds):
@@ -53,8 +52,14 @@ class ShortcutsPopup(CcpnDialogMainWidget):
 
         self.setMinimumSize(400, 400)
 
-        # add a close button just for clarity
-        self.setCloseButton(callback=self.reject)
+        # ButtonList(self, grid=(1, 1),
+        #            texts=['Cancel', 'Save', 'Save and Close'],
+        #            callbacks=[self.close, self.save, self.saveAndQuit])
+
+        # add close/save/saveAndClose buttons (close/apply/ok)
+        self.setCloseButton(callback=self.close)
+        self.setApplyButton(callback=self.save, text='Save')
+        self.setOkButton(callback=self.saveAndQuit, text='Save and Close')
         self.setDefaultButton(CcpnDialogMainWidget.CLOSEBUTTON)
 
         # make the buttons appear

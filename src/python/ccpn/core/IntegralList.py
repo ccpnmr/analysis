@@ -32,7 +32,6 @@ from ccpn.util.decorators import logCommand
 from ccpn.core.lib.ContextManagers import newObject
 from ccpn.util.Logging import getLogger
 from ccpn.core.lib.SpectrumLib import _oldEstimateNoiseLevel1D
-from scipy import signal
 from ccpn.util.Common import percentage
 from ccpn.core.PMIListABC import PMIListABC
 from scipy import signal
@@ -167,7 +166,7 @@ class IntegralList(PMIListABC):
         """
         # TODO: add excludeRegions option. Calculate Negative peak integral.
         # self._project.suspendNotification()
-        from ccpn.core.lib.peakUtils import peakdet
+        from ccpn.core.lib.peakUtils import simple1DPeakPicker
         from ccpn.core.PeakList import _filterROI1Darray, estimateNoiseLevel1D
 
         try:
@@ -202,7 +201,7 @@ class IntegralList(PMIListABC):
                     filteredX = np.where((x <= i[0]) & (x >= i[1]))
                     filteredY = spectrum.intensities[filteredX]
                     if findPeak:  # pick peaks and link to integral
-                        maxValues, minValues = peakdet(y=filteredY, x=filteredX[0], delta=noiseThreshold / deltaFactor)
+                        maxValues, minValues = simple1DPeakPicker(y=filteredY, x=filteredX[0], delta=noiseThreshold / deltaFactor)
                         if len(maxValues) > 1:  #calculate centre of mass or     #   add to multiplet ??
 
                             positions = []

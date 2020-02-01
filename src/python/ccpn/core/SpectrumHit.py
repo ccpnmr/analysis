@@ -56,25 +56,28 @@ def _grade(i):
     for k,v in defaultScoring.items():
         if i>=v: return k
 
-def _getReferenceLevel(project, referenceSpectrum):
+def _getReferenceLevel(referenceSpectrum):
     '''
 
     :return:int  the hit level based on  how many experiment type the reference has appeared to be a hit.
     EG. STD only -- Grade:1
     EG. STD and Wlogsy -- Grade:2 etc
 
-    VERY SLOW
+
 
     '''
+
+    if referenceSpectrum is None:
+        return 0, []
+
     experimentTypes = []
     levelHit = 1
-    for spectrumHit in project.spectrumHits:
-        linkedReferenceSpectra = spectrumHit._linkedReferenceSpectra
-        if referenceSpectrum in linkedReferenceSpectra:
+    for spectrumHit in referenceSpectrum.project.spectrumHits:
+        if referenceSpectrum in spectrumHit._linkedReferenceSpectra:
             experimentTypes.append(spectrumHit._parent.experimentType)
-            levelHit = len(set(experimentTypes))
+    levelHit = set(experimentTypes)
 
-    return levelHit
+    return len(levelHit), list(experimentTypes)
 
 def scoreHit(heights, snr):
     score = 0
@@ -401,6 +404,17 @@ class SpectrumHit(AbstractWrapperObject):
         '''
         return self._parent.experimentType
 
+    def _getPeaksForReference(self, reference):
+        # not needed but another way as in _getReferencePeakHits
+        ph = self._getPeakHits()
+        dd = {}
+        for p in ph:
+            pr = [p for p in p._linkedPeaks if p.peakList.spectrum == reference]
+            if len(pr)>0:
+                dd[p] = pr
+
+        return dd
+
     def _getReferenceHitsSpectra(self):
         '''Return reference spectra identified as hit in a particular mixture. The mixture is the spectrumHit'''
 
@@ -408,6 +422,9 @@ class SpectrumHit(AbstractWrapperObject):
         linkedPeaks = [p._linkedPeaks for p in peaks]
         spectra = [p.peakList.spectrum for lps in linkedPeaks for p in lps]
         linkedSpectra = list(set(spectra))
+
+        # linkedSpectra = spectra
+
         self._linkedReferenceSpectra = linkedSpectra
         return linkedSpectra
 

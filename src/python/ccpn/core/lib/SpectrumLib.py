@@ -172,6 +172,28 @@ def align2HSQCs(refSpectrum, querySpectrum, refPeakListIdx=-1, queryPeakListIdx=
 
     return shifts, correctedValues
 
+def _estimate1DSpectrumSNR(spectrum, engine='max'):
+    '''
+
+    :param spectrum:
+    :type spectrum:
+    :param engine: max: calculate using the max intensity of all spectrum
+    :type engine:
+    :return:
+    :rtype:
+    '''
+    engines = {'max':np.max, 'mean':np.mean, 'std':np.std}
+    from ccpn.core.PeakList import estimateSNR_1D
+
+    if engine in engines:
+        func = engines.get(engine)
+    else:
+        func = np.max
+        print('Engine not recognised. Using Default')
+    _snr = estimateSNR_1D(noiseLevels=[spectrum.noiseLevel, spectrum.negativeNoiseLevel],
+                                   signalPoints=[func(spectrum.intensities)])
+
+    return _snr[0]
 
 # refSpectrum = project.spectra[]
 # querySpectrum = project.spectra[]

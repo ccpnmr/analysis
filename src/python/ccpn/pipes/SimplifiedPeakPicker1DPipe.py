@@ -30,7 +30,7 @@ from ccpn.ui.gui.widgets.Spinbox import Spinbox
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.DoubleSpinbox import DoubleSpinbox
-from ccpn.core.lib.peakUtils import peakdet
+from ccpn.core.lib.peakUtils import simple1DPeakPicker
 #### NON GUI IMPORTS
 from ccpn.framework.lib.Pipe import SpectraPipe
 from ccpn.pipes.lib._getNoiseLevel import _getNoiseLevelForPipe
@@ -99,7 +99,7 @@ class PeakPicker1DPipe(SpectraPipe):
         else:
             self._kwargs.update({ExcludeRegions: DefaultExcludeRegions})
             excludeRegions = self._kwargs[ExcludeRegions]
-        peakdet([1],[1],1)# just compile
+        simple1DPeakPicker([1], [1], 1)# just compile
         from ccpn.core.lib.ContextManagers import  undoBlockWithoutSideBar, notificationEchoBlocking
         with undoBlockWithoutSideBar():
             with notificationEchoBlocking():

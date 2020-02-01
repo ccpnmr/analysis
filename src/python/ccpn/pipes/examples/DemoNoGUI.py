@@ -33,11 +33,9 @@ import pandas as pd
 ##########################################      ALGORITHM       ########################################################
 ########################################################################################################################
 
-
 def myAlgorithm(data):
     # do something
     return data
-
 
 ########################################################################################################################
 ##########################################     GUI PIPE    #############################################################
@@ -46,11 +44,9 @@ def myAlgorithm(data):
 ##  GUI PIPE  -->  None . If the pipe is inserted in
 ## the guiPipeline will still appear as an empty guiPipe but without widgets.
 
-
 ########################################################################################################################
 ##########################################       PIPE      #############################################################
 ########################################################################################################################
-
 
 class DemoPipe3(PandasPipe):
     'Pandas pipe with No Gui, Feeds with a dataFrame, returns a DataFrame '
@@ -59,3 +55,4 @@ class DemoPipe3(PandasPipe):
     def runPipe(self, dataframe: pd.DataFrame) -> pd.DataFrame:
         outputDataframe = myAlgorithm(dataframe)
         return outputDataframe
+

@@ -144,6 +144,7 @@ def estimateSNR_1D(noiseLevels, signalPoints, ratio=2.5):
     if dd != 0 and dd is not None:
         snRatios = (ratio * pp) / dd
         return snRatios
+    print('Failed to estimate SNR')
     return [None] * len(signalPoints)
 
 
@@ -389,8 +390,8 @@ class PeakList(PMIListABC):
         return peaks
 
     @logCommand(get='self')
-    def pickPeaks1dFiltered(self, size: int = 9, mode: str = 'wrap', factor=2, excludeRegions=None,
-                            positiveNoiseThreshold=None, negativeNoiseThreshold=None, negativePeaks=True):
+    def pickPeaks1dFiltered(self, size: int = 9, mode: str = 'wrap', factor=10, excludeRegions=None,
+                            positiveNoiseThreshold=None, negativeNoiseThreshold=None, negativePeaks=True,stdFactor=0.5):
         """
         Pick 1D peaks from data in self.spectrum.
         """
@@ -403,16 +404,22 @@ class PeakList(PMIListABC):
             # data = spectrum._apiDataSource.get1dSpectrumData()
             data = np.array([spectrum.positions, spectrum.intensities])
             ppmValues = data[0]
-            if positiveNoiseThreshold == 0.0 or positiveNoiseThreshold is None:
-                positiveNoiseThreshold = _oldEstimateNoiseLevel1D(spectrum.intensities, factor=factor)
-                if spectrum.noiseLevel is None:
-                    positiveNoiseThreshold = _oldEstimateNoiseLevel1D(spectrum.intensities, factor=factor)
-                    negativeNoiseThreshold = -positiveNoiseThreshold
+            estimateNoiseLevel1D(spectrum.intensities, f=factor, stdFactor=0.5)
 
-            if negativeNoiseThreshold == 0.0 or negativeNoiseThreshold is None:
-                negativeNoiseThreshold = _oldEstimateNoiseLevel1D(spectrum.intensities, factor=factor)
-                if spectrum.noiseLevel is None:
-                    negativeNoiseThreshold = -positiveNoiseThreshold
+            if positiveNoiseThreshold == 0.0 or positiveNoiseThreshold is None:
+                positiveNoiseThreshold,negativeNoiseThreshold = estimateNoiseLevel1D(spectrum.intensities,
+                                                                             f=factor, stdFactor=stdFactor)
+            spectrum.noiseLevel = positiveNoiseThreshold
+            spectrum.negativeNoiseLevel = negativeNoiseThreshold
+            #     positiveNoiseThreshold = _oldEstimateNoiseLevel1D(spectrum.intensities, factor=factor)
+            #     if spectrum.noiseLevel is None:
+            #         positiveNoiseThreshold = _oldEstimateNoiseLevel1D(spectrum.intensities, factor=factor)
+            #         negativeNoiseThreshold = -positiveNoiseThreshold
+            #
+            # if negativeNoiseThreshold == 0.0 or negativeNoiseThreshold is None:
+            #     negativeNoiseThreshold = _oldEstimateNoiseLevel1D(spectrum.intensities, factor=factor)
+            #     if spectrum.noiseLevel is None:
+            #         negativeNoiseThreshold = -positiveNoiseThreshold
 
             masks = []
             for region in excludeRegions:
@@ -430,6 +437,7 @@ class PeakList(PMIListABC):
             boolsPeak = posBoolsVal & boolsMax
             indices = np.argwhere(boolsPeak)
 
+            snr_ratios = []
             if negativePeaks:
                 minFilter = minimum_filter(data[1], size=size, mode=mode)
                 boolsMin = newArray2[1] == minFilter
@@ -441,8 +449,11 @@ class PeakList(PMIListABC):
             for position in indices:
                 peakPosition = [float(newArray2[0][position])]
                 height = newArray2[1][position]
-                peaks.append(self.newPeak(height=float(height), ppmPositions=peakPosition))
-
+                peak = self.newPeak(height=float(height), ppmPositions=peakPosition)
+                snr = peak._getSNRatio()
+                snr_ratios.append(snr)
+                peaks.append(peak)
+            spectrum._snr = np.mean(snr_ratios)
         return peaks
 
     def _noiseLineWidth(self):
@@ -616,63 +627,51 @@ class PeakList(PMIListABC):
 
     # from ccpn.util.decorators import profile
     # @profile
-    def peakFinder1D(self, maxNoiseLevel=None, minNoiseLevel=None, ignoredRegions=[[20, 19]], negativePeaks=True):
-        from ccpn.core.lib.peakUtils import peakdet, _getIntersectionPoints, _pairIntersectionPoints
-        from scipy import signal
+    def peakFinder1D(self, maxNoiseLevel=None, minNoiseLevel=None,
+                     ignoredRegions=[[20, 19]], negativePeaks=False,
+                     eNoiseThresholdFactor=1.5,
+                     recalculateSNR = True,
+                     deltaPercent=10,
+                     useXRange=10):
+        from ccpn.core.lib.peakUtils import simple1DPeakPicker
+        from ccpn.core.lib.ContextManagers import undoBlock, undoBlockWithoutSideBar, notificationEchoBlocking
+        from ccpn.core.lib.SpectrumLib import _estimate1DSpectrumSNR
+        peaks = []
+        with undoBlockWithoutSideBar():
+            with notificationEchoBlocking():
+                spectrum = self.spectrum
 
-        # from ccpn.core.lib.ContextManagers import undoBlock, undoBlockWithoutSideBar, notificationEchoBlocking
-        # import time
-        # t1 = time.time()
+                x, y = spectrum.positions, spectrum.intensities
+                masked = _filtered1DArray(np.array([x, y]), ignoredRegions)
+                filteredX, filteredY = masked[0].compressed(), masked[1].compressed()
+                if maxNoiseLevel is None or minNoiseLevel is None:
+                    maxNoiseLevel, minNoiseLevel = estimateNoiseLevel1D(y, f=useXRange, stdFactor=eNoiseThresholdFactor)
+                    spectrum.noiseLevel = float(maxNoiseLevel)
+                    spectrum.negativeNoiseLevel = float(minNoiseLevel)
+                deltaAdjustment = percentage(deltaPercent, maxNoiseLevel)
+                maxValues, minValues = simple1DPeakPicker(y=filteredY, x=filteredX, delta=maxNoiseLevel + deltaAdjustment, negative=False)
+                spectrum.noiseLevel = float(maxNoiseLevel)
+                spectrum.negativeNoiseLevel = float(minNoiseLevel)
+                snr_ratios = []
 
-        # with undoBlockWithoutSideBar():
-        #     with notificationEchoBlocking():
-        spectrum = self.spectrum
-        # integralList = self.spectrum.newIntegralList()
+                for position, height in maxValues:
+                    peak = self.newPeak(ppmPositions=[position], height=height)
+                    snr = peak._getSNRatio()
+                    snr_ratios.append(snr)
+                    peaks.append(peak)
+                if negativePeaks:
+                    for position, height in minValues:
+                        peak = self.newPeak(ppmPositions=[position], height=height)
+                        snr = peak._getSNRatio()
+                        snr_ratios.append(snr)
+                        peaks.append(peak)
+                if recalculateSNR:
+                    spectrum._snr = np.mean(snr_ratios)
+                    if math.isnan(spectrum._snr):  #estimate from the std of all y points
+                        print("SNR from Peaks is None. Using the STD of spectrum intensities" )
+                        spectrum._snr = _estimate1DSpectrumSNR(spectrum)
+        return peaks
 
-        x, y = spectrum.positions, spectrum.intensities
-        masked = _filtered1DArray(np.array([x, y]), ignoredRegions)
-        filteredX, filteredY = masked[0], masked[1]
-        if maxNoiseLevel is None or minNoiseLevel is None:
-            maxNoiseLevel, minNoiseLevel = estimateNoiseLevel1D(filteredY)
-        # t1 = time.time()
-        maxValues, minValues = peakdet(y=filteredY, x=filteredX, delta=maxNoiseLevel)
-        # t2 = time.time()
-        # print(' DETECT',t2 - t1)
-
-        # t1 = time.time()
-        # maxValues, minValues = peakdet(y=filteredY, x=filteredX, delta=maxNoiseLevel)
-        # t2 = time.time()
-        # print(' DETECT After', t2 - t1)
-
-        for position, height in maxValues:
-            peak = self.newPeak(ppmPositions=[position], height=height)
-        # t3 = time.time()
-        spectrum.noiseLevel = float(maxNoiseLevel)
-        # t2 = time.time()
-        # print(' ££££ ', t2 - t1)
-        # const = round(len(y) * 0.0039, 1)
-        # correlatedSignal1 = signal.correlate(y, np.ones(int(const)), mode='same') / const
-        # intersectionPoints = _getIntersectionPoints(x, y, correlatedSignal1)
-        # pairIntersectionPoints = _pairIntersectionPoints(intersectionPoints)
-        #
-        #
-        # for limits in list(pairIntersectionPoints):
-        #   for position, height in maxValues:
-        #     if height > delta: # ensure are only the positive peaks
-        #       if max(limits) > position > min(limits):  # peak  position is between limits
-        #         lw = max(limits) - min(limits)
-        #         peak = self.newPeak(ppmPositions=[position], height=height, lineWidths = [lw])
-        #         newIntegral = integralList.newIntegral(limits=[[min(limits), max(limits)]])
-        #         newIntegral.peak = peak
-        #         peak.volume = newIntegral.value
-        #         peaks.append(peak)
-        #
-        # if negativePeaks:
-        #   for i in minValues:
-        #     if i[1] < -delta:
-        #       peaks.append(self.newPeak(ppmPositions=[i[0]], height=i[1]))
-
-        # return peaks
 
     @logCommand(get='self')
     def copyTo(self, targetSpectrum: Spectrum, **kwargs) -> 'PeakList':

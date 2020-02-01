@@ -63,7 +63,7 @@ sequenceCodePattern = re.compile('(\-?\d+)?(.*?)(\+\d+|\-\d+)?$')
 amountUnits = ('L', 'g', 'mole')
 
 #  Units allowed for concentrations (e.g. SampleComponents)
-concentrationUnits = ('Molar', 'g/L', 'L/L', 'mol/mol', 'g/g', 'eq')
+concentrationUnits = ('Molar', 'g/L', 'L/L', 'mol/mol', 'g/g', 'eq', 'sec')
 
 #  Units pre-defined for seriesValues
 OTHER_UNITS = ('µ', 'm', 'n', 'p')

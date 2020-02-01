@@ -695,10 +695,16 @@ class Peak(AbstractWrapperObject):
         noiseLevel = spectrum.noiseLevel
         negativeNoiseLevel = spectrum.negativeNoiseLevel
         if noiseLevel is None:
-            getLogger().warning('Spectrum noise level not defined for %s' % spectrum.pid)
+            m = 'Spectrum noise level not defined for %s' % spectrum.pid
+            getLogger().warning(m)
+            print(m)
             return None
         if negativeNoiseLevel is None:
             getLogger().warning('Spectrum negative noise level not defined %s' % spectrum.pid)
+            print('Spectrum negative noise level not defined %s' % spectrum.pid)
+            return None
+        if self.height is None:
+            print('Peak height not defined %s' % self.pid)
             return None
         snr = estimateSNR_1D(noiseLevels=[noiseLevel, negativeNoiseLevel], signalPoints=[self.height], ratio=ratio)
         return snr[0]

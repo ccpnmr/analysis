@@ -568,8 +568,20 @@ GuiTable::item::selected {
 
     def _doubleClickCallback(self, itemSelection):
 
-        # if nothing attached don't do anything
+        # if not a _dataFrameObject is a normal guiTable.
         if not self._dataFrameObject:
+            item = self.currentItem()
+            if item is not None:
+                data = CallBack(value=item.value,
+                                theObject=None,
+                                object=None,
+                                index=item.index,
+                                targetName=None,
+                                trigger=CallBack.CLICK,
+                                row=item.row(),
+                                col=item.column(),
+                                rowItem=item)
+                self._actionCallback(data)
             return
 
         self._lastClick = 'doubleClick'
@@ -680,8 +692,20 @@ GuiTable::item::selected {
         """
         # getLogger().debug('>>> %s _selectionTableCallback' % _moduleId(self.moduleParent), self._tableBlockingLevel)
 
-        # if nothing attached don't do anything
+        # if not a _dataFrameObject is a normal guiTable.
         if not self._dataFrameObject:
+            item = self.currentItem()
+            if item is not None:
+                data = CallBack(value=item.value,
+                                theObject=None,
+                                object=None,
+                                index=item.index,
+                                targetName=None,
+                                trigger=CallBack.CLICK,
+                                row=item.row(),
+                                col=item.column(),
+                                rowItem=item)
+                self._selectionCallback(data)
             return
 
         # skip selection if it already exists and hasn't changed
@@ -2428,7 +2452,8 @@ if __name__ == '__main__':
     # table.item(0, 0).setCheckState(QtCore.Qt.Unchecked)
     # table.item(0,0).setFormat(float(table.item(0,0).format))
     # print(table.item(0,0)._format)
-    print(table.horizontalHeaderItem(1).text())
+    print(table.horizontalHeaderItem(0).text())
+    print(table.item(0, 1).text())
     table.horizontalHeaderItem(1).setFlags(QtCore.Qt.ItemIsUserCheckable | QtCore.Qt.ItemIsEnabled)
     table.horizontalHeaderItem(1).setCheckState(QtCore.Qt.Unchecked)
 

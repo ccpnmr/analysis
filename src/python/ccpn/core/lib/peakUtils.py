@@ -159,20 +159,15 @@ def _get1DPeaksPosAndHeightAsArray(peakList):
 
 
 import sys
-from numpy import NaN, Inf, arange, isscalar, asarray, array
-
-# from numba import jit, prange
+from numpy import NaN, Inf, arange
 from numba import jit
 @jit(nopython=True, nogil=True)
-def peakdet(y, x, delta, negative=False):
+def simple1DPeakPicker(y, x, delta, negative=False):
     """
     Converted from MATLAB script at http://billauer.co.il/peakdet.html
     % Eli Billauer, 3.4.05 (Explicitly not copyrighted).
     % This function is released to the public domain; Any use is allowed.
     """
-    # import time
-    #
-    # start = time.time()
 
     maxtab = []
     mintab = []
@@ -181,28 +176,27 @@ def peakdet(y, x, delta, negative=False):
     lookformax = True
 
     for i in arange(len(y)):
-    # for i in prange(len(y)):
-        this = y[i]
-        if this > mx:
-            mx = this
-            mxpos = x[i]
-        if this < mn:
-            mn = this
-            mnpos = x[i]
-        if lookformax:
-            if not negative:  # just positives
-                this = abs(this)
-            if this < mx - delta:
-                maxtab.append((float(mxpos), float(mx)))
-                mn = this
-                mnpos = x[i]
-                lookformax = False
-        else:
-            if this > mn + delta:
-                mintab.append((float(mnpos), float(mn)))
+            this = y[i]
+            if this > mx:
                 mx = this
                 mxpos = x[i]
-                lookformax = True
+            if this < mn:
+                mn = this
+                mnpos = x[i]
+            if lookformax:
+                if not negative:  # just positives
+                    this = abs(this)
+                if this < mx - delta:
+                    maxtab.append((float(mxpos), float(mx)))
+                    mn = this
+                    mnpos = x[i]
+                    lookformax = False
+            else:
+                if this > mn + delta:
+                    mintab.append((float(mnpos), float(mn)))
+                    mx = this
+                    mxpos = x[i]
+                    lookformax = True
 
     return maxtab, mintab
 

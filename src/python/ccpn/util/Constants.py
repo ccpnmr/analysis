@@ -63,7 +63,7 @@ sequenceCodePattern = re.compile('(\-?\d+)?(.*?)(\+\d+|\-\d+)?$')
 amountUnits = ('L', 'g', 'mole')
 
 #  Units allowed for concentrations (e.g. SampleComponents)
-concentrationUnits = ('Molar', 'g/L', 'L/L', 'mol/mol', 'g/g', 'eq')
+concentrationUnits = ('Molar', 'g/L', 'L/L', 'mol/mol', 'g/g', 'eq', 'sec')
 
 # Default name for natural abundance labelling - given as None externally
 DEFAULT_LABELLING = '_NATURAL_ABUNDANCE'

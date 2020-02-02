@@ -566,7 +566,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
 
         self.regionPaddingData.setValue(float('%.1f' % (100 * self.preferences.general.stripRegionPadding)))
         self.dropFactorData.setValue(float('%.1f' % (100 * self.preferences.general.peakDropFactor)))
-
+        self.peakFactor1D.setValue(float(self.preferences.general.peakFactor1D))
         volumeIntegralLimit = self.preferences.general.volumeIntegralLimit
         self.volumeIntegralLimitData.setValue(int(volumeIntegralLimit))
         self.peakFittingMethod.setIndex(PEAKFITTINGDEFAULTS.index(self.preferences.general.peakFittingMethod))
@@ -681,6 +681,14 @@ class PreferencesPopup(CcpnDialogMainWidget):
         self.dropFactorData.setMinimumWidth(LineEditsMinimumWidth)
         # self.dropFactorData.setValue(float('%.1f' % (100 * self.preferences.general.peakDropFactor)))
         self.dropFactorData.valueChanged.connect(self._queueSetDropFactor)
+
+        row += 1
+        self.dropFactorLabel = Label(parent, text="1D Peak Picking Factor",tipText='Increase to filter out more', grid=(row, 0))
+        self.peakFactor1D = DoubleSpinbox(parent, grid=(row, 1), hAlign='l', decimals=1, step=0.1, min=0, max=100)
+        self.peakFactor1D.setMinimumWidth(LineEditsMinimumWidth)
+        self.peakFactor1D.valueChanged.connect(self._queueSetDropFactor1D)
+
+
 
         row += 1
         volumeIntegralLimit = self.preferences.general.volumeIntegralLimit
@@ -1389,6 +1397,14 @@ class PreferencesPopup(CcpnDialogMainWidget):
         # except:
         #     return
         self.preferences.general.peakDropFactor = value
+
+    @queueStateChange(_verifyPopupApply)
+    def _queueSetDropFactor1D(self):
+        value = self.peakFactor1D.get()
+        return partial(self._set1DPeakFactor, value)
+
+    def _set1DPeakFactor(self, value):
+        self.preferences.general.peakFactor1D = value
 
     @queueStateChange(_verifyPopupApply)
     def _queueSetSymbolSizePixel(self):

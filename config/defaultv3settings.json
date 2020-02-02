@@ -24,6 +24,7 @@
         "autoBackupFrequency": 30,
         "stripRegionPadding": 0.0,
         "peakDropFactor": 0.1,
+        "peakFactor1D": 15,
         "peakFittingMethod": "parabolic",
         "annotationType": 0,
         "symbolSizePixel": 9,

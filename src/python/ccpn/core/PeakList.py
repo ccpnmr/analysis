@@ -35,7 +35,7 @@ from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import PeakList as ApiPeakList
 from ccpn.core.lib.SpectrumLib import _oldEstimateNoiseLevel1D
 from ccpnmodel.ccpncore.lib._ccp.nmr.Nmr.PeakList import pickNewPeaks
 from ccpn.util.decorators import logCommand
-from ccpn.core.lib.ContextManagers import newObject, undoBlock, undoBlockWithoutSideBar
+from ccpn.core.lib.ContextManagers import newObject, undoBlock, undoBlockWithoutSideBar, notificationEchoBlocking
 from ccpn.util.Logging import getLogger
 from ccpn.core.PMIListABC import PMIListABC
 
@@ -353,41 +353,60 @@ class PeakList(PMIListABC):
 
         return result
 
-    @logCommand(get='self')
     def pickPeaks1d(self, dataRange, intensityRange=None, size: int = 3, mode: str = 'wrap') -> List['Peak']:
         """
         Pick 1D peaks from a dataRange
         """
+        from ccpn.core.lib.peakUtils import simple1DPeakPicker
+        from ccpn.ui.gui.widgets.MessageDialog import _stoppableProgressBar
+        from ccpn.ui.gui.widgets.MessageDialog import showYesNoWarning
+        # maxValues, minValues = simple1DPeakPicker(y=filteredY, x=filteredX, delta=maxNoiseLevel + deltaAdjustment,
+        #                                           negative=False)
+        with undoBlockWithoutSideBar():
+            with notificationEchoBlocking():
 
-        with undoBlock():
-            if dataRange[0] < dataRange[1]:
-                dataRange[0], dataRange[1] = dataRange[1], dataRange[0]
-            # code below assumes that dataRange[1] > dataRange[0]
-            peaks = []
-            spectrum = self.spectrum
-            # data1d = spectrum._apiDataSource.get1dSpectrumData()
-            data1d = np.array([self.spectrum.positions, self.spectrum.intensities])
-            selectedData = data1d[:, (data1d[0] < dataRange[0]) * (data1d[0] > dataRange[1])]
-            if selectedData.size == 0:
-                return peaks
-            maxFilter = maximum_filter(selectedData[1], size=size, mode=mode)
-            boolsMax = selectedData[1] == maxFilter
-            indices = np.argwhere(boolsMax)
+                if dataRange[0] < dataRange[1]:
+                    dataRange[0], dataRange[1] = dataRange[1], dataRange[0]
+                # code below assumes that dataRange[1] > dataRange[0]
+                peaks = []
+                spectrum = self.spectrum
+                # data1d = spectrum._apiDataSource.get1dSpectrumData()
+                data1d = np.array([self.spectrum.positions, self.spectrum.intensities])
+                selectedData = data1d[:, (data1d[0] < dataRange[0]) * (data1d[0] > dataRange[1])]
 
-            minFilter = minimum_filter(selectedData[1], size=size, mode=mode)
-            boolsMin = selectedData[1] == minFilter
-            negBoolsPeak = boolsMin
-            indicesMin = np.argwhere(negBoolsPeak)
+                if selectedData.size == 0:
+                    return peaks
+                x,y = selectedData
 
-            fullIndices = np.append(indices, indicesMin)  # True positional indices
+                maxFilter = maximum_filter(selectedData[1], size=size, mode=mode)
+                boolsMax = selectedData[1] == maxFilter
+                indices = np.argwhere(boolsMax)
 
-            for position in fullIndices:
-                peakPosition = [float(selectedData[0][position])]
-                height = selectedData[1][position]
-                if intensityRange is None or intensityRange[0] <= height <= intensityRange[1]:
-                    peaks.append(self.newPeak(height=float(height), ppmPositions=peakPosition))
+                minFilter = minimum_filter(selectedData[1], size=size, mode=mode)
+                boolsMin = selectedData[1] == minFilter
+                negBoolsPeak = boolsMin
+                indicesMin = np.argwhere(negBoolsPeak)
 
-        return peaks
+                fullIndices = np.append(indices, indicesMin)  # True positional indices
+                values = []
+                for position in fullIndices:
+                    peakPosition = [float(selectedData[0][position])]
+                    height = selectedData[1][position]
+                    if intensityRange is None or intensityRange[0] <= height <= intensityRange[1]:
+                        values.append((float(height), peakPosition), )
+                found = len(values)
+                if found > 10:
+                    title = 'Found %s peaks on %s'% (found, self.spectrum.name)
+                    msg = 'Do you want continue? \n\n\n\nTo filter out more peaks: Increase the peak factor from preferences:' \
+                          '\nProject > Preferences... > Spectrum > 1D Peak Picking Factor.\nAlso, try to select above the noise region'
+
+                    proceed = showYesNoWarning(title, msg)
+                    if not proceed:
+                        return []
+                for height, position in _stoppableProgressBar(values):
+                    peaks.append(self.newPeak(height=float(height), ppmPositions=position))
+
+            return peaks
 
     @logCommand(get='self')
     def pickPeaks1dFiltered(self, size: int = 9, mode: str = 'wrap', factor=10, excludeRegions=None,

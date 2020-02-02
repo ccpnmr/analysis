@@ -756,8 +756,9 @@ class Strip(AbstractWrapperObject):
                                                             fitMethod=fitMethod, minDropFactor=minDropFactor)
 
                     else:
+                        peakFactor1D = self.application.preferences.general.peakFactor1D
                         selectedRegion = [[min(ss), max(ss)] for ss in selectedRegion]
-                        newPeaks = peakList.pickPeaks1d(*selectedRegion, size=minDropFactor * 100)
+                        newPeaks = peakList.pickPeaks1d(*selectedRegion, size=peakFactor1D)
 
                     if newPeaks:
                         result.extend(newPeaks)

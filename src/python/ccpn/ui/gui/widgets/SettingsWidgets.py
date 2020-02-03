@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-01-10 11:21:55 +0000 (Fri, January 10, 2020) $"
+__dateModified__ = "$dateModified: 2020-02-03 18:23:06 +0000 (Mon, February 03, 2020) $"
 __version__ = "$Revision: 3.0.0 $"
 #=========================================================================================
 # Created
@@ -689,6 +689,8 @@ class StripPlot(Widget, _commonSettings):
 
         # put hLine and text here
 
+        self.NMRCHAINBUTTON = None
+
         if includePeakLists and includeNmrChains and includeNmrChainPullSelection:
             HLine(self, grid=(row, 0), gridSpan=(1, 4),
                   colour=getColours()[DIVIDER], height=15)
@@ -711,7 +713,10 @@ class StripPlot(Widget, _commonSettings):
             tipTexts += ['Use current selected nmrResidues']
             callbacks += [partial(self._buttonClick, STRIPPLOT_NMRRESIDUES)]
             buttonTypes += [STRIPPLOT_NMRRESIDUES]
+
         if includeNmrChainPullSelection:
+            # get the index of this button and set the required fields
+            self.NMRCHAINBUTTON = len(texts)
             texts += ['use nmrChain']
             tipTexts += ['Use nmrResidues in selected nmrChain']
             callbacks += [partial(self._buttonClick, STRIPPLOT_NMRCHAINS)]
@@ -845,9 +850,9 @@ class StripPlot(Widget, _commonSettings):
         """Notifier Callback for selecting NmrChain
         """
         self.nmrChain = self.project.getByPid(item)
-        if self.nmrChain is not None:
+        if self.nmrChain is not None and self.NMRCHAINBUTTON is not None:
             # select the nmrChain here
-            self.listButtons.setIndex(2)
+            self.listButtons.setIndex(self.NMRCHAINBUTTON)
 
         else:
             # do nothing for the minute

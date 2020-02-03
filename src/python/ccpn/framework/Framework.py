@@ -11,7 +11,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-02-03 14:41:03 +0000 (Mon, February 03, 2020) $"
+__dateModified__ = "$dateModified: 2020-02-03 18:23:05 +0000 (Mon, February 03, 2020) $"
 __version__ = "$Revision: 3.0.0 $"
 #=========================================================================================
 # Created
@@ -2225,9 +2225,11 @@ class Framework(NotifierBase):
             from ccpn.ui.gui.popups.SpectrumGroupEditor import SpectrumGroupEditor
 
             if not self.project.spectrumGroups:
-                #GST This seems to have probles MessageDialog wraps it which looks bad...
-                MessageDialog.showWarning('Project has no Spectrum Groups.',
-                                          'Create them using:\nSidebar → SpectrumGroups → <New SpectrumGroup>\n ')
+                #GST This seems to have problems MessageDialog wraps it which looks bad...
+                # MessageDialog.showWarning('Project has no Spectrum Groups.',
+                #                           'Create them using:\nSidebar → SpectrumGroups → <New SpectrumGroup>\n ')
+                SpectrumGroupEditor(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow, editMode=False).exec_()
+
             else:
                 SpectrumGroupEditor(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow, editMode=True, obj=self.project.spectrumGroups[0]).exec_()
 

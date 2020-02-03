@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-01-28 16:27:16 +0000 (Tue, January 28, 2020) $"
+__dateModified__ = "$dateModified: 2020-02-03 14:41:03 +0000 (Mon, February 03, 2020) $"
 __version__ = "$Revision: 3.0.0 $"
 #=========================================================================================
 # Created
@@ -221,8 +221,8 @@ class SpectrumGroupEditor(_GroupEditorPopupABC):
             defaultItems = obj.spectra
         # replace the tab widget with a new seriesWidget
         seriesTabContents = SeriesFrame(parent=self, mainWindow=self.mainWindow, spectrumGroup=obj, editMode=editMode,
-                                        showCopyOptions=True if len(defaultItems) > 1 else False,
-                                        defaultItems=defaultItems)
+                                        showCopyOptions=True if defaultItems and len(defaultItems) > 1 else False,
+                                        defaultItems=defaultItems or ())
         self._tabWidget.widget(SERIESTABNUM).setWidget(seriesTabContents)
 
         # get pointers to the tabs

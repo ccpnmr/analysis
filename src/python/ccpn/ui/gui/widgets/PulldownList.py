@@ -5,7 +5,7 @@ PulldownList widget
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: CCPN $"
-__dateModified__ = "$dateModified: 2017-07-07 16:32:55 +0100 (Fri, July 07, 2017) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2020-02-04 18:10:35 +0000 (Tue, February 04, 2020) $"
 __version__ = "$Revision: 3.0.0 $"
 #=========================================================================================
 # Created
@@ -39,8 +39,8 @@ NULL = object()
 
 class PulldownList(QtWidgets.QComboBox, Base):
     popupAboutToBeShown = QtCore.pyqtSignal()
-
     pulldownTextEdited = QtCore.pyqtSignal()
+    pulldownTextReady = QtCore.pyqtSignal(str)
 
     def __init__(self, parent, texts=None, objects=None,
                  icons=None, callback=None,
@@ -106,9 +106,22 @@ class PulldownList(QtWidgets.QComboBox, Base):
     """)
 
         self.setMaxVisibleItems(maxVisibleItems)
+        self._editedText = None
 
         # self.connect(self, QtCore.SIGNAL('currentIndexChanged(int)'), self._callback)
         self.currentIndexChanged.connect(self._callback)
+
+        if editable:
+            self.currentIndexChanged.connect(self._textReady)
+            self.lineEdit().editingFinished.connect(self._textReady)
+
+    def focusOutEvent(self, ev) -> None:
+        super(PulldownList, self).focusOutEvent(ev)
+        if self.isEditable():
+            self._textReady()
+
+    def _textReady(self):
+        self.pulldownTextReady.emit(self._editedText)
 
     def showPopup(self):
         self.popupAboutToBeShown.emit()
@@ -321,6 +334,7 @@ class PulldownList(QtWidgets.QComboBox, Base):
 
     @QtCore.pyqtSlot()
     def _emitPulldownTextEdited(self):
+        self._editedText = self.getText()
         self.pulldownTextEdited.emit()
 
     # def _blockEvents(self, blanking=False):

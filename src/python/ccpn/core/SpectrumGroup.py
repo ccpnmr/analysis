@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-01-27 19:23:39 +0000 (Mon, January 27, 2020) $"
+__dateModified__ = "$dateModified: 2020-02-04 18:10:35 +0000 (Tue, February 04, 2020) $"
 __version__ = "$Revision: 3.0.0 $"
 #=========================================================================================
 # Created
@@ -26,6 +26,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 
 from typing import Tuple, Any
 from functools import partial
+from enum import Enum
 from ccpn.core.Project import Project
 from ccpn.core.Spectrum import Spectrum
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
@@ -39,6 +40,30 @@ from ccpn.util.Logging import getLogger
 
 SPECTRUMGROUPSERIES = 'spectrumGroupSeries'
 SPECTRUMGROUPSERIESUNITS = 'spectrumGroupSeriesUnits'
+SPECTRUMGROUPSERIESTYPE = 'spectrumGroupSeriesType'
+
+class SERIESTYPES(Enum):
+    # NOTE:ED - could make this a labelledEnum
+    DECIMAL = 0, 'Decimal'
+    STRING = 1, 'String'
+    PYTHONLITERAL = 2, 'Python Literal'
+
+    def __new__(cls, *args, **kwds):
+        obj = object.__new__(cls)
+        obj._value_ = args[0]
+        return obj
+
+    # ignore the first param since it's already set by __new__
+    def __init__(self, _: str, description: str = None):
+        self._description_ = description
+
+    def __str__(self):
+        return self.value
+
+    # this makes sure that the description is read-only
+    @property
+    def description(self):
+        return self._description_
 
 
 class SpectrumGroup(AbstractWrapperObject):
@@ -176,6 +201,22 @@ class SpectrumGroup(AbstractWrapperObject):
             raise ValueError("seriesUnits must be a string.")
 
         self.setParameter(SPECTRUMGROUPSERIES, SPECTRUMGROUPSERIESUNITS, value)
+
+    @property
+    def seriesType(self):
+        """Return the seriesType for the spectrumGroup
+        """
+        seriesType = self.getParameter(SPECTRUMGROUPSERIES, SPECTRUMGROUPSERIESTYPE)
+        return seriesType
+
+    @seriesType.setter
+    def seriesType(self, value):
+        """Set the seriesType for the spectrumGroup
+        """
+        if not isinstance(value, str):
+            raise ValueError("seriesType must be an int.")
+
+        self.setParameter(SPECTRUMGROUPSERIES, SPECTRUMGROUPSERIESTYPE, value)
 
     #=========================================================================================
     # Implementation functions

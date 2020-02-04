@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-02-03 14:41:03 +0000 (Mon, February 03, 2020) $"
+__dateModified__ = "$dateModified: 2020-02-04 18:10:35 +0000 (Tue, February 04, 2020) $"
 __version__ = "$Revision: 3.0.0 $"
 #=========================================================================================
 # Created
@@ -36,7 +36,7 @@ from ccpn.ui.gui.popups.Dialog import handleDialogApply, _verifyPopupChangesAppl
 from ccpn.core.lib.ContextManagers import undoStackBlocking
 from ccpn.core.lib.ContextManagers import queueStateChange
 from ccpn.core.Spectrum import Spectrum
-from ccpn.core.SpectrumGroup import SpectrumGroup
+from ccpn.core.SpectrumGroup import SpectrumGroup, SERIESTYPES
 from ccpn.ui.gui.widgets.Tabs import Tabs
 from ccpn.ui.gui.widgets.Widget import Widget
 from ccpn.ui.gui.widgets.Label import Label
@@ -44,9 +44,13 @@ from ccpn.ui.gui.widgets.Frame import Frame
 from ccpn.ui.gui.widgets.PulldownListsForObjects import SpectrumGroupPulldown
 from ccpn.ui.gui.widgets.Spacer import Spacer
 from ccpn.ui.gui.widgets.TextEditor import PlainTextEditor
+from ccpn.ui.gui.widgets.RadioButtons import RadioButtons
+from ccpn.ui.gui.widgets.CompoundWidgets import PulldownListCompoundWidget
+from ccpn.ui.gui.widgets.Icon import Icon
 from ccpn.ui.gui.popups._GroupEditorPopupABC import _GroupEditorPopupABC
 from ccpn.ui.gui.popups.SpectrumPropertiesPopup import ColourTab, ContoursTab
 from ccpn.util.AttrDict import AttrDict
+from ccpn.util.Constants import concentrationUnits
 
 
 DEFAULTSPACING = (3, 3)
@@ -179,6 +183,7 @@ class SpectrumGroupEditor(_GroupEditorPopupABC):
         self._spectrumGroupSeriesEdited = OrderedDict()
         self._spectrumGroupSeriesValues = list(self.obj.series)
         self._spectrumGroupSeriesUnitsEdited = None
+        self._spectrumGroupSeriesTypeEdited = None
 
         # set the series values - this may crash
         if self.seriesTab._changes:
@@ -199,6 +204,9 @@ class SpectrumGroupEditor(_GroupEditorPopupABC):
 
         if self._spectrumGroupSeriesUnitsEdited is not None:
             self.obj.seriesUnits = self._spectrumGroupSeriesUnitsEdited
+
+        if self._spectrumGroupSeriesTypeEdited is not None:
+            self.obj.seriesType = self._spectrumGroupSeriesTypeEdited
 
     GROUPEDITOR_INIT_METHOD = _groupInit
 
@@ -246,6 +254,7 @@ class SpectrumGroupEditor(_GroupEditorPopupABC):
                 tabFunc()
 
         self._populate()
+        self.setDefaultButton(None)
         self.setMinimumSize(600, 550)  # change to a calculation rather than a guess
 
         self.connectSignals()
@@ -553,9 +562,15 @@ class SeriesFrame(Widget):
 
         row = 0
         col = 0
-        seriesLabel = Label(self, text="Spectrum SeriesValues - use python literals", grid=(row, col), gridSpan=(1, 2), hAlign='l')
+        seriesLabel = Label(self, text="Spectrum SeriesValues - use python literals", grid=(row, col), gridSpan=(1, 3), hAlign='l')
         seriesLabel.setFixedHeight(30)
         seriesLabel.setSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Fixed)
+
+        row += 1
+        seriesTypeLabel = Label(self, text='Series Type', grid=(row, col), hAlign='l')
+        self.seriesType = RadioButtons(self, texts=[str(val.description) for val in SERIESTYPES],
+                                       grid=(row, col + 1), gridSpan=(1, 2), hAlign='l',
+                                       callback=partial(self._queueChangeSeriesType, self.defaultObject))
 
         row += 1
         self._seriesFrameRow = row
@@ -566,10 +581,28 @@ class SeriesFrame(Widget):
         self._fillSeriesFrame(defaultItems=defaultItems)
 
         row += 1
-        unitsLabel = Label(self, text='Series Units', grid=(row, col), hAlign='l')
-        self.unitsEditor = LineEdit(self, grid=(row, col + 1))
-        unitsLabel.setFixedHeight(30)
-        self.unitsEditor.textChanged.connect(partial(self._queueChangeSpectrumSeriesUnits, self.unitsEditor, self.defaultObject))
+        # unitsLabel = Label(self, text='Series Units', grid=(row, col), hAlign='l')
+        # self.unitsEditor = LineEdit(self, grid=(row, col + 1))
+        # unitsLabel.setFixedHeight(30)
+        self.unitsEditor = PulldownListCompoundWidget(self, labelText='Series Units', grid=(row, col), gridSpan=(1, 3), hAlign='l',
+                                                      editable=True, sizeAdjustPolicy=QtWidgets.QComboBox.AdjustToContents)
+        self.unitsEditor.pulldownList.pulldownTextEdited.connect(partial(self._queueChangeSeriesUnits, self.unitsEditor, self.defaultObject))
+        self.unitsEditor.pulldownList.pulldownTextReady.connect(partial(self._updateSeriesUnitsPulldown, self.unitsEditor, self.defaultObject))
+        self._pulldownData = concentrationUnits
+
+        row += 1
+        self._errorFrame = Frame(self, setLayout=True, grid=(row, col), gridSpan=(1, 3), hAlign='l')
+
+        # add a frame containing an error message if the series values are not all the same type
+        self.errorIcon = Icon('icons/exclamation_small')
+        self._errorFrame.layout().setColumnStretch(0, 1)
+        self._errorFrame.layout().setColumnStretch(1, 1000)
+        self._errors = ['seriesValues must be of the same type']
+        for i, error in enumerate(self._errors):
+            iconLabel = Label(self._errorFrame, grid=(i, 0))
+            iconLabel.setPixmap(self.errorIcon.pixmap(16, 16))
+            label = Label(self._errorFrame, error, grid=(i, 1))
+        self._errorFrame.hide()
 
         row += 1
         Spacer(self, 1, 1, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding,
@@ -624,12 +657,28 @@ class SeriesFrame(Widget):
     def _populate(self):
         """Populate the texteditors - seriesValues and seriesUnits for the spectrumGroup
         """
+        self.seriesType.setIndex(int(self.defaultObject.seriesType or 0))
         series = self.defaultObject.series
         if series:
             for spec, textEditor in self._editors.items():
                 ii = self.defaultObject.spectra.index(spec)
-                textEditor.set(repr(series[ii]))
-        self.unitsEditor.set(self.defaultObject.seriesUnits)
+
+                try:
+                    if self.seriesType.getIndex() == SERIESTYPES.DECIMAL.value:
+                        seriesValue = float(series[ii])
+                    elif self.seriesType.getIndex() == SERIESTYPES.STRING.value:
+                        seriesValue = str(series[ii])
+                    else:
+                        seriesValue = repr(series[ii])
+                except Exception as es:
+                    seriesValue = ''
+
+                textEditor.set(seriesValue)
+
+        if self.defaultObject.seriesUnits is not None and self.defaultObject.seriesUnits not in self._pulldownData:
+            self._pulldownData += (self.defaultObject.seriesUnits,)
+        self.unitsEditor.modifyTexts(texts=self._pulldownData)
+        self.unitsEditor.select(self.defaultObject.seriesUnits)
 
     def _getValuesFromTextEdit(self):
         # read the values from the textEditors and put in dict for later
@@ -651,12 +700,17 @@ class SeriesFrame(Widget):
         palette = editor.viewport().palette()
         colour = editor._background
         try:
-            seriesValue = literal_eval(value)
+            seriesValue = None
+            if self.seriesType.getIndex() == SERIESTYPES.DECIMAL.value:
+                seriesValue = float(value)
+            elif self.seriesType.getIndex() == SERIESTYPES.STRING.value:
+                seriesValue = str(value)
+            else:
+                seriesValue = literal_eval(value)
 
         except Exception as es:
             # catch exception raised by bad literals
-            if value:
-                colour = INVALIDROWCOLOUR
+            colour = INVALIDROWCOLOUR
 
         else:
             # if isinstance(seriesValue, dict):
@@ -692,18 +746,28 @@ class SeriesFrame(Widget):
         self._parent._spectrumGroupSeriesEdited[dim] = value
 
     @queueStateChange(_verifyPopupChangesApply)
-    def _queueChangeSpectrumSeriesUnits(self, editor, spectrumGroup):
-        """callback from editing the seriesUnits
+    def _queueChangeSeriesUnits(self, editor, spectrumGroup):
+        """callback from editing the seriesUnits - respond to every keypress
         """
-        value = editor.get()
+        value = editor.getText()
         specValue = spectrumGroup.seriesUnits
         if value != specValue:
-            return partial(self._changeSpectrumSeriesUnits, spectrumGroup, value)
+            return partial(self._changeSeriesUnits, spectrumGroup, value)
 
-    def _changeSpectrumSeriesUnits(self, spectrumGroup, value):
+    def _changeSeriesUnits(self, spectrumGroup, value):
         """set the spectrumGroup seriesUnits
         """
         self._parent._spectrumGroupSeriesUnitsEdited = value
+
+    def _updateSeriesUnitsPulldown(self, editor, spectrumGroup, newText):
+        """callback from editing the seriesUnits pulldown
+         - respond to index changed/focus changed to capture new text and add to pulldown list
+        """
+        # NOTE:ED - could put this into the pullDown widget as an 'autoUpdateContents' setting
+        value = newText
+        if value and value not in self._pulldownData:
+            self._pulldownData += (value,)
+            editor.modifyTexts(self._pulldownData)
 
     def getChangesDict(self):
         """Define the required widgets with storing changes
@@ -712,6 +776,20 @@ class SeriesFrame(Widget):
                 stateValue, an overriding boolean that needs to be true for all else to be true
         """
         return self._parent, self._changes, True if self._parent._currentEditorState() else False
+
+    @queueStateChange(_verifyPopupChangesApply)
+    def _queueChangeSeriesType(self, spectrumGroup):
+        """callback from editing the seriesType
+        """
+        index = self.seriesType.getIndex()
+        specType = spectrumGroup.seriesType
+        if index != specType:
+            return partial(self._changeSeriesType, spectrumGroup, index)
+
+    def _changeSeriesType(self, spectrumGroup, value):
+        """set the spectrumGroup seriesType
+        """
+        self._parent._spectrumGroupSeriesTypeEdited = value
 
 
 class _SpectrumGroupContainer(AttrDict):
@@ -726,6 +804,7 @@ class _SpectrumGroupContainer(AttrDict):
         self._modifiedSpectra = set()
         self._setDefaultSeriesValues()
         self._seriesUnits = None
+        self._seriesType = 0
 
     @property
     def series(self) -> Tuple[Any, ...]:
@@ -749,6 +828,12 @@ class _SpectrumGroupContainer(AttrDict):
         """Return the seriesUnits for the simulated spectrumGroup
         """
         return self._seriesUnits
+
+    @property
+    def seriesType(self):
+        """Return the type for seriesValues widget entry
+        """
+        return self._seriesType
 
     def _setDefaultSeriesValues(self):
         for spec in self.spectra:

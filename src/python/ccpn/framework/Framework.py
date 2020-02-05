@@ -11,7 +11,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-02-03 18:23:05 +0000 (Mon, February 03, 2020) $"
+__dateModified__ = "$dateModified: 2020-02-05 16:03:53 +0000 (Wed, February 05, 2020) $"
 __version__ = "$Revision: 3.0.0 $"
 #=========================================================================================
 # Created
@@ -1333,9 +1333,10 @@ class Framework(NotifierBase):
             ("About CCPN...", self.showAboutCcpn),
             ("Show License...", self.showCcpnLicense),
             (),
-            ("Inspect Code...", self.showCodeInspectionPopup, [('shortcut', 'gv'),
-                                                               ('enabled', False)]),
-            ("Show Issues...", self.showIssuesList),
+            # ("Inspect Code...", self.showCodeInspectionPopup, [('shortcut', 'gv'),
+            #                                                    ('enabled', False)]),
+            # ("Show Issues...", self.showIssuesList),
+
             ("Check for Updates...", self.showUpdatePopup),
             ("Register...", self.showRegisterPopup),
             (),

@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-01-27 19:23:39 +0000 (Mon, January 27, 2020) $"
+__dateModified__ = "$dateModified: 2020-02-05 16:03:53 +0000 (Wed, February 05, 2020) $"
 __version__ = "$Revision: 3.0.0 $"
 #=========================================================================================
 # Created
@@ -334,8 +334,8 @@ class PreferencesPopup(CcpnDialogMainWidget):
         self.useNativeWebBox.toggled.connect(partial(self._queueToggleGeneralOptions, 'useNativeWebbrowser'))
 
         # self._toggleGeneralOptions('useNativeWebbrowser', True)
-        self.useNativeWebLabel.setEnabled(False)
-        self.useNativeWebBox.setEnabled(False)
+        # self.useNativeWebLabel.setEnabled(False)
+        # self.useNativeWebBox.setEnabled(False)
 
         row += 1
         self.autoSaveLayoutOnQuitLabel = Label(parent, text="Auto Save Layout On Quit: ", grid=(row, 0))
@@ -518,8 +518,8 @@ class PreferencesPopup(CcpnDialogMainWidget):
 
         # TODO:ED disabled for testing
         # self._toggleGeneralOptions('useNativeWebbrowser', True)
-        self.useNativeWebLabel.setEnabled(False)
-        self.useNativeWebBox.setEnabled(False)
+        # self.useNativeWebLabel.setEnabled(False)
+        # self.useNativeWebBox.setEnabled(False)
 
         self.autoSaveLayoutOnQuitBox.setChecked(self.preferences.general.autoSaveLayoutOnQuit)
         self.restoreLayoutOnOpeningBox.setChecked(self.preferences.general.restoreLayoutOnOpening)

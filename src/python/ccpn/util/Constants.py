@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-02-05 09:39:57 +0000 (Wed, February 05, 2020) $"
+__dateModified__ = "$dateModified: 2020-02-05 15:54:09 +0000 (Wed, February 05, 2020) $"
 __version__ = "$Revision: 3.0.0 $"
 #=========================================================================================
 # Created
@@ -67,12 +67,13 @@ concentrationUnits = ('Molar', 'g/L', 'L/L', 'mol/mol', 'g/g', 'eq')
 
 #  Units pre-defined for seriesValues
 OTHER_UNITS = ('µ', 'm', 'n', 'p')
-CONCENTRATION_UNITS = ('µM', 'mM', 'nM', 'pM')
-VOLUME_UNITS = ('µL', 'mL', 'nL', 'pL')
-MASS_UNITS = ('µg', 'kg', 'g', 'mg', 'ng', 'pg')
+CONCENTRATION_UNITS = ('M', 'mM', 'µM', 'nM', 'pM')
+VOLUME_UNITS = ('L', 'mL', 'µL', 'nL', 'pL')
+MASS_UNITS = ('g', 'mg', 'µg', 'ng', 'pg')
 TEMPERATURE_UNITS = ('K',)
+TIME_UNITS = ('s', 'ms', 'µs', 'ns', 'ps')
 DISTANCE_UNITS = ('µm', 'mm', 'm')
-ALL_UNITS = TEMPERATURE_UNITS + MASS_UNITS + VOLUME_UNITS + CONCENTRATION_UNITS + DISTANCE_UNITS
+ALL_UNITS = ('',) + TEMPERATURE_UNITS + MASS_UNITS + VOLUME_UNITS + CONCENTRATION_UNITS + DISTANCE_UNITS + TIME_UNITS
 
 # Default name for natural abundance labelling - given as None externally
 DEFAULT_LABELLING = '_NATURAL_ABUNDANCE'

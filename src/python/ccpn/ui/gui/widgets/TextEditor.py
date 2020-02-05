@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-01-28 03:15:20 +0000 (Tue, January 28, 2020) $"
+__dateModified__ = "$dateModified: 2020-02-05 15:54:09 +0000 (Wed, February 05, 2020) $"
 __version__ = "$Revision: 3.0.0 $"
 #=========================================================================================
 # Created
@@ -152,6 +152,21 @@ class TextEditor(QtWidgets.QTextEdit, Base):
             height = max(self._minimumHeight, self._heightStart + delta.y())
             self.setMinimumSize(width, height)
 
+    def sizeHint(self) -> QtCore.QSize:
+        return QtCore.QSize(200, 20)
+
+    def minimumSizeHint(self) -> QtCore.QSize:
+        return QtCore.QSize(200, 20)
+
+    # def sizeHint(self) -> QtCore.QSize:
+    #     rowHeight = QtGui.QFontMetrics(self.document().defaultFont()).height()
+    #     lineCount = self.document().lineCount()
+    #
+    #     minHeight = (rowHeight + 1) * (lineCount + 1)
+    #     height = max(self._minimumHeight, minHeight)
+    #
+    #     return QtCore.QSize(height, self.width())
+
 
 class PlainTextEditor(QtWidgets.QPlainTextEdit, Base):
     editingFinished = QtCore.pyqtSignal()
@@ -175,7 +190,7 @@ class PlainTextEditor(QtWidgets.QPlainTextEdit, Base):
         self._background = palette.color(self.viewport().backgroundRole())
 
         self._setFocusColour()
-        # self.setAttribute(QtCore.Qt.WA_MacShowFocusRect)
+        self._maxHeight = 0
 
     def _setFocusColour(self, focusColour=None, noFocusColour=None):
         """Set the focus/noFocus colours for the widget
@@ -229,6 +244,7 @@ class PlainTextEditor(QtWidgets.QPlainTextEdit, Base):
 
     def _handle_text_changed(self):
         self._changed = True
+        self._updateheight()
 
     def setTextChanged(self, state=True):
         self._changed = state
@@ -286,6 +302,20 @@ class PlainTextEditor(QtWidgets.QPlainTextEdit, Base):
 
             self.setMinimumSize(width, height)
             self.updateGeometry()
+
+    def resizeEvent(self, e: QtGui.QResizeEvent) -> None:
+        self._updateheight()
+        super(PlainTextEditor, self).resizeEvent(e)
+
+    def _updateheight(self):
+        # Override the resize event to fit to contents
+        rowHeight = QtGui.QFontMetrics(self.document().defaultFont()).height()
+        lineCount = self.document().lineCount()
+
+        minHeight = (rowHeight + 1) * (lineCount + 1)
+        self._maxHeight = max(self._minimumHeight, minHeight)
+        self.setMaximumHeight(self._maxHeight)
+
 
 if __name__ == '__main__':
     from ccpn.ui.gui.widgets.Application import TestApplication

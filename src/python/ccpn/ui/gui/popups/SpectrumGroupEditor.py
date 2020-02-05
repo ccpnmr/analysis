@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-02-05 09:39:57 +0000 (Wed, February 05, 2020) $"
+__dateModified__ = "$dateModified: 2020-02-05 15:54:09 +0000 (Wed, February 05, 2020) $"
 __version__ = "$Revision: 3.0.0 $"
 #=========================================================================================
 # Created
@@ -26,7 +26,7 @@ __date__ = "$Date: 2017-03-30 11:28:58 +0100 (Thu, March 30, 2017) $"
 #=========================================================================================
 
 from functools import partial
-from PyQt5 import QtWidgets, QtGui
+from PyQt5 import QtWidgets, QtGui, QtCore
 from ast import literal_eval
 from typing import Tuple, Any
 from collections import OrderedDict, Iterable
@@ -591,18 +591,32 @@ class SeriesFrame(Widget):
         self._pulldownData = ALL_UNITS
 
         row += 1
-        self._errorFrame = Frame(self, setLayout=True, grid=(row, col), gridSpan=(1, 3), hAlign='l')
+        self._errorFrameSeriesValues = Frame(self, setLayout=True, grid=(row, col), gridSpan=(1, 3), hAlign='l')
 
         # add a frame containing an error message if the series values are not all the same type
         self.errorIcon = Icon('icons/exclamation_small')
-        self._errorFrame.layout().setColumnStretch(0, 1)
-        self._errorFrame.layout().setColumnStretch(1, 1000)
+        # self._errorFrameSeriesValues.layout().setColumnStretch(0, 1)
+        # self._errorFrameSeriesValues.layout().setColumnStretch(1, 1000)
         self._errors = ['seriesValues must be of the same type']
         for i, error in enumerate(self._errors):
-            iconLabel = Label(self._errorFrame, grid=(i, 0))
+            iconLabel = Label(self._errorFrameSeriesValues, grid=(i, 0))
             iconLabel.setPixmap(self.errorIcon.pixmap(16, 16))
-            label = Label(self._errorFrame, error, grid=(i, 1))
-        self._errorFrame.hide()
+            label = Label(self._errorFrameSeriesValues, error, grid=(i, 1))
+        self._errorFrameSeriesValues.hide()
+
+        row += 1
+        self._errorFrameDict = Frame(self, setLayout=True, grid=(row, col), gridSpan=(1, 3), hAlign='l')
+
+        # add a frame containing an error message if the dicts do not contain the same keys
+        self.errorIcon = Icon('icons/exclamation_small')
+        # self._errorFrameDict.layout().setColumnStretch(0, 1)
+        # self._errorFrameDict.layout().setColumnStretch(1, 1000)
+        self._errors = ['seriesValue dicts do not contain the same keys']
+        for i, error in enumerate(self._errors):
+            iconLabel = Label(self._errorFrameDict, grid=(i, 0))
+            iconLabel.setPixmap(self.errorIcon.pixmap(16, 16))
+            label = Label(self._errorFrameDict, error, grid=(i, 1))
+        self._errorFrameDict.hide()
 
         row += 1
         Spacer(self, 1, 1, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding,
@@ -628,31 +642,33 @@ class SeriesFrame(Widget):
             self._seriesFrame.hide()
             self._seriesFrame.deleteLater()
 
-        self._seriesFrame = Frame(self, setLayout=True, showBorder=False, grid=(self._seriesFrameRow, self._seriesFrameCol), gridSpan=(1, 3))
+        self._seriesFrame = Frame(self, setLayout=True, showBorder=False,
+                                  grid=(self._seriesFrameRow, self._seriesFrameCol), gridSpan=(1, 3),
+                                  vAlign='t')
 
         # add new editors with the new values
         for sRow, spec in enumerate(defaultItems):
-            seriesLabel = Label(self._seriesFrame, text=spec.pid, grid=(sRow, 0), hAlign='left', vAlign='top')
+            seriesLabel = Label(self._seriesFrame, text=spec.pid, grid=(sRow, 0), vAlign='t')
             seriesLabel.setFixedHeight(30)
-            seriesLabel.setSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Fixed)
 
-            seriesEditor = PlainTextEditor(self._seriesFrame, grid=(sRow, 1))
-            # seriesEditor._setFocusColour()
+            editorFrame = Frame(self._seriesFrame, setLayout=True, grid=(sRow, 1), vAlign='t')
+            seriesEditor = PlainTextEditor(editorFrame, grid=(0, 0), vAlign='t')
             seriesEditor.textChanged.connect(partial(self._queueChangeSpectrumSeriesValues,
                                                      seriesEditor, self.defaultObject,
                                                      spec, sRow))
 
             seriesEditor.setMinimumSize(50, 25)
-            seriesEditor.setMaximumHeight(30)
+            # attributes for setting size when using resize-grip
             seriesEditor._minimumWidth = 50
             seriesEditor._minimumHeight = 25
+            seriesEditor.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
 
             if spec in self._currentSeriesValues and self._currentSeriesValues[spec] is not None:
                 seriesEditor.set(self._currentSeriesValues[spec])
 
             self._editors[spec] = seriesEditor
 
-        self._seriesFrame.setMaximumHeight(self._seriesFrame.sizeHint().height())
+        self._seriesFrame.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Preferred)
 
     def _populate(self):
         """Populate the texteditors - seriesValues and seriesUnits for the spectrumGroup
@@ -671,9 +687,9 @@ class SeriesFrame(Widget):
                     else:
                         seriesValue = repr(series[ii])
                 except Exception as es:
-                    seriesValue = ''
-
-                textEditor.set(seriesValue)
+                    textEditor.set('')
+                else:
+                    textEditor.set(str(seriesValue))
 
         if self.defaultObject.seriesUnits is not None and self.defaultObject.seriesUnits not in self._pulldownData:
             self._pulldownData += (self.defaultObject.seriesUnits,)
@@ -695,13 +711,9 @@ class SeriesFrame(Widget):
 
     @queueStateChange(_verifyPopupChangesApply)
     def _queueChangeSpectrumSeriesValues(self, editor, spectrumGroup, spectrum, dim):
-        # if value >= 0 and list(spectrumColours.keys())[value] != spectrum.sliceColour:
-        #     return partial(self._changedSliceComboIndex, spectrum, value)
+        # queue the value if has changed from the original
         value = editor.get()
-        palette = editor.viewport().palette()
-        colour = editor._background
         try:
-            seriesValue = None
             if self.seriesType.getIndex() == SERIESTYPES.DECIMAL.value:
                 seriesValue = float(value)
             elif self.seriesType.getIndex() == SERIESTYPES.STRING.value:
@@ -710,41 +722,51 @@ class SeriesFrame(Widget):
                 seriesValue = literal_eval(value)
 
         except Exception as es:
-            # catch exception raised by bad literals
-            colour = INVALIDROWCOLOUR
+            pass
 
         else:
-            # if isinstance(seriesValue, dict):
-            #     # if a dict is used, it should be an ordered dict to help with checking
-            #     seriesValue = OrderedDict(seriesValue)
-
             specValue = spectrum._getSeriesItemsById(spectrumGroup.pid)
             if seriesValue != specValue:
                 return partial(self._changeSpectrumSeriesValues, spectrumGroup, spectrum, dim, seriesValue)
 
         finally:
-            palette.setColor(editor.viewport().backgroundRole(), colour)
-            editor.viewport().setPalette(palette)
-
-            rowHeight = QtGui.QFontMetrics(editor.document().defaultFont()).height()
-            lineCount = editor.document().lineCount()
-
-            minHeight = (rowHeight + 1) * (lineCount + 1)
-            height = max(editor._minimumHeight, minHeight)
-            editor.setMaximumHeight(height)
-            editor.updateGeometry()
-
-            sum = 0.0
-            for ee in self._editors.values():
-                sum += ee.maximumHeight()
-            self._seriesFrame.setMaximumHeight(self._seriesFrame.sizeHint().height())
-
             self._validateEditors()
 
+    def _compareDict(self, d1, d2):
+        """Compare the keys in two dictionaries
+        Routine is recursive, empty dicts are ignored
+        """
+        for k in d1:
+            if k not in d2:
+                return False
+            if type(d1[k]) == dict and d1[k]:
+                if type(d2[k]) == dict and d2[k]:
+                    compare = self._compareDict(d1[k], d2[k])
+                    if not compare:
+                        return False
+                else:
+                    return False
+        for k in d2:
+            if k not in d1:
+                return False
+            if type(d2[k]) == dict and d2[k]:
+                if type(d1[k]) == dict and d1[k]:
+                    compare = self._compareDict(d1[k], d2[k])
+                    if not compare:
+                        return False
+                else:
+                    return False
+      
+        return True
+    
     def _validateEditors(self):
         """Check that all the editors contain the same type of seriesValues
         """
         errorState = False
+        errorDict = False
+        heightSum = 0.0
+        literalTypes = set()
+        literalDictCompare = None
         for editor in self._editors.values():
             value = editor.get()
             palette = editor.viewport().palette()
@@ -757,17 +779,39 @@ class SeriesFrame(Widget):
                     seriesValue = str(value)
                 else:
                     seriesValue = literal_eval(value)
+                    literalTypes.add(type(seriesValue))
 
+                    # compare whether the dicts contain the same keys - not essential
+                    if not literalDictCompare:
+                        literalDictCompare = seriesValue
+                    else:
+                        cmp = self._compareDict(literalDictCompare, seriesValue)
+                        if not cmp:
+                            errorDict = True
+                        
             except Exception as es:
                 # catch exception raised by bad literals
                 colour = INVALIDROWCOLOUR
                 errorState = True
 
             finally:
+                if literalTypes and len(literalTypes) > 1:
+                    errorState = True
+
                 palette.setColor(editor.viewport().backgroundRole(), colour)
                 editor.viewport().setPalette(palette)
 
-        self._errorFrame.setVisible(errorState)
+            # rowHeight = QtGui.QFontMetrics(editor.document().defaultFont()).height()
+            # lineCount = editor.document().lineCount()
+            #
+            # minHeight = (rowHeight + 1) * (lineCount + 1)
+            # height = max(editor._minimumHeight, minHeight)
+            # heightSum += height
+            # editor.setMaximumHeight(height)
+            # editor.updateGeometry()
+
+        self._errorFrameSeriesValues.setVisible(errorState)
+        self._errorFrameDict.setVisible(errorDict)
 
     def _changeSpectrumSeriesValues(self, spectrumGroup, spectrum, dim, value):
         # set the spectrum series value from here

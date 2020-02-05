@@ -52,7 +52,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-01-28 00:02:07 +0000 (Tue, January 28, 2020) $"
+__dateModified__ = "$dateModified: 2020-02-05 15:54:09 +0000 (Wed, February 05, 2020) $"
 __version__ = "$Revision: 3.0.0 $"
 #=========================================================================================
 # Created
@@ -1733,6 +1733,9 @@ assignmentTolerances
             raise ValueError('Spectrum %s does not belong to spectrumGroup %s' % (str(self), str(spectrumGroup)))
 
         seriesItems = self.getParameter(SPECTRUMSERIES, SPECTRUMSERIESITEMS)
+
+        # clear the original value because updating a dict doesn't register a change in the api
+        self.setParameter(SPECTRUMSERIES, SPECTRUMSERIESITEMS, None)
         if seriesItems:
             seriesItems[spectrumGroup.pid] = item
         else:

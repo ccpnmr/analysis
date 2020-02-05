@@ -4,7 +4,7 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -13,8 +13,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: CCPN $"
-__dateModified__ = "$dateModified: 2017-07-07 16:32:58 +0100 (Fri, July 07, 2017) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2020-02-05 09:39:57 +0000 (Wed, February 05, 2020) $"
 __version__ = "$Revision: 3.0.0 $"
 #=========================================================================================
 # Created
@@ -64,6 +64,15 @@ amountUnits = ('L', 'g', 'mole')
 
 #  Units allowed for concentrations (e.g. SampleComponents)
 concentrationUnits = ('Molar', 'g/L', 'L/L', 'mol/mol', 'g/g', 'eq')
+
+#  Units pre-defined for seriesValues
+OTHER_UNITS = ('µ', 'm', 'n', 'p')
+CONCENTRATION_UNITS = ('µM', 'mM', 'nM', 'pM')
+VOLUME_UNITS = ('µL', 'mL', 'nL', 'pL')
+MASS_UNITS = ('µg', 'kg', 'g', 'mg', 'ng', 'pg')
+TEMPERATURE_UNITS = ('K',)
+DISTANCE_UNITS = ('µm', 'mm', 'm')
+ALL_UNITS = TEMPERATURE_UNITS + MASS_UNITS + VOLUME_UNITS + CONCENTRATION_UNITS + DISTANCE_UNITS
 
 # Default name for natural abundance labelling - given as None externally
 DEFAULT_LABELLING = '_NATURAL_ABUNDANCE'

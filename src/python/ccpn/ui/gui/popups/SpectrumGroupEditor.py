@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-02-04 18:10:35 +0000 (Tue, February 04, 2020) $"
+__dateModified__ = "$dateModified: 2020-02-05 09:39:57 +0000 (Wed, February 05, 2020) $"
 __version__ = "$Revision: 3.0.0 $"
 #=========================================================================================
 # Created
@@ -50,7 +50,7 @@ from ccpn.ui.gui.widgets.Icon import Icon
 from ccpn.ui.gui.popups._GroupEditorPopupABC import _GroupEditorPopupABC
 from ccpn.ui.gui.popups.SpectrumPropertiesPopup import ColourTab, ContoursTab
 from ccpn.util.AttrDict import AttrDict
-from ccpn.util.Constants import concentrationUnits
+from ccpn.util.Constants import ALL_UNITS
 
 
 DEFAULTSPACING = (3, 3)
@@ -588,7 +588,7 @@ class SeriesFrame(Widget):
                                                       editable=True, sizeAdjustPolicy=QtWidgets.QComboBox.AdjustToContents)
         self.unitsEditor.pulldownList.pulldownTextEdited.connect(partial(self._queueChangeSeriesUnits, self.unitsEditor, self.defaultObject))
         self.unitsEditor.pulldownList.pulldownTextReady.connect(partial(self._updateSeriesUnitsPulldown, self.unitsEditor, self.defaultObject))
-        self._pulldownData = concentrationUnits
+        self._pulldownData = ALL_UNITS
 
         row += 1
         self._errorFrame = Frame(self, setLayout=True, grid=(row, col), gridSpan=(1, 3), hAlign='l')
@@ -679,6 +679,7 @@ class SeriesFrame(Widget):
             self._pulldownData += (self.defaultObject.seriesUnits,)
         self.unitsEditor.modifyTexts(texts=self._pulldownData)
         self.unitsEditor.select(self.defaultObject.seriesUnits)
+        self._validateEditors()
 
     def _getValuesFromTextEdit(self):
         # read the values from the textEditors and put in dict for later
@@ -738,6 +739,36 @@ class SeriesFrame(Widget):
                 sum += ee.maximumHeight()
             self._seriesFrame.setMaximumHeight(self._seriesFrame.sizeHint().height())
 
+            self._validateEditors()
+
+    def _validateEditors(self):
+        """Check that all the editors contain the same type of seriesValues
+        """
+        errorState = False
+        for editor in self._editors.values():
+            value = editor.get()
+            palette = editor.viewport().palette()
+            colour = editor._background
+            try:
+                seriesValue = None
+                if self.seriesType.getIndex() == SERIESTYPES.DECIMAL.value:
+                    seriesValue = float(value)
+                elif self.seriesType.getIndex() == SERIESTYPES.STRING.value:
+                    seriesValue = str(value)
+                else:
+                    seriesValue = literal_eval(value)
+
+            except Exception as es:
+                # catch exception raised by bad literals
+                colour = INVALIDROWCOLOUR
+                errorState = True
+
+            finally:
+                palette.setColor(editor.viewport().backgroundRole(), colour)
+                editor.viewport().setPalette(palette)
+
+        self._errorFrame.setVisible(errorState)
+
     def _changeSpectrumSeriesValues(self, spectrumGroup, spectrum, dim, value):
         # set the spectrum series value from here
         # spectrum.seriesValue = value
@@ -769,6 +800,8 @@ class SeriesFrame(Widget):
             self._pulldownData += (value,)
             editor.modifyTexts(self._pulldownData)
 
+        self._queueChangeSeriesUnits(editor, spectrumGroup)
+
     def getChangesDict(self):
         """Define the required widgets with storing changes
         returns Popup containing then apply/close buttons
@@ -781,6 +814,8 @@ class SeriesFrame(Widget):
     def _queueChangeSeriesType(self, spectrumGroup):
         """callback from editing the seriesType
         """
+        self._validateEditors()
+
         index = self.seriesType.getIndex()
         specType = spectrumGroup.seriesType
         if index != specType:

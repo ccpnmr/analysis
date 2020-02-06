@@ -70,7 +70,7 @@ class FeedbackFrame(Frame):
             self.setStyleSheet('FeedbackFrame {border: 2px solid rgb(88,88,192)}')
         else:
             # this is background grey which I guess should be defined somewhere
-            self.setStyleSheet('FeedbackFrame {border: 2px solid rgb(235,235,235)}')
+            self.setStyleSheet('FeedbackFrame {border: 2px solid transparent}')
 
 
 class OrderedListWidgteItem(QtWidgets.QListWidgetItem):
@@ -121,7 +121,7 @@ class DefaultItemFactory:
         return result
 
     # GST from https://wiki.python.org/moin/PyQt/Handling%20Qt%27s%20internal%20item%20MIME%20type
-    # note the original has a bug! the items {} is declared to high and is aliased, this only appears
+    # note the original has a bug! the items {} is declared too high and is aliased, this only appears
     # when multiple items are dragged
     def decodeDragData(self, bytearray):
 

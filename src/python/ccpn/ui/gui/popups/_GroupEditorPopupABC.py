@@ -535,27 +535,31 @@ class _GroupEditorPopupABC(CcpnDialogMainWidget):
         else:
             labelName = 'Name'
 
-        self.nameLabel = Label(self._dialogWidget, labelName, grid=(1, 0))
+        row = 1
+        self.nameLabel = Label(self._dialogWidget, labelName, grid=(row, 0))
         self.nameEdit = LineEdit(self._dialogWidget, backgroundText='%s Name' % self.GROUP_NAME, textAlignment='left', grid=(1, 1))
 
         # GST need something better than this..!
         self.nameEdit.setFixedWidth(self._FIXEDWIDTH * 1.5)
         # self.nameEdit.setVisible(True)
 
+        row += 1
         if self.editMode:
-            self.leftPullDownLabel = Label(self._dialogWidget, self.GROUP_NAME, grid=(2, 0))
+            self.leftPullDownLabel = Label(self._dialogWidget, self.GROUP_NAME, grid=(row, 0))
             self.leftPullDown = self.KLASS_PULLDOWN(parent=self._dialogWidget,
                                                     mainWindow=self.mainWindow,
                                                     showSelectName=False,
                                                     default=self.obj,
                                                     callback=self._leftPullDownCallback,
                                                     fixedWidths=[0, self._FIXEDWIDTH],
-                                                    hAlign='l', grid=(2, 1),
+                                                    hAlign='l', grid=(row, 1),
                                                     )
+        row += 2
+        self.selectionLabel = Label(self._dialogWidget, 'Selection', grid=(row, 0))
+        self.leftItemsLabel = Label(self._dialogWidget, self.KLASS_ITEM_ATTRIBUTE.capitalize(), grid=(row, 1))
 
-        self.selectionLabel = Label(self._dialogWidget, 'Selection', grid=(3, 0))
-        self.leftItemsLabel = Label(self._dialogWidget, self.KLASS_ITEM_ATTRIBUTE.capitalize(), grid=(3, 1))
-        self.leftListFeedbackWidget = FeedbackFrame(self._dialogWidget, grid=(4, 2))
+        row += 1
+        self.leftListFeedbackWidget = FeedbackFrame(self._dialogWidget, grid=(row, 2))
         self.leftListWidget = _ListWidget(self.leftListFeedbackWidget, feedbackWidget=self.leftListFeedbackWidget,
                                           grid=(0, 0), dragRole='right', acceptDrops=True, sortOnDrop=False, copyDrop=False,
                                           emptyText=self.LEFT_EMPTY_TEXT, rearrangeable=True, itemFactory=OrderedListWidgetItemFactory())
@@ -579,9 +583,14 @@ class _GroupEditorPopupABC(CcpnDialogMainWidget):
 
     def _setRightWidgets(self):
 
-        self.rightItemsLabel = Label(self._dialogWidget, self.GROUP_NAME, grid=(3, 2))
+        row = 3
+        self.addSpacer(0, 5, grid=(row, 0), gridSpan=(1, 3), parent=self._dialogWidget)
 
-        self.rightListFeedbackWidget = FeedbackFrame(self._dialogWidget, grid=(4, 1))
+        row+=1
+        self.rightItemsLabel = Label(self._dialogWidget, self.GROUP_NAME, grid=(row, 2))
+
+        row += 1
+        self.rightListFeedbackWidget = FeedbackFrame(self._dialogWidget, grid=(row, 1))
         self.rightListWidget = _ListWidget(self.rightListFeedbackWidget, feedbackWidget=self.rightListFeedbackWidget,
                                            grid=(0, 0), dragRole='left', acceptDrops=True, sortOnDrop=False, copyDrop=False,
                                            emptyText=self.RIGHT_EMPTY_TEXT, sorted=True, itemFactory=OrderedListWidgetItemFactory())
@@ -590,7 +599,8 @@ class _GroupEditorPopupABC(CcpnDialogMainWidget):
         self.rightListWidget.setSizePolicy(QtWidgets.QSizePolicy.Ignored, QtWidgets.QSizePolicy.Ignored)
 
         # small frame for holding the pulldown list
-        self.rightListFilterFrame = Frame(self._dialogWidget, setLayout=True, showBorder=False, grid=(5, 1), gridSpan=(1, 2))
+        row += 1
+        self.rightListFilterFrame = Frame(self._dialogWidget, setLayout=True, showBorder=False, grid=(row, 1), gridSpan=(1, 2))
         self.rightFilterLabel = Label(self.rightListFilterFrame, self.BUTTON_FILTER, hAlign='l', grid=(0, 0))
         self.rightPullDown = self.KLASS_PULLDOWN(parent=self.rightListFilterFrame,
                                                  mainWindow=self.mainWindow,
@@ -603,7 +613,15 @@ class _GroupEditorPopupABC(CcpnDialogMainWidget):
                                                  )
         self.rightListFilterFrame.getLayout().setColumnStretch(2, 1)
 
-        self.errorFrame = Frame(self._dialogWidget, setLayout=True, grid=(6, 1), gridSpan=(1, 2))
+        row += 1
+        self.addSpacer(0, 5, grid=(row, 0), gridSpan=(1, 3), parent=self._dialogWidget)
+
+        row+=1
+        self.errorFrame = Frame(self._dialogWidget, setLayout=True, grid=(row, 1), gridSpan=(1, 2))
+
+        row += 1
+        self.addSpacer(0, 10, grid=(row, 0), gridSpan=(1, 3), parent=self._dialogWidget)
+
         # self.rightListWidget.setFixedWidth(2*self.FIXEDWIDTH)
 
     def _rightPullDownFilter(self, pids):

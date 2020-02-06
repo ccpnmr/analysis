@@ -42,25 +42,36 @@ Development of a Software Pipeline. Proteins 59, 687 - 696.
 #define _incl_npy_defns
 
 #include "Python.h"
-
 #include "defns.h"
 
-#define RETURN_OBJ_ERROR(message) \
-	{ PyErr_SetString(ErrorObject, message); return NULL; }
+#define RETURN_OBJ_ERROR(message)              \
+    {                                          \
+        PyErr_SetString(ErrorObject, message); \
+        return NULL;                           \
+    }
 
-#define RETURN_INT_ERROR(message) \
-	{ PyErr_SetString(ErrorObject, message); return -1; }
+#define RETURN_INT_ERROR(message)              \
+    {                                          \
+        PyErr_SetString(ErrorObject, message); \
+        return -1;                             \
+    }
 
-#define CHECK_OBJ_STATUS(status) \
-	{   if ((status) == CCPN_ERROR)  RETURN_OBJ_ERROR(error_msg);   }
+#define CHECK_OBJ_STATUS(status)                                 \
+    {                                                            \
+        if ((status) == CCPN_ERROR) RETURN_OBJ_ERROR(error_msg); \
+    }
 
-#define PY_MALLOC(obj, type, typeobj) \
-	{   obj = PyObject_NEW(type, typeobj); \
-            DEBUG_CODE_HEX("py_malloc", obj);   }
+#define PY_MALLOC(obj, type, typeobj)      \
+    {                                      \
+        obj = PyObject_NEW(type, typeobj); \
+        DEBUG_CODE_HEX("py_malloc", obj);  \
+    }
 
-#define PY_FREE(obj) \
-	{   DEBUG_CODE_HEX("py_free", obj); \
-            PyObject_DEL(obj);   }
+#define PY_FREE(obj)                    \
+    {                                   \
+        DEBUG_CODE_HEX("py_free", obj); \
+        PyObject_DEL(obj);              \
+    }
 
 #ifdef WIN32
 #define PY_MOD_INIT_FUNC PyMODINIT_FUNC

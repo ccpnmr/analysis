@@ -11,8 +11,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-02-05 16:03:53 +0000 (Wed, February 05, 2020) $"
-__version__ = "$Revision: 3.0.0 $"
+__dateModified__ = "$dateModified: 2020-02-06 18:27:17 +0000 (Thu, February 06, 2020) $"
+__version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -752,11 +752,29 @@ class Framework(NotifierBase):
                 if not strip:
                     continue
 
+                # get the new tilePosition of the strip - tilePosition is always (x, y) relative to screen stripArrangement
+                #                                       changing screen arrangement does NOT require flipping tilePositions
+                #                                       i.e. Y = (across, down); X = (down, across)
+                #                                       - check delete/undo/redo strips
+                tilePosition = strip.tilePosition
+
                 # move to the correct place in the widget - check stripDirection to display as row or column
                 if spectrumDisplay.stripArrangement == 'Y':
-                    spectrumDisplay.stripFrame.layout().addWidget(strip, 0, si)  #stripIndex)
+
+                    if tilePosition is None:
+                        spectrumDisplay.stripFrame.layout().addWidget(strip, 0, si)  #stripIndex)
+                        strip.tilePosition = (0, si)
+                    else:
+                        spectrumDisplay.stripFrame.layout().addWidget(strip, tilePosition[0], tilePosition[1])
+
                 elif spectrumDisplay.stripArrangement == 'X':
-                    spectrumDisplay.stripFrame.layout().addWidget(strip, si, 0)  #stripIndex)
+
+                    if tilePosition is None:
+                        spectrumDisplay.stripFrame.layout().addWidget(strip, si, 0)  #stripIndex)
+                        strip.tilePosition = (0, si)
+                    else:
+                        spectrumDisplay.stripFrame.layout().addWidget(strip, tilePosition[1], tilePosition[0])
+
                 elif spectrumDisplay.stripArrangement == 'T':
 
                     # NOTE:ED - Tiled plots not fully implemented yet

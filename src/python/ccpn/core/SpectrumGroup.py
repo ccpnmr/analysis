@@ -13,8 +13,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-02-05 09:39:57 +0000 (Wed, February 05, 2020) $"
-__version__ = "$Revision: 3.0.0 $"
+__dateModified__ = "$dateModified: 2020-02-06 18:27:16 +0000 (Thu, February 06, 2020) $"
+__version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -44,9 +44,10 @@ SPECTRUMGROUPSERIESTYPE = 'spectrumGroupSeriesType'
 
 class SERIESTYPES(Enum):
     # NOTE:ED - could make this a labelledEnum
-    DECIMAL = 0, 'Decimal'
-    STRING = 1, 'String'
-    PYTHONLITERAL = 2, 'Python Literal'
+    FLOAT = 0, 'Float'
+    INTEGER = 1, 'Integer'
+    STRING = 2, 'String'
+    PYTHONLITERAL = 3, 'Python Literal'
 
     def __new__(cls, *args, **kwds):
         obj = object.__new__(cls)

@@ -7,7 +7,7 @@ E.g.  Mouse co-ordinates
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -17,8 +17,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2018-12-20 14:07:59 +0000 (Thu, December 20, 2018) $"
-__version__ = "$Revision: 3.0.0 $"
+__dateModified__ = "$dateModified: 2020-02-06 18:27:17 +0000 (Thu, February 06, 2020) $"
+__version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -51,6 +51,9 @@ class GLNotifier(QtWidgets.QWidget):
     GLTOPAXISVALUE = 'topAxis'
     GLLEFTAXISVALUE = 'leftAxis'
     GLRIGHTAXISVALUE = 'rightAxis'
+    GLSTRIPROW = 'stripRow'
+    GLSTRIPCOLUMN = 'stripColumn'
+    GLSTRIPAXES = 'stripAxes'
     GLADD1DPHASING = 'add1DPhasing'
     GLCLEARPHASING = 'clearPhasing'
     GLALLCONTOURS = 'updateAllContours'
@@ -129,29 +132,50 @@ class GLNotifier(QtWidgets.QWidget):
                  }
         self.glEvent.emit(aDict)
 
-    def _emitAllAxesChanged(self, source=None, strip=None,
-                            axisB=None, axisT=None, axisL=None, axisR=None):
+    def _emitAllAxesChanged(self, source=None, strip=None, spectrumDisplay=None,
+                            axisB=None, axisT=None, axisL=None, axisR=None, row=None, column=None, stripAxes=None):
         aDict = {GLNotifier.GLSOURCE         : source,
                  GLNotifier.GLSTRIP          : strip,
-                 GLNotifier.GLSPECTRUMDISPLAY: strip.spectrumDisplay if strip else None,
+                 GLNotifier.GLSPECTRUMDISPLAY: spectrumDisplay or (strip.spectrumDisplay if strip else None),
                  GLNotifier.GLAXISVALUES     : {GLNotifier.GLBOTTOMAXISVALUE: axisB,
                                                 GLNotifier.GLTOPAXISVALUE   : axisT,
                                                 GLNotifier.GLLEFTAXISVALUE  : axisL,
-                                                GLNotifier.GLRIGHTAXISVALUE : axisR}
+                                                GLNotifier.GLRIGHTAXISVALUE : axisR,
+                                                GLNotifier.GLSTRIPAXES      : stripAxes,
+                                                GLNotifier.GLSTRIPROW       : row,
+                                                GLNotifier.GLSTRIPCOLUMN    : column}
                  }
         self.glAllAxesChanged.emit(aDict)
 
-    def _emitXAxisChanged(self, source=None, strip=None,
-                          axisB=None, axisT=None, axisL=None, axisR=None):
+    def _emitXAxisChanged(self, source=None, strip=None, spectrumDisplay=None,
+                          axisB=None, axisT=None, axisL=None, axisR=None, row=None, column=None, stripAxes=None):
         aDict = {GLNotifier.GLSOURCE         : source,
                  GLNotifier.GLSTRIP          : strip,
-                 GLNotifier.GLSPECTRUMDISPLAY: strip.spectrumDisplay if strip else None,
+                 GLNotifier.GLSPECTRUMDISPLAY: spectrumDisplay or (strip.spectrumDisplay if strip else None),
                  GLNotifier.GLAXISVALUES     : {GLNotifier.GLBOTTOMAXISVALUE: axisB,
                                                 GLNotifier.GLTOPAXISVALUE   : axisT,
                                                 GLNotifier.GLLEFTAXISVALUE  : axisL,
-                                                GLNotifier.GLRIGHTAXISVALUE : axisR}
+                                                GLNotifier.GLRIGHTAXISVALUE : axisR,
+                                                GLNotifier.GLSTRIPAXES      : stripAxes,
+                                                GLNotifier.GLSTRIPROW       : row,
+                                                GLNotifier.GLSTRIPCOLUMN    : column}
                  }
         self.glXAxisChanged.emit(aDict)
+
+    def _emitYAxisChanged(self, source=None, strip=None, spectrumDisplay=None,
+                          axisB=None, axisT=None, axisL=None, axisR=None, row=None, column=None, stripAxes=None):
+        aDict = {GLNotifier.GLSOURCE         : source,
+                 GLNotifier.GLSTRIP          : strip,
+                 GLNotifier.GLSPECTRUMDISPLAY: spectrumDisplay or (strip.spectrumDisplay if strip else None),
+                 GLNotifier.GLAXISVALUES     : {GLNotifier.GLBOTTOMAXISVALUE: axisB,
+                                                GLNotifier.GLTOPAXISVALUE   : axisT,
+                                                GLNotifier.GLLEFTAXISVALUE  : axisL,
+                                                GLNotifier.GLRIGHTAXISVALUE : axisR,
+                                                GLNotifier.GLSTRIPAXES      : stripAxes,
+                                                GLNotifier.GLSTRIPROW       : row,
+                                                GLNotifier.GLSTRIPCOLUMN    : column}
+                 }
+        self.glYAxisChanged.emit(aDict)
 
     def _emitMouseMoved(self, source=None, coords=None, mouseMovedDict=None, mainWindow=None):
         aDict = {GLNotifier.GLSOURCE        : source,
@@ -165,18 +189,6 @@ class GLNotifier(QtWidgets.QWidget):
         #         if strip._CcpnGLWidget != source:
         #             strip._CcpnGLWidget._glMouseMoved(aDict)
         #     # specDisplay.stripFrame.update()
-
-    def _emitYAxisChanged(self, source=None, strip=None,
-                          axisB=None, axisT=None, axisL=None, axisR=None):
-        aDict = {GLNotifier.GLSOURCE         : source,
-                 GLNotifier.GLSTRIP          : strip,
-                 GLNotifier.GLSPECTRUMDISPLAY: strip.spectrumDisplay if strip else None,
-                 GLNotifier.GLAXISVALUES     : {GLNotifier.GLBOTTOMAXISVALUE: axisB,
-                                                GLNotifier.GLTOPAXISVALUE   : axisT,
-                                                GLNotifier.GLLEFTAXISVALUE  : axisL,
-                                                GLNotifier.GLRIGHTAXISVALUE : axisR}
-                 }
-        self.glYAxisChanged.emit(aDict)
 
     def _emitAxisLockChanged(self, source=None, strip=None, lockValues=None):
         aDict = {GLNotifier.GLSOURCE         : source,

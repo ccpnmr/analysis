@@ -4,7 +4,7 @@ GUI Display Strip class
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -13,9 +13,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: CCPN $"
-__dateModified__ = "$dateModified: 2017-07-07 16:32:41 +0100 (Fri, July 07, 2017) $"
-__version__ = "$Revision: 3.0.0 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2020-02-06 18:27:17 +0000 (Thu, February 06, 2020) $"
+__version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -39,6 +39,8 @@ from ccpn.core.lib.ContextManagers import undoBlock, newObject
 
 
 # SV_TITLE = '_Strip'
+STRIPTILING = 'stripTiling'
+STRIPTILEPOSITION = 'stripTilePosition'
 
 
 class Strip(AbstractWrapperObject):
@@ -308,6 +310,28 @@ class Strip(AbstractWrapperObject):
 
     def _removeOrderedSpectrumViewIndex(self, index):
         self.spectrumDisplay.removeOrderedSpectrumView(index)
+
+    @property
+    def tilePosition(self) -> Tuple[int, int]:
+        """Returns a tuple of the tile coordinates (from top-left)
+        tilePosition = (x, y)
+        """
+        tilePosition = self.getParameter(STRIPTILING, STRIPTILEPOSITION)
+        return tilePosition
+
+    @tilePosition.setter
+    def tilePosition(self, value):
+        """Setter for tilePosition
+        tilePosition must be a tuple of int (x, y)
+        """
+        if not isinstance(value, tuple):
+            raise ValueError('Expected a tuple for tilePosition')
+        if len(value) != 2:
+            raise ValueError('Tuple must be (x, y)')
+        if any(type(vv) != int for vv in value):
+            raise ValueError('Tuple must be of type int')
+
+        self.setParameter(STRIPTILING, STRIPTILEPOSITION, value)
 
     #=========================================================================================
     # CCPN functions

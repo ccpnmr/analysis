@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-01-28 16:57:39 +0000 (Tue, January 28, 2020) $"
-__version__ = "$Revision: 3.0.0 $"
+__dateModified__ = "$dateModified: 2020-02-06 18:27:17 +0000 (Thu, February 06, 2020) $"
+__version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -61,7 +61,7 @@ from ccpn.core.lib.AssignmentLib import _assignNmrAtomsToPeaks, _assignNmrResidu
 from ccpn.util.Constants import MOUSEDICTSTRIP
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import PEAKSELECT, MULTIPLETSELECT
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import CcpnGLWidget
-from ccpn.ui.gui.widgets.GLWidgets import Gui1dWidgetAxis
+from ccpn.ui.gui.widgets.GLWidgets import Gui1dWidgetAxis, GuiNdWidgetAxis
 from ccpn.util.Logging import getLogger
 from ccpn.core.NmrAtom import NmrAtom
 from ccpn.core.NmrResidue import NmrResidue
@@ -94,6 +94,8 @@ SPECTRUMDISPLAY = 'spectrumDisplay'
 STRIPARRANGEMENT = 'stripArrangement'
 
 MAXITEMLOGGING = 4
+
+INCLUDE_AXIS_WIDGET = True
 
 # GST All this complication is added because the scroll frame appears to have a lower margin added by some part of Qt
 #     that we can't control in PyQt. Specifically even if you overide setContentsMargins on ScrollArea it is never
@@ -256,7 +258,8 @@ class GuiSpectrumDisplay(CcpnModule):
         spectrumRow = 1
         toolBarRow = 0
         stripRow = 2
-        phasingRow = 3
+        axisRow = 3
+        phasingRow = 4
 
         # self._widgetScrollArea = ScrollArea(parent=self.qtParent, scrollBarPolicies=('asNeeded', 'never'),
         #                                     grid=(spectrumRow, 0), gridSpan=(1,7))
@@ -321,6 +324,16 @@ class GuiSpectrumDisplay(CcpnModule):
                                 acceptDrops=True)
         # self.stripFrame.layout().setContentsMargins(0, 0, 0, 0)
 
+        if INCLUDE_AXIS_WIDGET:
+            # NOTE:ED - testing new axis widget - required actually adding tiling
+            if self.is1D:
+                self._rightGLAxis = Gui1dWidgetAxis(self.qtParent, spectrumDisplay=self, mainWindow=self.mainWindow)
+                self.qtParent.getLayout().addWidget(self._rightGLAxis, stripRow, 1, 1, 7)
+            else:
+                self._rightGLAxis = GuiNdWidgetAxis(self.qtParent, spectrumDisplay=self, mainWindow=self.mainWindow)
+                self.qtParent.getLayout().addWidget(self._rightGLAxis, stripRow, 1, 1, 7)
+            self._rightGLAxis.tilePosition = (0, -1)
+
         # frameStyleSheetTemplate = ''' .%s { border-left: 1px solid #a9a9a9;
         #                               border-right: 1px solid #a9a9a9;
         #                               border-bottom: 1px solid #a9a9a9;
@@ -350,6 +363,16 @@ class GuiSpectrumDisplay(CcpnModule):
             self._stripFrameScrollArea = None
             self.qtParent.getLayout().addWidget(self.stripFrame, stripRow, 0, 1, 7)
             # self.stripFrame.setStyleSheet(frameStyleSheetTemplate % ('Frame', ''))
+
+        if INCLUDE_AXIS_WIDGET:
+            # NOTE:ED - testing new axis widget - required actually adding tiling
+            if self.is1D:
+                self._bottomGLAxis = Gui1dWidgetAxis(self.qtParent, spectrumDisplay=self, mainWindow=self.mainWindow)
+                self.qtParent.getLayout().addWidget(self._bottomGLAxis, axisRow, 0, 1, 7)
+            else:
+                self._bottomGLAxis = GuiNdWidgetAxis(self.qtParent, spectrumDisplay=self, mainWindow=self.mainWindow)
+                self.qtParent.getLayout().addWidget(self._bottomGLAxis, axisRow, 0, 1, 7)
+            self._bottomGLAxis.tilePosition = (-1, 0)
 
         includeDirection = not self.is1D
         self.phasingFrame = PhasingFrame(parent=self.qtParent,
@@ -1079,13 +1102,27 @@ class GuiSpectrumDisplay(CcpnModule):
 
                 # horizontal strip layout
                 for m, widgStrip in enumerate(_widgets):
-                    layout.addWidget(widgStrip, 0, m)
+                    # layout.addWidget(widgStrip, 0, m)
+
+                    tilePosition = widgStrip.tilePosition
+                    if tilePosition is None:
+                        layout.addWidget(widgStrip, 0, m)
+                        widgStrip.tilePosition = (0, m)
+                    else:
+                        layout.addWidget(widgStrip, tilePosition[0], tilePosition[1])
 
             elif spectrumDisplay.stripArrangement == 'X':
 
                 # vertical strip layout
                 for m, widgStrip in enumerate(_widgets):
-                    layout.addWidget(widgStrip, m, 0)
+                    # layout.addWidget(widgStrip, m, 0)
+
+                    tilePosition = widgStrip.tilePosition
+                    if tilePosition is None:
+                        layout.addWidget(widgStrip, m, 0)
+                        widgStrip.tilePosition = (0, m)
+                    else:
+                        layout.addWidget(widgStrip, tilePosition[1], tilePosition[0])
 
             elif spectrumDisplay.stripArrangement == 'T':
 
@@ -1136,13 +1173,27 @@ class GuiSpectrumDisplay(CcpnModule):
 
                 # horizontal strip layout
                 for m, widgStrip in enumerate(_widgets):
-                    layout.addWidget(widgStrip, 0, m)
+                #     layout.addWidget(widgStrip, 0, m)
+
+                    tilePosition = widgStrip.tilePosition
+                    if tilePosition is None:
+                        layout.addWidget(widgStrip, 0, m)
+                        widgStrip.tilePosition = (0, m)
+                    else:
+                        layout.addWidget(widgStrip, tilePosition[0], tilePosition[1])
 
             elif spectrumDisplay.stripArrangement == 'X':
 
                 # vertical strip layout
                 for m, widgStrip in enumerate(_widgets):
-                    layout.addWidget(widgStrip, m, 0)
+                #     layout.addWidget(widgStrip, m, 0)
+
+                    tilePosition = widgStrip.tilePosition
+                    if tilePosition is None:
+                        layout.addWidget(widgStrip, m, 0)
+                        widgStrip.tilePosition = (0, m)
+                    else:
+                        layout.addWidget(widgStrip, tilePosition[1], tilePosition[0])
 
             elif spectrumDisplay.stripArrangement == 'T':
 
@@ -1190,13 +1241,27 @@ class GuiSpectrumDisplay(CcpnModule):
 
                 # horizontal strip layout
                 for m, widgStrip in enumerate(_widgets):
-                    layout.addWidget(widgStrip, 0, m)
+                    # layout.addWidget(widgStrip, 0, m)
+
+                    tilePosition = widgStrip.tilePosition
+                    if tilePosition is None:
+                        layout.addWidget(widgStrip, 0, m)
+                        widgStrip.tilePosition = (0, m)
+                    else:
+                        layout.addWidget(widgStrip, tilePosition[0], tilePosition[1])
 
             elif spectrumDisplay.stripArrangement == 'X':
 
                 # vertical strip layout
                 for m, widgStrip in enumerate(_widgets):
-                    layout.addWidget(widgStrip, m, 0)
+                    # layout.addWidget(widgStrip, m, 0)
+
+                    tilePosition = widgStrip.tilePosition
+                    if tilePosition is None:
+                        layout.addWidget(widgStrip, m, 0)
+                        widgStrip.tilePosition = (0, m)
+                    else:
+                        layout.addWidget(widgStrip, tilePosition[1], tilePosition[0])
 
             elif spectrumDisplay.stripArrangement == 'T':
 
@@ -1504,6 +1569,9 @@ class GuiSpectrumDisplay(CcpnModule):
         """
         strip = self.getByPid(strip) if isinstance(strip, str) else strip
         index = strip.stripIndex() if strip else -1
+        tilePosition = strip.tilePosition if strip else None
+        if tilePosition is None:
+            tilePosition = (0, 0)
 
         if self.phasingFrame.isVisible():
             showWarning(str(self.windowTitle()), 'Please disable Phasing Console before adding strips')

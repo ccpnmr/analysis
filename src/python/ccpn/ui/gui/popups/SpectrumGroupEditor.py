@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-02-05 15:54:09 +0000 (Wed, February 05, 2020) $"
-__version__ = "$Revision: 3.0.0 $"
+__dateModified__ = "$dateModified: 2020-02-06 18:27:17 +0000 (Thu, February 06, 2020) $"
+__version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -562,9 +562,11 @@ class SeriesFrame(Widget):
 
         row = 0
         col = 0
-        seriesLabel = Label(self, text="Spectrum SeriesValues - use python literals", grid=(row, col), gridSpan=(1, 3), hAlign='l')
-        seriesLabel.setFixedHeight(30)
-        seriesLabel.setSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Fixed)
+        # seriesLabel = Label(self, text="Spectrum SeriesValues", grid=(row, col), gridSpan=(1, 3), hAlign='l')
+        # seriesLabel.setFixedHeight(30)
+        # seriesLabel.setSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Fixed)
+        Spacer(self, 10, 10, QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed,
+               grid=(row, col))
 
         row += 1
         seriesTypeLabel = Label(self, text='Series Type', grid=(row, col), hAlign='l')
@@ -680,8 +682,10 @@ class SeriesFrame(Widget):
                 ii = self.defaultObject.spectra.index(spec)
 
                 try:
-                    if self.seriesType.getIndex() == SERIESTYPES.DECIMAL.value:
+                    if self.seriesType.getIndex() == SERIESTYPES.FLOAT.value:
                         seriesValue = float(series[ii])
+                    if self.seriesType.getIndex() == SERIESTYPES.INTEGER.value:
+                        seriesValue = int(series[ii])
                     elif self.seriesType.getIndex() == SERIESTYPES.STRING.value:
                         seriesValue = str(series[ii])
                     else:
@@ -714,8 +718,10 @@ class SeriesFrame(Widget):
         # queue the value if has changed from the original
         value = editor.get()
         try:
-            if self.seriesType.getIndex() == SERIESTYPES.DECIMAL.value:
+            if self.seriesType.getIndex() == SERIESTYPES.FLOAT.value:
                 seriesValue = float(value)
+            if self.seriesType.getIndex() == SERIESTYPES.INTEGER.value:
+                seriesValue = int(value)
             elif self.seriesType.getIndex() == SERIESTYPES.STRING.value:
                 seriesValue = str(value)
             else:
@@ -773,8 +779,10 @@ class SeriesFrame(Widget):
             colour = editor._background
             try:
                 seriesValue = None
-                if self.seriesType.getIndex() == SERIESTYPES.DECIMAL.value:
+                if self.seriesType.getIndex() == SERIESTYPES.FLOAT.value:
                     seriesValue = float(value)
+                if self.seriesType.getIndex() == SERIESTYPES.INTEGER.value:
+                    seriesValue = int(value)
                 elif self.seriesType.getIndex() == SERIESTYPES.STRING.value:
                     seriesValue = str(value)
                 else:

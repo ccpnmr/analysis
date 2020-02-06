@@ -55,8 +55,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-01-29 09:03:04 +0000 (Wed, January 29, 2020) $"
-__version__ = "$Revision: 3.0.0 $"
+__dateModified__ = "$dateModified: 2020-02-06 18:27:17 +0000 (Thu, February 06, 2020) $"
+__version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -1013,29 +1013,42 @@ class CcpnGLWidget(QOpenGLWidget):
 
         # find the correct viewport
         if (self._drawRightAxis and self._drawBottomAxis):
-            mw = [0, self.AXIS_MARGINBOTTOM, w - self.AXIS_MARGINRIGHT, h - 1]
-            ba = [0, 0, w - self.AXIS_MARGINRIGHT, self.AXIS_MARGINBOTTOM - 1]
-            ra = [w - self.AXIS_MARGINRIGHT, self.AXIS_MARGINBOTTOM, w, h]
+            # mw = [0, self.AXIS_MARGINBOTTOM, w - self.AXIS_MARGINRIGHT, h - 1]
+            # ba = [0, 0, w - self.AXIS_MARGINRIGHT, self.AXIS_MARGINBOTTOM - 1]
+            # ra = [w - self.AXIS_MARGINRIGHT, self.AXIS_MARGINBOTTOM, w, h]
+
+            mw = self.viewports.getViewportFromWH(GLDefs.MAINVIEW, w, h)
+            ba = self.viewports.getViewportFromWH(GLDefs.BOTTOMAXISBAR, w, h)
+            ra = self.viewports.getViewportFromWH(GLDefs.RIGHTAXISBAR, w, h)
 
         elif (self._drawBottomAxis):
-            mw = [0, self.AXIS_MARGINBOTTOM, w, h - 1]
-            ba = [0, 0, w, self.AXIS_MARGINBOTTOM - 1]
-            ra = [w, self.AXIS_MARGINBOTTOM, w, h]
+            # mw = [0, self.AXIS_MARGINBOTTOM, w, h - 1]
+            # ba = [0, 0, w, self.AXIS_MARGINBOTTOM - 1]
+            # ra = [w, self.AXIS_MARGINBOTTOM, w, h]
+
+            mw = self.viewports.getViewportFromWH(GLDefs.MAINVIEWFULLWIDTH, w, h)
+            ba = self.viewports.getViewportFromWH(GLDefs.FULLBOTTOMAXISBAR, w, h)
+            ra = (0, 0, 0, 0)
 
         elif (self._drawRightAxis):
-            mw = [0, 0, w - self.AXIS_MARGINRIGHT, h - 1]
-            ba = [0, 0, w - self.AXIS_MARGINRIGHT, 0]
-            ra = [w - self.AXIS_MARGINRIGHT, 0, w, h]
+            # mw = [0, 0, w - self.AXIS_MARGINRIGHT, h - 1]
+            # ba = [0, 0, w - self.AXIS_MARGINRIGHT, 0]
+            # ra = [w - self.AXIS_MARGINRIGHT, 0, w, h]
+
+            mw = self.viewports.getViewportFromWH(GLDefs.MAINVIEWFULLHEIGHT, w, h)
+            ba = (0, 0, 0, 0)
+            ra = self.viewports.getViewportFromWH(GLDefs.FULLRIGHTAXISBAR, w, h)
 
         else:  # no axes visible
-            mw = [0, 0, w, h]
-            ba = [0, 0, w, 0]
-            ra = [w, 0, w, h]
+            mw = self.viewports.getViewportFromWH(GLDefs.FULLVIEW, w, h)
+            ba = (0, 0, 0, 0)
+            ra = (0, 0, 0, 0)
 
         mx = event.pos().x()
         my = self.height() - event.pos().y()
 
-        if self.between(mx, mw[0], mw[2]) and self.between(my, mw[1], mw[3]):
+        tilePos = self.strip.tilePosition if self.strip else self.tilePosition
+        if self.between(mx, mw[0], mw[0] + mw[2]) and self.between(my, mw[1], mw[1] + mw[3]):
 
             # if in the mainView
 
@@ -1067,12 +1080,13 @@ class CcpnGLWidget(QOpenGLWidget):
 
             self.GLSignals._emitAllAxesChanged(source=self, strip=self.strip,
                                                axisB=self.axisB, axisT=self.axisT,
-                                               axisL=self.axisL, axisR=self.axisR)
+                                               axisL=self.axisL, axisR=self.axisR,
+                                               row=tilePos[0], column=tilePos[1])
 
             self._rescaleAllAxes()
             self._storeZoomHistory()
 
-        elif self.between(mx, ba[0], ba[2]) and self.between(my, ba[1], ba[3]):
+        elif self.between(mx, ba[0], ba[0] + ba[2]) and self.between(my, ba[1], ba[1] + ba[3]):
 
             # in the bottomAxisBar, so zoom in the X axis
 
@@ -1098,7 +1112,8 @@ class CcpnGLWidget(QOpenGLWidget):
             if not (self._useLockedAspect or self._useDefaultAspect):
                 self.GLSignals._emitXAxisChanged(source=self, strip=self.strip,
                                                  axisB=self.axisB, axisT=self.axisT,
-                                                 axisL=self.axisL, axisR=self.axisR)
+                                                 axisL=self.axisL, axisR=self.axisR,
+                                                 row=tilePos[0], column=tilePos[1])
 
                 self._rescaleXAxis()
                 self._storeZoomHistory()
@@ -1108,11 +1123,12 @@ class CcpnGLWidget(QOpenGLWidget):
 
                 self.GLSignals._emitAllAxesChanged(source=self, strip=self.strip,
                                                    axisB=self.axisB, axisT=self.axisT,
-                                                   axisL=self.axisL, axisR=self.axisR)
+                                                   axisL=self.axisL, axisR=self.axisR,
+                                                   row=tilePos[0], column=tilePos[1])
 
                 self._storeZoomHistory()
 
-        elif self.between(mx, ra[0], ra[2]) and self.between(my, ra[1], ra[3]):
+        elif self.between(mx, ra[0], ra[0] + ra[2]) and self.between(my, ra[1], ra[1] + ra[3]):
 
             # in the rightAxisBar, so zoom in the Y axis
 
@@ -1138,7 +1154,8 @@ class CcpnGLWidget(QOpenGLWidget):
             if not (self._useLockedAspect or self._useDefaultAspect):
                 self.GLSignals._emitYAxisChanged(source=self, strip=self.strip,
                                                  axisB=self.axisB, axisT=self.axisT,
-                                                 axisL=self.axisL, axisR=self.axisR)
+                                                 axisL=self.axisL, axisR=self.axisR,
+                                                 row=tilePos[0], column=tilePos[1])
 
                 self._rescaleYAxis()
                 self._storeZoomHistory()
@@ -1148,7 +1165,8 @@ class CcpnGLWidget(QOpenGLWidget):
 
                 self.GLSignals._emitAllAxesChanged(source=self, strip=self.strip,
                                                    axisB=self.axisB, axisT=self.axisT,
-                                                   axisL=self.axisL, axisR=self.axisR)
+                                                   axisL=self.axisL, axisR=self.axisR,
+                                                   row=tilePos[0], column=tilePos[1])
 
                 self._storeZoomHistory()
 
@@ -1428,9 +1446,11 @@ class CcpnGLWidget(QOpenGLWidget):
             # not a movement key
             return
 
+        tilePos = self.strip.tilePosition if self.strip else self.tilePosition
         self.GLSignals._emitAllAxesChanged(source=self, strip=self.strip,
                                            axisB=self.axisB, axisT=self.axisT,
-                                           axisL=self.axisL, axisR=self.axisR)
+                                           axisL=self.axisL, axisR=self.axisR,
+                                           row=tilePos[0], column=tilePos[1])
 
         # self._testAxisLimits(setLimits=True)
         self._rescaleAllAxes()
@@ -1479,9 +1499,11 @@ class CcpnGLWidget(QOpenGLWidget):
             # not a movement key
             return
 
+        tilePos = self.strip.tilePosition if self.strip else self.tilePosition
         self.GLSignals._emitAllAxesChanged(source=self, strip=self.strip,
                                            axisB=self.axisB, axisT=self.axisT,
-                                           axisL=self.axisL, axisR=self.axisR)
+                                           axisL=self.axisL, axisR=self.axisR,
+                                           row=tilePos[0], column=tilePos[1])
 
         # self._testAxisLimits(setLimits=True)
         self._rescaleAllAxes()
@@ -1496,9 +1518,11 @@ class CcpnGLWidget(QOpenGLWidget):
         self.axisT += delta[1]
         self.axisB += delta[1]
 
+        tilePos = self.strip.tilePosition if self.strip else self.tilePosition
         self.GLSignals._emitAllAxesChanged(source=self, strip=self.strip,
                                            axisB=self.axisB, axisT=self.axisT,
-                                           axisL=self.axisL, axisR=self.axisR)
+                                           axisL=self.axisL, axisR=self.axisR,
+                                           row=tilePos[0], column=tilePos[1])
         self._rescaleAllAxes()
 
     def initialiseAxes(self, strip=None):
@@ -1975,28 +1999,24 @@ class CcpnGLWidget(QOpenGLWidget):
 
         # define the viewports for the right axis bar
         if self.AXIS_INSIDE:
-            self.viewports.addViewport(GLDefs.RIGHTAXIS, self, (-(self.AXIS_MARGINRIGHT + self.AXIS_LINE), 'w'),
-                                       (self.AXIS_MARGINBOTTOM, 'a'),
+            self.viewports.addViewport(GLDefs.RIGHTAXIS, self, (-(self.AXIS_MARGINRIGHT + self.AXIS_LINE), 'w'), (self.AXIS_MARGINBOTTOM, 'a'),
                                        (self.AXIS_LINE, 'a'), (-self.AXIS_MARGINBOTTOM, 'h'))
-            self.viewports.addViewport(GLDefs.RIGHTAXISBAR, self, (-self.AXIS_MARGINRIGHT, 'w'),
-                                       (self.AXIS_MARGINBOTTOM, 'a'),
-                                       (0, 'w'), (-self.AXIS_MARGINBOTTOM, 'h'))
+            self.viewports.addViewport(GLDefs.RIGHTAXISBAR, self, (-self.AXIS_MARGINRIGHT, 'w'), (self.AXIS_MARGINBOTTOM, 'a'),
+                                       (self.AXIS_MARGINRIGHT, 'a'), (-self.AXIS_MARGINBOTTOM, 'h'))
 
         else:
-            self.viewports.addViewport(GLDefs.RIGHTAXIS, self, (-(self.AXIS_MARGINRIGHT + self.AXIS_LINE), 'w'),
-                                       (self.AXIS_MARGINBOTTOM + self.AXIS_LINE, 'a'),
+            self.viewports.addViewport(GLDefs.RIGHTAXIS, self, (-(self.AXIS_MARGINRIGHT + self.AXIS_LINE), 'w'), (self.AXIS_MARGINBOTTOM + self.AXIS_LINE, 'a'),
                                        (self.AXIS_LINE, 'a'), (-(self.AXIS_MARGINBOTTOM + self.AXIS_LINE), 'h'))
 
-            self.viewports.addViewport(GLDefs.RIGHTAXISBAR, self, (-self.AXIS_MARGINRIGHT, 'w'),
-                                       (self.AXIS_MARGINBOTTOM + self.AXIS_LINE, 'a'),
-                                       (0, 'w'), (-(self.AXIS_MARGINBOTTOM + self.AXIS_LINE), 'h'))
+            self.viewports.addViewport(GLDefs.RIGHTAXISBAR, self, (-self.AXIS_MARGINRIGHT, 'w'), (self.AXIS_MARGINBOTTOM + self.AXIS_LINE, 'a'),
+                                       (self.AXIS_MARGINRIGHT, 'a'), (-(self.AXIS_MARGINBOTTOM + self.AXIS_LINE), 'h'))
 
         self.viewports.addViewport(GLDefs.FULLRIGHTAXIS, self, (-(self.AXIS_MARGINRIGHT + self.AXIS_LINE), 'w'),
                                    (0, 'a'),
                                    (self.AXIS_LINE, 'a'), (0, 'h'))
 
         self.viewports.addViewport(GLDefs.FULLRIGHTAXISBAR, self, (-self.AXIS_MARGINRIGHT, 'w'), (0, 'a'),
-                                   (0, 'w'), (0, 'h'))
+                                   (self.AXIS_MARGINRIGHT, 'a'), (0, 'h'))
 
         # define the viewports for the bottom axis bar
         if self.AXIS_INSIDE:
@@ -2022,7 +2042,8 @@ class CcpnGLWidget(QOpenGLWidget):
         self.viewports.addViewport(GLDefs.FULLVIEW, self, (0, 'a'), (0, 'a'), (0, 'w'), (0, 'h'))
 
         # define the remaining corner
-        self.viewports.addViewport(GLDefs.AXISCORNER, self, (-self.AXIS_MARGINRIGHT, 'w'), (0, 'a'), (0, 'w'), (self.AXIS_MARGINBOTTOM, 'a'))
+        self.viewports.addViewport(GLDefs.AXISCORNER, self, (-self.AXIS_MARGINRIGHT, 'w'), (0, 'a'), (self.AXIS_MARGINRIGHT, 'a'),
+                                   (self.AXIS_MARGINBOTTOM, 'a'))
 
         # define an empty view (for printing mainly)
         self.viewports.addViewport(GLDefs.BLANKVIEW, self, (0, 'a'), (0, 'a'), (0, 'a'), (0, 'a'))
@@ -2764,9 +2785,12 @@ class CcpnGLWidget(QOpenGLWidget):
                     self.axisR -= dx * self.pixelX
                     self.axisT += dy * self.pixelY
                     self.axisB += dy * self.pixelY
+
+                    tilePos = self.strip.tilePosition if self.strip else self.tilePosition
                     self.GLSignals._emitAllAxesChanged(source=self, strip=self.strip,
                                                        axisB=self.axisB, axisT=self.axisT,
-                                                       axisL=self.axisL, axisR=self.axisR)
+                                                       axisL=self.axisL, axisR=self.axisR,
+                                                       row=tilePos[0], column=tilePos[1])
                     self._selectionMode = 0
                     self._rescaleAllAxes(mouseMoveOnly=True)
                     self._storeZoomHistory()
@@ -2965,6 +2989,7 @@ class CcpnGLWidget(QOpenGLWidget):
             self.buildStaticTraces()
 
     from ccpn.util.decorators import profile
+
     @profile
     def _buildGLWithProfile(self):
         """Separate the building of the display from the paint event; not sure that this is required
@@ -6005,12 +6030,31 @@ class CcpnGLWidget(QOpenGLWidget):
             # match only the scale for the X axis
             axisL = aDict[GLNotifier.GLAXISVALUES][GLNotifier.GLLEFTAXISVALUE]
             axisR = aDict[GLNotifier.GLAXISVALUES][GLNotifier.GLRIGHTAXISVALUE]
+            row = aDict[GLNotifier.GLAXISVALUES][GLNotifier.GLSTRIPROW]
+            col = aDict[GLNotifier.GLAXISVALUES][GLNotifier.GLSTRIPCOLUMN]
 
             if self._widthsChangedEnough([axisL, self.axisL], [axisR, self.axisR]):
-                diff = (axisR - axisL) / 2.0
-                mid = (self.axisR + self.axisL) / 2.0
-                self.axisL = mid - diff
-                self.axisR = mid + diff
+                if self.spectrumDisplay.stripArrangement == 'Y':
+                    if self.strip.tilePosition[1] == col:
+                        self.axisL = axisL
+                        self.axisR = axisR
+                    else:
+                        diff = (axisR - axisL) / 2.0
+                        mid = (self.axisR + self.axisL) / 2.0
+                        self.axisL = mid - diff
+                        self.axisR = mid + diff
+
+                elif self.spectrumDisplay.stripArrangement == 'X':
+                    if self.strip.tilePosition[0] == row:
+                        self.axisL = axisL
+                        self.axisR = axisR
+                    else:
+                        diff = (axisR - axisL) / 2.0
+                        mid = (self.axisR + self.axisL) / 2.0
+                        self.axisL = mid - diff
+                        self.axisR = mid + diff
+                else:
+                    raise
                 self._rescaleXAxis()
                 self._storeZoomHistory()
 
@@ -6164,10 +6208,32 @@ class CcpnGLWidget(QOpenGLWidget):
             # match the Y axis
             axisB = aDict[GLNotifier.GLAXISVALUES][GLNotifier.GLBOTTOMAXISVALUE]
             axisT = aDict[GLNotifier.GLAXISVALUES][GLNotifier.GLTOPAXISVALUE]
+            row = aDict[GLNotifier.GLAXISVALUES][GLNotifier.GLSTRIPROW]
+            col = aDict[GLNotifier.GLAXISVALUES][GLNotifier.GLSTRIPCOLUMN]
 
             if self._widthsChangedEnough([axisB, self.axisB], [axisT, self.axisT]):
-                self.axisB = axisB
-                self.axisT = axisT
+                if self.spectrumDisplay.stripArrangement == 'Y':
+                    if self.strip.tilePosition[0] == row:
+                        self.axisB = axisB
+                        self.axisT = axisT
+                    else:
+                        diff = (axisT - axisB) / 2.0
+                        mid = (self.axisT + self.axisB) / 2.0
+                        self.axisB = mid - diff
+                        self.axisT = mid + diff
+
+                elif self.spectrumDisplay.stripArrangement == 'X':
+                    if self.strip.tilePosition[1] == col:
+                        self.axisB = axisB
+                        self.axisT = axisT
+                    else:
+                        diff = (axisT - axisB) / 2.0
+                        mid = (self.axisT + self.axisB) / 2.0
+                        self.axisB = mid - diff
+                        self.axisT = mid + diff
+                else:
+                    raise
+
                 self._rescaleYAxis()
                 self._storeZoomHistory()
 
@@ -6186,29 +6252,44 @@ class CcpnGLWidget(QOpenGLWidget):
             axisT = aDict[GLNotifier.GLAXISVALUES][GLNotifier.GLTOPAXISVALUE]
             axisL = aDict[GLNotifier.GLAXISVALUES][GLNotifier.GLLEFTAXISVALUE]
             axisR = aDict[GLNotifier.GLAXISVALUES][GLNotifier.GLRIGHTAXISVALUE]
+            row = aDict[GLNotifier.GLAXISVALUES][GLNotifier.GLSTRIPROW]
+            col = aDict[GLNotifier.GLAXISVALUES][GLNotifier.GLSTRIPCOLUMN]
 
             if self._widthsChangedEnough([axisB, self.axisB], [axisT, self.axisT]) and \
                     self._widthsChangedEnough([axisL, self.axisL], [axisR, self.axisR]):
 
+                if not (self.strip.tilePosition[0] == row or self.strip.tilePosition[1] == col):
+                    return
+
                 if self.spectrumDisplay.stripArrangement == 'Y':
 
                     # strips are arranged in a row
-                    diff = (axisR - axisL) / 2.0
-                    mid = (self.axisR + self.axisL) / 2.0
-                    self.axisL = mid - diff
-                    self.axisR = mid + diff
-                    self.axisB = axisB
-                    self.axisT = axisT
+                    if self.strip.tilePosition[1] == col:
+                        self.axisL = axisL
+                        self.axisR = axisR
+                        # diff = (axisR - axisL) / 2.0
+                        # mid = (self.axisR + self.axisL) / 2.0
+                        # self.axisL = mid - diff
+                        # self.axisR = mid + diff
+
+                    if self.strip.tilePosition[0] == row:
+                        self.axisB = axisB
+                        self.axisT = axisT
 
                 elif self.spectrumDisplay.stripArrangement == 'X':
 
                     # strips are arranged in a column
-                    diff = (axisT - axisB) / 2.0
-                    mid = (self.axisT + self.axisB) / 2.0
-                    self.axisB = mid - diff
-                    self.axisT = mid + diff
-                    self.axisL = axisL
-                    self.axisR = axisR
+                    if self.strip.tilePosition[1] == col:
+                        self.axisB = axisB
+                        self.axisT = axisT
+                        # diff = (axisT - axisB) / 2.0
+                        # mid = (self.axisT + self.axisB) / 2.0
+                        # self.axisB = mid - diff
+                        # self.axisT = mid + diff
+
+                    if self.strip.tilePosition[0] == row:
+                        self.axisL = axisL
+                        self.axisR = axisR
 
                 elif self.spectrumDisplay.stripArrangement == 'T':
 

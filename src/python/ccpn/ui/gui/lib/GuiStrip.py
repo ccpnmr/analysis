@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-01-10 11:21:54 +0000 (Fri, January 10, 2020) $"
-__version__ = "$Revision: 3.0.0 $"
+__dateModified__ = "$dateModified: 2020-02-06 18:27:17 +0000 (Thu, February 06, 2020) $"
+__version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -2160,11 +2160,11 @@ class GuiStrip(Frame):
 
         # remove old widgets - this needs to done otherwise the layout swap destroys all children, and remember minimum widths
         _oldWidgets = []
-        minWidths = []
+        minSizes = []
         while layout.count():
             wid = layout.takeAt(0).widget()
             _oldWidgets.append(wid)
-            minWidths.append(wid.minimumWidth())
+            minSizes.append(wid.minimumSize())
 
         # get the new strip order
         _widgets = list(spectrumDisplay.orderedStrips)
@@ -2186,14 +2186,28 @@ class GuiStrip(Frame):
 
             # horizontal strip layout
             for m, widgStrip in enumerate(_widgets):
-                layout.addWidget(widgStrip, 0, m)
-                widgStrip.setMinimumWidth(minWidths[m])
+
+                tilePosition = widgStrip.tilePosition
+                if tilePosition is None:
+                    layout.addWidget(widgStrip, 0, m)
+                    widgStrip.tilePosition = (0, m)
+                else:
+                    layout.addWidget(widgStrip, tilePosition[0], tilePosition[1])
+
+                widgStrip.setMinimumWidth(minSizes[m].width())
 
         elif spectrumDisplay.stripArrangement == 'X':
 
             # vertical strip layout
             for m, widgStrip in enumerate(_widgets):
-                layout.addWidget(widgStrip, m, 0)
+                tilePosition = widgStrip.tilePosition
+                if tilePosition is None:
+                    layout.addWidget(widgStrip, m, 0)
+                    widgStrip.tilePosition = (0, m)
+                else:
+                    layout.addWidget(widgStrip, tilePosition[1], tilePosition[0])
+
+                widgStrip.setMinimumHeight(minSizes[m].height())
 
         elif spectrumDisplay.stripArrangement == 'T':
 

@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-02-07 19:17:10 +0000 (Fri, February 07, 2020) $"
+__dateModified__ = "$dateModified: 2020-02-07 19:34:47 +0000 (Fri, February 07, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -1249,16 +1249,16 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
         self.disableTextClientState()
         self.disableTexture()
 
-        # use the current viewport matrix to display the last bit of the axes
-        currentShader = self.globalGL._shaderProgram1.makeCurrent()
-        currentShader.setProjectionAxes(self._uVMatrix, 0, w - self.AXIS_MARGINRIGHT, -1, h - self.AXIS_MARGINBOTTOM,
-                                        -1.0, 1.0)
-
-        self.viewports.setViewport(self._currentView)
-
-        # why are these labelled the other way round?
-        currentShader.setGLUniformMatrix4fv('pMatrix', 1, GL.GL_FALSE, self._uVMatrix)
-        currentShader.setGLUniformMatrix4fv('mvMatrix', 1, GL.GL_FALSE, self._IMatrix)
+        # # use the current viewport matrix to display the last bit of the axes
+        # currentShader = self.globalGL._shaderProgram1.makeCurrent()
+        # currentShader.setProjectionAxes(self._uVMatrix, 0, w - self.AXIS_MARGINRIGHT, -1, h - self.AXIS_MARGINBOTTOM,
+        #                                 -1.0, 1.0)
+        #
+        # self.viewports.setViewport(self._currentView)
+        #
+        # # why are these labelled the other way round?
+        # currentShader.setGLUniformMatrix4fv('pMatrix', 1, GL.GL_FALSE, self._uVMatrix)
+        # currentShader.setGLUniformMatrix4fv('mvMatrix', 1, GL.GL_FALSE, self._IMatrix)
 
     @pyqtSlot(dict)
     def _glAxisUnitsChanged(self, aDict):
@@ -1906,14 +1906,15 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
     def _attachParentStrip(self):
         self._parentStrip.stripResized.connect(self._parentResize)
 
-    def _parentResize(self):
+    def _parentResize(self, size):
+        return
         if self._axisType == 0:
             # axis widget is an X widget so grab connected width
-            self.setMaximumWidth(self._parentStrip.width())
+            self.setMaximumWidth(size[0])
 
         else:
             # axis widget is a Y widget so grab connected height
-            self.setMaximumHeight(self._parentStrip.height())
+            self.setMaximumHeight(size[1])
 
     # def _clearGLCursorQueue(self):
     #     for glBuf in self._glCursorQueue:

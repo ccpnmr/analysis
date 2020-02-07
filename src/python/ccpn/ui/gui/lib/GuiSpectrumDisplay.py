@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-02-07 19:17:10 +0000 (Fri, February 07, 2020) $"
+__dateModified__ = "$dateModified: 2020-02-07 19:34:47 +0000 (Fri, February 07, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -373,6 +373,7 @@ class GuiSpectrumDisplay(CcpnModule):
 
         self.qtParent.getLayout().setContentsMargins(0, 0, 0, 0)
         self.qtParent.getLayout().setSpacing(0)
+        self.setVisibleAxes()
 
         includeDirection = not self.is1D
         self.phasingFrame = PhasingFrame(parent=self.qtParent,
@@ -584,11 +585,16 @@ class GuiSpectrumDisplay(CcpnModule):
             self._stripFrameScrollArea.setViewportMargins(0, 0, self._rightGLAxis.width(), 0)
             self._rightGLAxis.show()
             self._bottomGLAxis.hide()
+            self._rightGLAxis._updateAxes = True
         else:
             # self.stripFrame.getLayout().setContentsMargins(0, 0, 0, self._bottomGLAxis.height())
             self._stripFrameScrollArea.setViewportMargins(0, 0, 0, self._bottomGLAxis.height())
             self._rightGLAxis.hide()
             self._bottomGLAxis.show()
+            self._bottomGLAxis._updateAxes = True
+
+        self.stripFrame.update()
+        self._stripFrameScrollArea._updateAxisWidgets()
 
     def _stripRange(self):
         """Return the bounds for the tilePositions of the strips

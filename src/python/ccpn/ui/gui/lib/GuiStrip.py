@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-02-07 19:17:10 +0000 (Fri, February 07, 2020) $"
+__dateModified__ = "$dateModified: 2020-02-07 19:34:47 +0000 (Fri, February 07, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -64,7 +64,7 @@ class GuiStrip(Frame):
     # inherits NotifierBase
 
     optionsChanged = QtCore.pyqtSignal(dict)
-    stripResized = QtCore.pyqtSignal()
+    stripResized = QtCore.pyqtSignal(tuple)
 
     MAXPEAKLABELTYPES = 5
     MAXPEAKSYMBOLTYPES = 4
@@ -222,10 +222,10 @@ class GuiStrip(Frame):
         self.spectrumDisplay._spectrumDisplaySettings.symbolsChanged.connect(self._symbolsChangedInSettings)
 
     def resizeEvent(self, ev):
-        self.stripResized.emit()
         super().resizeEvent(ev)
         # call subclass _resize event
         self._resize()
+        self.stripResized.emit((self.width(), self.height()))
 
     def _resize(self):
         """Resize event to handle resizing of frames that overlay the OpenGL frame

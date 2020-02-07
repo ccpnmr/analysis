@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-02-07 19:17:10 +0000 (Fri, February 07, 2020) $"
+__dateModified__ = "$dateModified: 2020-02-07 19:34:47 +0000 (Fri, February 07, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -70,7 +70,9 @@ class ScrollArea(QtWidgets.QScrollArea, Base):
 
     def resizeEvent(self, event):
         super(ScrollArea, self).resizeEvent(event)
+        self._updateAxisWidgets()
 
+    def _updateAxisWidgets(self):
         rect = self.viewport().geometry()
         try:
             from ccpn.ui.gui.widgets.GLWidgets import Gui1dWidgetAxis, GuiNdWidgetAxis
@@ -79,15 +81,12 @@ class ScrollArea(QtWidgets.QScrollArea, Base):
             if children:
                 for child in children:
                     if child._axisType == 0:
-
                         child.setGeometry(0, rect.height() - 1, rect.width(), child.height())
-
                     else:
-
                         child.setGeometry(rect.width(), 0, child.width(), rect.height())
 
                     child._updateAxes = True
                     child.update()
-
         except:
             pass
+

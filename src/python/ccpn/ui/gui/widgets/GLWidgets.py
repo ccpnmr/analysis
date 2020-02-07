@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-02-06 18:27:17 +0000 (Thu, February 06, 2020) $"
+__dateModified__ = "$dateModified: 2020-02-07 12:31:59 +0000 (Fri, February 07, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -231,8 +231,8 @@ class GuiNdWidget(CcpnGLWidget):
 
         for visibleSpecView in self._ordering:
             self.visiblePlaneList[visibleSpecView], self.visiblePlaneListPointValues[visibleSpecView] = visibleSpecView._getVisiblePlaneList(
-                firstVisible=self._firstVisible,
-                minimumValuePerPoint=minimumValuePerPoint)
+                    firstVisible=self._firstVisible,
+                    minimumValuePerPoint=minimumValuePerPoint)
 
         # update the labelling lists
         self._GLPeaks.setListViews(self._ordering)
@@ -990,7 +990,7 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
                         elif ax == 1:
                             # add the y axis line
                             indexList += (index, index + 1)
-                            vertexList += (1.0-offset, 0.0, 1.0-offset, 1.0)
+                            vertexList += (1.0 - offset, 0.0, 1.0 - offset, 1.0)
                             colorList += (r, g, b, 1.0, r, g, b, 1.0)
                             gridGLList.numVertices += 2
                             index += 2
@@ -1554,7 +1554,7 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
                 else:
                     raise
                 self._rescaleXAxis()
-                self._storeZoomHistory()
+                # self._storeZoomHistory()
 
     @pyqtSlot(dict)
     def _glAxisLockChanged(self, aDict):
@@ -1676,7 +1676,7 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
                     raise
 
                 self._rescaleYAxis()
-                self._storeZoomHistory()
+                # self._storeZoomHistory()
 
     @pyqtSlot(dict)
     def _glAllAxesChanged(self, aDict):
@@ -1696,31 +1696,61 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
             row = aDict[GLNotifier.GLAXISVALUES][GLNotifier.GLSTRIPROW]
             col = aDict[GLNotifier.GLAXISVALUES][GLNotifier.GLSTRIPCOLUMN]
 
+            # axis tilePosition always depends on stripArrangement
+            if self.spectrumDisplay.stripArrangement == 'Y':
+                tilePos = self.tilePosition
+            else:
+                tilePos = (self.tilePosition[1], self.tilePosition[0])
+
             if self._widthsChangedEnough([axisB, self.axisB], [axisT, self.axisT]) and \
                     self._widthsChangedEnough([axisL, self.axisL], [axisR, self.axisR]):
 
-                if not (self.tilePosition[0] == row or self.tilePosition[1] == col):
+                # do the matching row and column only unless _useLockedAspect or self._useDefaultAspect are set
+                if not (tilePos[0] == row or tilePos[1] == col) and \
+                        not (self._useLockedAspect or self._useDefaultAspect):
                     return
 
                 if self.spectrumDisplay.stripArrangement == 'Y':
 
                     # strips are arranged in a row
-                    diff = (axisR - axisL) / 2.0
-                    mid = (self.axisR + self.axisL) / 2.0
-                    self.axisL = mid - diff
-                    self.axisR = mid + diff
-                    self.axisB = axisB
-                    self.axisT = axisT
+                    if tilePos[1] == col:
+                        self.axisL = axisL
+                        self.axisR = axisR
+                    elif self._useLockedAspect or self._useDefaultAspect:
+                        diff = (axisR - axisL) / 2.0
+                        mid = (self.axisR + self.axisL) / 2.0
+                        self.axisL = mid - diff
+                        self.axisR = mid + diff
+
+                    if tilePos[0] == row:
+                        self.axisB = axisB
+                        self.axisT = axisT
+                    elif self._useLockedAspect or self._useDefaultAspect:
+                        diff = (axisT - axisB) / 2.0
+                        mid = (self.axisT + self.axisB) / 2.0
+                        self.axisB = mid - diff
+                        self.axisT = mid + diff
 
                 elif self.spectrumDisplay.stripArrangement == 'X':
 
                     # strips are arranged in a column
-                    diff = (axisT - axisB) / 2.0
-                    mid = (self.axisT + self.axisB) / 2.0
-                    self.axisB = mid - diff
-                    self.axisT = mid + diff
-                    self.axisL = axisL
-                    self.axisR = axisR
+                    if tilePos[1] == col:
+                        self.axisB = axisB
+                        self.axisT = axisT
+                    elif self._useLockedAspect or self._useDefaultAspect:
+                        diff = (axisT - axisB) / 2.0
+                        mid = (self.axisT + self.axisB) / 2.0
+                        self.axisB = mid - diff
+                        self.axisT = mid + diff
+
+                    if tilePos[0] == row:
+                        self.axisL = axisL
+                        self.axisR = axisR
+                    elif self._useLockedAspect or self._useDefaultAspect:
+                        diff = (axisR - axisL) / 2.0
+                        mid = (self.axisR + self.axisL) / 2.0
+                        self.axisL = mid - diff
+                        self.axisR = mid + diff
 
                 elif self.spectrumDisplay.stripArrangement == 'T':
 
@@ -1732,7 +1762,7 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
                     pass
 
                 self._rescaleAllAxes()
-                self._storeZoomHistory()
+                # self._storeZoomHistory()
 
     @pyqtSlot(dict)
     def _glMouseMoved(self, aDict):
@@ -1845,6 +1875,8 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
         self._paintLastFrame = True
         self._leavingWidget = False
 
+        self.initialiseAxes()
+
         # check that the screen device pixel ratio is correct
         self.refreshDevicePixelRatio()
 
@@ -1859,6 +1891,53 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
     #     """
     #     self._glCursorHead = (self._glCursorHead + 1) % self._numBuffers
     #     self._glCursorTail = (self._glCursorHead - 1) % self._numBuffers
+
+    def initialiseAxes(self, strip=None):
+        """setup the correct axis range and padding
+        """
+
+        # need to get the matching strip at the correct tilePosition
+        if self.tilePosition[1] == -1:
+            # this should be the axes to the right of a row
+
+            if self.spectrumDisplay.stripArrangement == 'Y':
+                stripList = self.spectrumDisplay.stripRow(self.tilePosition[0])
+            else:
+                stripList = self.spectrumDisplay.stripColumn(self.tilePosition[0])
+
+        elif self.tilePosition[0] == -1:
+            # this should be the axis at the bottom of a column
+
+            if self.spectrumDisplay.stripArrangement == 'Y':
+                stripList = self.spectrumDisplay.stripColumn(self.tilePosition[1])
+            else:
+                stripList = self.spectrumDisplay.stripRow(self.tilePosition[1])
+        else:
+            raise ValueError('Badly defined axisWidget position')
+
+        if not stripList:
+            getLogger().warning('Error initialising axis widget, no strips found')
+
+        self._orderedAxes = stripList[0].axes
+        self._axisCodes = stripList[0].axisCodes
+        self._axisOrder = stripList[0].axisOrder
+
+        axis = self._orderedAxes[0]
+        if self.INVERTXAXIS:
+            self.axisL = max(axis.region[0], axis.region[1])
+            self.axisR = min(axis.region[0], axis.region[1])
+        else:
+            self.axisL = min(axis.region[0], axis.region[1])
+            self.axisR = max(axis.region[0], axis.region[1])
+
+        axis = self._orderedAxes[1]
+        if self.INVERTYAXIS:
+            self.axisB = max(axis.region[0], axis.region[1])
+            self.axisT = min(axis.region[0], axis.region[1])
+        else:
+            self.axisB = min(axis.region[0], axis.region[1])
+            self.axisT = max(axis.region[0], axis.region[1])
+        self.update()
 
     def _initialiseViewPorts(self):
         """Initialise all the viewports for the widget
@@ -1946,7 +2025,7 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
         if newPixelRatio != self.lastPixelRatio:
             self.lastPixelRatio = newPixelRatio
             self.viewports._devicePixelRatio = newPixelRatio
-            self.update()
+            # self.update()
 
     def _preferencesUpdate(self):
         """update GL values after the preferences have changed
@@ -2383,12 +2462,13 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
 
             if self.spectrumDisplay.stripArrangement == 'Y':
                 tilePos = self.tilePosition
-            elif self.spectrumDisplay.stripArrangement == 'X':
+            else:
+                # default here for the minute
                 tilePos = (self.tilePosition[1], self.tilePosition[0])
             self.GLSignals._emitAllAxesChanged(source=self, strip=None, spectrumDisplay=self.spectrumDisplay,
                                                axisB=self.axisB, axisT=self.axisT,
                                                axisL=self.axisL, axisR=self.axisR,
-                                                       row=tilePos[0], column=tilePos[1])
+                                               row=tilePos[0], column=tilePos[1])
             # self._selectionMode = 0
             self._rescaleAllAxes(mouseMoveOnly=True)
             # self._storeZoomHistory()
@@ -2698,10 +2778,10 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
 
         if self.spectrumDisplay.stripArrangement == 'Y':
             tilePos = self.tilePosition
-        elif self.spectrumDisplay.stripArrangement == 'X':
+        else:
             tilePos = (self.tilePosition[1], self.tilePosition[0])
 
-        if self.between(mx, ba[0], ba[0]+ba[2]) and self.between(my, ba[1], ba[1]+ba[3]):
+        if self.between(mx, ba[0], ba[0] + ba[2]) and self.between(my, ba[1], ba[1] + ba[3]):
 
             # in the bottomAxisBar, so zoom in the X axis
 
@@ -2728,7 +2808,7 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
                 self.GLSignals._emitXAxisChanged(source=self, strip=None, spectrumDisplay=self.spectrumDisplay,
                                                  axisB=self.axisB, axisT=self.axisT,
                                                  axisL=self.axisL, axisR=self.axisR,
-                                                       row=tilePos[0], column=tilePos[1])
+                                                 row=tilePos[0], column=tilePos[1])
 
                 self._rescaleXAxis()
                 # self._storeZoomHistory()
@@ -2739,7 +2819,7 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
                 self.GLSignals._emitAllAxesChanged(source=self, strip=None, spectrumDisplay=self.spectrumDisplay,
                                                    axisB=self.axisB, axisT=self.axisT,
                                                    axisL=self.axisL, axisR=self.axisR,
-                                                       row=tilePos[0], column=tilePos[1])
+                                                   row=tilePos[0], column=tilePos[1])
 
                 # self._storeZoomHistory()
 
@@ -2770,7 +2850,7 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
                 self.GLSignals._emitYAxisChanged(source=self, strip=None, spectrumDisplay=self.spectrumDisplay,
                                                  axisB=self.axisB, axisT=self.axisT,
                                                  axisL=self.axisL, axisR=self.axisR,
-                                                       row=tilePos[0], column=tilePos[1])
+                                                 row=tilePos[0], column=tilePos[1])
 
                 self._rescaleYAxis()
                 # self._storeZoomHistory()
@@ -2781,7 +2861,7 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
                 self.GLSignals._emitAllAxesChanged(source=self, strip=None, spectrumDisplay=self.spectrumDisplay,
                                                    axisB=self.axisB, axisT=self.axisT,
                                                    axisL=self.axisL, axisR=self.axisR,
-                                                       row=tilePos[0], column=tilePos[1])
+                                                   row=tilePos[0], column=tilePos[1])
 
                 # self._storeZoomHistory()
 

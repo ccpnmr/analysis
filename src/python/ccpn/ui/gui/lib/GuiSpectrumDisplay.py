@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-02-06 18:27:17 +0000 (Thu, February 06, 2020) $"
+__dateModified__ = "$dateModified: 2020-02-07 12:31:58 +0000 (Fri, February 07, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -29,7 +29,6 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 
 from PyQt5 import QtWidgets, QtCore, QtGui
 from functools import partial
-from copy import deepcopy
 
 from ccpn.core.Project import Project
 from ccpn.core.Peak import Peak
@@ -38,27 +37,20 @@ from ccpn.core.Spectrum import Spectrum
 from ccpn.core.SpectrumGroup import SpectrumGroup
 from ccpn.core.Sample import Sample
 
-#from ccpn.ui.gui.widgets.Icon import Icon
 from ccpn.ui.gui.widgets.ToolBar import ToolBar
-#import typing
+from typing import Tuple
 
-from ccpn.ui.gui.widgets.Frame import Frame  #, ScrollableFrame
+from ccpn.ui.gui.widgets.Frame import Frame
 from ccpn.ui.gui.modules.CcpnModule import CcpnModule
 from ccpn.ui.gui.widgets.PhasingFrame import PhasingFrame
 from ccpn.ui.gui.widgets.SpectrumToolBar import SpectrumToolBar
 from ccpn.ui.gui.widgets.SpectrumGroupToolBar import SpectrumGroupToolBar
-#from ccpn.ui.gui.widgets.Widget import ScrollableWidget, Widget
 from ccpn.ui.gui.widgets.ScrollArea import ScrollArea
-from ccpn.ui.gui.widgets.Button import Button
-from ccpn.ui.gui.widgets.Spacer import Spacer
 from ccpn.ui.gui.widgets.MessageDialog import showWarning
-#from ccpn.ui.gui.widgets.BasePopup import BasePopup
-#from ccpn.ui.gui.widgets.CheckBox import CheckBox
 from ccpn.ui.gui.widgets.DropBase import DropBase
 from ccpn.ui.gui.lib.GuiNotifier import GuiNotifier
 from ccpn.core.lib.Notifiers import Notifier
 from ccpn.core.lib.AssignmentLib import _assignNmrAtomsToPeaks, _assignNmrResiduesToPeaks
-from ccpn.util.Constants import MOUSEDICTSTRIP
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import PEAKSELECT, MULTIPLETSELECT
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import CcpnGLWidget
 from ccpn.ui.gui.widgets.GLWidgets import Gui1dWidgetAxis, GuiNdWidgetAxis
@@ -73,11 +65,10 @@ from ccpn.ui._implementation.MultipletListView import MultipletListView
 from ccpn.ui.gui.widgets.SettingsWidgets import SpectrumDisplaySettings
 from ccpn.ui._implementation.SpectrumView import SpectrumView
 from ccpn.core.lib.ContextManagers import undoStackBlocking, notificationBlanking, \
-    BlankedPartial, undoBlock, notificationEchoBlocking, undoBlockWithoutSideBar
+    BlankedPartial, undoBlock, notificationEchoBlocking
 from ccpn.util.decorators import logCommand
 from ccpn.util.Common import makeIterableList
 from ccpn.core.lib import Undo
-from ccpn.ui.gui.widgets.MessageDialog import showMulti
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 
 
@@ -94,19 +85,20 @@ SPECTRUMDISPLAY = 'spectrumDisplay'
 STRIPARRANGEMENT = 'stripArrangement'
 
 MAXITEMLOGGING = 4
-
+MAXTILEBOUND = 65536
 INCLUDE_AXIS_WIDGET = True
+
 
 # GST All this complication is added because the scroll frame appears to have a lower margin added by some part of Qt
 #     that we can't control in PyQt. Specifically even if you overide setContentsMargins on ScrollArea it is never
 #     called but at the same time ScrollArea gets a lower contents margin of 1 pixel that we didn't ask for... ;-(
 def styleSheetPredicate(target):
-    children  = [child for child in target.children() if isinstance(child,QtGui.QWidget)]
+    children = [child for child in target.children() if isinstance(child, QtGui.QWidget)]
 
     return len(children) < 2
 
-def styleSheetMutator(styleSheetTemplate, predicate, clazz):
 
+def styleSheetMutator(styleSheetTemplate, predicate, clazz):
     if predicate:
         styleSheet = styleSheetTemplate % (clazz.__class__.__name__, '')
     else:
@@ -114,9 +106,10 @@ def styleSheetMutator(styleSheetTemplate, predicate, clazz):
 
     return styleSheet
 
+
 class ScrollAreaWithPredicateStylesheet(ScrollArea):
 
-    def __init__(self, styleSheetTemplate, predicate, mutator,  *args, **kwds):
+    def __init__(self, styleSheetTemplate, predicate, mutator, *args, **kwds):
         self.styleSheetTemplate = styleSheetTemplate
         self.predicate = predicate
         self.mutator = mutator
@@ -128,9 +121,10 @@ class ScrollAreaWithPredicateStylesheet(ScrollArea):
     def modifyStyleSheet(self, predicate):
         self.setStyleSheet(self.mutator(self.styleSheetTemplate, predicate, self))
 
-    def resizeEvent(self,e):
+    def resizeEvent(self, e):
         self.modifyStyleSheet(self.checkPredicate())
         return super().resizeEvent(e)
+
 
 class GuiSpectrumDisplay(CcpnModule):
     """
@@ -333,6 +327,7 @@ class GuiSpectrumDisplay(CcpnModule):
                 self._rightGLAxis = GuiNdWidgetAxis(self.qtParent, spectrumDisplay=self, mainWindow=self.mainWindow)
                 self.qtParent.getLayout().addWidget(self._rightGLAxis, stripRow, 1, 1, 7)
             self._rightGLAxis.tilePosition = (0, -1)
+            self._rightGLAxis.show()
 
         # frameStyleSheetTemplate = ''' .%s { border-left: 1px solid #a9a9a9;
         #                               border-right: 1px solid #a9a9a9;
@@ -373,6 +368,7 @@ class GuiSpectrumDisplay(CcpnModule):
                 self._bottomGLAxis = GuiNdWidgetAxis(self.qtParent, spectrumDisplay=self, mainWindow=self.mainWindow)
                 self.qtParent.getLayout().addWidget(self._bottomGLAxis, axisRow, 0, 1, 7)
             self._bottomGLAxis.tilePosition = (-1, 0)
+            self._bottomGLAxis.hide()
 
         includeDirection = not self.is1D
         self.phasingFrame = PhasingFrame(parent=self.qtParent,
@@ -570,6 +566,100 @@ class GuiSpectrumDisplay(CcpnModule):
 
         AbstractWrapperObject.setParameter(self, SPECTRUMDISPLAY, STRIPARRANGEMENT, value)
         # leave the _wrappedData as it's initialised value
+
+        self.setVisibleAxes()
+
+    def setVisibleAxes(self):
+        """Set which of the axis widgets are visible based on the strip tilePositions and stripArrangement
+        """
+        # NOTE:ED - currently only one row or column
+        if self.stripArrangement == 'Y':
+            self._rightGLAxis.show()
+            self._bottomGLAxis.hide()
+        else:
+            self._rightGLAxis.hide()
+            self._bottomGLAxis.show()
+
+    def _stripRange(self):
+        """Return the bounds for the tilePositions of the strips
+        as tuple of tuples ((minRow, minColumn), (maxRow, maxColumn))
+        """
+        maxTilePos = (0, 0)
+        minTilePos = (MAXTILEBOUND, MAXTILEBOUND)
+        for strip in self.strips:
+            tilePos = strip.tilePosition or (0, strip.stripIndex)
+            minTilePos = tuple(min(ii, jj) for ii, jj in zip(minTilePos, tilePos))
+            maxTilePos = tuple(max(ii, jj) for ii, jj in zip(maxTilePos, tilePos))
+
+        if minTilePos != (0, 0):
+            raise ValueError('Illegal tilePosition in strips')
+
+        return (minTilePos, maxTilePos)
+
+    @property
+    def rowCount(self):
+        """Strip row count.
+        This is independent of the stripArrangement and always returns the same value.
+        If stripArrangement is 'Y', strips are in a row and 'row' will return the visible row count
+        If stripArrangement is 'X', strips are in a column and 'row' will return the visible column count
+        """
+        _, maxTilePos = self._stripRange()
+        return maxTilePos[0] + 1
+
+    @property
+    def columnCount(self):
+        """Strip column count.
+        This is independent of the stripArrangement and always returns the same value.
+        If stripArrangement is 'Y', strips are in a row and 'column' will return the visible column count
+        If stripArrangement is 'X', strips are in a column and 'column' will return the visible row count
+        """
+        _, maxTilePos = self._stripRange()
+        return maxTilePos[1] + 1
+
+    def stripAtTilePosition(self, tilePosition:Tuple[int, int]) -> 'Strip':
+        """Return the strip at a given tilePosition
+        """
+        if not isinstance(tilePosition, tuple):
+            raise ValueError('Expected a tuple for tilePosition')
+        if len(tilePosition) != 2:
+            raise ValueError('Tuple must be (x, y)')
+        if any(type(vv) != int for vv in tilePosition):
+            raise ValueError('Tuple must be of type int')
+
+        for strip in self.strips:
+            stripTilePos = strip.tilePosition or (0, strip.stripIndex)
+            if tilePosition == stripTilePos:
+                return strip
+
+    def _stripList(self, dim, value):
+        foundStrips = []
+        for strip in self.strips:
+            stripTilePos = strip.tilePosition or (0, strip.stripIndex)
+            if stripTilePos[dim] == value:
+                # append the strip with its row
+                foundStrips.append((strip, stripTilePos[1-dim]))
+
+        # sort by required dimension
+        sortedStrips = sorted(foundStrips, key=lambda k:k[dim])
+        return tuple(strip for strip, dim in sortedStrips)
+
+    def stripRow(self, row:int) -> ['Strip']:
+        """Return the ordered stripRow at a given row
+        tilePositions are independent of stripArrangement
+        """
+        if not isinstance(row, int):
+            raise ValueError('Expected an int')
+
+        return self._stripList(0, row)
+
+    def stripColumn(self, column:int) -> ['Strip']:
+        """Return the ordered stripColumn at a given column
+        tilePositions are independent of stripArrangement
+        """
+        if not isinstance(column, int):
+            raise ValueError('Expected an int')
+
+        return self._stripList(1, column)
 
     def _getSpectrumGroups(self):
         """Return the groups contained in the spectrumDisplay
@@ -1173,7 +1263,7 @@ class GuiSpectrumDisplay(CcpnModule):
 
                 # horizontal strip layout
                 for m, widgStrip in enumerate(_widgets):
-                #     layout.addWidget(widgStrip, 0, m)
+                    #     layout.addWidget(widgStrip, 0, m)
 
                     tilePosition = widgStrip.tilePosition
                     if tilePosition is None:
@@ -1186,7 +1276,7 @@ class GuiSpectrumDisplay(CcpnModule):
 
                 # vertical strip layout
                 for m, widgStrip in enumerate(_widgets):
-                #     layout.addWidget(widgStrip, m, 0)
+                    #     layout.addWidget(widgStrip, m, 0)
 
                     tilePosition = widgStrip.tilePosition
                     if tilePosition is None:

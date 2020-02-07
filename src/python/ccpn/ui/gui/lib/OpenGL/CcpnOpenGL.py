@@ -55,7 +55,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-02-06 18:27:17 +0000 (Thu, February 06, 2020) $"
+__dateModified__ = "$dateModified: 2020-02-07 12:31:58 +0000 (Fri, February 07, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -6022,6 +6022,9 @@ class CcpnGLWidget(QOpenGLWidget):
 
     @pyqtSlot(dict)
     def _glXAxisChanged(self, aDict):
+        if self._useLockedAspect or self._useDefaultAspect:
+            self._glAllAxesChanged(aDict)
+
         if self.strip.isDeleted:
             return
 
@@ -6200,6 +6203,9 @@ class CcpnGLWidget(QOpenGLWidget):
 
     @pyqtSlot(dict)
     def _glYAxisChanged(self, aDict):
+        if self._useLockedAspect or self._useDefaultAspect:
+            self._glAllAxesChanged(aDict)
+
         if self.strip.isDeleted:
             return
 
@@ -6258,7 +6264,9 @@ class CcpnGLWidget(QOpenGLWidget):
             if self._widthsChangedEnough([axisB, self.axisB], [axisT, self.axisT]) and \
                     self._widthsChangedEnough([axisL, self.axisL], [axisR, self.axisR]):
 
-                if not (self.strip.tilePosition[0] == row or self.strip.tilePosition[1] == col):
+                # do the matching row and column only unless _useLockedAspect or self._useDefaultAspect are set
+                if not (self.strip.tilePosition[0] == row or self.strip.tilePosition[1] == col) and \
+                        not (self._useLockedAspect or self._useDefaultAspect):
                     return
 
                 if self.spectrumDisplay.stripArrangement == 'Y':
@@ -6267,14 +6275,20 @@ class CcpnGLWidget(QOpenGLWidget):
                     if self.strip.tilePosition[1] == col:
                         self.axisL = axisL
                         self.axisR = axisR
-                        # diff = (axisR - axisL) / 2.0
-                        # mid = (self.axisR + self.axisL) / 2.0
-                        # self.axisL = mid - diff
-                        # self.axisR = mid + diff
+                    elif self._useLockedAspect or self._useDefaultAspect:
+                        diff = (axisR - axisL) / 2.0
+                        mid = (self.axisR + self.axisL) / 2.0
+                        self.axisL = mid - diff
+                        self.axisR = mid + diff
 
                     if self.strip.tilePosition[0] == row:
                         self.axisB = axisB
                         self.axisT = axisT
+                    elif self._useLockedAspect or self._useDefaultAspect:
+                        diff = (axisT - axisB) / 2.0
+                        mid = (self.axisT + self.axisB) / 2.0
+                        self.axisB = mid - diff
+                        self.axisT = mid + diff
 
                 elif self.spectrumDisplay.stripArrangement == 'X':
 
@@ -6282,14 +6296,20 @@ class CcpnGLWidget(QOpenGLWidget):
                     if self.strip.tilePosition[1] == col:
                         self.axisB = axisB
                         self.axisT = axisT
-                        # diff = (axisT - axisB) / 2.0
-                        # mid = (self.axisT + self.axisB) / 2.0
-                        # self.axisB = mid - diff
-                        # self.axisT = mid + diff
+                    elif self._useLockedAspect or self._useDefaultAspect:
+                        diff = (axisT - axisB) / 2.0
+                        mid = (self.axisT + self.axisB) / 2.0
+                        self.axisB = mid - diff
+                        self.axisT = mid + diff
 
                     if self.strip.tilePosition[0] == row:
                         self.axisL = axisL
                         self.axisR = axisR
+                    elif self._useLockedAspect or self._useDefaultAspect:
+                        diff = (axisR - axisL) / 2.0
+                        mid = (self.axisR + self.axisL) / 2.0
+                        self.axisL = mid - diff
+                        self.axisR = mid + diff
 
                 elif self.spectrumDisplay.stripArrangement == 'T':
 

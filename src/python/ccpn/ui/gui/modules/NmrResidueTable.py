@@ -10,6 +10,7 @@ Geerten 1-7/12/2016; 11/04/2017
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
+
 __copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
@@ -45,13 +46,15 @@ from ccpn.core.NmrChain import NmrChain
 from ccpn.core.NmrResidue import NmrResidue
 from ccpn.core.NmrAtom import NmrAtom
 from ccpn.core.Peak import Peak
-from PyQt5 import QtWidgets
 from ccpn.util.Logging import getLogger
 from ccpn.ui.gui.widgets.DropBase import DropBase
 from ccpn.ui.gui.lib.GuiNotifier import GuiNotifier
 from ccpn.ui.gui.widgets.ScrollArea import ScrollArea
 from ccpn.ui.gui.widgets.SettingsWidgets import StripPlot
 from ccpnc.clibrary import Clibrary
+from PyQt5.QtCore import QObject
+from PyQt5.QtGui import QShowEvent, QHideEvent
+from PyQt5 import QtWidgets
 
 logger = getLogger()
 ALL = '<all>'
@@ -294,6 +297,65 @@ class NmrResidueTable(GuiTable):
         except:
             return None
 
+
+    class ScrollBarVisibilityWatcher(QObject):
+
+        def __init__(self,table,corner):
+            super().__init__()
+            self._corner = corner
+            self._table = table
+            horizontalScrollBar = self._getHorizontalScrollBar(table)
+            verticalScrollBar = self._getVerticalScrollBar(table)
+
+            horizontalScrollBar.installEventFilter(self)
+            verticalScrollBar.installEventFilter(self)
+
+            self.scrollBarChanged( horizontalScrollBar, horizontalScrollBar.isVisible(),
+                                   verticalScrollBar, verticalScrollBar.isVisible(), self._table)
+
+
+
+
+
+        def eventFilter(self, watched, event):
+
+            show = None
+            if isinstance(event,QShowEvent):
+                show = True
+            elif isinstance(event, QHideEvent):
+                show = False
+
+            if show is not None:
+
+                self._doScrollBarChange(show, watched)
+
+            return super().eventFilter(watched,event)
+
+        def _doScrollBarChange(self, show, watched):
+            horizontalScrollBar = self._getHorizontalScrollBar(self._table)
+            verticalScrollBar = self._getVerticalScrollBar(self._table)
+            if watched == horizontalScrollBar:
+                horizontalVisible = show
+                verticalVisible = verticalScrollBar is not None and verticalScrollBar.isVisible()
+            elif watched == verticalScrollBar:
+                horizontalVisible = horizontalScrollBar is not None and horizontalScrollBar.isVisible()
+                verticalVisible = show
+            else:
+                raise Exception("scroll bar watcher recieved a object that wasn't watched %s" % repr(watched))
+            self.scrollBarChanged(horizontalScrollBar, horizontalVisible, verticalScrollBar, verticalVisible, self._table)
+
+        def _getHorizontalScrollBar(self, watched):
+            return watched.horizontalScrollBar()
+
+        def _getVerticalScrollBar(self, watched):
+            return watched.verticalScrollBar()
+
+        def scrollBarChanged(self, horizontal, horizontalVisible, vertical, verticalVisible, parent):
+            if horizontalVisible and verticalVisible:
+                self._table.setCornerWidget(self._corner)
+            else:
+                self._table.setCornerWidget(None)
+
     def __init__(self, parent=None, mainWindow=None, moduleParent=None, actionCallback=None, selectionCallback=None,
                  checkBoxCallback=None, _pulldownKwds=None, nmrChain=None, multiSelect=False,
                  **kwds):
@@ -411,6 +473,22 @@ class NmrResidueTable(GuiTable):
         # put into subclass
         self._activePulldownClass = None
         self._activeCheckbox = None
+
+        self.setStyleSheet('''
+                    NmrResidueTable {border: 1px solid  #a9a9a9;
+                    border-bottom-right-radius: 2px;
+                    border-bottom-left-radius: 2px;}
+                    ''')
+        try:
+            self._corner = QtGui.QWidget()
+            self._corner.setStyleSheet('''
+                border-top: 1px solid #a9a9a9;
+                border-left: 1px solid #a9a9a9;
+            ''')
+
+            self._cornerDisplay = NmrResidueTable.ScrollBarVisibilityWatcher(self, self._corner)
+        except Exception as e:
+            print(e)
 
     def _processDroppedItems(self, data):
         """

@@ -340,7 +340,7 @@ class Base(DropBase, SignalBlocking):
         """
         return self.parent()
 
-    def addSpacer(self, width, height, grid, gridSpan=(1, 1), expandX=False, expandY=False):
+    def addSpacer(self, width, height, grid, gridSpan=(1, 1), expandX=False, expandY=False, parent=None):
         """Convenience to insert spacer
         width, height: in pixels
         grid=(row,col): tuple or list defining row, column
@@ -353,4 +353,6 @@ class Base(DropBase, SignalBlocking):
         expandingX = QtWidgets.QSizePolicy.MinimumExpanding if expandX else QtWidgets.QSizePolicy.Fixed
         expandingY = QtWidgets.QSizePolicy.MinimumExpanding if expandY else QtWidgets.QSizePolicy.Fixed
 
-        return Spacer(self, width, height, expandingX, expandingY, grid=grid, gridSpan=gridSpan)
+        if parent is None:
+            parent = self
+        return Spacer(parent, width, height, expandingX, expandingY, grid=grid, gridSpan=gridSpan)

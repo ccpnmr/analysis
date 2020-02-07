@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-02-07 12:31:59 +0000 (Fri, February 07, 2020) $"
+__dateModified__ = "$dateModified: 2020-02-07 15:10:49 +0000 (Fri, February 07, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -31,6 +31,7 @@ import math
 import numpy as np
 from contextlib import contextmanager
 from itertools import zip_longest
+from typing import Tuple
 from PyQt5 import QtWidgets, QtGui, QtCore
 from PyQt5.QtCore import Qt, pyqtSignal, pyqtSlot
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import CcpnGLWidget, GLVertexArray, GLRENDERMODE_DRAW, \
@@ -43,7 +44,6 @@ from ccpn.util.Constants import AXIS_FULLATOMNAME, AXIS_MATCHATOMTYPE, AXIS_ACTI
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
 from ccpn.ui.gui.lib.OpenGL import CcpnOpenGLDefs as GLDefs
 from ccpn.util.Logging import getLogger
-
 
 try:
     from OpenGL import GL, GLU, GLUT
@@ -663,6 +663,31 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
 
         self.lastPixelRatio = None
         # self.setFixedWidth(self.AXIS_MARGINRIGHT+self.AXIS_LINE)
+
+    @property
+    def tilePosition(self) -> Tuple[int, int]:
+        """Returns a tuple of the tile coordinates (from top-left)
+        tilePosition = (x, y)
+        """
+        if self.spectrumDisplay.stripArrangement == 'Y':
+            return self._tilePosition
+        else:
+            # return the flipped position
+            return (self._tilePosition[1], self._tilePosition[0])
+
+    @tilePosition.setter
+    def tilePosition(self, value):
+        """Setter for tilePosition
+        tilePosition must be a tuple of int (x, y)
+        """
+        if not isinstance(value, tuple):
+            raise ValueError('Expected a tuple for tilePosition')
+        if len(value) != 2:
+            raise ValueError('Tuple must be (x, y)')
+        if any(type(vv) != int for vv in value):
+            raise ValueError('Tuple must be of type int')
+
+        self._tilePosition = value
 
     def getSmallFont(self, transparent=False):
         # GST tried this, it wrong sometimes, also sometimes its a float?
@@ -1531,9 +1556,11 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
             row = aDict[GLNotifier.GLAXISVALUES][GLNotifier.GLSTRIPROW]
             col = aDict[GLNotifier.GLAXISVALUES][GLNotifier.GLSTRIPCOLUMN]
 
+            tilePos = self._tilePosition
+
             if self._widthsChangedEnough([axisL, self.axisL], [axisR, self.axisR]):
                 if self.spectrumDisplay.stripArrangement == 'Y':
-                    if self.tilePosition[1] == col:
+                    if tilePos[1] == col:
                         self.axisL = axisL
                         self.axisR = axisR
                     else:
@@ -1543,7 +1570,7 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
                         self.axisR = mid + diff
 
                 elif self.spectrumDisplay.stripArrangement == 'X':
-                    if self.tilePosition[0] == row:
+                    if tilePos[0] == row:
                         self.axisL = axisL
                         self.axisR = axisR
                     else:
@@ -1652,9 +1679,11 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
             row = aDict[GLNotifier.GLAXISVALUES][GLNotifier.GLSTRIPROW]
             col = aDict[GLNotifier.GLAXISVALUES][GLNotifier.GLSTRIPCOLUMN]
 
+            tilePos = self._tilePosition
+
             if self._widthsChangedEnough([axisB, self.axisB], [axisT, self.axisT]):
                 if self.spectrumDisplay.stripArrangement == 'Y':
-                    if self.tilePosition[0] == row:
+                    if tilePos[0] == row:
                         self.axisB = axisB
                         self.axisT = axisT
                     else:
@@ -1664,7 +1693,7 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
                         self.axisT = mid + diff
 
                 elif self.spectrumDisplay.stripArrangement == 'X':
-                    if self.tilePosition[1] == col:
+                    if tilePos[1] == col:
                         self.axisB = axisB
                         self.axisT = axisT
                     else:
@@ -1696,19 +1725,15 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
             row = aDict[GLNotifier.GLAXISVALUES][GLNotifier.GLSTRIPROW]
             col = aDict[GLNotifier.GLAXISVALUES][GLNotifier.GLSTRIPCOLUMN]
 
-            # axis tilePosition always depends on stripArrangement
-            if self.spectrumDisplay.stripArrangement == 'Y':
-                tilePos = self.tilePosition
-            else:
-                tilePos = (self.tilePosition[1], self.tilePosition[0])
+            tilePos = self.tilePosition
 
             if self._widthsChangedEnough([axisB, self.axisB], [axisT, self.axisT]) and \
                     self._widthsChangedEnough([axisL, self.axisL], [axisR, self.axisR]):
 
-                # do the matching row and column only unless _useLockedAspect or self._useDefaultAspect are set
-                if not (tilePos[0] == row or tilePos[1] == col) and \
-                        not (self._useLockedAspect or self._useDefaultAspect):
-                    return
+                # # do the matching row and column only unless _useLockedAspect or self._useDefaultAspect are set
+                # if not (tilePos[0] == row or tilePos[1] == col) and \
+                #         not (self._useLockedAspect or self._useDefaultAspect):
+                #     return
 
                 if self.spectrumDisplay.stripArrangement == 'Y':
 
@@ -1897,21 +1922,23 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
         """
 
         # need to get the matching strip at the correct tilePosition
-        if self.tilePosition[1] == -1:
+        tilePos = self._tilePosition
+
+        if tilePos[1] == -1:
             # this should be the axes to the right of a row
 
             if self.spectrumDisplay.stripArrangement == 'Y':
-                stripList = self.spectrumDisplay.stripRow(self.tilePosition[0])
+                stripList = self.spectrumDisplay.stripRow(tilePos[0])
             else:
-                stripList = self.spectrumDisplay.stripColumn(self.tilePosition[0])
+                stripList = self.spectrumDisplay.stripColumn(tilePos[0])
 
-        elif self.tilePosition[0] == -1:
+        elif tilePos[0] == -1:
             # this should be the axis at the bottom of a column
 
             if self.spectrumDisplay.stripArrangement == 'Y':
-                stripList = self.spectrumDisplay.stripColumn(self.tilePosition[1])
+                stripList = self.spectrumDisplay.stripColumn(tilePos[1])
             else:
-                stripList = self.spectrumDisplay.stripRow(self.tilePosition[1])
+                stripList = self.spectrumDisplay.stripRow(tilePos[1])
         else:
             raise ValueError('Badly defined axisWidget position')
 
@@ -2460,11 +2487,7 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
             self.axisT += dy * self.pixelY
             self.axisB += dy * self.pixelY
 
-            if self.spectrumDisplay.stripArrangement == 'Y':
-                tilePos = self.tilePosition
-            else:
-                # default here for the minute
-                tilePos = (self.tilePosition[1], self.tilePosition[0])
+            tilePos = self.tilePosition
             self.GLSignals._emitAllAxesChanged(source=self, strip=None, spectrumDisplay=self.spectrumDisplay,
                                                axisB=self.axisB, axisT=self.axisT,
                                                axisL=self.axisL, axisR=self.axisR,
@@ -2776,10 +2799,7 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
         mx = event.pos().x()
         my = self.height() - event.pos().y()
 
-        if self.spectrumDisplay.stripArrangement == 'Y':
-            tilePos = self.tilePosition
-        else:
-            tilePos = (self.tilePosition[1], self.tilePosition[0])
+        tilePos = self.tilePosition
 
         if self.between(mx, ba[0], ba[0] + ba[2]) and self.between(my, ba[1], ba[1] + ba[3]):
 

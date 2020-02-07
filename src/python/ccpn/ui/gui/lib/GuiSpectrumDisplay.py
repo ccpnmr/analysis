@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-02-07 12:31:58 +0000 (Fri, February 07, 2020) $"
+__dateModified__ = "$dateModified: 2020-02-07 15:10:48 +0000 (Fri, February 07, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -322,10 +322,10 @@ class GuiSpectrumDisplay(CcpnModule):
             # NOTE:ED - testing new axis widget - required actually adding tiling
             if self.is1D:
                 self._rightGLAxis = Gui1dWidgetAxis(self.qtParent, spectrumDisplay=self, mainWindow=self.mainWindow)
-                self.qtParent.getLayout().addWidget(self._rightGLAxis, stripRow, 1, 1, 7)
+                self.qtParent.getLayout().addWidget(self._rightGLAxis, stripRow, 8, 1, 1)
             else:
                 self._rightGLAxis = GuiNdWidgetAxis(self.qtParent, spectrumDisplay=self, mainWindow=self.mainWindow)
-                self.qtParent.getLayout().addWidget(self._rightGLAxis, stripRow, 1, 1, 7)
+                self.qtParent.getLayout().addWidget(self._rightGLAxis, stripRow, 8, 1, 1)
             self._rightGLAxis.tilePosition = (0, -1)
             self._rightGLAxis.show()
 
@@ -368,7 +368,7 @@ class GuiSpectrumDisplay(CcpnModule):
                 self._bottomGLAxis = GuiNdWidgetAxis(self.qtParent, spectrumDisplay=self, mainWindow=self.mainWindow)
                 self.qtParent.getLayout().addWidget(self._bottomGLAxis, axisRow, 0, 1, 7)
             self._bottomGLAxis.tilePosition = (-1, 0)
-            self._bottomGLAxis.hide()
+            self._bottomGLAxis.show()
 
         includeDirection = not self.is1D
         self.phasingFrame = PhasingFrame(parent=self.qtParent,
@@ -572,6 +572,8 @@ class GuiSpectrumDisplay(CcpnModule):
     def setVisibleAxes(self):
         """Set which of the axis widgets are visible based on the strip tilePositions and stripArrangement
         """
+        return
+
         # NOTE:ED - currently only one row or column
         if self.stripArrangement == 'Y':
             self._rightGLAxis.show()

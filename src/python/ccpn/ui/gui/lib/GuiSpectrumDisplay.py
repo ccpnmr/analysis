@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-02-07 15:10:48 +0000 (Fri, February 07, 2020) $"
+__dateModified__ = "$dateModified: 2020-02-07 19:17:10 +0000 (Fri, February 07, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -318,17 +318,6 @@ class GuiSpectrumDisplay(CcpnModule):
                                 acceptDrops=True)
         # self.stripFrame.layout().setContentsMargins(0, 0, 0, 0)
 
-        if INCLUDE_AXIS_WIDGET:
-            # NOTE:ED - testing new axis widget - required actually adding tiling
-            if self.is1D:
-                self._rightGLAxis = Gui1dWidgetAxis(self.qtParent, spectrumDisplay=self, mainWindow=self.mainWindow)
-                self.qtParent.getLayout().addWidget(self._rightGLAxis, stripRow, 8, 1, 1)
-            else:
-                self._rightGLAxis = GuiNdWidgetAxis(self.qtParent, spectrumDisplay=self, mainWindow=self.mainWindow)
-                self.qtParent.getLayout().addWidget(self._rightGLAxis, stripRow, 8, 1, 1)
-            self._rightGLAxis.tilePosition = (0, -1)
-            self._rightGLAxis.show()
-
         # frameStyleSheetTemplate = ''' .%s { border-left: 1px solid #a9a9a9;
         #                               border-right: 1px solid #a9a9a9;
         #                               border-bottom: 1px solid #a9a9a9;
@@ -362,13 +351,28 @@ class GuiSpectrumDisplay(CcpnModule):
         if INCLUDE_AXIS_WIDGET:
             # NOTE:ED - testing new axis widget - required actually adding tiling
             if self.is1D:
-                self._bottomGLAxis = Gui1dWidgetAxis(self.qtParent, spectrumDisplay=self, mainWindow=self.mainWindow)
-                self.qtParent.getLayout().addWidget(self._bottomGLAxis, axisRow, 0, 1, 7)
+                self._rightGLAxis = Gui1dWidgetAxis(self._stripFrameScrollArea, spectrumDisplay=self, mainWindow=self.mainWindow)
+                # self.qtParent.getLayout().addWidget(self._rightGLAxis, stripRow, 8, 1, 1)
             else:
-                self._bottomGLAxis = GuiNdWidgetAxis(self.qtParent, spectrumDisplay=self, mainWindow=self.mainWindow)
-                self.qtParent.getLayout().addWidget(self._bottomGLAxis, axisRow, 0, 1, 7)
+                self._rightGLAxis = GuiNdWidgetAxis(self._stripFrameScrollArea, spectrumDisplay=self, mainWindow=self.mainWindow)
+                # self.qtParent.getLayout().addWidget(self._rightGLAxis, stripRow, 8, 1, 1)
+            self._rightGLAxis.tilePosition = (0, -1)
+            self._rightGLAxis.setAxisType(1)
+            self._rightGLAxis.show()
+
+            # NOTE:ED - testing new axis widget - required actually adding tiling
+            if self.is1D:
+                self._bottomGLAxis = Gui1dWidgetAxis(self._stripFrameScrollArea, spectrumDisplay=self, mainWindow=self.mainWindow)
+                # self.qtParent.getLayout().addWidget(self._bottomGLAxis, axisRow, 0, 1, 7)
+            else:
+                self._bottomGLAxis = GuiNdWidgetAxis(self._stripFrameScrollArea, spectrumDisplay=self, mainWindow=self.mainWindow)
+                # self.qtParent.getLayout().addWidget(self._bottomGLAxis, axisRow, 0, 1, 7)
             self._bottomGLAxis.tilePosition = (-1, 0)
-            self._bottomGLAxis.show()
+            self._bottomGLAxis.setAxisType(0)
+            self._bottomGLAxis.hide()
+
+        self.qtParent.getLayout().setContentsMargins(0, 0, 0, 0)
+        self.qtParent.getLayout().setSpacing(0)
 
         includeDirection = not self.is1D
         self.phasingFrame = PhasingFrame(parent=self.qtParent,
@@ -572,13 +576,17 @@ class GuiSpectrumDisplay(CcpnModule):
     def setVisibleAxes(self):
         """Set which of the axis widgets are visible based on the strip tilePositions and stripArrangement
         """
-        return
-
         # NOTE:ED - currently only one row or column
+
+        # leave a gap for overlaying the axis widgets
         if self.stripArrangement == 'Y':
+            # self.stripFrame.getLayout().setContentsMargins(0, 0, self._rightGLAxis.width(), 0)
+            self._stripFrameScrollArea.setViewportMargins(0, 0, self._rightGLAxis.width(), 0)
             self._rightGLAxis.show()
             self._bottomGLAxis.hide()
         else:
+            # self.stripFrame.getLayout().setContentsMargins(0, 0, 0, self._bottomGLAxis.height())
+            self._stripFrameScrollArea.setViewportMargins(0, 0, 0, self._bottomGLAxis.height())
             self._rightGLAxis.hide()
             self._bottomGLAxis.show()
 

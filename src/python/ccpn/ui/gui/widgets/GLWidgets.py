@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-02-07 15:10:49 +0000 (Fri, February 07, 2020) $"
+__dateModified__ = "$dateModified: 2020-02-07 19:17:10 +0000 (Fri, February 07, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -689,6 +689,22 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
 
         self._tilePosition = value
 
+    def setAxisType(self, dimension):
+        """Set the current axis type for the axis widget
+        0 = X Axis type, 1 = Y Axis type
+        Only the required axis is drawn and the widget dimensions are fixed in the other axis
+        """
+        if type(dimension) != int:
+            raise TypeError('dimension must be an int')
+        if not (0 <= dimension < 2):
+            raise TypeError('dimension is out of range')
+
+        self._axisType = dimension
+        if dimension == 1:
+            self.setFixedWidth(self.AXIS_MARGINRIGHT + (0 if self.AXIS_INSIDE else self.AXIS_LINE))
+        else:
+            self.setFixedHeight(self.AXIS_MARGINBOTTOM + (0 if self.AXIS_INSIDE else self.AXIS_LINE))
+
     def getSmallFont(self, transparent=False):
         # GST tried this, it wrong sometimes, also sometimes its a float?
         # scale =  int(self.viewports._devicePixelRatio)
@@ -1107,34 +1123,37 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
         """Build the grids for the mainGrid and the bottom/right axes
         """
         # build the axes
-        self.axisLabelling, self.axesChanged = self._buildAxes(self.gridList[0], axisList=[0, 1],
-                                                               scaleGrid=[1, 0],
-                                                               r=self.foreground[0],
-                                                               g=self.foreground[1],
-                                                               b=self.foreground[2],
-                                                               transparency=300.0,
-                                                               _includeDiagonal=self._matchingIsotopeCodes,
-                                                               _diagonalList=None)  #self.diagonalGLList)
+        # self.axisLabelling, self.axesChanged = self._buildAxes(self.gridList[0], axisList=[0, 1],
+        #                                                        scaleGrid=[1, 0],
+        #                                                        r=self.foreground[0],
+        #                                                        g=self.foreground[1],
+        #                                                        b=self.foreground[2],
+        #                                                        transparency=300.0,
+        #                                                        _includeDiagonal=self._matchingIsotopeCodes,
+        #                                                        _diagonalList=None)  #self.diagonalGLList)
 
-        if self.axesChanged:
-            if self.highlighted:
-                self._buildAxes(self.gridList[1], axisList=[1], scaleGrid=[1, 0], r=self.highlightColour[0],
+        if self.highlighted:
+            if self._axisType == 1:
+                self.axisLabelling, self.axesChanged = self._buildAxes(self.gridList[1], axisList=[1], scaleGrid=[1, 0], r=self.highlightColour[0],
                                 g=self.highlightColour[1],
                                 b=self.highlightColour[2], transparency=32.0)
-                self._buildAxes(self.gridList[2], axisList=[0], scaleGrid=[1, 0], r=self.highlightColour[0],
+            if self._axisType == 0:
+                self.axisLabelling, self.axesChanged = self._buildAxes(self.gridList[2], axisList=[0], scaleGrid=[1, 0], r=self.highlightColour[0],
                                 g=self.highlightColour[1],
                                 b=self.highlightColour[2], transparency=32.0)
-            else:
-                self._buildAxes(self.gridList[1], axisList=[1], scaleGrid=[1, 0], r=self.foreground[0],
+        else:
+            if self._axisType == 1:
+                self.axisLabelling, self.axesChanged = self._buildAxes(self.gridList[1], axisList=[1], scaleGrid=[1, 0], r=self.foreground[0],
                                 g=self.foreground[1],
                                 b=self.foreground[2], transparency=32.0)
-                self._buildAxes(self.gridList[2], axisList=[0], scaleGrid=[1, 0], r=self.foreground[0],
+            if self._axisType == 0:
+                self.axisLabelling, self.axesChanged = self._buildAxes(self.gridList[2], axisList=[0], scaleGrid=[1, 0], r=self.foreground[0],
                                 g=self.foreground[1],
                                 b=self.foreground[2], transparency=32.0)
 
-            # buffer the lists to VBOs
-            for gr in self.gridList:
-                gr.defineIndexVBO(enableVBO=True)
+        # buffer the lists to VBOs
+        for gr in self.gridList[1:]:
+            gr.defineIndexVBO(enableVBO=True)
 
     def drawGrid(self):
         # set to the mainView and draw the grid
@@ -1145,12 +1164,12 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
 
         # draw the axes tick marks (effectively the same grid in smaller viewport)
         if self._axesVisible:
-            if self._drawRightAxis:
+            if self._drawRightAxis and self._axisType == 1:
                 # draw the grid marks for the right axis
                 self.viewports.setViewport(self._currentRightAxisView)
                 self.gridList[1].drawIndexVBO(enableVBO=True)
 
-            if self._drawBottomAxis:
+            if self._drawBottomAxis and self._axisType == 0:
                 # draw the grid marks for the bottom axis
                 self.viewports.setViewport(self._currentBottomAxisView)
                 self.gridList[2].drawIndexVBO(enableVBO=True)
@@ -1240,29 +1259,6 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
         # why are these labelled the other way round?
         currentShader.setGLUniformMatrix4fv('pMatrix', 1, GL.GL_FALSE, self._uVMatrix)
         currentShader.setGLUniformMatrix4fv('mvMatrix', 1, GL.GL_FALSE, self._IMatrix)
-
-        # need to draw the axis tick marks?
-
-        # # cheat for the moment to draw the axes (if visible)
-        # if self.highlighted:
-        #     colour = self.highlightColour
-        # else:
-        #     colour = self.foreground
-        #
-        # with self._disableGLAliasing():
-        #     GL.glDisable(GL.GL_BLEND)
-        #     GL.glColor4f(*colour)
-        #     GL.glBegin(GL.GL_LINES)
-        #
-        #     if self._drawBottomAxis:
-        #         GL.glVertex2d(0, 0)
-        #         GL.glVertex2d(w - self.AXIS_MARGINRIGHT, 0)
-        #
-        #     if self._drawRightAxis:
-        #         GL.glVertex2d(w - self.AXIS_MARGINRIGHT, 0)
-        #         GL.glVertex2d(w - self.AXIS_MARGINRIGHT, h - self.AXIS_MARGINBOTTOM)
-        #
-        #     GL.glEnd()
 
     @pyqtSlot(dict)
     def _glAxisUnitsChanged(self, aDict):
@@ -1453,6 +1449,7 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
         self._axisXLabelling = []
         self._axisYLabelling = []
         self._axisScaleLabelling = []
+        self._axisType = 0
 
         self._stackingValue = (0.0, 0.0)
         self._stackingMode = False
@@ -1901,9 +1898,22 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
         self._leavingWidget = False
 
         self.initialiseAxes()
+        self._attachParentStrip()
 
         # check that the screen device pixel ratio is correct
         self.refreshDevicePixelRatio()
+
+    def _attachParentStrip(self):
+        self._parentStrip.stripResized.connect(self._parentResize)
+
+    def _parentResize(self):
+        if self._axisType == 0:
+            # axis widget is an X widget so grab connected width
+            self.setMaximumWidth(self._parentStrip.width())
+
+        else:
+            # axis widget is a Y widget so grab connected height
+            self.setMaximumHeight(self._parentStrip.height())
 
     # def _clearGLCursorQueue(self):
     #     for glBuf in self._glCursorQueue:
@@ -1948,6 +1958,9 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
         self._orderedAxes = stripList[0].axes
         self._axisCodes = stripList[0].axisCodes
         self._axisOrder = stripList[0].axisOrder
+
+        # use this to link to the parent height/width
+        self._parentStrip = stripList[0]
 
         axis = self._orderedAxes[0]
         if self.INVERTXAXIS:
@@ -2194,7 +2207,7 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
         if self._axesVisible:
             self.buildAxisLabels()
 
-            if self._drawBottomAxis:
+            if self._drawBottomAxis and self._axisType == 0:
                 # put the axis labels into the bottom bar
                 self.viewports.setViewport(self._currentBottomAxisBarView)
 
@@ -2209,7 +2222,7 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
                 for lb in self._axisXLabelling:
                     lb.drawTextArrayVBO(enableVBO=True)
 
-            if self._drawRightAxis:
+            if self._drawRightAxis and self._axisType == 1:
                 # put the axis labels into the right bar
                 self.viewports.setViewport(self._currentRightAxisBarView)
 
@@ -2596,10 +2609,10 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
 
             currentShader.setViewportMatrix(self._uVMatrix, 0, w - self.AXIS_MARGINRIGHT, 0, h - self.AXIS_MARGINBOTTOM,
                                             -1.0, 1.0)
-            self.pixelX = (self.axisR - self.axisL) / (w - self.AXIS_MARGINRIGHT)
-            self.pixelY = (self.axisT - self.axisB) / (h - self.AXIS_MARGINBOTTOM)
-            self.deltaX = 1.0 / (w - self.AXIS_MARGINRIGHT)
-            self.deltaY = 1.0 / (h - self.AXIS_MARGINBOTTOM)
+            self.pixelX = (self.axisR - self.axisL) / max((w - self.AXIS_MARGINRIGHT), 1)
+            self.pixelY = (self.axisT - self.axisB) / max((h - self.AXIS_MARGINBOTTOM), 1)
+            self.deltaX = 1.0 / max((w - self.AXIS_MARGINRIGHT), 1)
+            self.deltaY = 1.0 / max((h - self.AXIS_MARGINBOTTOM), 1)
 
         elif self._drawRightAxis and not self._drawBottomAxis:
 
@@ -2608,9 +2621,9 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
             self._currentRightAxisBarView = GLDefs.FULLRIGHTAXISBAR
 
             currentShader.setViewportMatrix(self._uVMatrix, 0, w - self.AXIS_MARGINRIGHT, 0, h, -1.0, 1.0)
-            self.pixelX = (self.axisR - self.axisL) / (w - self.AXIS_MARGINRIGHT)
+            self.pixelX = (self.axisR - self.axisL) / max((w - self.AXIS_MARGINRIGHT), 1)
             self.pixelY = (self.axisT - self.axisB) / h
-            self.deltaX = 1.0 / (w - self.AXIS_MARGINRIGHT)
+            self.deltaX = 1.0 / max((w - self.AXIS_MARGINRIGHT), 1)
             self.deltaY = 1.0 / h
 
         elif not self._drawRightAxis and self._drawBottomAxis:
@@ -2621,9 +2634,9 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
 
             currentShader.setViewportMatrix(self._uVMatrix, 0, w, 0, h - self.AXIS_MARGINBOTTOM, -1.0, 1.0)
             self.pixelX = (self.axisR - self.axisL) / w
-            self.pixelY = (self.axisT - self.axisB) / (h - self.AXIS_MARGINBOTTOM)
+            self.pixelY = (self.axisT - self.axisB) / max((h - self.AXIS_MARGINBOTTOM), 1)
             self.deltaX = 1.0 / w
-            self.deltaY = 1.0 / (h - self.AXIS_MARGINBOTTOM)
+            self.deltaY = 1.0 / max((h - self.AXIS_MARGINBOTTOM), 1)
 
         else:
 
@@ -2896,7 +2909,7 @@ class GuiNdWidgetAxis(Gui1dWidgetAxis):
     AXIS_MARGINBOTTOM = 25
     AXIS_LINE = 7
     AXIS_OFFSET = 3
-    AXIS_INSIDE = True
+    AXIS_INSIDE = False
     YAXISUSEEFORMAT = False
     INVERTXAXIS = True
     INVERTYAXIS = True

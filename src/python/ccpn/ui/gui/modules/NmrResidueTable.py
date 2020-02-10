@@ -55,7 +55,7 @@ from ccpnc.clibrary import Clibrary
 from PyQt5.QtCore import QObject
 from PyQt5.QtGui import QShowEvent, QHideEvent
 from PyQt5 import QtWidgets
-
+from PyQt5.QtWidgets import QWidget
 logger = getLogger()
 ALL = '<all>'
 _getNmrIndex = Clibrary.getNmrResidueIndex
@@ -479,16 +479,13 @@ class NmrResidueTable(GuiTable):
                     border-bottom-right-radius: 2px;
                     border-bottom-left-radius: 2px;}
                     ''')
-        try:
-            self._corner = QtGui.QWidget()
-            self._corner.setStyleSheet('''
-                border-top: 1px solid #a9a9a9;
-                border-left: 1px solid #a9a9a9;
-            ''')
 
-            self._cornerDisplay = NmrResidueTable.ScrollBarVisibilityWatcher(self, self._corner)
-        except Exception as e:
-            print(e)
+        self._corner = QWidget()
+        self._corner.setStyleSheet('''
+            border-top: 1px solid #a9a9a9;
+            border-left: 1px solid #a9a9a9;
+        ''')
+        self._cornerDisplay = NmrResidueTable.ScrollBarVisibilityWatcher(self, self._corner)
 
     def _processDroppedItems(self, data):
         """

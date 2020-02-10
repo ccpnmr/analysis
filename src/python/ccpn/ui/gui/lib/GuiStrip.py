@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-02-07 19:34:47 +0000 (Fri, February 07, 2020) $"
+__dateModified__ = "$dateModified: 2020-02-10 18:38:01 +0000 (Mon, February 10, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -2183,6 +2183,8 @@ class GuiStrip(Frame):
         layout.setContentsMargins(*margins)
         layout.setSpacing(space)
 
+        # need to switch the tile positions for the moved strips
+
         # reinsert strips in new order - reset minimum widths
         if spectrumDisplay.stripArrangement == 'Y':
 
@@ -2190,7 +2192,7 @@ class GuiStrip(Frame):
             for m, widgStrip in enumerate(_widgets):
 
                 tilePosition = widgStrip.tilePosition
-                if tilePosition is None:
+                if True:            # tilePosition is None:
                     layout.addWidget(widgStrip, 0, m)
                     widgStrip.tilePosition = (0, m)
                 else:
@@ -2202,8 +2204,9 @@ class GuiStrip(Frame):
 
             # vertical strip layout
             for m, widgStrip in enumerate(_widgets):
+
                 tilePosition = widgStrip.tilePosition
-                if tilePosition is None:
+                if True:            # tilePosition is None:
                     layout.addWidget(widgStrip, m, 0)
                     widgStrip.tilePosition = (0, m)
                 else:

@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-02-06 18:27:17 +0000 (Thu, February 06, 2020) $"
+__dateModified__ = "$dateModified: 2020-02-10 18:38:00 +0000 (Mon, February 10, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -532,7 +532,7 @@ class Strip1d(coreClass, _GuiStrip1d):
             # strips are arranged in a row
             # self.spectrumDisplay.stripFrame.layout().addWidget(self, 0, stripIndex)
 
-            if tilePosition is None:
+            if True:            #tilePosition is None:
                 self.spectrumDisplay.stripFrame.layout().addWidget(self, 0, stripIndex)
                 self.tilePosition = (0, stripIndex)
             else:
@@ -543,7 +543,7 @@ class Strip1d(coreClass, _GuiStrip1d):
             # strips are arranged in a column
             # self.spectrumDisplay.stripFrame.layout().addWidget(self, stripIndex, 0)
 
-            if tilePosition is None:
+            if True:            #tilePosition is None:
                 self.spectrumDisplay.stripFrame.layout().addWidget(self, stripIndex, 0)
                 self.tilePosition = (0, stripIndex)
             else:
@@ -587,7 +587,7 @@ class StripNd(coreClass, _GuiStripNd):
             # strips are arranged in a row
             # self.spectrumDisplay.stripFrame.layout().addWidget(self, 0, stripIndex)
 
-            if tilePosition is None:
+            if True:            #tilePosition is None:
                 self.spectrumDisplay.stripFrame.layout().addWidget(self, 0, stripIndex)
                 self.tilePosition = (0, stripIndex)
             else:
@@ -598,7 +598,7 @@ class StripNd(coreClass, _GuiStripNd):
             # strips are arranged in a column
             # self.spectrumDisplay.stripFrame.layout().addWidget(self, stripIndex, 0)
 
-            if tilePosition is None:
+            if True:            #tilePosition is None:
                 self.spectrumDisplay.stripFrame.layout().addWidget(self, stripIndex, 0)
                 self.tilePosition = (0, stripIndex)
             else:

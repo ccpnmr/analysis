@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-02-10 16:59:37 +0000 (Mon, February 10, 2020) $"
+__dateModified__ = "$dateModified: 2020-02-10 18:38:00 +0000 (Mon, February 10, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -475,6 +475,7 @@ class GuiSpectrumDisplay(CcpnModule):
         """
         for strip in self.strips:
             strip._updateVisibility()
+        self._updateAxesVisibilty()
 
         from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
 
@@ -486,6 +487,7 @@ class GuiSpectrumDisplay(CcpnModule):
         """
         for strip in self.strips:
             strip._updateVisibility()
+        self._updateAxesVisibilty()
 
         from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
 
@@ -524,6 +526,7 @@ class GuiSpectrumDisplay(CcpnModule):
         """
         for strip in self.strips:
             strip._updateVisibility()
+        self._updateAxesVisibilty()
 
         from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
 
@@ -579,11 +582,16 @@ class GuiSpectrumDisplay(CcpnModule):
 
         self.setVisibleAxes()
 
+    def _updateAxesVisibilty(self):
+        self._rightGLAxis.updateVisibleSpectrumViews()
+        self._bottomGLAxis.updateVisibleSpectrumViews()
+
     def setVisibleAxes(self):
         """Set which of the axis widgets are visible based on the strip tilePositions and stripArrangement
         """
         # NOTE:ED - currently only one row or column
-
+        #           Should no-shared-axis mean don't show either axis?
+        #           Need to think about tiles later
         # leave a gap for overlaying the axis widgets
         if self.stripArrangement == 'Y':
             self._stripFrameScrollArea.setViewportMargins(0, 0, self._rightGLAxis.width(), 0)
@@ -740,6 +748,7 @@ class GuiSpectrumDisplay(CcpnModule):
                     # flag that the listViews need to be updated
                     for strip in self.strips:
                         strip._updateVisibility()
+                    self._updateAxesVisibilty()
 
                     # spawn a redraw of the GL windows
                     from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
@@ -1219,7 +1228,7 @@ class GuiSpectrumDisplay(CcpnModule):
                     # layout.addWidget(widgStrip, 0, m)
 
                     tilePosition = widgStrip.tilePosition
-                    if tilePosition is None:
+                    if True:            #tilePosition is None:
                         layout.addWidget(widgStrip, 0, m)
                         widgStrip.tilePosition = (0, m)
                     else:
@@ -1232,7 +1241,7 @@ class GuiSpectrumDisplay(CcpnModule):
                     # layout.addWidget(widgStrip, m, 0)
 
                     tilePosition = widgStrip.tilePosition
-                    if tilePosition is None:
+                    if True:            #tilePosition is None:
                         layout.addWidget(widgStrip, m, 0)
                         widgStrip.tilePosition = (0, m)
                     else:
@@ -1290,7 +1299,7 @@ class GuiSpectrumDisplay(CcpnModule):
                     #     layout.addWidget(widgStrip, 0, m)
 
                     tilePosition = widgStrip.tilePosition
-                    if tilePosition is None:
+                    if True:            #tilePosition is None:
                         layout.addWidget(widgStrip, 0, m)
                         widgStrip.tilePosition = (0, m)
                     else:
@@ -1303,7 +1312,7 @@ class GuiSpectrumDisplay(CcpnModule):
                     #     layout.addWidget(widgStrip, m, 0)
 
                     tilePosition = widgStrip.tilePosition
-                    if tilePosition is None:
+                    if True:            #tilePosition is None:
                         layout.addWidget(widgStrip, m, 0)
                         widgStrip.tilePosition = (0, m)
                     else:
@@ -1358,7 +1367,7 @@ class GuiSpectrumDisplay(CcpnModule):
                     # layout.addWidget(widgStrip, 0, m)
 
                     tilePosition = widgStrip.tilePosition
-                    if tilePosition is None:
+                    if True:            #tilePosition is None:
                         layout.addWidget(widgStrip, 0, m)
                         widgStrip.tilePosition = (0, m)
                     else:
@@ -1371,7 +1380,7 @@ class GuiSpectrumDisplay(CcpnModule):
                     # layout.addWidget(widgStrip, m, 0)
 
                     tilePosition = widgStrip.tilePosition
-                    if tilePosition is None:
+                    if True:            #tilePosition is None:
                         layout.addWidget(widgStrip, m, 0)
                         widgStrip.tilePosition = (0, m)
                     else:

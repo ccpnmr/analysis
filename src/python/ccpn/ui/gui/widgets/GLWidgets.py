@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-02-10 16:59:38 +0000 (Mon, February 10, 2020) $"
+__dateModified__ = "$dateModified: 2020-02-10 18:38:01 +0000 (Mon, February 10, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -728,7 +728,7 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
             return
 
         # NOTE:ED - testing, remove later
-        # self._paintMode = PAINTMODES.PAINT_ALL
+        self._paintMode = PAINTMODES.PAINT_ALL
 
         if self._paintMode == PAINTMODES.PAINT_NONE:
 
@@ -2624,6 +2624,8 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
 
             else:
                 dPos = pos = self._orderedAxes[n].position  # if n in self._orderedAxes else 0
+                # dPos = pos = self.spectrumDisplay.axes[n].position  # if n in self._orderedAxes else 0
+
                 activeOther.append(axisCode)  #[0])
 
             # populate the mouse moved dict
@@ -2878,9 +2880,6 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
                 # print('>>>_updateVisibleSpectrumViews delete', specView, id(specView))
                 # print('>>>', [id(spec) for spec in self._ordering])
                 del self._spectrumSettings[specView]
-
-                # delete the 1d string relating to the spectrumView
-                self._spectrumLabelling.removeString(specView)
 
         # make a list of the visible and not-deleted spectrumViews
         # visibleSpectra = [specView.spectrum for specView in self._ordering if not specView.isDeleted and specView.isVisible()]

@@ -11,7 +11,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-02-06 18:27:17 +0000 (Thu, February 06, 2020) $"
+__dateModified__ = "$dateModified: 2020-02-10 18:38:00 +0000 (Mon, February 10, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -761,7 +761,7 @@ class Framework(NotifierBase):
                 # move to the correct place in the widget - check stripDirection to display as row or column
                 if spectrumDisplay.stripArrangement == 'Y':
 
-                    if tilePosition is None:
+                    if True:            # tilePosition is None:
                         spectrumDisplay.stripFrame.layout().addWidget(strip, 0, si)  #stripIndex)
                         strip.tilePosition = (0, si)
                     else:
@@ -769,7 +769,7 @@ class Framework(NotifierBase):
 
                 elif spectrumDisplay.stripArrangement == 'X':
 
-                    if tilePosition is None:
+                    if True:            #tilePosition is None:
                         spectrumDisplay.stripFrame.layout().addWidget(strip, si, 0)  #stripIndex)
                         strip.tilePosition = (0, si)
                     else:

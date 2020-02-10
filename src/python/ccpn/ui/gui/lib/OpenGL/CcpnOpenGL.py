@@ -55,7 +55,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-02-07 15:10:48 +0000 (Fri, February 07, 2020) $"
+__dateModified__ = "$dateModified: 2020-02-10 16:59:37 +0000 (Mon, February 10, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -190,7 +190,7 @@ class CcpnGLWidget(QOpenGLWidget):
     AXIS_MARGINBOTTOM = 25
     AXIS_LINE = 7
     AXIS_OFFSET = 3
-    AXIS_INSIDE = True
+    AXIS_INSIDE = False
     YAXISUSEEFORMAT = False
     INVERTXAXIS = True
     INVERTYAXIS = True
@@ -543,12 +543,21 @@ class CcpnGLWidget(QOpenGLWidget):
             self._currentBottomAxisView = GLDefs.BOTTOMAXIS
             self._currentBottomAxisBarView = GLDefs.BOTTOMAXISBAR
 
-            currentShader.setViewportMatrix(self._uVMatrix, 0, w - self.AXIS_MARGINRIGHT, 0, h - self.AXIS_MARGINBOTTOM,
-                                            -1.0, 1.0)
-            self.pixelX = (self.axisR - self.axisL) / (w - self.AXIS_MARGINRIGHT)
-            self.pixelY = (self.axisT - self.axisB) / (h - self.AXIS_MARGINBOTTOM)
-            self.deltaX = 1.0 / (w - self.AXIS_MARGINRIGHT)
-            self.deltaY = 1.0 / (h - self.AXIS_MARGINBOTTOM)
+            # vp = self.viewports.getViewportFromWH(self._currentView, w, h)
+            #
+            # # currentShader.setViewportMatrix(self._uVMatrix, 0, w - self.AXIS_MARGINRIGHT, 0, h - self.AXIS_MARGINBOTTOM,
+            # #                                 -1.0, 1.0)
+            # # self.pixelX = (self.axisR - self.axisL) / max((w - self.AXIS_MARGINRIGHT), 1)
+            # # self.pixelY = (self.axisT - self.axisB) / max((h - self.AXIS_MARGINBOTTOM), 1)
+            # # self.deltaX = 1.0 / max((w - self.AXIS_MARGINRIGHT), 1)
+            # # self.deltaY = 1.0 / max((h - self.AXIS_MARGINBOTTOM), 1)
+            #
+            # currentShader.setViewportMatrix(self._uVMatrix, 0, vp.width, 0, vp.height,
+            #                                 -1.0, 1.0)
+            # self.pixelX = (self.axisR - self.axisL) / vp.width
+            # self.pixelY = (self.axisT - self.axisB) / vp.height
+            # self.deltaX = 1.0 / vp.width
+            # self.deltaY = 1.0 / vp.height
 
         elif self._drawRightAxis and not self._drawBottomAxis:
 
@@ -556,11 +565,19 @@ class CcpnGLWidget(QOpenGLWidget):
             self._currentRightAxisView = GLDefs.FULLRIGHTAXIS
             self._currentRightAxisBarView = GLDefs.FULLRIGHTAXISBAR
 
-            currentShader.setViewportMatrix(self._uVMatrix, 0, w - self.AXIS_MARGINRIGHT, 0, h, -1.0, 1.0)
-            self.pixelX = (self.axisR - self.axisL) / (w - self.AXIS_MARGINRIGHT)
-            self.pixelY = (self.axisT - self.axisB) / h
-            self.deltaX = 1.0 / (w - self.AXIS_MARGINRIGHT)
-            self.deltaY = 1.0 / h
+            # vp = self.viewports.getViewportFromWH(self._currentView, w, h)
+            #
+            # # currentShader.setViewportMatrix(self._uVMatrix, 0, w - self.AXIS_MARGINRIGHT, 0, h, -1.0, 1.0)
+            # # self.pixelX = (self.axisR - self.axisL) / max((w - self.AXIS_MARGINRIGHT), 1)
+            # # self.pixelY = (self.axisT - self.axisB) / h
+            # # self.deltaX = 1.0 / max((w - self.AXIS_MARGINRIGHT), 1)
+            # # self.deltaY = 1.0 / h
+            #
+            # currentShader.setViewportMatrix(self._uVMatrix, 0, vp.width, 0, h, -1.0, 1.0)
+            # self.pixelX = (self.axisR - self.axisL) / max(vp.width, 1)
+            # self.pixelY = (self.axisT - self.axisB) / h
+            # self.deltaX = 1.0 / max(vp.width, 1)
+            # self.deltaY = 1.0 / h
 
         elif not self._drawRightAxis and self._drawBottomAxis:
 
@@ -568,24 +585,43 @@ class CcpnGLWidget(QOpenGLWidget):
             self._currentBottomAxisView = GLDefs.FULLBOTTOMAXIS
             self._currentBottomAxisBarView = GLDefs.FULLBOTTOMAXISBAR
 
-            currentShader.setViewportMatrix(self._uVMatrix, 0, w, 0, h - self.AXIS_MARGINBOTTOM, -1.0, 1.0)
-            self.pixelX = (self.axisR - self.axisL) / w
-            self.pixelY = (self.axisT - self.axisB) / (h - self.AXIS_MARGINBOTTOM)
-            self.deltaX = 1.0 / w
-            self.deltaY = 1.0 / (h - self.AXIS_MARGINBOTTOM)
+            # vp = self.viewports.getViewportFromWH(self._currentView, w, h)
+            #
+            # # currentShader.setViewportMatrix(self._uVMatrix, 0, w, 0, h - self.AXIS_MARGINBOTTOM, -1.0, 1.0)
+            # # self.pixelX = (self.axisR - self.axisL) / w
+            # # self.pixelY = (self.axisT - self.axisB) / max((h - self.AXIS_MARGINBOTTOM), 1)
+            # # self.deltaX = 1.0 / w
+            # # self.deltaY = 1.0 / max((h - self.AXIS_MARGINBOTTOM), 1)
+            #
+            # currentShader.setViewportMatrix(self._uVMatrix, 0, w, 0, vp.height, -1.0, 1.0)
+            # self.pixelX = (self.axisR - self.axisL) / w
+            # self.pixelY = (self.axisT - self.axisB) / max(vp.height, 1)
+            # self.deltaX = 1.0 / w
+            # self.deltaY = 1.0 / max(vp.height, 1)
 
         else:
 
             self._currentView = GLDefs.FULLVIEW
 
-            currentShader.setViewportMatrix(self._uVMatrix, 0, w, 0, h, -1.0, 1.0)
-            self.pixelX = (self.axisR - self.axisL) / w
-            self.pixelY = (self.axisT - self.axisB) / h
-            self.deltaX = 1.0 / w
-            self.deltaY = 1.0 / h
+            # vp = self.viewports.getViewportFromWH(self._currentView, w, h)
+            #
+            # currentShader.setViewportMatrix(self._uVMatrix, 0, w, 0, h, -1.0, 1.0)
+            # self.pixelX = (self.axisR - self.axisL) / w
+            # self.pixelY = (self.axisT - self.axisB) / h
+            # self.deltaX = 1.0 / w
+            # self.deltaY = 1.0 / h
 
         self.symbolX = abs(self._symbolSize * self.pixelX)
         self.symbolY = abs(self._symbolSize * self.pixelY)
+
+        vp = self.viewports.getViewportFromWH(self._currentView, w, h)
+        currentShader.setViewportMatrix(self._uVMatrix, 0, vp.width, 0, vp.height,
+                                        -1.0, 1.0)
+        self.pixelX = (self.axisR - self.axisL) / vp.width
+        self.pixelY = (self.axisT - self.axisB) / vp.height
+        self.deltaX = 1.0 / vp.width
+        self.deltaY = 1.0 / vp.height
+
 
         self._dataMatrix[0:16] = [self.axisL, self.axisR, self.axisT, self.axisB,
                                   self.pixelX, self.pixelY, w, h,
@@ -613,7 +649,8 @@ class CcpnGLWidget(QOpenGLWidget):
         currentShader.setGLUniformMatrix4fv('pTexMatrix', 1, GL.GL_FALSE, self._uPMatrix)
 
         self._axisScale[0:4] = [self.pixelX, self.pixelY, 1.0, 1.0]
-        self._view[0:4] = [w - self.AXIS_MARGINRIGHT, h - self.AXIS_MARGINBOTTOM, 1.0, 1.0]
+        # self._view[0:4] = [w - self.AXIS_MARGINRIGHT, h - self.AXIS_MARGINBOTTOM, 1.0, 1.0]
+        self._view[0:4] = [vp.width, vp.height, 1.0, 1.0]
 
         # self._axisScale[0:4] = [1.0/(self.axisR-self.axisL), 1.0/(self.axisT-self.axisB), 1.0, 1.0]
         currentShader.setGLUniform4fv('axisScale', 1, self._axisScale)
@@ -903,7 +940,9 @@ class CcpnGLWidget(QOpenGLWidget):
         newPixelRatio = self.devicePixelRatio()
         if newPixelRatio != self.lastPixelRatio:
             self.lastPixelRatio = newPixelRatio
-            self.viewports._devicePixelRatio = newPixelRatio
+            if hasattr(self, GLDefs.VIEWPORTSATTRIB):
+                self.viewports._devicePixelRatio = newPixelRatio
+
             self.buildOverlayStrings()
             for spectrumView in self._ordering:
                 for listView in spectrumView.peakListViews:
@@ -3247,37 +3286,37 @@ class CcpnGLWidget(QOpenGLWidget):
         self.disableTextClientState()
         self.disableTexture()
 
-        # use the current viewport matrix to display the last bit of the axes
-        currentShader = self.globalGL._shaderProgram1.makeCurrent()
-        currentShader.setProjectionAxes(self._uVMatrix, 0, w - self.AXIS_MARGINRIGHT, -1, h - self.AXIS_MARGINBOTTOM,
-                                        -1.0, 1.0)
-
-        self.viewports.setViewport(self._currentView)
-
-        # why are these labelled the other way round?
-        currentShader.setGLUniformMatrix4fv('pMatrix', 1, GL.GL_FALSE, self._uVMatrix)
-        currentShader.setGLUniformMatrix4fv('mvMatrix', 1, GL.GL_FALSE, self._IMatrix)
-
-        # cheat for the moment to draw the axes (if visible)
-        if self.highlighted:
-            colour = self.highlightColour
-        else:
-            colour = self.foreground
-
-        with self._disableGLAliasing():
-            GL.glDisable(GL.GL_BLEND)
-            GL.glColor4f(*colour)
-            GL.glBegin(GL.GL_LINES)
-
-            if self._drawBottomAxis:
-                GL.glVertex2d(0, 0)
-                GL.glVertex2d(w - self.AXIS_MARGINRIGHT, 0)
-
-            if self._drawRightAxis:
-                GL.glVertex2d(w - self.AXIS_MARGINRIGHT, 0)
-                GL.glVertex2d(w - self.AXIS_MARGINRIGHT, h - self.AXIS_MARGINBOTTOM)
-
-            GL.glEnd()
+        # # use the current viewport matrix to display the last bit of the axes
+        # currentShader = self.globalGL._shaderProgram1.makeCurrent()
+        # currentShader.setProjectionAxes(self._uVMatrix, 0, w - self.AXIS_MARGINRIGHT, -1, h - self.AXIS_MARGINBOTTOM,
+        #                                 -1.0, 1.0)
+        #
+        # self.viewports.setViewport(self._currentView)
+        #
+        # # why are these labelled the other way round?
+        # currentShader.setGLUniformMatrix4fv('pMatrix', 1, GL.GL_FALSE, self._uVMatrix)
+        # currentShader.setGLUniformMatrix4fv('mvMatrix', 1, GL.GL_FALSE, self._IMatrix)
+        #
+        # # cheat for the moment to draw the axes (if visible)
+        # if self.highlighted:
+        #     colour = self.highlightColour
+        # else:
+        #     colour = self.foreground
+        #
+        # with self._disableGLAliasing():
+        #     GL.glDisable(GL.GL_BLEND)
+        #     GL.glColor4f(*colour)
+        #     GL.glBegin(GL.GL_LINES)
+        #
+        #     if self._drawBottomAxis:
+        #         GL.glVertex2d(0, 0)
+        #         GL.glVertex2d(w - self.AXIS_MARGINRIGHT, 0)
+        #
+        #     if self._drawRightAxis:
+        #         GL.glVertex2d(w - self.AXIS_MARGINRIGHT, 0)
+        #         GL.glVertex2d(w - self.AXIS_MARGINRIGHT, h - self.AXIS_MARGINBOTTOM)
+        #
+        #     GL.glEnd()
 
     def enableTexture(self):
         GL.glEnable(GL.GL_BLEND)
@@ -3575,7 +3614,8 @@ class CcpnGLWidget(QOpenGLWidget):
                                                                b=self.foreground[2],
                                                                transparency=300.0,
                                                                _includeDiagonal=self._matchingIsotopeCodes,
-                                                               _diagonalList=None)  #self.diagonalGLList)
+                                                               _diagonalList=None,
+                                                               _includeAxis=False)  #self.diagonalGLList)
 
         if self.axesChanged:
             if self.highlighted:
@@ -5712,7 +5752,7 @@ class CcpnGLWidget(QOpenGLWidget):
         self.update()
 
     def _buildAxes(self, gridGLList, axisList=None, scaleGrid=None, r=0.0, g=0.0, b=0.0, transparency=256.0,
-                   _includeDiagonal=False, _diagonalList=None):
+                   _includeDiagonal=False, _diagonalList=None, _includeAxis=True):
         """Build the grid
         """
 
@@ -5924,49 +5964,26 @@ class CcpnGLWidget(QOpenGLWidget):
                                         gridGLList.numVertices += 2
                                         index += 2
 
-                # # draw the diagonal x=y if required - need to determine the origin
-                # # OR draw on the spectrum bounding box
-                # if _includeDiagonal and _diagonalList:
-                #
-                #     _diagVertexList = ()
-                #
-                #     if self.between(axisLimitB, axisLimitL, axisLimitR):
-                #         _diagVertexList += (valueToRatio(axisLimitB, axisLimitL, axisLimitR),
-                #                             0.0)
-                #
-                #     if self.between(axisLimitL, axisLimitB, axisLimitT):
-                #         _diagVertexList += (0.0,
-                #                             valueToRatio(axisLimitL, axisLimitB, axisLimitT))
-                #
-                #     if self.between(axisLimitT, axisLimitL, axisLimitR):
-                #         _diagVertexList += (valueToRatio(axisLimitT, axisLimitL, axisLimitR),
-                #                             1.0)
-                #
-                #     if self.between(axisLimitR, axisLimitB, axisLimitT):
-                #         _diagVertexList += (1.0,
-                #                             valueToRatio(axisLimitR, axisLimitB, axisLimitT))
-                #
-                #     if len(_diagVertexList) == 4:
-                #         # indexList += (index, index + 1)
-                #         # vertexList += diag
-                #         #
-                #         # alpha = min([1.0, (30.0 + (len(scaleGrid) * 20)) / transparency])
-                #         # colorList += (r, g, b, alpha, r, g, b, alpha)
-                #         #
-                #         # gridGLList.numVertices += 2
-                #         # index += 2
-                #
-                #         alpha = min([1.0, (30.0 + (len(scaleGrid) * 20)) / transparency])
-                #
-                #         _diagIndexList = (0, 1)
-                #         _diagonalList.numVertices = 2
-                #         _diagonalList.vertices = np.array(_diagVertexList, dtype=np.float32)
-                #         _diagonalList.indices = np.array((0, 1), dtype=np.uint32)
-                #         _diagonalList.colors = np.array((r, g, b, alpha, r, g, b, alpha), dtype=np.float32)
-                #
-                #     else:
-                #         _diagonalList.numVertices = 0
-                #         _diagonalList.indices = np.array((), dtype=np.uint32)
+                # add the extra axis lines
+                if _includeAxis:
+                    for ax in axisList:
+
+                        offset = 0.1 if self.AXIS_INSIDE else 0.9
+                        if ax == 0:
+                            # add the x axis line
+                            indexList += (index, index + 1)
+                            vertexList += (0.0, offset, 1.0, offset)
+                            colorList += (r, g, b, 1.0, r, g, b, 1.0)
+                            gridGLList.numVertices += 2
+                            index += 2
+
+                        elif ax == 1:
+                            # add the y axis line
+                            indexList += (index, index + 1)
+                            vertexList += (1.0 - offset, 0.0, 1.0 - offset, 1.0)
+                            colorList += (r, g, b, 1.0, r, g, b, 1.0)
+                            gridGLList.numVertices += 2
+                            index += 2
 
                 # copy the arrays the the GLstore
                 gridGLList.vertices = np.array(vertexList, dtype=np.float32)

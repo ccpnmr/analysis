@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-02-05 16:03:53 +0000 (Wed, February 05, 2020) $"
-__version__ = "$Revision: 3.0.0 $"
+__dateModified__ = "$dateModified: 2020-02-10 16:59:38 +0000 (Mon, February 10, 2020) $"
+__version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -272,6 +272,10 @@ class PreferencesPopup(CcpnDialogMainWidget):
                                       GLNotifier.GLALLPEAKS,
                                       GLNotifier.GLALLMULTIPLETS,
                                       GLNotifier.GLPREFERENCES])
+
+        # NOTE:ED - quick setting of new background colour for cornerWidget, not very nice should use a notifier
+        for specDisplay in self.project.spectrumDisplays:
+            specDisplay.setVisibleAxes()
 
     def _setTabs(self):
 

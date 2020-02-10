@@ -16,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-01-28 10:04:26 +0000 (Tue, January 28, 2020) $"
-__version__ = "$Revision: 3.0.0 $"
+__dateModified__ = "$dateModified: 2020-02-10 16:59:37 +0000 (Mon, February 10, 2020) $"
+__version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -214,6 +214,12 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
         for spectrumDisplay in project.spectrumDisplays:
             for strip in spectrumDisplay.strips:
                 strip.refreshDevicePixelRatio()
+
+            # NOTE:ED - set pixelratio for extra axes
+            if hasattr(spectrumDisplay, '_rightGLAxis'):
+                spectrumDisplay._rightGLAxis.refreshDevicePixelRatio()
+            if hasattr(spectrumDisplay, '_bottomGLAxis'):
+                spectrumDisplay._bottomGLAxis.refreshDevicePixelRatio()
 
     @property
     def modules(self):

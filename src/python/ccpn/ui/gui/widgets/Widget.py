@@ -11,7 +11,7 @@ ScrollableWidget(parent=None, setLayout=False,
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -20,9 +20,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: CCPN $"
-__dateModified__ = "$dateModified: 2017-07-07 16:32:57 +0100 (Fri, July 07, 2017) $"
-__version__ = "$Revision: 3.0.0 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2020-02-10 16:59:38 +0000 (Mon, February 10, 2020) $"
+__version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -35,10 +35,13 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 from PyQt5 import QtGui, QtWidgets
 from ccpn.ui.gui.widgets.Base import Base
 from ccpn.ui.gui.widgets.ScrollArea import ScrollArea
+from ccpn.util.Colour import rgbRatioToHex
 
 
 class Widget(QtWidgets.QWidget, Base):
-
+    """
+    Class to handle a simple widget item
+    """
     def __init__(self, parent=None, setLayout=False, acceptDrops=False, **kwds):
         """General widget; default accepts drops (for now)
         """
@@ -50,19 +53,46 @@ class Widget(QtWidgets.QWidget, Base):
 
         self.setContentsMargins(0, 0, 0, 0)
 
-    # def clearWidget(self):
-    #     """Delete all the contents of the widget
-    #     """
-    #     layout = self.getLayout()
-    #     if layout:
-    #         rowCount = layout.rowCount()
-    #         colCount = layout.columnCount()
-    #
-    #         for r in range(rowCount):
-    #             for m in range(colCount):
-    #                 item = layout.itemAtPosition(r, m)
-    #                 if item and item.widget():
-    #                     item.widget().deleteLater()
+
+class WidgetCorner(Widget):
+    """
+    Class to handle a simple widget item with a constant painted background
+    Item is to be resized by parent handler
+    """
+
+    def __init__(self, parent, spectrumDisplay=None, mainWindow=None, setLayout=False, acceptDrops=False, background=None, **kwds):
+        """Initialise the widget
+        """
+        super(WidgetCorner, self).__init__(parent=parent, setLayout=setLayout, acceptDrops=acceptDrops, **kwds)
+        self._parent = parent
+        self.spectrumDisplay = spectrumDisplay
+        self.mainWindow = mainWindow
+        self._background = None
+
+        if background:
+            self.setBackground(background)
+
+    def setBackground(self, colour):
+        """Set the background colour (or None)
+        """
+        try:
+            # try a QColor first
+            self._background = QtGui.QColor(colour)
+        except:
+            # otherwise assume to be a tuple (0..1, 0..1, 0..1, 0..1, 0..1)
+            if type(colour) != tuple or len(colour) != 4 or any(not(0 <= col <= 1) for col in colour):
+                raise TypeError("colour must be a tuple(r, g, b, alpha)")
+            
+            self._background = QtGui.QColor(rgbRatioToHex(*colour[:3]))
+
+    def paintEvent(self, a0: QtGui.QPaintEvent):
+        """Paint the background in the required colour
+        """
+        if self._background is not None:
+            p = QtGui.QPainter(self)
+            rgn = self.rect()
+            p.fillRect(rgn, self._background)
+            p.end()
 
 
 class ScrollableWidget(Widget):

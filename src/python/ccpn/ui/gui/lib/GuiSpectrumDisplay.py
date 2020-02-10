@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-02-07 19:34:47 +0000 (Fri, February 07, 2020) $"
+__dateModified__ = "$dateModified: 2020-02-10 16:59:37 +0000 (Mon, February 10, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -40,12 +40,13 @@ from ccpn.core.Sample import Sample
 from ccpn.ui.gui.widgets.ToolBar import ToolBar
 from typing import Tuple
 
+from ccpn.ui.gui.widgets.Widget import WidgetCorner
 from ccpn.ui.gui.widgets.Frame import Frame
 from ccpn.ui.gui.modules.CcpnModule import CcpnModule
 from ccpn.ui.gui.widgets.PhasingFrame import PhasingFrame
 from ccpn.ui.gui.widgets.SpectrumToolBar import SpectrumToolBar
 from ccpn.ui.gui.widgets.SpectrumGroupToolBar import SpectrumGroupToolBar
-from ccpn.ui.gui.widgets.ScrollArea import ScrollArea
+from ccpn.ui.gui.widgets.ScrollArea import ScrollArea, SpectrumDisplayScrollArea
 from ccpn.ui.gui.widgets.MessageDialog import showWarning
 from ccpn.ui.gui.widgets.DropBase import DropBase
 from ccpn.ui.gui.lib.GuiNotifier import GuiNotifier
@@ -70,6 +71,7 @@ from ccpn.util.decorators import logCommand
 from ccpn.util.Common import makeIterableList
 from ccpn.core.lib import Undo
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
+from ccpn.ui.gui.guiSettings import getColours, CCPNGLWIDGET_HEXBACKGROUND, CCPNGLWIDGET_BACKGROUND
 
 
 STRIP_SPACING = 5
@@ -330,11 +332,11 @@ class GuiSpectrumDisplay(CcpnModule):
             # scroll area for strips
             # This took a lot of sorting-out; better leave as is or test thoroughly
             # self._stripFrameScrollArea = ScrollAreaWithPredicateStylesheet(parent=self.qtParent,
-            self._stripFrameScrollArea = ScrollArea(parent=self.qtParent,
-                                                    # styleSheetTemplate = frameStyleSheetTemplate,
-                                                    # predicate=styleSheetPredicate, mutator=styleSheetMutator,
-                                                    setLayout=True, acceptDrops=False,
-                                                    scrollBarPolicies=('asNeeded', 'never'))
+            self._stripFrameScrollArea = SpectrumDisplayScrollArea(parent=self.qtParent,
+                                                                   # styleSheetTemplate = frameStyleSheetTemplate,
+                                                                   # predicate=styleSheetPredicate, mutator=styleSheetMutator,
+                                                                   setLayout=True, acceptDrops=False,
+                                                                   scrollBarPolicies=('asNeeded', 'never'))
             self._stripFrameScrollArea.setWidget(self.stripFrame)
             self._stripFrameScrollArea.setWidgetResizable(True)
             self.qtParent.getLayout().addWidget(self._stripFrameScrollArea, stripRow, 0, 1, 7)
@@ -370,6 +372,9 @@ class GuiSpectrumDisplay(CcpnModule):
             self._bottomGLAxis.tilePosition = (-1, 0)
             self._bottomGLAxis.setAxisType(0)
             self._bottomGLAxis.hide()
+
+            # add a small widget to fill the corner between the widgets
+            self._cornerAxis = WidgetCorner(self._stripFrameScrollArea, spectrumDisplay=self, mainWindow=self.mainWindow)
 
         self.qtParent.getLayout().setContentsMargins(0, 0, 0, 0)
         self.qtParent.getLayout().setSpacing(0)
@@ -581,17 +586,20 @@ class GuiSpectrumDisplay(CcpnModule):
 
         # leave a gap for overlaying the axis widgets
         if self.stripArrangement == 'Y':
-            # self.stripFrame.getLayout().setContentsMargins(0, 0, self._rightGLAxis.width(), 0)
             self._stripFrameScrollArea.setViewportMargins(0, 0, self._rightGLAxis.width(), 0)
+            # self._stripFrameScrollArea.setViewportMargins(0, 0, self._rightGLAxis.width(), self._bottomGLAxis.height())
             self._rightGLAxis.show()
             self._bottomGLAxis.hide()
             self._rightGLAxis._updateAxes = True
         else:
-            # self.stripFrame.getLayout().setContentsMargins(0, 0, 0, self._bottomGLAxis.height())
             self._stripFrameScrollArea.setViewportMargins(0, 0, 0, self._bottomGLAxis.height())
+            # self._stripFrameScrollArea.setViewportMargins(0, 0, self._rightGLAxis.width(), self._bottomGLAxis.height())
             self._rightGLAxis.hide()
             self._bottomGLAxis.show()
             self._bottomGLAxis._updateAxes = True
+
+        self.colours = getColours()
+        self._cornerAxis.setBackground(self.colours[CCPNGLWIDGET_BACKGROUND])
 
         self.stripFrame.update()
         self._stripFrameScrollArea._updateAxisWidgets()
@@ -632,7 +640,7 @@ class GuiSpectrumDisplay(CcpnModule):
         _, maxTilePos = self._stripRange()
         return maxTilePos[1] + 1
 
-    def stripAtTilePosition(self, tilePosition:Tuple[int, int]) -> 'Strip':
+    def stripAtTilePosition(self, tilePosition: Tuple[int, int]) -> 'Strip':
         """Return the strip at a given tilePosition
         """
         if not isinstance(tilePosition, tuple):
@@ -653,13 +661,13 @@ class GuiSpectrumDisplay(CcpnModule):
             stripTilePos = strip.tilePosition or (0, strip.stripIndex)
             if stripTilePos[dim] == value:
                 # append the strip with its row
-                foundStrips.append((strip, stripTilePos[1-dim]))
+                foundStrips.append((strip, stripTilePos[1 - dim]))
 
         # sort by required dimension
-        sortedStrips = sorted(foundStrips, key=lambda k:k[dim])
+        sortedStrips = sorted(foundStrips, key=lambda k: k[dim])
         return tuple(strip for strip, dim in sortedStrips)
 
-    def stripRow(self, row:int) -> ['Strip']:
+    def stripRow(self, row: int) -> ['Strip']:
         """Return the ordered stripRow at a given row
         tilePositions are independent of stripArrangement
         """
@@ -668,7 +676,7 @@ class GuiSpectrumDisplay(CcpnModule):
 
         return self._stripList(0, row)
 
-    def stripColumn(self, column:int) -> ['Strip']:
+    def stripColumn(self, column: int) -> ['Strip']:
         """Return the ordered stripColumn at a given column
         tilePositions are independent of stripArrangement
         """

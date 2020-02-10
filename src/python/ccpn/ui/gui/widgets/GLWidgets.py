@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-02-08 03:01:44 +0000 (Sat, February 08, 2020) $"
+__dateModified__ = "$dateModified: 2020-02-10 16:59:38 +0000 (Mon, February 10, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -45,6 +45,7 @@ from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
 from ccpn.ui.gui.lib.OpenGL import CcpnOpenGLDefs as GLDefs
 from ccpn.util.Logging import getLogger
 
+
 try:
     from OpenGL import GL, GLU, GLUT
 except ImportError:
@@ -73,7 +74,7 @@ class GuiNdWidget(CcpnGLWidget):
     INVERTYAXIS = True
     SPECTRUMPOSCOLOUR = 'positiveContourColour'
     SPECTRUMNEGCOLOUR = 'negativeContourColour'
-    AXIS_INSIDE = True
+    AXIS_INSIDE = False
 
     def __init__(self, strip=None, mainWindow=None, stripIDLabel=None):
         super().__init__(strip=strip, mainWindow=mainWindow, stripIDLabel=stripIDLabel)
@@ -587,7 +588,7 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
     AXIS_MARGINBOTTOM = 25
     AXIS_LINE = 7
     AXIS_OFFSET = 3
-    AXIS_INSIDE = True
+    AXIS_INSIDE = False
     YAXISUSEEFORMAT = True
     INVERTXAXIS = True
     INVERTYAXIS = True
@@ -727,7 +728,7 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
             return
 
         # NOTE:ED - testing, remove later
-        self._paintMode = PAINTMODES.PAINT_ALL
+        # self._paintMode = PAINTMODES.PAINT_ALL
 
         if self._paintMode == PAINTMODES.PAINT_NONE:
 
@@ -749,6 +750,20 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
                 # simple profile of building all
                 self._buildGL()
                 self._paintGL()
+
+            # make all following paint events into mouse only
+            # so only paints a single frame from an update event
+            self._paintMode = PAINTMODES.PAINT_MOUSEONLY
+            self._paintLastFrame = True
+            self._leavingWidget = False
+
+        elif self._paintMode == PAINTMODES.PAINT_MOUSEONLY:
+            self._paintLastFrame = False
+            self._leavingWidget = False
+
+            # only need to paint the mouse cursor
+            # self._paintGLMouseOnly()
+            self._paintGL()
 
     @contextmanager
     def glBlocking(self):
@@ -1036,50 +1051,6 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
                             gridGLList.numVertices += 2
                             index += 2
 
-                # draw the diagonal x=y if required - need to determine the origin
-                # OR draw on the spectrum bounding box
-                if _includeDiagonal and _diagonalList:
-
-                    _diagVertexList = ()
-
-                    if self.between(axisLimitB, axisLimitL, axisLimitR):
-                        _diagVertexList += (valueToRatio(axisLimitB, axisLimitL, axisLimitR),
-                                            0.0)
-
-                    if self.between(axisLimitL, axisLimitB, axisLimitT):
-                        _diagVertexList += (0.0,
-                                            valueToRatio(axisLimitL, axisLimitB, axisLimitT))
-
-                    if self.between(axisLimitT, axisLimitL, axisLimitR):
-                        _diagVertexList += (valueToRatio(axisLimitT, axisLimitL, axisLimitR),
-                                            1.0)
-
-                    if self.between(axisLimitR, axisLimitB, axisLimitT):
-                        _diagVertexList += (1.0,
-                                            valueToRatio(axisLimitR, axisLimitB, axisLimitT))
-
-                    if len(_diagVertexList) == 4:
-                        # indexList += (index, index + 1)
-                        # vertexList += diag
-                        #
-                        # alpha = min([1.0, (30.0 + (len(scaleGrid) * 20)) / transparency])
-                        # colorList += (r, g, b, alpha, r, g, b, alpha)
-                        #
-                        # gridGLList.numVertices += 2
-                        # index += 2
-
-                        alpha = min([1.0, (30.0 + (len(scaleGrid) * 20)) / transparency])
-
-                        _diagIndexList = (0, 1)
-                        _diagonalList.numVertices = 2
-                        _diagonalList.vertices = np.array(_diagVertexList, dtype=np.float32)
-                        _diagonalList.indices = np.array((0, 1), dtype=np.uint32)
-                        _diagonalList.colors = np.array((r, g, b, alpha, r, g, b, alpha), dtype=np.float32)
-
-                    else:
-                        _diagonalList.numVertices = 0
-                        _diagonalList.indices = np.array((), dtype=np.uint32)
-
                 # copy the arrays the the GLstore
                 gridGLList.vertices = np.array(vertexList, dtype=np.float32)
                 gridGLList.indices = np.array(indexList, dtype=np.uint32)
@@ -1123,33 +1094,28 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
         """Build the grids for the mainGrid and the bottom/right axes
         """
         # build the axes
-        # self.axisLabelling, self.axesChanged = self._buildAxes(self.gridList[0], axisList=[0, 1],
-        #                                                        scaleGrid=[1, 0],
-        #                                                        r=self.foreground[0],
-        #                                                        g=self.foreground[1],
-        #                                                        b=self.foreground[2],
-        #                                                        transparency=300.0,
-        #                                                        _includeDiagonal=self._matchingIsotopeCodes,
-        #                                                        _diagonalList=None)  #self.diagonalGLList)
-
         if self.highlighted:
             if self._axisType == 1:
-                self.axisLabelling, self.axesChanged = self._buildAxes(self.gridList[1], axisList=[1], scaleGrid=[1, 0], r=self.highlightColour[0],
-                                g=self.highlightColour[1],
-                                b=self.highlightColour[2], transparency=32.0)
-            if self._axisType == 0:
-                self.axisLabelling, self.axesChanged = self._buildAxes(self.gridList[2], axisList=[0], scaleGrid=[1, 0], r=self.highlightColour[0],
-                                g=self.highlightColour[1],
-                                b=self.highlightColour[2], transparency=32.0)
+                self.axisLabelling, self.axesChanged = self._buildAxes(self.gridList[1], axisList=[1], scaleGrid=[1, 0],
+                                                                       r=self.highlightColour[0],
+                                                                       g=self.highlightColour[1],
+                                                                       b=self.highlightColour[2], transparency=32.0)
+            else:  # self._axisType == 0:
+                self.axisLabelling, self.axesChanged = self._buildAxes(self.gridList[2], axisList=[0], scaleGrid=[1, 0],
+                                                                       r=self.highlightColour[0],
+                                                                       g=self.highlightColour[1],
+                                                                       b=self.highlightColour[2], transparency=32.0)
         else:
             if self._axisType == 1:
-                self.axisLabelling, self.axesChanged = self._buildAxes(self.gridList[1], axisList=[1], scaleGrid=[1, 0], r=self.foreground[0],
-                                g=self.foreground[1],
-                                b=self.foreground[2], transparency=32.0)
-            if self._axisType == 0:
-                self.axisLabelling, self.axesChanged = self._buildAxes(self.gridList[2], axisList=[0], scaleGrid=[1, 0], r=self.foreground[0],
-                                g=self.foreground[1],
-                                b=self.foreground[2], transparency=32.0)
+                self.axisLabelling, self.axesChanged = self._buildAxes(self.gridList[1], axisList=[1], scaleGrid=[1, 0],
+                                                                       r=self.foreground[0],
+                                                                       g=self.foreground[1],
+                                                                       b=self.foreground[2], transparency=32.0)
+            else:  # self._axisType == 0:
+                self.axisLabelling, self.axesChanged = self._buildAxes(self.gridList[2], axisList=[0], scaleGrid=[1, 0],
+                                                                       r=self.foreground[0],
+                                                                       g=self.foreground[1],
+                                                                       b=self.foreground[2], transparency=32.0)
 
         # buffer the lists to VBOs
         for gr in self.gridList[1:]:
@@ -1371,13 +1337,13 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
         """Separate the building of the display from the paint event; not sure that this is required
         """
         # only call if the axes have changed
-        self._updateAxes = True
-
-        self.buildSpectra()
+        # self._updateAxes = True
 
         if self._updateAxes:
             self.buildGrid()
-            # self._updateAxes = False
+            self._updateAxes = False
+
+        self.buildSpectra()
 
     def _paintGLMouseOnly(self):
         """paintGL event - paint only the mouse in Xor mode
@@ -1728,7 +1694,7 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
             row = aDict[GLNotifier.GLAXISVALUES][GLNotifier.GLSTRIPROW]
             col = aDict[GLNotifier.GLAXISVALUES][GLNotifier.GLSTRIPCOLUMN]
 
-            tilePos = self._tilePosition
+            tilePos = self.tilePosition
 
             if self._widthsChangedEnough([axisL, self.axisL], [axisR, self.axisR]):
                 if self.spectrumDisplay.stripArrangement == 'Y':
@@ -1851,7 +1817,7 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
             row = aDict[GLNotifier.GLAXISVALUES][GLNotifier.GLSTRIPROW]
             col = aDict[GLNotifier.GLAXISVALUES][GLNotifier.GLSTRIPCOLUMN]
 
-            tilePos = self._tilePosition
+            tilePos = self.tilePosition
 
             if self._widthsChangedEnough([axisB, self.axisB], [axisT, self.axisT]):
                 if self.spectrumDisplay.stripArrangement == 'Y':
@@ -2002,7 +1968,8 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
 
                 # force a redraw to only paint the cursor
                 # self._paintMode = PAINTMODES.PAINT_MOUSEONLY
-                self.update(mode=PAINTMODES.PAINT_ALL)
+                # self.update(mode=PAINTMODES.PAINT_ALL)
+                self.update(mode=PAINTMODES.PAINT_MOUSEONLY)
 
     def update(self, mode=PAINTMODES.PAINT_ALL):
         """Update the glWidget with the correct refresh mode
@@ -2067,14 +2034,14 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
         self.setBackgroundColour(self.background, silent=True)
         self.globalGL._shaderProgramTex.setBlendEnabled(0)
 
+        self.updateVisibleSpectrumViews()
+        self.initialiseAxes()
+        self._attachParentStrip()
+
         # set the painting mode
         self._paintMode = PAINTMODES.PAINT_ALL
         self._paintLastFrame = True
         self._leavingWidget = False
-
-        self.updateVisibleSpectrumViews()
-        self.initialiseAxes()
-        self._attachParentStrip()
 
         # check that the screen device pixel ratio is correct
         self.refreshDevicePixelRatio()
@@ -2241,8 +2208,9 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
         newPixelRatio = self.devicePixelRatio()
         if newPixelRatio != self.lastPixelRatio:
             self.lastPixelRatio = newPixelRatio
-            self.viewports._devicePixelRatio = newPixelRatio
-            # self.update()
+            if hasattr(self, GLDefs.VIEWPORTSATTRIB):
+                self.viewports._devicePixelRatio = newPixelRatio
+            self.update()
 
     def _preferencesUpdate(self):
         """update GL values after the preferences have changed
@@ -2307,7 +2275,7 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
             smallFont = self.getSmallFont()
             fScale = smallFont.scale
 
-            if self._drawBottomAxis:
+            if self._drawBottomAxis and self._axisType == 0:
                 # create the X axis labelling
                 for axLabel in self.axisLabelling['0']:
                     axisX = axLabel[2]
@@ -2343,7 +2311,7 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
 
             self._axisYLabelling = []
 
-            if self._drawRightAxis:
+            if self._drawRightAxis and self._axisType == 1:
                 # create the Y axis labelling
                 for xx, ayLabel in enumerate(self.axisLabelling['1']):
                     axisY = ayLabel[2]
@@ -2784,12 +2752,21 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
             self._currentBottomAxisView = GLDefs.BOTTOMAXIS
             self._currentBottomAxisBarView = GLDefs.BOTTOMAXISBAR
 
-            currentShader.setViewportMatrix(self._uVMatrix, 0, w - self.AXIS_MARGINRIGHT, 0, h - self.AXIS_MARGINBOTTOM,
-                                            -1.0, 1.0)
-            self.pixelX = (self.axisR - self.axisL) / max((w - self.AXIS_MARGINRIGHT), 1)
-            self.pixelY = (self.axisT - self.axisB) / max((h - self.AXIS_MARGINBOTTOM), 1)
-            self.deltaX = 1.0 / max((w - self.AXIS_MARGINRIGHT), 1)
-            self.deltaY = 1.0 / max((h - self.AXIS_MARGINBOTTOM), 1)
+            # vp = self.viewports.getViewportFromWH(self._currentView, w, h)
+            #
+            # # currentShader.setViewportMatrix(self._uVMatrix, 0, w - self.AXIS_MARGINRIGHT, 0, h - self.AXIS_MARGINBOTTOM,
+            # #                                 -1.0, 1.0)
+            # # self.pixelX = (self.axisR - self.axisL) / max((w - self.AXIS_MARGINRIGHT), 1)
+            # # self.pixelY = (self.axisT - self.axisB) / max((h - self.AXIS_MARGINBOTTOM), 1)
+            # # self.deltaX = 1.0 / max((w - self.AXIS_MARGINRIGHT), 1)
+            # # self.deltaY = 1.0 / max((h - self.AXIS_MARGINBOTTOM), 1)
+            #
+            # currentShader.setViewportMatrix(self._uVMatrix, 0, vp.width, 0, vp.height,
+            #                                 -1.0, 1.0)
+            # self.pixelX = (self.axisR - self.axisL) / vp.width
+            # self.pixelY = (self.axisT - self.axisB) / vp.height
+            # self.deltaX = 1.0 / vp.width
+            # self.deltaY = 1.0 / vp.height
 
         elif self._drawRightAxis and not self._drawBottomAxis:
 
@@ -2797,11 +2774,19 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
             self._currentRightAxisView = GLDefs.FULLRIGHTAXIS
             self._currentRightAxisBarView = GLDefs.FULLRIGHTAXISBAR
 
-            currentShader.setViewportMatrix(self._uVMatrix, 0, w - self.AXIS_MARGINRIGHT, 0, h, -1.0, 1.0)
-            self.pixelX = (self.axisR - self.axisL) / max((w - self.AXIS_MARGINRIGHT), 1)
-            self.pixelY = (self.axisT - self.axisB) / h
-            self.deltaX = 1.0 / max((w - self.AXIS_MARGINRIGHT), 1)
-            self.deltaY = 1.0 / h
+            # vp = self.viewports.getViewportFromWH(self._currentView, w, h)
+            #
+            # # currentShader.setViewportMatrix(self._uVMatrix, 0, w - self.AXIS_MARGINRIGHT, 0, h, -1.0, 1.0)
+            # # self.pixelX = (self.axisR - self.axisL) / max((w - self.AXIS_MARGINRIGHT), 1)
+            # # self.pixelY = (self.axisT - self.axisB) / h
+            # # self.deltaX = 1.0 / max((w - self.AXIS_MARGINRIGHT), 1)
+            # # self.deltaY = 1.0 / h
+            #
+            # currentShader.setViewportMatrix(self._uVMatrix, 0, vp.width, 0, h, -1.0, 1.0)
+            # self.pixelX = (self.axisR - self.axisL) / max(vp.width, 1)
+            # self.pixelY = (self.axisT - self.axisB) / h
+            # self.deltaX = 1.0 / max(vp.width, 1)
+            # self.deltaY = 1.0 / h
 
         elif not self._drawRightAxis and self._drawBottomAxis:
 
@@ -2809,24 +2794,42 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
             self._currentBottomAxisView = GLDefs.FULLBOTTOMAXIS
             self._currentBottomAxisBarView = GLDefs.FULLBOTTOMAXISBAR
 
-            currentShader.setViewportMatrix(self._uVMatrix, 0, w, 0, h - self.AXIS_MARGINBOTTOM, -1.0, 1.0)
-            self.pixelX = (self.axisR - self.axisL) / w
-            self.pixelY = (self.axisT - self.axisB) / max((h - self.AXIS_MARGINBOTTOM), 1)
-            self.deltaX = 1.0 / w
-            self.deltaY = 1.0 / max((h - self.AXIS_MARGINBOTTOM), 1)
+            # vp = self.viewports.getViewportFromWH(self._currentView, w, h)
+            #
+            # # currentShader.setViewportMatrix(self._uVMatrix, 0, w, 0, h - self.AXIS_MARGINBOTTOM, -1.0, 1.0)
+            # # self.pixelX = (self.axisR - self.axisL) / w
+            # # self.pixelY = (self.axisT - self.axisB) / max((h - self.AXIS_MARGINBOTTOM), 1)
+            # # self.deltaX = 1.0 / w
+            # # self.deltaY = 1.0 / max((h - self.AXIS_MARGINBOTTOM), 1)
+            #
+            # currentShader.setViewportMatrix(self._uVMatrix, 0, w, 0, vp.height, -1.0, 1.0)
+            # self.pixelX = (self.axisR - self.axisL) / w
+            # self.pixelY = (self.axisT - self.axisB) / max(vp.height, 1)
+            # self.deltaX = 1.0 / w
+            # self.deltaY = 1.0 / max(vp.height, 1)
 
         else:
 
             self._currentView = GLDefs.FULLVIEW
 
-            currentShader.setViewportMatrix(self._uVMatrix, 0, w, 0, h, -1.0, 1.0)
-            self.pixelX = (self.axisR - self.axisL) / w
-            self.pixelY = (self.axisT - self.axisB) / h
-            self.deltaX = 1.0 / w
-            self.deltaY = 1.0 / h
+            # vp = self.viewports.getViewportFromWH(self._currentView, w, h)
+            #
+            # currentShader.setViewportMatrix(self._uVMatrix, 0, w, 0, h, -1.0, 1.0)
+            # self.pixelX = (self.axisR - self.axisL) / w
+            # self.pixelY = (self.axisT - self.axisB) / h
+            # self.deltaX = 1.0 / w
+            # self.deltaY = 1.0 / h
 
         # self.symbolX = abs(self._symbolSize * self.pixelX)
         # self.symbolY = abs(self._symbolSize * self.pixelY)
+
+        vp = self.viewports.getViewportFromWH(self._currentView, w, h)
+        currentShader.setViewportMatrix(self._uVMatrix, 0, vp.width, 0, vp.height,
+                                        -1.0, 1.0)
+        self.pixelX = (self.axisR - self.axisL) / vp.width
+        self.pixelY = (self.axisT - self.axisB) / vp.height
+        self.deltaX = 1.0 / vp.width
+        self.deltaY = 1.0 / vp.height
 
         self._dataMatrix[0:16] = [self.axisL, self.axisR, self.axisT, self.axisB,
                                   self.pixelX, self.pixelY, w, h,
@@ -2854,7 +2857,8 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
         currentShader.setGLUniformMatrix4fv('pTexMatrix', 1, GL.GL_FALSE, self._uPMatrix)
 
         self._axisScale[0:4] = [self.pixelX, self.pixelY, 1.0, 1.0]
-        self._view[0:4] = [w - self.AXIS_MARGINRIGHT, h - self.AXIS_MARGINBOTTOM, 1.0, 1.0]
+        # self._view[0:4] = [w - self.AXIS_MARGINRIGHT, h - self.AXIS_MARGINBOTTOM, 1.0, 1.0]
+        self._view[0:4] = [vp.width, vp.height, 1.0, 1.0]
 
         # self._axisScale[0:4] = [1.0/(self.axisR-self.axisL), 1.0/(self.axisT-self.axisB), 1.0, 1.0]
         currentShader.setGLUniform4fv('axisScale', 1, self._axisScale)

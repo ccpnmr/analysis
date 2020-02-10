@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-01-10 11:21:55 +0000 (Fri, January 10, 2020) $"
-__version__ = "$Revision: 3.0.0 $"
+__dateModified__ = "$dateModified: 2020-02-10 16:59:38 +0000 (Mon, February 10, 2020) $"
+__version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -30,14 +30,12 @@ from PyQt5 import QtWidgets
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Flowable
 from reportlab.lib.styles import getSampleStyleSheet
 from reportlab.lib.units import inch, cm
-from reportlab.lib.pagesizes import A4
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs import SPECTRUM_STACKEDMATRIX, SPECTRUM_MATRIX, \
     GLLINE_STYLES_ARRAY
-from collections import OrderedDict, Iterable, namedtuple
+from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLViewports import viewportDimensions
+from collections import OrderedDict, Iterable
 import io
 import numpy as np
-
-
 try:
     from OpenGL import GL, GLU, GLUT
 except ImportError:
@@ -51,6 +49,7 @@ from reportlab.graphics.shapes import Drawing, Rect, String, PolyLine, Line, Gro
 from reportlab.graphics.shapes import definePath
 from reportlab.graphics.renderSVG import draw, renderScaledDrawing, SVGCanvas
 from reportlab.lib.units import mm
+from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import A4, portrait, landscape
 from reportlab.platypus.tables import Table
 from reportlab.pdfbase import pdfmetrics
@@ -70,7 +69,6 @@ from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs import GLFILENAME, GLGRIDLINES, GLAXI
     BOTTOMAXIS, BOTTOMAXISBAR, FULLBOTTOMAXIS, FULLBOTTOMAXISBAR, FULLVIEW, BLANKVIEW
 from ccpn.ui.gui.popups.ExportStripToFile import EXPORTPDF, EXPORTSVG, EXPORTTYPES, \
     PAGEPORTRAIT, PAGELANDSCAPE, PAGETYPES
-from ccpn.util.Logging import getLogger
 
 
 PLOTLEFT = 'plotLeft'
@@ -89,8 +87,6 @@ PDFSTROKEDASHARRAY = 'strokeDashArray'
 PDFCLOSEPATH = 'closePath'
 PDFLINES = 'lines'
 FRAMEPADDING = 12
-
-viewportDimensions = namedtuple('viewportDimensions', ('left', 'bottom', 'width', 'height'))
 
 
 def alphaClip(value):
@@ -183,7 +179,7 @@ class GLExporter():
             pdfmetrics.registerFont(TTFont(glFonts.fontName, os.path.join(fontsPath, 'open-sans', SUBSTITUTEFONT + '.ttf')))
 
         # set a default fontName
-        self.fontName = self._parent.globalGL.glSmallFont.fontName
+        self.fontName = self._parent.getSmallFont().fontName
 
     def _buildPage(self, singleStrip=True):
         """Build the main sections of the pdf file from a drawing object
@@ -1645,12 +1641,6 @@ if __name__ == '__main__':
     paragraphs.append(
             Paragraph('This is another paragraph', styles['Normal']))
 
-    from reportlab.lib import colors
-    from reportlab.graphics.shapes import Drawing, Rect, String, PolyLine, Group
-    from reportlab.lib.units import mm
-    from reportlab.pdfgen import canvas
-
-
     dpi = 72
     mmwidth = 150
     mmheight = 150
@@ -1747,9 +1737,6 @@ if __name__ == '__main__':
     c.rect(0, 0, 100, 100, fill=True, stroke=False)
 
     # this is much better as it remembers the transparency and object grouping
-    from reportlab.lib.units import inch
-
-
     h = inch / 3.0
     k = inch / 2.0
     c.setStrokeColorRGB(0.2, 0.3, 0.5)

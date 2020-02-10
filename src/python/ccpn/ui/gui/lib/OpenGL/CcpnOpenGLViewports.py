@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-02-07 19:17:10 +0000 (Fri, February 07, 2020) $"
+__dateModified__ = "$dateModified: 2020-02-10 16:59:38 +0000 (Mon, February 10, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -26,8 +26,9 @@ __date__ = "$Date: 2018-12-20 13:28:13 +0000 (Thu, December 20, 2018) $"
 #=========================================================================================
 
 import sys
-from PyQt5 import QtWidgets
+from collections import namedtuple
 
+from PyQt5 import QtWidgets
 
 try:
     from OpenGL import GL, GLU, GLUT
@@ -36,6 +37,8 @@ except ImportError:
     QtWidgets.QMessageBox.critical(None, "OpenGL CCPN",
                                    "PyOpenGL must be installed to run this example.")
     sys.exit(1)
+
+viewportDimensions = namedtuple('viewportDimensions', ('left', 'bottom', 'width', 'height'))
 
 
 class GLViewports(object):
@@ -107,7 +110,7 @@ class GLViewports(object):
             wi = setVal(thisView[3], w, h, l)
             he = setVal(thisView[4], w, h, 0)
 
-            return (l, b, wi, he)
+            return viewportDimensions(l, b, max(wi, 1), max(he, 1))
 
         else:
             raise RuntimeError('Error: viewport %s does not exist' % name)
@@ -131,7 +134,7 @@ class GLViewports(object):
             wi = setVal(thisView[3], w, h, l)
             he = setVal(thisView[4], w, h, 0)
 
-            return (l, b, wi, he)
+            return viewportDimensions(l, b, max(wi, 1), max(he, 1))
 
         else:
             raise RuntimeError('Error: viewport %s does not exist' % name)

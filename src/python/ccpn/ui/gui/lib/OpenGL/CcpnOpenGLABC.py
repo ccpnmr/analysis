@@ -55,7 +55,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-02-06 18:27:17 +0000 (Thu, February 06, 2020) $"
+__dateModified__ = "$dateModified: 2020-02-10 16:59:38 +0000 (Mon, February 10, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -337,8 +337,12 @@ class CcpnGLWidgetABC(QOpenGLWidget):
     def refreshDevicePixelRatio(self):
         """refresh the devicePixelRatio for the viewports
         """
-        self.viewports._devicePixelRatio = self.devicePixelRatio()
-        self.update()
+        newPixelRatio = self.devicePixelRatio()
+        if newPixelRatio != self.lastPixelRatio:
+            self.lastPixelRatio = newPixelRatio
+            if hasattr(self, GLDefs.VIEWPORTSATTRIB):
+                self.viewports._devicePixelRatio = newPixelRatio
+            self.update()
 
     def close(self):
         self.GLSignals.glEvent.disconnect()

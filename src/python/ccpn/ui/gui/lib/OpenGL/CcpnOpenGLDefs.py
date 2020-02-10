@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-01-28 16:27:16 +0000 (Tue, January 28, 2020) $"
-__version__ = "$Revision: 3.0.0 $"
+__dateModified__ = "$dateModified: 2020-02-10 16:59:38 +0000 (Mon, February 10, 2020) $"
+__version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -24,6 +24,7 @@ __date__ = "$Date: 2018-12-20 13:28:13 +0000 (Thu, December 20, 2018) $"
 #=========================================================================================
 # Start of code
 #=========================================================================================
+
 
 SPECTRUM_STACKEDMATRIX = 'stackedMatrix'
 SPECTRUM_STACKEDMATRIXOFFSET = 'stackedMatrixOffset'
@@ -262,4 +263,6 @@ LOCKBOTTOM = 64
 LOCKAXIS = 128
 
 LOCKSTRING = 'Lock'
-USEDEFAULTASPECTSTRING = '         Fixed'      # easier to overlay
+USEDEFAULTASPECTSTRING = '         Fixed'  # easier to overlay
+
+VIEWPORTSATTRIB = 'viewports'

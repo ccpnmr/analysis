@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-02-10 18:38:00 +0000 (Mon, February 10, 2020) $"
+__dateModified__ = "$dateModified: 2020-02-10 23:35:07 +0000 (Mon, February 10, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -378,6 +378,7 @@ class GuiSpectrumDisplay(CcpnModule):
 
         self.qtParent.getLayout().setContentsMargins(0, 0, 0, 0)
         self.qtParent.getLayout().setSpacing(0)
+        self.lastAxisOnly = mainWindow.application.preferences.general.lastAxisOnly
         self.setVisibleAxes()
 
         includeDirection = not self.is1D
@@ -402,7 +403,6 @@ class GuiSpectrumDisplay(CcpnModule):
         # GWV: This assures that a 'hoverbar' is visible over the strip when dragging
         # the module to another location
         self.hoverEvent = self._hoverEvent
-        self.lastAxisOnly = mainWindow.application.preferences.general.lastAxisOnly
         self._phasingTraceScale = 1.0e-7
         self.stripScaleFactor = 1.0
 
@@ -593,19 +593,29 @@ class GuiSpectrumDisplay(CcpnModule):
         #           Should no-shared-axis mean don't show either axis?
         #           Need to think about tiles later
         # leave a gap for overlaying the axis widgets
-        if self.stripArrangement == 'Y':
-            self._stripFrameScrollArea.setViewportMargins(0, 0, self._rightGLAxis.width(), 0)
-            # self._stripFrameScrollArea.setViewportMargins(0, 0, self._rightGLAxis.width(), self._bottomGLAxis.height())
-            self._rightGLAxis.show()
-            self._bottomGLAxis.hide()
-            self._rightGLAxis._updateAxes = True
-        else:
-            self._stripFrameScrollArea.setViewportMargins(0, 0, 0, self._bottomGLAxis.height())
-            # self._stripFrameScrollArea.setViewportMargins(0, 0, self._rightGLAxis.width(), self._bottomGLAxis.height())
-            self._rightGLAxis.hide()
-            self._bottomGLAxis.show()
-            self._bottomGLAxis._updateAxes = True
 
+        if not self.lastAxisOnly:
+            # remove the margins and hide the axes
+            self._stripFrameScrollArea.setViewportMargins(0, 0, 0, 0)
+            self._rightGLAxis.hide()
+            self._bottomGLAxis.hide()
+        else:
+
+            # show the required axis
+            if self.stripArrangement == 'Y':
+                self._stripFrameScrollArea.setViewportMargins(0, 0, self._rightGLAxis.width(), 0)
+                # self._stripFrameScrollArea.setViewportMargins(0, 0, self._rightGLAxis.width(), self._bottomGLAxis.height())
+                self._rightGLAxis.show()
+                self._bottomGLAxis.hide()
+                self._rightGLAxis._updateAxes = True
+            else:
+                self._stripFrameScrollArea.setViewportMargins(0, 0, 0, self._bottomGLAxis.height())
+                # self._stripFrameScrollArea.setViewportMargins(0, 0, self._rightGLAxis.width(), self._bottomGLAxis.height())
+                self._rightGLAxis.hide()
+                self._bottomGLAxis.show()
+                self._bottomGLAxis._updateAxes = True
+
+        # update the background colour
         self.colours = getColours()
         self._cornerAxis.setBackground(self.colours[CCPNGLWIDGET_BACKGROUND])
 
@@ -1519,11 +1529,15 @@ class GuiSpectrumDisplay(CcpnModule):
 
                 # strips are arranged in a row
                 if self.lastAxisOnly:
-                    for ss in currentStrips[:-1]:
+                    # for ss in currentStrips[:-1]:
+                    #     ss.setAxesVisible(rightAxisVisible=False, bottomAxisVisible=True)
+                    #
+                    # currentStrips[-1].setAxesVisible(rightAxisVisible=True, bottomAxisVisible=True)
+
+                    for ss in self.strips:
                         ss.setAxesVisible(rightAxisVisible=False, bottomAxisVisible=True)
 
-                    currentStrips[-1].setAxesVisible(rightAxisVisible=True, bottomAxisVisible=True)
-
+                    # show _rightGLAxis
                 else:
                     for ss in self.strips:
                         ss.setAxesVisible(rightAxisVisible=True, bottomAxisVisible=True)
@@ -1532,10 +1546,15 @@ class GuiSpectrumDisplay(CcpnModule):
 
                 # strips are arranged in a column
                 if self.lastAxisOnly:
-                    for ss in currentStrips[:-1]:
+                    # for ss in currentStrips[:-1]:
+                    #     ss.setAxesVisible(rightAxisVisible=True, bottomAxisVisible=False)
+                    #
+                    # currentStrips[-1].setAxesVisible(rightAxisVisible=True, bottomAxisVisible=True)
+
+                    for ss in self.strips:
                         ss.setAxesVisible(rightAxisVisible=True, bottomAxisVisible=False)
 
-                    currentStrips[-1].setAxesVisible(rightAxisVisible=True, bottomAxisVisible=True)
+                    # show _bottomGLAxis
 
                 else:
                     for ss in self.strips:
@@ -1550,6 +1569,9 @@ class GuiSpectrumDisplay(CcpnModule):
                 getLogger().warning('Strip direction is not defined for spectrumDisplay: %s' % str(self.pid))
 
             self.setColumnStretches(stretchValue=stretchValue, widths=widths, minimumWidth=minimumWidth, deletingStrip=deletingStrip)
+
+            # show the required _rightGLAxis/_bottomGLAxis
+            self.setVisibleAxes()
 
     def increaseTraceScale(self):
         # self.mainWindow.traceScaleUp(self.mainWindow)
@@ -1632,7 +1654,9 @@ class GuiSpectrumDisplay(CcpnModule):
 
         strips = self.orderedStrips
         newWidth = max(strips[0].width() * factor, STRIP_MINIMUMWIDTH)  # + (0 if self.lastAxisOnly else strips[0].getRightAxisWidth()))
-        axisWidth = strips[0].getRightAxisWidth() if self.lastAxisOnly else 0
+        axisWidth = 0               #strips[0].getRightAxisWidth() if self.lastAxisOnly else 0
+
+        # NOTE:ED - always uniform width with new axis
 
         if len(strips) > 1:
             for strip in strips[:-1]:
@@ -1664,7 +1688,9 @@ class GuiSpectrumDisplay(CcpnModule):
 
         strips = self.orderedStrips
         newHeight = max(strips[0].height() * factor, STRIP_MINIMUMHEIGHT)  # + (0 if self.lastAxisOnly else strips[0].getRightAxisWidth()))
-        axisHeight = strips[0].getBottomAxisHeight() if self.lastAxisOnly else 0
+        axisHeight = 0                  #strips[0].getBottomAxisHeight() if self.lastAxisOnly else 0
+
+        # NOTE:ED - always uniform height with new axis
 
         if len(strips) > 1:
             for strip in strips[:-1]:
@@ -1817,7 +1843,7 @@ class GuiSpectrumDisplay(CcpnModule):
             if minimumWidth:
                 firstStripWidth = max(firstStripWidth, minimumWidth)
 
-            if not self.lastAxisOnly:
+            if True:                    # not self.lastAxisOnly:
                 maxCol = 0
                 for wid in self.orderedStrips:
                     index = thisLayout.indexOf(wid)
@@ -1909,7 +1935,7 @@ class GuiSpectrumDisplay(CcpnModule):
             if minimumHeight:
                 firstStripHeight = max(firstStripHeight, minimumHeight)
 
-            if not self.lastAxisOnly:
+            if True:                        #not self.lastAxisOnly:
                 maxRow = 0
                 for wid in self.orderedStrips:
                     index = thisLayout.indexOf(wid)

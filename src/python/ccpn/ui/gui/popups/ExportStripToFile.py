@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-02-11 13:49:45 +0000 (Tue, February 11, 2020) $"
+__dateModified__ = "$dateModified: 2020-02-11 14:59:20 +0000 (Tue, February 11, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -229,7 +229,7 @@ class ExportStripToFilePopup(ExportDialog):
         row += 1
         self.baseThicknessBox = DoubleSpinBoxCompoundWidget(
                 userFrame, grid=(row, 0), gridSpan=(1, 3), hAlign='left',
-                labelText='Thickness Scale',
+                labelText='Line Thickness',
                 value=1.0,
                 decimals=2, step=0.05, range=(0.01, 20))
         self.baseThicknessBox.setFixedHeight(25)

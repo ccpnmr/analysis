@@ -48,7 +48,7 @@ COPY_LIBRARIES = sh copySharedObjs
 MATH_LIB = -lm
 
 # rest of Python
-PYTHON_VERSION = 3.5
+PYTHON_VERSION = 3.7
 
 # for Unix do not seem to need PYTHON_LIB
 # for Windows seem to need below (or similar)

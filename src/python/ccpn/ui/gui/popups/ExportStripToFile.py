@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-02-11 03:17:19 +0000 (Tue, February 11, 2020) $"
+__dateModified__ = "$dateModified: 2020-02-11 13:49:45 +0000 (Tue, February 11, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -85,7 +85,7 @@ from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs import GLFILENAME, GLGRIDLINES, GLAXI
     GLSPECTRUMDISPLAY, GLSTRIP, GLSTRIPLABELLING, GLTRACES, \
     GLWIDGET, GLPLOTBORDER, GLAXISLINES, GLBACKGROUND, GLBASETHICKNESS, GLSYMBOLTHICKNESS, GLFOREGROUND, \
     GLCONTOURTHICKNESS, GLSHOWSPECTRAONPHASE, \
-    GLAXISTITLES, GLAXISUNITS, GLAXISMARKSINSIDE, GLSTRIPDIRECTION, GLSTRIPPADDING, \
+    GLAXISTITLES, GLAXISUNITS, GLAXISMARKSINSIDE, GLSTRIPDIRECTION, GLSTRIPPADDING, GLEXPORTDPI, \
     GLFULLLIST, GLEXTENDEDLIST, GLDIAGONALLINE, GLCURSORS, GLDIAGONALSIDEBANDS
 
 
@@ -241,6 +241,14 @@ class ExportStripToFilePopup(ExportDialog):
                 value=5,
                 decimals=0, step=1, range=(0, 50))
         self.stripPaddingBox.setFixedHeight(25)
+
+        row += 1
+        self.exportDpiBox = DoubleSpinBoxCompoundWidget(
+                userFrame, grid=(row, 0), gridSpan=(1, 3), hAlign='left',
+                labelText='Image dpi',
+                value=300,
+                decimals=0, step=5, range=(36, 2400))
+        self.exportDpiBox.setFixedHeight(25)
 
         row += 1
         userFrame.addSpacer(0, 10, grid=(row, 0))
@@ -543,6 +551,7 @@ class ExportStripToFilePopup(ExportDialog):
         symbolThickness = self.application.preferences.general.symbolThickness
         contourThickness = self.application.preferences.general.contourThickness
         stripPadding = self.stripPaddingBox.getValue()
+        exportDpi = self.exportDpiBox.getValue()
 
         if strip:
             # return the parameters
@@ -559,6 +568,7 @@ class ExportStripToFilePopup(ExportDialog):
                       GLCONTOURTHICKNESS: contourThickness,
                       GLSTRIPDIRECTION  : stripDirection,
                       GLSTRIPPADDING    : stripPadding,
+                      GLEXPORTDPI       : exportDpi,
                       GLSELECTEDPIDS    : self.treeView.getSelectedObjectsPids()
                       }
             selectedList = self.treeView.getSelectedItems()

@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-02-11 03:17:19 +0000 (Tue, February 11, 2020) $"
+__dateModified__ = "$dateModified: 2020-02-11 13:49:45 +0000 (Tue, February 11, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -36,6 +36,8 @@ from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLViewports import viewportDimensions
 from collections import OrderedDict, Iterable
 import io
 import numpy as np
+
+
 try:
     from OpenGL import GL, GLU, GLUT
 except ImportError:
@@ -62,13 +64,14 @@ from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs import GLFILENAME, GLGRIDLINES, GLAXI
     GLSTRIP, GLSTRIPLABELLING, GLTRACES, GLACTIVETRACES, GLWIDGET, GLPLOTBORDER, \
     GLPAGETYPE, GLSPECTRUMDISPLAY, GLAXISLINES, GLBACKGROUND, GLBASETHICKNESS, GLSYMBOLTHICKNESS, \
     GLCONTOURTHICKNESS, GLFOREGROUND, GLSHOWSPECTRAONPHASE, \
-    GLAXISTITLES, GLAXISUNITS, GLAXISMARKSINSIDE, GLSTRIPDIRECTION, GLSTRIPPADDING, \
+    GLAXISTITLES, GLAXISUNITS, GLAXISMARKSINSIDE, GLSTRIPDIRECTION, GLSTRIPPADDING, GLEXPORTDPI, \
     GLFULLLIST, GLEXTENDEDLIST, GLCURSORS, GLDIAGONALLINE, GLDIAGONALSIDEBANDS, \
     MAINVIEW, MAINVIEWFULLHEIGHT, MAINVIEWFULLWIDTH, \
     RIGHTAXIS, RIGHTAXISBAR, FULLRIGHTAXIS, FULLRIGHTAXISBAR, \
     BOTTOMAXIS, BOTTOMAXISBAR, FULLBOTTOMAXIS, FULLBOTTOMAXISBAR, FULLVIEW, BLANKVIEW
 from ccpn.ui.gui.popups.ExportStripToFile import EXPORTPDF, EXPORTSVG, EXPORTTYPES, \
     PAGEPORTRAIT, PAGELANDSCAPE, PAGETYPES
+from ccpn.ui.gui.popups.ExportStripToFile import EXPORTPNG
 
 
 PLOTLEFT = 'plotLeft'
@@ -103,6 +106,11 @@ class GLExporter():
         Initialise the exporter
         :param fileName - not required:
         :param params - parameter dict from the exporter dialog:
+
+        Need to have different settingsif the output is to a .png file
+        This needs a multiplier based on (output dpi / 72) and scale = (output dpi / 72)
+         - a thickness modifier on all drawing output
+        Fonts need a 0.5 scaling for .png
         """
         self._parent = parent
         self.strip = strip
@@ -119,6 +127,25 @@ class GLExporter():
 
         self._ordering = []
         self._importFonts()
+
+        self._printType = self.params[GLPRINTTYPE]
+
+        if self._printType == EXPORTPNG:
+            # need to set the scaling for a PNG file and alter baseThickness/font size
+            self._dpiScale = self.params[GLEXPORTDPI] / 72
+
+            self.baseThickness = self.params[GLBASETHICKNESS] * self._dpiScale
+            self.symbolThickness = self.params[GLSYMBOLTHICKNESS]
+            self.contourThickness = self.params[GLCONTOURTHICKNESS]
+
+            self._pngScale = 0.5
+        else:
+            self.baseThickness = self.params[GLBASETHICKNESS]
+            self.symbolThickness = self.params[GLSYMBOLTHICKNESS]
+            self.contourThickness = self.params[GLCONTOURTHICKNESS]
+
+            self._pngScale = 1.0
+            self._dpiScale = 1.0
 
         # set default colours
         # self.backgroundColour = colors.Color(*self._parent.background[0:3],
@@ -182,10 +209,10 @@ class GLExporter():
         self.fontName = self._parent.getSmallFont().fontName
 
         # load a .pfb/.afm font for the png exporter
-        afmdir = fontsPath+'/open-sans/'
-        pfbdir = fontsPath+'/open-sans/'
-        afmFile = os.path.join(afmdir, 'OpenSans.afm')
-        pfbFile = os.path.join(pfbdir, 'OpenSans.pfb')
+        afmdir = fontsPath + '/open-sans/'
+        pfbdir = fontsPath + '/open-sans/'
+        afmFile = os.path.join(afmdir, 'OpenSans-Regular.afm')
+        pfbFile = os.path.join(pfbdir, 'OpenSans-Regular.pfb')
 
         justFace = pdfmetrics.EmbeddedType1Face(afmFile, pfbFile)
         faceName = 'OpenSans'  # pulled from AFM file
@@ -285,7 +312,7 @@ class GLExporter():
             self.pixHeight = self.pixWidth * ratio
 
             # scale fonts to appear the correct size
-            self.fontScale = 1.0 * self.pixWidth / _parentW  #   1.1
+            self.fontScale = self._pngScale * self.pixWidth / _parentW
 
             # if too tall then reduce scaling
             if self.pixHeight > docHeight:
@@ -303,7 +330,7 @@ class GLExporter():
             self.pixWidth = self.pixHeight / ratio
 
             # scale fonts to appear the correct size
-            self.fontScale = 1.0 * self.pixWidth / _parentW  #   1.1
+            self.fontScale = self._pngScale * self.pixWidth / _parentW
 
             # if too wide then reduce scaling
             if self.pixWidth > docWidth:
@@ -384,12 +411,14 @@ class GLExporter():
         gr = Group()
         ll = [self.displayScale * self.mainView.left, self.displayScale * self.mainView.bottom,
               self.displayScale * self.mainView.left, self.pixHeight,
-              self.displayScale * self.mainView.width, self.pixHeight,]
-              # self.displayScale * self.mainView.width, self.displayScale * self.mainView.bottom,
-              # self.displayScale * self.mainView.left, self.displayScale * self.mainView.bottom]
+              self.displayScale * self.mainView.width, self.pixHeight, ]
+        # self.displayScale * self.mainView.width, self.displayScale * self.mainView.bottom,
+        # self.displayScale * self.mainView.left, self.displayScale * self.mainView.bottom]
 
         if ll and self.params[GLPLOTBORDER]:
-            pl = Path(fillColor=None, strokeColor=self.foregroundColour if self.params[GLPLOTBORDER] else self.backgroundColour, strokeWidth=0.5)
+            pl = Path(fillColor=None,
+                      strokeColor=self.foregroundColour if self.params[GLPLOTBORDER] else self.backgroundColour,
+                      strokeWidth=0.5 * self.baseThickness)
             pl.moveTo(ll[0], ll[1])
             for vv in range(2, len(ll), 2):
                 pl.lineTo(ll[vv], ll[vv + 1])
@@ -463,7 +492,8 @@ class GLExporter():
                                                 PLOTWIDTH : self.displayScale * self.mainView.width,
                                                 PLOTHEIGHT: self.displayScale * self.mainView.height},
                                        name='grid',
-                                       ratioLine=True)
+                                       ratioLine=True,
+                                       lineWidth=0.5 * self.baseThickness)
             self._appendGroup(drawing=self._mainPlot, colourGroups=colourGroups, name='grid')
 
     def _addDiagonalSideBands(self):
@@ -479,7 +509,8 @@ class GLExporter():
                                                 PLOTWIDTH : self.displayScale * self.mainView.width,
                                                 PLOTHEIGHT: self.displayScale * self.mainView.height},
                                        name='diagonal',
-                                       ratioLine=True)
+                                       ratioLine=True,
+                                       lineWidth=0.5 * self.baseThickness)
             self._appendGroup(drawing=self._mainPlot, colourGroups=colourGroups, name='diagonal')
 
     def _addDiagonalLine(self):
@@ -495,7 +526,8 @@ class GLExporter():
                                                 PLOTWIDTH : self.displayScale * self.mainView.width,
                                                 PLOTHEIGHT: self.displayScale * self.mainView.height},
                                        name='diagonal',
-                                       ratioLine=True)
+                                       ratioLine=True,
+                                       lineWidth=0.5 * self.baseThickness)
             self._appendGroup(drawing=self._mainPlot, colourGroups=colourGroups, name='diagonal')
 
     def _addCursors(self):
@@ -511,7 +543,8 @@ class GLExporter():
                                                 PLOTWIDTH : self.displayScale * self.mainView.width,
                                                 PLOTHEIGHT: self.displayScale * self.mainView.height},
                                        name='cursors',
-                                       ratioLine=True)
+                                       ratioLine=True,
+                                       lineWidth=0.5 * self.baseThickness)
             self._appendGroup(drawing=self._mainPlot, colourGroups=colourGroups, name='cursors')
 
     def _addSpectrumContours(self):
@@ -625,14 +658,14 @@ class GLExporter():
 
                 # generate the bounding box
                 newLine = [fx0, fy0, fx0, fy1, fx1, fy1, fx1, fy0, fx0, fy0]
-                for ii in range(0, len(newLine)-2, 2):
-                    thisLine = newLine[ii:ii+4]
+                for ii in range(0, len(newLine) - 2, 2):
+                    thisLine = newLine[ii:ii + 4]
 
                     thisLine = self._parent.lineVisible(thisLine,
-                                                       x=self.displayScale * self.mainView.left,
-                                                       y=self.displayScale * self.mainView.bottom,
-                                                       width=self.displayScale * self.mainView.width,
-                                                       height=self.displayScale * self.mainView.height)
+                                                        x=self.displayScale * self.mainView.left,
+                                                        y=self.displayScale * self.mainView.bottom,
+                                                        width=self.displayScale * self.mainView.width,
+                                                        height=self.displayScale * self.mainView.height)
                     if thisLine:
                         if colourPath not in colourGroups:
                             colourGroups[colourPath] = {PDFLINES        : [],
@@ -688,7 +721,8 @@ class GLExporter():
                                             PLOTBOTTOM: self.displayScale * self.mainView.bottom,
                                             PLOTWIDTH : self.displayScale * self.mainView.width,
                                             PLOTHEIGHT: self.displayScale * self.mainView.height},
-                                   name='marks')
+                                   name='marks',
+                                   lineWidth=0.5 * self.baseThickness)
         self._appendGroup(drawing=self._mainPlot, colourGroups=colourGroups, name='marks')
 
     def _addIntegralLines(self):
@@ -705,7 +739,8 @@ class GLExporter():
                                                 PLOTHEIGHT: self.displayScale * self.mainView.height},
                                        name='IntegralListsFill',
                                        fillMode=GL.GL_FILL,
-                                       splitGroups=True)
+                                       splitGroups=True,
+                                       lineWidth=0.5 * self.baseThickness)
         self._appendGroup(drawing=self._mainPlot, colourGroups=colourGroups, name='integralLists')
 
     def _addIntegralAreas(self):
@@ -787,7 +822,8 @@ class GLExporter():
                                             PLOTBOTTOM: self.displayScale * self.mainView.bottom,
                                             PLOTWIDTH : self.displayScale * self.mainView.width,
                                             PLOTHEIGHT: self.displayScale * self.mainView.height},
-                                   name='regions')
+                                   name='regions',
+                                   lineWidth=0.5 * self.baseThickness)
         self._appendGroup(drawing=self._mainPlot, colourGroups=colourGroups, name='regions')
 
     def _addPeakLabels(self):
@@ -1016,7 +1052,8 @@ class GLExporter():
                                                  PLOTHEIGHT: self.displayScale * self.mainView.height},
                                         name='%s%s' % (traceName, spectrumView.pid),
                                         includeLastVertex=not self._parent.is1D,
-                                        mat=mat)
+                                        mat=mat,
+                                        lineWidth=0.5 * self.baseThickness * self.contourThickness)
 
     def _addTraces(self):
         """
@@ -1068,7 +1105,9 @@ class GLExporter():
                                                    height=self.displayScale * self.mainView.height)
                 if newLine:
                     if colourPath not in colourGroups:
-                        colourGroups[colourPath] = {PDFLINES          : [], PDFSTROKEWIDTH: 0.5 * infLine.lineWidth, PDFSTROKECOLOR: colour,
+                        colourGroups[colourPath] = {PDFLINES          : [],
+                                                    PDFSTROKEWIDTH    : 0.5 * infLine.lineWidth * self.baseThickness,
+                                                    PDFSTROKECOLOR    : colour,
                                                     PDFSTROKELINECAP  : 1, PDFCLOSEPATH: False,
                                                     PDFSTROKEDASHARRAY: GLLINE_STYLES_ARRAY[infLine.lineStyle]}
                     colourGroups[colourPath][PDFLINES].append(newLine)
@@ -1173,7 +1212,8 @@ class GLExporter():
                                                         PLOTHEIGHT: self.displayScale * self.rAxisMarkView.height},
                                                name='gridAxes',
                                                setColour=self.foregroundColour,
-                                               ratioLine=True)
+                                               ratioLine=True,
+                                               lineWidth=0.5 * self.baseThickness)
 
             # add the right axis border line if needed
             if self.params[GLPLOTBORDER] or (self.rAxis and self.params[GLAXISLINES]):
@@ -1193,7 +1233,8 @@ class GLExporter():
                                                                PLOTHEIGHT: self.displayScale * self.rAxisMarkView.height},
                                                       name='gridAxes',
                                                       setColour=self.foregroundColour,
-                                                      ratioLine=True)
+                                                      ratioLine=True,
+                                                      lineWidth=0.5 * self.baseThickness)
                 if setGroup in colourGroups:
                     colourGroups[setGroup][PDFLINES].append([self.displayScale * self.mainView.width, self.displayScale * self.mainView.bottom,
                                                              self.displayScale * self.mainView.width, self.pixHeight])
@@ -1212,7 +1253,8 @@ class GLExporter():
                                                         PLOTHEIGHT: self.displayScale * self.bAxisMarkView.height},
                                                name='gridAxes',
                                                setColour=self.foregroundColour,
-                                               ratioLine=True)
+                                               ratioLine=True,
+                                               lineWidth=0.5 * self.baseThickness)
 
             # add the bottom axis border line if needed
             if self.params[GLPLOTBORDER] or (self.bAxis and self.params[GLAXISLINES]):
@@ -1231,7 +1273,8 @@ class GLExporter():
                                                                PLOTHEIGHT: self.displayScale * self.bAxisMarkView.height},
                                                       name='gridAxes',
                                                       setColour=self.foregroundColour,
-                                                      ratioLine=True)
+                                                      ratioLine=True,
+                                                      lineWidth=0.5 * self.baseThickness)
 
                 if setGroup in colourGroups:
                     colourGroups[setGroup][PDFLINES].append([self.displayScale * self.mainView.left, self.displayScale * self.mainView.bottom,
@@ -1424,8 +1467,10 @@ class GLExporter():
         """
         Output a PNG file for the GL widget.
         """
-        self._mainPlot.scale(0.95, 0.95)
-        renderPM.drawToFile(self._mainPlot, self.filename, fmt='PNG', dpi=300, showBoundary=False)
+        dpi = self.params[GLEXPORTDPI]
+
+        self._mainPlot.scale(dpi / 72, dpi / 72)
+        renderPM.drawToFile(self._mainPlot, self.filename, fmt='PNG', dpi=dpi, showBoundary=False)
 
     def writeSVGFile(self):
         """
@@ -1443,10 +1488,10 @@ class GLExporter():
         """
         Output a PS file for the GL widget.
         """
-        renderPS.drawToFile(self._mainPlot, self.filename, showBoundary = False)
+        renderPS.drawToFile(self._mainPlot, self.filename, showBoundary=False)
 
     def _appendVertexLineGroup(self, indArray, colourGroups, plotDim, name, mat=None,
-                           includeLastVertex=False, lineWidth=0.5):
+                               includeLastVertex=False, lineWidth=0.5):
         for vv in range(0, len(indArray.vertices) - 2, 2):
 
             if mat is not None:

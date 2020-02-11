@@ -1,32 +1,22 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
+<!DOCTYPE html>
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    
-    <title>ccpn.ui.gui.guiSettings &mdash; Python  documentation</title>
-    
+    <meta charset="utf-8" />
+    <title>ccpn.ui.gui.guiSettings &#8212; Python  documentation</title>
     <link rel="stylesheet" href="../../../../_static/classic.css" type="text/css" />
     <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
     
-    <script type="text/javascript">
-      var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    '../../../../',
-        VERSION:     '',
-        COLLAPSE_INDEX: false,
-        FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true
-      };
-    </script>
-    <script type="text/javascript" src="../../../../_static/jquery.js"></script>
-    <script type="text/javascript" src="../../../../_static/underscore.js"></script>
-    <script type="text/javascript" src="../../../../_static/doctools.js"></script>
-    <link rel="top" title="Python  documentation" href="../../../../index.html" />
-    <link rel="up" title="Module code" href="../../../index.html" /> 
-  </head>
-  <body role="document">
+    <script id="documentation_options" data-url_root="../../../../" src="../../../../_static/documentation_options.js"></script>
+    <script src="../../../../_static/jquery.js"></script>
+    <script src="../../../../_static/underscore.js"></script>
+    <script src="../../../../_static/doctools.js"></script>
+    <script src="../../../../_static/language_data.js"></script>
+    
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+  </head><body>
     <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
@@ -36,8 +26,8 @@
         <li class="right" >
           <a href="../../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../../index.html">Python  documentation</a> &raquo;</li>
-          <li class="nav-item nav-item-1"><a href="../../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="../../../../index.html">Python  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../../index.html" accesskey="U">Module code</a> &#187;</li> 
       </ul>
     </div>  
 
@@ -54,7 +44,7 @@
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Licence, Reference and Credits</span>
 <span class="c1">#=========================================================================================</span>
-<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019&quot;</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020&quot;</span>
 <span class="n">__credits__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Ed Brooksbank, Luca Mureddu, Timothy J Ragan &amp; Geerten W Vuister&quot;</span><span class="p">)</span>
 <span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">)</span>
 <span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., &amp; Vuister, G.W.&quot;</span><span class="p">,</span>
@@ -63,8 +53,8 @@
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Last code modification</span>
 <span class="c1">#=========================================================================================</span>
-<span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: CCPN $&quot;</span>
-<span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2017-07-07 16:32:41 +0100 (Fri, July 07, 2017) $&quot;</span>
+<span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: Ed Brooksbank $&quot;</span>
+<span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2020-01-28 03:15:19 +0000 (Tue, January 28, 2020) $&quot;</span>
 <span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.0 $&quot;</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Created</span>
@@ -81,7 +71,7 @@
 <span class="kn">from</span> <span class="nn">ccpn.util.Logging</span> <span class="kn">import</span> <span class="n">getLogger</span>
 <span class="kn">from</span> <span class="nn">ccpn.util.Colour</span> <span class="kn">import</span> <span class="n">allColours</span><span class="p">,</span> <span class="n">hexToRgbRatio</span><span class="p">,</span> <span class="n">autoCorrectHexColour</span><span class="p">,</span> \
     <span class="n">spectrumHexDarkColours</span><span class="p">,</span> <span class="n">spectrumHexLightColours</span><span class="p">,</span> <span class="n">spectrumHexMediumColours</span><span class="p">,</span> \
-    <span class="n">spectrumHexDefaultLightColours</span><span class="p">,</span> <span class="n">spectrumHexDefaultDarkColours</span>
+    <span class="n">spectrumHexDefaultLightColours</span><span class="p">,</span> <span class="n">spectrumHexDefaultDarkColours</span><span class="p">,</span> <span class="n">rgbRatioToHex</span>
 
 
 <span class="c1"># fonts</span>
@@ -90,24 +80,24 @@
 <span class="n">monaco20</span> <span class="o">=</span> <span class="n">Font</span><span class="p">(</span><span class="s1">&#39;Monaco&#39;</span><span class="p">,</span> <span class="mi">20</span><span class="p">)</span>
 
 <span class="n">helvetica8</span> <span class="o">=</span> <span class="n">Font</span><span class="p">(</span><span class="s1">&#39;Helvetica&#39;</span><span class="p">,</span> <span class="mi">8</span><span class="p">)</span>
-<span class="n">helveticaItalic8</span> <span class="o">=</span> <span class="n">Font</span><span class="p">(</span><span class="s1">&#39;Helvetica&#39;</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="n">italic</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
-<span class="n">helveticaBold8</span> <span class="o">=</span> <span class="n">Font</span><span class="p">(</span><span class="s1">&#39;Helvetica&#39;</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="n">bold</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<span class="n">helveticaItalic8</span> <span class="o">=</span> <span class="n">Font</span><span class="p">(</span><span class="s1">&#39;Helvetica&#39;</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="n">italic</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">helveticaBold8</span> <span class="o">=</span> <span class="n">Font</span><span class="p">(</span><span class="s1">&#39;Helvetica&#39;</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="n">bold</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
 <span class="n">helvetica10</span> <span class="o">=</span> <span class="n">Font</span><span class="p">(</span><span class="s1">&#39;Helvetica&#39;</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>
-<span class="n">helveticaItalic10</span> <span class="o">=</span> <span class="n">Font</span><span class="p">(</span><span class="s1">&#39;Helvetica&#39;</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="n">italic</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
-<span class="n">helveticaBold10</span> <span class="o">=</span> <span class="n">Font</span><span class="p">(</span><span class="s1">&#39;Helvetica&#39;</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="n">bold</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<span class="n">helveticaItalic10</span> <span class="o">=</span> <span class="n">Font</span><span class="p">(</span><span class="s1">&#39;Helvetica&#39;</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="n">italic</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">helveticaBold10</span> <span class="o">=</span> <span class="n">Font</span><span class="p">(</span><span class="s1">&#39;Helvetica&#39;</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="n">bold</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
 <span class="n">helvetica12</span> <span class="o">=</span> <span class="n">Font</span><span class="p">(</span><span class="s1">&#39;Helvetica&#39;</span><span class="p">,</span> <span class="mi">12</span><span class="p">)</span>
-<span class="n">helveticaItalic12</span> <span class="o">=</span> <span class="n">Font</span><span class="p">(</span><span class="s1">&#39;Helvetica&#39;</span><span class="p">,</span> <span class="mi">12</span><span class="p">,</span> <span class="n">italic</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
-<span class="n">helveticaBold12</span> <span class="o">=</span> <span class="n">Font</span><span class="p">(</span><span class="s1">&#39;Helvetica&#39;</span><span class="p">,</span> <span class="mi">12</span><span class="p">,</span> <span class="n">bold</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
-<span class="n">helveticaUnderline12</span> <span class="o">=</span> <span class="n">Font</span><span class="p">(</span><span class="s1">&#39;Helvetica&#39;</span><span class="p">,</span> <span class="mi">12</span><span class="p">,</span> <span class="n">underline</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
-<span class="n">helveticaStrikeout12</span> <span class="o">=</span> <span class="n">Font</span><span class="p">(</span><span class="s1">&#39;Helvetica&#39;</span><span class="p">,</span> <span class="mi">12</span><span class="p">,</span> <span class="n">strikeout</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<span class="n">helveticaItalic12</span> <span class="o">=</span> <span class="n">Font</span><span class="p">(</span><span class="s1">&#39;Helvetica&#39;</span><span class="p">,</span> <span class="mi">12</span><span class="p">,</span> <span class="n">italic</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">helveticaBold12</span> <span class="o">=</span> <span class="n">Font</span><span class="p">(</span><span class="s1">&#39;Helvetica&#39;</span><span class="p">,</span> <span class="mi">12</span><span class="p">,</span> <span class="n">bold</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">helveticaUnderline12</span> <span class="o">=</span> <span class="n">Font</span><span class="p">(</span><span class="s1">&#39;Helvetica&#39;</span><span class="p">,</span> <span class="mi">12</span><span class="p">,</span> <span class="n">underline</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">helveticaStrikeout12</span> <span class="o">=</span> <span class="n">Font</span><span class="p">(</span><span class="s1">&#39;Helvetica&#39;</span><span class="p">,</span> <span class="mi">12</span><span class="p">,</span> <span class="n">strikeout</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
 <span class="n">helvetica14</span> <span class="o">=</span> <span class="n">Font</span><span class="p">(</span><span class="s1">&#39;Helvetica&#39;</span><span class="p">,</span> <span class="mi">14</span><span class="p">)</span>
-<span class="n">helveticaBold14</span> <span class="o">=</span> <span class="n">Font</span><span class="p">(</span><span class="s1">&#39;Helvetica&#39;</span><span class="p">,</span> <span class="mi">14</span><span class="p">,</span> <span class="n">bold</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<span class="n">helveticaBold14</span> <span class="o">=</span> <span class="n">Font</span><span class="p">(</span><span class="s1">&#39;Helvetica&#39;</span><span class="p">,</span> <span class="mi">14</span><span class="p">,</span> <span class="n">bold</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
 <span class="n">helvetica20</span> <span class="o">=</span> <span class="n">Font</span><span class="p">(</span><span class="s1">&#39;Helvetica&#39;</span><span class="p">,</span> <span class="mi">20</span><span class="p">)</span>
-<span class="n">helveticaBold20</span> <span class="o">=</span> <span class="n">Font</span><span class="p">(</span><span class="s1">&#39;Helvetica&#39;</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="n">bold</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<span class="n">helveticaBold20</span> <span class="o">=</span> <span class="n">Font</span><span class="p">(</span><span class="s1">&#39;Helvetica&#39;</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="n">bold</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
 <span class="n">lucidaGrande12</span> <span class="o">=</span> <span class="n">Font</span><span class="p">(</span><span class="s1">&#39;Lucida Grande&#39;</span><span class="p">,</span> <span class="mi">12</span><span class="p">)</span>
 <span class="n">lucidaGrande14</span> <span class="o">=</span> <span class="n">Font</span><span class="p">(</span><span class="s1">&#39;Lucida Grande&#39;</span><span class="p">,</span> <span class="mi">14</span><span class="p">)</span>
@@ -188,9 +178,12 @@
 <span class="n">CCPNMODULELABEL_BORDER_ACTIVE</span> <span class="o">=</span> <span class="s1">&#39;CCPNMODULELABEL_BORDER_ACTIVE&#39;</span>
 
 <span class="c1"># Spectrum GL base class</span>
+<span class="n">CCPNGLWIDGET_HEXFOREGROUND</span> <span class="o">=</span> <span class="s1">&#39;CCPNGLWIDGET_HEXFOREGROUND&#39;</span>
 <span class="n">CCPNGLWIDGET_HEXBACKGROUND</span> <span class="o">=</span> <span class="s1">&#39;CCPNGLWIDGET_HEXBACKGROUND&#39;</span>
-<span class="n">CCPNGLWIDGET_BACKGROUND</span> <span class="o">=</span> <span class="s1">&#39;CCPNGLWIDGET_BACKGROUND&#39;</span>
+<span class="n">CCPNGLWIDGET_HEXHIGHLIGHT</span> <span class="o">=</span> <span class="s1">&#39;CCPNGLWIDGET_HEXHIGHLIGHT&#39;</span>
 <span class="n">CCPNGLWIDGET_FOREGROUND</span> <span class="o">=</span> <span class="s1">&#39;CCPNGLWIDGET_FOREGROUND&#39;</span>
+<span class="n">CCPNGLWIDGET_BACKGROUND</span> <span class="o">=</span> <span class="s1">&#39;CCPNGLWIDGET_BACKGROUND&#39;</span>
+
 <span class="n">CCPNGLWIDGET_PICKCOLOUR</span> <span class="o">=</span> <span class="s1">&#39;CCPNGLWIDGET_PICKCOLOUR&#39;</span>
 <span class="n">CCPNGLWIDGET_GRID</span> <span class="o">=</span> <span class="s1">&#39;CCPNGLWIDGET_GRID&#39;</span>
 <span class="n">CCPNGLWIDGET_HIGHLIGHT</span> <span class="o">=</span> <span class="s1">&#39;CCPNGLWIDGET_HIGHLIGHT&#39;</span>
@@ -246,6 +239,10 @@
 <span class="n">STRIPHEADER_FOREGROUND</span> <span class="o">=</span> <span class="s1">&#39;STRIPHEADER_FOREGROUND&#39;</span>
 <span class="n">STRIPHEADER_BACKGROUND</span> <span class="o">=</span> <span class="s1">&#39;STRIPHEADER_BACKGROUND&#39;</span>
 
+<span class="c1"># border for focus/noFocus - QPlainTextEdit</span>
+<span class="n">BORDERNOFOCUS</span> <span class="o">=</span> <span class="s1">&#39;BORDER_NOFOCUS&#39;</span>
+<span class="n">BORDERFOCUS</span> <span class="o">=</span> <span class="s1">&#39;BORDER_FOCUS&#39;</span>
+
 <span class="c1"># Colours</span>
 <span class="n">TEXT_COLOUR</span> <span class="o">=</span> <span class="s1">&#39;#555D85&#39;</span>
 <span class="n">SOFT_DIVIDER_COLOUR</span> <span class="o">=</span> <span class="s1">&#39;#888DA5&#39;</span>
@@ -258,6 +255,9 @@
 <span class="n">FIREBRICK</span> <span class="o">=</span> <span class="n">hexToRgbRatio</span><span class="p">([</span><span class="n">k</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">allColours</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">v</span> <span class="o">==</span> <span class="s1">&#39;firebrick&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
 <span class="n">LIGHTCORAL</span> <span class="o">=</span> <span class="n">hexToRgbRatio</span><span class="p">([</span><span class="n">k</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">allColours</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">v</span> <span class="o">==</span> <span class="s1">&#39;lightcoral&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
 
+<span class="n">BORDERNOFOCUS_COLOUR</span> <span class="o">=</span> <span class="s1">&#39;#A9A9A9&#39;</span>
+<span class="n">BORDERFOCUS_COLOUR</span> <span class="o">=</span> <span class="s1">&#39;#4E86F6&#39;</span>
+
 <span class="c1"># Shades</span>
 <span class="n">CCPNGLWIDGET_REGIONSHADE</span> <span class="o">=</span> <span class="mf">0.30</span>
 <span class="n">CCPNGLWIDGET_INTEGRALSHADE</span> <span class="o">=</span> <span class="mf">0.1</span>
@@ -267,9 +267,13 @@
     <span class="c1"># all colours defined here</span>
     <span class="n">DEFAULT</span><span class="p">:</span> <span class="p">{</span>
 
+        <span class="n">CCPNGLWIDGET_HEXFOREGROUND</span>       <span class="p">:</span> <span class="s1">&#39;#070707&#39;</span><span class="p">,</span>
         <span class="n">CCPNGLWIDGET_HEXBACKGROUND</span>       <span class="p">:</span> <span class="s1">&#39;#FFFFFF&#39;</span><span class="p">,</span>
-        <span class="n">CCPNGLWIDGET_BACKGROUND</span>          <span class="p">:</span> <span class="p">(</span><span class="mf">0.99</span><span class="p">,</span> <span class="mf">0.99</span><span class="p">,</span> <span class="mf">0.99</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">),</span>
+        <span class="n">CCPNGLWIDGET_HEXHIGHLIGHT</span>        <span class="p">:</span> <span class="n">rgbRatioToHex</span><span class="p">(</span><span class="mf">0.23</span><span class="p">,</span> <span class="mf">0.23</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">),</span>
+
         <span class="n">CCPNGLWIDGET_FOREGROUND</span>          <span class="p">:</span> <span class="p">(</span><span class="mf">0.05</span><span class="p">,</span> <span class="mf">0.05</span><span class="p">,</span> <span class="mf">0.05</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">),</span>  <span class="c1">#&#39;#080000&#39;</span>
+        <span class="n">CCPNGLWIDGET_BACKGROUND</span>          <span class="p">:</span> <span class="p">(</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">),</span>
+
         <span class="n">CCPNGLWIDGET_PICKCOLOUR</span>          <span class="p">:</span> <span class="p">(</span><span class="mf">0.2</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.9</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">),</span>
         <span class="n">CCPNGLWIDGET_GRID</span>                <span class="p">:</span> <span class="p">(</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">),</span>  <span class="c1">#&#39;#080000&#39;</span>
         <span class="n">CCPNGLWIDGET_HIGHLIGHT</span>           <span class="p">:</span> <span class="p">(</span><span class="mf">0.23</span><span class="p">,</span> <span class="mf">0.23</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">),</span>  <span class="c1">#&#39;#3333ff&#39;</span>
@@ -307,7 +311,7 @@
         <span class="n">GUISTRIP_PIVOT</span>                   <span class="p">:</span> <span class="n">MARISHINO</span><span class="p">,</span>
 
         <span class="n">LABEL_FOREGROUND</span>                 <span class="p">:</span> <span class="n">TEXT_COLOUR</span><span class="p">,</span>
-        <span class="n">DIVIDER</span>                          <span class="p">:</span> <span class="n">TEXT_COLOUR</span><span class="p">,</span>
+        <span class="n">DIVIDER</span>                          <span class="p">:</span> <span class="s1">&#39;#a9a9a9&#39;</span><span class="p">,</span>  <span class="c1"># could be could CCPN_WIDGET_BORDER_COLOUR, was TEXT_COLOUR</span>
         <span class="n">SOFTDIVIDER</span>                      <span class="p">:</span> <span class="n">SOFT_DIVIDER_COLOUR</span><span class="p">,</span>
         <span class="n">LABEL_SELECTEDBACKGROUND</span>         <span class="p">:</span> <span class="s1">&#39;mediumseagreen&#39;</span><span class="p">,</span>
         <span class="n">LABEL_SELECTEDFOREGROUND</span>         <span class="p">:</span> <span class="s1">&#39;black&#39;</span><span class="p">,</span>
@@ -328,6 +332,9 @@
         <span class="n">STRIPHEADER_FOREGROUND</span>           <span class="p">:</span> <span class="n">TEXT_COLOUR</span><span class="p">,</span>
         <span class="n">STRIPHEADER_BACKGROUND</span>           <span class="p">:</span> <span class="s1">&#39;#ebebeb&#39;</span><span class="p">,</span>
 
+        <span class="n">BORDERFOCUS</span>                      <span class="p">:</span> <span class="n">BORDERFOCUS_COLOUR</span><span class="p">,</span>
+        <span class="n">BORDERNOFOCUS</span>                    <span class="p">:</span> <span class="n">BORDERNOFOCUS_COLOUR</span><span class="p">,</span>
+
         <span class="n">MARKS_COLOURS</span>                    <span class="p">:</span> <span class="n">MARK_LINE_COLOUR_DICT</span><span class="p">,</span>
         <span class="n">SPECTRUM_HEXCOLOURS</span>              <span class="p">:</span> <span class="n">spectrumHexDarkColours</span><span class="p">,</span>
         <span class="n">SPECTRUM_HEXMEDIUMCOLOURS</span>        <span class="p">:</span> <span class="n">spectrumHexMediumColours</span><span class="p">,</span>
@@ -337,9 +344,13 @@
     <span class="c1"># Overridden for dark colour scheme</span>
     <span class="n">DARK</span>   <span class="p">:</span> <span class="p">{</span>
 
+        <span class="n">CCPNGLWIDGET_HEXFOREGROUND</span><span class="p">:</span> <span class="s1">&#39;#F0FFFF&#39;</span><span class="p">,</span>
         <span class="n">CCPNGLWIDGET_HEXBACKGROUND</span><span class="p">:</span> <span class="s1">&#39;#0F0F0F&#39;</span><span class="p">,</span>
+        <span class="n">CCPNGLWIDGET_HEXHIGHLIGHT</span> <span class="p">:</span> <span class="n">rgbRatioToHex</span><span class="p">(</span><span class="mf">0.2</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">),</span>
+
+        <span class="n">CCPNGLWIDGET_FOREGROUND</span>   <span class="p">:</span> <span class="p">(</span><span class="mf">0.9</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">),</span>  <span class="c1">#&#39;#f0ffff&#39;</span>
         <span class="n">CCPNGLWIDGET_BACKGROUND</span>   <span class="p">:</span> <span class="p">(</span><span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">),</span>
-        <span class="n">CCPNGLWIDGET_FOREGROUND</span>   <span class="p">:</span> <span class="p">(</span><span class="mf">0.9</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">),</span>  <span class="c1">#&#39;#f7ffff&#39;</span>
+
         <span class="n">CCPNGLWIDGET_PICKCOLOUR</span>   <span class="p">:</span> <span class="p">(</span><span class="mf">0.2</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.9</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">),</span>
         <span class="n">CCPNGLWIDGET_GRID</span>         <span class="p">:</span> <span class="p">(</span><span class="mf">0.9</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">),</span>  <span class="c1">#&#39;#f7ffff&#39;</span>
         <span class="n">CCPNGLWIDGET_HIGHLIGHT</span>    <span class="p">:</span> <span class="p">(</span><span class="mf">0.2</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">),</span>  <span class="c1">#&#39;#00ff00&#39;</span>
@@ -352,9 +363,9 @@
         <span class="n">SPECTRUM_HEXMEDIUMCOLOURS</span> <span class="p">:</span> <span class="n">spectrumHexMediumColours</span><span class="p">,</span>
         <span class="n">SPECTRUM_HEXDEFAULTCOLOURS</span><span class="p">:</span> <span class="n">spectrumHexDefaultLightColours</span><span class="p">,</span>
 
-        <span class="n">LABEL_SELECTEDBACKGROUND</span>         <span class="p">:</span> <span class="s1">&#39;mediumseagreen&#39;</span><span class="p">,</span>
-        <span class="n">LABEL_SELECTEDFOREGROUND</span>         <span class="p">:</span> <span class="s1">&#39;black&#39;</span><span class="p">,</span>
-        <span class="n">LABEL_HIGHLIGHT</span>                  <span class="p">:</span> <span class="s1">&#39;palegreen&#39;</span><span class="p">,</span>
+        <span class="n">LABEL_SELECTEDBACKGROUND</span>  <span class="p">:</span> <span class="s1">&#39;mediumseagreen&#39;</span><span class="p">,</span>
+        <span class="n">LABEL_SELECTEDFOREGROUND</span>  <span class="p">:</span> <span class="s1">&#39;black&#39;</span><span class="p">,</span>
+        <span class="n">LABEL_HIGHLIGHT</span>           <span class="p">:</span> <span class="s1">&#39;palegreen&#39;</span><span class="p">,</span>
         <span class="p">},</span>
 
     <span class="c1"># Overridden for light colour scheme</span>
@@ -365,9 +376,9 @@
 
 <span class="c1"># adjust the default marks for the light/dark colour schemes</span>
 <span class="n">MARK_LINE_COLOUR_DICT_LIGHT</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">([(</span><span class="n">k</span><span class="p">,</span> <span class="n">autoCorrectHexColour</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">colourSchemes</span><span class="p">[</span><span class="n">DEFAULT</span><span class="p">][</span><span class="n">CCPNGLWIDGET_HEXBACKGROUND</span><span class="p">],</span>
-                                                             <span class="n">addNewColour</span><span class="o">=</span><span class="bp">False</span><span class="p">))</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">MARK_LINE_COLOUR_DICT</span><span class="o">.</span><span class="n">items</span><span class="p">()])</span>
+                                                             <span class="n">addNewColour</span><span class="o">=</span><span class="kc">False</span><span class="p">))</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">MARK_LINE_COLOUR_DICT</span><span class="o">.</span><span class="n">items</span><span class="p">()])</span>
 <span class="n">MARK_LINE_COLOUR_DICT_DARK</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">([(</span><span class="n">k</span><span class="p">,</span> <span class="n">autoCorrectHexColour</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">colourSchemes</span><span class="p">[</span><span class="n">DARK</span><span class="p">][</span><span class="n">CCPNGLWIDGET_HEXBACKGROUND</span><span class="p">],</span>
-                                                            <span class="n">addNewColour</span><span class="o">=</span><span class="bp">False</span><span class="p">))</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">MARK_LINE_COLOUR_DICT</span><span class="o">.</span><span class="n">items</span><span class="p">()])</span>
+                                                            <span class="n">addNewColour</span><span class="o">=</span><span class="kc">False</span><span class="p">))</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">MARK_LINE_COLOUR_DICT</span><span class="o">.</span><span class="n">items</span><span class="p">()])</span>
 
 <span class="c1"># insert the marks colours into colourScheme</span>
 <span class="n">colourSchemes</span><span class="p">[</span><span class="n">LIGHT</span><span class="p">][</span><span class="n">MARKS_COLOURS</span><span class="p">]</span> <span class="o">=</span> <span class="n">MARK_LINE_COLOUR_DICT_LIGHT</span>
@@ -405,17 +416,17 @@
         <span class="n">ColourDict</span><span class="p">(</span><span class="n">colourScheme</span><span class="p">)</span><span class="o">.</span><span class="n">setColourScheme</span><span class="p">(</span><span class="n">colourScheme</span><span class="p">)</span></div>
 
 
-<span class="nd">@singleton</span>
-<div class="viewcode-block" id="ColourDict"><a class="viewcode-back" href="../../../../ccpn/ccpn.ui.gui.html#ccpn.ui.gui.guiSettings.ColourDict">[docs]</a><span class="k">class</span> <span class="nc">ColourDict</span><span class="p">(</span><span class="nb">dict</span><span class="p">):</span>
+<div class="viewcode-block" id="ColourDict"><a class="viewcode-back" href="../../../../ccpn/ccpn.ui.gui.html#ccpn.ui.gui.guiSettings.ColourDict">[docs]</a><span class="nd">@singleton</span>
+<span class="k">class</span> <span class="nc">ColourDict</span><span class="p">(</span><span class="nb">dict</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Singleton Class to store colours;</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">colourScheme</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
-        <span class="nb">super</span><span class="p">(</span><span class="nb">dict</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">()</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">colourScheme</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="nb">dict</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
         <span class="c1"># assure always default values</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">setColourScheme</span><span class="p">(</span><span class="n">DEFAULT</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">colourScheme</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">colourScheme</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">setColourScheme</span><span class="p">(</span><span class="n">colourScheme</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">setColourScheme</span><span class="p">(</span><span class="n">getColourScheme</span><span class="p">())</span>
@@ -448,15 +459,15 @@
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
 <div id="searchbox" style="display: none" role="search">
-  <h3>Quick search</h3>
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
     <form class="search" action="../../../../search.html" method="get">
-      <input type="text" name="q" />
+      <input type="text" name="q" aria-labelledby="searchlabel" />
       <input type="submit" value="Go" />
-      <input type="hidden" name="check_keywords" value="yes" />
-      <input type="hidden" name="area" value="default" />
     </form>
+    </div>
 </div>
-<script type="text/javascript">$('#searchbox').show(0);</script>
+<script>$('#searchbox').show(0);</script>
         </div>
       </div>
       <div class="clearer"></div>
@@ -470,13 +481,13 @@
         <li class="right" >
           <a href="../../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../../index.html">Python  documentation</a> &raquo;</li>
-          <li class="nav-item nav-item-1"><a href="../../../index.html" >Module code</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="../../../../index.html">Python  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../../index.html" >Module code</a> &#187;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
-        &copy; Copyright .
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.1.
+        &#169; Copyright .
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.4.0.
     </div>
   </body>
 </html>

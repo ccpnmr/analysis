@@ -1,32 +1,22 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
+<!DOCTYPE html>
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    
-    <title>ccpn.core.lib.Util &mdash; Python  documentation</title>
-    
+    <meta charset="utf-8" />
+    <title>ccpn.core.lib.Util &#8212; Python  documentation</title>
     <link rel="stylesheet" href="../../../../_static/classic.css" type="text/css" />
     <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
     
-    <script type="text/javascript">
-      var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    '../../../../',
-        VERSION:     '',
-        COLLAPSE_INDEX: false,
-        FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true
-      };
-    </script>
-    <script type="text/javascript" src="../../../../_static/jquery.js"></script>
-    <script type="text/javascript" src="../../../../_static/underscore.js"></script>
-    <script type="text/javascript" src="../../../../_static/doctools.js"></script>
-    <link rel="top" title="Python  documentation" href="../../../../index.html" />
-    <link rel="up" title="Module code" href="../../../index.html" /> 
-  </head>
-  <body role="document">
+    <script id="documentation_options" data-url_root="../../../../" src="../../../../_static/documentation_options.js"></script>
+    <script src="../../../../_static/jquery.js"></script>
+    <script src="../../../../_static/underscore.js"></script>
+    <script src="../../../../_static/doctools.js"></script>
+    <script src="../../../../_static/language_data.js"></script>
+    
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+  </head><body>
     <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
@@ -36,8 +26,8 @@
         <li class="right" >
           <a href="../../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../../index.html">Python  documentation</a> &raquo;</li>
-          <li class="nav-item nav-item-1"><a href="../../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="../../../../index.html">Python  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../../index.html" accesskey="U">Module code</a> &#187;</li> 
       </ul>
     </div>  
 
@@ -90,11 +80,11 @@
     <span class="kn">from</span> <span class="nn">ccpn.core.Project</span> <span class="kn">import</span> <span class="n">Project</span>
 
     <span class="n">tag</span> <span class="o">=</span> <span class="n">pid</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">Pid</span><span class="o">.</span><span class="n">PREFIXSEP</span><span class="p">,</span> <span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
-    <span class="n">cls</span> <span class="o">=</span> <span class="n">Project</span><span class="o">.</span><span class="n">_className2Class</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">tag</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">cls</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+    <span class="bp">cls</span> <span class="o">=</span> <span class="n">Project</span><span class="o">.</span><span class="n">_className2Class</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">tag</span><span class="p">)</span>
+    <span class="k">if</span> <span class="bp">cls</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">tag</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">cls</span><span class="o">.</span><span class="n">_pluralLinkName</span></div>
+        <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_pluralLinkName</span></div>
 
 
 <div class="viewcode-block" id="getParentPid"><a class="viewcode-back" href="../../../../ccpn/ccpn.core.lib.html#ccpn.core.lib.Util.getParentPid">[docs]</a><span class="k">def</span> <span class="nf">getParentPid</span><span class="p">(</span><span class="n">childPid</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Pid</span><span class="o">.</span><span class="n">Pid</span><span class="p">:</span>
@@ -127,16 +117,16 @@
     <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">pid</span><span class="p">,</span> <span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">Pid</span><span class="o">.</span><span class="n">Pid</span><span class="p">)):</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Invalid pid &quot;</span><span class="si">%s</span><span class="s1">&quot;&#39;</span> <span class="o">%</span> <span class="n">pid</span><span class="p">)</span>
 
-    <span class="n">obj</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="n">obj</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="c1"># First try if the object defined by pid still exists</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="n">obj</span> <span class="o">=</span> <span class="n">project</span><span class="o">.</span><span class="n">getByPid</span><span class="p">(</span><span class="n">pid</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">obj</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">obj</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">obj</span><span class="o">.</span><span class="n">_parent</span>
     <span class="k">except</span><span class="p">:</span>
         <span class="k">pass</span>
 
-    <span class="k">if</span> <span class="n">obj</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">obj</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">parentPid</span> <span class="o">=</span> <span class="n">getParentPid</span><span class="p">(</span><span class="n">pid</span><span class="p">)</span>
         <span class="n">obj</span> <span class="o">=</span> <span class="n">project</span><span class="o">.</span><span class="n">getByPid</span><span class="p">(</span><span class="n">parentPid</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">obj</span></div>
@@ -162,7 +152,7 @@
     <span class="c1"># [(store.name, store.url.dataLocation, url.path,) for store in standardStore.sortedDataUrls() for url in store.sortedDataStores()]</span>
     <span class="c1"># [(store.dataUrl.name, store.dataUrl.url.dataLocation, store.path,) for store in standardStore.sortedDataStores()]</span>
 
-    <span class="k">if</span> <span class="n">standardStore</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">standardStore</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Coding error - standard DataLocationStore has not been set&quot;</span><span class="p">)</span>
 
     <span class="n">stores</span> <span class="o">=</span> <span class="nb">set</span><span class="p">([(</span><span class="n">store</span><span class="p">,</span> <span class="n">store</span><span class="o">.</span><span class="n">dataUrl</span><span class="p">)</span> <span class="k">for</span> <span class="n">store</span> <span class="ow">in</span> <span class="n">standardStore</span><span class="o">.</span><span class="n">sortedDataStores</span><span class="p">()</span> <span class="k">if</span> <span class="n">store</span><span class="o">.</span><span class="n">path</span> <span class="o">==</span> <span class="n">filePath</span><span class="p">])</span>
@@ -173,7 +163,7 @@
     <span class="k">for</span> <span class="n">store</span><span class="p">,</span> <span class="n">dataUrl</span> <span class="ow">in</span> <span class="n">stores</span><span class="p">:</span>
         <span class="n">directoryPath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dataUrl</span><span class="o">.</span><span class="n">url</span><span class="o">.</span><span class="n">path</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
 
-        <span class="k">print</span><span class="p">(</span><span class="s1">&#39;&gt;&gt;&gt;_fetchDataUrl&#39;</span><span class="p">,</span> <span class="n">filePath</span><span class="p">,</span> <span class="n">directoryPath</span><span class="p">)</span>
+        <span class="c1"># print(&#39;&gt;&gt;&gt;_fetchDataUrl&#39;, filePath, directoryPath)</span>
 
         <span class="k">if</span> <span class="n">filePath</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">directoryPath</span><span class="p">):</span>
             <span class="k">return</span> <span class="n">store</span><span class="o">.</span><span class="n">fullPath</span>
@@ -222,19 +212,42 @@
 
     <span class="n">dataLocationStore</span> <span class="o">=</span> <span class="n">project</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">findFirstDataLocationStore</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;standard&#39;</span><span class="p">)</span>
 
-    <span class="k">if</span> <span class="n">dataLocationStore</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">dataLocationStore</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Coding error - standard DataLocationStore has not been set&quot;</span><span class="p">)</span>
 
     <span class="k">for</span> <span class="n">prefix</span><span class="p">,</span> <span class="n">dataUrlName</span> <span class="ow">in</span> <span class="n">stdRepositoryNames</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
         <span class="k">if</span> <span class="n">filePath</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">prefix</span><span class="p">):</span>
-            <span class="n">dataUrl</span> <span class="o">=</span> <span class="n">dataLocationStore</span><span class="o">.</span><span class="n">findFirstDataUrl</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">dataUrlName</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">dataUrl</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
-                <span class="k">return</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dataUrl</span><span class="o">.</span><span class="n">url</span><span class="o">.</span><span class="n">dataLocation</span><span class="p">,</span> <span class="n">filePath</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">prefix</span><span class="p">):])</span>
+
+            <span class="n">apiDataStore</span> <span class="o">=</span> <span class="n">spectrum</span><span class="o">.</span><span class="n">_apiDataSource</span><span class="o">.</span><span class="n">dataStore</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">apiDataStore</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">filePath</span>
+
+            <span class="k">elif</span> <span class="n">apiDataStore</span><span class="o">.</span><span class="n">dataLocationStore</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s1">&#39;standard&#39;</span><span class="p">:</span>
+
+                <span class="c1"># this fails on the first loading of V2 projects - ordering issue?</span>
+                <span class="n">spectrumDataUrlName</span> <span class="o">=</span> <span class="n">apiDataStore</span><span class="o">.</span><span class="n">dataUrl</span><span class="o">.</span><span class="n">name</span>
+
+                <span class="k">if</span> <span class="n">spectrumDataUrlName</span> <span class="o">==</span> <span class="n">dataUrlName</span><span class="p">:</span>
+                    <span class="k">return</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">apiDataStore</span><span class="o">.</span><span class="n">dataUrl</span><span class="o">.</span><span class="n">url</span><span class="o">.</span><span class="n">dataLocation</span><span class="p">,</span> <span class="n">filePath</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">prefix</span><span class="p">):])</span>
+
+                <span class="c1"># if dataUrlName == &#39;insideData&#39;:</span>
+                <span class="c1">#     pathData.setText(&#39;$INSIDE/%s&#39; % apiDataStore.path)</span>
+                <span class="c1"># elif dataUrlName == &#39;alongsideData&#39;:</span>
+                <span class="c1">#     pathData.setText(&#39;$ALONGSIDE/%s&#39; % apiDataStore.path)</span>
+                <span class="c1"># elif dataUrlName == &#39;remoteData&#39;:</span>
+                <span class="c1">#     pathData.setText(&#39;$DATA/%s&#39; % apiDataStore.path)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># pathData.setText(apiDataStore.fullPath)</span>
+                <span class="k">return</span> <span class="n">filePath</span>
+
+            <span class="c1"># dataUrl = dataLocationStore.findFirstDataUrl(name=dataUrlName)</span>
+            <span class="c1"># if dataUrl is not None:</span>
+            <span class="c1">#     return os.path.join(dataUrl.url.dataLocation, filePath[len(prefix):])</span>
 
     <span class="k">return</span> <span class="n">filePath</span></div>
 
 
-<div class="viewcode-block" id="commandParameterString"><a class="viewcode-back" href="../../../../ccpn/ccpn.core.lib.html#ccpn.core.lib.Util.commandParameterString">[docs]</a><span class="k">def</span> <span class="nf">commandParameterString</span><span class="p">(</span><span class="o">*</span><span class="n">params</span><span class="p">,</span> <span class="n">values</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="n">defaults</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="bp">None</span><span class="p">):</span>
+<div class="viewcode-block" id="commandParameterString"><a class="viewcode-back" href="../../../../ccpn/ccpn.core.lib.html#ccpn.core.lib.Util.commandParameterString">[docs]</a><span class="k">def</span> <span class="nf">commandParameterString</span><span class="p">(</span><span class="o">*</span><span class="n">params</span><span class="p">,</span> <span class="n">values</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">defaults</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Make  parameter string to insert into function call string.</span>
 
 <span class="sd">    params are positional parameters in order, values are keyword parameters.</span>
@@ -282,7 +295,7 @@
     <span class="k">return</span> <span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">ll</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="commandParameterStringValues"><a class="viewcode-back" href="../../../../ccpn/ccpn.core.lib.html#ccpn.core.lib.Util.commandParameterStringValues">[docs]</a><span class="k">def</span> <span class="nf">commandParameterStringValues</span><span class="p">(</span><span class="o">*</span><span class="n">params</span><span class="p">,</span> <span class="n">values</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="n">defaults</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="bp">None</span><span class="p">):</span>
+<div class="viewcode-block" id="commandParameterStringValues"><a class="viewcode-back" href="../../../../ccpn/ccpn.core.lib.html#ccpn.core.lib.Util.commandParameterStringValues">[docs]</a><span class="k">def</span> <span class="nf">commandParameterStringValues</span><span class="p">(</span><span class="o">*</span><span class="n">params</span><span class="p">,</span> <span class="n">values</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">defaults</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Make  parameter string to insert into function call string.</span>
 
 <span class="sd">    params are positional parameters in order, values are keyword parameters.</span>
@@ -339,7 +352,7 @@
     <span class="k">try</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">inspect</span><span class="o">.</span><span class="n">stack</span><span class="p">()[</span><span class="mi">1</span><span class="p">][</span><span class="mi">3</span><span class="p">]</span>
     <span class="k">except</span><span class="p">:</span>
-        <span class="k">return</span> <span class="bp">None</span></div>
+        <span class="k">return</span> <span class="kc">None</span></div>
 
 
 <div class="viewcode-block" id="callList"><a class="viewcode-back" href="../../../../ccpn/ccpn.core.lib.html#ccpn.core.lib.Util.callList">[docs]</a><span class="k">def</span> <span class="nf">callList</span><span class="p">(</span><span class="n">fn</span><span class="p">):</span>
@@ -353,15 +366,15 @@
         <span class="n">minStack</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">stack</span><span class="p">)</span>  <span class="c1"># min(stack_size, len(stack))</span>
         <span class="n">modules</span> <span class="o">=</span> <span class="p">[(</span><span class="n">index</span><span class="p">,</span> <span class="n">inspect</span><span class="o">.</span><span class="n">getmodule</span><span class="p">(</span><span class="n">stack</span><span class="p">[</span><span class="n">index</span><span class="p">][</span><span class="mi">0</span><span class="p">]))</span>
                    <span class="k">for</span> <span class="n">index</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">minStack</span><span class="p">)]</span>
-        <span class="n">callers</span> <span class="o">=</span> <span class="p">[(</span><span class="mi">0</span><span class="p">,</span> <span class="n">fn</span><span class="o">.</span><span class="n">__module__</span><span class="p">,</span> <span class="n">fn</span><span class="o">.</span><span class="n">__name__</span><span class="p">)]</span>
+        <span class="n">callers</span> <span class="o">=</span> <span class="p">[(</span><span class="mi">0</span><span class="p">,</span> <span class="n">fn</span><span class="o">.</span><span class="vm">__module__</span><span class="p">,</span> <span class="n">fn</span><span class="o">.</span><span class="vm">__name__</span><span class="p">)]</span>
         <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">module</span> <span class="ow">in</span> <span class="n">modules</span><span class="p">:</span>
             <span class="k">try</span><span class="p">:</span>
-                <span class="n">name</span> <span class="o">=</span> <span class="n">module</span><span class="o">.</span><span class="n">__name__</span>
+                <span class="n">name</span> <span class="o">=</span> <span class="n">module</span><span class="o">.</span><span class="vm">__name__</span>
             <span class="k">except</span><span class="p">:</span>
                 <span class="n">name</span> <span class="o">=</span> <span class="s1">&#39;&lt;NOT_FOUND&gt;&#39;</span>
             <span class="n">callers</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">index</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">stack</span><span class="p">[</span><span class="n">index</span><span class="p">][</span><span class="mi">3</span><span class="p">]))</span>
 
-        <span class="n">s</span> <span class="o">=</span> <span class="s1">&#39;{index:&gt;5} : {module:^</span><span class="si">%i</span><span class="s1">} : {name}&#39;</span> <span class="o">%</span> <span class="mi">20</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">{index:&gt;5}</span><span class="s1"> : {module:^</span><span class="si">%i</span><span class="s1">} : </span><span class="si">{name}</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="mi">20</span>
         <span class="n">printStr</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">callers</span><span class="p">)):</span>
             <span class="n">printStr</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">s</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="n">callers</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="n">module</span><span class="o">=</span><span class="n">callers</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">1</span><span class="p">],</span> <span class="n">name</span><span class="o">=</span><span class="n">callers</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">2</span><span class="p">]))</span>
@@ -380,15 +393,15 @@
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
 <div id="searchbox" style="display: none" role="search">
-  <h3>Quick search</h3>
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
     <form class="search" action="../../../../search.html" method="get">
-      <input type="text" name="q" />
+      <input type="text" name="q" aria-labelledby="searchlabel" />
       <input type="submit" value="Go" />
-      <input type="hidden" name="check_keywords" value="yes" />
-      <input type="hidden" name="area" value="default" />
     </form>
+    </div>
 </div>
-<script type="text/javascript">$('#searchbox').show(0);</script>
+<script>$('#searchbox').show(0);</script>
         </div>
       </div>
       <div class="clearer"></div>
@@ -402,13 +415,13 @@
         <li class="right" >
           <a href="../../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../../index.html">Python  documentation</a> &raquo;</li>
-          <li class="nav-item nav-item-1"><a href="../../../index.html" >Module code</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="../../../../index.html">Python  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../../index.html" >Module code</a> &#187;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
-        &copy; Copyright .
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.1.
+        &#169; Copyright .
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.4.0.
     </div>
   </body>
 </html>

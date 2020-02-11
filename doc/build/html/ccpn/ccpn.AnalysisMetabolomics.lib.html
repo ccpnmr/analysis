@@ -1,34 +1,24 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
+<!DOCTYPE html>
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    
-    <title>ccpn.AnalysisMetabolomics.lib package &mdash; Python  documentation</title>
-    
+    <meta charset="utf-8" />
+    <title>ccpn.AnalysisMetabolomics.lib package &#8212; Python  documentation</title>
     <link rel="stylesheet" href="../_static/classic.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
     
-    <script type="text/javascript">
-      var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    '../',
-        VERSION:     '',
-        COLLAPSE_INDEX: false,
-        FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true
-      };
-    </script>
-    <script type="text/javascript" src="../_static/jquery.js"></script>
-    <script type="text/javascript" src="../_static/underscore.js"></script>
-    <script type="text/javascript" src="../_static/doctools.js"></script>
-    <link rel="top" title="Python  documentation" href="../index.html" />
-    <link rel="up" title="ccpn.AnalysisMetabolomics package" href="ccpn.AnalysisMetabolomics.html" />
+    <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/language_data.js"></script>
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="ccpn.AnalysisMetabolomics.ui package" href="ccpn.AnalysisMetabolomics.ui.html" />
     <link rel="prev" title="ccpn.AnalysisMetabolomics package" href="ccpn.AnalysisMetabolomics.html" /> 
-  </head>
-  <body role="document">
+  </head><body>
     <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
@@ -44,10 +34,10 @@
         <li class="right" >
           <a href="ccpn.AnalysisMetabolomics.html" title="ccpn.AnalysisMetabolomics package"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../index.html">Python  documentation</a> &raquo;</li>
-          <li class="nav-item nav-item-1"><a href="modules.html" >CCPN</a> &raquo;</li>
-          <li class="nav-item nav-item-2"><a href="ccpn.html" >ccpn package</a> &raquo;</li>
-          <li class="nav-item nav-item-3"><a href="ccpn.AnalysisMetabolomics.html" accesskey="U">ccpn.AnalysisMetabolomics package</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="../index.html">Python  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="modules.html" >CCPN</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="ccpn.html" >ccpn package</a> &#187;</li>
+          <li class="nav-item nav-item-3"><a href="ccpn.AnalysisMetabolomics.html" accesskey="U">ccpn.AnalysisMetabolomics package</a> &#187;</li> 
       </ul>
     </div>  
 
@@ -66,41 +56,39 @@
 <p>Module Documentation here</p>
 <dl class="data">
 <dt id="ccpn.AnalysisMetabolomics.lib.BMRBquery.ShiftColumns">
-<code class="descclassname">ccpn.AnalysisMetabolomics.lib.BMRBquery.</code><code class="descname">ShiftColumns</code><em class="property"> = ['Assigned_chem_shift_list_ID', 'Combined_offset', 'Entry_ID', 'Link', 'Peaks_matched', 'Title']</em><a class="headerlink" href="#ccpn.AnalysisMetabolomics.lib.BMRBquery.ShiftColumns" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">ccpn.AnalysisMetabolomics.lib.BMRBquery.</code><code class="sig-name descname">ShiftColumns</code><em class="property"> = ['Assigned_chem_shift_list_ID', 'Combined_offset', 'Entry_ID', 'Link', 'Peaks_matched', 'Title']</em><a class="headerlink" href="#ccpn.AnalysisMetabolomics.lib.BMRBquery.ShiftColumns" title="Permalink to this definition">¶</a></dt>
 <dd><p>Full address to be:</p>
 <blockquote>
 <div><ul class="simple">
-<li>for a single chemical shift query (e.g. 3.136), database=metabolomics
-&gt;&gt; &#8220;<a class="reference external" href="http://webapi.bmrb.wisc.edu/v2/search/multiple_shift_search?s=3.136&amp;database=metabolomics">http://webapi.bmrb.wisc.edu/v2/search/multiple_shift_search?s=3.136&amp;database=metabolomics</a>&#8220;</li>
-<li>for multiple  chemical shift searches (e.g. 3.136,7):
-&gt;&gt; &#8220;<a class="reference external" href="http://webapi.bmrb.wisc.edu/v2/search/multiple_shift_search?s=3.136&amp;s=7.0&amp;database=metabolomics">http://webapi.bmrb.wisc.edu/v2/search/multiple_shift_search?s=3.136&amp;s=7.0&amp;database=metabolomics</a>&#8220;</li>
+<li><p>for a single chemical shift query (e.g. 3.136), database=metabolomics
+&gt;&gt; “<a class="reference external" href="http://webapi.bmrb.wisc.edu/v2/search/multiple_shift_search?s=3.136&amp;database=metabolomics">http://webapi.bmrb.wisc.edu/v2/search/multiple_shift_search?s=3.136&amp;database=metabolomics</a>”</p></li>
+<li><p>for multiple  chemical shift searches (e.g. 3.136,7):
+&gt;&gt; “<a class="reference external" href="http://webapi.bmrb.wisc.edu/v2/search/multiple_shift_search?s=3.136&amp;s=7.0&amp;database=metabolomics">http://webapi.bmrb.wisc.edu/v2/search/multiple_shift_search?s=3.136&amp;s=7.0&amp;database=metabolomics</a>”</p></li>
 </ul>
 </div></blockquote>
 </dd></dl>
 
 <dl class="function">
 <dt id="ccpn.AnalysisMetabolomics.lib.BMRBquery.bmrbMultiShiftSearch">
-<code class="descclassname">ccpn.AnalysisMetabolomics.lib.BMRBquery.</code><code class="descname">bmrbMultiShiftSearch</code><span class="sig-paren">(</span><em>shifts: list</em>, <em>databaseType='metabolomics'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisMetabolomics/lib/BMRBquery.html#bmrbMultiShiftSearch"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.AnalysisMetabolomics.lib.BMRBquery.bmrbMultiShiftSearch" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">ccpn.AnalysisMetabolomics.lib.BMRBquery.</code><code class="sig-name descname">bmrbMultiShiftSearch</code><span class="sig-paren">(</span><em class="sig-param">shifts: list</em>, <em class="sig-param">databaseType='metabolomics'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisMetabolomics/lib/BMRBquery.html#bmrbMultiShiftSearch"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.AnalysisMetabolomics.lib.BMRBquery.bmrbMultiShiftSearch" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="function">
 <dt id="ccpn.AnalysisMetabolomics.lib.BMRBquery.peaksToShifts1D">
-<code class="descclassname">ccpn.AnalysisMetabolomics.lib.BMRBquery.</code><code class="descname">peaksToShifts1D</code><span class="sig-paren">(</span><em>objs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisMetabolomics/lib/BMRBquery.html#peaksToShifts1D"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.AnalysisMetabolomics.lib.BMRBquery.peaksToShifts1D" title="Permalink to this definition">¶</a></dt>
-<dd><table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>objs</strong> &#8211; peaks or multiplets</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">a list of peak positions</td>
-</tr>
-</tbody>
-</table>
+<code class="sig-prename descclassname">ccpn.AnalysisMetabolomics.lib.BMRBquery.</code><code class="sig-name descname">peaksToShifts1D</code><span class="sig-paren">(</span><em class="sig-param">objs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisMetabolomics/lib/BMRBquery.html#peaksToShifts1D"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.AnalysisMetabolomics.lib.BMRBquery.peaksToShifts1D" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>objs</strong> – peaks or multiplets</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>a list of peak positions</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="function">
 <dt id="ccpn.AnalysisMetabolomics.lib.BMRBquery.testAla">
-<code class="descclassname">ccpn.AnalysisMetabolomics.lib.BMRBquery.</code><code class="descname">testAla</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisMetabolomics/lib/BMRBquery.html#testAla"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.AnalysisMetabolomics.lib.BMRBquery.testAla" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">ccpn.AnalysisMetabolomics.lib.BMRBquery.</code><code class="sig-name descname">testAla</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisMetabolomics/lib/BMRBquery.html#testAla"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.AnalysisMetabolomics.lib.BMRBquery.testAla" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </div>
@@ -108,12 +96,12 @@
 <span id="ccpn-analysismetabolomics-lib-centering-module"></span><h2>ccpn.AnalysisMetabolomics.lib.centering module<a class="headerlink" href="#module-ccpn.AnalysisMetabolomics.lib.centering" title="Permalink to this headline">¶</a></h2>
 <dl class="function">
 <dt id="ccpn.AnalysisMetabolomics.lib.centering.meanCenter">
-<code class="descclassname">ccpn.AnalysisMetabolomics.lib.centering.</code><code class="descname">meanCenter</code><span class="sig-paren">(</span><em>spectrumCluster</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisMetabolomics/lib/centering.html#meanCenter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.AnalysisMetabolomics.lib.centering.meanCenter" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">ccpn.AnalysisMetabolomics.lib.centering.</code><code class="sig-name descname">meanCenter</code><span class="sig-paren">(</span><em class="sig-param">spectrumCluster</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisMetabolomics/lib/centering.html#meanCenter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.AnalysisMetabolomics.lib.centering.meanCenter" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="function">
 <dt id="ccpn.AnalysisMetabolomics.lib.centering.medianCenter">
-<code class="descclassname">ccpn.AnalysisMetabolomics.lib.centering.</code><code class="descname">medianCenter</code><span class="sig-paren">(</span><em>spectrumCluster</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisMetabolomics/lib/centering.html#medianCenter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.AnalysisMetabolomics.lib.centering.medianCenter" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">ccpn.AnalysisMetabolomics.lib.centering.</code><code class="sig-name descname">medianCenter</code><span class="sig-paren">(</span><em class="sig-param">spectrumCluster</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisMetabolomics/lib/centering.html#medianCenter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.AnalysisMetabolomics.lib.centering.medianCenter" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </div>
@@ -121,36 +109,36 @@
 <span id="ccpn-analysismetabolomics-lib-commands-module"></span><h2>ccpn.AnalysisMetabolomics.lib.commands module<a class="headerlink" href="#module-ccpn.AnalysisMetabolomics.lib.commands" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
 <dt id="ccpn.AnalysisMetabolomics.lib.commands.Command">
-<em class="property">class </em><code class="descclassname">ccpn.AnalysisMetabolomics.lib.commands.</code><code class="descname">Command</code><span class="sig-paren">(</span><em>method</em>, <em>methodSpec</em>, <em>how</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisMetabolomics/lib/commands.html#Command"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.AnalysisMetabolomics.lib.commands.Command" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<em class="property">class </em><code class="sig-prename descclassname">ccpn.AnalysisMetabolomics.lib.commands.</code><code class="sig-name descname">Command</code><span class="sig-paren">(</span><em class="sig-param">method</em>, <em class="sig-param">methodSpec</em>, <em class="sig-param">how</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisMetabolomics/lib/commands.html#Command"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.AnalysisMetabolomics.lib.commands.Command" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <dl class="method">
 <dt id="ccpn.AnalysisMetabolomics.lib.commands.Command.add">
-<code class="descname">add</code><span class="sig-paren">(</span><em>targetSpec</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisMetabolomics/lib/commands.html#Command.add"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.AnalysisMetabolomics.lib.commands.Command.add" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">add</code><span class="sig-paren">(</span><em class="sig-param">targetSpec</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisMetabolomics/lib/commands.html#Command.add"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.AnalysisMetabolomics.lib.commands.Command.add" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="ccpn.AnalysisMetabolomics.lib.commands.Command.divide">
-<code class="descname">divide</code><span class="sig-paren">(</span><em>targetSpec</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisMetabolomics/lib/commands.html#Command.divide"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.AnalysisMetabolomics.lib.commands.Command.divide" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">divide</code><span class="sig-paren">(</span><em class="sig-param">targetSpec</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisMetabolomics/lib/commands.html#Command.divide"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.AnalysisMetabolomics.lib.commands.Command.divide" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="ccpn.AnalysisMetabolomics.lib.commands.Command.multiply">
-<code class="descname">multiply</code><span class="sig-paren">(</span><em>targetSpec</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisMetabolomics/lib/commands.html#Command.multiply"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.AnalysisMetabolomics.lib.commands.Command.multiply" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">multiply</code><span class="sig-paren">(</span><em class="sig-param">targetSpec</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisMetabolomics/lib/commands.html#Command.multiply"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.AnalysisMetabolomics.lib.commands.Command.multiply" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="ccpn.AnalysisMetabolomics.lib.commands.Command.process">
-<code class="descname">process</code><span class="sig-paren">(</span><em>targetSpec</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisMetabolomics/lib/commands.html#Command.process"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.AnalysisMetabolomics.lib.commands.Command.process" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">process</code><span class="sig-paren">(</span><em class="sig-param">targetSpec</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisMetabolomics/lib/commands.html#Command.process"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.AnalysisMetabolomics.lib.commands.Command.process" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="ccpn.AnalysisMetabolomics.lib.commands.Command.subtract">
-<code class="descname">subtract</code><span class="sig-paren">(</span><em>targetSpec</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisMetabolomics/lib/commands.html#Command.subtract"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.AnalysisMetabolomics.lib.commands.Command.subtract" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">subtract</code><span class="sig-paren">(</span><em class="sig-param">targetSpec</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisMetabolomics/lib/commands.html#Command.subtract"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.AnalysisMetabolomics.lib.commands.Command.subtract" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="ccpn.AnalysisMetabolomics.lib.commands.Command.unprocess">
-<code class="descname">unprocess</code><span class="sig-paren">(</span><em>targetSpec</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisMetabolomics/lib/commands.html#Command.unprocess"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.AnalysisMetabolomics.lib.commands.Command.unprocess" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">unprocess</code><span class="sig-paren">(</span><em class="sig-param">targetSpec</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisMetabolomics/lib/commands.html#Command.unprocess"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.AnalysisMetabolomics.lib.commands.Command.unprocess" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -160,53 +148,53 @@
 <span id="ccpn-analysismetabolomics-lib-decomposition-module"></span><h2>ccpn.AnalysisMetabolomics.lib.decomposition module<a class="headerlink" href="#module-ccpn.AnalysisMetabolomics.lib.decomposition" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
 <dt id="ccpn.AnalysisMetabolomics.lib.decomposition.PCA">
-<em class="property">class </em><code class="descclassname">ccpn.AnalysisMetabolomics.lib.decomposition.</code><code class="descname">PCA</code><span class="sig-paren">(</span><em>dataFrame</em>, <em>nComponents=None</em>, <em>confidenceLimit=0.95</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisMetabolomics/lib/decomposition.html#PCA"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.AnalysisMetabolomics.lib.decomposition.PCA" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
-<dl class="attribute">
+<em class="property">class </em><code class="sig-prename descclassname">ccpn.AnalysisMetabolomics.lib.decomposition.</code><code class="sig-name descname">PCA</code><span class="sig-paren">(</span><em class="sig-param">dataFrame</em>, <em class="sig-param">nComponents=None</em>, <em class="sig-param">confidenceLimit=0.95</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisMetabolomics/lib/decomposition.html#PCA"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.AnalysisMetabolomics.lib.decomposition.PCA" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="method">
 <dt id="ccpn.AnalysisMetabolomics.lib.decomposition.PCA.confidenceLimit">
-<code class="descname">confidenceLimit</code><a class="headerlink" href="#ccpn.AnalysisMetabolomics.lib.decomposition.PCA.confidenceLimit" title="Permalink to this definition">¶</a></dt>
+<em class="property">property </em><code class="sig-name descname">confidenceLimit</code><a class="headerlink" href="#ccpn.AnalysisMetabolomics.lib.decomposition.PCA.confidenceLimit" title="Permalink to this definition">¶</a></dt>
 <dd><p>- <em>None</em>, <em>mutable</em> -</p>
 </dd></dl>
 
-<dl class="attribute">
+<dl class="method">
 <dt id="ccpn.AnalysisMetabolomics.lib.decomposition.PCA.confidenceLimits_">
-<code class="descname">confidenceLimits_</code><a class="headerlink" href="#ccpn.AnalysisMetabolomics.lib.decomposition.PCA.confidenceLimits_" title="Permalink to this definition">¶</a></dt>
+<em class="property">property </em><code class="sig-name descname">confidenceLimits_</code><a class="headerlink" href="#ccpn.AnalysisMetabolomics.lib.decomposition.PCA.confidenceLimits_" title="Permalink to this definition">¶</a></dt>
 <dd><p>- <em>None</em>, <em>immutable</em> -</p>
 </dd></dl>
 
-<dl class="attribute">
+<dl class="method">
 <dt id="ccpn.AnalysisMetabolomics.lib.decomposition.PCA.eigenvalues_">
-<code class="descname">eigenvalues_</code><a class="headerlink" href="#ccpn.AnalysisMetabolomics.lib.decomposition.PCA.eigenvalues_" title="Permalink to this definition">¶</a></dt>
+<em class="property">property </em><code class="sig-name descname">eigenvalues_</code><a class="headerlink" href="#ccpn.AnalysisMetabolomics.lib.decomposition.PCA.eigenvalues_" title="Permalink to this definition">¶</a></dt>
 <dd><p>- <em>None</em>, <em>immutable</em> -</p>
 </dd></dl>
 
-<dl class="attribute">
+<dl class="method">
 <dt id="ccpn.AnalysisMetabolomics.lib.decomposition.PCA.explainedVariance_">
-<code class="descname">explainedVariance_</code><a class="headerlink" href="#ccpn.AnalysisMetabolomics.lib.decomposition.PCA.explainedVariance_" title="Permalink to this definition">¶</a></dt>
+<em class="property">property </em><code class="sig-name descname">explainedVariance_</code><a class="headerlink" href="#ccpn.AnalysisMetabolomics.lib.decomposition.PCA.explainedVariance_" title="Permalink to this definition">¶</a></dt>
 <dd><p>- <em>None</em>, <em>immutable</em> -</p>
 </dd></dl>
 
-<dl class="attribute">
+<dl class="method">
 <dt id="ccpn.AnalysisMetabolomics.lib.decomposition.PCA.loadings_">
-<code class="descname">loadings_</code><a class="headerlink" href="#ccpn.AnalysisMetabolomics.lib.decomposition.PCA.loadings_" title="Permalink to this definition">¶</a></dt>
+<em class="property">property </em><code class="sig-name descname">loadings_</code><a class="headerlink" href="#ccpn.AnalysisMetabolomics.lib.decomposition.PCA.loadings_" title="Permalink to this definition">¶</a></dt>
 <dd><p>- <em>None</em>, <em>immutable</em> -</p>
 </dd></dl>
 
-<dl class="attribute">
+<dl class="method">
 <dt id="ccpn.AnalysisMetabolomics.lib.decomposition.PCA.nComponents">
-<code class="descname">nComponents</code><a class="headerlink" href="#ccpn.AnalysisMetabolomics.lib.decomposition.PCA.nComponents" title="Permalink to this definition">¶</a></dt>
+<em class="property">property </em><code class="sig-name descname">nComponents</code><a class="headerlink" href="#ccpn.AnalysisMetabolomics.lib.decomposition.PCA.nComponents" title="Permalink to this definition">¶</a></dt>
 <dd><p>- <em>None</em>, <em>mutable</em> -</p>
 </dd></dl>
 
-<dl class="attribute">
+<dl class="method">
 <dt id="ccpn.AnalysisMetabolomics.lib.decomposition.PCA.predictions_">
-<code class="descname">predictions_</code><a class="headerlink" href="#ccpn.AnalysisMetabolomics.lib.decomposition.PCA.predictions_" title="Permalink to this definition">¶</a></dt>
+<em class="property">property </em><code class="sig-name descname">predictions_</code><a class="headerlink" href="#ccpn.AnalysisMetabolomics.lib.decomposition.PCA.predictions_" title="Permalink to this definition">¶</a></dt>
 <dd><p>- <em>None</em>, <em>immutable</em> -</p>
 </dd></dl>
 
-<dl class="attribute">
+<dl class="method">
 <dt id="ccpn.AnalysisMetabolomics.lib.decomposition.PCA.qConfLimit">
-<code class="descname">qConfLimit</code><a class="headerlink" href="#ccpn.AnalysisMetabolomics.lib.decomposition.PCA.qConfLimit" title="Permalink to this definition">¶</a></dt>
+<em class="property">property </em><code class="sig-name descname">qConfLimit</code><a class="headerlink" href="#ccpn.AnalysisMetabolomics.lib.decomposition.PCA.qConfLimit" title="Permalink to this definition">¶</a></dt>
 <dd><p>- <em>None</em>, <em>immutable</em> - 
 From:
 J. Edward Jackson and Govind S. Mudholkar Technometrics
@@ -215,40 +203,40 @@ Vol. 21, No. 3 (Aug., 1979), pp. 341-349
 :return:</p>
 </dd></dl>
 
-<dl class="attribute">
+<dl class="method">
 <dt id="ccpn.AnalysisMetabolomics.lib.decomposition.PCA.qScores_">
-<code class="descname">qScores_</code><a class="headerlink" href="#ccpn.AnalysisMetabolomics.lib.decomposition.PCA.qScores_" title="Permalink to this definition">¶</a></dt>
+<em class="property">property </em><code class="sig-name descname">qScores_</code><a class="headerlink" href="#ccpn.AnalysisMetabolomics.lib.decomposition.PCA.qScores_" title="Permalink to this definition">¶</a></dt>
 <dd><p>- <em>None</em>, <em>immutable</em> -</p>
 </dd></dl>
 
-<dl class="attribute">
+<dl class="method">
 <dt id="ccpn.AnalysisMetabolomics.lib.decomposition.PCA.residualEigenvalues_">
-<code class="descname">residualEigenvalues_</code><a class="headerlink" href="#ccpn.AnalysisMetabolomics.lib.decomposition.PCA.residualEigenvalues_" title="Permalink to this definition">¶</a></dt>
+<em class="property">property </em><code class="sig-name descname">residualEigenvalues_</code><a class="headerlink" href="#ccpn.AnalysisMetabolomics.lib.decomposition.PCA.residualEigenvalues_" title="Permalink to this definition">¶</a></dt>
 <dd><p>- <em>None</em>, <em>immutable</em> -</p>
 </dd></dl>
 
-<dl class="attribute">
+<dl class="method">
 <dt id="ccpn.AnalysisMetabolomics.lib.decomposition.PCA.residuals_">
-<code class="descname">residuals_</code><a class="headerlink" href="#ccpn.AnalysisMetabolomics.lib.decomposition.PCA.residuals_" title="Permalink to this definition">¶</a></dt>
+<em class="property">property </em><code class="sig-name descname">residuals_</code><a class="headerlink" href="#ccpn.AnalysisMetabolomics.lib.decomposition.PCA.residuals_" title="Permalink to this definition">¶</a></dt>
 <dd><p>- <em>None</em>, <em>immutable</em> -</p>
 </dd></dl>
 
-<dl class="attribute">
+<dl class="method">
 <dt id="ccpn.AnalysisMetabolomics.lib.decomposition.PCA.scores_">
-<code class="descname">scores_</code><a class="headerlink" href="#ccpn.AnalysisMetabolomics.lib.decomposition.PCA.scores_" title="Permalink to this definition">¶</a></dt>
+<em class="property">property </em><code class="sig-name descname">scores_</code><a class="headerlink" href="#ccpn.AnalysisMetabolomics.lib.decomposition.PCA.scores_" title="Permalink to this definition">¶</a></dt>
 <dd><p>- <em>None</em>, <em>immutable</em> -</p>
 </dd></dl>
 
-<dl class="attribute">
+<dl class="method">
 <dt id="ccpn.AnalysisMetabolomics.lib.decomposition.PCA.t2ConfLimit">
-<code class="descname">t2ConfLimit</code><a class="headerlink" href="#ccpn.AnalysisMetabolomics.lib.decomposition.PCA.t2ConfLimit" title="Permalink to this definition">¶</a></dt>
+<em class="property">property </em><code class="sig-name descname">t2ConfLimit</code><a class="headerlink" href="#ccpn.AnalysisMetabolomics.lib.decomposition.PCA.t2ConfLimit" title="Permalink to this definition">¶</a></dt>
 <dd><p>- <em>None</em>, <em>immutable</em> - 
 from <a class="reference external" href="http://users.stat.umn.edu/~gary/classes/5401/handouts/11.hotellingt.handout.pdf">http://users.stat.umn.edu/~gary/classes/5401/handouts/11.hotellingt.handout.pdf</a></p>
 </dd></dl>
 
-<dl class="attribute">
+<dl class="method">
 <dt id="ccpn.AnalysisMetabolomics.lib.decomposition.PCA.t2Scores_">
-<code class="descname">t2Scores_</code><a class="headerlink" href="#ccpn.AnalysisMetabolomics.lib.decomposition.PCA.t2Scores_" title="Permalink to this definition">¶</a></dt>
+<em class="property">property </em><code class="sig-name descname">t2Scores_</code><a class="headerlink" href="#ccpn.AnalysisMetabolomics.lib.decomposition.PCA.t2Scores_" title="Permalink to this definition">¶</a></dt>
 <dd><p>- <em>None</em>, <em>immutable</em> -</p>
 </dd></dl>
 
@@ -259,22 +247,22 @@ from <a class="reference external" href="http://users.stat.umn.edu/~gary/classes
 <span id="ccpn-analysismetabolomics-lib-normalisation-module"></span><h2>ccpn.AnalysisMetabolomics.lib.normalisation module<a class="headerlink" href="#module-ccpn.AnalysisMetabolomics.lib.normalisation" title="Permalink to this headline">¶</a></h2>
 <dl class="function">
 <dt id="ccpn.AnalysisMetabolomics.lib.normalisation.getSpectrumCluster">
-<code class="descclassname">ccpn.AnalysisMetabolomics.lib.normalisation.</code><code class="descname">getSpectrumCluster</code><span class="sig-paren">(</span><em>spectra</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisMetabolomics/lib/normalisation.html#getSpectrumCluster"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.AnalysisMetabolomics.lib.normalisation.getSpectrumCluster" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">ccpn.AnalysisMetabolomics.lib.normalisation.</code><code class="sig-name descname">getSpectrumCluster</code><span class="sig-paren">(</span><em class="sig-param">spectra</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisMetabolomics/lib/normalisation.html#getSpectrumCluster"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.AnalysisMetabolomics.lib.normalisation.getSpectrumCluster" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="function">
 <dt id="ccpn.AnalysisMetabolomics.lib.normalisation.pqn">
-<code class="descclassname">ccpn.AnalysisMetabolomics.lib.normalisation.</code><code class="descname">pqn</code><span class="sig-paren">(</span><em>spectrumCluster</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisMetabolomics/lib/normalisation.html#pqn"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.AnalysisMetabolomics.lib.normalisation.pqn" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">ccpn.AnalysisMetabolomics.lib.normalisation.</code><code class="sig-name descname">pqn</code><span class="sig-paren">(</span><em class="sig-param">spectrumCluster</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisMetabolomics/lib/normalisation.html#pqn"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.AnalysisMetabolomics.lib.normalisation.pqn" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="function">
 <dt id="ccpn.AnalysisMetabolomics.lib.normalisation.tsa">
-<code class="descclassname">ccpn.AnalysisMetabolomics.lib.normalisation.</code><code class="descname">tsa</code><span class="sig-paren">(</span><em>spectra</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisMetabolomics/lib/normalisation.html#tsa"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.AnalysisMetabolomics.lib.normalisation.tsa" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">ccpn.AnalysisMetabolomics.lib.normalisation.</code><code class="sig-name descname">tsa</code><span class="sig-paren">(</span><em class="sig-param">spectra</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisMetabolomics/lib/normalisation.html#tsa"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.AnalysisMetabolomics.lib.normalisation.tsa" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="function">
 <dt id="ccpn.AnalysisMetabolomics.lib.normalisation.updateSpectrumCluster">
-<code class="descclassname">ccpn.AnalysisMetabolomics.lib.normalisation.</code><code class="descname">updateSpectrumCluster</code><span class="sig-paren">(</span><em>spectra</em>, <em>spectrumCluster</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisMetabolomics/lib/normalisation.html#updateSpectrumCluster"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.AnalysisMetabolomics.lib.normalisation.updateSpectrumCluster" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">ccpn.AnalysisMetabolomics.lib.normalisation.</code><code class="sig-name descname">updateSpectrumCluster</code><span class="sig-paren">(</span><em class="sig-param">spectra</em>, <em class="sig-param">spectrumCluster</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisMetabolomics/lib/normalisation.html#updateSpectrumCluster"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.AnalysisMetabolomics.lib.normalisation.updateSpectrumCluster" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </div>
@@ -282,34 +270,34 @@ from <a class="reference external" href="http://users.stat.umn.edu/~gary/classes
 <span id="ccpn-analysismetabolomics-lib-persistence-module"></span><h2>ccpn.AnalysisMetabolomics.lib.persistence module<a class="headerlink" href="#module-ccpn.AnalysisMetabolomics.lib.persistence" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
 <dt id="ccpn.AnalysisMetabolomics.lib.persistence.Borg">
-<em class="property">class </em><code class="descclassname">ccpn.AnalysisMetabolomics.lib.persistence.</code><code class="descname">Borg</code><a class="reference internal" href="../_modules/ccpn/AnalysisMetabolomics/lib/persistence.html#Borg"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.AnalysisMetabolomics.lib.persistence.Borg" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<em class="property">class </em><code class="sig-prename descclassname">ccpn.AnalysisMetabolomics.lib.persistence.</code><code class="sig-name descname">Borg</code><a class="reference internal" href="../_modules/ccpn/AnalysisMetabolomics/lib/persistence.html#Borg"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.AnalysisMetabolomics.lib.persistence.Borg" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 </dd></dl>
 
 <dl class="class">
 <dt id="ccpn.AnalysisMetabolomics.lib.persistence.MetabolomicsPersistenceDict">
-<em class="property">class </em><code class="descclassname">ccpn.AnalysisMetabolomics.lib.persistence.</code><code class="descname">MetabolomicsPersistenceDict</code><a class="reference internal" href="../_modules/ccpn/AnalysisMetabolomics/lib/persistence.html#MetabolomicsPersistenceDict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.AnalysisMetabolomics.lib.persistence.MetabolomicsPersistenceDict" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">collections.OrderedDict</span></code></p>
+<em class="property">class </em><code class="sig-prename descclassname">ccpn.AnalysisMetabolomics.lib.persistence.</code><code class="sig-name descname">MetabolomicsPersistenceDict</code><a class="reference internal" href="../_modules/ccpn/AnalysisMetabolomics/lib/persistence.html#MetabolomicsPersistenceDict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.AnalysisMetabolomics.lib.persistence.MetabolomicsPersistenceDict" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">collections.OrderedDict</span></code></p>
 <dl class="attribute">
 <dt id="ccpn.AnalysisMetabolomics.lib.persistence.MetabolomicsPersistenceDict.instance">
-<code class="descname">instance</code><em class="property"> = None</em><a class="headerlink" href="#ccpn.AnalysisMetabolomics.lib.persistence.MetabolomicsPersistenceDict.instance" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">instance</code><em class="property"> = None</em><a class="headerlink" href="#ccpn.AnalysisMetabolomics.lib.persistence.MetabolomicsPersistenceDict.instance" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
 
 <dl class="function">
 <dt id="ccpn.AnalysisMetabolomics.lib.persistence.bruker1dDict">
-<code class="descclassname">ccpn.AnalysisMetabolomics.lib.persistence.</code><code class="descname">bruker1dDict</code><span class="sig-paren">(</span><em>refDF=None</em>, <em>SF=1</em>, <em>FTSIZE=None</em>, <em>SW_p=None</em>, <em>OFFSET=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisMetabolomics/lib/persistence.html#bruker1dDict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.AnalysisMetabolomics.lib.persistence.bruker1dDict" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">ccpn.AnalysisMetabolomics.lib.persistence.</code><code class="sig-name descname">bruker1dDict</code><span class="sig-paren">(</span><em class="sig-param">refDF=None</em>, <em class="sig-param">SF=1</em>, <em class="sig-param">FTSIZE=None</em>, <em class="sig-param">SW_p=None</em>, <em class="sig-param">OFFSET=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisMetabolomics/lib/persistence.html#bruker1dDict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.AnalysisMetabolomics.lib.persistence.bruker1dDict" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="function">
 <dt id="ccpn.AnalysisMetabolomics.lib.persistence.spectraDicToBrukerExperiment">
-<code class="descclassname">ccpn.AnalysisMetabolomics.lib.persistence.</code><code class="descname">spectraDicToBrukerExperiment</code><span class="sig-paren">(</span><em>spectraDF</em>, <em>directoryName</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisMetabolomics/lib/persistence.html#spectraDicToBrukerExperiment"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.AnalysisMetabolomics.lib.persistence.spectraDicToBrukerExperiment" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">ccpn.AnalysisMetabolomics.lib.persistence.</code><code class="sig-name descname">spectraDicToBrukerExperiment</code><span class="sig-paren">(</span><em class="sig-param">spectraDF</em>, <em class="sig-param">directoryName</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisMetabolomics/lib/persistence.html#spectraDicToBrukerExperiment"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.AnalysisMetabolomics.lib.persistence.spectraDicToBrukerExperiment" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="function">
 <dt id="ccpn.AnalysisMetabolomics.lib.persistence.writeBruker">
-<code class="descclassname">ccpn.AnalysisMetabolomics.lib.persistence.</code><code class="descname">writeBruker</code><span class="sig-paren">(</span><em>directory</em>, <em>dic</em>, <em>data</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisMetabolomics/lib/persistence.html#writeBruker"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.AnalysisMetabolomics.lib.persistence.writeBruker" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">ccpn.AnalysisMetabolomics.lib.persistence.</code><code class="sig-name descname">writeBruker</code><span class="sig-paren">(</span><em class="sig-param">directory</em>, <em class="sig-param">dic</em>, <em class="sig-param">data</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisMetabolomics/lib/persistence.html#writeBruker"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.AnalysisMetabolomics.lib.persistence.writeBruker" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </div>
@@ -317,7 +305,7 @@ from <a class="reference external" href="http://users.stat.umn.edu/~gary/classes
 <span id="ccpn-analysismetabolomics-lib-pipeline-module"></span><h2>ccpn.AnalysisMetabolomics.lib.pipeline module<a class="headerlink" href="#module-ccpn.AnalysisMetabolomics.lib.pipeline" title="Permalink to this headline">¶</a></h2>
 <dl class="function">
 <dt id="ccpn.AnalysisMetabolomics.lib.pipeline.pipeline">
-<code class="descclassname">ccpn.AnalysisMetabolomics.lib.pipeline.</code><code class="descname">pipeline</code><span class="sig-paren">(</span><em>spectra</em>, <em>commands</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisMetabolomics/lib/pipeline.html#pipeline"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.AnalysisMetabolomics.lib.pipeline.pipeline" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">ccpn.AnalysisMetabolomics.lib.pipeline.</code><code class="sig-name descname">pipeline</code><span class="sig-paren">(</span><em class="sig-param">spectra</em>, <em class="sig-param">commands</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisMetabolomics/lib/pipeline.html#pipeline"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.AnalysisMetabolomics.lib.pipeline.pipeline" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </div>
@@ -325,37 +313,37 @@ from <a class="reference external" href="http://users.stat.umn.edu/~gary/classes
 <span id="ccpn-analysismetabolomics-lib-scaling-module"></span><h2>ccpn.AnalysisMetabolomics.lib.scaling module<a class="headerlink" href="#module-ccpn.AnalysisMetabolomics.lib.scaling" title="Permalink to this headline">¶</a></h2>
 <dl class="function">
 <dt id="ccpn.AnalysisMetabolomics.lib.scaling.autoScale">
-<code class="descclassname">ccpn.AnalysisMetabolomics.lib.scaling.</code><code class="descname">autoScale</code><span class="sig-paren">(</span><em>spectra</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisMetabolomics/lib/scaling.html#autoScale"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.AnalysisMetabolomics.lib.scaling.autoScale" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">ccpn.AnalysisMetabolomics.lib.scaling.</code><code class="sig-name descname">autoScale</code><span class="sig-paren">(</span><em class="sig-param">spectra</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisMetabolomics/lib/scaling.html#autoScale"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.AnalysisMetabolomics.lib.scaling.autoScale" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="function">
 <dt id="ccpn.AnalysisMetabolomics.lib.scaling.levelScale">
-<code class="descclassname">ccpn.AnalysisMetabolomics.lib.scaling.</code><code class="descname">levelScale</code><span class="sig-paren">(</span><em>spectra</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisMetabolomics/lib/scaling.html#levelScale"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.AnalysisMetabolomics.lib.scaling.levelScale" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">ccpn.AnalysisMetabolomics.lib.scaling.</code><code class="sig-name descname">levelScale</code><span class="sig-paren">(</span><em class="sig-param">spectra</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisMetabolomics/lib/scaling.html#levelScale"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.AnalysisMetabolomics.lib.scaling.levelScale" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="function">
 <dt id="ccpn.AnalysisMetabolomics.lib.scaling.paretoScale">
-<code class="descclassname">ccpn.AnalysisMetabolomics.lib.scaling.</code><code class="descname">paretoScale</code><span class="sig-paren">(</span><em>spectra</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisMetabolomics/lib/scaling.html#paretoScale"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.AnalysisMetabolomics.lib.scaling.paretoScale" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">ccpn.AnalysisMetabolomics.lib.scaling.</code><code class="sig-name descname">paretoScale</code><span class="sig-paren">(</span><em class="sig-param">spectra</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisMetabolomics/lib/scaling.html#paretoScale"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.AnalysisMetabolomics.lib.scaling.paretoScale" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="function">
 <dt id="ccpn.AnalysisMetabolomics.lib.scaling.rangeScale">
-<code class="descclassname">ccpn.AnalysisMetabolomics.lib.scaling.</code><code class="descname">rangeScale</code><span class="sig-paren">(</span><em>spectra</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisMetabolomics/lib/scaling.html#rangeScale"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.AnalysisMetabolomics.lib.scaling.rangeScale" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">ccpn.AnalysisMetabolomics.lib.scaling.</code><code class="sig-name descname">rangeScale</code><span class="sig-paren">(</span><em class="sig-param">spectra</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisMetabolomics/lib/scaling.html#rangeScale"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.AnalysisMetabolomics.lib.scaling.rangeScale" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="function">
 <dt id="ccpn.AnalysisMetabolomics.lib.scaling.unitVarianceScale">
-<code class="descclassname">ccpn.AnalysisMetabolomics.lib.scaling.</code><code class="descname">unitVarianceScale</code><span class="sig-paren">(</span><em>spectra</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisMetabolomics/lib/scaling.html#unitVarianceScale"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.AnalysisMetabolomics.lib.scaling.unitVarianceScale" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">ccpn.AnalysisMetabolomics.lib.scaling.</code><code class="sig-name descname">unitVarianceScale</code><span class="sig-paren">(</span><em class="sig-param">spectra</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisMetabolomics/lib/scaling.html#unitVarianceScale"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.AnalysisMetabolomics.lib.scaling.unitVarianceScale" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="function">
 <dt id="ccpn.AnalysisMetabolomics.lib.scaling.varianceScale">
-<code class="descclassname">ccpn.AnalysisMetabolomics.lib.scaling.</code><code class="descname">varianceScale</code><span class="sig-paren">(</span><em>spectrumCluster</em>, <em>power</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisMetabolomics/lib/scaling.html#varianceScale"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.AnalysisMetabolomics.lib.scaling.varianceScale" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">ccpn.AnalysisMetabolomics.lib.scaling.</code><code class="sig-name descname">varianceScale</code><span class="sig-paren">(</span><em class="sig-param">spectrumCluster</em>, <em class="sig-param">power</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisMetabolomics/lib/scaling.html#varianceScale"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.AnalysisMetabolomics.lib.scaling.varianceScale" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="function">
 <dt id="ccpn.AnalysisMetabolomics.lib.scaling.vastScale">
-<code class="descclassname">ccpn.AnalysisMetabolomics.lib.scaling.</code><code class="descname">vastScale</code><span class="sig-paren">(</span><em>spectra</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisMetabolomics/lib/scaling.html#vastScale"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.AnalysisMetabolomics.lib.scaling.vastScale" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">ccpn.AnalysisMetabolomics.lib.scaling.</code><code class="sig-name descname">vastScale</code><span class="sig-paren">(</span><em class="sig-param">spectra</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisMetabolomics/lib/scaling.html#vastScale"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.AnalysisMetabolomics.lib.scaling.vastScale" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </div>
@@ -364,12 +352,12 @@ from <a class="reference external" href="http://users.stat.umn.edu/~gary/classes
 <p>Module documentation here.</p>
 <dl class="function">
 <dt id="ccpn.AnalysisMetabolomics.lib.transformations.logTransform">
-<code class="descclassname">ccpn.AnalysisMetabolomics.lib.transformations.</code><code class="descname">logTransform</code><span class="sig-paren">(</span><em>spectrumCluster</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisMetabolomics/lib/transformations.html#logTransform"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.AnalysisMetabolomics.lib.transformations.logTransform" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">ccpn.AnalysisMetabolomics.lib.transformations.</code><code class="sig-name descname">logTransform</code><span class="sig-paren">(</span><em class="sig-param">spectrumCluster</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisMetabolomics/lib/transformations.html#logTransform"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.AnalysisMetabolomics.lib.transformations.logTransform" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="function">
 <dt id="ccpn.AnalysisMetabolomics.lib.transformations.powerTransform">
-<code class="descclassname">ccpn.AnalysisMetabolomics.lib.transformations.</code><code class="descname">powerTransform</code><span class="sig-paren">(</span><em>spectrumCluster</em>, <em>power=0.5</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisMetabolomics/lib/transformations.html#powerTransform"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.AnalysisMetabolomics.lib.transformations.powerTransform" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">ccpn.AnalysisMetabolomics.lib.transformations.</code><code class="sig-name descname">powerTransform</code><span class="sig-paren">(</span><em class="sig-param">spectrumCluster</em>, <em class="sig-param">power=0.5</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisMetabolomics/lib/transformations.html#powerTransform"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.AnalysisMetabolomics.lib.transformations.powerTransform" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </div>
@@ -381,7 +369,7 @@ from <a class="reference external" href="http://users.stat.umn.edu/~gary/classes
       </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
-  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <h3><a href="../index.html">Table of Contents</a></h3>
   <ul>
 <li><a class="reference internal" href="#">ccpn.AnalysisMetabolomics.lib package</a><ul>
 <li><a class="reference internal" href="#submodules">Submodules</a></li>
@@ -407,20 +395,20 @@ from <a class="reference external" href="http://users.stat.umn.edu/~gary/classes
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
     <ul class="this-page-menu">
-      <li><a href="../_sources/ccpn/ccpn.AnalysisMetabolomics.lib.txt"
+      <li><a href="../_sources/ccpn/ccpn.AnalysisMetabolomics.lib.rst.txt"
             rel="nofollow">Show Source</a></li>
     </ul>
    </div>
 <div id="searchbox" style="display: none" role="search">
-  <h3>Quick search</h3>
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
     <form class="search" action="../search.html" method="get">
-      <input type="text" name="q" />
+      <input type="text" name="q" aria-labelledby="searchlabel" />
       <input type="submit" value="Go" />
-      <input type="hidden" name="check_keywords" value="yes" />
-      <input type="hidden" name="area" value="default" />
     </form>
+    </div>
 </div>
-<script type="text/javascript">$('#searchbox').show(0);</script>
+<script>$('#searchbox').show(0);</script>
         </div>
       </div>
       <div class="clearer"></div>
@@ -440,15 +428,15 @@ from <a class="reference external" href="http://users.stat.umn.edu/~gary/classes
         <li class="right" >
           <a href="ccpn.AnalysisMetabolomics.html" title="ccpn.AnalysisMetabolomics package"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../index.html">Python  documentation</a> &raquo;</li>
-          <li class="nav-item nav-item-1"><a href="modules.html" >CCPN</a> &raquo;</li>
-          <li class="nav-item nav-item-2"><a href="ccpn.html" >ccpn package</a> &raquo;</li>
-          <li class="nav-item nav-item-3"><a href="ccpn.AnalysisMetabolomics.html" >ccpn.AnalysisMetabolomics package</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="../index.html">Python  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="modules.html" >CCPN</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="ccpn.html" >ccpn package</a> &#187;</li>
+          <li class="nav-item nav-item-3"><a href="ccpn.AnalysisMetabolomics.html" >ccpn.AnalysisMetabolomics package</a> &#187;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
-        &copy; Copyright .
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.1.
+        &#169; Copyright .
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.4.0.
     </div>
   </body>
 </html>

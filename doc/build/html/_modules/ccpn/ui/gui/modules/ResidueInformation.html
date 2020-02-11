@@ -1,32 +1,22 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
+<!DOCTYPE html>
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    
-    <title>ccpn.ui.gui.modules.ResidueInformation &mdash; Python  documentation</title>
-    
+    <meta charset="utf-8" />
+    <title>ccpn.ui.gui.modules.ResidueInformation &#8212; Python  documentation</title>
     <link rel="stylesheet" href="../../../../../_static/classic.css" type="text/css" />
     <link rel="stylesheet" href="../../../../../_static/pygments.css" type="text/css" />
     
-    <script type="text/javascript">
-      var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    '../../../../../',
-        VERSION:     '',
-        COLLAPSE_INDEX: false,
-        FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true
-      };
-    </script>
-    <script type="text/javascript" src="../../../../../_static/jquery.js"></script>
-    <script type="text/javascript" src="../../../../../_static/underscore.js"></script>
-    <script type="text/javascript" src="../../../../../_static/doctools.js"></script>
-    <link rel="top" title="Python  documentation" href="../../../../../index.html" />
-    <link rel="up" title="Module code" href="../../../../index.html" /> 
-  </head>
-  <body role="document">
+    <script id="documentation_options" data-url_root="../../../../../" src="../../../../../_static/documentation_options.js"></script>
+    <script src="../../../../../_static/jquery.js"></script>
+    <script src="../../../../../_static/underscore.js"></script>
+    <script src="../../../../../_static/doctools.js"></script>
+    <script src="../../../../../_static/language_data.js"></script>
+    
+    <link rel="index" title="Index" href="../../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../../search.html" /> 
+  </head><body>
     <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
@@ -36,8 +26,8 @@
         <li class="right" >
           <a href="../../../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../../../index.html">Python  documentation</a> &raquo;</li>
-          <li class="nav-item nav-item-1"><a href="../../../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="../../../../../index.html">Python  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../../../index.html" accesskey="U">Module code</a> &#187;</li> 
       </ul>
     </div>  
 
@@ -72,80 +62,219 @@
 <span class="c1">#=========================================================================================</span>
 
 <span class="kn">from</span> <span class="nn">PyQt5</span> <span class="kn">import</span> <span class="n">QtGui</span><span class="p">,</span> <span class="n">QtWidgets</span>
-
+<span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">partial</span>
 <span class="kn">from</span> <span class="nn">ccpn.core.lib.AssignmentLib</span> <span class="kn">import</span> <span class="n">CCP_CODES</span>
+<span class="kn">from</span> <span class="nn">ccpn.core.lib.Notifiers</span> <span class="kn">import</span> <span class="n">Notifier</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.modules.CcpnModule</span> <span class="kn">import</span> <span class="n">CcpnModule</span>
-<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Label</span> <span class="kn">import</span> <span class="n">Label</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Label</span> <span class="kn">import</span> <span class="n">Label</span><span class="p">,</span> <span class="n">ActiveLabel</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Button</span> <span class="kn">import</span> <span class="n">Button</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Spacer</span> <span class="kn">import</span> <span class="n">Spacer</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Widget</span> <span class="kn">import</span> <span class="n">Widget</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.PulldownList</span> <span class="kn">import</span> <span class="n">PulldownList</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.ScrollArea</span> <span class="kn">import</span> <span class="n">ScrollArea</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Splitter</span> <span class="kn">import</span> <span class="n">Splitter</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Frame</span> <span class="kn">import</span> <span class="n">Frame</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.SettingsWidgets</span> <span class="kn">import</span> <span class="n">StripPlot</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.MessageDialog</span> <span class="kn">import</span> <span class="n">showWarning</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.PulldownListsForObjects</span> <span class="kn">import</span> <span class="n">ChainPulldown</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.VLine</span> <span class="kn">import</span> <span class="n">VLine</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.modules.SequenceModule</span> <span class="kn">import</span> <span class="n">SequenceModule</span>
+<span class="kn">from</span> <span class="nn">ccpn.core.Chain</span> <span class="kn">import</span> <span class="n">Chain</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.guiSettings</span> <span class="kn">import</span> <span class="n">getColours</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.guiSettings</span> <span class="kn">import</span> <span class="n">LABEL_SELECTEDBACKGROUND</span><span class="p">,</span> <span class="n">LABEL_SELECTEDFOREGROUND</span><span class="p">,</span> <span class="n">LABEL_HIGHLIGHT</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.lib.Strip</span> <span class="kn">import</span> <span class="n">navigateToNmrResidueInDisplay</span><span class="p">,</span> <span class="n">navigateToNmrAtomsInStrip</span><span class="p">,</span> <span class="n">_getCurrentZoomRatio</span>
+<span class="kn">from</span> <span class="nn">ccpn.util.Logging</span> <span class="kn">import</span> <span class="n">getLogger</span>
+
+
+<span class="n">logger</span> <span class="o">=</span> <span class="n">getLogger</span><span class="p">()</span>
+<span class="n">ALL</span> <span class="o">=</span> <span class="s1">&#39;&lt;all&gt;&#39;</span>
+
+<span class="n">LINKTOPULLDOWNCLASS</span> <span class="o">=</span> <span class="s1">&#39;linkToPulldownClass&#39;</span>
 
 
 <div class="viewcode-block" id="ResidueInformation"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.modules.ResidueInformation.ResidueInformation">[docs]</a><span class="k">class</span> <span class="nc">ResidueInformation</span><span class="p">(</span><span class="n">CcpnModule</span><span class="p">):</span>
-    <span class="n">includeSettingsWidget</span> <span class="o">=</span> <span class="bp">False</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This class implements the module for a residue table and sequence module</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">includeSettingsWidget</span> <span class="o">=</span> <span class="kc">True</span>
     <span class="n">maxSettingsState</span> <span class="o">=</span> <span class="mi">2</span>
-    <span class="n">settingsPosition</span> <span class="o">=</span> <span class="s1">&#39;top&#39;</span>
+    <span class="n">settingsPosition</span> <span class="o">=</span> <span class="s1">&#39;left&#39;</span>
     <span class="n">className</span> <span class="o">=</span> <span class="s1">&#39;ResidueInformation&#39;</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mainWindow</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;Residue Information&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
-        <span class="n">CcpnModule</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mainWindow</span><span class="o">=</span><span class="n">mainWindow</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
+    <span class="n">includeDisplaySettings</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">includeSequentialStrips</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">includePeakLists</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">includeNmrChains</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">includeSpectrumTable</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">activePulldownClass</span> <span class="o">=</span> <span class="n">Chain</span>
 
+    <span class="n">_residueWidth</span> <span class="o">=</span> <span class="s1">&#39;3&#39;</span>
+
+    <span class="n">textOptions</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;1&#39;</span><span class="p">,</span> <span class="s1">&#39;3&#39;</span><span class="p">,</span> <span class="s1">&#39;5&#39;</span><span class="p">,</span> <span class="s1">&#39;7&#39;</span><span class="p">]</span>
+    <span class="n">textColumns</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;1&#39;</span><span class="p">:</span> <span class="p">([</span><span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">]),</span>
+                   <span class="s1">&#39;3&#39;</span><span class="p">:</span> <span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">4</span><span class="p">],</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">)),</span>
+                   <span class="s1">&#39;5&#39;</span><span class="p">:</span> <span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">],</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">4</span><span class="p">)),</span>
+                   <span class="s1">&#39;7&#39;</span><span class="p">:</span> <span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">8</span><span class="p">],</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">5</span><span class="p">)),</span>
+                   <span class="p">}</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mainWindow</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;Residue Information&#39;</span><span class="p">,</span> <span class="n">chain</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
+        <span class="n">CcpnModule</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mainWindow</span><span class="o">=</span><span class="n">mainWindow</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
+
+        <span class="c1"># Derive application, project, and current from mainWindow</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span> <span class="o">=</span> <span class="n">mainWindow</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">application</span> <span class="o">=</span> <span class="n">mainWindow</span><span class="o">.</span><span class="n">application</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">project</span> <span class="o">=</span> <span class="n">mainWindow</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">project</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">current</span> <span class="o">=</span> <span class="n">mainWindow</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">current</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">application</span> <span class="o">=</span> <span class="n">mainWindow</span><span class="o">.</span><span class="n">application</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">project</span> <span class="o">=</span> <span class="n">mainWindow</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">project</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">current</span> <span class="o">=</span> <span class="n">mainWindow</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">current</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">application</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">project</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">current</span> <span class="o">=</span> <span class="kc">None</span>
 
+        <span class="bp">self</span><span class="o">.</span><span class="n">_moduleSettings</span> <span class="o">=</span> <span class="n">StripPlot</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">settingsWidget</span><span class="p">,</span> <span class="n">mainWindow</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span><span class="p">,</span>
+                                         <span class="n">includeDisplaySettings</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">includeDisplaySettings</span><span class="p">,</span>
+                                         <span class="n">includeSequentialStrips</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">includeSequentialStrips</span><span class="p">,</span>
+                                         <span class="n">includePeakLists</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">includePeakLists</span><span class="p">,</span>
+                                         <span class="n">includeNmrChains</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">includeNmrChains</span><span class="p">,</span>
+                                         <span class="n">includeSpectrumTable</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">includeSpectrumTable</span><span class="p">,</span>
+                                         <span class="n">activePulldownClass</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">activePulldownClass</span><span class="p">,</span>
+                                         <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+
+        <span class="c1"># add a splitter to contain the residue table and the sequence module</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">splitter</span> <span class="o">=</span> <span class="n">Splitter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mainWidget</span><span class="p">,</span> <span class="n">horizontal</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_sequenceModuleFrame</span> <span class="o">=</span> <span class="n">Frame</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="n">setLayout</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="c1"># self._SequenceGraphFrame = Frame(self.splitter, setLayout=True)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mainWidget</span><span class="o">.</span><span class="n">getLayout</span><span class="p">()</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">splitter</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+
+        <span class="c1"># initialise the sequence module</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">thisSequenceModule</span> <span class="o">=</span> <span class="n">SequenceModule</span><span class="p">(</span><span class="n">moduleParent</span><span class="o">=</span><span class="bp">self</span><span class="p">,</span>
+                                                 <span class="n">parent</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_sequenceModuleFrame</span><span class="p">,</span>
+                                                 <span class="n">mainWindow</span><span class="o">=</span><span class="n">mainWindow</span><span class="p">)</span>
+
+        <span class="c1"># add a scroll area to contain the residue table</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_widgetScrollArea</span> <span class="o">=</span> <span class="n">ScrollArea</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">mainWidget</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">scrollBarPolicies</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;asNeeded&#39;</span><span class="p">,</span> <span class="s1">&#39;asNeeded&#39;</span><span class="p">),</span> <span class="o">**</span><span class="n">kwds</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_widgetScrollArea</span><span class="o">.</span><span class="n">setWidgetResizable</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_widget</span> <span class="o">=</span> <span class="n">Widget</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_widgetScrollArea</span><span class="p">,</span> <span class="n">setLayout</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_widgetScrollArea</span><span class="o">.</span><span class="n">setWidgetResizable</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_widget</span> <span class="o">=</span> <span class="n">Widget</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_widgetScrollArea</span><span class="p">,</span> <span class="n">setLayout</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_widgetScrollArea</span><span class="o">.</span><span class="n">setWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_widget</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_widget</span><span class="o">.</span><span class="n">setSizePolicy</span><span class="p">(</span><span class="n">QtWidgets</span><span class="o">.</span><span class="n">QSizePolicy</span><span class="o">.</span><span class="n">Expanding</span><span class="p">,</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QSizePolicy</span><span class="o">.</span><span class="n">Expanding</span><span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">chainLabel</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_widget</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s1">&#39;Chain&#39;</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
-        <span class="c1"># self.layout.addWidget(chainLabel, 0, 0)</span>
-        <span class="n">chainPulldown</span> <span class="o">=</span> <span class="n">PulldownList</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_widget</span><span class="p">,</span> <span class="n">callback</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_setChain</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
-        <span class="n">chainPulldownData</span> <span class="o">=</span> <span class="p">[</span><span class="n">chain</span><span class="o">.</span><span class="n">pid</span> <span class="k">for</span> <span class="n">chain</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">chains</span><span class="p">]</span>
-        <span class="n">chainPulldownData</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;&lt;All&gt;&#39;</span><span class="p">)</span>
-        <span class="n">chainPulldown</span><span class="o">.</span><span class="n">setData</span><span class="p">(</span><span class="n">chainPulldownData</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">selectedChain</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">getByPid</span><span class="p">(</span><span class="n">chainPulldown</span><span class="o">.</span><span class="n">currentText</span><span class="p">())</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">residueLabel</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_widget</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s1">&#39;Residue &#39;</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
+        <span class="c1"># insert into the mainWidget</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">splitter</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_widgetScrollArea</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">splitter</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_sequenceModuleFrame</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">splitter</span><span class="o">.</span><span class="n">setStretchFactor</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">splitter</span><span class="o">.</span><span class="n">setChildrenCollapsible</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+
+        <span class="c1"># make a frame to contain the pulldown widgets</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_pulldownFrame</span> <span class="o">=</span> <span class="n">Frame</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_widget</span><span class="p">,</span> <span class="n">setLayout</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">showBorder</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+
+        <span class="c1"># # insert into pulldownFrame</span>
+        <span class="c1"># self.chainLabel = Label(self._pulldownFrame, text=&#39;Chain&#39;, grid=(0, 0))</span>
+        <span class="c1"># # self.layout.addWidget(chainLabel, 0, 0)</span>
+        <span class="c1"># chainPulldown = PulldownList(self._pulldownFrame, callback=self._setChain, grid=(0, 1))</span>
+        <span class="c1"># chainPulldownData = [chain.pid for chain in self.project.chains]</span>
+        <span class="c1"># # chainPulldownData.append(ALL)</span>
+        <span class="c1"># chainPulldown.setData(chainPulldownData)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">chainPulldown</span> <span class="o">=</span> <span class="n">ChainPulldown</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_pulldownFrame</span><span class="p">,</span>
+                                           <span class="n">mainWindow</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>  <span class="c1">#first Chain in project (if present)</span>
+                                           <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">gridSpan</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">minimumWidths</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">100</span><span class="p">),</span>
+                                           <span class="n">showSelectName</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                                           <span class="n">sizeAdjustPolicy</span><span class="o">=</span><span class="n">QtWidgets</span><span class="o">.</span><span class="n">QComboBox</span><span class="o">.</span><span class="n">AdjustToContents</span><span class="p">,</span>
+                                           <span class="n">callback</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_selectionPulldownCallback</span>
+                                           <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">selectedChain</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1">#self.project.getByPid(self.chainPulldown.currentText())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">residueLabel</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_pulldownFrame</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s1">&#39;Residue&#39;</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">colourScheme</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">colourScheme</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">residuePulldown</span> <span class="o">=</span> <span class="n">PulldownList</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_widget</span><span class="p">,</span> <span class="n">callback</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_setCurrentResidue</span><span class="p">,</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">residuePulldown</span> <span class="o">=</span> <span class="n">PulldownList</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_pulldownFrame</span><span class="p">,</span> <span class="n">callback</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_setCurrentResidue</span><span class="p">,</span>
                                             <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">4</span><span class="p">))</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">residuePulldown</span><span class="o">.</span><span class="n">setData</span><span class="p">(</span><span class="n">CCP_CODES</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_residueWidthLabel</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_pulldownFrame</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s1">&#39;Residue window width&#39;</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">5</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_residueWidthData</span> <span class="o">=</span> <span class="n">PulldownList</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_pulldownFrame</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">6</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_residueWidthData</span><span class="o">.</span><span class="n">setData</span><span class="p">(</span><span class="n">texts</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">textOptions</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_residueWidthData</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_residueWidth</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">residuePulldown</span><span class="o">.</span><span class="n">setData</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">CCP_CODES</span><span class="p">))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">selectedResidueType</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">residuePulldown</span><span class="o">.</span><span class="n">currentText</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">residueWidget</span> <span class="o">=</span> <span class="n">Widget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_widget</span><span class="p">,</span> <span class="n">setLayout</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
-                                    <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">gridSpan</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">5</span><span class="p">))</span>
+
+        <span class="c1"># set the callback after populating</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_residueWidthData</span><span class="o">.</span><span class="n">setCallback</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_setResidueWidth</span><span class="p">)</span>
+        <span class="c1"># add under the pulldownFrame</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">residueWidget</span> <span class="o">=</span> <span class="n">Widget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_widget</span><span class="p">,</span> <span class="n">setLayout</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                                    <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">gridSpan</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">spacer</span> <span class="o">=</span> <span class="n">Spacer</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_widget</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span>
                              <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QSizePolicy</span><span class="o">.</span><span class="n">Expanding</span><span class="p">,</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QSizePolicy</span><span class="o">.</span><span class="n">Expanding</span><span class="p">,</span>
-                             <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">5</span><span class="p">),</span> <span class="n">gridSpan</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+                             <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="n">gridSpan</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
 
-        <span class="c1"># self._setWidgetHeight(35)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_widget</span><span class="o">.</span><span class="n">setContentsMargins</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>
 
-        <span class="c1"># self.residueWidget = QtWidgets.QWidget(self)</span>
-        <span class="c1"># self.residueWidget.setLayout(QtWidgets.QGridLayout())</span>
-        <span class="c1"># self.project = project</span>
-        <span class="c1"># self.layout.addWidget(self.residueWidget, 1, 0, 1, 5)</span>
+        <span class="k">if</span> <span class="n">chain</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_selectChain</span><span class="p">(</span><span class="n">chain</span><span class="p">)</span>
+
         <span class="bp">self</span><span class="o">.</span><span class="n">_getResidues</span><span class="p">()</span>
 
-    <span class="k">def</span> <span class="nf">_setChain</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Sets the selected chain to the specified value and updates the module.</span>
+        <span class="c1"># set the notifies for current chain</span>
+        <span class="c1"># TODO: put into subclass</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_activePulldownClass</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_activeCheckbox</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_setCurrentPulldownNotifier</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">activePulldownClass</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_setCurrentPulldownNotifier</span> <span class="o">=</span> <span class="n">Notifier</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">current</span><span class="p">,</span>
+                                                        <span class="p">[</span><span class="n">Notifier</span><span class="o">.</span><span class="n">CURRENT</span><span class="p">],</span>
+                                                        <span class="n">targetName</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">activePulldownClass</span><span class="o">.</span><span class="n">_pluralLinkName</span><span class="p">,</span>
+                                                        <span class="n">callback</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_selectCurrentPulldownClass</span><span class="p">)</span>
+
+        <span class="c1"># put these in a smaller additional class</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">activePulldownClass</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_activePulldownClass</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">activePulldownClass</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_activeCheckbox</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_moduleSettings</span><span class="p">,</span> <span class="n">LINKTOPULLDOWNCLASS</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_selectCurrentPulldownClass</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Respond to change in current activePulldownClass</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="n">value</span> <span class="o">==</span> <span class="s1">&#39;&lt;All&gt;&#39;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">activePulldownClass</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_activeCheckbox</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_activeCheckbox</span><span class="o">.</span><span class="n">isChecked</span><span class="p">()</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">chain</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_selectChain</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">chain</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_selectChain</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">chain</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Manually select a Chain from the pullDown</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">chain</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="c1"># logger.warning(&#39;select: No Chain selected&#39;)</span>
+            <span class="c1"># raise ValueError(&#39;select: No Chain selected&#39;)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">chainPulldown</span><span class="o">.</span><span class="n">selectFirstItem</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">chain</span><span class="p">,</span> <span class="n">Chain</span><span class="p">):</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;select: Object is not of type Chain&#39;</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;select: Object is not of type Chain&#39;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">widgetObj</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">chainPulldown</span><span class="o">.</span><span class="n">textList</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">chain</span><span class="o">.</span><span class="n">pid</span> <span class="o">==</span> <span class="n">widgetObj</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">selectedChain</span> <span class="o">=</span> <span class="n">chain</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">chainPulldown</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">selectedChain</span><span class="o">.</span><span class="n">pid</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_setResidueWidth</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_residueWidth</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_residueWidthData</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_getResidues</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">_selectionPulldownCallback</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Sets the selected chain to the specified value and updates the module.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">item</span> <span class="o">==</span> <span class="n">ALL</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">selectedChain</span> <span class="o">=</span> <span class="s1">&#39;All&#39;</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">selectedChain</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">getByPid</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">selectedChain</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">getByPid</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_activePulldownClass</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_activeCheckbox</span> <span class="ow">and</span> \
+                    <span class="bp">self</span><span class="o">.</span><span class="n">selectedChain</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">chain</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_activeCheckbox</span><span class="o">.</span><span class="n">isChecked</span><span class="p">():</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">chain</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">selectedChain</span>
+
         <span class="bp">self</span><span class="o">.</span><span class="n">_getResidues</span><span class="p">()</span>
 
     <span class="k">def</span> <span class="nf">_setCurrentResidue</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Sets the selected residue to the specified value and updates the module.</span>
+        <span class="sd">&quot;&quot;&quot;Sets the selected residue to the specified value and updates the module.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">selectedResidueType</span> <span class="o">=</span> <span class="n">value</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_getResidues</span><span class="p">()</span>
@@ -158,9 +287,26 @@
         <span class="n">palette</span><span class="o">.</span><span class="n">setColor</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QPalette</span><span class="o">.</span><span class="n">Background</span><span class="p">,</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QColor</span><span class="p">(</span><span class="n">LABEL_SELECTEDBACKGROUND</span><span class="p">))</span>
         <span class="n">widget</span><span class="o">.</span><span class="n">setPalette</span><span class="p">(</span><span class="n">palette</span><span class="p">)</span>
 
+    <span class="k">def</span> <span class="nf">_removeWidget</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">widget</span><span class="p">,</span> <span class="n">removeTopWidget</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Destroy a widget and all it&#39;s contents</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">def</span> <span class="nf">deleteItems</span><span class="p">(</span><span class="n">layout</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">layout</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">while</span> <span class="n">layout</span><span class="o">.</span><span class="n">count</span><span class="p">():</span>
+                    <span class="n">item</span> <span class="o">=</span> <span class="n">layout</span><span class="o">.</span><span class="n">takeAt</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+                    <span class="n">widget</span> <span class="o">=</span> <span class="n">item</span><span class="o">.</span><span class="n">widget</span><span class="p">()</span>
+                    <span class="k">if</span> <span class="n">widget</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                        <span class="n">widget</span><span class="o">.</span><span class="n">setVisible</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+                        <span class="n">widget</span><span class="o">.</span><span class="n">setParent</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
+                        <span class="k">del</span> <span class="n">widget</span>
+
+        <span class="n">deleteItems</span><span class="p">(</span><span class="n">widget</span><span class="o">.</span><span class="n">getLayout</span><span class="p">())</span>
+        <span class="k">if</span> <span class="n">removeTopWidget</span><span class="p">:</span>
+            <span class="k">del</span> <span class="n">widget</span>
+
     <span class="k">def</span> <span class="nf">_getResidues</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Finds all residues of the selected type along with one flanking residue either side and displays</span>
+        <span class="sd">&quot;&quot;&quot;Finds all residues of the selected type along with one flanking residue either side and displays</span>
 <span class="sd">        this information in the module.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">colours</span> <span class="o">=</span> <span class="n">getColours</span><span class="p">()</span>
@@ -189,56 +335,161 @@
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">selectedChain</span> <span class="o">==</span> <span class="s1">&#39;All&#39;</span><span class="p">:</span>
             <span class="n">residues</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">residues</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">selectedChain</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">selectedChain</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="n">residues</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">selectedChain</span><span class="o">.</span><span class="n">residues</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="k">return</span>
+                <span class="n">residues</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_removeWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">residueWidget</span><span class="p">,</span> <span class="n">removeTopWidget</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">residues</span><span class="p">:</span>
-            <span class="k">for</span> <span class="n">residue</span> <span class="ow">in</span> <span class="n">residues</span><span class="p">:</span>
+            <span class="n">width</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_residueWidthData</span><span class="o">.</span><span class="n">get</span><span class="p">())</span> <span class="o">//</span> <span class="mi">2</span>
+
+            <span class="k">for</span> <span class="n">resInd</span><span class="p">,</span> <span class="n">residue</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">residues</span><span class="p">):</span>
                 <span class="k">if</span> <span class="n">residue</span><span class="o">.</span><span class="n">residueType</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">selectedResidueType</span><span class="o">.</span><span class="n">upper</span><span class="p">():</span>
-                    <span class="n">foundResidues</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">residue</span><span class="o">.</span><span class="n">previousResidue</span><span class="p">,</span> <span class="n">residue</span><span class="p">,</span> <span class="n">residue</span><span class="o">.</span><span class="n">nextResidue</span><span class="p">])</span>
-            <span class="n">layout</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">residueWidget</span><span class="o">.</span><span class="n">layout</span><span class="p">()</span>
-            <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">layout</span><span class="o">.</span><span class="n">rowCount</span><span class="p">()):</span>
-                <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">):</span>
-                    <span class="n">item</span> <span class="o">=</span> <span class="n">layout</span><span class="o">.</span><span class="n">itemAtPosition</span><span class="p">(</span><span class="n">r</span><span class="p">,</span> <span class="n">n</span><span class="p">)</span>
-                    <span class="k">if</span> <span class="n">item</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
-                        <span class="n">item</span><span class="o">.</span><span class="n">widget</span><span class="p">()</span><span class="o">.</span><span class="n">deleteLater</span><span class="p">()</span>
+                    <span class="c1"># add the previous and next residue chains to the visible list for this residue</span>
+                    <span class="n">resList</span> <span class="o">=</span> <span class="p">[</span><span class="n">residue</span><span class="p">]</span>
+                    <span class="n">leftRes</span> <span class="o">=</span> <span class="n">residue</span>
+                    <span class="n">rightRes</span> <span class="o">=</span> <span class="n">residue</span>
+                    <span class="k">for</span> <span class="n">count</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">width</span><span class="p">):</span>
+                        <span class="k">if</span> <span class="n">leftRes</span><span class="p">:</span>
+                            <span class="n">resList</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">leftRes</span><span class="o">.</span><span class="n">previousResidue</span><span class="p">)</span>
+                            <span class="n">leftRes</span> <span class="o">=</span> <span class="n">leftRes</span><span class="o">.</span><span class="n">previousResidue</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="n">resList</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+                    <span class="k">for</span> <span class="n">count</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">width</span><span class="p">):</span>
+                        <span class="k">if</span> <span class="n">rightRes</span><span class="p">:</span>
+                            <span class="n">resList</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">rightRes</span><span class="o">.</span><span class="n">nextResidue</span><span class="p">)</span>
+                            <span class="n">rightRes</span> <span class="o">=</span> <span class="n">rightRes</span><span class="o">.</span><span class="n">nextResidue</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="n">resList</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
+                    <span class="n">foundResidues</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">resList</span><span class="p">)</span>
 
-            <span class="n">j</span> <span class="o">=</span> <span class="mi">0</span>  <span class="c1"># why was this introduced (it&#39;s not altered below)?</span>
-            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">foundResidues</span><span class="p">)):</span>
+            <span class="n">i</span> <span class="o">=</span> <span class="n">rr</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="n">textCols</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">textColumns</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_residueWidth</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">columnCols</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">textColumns</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_residueWidth</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
 
-                <span class="n">checkResidues</span> <span class="o">=</span> <span class="n">foundResidues</span><span class="p">[</span><span class="n">j</span> <span class="o">+</span> <span class="n">i</span><span class="p">]</span>
+            <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">checkResidues</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">foundResidues</span><span class="p">):</span>
+                <span class="k">for</span> <span class="n">rr</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_residueWidth</span><span class="p">)):</span>
+                    <span class="k">if</span> <span class="n">rr</span> <span class="o">&gt;=</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">rr</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">checkResidues</span><span class="p">):</span>
+                        <span class="k">if</span> <span class="n">checkResidues</span><span class="p">[</span><span class="n">rr</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                            <span class="n">item</span> <span class="o">=</span> <span class="n">ActiveLabel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mainWindow</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span><span class="p">,</span>
+                                               <span class="n">text</span><span class="o">=</span><span class="n">checkResidues</span><span class="p">[</span><span class="n">rr</span><span class="p">]</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
+                                               <span class="n">hAlign</span><span class="o">=</span><span class="s1">&#39;c&#39;</span><span class="p">)</span>
+                            <span class="n">item</span><span class="o">.</span><span class="n">setMaximumHeight</span><span class="p">(</span><span class="mi">30</span><span class="p">)</span>
+                            <span class="n">item</span><span class="o">.</span><span class="n">setSelectionCallback</span><span class="p">(</span><span class="n">partial</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_residueClicked</span><span class="p">,</span> <span class="n">checkResidues</span><span class="p">[</span><span class="n">rr</span><span class="p">]))</span>
 
-                <span class="k">if</span> <span class="n">checkResidues</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
-                    <span class="n">label1</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="n">checkResidues</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
-                                   <span class="n">hAlign</span><span class="o">=</span><span class="s1">&#39;c&#39;</span><span class="p">)</span>
-                    <span class="n">label1</span><span class="o">.</span><span class="n">setMaximumHeight</span><span class="p">(</span><span class="mi">30</span><span class="p">)</span>
-                    <span class="k">if</span> <span class="n">checkResidues</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">nmrResidue</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
-                        <span class="n">label1</span><span class="o">.</span><span class="n">setStyleSheet</span><span class="p">(</span><span class="n">stylesheet</span><span class="p">)</span>
-                        <span class="c1"># self._setWidgetColour(label1)</span>
+                            <span class="k">if</span> <span class="n">checkResidues</span><span class="p">[</span><span class="n">rr</span><span class="p">]</span><span class="o">.</span><span class="n">nmrResidue</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                                <span class="n">item</span><span class="o">.</span><span class="n">setStyleSheet</span><span class="p">(</span><span class="n">stylesheet</span><span class="p">)</span>
+                                <span class="n">item</span><span class="o">.</span><span class="n">setActionCallback</span><span class="p">(</span><span class="n">partial</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_residueDoubleClicked</span><span class="p">,</span> <span class="n">checkResidues</span><span class="p">[</span><span class="n">rr</span><span class="p">]))</span>
+                                <span class="c1"># self._setWidgetColour(label1)</span>
 
-                    <span class="bp">self</span><span class="o">.</span><span class="n">residueWidget</span><span class="o">.</span><span class="n">layout</span><span class="p">()</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">label1</span><span class="p">,</span> <span class="n">j</span> <span class="o">+</span> <span class="n">i</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
-                    
-                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">checkResidues</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="ow">and</span> <span class="n">checkResidues</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
-                    <span class="n">label2</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="n">checkResidues</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
-                                   <span class="n">hAlign</span><span class="o">=</span><span class="s1">&#39;c&#39;</span><span class="p">)</span>
-                    <span class="k">if</span> <span class="n">checkResidues</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">nmrResidue</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
-                        <span class="n">label2</span><span class="o">.</span><span class="n">setStyleSheet</span><span class="p">(</span><span class="n">stylesheet</span><span class="p">)</span>
-                        <span class="c1"># self._setWidgetColour(label2)</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">residueWidget</span><span class="o">.</span><span class="n">layout</span><span class="p">()</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">textCols</span><span class="p">[</span><span class="n">rr</span><span class="p">])</span>
 
-                    <span class="n">label2</span><span class="o">.</span><span class="n">setMaximumHeight</span><span class="p">(</span><span class="mi">30</span><span class="p">)</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">residueWidget</span><span class="o">.</span><span class="n">layout</span><span class="p">()</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">label2</span><span class="p">,</span> <span class="n">j</span> <span class="o">+</span> <span class="n">i</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
-                    
-                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">checkResidues</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">2</span> <span class="ow">and</span> <span class="n">checkResidues</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
-                    <span class="n">label3</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="n">checkResidues</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
-                                   <span class="n">hAlign</span><span class="o">=</span><span class="s1">&#39;c&#39;</span><span class="p">)</span>
-                    <span class="k">if</span> <span class="n">checkResidues</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">nmrResidue</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
-                        <span class="n">label3</span><span class="o">.</span><span class="n">setStyleSheet</span><span class="p">(</span><span class="n">stylesheet</span><span class="p">)</span>
-                        <span class="c1"># self._setWidgetColour(label3)</span>
+            <span class="k">if</span> <span class="n">i</span> <span class="ow">and</span> <span class="n">rr</span><span class="p">:</span>
+                <span class="c1"># put a couple of lines marking the centre section of the table</span>
+                <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">columnCols</span><span class="p">:</span>
+                    <span class="n">item</span> <span class="o">=</span> <span class="n">VLine</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">residueWidget</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">col</span><span class="p">),</span> <span class="n">gridSpan</span><span class="o">=</span><span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
 
-                    <span class="bp">self</span><span class="o">.</span><span class="n">residueWidget</span><span class="o">.</span><span class="n">layout</span><span class="p">()</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">label3</span><span class="p">,</span> <span class="n">j</span> <span class="o">+</span> <span class="n">i</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
-                    <span class="n">label3</span><span class="o">.</span><span class="n">setMaximumHeight</span><span class="p">(</span><span class="mi">30</span><span class="p">)</span></div>
+            <span class="bp">self</span><span class="o">.</span><span class="n">spacer</span> <span class="o">=</span> <span class="n">Spacer</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">residueWidget</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span>
+                                 <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QSizePolicy</span><span class="o">.</span><span class="n">Expanding</span><span class="p">,</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QSizePolicy</span><span class="o">.</span><span class="n">Expanding</span><span class="p">,</span>
+                                 <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">textCols</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="p">),</span> <span class="n">gridSpan</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">_residueClicked</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">residue</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Handle cicking a residue in the table</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">residue</span> <span class="o">=</span> <span class="n">residue</span>
+
+    <span class="k">def</span> <span class="nf">_getDisplays</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">settings</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return list of displays to navigate - if needed - need to update for all modules</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">displays</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="c1"># check for valid displays</span>
+        <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">displaysWidget</span><span class="p">:</span>
+            <span class="n">gids</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">displaysWidget</span><span class="o">.</span><span class="n">getTexts</span><span class="p">()</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">gids</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">displays</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">includeDisplaySettings</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">ALL</span> <span class="ow">in</span> <span class="n">gids</span><span class="p">:</span>
+                    <span class="n">displays</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">spectrumDisplays</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">displays</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">getByGid</span><span class="p">(</span><span class="n">gid</span><span class="p">)</span> <span class="k">for</span> <span class="n">gid</span> <span class="ow">in</span> <span class="n">gids</span> <span class="k">if</span> <span class="n">gid</span> <span class="o">!=</span> <span class="n">ALL</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">strip</span><span class="p">:</span>
+                <span class="n">displays</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">strip</span><span class="o">.</span><span class="n">spectrumDisplay</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">displays</span>
+
+    <span class="k">def</span> <span class="nf">_residueDoubleClicked</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">residue</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Handle double-cicking a residue in the table</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">nmrResidue</span> <span class="o">=</span> <span class="n">residue</span><span class="o">.</span><span class="n">nmrResidue</span>
+
+        <span class="c1"># just copied from nmrResidueTable</span>
+        <span class="kn">from</span> <span class="nn">ccpn.core.lib.CallBack</span> <span class="kn">import</span> <span class="n">CallBack</span>
+
+        <span class="n">data</span> <span class="o">=</span> <span class="n">CallBack</span><span class="p">(</span><span class="n">theObject</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="p">,</span>
+                        <span class="nb">object</span><span class="o">=</span><span class="n">nmrResidue</span><span class="p">,</span>
+                        <span class="n">targetName</span><span class="o">=</span><span class="n">nmrResidue</span><span class="o">.</span><span class="n">className</span><span class="p">,</span>
+                        <span class="n">trigger</span><span class="o">=</span><span class="n">CallBack</span><span class="o">.</span><span class="n">DOUBLECLICK</span><span class="p">,</span>
+                        <span class="p">)</span>
+
+        <span class="c1"># handle a single nmrResidue - should always contain an object</span>
+        <span class="n">objs</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">CallBack</span><span class="o">.</span><span class="n">OBJECT</span><span class="p">]</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">objs</span><span class="p">:</span>
+            <span class="k">return</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">objs</span><span class="p">,</span> <span class="p">(</span><span class="nb">tuple</span><span class="p">,</span> <span class="nb">list</span><span class="p">)):</span>
+            <span class="n">nmrResidue</span> <span class="o">=</span> <span class="n">objs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">nmrResidue</span> <span class="o">=</span> <span class="n">objs</span>
+
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;nmrResidue=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">nmrResidue</span><span class="o">.</span><span class="n">id</span> <span class="k">if</span> <span class="n">nmrResidue</span> <span class="k">else</span> <span class="kc">None</span><span class="p">))</span>
+
+        <span class="n">_settings</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_moduleSettings</span>
+        <span class="n">displays</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getDisplays</span><span class="p">(</span><span class="n">_settings</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">displays</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_moduleSettings</span><span class="o">.</span><span class="n">displaysWidget</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;Undefined display module(s); select in settings first&#39;</span><span class="p">)</span>
+            <span class="n">showWarning</span><span class="p">(</span><span class="s1">&#39;startAssignment&#39;</span><span class="p">,</span> <span class="s1">&#39;Undefined display module(s);</span><span class="se">\n</span><span class="s1">select in settings first&#39;</span><span class="p">)</span>
+            <span class="k">return</span>
+
+        <span class="kn">from</span> <span class="nn">ccpn.core.lib.ContextManagers</span> <span class="kn">import</span> <span class="n">undoBlock</span>
+
+        <span class="k">with</span> <span class="n">undoBlock</span><span class="p">():</span>
+            <span class="c1"># optionally clear the marks</span>
+            <span class="k">if</span> <span class="n">_settings</span><span class="o">.</span><span class="n">autoClearMarksWidget</span><span class="o">.</span><span class="n">checkBox</span><span class="o">.</span><span class="n">isChecked</span><span class="p">():</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">clearMarks</span><span class="p">()</span>
+
+            <span class="n">newWidths</span> <span class="o">=</span> <span class="p">[]</span>
+
+            <span class="k">for</span> <span class="n">specDisplay</span> <span class="ow">in</span> <span class="n">displays</span><span class="p">:</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">strip</span> <span class="ow">in</span> <span class="n">specDisplay</span><span class="o">.</span><span class="n">strips</span><span class="p">:</span>
+
+                    <span class="c1"># just navigate to this strip</span>
+                    <span class="n">navigateToNmrAtomsInStrip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">strip</span><span class="p">,</span>
+                                              <span class="n">nmrResidue</span><span class="o">.</span><span class="n">nmrAtoms</span><span class="p">,</span>
+                                              <span class="n">widths</span><span class="o">=</span><span class="n">newWidths</span><span class="p">,</span>
+                                              <span class="n">markPositions</span><span class="o">=</span><span class="n">_settings</span><span class="o">.</span><span class="n">markPositionsWidget</span><span class="o">.</span><span class="n">checkBox</span><span class="o">.</span><span class="n">isChecked</span><span class="p">(),</span>
+                                              <span class="n">setNmrResidueLabel</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="c1">#navigate to the specDisplay (and remove excess strips)</span>
+                    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">specDisplay</span><span class="o">.</span><span class="n">strips</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                        <span class="n">newWidths</span> <span class="o">=</span> <span class="p">[]</span>
+                        <span class="n">navigateToNmrResidueInDisplay</span><span class="p">(</span><span class="n">nmrResidue</span><span class="p">,</span> <span class="n">specDisplay</span><span class="p">,</span> <span class="n">stripIndex</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+                                                      <span class="n">widths</span><span class="o">=</span><span class="n">newWidths</span><span class="p">,</span>  <span class="c1">#[&#39;full&#39;] * len(display.strips[0].axisCodes),</span>
+                                                      <span class="n">showSequentialResidues</span><span class="o">=</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">specDisplay</span><span class="o">.</span><span class="n">axisCodes</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">2</span><span class="p">)</span> <span class="ow">and</span>
+                                                                             <span class="bp">self</span><span class="o">.</span><span class="n">includeSequentialStrips</span> <span class="ow">and</span>
+                                                                             <span class="n">_settings</span><span class="o">.</span><span class="n">sequentialStripsWidget</span><span class="o">.</span><span class="n">checkBox</span><span class="o">.</span><span class="n">isChecked</span><span class="p">(),</span>
+                                                      <span class="n">markPositions</span><span class="o">=</span><span class="n">_settings</span><span class="o">.</span><span class="n">markPositionsWidget</span><span class="o">.</span><span class="n">checkBox</span><span class="o">.</span><span class="n">isChecked</span><span class="p">()</span>
+                                                      <span class="p">)</span>
+
+                <span class="c1"># open the other headers to match</span>
+                <span class="k">for</span> <span class="n">strip</span> <span class="ow">in</span> <span class="n">specDisplay</span><span class="o">.</span><span class="n">strips</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">strip</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">strip</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">strip</span><span class="o">.</span><span class="n">header</span><span class="o">.</span><span class="n">headerVisible</span><span class="p">:</span>
+                        <span class="n">strip</span><span class="o">.</span><span class="n">header</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span>
+                        <span class="n">strip</span><span class="o">.</span><span class="n">header</span><span class="o">.</span><span class="n">headerVisible</span> <span class="o">=</span> <span class="kc">True</span></div>
 </pre></div>
 
           </div>
@@ -247,15 +498,15 @@
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
 <div id="searchbox" style="display: none" role="search">
-  <h3>Quick search</h3>
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
     <form class="search" action="../../../../../search.html" method="get">
-      <input type="text" name="q" />
+      <input type="text" name="q" aria-labelledby="searchlabel" />
       <input type="submit" value="Go" />
-      <input type="hidden" name="check_keywords" value="yes" />
-      <input type="hidden" name="area" value="default" />
     </form>
+    </div>
 </div>
-<script type="text/javascript">$('#searchbox').show(0);</script>
+<script>$('#searchbox').show(0);</script>
         </div>
       </div>
       <div class="clearer"></div>
@@ -269,13 +520,13 @@
         <li class="right" >
           <a href="../../../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../../../index.html">Python  documentation</a> &raquo;</li>
-          <li class="nav-item nav-item-1"><a href="../../../../index.html" >Module code</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="../../../../../index.html">Python  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../../../index.html" >Module code</a> &#187;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
-        &copy; Copyright .
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.1.
+        &#169; Copyright .
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.4.0.
     </div>
   </body>
 </html>

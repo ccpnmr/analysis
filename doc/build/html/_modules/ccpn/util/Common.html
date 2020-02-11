@@ -1,32 +1,22 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
+<!DOCTYPE html>
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    
-    <title>ccpn.util.Common &mdash; Python  documentation</title>
-    
+    <meta charset="utf-8" />
+    <title>ccpn.util.Common &#8212; Python  documentation</title>
     <link rel="stylesheet" href="../../../_static/classic.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
     
-    <script type="text/javascript">
-      var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    '../../../',
-        VERSION:     '',
-        COLLAPSE_INDEX: false,
-        FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true
-      };
-    </script>
-    <script type="text/javascript" src="../../../_static/jquery.js"></script>
-    <script type="text/javascript" src="../../../_static/underscore.js"></script>
-    <script type="text/javascript" src="../../../_static/doctools.js"></script>
-    <link rel="top" title="Python  documentation" href="../../../index.html" />
-    <link rel="up" title="Module code" href="../../index.html" /> 
-  </head>
-  <body role="document">
+    <script id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/jquery.js"></script>
+    <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/language_data.js"></script>
+    
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+  </head><body>
     <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
@@ -36,8 +26,8 @@
         <li class="right" >
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../index.html">Python  documentation</a> &raquo;</li>
-          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="../../../index.html">Python  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &#187;</li> 
       </ul>
     </div>  
 
@@ -60,7 +50,7 @@
 <span class="c1"># Licence, Reference and Credits</span>
 <span class="c1">#=========================================================================================</span>
 
-<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019&quot;</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020&quot;</span>
 <span class="n">__credits__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Ed Brooksbank, Luca Mureddu, Timothy J Ragan &amp; Geerten W Vuister&quot;</span><span class="p">)</span>
 <span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">)</span>
 <span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., &amp; Vuister, G.W.&quot;</span><span class="p">,</span>
@@ -69,8 +59,8 @@
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Last code modification</span>
 <span class="c1">#=========================================================================================</span>
-<span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: CCPN $&quot;</span>
-<span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2017-07-07 16:32:57 +0100 (Fri, July 07, 2017) $&quot;</span>
+<span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: Ed Brooksbank $&quot;</span>
+<span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2020-01-10 11:21:56 +0000 (Fri, January 10, 2020) $&quot;</span>
 <span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.0 $&quot;</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Created</span>
@@ -147,7 +137,7 @@
     <span class="k">return</span> <span class="n">name</span> <span class="o">+</span> <span class="s1">&#39;_1&#39;</span></div>
 
 
-<div class="viewcode-block" id="recursiveImport"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Common.recursiveImport">[docs]</a><span class="k">def</span> <span class="nf">recursiveImport</span><span class="p">(</span><span class="n">dirname</span><span class="p">,</span> <span class="n">modname</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">ignoreModules</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">force</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+<div class="viewcode-block" id="recursiveImport"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Common.recursiveImport">[docs]</a><span class="k">def</span> <span class="nf">recursiveImport</span><span class="p">(</span><span class="n">dirname</span><span class="p">,</span> <span class="n">modname</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ignoreModules</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">force</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; recursively import all .py files</span>
 <span class="sd">    (not starting with &#39;__&#39; and not containing internal &#39;.&#39; in their name)</span>
 <span class="sd">    from directory dirname and all its subdirectories, provided they</span>
@@ -174,10 +164,10 @@
 
     <span class="n">files</span> <span class="o">=</span> <span class="p">[]</span>
 
-    <span class="k">if</span> <span class="n">ignoreModules</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">ignoreModules</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">ignoreModules</span> <span class="o">=</span> <span class="p">[]</span>
 
-    <span class="k">if</span> <span class="n">modname</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">modname</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">prefix</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">prefix</span> <span class="o">=</span> <span class="n">modname</span> <span class="o">+</span> <span class="s1">&#39;.&#39;</span>
@@ -221,9 +211,9 @@
 
     <span class="n">tt</span> <span class="o">=</span> <span class="n">Constants</span><span class="o">.</span><span class="n">sequenceCodePattern</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">value</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span><span class="o">.</span><span class="n">groups</span><span class="p">()</span>
 
-    <span class="k">if</span> <span class="n">tt</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">is</span> <span class="bp">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">tt</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
+    <span class="k">if</span> <span class="n">tt</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">tt</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
         <span class="c1"># special case: entire string matches offset modifier and is misread</span>
-        <span class="k">return</span> <span class="bp">None</span><span class="p">,</span> <span class="n">tt</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="bp">None</span>
+        <span class="k">return</span> <span class="kc">None</span><span class="p">,</span> <span class="n">tt</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="kc">None</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="k">return</span> <span class="p">(</span>
             <span class="n">tt</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">and</span> <span class="nb">int</span><span class="p">(</span><span class="n">tt</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span>  <span class="c1"># None or an integer</span>
@@ -246,7 +236,7 @@
         <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
             <span class="k">continue</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">number</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="n">number</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="n">chars</span> <span class="o">=</span> <span class="n">value</span>
 
     <span class="k">return</span> <span class="n">number</span><span class="p">,</span> <span class="n">chars</span></div>
@@ -281,10 +271,10 @@
     <span class="s2">&quot;Returns True if obj is iterable&quot;</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="nb">iter</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
-        <span class="k">return</span> <span class="bp">True</span>
+        <span class="k">return</span> <span class="kc">True</span>
     <span class="k">except</span> <span class="ne">TypeError</span><span class="p">:</span>
         <span class="k">pass</span>
-    <span class="k">return</span> <span class="bp">False</span></div>
+    <span class="k">return</span> <span class="kc">False</span></div>
 
 
 <div class="viewcode-block" id="getTimeStamp"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Common.getTimeStamp">[docs]</a><span class="k">def</span> <span class="nf">getTimeStamp</span><span class="p">():</span>
@@ -292,22 +282,22 @@
     <span class="k">return</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">today</span><span class="p">()</span><span class="o">.</span><span class="n">isoformat</span><span class="p">()</span></div>
 
 
-<div class="viewcode-block" id="getUuid"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Common.getUuid">[docs]</a><span class="k">def</span> <span class="nf">getUuid</span><span class="p">(</span><span class="n">programName</span><span class="p">,</span> <span class="n">timeStamp</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+<div class="viewcode-block" id="getUuid"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Common.getUuid">[docs]</a><span class="k">def</span> <span class="nf">getUuid</span><span class="p">(</span><span class="n">programName</span><span class="p">,</span> <span class="n">timeStamp</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Get UUid following the NEF convention&quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="n">timeStamp</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">timeStamp</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">timeStamp</span> <span class="o">=</span> <span class="n">getTimeStamp</span><span class="p">()</span>
     <span class="k">return</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">-</span><span class="si">%s</span><span class="s1">-</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">programName</span><span class="p">,</span> <span class="n">timeStamp</span><span class="p">,</span> <span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">maxRandomInt</span><span class="p">))</span></div>
 
 
-<div class="viewcode-block" id="name2IsotopeCode"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Common.name2IsotopeCode">[docs]</a><span class="k">def</span> <span class="nf">name2IsotopeCode</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+<div class="viewcode-block" id="name2IsotopeCode"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Common.name2IsotopeCode">[docs]</a><span class="k">def</span> <span class="nf">name2IsotopeCode</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Get standard isotope code matching atom name or axisCode string</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">name</span><span class="p">:</span>
-        <span class="k">return</span> <span class="bp">None</span>
+        <span class="k">return</span> <span class="kc">None</span>
 
     <span class="n">result</span> <span class="o">=</span> <span class="n">Constants</span><span class="o">.</span><span class="n">DEFAULT_ISOTOPE_DICT</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
-    <span class="k">if</span> <span class="n">result</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">result</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">name</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">isdigit</span><span class="p">():</span>
             <span class="n">ss</span> <span class="o">=</span> <span class="n">name</span><span class="o">.</span><span class="n">title</span><span class="p">()</span>
             <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">Constants</span><span class="o">.</span><span class="n">isotopeRecords</span><span class="p">:</span>
@@ -321,13 +311,13 @@
     <span class="k">return</span> <span class="n">result</span></div>
 
 
-<div class="viewcode-block" id="isotopeCode2Nucleus"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Common.isotopeCode2Nucleus">[docs]</a><span class="k">def</span> <span class="nf">isotopeCode2Nucleus</span><span class="p">(</span><span class="n">isotopeCode</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+<div class="viewcode-block" id="isotopeCode2Nucleus"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Common.isotopeCode2Nucleus">[docs]</a><span class="k">def</span> <span class="nf">isotopeCode2Nucleus</span><span class="p">(</span><span class="n">isotopeCode</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">isotopeCode</span><span class="p">:</span>
-        <span class="k">return</span> <span class="bp">None</span>
+        <span class="k">return</span> <span class="kc">None</span>
 
     <span class="n">record</span> <span class="o">=</span> <span class="n">Constants</span><span class="o">.</span><span class="n">isotopeRecords</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">isotopeCode</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">record</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
-        <span class="k">return</span> <span class="bp">None</span>
+    <span class="k">if</span> <span class="n">record</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">record</span><span class="o">.</span><span class="n">symbol</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span></div>
 
@@ -347,10 +337,10 @@
     <span class="c1"># NB, We deliberately do NOT use &#39;value in Constants.DEFAULT_ISOTOPE_DICT&#39;</span>
     <span class="c1"># We want to avoid elements that are in the dict but have value None.</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">name</span><span class="p">:</span>
-        <span class="k">return</span> <span class="bp">None</span>
-    <span class="k">elif</span> <span class="n">Constants</span><span class="o">.</span><span class="n">DEFAULT_ISOTOPE_DICT</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span>
+    <span class="k">elif</span> <span class="n">Constants</span><span class="o">.</span><span class="n">DEFAULT_ISOTOPE_DICT</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">name</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-    <span class="k">elif</span> <span class="n">Constants</span><span class="o">.</span><span class="n">DEFAULT_ISOTOPE_DICT</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="p">[:</span><span class="mi">2</span><span class="p">])</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+    <span class="k">elif</span> <span class="n">Constants</span><span class="o">.</span><span class="n">DEFAULT_ISOTOPE_DICT</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="p">[:</span><span class="mi">2</span><span class="p">])</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">name</span><span class="p">[:</span><span class="mi">2</span><span class="p">]</span>
     <span class="k">elif</span> <span class="n">name</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">isdigit</span><span class="p">():</span>
         <span class="n">ss</span> <span class="o">=</span> <span class="n">name</span><span class="o">.</span><span class="n">title</span><span class="p">()</span>
@@ -360,7 +350,7 @@
                     <span class="k">return</span> <span class="n">record</span><span class="o">.</span><span class="n">symbol</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
                 <span class="k">break</span>
     <span class="c1">#</span>
-    <span class="k">return</span> <span class="bp">None</span></div>
+    <span class="k">return</span> <span class="kc">None</span></div>
 
 
 <div class="viewcode-block" id="checkIsotope"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Common.checkIsotope">[docs]</a><span class="k">def</span> <span class="nf">checkIsotope</span><span class="p">(</span><span class="n">text</span><span class="p">):</span>
@@ -388,7 +378,7 @@
     <span class="n">result</span> <span class="o">=</span> <span class="p">(</span><span class="n">Constants</span><span class="o">.</span><span class="n">DEFAULT_ISOTOPE_DICT</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="p">[:</span><span class="mi">2</span><span class="p">])</span>
               <span class="ow">or</span> <span class="n">Constants</span><span class="o">.</span><span class="n">DEFAULT_ISOTOPE_DICT</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
 
-    <span class="k">if</span> <span class="n">result</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">result</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">name</span> <span class="o">==</span> <span class="s1">&#39;D&#39;</span><span class="p">:</span>
             <span class="c1"># special case</span>
             <span class="n">result</span> <span class="o">=</span> <span class="s1">&#39;2H&#39;</span>
@@ -405,7 +395,7 @@
             <span class="c1"># We have a match</span>
             <span class="k">return</span> <span class="n">refAxisCodes</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="k">return</span> <span class="bp">None</span></div>
+        <span class="k">return</span> <span class="kc">None</span></div>
 
 
 <div class="viewcode-block" id="axisCodeMapping"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Common.axisCodeMapping">[docs]</a><span class="k">def</span> <span class="nf">axisCodeMapping</span><span class="p">(</span><span class="n">axisCodes</span><span class="p">,</span> <span class="n">refAxisCodes</span><span class="p">):</span>
@@ -417,7 +407,7 @@
     <span class="k">if</span> <span class="n">mapIndices</span><span class="p">:</span>
         <span class="k">for</span> <span class="n">ii</span><span class="p">,</span> <span class="n">refAxisCode</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">refAxisCodes</span><span class="p">):</span>
             <span class="n">indx</span> <span class="o">=</span> <span class="n">mapIndices</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span>
-            <span class="k">if</span> <span class="n">indx</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">indx</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="n">result</span><span class="p">[</span><span class="n">axisCodes</span><span class="p">[</span><span class="n">indx</span><span class="p">]]</span> <span class="o">=</span> <span class="n">refAxisCode</span>
     <span class="c1">#</span>
     <span class="k">return</span> <span class="n">result</span></div>
@@ -447,7 +437,7 @@
 
     <span class="n">lenDifference</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">refAxisCodes</span><span class="p">)</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">axisCodes</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">lenDifference</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
-        <span class="k">return</span> <span class="bp">None</span>
+        <span class="k">return</span> <span class="kc">None</span>
 
     <span class="c1"># Set up match matrix</span>
     <span class="n">matches</span> <span class="o">=</span> <span class="p">[]</span>
@@ -457,12 +447,12 @@
     <span class="c1"># find best mapping</span>
     <span class="n">maxScore</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">axisCodes</span><span class="p">)</span>
     <span class="n">bestscore</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
-    <span class="n">results</span> <span class="o">=</span> <span class="bp">None</span>
-    <span class="n">values</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">axisCodes</span><span class="p">)))</span> <span class="o">+</span> <span class="p">[</span><span class="bp">None</span><span class="p">]</span> <span class="o">*</span> <span class="n">lenDifference</span>
+    <span class="n">results</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">values</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">axisCodes</span><span class="p">)))</span> <span class="o">+</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span> <span class="o">*</span> <span class="n">lenDifference</span>
     <span class="k">for</span> <span class="n">permutation</span> <span class="ow">in</span> <span class="n">itertools</span><span class="o">.</span><span class="n">permutations</span><span class="p">(</span><span class="n">values</span><span class="p">):</span>
         <span class="n">score</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="k">for</span> <span class="n">ii</span><span class="p">,</span> <span class="n">jj</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">permutation</span><span class="p">):</span>
-            <span class="k">if</span> <span class="n">jj</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">jj</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="n">score</span> <span class="o">+=</span> <span class="n">matches</span><span class="p">[</span><span class="n">jj</span><span class="p">][</span><span class="n">ii</span><span class="p">]</span>
         <span class="k">if</span> <span class="n">score</span> <span class="o">&gt;</span> <span class="n">bestscore</span><span class="p">:</span>
             <span class="n">bestscore</span> <span class="o">=</span> <span class="n">score</span>
@@ -501,13 +491,13 @@
                     <span class="n">score</span> <span class="o">=</span> <span class="mi">0</span>
                     <span class="k">for</span> <span class="n">idx1</span><span class="p">,</span> <span class="n">idx2</span> <span class="ow">in</span> <span class="n">boundCodeDicts</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
                         <span class="n">target</span> <span class="o">=</span> <span class="n">permutation</span><span class="p">[</span><span class="n">idx1</span><span class="p">]</span>
-                        <span class="k">if</span> <span class="n">target</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> <span class="n">target</span> <span class="o">==</span> <span class="n">boundCodeDicts</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">permutation</span><span class="p">[</span><span class="n">idx2</span><span class="p">]):</span>
+                        <span class="k">if</span> <span class="n">target</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">target</span> <span class="o">==</span> <span class="n">boundCodeDicts</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">permutation</span><span class="p">[</span><span class="n">idx2</span><span class="p">]):</span>
                             <span class="n">score</span> <span class="o">+=</span> <span class="mi">1</span>
                     <span class="k">if</span> <span class="n">score</span> <span class="o">&gt;</span> <span class="n">bestscore</span><span class="p">:</span>
                         <span class="n">bestscore</span> <span class="o">=</span> <span class="n">score</span>
                         <span class="n">result</span> <span class="o">=</span> <span class="n">permutation</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">result</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="c1">#</span>
     <span class="k">return</span> <span class="n">result</span>
 
@@ -552,13 +542,13 @@
 <div class="viewcode-block" id="doAxisCodesMatch"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Common.doAxisCodesMatch">[docs]</a><span class="k">def</span> <span class="nf">doAxisCodesMatch</span><span class="p">(</span><span class="n">axisCodes</span><span class="p">,</span> <span class="n">refAxisCodes</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Return True if axisCodes match refAxisCodes else False&quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">axisCodes</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">refAxisCodes</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">False</span>
+        <span class="k">return</span> <span class="kc">False</span>
 
     <span class="k">for</span> <span class="n">ii</span><span class="p">,</span> <span class="n">code</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">axisCodes</span><span class="p">):</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">axisCodesCompare</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">refAxisCodes</span><span class="p">[</span><span class="n">ii</span><span class="p">]):</span>
-            <span class="k">return</span> <span class="bp">False</span>
+            <span class="k">return</span> <span class="kc">False</span>
     <span class="c1">#</span>
-    <span class="k">return</span> <span class="bp">True</span></div>
+    <span class="k">return</span> <span class="kc">True</span></div>
 
 
 <div class="viewcode-block" id="stringifier"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Common.stringifier">[docs]</a><span class="k">def</span> <span class="nf">stringifier</span><span class="p">(</span><span class="o">*</span><span class="n">fields</span><span class="p">,</span> <span class="o">**</span><span class="n">options</span><span class="p">):</span>
@@ -575,12 +565,12 @@
     <span class="k">if</span> <span class="s1">&#39;floatFormat&#39;</span> <span class="ow">in</span> <span class="n">options</span><span class="p">:</span>
         <span class="n">floatFormat</span> <span class="o">=</span> <span class="n">options</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;floatFormat&#39;</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">floatFormat</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="n">floatFormat</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="k">if</span> <span class="n">options</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Unknown options: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">options</span><span class="o">.</span><span class="n">keys</span><span class="p">())))</span>
 
     <span class="c1"># Proper body of function starts here</span>
-    <span class="k">if</span> <span class="n">floatFormat</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">floatFormat</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="c1"># use default formatter, avoiding continuous creation of new ones</span>
         <span class="n">localFormatter</span> <span class="o">=</span> <span class="n">stdLocalFormatter</span>
     <span class="k">else</span><span class="p">:</span>
@@ -589,9 +579,9 @@
     <span class="n">fieldFormats</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="n">fields</span><span class="p">:</span>
         <span class="c1"># String will be &#39;field1={_obj.field1}</span>
-        <span class="n">fieldFormats</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;{0}={{_obj.{0}!r}}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">field</span><span class="p">))</span>
+        <span class="n">fieldFormats</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{0}</span><span class="s1">={{_obj.</span><span class="si">{0}</span><span class="s1">!r}}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">field</span><span class="p">))</span>
 
-    <span class="n">formatString</span> <span class="o">=</span> <span class="s1">&#39;&lt;{_obj.pid!s}| &#39;</span> <span class="o">+</span> <span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">fieldFormats</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;&gt;&#39;</span>
+    <span class="n">formatString</span> <span class="o">=</span> <span class="s1">&#39;&lt;</span><span class="si">{_obj.pid!s}</span><span class="s1">| &#39;</span> <span class="o">+</span> <span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">fieldFormats</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;&gt;&#39;</span>
 
     <span class="k">def</span> <span class="nf">formatter</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">localFormatter</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">format_string</span><span class="o">=</span><span class="n">formatString</span><span class="p">,</span> <span class="n">_obj</span><span class="o">=</span><span class="n">x</span><span class="p">)</span>
@@ -600,7 +590,7 @@
 
 
 <div class="viewcode-block" id="contains_whitespace"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Common.contains_whitespace">[docs]</a><span class="k">def</span> <span class="nf">contains_whitespace</span><span class="p">(</span><span class="n">s</span><span class="p">):</span>
-    <span class="k">return</span> <span class="bp">True</span> <span class="ow">in</span> <span class="p">[</span><span class="n">c</span> <span class="ow">in</span> <span class="n">s</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">string</span><span class="o">.</span><span class="n">whitespace</span><span class="p">]</span></div>
+    <span class="k">return</span> <span class="kc">True</span> <span class="ow">in</span> <span class="p">[</span><span class="n">c</span> <span class="ow">in</span> <span class="n">s</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">string</span><span class="o">.</span><span class="n">whitespace</span><span class="p">]</span></div>
 
 
 <div class="viewcode-block" id="resetSerial"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Common.resetSerial">[docs]</a><span class="k">def</span> <span class="nf">resetSerial</span><span class="p">(</span><span class="n">apiObject</span><span class="p">,</span> <span class="n">newSerial</span><span class="p">):</span>
@@ -616,9 +606,9 @@
     <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">apiObject</span><span class="p">,</span> <span class="s1">&#39;serial&#39;</span><span class="p">):</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Cannot reset serial, </span><span class="si">%s</span><span class="s2"> does not have a &#39;serial&#39; attribute&quot;</span>
                          <span class="o">%</span> <span class="n">apiObject</span><span class="p">)</span>
-    <span class="n">downlink</span> <span class="o">=</span> <span class="n">apiObject</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">_metaclass</span><span class="o">.</span><span class="n">parentRole</span><span class="o">.</span><span class="n">otherRole</span><span class="o">.</span><span class="n">name</span>
+    <span class="n">downlink</span> <span class="o">=</span> <span class="n">apiObject</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="n">_metaclass</span><span class="o">.</span><span class="n">parentRole</span><span class="o">.</span><span class="n">otherRole</span><span class="o">.</span><span class="n">name</span>
 
-    <span class="n">parentDict</span> <span class="o">=</span> <span class="n">apiObject</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">__dict__</span>
+    <span class="n">parentDict</span> <span class="o">=</span> <span class="n">apiObject</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="vm">__dict__</span>
     <span class="n">downdict</span> <span class="o">=</span> <span class="n">parentDict</span><span class="p">[</span><span class="n">downlink</span><span class="p">]</span>
     <span class="n">oldSerial</span> <span class="o">=</span> <span class="n">apiObject</span><span class="o">.</span><span class="n">serial</span>
     <span class="n">serialDict</span> <span class="o">=</span> <span class="n">parentDict</span><span class="p">[</span><span class="s1">&#39;_serialDict&#39;</span><span class="p">]</span>
@@ -631,7 +621,7 @@
 
     <span class="k">else</span><span class="p">:</span>
         <span class="n">maxSerial</span> <span class="o">=</span> <span class="n">serialDict</span><span class="p">[</span><span class="n">downlink</span><span class="p">]</span>
-        <span class="n">apiObject</span><span class="o">.</span><span class="n">__dict__</span><span class="p">[</span><span class="s1">&#39;serial&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">newSerial</span>
+        <span class="n">apiObject</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="s1">&#39;serial&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">newSerial</span>
         <span class="n">downdict</span><span class="p">[</span><span class="n">newSerial</span><span class="p">]</span> <span class="o">=</span> <span class="n">apiObject</span>
         <span class="k">del</span> <span class="n">downdict</span><span class="p">[</span><span class="n">oldSerial</span><span class="p">]</span>
         <span class="k">if</span> <span class="n">newSerial</span> <span class="o">&gt;</span> <span class="n">maxSerial</span><span class="p">:</span>
@@ -640,7 +630,7 @@
             <span class="n">serialDict</span><span class="p">[</span><span class="n">downlink</span><span class="p">]</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">downdict</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="makeIterableList"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Common.makeIterableList">[docs]</a><span class="k">def</span> <span class="nf">makeIterableList</span><span class="p">(</span><span class="n">inList</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+<div class="viewcode-block" id="makeIterableList"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Common.makeIterableList">[docs]</a><span class="k">def</span> <span class="nf">makeIterableList</span><span class="p">(</span><span class="n">inList</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Take a list of lists and concatenate into a single list.</span>
 <span class="sd">    Remove any Nones from the list</span>
@@ -650,7 +640,7 @@
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">inList</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">inList</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
         <span class="k">return</span> <span class="p">[</span><span class="n">y</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">inList</span> <span class="k">for</span> <span class="n">y</span> <span class="ow">in</span> <span class="n">makeIterableList</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">if</span> <span class="n">inList</span><span class="p">]</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="k">if</span> <span class="n">inList</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">inList</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">return</span> <span class="p">[</span><span class="n">inList</span><span class="p">]</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="p">[]</span></div>
@@ -677,12 +667,12 @@
         <span class="k">yield</span> <span class="n">obj</span>
 
 
-<span class="k">def</span> <span class="nf">_getChildren</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">_getChildren</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Walks in a tree like obj and put all children/parents in list of list eg: [[Parent,child...,],...]</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">children</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="k">if</span> <span class="n">path</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">path</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">path</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="n">path</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">obj</span><span class="o">.</span><span class="n">_childClasses</span><span class="p">:</span>
@@ -711,7 +701,7 @@
 <span class="sd">              outers (rest) not included in inners</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="n">bools</span> <span class="o">=</span> <span class="n">dataframe</span><span class="p">[</span><span class="n">column1</span><span class="p">]</span><span class="o">.</span><span class="n">between</span><span class="p">(</span><span class="n">minX</span><span class="p">,</span> <span class="n">maxX</span><span class="p">,</span> <span class="n">inclusive</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span> <span class="o">&amp;</span> <span class="n">dataframe</span><span class="p">[</span><span class="n">column2</span><span class="p">]</span><span class="o">.</span><span class="n">between</span><span class="p">(</span><span class="n">minY</span><span class="p">,</span> <span class="n">maxY</span><span class="p">,</span> <span class="n">inclusive</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    <span class="n">bools</span> <span class="o">=</span> <span class="n">dataframe</span><span class="p">[</span><span class="n">column1</span><span class="p">]</span><span class="o">.</span><span class="n">between</span><span class="p">(</span><span class="n">minX</span><span class="p">,</span> <span class="n">maxX</span><span class="p">,</span> <span class="n">inclusive</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="o">&amp;</span> <span class="n">dataframe</span><span class="p">[</span><span class="n">column2</span><span class="p">]</span><span class="o">.</span><span class="n">between</span><span class="p">(</span><span class="n">minY</span><span class="p">,</span> <span class="n">maxY</span><span class="p">,</span> <span class="n">inclusive</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="n">inners</span> <span class="o">=</span> <span class="n">dataframe</span><span class="p">[</span><span class="n">bools</span><span class="p">]</span>
     <span class="n">outers</span> <span class="o">=</span> <span class="n">dataframe</span><span class="p">[</span><span class="o">-</span><span class="n">bools</span><span class="p">]</span>
     <span class="n">filteredInners</span> <span class="o">=</span> <span class="n">inners</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">items</span><span class="o">=</span><span class="p">[</span><span class="n">column1</span><span class="p">,</span> <span class="n">column2</span><span class="p">])</span>
@@ -723,8 +713,8 @@
 <div class="viewcode-block" id="LocalFormatter"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Common.LocalFormatter">[docs]</a><span class="k">class</span> <span class="nc">LocalFormatter</span><span class="p">(</span><span class="n">string</span><span class="o">.</span><span class="n">Formatter</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Overrides the string formatter to change the float formatting&quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">overrideFloatFormat</span><span class="o">=</span><span class="s1">&#39;.6g&#39;</span><span class="p">):</span>
-        <span class="nb">super</span><span class="p">(</span><span class="n">LocalFormatter</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">()</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">overrideFloatFormat</span><span class="o">=</span><span class="s1">&#39;.6g&#39;</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">LocalFormatter</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">overrideFloatFormat</span> <span class="o">=</span> <span class="n">overrideFloatFormat</span>
 
 <div class="viewcode-block" id="LocalFormatter.convert_field"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Common.LocalFormatter.convert_field">[docs]</a>    <span class="k">def</span> <span class="nf">convert_field</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">conversion</span><span class="p">):</span>
@@ -734,7 +724,7 @@
         <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="s1">&#39;pid&#39;</span><span class="p">):</span>
             <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
         <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">float</span><span class="p">):</span>
-            <span class="k">return</span> <span class="n">format</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">overrideFloatFormat</span><span class="p">)</span>
+            <span class="k">return</span> <span class="nb">format</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">overrideFloatFormat</span><span class="p">)</span>
         <span class="k">elif</span> <span class="nb">type</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="o">==</span> <span class="nb">tuple</span><span class="p">:</span>
             <span class="c1"># Deliberate. We do NOT want to catch tuple subtypes here</span>
             <span class="n">end</span> <span class="o">=</span> <span class="s1">&#39;,)&#39;</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span> <span class="k">else</span> <span class="s1">&#39;)&#39;</span>
@@ -742,7 +732,7 @@
         <span class="k">elif</span> <span class="nb">type</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="o">==</span> <span class="nb">list</span><span class="p">:</span>
             <span class="c1"># Deliberate. We do NOT want to catch list subtypes here</span>
             <span class="k">return</span> <span class="s1">&#39;[&#39;</span> <span class="o">+</span> <span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">convert_field</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">value</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;]&#39;</span>
-        <span class="k">elif</span> <span class="n">conversion</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">elif</span> <span class="n">conversion</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">value</span>
         <span class="k">elif</span> <span class="n">conversion</span> <span class="o">==</span> <span class="s1">&#39;s&#39;</span><span class="p">:</span>
             <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
@@ -755,7 +745,7 @@
                 <span class="c1"># Likely we are in Python 2.</span>
                 <span class="c1"># As ascii behaves like Python 2 repr, this should be the correct workaround</span>
                 <span class="k">return</span> <span class="nb">repr</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Unknown conversion specifier {0!s}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">conversion</span><span class="p">))</span></div></div>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Unknown conversion specifier </span><span class="si">{0!s}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">conversion</span><span class="p">))</span></div></div>
 
 
 <span class="n">stdLocalFormatter</span> <span class="o">=</span> <span class="n">LocalFormatter</span><span class="p">()</span>
@@ -764,7 +754,7 @@
 <span class="c1">#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~</span>
 <span class="c1"># 20190507:ED new routines to match axis codes and return dict or indices</span>
 
-<span class="k">def</span> <span class="nf">_matchSingleAxisCode</span><span class="p">(</span><span class="n">code1</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="n">code2</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="n">exactMatch</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="bp">False</span><span class="p">,</span> <span class="n">allowLowercase</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="k">def</span> <span class="nf">_matchSingleAxisCode</span><span class="p">(</span><span class="n">code1</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">code2</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">exactMatch</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">allowLowercase</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;number of matching characters</span>
 <span class="sd">    code1, code2 = strings</span>
 <span class="sd">    e.g. &#39;Hn1&#39;, &#39;H1&#39;</span>
@@ -838,7 +828,7 @@
     <span class="k">return</span> <span class="o">-</span><span class="n">item</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>  <span class="c1"># sort from high to low</span>
 
 
-<div class="viewcode-block" id="getAxisCodeMatch"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Common.getAxisCodeMatch">[docs]</a><span class="k">def</span> <span class="nf">getAxisCodeMatch</span><span class="p">(</span><span class="n">axisCodes</span><span class="p">,</span> <span class="n">refAxisCodes</span><span class="p">,</span> <span class="n">allMatches</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">exactMatch</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">OrderedDict</span><span class="p">:</span>
+<div class="viewcode-block" id="getAxisCodeMatch"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Common.getAxisCodeMatch">[docs]</a><span class="k">def</span> <span class="nf">getAxisCodeMatch</span><span class="p">(</span><span class="n">axisCodes</span><span class="p">,</span> <span class="n">refAxisCodes</span><span class="p">,</span> <span class="n">exactMatch</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">allMatches</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">OrderedDict</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;Return an OrderedDict containing the mapping from the refAxisCodes to axisCodes</span>
 
 <span class="sd">    There may be multiple matches, or None for each axis code.</span>
@@ -888,15 +878,15 @@
         <span class="k">if</span> <span class="n">allMatches</span><span class="p">:</span>
             <span class="n">found</span><span class="p">[</span><span class="n">code1</span><span class="p">]</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">mm</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">mm</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">foundCodes</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="n">_SortByMatch</span><span class="p">))</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">found</span><span class="p">[</span><span class="n">code1</span><span class="p">]</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">foundCodes</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="n">_SortByMatch</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="n">foundCodes</span> <span class="k">else</span> <span class="bp">None</span>
+            <span class="n">found</span><span class="p">[</span><span class="n">code1</span><span class="p">]</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">foundCodes</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="n">_SortByMatch</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="n">foundCodes</span> <span class="k">else</span> <span class="kc">None</span>
 
     <span class="k">return</span> <span class="n">found</span></div>
 
 
-<div class="viewcode-block" id="getAxisCodeMatchIndices"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Common.getAxisCodeMatchIndices">[docs]</a><span class="k">def</span> <span class="nf">getAxisCodeMatchIndices</span><span class="p">(</span><span class="n">axisCodes</span><span class="p">,</span> <span class="n">refAxisCodes</span><span class="p">,</span> <span class="n">exactMatch</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Return a tuple containing the indices for mapping axisCodes into refAxisCodes</span>
+<div class="viewcode-block" id="getAxisCodeMatchIndices"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Common.getAxisCodeMatchIndices">[docs]</a><span class="k">def</span> <span class="nf">getAxisCodeMatchIndices</span><span class="p">(</span><span class="n">axisCodes</span><span class="p">,</span> <span class="n">refAxisCodes</span><span class="p">,</span> <span class="n">exactMatch</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">allMatches</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Return a tuple containing the indices for each axis code in axisCodes in refAxisCodes</span>
 
-<span class="sd">    Only the best match is returned for each code</span>
+<span class="sd">    Only the best match is returned for each code, elements not found in refAxisCodes will be marked as &#39;None&#39;</span>
 
 <span class="sd">    e.g. for unique axis codes:</span>
 
@@ -923,7 +913,10 @@
             <span class="k">if</span> <span class="n">match</span><span class="p">:</span>
                 <span class="n">foundCodes</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">code2</span><span class="p">,</span> <span class="n">jj</span><span class="p">,</span> <span class="n">match</span><span class="p">))</span>
 
-        <span class="n">found</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">foundCodes</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="n">_SortByMatch</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="k">if</span> <span class="n">foundCodes</span> <span class="k">else</span> <span class="bp">None</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">allMatches</span><span class="p">:</span>
+            <span class="n">found</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">tuple</span><span class="p">(</span><span class="n">mm</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">mm</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">foundCodes</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="n">_SortByMatch</span><span class="p">)))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">found</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">foundCodes</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="n">_SortByMatch</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="k">if</span> <span class="n">foundCodes</span> <span class="k">else</span> <span class="kc">None</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">found</span><span class="p">)</span></div>
 </pre></div>
@@ -934,15 +927,15 @@
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
 <div id="searchbox" style="display: none" role="search">
-  <h3>Quick search</h3>
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
     <form class="search" action="../../../search.html" method="get">
-      <input type="text" name="q" />
+      <input type="text" name="q" aria-labelledby="searchlabel" />
       <input type="submit" value="Go" />
-      <input type="hidden" name="check_keywords" value="yes" />
-      <input type="hidden" name="area" value="default" />
     </form>
+    </div>
 </div>
-<script type="text/javascript">$('#searchbox').show(0);</script>
+<script>$('#searchbox').show(0);</script>
         </div>
       </div>
       <div class="clearer"></div>
@@ -956,13 +949,13 @@
         <li class="right" >
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../index.html">Python  documentation</a> &raquo;</li>
-          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="../../../index.html">Python  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &#187;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
-        &copy; Copyright .
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.1.
+        &#169; Copyright .
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.4.0.
     </div>
   </body>
 </html>

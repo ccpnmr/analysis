@@ -1,32 +1,22 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
+<!DOCTYPE html>
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    
-    <title>ccpnmodel.ccpncore.memops.scripts.xmlio.CompatibilityGen &mdash; Python  documentation</title>
-    
+    <meta charset="utf-8" />
+    <title>ccpnmodel.ccpncore.memops.scripts.xmlio.CompatibilityGen &#8212; Python  documentation</title>
     <link rel="stylesheet" href="../../../../../../_static/classic.css" type="text/css" />
     <link rel="stylesheet" href="../../../../../../_static/pygments.css" type="text/css" />
     
-    <script type="text/javascript">
-      var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    '../../../../../../',
-        VERSION:     '',
-        COLLAPSE_INDEX: false,
-        FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true
-      };
-    </script>
-    <script type="text/javascript" src="../../../../../../_static/jquery.js"></script>
-    <script type="text/javascript" src="../../../../../../_static/underscore.js"></script>
-    <script type="text/javascript" src="../../../../../../_static/doctools.js"></script>
-    <link rel="top" title="Python  documentation" href="../../../../../../index.html" />
-    <link rel="up" title="Module code" href="../../../../../index.html" /> 
-  </head>
-  <body role="document">
+    <script id="documentation_options" data-url_root="../../../../../../" src="../../../../../../_static/documentation_options.js"></script>
+    <script src="../../../../../../_static/jquery.js"></script>
+    <script src="../../../../../../_static/underscore.js"></script>
+    <script src="../../../../../../_static/doctools.js"></script>
+    <script src="../../../../../../_static/language_data.js"></script>
+    
+    <link rel="index" title="Index" href="../../../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../../../search.html" /> 
+  </head><body>
     <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
@@ -36,8 +26,8 @@
         <li class="right" >
           <a href="../../../../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../../../../index.html">Python  documentation</a> &raquo;</li>
-          <li class="nav-item nav-item-1"><a href="../../../../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="../../../../../../index.html">Python  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../../../../index.html" accesskey="U">Module code</a> &#187;</li> 
       </ul>
     </div>  
 
@@ -103,7 +93,7 @@
 
 <div class="viewcode-block" id="LocalXmlGen"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.xmlio.html#ccpnmodel.ccpncore.memops.scripts.xmlio.CompatibilityGen.LocalXmlGen">[docs]</a><span class="k">class</span> <span class="nc">LocalXmlGen</span><span class="p">(</span><span class="n">XmlGen</span><span class="o">.</span><span class="n">XmlGen</span><span class="p">):</span>
 
-  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">):</span>
+  <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">):</span>
   
     <span class="bp">self</span><span class="o">.</span><span class="n">addModelFlavour</span><span class="p">(</span><span class="s1">&#39;language&#39;</span><span class="p">,</span> <span class="s1">&#39;python&#39;</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">baseName</span> <span class="o">=</span> <span class="s1">&#39;xml&#39;</span>
@@ -112,11 +102,11 @@
       <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tag</span><span class="p">):</span>
         <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tag</span><span class="p">,</span> <span class="n">val</span><span class="p">)</span>
     
-    <span class="nb">super</span><span class="p">(</span><span class="n">LocalXmlGen</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">()</span></div>
+    <span class="nb">super</span><span class="p">(</span><span class="n">LocalXmlGen</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span></div>
 
 
-<div class="viewcode-block" id="makeUpgrade"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.xmlio.html#ccpnmodel.ccpncore.memops.scripts.xmlio.CompatibilityGen.makeUpgrade">[docs]</a><span class="k">def</span> <span class="nf">makeUpgrade</span><span class="p">(</span><span class="n">fromVersionTag</span><span class="p">,</span> <span class="n">toVersionTag</span><span class="p">,</span> <span class="n">toTopPackage</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">modelPortal</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
-                <span class="n">includePackageNames</span><span class="o">=</span><span class="p">(),</span> <span class="n">excludePackageNames</span><span class="o">=</span><span class="p">(),</span> <span class="n">infoFileName</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+<div class="viewcode-block" id="makeUpgrade"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.xmlio.html#ccpnmodel.ccpncore.memops.scripts.xmlio.CompatibilityGen.makeUpgrade">[docs]</a><span class="k">def</span> <span class="nf">makeUpgrade</span><span class="p">(</span><span class="n">fromVersionTag</span><span class="p">,</span> <span class="n">toVersionTag</span><span class="p">,</span> <span class="n">toTopPackage</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">modelPortal</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                <span class="n">includePackageNames</span><span class="o">=</span><span class="p">(),</span> <span class="n">excludePackageNames</span><span class="o">=</span><span class="p">(),</span> <span class="n">infoFileName</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
   <span class="sd">&quot;&quot;&quot; Make upgrade or downgrade map code from fromVersion to toVersion</span>
 <span class="sd">  Will look for the models in ccpnmodel.versionDir</span>
 <span class="sd">  and place the compatibility code in e.g.</span>
@@ -124,7 +114,7 @@
 <span class="sd">  ccpncore/memops/format/compatibility/downgrade/v_2_2_1/MapInfo.py</span>
 <span class="sd">  &quot;&quot;&quot;</span>
 
-  <span class="k">if</span> <span class="n">infoFileName</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+  <span class="k">if</span> <span class="n">infoFileName</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
     <span class="n">infoFileName</span> <span class="o">=</span> <span class="n">defaultInfoFile</span>
 
   <span class="n">fromVersion</span> <span class="o">=</span> <span class="n">Version</span><span class="o">.</span><span class="n">Version</span><span class="p">(</span><span class="n">fromVersionTag</span><span class="p">)</span>
@@ -133,7 +123,7 @@
     <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Trying to make compatibility between identical versions: </span><span class="si">%s</span><span class="s2"> </span><span class="si">%s</span><span class="s2">&quot;</span>
                     <span class="o">%</span> <span class="p">(</span><span class="n">fromVersion</span><span class="p">,</span> <span class="n">toVersion</span><span class="p">))</span>
   
-  <span class="k">if</span> <span class="n">toTopPackage</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+  <span class="k">if</span> <span class="n">toTopPackage</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
     <span class="n">toTopPackage</span> <span class="o">=</span> <span class="n">XmlModelIo</span><span class="o">.</span><span class="n">readModel</span><span class="p">(</span><span class="n">versionTag</span><span class="o">=</span><span class="n">toVersionTag</span><span class="p">,</span>
                                        <span class="n">includePackageNames</span><span class="o">=</span><span class="n">includePackageNames</span><span class="p">,</span>
                                        <span class="n">excludePackageNames</span><span class="o">=</span><span class="n">excludePackageNames</span><span class="p">)</span>
@@ -165,14 +155,14 @@
     <span class="n">versionFile</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">topDir</span><span class="p">,</span> <span class="s1">&#39;python/ccpncore/memops/Version.py&#39;</span><span class="p">)</span>
   <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="nb">open</span><span class="p">(</span><span class="n">versionFile</span><span class="p">):</span>
     <span class="k">if</span> <span class="n">line</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;currentModelVersion = &#39;</span><span class="p">):</span>
-      <span class="k">exec</span><span class="p">(</span><span class="n">line</span><span class="p">,</span> <span class="nb">locals</span><span class="p">(),</span> <span class="nb">globals</span><span class="p">())</span>
+      <span class="n">exec</span><span class="p">(</span><span class="n">line</span><span class="p">,</span> <span class="nb">locals</span><span class="p">(),</span> <span class="nb">globals</span><span class="p">())</span>
       <span class="k">return</span> <span class="n">Version</span><span class="o">.</span><span class="n">currentModelVersion</span>
   <span class="k">else</span><span class="p">:</span>
-    <span class="k">return</span>  <span class="bp">None</span></div>
+    <span class="k">return</span>  <span class="kc">None</span></div>
     
   
-<div class="viewcode-block" id="makeCompatibility"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.xmlio.html#ccpnmodel.ccpncore.memops.scripts.xmlio.CompatibilityGen.makeCompatibility">[docs]</a><span class="k">def</span> <span class="nf">makeCompatibility</span><span class="p">(</span><span class="n">fromModel</span><span class="p">,</span> <span class="n">toModel</span><span class="p">,</span> <span class="n">modelPortal</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
-                      <span class="n">elementPairings</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">fileName</span><span class="o">=</span><span class="s1">&#39;CompatibilityMapInfo.py&#39;</span><span class="p">):</span>
+<div class="viewcode-block" id="makeCompatibility"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.xmlio.html#ccpnmodel.ccpncore.memops.scripts.xmlio.CompatibilityGen.makeCompatibility">[docs]</a><span class="k">def</span> <span class="nf">makeCompatibility</span><span class="p">(</span><span class="n">fromModel</span><span class="p">,</span> <span class="n">toModel</span><span class="p">,</span> <span class="n">modelPortal</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                      <span class="n">elementPairings</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">fileName</span><span class="o">=</span><span class="s1">&#39;CompatibilityMapInfo.py&#39;</span><span class="p">):</span>
   <span class="sd">&quot;&quot;&quot; Make compatibility info for converting fromModel to toModel.</span>
 <span class="sd">  elementPairings is a list of (oldGuid, newGuid) pairs that</span>
 <span class="sd">  map elements from the two models. Note that several old guids</span>
@@ -183,11 +173,11 @@
     <span class="kn">from</span> <span class="nn">ccpn.util.Logging</span> <span class="kn">import</span> <span class="n">getLogger</span>
     <span class="n">loggerfunc</span> <span class="o">=</span> <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">warning</span>
   <span class="k">except</span><span class="p">:</span>
-    <span class="n">loggerfunc</span> <span class="o">=</span> <span class="k">print</span>
+    <span class="n">loggerfunc</span> <span class="o">=</span> <span class="nb">print</span>
   
   <span class="n">comparison</span> <span class="o">=</span> <span class="n">MetaModel</span><span class="o">.</span><span class="n">compareModels</span><span class="p">(</span><span class="n">fromModel</span><span class="p">,</span> <span class="n">toModel</span><span class="p">,</span>
                                        <span class="n">elementPairings</span><span class="o">=</span><span class="n">elementPairings</span><span class="p">)</span>
-  <span class="k">if</span> <span class="n">modelPortal</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+  <span class="k">if</span> <span class="n">modelPortal</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
     <span class="n">modelPortal</span> <span class="o">=</span> <span class="n">ModelPortal</span><span class="p">(</span><span class="n">toModel</span><span class="p">)</span>
     <span class="n">PyFileModelAdapt</span><span class="o">.</span><span class="n">processModel</span><span class="p">(</span><span class="n">modelPortal</span><span class="p">)</span>
   <span class="n">xmlGen</span> <span class="o">=</span> <span class="n">LocalXmlGen</span><span class="p">(</span><span class="n">modelPortal</span><span class="o">=</span><span class="n">modelPortal</span><span class="p">)</span>
@@ -210,10 +200,10 @@
     <span class="k">if</span> <span class="n">ee</span><span class="o">.</span><span class="n">container</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">elems</span><span class="p">:</span>
       <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">ee</span><span class="p">,</span> <span class="n">MetaModel</span><span class="o">.</span><span class="n">AbstractDataType</span><span class="p">):</span>
         <span class="n">skips</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">ee</span><span class="o">.</span><span class="n">container</span><span class="o">.</span><span class="n">shortName</span><span class="p">,</span> <span class="n">ee</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">ee</span><span class="o">.</span><span class="n">guid</span><span class="p">,</span>
-                      <span class="n">ee</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span><span class="p">))</span>
+                      <span class="n">ee</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">))</span>
         
       <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">ee</span><span class="p">,</span> <span class="n">MetaModel</span><span class="o">.</span><span class="n">MetaPackage</span><span class="p">):</span>
-        <span class="n">skips</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">ee</span><span class="o">.</span><span class="n">shortName</span> <span class="ow">or</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">ee</span><span class="o">.</span><span class="n">guid</span><span class="p">,</span> <span class="n">ee</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span><span class="p">))</span>
+        <span class="n">skips</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">ee</span><span class="o">.</span><span class="n">shortName</span> <span class="ow">or</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">ee</span><span class="o">.</span><span class="n">guid</span><span class="p">,</span> <span class="n">ee</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">))</span>
         
       <span class="k">elif</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">ee</span><span class="p">,</span> <span class="n">MetaModel</span><span class="o">.</span><span class="n">MetaOperation</span><span class="p">)</span> <span class="ow">or</span> 
             <span class="nb">isinstance</span><span class="p">(</span><span class="n">ee</span><span class="p">,</span> <span class="n">MetaModel</span><span class="o">.</span><span class="n">MetaConstraint</span><span class="p">)):</span>
@@ -234,41 +224,41 @@
           <span class="c1"># interpackage link in wrong direction. Not in maps. Must be skipped</span>
           <span class="c1"># Should not matter, but skip rather than ignore in case of model changes.</span>
           <span class="n">skips</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">cc</span><span class="o">.</span><span class="n">container</span><span class="o">.</span><span class="n">shortName</span><span class="p">,</span> <span class="n">cc</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">ee</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">ee</span><span class="o">.</span><span class="n">guid</span><span class="p">,</span> 
-                        <span class="n">ee</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span><span class="p">))</span>
+                        <span class="n">ee</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">))</span>
  
         <span class="k">elif</span> <span class="n">ee</span><span class="o">.</span><span class="n">hierarchy</span> <span class="o">!=</span> <span class="n">metaConstants</span><span class="o">.</span><span class="n">no_hierarchy</span><span class="p">:</span>
           <span class="c1"># parent or child link. Delay is not defined - must be skipped</span>
           <span class="n">skips</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">cc</span><span class="o">.</span><span class="n">container</span><span class="o">.</span><span class="n">shortName</span><span class="p">,</span> <span class="n">cc</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">ee</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">ee</span><span class="o">.</span><span class="n">guid</span><span class="p">,</span> 
-                        <span class="n">ee</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span><span class="p">))</span>
+                        <span class="n">ee</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">))</span>
  
         <span class="k">elif</span> <span class="n">vt</span><span class="o">.</span><span class="n">guid</span> <span class="ow">in</span> <span class="n">comparison</span><span class="p">[</span><span class="s1">&#39;dict2&#39;</span><span class="p">]:</span>
           <span class="c1"># The valueType also still exists</span>
                          
           <span class="n">dd</span> <span class="o">=</span> <span class="n">XmlGen</span><span class="o">.</span><span class="n">getRoleMap</span><span class="p">(</span><span class="n">ee</span><span class="p">,</span> <span class="n">cc</span><span class="p">,</span> <span class="n">globalMapping</span><span class="p">)</span>
           <span class="n">elemMap</span> <span class="o">=</span> <span class="p">{}</span>
-          <span class="k">if</span> <span class="n">dd</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+          <span class="k">if</span> <span class="n">dd</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">loggerfunc</span> <span class="p">(</span><span class="s1">&#39;WARNING, no map found for </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">ee</span><span class="p">)</span>
             
           <span class="k">else</span><span class="p">:</span>
             <span class="k">for</span> <span class="n">tag</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;type&#39;</span><span class="p">,</span> <span class="s1">&#39;proc&#39;</span><span class="p">,</span> <span class="s1">&#39;name&#39;</span><span class="p">,</span> <span class="s1">&#39;eType&#39;</span><span class="p">,</span> <span class="s1">&#39;tag&#39;</span><span class="p">):</span>
               <span class="n">xx</span> <span class="o">=</span> <span class="n">dd</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">tag</span><span class="p">)</span>
-              <span class="k">if</span> <span class="n">xx</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+              <span class="k">if</span> <span class="n">xx</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="n">elemMap</span><span class="p">[</span><span class="n">tag</span><span class="p">]</span> <span class="o">=</span> <span class="n">xx</span>
  
             <span class="k">if</span> <span class="n">elemMap</span><span class="p">:</span>
               <span class="c1"># put as delay</span>
               <span class="n">delays</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">cc</span><span class="o">.</span><span class="n">container</span><span class="o">.</span><span class="n">shortName</span><span class="p">,</span> <span class="n">cc</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">ee</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">ee</span><span class="o">.</span><span class="n">guid</span><span class="p">,</span>
-                             <span class="n">elemMap</span><span class="p">,</span> <span class="bp">None</span><span class="p">))</span>
+                             <span class="n">elemMap</span><span class="p">,</span> <span class="kc">None</span><span class="p">))</span>
             <span class="k">else</span><span class="p">:</span>
               <span class="c1"># cannot create map, skip</span>
               <span class="n">loggerfunc</span> <span class="p">(</span><span class="s1">&#39;WARNING, incomplete map found for </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">ee</span><span class="p">)</span>
               <span class="n">skips</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">cc</span><span class="o">.</span><span class="n">container</span><span class="o">.</span><span class="n">shortName</span><span class="p">,</span> <span class="n">cc</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">ee</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">ee</span><span class="o">.</span><span class="n">guid</span><span class="p">,</span> 
-                            <span class="n">ee</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span><span class="p">))</span>
+                            <span class="n">ee</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">))</span>
  
         <span class="k">else</span><span class="p">:</span>
           <span class="c1"># ee valueType does not exist. Skip.</span>
           <span class="n">skips</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-           <span class="p">(</span><span class="n">cc</span><span class="o">.</span><span class="n">container</span><span class="o">.</span><span class="n">shortName</span><span class="p">,</span> <span class="n">cc</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">ee</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">ee</span><span class="o">.</span><span class="n">guid</span><span class="p">,</span> <span class="n">ee</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span><span class="p">)</span>
+           <span class="p">(</span><span class="n">cc</span><span class="o">.</span><span class="n">container</span><span class="o">.</span><span class="n">shortName</span><span class="p">,</span> <span class="n">cc</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">ee</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">ee</span><span class="o">.</span><span class="n">guid</span><span class="p">,</span> <span class="n">ee</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">)</span>
           <span class="p">)</span>
  
       <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">ee</span><span class="p">,</span> <span class="n">MetaModel</span><span class="o">.</span><span class="n">MetaAttribute</span><span class="p">):</span>
@@ -280,15 +270,15 @@
         <span class="n">valueTypeGuid</span> <span class="o">=</span> <span class="n">superVts</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">guid</span>
         
         <span class="k">if</span> <span class="p">(</span><span class="n">vt</span><span class="o">.</span><span class="n">guid</span> <span class="ow">in</span> <span class="n">comparison</span><span class="p">[</span><span class="s1">&#39;dict2&#39;</span><span class="p">]</span> 
-            <span class="ow">or</span> <span class="n">vt</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span> <span class="o">==</span> <span class="s1">&#39;MetaDataType&#39;</span> <span class="ow">and</span> <span class="n">superVts</span><span class="p">):</span>
+            <span class="ow">or</span> <span class="n">vt</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;MetaDataType&#39;</span> <span class="ow">and</span> <span class="n">superVts</span><span class="p">):</span>
  
           <span class="n">dd</span> <span class="o">=</span> <span class="n">XmlGen</span><span class="o">.</span><span class="n">getAttrMap</span><span class="p">(</span><span class="n">ee</span><span class="p">,</span> <span class="n">cc</span><span class="p">,</span> <span class="n">globalMapping</span><span class="p">,</span> 
                                  <span class="n">valueTypeGuid</span><span class="o">=</span><span class="n">valueTypeGuid</span><span class="p">)</span>
           <span class="n">elemMap</span> <span class="o">=</span> <span class="p">{}</span>
-          <span class="k">if</span> <span class="n">dd</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+          <span class="k">if</span> <span class="n">dd</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">for</span> <span class="n">tag</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;type&#39;</span><span class="p">,</span> <span class="s1">&#39;proc&#39;</span><span class="p">,</span> <span class="s1">&#39;name&#39;</span><span class="p">,</span> <span class="s1">&#39;eType&#39;</span><span class="p">,</span> <span class="s1">&#39;tag&#39;</span><span class="p">):</span>
               <span class="n">xx</span> <span class="o">=</span> <span class="n">dd</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">tag</span><span class="p">)</span>
-              <span class="k">if</span> <span class="n">xx</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+              <span class="k">if</span> <span class="n">xx</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="n">elemMap</span><span class="p">[</span><span class="n">tag</span><span class="p">]</span> <span class="o">=</span> <span class="n">xx</span>
         
           <span class="k">if</span> <span class="n">elemMap</span><span class="p">:</span>
@@ -296,11 +286,11 @@
                            <span class="n">elemMap</span><span class="p">,</span> <span class="n">valueTypeGuid</span><span class="p">))</span>
           <span class="k">else</span><span class="p">:</span>
             <span class="n">loggerfunc</span> <span class="p">(</span><span class="s1">&#39;WARNING, no map found for </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">ee</span><span class="p">)</span>
-            <span class="n">skips</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">cc</span><span class="o">.</span><span class="n">container</span><span class="o">.</span><span class="n">shortName</span><span class="p">,</span> <span class="n">cc</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">ee</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">ee</span><span class="o">.</span><span class="n">guid</span><span class="p">,</span> <span class="n">ee</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span><span class="p">))</span>
+            <span class="n">skips</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">cc</span><span class="o">.</span><span class="n">container</span><span class="o">.</span><span class="n">shortName</span><span class="p">,</span> <span class="n">cc</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">ee</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">ee</span><span class="o">.</span><span class="n">guid</span><span class="p">,</span> <span class="n">ee</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">))</span>
   
         <span class="k">else</span><span class="p">:</span>
           <span class="c1"># ee valueType does not exist and can not be substituted. Skip.</span>
-          <span class="n">skips</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">cc</span><span class="o">.</span><span class="n">container</span><span class="o">.</span><span class="n">shortName</span><span class="p">,</span> <span class="n">cc</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">ee</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">ee</span><span class="o">.</span><span class="n">guid</span><span class="p">,</span> <span class="n">ee</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span><span class="p">))</span>
+          <span class="n">skips</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">cc</span><span class="o">.</span><span class="n">container</span><span class="o">.</span><span class="n">shortName</span><span class="p">,</span> <span class="n">cc</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">ee</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">ee</span><span class="o">.</span><span class="n">guid</span><span class="p">,</span> <span class="n">ee</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">))</span>
 
   <span class="n">skips</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
   <span class="n">fp</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;&#39;&#39;</span>
@@ -309,7 +299,7 @@
 <span class="s1">skipElements = [</span>
 <span class="s1">&#39;&#39;&#39;</span><span class="p">)</span>
   <span class="k">for</span> <span class="n">tt</span> <span class="ow">in</span> <span class="n">skips</span><span class="p">:</span> 
-    <span class="n">fp</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot; </span><span class="si">%s</span><span class="s2">, </span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">tuple</span><span class="p">(</span><span class="n">x</span> <span class="ow">or</span> <span class="bp">None</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">tt</span><span class="p">),))</span>
+    <span class="n">fp</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot; </span><span class="si">%s</span><span class="s2">, </span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">tuple</span><span class="p">(</span><span class="n">x</span> <span class="ow">or</span> <span class="kc">None</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">tt</span><span class="p">),))</span>
   <span class="n">fp</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;]</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
       
   <span class="n">delays</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
@@ -382,7 +372,7 @@
 <span class="s1">newElements = [</span>
 <span class="s1">&#39;&#39;&#39;</span><span class="p">)</span>
   <span class="k">for</span> <span class="n">tt</span> <span class="ow">in</span> <span class="n">optional</span><span class="p">:</span>
-    <span class="n">fp</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot; </span><span class="si">%s</span><span class="s2">, </span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">tuple</span><span class="p">(</span><span class="n">x</span> <span class="ow">or</span> <span class="bp">None</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">tt</span><span class="p">),))</span>
+    <span class="n">fp</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot; </span><span class="si">%s</span><span class="s2">, </span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">tuple</span><span class="p">(</span><span class="n">x</span> <span class="ow">or</span> <span class="kc">None</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">tt</span><span class="p">),))</span>
   <span class="n">fp</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;]</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
         
   <span class="c1"># </span>
@@ -460,7 +450,7 @@
                 <span class="k">if</span> <span class="n">elem</span><span class="o">.</span><span class="n">isImplementation</span><span class="p">:</span>
                   <span class="k">continue</span>
                 <span class="n">newElem</span> <span class="o">=</span> <span class="n">newobj</span><span class="o">.</span><span class="n">getElement</span><span class="p">(</span><span class="n">elem</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
-                <span class="k">if</span> <span class="n">newElem</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> <span class="n">elem</span><span class="o">.</span><span class="n">guid</span> <span class="o">==</span> <span class="n">newElem</span><span class="o">.</span><span class="n">guid</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">newElem</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">elem</span><span class="o">.</span><span class="n">guid</span> <span class="o">==</span> <span class="n">newElem</span><span class="o">.</span><span class="n">guid</span><span class="p">:</span>
                   <span class="n">tt</span> <span class="o">=</span> <span class="p">(</span><span class="n">shortName</span><span class="p">,</span> <span class="n">oldobjName</span><span class="p">,</span> <span class="n">elem</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
                   <span class="k">if</span> <span class="n">tt</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">renames</span><span class="p">:</span>
                     <span class="n">renames</span><span class="p">[</span><span class="n">tt</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">newobj</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">elem</span><span class="o">.</span><span class="n">guid</span><span class="p">)</span>
@@ -480,7 +470,7 @@
           <span class="n">action</span> <span class="o">=</span> <span class="s1">&#39;ignore&#39;</span>
           <span class="k">if</span> <span class="n">oldvt</span><span class="o">.</span><span class="n">guid</span> <span class="ow">in</span> <span class="n">globalMapping</span><span class="p">[</span><span class="s1">&#39;mapsByGuid&#39;</span><span class="p">]:</span>
             <span class="c1"># old valueType is still around and can be used</span>
-            <span class="n">valueTypeGuid</span> <span class="o">=</span> <span class="bp">None</span>
+            <span class="n">valueTypeGuid</span> <span class="o">=</span> <span class="kc">None</span>
           <span class="k">else</span><span class="p">:</span>
             <span class="c1"># oldvt no longer around - switch to new vt</span>
             <span class="n">valueTypeGuid</span> <span class="o">=</span> <span class="n">newvt</span><span class="o">.</span><span class="n">guid</span>
@@ -491,7 +481,7 @@
           <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">newobj</span><span class="p">,</span> <span class="n">MetaModel</span><span class="o">.</span><span class="n">MetaAttribute</span><span class="p">):</span>
             <span class="n">valueTypeGuid</span> <span class="o">=</span> <span class="n">oldvt</span><span class="o">.</span><span class="n">guid</span>
           <span class="k">else</span><span class="p">:</span>
-            <span class="n">valueTypeGuid</span> <span class="o">=</span> <span class="bp">None</span>
+            <span class="n">valueTypeGuid</span> <span class="o">=</span> <span class="kc">None</span>
           
         <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">oldvt</span><span class="p">,</span> <span class="n">MetaModel</span><span class="o">.</span><span class="n">MetaDataType</span><span class="p">):</span>
           <span class="c1"># </span>
@@ -508,13 +498,13 @@
               <span class="n">oldobj</span><span class="o">.</span><span class="n">container</span><span class="o">.</span><span class="n">container</span> <span class="ow">is</span> <span class="n">oldvt</span><span class="o">.</span><span class="n">container</span><span class="p">):</span>
           <span class="c1"># incompatible intrapackage crosslink - delay</span>
           <span class="n">action</span> <span class="o">=</span> <span class="s1">&#39;delay&#39;</span>
-          <span class="n">valueTypeGuid</span> <span class="o">=</span> <span class="bp">None</span>
+          <span class="n">valueTypeGuid</span> <span class="o">=</span> <span class="kc">None</span>
         
         <span class="k">else</span><span class="p">:</span>
           <span class="c1"># incompatible ComplexDataType or exolink - nothing doing</span>
           <span class="c1">#action = &#39;skip&#39;</span>
           <span class="n">action</span> <span class="o">=</span> <span class="s1">&#39;delay&#39;</span>
-          <span class="n">valueTypeGuid</span> <span class="o">=</span> <span class="bp">None</span>
+          <span class="n">valueTypeGuid</span> <span class="o">=</span> <span class="kc">None</span>
         
         <span class="n">cc</span> <span class="o">=</span> <span class="n">oldobj</span><span class="o">.</span><span class="n">container</span>
         
@@ -524,7 +514,7 @@
           <span class="k">if</span> <span class="n">dd</span><span class="p">:</span>
             <span class="k">for</span> <span class="n">tag</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;type&#39;</span><span class="p">,</span> <span class="s1">&#39;proc&#39;</span><span class="p">,</span> <span class="s1">&#39;name&#39;</span><span class="p">,</span> <span class="s1">&#39;eType&#39;</span><span class="p">,</span> <span class="s1">&#39;tag&#39;</span><span class="p">):</span>
               <span class="n">xx</span> <span class="o">=</span> <span class="n">dd</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">tag</span><span class="p">)</span>
-              <span class="k">if</span> <span class="n">xx</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+              <span class="k">if</span> <span class="n">xx</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="n">elemMap</span><span class="p">[</span><span class="n">tag</span><span class="p">]</span> <span class="o">=</span> <span class="n">xx</span>
  
         <span class="k">else</span><span class="p">:</span>
@@ -535,7 +525,7 @@
           <span class="k">if</span> <span class="n">dd</span><span class="p">:</span>
             <span class="k">for</span> <span class="n">tag</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;type&#39;</span><span class="p">,</span> <span class="s1">&#39;proc&#39;</span><span class="p">,</span> <span class="s1">&#39;name&#39;</span><span class="p">,</span> <span class="s1">&#39;eType&#39;</span><span class="p">,</span> <span class="s1">&#39;tag&#39;</span><span class="p">):</span>
               <span class="n">xx</span> <span class="o">=</span> <span class="n">dd</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">tag</span><span class="p">)</span>
-              <span class="k">if</span> <span class="n">xx</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+              <span class="k">if</span> <span class="n">xx</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="n">elemMap</span><span class="p">[</span><span class="n">tag</span><span class="p">]</span> <span class="o">=</span> <span class="n">xx</span>
  
         <span class="n">tt</span> <span class="o">=</span> <span class="p">(</span><span class="n">cc</span><span class="o">.</span><span class="n">container</span><span class="o">.</span><span class="n">shortName</span><span class="p">,</span> <span class="n">cc</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">oldobj</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">action</span><span class="p">,</span> 
@@ -579,7 +569,7 @@
 
   <span class="c1"># NBNB kludge around the impossibility of sorting strings with None</span>
   <span class="k">for</span> <span class="n">tt1</span><span class="p">,</span> <span class="n">tt2</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">renames</span><span class="o">.</span><span class="n">items</span><span class="p">()):</span>
-    <span class="n">fp</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot; </span><span class="si">%s</span><span class="s2">, </span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">tuple</span><span class="p">(</span><span class="n">x</span> <span class="ow">or</span> <span class="bp">None</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">tt1</span><span class="o">+</span><span class="n">tt2</span><span class="p">),))</span>
+    <span class="n">fp</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot; </span><span class="si">%s</span><span class="s2">, </span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">tuple</span><span class="p">(</span><span class="n">x</span> <span class="ow">or</span> <span class="kc">None</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">tt1</span><span class="o">+</span><span class="n">tt2</span><span class="p">),))</span>
   <span class="n">fp</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;]</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
   
   <span class="n">fp</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;&#39;&#39;</span>
@@ -622,15 +612,15 @@
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
 <div id="searchbox" style="display: none" role="search">
-  <h3>Quick search</h3>
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
     <form class="search" action="../../../../../../search.html" method="get">
-      <input type="text" name="q" />
+      <input type="text" name="q" aria-labelledby="searchlabel" />
       <input type="submit" value="Go" />
-      <input type="hidden" name="check_keywords" value="yes" />
-      <input type="hidden" name="area" value="default" />
     </form>
+    </div>
 </div>
-<script type="text/javascript">$('#searchbox').show(0);</script>
+<script>$('#searchbox').show(0);</script>
         </div>
       </div>
       <div class="clearer"></div>
@@ -644,13 +634,13 @@
         <li class="right" >
           <a href="../../../../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../../../../index.html">Python  documentation</a> &raquo;</li>
-          <li class="nav-item nav-item-1"><a href="../../../../../index.html" >Module code</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="../../../../../../index.html">Python  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../../../../index.html" >Module code</a> &#187;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
-        &copy; Copyright .
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.1.
+        &#169; Copyright .
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.4.0.
     </div>
   </body>
 </html>

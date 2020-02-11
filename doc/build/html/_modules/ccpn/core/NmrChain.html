@@ -1,32 +1,22 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
+<!DOCTYPE html>
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    
-    <title>ccpn.core.NmrChain &mdash; Python  documentation</title>
-    
+    <meta charset="utf-8" />
+    <title>ccpn.core.NmrChain &#8212; Python  documentation</title>
     <link rel="stylesheet" href="../../../_static/classic.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
     
-    <script type="text/javascript">
-      var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    '../../../',
-        VERSION:     '',
-        COLLAPSE_INDEX: false,
-        FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true
-      };
-    </script>
-    <script type="text/javascript" src="../../../_static/jquery.js"></script>
-    <script type="text/javascript" src="../../../_static/underscore.js"></script>
-    <script type="text/javascript" src="../../../_static/doctools.js"></script>
-    <link rel="top" title="Python  documentation" href="../../../index.html" />
-    <link rel="up" title="Module code" href="../../index.html" /> 
-  </head>
-  <body role="document">
+    <script id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/jquery.js"></script>
+    <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/language_data.js"></script>
+    
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+  </head><body>
     <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
@@ -36,8 +26,8 @@
         <li class="right" >
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../index.html">Python  documentation</a> &raquo;</li>
-          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="../../../index.html">Python  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &#187;</li> 
       </ul>
     </div>  
 
@@ -154,12 +144,12 @@
         <span class="sd">&quot;&quot;&quot;Identifying label of NmrChain. Defaults to &#39;?&#39;&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">label</span>
 
-    <span class="nd">@label.setter</span>
+    <span class="nd">@label</span><span class="o">.</span><span class="n">setter</span>
     <span class="k">def</span> <span class="nf">label</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Set label of NmrChain.&quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">label</span> <span class="o">=</span> <span class="n">value</span>
 
-    <span class="nd">@name.setter</span>
+    <span class="nd">@name</span><span class="o">.</span><span class="n">setter</span>
     <span class="k">def</span> <span class="nf">name</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span><span class="nb">str</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;set name of nmrResidue.&quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
@@ -207,7 +197,7 @@
             <span class="n">result</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
         <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
 
-    <span class="nd">@mainNmrResidues.setter</span>
+    <span class="nd">@mainNmrResidues</span><span class="o">.</span><span class="n">setter</span>
     <span class="k">def</span> <span class="nf">mainNmrResidues</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">mainResonanceGroups</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span><span class="o">.</span><span class="n">_wrappedData</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">value</span><span class="p">]</span>
 
@@ -222,14 +212,14 @@
     <span class="c1">#     # NB The API code will throw ValueError if there is already an NmrChain with that code</span>
     <span class="c1">#     self.rename(value._wrappedData.code)</span>
 
-    <span class="nd">@logCommand</span><span class="p">(</span><span class="n">get</span><span class="o">=</span><span class="s1">&#39;self&#39;</span><span class="p">)</span>
-<div class="viewcode-block" id="NmrChain.deassign"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.AnalysisAssign.modules.BackboneAssignmentModule.NmrChain.deassign">[docs]</a>    <span class="k">def</span> <span class="nf">deassign</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="NmrChain.deassign"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.AnalysisAssign.modules.BackboneAssignmentModule.NmrChain.deassign">[docs]</a>    <span class="nd">@logCommand</span><span class="p">(</span><span class="n">get</span><span class="o">=</span><span class="s1">&#39;self&#39;</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">deassign</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Reset NmrChain back to its originalName, cutting all assignment links&quot;&quot;&quot;</span>
         <span class="k">with</span> <span class="n">undoBlock</span><span class="p">():</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">code</span> <span class="o">=</span> <span class="bp">None</span></div>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">code</span> <span class="o">=</span> <span class="kc">None</span></div>
 
-    <span class="nd">@logCommand</span><span class="p">(</span><span class="n">get</span><span class="o">=</span><span class="s1">&#39;self&#39;</span><span class="p">)</span>
-<div class="viewcode-block" id="NmrChain.assignSingleResidue"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.AnalysisAssign.modules.BackboneAssignmentModule.NmrChain.assignSingleResidue">[docs]</a>    <span class="k">def</span> <span class="nf">assignSingleResidue</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">thisNmrResidue</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="s1">&#39;NmrResidue&#39;</span><span class="p">],</span> <span class="n">firstResidue</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="s1">&#39;Residue&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">]):</span>
+<div class="viewcode-block" id="NmrChain.assignSingleResidue"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.AnalysisAssign.modules.BackboneAssignmentModule.NmrChain.assignSingleResidue">[docs]</a>    <span class="nd">@logCommand</span><span class="p">(</span><span class="n">get</span><span class="o">=</span><span class="s1">&#39;self&#39;</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">assignSingleResidue</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">thisNmrResidue</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="s1">&#39;NmrResidue&#39;</span><span class="p">],</span> <span class="n">firstResidue</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="s1">&#39;Residue&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">]):</span>
         <span class="sd">&quot;&quot;&quot;Assign a single unconnected residue from the default &#39;@-&#39; chain&quot;&quot;&quot;</span>
 
         <span class="n">project</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span>
@@ -240,13 +230,13 @@
         <span class="c1"># make sure that object exists</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">firstResidue</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
             <span class="n">xx</span> <span class="o">=</span> <span class="n">project</span><span class="o">.</span><span class="n">getByPid</span><span class="p">(</span><span class="n">firstResidue</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">xx</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">xx</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;No object found matching Pid </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">firstResidue</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">firstResidue</span> <span class="o">=</span> <span class="n">xx</span>
 
         <span class="c1"># check that it isn&#39;t already connected</span>
-        <span class="k">if</span> <span class="n">firstResidue</span><span class="o">.</span><span class="n">nmrResidue</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">firstResidue</span><span class="o">.</span><span class="n">nmrResidue</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Cannot assign </span><span class="si">%s</span><span class="s2">: Residue </span><span class="si">%s</span><span class="s2"> is already assigned&quot;</span>
                              <span class="o">%</span> <span class="p">(</span><span class="n">thisNmrResidue</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">firstResidue</span><span class="o">.</span><span class="n">id</span><span class="p">))</span>
 
@@ -254,8 +244,8 @@
         <span class="k">with</span> <span class="n">undoBlock</span><span class="p">():</span>
             <span class="n">thisNmrResidue</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">assignedResidue</span> <span class="o">=</span> <span class="n">firstResidue</span><span class="o">.</span><span class="n">_wrappedData</span></div>
 
-    <span class="nd">@logCommand</span><span class="p">(</span><span class="n">get</span><span class="o">=</span><span class="s1">&#39;self&#39;</span><span class="p">)</span>
-<div class="viewcode-block" id="NmrChain.assignConnectedResidues"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.AnalysisAssign.modules.BackboneAssignmentModule.NmrChain.assignConnectedResidues">[docs]</a>    <span class="k">def</span> <span class="nf">assignConnectedResidues</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">firstResidue</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="s1">&#39;Residue&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">]):</span>
+<div class="viewcode-block" id="NmrChain.assignConnectedResidues"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.AnalysisAssign.modules.BackboneAssignmentModule.NmrChain.assignConnectedResidues">[docs]</a>    <span class="nd">@logCommand</span><span class="p">(</span><span class="n">get</span><span class="o">=</span><span class="s1">&#39;self&#39;</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">assignConnectedResidues</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">firstResidue</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="s1">&#39;Residue&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">]):</span>
         <span class="sd">&quot;&quot;&quot;Assign all NmrResidues in connected NmrChain sequentially,</span>
 <span class="sd">        with the first NmrResidue assigned to firstResidue.</span>
 
@@ -273,13 +263,13 @@
 
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">firstResidue</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
             <span class="n">xx</span> <span class="o">=</span> <span class="n">project</span><span class="o">.</span><span class="n">getByPid</span><span class="p">(</span><span class="n">firstResidue</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">xx</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">xx</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;No object found matching Pid </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">firstResidue</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">firstResidue</span> <span class="o">=</span> <span class="n">xx</span>
 
         <span class="n">apiStretch</span> <span class="o">=</span> <span class="n">apiNmrChain</span><span class="o">.</span><span class="n">mainResonanceGroups</span>
-        <span class="k">if</span> <span class="n">firstResidue</span><span class="o">.</span><span class="n">nmrResidue</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">firstResidue</span><span class="o">.</span><span class="n">nmrResidue</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Cannot assign </span><span class="si">%s</span><span class="s2"> NmrResidue stretch: First Residue </span><span class="si">%s</span><span class="s2"> is already assigned&quot;</span>
                              <span class="o">%</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">apiStretch</span><span class="p">),</span> <span class="n">firstResidue</span><span class="o">.</span><span class="n">id</span><span class="p">))</span>
 
@@ -287,10 +277,10 @@
         <span class="k">for</span> <span class="n">ii</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">apiStretch</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">):</span>
             <span class="n">res</span> <span class="o">=</span> <span class="n">residues</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span>
             <span class="nb">next</span> <span class="o">=</span> <span class="n">res</span><span class="o">.</span><span class="n">nextResidue</span>
-            <span class="k">if</span> <span class="nb">next</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">next</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Cannot assign </span><span class="si">%s</span><span class="s2"> NmrResidues to </span><span class="si">%s</span><span class="s2"> Residues from Chain&quot;</span>
                                  <span class="o">%</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">apiStretch</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">residues</span><span class="p">)))</span>
-            <span class="k">elif</span> <span class="nb">next</span><span class="o">.</span><span class="n">nmrResidue</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">elif</span> <span class="nb">next</span><span class="o">.</span><span class="n">nmrResidue</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Cannot assign </span><span class="si">%s</span><span class="s2"> NmrResidue stretch: Residue </span><span class="si">%s</span><span class="s2"> is already assigned&quot;</span>
                                  <span class="o">%</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">apiStretch</span><span class="p">),</span> <span class="nb">next</span><span class="o">.</span><span class="n">id</span><span class="p">))</span>
 
@@ -312,25 +302,25 @@
             <span class="k">if</span> <span class="ow">not</span> <span class="n">V3nmrChain</span><span class="o">.</span><span class="n">id</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;@-&#39;</span><span class="p">):</span>
                 <span class="n">V3nmrChain</span><span class="o">.</span><span class="n">delete</span><span class="p">()</span></div>
 
-    <span class="nd">@logCommand</span><span class="p">(</span><span class="n">get</span><span class="o">=</span><span class="s1">&#39;self&#39;</span><span class="p">)</span>
-<div class="viewcode-block" id="NmrChain.reverse"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.AnalysisAssign.modules.BackboneAssignmentModule.NmrChain.reverse">[docs]</a>    <span class="k">def</span> <span class="nf">reverse</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">_force</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+<div class="viewcode-block" id="NmrChain.reverse"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.AnalysisAssign.modules.BackboneAssignmentModule.NmrChain.reverse">[docs]</a>    <span class="nd">@logCommand</span><span class="p">(</span><span class="n">get</span><span class="o">=</span><span class="s1">&#39;self&#39;</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">reverse</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">_force</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Reverse order of NmrResidues within NmrChain</span>
 
 <span class="sd">        Illegal for assigned NmrChains, and only relevant for connected NmrChains.</span>
 <span class="sd">        Serves mainly as building block to make disconnections easier to undo&quot;&quot;&quot;</span>
 
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">chain</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>  <span class="c1"># and _force is False:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">chain</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>  <span class="c1"># and _force is False:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;NmrChain is assigned (to </span><span class="si">%s</span><span class="s2">) and cannot be reversed&quot;</span>
                              <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">chain</span><span class="o">.</span><span class="n">longPid</span><span class="p">)</span>
 
         <span class="k">with</span> <span class="n">undoBlock</span><span class="p">():</span>
             <span class="k">with</span> <span class="n">undoStackBlocking</span><span class="p">()</span> <span class="k">as</span> <span class="n">addUndoItem</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">__dict__</span><span class="p">[</span><span class="s1">&#39;mainResonanceGroups&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">reverse</span><span class="p">()</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="s1">&#39;mainResonanceGroups&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">reverse</span><span class="p">()</span>
 
                 <span class="n">addUndoItem</span><span class="p">(</span><span class="n">undo</span><span class="o">=</span><span class="n">partial</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">reverse</span><span class="p">),</span> <span class="n">redo</span><span class="o">=</span><span class="n">partial</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">reverse</span><span class="p">))</span></div>
 
-    <span class="nd">@logCommand</span><span class="p">(</span><span class="n">get</span><span class="o">=</span><span class="s1">&#39;self&#39;</span><span class="p">)</span>
-<div class="viewcode-block" id="NmrChain.renumberNmrResidues"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.AnalysisAssign.modules.BackboneAssignmentModule.NmrChain.renumberNmrResidues">[docs]</a>    <span class="k">def</span> <span class="nf">renumberNmrResidues</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">offset</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">start</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="n">stop</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="bp">None</span><span class="p">):</span>
+<div class="viewcode-block" id="NmrChain.renumberNmrResidues"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.AnalysisAssign.modules.BackboneAssignmentModule.NmrChain.renumberNmrResidues">[docs]</a>    <span class="nd">@logCommand</span><span class="p">(</span><span class="n">get</span><span class="o">=</span><span class="s1">&#39;self&#39;</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">renumberNmrResidues</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">offset</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">start</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">stop</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Renumber nmrResidues in range start-stop (inclusive) by adding offset</span>
 
 <span class="sd">        The nmrResidue number is the integer starting part of the sequenceCode,</span>
@@ -351,10 +341,10 @@
             <span class="k">for</span> <span class="n">nmrResidue</span> <span class="ow">in</span> <span class="n">nmrResidues</span><span class="p">:</span>
                 <span class="n">sequenceCode</span> <span class="o">=</span> <span class="n">nmrResidue</span><span class="o">.</span><span class="n">sequenceCode</span>
                 <span class="n">code</span><span class="p">,</span> <span class="n">ss</span><span class="p">,</span> <span class="n">offs</span> <span class="o">=</span> <span class="n">commonUtil</span><span class="o">.</span><span class="n">parseSequenceCode</span><span class="p">(</span><span class="n">sequenceCode</span><span class="p">)</span>
-                <span class="k">if</span> <span class="n">offs</span> <span class="ow">is</span> <span class="bp">None</span> <span class="ow">and</span> <span class="n">code</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">offs</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">code</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                     <span class="c1"># offset residues are handled with their mainResidues</span>
-                    <span class="k">if</span> <span class="p">((</span><span class="n">start</span> <span class="ow">is</span> <span class="bp">None</span> <span class="ow">or</span> <span class="n">code</span> <span class="o">&gt;=</span> <span class="n">start</span><span class="p">)</span>
-                            <span class="ow">and</span> <span class="p">(</span><span class="n">stop</span> <span class="ow">is</span> <span class="bp">None</span> <span class="ow">or</span> <span class="n">code</span> <span class="o">&lt;=</span> <span class="n">stop</span><span class="p">)):</span>
+                    <span class="k">if</span> <span class="p">((</span><span class="n">start</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">code</span> <span class="o">&gt;=</span> <span class="n">start</span><span class="p">)</span>
+                            <span class="ow">and</span> <span class="p">(</span><span class="n">stop</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">code</span> <span class="o">&lt;=</span> <span class="n">stop</span><span class="p">)):</span>
                         <span class="n">newSequenceCode</span> <span class="o">=</span> <span class="n">MoleculeLib</span><span class="o">.</span><span class="n">_incrementedSequenceCode</span><span class="p">(</span><span class="n">nmrResidue</span><span class="o">.</span><span class="n">sequenceCode</span><span class="p">,</span> <span class="n">offset</span><span class="p">)</span>
 
                         <span class="n">nmrResidue</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">newSequenceCode</span><span class="p">,</span> <span class="n">nmrResidue</span><span class="o">.</span><span class="n">residueType</span> <span class="ow">or</span> <span class="s1">&#39;&#39;</span><span class="p">))</span>
@@ -364,7 +354,7 @@
                 <span class="n">nmrResidue</span><span class="o">.</span><span class="n">_finaliseAction</span><span class="p">(</span><span class="s1">&#39;rename&#39;</span><span class="p">)</span>
                 <span class="c1"># nmrResidue._finaliseAction(&#39;change&#39;)</span>
 
-        <span class="k">if</span> <span class="n">start</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> <span class="n">stop</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">start</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">stop</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">changedNmrResidues</span><span class="p">)</span> <span class="o">!=</span> <span class="n">stop</span> <span class="o">+</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">start</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Only </span><span class="si">%s</span><span class="s2"> nmrResidues found in range </span><span class="si">%s</span><span class="s2"> to </span><span class="si">%s</span><span class="s2">&quot;</span>
                                               <span class="o">%</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">changedNmrResidues</span><span class="p">),</span> <span class="n">start</span><span class="p">,</span> <span class="n">stop</span><span class="p">))</span></div>
@@ -374,12 +364,13 @@
     <span class="c1">#=========================================================================================</span>
 
     <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">_getAllWrappedData</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">parent</span><span class="p">:</span> <span class="n">Project</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">_getAllWrappedData</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">parent</span><span class="p">:</span> <span class="n">Project</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;get wrappedData (Nmr.NmrChains) for all NmrChain children of parent Project&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">parent</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">sortedNmrChains</span><span class="p">()</span>
 
+<div class="viewcode-block" id="NmrChain.rename"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.AnalysisAssign.modules.BackboneAssignmentModule.NmrChain.rename">[docs]</a>    <span class="nd">@renameObject</span><span class="p">()</span>
     <span class="nd">@logCommand</span><span class="p">(</span><span class="n">get</span><span class="o">=</span><span class="s1">&#39;self&#39;</span><span class="p">)</span>
-<div class="viewcode-block" id="NmrChain.rename"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.AnalysisAssign.modules.BackboneAssignmentModule.NmrChain.rename">[docs]</a>    <span class="k">def</span> <span class="nf">rename</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">rename</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Rename NmrChain, changing its shortName and Pid.</span>
 <span class="sd">        Use the &#39;deassign&#39; function if you want to revert to the canonical name&quot;&quot;&quot;</span>
 
@@ -393,14 +384,12 @@
         <span class="k">elif</span> <span class="n">wrappedData</span><span class="o">.</span><span class="n">code</span> <span class="o">==</span> <span class="n">Constants</span><span class="o">.</span><span class="n">defaultNmrChainCode</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;NmrChain:</span><span class="si">%s</span><span class="s2"> cannot be renamed&quot;</span> <span class="o">%</span> <span class="n">Constants</span><span class="o">.</span><span class="n">defaultNmrChainCode</span><span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">_validateName</span><span class="p">(</span><span class="n">value</span><span class="o">=</span><span class="n">value</span><span class="p">,</span> <span class="n">allowWhitespace</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_validateName</span><span class="p">(</span><span class="n">value</span><span class="o">=</span><span class="n">value</span><span class="p">,</span> <span class="n">allowWhitespace</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 
-        <span class="k">with</span> <span class="n">renameObject</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="k">as</span> <span class="n">addUndoItem</span><span class="p">:</span>
-            <span class="n">oldName</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">shortName</span>
-            <span class="n">wrappedData</span><span class="o">.</span><span class="n">code</span> <span class="o">=</span> <span class="n">value</span>
-
-            <span class="n">addUndoItem</span><span class="p">(</span><span class="n">undo</span><span class="o">=</span><span class="n">partial</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rename</span><span class="p">,</span> <span class="n">oldName</span><span class="p">),</span>
-                        <span class="n">redo</span><span class="o">=</span><span class="n">partial</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rename</span><span class="p">,</span> <span class="n">value</span><span class="p">))</span></div>
+        <span class="c1"># rename functions from here</span>
+        <span class="n">oldName</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">shortName</span>
+        <span class="n">wrappedData</span><span class="o">.</span><span class="n">code</span> <span class="o">=</span> <span class="n">value</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">oldName</span><span class="p">,)</span></div>
 
     <span class="k">def</span> <span class="nf">_finaliseAction</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">action</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">action</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;delete&#39;</span><span class="p">]:</span>
@@ -418,9 +407,9 @@
     <span class="c1"># Call appropriate routines in their respective locations</span>
     <span class="c1">#===========================================================================================</span>
 
-    <span class="nd">@logCommand</span><span class="p">(</span><span class="n">get</span><span class="o">=</span><span class="s1">&#39;self&#39;</span><span class="p">)</span>
-<div class="viewcode-block" id="NmrChain.newNmrResidue"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.AnalysisAssign.modules.BackboneAssignmentModule.NmrChain.newNmrResidue">[docs]</a>    <span class="k">def</span> <span class="nf">newNmrResidue</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sequenceCode</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="n">residueType</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span>
-                      <span class="n">comment</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="bp">None</span><span class="p">):</span>
+<div class="viewcode-block" id="NmrChain.newNmrResidue"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.AnalysisAssign.modules.BackboneAssignmentModule.NmrChain.newNmrResidue">[docs]</a>    <span class="nd">@logCommand</span><span class="p">(</span><span class="n">get</span><span class="o">=</span><span class="s1">&#39;self&#39;</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">newNmrResidue</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sequenceCode</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">residueType</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                      <span class="n">comment</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Create new NmrResidue within NmrChain.</span>
 
 <span class="sd">        If NmrChain is connected, append the new NmrResidue to the end of the stretch.</span>
@@ -435,9 +424,9 @@
         <span class="k">return</span> <span class="n">_newNmrResidue</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sequenceCode</span><span class="o">=</span><span class="n">sequenceCode</span><span class="p">,</span> <span class="n">residueType</span><span class="o">=</span><span class="n">residueType</span><span class="p">,</span>
                               <span class="n">comment</span><span class="o">=</span><span class="n">comment</span><span class="p">)</span></div>
 
-    <span class="nd">@logCommand</span><span class="p">(</span><span class="n">get</span><span class="o">=</span><span class="s1">&#39;self&#39;</span><span class="p">)</span>
-<div class="viewcode-block" id="NmrChain.fetchNmrResidue"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.AnalysisAssign.modules.BackboneAssignmentModule.NmrChain.fetchNmrResidue">[docs]</a>    <span class="k">def</span> <span class="nf">fetchNmrResidue</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sequenceCode</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span>
-                        <span class="n">residueType</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="bp">None</span><span class="p">):</span>
+<div class="viewcode-block" id="NmrChain.fetchNmrResidue"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.AnalysisAssign.modules.BackboneAssignmentModule.NmrChain.fetchNmrResidue">[docs]</a>    <span class="nd">@logCommand</span><span class="p">(</span><span class="n">get</span><span class="o">=</span><span class="s1">&#39;self&#39;</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">fetchNmrResidue</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sequenceCode</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                        <span class="n">residueType</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Fetch NmrResidue with sequenceCode=sequenceCode and residueType=residueType,</span>
 <span class="sd">        creating it if necessary.</span>
 
@@ -477,8 +466,8 @@
 <span class="c1">#=========================================================================================</span>
 
 <span class="nd">@newObject</span><span class="p">(</span><span class="n">NmrChain</span><span class="p">)</span>
-<span class="k">def</span> <span class="nf">_newNmrChain</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">Project</span><span class="p">,</span> <span class="n">shortName</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="n">isConnected</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="bp">False</span><span class="p">,</span> <span class="n">label</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;?&#39;</span><span class="p">,</span>
-                 <span class="n">comment</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="n">serial</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="bp">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NmrChain</span><span class="p">:</span>
+<span class="k">def</span> <span class="nf">_newNmrChain</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">Project</span><span class="p">,</span> <span class="n">shortName</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">isConnected</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">label</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;?&#39;</span><span class="p">,</span>
+                 <span class="n">comment</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">serial</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NmrChain</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;Create new NmrChain. Setting isConnected=True produces a connected NmrChain.</span>
 
 <span class="sd">    See the NmrChain class for details.</span>
@@ -491,11 +480,11 @@
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">nmrProject</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_apiNmrProject</span>
-    <span class="n">serial</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="n">serial</span> <span class="o">=</span> <span class="kc">None</span>
 
     <span class="k">if</span> <span class="n">shortName</span><span class="p">:</span>
         <span class="n">previous</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getNmrChain</span><span class="p">(</span><span class="n">shortName</span><span class="o">.</span><span class="n">translate</span><span class="p">(</span><span class="n">Pid</span><span class="o">.</span><span class="n">remapSeparators</span><span class="p">))</span>
-        <span class="k">if</span> <span class="n">previous</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">previous</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2"> already exists&quot;</span> <span class="o">%</span> <span class="n">previous</span><span class="o">.</span><span class="n">longPid</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">shortName</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">in</span> <span class="s1">&#39;#@&#39;</span><span class="p">:</span>
             <span class="k">try</span><span class="p">:</span>
@@ -503,26 +492,26 @@
             <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
                 <span class="c1"># the rest of the name is not an int. We are OK</span>
                 <span class="k">pass</span>
-            <span class="k">if</span> <span class="n">serial</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> <span class="n">serial</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">serial</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">serial</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
                 <span class="c1"># this is a reserved name - try to set it with serial</span>
-                <span class="k">if</span> <span class="n">nmrProject</span><span class="o">.</span><span class="n">findFirstNmrChain</span><span class="p">(</span><span class="n">serial</span><span class="o">=</span><span class="n">serial</span><span class="p">)</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">nmrProject</span><span class="o">.</span><span class="n">findFirstNmrChain</span><span class="p">(</span><span class="n">serial</span><span class="o">=</span><span class="n">serial</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                     <span class="c1"># We are setting a shortName that matches the passed-in serial. OK.</span>
                     <span class="c1"># Set isConnected to match - this overrides the isConnected parameter.</span>
                     <span class="n">isConnected</span> <span class="o">=</span> <span class="p">(</span><span class="n">shortName</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;#&#39;</span><span class="p">)</span>
-                    <span class="n">shortName</span> <span class="o">=</span> <span class="bp">None</span>
+                    <span class="n">shortName</span> <span class="o">=</span> <span class="kc">None</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Cannot create NmrChain with reserved name </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">shortName</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">shortName</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="n">shortName</span> <span class="o">=</span> <span class="kc">None</span>
 
     <span class="n">dd</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;code&#39;</span><span class="p">:</span> <span class="n">shortName</span><span class="p">,</span> <span class="s1">&#39;isConnected&#39;</span><span class="p">:</span> <span class="n">isConnected</span><span class="p">,</span> <span class="s1">&#39;label&#39;</span><span class="p">:</span> <span class="n">label</span><span class="p">,</span> <span class="s1">&#39;details&#39;</span><span class="p">:</span> <span class="n">comment</span><span class="p">}</span>
 
     <span class="n">newApiNmrChain</span> <span class="o">=</span> <span class="n">nmrProject</span><span class="o">.</span><span class="n">newNmrChain</span><span class="p">(</span><span class="o">**</span><span class="n">dd</span><span class="p">)</span>
     <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data2Obj</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">newApiNmrChain</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">result</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">result</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;Unable to generate new NmrChain item&#39;</span><span class="p">)</span>
 
-    <span class="k">if</span> <span class="n">serial</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">serial</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">result</span><span class="o">.</span><span class="n">resetSerial</span><span class="p">(</span><span class="n">serial</span><span class="p">)</span>
         <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
@@ -532,7 +521,7 @@
     <span class="k">return</span> <span class="n">result</span>
 
 
-<span class="k">def</span> <span class="nf">_fetchNmrChain</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">Project</span><span class="p">,</span> <span class="n">shortName</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="bp">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NmrChain</span><span class="p">:</span>
+<span class="k">def</span> <span class="nf">_fetchNmrChain</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">Project</span><span class="p">,</span> <span class="n">shortName</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NmrChain</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;Fetch chain with given shortName; If none exists call newNmrChain to make one first</span>
 
 <span class="sd">    If shortName is None returns a new NmrChain with name starting with &#39;@&#39;</span>
@@ -546,7 +535,7 @@
             <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">newNmrChain</span><span class="p">()</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">apiNmrChain</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_apiNmrProject</span><span class="o">.</span><span class="n">findFirstNmrChain</span><span class="p">(</span><span class="n">code</span><span class="o">=</span><span class="n">shortName</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">apiNmrChain</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">apiNmrChain</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">newNmrChain</span><span class="p">(</span><span class="n">shortName</span><span class="o">=</span><span class="n">shortName</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data2Obj</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">apiNmrChain</span><span class="p">)</span>
@@ -585,15 +574,15 @@
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
 <div id="searchbox" style="display: none" role="search">
-  <h3>Quick search</h3>
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
     <form class="search" action="../../../search.html" method="get">
-      <input type="text" name="q" />
+      <input type="text" name="q" aria-labelledby="searchlabel" />
       <input type="submit" value="Go" />
-      <input type="hidden" name="check_keywords" value="yes" />
-      <input type="hidden" name="area" value="default" />
     </form>
+    </div>
 </div>
-<script type="text/javascript">$('#searchbox').show(0);</script>
+<script>$('#searchbox').show(0);</script>
         </div>
       </div>
       <div class="clearer"></div>
@@ -607,13 +596,13 @@
         <li class="right" >
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../index.html">Python  documentation</a> &raquo;</li>
-          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="../../../index.html">Python  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &#187;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
-        &copy; Copyright .
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.1.
+        &#169; Copyright .
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.4.0.
     </div>
   </body>
 </html>

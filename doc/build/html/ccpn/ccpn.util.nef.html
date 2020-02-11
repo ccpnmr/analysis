@@ -1,34 +1,24 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
+<!DOCTYPE html>
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    
-    <title>ccpn.util.nef package &mdash; Python  documentation</title>
-    
+    <meta charset="utf-8" />
+    <title>ccpn.util.nef package &#8212; Python  documentation</title>
     <link rel="stylesheet" href="../_static/classic.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
     
-    <script type="text/javascript">
-      var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    '../',
-        VERSION:     '',
-        COLLAPSE_INDEX: false,
-        FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true
-      };
-    </script>
-    <script type="text/javascript" src="../_static/jquery.js"></script>
-    <script type="text/javascript" src="../_static/underscore.js"></script>
-    <script type="text/javascript" src="../_static/doctools.js"></script>
-    <link rel="top" title="Python  documentation" href="../index.html" />
-    <link rel="up" title="ccpn.util package" href="ccpn.util.html" />
+    <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/language_data.js"></script>
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="ccpn.util.v2io package" href="ccpn.util.v2io.html" />
     <link rel="prev" title="ccpn.util package" href="ccpn.util.html" /> 
-  </head>
-  <body role="document">
+  </head><body>
     <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
@@ -44,10 +34,10 @@
         <li class="right" >
           <a href="ccpn.util.html" title="ccpn.util package"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../index.html">Python  documentation</a> &raquo;</li>
-          <li class="nav-item nav-item-1"><a href="modules.html" >CCPN</a> &raquo;</li>
-          <li class="nav-item nav-item-2"><a href="ccpn.html" >ccpn package</a> &raquo;</li>
-          <li class="nav-item nav-item-3"><a href="ccpn.util.html" accesskey="U">ccpn.util package</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="../index.html">Python  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="modules.html" >CCPN</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="ccpn.html" >ccpn package</a> &#187;</li>
+          <li class="nav-item nav-item-3"><a href="ccpn.util.html" accesskey="U">ccpn.util package</a> &#187;</li> 
       </ul>
     </div>  
 
@@ -71,71 +61,68 @@ and converts strings to numerical values with some limited heuristics.</p>
 <div class="section" id="submodules">
 <h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
 </div>
-<div class="section" id="ccpn-util-nef-comparenef-module">
-<h2>ccpn.util.nef.CompareNef module<a class="headerlink" href="#ccpn-util-nef-comparenef-module" title="Permalink to this headline">¶</a></h2>
-<span class="target" id="module-ccpn.util.nef.CompareNef"></span><p>compareNef - a series of routines to compare the contents of two Nef files</p>
-<dl class="docutils">
-<dt>Command Line Usage:</dt>
-<dd><p class="first">compareNef for execution from the command line with a suitable script
+<div class="section" id="module-ccpn.util.nef.CompareNef">
+<span id="ccpn-util-nef-comparenef-module"></span><h2>ccpn.util.nef.CompareNef module<a class="headerlink" href="#module-ccpn.util.nef.CompareNef" title="Permalink to this headline">¶</a></h2>
+<p>compareNef - a series of routines to compare the contents of two Nef files</p>
+<dl>
+<dt>Command Line Usage:</dt><dd><p>compareNef for execution from the command line with a suitable script
 An example can be found in AnalysisV3/bin/compareNef:</p>
 <blockquote>
-<div>#!/usr/bin/env sh
-export CCPNMR_TOP_DIR=&#8221;$(dirname $(cd $(dirname &#8220;$0&#8221;); pwd))&#8221;
+<div><p>#!/usr/bin/env sh
+export CCPNMR_TOP_DIR=”$(dirname $(cd $(dirname “$0”); pwd))”
 export ANACONDA3=${CCPNMR_TOP_DIR}/miniconda
 export PYTHONPATH=${CCPNMR_TOP_DIR}/src/python:${CCPNMR_TOP_DIR}/src/c
-${ANACONDA3}/bin/python ${CCPNMR_TOP_DIR}/src/python/ccpn/util/nef/compareNef.py $*</div></blockquote>
+${ANACONDA3}/bin/python ${CCPNMR_TOP_DIR}/src/python/ccpn/util/nef/compareNef.py $*</p>
+</div></blockquote>
 <p>Usage:  compareNef [options]</p>
-<dl class="last docutils">
-<dt>optional arguments:</dt>
-<dd><table class="first docutils option-list" frame="void" rules="none">
-<col class="option" />
-<col class="description" />
-<tbody valign="top">
-<tr><td class="option-group">
-<kbd><span class="option">-h</span>, <span class="option">--help</span></kbd></td>
-<td>show this help message</td></tr>
-<tr><td class="option-group">
-<kbd><span class="option">-H</span>, <span class="option">--Help</span></kbd></td>
-<td>Show detailed help</td></tr>
-<tr><td class="option-group" colspan="2">
-<kbd><span class="option">-i</span>, <span class="option">--ignoreblockname</span></kbd></td>
-</tr>
-<tr><td>&nbsp;</td><td>Ignore the blockname when comparing two Nef files
+<dl>
+<dt>optional arguments:</dt><dd><dl class="option-list">
+<dt><kbd><span class="option">-h</span>, <span class="option">--help</span></kbd></dt>
+<dd><p>show this help message</p>
+</dd>
+<dt><kbd><span class="option">-H</span>, <span class="option">--Help</span></kbd></dt>
+<dd><p>Show detailed help</p>
+</dd>
+<dt><kbd><span class="option">-i</span>, <span class="option">--ignoreblockname</span></kbd></dt>
+<dd><p>Ignore the blockname when comparing two Nef files
 May be required when converting Nef files through
-different applications
-May be used with -f and -b</td></tr>
-</tbody>
-</table>
-<dl class="docutils">
-<dt>-f inFile1 inFile2, &#8211;file inFile1 inFile2</dt>
-<dd>Compare two Nef files and print the results to the
-screen</dd>
-<dt>-b inDir1 inDir2 outDir, &#8211;block inDir1 inDir2 outDir</dt>
-<dd>compare Nef files common to directories
-inDir1 and inDir2. Write output <a href="#id1"><span class="problematic" id="id2">*</span></a>.txt for each
-file into the outDir directory.</dd>
+different applications.
+May be used with -f and -b.</p>
+</dd>
 </dl>
-<table class="last docutils option-list" frame="void" rules="none">
-<col class="option" />
-<col class="description" />
-<tbody valign="top">
-<tr><td class="option-group">
-<kbd><span class="option">-s</span>, <span class="option">--screen</span></kbd></td>
-<td>Output batch processing to screen, default is to .txt files
-may be used with -b</td></tr>
-<tr><td class="option-group">
-<kbd><span class="option">-k</span>, <span class="option">--keep</span></kbd></td>
-<td>Keep existing .txt files. New files are appended with &#8216;(n)&#8217; before
-the extension, where n is the next available number.</td></tr>
-</tbody>
-</table>
+<dl class="simple">
+<dt>-f inFile1 inFile2, –file inFile1 inFile2</dt><dd><p>Compare two Nef files and print the results to the
+screen.</p>
+</dd>
+<dt>-b inDir1 inDir2 outDir, –block inDir1 inDir2 outDir</dt><dd><p>compare Nef files common to directories
+inDir1 and inDir2. Write output <a href="#id1"><span class="problematic" id="id2">*</span></a>.txt for each
+file into the outDir directory.</p>
+</dd>
+</dl>
+<dl class="option-list">
+<dt><kbd><span class="option">-s</span>, <span class="option">--screen</span></kbd></dt>
+<dd><p>Output batch processing to screen, default is to .txt files
+may be used with -b</p>
+</dd>
+<dt><kbd><span class="option">-o</span>, <span class="option">--overwrite</span></kbd></dt>
+<dd><p>Overwrite existing .txt files. If false then files are
+appended with ‘(n)’ before the extension, where n is
+the next available number.</p>
+</dd>
+<dt><kbd><span class="option">-c</span>, <span class="option">--create</span></kbd></dt>
+<dd><p>Automatically create directories as required.</p>
+</dd>
+<dt><kbd><span class="option">-I</span>, <span class="option">--ignorecase</span></kbd></dt>
+<dd><p>Ignore case when comparing items.</p>
+</dd>
+</dl>
 </dd>
 </dl>
 </dd>
 </dl>
 <p>Details of the contents of Nef files can be found in GenericStarParser
 The general structure of a Nef file is:</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">DataExtent</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">DataExtent</span>
   <span class="n">DataBlock</span>
     <span class="n">Item</span>
     <span class="n">Loop</span>
@@ -144,40 +131,39 @@ The general structure of a Nef file is:</p>
       <span class="n">Loop</span>
 </pre></div>
 </div>
-<p>DataExtent, DataBlock and SaveFrame are Python OrderedDict with an additional &#8216;name&#8217; attribute
+<p>DataExtent, DataBlock and SaveFrame are Python OrderedDict with an additional ‘name’ attribute
 DataBlocks and SaveFrames are entered in their container using their name as the key.</p>
-<p>Loop is an object with a &#8216;columns&#8217; list, a &#8216;data&#8217; list-of-row-OrderedDict, and a name attribute
+<p>Loop is an object with a ‘columns’ list, a ‘data’ list-of-row-OrderedDict, and a name attribute
 set equal to the name of the first column. A loop is entered in its container under each
-column name, so that e.g. aSaveFrame[&#8216;_Loopx.loopcol1&#8217;] and aSaveFrame[&#8216;_Loopx.loopcol2&#8217;] both
+column name, so that e.g. aSaveFrame[‘_Loopx.loopcol1’] and aSaveFrame[‘_Loopx.loopcol2’] both
 exist and both correspond to the same loop object.</p>
-<dl class="docutils">
-<dt>Items are entered as a string key - string value pair.</dt>
-<dd>the string value can be a dictionary</dd>
+<dl class="simple">
+<dt>Items are entered as a string key - string value pair.</dt><dd><p>the string value can be a dictionary</p>
+</dd>
 </dl>
 <div class="section" id="module-contents">
 <h3>Module Contents<a class="headerlink" href="#module-contents" title="Permalink to this headline">¶</a></h3>
-<dl class="docutils">
-<dt>compareNef contains the following routines:</dt>
-<dd><p class="first">compareNefFiles      compare two Nef files and return a compare object</p>
+<dl>
+<dt>compareNef contains the following routines:</dt><dd><p>compareNefFiles      compare two Nef files and return a compare object</p>
 <blockquote>
 <div><p>Searches through all objects: dataExtents, dataBlocks, saveFrames and Loops within the files.
 Comparisons are made for all data structures that have the same name.
 Differences for items within a column are listed in the form:</p>
 <blockquote>
-<div>dataExtent:dataBlock:saveFrame:Loop:  &lt;Column&gt;: columnName  &lt;rowIndex&gt;: row  &#8211;&gt;  value1 != value2</div></blockquote>
-<dl class="docutils">
-<dt>dataExtents, dataBlocks, saveFrames, Loops, columns present only in one file are listed, in the form:</dt>
-<dd><dl class="first last docutils">
-<dt>dataExtent:dataBlock:saveFrame:Loop: contains &#8211;&gt; parameter1</dt>
-<dd>parameter2
-...
-parameterN</dd>
+<div><p>dataExtent:dataBlock:saveFrame:Loop:  &lt;Column&gt;: columnName  &lt;rowIndex&gt;: row  –&gt;  value1 != value2</p>
+</div></blockquote>
+<dl class="simple">
+<dt>dataExtents, dataBlocks, saveFrames, Loops, columns present only in one file are listed, in the form:</dt><dd><dl class="simple">
+<dt>dataExtent:dataBlock:saveFrame:Loop: contains –&gt; parameter1</dt><dd><p>parameter2
+…
+parameterN</p>
+</dd>
 </dl>
 </dd>
 </dl>
 </div></blockquote>
 <p>A compare object is a list of nefItems of the form:</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">NefItem</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">NefItem</span>
   <span class="n">inWhich</span>         <span class="n">a</span> <span class="n">flag</span> <span class="n">labelling</span> <span class="n">which</span> <span class="n">file</span> <span class="n">the</span> <span class="n">item</span> <span class="n">was</span> <span class="n">found</span> <span class="ow">in</span>
                   <span class="mi">1</span> <span class="o">=</span> <span class="n">found</span> <span class="ow">in</span> <span class="n">first</span> <span class="n">file</span><span class="p">,</span> <span class="mi">2</span> <span class="o">=</span> <span class="n">found</span> <span class="ow">in</span> <span class="n">second</span> <span class="n">file</span><span class="p">,</span> <span class="mi">3</span> <span class="o">=</span> <span class="n">common</span> <span class="n">to</span> <span class="n">both</span>
   <span class="n">List</span>
@@ -185,14 +171,13 @@ parameterN</dd>
     <span class="p">(,</span><span class="n">List</span><span class="p">)</span>       <span class="n">the</span> <span class="n">last</span> <span class="n">item</span> <span class="n">of</span> <span class="n">which</span> <span class="n">may</span> <span class="n">be</span> <span class="n">a</span> <span class="nb">list</span> <span class="n">of</span> <span class="n">items</span> <span class="n">common</span> <span class="n">to</span> <span class="n">the</span> <span class="n">tree</span>
 </pre></div>
 </div>
-<dl class="docutils">
-<dt>e.g., for parameters present in the first file:</dt>
-<dd><dl class="first docutils">
-<dt>[</dt>
-<dd>inWhich=1
-list=[dataExtent1, dataBlock1, saveFrame1, Loop1, [parameter1, parameter2, parameter3]]</dd>
+<dl>
+<dt>e.g., for parameters present in the first file:</dt><dd><dl class="simple">
+<dt>[</dt><dd><p>inWhich=1
+list=[dataExtent1, dataBlock1, saveFrame1, Loop1, [parameter1, parameter2, parameter3]]</p>
+</dd>
 </dl>
-<p class="last">]</p>
+<p>]</p>
 </dd>
 </dl>
 <p>compareDataExtents    compare two DataExtent objects and return a compare list as above
@@ -202,172 +187,246 @@ compareLoops          compare two Loop objects and return a compare list as abov
 <p>compareNefFiles       compare two Nef files and return a compare list as above
 batchCompareNefFiles  compare two directories of Nef files.</p>
 <blockquote>
-<div>Nef Files common to specified directories are compared and the compare
-lists are written to the third directory as .txt</div></blockquote>
-<p class="last">printCompareList      print the compare list to the screen</p>
+<div><p>Nef Files common to specified directories are compared and the compare
+lists are written to the third directory as .txt</p>
+</div></blockquote>
+<p>printCompareList      print the compare list to the screen</p>
 </dd>
 </dl>
 <dl class="class">
 <dt id="ccpn.util.nef.CompareNef.Test_Compare_Files">
-<em class="property">class </em><code class="descclassname">ccpn.util.nef.CompareNef.</code><code class="descname">Test_Compare_Files</code><span class="sig-paren">(</span><em>methodName='runTest'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/CompareNef.html#Test_Compare_Files"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.CompareNef.Test_Compare_Files" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">unittest.case.TestCase</span></code></p>
+<em class="property">class </em><code class="sig-prename descclassname">ccpn.util.nef.CompareNef.</code><code class="sig-name descname">Test_Compare_Files</code><span class="sig-paren">(</span><em class="sig-param">methodName='runTest'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/CompareNef.html#Test_Compare_Files"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.CompareNef.Test_Compare_Files" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">unittest.case.TestCase</span></code></p>
 <p>Test the comparison of nef files and print the results</p>
+<dl class="method">
+<dt id="ccpn.util.nef.CompareNef.Test_Compare_Files.test_Compare_BatchFiles">
+<code class="sig-name descname">test_Compare_BatchFiles</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/CompareNef.html#Test_Compare_Files.test_Compare_BatchFiles"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.CompareNef.Test_Compare_Files.test_Compare_BatchFiles" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compare the Nef files in two directories</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ccpn.util.nef.CompareNef.Test_Compare_Files.test_Compare_Files">
+<code class="sig-name descname">test_Compare_Files</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/CompareNef.html#Test_Compare_Files.test_Compare_Files"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.CompareNef.Test_Compare_Files.test_Compare_Files" title="Permalink to this definition">¶</a></dt>
+<dd><p>Load two files and compare</p>
+</dd></dl>
+
 </dd></dl>
 
 <dl class="function">
 <dt id="ccpn.util.nef.CompareNef.addToList">
-<code class="descclassname">ccpn.util.nef.CompareNef.</code><code class="descname">addToList</code><span class="sig-paren">(</span><em>inList</em>, <em>cItem</em>, <em>nefList</em><span class="sig-paren">)</span> &rarr; list<a class="reference internal" href="../_modules/ccpn/util/nef/CompareNef.html#addToList"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.CompareNef.addToList" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">ccpn.util.nef.CompareNef.</code><code class="sig-name descname">addToList</code><span class="sig-paren">(</span><em class="sig-param">inList</em>, <em class="sig-param">cItem</em>, <em class="sig-param">nefList</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/CompareNef.html#addToList"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.CompareNef.addToList" title="Permalink to this definition">¶</a></dt>
 <dd><p>Append cItem to the compare list
 Currently adds one cItem with a list as the last element</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>inList</strong> &#8211; a list of items to add to the end of cItem</li>
-<li><strong>cItem</strong> &#8211; object containing the current tree to add to the list</li>
-<li><strong>nefList</strong> &#8211; current list of comparisons</li>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>inList</strong> – a list of items to add to the end of cItem</p></li>
+<li><p><strong>cItem</strong> – object containing the current tree to add to the list</p></li>
+<li><p><strong>nefList</strong> – current list of comparisons</p></li>
 </ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">list of type nefItem</p>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>list of type nefItem</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="function">
 <dt id="ccpn.util.nef.CompareNef.batchCompareNefFiles">
-<code class="descclassname">ccpn.util.nef.CompareNef.</code><code class="descname">batchCompareNefFiles</code><span class="sig-paren">(</span><em>inDir1</em>, <em>inDir2</em>, <em>outDir</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/CompareNef.html#batchCompareNefFiles"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.CompareNef.batchCompareNefFiles" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">ccpn.util.nef.CompareNef.</code><code class="sig-name descname">batchCompareNefFiles</code><span class="sig-paren">(</span><em class="sig-param">inDir1</em>, <em class="sig-param">inDir2</em>, <em class="sig-param">outDir</em>, <em class="sig-param">options</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/CompareNef.html#batchCompareNefFiles"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.CompareNef.batchCompareNefFiles" title="Permalink to this definition">¶</a></dt>
 <dd><p>Batch compare the Nef files common to the two directories
 For each file found, write the compare log to the corresponding .txt file</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>inDir1</strong> &#8211; </li>
-<li><strong>inDir2</strong> &#8211; </li>
-<li><strong>outDir</strong> &#8211; </li>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>inDir1</strong> – </p></li>
+<li><p><strong>inDir2</strong> – </p></li>
+<li><p><strong>outDir</strong> – </p></li>
+<li><p><strong>options</strong> – nameSpace holding the commandLineArguments</p></li>
 </ul>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="function">
 <dt id="ccpn.util.nef.CompareNef.compareDataBlocks">
-<code class="descclassname">ccpn.util.nef.CompareNef.</code><code class="descname">compareDataBlocks</code><span class="sig-paren">(</span><em>dataBlock1: ccpn.util.nef.GenericStarParser.DataBlock</em>, <em>dataBlock2: ccpn.util.nef.GenericStarParser.DataBlock</em>, <em>cItem=None</em>, <em>nefList=None</em><span class="sig-paren">)</span> &rarr; list<a class="reference internal" href="../_modules/ccpn/util/nef/CompareNef.html#compareDataBlocks"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.CompareNef.compareDataBlocks" title="Permalink to this definition">¶</a></dt>
-<dd><p>Compare two dataBlocks, if they have the same name then check their contents
-:param dataBlock1: name of the first DataBlock object
-:param dataBlock2: name of the second DataBlock object
-:return: list of type nefItem</p>
+<code class="sig-prename descclassname">ccpn.util.nef.CompareNef.</code><code class="sig-name descname">compareDataBlocks</code><span class="sig-paren">(</span><em class="sig-param">dataBlock1</em>, <em class="sig-param">dataBlock2</em>, <em class="sig-param">options</em>, <em class="sig-param">cItem=None</em>, <em class="sig-param">nefList=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/CompareNef.html#compareDataBlocks"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.CompareNef.compareDataBlocks" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compare two dataBlocks, if they have the same name then check their contents</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>dataBlock1</strong> – first DataBlock object, of type GenericStarParser.DataBlock</p></li>
+<li><p><strong>dataBlock2</strong> – second DataBlock object, of type GenericStarParser.DataBlock</p></li>
+<li><p><strong>options</strong> – nameSpace holding the commandLineArguments</p></li>
+<li><p><strong>cItem</strong> – list of str describing differences between nefItems</p></li>
+<li><p><strong>nefList</strong> – input of nefItems</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>list of type nefItem</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="function">
 <dt id="ccpn.util.nef.CompareNef.compareDataExtents">
-<code class="descclassname">ccpn.util.nef.CompareNef.</code><code class="descname">compareDataExtents</code><span class="sig-paren">(</span><em>dataExt1: ccpn.util.nef.GenericStarParser.DataExtent</em>, <em>dataExt2: ccpn.util.nef.GenericStarParser.DataExtent</em>, <em>cItem=None</em>, <em>nefList=None</em><span class="sig-paren">)</span> &rarr; list<a class="reference internal" href="../_modules/ccpn/util/nef/CompareNef.html#compareDataExtents"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.CompareNef.compareDataExtents" title="Permalink to this definition">¶</a></dt>
-<dd><p>Compare two dataExtents, if they have the same name then check their contents
-:param dataExt1: name of the first DataExtent object
-:param dataExt2: name of the second DataExtent object
-:return: list of type nefItem</p>
+<code class="sig-prename descclassname">ccpn.util.nef.CompareNef.</code><code class="sig-name descname">compareDataExtents</code><span class="sig-paren">(</span><em class="sig-param">dataExt1</em>, <em class="sig-param">dataExt2</em>, <em class="sig-param">options</em>, <em class="sig-param">cItem=None</em>, <em class="sig-param">nefList=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/CompareNef.html#compareDataExtents"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.CompareNef.compareDataExtents" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compare two dataExtents, if they have the same name then check their contents</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>dataExt1</strong> – first DataExtent object, of type GenericStarParser.DataExtent</p></li>
+<li><p><strong>dataExt2</strong> – second DataExtent object, of type GenericStarParser.DataExtent</p></li>
+<li><p><strong>options</strong> – nameSpace holding the commandLineArguments</p></li>
+<li><p><strong>cItem</strong> – list of str describing differences between nefItems</p></li>
+<li><p><strong>nefList</strong> – input of nefItems</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>list of type nefItem</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="function">
 <dt id="ccpn.util.nef.CompareNef.compareLoops">
-<code class="descclassname">ccpn.util.nef.CompareNef.</code><code class="descname">compareLoops</code><span class="sig-paren">(</span><em>loop1: ccpn.util.nef.GenericStarParser.Loop</em>, <em>loop2: ccpn.util.nef.GenericStarParser.Loop</em>, <em>cItem=None</em>, <em>nefList=None</em><span class="sig-paren">)</span> &rarr; list<a class="reference internal" href="../_modules/ccpn/util/nef/CompareNef.html#compareLoops"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.CompareNef.compareLoops" title="Permalink to this definition">¶</a></dt>
-<dd><p>Compare two Loops
-:param loop1: name of the first Loop object
-:param loop2: name of the second Loop object
-:return: list of type nefItem</p>
+<code class="sig-prename descclassname">ccpn.util.nef.CompareNef.</code><code class="sig-name descname">compareLoops</code><span class="sig-paren">(</span><em class="sig-param">loop1</em>, <em class="sig-param">loop2</em>, <em class="sig-param">options</em>, <em class="sig-param">cItem=None</em>, <em class="sig-param">nefList=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/CompareNef.html#compareLoops"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.CompareNef.compareLoops" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compare two Loops</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>loop1</strong> – first Loop object, of type GenericStarParser.Loop</p></li>
+<li><p><strong>loop2</strong> – second Loop object, of type GenericStarParser.Loop</p></li>
+<li><p><strong>options</strong> – nameSpace holding the commandLineArguments</p></li>
+<li><p><strong>cItem</strong> – list of str describing differences between nefItems</p></li>
+<li><p><strong>nefList</strong> – input of nefItems</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>list of type nefItem</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="function">
 <dt id="ccpn.util.nef.CompareNef.compareNefFiles">
-<code class="descclassname">ccpn.util.nef.CompareNef.</code><code class="descname">compareNefFiles</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/CompareNef.html#compareNefFiles"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.CompareNef.compareNefFiles" title="Permalink to this definition">¶</a></dt>
-<dd><p>Compare two Nef files and return comparison as a nefItem list
-:param inFile1: name of the first file
-:param inFile2: name of the second file
-:return: list of type nefItem</p>
+<code class="sig-prename descclassname">ccpn.util.nef.CompareNef.</code><code class="sig-name descname">compareNefFiles</code><span class="sig-paren">(</span><em class="sig-param">inFile1</em>, <em class="sig-param">inFile2</em>, <em class="sig-param">options</em>, <em class="sig-param">cItem=None</em>, <em class="sig-param">nefList=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/CompareNef.html#compareNefFiles"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.CompareNef.compareNefFiles" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compare two Nef files and return comparison as a nefItem list</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>inFile1</strong> – name of the first file</p></li>
+<li><p><strong>inFile2</strong> – name of the second file</p></li>
+<li><p><strong>options</strong> – nameSpace holding the commandLineArguments</p></li>
+<li><p><strong>cItem</strong> – list of str describing differences between nefItems</p></li>
+<li><p><strong>nefList</strong> – input of nefItems</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>list of type nefItem</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="function">
 <dt id="ccpn.util.nef.CompareNef.compareSaveFrames">
-<code class="descclassname">ccpn.util.nef.CompareNef.</code><code class="descname">compareSaveFrames</code><span class="sig-paren">(</span><em>saveFrame1: ccpn.util.nef.GenericStarParser.SaveFrame</em>, <em>saveFrame2: ccpn.util.nef.GenericStarParser.SaveFrame</em>, <em>cItem=None</em>, <em>nefList=None</em><span class="sig-paren">)</span> &rarr; list<a class="reference internal" href="../_modules/ccpn/util/nef/CompareNef.html#compareSaveFrames"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.CompareNef.compareSaveFrames" title="Permalink to this definition">¶</a></dt>
-<dd><p>Compare two saveFrames, if they have the same name then check their contents
-:param saveFrame1: name of the first SaveFrame object
-:param saveFrame2: name of the second SaveFrame object
-:return: list of type nefItem</p>
+<code class="sig-prename descclassname">ccpn.util.nef.CompareNef.</code><code class="sig-name descname">compareSaveFrames</code><span class="sig-paren">(</span><em class="sig-param">saveFrame1</em>, <em class="sig-param">saveFrame2</em>, <em class="sig-param">options</em>, <em class="sig-param">cItem=None</em>, <em class="sig-param">nefList=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/CompareNef.html#compareSaveFrames"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.CompareNef.compareSaveFrames" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compare two saveFrames, if they have the same name then check their contents</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>saveFrame1</strong> – first SaveFrame object, of type GenericStarParser.SaveFrame</p></li>
+<li><p><strong>saveFrame2</strong> – second SaveFrame object, of type GenericStarParser.SaveFrame</p></li>
+<li><p><strong>options</strong> – nameSpace holding the commandLineArguments</p></li>
+<li><p><strong>cItem</strong> – list of str describing differences between nefItems</p></li>
+<li><p><strong>nefList</strong> – input of nefItems</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>list of type nefItem</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="function">
 <dt id="ccpn.util.nef.CompareNef.defineArguments">
-<code class="descclassname">ccpn.util.nef.CompareNef.</code><code class="descname">defineArguments</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/CompareNef.html#defineArguments"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.CompareNef.defineArguments" title="Permalink to this definition">¶</a></dt>
-<dd><p>Define the arguments of the program
-:return argparse instance</p>
+<code class="sig-prename descclassname">ccpn.util.nef.CompareNef.</code><code class="sig-name descname">defineArguments</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/CompareNef.html#defineArguments"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.CompareNef.defineArguments" title="Permalink to this definition">¶</a></dt>
+<dd><p>Define the arguments of the program</p>
+<p>:return argparse instance</p>
 </dd></dl>
+
+<dl class="function">
+<dt id="ccpn.util.nef.CompareNef.import_parents">
+<code class="sig-prename descclassname">ccpn.util.nef.CompareNef.</code><code class="sig-name descname">import_parents</code><span class="sig-paren">(</span><em class="sig-param">level=1</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/CompareNef.html#import_parents"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.CompareNef.import_parents" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 <dl class="class">
 <dt id="ccpn.util.nef.CompareNef.nefItem">
-<em class="property">class </em><code class="descclassname">ccpn.util.nef.CompareNef.</code><code class="descname">nefItem</code><span class="sig-paren">(</span><em>cItem=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/CompareNef.html#nefItem"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.CompareNef.nefItem" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<em class="property">class </em><code class="sig-prename descclassname">ccpn.util.nef.CompareNef.</code><code class="sig-name descname">nefItem</code><span class="sig-paren">(</span><em class="sig-param">cItem=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/CompareNef.html#nefItem"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.CompareNef.nefItem" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Holds the contents of a single Nef comparison
 inWhich   a flag labelling which file the item was found in</p>
 <blockquote>
-<div>1 = found in the first file, 2 = found on the second file, 3 = common to both</div></blockquote>
+<div><p>1 = found in the first file, 2 = found on the second file, 3 = common to both</p>
+</div></blockquote>
 <p>list      a list of strings containing the comparison information</p>
 </dd></dl>
 
 <dl class="function">
 <dt id="ccpn.util.nef.CompareNef.printCompareList">
-<code class="descclassname">ccpn.util.nef.CompareNef.</code><code class="descname">printCompareList</code><span class="sig-paren">(</span><em>nefList</em>, <em>inFile1</em>, <em>inFile2</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/CompareNef.html#printCompareList"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.CompareNef.printCompareList" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">ccpn.util.nef.CompareNef.</code><code class="sig-name descname">printCompareList</code><span class="sig-paren">(</span><em class="sig-param">nefList</em>, <em class="sig-param">inFile1</em>, <em class="sig-param">inFile2</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/CompareNef.html#printCompareList"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.CompareNef.printCompareList" title="Permalink to this definition">¶</a></dt>
 <dd><p>Print the contents of the nef compare list to the screen</p>
-<dl class="docutils">
-<dt>Output is in three parts:</dt>
-<dd><ul class="first last simple">
-<li>items that are present only in the first file</li>
-<li>items that are only in the second file</li>
-<li>differences between objects that are common in both files</li>
+<dl class="simple">
+<dt>Output is in three parts:</dt><dd><ul class="simple">
+<li><p>items that are present only in the first file</p></li>
+<li><p>items that are only in the second file</p></li>
+<li><p>differences between objects that are common in both files</p></li>
 </ul>
 </dd>
 </dl>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>nefList</strong> &#8211; list to print</li>
-<li><strong>inFile1</strong> &#8211; name of the first file</li>
-<li><strong>inFile2</strong> &#8211; name of the second file</li>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>nefList</strong> – list to print</p></li>
+<li><p><strong>inFile1</strong> – name of the first file</p></li>
+<li><p><strong>inFile2</strong> – name of the second file</p></li>
 </ul>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="function">
 <dt id="ccpn.util.nef.CompareNef.printFile">
-<code class="descclassname">ccpn.util.nef.CompareNef.</code><code class="descname">printFile</code><span class="sig-paren">(</span><em>thisFile</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/CompareNef.html#printFile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.CompareNef.printFile" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">ccpn.util.nef.CompareNef.</code><code class="sig-name descname">printFile</code><span class="sig-paren">(</span><em class="sig-param">thisFile</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/CompareNef.html#printFile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.CompareNef.printFile" title="Permalink to this definition">¶</a></dt>
 <dd><p>Print a file to the screen</p>
 </dd></dl>
 
 <dl class="function">
 <dt id="ccpn.util.nef.CompareNef.printWhichList">
-<code class="descclassname">ccpn.util.nef.CompareNef.</code><code class="descname">printWhichList</code><span class="sig-paren">(</span><em>nefList</em>, <em>whichType=0</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/CompareNef.html#printWhichList"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.CompareNef.printWhichList" title="Permalink to this definition">¶</a></dt>
-<dd><p>List only those items that are of type whichType
-:param nefList: list to print
-:param whichType: type to print</p>
+<code class="sig-prename descclassname">ccpn.util.nef.CompareNef.</code><code class="sig-name descname">printWhichList</code><span class="sig-paren">(</span><em class="sig-param">nefList</em>, <em class="sig-param">whichType=0</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/CompareNef.html#printWhichList"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.CompareNef.printWhichList" title="Permalink to this definition">¶</a></dt>
+<dd><p>List only those items that are of type whichType</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>nefList</strong> – list to print</p></li>
+<li><p><strong>whichType</strong> – type to print</p></li>
+</ul>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="function">
 <dt id="ccpn.util.nef.CompareNef.sizeNefList">
-<code class="descclassname">ccpn.util.nef.CompareNef.</code><code class="descname">sizeNefList</code><span class="sig-paren">(</span><em>nefList</em>, <em>whichType=0</em><span class="sig-paren">)</span> &rarr; int<a class="reference internal" href="../_modules/ccpn/util/nef/CompareNef.html#sizeNefList"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.CompareNef.sizeNefList" title="Permalink to this definition">¶</a></dt>
-<dd><p>List only those items that are of type whichType
-:param nefList: list to print
-:param whichType: type to print</p>
+<code class="sig-prename descclassname">ccpn.util.nef.CompareNef.</code><code class="sig-name descname">sizeNefList</code><span class="sig-paren">(</span><em class="sig-param">nefList</em>, <em class="sig-param">whichType=0</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/CompareNef.html#sizeNefList"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.CompareNef.sizeNefList" title="Permalink to this definition">¶</a></dt>
+<dd><p>List only those items that are of type whichType</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>nefList</strong> – list to print</p></li>
+<li><p><strong>whichType</strong> – type to print</p></li>
+</ul>
+</dd>
+</dl>
 </dd></dl>
 
 </div>
@@ -377,12 +436,12 @@ inWhich   a flag labelling which file the item was found in</p>
 <p>Module Documentation here</p>
 <dl class="class">
 <dt id="ccpn.util.nef.ErrorLog.ErrorLog">
-<em class="property">class </em><code class="descclassname">ccpn.util.nef.ErrorLog.</code><code class="descname">ErrorLog</code><span class="sig-paren">(</span><em>logOutput=&lt;built-in method write of _io.TextIOWrapper object&gt;</em>, <em>loggingMode='standard'</em>, <em>errorCode=0</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/ErrorLog.html#ErrorLog"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.ErrorLog.ErrorLog" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<em class="property">class </em><code class="sig-prename descclassname">ccpn.util.nef.ErrorLog.</code><code class="sig-name descname">ErrorLog</code><span class="sig-paren">(</span><em class="sig-param">logOutput=&lt;built-in method write of _io.TextIOWrapper object&gt;</em>, <em class="sig-param">loggingMode='standard'</em>, <em class="sig-param">errorCode=0</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/ErrorLog.html#ErrorLog"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.ErrorLog.ErrorLog" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>A class to facilitate Logging of errors to stderr.</p>
-<dl class="docutils">
-<dt>example:</dt>
-<dd>errorLogging.logError(&#8216;Error: %s&#8217; % errorMessage)</dd>
+<dl class="simple">
+<dt>example:</dt><dd><p>errorLogging.logError(‘Error: %s’ % errorMessage)</p>
+</dd>
 </dl>
 <p>functions available are:</p>
 <blockquote>
@@ -392,14 +451,15 @@ logger = func         set the current logger
 loggingMode = mode    set the logging mode where mode is:</p>
 <blockquote>
 <div><blockquote>
-<div>&#8216;standard&#8217;, &#8216;silent&#8217;, &#8216;strict&#8217;</div></blockquote>
-<dl class="docutils">
-<dt>current modes are:</dt>
-<dd><p class="first">&#8216;standard&#8217;      errors are written to the stderr, no errors are raised
-&#8216;silent&#8217;        no errors are raised, no output to the stderr
-&#8216;strict&#8217;        errors are logged to stderr and errors are raised</p>
-<blockquote class="last">
-<div>to be handled by the calling functions</div></blockquote>
+<div><p>‘standard’, ‘silent’, ‘strict’</p>
+</div></blockquote>
+<dl>
+<dt>current modes are:</dt><dd><p>‘standard’      errors are written to the stderr, no errors are raised
+‘silent’        no errors are raised, no output to the stderr
+‘strict’        errors are logged to stderr and errors are raised</p>
+<blockquote>
+<div><p>to be handled by the calling functions</p>
+</div></blockquote>
 </dd>
 </dl>
 </div></blockquote>
@@ -407,55 +467,52 @@ loggingMode = mode    set the logging mode where mode is:</p>
 </div></blockquote>
 <dl class="attribute">
 <dt id="ccpn.util.nef.ErrorLog.ErrorLog.NEFERRORS">
-<code class="descname">NEFERRORS</code><em class="property"> = {-1: 'table error', -17: 'error reading keys', -16: 'error reading attribute', -15: 'error reading attribute names', -14: 'bad add saveFrame', -13: 'bad categories', -12: '', -11: 'bad listType', -10: 'list type error', -9: 'bad table names', -8: 'bad multiColumnValues', -7: 'bad convert from string', -6: 'bad convert to string', -5: 'error saving file', -4: 'error loading file', -3: 'saveFrame does not exist', -2: 'table does not exist'}</em><a class="headerlink" href="#ccpn.util.nef.ErrorLog.ErrorLog.NEFERRORS" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">NEFERRORS</code><em class="property"> = {-17: 'error reading keys', -16: 'error reading attribute', -15: 'error reading attribute names', -14: 'bad add saveFrame', -13: 'bad categories', -12: '', -11: 'bad listType', -10: 'list type error', -9: 'bad table names', -8: 'bad multiColumnValues', -7: 'bad convert from string', -6: 'bad convert to string', -5: 'error saving file', -4: 'error loading file', -3: 'saveFrame does not exist', -2: 'table does not exist', -1: 'table error'}</em><a class="headerlink" href="#ccpn.util.nef.ErrorLog.ErrorLog.NEFERRORS" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<dl class="attribute">
+<dl class="method">
 <dt id="ccpn.util.nef.ErrorLog.ErrorLog.lastError">
-<code class="descname">lastError</code><a class="headerlink" href="#ccpn.util.nef.ErrorLog.ErrorLog.lastError" title="Permalink to this definition">¶</a></dt>
+<em class="property">property </em><code class="sig-name descname">lastError</code><a class="headerlink" href="#ccpn.util.nef.ErrorLog.ErrorLog.lastError" title="Permalink to this definition">¶</a></dt>
 <dd><p>- <em>None</em>, <em>immutable</em> - 
 Return the error code of the last action
 :return int:</p>
 </dd></dl>
 
-<dl class="attribute">
+<dl class="method">
 <dt id="ccpn.util.nef.ErrorLog.ErrorLog.lastErrorString">
-<code class="descname">lastErrorString</code><a class="headerlink" href="#ccpn.util.nef.ErrorLog.ErrorLog.lastErrorString" title="Permalink to this definition">¶</a></dt>
+<em class="property">property </em><code class="sig-name descname">lastErrorString</code><a class="headerlink" href="#ccpn.util.nef.ErrorLog.ErrorLog.lastErrorString" title="Permalink to this definition">¶</a></dt>
 <dd><p>- <em>None</em>, <em>immutable</em> - 
 Return the error string of the last action
 :return string:</p>
 </dd></dl>
 
-<dl class="attribute">
+<dl class="method">
 <dt id="ccpn.util.nef.ErrorLog.ErrorLog.logger">
-<code class="descname">logger</code><a class="headerlink" href="#ccpn.util.nef.ErrorLog.ErrorLog.logger" title="Permalink to this definition">¶</a></dt>
+<em class="property">property </em><code class="sig-name descname">logger</code><a class="headerlink" href="#ccpn.util.nef.ErrorLog.ErrorLog.logger" title="Permalink to this definition">¶</a></dt>
 <dd><p>- <em>None</em>, <em>mutable</em> - 
 Return the current logging function
 default is set to: sys.stderr.write
 :return func:</p>
 </dd></dl>
 
-<dl class="attribute">
+<dl class="method">
 <dt id="ccpn.util.nef.ErrorLog.ErrorLog.loggingMode">
-<code class="descname">loggingMode</code><a class="headerlink" href="#ccpn.util.nef.ErrorLog.ErrorLog.loggingMode" title="Permalink to this definition">¶</a></dt>
+<em class="property">property </em><code class="sig-name descname">loggingMode</code><a class="headerlink" href="#ccpn.util.nef.ErrorLog.ErrorLog.loggingMode" title="Permalink to this definition">¶</a></dt>
 <dd><p>- <em>None</em>, <em>mutable</em> - 
 Return the current logging Mode
 current modes are:</p>
 <blockquote>
-<div><p>&#8216;standard&#8217;      errors are written to the stderr, no errors are raised
-&#8216;silent&#8217;        no errors are raised, no output to the stderr
-&#8216;strict&#8217;        errors are logged to stderr and errors are raised</p>
+<div><p>‘standard’      errors are written to the stderr, no errors are raised
+‘silent’        no errors are raised, no output to the stderr
+‘strict’        errors are logged to stderr and errors are raised</p>
 <blockquote>
-<div>to be handled by the calling functions</div></blockquote>
+<div><p>to be handled by the calling functions</p>
 </div></blockquote>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Return string:</th><td class="field-body"></td>
-</tr>
-</tbody>
-</table>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Return string</dt>
+<dd class="field-odd"><p></p></dd>
+</dl>
 </dd></dl>
 
 </dd></dl>
@@ -481,14 +538,14 @@ International Tables for Crystallography volume G section 2.1
 with the following exceptions:</p>
 <blockquote>
 <div><ul class="simple">
-<li>Nested loops are NOT supported</li>
-<li>Global blocks are treated as simple data blocks. If the first data block in the file is
-a <a href="#id4"><span class="problematic" id="id5">global_</span></a>, is is named &#8216;<a href="#id6"><span class="problematic" id="id7">global_</span></a>&#8216;; globals elsewhere are named global_1, global_2, etc.
-This may cause trouble downstream if there is a DataBlock named e.g. &#8216;data_global_1&#8217;.</li>
+<li><p>Nested loops are NOT supported</p></li>
+<li><p>Global blocks are treated as simple data blocks. If the first data block in the file is
+a <a href="#id4"><span class="problematic" id="id5">global_</span></a>, is is named ‘<a href="#id6"><span class="problematic" id="id7">global_</span></a>’; globals elsewhere are named global_1, global_2, etc.
+This may cause trouble downstream if there is a DataBlock named e.g. ‘data_global_1’.</p></li>
 </ul>
 </div></blockquote>
 <p>The object structure returned is:</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">DataExtent</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">DataExtent</span>
   <span class="n">DataBlock</span>
     <span class="n">Item</span>
     <span class="n">Loop</span>
@@ -497,14 +554,14 @@ This may cause trouble downstream if there is a DataBlock named e.g. &#8216;data
       <span class="n">Loop</span>
 </pre></div>
 </div>
-<p>DataExtent, DataBlock and SaveFrame are Python OrderedDict with an additional &#8216;name&#8217; attribute
+<p>DataExtent, DataBlock and SaveFrame are Python OrderedDict with an additional ‘name’ attribute
 DataBlocks and SaveFrames are entered in their container using their name as the key.</p>
-<p>Loop is an object with a &#8216;columns&#8217; list, a &#8216;data&#8217; list-of-row-OrderedDict, and a name attribute
+<p>Loop is an object with a ‘columns’ list, a ‘data’ list-of-row-OrderedDict, and a name attribute
 set equal to the name of the first column. A loop is entered in its container under each
-column name, so that e.g. aSaveFrame[&#8216;_Loopx.loopcol1&#8217;] and aSaveFrame[&#8216;_Loopx.loopcol2&#8217;] both
+column name, so that e.g. aSaveFrame[‘_Loopx.loopcol1’] and aSaveFrame[‘_Loopx.loopcol2’] both
 exist and both correspond to the same loop object.</p>
 <p>Items are entered as a string key - string value pair.</p>
-<p>All tags are preserved &#8216;as is&#8217; (i.e. without stripping leading &#8216;_&#8217;, &#8216;<a href="#id8"><span class="problematic" id="id9">data_</span></a>&#8216;, or &#8216;<a href="#id10"><span class="problematic" id="id11">save_</span></a>&#8216;),
+<p>All tags are preserved ‘as is’ (i.e. without stripping leading ‘_’, ‘<a href="#id8"><span class="problematic" id="id9">data_</span></a>’, or ‘<a href="#id10"><span class="problematic" id="id11">save_</span></a>’),
 basically to avoid the theoretical risk that a SaveFrame name might clash with
 an item name or loop column, or a DataBlock with a Global. Duplicate tags raise an error.</p>
 <p>Quoted values are returned as str,
@@ -519,26 +576,20 @@ International Tables for Crystallography volume G section 2.1
 with the following exceptions and additions.</p>
 <blockquote>
 <div><ul>
-<li><p class="first">Strings of type UnquotedValue are written as-is, without quoting them.</p>
-</li>
-<li><p class="first">Note that e.g. &#8216; &#8220;say&#8221; &#8216;what&#8217;?&#8217;    or    &#8221; &#8216;say&#8221;&#8216;&#8220;what&#8221;?&#8221; are
+<li><p>Strings of type UnquotedValue are written as-is, without quoting them.</p></li>
+<li><p>Note that e.g. ‘ “say” ‘what’?’    or    ” ‘say”‘“what”?” are
 valid quoted strings according to the standard, since  the end-quote marker
-is a quotation marker FOLLOWED BY WHITESPACE.</p>
-</li>
-<li><p class="first">Strings that cannot be quoted on one line (e.g.   &#8216;&#8217;&#8217; &#8220;say&#8221; &#8216;what&#8217; &#8216;&#8217;&#8217;   )
-are converted to  multiline strings by appending a newline</p>
-</li>
-<li><p class="first">Strings with internal linebreaks but no terminal linebreak
-are converted by appending a linebreak</p>
-</li>
-<li><p class="first">Strings that cannot be quoted as multiline strings because they contain
-a line starting with &#8216;;&#8217; are converted by prepending a space (&#8216; &#8216;) to each line</p>
-</li>
-<li><p class="first">Values None, True, False, NaN, Infinity and -Infinity are converted to
-UNQUOTED strings &#8216;.&#8217;, &#8216;true&#8217;, &#8216;false&#8217;, &#8216;NaN&#8217;, &#8216;Infinity&#8217; and &#8216;-Infinity&#8217;, respectively.</p>
-</li>
-<li><p class="first">Normal (not unquoted) strings that evaluate to a float are written in quotes.
-Also the literal strings &#8216;.&#8217;, &#8216;true&#8217;, &#8216;false&#8217;, &#8216;NaN&#8217;, &#8216;Infinity&#8217; and &#8216;-Infinity&#8217;
+is a quotation marker FOLLOWED BY WHITESPACE.</p></li>
+<li><p>Strings that cannot be quoted on one line (e.g.   ‘’’ “say” ‘what’ ‘’’   )
+are converted to  multiline strings by appending a newline</p></li>
+<li><p>Strings with internal linebreaks but no terminal linebreak
+are converted by appending a linebreak</p></li>
+<li><p>Strings that cannot be quoted as multiline strings because they contain
+a line starting with ‘;’ are converted by prepending a space (‘ ‘) to each line</p></li>
+<li><p>Values None, True, False, NaN, Infinity and -Infinity are converted to
+UNQUOTED strings ‘.’, ‘true’, ‘false’, ‘NaN’, ‘Infinity’ and ‘-Infinity’, respectively.</p></li>
+<li><p>Normal (not unquoted) strings that evaluate to a float are written in quotes.
+Also the literal strings ‘.’, ‘true’, ‘false’, ‘NaN’, ‘Infinity’ and ‘-Infinity’
 are always written in quotes.</p>
 <p>This makes it possible (but NOT mandatory) to distinguish the null,  boolean and float values
 from the equivalent strings</p>
@@ -550,17 +601,17 @@ either tuples, lists, or OrderedDicts, and accept an optional tag prefix for
 DataBlocks, SaveFrames, and Loops, to prepend to item and column names.</p>
 <dl class="class">
 <dt id="ccpn.util.nef.GenericStarParser.DataBlock">
-<em class="property">class </em><code class="descclassname">ccpn.util.nef.GenericStarParser.</code><code class="descname">DataBlock</code><span class="sig-paren">(</span><em>name=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/GenericStarParser.html#DataBlock"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.GenericStarParser.DataBlock" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#ccpn.util.nef.GenericStarParser.StarContainer" title="ccpn.util.nef.GenericStarParser.StarContainer"><code class="xref py py-class docutils literal"><span class="pre">ccpn.util.nef.GenericStarParser.StarContainer</span></code></a></p>
+<em class="property">class </em><code class="sig-prename descclassname">ccpn.util.nef.GenericStarParser.</code><code class="sig-name descname">DataBlock</code><span class="sig-paren">(</span><em class="sig-param">name=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/GenericStarParser.html#DataBlock"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.GenericStarParser.DataBlock" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#ccpn.util.nef.GenericStarParser.StarContainer" title="ccpn.util.nef.GenericStarParser.StarContainer"><code class="xref py py-class docutils literal notranslate"><span class="pre">ccpn.util.nef.GenericStarParser.StarContainer</span></code></a></p>
 <p>DataBlock for general STAR object tree</p>
 <dl class="attribute">
 <dt id="ccpn.util.nef.GenericStarParser.DataBlock.tagPrefix">
-<code class="descname">tagPrefix</code><em class="property"> = None</em><a class="headerlink" href="#ccpn.util.nef.GenericStarParser.DataBlock.tagPrefix" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">tagPrefix</code><em class="property"> = None</em><a class="headerlink" href="#ccpn.util.nef.GenericStarParser.DataBlock.tagPrefix" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="ccpn.util.nef.GenericStarParser.DataBlock.toString">
-<code class="descname">toString</code><span class="sig-paren">(</span><em>indent=''</em>, <em>separator='  '</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/GenericStarParser.html#DataBlock.toString"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.GenericStarParser.DataBlock.toString" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">toString</code><span class="sig-paren">(</span><em class="sig-param">indent=''</em>, <em class="sig-param">separator='  '</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/GenericStarParser.html#DataBlock.toString"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.GenericStarParser.DataBlock.toString" title="Permalink to this definition">¶</a></dt>
 <dd><p>Convert DataBlock to string, for writing</p>
 </dd></dl>
 
@@ -568,23 +619,23 @@ DataBlocks, SaveFrames, and Loops, to prepend to item and column names.</p>
 
 <dl class="class">
 <dt id="ccpn.util.nef.GenericStarParser.DataExtent">
-<em class="property">class </em><code class="descclassname">ccpn.util.nef.GenericStarParser.</code><code class="descname">DataExtent</code><span class="sig-paren">(</span><em>name='Root'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/GenericStarParser.html#DataExtent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.GenericStarParser.DataExtent" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#ccpn.util.nef.GenericStarParser.NamedOrderedDict" title="ccpn.util.nef.GenericStarParser.NamedOrderedDict"><code class="xref py py-class docutils literal"><span class="pre">ccpn.util.nef.GenericStarParser.NamedOrderedDict</span></code></a></p>
+<em class="property">class </em><code class="sig-prename descclassname">ccpn.util.nef.GenericStarParser.</code><code class="sig-name descname">DataExtent</code><span class="sig-paren">(</span><em class="sig-param">name='Root'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/GenericStarParser.html#DataExtent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.GenericStarParser.DataExtent" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#ccpn.util.nef.GenericStarParser.NamedOrderedDict" title="ccpn.util.nef.GenericStarParser.NamedOrderedDict"><code class="xref py py-class docutils literal notranslate"><span class="pre">ccpn.util.nef.GenericStarParser.NamedOrderedDict</span></code></a></p>
 <p>Top level container for general STAR object tree</p>
 <dl class="method">
 <dt id="ccpn.util.nef.GenericStarParser.DataExtent.toString">
-<code class="descname">toString</code><span class="sig-paren">(</span><em>indent=''</em>, <em>separator='  '</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/GenericStarParser.html#DataExtent.toString"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.GenericStarParser.DataExtent.toString" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">toString</code><span class="sig-paren">(</span><em class="sig-param">indent=''</em>, <em class="sig-param">separator='  '</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/GenericStarParser.html#DataExtent.toString"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.GenericStarParser.DataExtent.toString" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
 
 <dl class="class">
 <dt id="ccpn.util.nef.GenericStarParser.GeneralStarParser">
-<em class="property">class </em><code class="descclassname">ccpn.util.nef.GenericStarParser.</code><code class="descname">GeneralStarParser</code><span class="sig-paren">(</span><em>text</em>, <em>enforceSaveFrameStop=True</em>, <em>enforceLoopStop=False</em>, <em>padIncompleteLoops=False</em>, <em>allowSquareBracketStrings=False</em>, <em>lowerCaseTags=True</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/GenericStarParser.html#GeneralStarParser"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.GenericStarParser.GeneralStarParser" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<em class="property">class </em><code class="sig-prename descclassname">ccpn.util.nef.GenericStarParser.</code><code class="sig-name descname">GeneralStarParser</code><span class="sig-paren">(</span><em class="sig-param">text</em>, <em class="sig-param">enforceSaveFrameStop=True</em>, <em class="sig-param">enforceLoopStop=False</em>, <em class="sig-param">padIncompleteLoops=False</em>, <em class="sig-param">allowSquareBracketStrings=False</em>, <em class="sig-param">lowerCaseTags=True</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/GenericStarParser.html#GeneralStarParser"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.GenericStarParser.GeneralStarParser" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Parser for text corresponding to a STAR file with one or more data blocks,
 producing a nested object structure matching the file (see module documentation for details:</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">DataExtent</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">DataExtent</span>
   <span class="n">DataBlock</span>
     <span class="n">Loop</span>
     <span class="n">Item</span>
@@ -595,74 +646,74 @@ producing a nested object structure matching the file (see module documentation 
 </div>
 <p>Parameters (default values correspond to the International Tables for Crystallography standard):</p>
 <ul class="simple">
-<li><em>text</em> Text to parse</li>
-<li><em>enforceSaveFrameStop</em> : True. Raise an error for missing &#8216;<a href="#id12"><span class="problematic" id="id13">save_</span></a>&#8216; terminators - Yes/No</li>
-<li><em>enforceLoopStop</em> : False. Raise an error for missing &#8216;<a href="#id14"><span class="problematic" id="id15">stop_</span></a>&#8216; terminators - Yes/No</li>
-<li><em>padIncompleteLoops</em> : False.  Pad final loop row with &#8216;.&#8217; for missing values - Yes/No</li>
-<li><em>allowSquareBracketStrings</em> : False.  Allow values starting &#8216;[&#8216; or &#8216;]&#8217; - Yes/No</li>
-<li><em>lowerCaseTags</em> : True. Convert all data and object names to lower case</li>
+<li><p><em>text</em> Text to parse</p></li>
+<li><p><em>enforceSaveFrameStop</em> : True. Raise an error for missing ‘<a href="#id12"><span class="problematic" id="id13">save_</span></a>’ terminators - Yes/No</p></li>
+<li><p><em>enforceLoopStop</em> : False. Raise an error for missing ‘<a href="#id14"><span class="problematic" id="id15">stop_</span></a>’ terminators - Yes/No</p></li>
+<li><p><em>padIncompleteLoops</em> : False.  Pad final loop row with ‘.’ for missing values - Yes/No</p></li>
+<li><p><em>allowSquareBracketStrings</em> : False.  Allow values starting ‘[‘ or ‘]’ - Yes/No</p></li>
+<li><p><em>lowerCaseTags</em> : True. Convert all data and object names to lower case</p></li>
 </ul>
 <dl class="method">
 <dt id="ccpn.util.nef.GenericStarParser.GeneralStarParser.parse">
-<code class="descname">parse</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/GenericStarParser.html#GeneralStarParser.parse"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.GenericStarParser.GeneralStarParser.parse" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">parse</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/GenericStarParser.html#GeneralStarParser.parse"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.GenericStarParser.GeneralStarParser.parse" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="ccpn.util.nef.GenericStarParser.GeneralStarParser.processDataName">
-<code class="descname">processDataName</code><span class="sig-paren">(</span><em>value</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/GenericStarParser.html#GeneralStarParser.processDataName"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.GenericStarParser.GeneralStarParser.processDataName" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">processDataName</code><span class="sig-paren">(</span><em class="sig-param">value</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/GenericStarParser.html#GeneralStarParser.processDataName"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.GenericStarParser.GeneralStarParser.processDataName" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="ccpn.util.nef.GenericStarParser.GeneralStarParser.processValue">
-<code class="descname">processValue</code><span class="sig-paren">(</span><em>value</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/GenericStarParser.html#GeneralStarParser.processValue"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.GenericStarParser.GeneralStarParser.processValue" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">processValue</code><span class="sig-paren">(</span><em class="sig-param">value</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/GenericStarParser.html#GeneralStarParser.processValue"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.GenericStarParser.GeneralStarParser.processValue" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
 
 <dl class="class">
 <dt id="ccpn.util.nef.GenericStarParser.Loop">
-<em class="property">class </em><code class="descclassname">ccpn.util.nef.GenericStarParser.</code><code class="descname">Loop</code><span class="sig-paren">(</span><em>name=None</em>, <em>columns=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/GenericStarParser.html#Loop"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.GenericStarParser.Loop" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<em class="property">class </em><code class="sig-prename descclassname">ccpn.util.nef.GenericStarParser.</code><code class="sig-name descname">Loop</code><span class="sig-paren">(</span><em class="sig-param">name=None</em>, <em class="sig-param">columns=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/GenericStarParser.html#Loop"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.GenericStarParser.Loop" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Loop for general STAR object tree
 Attributes are:</p>
 <ul class="simple">
-<li>name: string</li>
-<li>columns:  List of string column headers</li>
-<li>data: List-of-rows, where rows are OrderedDicts</li>
+<li><p>name: string</p></li>
+<li><p>columns:  List of string column headers</p></li>
+<li><p>data: List-of-rows, where rows are OrderedDicts</p></li>
 </ul>
 <dl class="method">
 <dt id="ccpn.util.nef.GenericStarParser.Loop.addColumn">
-<code class="descname">addColumn</code><span class="sig-paren">(</span><em>columnName</em>, <em>paddingValue=DataExtent([]</em>, <em>name=Root)</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/GenericStarParser.html#Loop.addColumn"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.GenericStarParser.Loop.addColumn" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">addColumn</code><span class="sig-paren">(</span><em class="sig-param">columnName</em>, <em class="sig-param">paddingValue={}</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/GenericStarParser.html#Loop.addColumn"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.GenericStarParser.Loop.addColumn" title="Permalink to this definition">¶</a></dt>
 <dd><p>Add new column to loop. if paddingValue is set, including to None, rows with None</p>
 </dd></dl>
 
-<dl class="attribute">
+<dl class="method">
 <dt id="ccpn.util.nef.GenericStarParser.Loop.columns">
-<code class="descname">columns</code><a class="headerlink" href="#ccpn.util.nef.GenericStarParser.Loop.columns" title="Permalink to this definition">¶</a></dt>
+<em class="property">property </em><code class="sig-name descname">columns</code><a class="headerlink" href="#ccpn.util.nef.GenericStarParser.Loop.columns" title="Permalink to this definition">¶</a></dt>
 <dd><p>- <em>None</em>, <em>immutable</em> - 
 Column names</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="ccpn.util.nef.GenericStarParser.Loop.newRow">
-<code class="descname">newRow</code><span class="sig-paren">(</span><em>values=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/GenericStarParser.html#Loop.newRow"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.GenericStarParser.Loop.newRow" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">newRow</code><span class="sig-paren">(</span><em class="sig-param">values=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/GenericStarParser.html#Loop.newRow"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.GenericStarParser.Loop.newRow" title="Permalink to this definition">¶</a></dt>
 <dd><p>Add new row, initialised from values</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="ccpn.util.nef.GenericStarParser.Loop.removeColumn">
-<code class="descname">removeColumn</code><span class="sig-paren">(</span><em>columnName</em>, <em>removeData=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/GenericStarParser.html#Loop.removeColumn"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.GenericStarParser.Loop.removeColumn" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">removeColumn</code><span class="sig-paren">(</span><em class="sig-param">columnName</em>, <em class="sig-param">removeData=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/GenericStarParser.html#Loop.removeColumn"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.GenericStarParser.Loop.removeColumn" title="Permalink to this definition">¶</a></dt>
 <dd><p>Remove column from loop. Will NOT work properly if called during parsing.</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="ccpn.util.nef.GenericStarParser.Loop.tagPrefix">
-<code class="descname">tagPrefix</code><em class="property"> = None</em><a class="headerlink" href="#ccpn.util.nef.GenericStarParser.Loop.tagPrefix" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">tagPrefix</code><em class="property"> = None</em><a class="headerlink" href="#ccpn.util.nef.GenericStarParser.Loop.tagPrefix" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="ccpn.util.nef.GenericStarParser.Loop.toString">
-<code class="descname">toString</code><span class="sig-paren">(</span><em>indent='   '</em>, <em>separator='  '</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/GenericStarParser.html#Loop.toString"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.GenericStarParser.Loop.toString" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">toString</code><span class="sig-paren">(</span><em class="sig-param">indent='   '</em>, <em class="sig-param">separator='  '</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/GenericStarParser.html#Loop.toString"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.GenericStarParser.Loop.toString" title="Permalink to this definition">¶</a></dt>
 <dd><p>Stringifier function for loop.</p>
 <p>Accepts (subtypes of) Loop with data as sequence of rows,
 where rows can be tuples, lists, or OrderedDicts.
@@ -673,35 +724,35 @@ In all cases the values must be in the order given by the columns attribute</p>
 
 <dl class="class">
 <dt id="ccpn.util.nef.GenericStarParser.LoopRow">
-<em class="property">class </em><code class="descclassname">ccpn.util.nef.GenericStarParser.</code><code class="descname">LoopRow</code><a class="reference internal" href="../_modules/ccpn/util/nef/GenericStarParser.html#LoopRow"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.GenericStarParser.LoopRow" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">collections.OrderedDict</span></code></p>
+<em class="property">class </em><code class="sig-prename descclassname">ccpn.util.nef.GenericStarParser.</code><code class="sig-name descname">LoopRow</code><a class="reference internal" href="../_modules/ccpn/util/nef/GenericStarParser.html#LoopRow"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.GenericStarParser.LoopRow" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">collections.OrderedDict</span></code></p>
 <p>Loop row - OrderedDict with additional functionality</p>
 </dd></dl>
 
 <dl class="class">
 <dt id="ccpn.util.nef.GenericStarParser.NamedOrderedDict">
-<em class="property">class </em><code class="descclassname">ccpn.util.nef.GenericStarParser.</code><code class="descname">NamedOrderedDict</code><span class="sig-paren">(</span><em>name=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/GenericStarParser.html#NamedOrderedDict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.GenericStarParser.NamedOrderedDict" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">collections.OrderedDict</span></code></p>
+<em class="property">class </em><code class="sig-prename descclassname">ccpn.util.nef.GenericStarParser.</code><code class="sig-name descname">NamedOrderedDict</code><span class="sig-paren">(</span><em class="sig-param">name=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/GenericStarParser.html#NamedOrderedDict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.GenericStarParser.NamedOrderedDict" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">collections.OrderedDict</span></code></p>
 <dl class="method">
 <dt id="ccpn.util.nef.GenericStarParser.NamedOrderedDict.addItem">
-<code class="descname">addItem</code><span class="sig-paren">(</span><em>tag</em>, <em>value</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/GenericStarParser.html#NamedOrderedDict.addItem"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.GenericStarParser.NamedOrderedDict.addItem" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">addItem</code><span class="sig-paren">(</span><em class="sig-param">tag</em>, <em class="sig-param">value</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/GenericStarParser.html#NamedOrderedDict.addItem"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.GenericStarParser.NamedOrderedDict.addItem" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
 
 <dl class="class">
 <dt id="ccpn.util.nef.GenericStarParser.SaveFrame">
-<em class="property">class </em><code class="descclassname">ccpn.util.nef.GenericStarParser.</code><code class="descname">SaveFrame</code><span class="sig-paren">(</span><em>name=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/GenericStarParser.html#SaveFrame"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.GenericStarParser.SaveFrame" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#ccpn.util.nef.GenericStarParser.StarContainer" title="ccpn.util.nef.GenericStarParser.StarContainer"><code class="xref py py-class docutils literal"><span class="pre">ccpn.util.nef.GenericStarParser.StarContainer</span></code></a></p>
+<em class="property">class </em><code class="sig-prename descclassname">ccpn.util.nef.GenericStarParser.</code><code class="sig-name descname">SaveFrame</code><span class="sig-paren">(</span><em class="sig-param">name=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/GenericStarParser.html#SaveFrame"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.GenericStarParser.SaveFrame" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#ccpn.util.nef.GenericStarParser.StarContainer" title="ccpn.util.nef.GenericStarParser.StarContainer"><code class="xref py py-class docutils literal notranslate"><span class="pre">ccpn.util.nef.GenericStarParser.StarContainer</span></code></a></p>
 <p>SaveFrame for general STAR object tree</p>
 <dl class="attribute">
 <dt id="ccpn.util.nef.GenericStarParser.SaveFrame.tagPrefix">
-<code class="descname">tagPrefix</code><em class="property"> = None</em><a class="headerlink" href="#ccpn.util.nef.GenericStarParser.SaveFrame.tagPrefix" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">tagPrefix</code><em class="property"> = None</em><a class="headerlink" href="#ccpn.util.nef.GenericStarParser.SaveFrame.tagPrefix" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="ccpn.util.nef.GenericStarParser.SaveFrame.toString">
-<code class="descname">toString</code><span class="sig-paren">(</span><em>indent='   '</em>, <em>separator='  '</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/GenericStarParser.html#SaveFrame.toString"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.GenericStarParser.SaveFrame.toString" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">toString</code><span class="sig-paren">(</span><em class="sig-param">indent='   '</em>, <em class="sig-param">separator='  '</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/GenericStarParser.html#SaveFrame.toString"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.GenericStarParser.SaveFrame.toString" title="Permalink to this definition">¶</a></dt>
 <dd><p>Convert SaveFrame to string, for writing</p>
 </dd></dl>
 
@@ -709,12 +760,12 @@ In all cases the values must be in the order given by the columns attribute</p>
 
 <dl class="class">
 <dt id="ccpn.util.nef.GenericStarParser.StarContainer">
-<em class="property">class </em><code class="descclassname">ccpn.util.nef.GenericStarParser.</code><code class="descname">StarContainer</code><span class="sig-paren">(</span><em>name=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/GenericStarParser.html#StarContainer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.GenericStarParser.StarContainer" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#ccpn.util.nef.GenericStarParser.NamedOrderedDict" title="ccpn.util.nef.GenericStarParser.NamedOrderedDict"><code class="xref py py-class docutils literal"><span class="pre">ccpn.util.nef.GenericStarParser.NamedOrderedDict</span></code></a></p>
+<em class="property">class </em><code class="sig-prename descclassname">ccpn.util.nef.GenericStarParser.</code><code class="sig-name descname">StarContainer</code><span class="sig-paren">(</span><em class="sig-param">name=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/GenericStarParser.html#StarContainer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.GenericStarParser.StarContainer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#ccpn.util.nef.GenericStarParser.NamedOrderedDict" title="ccpn.util.nef.GenericStarParser.NamedOrderedDict"><code class="xref py py-class docutils literal notranslate"><span class="pre">ccpn.util.nef.GenericStarParser.NamedOrderedDict</span></code></a></p>
 <p>DataBlock or SaveFrame containing items and loops</p>
 <dl class="method">
 <dt id="ccpn.util.nef.GenericStarParser.StarContainer.multiColumnValues">
-<code class="descname">multiColumnValues</code><span class="sig-paren">(</span><em>columns</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/GenericStarParser.html#StarContainer.multiColumnValues"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.GenericStarParser.StarContainer.multiColumnValues" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">multiColumnValues</code><span class="sig-paren">(</span><em class="sig-param">columns</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/GenericStarParser.html#StarContainer.multiColumnValues"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.GenericStarParser.StarContainer.multiColumnValues" title="Permalink to this definition">¶</a></dt>
 <dd><p>get tuple of orderedDict of values for columns.
 Will work whether columns are in a loop or single values
 If columns match a single loop or nothing, return the loop data.
@@ -727,48 +778,48 @@ If columns match more than one loop throw an error</p>
 
 <dl class="exception">
 <dt id="ccpn.util.nef.GenericStarParser.StarSyntaxError">
-<em class="property">exception </em><code class="descclassname">ccpn.util.nef.GenericStarParser.</code><code class="descname">StarSyntaxError</code><a class="reference internal" href="../_modules/ccpn/util/nef/GenericStarParser.html#StarSyntaxError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.GenericStarParser.StarSyntaxError" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">ValueError</span></code></p>
+<em class="property">exception </em><code class="sig-prename descclassname">ccpn.util.nef.GenericStarParser.</code><code class="sig-name descname">StarSyntaxError</code><a class="reference internal" href="../_modules/ccpn/util/nef/GenericStarParser.html#StarSyntaxError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.GenericStarParser.StarSyntaxError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">ValueError</span></code></p>
 </dd></dl>
 
 <dl class="class">
 <dt id="ccpn.util.nef.GenericStarParser.UnquotedValue">
-<em class="property">class </em><code class="descclassname">ccpn.util.nef.GenericStarParser.</code><code class="descname">UnquotedValue</code><a class="reference internal" href="../_modules/ccpn/util/nef/GenericStarParser.html#UnquotedValue"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.GenericStarParser.UnquotedValue" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">str</span></code></p>
-<p>A plain string - the only difference is the type: &#8216;UnquotedValue&#8217;.
+<em class="property">class </em><code class="sig-prename descclassname">ccpn.util.nef.GenericStarParser.</code><code class="sig-name descname">UnquotedValue</code><a class="reference internal" href="../_modules/ccpn/util/nef/GenericStarParser.html#UnquotedValue"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.GenericStarParser.UnquotedValue" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></p>
+<p>A plain string - the only difference is the type: ‘UnquotedValue’.
 Used to distinguish values from STAR files that were not quoted.
-STAR special values (like null,  unknown, ...) are only recognised if unquoted strings</p>
+STAR special values (like null,  unknown, …) are only recognised if unquoted strings</p>
 </dd></dl>
 
 <dl class="function">
 <dt id="ccpn.util.nef.GenericStarParser.extractMatchingNameSequence">
-<code class="descclassname">ccpn.util.nef.GenericStarParser.</code><code class="descname">extractMatchingNameSequence</code><span class="sig-paren">(</span><em>name</em>, <em>matchNames</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/GenericStarParser.html#extractMatchingNameSequence"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.GenericStarParser.extractMatchingNameSequence" title="Permalink to this definition">¶</a></dt>
-<dd><p>Get list of matchNames matching &#8216;name_1&#8217;, &#8216;name_2&#8217;, ..., in order.</p>
+<code class="sig-prename descclassname">ccpn.util.nef.GenericStarParser.</code><code class="sig-name descname">extractMatchingNameSequence</code><span class="sig-paren">(</span><em class="sig-param">name</em>, <em class="sig-param">matchNames</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/GenericStarParser.html#extractMatchingNameSequence"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.GenericStarParser.extractMatchingNameSequence" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get list of matchNames matching ‘name_1’, ‘name_2’, …, in order.</p>
 </dd></dl>
 
 <dl class="function">
 <dt id="ccpn.util.nef.GenericStarParser.parse">
-<code class="descclassname">ccpn.util.nef.GenericStarParser.</code><code class="descname">parse</code><span class="sig-paren">(</span><em>text</em>, <em>mode='standard'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/GenericStarParser.html#parse"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.GenericStarParser.parse" title="Permalink to this definition">¶</a></dt>
-<dd><p>Parse STAR text string &#8216;text&#8217;.
-Standard settings allow skipping &#8216;<a href="#id16"><span class="problematic" id="id17">stop_</span></a>&#8216; tags and strings starting with &#8216;[&#8216; or &#8216;]&#8217;,
-but require &#8216;<a href="#id18"><span class="problematic" id="id19">save_</span></a>&#8216; termination of SaveFrames and throw an error if the number of loop
+<code class="sig-prename descclassname">ccpn.util.nef.GenericStarParser.</code><code class="sig-name descname">parse</code><span class="sig-paren">(</span><em class="sig-param">text</em>, <em class="sig-param">mode='standard'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/GenericStarParser.html#parse"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.GenericStarParser.parse" title="Permalink to this definition">¶</a></dt>
+<dd><p>Parse STAR text string ‘text’.
+Standard settings allow skipping ‘<a href="#id16"><span class="problematic" id="id17">stop_</span></a>’ tags and strings starting with ‘[‘ or ‘]’,
+but require ‘<a href="#id18"><span class="problematic" id="id19">save_</span></a>’ termination of SaveFrames and throw an error if the number of loop
 values do not match the number of columns.</p>
-<p>&#8216;strict&#8217; and &#8216;lenient&#8217; modes are available; mode=&#8217;IUCr&#8217; follows the IUCr standard, which
-is like standard except that strings starting with &#8216;[&#8216; and &#8216;]&#8217; are not allowed</p>
+<p>‘strict’ and ‘lenient’ modes are available; mode=’IUCr’ follows the IUCr standard, which
+is like standard except that strings starting with ‘[‘ and ‘]’ are not allowed</p>
 <p>See GeneralStarParser class for details and control of individual settings</p>
 </dd></dl>
 
 <dl class="function">
 <dt id="ccpn.util.nef.GenericStarParser.parseFile">
-<code class="descclassname">ccpn.util.nef.GenericStarParser.</code><code class="descname">parseFile</code><span class="sig-paren">(</span><em>fileName</em>, <em>mode='standard'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/GenericStarParser.html#parseFile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.GenericStarParser.parseFile" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">ccpn.util.nef.GenericStarParser.</code><code class="sig-name descname">parseFile</code><span class="sig-paren">(</span><em class="sig-param">fileName</em>, <em class="sig-param">mode='standard'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/GenericStarParser.html#parseFile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.GenericStarParser.parseFile" title="Permalink to this definition">¶</a></dt>
 <dd><p>load generic STAR file and parse the contents</p>
 </dd></dl>
 
 <dl class="function">
 <dt id="ccpn.util.nef.GenericStarParser.valueToStarString">
-<code class="descclassname">ccpn.util.nef.GenericStarParser.</code><code class="descname">valueToStarString</code><span class="sig-paren">(</span><em>value</em>, <em>quoteNumberStrings=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/GenericStarParser.html#valueToStarString"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.GenericStarParser.valueToStarString" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">ccpn.util.nef.GenericStarParser.</code><code class="sig-name descname">valueToStarString</code><span class="sig-paren">(</span><em class="sig-param">value</em>, <em class="sig-param">quoteNumberStrings=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/GenericStarParser.html#valueToStarString"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.GenericStarParser.valueToStarString" title="Permalink to this definition">¶</a></dt>
 <dd><p>Convert value to properly quoted STAR string</p>
-<p>if quoteNumberStrings, strings that evaluate to a float (e.g. &#8216;1&#8217;, &#8216;2.7e5&#8217;, ...)
+<p>if quoteNumberStrings, strings that evaluate to a float (e.g. ‘1’, ‘2.7e5’, …)
 are put in quotes</p>
 </dd></dl>
 
@@ -797,31 +848,31 @@ getSaveFrameNames   return the names of the saveFrames with the file
 hasSaveFrame        return True if the saveFrame exists
 getSaveFrame        return saveFrame of the given name
 addSaveFrame        add a new saveFrame to the dictionary</p>
-<dl class="docutils">
-<dt>get&lt;name&gt;           return the relevant structures of the Nef file</dt>
-<dd><p class="first">defined by the available categories, where &lt;name&gt; can be:</p>
+<dl>
+<dt>get&lt;name&gt;           return the relevant structures of the Nef file</dt><dd><p>defined by the available categories, where &lt;name&gt; can be:</p>
 <blockquote>
-<div>NmrMetaData
+<div><p>NmrMetaData
 MolecularSystems
 ChemicalShiftLists
 DistanceRestraintLists
 DihedralRestraintLists
 RdcRestraintLists
 NmrSpectra
-PeakRestraintLinks</div></blockquote>
-<p class="last">e.g. yourImport.getChemicalShiftLists()</p>
+PeakRestraintLinks</p>
+</div></blockquote>
+<p>e.g. yourImport.getChemicalShiftLists()</p>
 </dd>
-<dt>add&lt;name&gt;           add a new saveFrame to the dictionary</dt>
-<dd><p class="first">defined by the available categories, where &lt;name&gt; can be:</p>
+<dt>add&lt;name&gt;           add a new saveFrame to the dictionary</dt><dd><p>defined by the available categories, where &lt;name&gt; can be:</p>
 <blockquote>
-<div>ChemicalShiftList
+<div><p>ChemicalShiftList
 DistanceRestraintList
 DihedralRestraintList
 RdcRestraintList
 NmrSpectra
 PeakLists
-LinkageTables</div></blockquote>
-<p class="last">e.g. addChemicalShiftList</p>
+LinkageTables</p>
+</div></blockquote>
+<p>e.g. addChemicalShiftList</p>
 </dd>
 </dl>
 <p>toString            convert Nef dictionary to a string that can be written to a file
@@ -837,7 +888,8 @@ lastErrorString     error string of the last operation</p>
 <div><p>getTableNames   return a list of the tables in the saveFrame
 getTable        return table from the saveFrame, it can be returned as an OrderedDict</p>
 <blockquote>
-<div>or as a Pandas DataFrame</div></blockquote>
+<div><p>or as a Pandas DataFrame</p>
+</div></blockquote>
 <p>hasTable        return true of the table exists
 setTable        set the table - currently not implemented</p>
 <p>getAttributeNames   get a list of the attributes attached to the saveFrame
@@ -851,18 +903,19 @@ lastErrorString     error string of the last operation</p>
 <h4>Error Handling<a class="headerlink" href="#error-handling" title="Permalink to this headline">¶</a></h4>
 <p>Errors can be handled in three different modes:</p>
 <blockquote>
-<div><dl class="docutils">
-<dt>&#8216;silent&#8217;            errors are handled internally and can be interrogated with saveFrame.lastError</dt>
-<dd>with no logging to the stderr</dd>
+<div><dl class="simple">
+<dt>‘silent’            errors are handled internally and can be interrogated with saveFrame.lastError</dt><dd><p>with no logging to the stderr</p>
+</dd>
 </dl>
-<p>&#8216;standard&#8217;          errors are handled internally, error messages are logged to stderr.</p>
-<dl class="docutils">
-<dt>&#8216;strict&#8217;            errors message are logged to stderr and errors are raised to be trapped by</dt>
-<dd>the calling functions</dd>
+<p>‘standard’          errors are handled internally, error messages are logged to stderr.</p>
+<dl class="simple">
+<dt>‘strict’            errors message are logged to stderr and errors are raised to be trapped by</dt><dd><p>the calling functions</p>
+</dd>
 </dl>
 <p>error handling mode can be set at the instantiation of the object, e.g.</p>
 <blockquote>
-<div>newObject = NefImporter(errorLogging=&#8217;standard&#8217;)</div></blockquote>
+<div><p>newObject = NefImporter(errorLogging=’standard’)</p>
+</div></blockquote>
 </div></blockquote>
 </div>
 <div class="section" id="examples">
@@ -871,7 +924,7 @@ lastErrorString     error string of the last operation</p>
 <blockquote>
 <div><p># load a Nef file
 test = NefImporter(errorLogging=NEF_STANDARD)
-test.loadFile(&#8216;/Users/account/Projects/NefFile.nef&#8217;)</p>
+test.loadFile(‘/Users/account/Projects/NefFile.nef’)</p>
 <p># get categories
 print (test.getCategories())</p>
 <p># get saveFrame names
@@ -886,15 +939,15 @@ ts = test.toString()
 test.fromString(ts)</p>
 <p># getting tables from a saveFrame
 print (sf1.getTableNames())
-table = sf1.getTable(&#8216;nmr_atom&#8217;, asPandas=True)
+table = sf1.getTable(‘nmr_atom’, asPandas=True)
 print (table)
-print (sf1.hasTable(&#8216;nmr_residue&#8217;))
+print (sf1.hasTable(‘nmr_residue’))
 print (sf1.getAttributeNames())
-print (sf1.hasAttribute(&#8216;sf_framecode&#8217;))
-print (sf1.hasAttribute(&#8216;nothing&#8217;))
-print (test.getSaveFrame(name=&#8217;ccpn_assignment&#8217;).getTable(name=&#8217;nmr_residue&#8217;, asPandas=True))</p>
+print (sf1.hasAttribute(‘sf_framecode’))
+print (sf1.hasAttribute(‘nothing’))
+print (test.getSaveFrame(name=’ccpn_assignment’).getTable(name=’nmr_residue’, asPandas=True))</p>
 <p># saving a file
-print (&#8216;SAVE &#8216;, test.saveFile(&#8216;/Users/ejb66/PycharmProjects/Sec5Part3testing.nef&#8217;))
+print (‘SAVE ‘, test.saveFile(‘/Users/ejb66/PycharmProjects/Sec5Part3testing.nef’))
 print (test.lastError)</p>
 <p># test meta creation of category names
 print (test.getMolecularSystems())</p>
@@ -905,7 +958,7 @@ print (test.getMolecularSystems())</p>
 <h4>Nef File Contents<a class="headerlink" href="#nef-file-contents" title="Permalink to this headline">¶</a></h4>
 <p>More details of the contents of Nef files can be found in GenericStarParser
 The general structure of a Nef file is:</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">DataExtent</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">DataExtent</span>
   <span class="n">DataBlock</span>
     <span class="n">Item</span>
     <span class="n">Loop</span>
@@ -914,40 +967,40 @@ The general structure of a Nef file is:</p>
       <span class="n">Loop</span>
 </pre></div>
 </div>
-<p>DataExtent, DataBlock and SaveFrame are Python OrderedDict with an additional &#8216;name&#8217; attribute
+<p>DataExtent, DataBlock and SaveFrame are Python OrderedDict with an additional ‘name’ attribute
 DataBlocks and SaveFrames are entered in their container using their name as the key.</p>
-<p>Loop is an object with a &#8216;columns&#8217; list, a &#8216;data&#8217; list-of-row-OrderedDict, and a name attribute
+<p>Loop is an object with a ‘columns’ list, a ‘data’ list-of-row-OrderedDict, and a name attribute
 set equal to the name of the first column. A loop is entered in its container under each
-column name, so that e.g. aSaveFrame[&#8216;_Loopx.loopcol1&#8217;] and aSaveFrame[&#8216;_Loopx.loopcol2&#8217;] both
+column name, so that e.g. aSaveFrame[‘_Loopx.loopcol1’] and aSaveFrame[‘_Loopx.loopcol2’] both
 exist and both correspond to the same loop object.</p>
-<dl class="docutils">
-<dt>Items are entered as a string key - string value pair.</dt>
-<dd>the string value can be a dictionary</dd>
+<dl class="simple">
+<dt>Items are entered as a string key - string value pair.</dt><dd><p>the string value can be a dictionary</p>
+</dd>
 </dl>
 <dl class="class">
 <dt id="ccpn.util.nef.NefImporter.NefDict">
-<em class="property">class </em><code class="descclassname">ccpn.util.nef.NefImporter.</code><code class="descname">NefDict</code><span class="sig-paren">(</span><em>inFrame</em>, <em>errorLogging='standard'</em>, <em>hidePrefix=True</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/NefImporter.html#NefDict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.NefImporter.NefDict" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#ccpn.util.nef.StarIo.NmrSaveFrame" title="ccpn.util.nef.StarIo.NmrSaveFrame"><code class="xref py py-class docutils literal"><span class="pre">ccpn.util.nef.StarIo.NmrSaveFrame</span></code></a>, <a class="reference internal" href="#ccpn.util.nef.ErrorLog.ErrorLog" title="ccpn.util.nef.ErrorLog.ErrorLog"><code class="xref py py-class docutils literal"><span class="pre">ccpn.util.nef.ErrorLog.ErrorLog</span></code></a></p>
+<em class="property">class </em><code class="sig-prename descclassname">ccpn.util.nef.NefImporter.</code><code class="sig-name descname">NefDict</code><span class="sig-paren">(</span><em class="sig-param">inFrame</em>, <em class="sig-param">errorLogging='standard'</em>, <em class="sig-param">hidePrefix=True</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/NefImporter.html#NefDict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.NefImporter.NefDict" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#ccpn.util.nef.StarIo.NmrSaveFrame" title="ccpn.util.nef.StarIo.NmrSaveFrame"><code class="xref py py-class docutils literal notranslate"><span class="pre">ccpn.util.nef.StarIo.NmrSaveFrame</span></code></a>, <a class="reference internal" href="#ccpn.util.nef.ErrorLog.ErrorLog" title="ccpn.util.nef.ErrorLog.ErrorLog"><code class="xref py py-class docutils literal notranslate"><span class="pre">ccpn.util.nef.ErrorLog.ErrorLog</span></code></a></p>
 <p>An orderedDict saveFrame object for extracting information from the NefImporter</p>
 <dl class="method">
 <dt id="ccpn.util.nef.NefImporter.NefDict.getAttribute">
-<code class="descname">getAttribute</code><span class="sig-paren">(</span><em>name</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/NefImporter.html#NefDict.getAttribute"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.NefImporter.NefDict.getAttribute" title="Permalink to this definition">¶</a></dt>
-<dd><p>Return attribute &#8216;name&#8217; if in the saveFrame
+<code class="sig-name descname">getAttribute</code><span class="sig-paren">(</span><em class="sig-param">name</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/NefImporter.html#NefDict.getAttribute"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.NefImporter.NefDict.getAttribute" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return attribute ‘name’ if in the saveFrame
 :param name:
 :return attribute:</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="ccpn.util.nef.NefImporter.NefDict.getAttributeNames">
-<code class="descname">getAttributeNames</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/NefImporter.html#NefDict.getAttributeNames"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.NefImporter.NefDict.getAttributeNames" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">getAttributeNames</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/NefImporter.html#NefDict.getAttributeNames"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.NefImporter.NefDict.getAttributeNames" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return list of attributes in the saveFrame
 :return list or None:</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="ccpn.util.nef.NefImporter.NefDict.getTable">
-<code class="descname">getTable</code><span class="sig-paren">(</span><em>name=None</em>, <em>asPandas=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/NefImporter.html#NefDict.getTable"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.NefImporter.NefDict.getTable" title="Permalink to this definition">¶</a></dt>
-<dd><p>Return the table &#8216;name&#8217; from the saveFrame if it exists
+<code class="sig-name descname">getTable</code><span class="sig-paren">(</span><em class="sig-param">name=None</em>, <em class="sig-param">asPandas=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/NefImporter.html#NefDict.getTable"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.NefImporter.NefDict.getTable" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the table ‘name’ from the saveFrame if it exists
 if asPandas is True then return as a pandas dataFrame,
 otherwise return a list of saveFrames
 :param name:
@@ -957,36 +1010,36 @@ otherwise return a list of saveFrames
 
 <dl class="method">
 <dt id="ccpn.util.nef.NefImporter.NefDict.getTableNames">
-<code class="descname">getTableNames</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/NefImporter.html#NefDict.getTableNames"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.NefImporter.NefDict.getTableNames" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">getTableNames</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/NefImporter.html#NefDict.getTableNames"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.NefImporter.NefDict.getTableNames" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return list of attributes in the saveFrame
 :return list or None:</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="ccpn.util.nef.NefImporter.NefDict.hasAttribute">
-<code class="descname">hasAttribute</code><span class="sig-paren">(</span><em>name</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/NefImporter.html#NefDict.hasAttribute"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.NefImporter.NefDict.hasAttribute" title="Permalink to this definition">¶</a></dt>
-<dd><p>Return True if attribute &#8216;name&#8217; is in the saveFrame
+<code class="sig-name descname">hasAttribute</code><span class="sig-paren">(</span><em class="sig-param">name</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/NefImporter.html#NefDict.hasAttribute"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.NefImporter.NefDict.hasAttribute" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return True if attribute ‘name’ is in the saveFrame
 :param name:
 :return True or False:</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="ccpn.util.nef.NefImporter.NefDict.hasTable">
-<code class="descname">hasTable</code><span class="sig-paren">(</span><em>name</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/NefImporter.html#NefDict.hasTable"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.NefImporter.NefDict.hasTable" title="Permalink to this definition">¶</a></dt>
-<dd><p>Return True if table &#8216;name&#8217; exists in the saveFrame
+<code class="sig-name descname">hasTable</code><span class="sig-paren">(</span><em class="sig-param">name</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/NefImporter.html#NefDict.hasTable"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.NefImporter.NefDict.hasTable" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return True if table ‘name’ exists in the saveFrame
 :param name:
 :return True or False:</p>
 </dd></dl>
 
-<dl class="attribute">
+<dl class="method">
 <dt id="ccpn.util.nef.NefImporter.NefDict.hidePrefix">
-<code class="descname">hidePrefix</code><a class="headerlink" href="#ccpn.util.nef.NefImporter.NefDict.hidePrefix" title="Permalink to this definition">¶</a></dt>
+<em class="property">property </em><code class="sig-name descname">hidePrefix</code><a class="headerlink" href="#ccpn.util.nef.NefImporter.NefDict.hidePrefix" title="Permalink to this definition">¶</a></dt>
 <dd><p>- <em>None</em>, <em>mutable</em> -</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="ccpn.util.nef.NefImporter.NefDict.multiColumnValues">
-<code class="descname">multiColumnValues</code><span class="sig-paren">(</span><em>column=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/NefImporter.html#NefDict.multiColumnValues"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.NefImporter.NefDict.multiColumnValues" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">multiColumnValues</code><span class="sig-paren">(</span><em class="sig-param">column=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/NefImporter.html#NefDict.multiColumnValues"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.NefImporter.NefDict.multiColumnValues" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return tuple of orderedDict of values for columns.
 Will work whether columns are in a loop or single values
 If columns match a single loop or nothing, return the loop data.
@@ -999,49 +1052,49 @@ If columns match more than one loop throw an error
 
 <dl class="method">
 <dt id="ccpn.util.nef.NefImporter.NefDict.setTable">
-<code class="descname">setTable</code><span class="sig-paren">(</span><em>name</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/NefImporter.html#NefDict.setTable"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.NefImporter.NefDict.setTable" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">setTable</code><span class="sig-paren">(</span><em class="sig-param">name</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/NefImporter.html#NefDict.setTable"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.NefImporter.NefDict.setTable" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
 
 <dl class="class">
 <dt id="ccpn.util.nef.NefImporter.NefImporter">
-<em class="property">class </em><code class="descclassname">ccpn.util.nef.NefImporter.</code><code class="descname">NefImporter</code><span class="sig-paren">(</span><em>name=None</em>, <em>programName='Unknown'</em>, <em>programVersion='Unknown'</em>, <em>initialise=True</em>, <em>errorLogging='standard'</em>, <em>hidePrefix=True</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/NefImporter.html#NefImporter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.NefImporter.NefImporter" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#ccpn.util.nef.ErrorLog.ErrorLog" title="ccpn.util.nef.ErrorLog.ErrorLog"><code class="xref py py-class docutils literal"><span class="pre">ccpn.util.nef.ErrorLog.ErrorLog</span></code></a></p>
+<em class="property">class </em><code class="sig-prename descclassname">ccpn.util.nef.NefImporter.</code><code class="sig-name descname">NefImporter</code><span class="sig-paren">(</span><em class="sig-param">name=None</em>, <em class="sig-param">programName='Unknown'</em>, <em class="sig-param">programVersion='Unknown'</em>, <em class="sig-param">initialise=True</em>, <em class="sig-param">errorLogging='standard'</em>, <em class="sig-param">hidePrefix=True</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/NefImporter.html#NefImporter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.NefImporter.NefImporter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#ccpn.util.nef.ErrorLog.ErrorLog" title="ccpn.util.nef.ErrorLog.ErrorLog"><code class="xref py py-class docutils literal notranslate"><span class="pre">ccpn.util.nef.ErrorLog.ErrorLog</span></code></a></p>
 <p>Top level data block for accessing object tree</p>
 <dl class="method">
 <dt id="ccpn.util.nef.NefImporter.NefImporter.addChemicalShiftList">
-<code class="descname">addChemicalShiftList</code><span class="sig-paren">(</span><em>name</em>, <em>cs_units='ppm'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/NefImporter.html#NefImporter.addChemicalShiftList"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.NefImporter.NefImporter.addChemicalShiftList" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">addChemicalShiftList</code><span class="sig-paren">(</span><em class="sig-param">name</em>, <em class="sig-param">cs_units='ppm'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/NefImporter.html#NefImporter.addChemicalShiftList"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.NefImporter.NefImporter.addChemicalShiftList" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="ccpn.util.nef.NefImporter.NefImporter.addDihedralRestraintList">
-<code class="descname">addDihedralRestraintList</code><span class="sig-paren">(</span><em>name</em>, <em>potential_type</em>, <em>restraint_origin=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/NefImporter.html#NefImporter.addDihedralRestraintList"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.NefImporter.NefImporter.addDihedralRestraintList" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">addDihedralRestraintList</code><span class="sig-paren">(</span><em class="sig-param">name</em>, <em class="sig-param">potential_type</em>, <em class="sig-param">restraint_origin=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/NefImporter.html#NefImporter.addDihedralRestraintList"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.NefImporter.NefImporter.addDihedralRestraintList" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="ccpn.util.nef.NefImporter.NefImporter.addDistanceRestraintList">
-<code class="descname">addDistanceRestraintList</code><span class="sig-paren">(</span><em>name</em>, <em>potential_type</em>, <em>restraint_origin=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/NefImporter.html#NefImporter.addDistanceRestraintList"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.NefImporter.NefImporter.addDistanceRestraintList" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">addDistanceRestraintList</code><span class="sig-paren">(</span><em class="sig-param">name</em>, <em class="sig-param">potential_type</em>, <em class="sig-param">restraint_origin=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/NefImporter.html#NefImporter.addDistanceRestraintList"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.NefImporter.NefImporter.addDistanceRestraintList" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="ccpn.util.nef.NefImporter.NefImporter.addLinkageTable">
-<code class="descname">addLinkageTable</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/NefImporter.html#NefImporter.addLinkageTable"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.NefImporter.NefImporter.addLinkageTable" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">addLinkageTable</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/NefImporter.html#NefImporter.addLinkageTable"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.NefImporter.NefImporter.addLinkageTable" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="ccpn.util.nef.NefImporter.NefImporter.addPeakList">
-<code class="descname">addPeakList</code><span class="sig-paren">(</span><em>name</em>, <em>num_dimensions</em>, <em>chemical_shift_list</em>, <em>experiment_classification=None</em>, <em>experiment_type=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/NefImporter.html#NefImporter.addPeakList"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.NefImporter.NefImporter.addPeakList" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">addPeakList</code><span class="sig-paren">(</span><em class="sig-param">name</em>, <em class="sig-param">num_dimensions</em>, <em class="sig-param">chemical_shift_list</em>, <em class="sig-param">experiment_classification=None</em>, <em class="sig-param">experiment_type=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/NefImporter.html#NefImporter.addPeakList"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.NefImporter.NefImporter.addPeakList" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="ccpn.util.nef.NefImporter.NefImporter.addRdcRestraintList">
-<code class="descname">addRdcRestraintList</code><span class="sig-paren">(</span><em>name</em>, <em>potential_type</em>, <em>restraint_origin=None</em>, <em>tensor_magnitude=None</em>, <em>tensor_rhombicity=None</em>, <em>tensor_chain_code=None</em>, <em>tensor_sequence_code=None</em>, <em>tensor_residue_type=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/NefImporter.html#NefImporter.addRdcRestraintList"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.NefImporter.NefImporter.addRdcRestraintList" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">addRdcRestraintList</code><span class="sig-paren">(</span><em class="sig-param">name</em>, <em class="sig-param">potential_type</em>, <em class="sig-param">restraint_origin=None</em>, <em class="sig-param">tensor_magnitude=None</em>, <em class="sig-param">tensor_rhombicity=None</em>, <em class="sig-param">tensor_chain_code=None</em>, <em class="sig-param">tensor_sequence_code=None</em>, <em class="sig-param">tensor_residue_type=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/NefImporter.html#NefImporter.addRdcRestraintList"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.NefImporter.NefImporter.addRdcRestraintList" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="ccpn.util.nef.NefImporter.NefImporter.addSaveFrame">
-<code class="descname">addSaveFrame</code><span class="sig-paren">(</span><em>name</em>, <em>category</em>, <em>required_fields=None</em>, <em>required_loops=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/NefImporter.html#NefImporter.addSaveFrame"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.NefImporter.NefImporter.addSaveFrame" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">addSaveFrame</code><span class="sig-paren">(</span><em class="sig-param">name</em>, <em class="sig-param">category</em>, <em class="sig-param">required_fields=None</em>, <em class="sig-param">required_loops=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/NefImporter.html#NefImporter.addSaveFrame"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.NefImporter.NefImporter.addSaveFrame" title="Permalink to this definition">¶</a></dt>
 <dd><p>Add a new saveFrame to NefImporter
 :param name:
 :param category:
@@ -1051,115 +1104,115 @@ If columns match more than one loop throw an error
 
 <dl class="method">
 <dt id="ccpn.util.nef.NefImporter.NefImporter.fromString">
-<code class="descname">fromString</code><span class="sig-paren">(</span><em>text</em>, <em>mode='standard'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/NefImporter.html#NefImporter.fromString"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.NefImporter.NefImporter.fromString" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">fromString</code><span class="sig-paren">(</span><em class="sig-param">text</em>, <em class="sig-param">mode='standard'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/NefImporter.html#NefImporter.fromString"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.NefImporter.NefImporter.fromString" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="ccpn.util.nef.NefImporter.NefImporter.getAttribute">
-<code class="descname">getAttribute</code><span class="sig-paren">(</span><em>name</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/NefImporter.html#NefImporter.getAttribute"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.NefImporter.NefImporter.getAttribute" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">getAttribute</code><span class="sig-paren">(</span><em class="sig-param">name</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/NefImporter.html#NefImporter.getAttribute"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.NefImporter.NefImporter.getAttribute" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="ccpn.util.nef.NefImporter.NefImporter.getAttributeNames">
-<code class="descname">getAttributeNames</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/NefImporter.html#NefImporter.getAttributeNames"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.NefImporter.NefImporter.getAttributeNames" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">getAttributeNames</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/NefImporter.html#NefImporter.getAttributeNames"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.NefImporter.NefImporter.getAttributeNames" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="ccpn.util.nef.NefImporter.NefImporter.getCategories">
-<code class="descname">getCategories</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/NefImporter.html#NefImporter.getCategories"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.NefImporter.NefImporter.getCategories" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">getCategories</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/NefImporter.html#NefImporter.getCategories"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.NefImporter.NefImporter.getCategories" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="ccpn.util.nef.NefImporter.NefImporter.getChemicalShiftLists">
-<code class="descname">getChemicalShiftLists</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/NefImporter.html#NefImporter.getChemicalShiftLists"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.NefImporter.NefImporter.getChemicalShiftLists" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">getChemicalShiftLists</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/NefImporter.html#NefImporter.getChemicalShiftLists"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.NefImporter.NefImporter.getChemicalShiftLists" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return the nef_chemical_shift_list saveFrames
 :return list or single item:</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="ccpn.util.nef.NefImporter.NefImporter.getDihedralRestraintLists">
-<code class="descname">getDihedralRestraintLists</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/NefImporter.html#NefImporter.getDihedralRestraintLists"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.NefImporter.NefImporter.getDihedralRestraintLists" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">getDihedralRestraintLists</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/NefImporter.html#NefImporter.getDihedralRestraintLists"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.NefImporter.NefImporter.getDihedralRestraintLists" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return the nef_dihedral_restraint_list saveFrames
 :return list or single item:</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="ccpn.util.nef.NefImporter.NefImporter.getDistanceRestraintLists">
-<code class="descname">getDistanceRestraintLists</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/NefImporter.html#NefImporter.getDistanceRestraintLists"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.NefImporter.NefImporter.getDistanceRestraintLists" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">getDistanceRestraintLists</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/NefImporter.html#NefImporter.getDistanceRestraintLists"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.NefImporter.NefImporter.getDistanceRestraintLists" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return the nef_distance_restraint_list saveFrames
 :return list or single item:</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="ccpn.util.nef.NefImporter.NefImporter.getMolecularSystems">
-<code class="descname">getMolecularSystems</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/NefImporter.html#NefImporter.getMolecularSystems"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.NefImporter.NefImporter.getMolecularSystems" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">getMolecularSystems</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/NefImporter.html#NefImporter.getMolecularSystems"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.NefImporter.NefImporter.getMolecularSystems" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return the nef_molecular_system saveFrames
 :return list or single item:</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="ccpn.util.nef.NefImporter.NefImporter.getNmrMetaData">
-<code class="descname">getNmrMetaData</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/NefImporter.html#NefImporter.getNmrMetaData"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.NefImporter.NefImporter.getNmrMetaData" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">getNmrMetaData</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/NefImporter.html#NefImporter.getNmrMetaData"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.NefImporter.NefImporter.getNmrMetaData" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return the nef_nmr_meta_data saveFrames
 :return list or single item:</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="ccpn.util.nef.NefImporter.NefImporter.getNmrSpectra">
-<code class="descname">getNmrSpectra</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/NefImporter.html#NefImporter.getNmrSpectra"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.NefImporter.NefImporter.getNmrSpectra" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">getNmrSpectra</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/NefImporter.html#NefImporter.getNmrSpectra"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.NefImporter.NefImporter.getNmrSpectra" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return the nef_nmr_spectrum saveFrames
 :return list or single item:</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="ccpn.util.nef.NefImporter.NefImporter.getPeakRestraintLinks">
-<code class="descname">getPeakRestraintLinks</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/NefImporter.html#NefImporter.getPeakRestraintLinks"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.NefImporter.NefImporter.getPeakRestraintLinks" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">getPeakRestraintLinks</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/NefImporter.html#NefImporter.getPeakRestraintLinks"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.NefImporter.NefImporter.getPeakRestraintLinks" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return the nef_peak_restraint_link saveFrames
 :return list or single item:</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="ccpn.util.nef.NefImporter.NefImporter.getRdcRestraintLists">
-<code class="descname">getRdcRestraintLists</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/NefImporter.html#NefImporter.getRdcRestraintLists"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.NefImporter.NefImporter.getRdcRestraintLists" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">getRdcRestraintLists</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/NefImporter.html#NefImporter.getRdcRestraintLists"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.NefImporter.NefImporter.getRdcRestraintLists" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return the nef_rdc_restraint_list saveFrames
 :return list or single item:</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="ccpn.util.nef.NefImporter.NefImporter.getSaveFrame">
-<code class="descname">getSaveFrame</code><span class="sig-paren">(</span><em>name</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/NefImporter.html#NefImporter.getSaveFrame"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.NefImporter.NefImporter.getSaveFrame" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">getSaveFrame</code><span class="sig-paren">(</span><em class="sig-param">name</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/NefImporter.html#NefImporter.getSaveFrame"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.NefImporter.NefImporter.getSaveFrame" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="ccpn.util.nef.NefImporter.NefImporter.getSaveFrameNames">
-<code class="descname">getSaveFrameNames</code><span class="sig-paren">(</span><em>returnType='all'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/NefImporter.html#NefImporter.getSaveFrameNames"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.NefImporter.NefImporter.getSaveFrameNames" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">getSaveFrameNames</code><span class="sig-paren">(</span><em class="sig-param">returnType='all'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/NefImporter.html#NefImporter.getSaveFrameNames"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.NefImporter.NefImporter.getSaveFrameNames" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="ccpn.util.nef.NefImporter.NefImporter.hasAttribute">
-<code class="descname">hasAttribute</code><span class="sig-paren">(</span><em>name</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/NefImporter.html#NefImporter.hasAttribute"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.NefImporter.NefImporter.hasAttribute" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">hasAttribute</code><span class="sig-paren">(</span><em class="sig-param">name</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/NefImporter.html#NefImporter.hasAttribute"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.NefImporter.NefImporter.hasAttribute" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="ccpn.util.nef.NefImporter.NefImporter.hasSaveFrame">
-<code class="descname">hasSaveFrame</code><span class="sig-paren">(</span><em>name</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/NefImporter.html#NefImporter.hasSaveFrame"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.NefImporter.NefImporter.hasSaveFrame" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">hasSaveFrame</code><span class="sig-paren">(</span><em class="sig-param">name</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/NefImporter.html#NefImporter.hasSaveFrame"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.NefImporter.NefImporter.hasSaveFrame" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<dl class="attribute">
+<dl class="method">
 <dt id="ccpn.util.nef.NefImporter.NefImporter.hidePrefix">
-<code class="descname">hidePrefix</code><a class="headerlink" href="#ccpn.util.nef.NefImporter.NefImporter.hidePrefix" title="Permalink to this definition">¶</a></dt>
+<em class="property">property </em><code class="sig-name descname">hidePrefix</code><a class="headerlink" href="#ccpn.util.nef.NefImporter.NefImporter.hidePrefix" title="Permalink to this definition">¶</a></dt>
 <dd><p>- <em>None</em>, <em>mutable</em> -</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="ccpn.util.nef.NefImporter.NefImporter.initialise">
-<code class="descname">initialise</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/NefImporter.html#NefImporter.initialise"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.NefImporter.NefImporter.initialise" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">initialise</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/NefImporter.html#NefImporter.initialise"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.NefImporter.NefImporter.initialise" title="Permalink to this definition">¶</a></dt>
 <dd><p>Initialise a new NefImporter object with a starting saveFrame</p>
 </dd></dl>
 
-<dl class="attribute">
+<dl class="method">
 <dt id="ccpn.util.nef.NefImporter.NefImporter.isValid">
-<code class="descname">isValid</code><a class="headerlink" href="#ccpn.util.nef.NefImporter.NefImporter.isValid" title="Permalink to this definition">¶</a></dt>
+<em class="property">property </em><code class="sig-name descname">isValid</code><a class="headerlink" href="#ccpn.util.nef.NefImporter.NefImporter.isValid" title="Permalink to this definition">¶</a></dt>
 <dd><p>- <em>None</em>, <em>immutable</em> - 
 Check whether the Nef object contains the required information
 :return True or False:</p>
@@ -1167,50 +1220,104 @@ Check whether the Nef object contains the required information
 
 <dl class="method">
 <dt id="ccpn.util.nef.NefImporter.NefImporter.loadFile">
-<code class="descname">loadFile</code><span class="sig-paren">(</span><em>fileName=None</em>, <em>mode='standard'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/NefImporter.html#NefImporter.loadFile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.NefImporter.NefImporter.loadFile" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">loadFile</code><span class="sig-paren">(</span><em class="sig-param">fileName=None</em>, <em class="sig-param">mode='standard'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/NefImporter.html#NefImporter.loadFile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.NefImporter.NefImporter.loadFile" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ccpn.util.nef.NefImporter.NefImporter.loadValidateDictionary">
+<code class="sig-name descname">loadValidateDictionary</code><span class="sig-paren">(</span><em class="sig-param">fileName=None</em>, <em class="sig-param">mode='standard'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/NefImporter.html#NefImporter.loadValidateDictionary"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.NefImporter.NefImporter.loadValidateDictionary" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="ccpn.util.nef.NefImporter.NefImporter.saveFile">
-<code class="descname">saveFile</code><span class="sig-paren">(</span><em>fileName=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/NefImporter.html#NefImporter.saveFile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.NefImporter.NefImporter.saveFile" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">saveFile</code><span class="sig-paren">(</span><em class="sig-param">fileName=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/NefImporter.html#NefImporter.saveFile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.NefImporter.NefImporter.saveFile" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="ccpn.util.nef.NefImporter.NefImporter.toString">
-<code class="descname">toString</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/NefImporter.html#NefImporter.toString"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.NefImporter.NefImporter.toString" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">toString</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/NefImporter.html#NefImporter.toString"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.NefImporter.NefImporter.toString" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<dl class="attribute">
+<dl class="method">
 <dt id="ccpn.util.nef.NefImporter.NefImporter.validErrorLog">
-<code class="descname">validErrorLog</code><a class="headerlink" href="#ccpn.util.nef.NefImporter.NefImporter.validErrorLog" title="Permalink to this definition">¶</a></dt>
+<em class="property">property </em><code class="sig-name descname">validErrorLog</code><a class="headerlink" href="#ccpn.util.nef.NefImporter.NefImporter.validErrorLog" title="Permalink to this definition">¶</a></dt>
 <dd><p>- <em>None</em>, <em>immutable</em> - 
 Return the error log from checking validity
-:return list:</p>
+:return dict:</p>
 </dd></dl>
 
 </dd></dl>
 
 <dl class="function">
 <dt id="ccpn.util.nef.NefImporter.import_parents">
-<code class="descclassname">ccpn.util.nef.NefImporter.</code><code class="descname">import_parents</code><span class="sig-paren">(</span><em>level=1</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/NefImporter.html#import_parents"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.NefImporter.import_parents" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">ccpn.util.nef.NefImporter.</code><code class="sig-name descname">import_parents</code><span class="sig-paren">(</span><em class="sig-param">level=1</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/NefImporter.html#import_parents"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.NefImporter.import_parents" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </div>
 </div>
+</div>
+<div class="section" id="module-ccpn.util.nef.SafeOpen">
+<span id="ccpn-util-nef-safeopen-module"></span><h2>ccpn.util.nef.SafeOpen module<a class="headerlink" href="#module-ccpn.util.nef.SafeOpen" title="Permalink to this headline">¶</a></h2>
+<p>Functions to append a number to the end of a filename if it already exists</p>
+<dl class="function">
+<dt id="ccpn.util.nef.SafeOpen.getSafeFilename">
+<code class="sig-prename descclassname">ccpn.util.nef.SafeOpen.</code><code class="sig-name descname">getSafeFilename</code><span class="sig-paren">(</span><em class="sig-param">path</em>, <em class="sig-param">mode='w'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/SafeOpen.html#getSafeFilename"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.SafeOpen.getSafeFilename" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the first safe filename from the given path</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>path</strong> – filepath and filename.</p></li>
+<li><p><strong>mode</strong> – open flags</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Open file handle and new fileName</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="ccpn.util.nef.SafeOpen.safeOpen">
+<code class="sig-prename descclassname">ccpn.util.nef.SafeOpen.</code><code class="sig-name descname">safeOpen</code><span class="sig-paren">(</span><em class="sig-param">path</em>, <em class="sig-param">mode</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/SafeOpen.html#safeOpen"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.SafeOpen.safeOpen" title="Permalink to this definition">¶</a></dt>
+<dd><p>Open path, but if it already exists, add ‘(n)’ before the extension,
+where n is the first number found such that the file does not already
+exist.
+Returns an open file handle.</p>
+<dl>
+<dt>Usage:  with safeOpen(path, [options]) as (fd, safeFileName):</dt><dd><blockquote>
+<div><p>…</p>
+</div></blockquote>
+<p>fd is the file descriptor, to be used as with open, e.g., fd.read()
+safeFileName is the new safe filename.</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>path</strong> – filepath and filename.</p></li>
+<li><p><strong>mode</strong> – open flags</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Open file handle and new fileName</p>
+</dd>
+</dl>
+</dd></dl>
+
 </div>
 <div class="section" id="module-ccpn.util.nef.Specification">
 <span id="ccpn-util-nef-specification-module"></span><h2>ccpn.util.nef.Specification module<a class="headerlink" href="#module-ccpn.util.nef.Specification" title="Permalink to this headline">¶</a></h2>
 <p>Code for handling NEF specification and metadata</p>
 <dl class="class">
 <dt id="ccpn.util.nef.Specification.CifDicConverter">
-<em class="property">class </em><code class="descclassname">ccpn.util.nef.Specification.</code><code class="descname">CifDicConverter</code><span class="sig-paren">(</span><em>inputText</em>, <em>skipExamples=True</em>, <em>additionalBlocks=()</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/Specification.html#CifDicConverter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.Specification.CifDicConverter" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<em class="property">class </em><code class="sig-prename descclassname">ccpn.util.nef.Specification.</code><code class="sig-name descname">CifDicConverter</code><span class="sig-paren">(</span><em class="sig-param">inputText</em>, <em class="sig-param">skipExamples=True</em>, <em class="sig-param">additionalBlocks=()</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/Specification.html#CifDicConverter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.Specification.CifDicConverter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Converts mmcif .dic file, with program-specific additions datablocks
 into a single NEF data structure, containing:</p>
 <p>1) a nef_specification saveframe, containing a dictionary_history loop and a
 item_type_list loop</p>
 <ol class="arabic" start="2">
-<li><p class="first">A saveframe for each saveframe_dategory in the specification. Each saveframe contains</p>
+<li><p>A saveframe for each saveframe_dategory in the specification. Each saveframe contains</p>
 <blockquote>
 <div><p>items:
 _nef_saveframe.sf_framecode
@@ -1219,18 +1326,16 @@ _nef_saveframe.is_mandatory
 _nef_saveframe.description
 _nef_saveframe.example</p>
 <p>A table for contained loops:</p>
-<dl class="docutils">
-<dt><a href="#id20"><span class="problematic" id="id21">loop_</span></a></dt>
-<dd><blockquote class="first">
+<dl>
+<dt><a href="#id20"><span class="problematic" id="id21">loop_</span></a></dt><dd><blockquote>
 <div><p>_nef_loop.category
 _nef_loop.is_mandatory
 _nef_loop.description
 _nef_loop.example</p>
 </div></blockquote>
-<p class="last">And a table for contained items and loop columns:</p>
+<p>And a table for contained items and loop columns:</p>
 </dd>
-<dt><a href="#id22"><span class="problematic" id="id23">loop_</span></a></dt>
-<dd><p class="first">_nef_item.name
+<dt><a href="#id22"><span class="problematic" id="id23">loop_</span></a></dt><dd><p>_nef_item.name
 _nef_item.loop_category
 _nef_item.type_code
 _nef_item.is_mandatory
@@ -1238,7 +1343,7 @@ _nef_item.is_key
 _nef_item.example_1
 _nef_item.example_2
 _nef_item.description</p>
-<p class="last">The loop_category defines which loop the item belongs to
+<p>The loop_category defines which loop the item belongs to
 (if empty it belongs directly inside the saveframe)</p>
 </dd>
 </dl>
@@ -1247,52 +1352,52 @@ _nef_item.description</p>
 </ol>
 <dl class="method">
 <dt id="ccpn.util.nef.Specification.CifDicConverter.convertToNef">
-<code class="descname">convertToNef</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/Specification.html#CifDicConverter.convertToNef"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.Specification.CifDicConverter.convertToNef" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">convertToNef</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/Specification.html#CifDicConverter.convertToNef"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.Specification.CifDicConverter.convertToNef" title="Permalink to this definition">¶</a></dt>
 <dd><p>Convert RCSB .cif file into a nef specification summary file</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="ccpn.util.nef.Specification.CifDicConverter.extractGeneralDataFrame">
-<code class="descname">extractGeneralDataFrame</code><span class="sig-paren">(</span><em>rcsbDataBlock</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/Specification.html#CifDicConverter.extractGeneralDataFrame"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.Specification.CifDicConverter.extractGeneralDataFrame" title="Permalink to this definition">¶</a></dt>
-<dd><p>extract general data saveframe</p>
+<code class="sig-name descname">extractGeneralDataFrame</code><span class="sig-paren">(</span><em class="sig-param">rcsbDataBlock</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/Specification.html#CifDicConverter.extractGeneralDataFrame"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.Specification.CifDicConverter.extractGeneralDataFrame" title="Permalink to this definition">¶</a></dt>
+<dd><p>Extract general data saveframe</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="ccpn.util.nef.Specification.CifDicConverter.extractItemDescription">
-<code class="descname">extractItemDescription</code><span class="sig-paren">(</span><em>inputSaveFrame</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/Specification.html#CifDicConverter.extractItemDescription"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.Specification.CifDicConverter.extractItemDescription" title="Permalink to this definition">¶</a></dt>
-<dd><p>extract item description</p>
+<code class="sig-name descname">extractItemDescription</code><span class="sig-paren">(</span><em class="sig-param">inputSaveFrame</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/Specification.html#CifDicConverter.extractItemDescription"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.Specification.CifDicConverter.extractItemDescription" title="Permalink to this definition">¶</a></dt>
+<dd><p>Extract item description</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="ccpn.util.nef.Specification.CifDicConverter.extractLoopDescription">
-<code class="descname">extractLoopDescription</code><span class="sig-paren">(</span><em>inputSaveFrame</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/Specification.html#CifDicConverter.extractLoopDescription"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.Specification.CifDicConverter.extractLoopDescription" title="Permalink to this definition">¶</a></dt>
-<dd><p>extract loop description</p>
+<code class="sig-name descname">extractLoopDescription</code><span class="sig-paren">(</span><em class="sig-param">inputSaveFrame</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/Specification.html#CifDicConverter.extractLoopDescription"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.Specification.CifDicConverter.extractLoopDescription" title="Permalink to this definition">¶</a></dt>
+<dd><p>Extract loop description</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="ccpn.util.nef.Specification.CifDicConverter.extractSaveFrameDescription">
-<code class="descname">extractSaveFrameDescription</code><span class="sig-paren">(</span><em>inputSaveFrame</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/Specification.html#CifDicConverter.extractSaveFrameDescription"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.Specification.CifDicConverter.extractSaveFrameDescription" title="Permalink to this definition">¶</a></dt>
-<dd><p>extract saveframe description</p>
+<code class="sig-name descname">extractSaveFrameDescription</code><span class="sig-paren">(</span><em class="sig-param">inputSaveFrame</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/Specification.html#CifDicConverter.extractSaveFrameDescription"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.Specification.CifDicConverter.extractSaveFrameDescription" title="Permalink to this definition">¶</a></dt>
+<dd><p>Extract saveframe description</p>
 </dd></dl>
 
 </dd></dl>
 
 <dl class="function">
 <dt id="ccpn.util.nef.Specification.extractByCategories">
-<code class="descclassname">ccpn.util.nef.Specification.</code><code class="descname">extractByCategories</code><span class="sig-paren">(</span><em>rcsbDataBlock</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/Specification.html#extractByCategories"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.Specification.extractByCategories" title="Permalink to this definition">¶</a></dt>
-<dd><p>get saveFrames describing SaveFrames, Loops, and items, respectively</p>
+<code class="sig-prename descclassname">ccpn.util.nef.Specification.</code><code class="sig-name descname">extractByCategories</code><span class="sig-paren">(</span><em class="sig-param">rcsbDataBlock</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/Specification.html#extractByCategories"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.Specification.extractByCategories" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get saveFrames describing SaveFrames, Loops, and items, respectively</p>
 </dd></dl>
 
 <dl class="function">
 <dt id="ccpn.util.nef.Specification.getCcpnSpecification">
-<code class="descclassname">ccpn.util.nef.Specification.</code><code class="descname">getCcpnSpecification</code><span class="sig-paren">(</span><em>filePath</em><span class="sig-paren">)</span> &rarr; ccpn.util.nef.StarIo.NmrDataBlock<a class="reference internal" href="../_modules/ccpn/util/nef/Specification.html#getCcpnSpecification"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.Specification.getCcpnSpecification" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">ccpn.util.nef.Specification.</code><code class="sig-name descname">getCcpnSpecification</code><span class="sig-paren">(</span><em class="sig-param">filePath</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/Specification.html#getCcpnSpecification"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.Specification.getCcpnSpecification" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get NEF specification summary with ccpn-specific additions</p>
 </dd></dl>
 
 <dl class="function">
 <dt id="ccpn.util.nef.Specification.transferLoop">
-<code class="descclassname">ccpn.util.nef.Specification.</code><code class="descname">transferLoop</code><span class="sig-paren">(</span><em>genericContainer</em>, <em>saveFrame</em>, <em>inputTags</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/Specification.html#transferLoop"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.Specification.transferLoop" title="Permalink to this definition">¶</a></dt>
-<dd><p>transfer _category.tag_x, ... to loop named category with tags tag_x etc.</p>
+<code class="sig-prename descclassname">ccpn.util.nef.Specification.</code><code class="sig-name descname">transferLoop</code><span class="sig-paren">(</span><em class="sig-param">genericContainer</em>, <em class="sig-param">saveFrame</em>, <em class="sig-param">inputTags</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/Specification.html#transferLoop"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.Specification.transferLoop" title="Permalink to this definition">¶</a></dt>
+<dd><p>Transfer _category.tag_x, … to loop named category with tags tag_x etc.</p>
 </dd></dl>
 
 </div>
@@ -1304,42 +1409,42 @@ _nef_item.description</p>
 <blockquote>
 <div><blockquote>
 <div><ul class="simple">
-<li>all plain tags in a saveframe start with a common prefix;</li>
+<li><p>all plain tags in a saveframe start with a common prefix;</p></li>
 </ul>
-<p>for NEF files this must be the &#8216;&lt;sf_category&gt;&#8217; followed by &#8216;.&#8217;,
-and the framecode value must start with the &#8216;&lt;sf_category&gt;&#8217; followed by underscore.</p>
+<p>for NEF files this must be the ‘&lt;sf_category&gt;’ followed by ‘.’,
+and the framecode value must start with the ‘&lt;sf_category&gt;’ followed by underscore.</p>
 <ul class="simple">
-<li>All loop column names start with &#8216;&lt;loopcategory&gt;.&#8217;</li>
-<li>loopcategories share a namespace with tags within a saveframe</li>
-<li>DataBlocks can contain only saveframes.</li>
-<li>For NEF files the</li>
+<li><p>All loop column names start with ‘&lt;loopcategory&gt;.’</p></li>
+<li><p>loopcategories share a namespace with tags within a saveframe</p></li>
+<li><p>DataBlocks can contain only saveframes.</p></li>
+<li><p>For NEF files the</p></li>
 </ul>
 </div></blockquote>
 <p>Use the functions parseNmrStar, parseNef, parseNmrStarFile, parseNefFile</p>
 <blockquote>
-<div><p>The &#8216;File&#8217; functions take a file name and pass the file contents to corresponding parser.</p>
-<dl class="docutils">
-<dt>The &#8216;NmrStar&#8217; functions will read any Star file that satisfies the constraints above, while</dt>
-<dd>the &#8216;Nef&#8217; functions will also enforce the NEF=-specific constraints above</dd>
+<div><p>The ‘File’ functions take a file name and pass the file contents to corresponding parser.</p>
+<dl class="simple">
+<dt>The ‘NmrStar’ functions will read any Star file that satisfies the constraints above, while</dt><dd><p>the ‘Nef’ functions will also enforce the NEF=-specific constraints above</p>
+</dd>
 </dl>
 </div></blockquote>
-<p>On reading tag prefixes (&#8216;_&#8217;, &#8216;<a href="#id24"><span class="problematic" id="id25">save_</span></a>&#8216;, &#8216;<a href="#id26"><span class="problematic" id="id27">data_</span></a>&#8216; are stripped,
-as are the parts of tags before the first &#8216;.&#8217;</p>
+<p>On reading tag prefixes (‘_’, ‘<a href="#id24"><span class="problematic" id="id25">save_</span></a>’, ‘<a href="#id26"><span class="problematic" id="id27">data_</span></a>’ are stripped,
+as are the parts of tags before the first ‘.’</p>
 </div></blockquote>
 <dl class="class">
 <dt id="ccpn.util.nef.StarIo.NmrDataBlock">
-<em class="property">class </em><code class="descclassname">ccpn.util.nef.StarIo.</code><code class="descname">NmrDataBlock</code><span class="sig-paren">(</span><em>name=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/StarIo.html#NmrDataBlock"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.StarIo.NmrDataBlock" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#ccpn.util.nef.GenericStarParser.DataBlock" title="ccpn.util.nef.GenericStarParser.DataBlock"><code class="xref py py-class docutils literal"><span class="pre">ccpn.util.nef.GenericStarParser.DataBlock</span></code></a></p>
+<em class="property">class </em><code class="sig-prename descclassname">ccpn.util.nef.StarIo.</code><code class="sig-name descname">NmrDataBlock</code><span class="sig-paren">(</span><em class="sig-param">name=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/StarIo.html#NmrDataBlock"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.StarIo.NmrDataBlock" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#ccpn.util.nef.GenericStarParser.DataBlock" title="ccpn.util.nef.GenericStarParser.DataBlock"><code class="xref py py-class docutils literal notranslate"><span class="pre">ccpn.util.nef.GenericStarParser.DataBlock</span></code></a></p>
 <p>DataBlock (OrderedDict)for NMRSTAR/NEF object tree</p>
 <dl class="method">
 <dt id="ccpn.util.nef.StarIo.NmrDataBlock.addSaveFrame">
-<code class="descname">addSaveFrame</code><span class="sig-paren">(</span><em>saveFrame</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/StarIo.html#NmrDataBlock.addSaveFrame"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.StarIo.NmrDataBlock.addSaveFrame" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">addSaveFrame</code><span class="sig-paren">(</span><em class="sig-param">saveFrame</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/StarIo.html#NmrDataBlock.addSaveFrame"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.StarIo.NmrDataBlock.addSaveFrame" title="Permalink to this definition">¶</a></dt>
 <dd><p>Add existing NmrSaveFrame to the DataBlock</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="ccpn.util.nef.StarIo.NmrDataBlock.newSaveFrame">
-<code class="descname">newSaveFrame</code><span class="sig-paren">(</span><em>name</em>, <em>category</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/StarIo.html#NmrDataBlock.newSaveFrame"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.StarIo.NmrDataBlock.newSaveFrame" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">newSaveFrame</code><span class="sig-paren">(</span><em class="sig-param">name</em>, <em class="sig-param">category</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/StarIo.html#NmrDataBlock.newSaveFrame"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.StarIo.NmrDataBlock.newSaveFrame" title="Permalink to this definition">¶</a></dt>
 <dd><p>Make new NmrSaveFrame and add it to the DataBlock</p>
 </dd></dl>
 
@@ -1347,29 +1452,29 @@ as are the parts of tags before the first &#8216;.&#8217;</p>
 
 <dl class="class">
 <dt id="ccpn.util.nef.StarIo.NmrDataExtent">
-<em class="property">class </em><code class="descclassname">ccpn.util.nef.StarIo.</code><code class="descname">NmrDataExtent</code><span class="sig-paren">(</span><em>name='Root'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/StarIo.html#NmrDataExtent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.StarIo.NmrDataExtent" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#ccpn.util.nef.GenericStarParser.DataExtent" title="ccpn.util.nef.GenericStarParser.DataExtent"><code class="xref py py-class docutils literal"><span class="pre">ccpn.util.nef.GenericStarParser.DataExtent</span></code></a></p>
+<em class="property">class </em><code class="sig-prename descclassname">ccpn.util.nef.StarIo.</code><code class="sig-name descname">NmrDataExtent</code><span class="sig-paren">(</span><em class="sig-param">name='Root'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/StarIo.html#NmrDataExtent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.StarIo.NmrDataExtent" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#ccpn.util.nef.GenericStarParser.DataExtent" title="ccpn.util.nef.GenericStarParser.DataExtent"><code class="xref py py-class docutils literal notranslate"><span class="pre">ccpn.util.nef.GenericStarParser.DataExtent</span></code></a></p>
 <p>Top level container (OrderedDict) for NMRSTAR/NEF object tree</p>
 </dd></dl>
 
 <dl class="class">
 <dt id="ccpn.util.nef.StarIo.NmrLoop">
-<em class="property">class </em><code class="descclassname">ccpn.util.nef.StarIo.</code><code class="descname">NmrLoop</code><span class="sig-paren">(</span><em>name=None</em>, <em>columns=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/StarIo.html#NmrLoop"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.StarIo.NmrLoop" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#ccpn.util.nef.GenericStarParser.Loop" title="ccpn.util.nef.GenericStarParser.Loop"><code class="xref py py-class docutils literal"><span class="pre">ccpn.util.nef.GenericStarParser.Loop</span></code></a></p>
+<em class="property">class </em><code class="sig-prename descclassname">ccpn.util.nef.StarIo.</code><code class="sig-name descname">NmrLoop</code><span class="sig-paren">(</span><em class="sig-param">name=None</em>, <em class="sig-param">columns=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/StarIo.html#NmrLoop"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.StarIo.NmrLoop" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#ccpn.util.nef.GenericStarParser.Loop" title="ccpn.util.nef.GenericStarParser.Loop"><code class="xref py py-class docutils literal notranslate"><span class="pre">ccpn.util.nef.GenericStarParser.Loop</span></code></a></p>
 <p>Loop for NMRSTAR/NEF object tree</p>
 <p>The contents, self.data is a list of OrderedDicts matching the column names.
 rows can be modified or deleted from data, but adding new rows directly is likely to
 break - use the newRow function.</p>
-<dl class="attribute">
+<dl class="method">
 <dt id="ccpn.util.nef.StarIo.NmrLoop.category">
-<code class="descname">category</code><a class="headerlink" href="#ccpn.util.nef.StarIo.NmrLoop.category" title="Permalink to this definition">¶</a></dt>
+<em class="property">property </em><code class="sig-name descname">category</code><a class="headerlink" href="#ccpn.util.nef.StarIo.NmrLoop.category" title="Permalink to this definition">¶</a></dt>
 <dd><p>- <em>None</em>, <em>immutable</em> - 
 Loop category tag - synonym for name (unlike the case of SaveFrame)</p>
 </dd></dl>
 
-<dl class="attribute">
+<dl class="method">
 <dt id="ccpn.util.nef.StarIo.NmrLoop.tagPrefix">
-<code class="descname">tagPrefix</code><a class="headerlink" href="#ccpn.util.nef.StarIo.NmrLoop.tagPrefix" title="Permalink to this definition">¶</a></dt>
+<em class="property">property </em><code class="sig-name descname">tagPrefix</code><a class="headerlink" href="#ccpn.util.nef.StarIo.NmrLoop.tagPrefix" title="Permalink to this definition">¶</a></dt>
 <dd><p>- <em>None</em>, <em>immutable</em> - 
 Prefix to use before item tags on output</p>
 </dd></dl>
@@ -1378,24 +1483,24 @@ Prefix to use before item tags on output</p>
 
 <dl class="class">
 <dt id="ccpn.util.nef.StarIo.NmrLoopRow">
-<em class="property">class </em><code class="descclassname">ccpn.util.nef.StarIo.</code><code class="descname">NmrLoopRow</code><a class="reference internal" href="../_modules/ccpn/util/nef/StarIo.html#NmrLoopRow"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.StarIo.NmrLoopRow" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#ccpn.util.nef.GenericStarParser.LoopRow" title="ccpn.util.nef.GenericStarParser.LoopRow"><code class="xref py py-class docutils literal"><span class="pre">ccpn.util.nef.GenericStarParser.LoopRow</span></code></a></p>
+<em class="property">class </em><code class="sig-prename descclassname">ccpn.util.nef.StarIo.</code><code class="sig-name descname">NmrLoopRow</code><a class="reference internal" href="../_modules/ccpn/util/nef/StarIo.html#NmrLoopRow"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.StarIo.NmrLoopRow" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#ccpn.util.nef.GenericStarParser.LoopRow" title="ccpn.util.nef.GenericStarParser.LoopRow"><code class="xref py py-class docutils literal notranslate"><span class="pre">ccpn.util.nef.GenericStarParser.LoopRow</span></code></a></p>
 </dd></dl>
 
 <dl class="class">
 <dt id="ccpn.util.nef.StarIo.NmrSaveFrame">
-<em class="property">class </em><code class="descclassname">ccpn.util.nef.StarIo.</code><code class="descname">NmrSaveFrame</code><span class="sig-paren">(</span><em>name=None</em>, <em>category=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/StarIo.html#NmrSaveFrame"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.StarIo.NmrSaveFrame" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#ccpn.util.nef.GenericStarParser.SaveFrame" title="ccpn.util.nef.GenericStarParser.SaveFrame"><code class="xref py py-class docutils literal"><span class="pre">ccpn.util.nef.GenericStarParser.SaveFrame</span></code></a></p>
+<em class="property">class </em><code class="sig-prename descclassname">ccpn.util.nef.StarIo.</code><code class="sig-name descname">NmrSaveFrame</code><span class="sig-paren">(</span><em class="sig-param">name=None</em>, <em class="sig-param">category=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/StarIo.html#NmrSaveFrame"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.StarIo.NmrSaveFrame" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#ccpn.util.nef.GenericStarParser.SaveFrame" title="ccpn.util.nef.GenericStarParser.SaveFrame"><code class="xref py py-class docutils literal notranslate"><span class="pre">ccpn.util.nef.GenericStarParser.SaveFrame</span></code></a></p>
 <p>SaveFrame (OrderedDict)for NMRSTAR/NEF object tree</p>
 <dl class="method">
 <dt id="ccpn.util.nef.StarIo.NmrSaveFrame.newLoop">
-<code class="descname">newLoop</code><span class="sig-paren">(</span><em>name</em>, <em>columns</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/StarIo.html#NmrSaveFrame.newLoop"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.StarIo.NmrSaveFrame.newLoop" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">newLoop</code><span class="sig-paren">(</span><em class="sig-param">name</em>, <em class="sig-param">columns</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/StarIo.html#NmrSaveFrame.newLoop"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.StarIo.NmrSaveFrame.newLoop" title="Permalink to this definition">¶</a></dt>
 <dd><p>Make new NmrLoop and add it to the NmrSaveFrame</p>
 </dd></dl>
 
-<dl class="attribute">
+<dl class="method">
 <dt id="ccpn.util.nef.StarIo.NmrSaveFrame.tagPrefix">
-<code class="descname">tagPrefix</code><a class="headerlink" href="#ccpn.util.nef.StarIo.NmrSaveFrame.tagPrefix" title="Permalink to this definition">¶</a></dt>
+<em class="property">property </em><code class="sig-name descname">tagPrefix</code><a class="headerlink" href="#ccpn.util.nef.StarIo.NmrSaveFrame.tagPrefix" title="Permalink to this definition">¶</a></dt>
 <dd><p>- <em>None</em>, <em>immutable</em> - 
 Prefix to use before item tags on output</p>
 </dd></dl>
@@ -1404,49 +1509,49 @@ Prefix to use before item tags on output</p>
 
 <dl class="exception">
 <dt id="ccpn.util.nef.StarIo.StarValidationError">
-<em class="property">exception </em><code class="descclassname">ccpn.util.nef.StarIo.</code><code class="descname">StarValidationError</code><a class="reference internal" href="../_modules/ccpn/util/nef/StarIo.html#StarValidationError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.StarIo.StarValidationError" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">ValueError</span></code></p>
+<em class="property">exception </em><code class="sig-prename descclassname">ccpn.util.nef.StarIo.</code><code class="sig-name descname">StarValidationError</code><a class="reference internal" href="../_modules/ccpn/util/nef/StarIo.html#StarValidationError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.StarIo.StarValidationError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">ValueError</span></code></p>
 </dd></dl>
 
 <dl class="function">
 <dt id="ccpn.util.nef.StarIo.parseNef">
-<code class="descclassname">ccpn.util.nef.StarIo.</code><code class="descname">parseNef</code><span class="sig-paren">(</span><em>text</em>, <em>mode='standard'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/StarIo.html#parseNef"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.StarIo.parseNef" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">ccpn.util.nef.StarIo.</code><code class="sig-name descname">parseNef</code><span class="sig-paren">(</span><em class="sig-param">text</em>, <em class="sig-param">mode='standard'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/StarIo.html#parseNef"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.StarIo.parseNef" title="Permalink to this definition">¶</a></dt>
 <dd><p>load NEF from string</p>
 </dd></dl>
 
 <dl class="function">
 <dt id="ccpn.util.nef.StarIo.parseNefFile">
-<code class="descclassname">ccpn.util.nef.StarIo.</code><code class="descname">parseNefFile</code><span class="sig-paren">(</span><em>fileName</em>, <em>mode='standard'</em>, <em>wrapInDataBlock=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/StarIo.html#parseNefFile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.StarIo.parseNefFile" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">ccpn.util.nef.StarIo.</code><code class="sig-name descname">parseNefFile</code><span class="sig-paren">(</span><em class="sig-param">fileName</em>, <em class="sig-param">mode='standard'</em>, <em class="sig-param">wrapInDataBlock=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/StarIo.html#parseNefFile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.StarIo.parseNefFile" title="Permalink to this definition">¶</a></dt>
 <dd><p>parse NEF from file</p>
 <p>if wrapInDataBlock missing DataBlock start will be provided</p>
 </dd></dl>
 
 <dl class="function">
 <dt id="ccpn.util.nef.StarIo.parseNmrStar">
-<code class="descclassname">ccpn.util.nef.StarIo.</code><code class="descname">parseNmrStar</code><span class="sig-paren">(</span><em>text</em>, <em>mode='standard'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/StarIo.html#parseNmrStar"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.StarIo.parseNmrStar" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">ccpn.util.nef.StarIo.</code><code class="sig-name descname">parseNmrStar</code><span class="sig-paren">(</span><em class="sig-param">text</em>, <em class="sig-param">mode='standard'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/StarIo.html#parseNmrStar"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.StarIo.parseNmrStar" title="Permalink to this definition">¶</a></dt>
 <dd><p>load NMRSTAR file</p>
 </dd></dl>
 
 <dl class="function">
 <dt id="ccpn.util.nef.StarIo.parseNmrStarFile">
-<code class="descclassname">ccpn.util.nef.StarIo.</code><code class="descname">parseNmrStarFile</code><span class="sig-paren">(</span><em>fileName</em>, <em>mode='standard'</em>, <em>wrapInDataBlock=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/StarIo.html#parseNmrStarFile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.StarIo.parseNmrStarFile" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">ccpn.util.nef.StarIo.</code><code class="sig-name descname">parseNmrStarFile</code><span class="sig-paren">(</span><em class="sig-param">fileName</em>, <em class="sig-param">mode='standard'</em>, <em class="sig-param">wrapInDataBlock=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/StarIo.html#parseNmrStarFile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.StarIo.parseNmrStarFile" title="Permalink to this definition">¶</a></dt>
 <dd><p>parse NMRSTAR from file</p>
 <p>if wrapInDataBlock missing DataBlock start will be provided</p>
 </dd></dl>
 
 <dl class="function">
 <dt id="ccpn.util.nef.StarIo.splitNefSequence">
-<code class="descclassname">ccpn.util.nef.StarIo.</code><code class="descname">splitNefSequence</code><span class="sig-paren">(</span><em>rows</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/StarIo.html#splitNefSequence"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.StarIo.splitNefSequence" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">ccpn.util.nef.StarIo.</code><code class="sig-name descname">splitNefSequence</code><span class="sig-paren">(</span><em class="sig-param">rows</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/StarIo.html#splitNefSequence"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.StarIo.splitNefSequence" title="Permalink to this definition">¶</a></dt>
 <dd><p>Split a sequence of nef_sequence dicts assumed to belong to the same chain
 into a list of lists of sequentially linked stretches following the NEF rules</p>
-<p>Note that missing linkings are treated as &#8216;middle&#8217; and missing start/end tags
-are ignored, with the first/last residue treated, effectively, as linking &#8216;break&#8217;</p>
-<p>Only unknown linking values and incorrect pairs of &#8216;cyclic&#8217; tags raise an error</p>
+<p>Note that missing linkings are treated as ‘middle’ and missing start/end tags
+are ignored, with the first/last residue treated, effectively, as linking ‘break’</p>
+<p>Only unknown linking values and incorrect pairs of ‘cyclic’ tags raise an error</p>
 </dd></dl>
 
 <dl class="function">
 <dt id="ccpn.util.nef.StarIo.string2FramecodeString">
-<code class="descclassname">ccpn.util.nef.StarIo.</code><code class="descname">string2FramecodeString</code><span class="sig-paren">(</span><em>text</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/StarIo.html#string2FramecodeString"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.StarIo.string2FramecodeString" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">ccpn.util.nef.StarIo.</code><code class="sig-name descname">string2FramecodeString</code><span class="sig-paren">(</span><em class="sig-param">text</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/StarIo.html#string2FramecodeString"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.StarIo.string2FramecodeString" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </div>
@@ -1477,7 +1582,7 @@ are ignored, with the first/last residue treated, effectively, as linking &#8216
 #  reproduced.
 #
 # THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-# &#8220;AS IS&#8221; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+# “AS IS” AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 # LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
 # FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
 # COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT,
@@ -1488,26 +1593,26 @@ are ignored, with the first/last residue treated, effectively, as linking &#8216
 # STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
 # OF THE POSSIBILITY OF SUCH DAMAGE.</p>
-<p>&#8216;&#8217;&#8217;
+<p>‘’’
 Created on 25 Nov 2013</p>
 <p>&#64;author: pkeller
-&#8216;&#8217;&#8216;</p>
+‘’’</p>
 <p>#
 # Modified by Rasmus Fogh, CCPN project, 5/2/2016
 #</p>
 <dl class="class">
 <dt id="ccpn.util.nef.StarTokeniser.StarToken">
-<em class="property">class </em><code class="descclassname">ccpn.util.nef.StarTokeniser.</code><code class="descname">StarToken</code><span class="sig-paren">(</span><em>type</em>, <em>value</em><span class="sig-paren">)</span><a class="headerlink" href="#ccpn.util.nef.StarTokeniser.StarToken" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">tuple</span></code></p>
+<em class="property">class </em><code class="sig-prename descclassname">ccpn.util.nef.StarTokeniser.</code><code class="sig-name descname">StarToken</code><span class="sig-paren">(</span><em class="sig-param">type</em>, <em class="sig-param">value</em><span class="sig-paren">)</span><a class="headerlink" href="#ccpn.util.nef.StarTokeniser.StarToken" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code></p>
 <dl class="attribute">
 <dt id="ccpn.util.nef.StarTokeniser.StarToken.type">
-<code class="descname">type</code><a class="headerlink" href="#ccpn.util.nef.StarTokeniser.StarToken.type" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">type</code><a class="headerlink" href="#ccpn.util.nef.StarTokeniser.StarToken.type" title="Permalink to this definition">¶</a></dt>
 <dd><p>Alias for field number 0</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="ccpn.util.nef.StarTokeniser.StarToken.value">
-<code class="descname">value</code><a class="headerlink" href="#ccpn.util.nef.StarTokeniser.StarToken.value" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">value</code><a class="headerlink" href="#ccpn.util.nef.StarTokeniser.StarToken.value" title="Permalink to this definition">¶</a></dt>
 <dd><p>Alias for field number 1</p>
 </dd></dl>
 
@@ -1515,7 +1620,7 @@ Created on 25 Nov 2013</p>
 
 <dl class="function">
 <dt id="ccpn.util.nef.StarTokeniser.getTokenIterator">
-<code class="descclassname">ccpn.util.nef.StarTokeniser.</code><code class="descname">getTokenIterator</code><span class="sig-paren">(</span><em>text</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/StarTokeniser.html#getTokenIterator"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.StarTokeniser.getTokenIterator" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">ccpn.util.nef.StarTokeniser.</code><code class="sig-name descname">getTokenIterator</code><span class="sig-paren">(</span><em class="sig-param">text</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/StarTokeniser.html#getTokenIterator"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.StarTokeniser.getTokenIterator" title="Permalink to this definition">¶</a></dt>
 <dd><p>Iterator that returns an iterator over all STAR tokens in a generic STAR file</p>
 </dd></dl>
 
@@ -1525,12 +1630,20 @@ Created on 25 Nov 2013</p>
 <p>Module Documentation here</p>
 <dl class="class">
 <dt id="ccpn.util.nef.Validator.Validator">
-<em class="property">class </em><code class="descclassname">ccpn.util.nef.Validator.</code><code class="descname">Validator</code><span class="sig-paren">(</span><em>nef=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/Validator.html#Validator"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.Validator.Validator" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<em class="property">class </em><code class="sig-prename descclassname">ccpn.util.nef.Validator.</code><code class="sig-name descname">Validator</code><span class="sig-paren">(</span><em class="sig-param">nef=None</em>, <em class="sig-param">validateNefDict=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/Validator.html#Validator"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.Validator.Validator" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <dl class="method">
 <dt id="ccpn.util.nef.Validator.Validator.isValid">
-<code class="descname">isValid</code><span class="sig-paren">(</span><em>nef=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/Validator.html#Validator.isValid"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.Validator.Validator.isValid" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<code class="sig-name descname">isValid</code><span class="sig-paren">(</span><em class="sig-param">nef=None</em>, <em class="sig-param">validNef=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/Validator.html#Validator.isValid"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.Validator.Validator.isValid" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return whether the Nef file is valid</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ccpn.util.nef.Validator.Validator.validationErrors">
+<em class="property">property </em><code class="sig-name descname">validationErrors</code><a class="headerlink" href="#ccpn.util.nef.Validator.Validator.validationErrors" title="Permalink to this definition">¶</a></dt>
+<dd><p>- <em>None</em>, <em>immutable</em> - 
+Return the dict of validation errors</p>
+</dd></dl>
 
 </dd></dl>
 
@@ -1543,11 +1656,11 @@ Created on 25 Nov 2013</p>
       </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
-  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <h3><a href="../index.html">Table of Contents</a></h3>
   <ul>
 <li><a class="reference internal" href="#">ccpn.util.nef package</a><ul>
 <li><a class="reference internal" href="#submodules">Submodules</a></li>
-<li><a class="reference internal" href="#ccpn-util-nef-comparenef-module">ccpn.util.nef.CompareNef module</a><ul>
+<li><a class="reference internal" href="#module-ccpn.util.nef.CompareNef">ccpn.util.nef.CompareNef module</a><ul>
 <li><a class="reference internal" href="#module-contents">Module Contents</a></li>
 </ul>
 </li>
@@ -1567,6 +1680,7 @@ Created on 25 Nov 2013</p>
 </li>
 </ul>
 </li>
+<li><a class="reference internal" href="#module-ccpn.util.nef.SafeOpen">ccpn.util.nef.SafeOpen module</a></li>
 <li><a class="reference internal" href="#module-ccpn.util.nef.Specification">ccpn.util.nef.Specification module</a></li>
 <li><a class="reference internal" href="#module-ccpn.util.nef.StarIo">ccpn.util.nef.StarIo module</a></li>
 <li><a class="reference internal" href="#module-ccpn.util.nef.StarTokeniser">ccpn.util.nef.StarTokeniser module</a></li>
@@ -1584,20 +1698,20 @@ Created on 25 Nov 2013</p>
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
     <ul class="this-page-menu">
-      <li><a href="../_sources/ccpn/ccpn.util.nef.txt"
+      <li><a href="../_sources/ccpn/ccpn.util.nef.rst.txt"
             rel="nofollow">Show Source</a></li>
     </ul>
    </div>
 <div id="searchbox" style="display: none" role="search">
-  <h3>Quick search</h3>
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
     <form class="search" action="../search.html" method="get">
-      <input type="text" name="q" />
+      <input type="text" name="q" aria-labelledby="searchlabel" />
       <input type="submit" value="Go" />
-      <input type="hidden" name="check_keywords" value="yes" />
-      <input type="hidden" name="area" value="default" />
     </form>
+    </div>
 </div>
-<script type="text/javascript">$('#searchbox').show(0);</script>
+<script>$('#searchbox').show(0);</script>
         </div>
       </div>
       <div class="clearer"></div>
@@ -1617,15 +1731,15 @@ Created on 25 Nov 2013</p>
         <li class="right" >
           <a href="ccpn.util.html" title="ccpn.util package"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../index.html">Python  documentation</a> &raquo;</li>
-          <li class="nav-item nav-item-1"><a href="modules.html" >CCPN</a> &raquo;</li>
-          <li class="nav-item nav-item-2"><a href="ccpn.html" >ccpn package</a> &raquo;</li>
-          <li class="nav-item nav-item-3"><a href="ccpn.util.html" >ccpn.util package</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="../index.html">Python  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="modules.html" >CCPN</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="ccpn.html" >ccpn package</a> &#187;</li>
+          <li class="nav-item nav-item-3"><a href="ccpn.util.html" >ccpn.util package</a> &#187;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
-        &copy; Copyright .
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.1.
+        &#169; Copyright .
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.4.0.
     </div>
   </body>
 </html>

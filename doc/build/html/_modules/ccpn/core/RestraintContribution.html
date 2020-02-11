@@ -1,32 +1,22 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
+<!DOCTYPE html>
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    
-    <title>ccpn.core.RestraintContribution &mdash; Python  documentation</title>
-    
+    <meta charset="utf-8" />
+    <title>ccpn.core.RestraintContribution &#8212; Python  documentation</title>
     <link rel="stylesheet" href="../../../_static/classic.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
     
-    <script type="text/javascript">
-      var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    '../../../',
-        VERSION:     '',
-        COLLAPSE_INDEX: false,
-        FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true
-      };
-    </script>
-    <script type="text/javascript" src="../../../_static/jquery.js"></script>
-    <script type="text/javascript" src="../../../_static/underscore.js"></script>
-    <script type="text/javascript" src="../../../_static/doctools.js"></script>
-    <link rel="top" title="Python  documentation" href="../../../index.html" />
-    <link rel="up" title="Module code" href="../../index.html" /> 
-  </head>
-  <body role="document">
+    <script id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/jquery.js"></script>
+    <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/language_data.js"></script>
+    
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+  </head><body>
     <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
@@ -36,8 +26,8 @@
         <li class="right" >
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../index.html">Python  documentation</a> &raquo;</li>
-          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="../../../index.html">Python  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &#187;</li> 
       </ul>
     </div>  
 
@@ -134,7 +124,7 @@
         <span class="sd">&quot;&quot;&quot;targetValue of contribution &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">targetValue</span>
 
-    <span class="nd">@targetValue.setter</span>
+    <span class="nd">@targetValue</span><span class="o">.</span><span class="n">setter</span>
     <span class="k">def</span> <span class="nf">targetValue</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">targetValue</span> <span class="o">=</span> <span class="n">value</span>
 
@@ -143,7 +133,7 @@
         <span class="sd">&quot;&quot;&quot;error of contribution &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">error</span>
 
-    <span class="nd">@error.setter</span>
+    <span class="nd">@error</span><span class="o">.</span><span class="n">setter</span>
     <span class="k">def</span> <span class="nf">error</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">error</span> <span class="o">=</span> <span class="n">value</span>
 
@@ -152,7 +142,7 @@
         <span class="sd">&quot;&quot;&quot;weight of contribution &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">weight</span>
 
-    <span class="nd">@weight.setter</span>
+    <span class="nd">@weight</span><span class="o">.</span><span class="n">setter</span>
     <span class="k">def</span> <span class="nf">weight</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">weight</span> <span class="o">=</span> <span class="n">value</span>
 
@@ -164,7 +154,7 @@
 <span class="sd">        parabolic to linear potential&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">additionalLowerLimit</span>
 
-    <span class="nd">@additionalLowerLimit.setter</span>
+    <span class="nd">@additionalLowerLimit</span><span class="o">.</span><span class="n">setter</span>
     <span class="k">def</span> <span class="nf">additionalLowerLimit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">additionalLowerLimit</span> <span class="o">=</span> <span class="n">value</span>
 
@@ -173,7 +163,7 @@
         <span class="sd">&quot;&quot;&quot;lowerLimit of contribution &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">lowerLimit</span>
 
-    <span class="nd">@lowerLimit.setter</span>
+    <span class="nd">@lowerLimit</span><span class="o">.</span><span class="n">setter</span>
     <span class="k">def</span> <span class="nf">lowerLimit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">lowerLimit</span> <span class="o">=</span> <span class="n">value</span>
 
@@ -182,7 +172,7 @@
         <span class="sd">&quot;&quot;&quot;upperLimit of contribution &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">upperLimit</span>
 
-    <span class="nd">@upperLimit.setter</span>
+    <span class="nd">@upperLimit</span><span class="o">.</span><span class="n">setter</span>
     <span class="k">def</span> <span class="nf">upperLimit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">upperLimit</span> <span class="o">=</span> <span class="n">value</span>
 
@@ -194,7 +184,7 @@
 <span class="sd">        parabolic to linear potential&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">additionalUpperLimit</span>
 
-    <span class="nd">@additionalUpperLimit.setter</span>
+    <span class="nd">@additionalUpperLimit</span><span class="o">.</span><span class="n">setter</span>
     <span class="k">def</span> <span class="nf">additionalUpperLimit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">additionalUpperLimit</span> <span class="o">=</span> <span class="n">value</span>
 
@@ -204,7 +194,7 @@
 <span class="sd">        value &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">scale</span>
 
-    <span class="nd">@scale.setter</span>
+    <span class="nd">@scale</span><span class="o">.</span><span class="n">setter</span>
     <span class="k">def</span> <span class="nf">scale</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">scale</span> <span class="o">=</span> <span class="n">value</span>
 
@@ -213,7 +203,7 @@
         <span class="sd">&quot;&quot;&quot;Does targetValue depend on a variable distance (where this is relevant, e.g. for Rdc) &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">isDistanceDependent</span>
 
-    <span class="nd">@isDistanceDependent.setter</span>
+    <span class="nd">@isDistanceDependent</span><span class="o">.</span><span class="n">setter</span>
     <span class="k">def</span> <span class="nf">isDistanceDependent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">bool</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">isDistanceDependent</span> <span class="o">=</span> <span class="n">value</span>
 
@@ -224,7 +214,7 @@
 <span class="sd">        are OR&#39;ed&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">combinationId</span>
 
-    <span class="nd">@combinationId.setter</span>
+    <span class="nd">@combinationId</span><span class="o">.</span><span class="n">setter</span>
     <span class="k">def</span> <span class="nf">combinationId</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">combinationId</span> <span class="o">=</span> <span class="n">value</span>
 
@@ -254,7 +244,7 @@
         <span class="c1">#</span>
         <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="n">sortkey</span><span class="p">))</span>
 
-    <span class="nd">@restraintItems.setter</span>
+    <span class="nd">@restraintItems</span><span class="o">.</span><span class="n">setter</span>
     <span class="k">def</span> <span class="nf">restraintItems</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">]]):</span>
 
         <span class="n">itemLength</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">constraint</span><span class="o">.</span><span class="n">parentList</span><span class="o">.</span><span class="n">itemLength</span>
@@ -284,7 +274,7 @@
                 <span class="c1"># make new items</span>
                 <span class="n">func</span><span class="p">(</span><span class="n">resonances</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="n">fetchFixedResonance</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">ll</span><span class="p">))</span>
 
-<div class="viewcode-block" id="RestraintContribution.addRestraintItem"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.RestraintContribution.RestraintContribution.addRestraintItem">[docs]</a>    <span class="k">def</span> <span class="nf">addRestraintItem</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">restraintItem</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">_string2Item</span><span class="p">:</span> <span class="n">Dict</span> <span class="o">=</span> <span class="bp">None</span><span class="p">):</span>
+<div class="viewcode-block" id="RestraintContribution.addRestraintItem"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.RestraintContribution.RestraintContribution.addRestraintItem">[docs]</a>    <span class="k">def</span> <span class="nf">addRestraintItem</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">restraintItem</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">_string2Item</span><span class="p">:</span> <span class="n">Dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Add a restraint item, given as aa tuple of atomId (NOT Pid).</span>
 <span class="sd">        Example value: (&#39;A.127.ALA.HA&#39;,&#39;A.130.SER.H&#39;)</span>
 
@@ -303,29 +293,29 @@
 
         <span class="n">fetchFixedResonance</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parent</span><span class="o">.</span><span class="n">_parent</span><span class="o">.</span><span class="n">_parent</span><span class="o">.</span><span class="n">_fetchFixedResonance</span>
         <span class="n">resonances</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="k">if</span> <span class="n">_string2Item</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">_string2Item</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">for</span> <span class="n">ss</span> <span class="ow">in</span> <span class="n">restraintItem</span><span class="p">:</span>
                 <span class="n">resonance</span> <span class="o">=</span> <span class="n">fetchFixedResonance</span><span class="p">(</span><span class="n">ss</span><span class="p">)</span>
                 <span class="n">resonances</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">resonance</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">for</span> <span class="n">ss</span> <span class="ow">in</span> <span class="n">restraintItem</span><span class="p">:</span>
                 <span class="n">resonance</span> <span class="o">=</span> <span class="n">_string2Item</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">ss</span><span class="p">)</span>
-                <span class="k">if</span> <span class="n">resonance</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
-                    <span class="n">resonance</span> <span class="o">=</span> <span class="n">fetchFixedResonance</span><span class="p">(</span><span class="n">ss</span><span class="p">,</span> <span class="n">checkUniqueness</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">resonance</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="n">resonance</span> <span class="o">=</span> <span class="n">fetchFixedResonance</span><span class="p">(</span><span class="n">ss</span><span class="p">,</span> <span class="n">checkUniqueness</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
                     <span class="n">_string2Item</span><span class="p">[</span><span class="n">ss</span><span class="p">]</span> <span class="o">=</span> <span class="n">resonance</span>
                 <span class="n">resonances</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">resonance</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">itemLength</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
             <span class="c1"># make new item</span>
             <span class="n">resonance</span> <span class="o">=</span> <span class="n">resonances</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-            <span class="k">if</span> <span class="n">apiContribution</span><span class="o">.</span><span class="n">findFirstItem</span><span class="p">(</span><span class="n">resonance</span><span class="o">=</span><span class="n">resonance</span><span class="p">)</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">apiContribution</span><span class="o">.</span><span class="n">findFirstItem</span><span class="p">(</span><span class="n">resonance</span><span class="o">=</span><span class="n">resonance</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="n">apiContribution</span><span class="o">.</span><span class="n">newSingleAtomItem</span><span class="p">(</span><span class="n">resonance</span><span class="o">=</span><span class="n">resonance</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Cannot add RestraintItem due to clash with pre-existing item: </span><span class="si">%s</span><span class="s2">&quot;</span>
                                  <span class="o">%</span> <span class="n">restraintItem</span><span class="p">)</span>
 
         <span class="k">elif</span> <span class="n">itemLength</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">apiContribution</span><span class="o">.</span><span class="n">findFirstItem</span><span class="p">(</span><span class="n">resonances</span><span class="o">=</span><span class="n">resonances</span><span class="p">)</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">apiContribution</span><span class="o">.</span><span class="n">findFirstItem</span><span class="p">(</span><span class="n">resonances</span><span class="o">=</span><span class="n">resonances</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="n">apiContribution</span><span class="o">.</span><span class="n">newFourAtomItem</span><span class="p">(</span>
                         <span class="n">resonances</span><span class="o">=</span><span class="n">resonances</span>
                         <span class="p">)</span>
@@ -334,7 +324,7 @@
                                  <span class="o">%</span> <span class="n">restraintItem</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="c1"># Assume length 2</span>
-            <span class="k">if</span> <span class="n">apiContribution</span><span class="o">.</span><span class="n">findFirstItem</span><span class="p">(</span><span class="n">resonances</span><span class="o">=</span><span class="n">resonances</span><span class="p">)</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">apiContribution</span><span class="o">.</span><span class="n">findFirstItem</span><span class="p">(</span><span class="n">resonances</span><span class="o">=</span><span class="n">resonances</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="n">apiContribution</span><span class="o">.</span><span class="n">newAtomPairItem</span><span class="p">(</span>
                         <span class="n">resonances</span><span class="o">=</span><span class="n">resonances</span>
                         <span class="p">)</span>
@@ -349,7 +339,7 @@
     <span class="c1">#=========================================================================================</span>
 
     <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">_getAllWrappedData</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">parent</span><span class="p">:</span> <span class="n">Restraint</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">_getAllWrappedData</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">parent</span><span class="p">:</span> <span class="n">Restraint</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;get wrappedData - all ConstraintContribution children of parent ConstraintList&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">parent</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">sortedContributions</span><span class="p">()</span>
 
@@ -373,11 +363,11 @@
 <span class="c1">#=========================================================================================</span>
 
 <span class="nd">@newObject</span><span class="p">(</span><span class="n">RestraintContribution</span><span class="p">)</span>
-<span class="k">def</span> <span class="nf">_newRestraintContribution</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">Restraint</span><span class="p">,</span> <span class="n">targetValue</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="n">error</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span>
-                              <span class="n">weight</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span> <span class="n">upperLimit</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="n">lowerLimit</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span>
-                              <span class="n">additionalUpperLimit</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="n">additionalLowerLimit</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span>
-                              <span class="n">scale</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span> <span class="n">isDistanceDependent</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="bp">False</span><span class="p">,</span> <span class="n">combinationId</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span>
-                              <span class="n">restraintItems</span><span class="p">:</span> <span class="n">Sequence</span> <span class="o">=</span> <span class="p">(),</span> <span class="n">serial</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="bp">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">RestraintContribution</span><span class="p">:</span>
+<span class="k">def</span> <span class="nf">_newRestraintContribution</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">Restraint</span><span class="p">,</span> <span class="n">targetValue</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">error</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                              <span class="n">weight</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span> <span class="n">upperLimit</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">lowerLimit</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                              <span class="n">additionalUpperLimit</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">additionalLowerLimit</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                              <span class="n">scale</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span> <span class="n">isDistanceDependent</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">combinationId</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                              <span class="n">restraintItems</span><span class="p">:</span> <span class="n">Sequence</span> <span class="o">=</span> <span class="p">(),</span> <span class="n">serial</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">RestraintContribution</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;Create new RestraintContribution within Restraint</span>
 
 <span class="sd">    See the RestraintContribution class for details.</span>
@@ -403,10 +393,10 @@
                <span class="n">additionalLowerLimit</span><span class="o">=</span><span class="n">additionalLowerLimit</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="n">scale</span><span class="p">,</span>
                <span class="n">isDistanceDependent</span><span class="o">=</span><span class="n">isDistanceDependent</span><span class="p">,</span> <span class="n">combinationId</span><span class="o">=</span><span class="n">combinationId</span><span class="p">)</span>
     <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_data2Obj</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">result</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">result</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;Unable to generate new RestraintContribution item&#39;</span><span class="p">)</span>
 
-    <span class="k">if</span> <span class="n">serial</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">serial</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">result</span><span class="o">.</span><span class="n">resetSerial</span><span class="p">(</span><span class="n">serial</span><span class="p">)</span>
         <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
@@ -456,15 +446,15 @@
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
 <div id="searchbox" style="display: none" role="search">
-  <h3>Quick search</h3>
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
     <form class="search" action="../../../search.html" method="get">
-      <input type="text" name="q" />
+      <input type="text" name="q" aria-labelledby="searchlabel" />
       <input type="submit" value="Go" />
-      <input type="hidden" name="check_keywords" value="yes" />
-      <input type="hidden" name="area" value="default" />
     </form>
+    </div>
 </div>
-<script type="text/javascript">$('#searchbox').show(0);</script>
+<script>$('#searchbox').show(0);</script>
         </div>
       </div>
       <div class="clearer"></div>
@@ -478,13 +468,13 @@
         <li class="right" >
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../index.html">Python  documentation</a> &raquo;</li>
-          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="../../../index.html">Python  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &#187;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
-        &copy; Copyright .
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.1.
+        &#169; Copyright .
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.4.0.
     </div>
   </body>
 </html>

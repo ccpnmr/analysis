@@ -1,32 +1,22 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
+<!DOCTYPE html>
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    
-    <title>ccpn.ui.gui.widgets.PlotWidget &mdash; Python  documentation</title>
-    
+    <meta charset="utf-8" />
+    <title>ccpn.ui.gui.widgets.PlotWidget &#8212; Python  documentation</title>
     <link rel="stylesheet" href="../../../../../_static/classic.css" type="text/css" />
     <link rel="stylesheet" href="../../../../../_static/pygments.css" type="text/css" />
     
-    <script type="text/javascript">
-      var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    '../../../../../',
-        VERSION:     '',
-        COLLAPSE_INDEX: false,
-        FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true
-      };
-    </script>
-    <script type="text/javascript" src="../../../../../_static/jquery.js"></script>
-    <script type="text/javascript" src="../../../../../_static/underscore.js"></script>
-    <script type="text/javascript" src="../../../../../_static/doctools.js"></script>
-    <link rel="top" title="Python  documentation" href="../../../../../index.html" />
-    <link rel="up" title="Module code" href="../../../../index.html" /> 
-  </head>
-  <body role="document">
+    <script id="documentation_options" data-url_root="../../../../../" src="../../../../../_static/documentation_options.js"></script>
+    <script src="../../../../../_static/jquery.js"></script>
+    <script src="../../../../../_static/underscore.js"></script>
+    <script src="../../../../../_static/doctools.js"></script>
+    <script src="../../../../../_static/language_data.js"></script>
+    
+    <link rel="index" title="Index" href="../../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../../search.html" /> 
+  </head><body>
     <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
@@ -36,8 +26,8 @@
         <li class="right" >
           <a href="../../../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../../../index.html">Python  documentation</a> &raquo;</li>
-          <li class="nav-item nav-item-1"><a href="../../../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="../../../../../index.html">Python  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../../../index.html" accesskey="U">Module code</a> &#187;</li> 
       </ul>
     </div>  
 
@@ -76,8 +66,8 @@
 
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Sequence</span>
 
-<span class="kn">import</span> <span class="nn">pyqtgraph</span> <span class="kn">as</span> <span class="nn">pg</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pyqtgraph</span> <span class="k">as</span> <span class="nn">pg</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">from</span> <span class="nn">PyQt5</span> <span class="kn">import</span> <span class="n">QtCore</span><span class="p">,</span> <span class="n">QtGui</span><span class="p">,</span> <span class="n">QtWidgets</span><span class="p">,</span> <span class="n">QtOpenGL</span>
 
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.ViewBox</span> <span class="kn">import</span> <span class="n">ViewBox</span>
@@ -88,7 +78,7 @@
 <span class="kn">from</span> <span class="nn">ccpn.util.Colour</span> <span class="kn">import</span> <span class="n">Colour</span>
 
 <span class="kn">from</span> <span class="nn">ccpnmodel.ccpncore.api.ccpnmr.gui.Task</span> <span class="kn">import</span> <span class="n">Ruler</span> <span class="k">as</span> <span class="n">ApiRuler</span>
-<span class="kn">import</span> <span class="nn">pyqtgraph.opengl</span> <span class="kn">as</span> <span class="nn">gl</span>
+<span class="kn">import</span> <span class="nn">pyqtgraph.opengl</span> <span class="k">as</span> <span class="nn">gl</span>
 
 
 <span class="c1">#TODO:WAYNE: This class should contain all the nitty gritty of the displaying; including the axis labels and the like</span>
@@ -99,21 +89,21 @@
 
 <div class="viewcode-block" id="PlotWidget"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.PlotWidget.PlotWidget">[docs]</a><span class="k">class</span> <span class="nc">PlotWidget</span><span class="p">(</span><span class="n">pg</span><span class="o">.</span><span class="n">PlotWidget</span><span class="p">):</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">strip</span><span class="p">,</span> <span class="n">useOpenGL</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">strip</span><span class="p">,</span> <span class="n">useOpenGL</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="c1">#def __init__(self, strip, useOpenGL=False, showDoubleCrosshair=False):</span>
 
         <span class="c1"># Be sure to use explicit arguments to ViewBox as the call order is different in the __init__</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">viewBox</span> <span class="o">=</span> <span class="n">ViewBox</span><span class="p">(</span><span class="n">strip</span><span class="p">)</span>
-        <span class="n">pg</span><span class="o">.</span><span class="n">PlotWidget</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="n">strip</span><span class="p">,</span>
+        <span class="n">pg</span><span class="o">.</span><span class="n">PlotWidget</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="n">strip</span><span class="p">,</span>
                                <span class="n">viewBox</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">viewBox</span><span class="p">,</span>
-                               <span class="n">axes</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">enableMenu</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+                               <span class="n">axes</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">enableMenu</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">strip</span> <span class="o">=</span> <span class="n">strip</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">plotItem</span><span class="o">.</span><span class="n">setAcceptHoverEvents</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">setInteractive</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">plotItem</span><span class="o">.</span><span class="n">setAcceptDrops</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">plotItem</span><span class="o">.</span><span class="n">setMenuEnabled</span><span class="p">(</span><span class="n">enableMenu</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">enableViewBoxMenu</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">plotItem</span><span class="o">.</span><span class="n">setAcceptHoverEvents</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setInteractive</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">plotItem</span><span class="o">.</span><span class="n">setAcceptDrops</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">plotItem</span><span class="o">.</span><span class="n">setMenuEnabled</span><span class="p">(</span><span class="n">enableMenu</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">enableViewBoxMenu</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">rulerLineDict</span> <span class="o">=</span> <span class="p">{}</span>  <span class="c1"># ruler --&gt; line for that ruler</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">rulerLabelDict</span> <span class="o">=</span> <span class="p">{}</span>  <span class="c1"># ruler --&gt; label for that ruler</span>
@@ -121,8 +111,8 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">xAxisAtomLabels</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">yAxisAtomLabels</span> <span class="o">=</span> <span class="p">[]</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">xAxisTextItem</span> <span class="o">=</span> <span class="bp">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">yAxisTextItem</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">xAxisTextItem</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">yAxisTextItem</span> <span class="o">=</span> <span class="kc">None</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">hideButtons</span><span class="p">()</span>
 
@@ -173,11 +163,11 @@
 
         <span class="c1"># add grid</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">grid</span> <span class="o">=</span> <span class="n">CcpnGridItem</span><span class="p">(</span><span class="n">gridColour</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">gridColour</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">grid</span><span class="p">,</span> <span class="n">ignoreBounds</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">grid</span><span class="p">,</span> <span class="n">ignoreBounds</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 
         <span class="c1"># Add two crosshairs</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">crossHair1</span> <span class="o">=</span> <span class="n">CrossHair</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">show</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">colour</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">foreground</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">crossHair2</span> <span class="o">=</span> <span class="n">CrossHair</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">show</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">colour</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">foreground</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">crossHair1</span> <span class="o">=</span> <span class="n">CrossHair</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">show</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">colour</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">foreground</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">crossHair2</span> <span class="o">=</span> <span class="n">CrossHair</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">show</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">colour</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">foreground</span><span class="p">)</span>
 
         <span class="c1"># add label to show mouse coordinates at the position of the cursor</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">mouseLabel</span> <span class="o">=</span> <span class="n">pg</span><span class="o">.</span><span class="n">TextItem</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_labellingColour</span><span class="p">,</span> <span class="n">anchor</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
@@ -191,7 +181,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">stripIDLabel</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">stripIDLabel</span><span class="o">.</span><span class="n">setZValue</span><span class="p">(</span><span class="mf">1.0</span><span class="p">)</span>
 
-<div class="viewcode-block" id="PlotWidget.highlightAxes"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.PlotWidget.PlotWidget.highlightAxes">[docs]</a>    <span class="k">def</span> <span class="nf">highlightAxes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+<div class="viewcode-block" id="PlotWidget.highlightAxes"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.PlotWidget.PlotWidget.highlightAxes">[docs]</a>    <span class="k">def</span> <span class="nf">highlightAxes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="s2">&quot;Highlight the axes on/of&quot;</span>
         <span class="k">if</span> <span class="n">state</span><span class="p">:</span>
             <span class="k">for</span> <span class="n">orientation</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;right&#39;</span><span class="p">,</span> <span class="s1">&#39;bottom&#39;</span><span class="p">):</span>
@@ -209,17 +199,17 @@
         <span class="n">newState</span> <span class="o">=</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">grid</span><span class="o">.</span><span class="n">isVisible</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">grid</span><span class="o">.</span><span class="n">setVisible</span><span class="p">(</span><span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">grid</span><span class="o">.</span><span class="n">isVisible</span><span class="p">())</span></div>
 
-    <span class="c1"># def cyclePeakLabelling(self):</span>
+    <span class="c1"># def cycleSymbolLabelling(self):</span>
     <span class="c1">#   &quot;Toggle grid state&quot;</span>
-    <span class="c1">#   self.peakLabelling = not self.peakLabelling</span>
+    <span class="c1">#   self.symbolLabelling = not self.symbolLabelling</span>
     <span class="c1"># TODO:ED update peaks here</span>
 
-    <span class="k">def</span> <span class="nf">__getattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attr</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__getattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attr</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Wrap pyqtgraph PlotWidget __getattr__, which raises wrong error and so makes hasattr fail.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">try</span><span class="p">:</span>
-            <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__getattr__</span><span class="p">(</span><span class="n">attr</span><span class="p">)</span>
+            <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__getattr__</span><span class="p">(</span><span class="n">attr</span><span class="p">)</span>
         <span class="k">except</span> <span class="ne">NameError</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="n">attr</span><span class="p">)</span>
 
@@ -244,7 +234,7 @@
         <span class="c1"># TBD: the naive approach below should be improved</span>
         <span class="k">return</span> <span class="n">axisCode</span>  <span class="c1"># if axisCode[0].isupper() else axisCode</span>
 
-    <span class="nd">@QtCore.pyqtSlot</span><span class="p">(</span><span class="nb">dict</span><span class="p">)</span>
+    <span class="nd">@QtCore</span><span class="o">.</span><span class="n">pyqtSlot</span><span class="p">(</span><span class="nb">dict</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">_mousePositionChanged</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mouseMovedDict</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">          This is called when the mouse position is changed in some strip</span>
@@ -282,14 +272,14 @@
                 <span class="n">displayIndices</span> <span class="o">=</span> <span class="n">spectrumView</span><span class="o">.</span><span class="n">_displayOrderSpectrumDimensionIndices</span>
                 <span class="n">xOffset</span> <span class="o">=</span> <span class="n">offsets</span><span class="p">[</span><span class="n">displayIndices</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>
                 <span class="n">yOffset</span> <span class="o">=</span> <span class="n">offsets</span><span class="p">[</span><span class="n">displayIndices</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span>
-                <span class="k">if</span> <span class="n">xPos</span> <span class="ow">is</span> <span class="bp">None</span> <span class="ow">or</span> <span class="n">xOffset</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">xPos</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">xOffset</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">crossHair2</span><span class="o">.</span><span class="n">vLine</span><span class="o">.</span><span class="n">hide</span><span class="p">()</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="c1"># TBD: below assumes that axis is in ppm</span>
                     <span class="n">xOffset</span> <span class="o">/=</span> <span class="n">spectrum</span><span class="o">.</span><span class="n">spectrometerFrequencies</span><span class="p">[</span><span class="n">displayIndices</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>  <span class="c1"># convert from Hz to ppm</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">crossHair2</span><span class="o">.</span><span class="n">setVline</span><span class="p">(</span><span class="n">xPos</span> <span class="o">+</span> <span class="n">xOffset</span><span class="p">)</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">crossHair2</span><span class="o">.</span><span class="n">vLine</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
-                <span class="k">if</span> <span class="n">yPos</span> <span class="ow">is</span> <span class="bp">None</span> <span class="ow">or</span> <span class="n">yOffset</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">yPos</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">yOffset</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">crossHair2</span><span class="o">.</span><span class="n">hLine</span><span class="o">.</span><span class="n">hide</span><span class="p">()</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="c1"># TBD: below assumes that axis is in ppm</span>
@@ -334,9 +324,9 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span>
 
-        <span class="n">line</span> <span class="o">=</span> <span class="n">pg</span><span class="o">.</span><span class="n">InfiniteLine</span><span class="p">(</span><span class="n">angle</span><span class="o">=</span><span class="n">angle</span><span class="p">,</span> <span class="n">movable</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">pen</span><span class="o">=</span><span class="n">colour</span><span class="p">)</span>
+        <span class="n">line</span> <span class="o">=</span> <span class="n">pg</span><span class="o">.</span><span class="n">InfiniteLine</span><span class="p">(</span><span class="n">angle</span><span class="o">=</span><span class="n">angle</span><span class="p">,</span> <span class="n">movable</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">pen</span><span class="o">=</span><span class="n">colour</span><span class="p">)</span>
         <span class="n">line</span><span class="o">.</span><span class="n">setPos</span><span class="p">(</span><span class="n">position</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="n">line</span><span class="p">,</span> <span class="n">ignoreBounds</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="n">line</span><span class="p">,</span> <span class="n">ignoreBounds</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">rulerLineDict</span><span class="p">[</span><span class="n">apiRuler</span><span class="p">]</span> <span class="o">=</span> <span class="n">line</span>
         <span class="k">if</span> <span class="n">label</span><span class="p">:</span>
             <span class="n">textItem</span> <span class="o">=</span> <span class="n">pg</span><span class="o">.</span><span class="n">TextItem</span><span class="p">(</span><span class="n">label</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">colour</span><span class="p">)</span>
@@ -411,14 +401,14 @@
 
 <div class="viewcode-block" id="AxisTextItem"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.PlotWidget.AxisTextItem">[docs]</a><span class="k">class</span> <span class="nc">AxisTextItem</span><span class="p">(</span><span class="n">pg</span><span class="o">.</span><span class="n">TextItem</span><span class="p">):</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">plotWidget</span><span class="p">,</span> <span class="n">orientation</span><span class="p">,</span> <span class="n">axisCode</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">mappedDim</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">plotWidget</span><span class="p">,</span> <span class="n">orientation</span><span class="p">,</span> <span class="n">axisCode</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">mappedDim</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">plotWidget</span> <span class="o">=</span> <span class="n">plotWidget</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">orientation</span> <span class="o">=</span> <span class="n">orientation</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">axisCode</span> <span class="o">=</span> <span class="n">axisCode</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">units</span> <span class="o">=</span> <span class="n">units</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">mappedDim</span> <span class="o">=</span> <span class="n">mappedDim</span>
-        <span class="n">pg</span><span class="o">.</span><span class="n">TextItem</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="n">axisCode</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">plotWidget</span><span class="o">.</span><span class="n">gridColour</span><span class="p">)</span>
+        <span class="n">pg</span><span class="o">.</span><span class="n">TextItem</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="n">axisCode</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">plotWidget</span><span class="o">.</span><span class="n">gridColour</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">orientation</span> <span class="o">==</span> <span class="s1">&#39;top&#39;</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">setPos</span><span class="p">(</span><span class="n">plotWidget</span><span class="o">.</span><span class="n">plotItem</span><span class="o">.</span><span class="n">vb</span><span class="o">.</span><span class="n">boundingRect</span><span class="p">()</span><span class="o">.</span><span class="n">bottomLeft</span><span class="p">())</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">anchor</span> <span class="o">=</span> <span class="n">pg</span><span class="o">.</span><span class="n">Point</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
@@ -440,15 +430,15 @@
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
 <div id="searchbox" style="display: none" role="search">
-  <h3>Quick search</h3>
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
     <form class="search" action="../../../../../search.html" method="get">
-      <input type="text" name="q" />
+      <input type="text" name="q" aria-labelledby="searchlabel" />
       <input type="submit" value="Go" />
-      <input type="hidden" name="check_keywords" value="yes" />
-      <input type="hidden" name="area" value="default" />
     </form>
+    </div>
 </div>
-<script type="text/javascript">$('#searchbox').show(0);</script>
+<script>$('#searchbox').show(0);</script>
         </div>
       </div>
       <div class="clearer"></div>
@@ -462,13 +452,13 @@
         <li class="right" >
           <a href="../../../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../../../index.html">Python  documentation</a> &raquo;</li>
-          <li class="nav-item nav-item-1"><a href="../../../../index.html" >Module code</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="../../../../../index.html">Python  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../../../index.html" >Module code</a> &#187;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
-        &copy; Copyright .
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.1.
+        &#169; Copyright .
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.4.0.
     </div>
   </body>
 </html>

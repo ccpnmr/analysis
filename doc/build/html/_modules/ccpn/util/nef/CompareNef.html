@@ -1,32 +1,22 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
+<!DOCTYPE html>
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    
-    <title>ccpn.util.nef.CompareNef &mdash; Python  documentation</title>
-    
+    <meta charset="utf-8" />
+    <title>ccpn.util.nef.CompareNef &#8212; Python  documentation</title>
     <link rel="stylesheet" href="../../../../_static/classic.css" type="text/css" />
     <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
     
-    <script type="text/javascript">
-      var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    '../../../../',
-        VERSION:     '',
-        COLLAPSE_INDEX: false,
-        FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true
-      };
-    </script>
-    <script type="text/javascript" src="../../../../_static/jquery.js"></script>
-    <script type="text/javascript" src="../../../../_static/underscore.js"></script>
-    <script type="text/javascript" src="../../../../_static/doctools.js"></script>
-    <link rel="top" title="Python  documentation" href="../../../../index.html" />
-    <link rel="up" title="Module code" href="../../../index.html" /> 
-  </head>
-  <body role="document">
+    <script id="documentation_options" data-url_root="../../../../" src="../../../../_static/documentation_options.js"></script>
+    <script src="../../../../_static/jquery.js"></script>
+    <script src="../../../../_static/underscore.js"></script>
+    <script src="../../../../_static/doctools.js"></script>
+    <script src="../../../../_static/language_data.js"></script>
+    
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+  </head><body>
     <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
@@ -36,8 +26,8 @@
         <li class="right" >
           <a href="../../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../../index.html">Python  documentation</a> &raquo;</li>
-          <li class="nav-item nav-item-1"><a href="../../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="../../../../index.html">Python  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../../index.html" accesskey="U">Module code</a> &#187;</li> 
       </ul>
     </div>  
 
@@ -68,12 +58,12 @@
 
 <span class="sd">    -i, --ignoreblockname   Ignore the blockname when comparing two Nef files</span>
 <span class="sd">                            May be required when converting Nef files through</span>
-<span class="sd">                            different applications</span>
-<span class="sd">                            May be used with -f and -b</span>
+<span class="sd">                            different applications.</span>
+<span class="sd">                            May be used with -f and -b.</span>
 
 <span class="sd">    -f inFile1 inFile2, --file inFile1 inFile2</span>
 <span class="sd">                            Compare two Nef files and print the results to the</span>
-<span class="sd">                            screen</span>
+<span class="sd">                            screen.</span>
 
 <span class="sd">    -b inDir1 inDir2 outDir, --block inDir1 inDir2 outDir</span>
 <span class="sd">                            compare Nef files common to directories</span>
@@ -83,9 +73,13 @@
 <span class="sd">    -s, --screen            Output batch processing to screen, default is to .txt files</span>
 <span class="sd">                            may be used with -b</span>
 
-<span class="sd">    -k, --keep              Keep existing .txt files. New files are appended with &#39;(n)&#39; before</span>
-<span class="sd">                            the extension, where n is the next available number.</span>
+<span class="sd">    -o, --overwrite         Overwrite existing .txt files. If false then files are</span>
+<span class="sd">                            appended with &#39;(n)&#39; before the extension, where n is</span>
+<span class="sd">                            the next available number.</span>
 
+<span class="sd">    -c, --create            Automatically create directories as required.</span>
+
+<span class="sd">    -I, --ignorecase        Ignore case when comparing items.</span>
 
 <span class="sd">Details of the contents of Nef files can be found in GenericStarParser</span>
 <span class="sd">The general structure of a Nef file is:</span>
@@ -158,10 +152,16 @@
 <span class="sd">  printCompareList      print the compare list to the screen</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">absolute_import</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">division</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">print_function</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">unicode_literals</span>
+
+
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Licence, Reference and Credits</span>
 <span class="c1">#=========================================================================================</span>
-<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019&quot;</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020&quot;</span>
 <span class="n">__credits__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Ed Brooksbank, Luca Mureddu, Timothy J Ragan &amp; Geerten W Vuister&quot;</span><span class="p">)</span>
 <span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">)</span>
 <span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., &amp; Vuister, G.W.&quot;</span><span class="p">,</span>
@@ -170,8 +170,8 @@
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Last code modification</span>
 <span class="c1">#=========================================================================================</span>
-<span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: CCPN $&quot;</span>
-<span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2017-07-07 16:33:01 +0100 (Fri, July 07, 2017) $&quot;</span>
+<span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: Ed Brooksbank $&quot;</span>
+<span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2020-01-14 11:49:36 +0000 (Tue, January 14, 2020) $&quot;</span>
 <span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.0 $&quot;</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Created</span>
@@ -183,26 +183,57 @@
 <span class="c1">#=========================================================================================</span>
 
 <span class="kn">import</span> <span class="nn">os</span>
-<span class="c1"># import time</span>
 <span class="kn">import</span> <span class="nn">copy</span>
 <span class="kn">import</span> <span class="nn">sys</span>
-<span class="kn">from</span> <span class="nn">ccpn.util.nef</span> <span class="kn">import</span> <span class="n">GenericStarParser</span><span class="p">,</span> <span class="n">StarIo</span>
-<span class="kn">from</span> <span class="nn">ccpn.util</span> <span class="kn">import</span> <span class="n">Path</span>
-<span class="kn">from</span> <span class="nn">ccpn.util.SafeFilename</span> <span class="kn">import</span> <span class="n">safeOpen</span>
+
+
+<span class="c1">#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~</span>
+<span class="c1"># this is a fix to get the import to work when running as a standalone</span>
+<span class="c1"># when importing into your own code, with PYTHON_PATH defined it can be safely removed</span>
+
+<div class="viewcode-block" id="import_parents"><a class="viewcode-back" href="../../../../ccpn/ccpn.util.nef.html#ccpn.util.nef.CompareNef.import_parents">[docs]</a><span class="k">def</span> <span class="nf">import_parents</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+    <span class="k">global</span> <span class="n">__package__</span>
+
+    <span class="kn">import</span> <span class="nn">sys</span>
+    <span class="kn">from</span> <span class="nn">os</span> <span class="kn">import</span> <span class="n">path</span>
+    <span class="kn">import</span> <span class="nn">importlib</span>
+
+    <span class="c1"># pathlib does all this a lot nicer, but don&#39;t think it&#39;s in python2.7</span>
+    <span class="n">top</span> <span class="o">=</span> <span class="n">parent</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="vm">__file__</span><span class="p">))</span>
+    <span class="n">package</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">level</span><span class="p">):</span>
+        <span class="n">package</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">top</span><span class="p">))</span>
+        <span class="n">top</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">top</span><span class="p">)</span>
+
+    <span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">top</span><span class="p">))</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">parent</span><span class="p">))</span>
+    <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>  <span class="c1"># already removed</span>
+        <span class="k">pass</span>
+
+    <span class="n">__package__</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">package</span><span class="p">))</span>
+    <span class="n">importlib</span><span class="o">.</span><span class="n">import_module</span><span class="p">(</span><span class="n">__package__</span><span class="p">)</span></div>
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span> <span class="ow">and</span> <span class="n">__package__</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="n">import_parents</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="c1">#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~</span>
+
+<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">GenericStarParser</span><span class="p">,</span> <span class="n">StarIo</span>
+<span class="kn">from</span> <span class="nn">.SafeOpen</span> <span class="kn">import</span> <span class="n">safeOpen</span>
 <span class="kn">import</span> <span class="nn">unittest</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Optional</span>
-<span class="c1"># import json</span>
-<span class="c1"># from collections import OrderedDict</span>
-<span class="c1"># import contextlib</span>
-<span class="c1"># import difflib</span>
 <span class="kn">from</span> <span class="nn">ast</span> <span class="kn">import</span> <span class="n">literal_eval</span>
 <span class="kn">from</span> <span class="nn">os</span> <span class="kn">import</span> <span class="n">listdir</span>
 <span class="kn">from</span> <span class="nn">os.path</span> <span class="kn">import</span> <span class="n">isfile</span><span class="p">,</span> <span class="n">join</span>
-<span class="kn">import</span> <span class="nn">textwrap</span>
 <span class="kn">import</span> <span class="nn">re</span>
 
 
-<span class="n">TEST_FILE_PATH</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">Path</span><span class="o">.</span><span class="n">getTopDirectory</span><span class="p">(),</span> <span class="s1">&#39;internal&#39;</span><span class="p">,</span> <span class="s1">&#39;data&#39;</span><span class="p">,</span> <span class="s1">&#39;starExamples&#39;</span><span class="p">)</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="c1"># Python 3</span>
+    <span class="kn">from</span> <span class="nn">itertools</span> <span class="kn">import</span> <span class="n">zip_longest</span>
+<span class="k">except</span><span class="p">:</span>
+    <span class="c1"># python 2.7</span>
+    <span class="kn">from</span> <span class="nn">itertools</span> <span class="kn">import</span> <span class="n">izip_longest</span> <span class="k">as</span> <span class="n">zip_longest</span>
 
 <span class="n">DATAEXTENT</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
 <span class="n">DATABLOCK</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
@@ -211,57 +242,29 @@
 <span class="n">COLUMN</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
 
 
-<span class="c1"># could add some command-line switches to control the options</span>
-<span class="c1"># would need to add a command-line parser</span>
-
-<span class="c1"># DATAEXTENT = &#39;dataExtent:&#39;</span>
-<span class="c1"># DATABLOCK = &#39;dataBlock:&#39;</span>
-<span class="c1"># SAVEFRAME = &#39;saveFrame:&#39;</span>
-<span class="c1"># LOOP = &#39;Loop:&#39;</span>
-<span class="c1"># COLUMN = &#39;Column&#39;</span>
-
 <div class="viewcode-block" id="defineArguments"><a class="viewcode-back" href="../../../../ccpn/ccpn.util.nef.html#ccpn.util.nef.CompareNef.defineArguments">[docs]</a><span class="k">def</span> <span class="nf">defineArguments</span><span class="p">():</span>
     <span class="sd">&quot;&quot;&quot;Define the arguments of the program</span>
+
 <span class="sd">    :return argparse instance</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="kn">import</span> <span class="nn">argparse</span>
 
-    <span class="c1"># parser = argparse.ArgumentParser(formatter_class=argparse.RawDescriptionHelpFormatter,</span>
-    <span class="c1">#   description=textwrap.dedent(&quot;&quot;&quot;</span>
-    <span class="c1"># Command Line Usage:</span>
-    <span class="c1">#   compareNef for execution from the command line with a suitable script</span>
-    <span class="c1">#   An example can be found in AnalysisV3/bin/compareNef:</span>
-    <span class="c1">#</span>
-    <span class="c1">#     #!/usr/bin/env sh</span>
-    <span class="c1">#     export CCPNMR_TOP_DIR=&quot;$(dirname $(cd $(dirname &quot;$0&quot;); pwd))&quot;</span>
-    <span class="c1">#     export ANACONDA3=${CCPNMR_TOP_DIR}/miniconda</span>
-    <span class="c1">#     export PYTHONPATH=${CCPNMR_TOP_DIR}/src/python:${CCPNMR_TOP_DIR}/src/c</span>
-    <span class="c1">#     ${ANACONDA3}/bin/python ${CCPNMR_TOP_DIR}/src/python/ccpn/util/nef/compareNef.py $*&quot;&quot;&quot;),</span>
-    <span class="c1">#</span>
-    <span class="c1">#   epilog=&quot;&quot;&quot;</span>
-    <span class="c1"># Searches through all objects: dataExtents, dataBlocks, saveFrames and Loops within the files.</span>
-    <span class="c1"># Comparisons are made for all data structures that have the same name.</span>
-    <span class="c1"># Differences for items within a column are listed in the form:</span>
-    <span class="c1">#   dataExtent:dataBlock:saveFrame:Loop:  &lt;Column&gt;: columnName  &lt;rowIndex&gt;: row  --&gt;  value1 != value2</span>
-    <span class="c1">#</span>
-    <span class="c1"># dataExtents, dataBlocks, saveFrames, Loops, columns present only in one file are listed.</span>
-    <span class="c1">#   dataExtent:dataBlock:saveFrame:Loop: contains --&gt; parameter1</span>
-    <span class="c1">#                                                     parameter2</span>
-    <span class="c1">#                                                     ...</span>
-    <span class="c1">#                                                     parameterN&quot;&quot;&quot;)</span>
-
     <span class="n">parser</span> <span class="o">=</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">(</span><span class="n">description</span><span class="o">=</span><span class="s1">&#39;Compare the contents of Nef files&#39;</span><span class="p">,</span> <span class="n">prog</span><span class="o">=</span><span class="s1">&#39;compareNef&#39;</span><span class="p">,</span> <span class="n">usage</span><span class="o">=</span><span class="s1">&#39;</span><span class="si">%(prog)s</span><span class="s1"> [options]&#39;</span><span class="p">,</span>
                                      <span class="n">formatter_class</span><span class="o">=</span><span class="n">argparse</span><span class="o">.</span><span class="n">RawDescriptionHelpFormatter</span><span class="p">)</span>
-    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;-H&#39;</span><span class="p">,</span> <span class="s1">&#39;--Help&#39;</span><span class="p">,</span> <span class="n">dest</span><span class="o">=</span><span class="s1">&#39;Help&#39;</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s1">&#39;store_true&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Show detailed help&#39;</span><span class="p">)</span>
-    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;-i&#39;</span><span class="p">,</span> <span class="s1">&#39;--ignoreblockname&#39;</span><span class="p">,</span> <span class="n">dest</span><span class="o">=</span><span class="s1">&#39;ignoreBlockName&#39;</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s1">&#39;store_true&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;-H&#39;</span><span class="p">,</span> <span class="s1">&#39;--Help&#39;</span><span class="p">,</span> <span class="n">dest</span><span class="o">=</span><span class="s1">&#39;help&#39;</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s1">&#39;store_true&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Show detailed help&#39;</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;-i&#39;</span><span class="p">,</span> <span class="s1">&#39;--ignoreblockname&#39;</span><span class="p">,</span> <span class="n">dest</span><span class="o">=</span><span class="s1">&#39;ignoreBlockName&#39;</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s1">&#39;store_true&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
                         <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Ignore the blockname when comparing two Nef files&#39;</span><span class="p">)</span>
-    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;-f&#39;</span><span class="p">,</span> <span class="s1">&#39;--file&#39;</span><span class="p">,</span> <span class="n">dest</span><span class="o">=</span><span class="s1">&#39;inFiles&#39;</span><span class="p">,</span> <span class="n">nargs</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">metavar</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;inFile1&#39;</span><span class="p">,</span> <span class="s1">&#39;inFile2&#39;</span><span class="p">),</span> <span class="n">default</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;-f&#39;</span><span class="p">,</span> <span class="s1">&#39;--file&#39;</span><span class="p">,</span> <span class="n">dest</span><span class="o">=</span><span class="s1">&#39;inFiles&#39;</span><span class="p">,</span> <span class="n">nargs</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">metavar</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;inFile1&#39;</span><span class="p">,</span> <span class="s1">&#39;inFile2&#39;</span><span class="p">),</span> <span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                         <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Compare two Nef files and print the results to the screen&#39;</span><span class="p">)</span>
-    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;-b&#39;</span><span class="p">,</span> <span class="s1">&#39;--block&#39;</span><span class="p">,</span> <span class="n">dest</span><span class="o">=</span><span class="s1">&#39;blockDirs&#39;</span><span class="p">,</span> <span class="n">nargs</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">metavar</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;inDir1&#39;</span><span class="p">,</span> <span class="s1">&#39;inDir2&#39;</span><span class="p">,</span> <span class="s1">&#39;outDir&#39;</span><span class="p">),</span> <span class="n">default</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;-b&#39;</span><span class="p">,</span> <span class="s1">&#39;--block&#39;</span><span class="p">,</span> <span class="n">dest</span><span class="o">=</span><span class="s1">&#39;blockDirs&#39;</span><span class="p">,</span> <span class="n">nargs</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">metavar</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;inDir1&#39;</span><span class="p">,</span> <span class="s1">&#39;inDir2&#39;</span><span class="p">,</span> <span class="s1">&#39;outDir&#39;</span><span class="p">),</span> <span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                         <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Batch mode: compare the contents of two directories&#39;</span><span class="p">)</span>
-    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;-s&#39;</span><span class="p">,</span> <span class="s1">&#39;--screen&#39;</span><span class="p">,</span> <span class="n">dest</span><span class="o">=</span><span class="s1">&#39;Screen&#39;</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s1">&#39;store_true&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Output batch processing to screen&#39;</span><span class="p">)</span>
-    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;-k&#39;</span><span class="p">,</span> <span class="s1">&#39;--keep&#39;</span><span class="p">,</span> <span class="n">dest</span><span class="o">=</span><span class="s1">&#39;keepExisting&#39;</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s1">&#39;store_true&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
-                        <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Keep existing .txt files. New files are appended with &quot;(n)&quot;&#39;</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;-s&#39;</span><span class="p">,</span> <span class="s1">&#39;--screen&#39;</span><span class="p">,</span> <span class="n">dest</span><span class="o">=</span><span class="s1">&#39;screen&#39;</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s1">&#39;store_true&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Output batch processing to screen&#39;</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;-o&#39;</span><span class="p">,</span> <span class="s1">&#39;--overwrite&#39;</span><span class="p">,</span> <span class="n">dest</span><span class="o">=</span><span class="s1">&#39;overwriteExisting&#39;</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s1">&#39;store_true&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                        <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Overwrite existing .txt files. If false, new files are appended with &quot;(n)&quot;&#39;</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;-c&#39;</span><span class="p">,</span> <span class="s1">&#39;--create&#39;</span><span class="p">,</span> <span class="n">dest</span><span class="o">=</span><span class="s1">&#39;createDirs&#39;</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s1">&#39;store_true&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                        <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Create directories as required&#39;</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;-I&#39;</span><span class="p">,</span> <span class="s1">&#39;--ignorecase&#39;</span><span class="p">,</span> <span class="n">dest</span><span class="o">=</span><span class="s1">&#39;ignoreCase&#39;</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s1">&#39;store_true&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                        <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Ignore case when comparing items.&#39;</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">parser</span></div>
 
@@ -270,19 +273,18 @@
 <span class="c1"># nefItem</span>
 <span class="c1">#=========================================================================================</span>
 
-<div class="viewcode-block" id="nefItem"><a class="viewcode-back" href="../../../../ccpn/ccpn.util.nef.html#ccpn.util.nef.CompareNef.nefItem">[docs]</a><span class="k">class</span> <span class="nc">nefItem</span><span class="p">():</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Holds the contents of a single Nef comparison</span>
+<div class="viewcode-block" id="nefItem"><a class="viewcode-back" href="../../../../ccpn/ccpn.util.nef.html#ccpn.util.nef.CompareNef.nefItem">[docs]</a><span class="k">class</span> <span class="nc">nefItem</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Holds the contents of a single Nef comparison</span>
 <span class="sd">    inWhich   a flag labelling which file the item was found in</span>
 <span class="sd">              1 = found in the first file, 2 = found on the second file, 3 = common to both</span>
 <span class="sd">    list      a list of strings containing the comparison information</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cItem</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">inWhich</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cItem</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">inWhich</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">list</span> <span class="o">=</span> <span class="p">[]</span>
 
-        <span class="k">if</span> <span class="n">cItem</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">cItem</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">list</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">cItem</span><span class="o">.</span><span class="n">list</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">inWhich</span> <span class="o">=</span> <span class="n">cItem</span><span class="o">.</span><span class="n">inWhich</span></div>
 
@@ -291,16 +293,14 @@
 <span class="c1"># _loadGeneralFile</span>
 <span class="c1">#=========================================================================================</span>
 
-<span class="k">def</span> <span class="nf">_loadGeneralFile</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Load a file with the given pathname and return a dict of the contents</span>
+<span class="k">def</span> <span class="nf">_loadGeneralFile</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Load a file with the given pathname and return a dict of the contents</span>
+
 <span class="sd">    :return entry:dict</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">usePath</span> <span class="o">=</span> <span class="n">path</span> <span class="k">if</span> <span class="n">path</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">)</span> <span class="k">else</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">TEST_FILE_PATH</span><span class="p">,</span> <span class="n">path</span><span class="p">)</span>
-    <span class="c1"># t0 = time.time()</span>
+    <span class="n">usePath</span> <span class="o">=</span> <span class="n">path</span> <span class="k">if</span> <span class="n">path</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">)</span> <span class="k">else</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">(),</span> <span class="n">path</span><span class="p">)</span>
     <span class="n">entry</span> <span class="o">=</span> <span class="n">StarIo</span><span class="o">.</span><span class="n">parseNefFile</span><span class="p">(</span><span class="n">usePath</span><span class="p">)</span>  <span class="c1"># &#39;lenient&#39;)</span>
-    <span class="c1"># print(&quot;Parsing time %s for %s&quot; % (time.time() - t0, path))</span>
-    <span class="k">print</span><span class="p">(</span><span class="s1">&#39; </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">path</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39; </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">path</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">entry</span>
 
 
@@ -309,16 +309,15 @@
 <span class="c1">#=========================================================================================</span>
 
 <div class="viewcode-block" id="printFile"><a class="viewcode-back" href="../../../../ccpn/ccpn.util.nef.html#ccpn.util.nef.CompareNef.printFile">[docs]</a><span class="k">def</span> <span class="nf">printFile</span><span class="p">(</span><span class="n">thisFile</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Print a file to the screen</span>
+    <span class="sd">&quot;&quot;&quot;Print a file to the screen</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">print</span><span class="p">(</span><span class="s1">&#39;~&#39;</span> <span class="o">*</span> <span class="mi">80</span><span class="p">)</span>
-    <span class="k">print</span><span class="p">(</span><span class="n">thisFile</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;~&#39;</span> <span class="o">*</span> <span class="mi">80</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">thisFile</span><span class="p">)</span>
     <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">thisFile</span><span class="p">):</span>
-        <span class="k">print</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">thisFile</span><span class="p">[</span><span class="n">val</span><span class="p">])</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">thisFile</span><span class="p">[</span><span class="n">val</span><span class="p">])</span>
         <span class="n">sub</span> <span class="o">=</span> <span class="n">thisFile</span><span class="p">[</span><span class="n">val</span><span class="p">]</span>
         <span class="k">for</span> <span class="n">j</span><span class="p">,</span> <span class="n">valj</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">sub</span><span class="p">):</span>
-            <span class="k">print</span><span class="p">(</span><span class="s1">&#39;  &#39;</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">sub</span><span class="p">[</span><span class="n">valj</span><span class="p">])</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;  &#39;</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">sub</span><span class="p">[</span><span class="n">valj</span><span class="p">])</span>
             <span class="k">if</span> <span class="n">j</span> <span class="o">&gt;</span> <span class="mi">3</span><span class="p">:</span>
                 <span class="k">break</span>
 
@@ -326,9 +325,9 @@
             <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">valk</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">sub2</span><span class="p">):</span>
                 <span class="n">loopType</span> <span class="o">=</span> <span class="n">sub2</span><span class="p">[</span><span class="n">valk</span><span class="p">]</span>
                 <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">loopType</span><span class="p">,</span> <span class="n">GenericStarParser</span><span class="o">.</span><span class="n">Loop</span><span class="p">):</span>
-                    <span class="k">print</span><span class="p">(</span><span class="s1">&#39;    &#39;</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="s1">&#39;LOOP&#39;</span><span class="p">,</span> <span class="n">loopType</span><span class="p">)</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;    &#39;</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="s1">&#39;LOOP&#39;</span><span class="p">,</span> <span class="n">loopType</span><span class="p">)</span>
                 <span class="k">else</span><span class="p">:</span>
-                    <span class="k">print</span><span class="p">(</span><span class="s1">&#39;    &#39;</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">loopType</span><span class="p">)</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;    &#39;</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">loopType</span><span class="p">)</span>
 
                 <span class="k">if</span> <span class="n">k</span> <span class="o">&gt;</span> <span class="mi">3</span><span class="p">:</span>
                     <span class="k">break</span></div>
@@ -338,14 +337,14 @@
 <span class="c1"># sizeNefList</span>
 <span class="c1">#=========================================================================================</span>
 
-<div class="viewcode-block" id="sizeNefList"><a class="viewcode-back" href="../../../../ccpn/ccpn.util.nef.html#ccpn.util.nef.CompareNef.sizeNefList">[docs]</a><span class="k">def</span> <span class="nf">sizeNefList</span><span class="p">(</span><span class="n">nefList</span><span class="p">,</span> <span class="n">whichType</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    List only those items that are of type whichType</span>
+<div class="viewcode-block" id="sizeNefList"><a class="viewcode-back" href="../../../../ccpn/ccpn.util.nef.html#ccpn.util.nef.CompareNef.sizeNefList">[docs]</a><span class="k">def</span> <span class="nf">sizeNefList</span><span class="p">(</span><span class="n">nefList</span><span class="p">,</span> <span class="n">whichType</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;List only those items that are of type whichType</span>
+
 <span class="sd">    :param nefList: list to print</span>
 <span class="sd">    :param whichType: type to print</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">count</span> <span class="o">=</span> <span class="mi">0</span>
-    <span class="k">if</span> <span class="n">nefList</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">nefList</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">for</span> <span class="n">cCount</span><span class="p">,</span> <span class="n">cc</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">nefList</span><span class="p">):</span>
             <span class="k">if</span> <span class="n">cc</span><span class="o">.</span><span class="n">inWhich</span> <span class="o">==</span> <span class="n">whichType</span><span class="p">:</span>
                 <span class="n">count</span> <span class="o">+=</span> <span class="mi">1</span>
@@ -357,8 +356,8 @@
 <span class="c1">#=========================================================================================</span>
 
 <div class="viewcode-block" id="printWhichList"><a class="viewcode-back" href="../../../../ccpn/ccpn.util.nef.html#ccpn.util.nef.CompareNef.printWhichList">[docs]</a><span class="k">def</span> <span class="nf">printWhichList</span><span class="p">(</span><span class="n">nefList</span><span class="p">,</span> <span class="n">whichType</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    List only those items that are of type whichType</span>
+    <span class="sd">&quot;&quot;&quot;List only those items that are of type whichType</span>
+
 <span class="sd">    :param nefList: list to print</span>
 <span class="sd">    :param whichType: type to print</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -366,11 +365,11 @@
         <span class="k">if</span> <span class="n">cc</span><span class="o">.</span><span class="n">inWhich</span> <span class="o">==</span> <span class="n">whichType</span><span class="p">:</span>
 
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">cc</span><span class="o">.</span><span class="n">list</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="nb">str</span><span class="p">):</span>
-                <span class="k">print</span><span class="p">(</span><span class="s1">&#39;  &#39;</span> <span class="o">+</span> <span class="s1">&#39;:&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">cc</span><span class="o">.</span><span class="n">list</span><span class="p">[:]))</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;  &#39;</span> <span class="o">+</span> <span class="s1">&#39;:&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">cc</span><span class="o">.</span><span class="n">list</span><span class="p">[:]))</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">outStr</span> <span class="o">=</span> <span class="s1">&#39;  &#39;</span> <span class="o">+</span> <span class="s1">&#39;:&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">cc</span><span class="o">.</span><span class="n">list</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span> <span class="o">+</span> <span class="s1">&#39;: contains --&gt; &#39;</span>
                 <span class="n">lineTab</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">+</span> <span class="s1">&#39; &#39;</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">outStr</span><span class="p">)</span>
-                <span class="k">print</span><span class="p">(</span><span class="n">outStr</span> <span class="o">+</span> <span class="n">lineTab</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">cc</span><span class="o">.</span><span class="n">list</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]))</span></div>
+                <span class="nb">print</span><span class="p">(</span><span class="n">outStr</span> <span class="o">+</span> <span class="n">lineTab</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">cc</span><span class="o">.</span><span class="n">list</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]))</span></div>
 
 
 <span class="c1">#=========================================================================================</span>
@@ -378,8 +377,7 @@
 <span class="c1">#=========================================================================================</span>
 
 <div class="viewcode-block" id="printCompareList"><a class="viewcode-back" href="../../../../ccpn/ccpn.util.nef.html#ccpn.util.nef.CompareNef.printCompareList">[docs]</a><span class="k">def</span> <span class="nf">printCompareList</span><span class="p">(</span><span class="n">nefList</span><span class="p">,</span> <span class="n">inFile1</span><span class="p">,</span> <span class="n">inFile2</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Print the contents of the nef compare list to the screen</span>
+    <span class="sd">&quot;&quot;&quot;Print the contents of the nef compare list to the screen</span>
 
 <span class="sd">    Output is in three parts:</span>
 <span class="sd">      - items that are present only in the first file</span>
@@ -392,22 +390,25 @@
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">inFile1</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-        <span class="k">print</span><span class="p">(</span><span class="s1">&#39;TypeError: inFile1 must be a string.&#39;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;TypeError: inFile1 must be a string.&#39;</span><span class="p">)</span>
         <span class="k">return</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">inFile2</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-        <span class="k">print</span><span class="p">(</span><span class="s1">&#39;TypeError: inFile2 must be a string.&#39;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;TypeError: inFile2 must be a string.&#39;</span><span class="p">)</span>
         <span class="k">return</span>
 
+    <span class="c1"># print the items that are only present in the first nefFile</span>
     <span class="k">if</span> <span class="n">sizeNefList</span><span class="p">(</span><span class="n">nefList</span><span class="p">,</span> <span class="n">whichType</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-        <span class="k">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">Items that are only present in &#39;</span> <span class="o">+</span> <span class="n">inFile1</span> <span class="o">+</span> <span class="s1">&#39;:&#39;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">Items that are only present in &#39;</span> <span class="o">+</span> <span class="n">inFile1</span> <span class="o">+</span> <span class="s1">&#39;:&#39;</span><span class="p">)</span>
         <span class="n">printWhichList</span><span class="p">(</span><span class="n">nefList</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
 
+    <span class="c1"># print the items that are only present in the second nefFile</span>
     <span class="k">if</span> <span class="n">sizeNefList</span><span class="p">(</span><span class="n">nefList</span><span class="p">,</span> <span class="n">whichType</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-        <span class="k">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">Items that are only present in &#39;</span> <span class="o">+</span> <span class="n">inFile2</span> <span class="o">+</span> <span class="s1">&#39;:&#39;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">Items that are only present in &#39;</span> <span class="o">+</span> <span class="n">inFile2</span> <span class="o">+</span> <span class="s1">&#39;:&#39;</span><span class="p">)</span>
         <span class="n">printWhichList</span><span class="p">(</span><span class="n">nefList</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
 
+    <span class="c1"># print the common items</span>
     <span class="k">if</span> <span class="n">sizeNefList</span><span class="p">(</span><span class="n">nefList</span><span class="p">,</span> <span class="n">whichType</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-        <span class="k">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">Items that are present in both files:&#39;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">Items that are present in both files:&#39;</span><span class="p">)</span>
         <span class="n">printWhichList</span><span class="p">(</span><span class="n">nefList</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span></div>
 
 
@@ -415,17 +416,17 @@
 <span class="c1"># _filterName</span>
 <span class="c1">#=========================================================================================</span>
 
-<span class="k">def</span> <span class="nf">_filterName</span><span class="p">(</span><span class="n">inName</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Remove rogue `n` quotes from the names.</span>
-<span class="sd">    This is currently only a test</span>
+<span class="k">def</span> <span class="nf">_filterName</span><span class="p">(</span><span class="n">inName</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Remove rogue `n` quotes from the names.</span>
+<span class="sd">    (This is currently only a test)</span>
+
 <span class="sd">    :param inName:</span>
 <span class="sd">    :return:</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># ejb - need to remove the rogue `n` at the beginning of the name if it exists</span>
     <span class="c1">#       as it is passed into the namespace and gets added iteratively every save</span>
     <span class="c1">#       next three lines remove all occurrences of `n` from name</span>
-    <span class="n">regex</span> <span class="o">=</span> <span class="s1">u&#39;\`\d*`+?&#39;</span>
+    <span class="n">regex</span> <span class="o">=</span> <span class="sa">u</span><span class="s1">&#39;\`\d*`+?&#39;</span>
     <span class="k">return</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="n">regex</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">inName</span><span class="p">)</span>  <span class="c1"># substitute with &#39;&#39;</span>
 
 
@@ -433,9 +434,8 @@
 <span class="c1"># addToList</span>
 <span class="c1">#=========================================================================================</span>
 
-<div class="viewcode-block" id="addToList"><a class="viewcode-back" href="../../../../ccpn/ccpn.util.nef.html#ccpn.util.nef.CompareNef.addToList">[docs]</a><span class="k">def</span> <span class="nf">addToList</span><span class="p">(</span><span class="n">inList</span><span class="p">,</span> <span class="n">cItem</span><span class="p">,</span> <span class="n">nefList</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Append cItem to the compare list</span>
+<div class="viewcode-block" id="addToList"><a class="viewcode-back" href="../../../../ccpn/ccpn.util.nef.html#ccpn.util.nef.CompareNef.addToList">[docs]</a><span class="k">def</span> <span class="nf">addToList</span><span class="p">(</span><span class="n">inList</span><span class="p">,</span> <span class="n">cItem</span><span class="p">,</span> <span class="n">nefList</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Append cItem to the compare list</span>
 <span class="sd">    Currently adds one cItem with a list as the last element</span>
 
 <span class="sd">    :param inList: a list of items to add to the end of cItem</span>
@@ -448,40 +448,63 @@
         <span class="n">cItem3</span><span class="o">.</span><span class="n">list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">inList</span><span class="p">))</span>  <span class="c1"># nest the list within the cItem</span>
         <span class="n">nefList</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">nefItem</span><span class="p">(</span><span class="n">cItem</span><span class="o">=</span><span class="n">cItem3</span><span class="p">))</span>
 
-    <span class="c1"># if len(inList) &gt; 0:</span>
-    <span class="c1">#   cItem3 = copy.deepcopy(cItem)</span>
-    <span class="c1">#   lineTab = len(&#39;contains --&gt; &#39;)+len(cItem.list)+1</span>
-    <span class="c1">#   for cc in cItem.list:</span>
-    <span class="c1">#     lineTab += len(cc)</span>
-    <span class="c1">#   preStr = &#39;\n&#39;+&#39; &#39;*lineTab</span>
-    <span class="c1">#   cItem3.list.append(&#39;contains --&gt; &#39;+preStr.join(inList))</span>
-    <span class="c1">#   nefList.append(nefItem(cItem=cItem3))</span>
-
-    <span class="c1"># for eachItem in inList:</span>
-    <span class="c1">#   cItem3 = copy.deepcopy(cItem)</span>
-    <span class="c1">#   cItem3.list.append(&#39;contains --&gt; &#39;+eachItem)</span>
-    <span class="c1">#   nefList.append(nefItem(cItem=cItem3))</span>
-
     <span class="k">return</span> <span class="n">nefList</span></div>
+
+
+<span class="c1">#=========================================================================================</span>
+<span class="c1"># _compareDicts</span>
+<span class="c1">#=========================================================================================</span>
+
+<span class="k">def</span> <span class="nf">_compareDicts</span><span class="p">(</span><span class="n">dd1</span><span class="p">,</span> <span class="n">dd2</span><span class="p">,</span> <span class="n">options</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Compare the contents of two dictionaries</span>
+
+<span class="sd">    :param dd1: dict containing keys from first nef file</span>
+<span class="sd">    :param dd2:  dict containing keys from second nef file</span>
+<span class="sd">    :param options: nameSpace holding the commandLineArguments</span>
+<span class="sd">    :return:</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">dd1</span> <span class="o">==</span> <span class="n">dd2</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">True</span>
+
+    <span class="k">if</span> <span class="n">options</span><span class="o">.</span><span class="n">ignoreCase</span><span class="p">:</span>
+        <span class="c1"># simple compare - make lowercase dictionaries and check equivalent</span>
+        <span class="c1"># not perfect as may have mix of upper/lowercase keys that are the same</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">lowerDd1</span> <span class="o">=</span> <span class="n">literal_eval</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">dd1</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">())</span>
+            <span class="n">lowerDd2</span> <span class="o">=</span> <span class="n">literal_eval</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">dd2</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">())</span>
+
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">dd1</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">lowerDd1</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
+                <span class="k">return</span> <span class="kc">False</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">dd2</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">lowerDd2</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
+                <span class="k">return</span> <span class="kc">False</span>
+
+            <span class="k">if</span> <span class="n">lowerDd1</span> <span class="o">==</span> <span class="n">lowerDd2</span><span class="p">:</span>
+                <span class="k">return</span> <span class="kc">True</span>
+
+        <span class="k">except</span> <span class="p">(</span><span class="ne">SyntaxError</span><span class="p">,</span> <span class="ne">ValueError</span><span class="p">,</span> <span class="ne">AssertionError</span><span class="p">):</span>
+            <span class="c1"># trap errors generated from a bad literal_eval</span>
+            <span class="k">return</span> <span class="kc">False</span>
+
+    <span class="k">return</span> <span class="kc">False</span>
 
 
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># compareLoops</span>
 <span class="c1">#=========================================================================================</span>
 
-<div class="viewcode-block" id="compareLoops"><a class="viewcode-back" href="../../../../ccpn/ccpn.util.nef.html#ccpn.util.nef.CompareNef.compareLoops">[docs]</a><span class="k">def</span> <span class="nf">compareLoops</span><span class="p">(</span><span class="n">loop1</span><span class="p">:</span> <span class="n">GenericStarParser</span><span class="o">.</span><span class="n">Loop</span><span class="p">,</span>
-                 <span class="n">loop2</span><span class="p">:</span> <span class="n">GenericStarParser</span><span class="o">.</span><span class="n">Loop</span><span class="p">,</span>
-                 <span class="n">cItem</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
-                 <span class="n">nefList</span><span class="o">=</span><span class="bp">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Compare two Loops</span>
-<span class="sd">    :param loop1: name of the first Loop object</span>
-<span class="sd">    :param loop2: name of the second Loop object</span>
+<div class="viewcode-block" id="compareLoops"><a class="viewcode-back" href="../../../../ccpn/ccpn.util.nef.html#ccpn.util.nef.CompareNef.compareLoops">[docs]</a><span class="k">def</span> <span class="nf">compareLoops</span><span class="p">(</span><span class="n">loop1</span><span class="p">,</span> <span class="n">loop2</span><span class="p">,</span> <span class="n">options</span><span class="p">,</span> <span class="n">cItem</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">nefList</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Compare two Loops</span>
+
+<span class="sd">    :param loop1: first Loop object, of type GenericStarParser.Loop</span>
+<span class="sd">    :param loop2: second Loop object, of type GenericStarParser.Loop</span>
+<span class="sd">    :param options: nameSpace holding the commandLineArguments</span>
+<span class="sd">    :param cItem: list of str describing differences between nefItems</span>
+<span class="sd">    :param nefList: input of nefItems</span>
 <span class="sd">    :return: list of type nefItem</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="n">cItem</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">cItem</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">cItem</span> <span class="o">=</span> <span class="n">nefItem</span><span class="p">()</span>
-    <span class="k">if</span> <span class="n">nefList</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">nefList</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">nefList</span> <span class="o">=</span> <span class="p">[]</span>
 
     <span class="n">lSet</span> <span class="o">=</span> <span class="p">[</span><span class="n">bl</span> <span class="k">for</span> <span class="n">bl</span> <span class="ow">in</span> <span class="n">loop1</span><span class="o">.</span><span class="n">columns</span><span class="p">]</span>
@@ -506,7 +529,7 @@
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">loop1</span><span class="o">.</span><span class="n">data</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">loop2</span><span class="o">.</span><span class="n">data</span><span class="p">):</span>  <span class="c1"># simple compare, same length tables</span>
             <span class="n">cItem3</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">cItem</span><span class="p">)</span>
             <span class="n">cItem3</span><span class="o">.</span><span class="n">list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">LOOP</span> <span class="o">+</span> <span class="n">loop1</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
-            <span class="n">cItem3</span><span class="o">.</span><span class="n">list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39; &lt;rowLength&gt;:  &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">loop1</span><span class="o">.</span><span class="n">data</span><span class="p">))</span> <span class="o">+</span> <span class="s1">&#39; != &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">loop2</span><span class="o">.</span><span class="n">data</span><span class="p">)))</span>
+            <span class="n">cItem3</span><span class="o">.</span><span class="n">list</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="s1">&#39; &lt;rowLength&gt;:  &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">loop1</span><span class="o">.</span><span class="n">data</span><span class="p">))</span> <span class="o">+</span> <span class="s1">&#39; != &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">loop2</span><span class="o">.</span><span class="n">data</span><span class="p">))])</span>
             <span class="n">cItem3</span><span class="o">.</span><span class="n">inWhich</span> <span class="o">=</span> <span class="mi">3</span>
             <span class="n">nefList</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">nefItem</span><span class="p">(</span><span class="n">cItem</span><span class="o">=</span><span class="n">cItem3</span><span class="p">))</span>
 
@@ -518,7 +541,8 @@
                 <span class="n">loopValue1</span> <span class="o">=</span> <span class="n">loop1</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">rowIndex</span><span class="p">][</span><span class="n">compName</span><span class="p">]</span>
                 <span class="n">loopValue2</span> <span class="o">=</span> <span class="n">loop2</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">rowIndex</span><span class="p">][</span><span class="n">compName</span><span class="p">]</span>
 
-                <span class="k">if</span> <span class="n">loopValue1</span> <span class="o">!=</span> <span class="n">loopValue2</span><span class="p">:</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="p">((</span><span class="n">loopValue1</span> <span class="o">==</span> <span class="n">loopValue2</span><span class="p">)</span> <span class="ow">or</span>
+                        <span class="p">((</span><span class="nb">str</span><span class="p">(</span><span class="n">loopValue1</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="nb">str</span><span class="p">(</span><span class="n">loopValue2</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">())</span> <span class="ow">and</span> <span class="n">options</span><span class="o">.</span><span class="n">ignoreCase</span><span class="p">)):</span>
 
                     <span class="c1"># The value_strings are different</span>
                     <span class="c1"># Check to see if they are dictionaries</span>
@@ -531,75 +555,44 @@
 
                         <span class="n">loopValue1</span> <span class="o">=</span> <span class="n">literal_eval</span><span class="p">(</span><span class="n">loopValue1</span><span class="p">)</span>
                         <span class="n">loopValue2</span> <span class="o">=</span> <span class="n">literal_eval</span><span class="p">(</span><span class="n">loopValue2</span><span class="p">)</span>
-                        <span class="c1"># assert isinstance(loopValue1, dict)</span>
-                        <span class="c1"># assert isinstance(loopValue2, dict)</span>
 
                         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">loopValue1</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">loopValue2</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
-                            <span class="k">if</span> <span class="n">loopValue1</span> <span class="o">!=</span> <span class="n">loopValue2</span><span class="p">:</span>
-                                <span class="c1"># may need a deeper compare of inserted dictionaries in here</span>
-                                <span class="n">cItem3</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">cItem</span><span class="p">)</span>
-                                <span class="n">cItem3</span><span class="o">.</span><span class="n">list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">LOOP</span> <span class="o">+</span> <span class="n">loop1</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
-                                <span class="n">cItem3</span><span class="o">.</span><span class="n">list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39; &lt;Column&gt;: &#39;</span> <span class="o">+</span> <span class="n">compName</span> <span class="o">+</span> <span class="s1">&#39;  &lt;rowIndex&gt;: &#39;</span> \
-                                                   <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">rowIndex</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;  --&gt;  &#39;</span> \
-                                                   <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">loopValue1</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39; != &#39;</span> \
-                                                   <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">loopValue2</span><span class="p">))</span>
-                                <span class="n">cItem3</span><span class="o">.</span><span class="n">inWhich</span> <span class="o">=</span> <span class="mi">3</span>
-                                <span class="n">nefList</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">nefItem</span><span class="p">(</span><span class="n">cItem</span><span class="o">=</span><span class="n">cItem3</span><span class="p">))</span>
-                        <span class="k">else</span><span class="p">:</span>
-                            <span class="c1"># not both dicts so compare as normal strings</span>
+                            <span class="k">if</span> <span class="ow">not</span> <span class="n">_compareDicts</span><span class="p">(</span><span class="n">loopValue1</span><span class="p">,</span> <span class="n">loopValue2</span><span class="p">,</span> <span class="n">options</span><span class="p">):</span>
+                                <span class="n">_addItem</span><span class="p">(</span><span class="n">cItem</span><span class="p">,</span> <span class="n">compName</span><span class="p">,</span> <span class="n">loop1</span><span class="p">,</span> <span class="n">loopValue1</span><span class="p">,</span> <span class="n">loopValue2</span><span class="p">,</span> <span class="n">nefList</span><span class="p">,</span> <span class="n">rowIndex</span><span class="p">,</span> <span class="n">inWhich</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
 
-                            <span class="n">cItem3</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">cItem</span><span class="p">)</span>
-                            <span class="n">cItem3</span><span class="o">.</span><span class="n">list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">LOOP</span> <span class="o">+</span> <span class="n">loop1</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
-                            <span class="n">cItem3</span><span class="o">.</span><span class="n">list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39; &lt;Column&gt;: &#39;</span> <span class="o">+</span> <span class="n">compName</span> <span class="o">+</span> <span class="s1">&#39;  &lt;rowIndex&gt;: &#39;</span> \
-                                               <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">rowIndex</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;  --&gt;  &#39;</span> \
-                                               <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">loopValue1</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39; != &#39;</span> \
-                                               <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">loopValue2</span><span class="p">))</span>
-                            <span class="n">cItem3</span><span class="o">.</span><span class="n">inWhich</span> <span class="o">=</span> <span class="mi">3</span>
-                            <span class="n">nefList</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">nefItem</span><span class="p">(</span><span class="n">cItem</span><span class="o">=</span><span class="n">cItem3</span><span class="p">))</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="c1"># not both dicts so compare is applicable</span>
+                            <span class="n">_addItem</span><span class="p">(</span><span class="n">cItem</span><span class="p">,</span> <span class="n">compName</span><span class="p">,</span> <span class="n">loop1</span><span class="p">,</span> <span class="n">loopValue1</span><span class="p">,</span> <span class="n">loopValue2</span><span class="p">,</span> <span class="n">nefList</span><span class="p">,</span> <span class="n">rowIndex</span><span class="p">,</span> <span class="n">inWhich</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
 
                     <span class="k">except</span> <span class="p">(</span><span class="ne">SyntaxError</span><span class="p">,</span> <span class="ne">ValueError</span><span class="p">,</span> <span class="ne">AssertionError</span><span class="p">):</span>
+
                         <span class="c1"># loopvalues cannot be converted to proper values</span>
                         <span class="c1"># need to check that comments are being loaded correctly</span>
-
-                        <span class="n">cItem3</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">cItem</span><span class="p">)</span>
-                        <span class="n">cItem3</span><span class="o">.</span><span class="n">list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">LOOP</span> <span class="o">+</span> <span class="n">loop1</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
-                        <span class="n">cItem3</span><span class="o">.</span><span class="n">list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39; &lt;Column&gt;: &#39;</span> <span class="o">+</span> <span class="n">compName</span> <span class="o">+</span> <span class="s1">&#39;  &lt;rowIndex&gt;: &#39;</span> \
-                                           <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">rowIndex</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;  --&gt;  &#39;</span> \
-                                           <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">loopValue1</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39; != &#39;</span> \
-                                           <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">loopValue2</span><span class="p">))</span>
-                        <span class="n">cItem3</span><span class="o">.</span><span class="n">inWhich</span> <span class="o">=</span> <span class="mi">3</span>
-                        <span class="n">nefList</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">nefItem</span><span class="p">(</span><span class="n">cItem</span><span class="o">=</span><span class="n">cItem3</span><span class="p">))</span>
+                        <span class="n">_addItem</span><span class="p">(</span><span class="n">cItem</span><span class="p">,</span> <span class="n">compName</span><span class="p">,</span> <span class="n">loop1</span><span class="p">,</span> <span class="n">loopValue1</span><span class="p">,</span> <span class="n">loopValue2</span><span class="p">,</span> <span class="n">nefList</span><span class="p">,</span> <span class="n">rowIndex</span><span class="p">,</span> <span class="n">inWhich</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
 
                 <span class="k">else</span><span class="p">:</span>
 
                     <span class="c1"># nothing for the minute as identical already but may want to keep a log</span>
                     <span class="k">pass</span>
 
-        <span class="c1"># else:</span>
-        <span class="c1">#   cItem3 = copy.deepcopy(cItem)</span>
-        <span class="c1">#   cItem3.list.append(LOOP+loop1.name)</span>
-        <span class="c1">#   cItem3.list.append(&#39; &lt;rowLength&gt;:  &#39;+str(len(loop1.data))+&#39; != &#39;+str(len(loop2.data)))</span>
-        <span class="c1">#   cItem3.inWhich = 3</span>
-        <span class="c1">#   nefList.append(nefItem(cItem=cItem3))</span>
-
         <span class="c1">#TODO</span>
         <span class="c1"># need to add a further test here, could do a diff on the tables which would pick up</span>
-        <span class="c1"># insertions to the table - this columns would need to be reordered for this to work</span>
+        <span class="c1"># insertions to the table - the columns would need to be reordered for this to work</span>
         <span class="c1"># what if there are a different number of columns?</span>
         <span class="c1"># also check for Mandatory items</span>
 
     <span class="k">else</span><span class="p">:</span>
         <span class="c1"># can&#39;t compare non-existent loopdata</span>
-        <span class="k">if</span> <span class="n">loop1</span><span class="o">.</span><span class="n">data</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">loop1</span><span class="o">.</span><span class="n">data</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">cItem3</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">cItem</span><span class="p">)</span>
             <span class="n">cItem3</span><span class="o">.</span><span class="n">list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">LOOP</span> <span class="o">+</span> <span class="n">loop1</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
-            <span class="n">cItem3</span><span class="o">.</span><span class="n">list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39; &lt;Contains no data&gt;&#39;</span><span class="p">)</span>
+            <span class="n">cItem3</span><span class="o">.</span><span class="n">list</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="s1">&#39; &lt;Contains no data&gt;&#39;</span><span class="p">])</span>
             <span class="n">cItem3</span><span class="o">.</span><span class="n">inWhich</span> <span class="o">=</span> <span class="mi">1</span>
             <span class="n">nefList</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">nefItem</span><span class="p">(</span><span class="n">cItem</span><span class="o">=</span><span class="n">cItem3</span><span class="p">))</span>
-        <span class="k">if</span> <span class="n">loop2</span><span class="o">.</span><span class="n">data</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">loop2</span><span class="o">.</span><span class="n">data</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">cItem3</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">cItem</span><span class="p">)</span>
             <span class="n">cItem3</span><span class="o">.</span><span class="n">list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">LOOP</span> <span class="o">+</span> <span class="n">loop2</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
-            <span class="n">cItem3</span><span class="o">.</span><span class="n">list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39; &lt;Contains no data&gt;&#39;</span><span class="p">)</span>
+            <span class="n">cItem3</span><span class="o">.</span><span class="n">list</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="s1">&#39; &lt;Contains no data&gt;&#39;</span><span class="p">])</span>
             <span class="n">cItem3</span><span class="o">.</span><span class="n">inWhich</span> <span class="o">=</span> <span class="mi">2</span>
             <span class="n">nefList</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">nefItem</span><span class="p">(</span><span class="n">cItem</span><span class="o">=</span><span class="n">cItem3</span><span class="p">))</span>
 
@@ -607,22 +600,59 @@
 
 
 <span class="c1">#=========================================================================================</span>
+<span class="c1"># _addItem to the NefList or append to existing</span>
+<span class="c1">#=========================================================================================</span>
+
+<span class="k">def</span> <span class="nf">_addItem</span><span class="p">(</span><span class="n">cItem</span><span class="p">,</span> <span class="n">compName</span><span class="p">,</span> <span class="n">loop1</span><span class="p">,</span> <span class="n">loopValue1</span><span class="p">,</span> <span class="n">loopValue2</span><span class="p">,</span> <span class="n">nefList</span><span class="p">,</span> <span class="n">rowIndex</span><span class="p">,</span> <span class="n">inWhich</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Check the list of already added items and append to the end OR create a new item</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">cItem3</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">cItem</span><span class="p">)</span>
+
+    <span class="c1"># iterate through existing items</span>
+    <span class="k">for</span> <span class="n">itm</span> <span class="ow">in</span> <span class="n">nefList</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span> <span class="ow">in</span> <span class="n">zip_longest</span><span class="p">(</span><span class="n">cItem3</span><span class="o">.</span><span class="n">list</span><span class="p">[:]</span> <span class="o">+</span> <span class="p">[</span><span class="n">LOOP</span> <span class="o">+</span> <span class="n">loop1</span><span class="o">.</span><span class="n">name</span><span class="p">],</span>
+                                <span class="n">itm</span><span class="o">.</span><span class="n">list</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]):</span>
+
+            <span class="c1"># check that the tree of saveFrame names matches</span>
+            <span class="k">if</span> <span class="n">a</span> <span class="o">!=</span> <span class="n">b</span><span class="p">:</span>
+                <span class="k">break</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># check that it is the correct frame type (1=inleft only, 2=inRight only, 3=inBoth)</span>
+            <span class="k">if</span> <span class="n">itm</span><span class="o">.</span><span class="n">inWhich</span> <span class="o">==</span> <span class="n">inWhich</span><span class="p">:</span>
+                <span class="n">itm</span><span class="o">.</span><span class="n">list</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39; &lt;Column&gt;: &#39;</span> <span class="o">+</span> <span class="n">compName</span> <span class="o">+</span> <span class="s1">&#39;  &lt;rowIndex&gt;: &#39;</span> \
+                                    <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">rowIndex</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;  --&gt;  &#39;</span> \
+                                    <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">loopValue1</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39; != &#39;</span> \
+                                    <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">loopValue2</span><span class="p">))</span>
+                <span class="k">break</span>
+
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># create a new item</span>
+        <span class="n">cItem3</span><span class="o">.</span><span class="n">list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">LOOP</span> <span class="o">+</span> <span class="n">loop1</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+        <span class="n">cItem3</span><span class="o">.</span><span class="n">list</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="s1">&#39; &lt;Column&gt;: &#39;</span> <span class="o">+</span> <span class="n">compName</span> <span class="o">+</span> <span class="s1">&#39;  &lt;rowIndex&gt;: &#39;</span> \
+                            <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">rowIndex</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;  --&gt;  &#39;</span> \
+                            <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">loopValue1</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39; != &#39;</span> \
+                            <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">loopValue2</span><span class="p">)])</span>
+        <span class="n">cItem3</span><span class="o">.</span><span class="n">inWhich</span> <span class="o">=</span> <span class="n">inWhich</span>
+        <span class="n">nefList</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">nefItem</span><span class="p">(</span><span class="n">cItem</span><span class="o">=</span><span class="n">cItem3</span><span class="p">))</span>
+
+
+<span class="c1">#=========================================================================================</span>
 <span class="c1"># compareSaveFrames</span>
 <span class="c1">#=========================================================================================</span>
 
-<div class="viewcode-block" id="compareSaveFrames"><a class="viewcode-back" href="../../../../ccpn/ccpn.util.nef.html#ccpn.util.nef.CompareNef.compareSaveFrames">[docs]</a><span class="k">def</span> <span class="nf">compareSaveFrames</span><span class="p">(</span><span class="n">saveFrame1</span><span class="p">:</span> <span class="n">GenericStarParser</span><span class="o">.</span><span class="n">SaveFrame</span><span class="p">,</span>
-                      <span class="n">saveFrame2</span><span class="p">:</span> <span class="n">GenericStarParser</span><span class="o">.</span><span class="n">SaveFrame</span><span class="p">,</span>
-                      <span class="n">cItem</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
-                      <span class="n">nefList</span><span class="o">=</span><span class="bp">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Compare two saveFrames, if they have the same name then check their contents</span>
-<span class="sd">    :param saveFrame1: name of the first SaveFrame object</span>
-<span class="sd">    :param saveFrame2: name of the second SaveFrame object</span>
+<div class="viewcode-block" id="compareSaveFrames"><a class="viewcode-back" href="../../../../ccpn/ccpn.util.nef.html#ccpn.util.nef.CompareNef.compareSaveFrames">[docs]</a><span class="k">def</span> <span class="nf">compareSaveFrames</span><span class="p">(</span><span class="n">saveFrame1</span><span class="p">,</span> <span class="n">saveFrame2</span><span class="p">,</span> <span class="n">options</span><span class="p">,</span> <span class="n">cItem</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">nefList</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Compare two saveFrames, if they have the same name then check their contents</span>
+
+<span class="sd">    :param saveFrame1: first SaveFrame object, of type GenericStarParser.SaveFrame</span>
+<span class="sd">    :param saveFrame2: second SaveFrame object, of type GenericStarParser.SaveFrame</span>
+<span class="sd">    :param options: nameSpace holding the commandLineArguments</span>
+<span class="sd">    :param cItem: list of str describing differences between nefItems</span>
+<span class="sd">    :param nefList: input of nefItems</span>
 <span class="sd">    :return: list of type nefItem</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="n">cItem</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">cItem</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">cItem</span> <span class="o">=</span> <span class="n">nefItem</span><span class="p">()</span>
-    <span class="k">if</span> <span class="n">nefList</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">nefList</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">nefList</span> <span class="o">=</span> <span class="p">[]</span>
 
     <span class="n">lSet</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39; &#39;</span> <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">saveFrame1</span><span class="p">[</span><span class="n">bl</span><span class="p">],</span> <span class="n">GenericStarParser</span><span class="o">.</span><span class="n">Loop</span><span class="p">)</span> <span class="k">else</span> <span class="n">saveFrame1</span><span class="p">[</span><span class="n">bl</span><span class="p">]</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">bl</span> <span class="ow">in</span> <span class="n">saveFrame1</span><span class="p">]</span>
@@ -630,9 +660,6 @@
     <span class="n">inLeft</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">lSet</span><span class="p">)</span><span class="o">.</span><span class="n">difference</span><span class="p">(</span><span class="n">rSet</span><span class="p">)</span><span class="o">.</span><span class="n">difference</span><span class="p">({</span><span class="s1">&#39; &#39;</span><span class="p">})</span>
     <span class="n">dSet</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">lSet</span><span class="p">)</span><span class="o">.</span><span class="n">intersection</span><span class="p">(</span><span class="n">rSet</span><span class="p">)</span><span class="o">.</span><span class="n">difference</span><span class="p">({</span><span class="s1">&#39; &#39;</span><span class="p">})</span>
     <span class="n">inRight</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">rSet</span><span class="p">)</span><span class="o">.</span><span class="n">difference</span><span class="p">(</span><span class="n">lSet</span><span class="p">)</span><span class="o">.</span><span class="n">difference</span><span class="p">({</span><span class="s1">&#39; &#39;</span><span class="p">})</span>
-
-    <span class="c1"># lVSet = [str(bl)+&#39;:&#39;+str(saveFrame1[bl]) if not isinstance(saveFrame1[bl], GenericStarParser.Loop) else &#39; &#39; for bl in saveFrame1]</span>
-    <span class="c1"># rVSet = [str(bl)+&#39;:&#39;+str(saveFrame2[bl]) if not isinstance(saveFrame2[bl], GenericStarParser.Loop) else &#39; &#39; for bl in saveFrame2]</span>
 
     <span class="n">lVSet</span> <span class="o">=</span> <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">bl</span><span class="p">)</span> <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">saveFrame1</span><span class="p">[</span><span class="n">bl</span><span class="p">],</span> <span class="n">GenericStarParser</span><span class="o">.</span><span class="n">Loop</span><span class="p">)</span> <span class="k">else</span> <span class="s1">&#39; &#39;</span> <span class="k">for</span> <span class="n">bl</span> <span class="ow">in</span> <span class="n">saveFrame1</span><span class="p">]</span>
     <span class="n">rVSet</span> <span class="o">=</span> <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">bl</span><span class="p">)</span> <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">saveFrame2</span><span class="p">[</span><span class="n">bl</span><span class="p">],</span> <span class="n">GenericStarParser</span><span class="o">.</span><span class="n">Loop</span><span class="p">)</span> <span class="k">else</span> <span class="s1">&#39; &#39;</span> <span class="k">for</span> <span class="n">bl</span> <span class="ow">in</span> <span class="n">saveFrame2</span><span class="p">]</span>
@@ -664,7 +691,7 @@
     <span class="k">for</span> <span class="n">compName</span> <span class="ow">in</span> <span class="n">dSet</span><span class="p">:</span>
         <span class="c1"># compare the loop items of the matching saveFrames</span>
 
-        <span class="n">compareLoops</span><span class="p">(</span><span class="n">saveFrame1</span><span class="p">[</span><span class="n">compName</span><span class="p">],</span> <span class="n">saveFrame2</span><span class="p">[</span><span class="n">compName</span><span class="p">],</span> <span class="n">cItem</span><span class="o">=</span><span class="n">cItem3</span><span class="p">,</span> <span class="n">nefList</span><span class="o">=</span><span class="n">nefList</span><span class="p">)</span>
+        <span class="n">compareLoops</span><span class="p">(</span><span class="n">saveFrame1</span><span class="p">[</span><span class="n">compName</span><span class="p">],</span> <span class="n">saveFrame2</span><span class="p">[</span><span class="n">compName</span><span class="p">],</span> <span class="n">options</span><span class="p">,</span> <span class="n">cItem</span><span class="o">=</span><span class="n">cItem3</span><span class="p">,</span> <span class="n">nefList</span><span class="o">=</span><span class="n">nefList</span><span class="p">)</span>
 
     <span class="k">for</span> <span class="n">compName</span> <span class="ow">in</span> <span class="n">dVSet</span><span class="p">:</span>
         <span class="c1"># compare the other items in the saveFrames</span>
@@ -673,9 +700,9 @@
         <span class="k">if</span> <span class="n">saveFrame1</span><span class="p">[</span><span class="n">compName</span><span class="p">]</span> <span class="o">!=</span> <span class="n">saveFrame2</span><span class="p">[</span><span class="n">compName</span><span class="p">]:</span>
             <span class="n">cItem3</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">cItem</span><span class="p">)</span>
             <span class="n">cItem3</span><span class="o">.</span><span class="n">list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">SAVEFRAME</span> <span class="o">+</span> <span class="n">saveFrame2</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
-            <span class="n">cItem3</span><span class="o">.</span><span class="n">list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39; &lt;Value&gt;:  &#39;</span> <span class="o">+</span> <span class="n">compName</span> <span class="o">+</span> <span class="s1">&#39;  --&gt;  &#39;</span> \
-                               <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">saveFrame1</span><span class="p">[</span><span class="n">compName</span><span class="p">])</span> <span class="o">+</span> <span class="s1">&#39; != &#39;</span> \
-                               <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">saveFrame2</span><span class="p">[</span><span class="n">compName</span><span class="p">]))</span>
+            <span class="n">cItem3</span><span class="o">.</span><span class="n">list</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="s1">&#39; &lt;Value&gt;:  &#39;</span> <span class="o">+</span> <span class="n">compName</span> <span class="o">+</span> <span class="s1">&#39;  --&gt;  &#39;</span> \
+                                <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">saveFrame1</span><span class="p">[</span><span class="n">compName</span><span class="p">])</span> <span class="o">+</span> <span class="s1">&#39; != &#39;</span> \
+                                <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">saveFrame2</span><span class="p">[</span><span class="n">compName</span><span class="p">])])</span>
             <span class="n">cItem3</span><span class="o">.</span><span class="n">inWhich</span> <span class="o">=</span> <span class="mi">3</span>
             <span class="n">nefList</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">nefItem</span><span class="p">(</span><span class="n">cItem</span><span class="o">=</span><span class="n">cItem3</span><span class="p">))</span>
 
@@ -686,19 +713,19 @@
 <span class="c1"># compareDataBlocks</span>
 <span class="c1">#=========================================================================================</span>
 
-<div class="viewcode-block" id="compareDataBlocks"><a class="viewcode-back" href="../../../../ccpn/ccpn.util.nef.html#ccpn.util.nef.CompareNef.compareDataBlocks">[docs]</a><span class="k">def</span> <span class="nf">compareDataBlocks</span><span class="p">(</span><span class="n">dataBlock1</span><span class="p">:</span> <span class="n">GenericStarParser</span><span class="o">.</span><span class="n">DataBlock</span><span class="p">,</span>
-                      <span class="n">dataBlock2</span><span class="p">:</span> <span class="n">GenericStarParser</span><span class="o">.</span><span class="n">DataBlock</span><span class="p">,</span>
-                      <span class="n">cItem</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
-                      <span class="n">nefList</span><span class="o">=</span><span class="bp">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Compare two dataBlocks, if they have the same name then check their contents</span>
-<span class="sd">    :param dataBlock1: name of the first DataBlock object</span>
-<span class="sd">    :param dataBlock2: name of the second DataBlock object</span>
+<div class="viewcode-block" id="compareDataBlocks"><a class="viewcode-back" href="../../../../ccpn/ccpn.util.nef.html#ccpn.util.nef.CompareNef.compareDataBlocks">[docs]</a><span class="k">def</span> <span class="nf">compareDataBlocks</span><span class="p">(</span><span class="n">dataBlock1</span><span class="p">,</span> <span class="n">dataBlock2</span><span class="p">,</span> <span class="n">options</span><span class="p">,</span> <span class="n">cItem</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">nefList</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Compare two dataBlocks, if they have the same name then check their contents</span>
+
+<span class="sd">    :param dataBlock1: first DataBlock object, of type GenericStarParser.DataBlock</span>
+<span class="sd">    :param dataBlock2: second DataBlock object, of type GenericStarParser.DataBlock</span>
+<span class="sd">    :param options: nameSpace holding the commandLineArguments</span>
+<span class="sd">    :param cItem: list of str describing differences between nefItems</span>
+<span class="sd">    :param nefList: input of nefItems</span>
 <span class="sd">    :return: list of type nefItem</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="n">cItem</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">cItem</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">cItem</span> <span class="o">=</span> <span class="n">nefItem</span><span class="p">()</span>
-    <span class="k">if</span> <span class="n">nefList</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">nefList</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">nefList</span> <span class="o">=</span> <span class="p">[]</span>
 
     <span class="n">lSet</span> <span class="o">=</span> <span class="p">[</span><span class="n">dataBlock1</span><span class="p">[</span><span class="n">bl</span><span class="p">]</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">bl</span> <span class="ow">in</span> <span class="n">dataBlock1</span><span class="p">]</span>
@@ -727,7 +754,7 @@
     <span class="n">cItem3</span><span class="o">.</span><span class="n">list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">DATABLOCK</span> <span class="o">+</span> <span class="n">dataBlock1</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
     <span class="n">cItem3</span><span class="o">.</span><span class="n">inWhich</span> <span class="o">=</span> <span class="mi">3</span>
     <span class="k">for</span> <span class="n">compName</span> <span class="ow">in</span> <span class="n">dSet</span><span class="p">:</span>
-        <span class="n">compareSaveFrames</span><span class="p">(</span><span class="n">dataBlock1</span><span class="p">[</span><span class="n">compName</span><span class="p">],</span> <span class="n">dataBlock2</span><span class="p">[</span><span class="n">compName</span><span class="p">],</span> <span class="n">cItem</span><span class="o">=</span><span class="n">cItem3</span><span class="p">,</span> <span class="n">nefList</span><span class="o">=</span><span class="n">nefList</span><span class="p">)</span>
+        <span class="n">compareSaveFrames</span><span class="p">(</span><span class="n">dataBlock1</span><span class="p">[</span><span class="n">compName</span><span class="p">],</span> <span class="n">dataBlock2</span><span class="p">[</span><span class="n">compName</span><span class="p">],</span> <span class="n">options</span><span class="p">,</span> <span class="n">cItem</span><span class="o">=</span><span class="n">cItem3</span><span class="p">,</span> <span class="n">nefList</span><span class="o">=</span><span class="n">nefList</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">nefList</span></div>
 
@@ -736,19 +763,19 @@
 <span class="c1"># compareDataExtents</span>
 <span class="c1">#=========================================================================================</span>
 
-<div class="viewcode-block" id="compareDataExtents"><a class="viewcode-back" href="../../../../ccpn/ccpn.util.nef.html#ccpn.util.nef.CompareNef.compareDataExtents">[docs]</a><span class="k">def</span> <span class="nf">compareDataExtents</span><span class="p">(</span><span class="n">dataExt1</span><span class="p">:</span> <span class="n">GenericStarParser</span><span class="o">.</span><span class="n">DataExtent</span><span class="p">,</span>
-                       <span class="n">dataExt2</span><span class="p">:</span> <span class="n">GenericStarParser</span><span class="o">.</span><span class="n">DataExtent</span><span class="p">,</span>
-                       <span class="n">cItem</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
-                       <span class="n">nefList</span><span class="o">=</span><span class="bp">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Compare two dataExtents, if they have the same name then check their contents</span>
-<span class="sd">    :param dataExt1: name of the first DataExtent object</span>
-<span class="sd">    :param dataExt2: name of the second DataExtent object</span>
+<div class="viewcode-block" id="compareDataExtents"><a class="viewcode-back" href="../../../../ccpn/ccpn.util.nef.html#ccpn.util.nef.CompareNef.compareDataExtents">[docs]</a><span class="k">def</span> <span class="nf">compareDataExtents</span><span class="p">(</span><span class="n">dataExt1</span><span class="p">,</span> <span class="n">dataExt2</span><span class="p">,</span> <span class="n">options</span><span class="p">,</span> <span class="n">cItem</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">nefList</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Compare two dataExtents, if they have the same name then check their contents</span>
+
+<span class="sd">    :param dataExt1: first DataExtent object, of type GenericStarParser.DataExtent</span>
+<span class="sd">    :param dataExt2: second DataExtent object, of type GenericStarParser.DataExtent</span>
+<span class="sd">    :param options: nameSpace holding the commandLineArguments</span>
+<span class="sd">    :param cItem: list of str describing differences between nefItems</span>
+<span class="sd">    :param nefList: input of nefItems</span>
 <span class="sd">    :return: list of type nefItem</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="n">cItem</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">cItem</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">cItem</span> <span class="o">=</span> <span class="n">nefItem</span><span class="p">()</span>
-    <span class="k">if</span> <span class="n">nefList</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">nefList</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">nefList</span> <span class="o">=</span> <span class="p">[]</span>
 
     <span class="n">lSet</span> <span class="o">=</span> <span class="p">[</span><span class="n">dataExt1</span><span class="p">[</span><span class="n">bl</span><span class="p">]</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">bl</span> <span class="ow">in</span> <span class="n">dataExt1</span><span class="p">]</span>
@@ -777,7 +804,7 @@
     <span class="n">cItem3</span><span class="o">.</span><span class="n">list</span> <span class="o">=</span> <span class="p">[</span><span class="n">DATAEXTENT</span> <span class="o">+</span> <span class="n">dataExt1</span><span class="o">.</span><span class="n">name</span><span class="p">]</span>
     <span class="n">cItem3</span><span class="o">.</span><span class="n">inWhich</span> <span class="o">=</span> <span class="mi">3</span>  <span class="c1"># both</span>
     <span class="k">for</span> <span class="n">compName</span> <span class="ow">in</span> <span class="n">dSet</span><span class="p">:</span>
-        <span class="n">compareDataBlocks</span><span class="p">(</span><span class="n">dataExt1</span><span class="p">[</span><span class="n">compName</span><span class="p">],</span> <span class="n">dataExt2</span><span class="p">[</span><span class="n">compName</span><span class="p">],</span> <span class="n">cItem</span><span class="o">=</span><span class="n">cItem3</span><span class="p">,</span> <span class="n">nefList</span><span class="o">=</span><span class="n">nefList</span><span class="p">)</span>
+        <span class="n">compareDataBlocks</span><span class="p">(</span><span class="n">dataExt1</span><span class="p">[</span><span class="n">compName</span><span class="p">],</span> <span class="n">dataExt2</span><span class="p">[</span><span class="n">compName</span><span class="p">],</span> <span class="n">options</span><span class="p">,</span> <span class="n">cItem</span><span class="o">=</span><span class="n">cItem3</span><span class="p">,</span> <span class="n">nefList</span><span class="o">=</span><span class="n">nefList</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">nefList</span></div>
 
@@ -786,37 +813,40 @@
 <span class="c1"># compareFiles</span>
 <span class="c1">#=========================================================================================</span>
 
-<div class="viewcode-block" id="compareNefFiles"><a class="viewcode-back" href="../../../../ccpn/ccpn.util.nef.html#ccpn.util.nef.CompareNef.compareNefFiles">[docs]</a><span class="k">def</span> <span class="nf">compareNefFiles</span><span class="p">(</span><span class="n">inFile1</span><span class="p">,</span> <span class="n">inFile2</span><span class="p">,</span> <span class="n">cItem</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">nefList</span><span class="o">=</span><span class="bp">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">list</span><span class="p">]:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Compare two Nef files and return comparison as a nefItem list</span>
+<div class="viewcode-block" id="compareNefFiles"><a class="viewcode-back" href="../../../../ccpn/ccpn.util.nef.html#ccpn.util.nef.CompareNef.compareNefFiles">[docs]</a><span class="k">def</span> <span class="nf">compareNefFiles</span><span class="p">(</span><span class="n">inFile1</span><span class="p">,</span> <span class="n">inFile2</span><span class="p">,</span> <span class="n">options</span><span class="p">,</span> <span class="n">cItem</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">nefList</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Compare two Nef files and return comparison as a nefItem list</span>
+
 <span class="sd">    :param inFile1: name of the first file</span>
 <span class="sd">    :param inFile2: name of the second file</span>
+<span class="sd">    :param options: nameSpace holding the commandLineArguments</span>
+<span class="sd">    :param cItem: list of str describing differences between nefItems</span>
+<span class="sd">    :param nefList: input of nefItems</span>
 <span class="sd">    :return: list of type nefItem</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="n">cItem</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">cItem</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">cItem</span> <span class="o">=</span> <span class="n">nefItem</span><span class="p">()</span>
-    <span class="k">if</span> <span class="n">nefList</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">nefList</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">nefList</span> <span class="o">=</span> <span class="p">[]</span>
 
     <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">inFile1</span><span class="p">):</span>
-        <span class="k">print</span><span class="p">(</span><span class="s1">&#39;File Error:&#39;</span><span class="p">,</span> <span class="n">inFile1</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;File Error:&#39;</span><span class="p">,</span> <span class="n">inFile1</span><span class="p">)</span>
     <span class="k">elif</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">inFile2</span><span class="p">):</span>
-        <span class="k">print</span><span class="p">(</span><span class="s1">&#39;File Error:&#39;</span><span class="p">,</span> <span class="n">inFile2</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;File Error:&#39;</span><span class="p">,</span> <span class="n">inFile2</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">NefData1</span> <span class="o">=</span> <span class="n">_loadGeneralFile</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="n">inFile1</span><span class="p">)</span>
         <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-            <span class="k">print</span><span class="p">(</span><span class="s1">&#39;Error on line {}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">exc_info</span><span class="p">()[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">tb_lineno</span><span class="p">),</span> <span class="nb">type</span><span class="p">(</span><span class="n">e</span><span class="p">),</span> <span class="n">e</span><span class="p">)</span>
-            <span class="k">return</span> <span class="bp">None</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Error on line </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">exc_info</span><span class="p">()[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">tb_lineno</span><span class="p">),</span> <span class="nb">type</span><span class="p">(</span><span class="n">e</span><span class="p">),</span> <span class="n">e</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">None</span>
 
         <span class="k">try</span><span class="p">:</span>
             <span class="n">NefData2</span> <span class="o">=</span> <span class="n">_loadGeneralFile</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="n">inFile2</span><span class="p">)</span>
         <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-            <span class="k">print</span><span class="p">(</span><span class="s1">&#39;Error on line {}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">exc_info</span><span class="p">()[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">tb_lineno</span><span class="p">),</span> <span class="nb">type</span><span class="p">(</span><span class="n">e</span><span class="p">),</span> <span class="n">e</span><span class="p">)</span>
-            <span class="k">return</span> <span class="bp">None</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Error on line </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">exc_info</span><span class="p">()[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">tb_lineno</span><span class="p">),</span> <span class="nb">type</span><span class="p">(</span><span class="n">e</span><span class="p">),</span> <span class="n">e</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">None</span>
 
-        <span class="k">if</span> <span class="n">commandLineArguments</span><span class="o">.</span><span class="n">ignoreBlockName</span> <span class="ow">is</span> <span class="bp">False</span><span class="p">:</span>
-            <span class="n">compareDataExtents</span><span class="p">(</span><span class="n">NefData1</span><span class="p">,</span> <span class="n">NefData2</span><span class="p">,</span> <span class="n">cItem</span><span class="o">=</span><span class="n">cItem</span><span class="p">,</span> <span class="n">nefList</span><span class="o">=</span><span class="n">nefList</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">options</span><span class="o">.</span><span class="n">ignoreBlockName</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
+            <span class="n">compareDataExtents</span><span class="p">(</span><span class="n">NefData1</span><span class="p">,</span> <span class="n">NefData2</span><span class="p">,</span> <span class="n">options</span><span class="p">,</span> <span class="n">cItem</span><span class="o">=</span><span class="n">cItem</span><span class="p">,</span> <span class="n">nefList</span><span class="o">=</span><span class="n">nefList</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
 
             <span class="c1"># assumes that there is only one block in a file</span>
@@ -824,7 +854,7 @@
 
             <span class="n">compList1</span> <span class="o">=</span> <span class="p">[</span><span class="n">cn</span> <span class="k">for</span> <span class="n">cn</span> <span class="ow">in</span> <span class="n">NefData1</span><span class="p">]</span>
             <span class="n">compList2</span> <span class="o">=</span> <span class="p">[</span><span class="n">cn</span> <span class="k">for</span> <span class="n">cn</span> <span class="ow">in</span> <span class="n">NefData2</span><span class="p">]</span>
-            <span class="n">compareDataBlocks</span><span class="p">(</span><span class="n">NefData1</span><span class="p">[</span><span class="n">compList1</span><span class="p">[</span><span class="mi">0</span><span class="p">]],</span> <span class="n">NefData2</span><span class="p">[</span><span class="n">compList2</span><span class="p">[</span><span class="mi">0</span><span class="p">]],</span> <span class="n">cItem</span><span class="o">=</span><span class="n">cItem</span><span class="p">,</span> <span class="n">nefList</span><span class="o">=</span><span class="n">nefList</span><span class="p">)</span>
+            <span class="n">compareDataBlocks</span><span class="p">(</span><span class="n">NefData1</span><span class="p">[</span><span class="n">compList1</span><span class="p">[</span><span class="mi">0</span><span class="p">]],</span> <span class="n">NefData2</span><span class="p">[</span><span class="n">compList2</span><span class="p">[</span><span class="mi">0</span><span class="p">]],</span> <span class="n">options</span><span class="p">,</span> <span class="n">cItem</span><span class="o">=</span><span class="n">cItem</span><span class="p">,</span> <span class="n">nefList</span><span class="o">=</span><span class="n">nefList</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">nefList</span></div>
 
@@ -833,61 +863,87 @@
 <span class="c1"># Test_Compare_Files</span>
 <span class="c1">#=========================================================================================</span>
 
-<div class="viewcode-block" id="batchCompareNefFiles"><a class="viewcode-back" href="../../../../ccpn/ccpn.util.nef.html#ccpn.util.nef.CompareNef.batchCompareNefFiles">[docs]</a><span class="k">def</span> <span class="nf">batchCompareNefFiles</span><span class="p">(</span><span class="n">inDir1</span><span class="p">,</span> <span class="n">inDir2</span><span class="p">,</span> <span class="n">outDir</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Batch compare the Nef files common to the two directories</span>
+<div class="viewcode-block" id="batchCompareNefFiles"><a class="viewcode-back" href="../../../../ccpn/ccpn.util.nef.html#ccpn.util.nef.CompareNef.batchCompareNefFiles">[docs]</a><span class="k">def</span> <span class="nf">batchCompareNefFiles</span><span class="p">(</span><span class="n">inDir1</span><span class="p">,</span> <span class="n">inDir2</span><span class="p">,</span> <span class="n">outDir</span><span class="p">,</span> <span class="n">options</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Batch compare the Nef files common to the two directories</span>
 <span class="sd">    For each file found, write the compare log to the corresponding .txt file</span>
 
 <span class="sd">    :param inDir1:</span>
 <span class="sd">    :param inDir2:</span>
 <span class="sd">    :param outDir:</span>
+<span class="sd">    :param options: nameSpace holding the commandLineArguments</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">inFileList</span> <span class="o">=</span> <span class="p">[</span><span class="n">f</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">listdir</span><span class="p">(</span><span class="n">inDir1</span><span class="p">)</span> <span class="k">if</span> <span class="n">isfile</span><span class="p">(</span><span class="n">join</span><span class="p">(</span><span class="n">inDir1</span><span class="p">,</span> <span class="n">f</span><span class="p">))</span> <span class="ow">and</span> <span class="n">f</span><span class="p">[</span><span class="o">-</span><span class="mi">4</span><span class="p">:]</span> <span class="o">==</span> <span class="s1">&#39;.nef&#39;</span><span class="p">]</span>
     <span class="n">outFileList</span> <span class="o">=</span> <span class="p">[</span><span class="n">f</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">listdir</span><span class="p">(</span><span class="n">inDir2</span><span class="p">)</span> <span class="k">if</span> <span class="n">isfile</span><span class="p">(</span><span class="n">join</span><span class="p">(</span><span class="n">inDir2</span><span class="p">,</span> <span class="n">f</span><span class="p">))</span> <span class="ow">and</span> <span class="n">f</span><span class="p">[</span><span class="o">-</span><span class="mi">4</span><span class="p">:]</span> <span class="o">==</span> <span class="s1">&#39;.nef&#39;</span><span class="p">]</span>
 
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">options</span><span class="o">.</span><span class="n">screen</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">options</span><span class="o">.</span><span class="n">createDirs</span> <span class="ow">is</span> <span class="kc">True</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">outDir</span><span class="p">):</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">outDir</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">outDir</span><span class="p">)</span> <span class="ow">and</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">outDir</span><span class="p">)):</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Error: No such directory:&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">outDir</span><span class="p">))</span>
+            <span class="k">return</span>
+
+    <span class="n">commonFiles</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">listdir</span><span class="p">(</span><span class="n">inDir1</span><span class="p">))</span> <span class="o">&amp;</span> <span class="nb">set</span><span class="p">(</span><span class="n">listdir</span><span class="p">(</span><span class="n">inDir2</span><span class="p">))</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">commonFiles</span><span class="p">:</span>
+        <span class="c1"># if no files found then write message to the screen or log.tx in the out folder</span>
+        <span class="k">if</span> <span class="n">options</span><span class="o">.</span><span class="n">screen</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="c1"># strip the .nef from the end</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;inDir1: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">inDir1</span><span class="p">))</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;inDir2: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">inDir2</span><span class="p">))</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;No common files found&#39;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">outFileName</span> <span class="o">=</span> <span class="n">join</span><span class="p">(</span><span class="n">outDir</span><span class="p">,</span> <span class="s1">&#39;log.txt&#39;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">options</span><span class="o">.</span><span class="n">overwriteExisting</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
+                <span class="k">with</span> <span class="n">safeOpen</span><span class="p">(</span><span class="n">outFileName</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="p">(</span><span class="n">outLog</span><span class="p">,</span> <span class="n">safeFileName</span><span class="p">):</span>
+                    <span class="n">outLog</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;inDir1: </span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">inDir1</span><span class="p">))</span>
+                    <span class="n">outLog</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;inDir2: </span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">inDir2</span><span class="p">))</span>
+                    <span class="n">outLog</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;No common files found&#39;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">outFileName</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">outLog</span><span class="p">:</span>
+                    <span class="n">sys</span><span class="o">.</span><span class="n">stdout</span> <span class="o">=</span> <span class="n">outLog</span>
+                    <span class="n">outLog</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;inDir1: </span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">inDir1</span><span class="p">))</span>
+                    <span class="n">outLog</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;inDir2: </span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">inDir2</span><span class="p">))</span>
+                    <span class="n">outLog</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;No common files found&#39;</span><span class="p">)</span>
+        <span class="k">return</span>
+
     <span class="k">for</span> <span class="n">fl</span> <span class="ow">in</span> <span class="n">inFileList</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">fl</span> <span class="ow">in</span> <span class="n">outFileList</span><span class="p">:</span>
 
-            <span class="c1"># outFileName = join(outDir, fl[:-4] + &#39;.txt&#39;)</span>
-            <span class="c1"># print(&#39;Batch processing %s &gt; %s&#39; % (fl, outFileName))</span>
-
-            <span class="c1"># keep the old output stream</span>
-            <span class="n">stdOriginal</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">stdout</span>
-
-            <span class="n">nefList</span> <span class="o">=</span> <span class="n">compareNefFiles</span><span class="p">(</span><span class="n">join</span><span class="p">(</span><span class="n">inDir1</span><span class="p">,</span> <span class="n">fl</span><span class="p">),</span> <span class="n">join</span><span class="p">(</span><span class="n">inDir2</span><span class="p">,</span> <span class="n">fl</span><span class="p">))</span>
-
-            <span class="k">if</span> <span class="n">commandLineArguments</span><span class="o">.</span><span class="n">Screen</span> <span class="ow">is</span> <span class="bp">True</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">options</span><span class="o">.</span><span class="n">screen</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
 
                 <span class="c1"># strip the .nef from the end</span>
                 <span class="n">outFileName</span> <span class="o">=</span> <span class="n">join</span><span class="p">(</span><span class="n">outDir</span><span class="p">,</span> <span class="n">fl</span><span class="p">[:</span><span class="o">-</span><span class="mi">4</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39;.txt&#39;</span><span class="p">)</span>
-                <span class="k">print</span><span class="p">(</span><span class="s1">&#39;Batch processing </span><span class="si">%s</span><span class="s1"> &gt; </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">fl</span><span class="p">,</span> <span class="n">outFileName</span><span class="p">))</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Batch processing </span><span class="si">%s</span><span class="s1"> &gt; </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">fl</span><span class="p">,</span> <span class="n">outFileName</span><span class="p">))</span>
 
+                <span class="n">nefList</span> <span class="o">=</span> <span class="n">compareNefFiles</span><span class="p">(</span><span class="n">join</span><span class="p">(</span><span class="n">inDir1</span><span class="p">,</span> <span class="n">fl</span><span class="p">),</span> <span class="n">join</span><span class="p">(</span><span class="n">inDir2</span><span class="p">,</span> <span class="n">fl</span><span class="p">),</span> <span class="n">options</span><span class="p">)</span>
                 <span class="n">printCompareList</span><span class="p">(</span><span class="n">nefList</span><span class="p">,</span> <span class="n">join</span><span class="p">(</span><span class="n">inDir1</span><span class="p">,</span> <span class="n">fl</span><span class="p">),</span> <span class="n">join</span><span class="p">(</span><span class="n">inDir2</span><span class="p">,</span> <span class="n">fl</span><span class="p">))</span>
 
             <span class="k">else</span><span class="p">:</span>
                 <span class="c1"># strip the .nef from the end</span>
                 <span class="n">outFileName</span> <span class="o">=</span> <span class="n">join</span><span class="p">(</span><span class="n">outDir</span><span class="p">,</span> <span class="n">fl</span><span class="p">[:</span><span class="o">-</span><span class="mi">4</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39;.txt&#39;</span><span class="p">)</span>
+                <span class="c1"># keep the old output stream</span>
+                <span class="n">stdOriginal</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">stdout</span>
 
-                <span class="k">if</span> <span class="n">commandLineArguments</span><span class="o">.</span><span class="n">keepExisting</span> <span class="ow">is</span> <span class="bp">True</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">options</span><span class="o">.</span><span class="n">overwriteExisting</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
 
                     <span class="k">with</span> <span class="n">safeOpen</span><span class="p">(</span><span class="n">outFileName</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="p">(</span><span class="n">outLog</span><span class="p">,</span> <span class="n">safeFileName</span><span class="p">):</span>
-                        <span class="k">print</span><span class="p">(</span><span class="s1">&#39;Batch processing </span><span class="si">%s</span><span class="s1"> &gt; </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">fl</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">safeFileName</span><span class="p">)))</span>
-
                         <span class="n">sys</span><span class="o">.</span><span class="n">stdout</span> <span class="o">=</span> <span class="n">outLog</span>
-                        <span class="k">print</span><span class="p">(</span><span class="n">join</span><span class="p">(</span><span class="n">inDir1</span><span class="p">,</span> <span class="n">fl</span><span class="p">))</span>
-                        <span class="k">print</span><span class="p">(</span><span class="n">join</span><span class="p">(</span><span class="n">inDir2</span><span class="p">,</span> <span class="n">fl</span><span class="p">))</span>
+                        <span class="n">nefList</span> <span class="o">=</span> <span class="n">compareNefFiles</span><span class="p">(</span><span class="n">join</span><span class="p">(</span><span class="n">inDir1</span><span class="p">,</span> <span class="n">fl</span><span class="p">),</span> <span class="n">join</span><span class="p">(</span><span class="n">inDir2</span><span class="p">,</span> <span class="n">fl</span><span class="p">),</span> <span class="n">options</span><span class="p">)</span>
+
+                        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Batch processing </span><span class="si">%s</span><span class="s1"> &gt; </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">fl</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">safeFileName</span><span class="p">)))</span>
+                        <span class="nb">print</span><span class="p">(</span><span class="n">join</span><span class="p">(</span><span class="n">inDir1</span><span class="p">,</span> <span class="n">fl</span><span class="p">))</span>
+                        <span class="nb">print</span><span class="p">(</span><span class="n">join</span><span class="p">(</span><span class="n">inDir2</span><span class="p">,</span> <span class="n">fl</span><span class="p">))</span>
                         <span class="n">printCompareList</span><span class="p">(</span><span class="n">nefList</span><span class="p">,</span> <span class="n">join</span><span class="p">(</span><span class="n">inDir1</span><span class="p">,</span> <span class="n">fl</span><span class="p">),</span> <span class="n">join</span><span class="p">(</span><span class="n">inDir2</span><span class="p">,</span> <span class="n">fl</span><span class="p">))</span>
-                        <span class="n">sys</span><span class="o">.</span><span class="n">stdout</span> <span class="o">=</span> <span class="n">stdOriginal</span>
 
                 <span class="k">else</span><span class="p">:</span>
-                    <span class="k">print</span><span class="p">(</span><span class="s1">&#39;Batch processing </span><span class="si">%s</span><span class="s1"> &gt; </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">fl</span><span class="p">,</span> <span class="n">outFileName</span><span class="p">))</span>
-
                     <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">outFileName</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">outLog</span><span class="p">:</span>
                         <span class="n">sys</span><span class="o">.</span><span class="n">stdout</span> <span class="o">=</span> <span class="n">outLog</span>
-                        <span class="k">print</span><span class="p">(</span><span class="n">join</span><span class="p">(</span><span class="n">inDir1</span><span class="p">,</span> <span class="n">fl</span><span class="p">))</span>
-                        <span class="k">print</span><span class="p">(</span><span class="n">join</span><span class="p">(</span><span class="n">inDir2</span><span class="p">,</span> <span class="n">fl</span><span class="p">))</span>
+                        <span class="n">nefList</span> <span class="o">=</span> <span class="n">compareNefFiles</span><span class="p">(</span><span class="n">join</span><span class="p">(</span><span class="n">inDir1</span><span class="p">,</span> <span class="n">fl</span><span class="p">),</span> <span class="n">join</span><span class="p">(</span><span class="n">inDir2</span><span class="p">,</span> <span class="n">fl</span><span class="p">),</span> <span class="n">options</span><span class="p">)</span>
+
+                        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Batch processing </span><span class="si">%s</span><span class="s1"> &gt; </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">fl</span><span class="p">,</span> <span class="n">outFileName</span><span class="p">))</span>
+                        <span class="nb">print</span><span class="p">(</span><span class="n">join</span><span class="p">(</span><span class="n">inDir1</span><span class="p">,</span> <span class="n">fl</span><span class="p">))</span>
+                        <span class="nb">print</span><span class="p">(</span><span class="n">join</span><span class="p">(</span><span class="n">inDir2</span><span class="p">,</span> <span class="n">fl</span><span class="p">))</span>
                         <span class="n">printCompareList</span><span class="p">(</span><span class="n">nefList</span><span class="p">,</span> <span class="n">join</span><span class="p">(</span><span class="n">inDir1</span><span class="p">,</span> <span class="n">fl</span><span class="p">),</span> <span class="n">join</span><span class="p">(</span><span class="n">inDir2</span><span class="p">,</span> <span class="n">fl</span><span class="p">))</span>
-                        <span class="n">sys</span><span class="o">.</span><span class="n">stdout</span> <span class="o">=</span> <span class="n">stdOriginal</span></div>
+                <span class="n">sys</span><span class="o">.</span><span class="n">stdout</span> <span class="o">=</span> <span class="n">stdOriginal</span></div>
 
 
 <span class="c1">#=========================================================================================</span>
@@ -895,64 +951,50 @@
 <span class="c1">#=========================================================================================</span>
 
 <div class="viewcode-block" id="Test_Compare_Files"><a class="viewcode-back" href="../../../../ccpn/ccpn.util.nef.html#ccpn.util.nef.CompareNef.Test_Compare_Files">[docs]</a><span class="k">class</span> <span class="nc">Test_Compare_Files</span><span class="p">(</span><span class="n">unittest</span><span class="o">.</span><span class="n">TestCase</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Test the comparison of nef files and print the results</span>
+    <span class="sd">&quot;&quot;&quot;Test the comparison of nef files and print the results</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="nf">_test_Compare_Files</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Load two files and compare</span>
+<div class="viewcode-block" id="Test_Compare_Files.test_Compare_Files"><a class="viewcode-back" href="../../../../ccpn/ccpn.util.nef.html#ccpn.util.nef.CompareNef.Test_Compare_Files.test_Compare_Files">[docs]</a>    <span class="k">def</span> <span class="nf">test_Compare_Files</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Load two files and compare</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="c1"># test set one</span>
-        <span class="n">inFile1</span> <span class="o">=</span> <span class="s1">&#39;/Users/ejb66/PycharmProjects/AnalysisV3/internal/data/starExamples/Commented_Example.nef&#39;</span>
-        <span class="n">inFile2</span> <span class="o">=</span> <span class="s1">&#39;/Users/ejb66/PycharmProjects/AnalysisV3/internal/data/starExamples/Commented_Example_Change.nef&#39;</span>
+        <span class="c1"># define arguments to simulate command line</span>
+        <span class="n">parser</span> <span class="o">=</span> <span class="n">defineArguments</span><span class="p">()</span>
+        <span class="n">options</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">parse_args</span><span class="p">([])</span>
 
-        <span class="k">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">TEST COMPARISON&#39;</span><span class="p">)</span>
-        <span class="k">print</span><span class="p">(</span><span class="s1">&#39;   file1 = &#39;</span> <span class="o">+</span> <span class="n">inFile1</span><span class="p">)</span>
-        <span class="k">print</span><span class="p">(</span><span class="s1">&#39;   file2 = &#39;</span> <span class="o">+</span> <span class="n">inFile2</span><span class="p">)</span>
-        <span class="k">print</span><span class="p">(</span><span class="s1">&#39;Loading...&#39;</span><span class="p">)</span>
-        <span class="n">nefList</span> <span class="o">=</span> <span class="n">compareNefFiles</span><span class="p">(</span><span class="n">inFile1</span><span class="p">,</span> <span class="n">inFile2</span><span class="p">)</span>
-        <span class="n">printCompareList</span><span class="p">(</span><span class="n">nefList</span><span class="p">,</span> <span class="n">inFile1</span><span class="p">,</span> <span class="n">inFile2</span><span class="p">)</span>
+        <span class="c1"># set the two files to compare</span>
+        <span class="n">inFile1</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">,</span> <span class="s1">&#39;nef&#39;</span><span class="p">,</span> <span class="s1">&#39;testdata&#39;</span><span class="p">,</span> <span class="s1">&#39;Commented_Example.nef&#39;</span><span class="p">))</span>
+        <span class="n">inFile2</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">,</span> <span class="s1">&#39;nef&#39;</span><span class="p">,</span> <span class="s1">&#39;testdata&#39;</span><span class="p">,</span> <span class="s1">&#39;Commented_Example_Change.nef&#39;</span><span class="p">))</span>
 
-        <span class="c1"># test set two</span>
-        <span class="n">inFile1</span> <span class="o">=</span> <span class="s1">&#39;/Users/ejb66/Desktop/Temporary/v3_exportNef/1nk2_docr_extended.ccpn.nef&#39;</span>
-        <span class="n">inFile2</span> <span class="o">=</span> <span class="s1">&#39;/Users/ejb66/PycharmProjects/AnalysisV3/internal/data/NEF_test_data/NMRX/1nk2_docr_extended.ccpn.nef&#39;</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">TEST COMPARISON&#39;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;   file1 = &#39;</span> <span class="o">+</span> <span class="n">inFile1</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;   file2 = &#39;</span> <span class="o">+</span> <span class="n">inFile2</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Loading...&#39;</span><span class="p">)</span>
 
-        <span class="k">print</span><span class="p">(</span><span class="s1">&#39;~&#39;</span> <span class="o">*</span> <span class="mi">80</span><span class="p">)</span>
-        <span class="k">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">TEST COMPARISON&#39;</span><span class="p">)</span>
-        <span class="k">print</span><span class="p">(</span><span class="s1">&#39;   file1 = &#39;</span> <span class="o">+</span> <span class="n">inFile1</span><span class="p">)</span>
-        <span class="k">print</span><span class="p">(</span><span class="s1">&#39;   file2 = &#39;</span> <span class="o">+</span> <span class="n">inFile2</span><span class="p">)</span>
-        <span class="k">print</span><span class="p">(</span><span class="s1">&#39;Loading...&#39;</span><span class="p">)</span>
-        <span class="n">nefList</span> <span class="o">=</span> <span class="n">compareNefFiles</span><span class="p">(</span><span class="n">inFile1</span><span class="p">,</span> <span class="n">inFile2</span><span class="p">)</span>
-        <span class="n">printCompareList</span><span class="p">(</span><span class="n">nefList</span><span class="p">,</span> <span class="n">inFile1</span><span class="p">,</span> <span class="n">inFile2</span><span class="p">)</span>
+        <span class="c1"># load and output results</span>
+        <span class="n">nefList</span> <span class="o">=</span> <span class="n">compareNefFiles</span><span class="p">(</span><span class="n">inFile1</span><span class="p">,</span> <span class="n">inFile2</span><span class="p">,</span> <span class="n">options</span><span class="p">)</span>
+        <span class="n">printCompareList</span><span class="p">(</span><span class="n">nefList</span><span class="p">,</span> <span class="n">inFile1</span><span class="p">,</span> <span class="n">inFile2</span><span class="p">)</span></div>
 
-        <span class="n">inFile1</span> <span class="o">=</span> <span class="s1">&#39;/Users/ejb66/Desktop/Temporary/v3_exportNef/2mqq_docr_extended.nef&#39;</span>
-        <span class="n">inFile2</span> <span class="o">=</span> <span class="s1">&#39;/Users/ejb66/PycharmProjects/AnalysisV3/internal/data/NEF_test_data/NMRX/2mqq_docr_extended.nef&#39;</span>
-
-        <span class="k">print</span><span class="p">(</span><span class="s1">&#39;~&#39;</span> <span class="o">*</span> <span class="mi">80</span><span class="p">)</span>
-        <span class="k">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">TEST COMPARISON&#39;</span><span class="p">)</span>
-        <span class="k">print</span><span class="p">(</span><span class="s1">&#39;   file1 = &#39;</span> <span class="o">+</span> <span class="n">inFile1</span><span class="p">)</span>
-        <span class="k">print</span><span class="p">(</span><span class="s1">&#39;   file2 = &#39;</span> <span class="o">+</span> <span class="n">inFile2</span><span class="p">)</span>
-        <span class="k">print</span><span class="p">(</span><span class="s1">&#39;Loading...&#39;</span><span class="p">)</span>
-        <span class="n">nefList</span> <span class="o">=</span> <span class="n">compareNefFiles</span><span class="p">(</span><span class="n">inFile1</span><span class="p">,</span> <span class="n">inFile2</span><span class="p">)</span>
-        <span class="n">printCompareList</span><span class="p">(</span><span class="n">nefList</span><span class="p">,</span> <span class="n">inFile1</span><span class="p">,</span> <span class="n">inFile2</span><span class="p">)</span>
-
-    <span class="k">def</span> <span class="nf">_test_Compare_BatchFiles</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Compare the Nef files in two directories</span>
+<div class="viewcode-block" id="Test_Compare_Files.test_Compare_BatchFiles"><a class="viewcode-back" href="../../../../ccpn/ccpn.util.nef.html#ccpn.util.nef.CompareNef.Test_Compare_Files.test_Compare_BatchFiles">[docs]</a>    <span class="k">def</span> <span class="nf">test_Compare_BatchFiles</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Compare the Nef files in two directories</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">inDir1</span> <span class="o">=</span> <span class="s1">&#39;/Users/ejb66/Desktop/Temporary/v3_exportNef&#39;</span>
-        <span class="n">inDir2</span> <span class="o">=</span> <span class="s1">&#39;/Users/ejb66/Dropbox/CCPNdocsShared/NefTestData/v3&#39;</span>
-        <span class="n">outDir</span> <span class="o">=</span> <span class="s1">&#39;/Users/ejb66/Desktop/Temporary/v3_exportNef&#39;</span>
+        <span class="c1"># define arguments to simulate command line</span>
+        <span class="n">parser</span> <span class="o">=</span> <span class="n">defineArguments</span><span class="p">()</span>
+        <span class="n">options</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">parse_args</span><span class="p">([])</span>
+        <span class="n">options</span><span class="o">.</span><span class="n">createDirs</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="n">options</span><span class="o">.</span><span class="n">overwriteExisting</span> <span class="o">=</span> <span class="kc">False</span>
 
-        <span class="n">batchCompareNefFiles</span><span class="p">(</span><span class="n">inDir1</span><span class="p">,</span> <span class="n">inDir2</span><span class="p">,</span> <span class="n">outDir</span><span class="p">)</span></div>
+        <span class="n">inDir1</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s1">&#39;testdata&#39;</span><span class="p">,</span> <span class="s1">&#39;testinfolder1&#39;</span><span class="p">)</span>
+        <span class="n">inDir2</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s1">&#39;testdata&#39;</span><span class="p">,</span> <span class="s1">&#39;testinfolder2&#39;</span><span class="p">)</span>
+        <span class="n">outDir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s1">&#39;testdata&#39;</span><span class="p">,</span> <span class="s1">&#39;testoutfolder&#39;</span><span class="p">)</span>
+
+        <span class="n">batchCompareNefFiles</span><span class="p">(</span><span class="n">inDir1</span><span class="p">,</span> <span class="n">inDir2</span><span class="p">,</span> <span class="n">outDir</span><span class="p">,</span> <span class="n">options</span><span class="p">)</span></div></div>
 
 
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># __main__</span>
 <span class="c1">#=========================================================================================</span>
 
-<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
     <span class="n">helpText</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span>
 <span class="s2">  Command Line Usage:</span>
 <span class="s2">    compareNef for execution from the command line with a suitable script</span>
@@ -960,9 +1002,9 @@
 <span class="s2">  </span>
 <span class="s2">        #!/usr/bin/env sh</span>
 <span class="s2">        export CCPNMR_TOP_DIR=&quot;$(dirname $(cd $(dirname &quot;$0&quot;); pwd))&quot;</span>
-<span class="s2">        export ANACONDA3=${CCPNMR_TOP_DIR}/miniconda</span>
-<span class="s2">        export PYTHONPATH=${CCPNMR_TOP_DIR}/src/python:${CCPNMR_TOP_DIR}/src/c</span>
-<span class="s2">        ${ANACONDA3}/bin/python ${CCPNMR_TOP_DIR}/src/python/ccpn/util/nef/compareNef.py $*</span>
+<span class="s2">        export ANACONDA3=$</span><span class="si">{CCPNMR_TOP_DIR}</span><span class="s2">/miniconda</span>
+<span class="s2">        export PYTHONPATH=$</span><span class="si">{CCPNMR_TOP_DIR}</span><span class="s2">/src/python:$</span><span class="si">{CCPNMR_TOP_DIR}</span><span class="s2">/src/c</span>
+<span class="s2">        $</span><span class="si">{ANACONDA3}</span><span class="s2">/bin/python $</span><span class="si">{CCPNMR_TOP_DIR}</span><span class="s2">/src/python/ccpn/util/nef/compareNef.py $*</span>
 <span class="s2">  </span>
 <span class="s2">    Usage:  compareNef [options]</span>
 <span class="s2">                                                  </span>
@@ -986,10 +1028,14 @@
 
 <span class="s2">      -s, --screen            Output batch processing to screen, default is to .txt files</span>
 <span class="s2">                              may be used with -b</span>
+
+<span class="s2">      -o, --overwrite         Overwrite existing .txt files. If false then files are</span>
+<span class="s2">                              appended with &#39;(n)&#39; before the extension, where n is </span>
+<span class="s2">                              the next available number.</span>
 <span class="s2">                              </span>
-<span class="s2">      -k, --keep              Keep existing .txt files. New files are appended with &#39;(n)&#39; before</span>
-<span class="s2">                              the extension, where n is the next available number. </span>
+<span class="s2">      -c, --create            Automatically create directories as required. </span>
 <span class="s2">      </span>
+<span class="s2">      -I, --ignorecase        Ignore case when comparing items.</span>
 <span class="s2">                          </span>
 <span class="s2">    Searches through all objects: dataExtents, dataBlocks, saveFrames and Loops within the files.</span>
 <span class="s2">    Comparisons are made for all data structures that have the same name.</span>
@@ -1008,23 +1054,27 @@
     <span class="n">parser</span> <span class="o">=</span> <span class="n">defineArguments</span><span class="p">()</span>
     <span class="n">commandLineArguments</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">parse_args</span><span class="p">()</span>
 
-    <span class="k">if</span> <span class="n">commandLineArguments</span><span class="o">.</span><span class="n">Help</span><span class="p">:</span>
-        <span class="k">print</span><span class="p">(</span><span class="n">helpText</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">commandLineArguments</span><span class="o">.</span><span class="n">help</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">helpText</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="k">if</span> <span class="n">commandLineArguments</span><span class="o">.</span><span class="n">inFiles</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>  <span class="c1"># assume compareNef inFile1 inFile2</span>
-            <span class="c1"># inFile1 = sys.argv[1]</span>
-            <span class="c1"># inFile2 = sys.argv[2]</span>
+        <span class="k">if</span> <span class="n">commandLineArguments</span><span class="o">.</span><span class="n">inFiles</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">inFile0</span> <span class="o">=</span> <span class="n">commandLineArguments</span><span class="o">.</span><span class="n">inFiles</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">inFile1</span> <span class="o">=</span> <span class="n">commandLineArguments</span><span class="o">.</span><span class="n">inFiles</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
 
-            <span class="k">print</span><span class="p">()</span>
-            <span class="k">print</span><span class="p">(</span><span class="s1">&#39;Loading Nef Files...&#39;</span><span class="p">)</span>
-            <span class="n">nefList</span> <span class="o">=</span> <span class="n">compareNefFiles</span><span class="p">(</span><span class="n">commandLineArguments</span><span class="o">.</span><span class="n">inFiles</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">commandLineArguments</span><span class="o">.</span><span class="n">inFiles</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
-            <span class="n">printCompareList</span><span class="p">(</span><span class="n">nefList</span><span class="p">,</span> <span class="n">commandLineArguments</span><span class="o">.</span><span class="n">inFiles</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">commandLineArguments</span><span class="o">.</span><span class="n">inFiles</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+            <span class="nb">print</span><span class="p">()</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Loading Nef Files...&#39;</span><span class="p">)</span>
+            <span class="n">nefList</span> <span class="o">=</span> <span class="n">compareNefFiles</span><span class="p">(</span><span class="n">inFile0</span><span class="p">,</span> <span class="n">inFile1</span><span class="p">,</span> <span class="n">commandLineArguments</span><span class="p">)</span>
+            <span class="n">printCompareList</span><span class="p">(</span><span class="n">nefList</span><span class="p">,</span> <span class="n">inFile0</span><span class="p">,</span> <span class="n">inFile1</span><span class="p">)</span>
 
-        <span class="k">elif</span> <span class="n">commandLineArguments</span><span class="o">.</span><span class="n">blockDirs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
-            <span class="n">batchCompareNefFiles</span><span class="p">(</span><span class="o">*</span><span class="n">commandLineArguments</span><span class="o">.</span><span class="n">blockDirs</span><span class="p">[:])</span>
+        <span class="k">elif</span> <span class="n">commandLineArguments</span><span class="o">.</span><span class="n">blockDirs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">inDir0</span> <span class="o">=</span> <span class="n">commandLineArguments</span><span class="o">.</span><span class="n">blockDirs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">inDir1</span> <span class="o">=</span> <span class="n">commandLineArguments</span><span class="o">.</span><span class="n">blockDirs</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">outDir</span> <span class="o">=</span> <span class="n">commandLineArguments</span><span class="o">.</span><span class="n">blockDirs</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+
+            <span class="n">batchCompareNefFiles</span><span class="p">(</span><span class="n">inDir0</span><span class="p">,</span> <span class="n">inDir1</span><span class="p">,</span> <span class="n">outDir</span><span class="p">,</span> <span class="n">commandLineArguments</span><span class="p">)</span>
 
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">print</span><span class="p">(</span><span class="s1">&#39;Incorrect arguments, use compareNef -h&#39;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Incorrect arguments, use compareNef -h&#39;</span><span class="p">)</span>
 </pre></div>
 
           </div>
@@ -1033,15 +1083,15 @@
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
 <div id="searchbox" style="display: none" role="search">
-  <h3>Quick search</h3>
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
     <form class="search" action="../../../../search.html" method="get">
-      <input type="text" name="q" />
+      <input type="text" name="q" aria-labelledby="searchlabel" />
       <input type="submit" value="Go" />
-      <input type="hidden" name="check_keywords" value="yes" />
-      <input type="hidden" name="area" value="default" />
     </form>
+    </div>
 </div>
-<script type="text/javascript">$('#searchbox').show(0);</script>
+<script>$('#searchbox').show(0);</script>
         </div>
       </div>
       <div class="clearer"></div>
@@ -1055,13 +1105,13 @@
         <li class="right" >
           <a href="../../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../../index.html">Python  documentation</a> &raquo;</li>
-          <li class="nav-item nav-item-1"><a href="../../../index.html" >Module code</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="../../../../index.html">Python  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../../index.html" >Module code</a> &#187;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
-        &copy; Copyright .
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.1.
+        &#169; Copyright .
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.4.0.
     </div>
   </body>
 </html>

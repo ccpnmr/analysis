@@ -1,32 +1,22 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
+<!DOCTYPE html>
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    
-    <title>ccpn.ui.gui.modules.ObjectAssigner &mdash; Python  documentation</title>
-    
+    <meta charset="utf-8" />
+    <title>ccpn.ui.gui.modules.ObjectAssigner &#8212; Python  documentation</title>
     <link rel="stylesheet" href="../../../../../_static/classic.css" type="text/css" />
     <link rel="stylesheet" href="../../../../../_static/pygments.css" type="text/css" />
     
-    <script type="text/javascript">
-      var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    '../../../../../',
-        VERSION:     '',
-        COLLAPSE_INDEX: false,
-        FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true
-      };
-    </script>
-    <script type="text/javascript" src="../../../../../_static/jquery.js"></script>
-    <script type="text/javascript" src="../../../../../_static/underscore.js"></script>
-    <script type="text/javascript" src="../../../../../_static/doctools.js"></script>
-    <link rel="top" title="Python  documentation" href="../../../../../index.html" />
-    <link rel="up" title="Module code" href="../../../../index.html" /> 
-  </head>
-  <body role="document">
+    <script id="documentation_options" data-url_root="../../../../../" src="../../../../../_static/documentation_options.js"></script>
+    <script src="../../../../../_static/jquery.js"></script>
+    <script src="../../../../../_static/underscore.js"></script>
+    <script src="../../../../../_static/doctools.js"></script>
+    <script src="../../../../../_static/language_data.js"></script>
+    
+    <link rel="index" title="Index" href="../../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../../search.html" /> 
+  </head><body>
     <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
@@ -36,8 +26,8 @@
         <li class="right" >
           <a href="../../../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../../../index.html">Python  documentation</a> &raquo;</li>
-          <li class="nav-item nav-item-1"><a href="../../../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="../../../../../index.html">Python  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../../../index.html" accesskey="U">Module code</a> &#187;</li> 
       </ul>
     </div>  
 
@@ -93,9 +83,9 @@
 <span class="c1">#                                                       matchingNmrAtomsForDimensionOfPeaks)</span>
 
 <div class="viewcode-block" id="ObjectAssigner"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.modules.ObjectAssigner.ObjectAssigner">[docs]</a><span class="k">class</span> <span class="nc">ObjectAssigner</span><span class="p">(</span><span class="n">Widget</span><span class="p">):</span>
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">mainWindow</span><span class="p">,</span> <span class="n">dim</span><span class="p">,</span> <span class="n">objects</span><span class="p">,</span> <span class="n">opts</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">mainWindow</span><span class="p">,</span> <span class="n">dim</span><span class="p">,</span> <span class="n">objects</span><span class="p">,</span> <span class="n">opts</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
 
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span> <span class="o">=</span> <span class="n">mainWindow</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">application</span> <span class="o">=</span> <span class="n">mainWindow</span><span class="o">.</span><span class="n">application</span>
@@ -120,7 +110,7 @@
         <span class="n">columnHeadings</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">opts</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;objectTableColumnHeadings&#39;</span><span class="p">)</span>
         <span class="n">columnFunctions</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">opts</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;objectTableColumnGetValues&#39;</span><span class="p">)</span>
         <span class="n">callback</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">opts</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;objectTableCallBack&#39;</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">columnFunctions</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">columnFunctions</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">columns</span> <span class="o">=</span> <span class="p">[</span><span class="n">Column</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">columnHeadings</span><span class="p">,</span> <span class="n">columnFunctions</span><span class="p">)]</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">columns</span> <span class="o">=</span> <span class="p">[</span><span class="n">Column</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">columnHeadings</span><span class="p">,</span> <span class="n">columnHeadings</span><span class="p">)]</span>
@@ -176,7 +166,7 @@
 
 <div class="viewcode-block" id="ObjectAssigner.createChainPulldown"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.modules.ObjectAssigner.ObjectAssigner.createChainPulldown">[docs]</a>    <span class="k">def</span> <span class="nf">createChainPulldown</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">pulldownList</span> <span class="o">=</span> <span class="n">PulldownList</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
-        <span class="n">pulldownList</span><span class="o">.</span><span class="n">setEditable</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+        <span class="n">pulldownList</span><span class="o">.</span><span class="n">setEditable</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
         <span class="c1"># pulldownList.lineEdit().editingFinished.connect(partial(self.addItemToPulldown, pulldownList))</span>
         <span class="c1"># pulldownList.editTextChanged.connect(self.addItemToPulldown)</span>
         <span class="c1"># pulldownList.setData([chain.pid for chain in self.project.nmrChains])</span>
@@ -185,7 +175,7 @@
 
 <div class="viewcode-block" id="ObjectAssigner.createSeqCodePulldown"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.modules.ObjectAssigner.ObjectAssigner.createSeqCodePulldown">[docs]</a>    <span class="k">def</span> <span class="nf">createSeqCodePulldown</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">pulldownList</span> <span class="o">=</span> <span class="n">PulldownList</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
-        <span class="n">pulldownList</span><span class="o">.</span><span class="n">setEditable</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+        <span class="n">pulldownList</span><span class="o">.</span><span class="n">setEditable</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
         <span class="c1"># pulldownList.editTextChanged.connect(self.addItemToPulldown)</span>
         <span class="c1"># sequenceCodes = [nmrResidue.sequenceCode for nmrResidue in self.project.nmrResidues]</span>
         <span class="c1"># pulldownList.setData(sorted(sequenceCodes, key=self.natural_key))</span>
@@ -195,13 +185,13 @@
 <div class="viewcode-block" id="ObjectAssigner.createResTypePulldown"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.modules.ObjectAssigner.ObjectAssigner.createResTypePulldown">[docs]</a>    <span class="k">def</span> <span class="nf">createResTypePulldown</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">pulldownList</span> <span class="o">=</span> <span class="n">PulldownList</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
         <span class="c1"># self.resTypePulldowns.append(pulldownList)</span>
-        <span class="n">pulldownList</span><span class="o">.</span><span class="n">setEditable</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+        <span class="n">pulldownList</span><span class="o">.</span><span class="n">setEditable</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
         <span class="c1"># pulldownList.editTextChanged.connect(self.addItemToPulldown)</span>
         <span class="k">return</span> <span class="n">pulldownList</span></div>
 
 <div class="viewcode-block" id="ObjectAssigner.createAtomTypePulldown"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.modules.ObjectAssigner.ObjectAssigner.createAtomTypePulldown">[docs]</a>    <span class="k">def</span> <span class="nf">createAtomTypePulldown</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">pulldownList</span> <span class="o">=</span> <span class="n">PulldownList</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
-        <span class="n">pulldownList</span><span class="o">.</span><span class="n">setEditable</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+        <span class="n">pulldownList</span><span class="o">.</span><span class="n">setEditable</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
         <span class="c1"># pulldownList.editTextChanged.connect(self.addItemToPulldown)</span>
         <span class="c1"># self.atomTypePulldowns.append(pulldownList)</span>
         <span class="k">return</span> <span class="n">pulldownList</span></div>
@@ -268,7 +258,7 @@
 
 <span class="sd">    &#39;&#39;&#39;</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">pid</span> <span class="o">=</span> <span class="s1">&#39;New NMR Atom&#39;</span></div>
 
 
@@ -282,7 +272,7 @@
 
 <span class="sd">    &#39;&#39;&#39;</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">pid</span> <span class="o">=</span> <span class="s1">&#39;Multiple selected peaks not on line.&#39;</span></div>
 
 
@@ -296,15 +286,15 @@
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
 <div id="searchbox" style="display: none" role="search">
-  <h3>Quick search</h3>
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
     <form class="search" action="../../../../../search.html" method="get">
-      <input type="text" name="q" />
+      <input type="text" name="q" aria-labelledby="searchlabel" />
       <input type="submit" value="Go" />
-      <input type="hidden" name="check_keywords" value="yes" />
-      <input type="hidden" name="area" value="default" />
     </form>
+    </div>
 </div>
-<script type="text/javascript">$('#searchbox').show(0);</script>
+<script>$('#searchbox').show(0);</script>
         </div>
       </div>
       <div class="clearer"></div>
@@ -318,13 +308,13 @@
         <li class="right" >
           <a href="../../../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../../../index.html">Python  documentation</a> &raquo;</li>
-          <li class="nav-item nav-item-1"><a href="../../../../index.html" >Module code</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="../../../../../index.html">Python  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../../../index.html" >Module code</a> &#187;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
-        &copy; Copyright .
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.1.
+        &#169; Copyright .
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.4.0.
     </div>
   </body>
 </html>

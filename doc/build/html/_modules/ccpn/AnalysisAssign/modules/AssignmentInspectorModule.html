@@ -1,32 +1,22 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
+<!DOCTYPE html>
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    
-    <title>ccpn.AnalysisAssign.modules.AssignmentInspectorModule &mdash; Python  documentation</title>
-    
+    <meta charset="utf-8" />
+    <title>ccpn.AnalysisAssign.modules.AssignmentInspectorModule &#8212; Python  documentation</title>
     <link rel="stylesheet" href="../../../../_static/classic.css" type="text/css" />
     <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
     
-    <script type="text/javascript">
-      var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    '../../../../',
-        VERSION:     '',
-        COLLAPSE_INDEX: false,
-        FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true
-      };
-    </script>
-    <script type="text/javascript" src="../../../../_static/jquery.js"></script>
-    <script type="text/javascript" src="../../../../_static/underscore.js"></script>
-    <script type="text/javascript" src="../../../../_static/doctools.js"></script>
-    <link rel="top" title="Python  documentation" href="../../../../index.html" />
-    <link rel="up" title="Module code" href="../../../index.html" /> 
-  </head>
-  <body role="document">
+    <script id="documentation_options" data-url_root="../../../../" src="../../../../_static/documentation_options.js"></script>
+    <script src="../../../../_static/jquery.js"></script>
+    <script src="../../../../_static/underscore.js"></script>
+    <script src="../../../../_static/doctools.js"></script>
+    <script src="../../../../_static/language_data.js"></script>
+    
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+  </head><body>
     <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
@@ -36,8 +26,8 @@
         <li class="right" >
           <a href="../../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../../index.html">Python  documentation</a> &raquo;</li>
-          <li class="nav-item nav-item-1"><a href="../../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="../../../../index.html">Python  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../../index.html" accesskey="U">Module code</a> &#187;</li> 
       </ul>
     </div>  
 
@@ -113,7 +103,7 @@
 
 <span class="k">class</span> <span class="nc">_emptyObject</span><span class="p">():</span>
     <span class="c1"># small object to facilitate passing data to simulated event</span>
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">pass</span>
 
 
@@ -129,12 +119,12 @@
     <span class="n">className</span> <span class="o">=</span> <span class="s1">&#39;AssignmentInspectorModule&#39;</span>
     <span class="n">attributeName</span> <span class="o">=</span> <span class="s1">&#39;peaks&#39;</span>
 
-    <span class="n">includeSettingsWidget</span> <span class="o">=</span> <span class="bp">True</span>
+    <span class="n">includeSettingsWidget</span> <span class="o">=</span> <span class="kc">True</span>
     <span class="n">maxSettingsState</span> <span class="o">=</span> <span class="mi">2</span>  <span class="c1"># states are defined as: 0: invisible, 1: both visible, 2: only settings visible</span>
     <span class="n">settingsPosition</span> <span class="o">=</span> <span class="s1">&#39;top&#39;</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mainWindow</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;Assignment Inspector&#39;</span><span class="p">,</span> <span class="n">chemicalShiftList</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">mainWindow</span><span class="o">=</span><span class="n">mainWindow</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>  <span class="c1"># gwv</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mainWindow</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;Assignment Inspector&#39;</span><span class="p">,</span> <span class="n">chemicalShiftList</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">mainWindow</span><span class="o">=</span><span class="n">mainWindow</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>  <span class="c1"># gwv</span>
 
         <span class="c1"># Derive application, project, and current from mainWindow</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span> <span class="o">=</span> <span class="n">mainWindow</span>
@@ -150,19 +140,19 @@
         <span class="c1"># settings window</span>
 
         <span class="c1"># self.splitter = Splitter(self.mainWidget, QtCore.Qt.Vertical)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">splitter</span> <span class="o">=</span> <span class="n">Splitter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mainWidget</span><span class="p">,</span> <span class="n">horizontal</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_chemicalShiftFrame</span> <span class="o">=</span> <span class="n">Frame</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">splitter</span><span class="p">,</span> <span class="n">setLayout</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_assignmentFrame</span> <span class="o">=</span> <span class="n">Frame</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">splitter</span><span class="p">,</span> <span class="n">setLayout</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">splitter</span> <span class="o">=</span> <span class="n">Splitter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mainWidget</span><span class="p">,</span> <span class="n">horizontal</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_chemicalShiftFrame</span> <span class="o">=</span> <span class="n">Frame</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">splitter</span><span class="p">,</span> <span class="n">setLayout</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_assignmentFrame</span> <span class="o">=</span> <span class="n">Frame</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">splitter</span><span class="p">,</span> <span class="n">setLayout</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="c1"># self._chemicalShiftFrame = Frame(self.mainWidget, setLayout=True, grid=(0,0))</span>
         <span class="c1"># self._assignmentFrame = Frame(self.mainWidget, setLayout=True, grid=(1,0))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">mainWidget</span><span class="o">.</span><span class="n">getLayout</span><span class="p">()</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">splitter</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">splitter</span><span class="o">.</span><span class="n">setStretchFactor</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">splitter</span><span class="o">.</span><span class="n">setStretchFactor</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">splitter</span><span class="o">.</span><span class="n">setChildrenCollapsible</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">splitter</span><span class="o">.</span><span class="n">setChildrenCollapsible</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_assignmentFrame</span><span class="o">.</span><span class="n">setMinimumHeight</span><span class="p">(</span><span class="mi">100</span><span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">_AIwidget</span> <span class="o">=</span> <span class="n">Widget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">settingsWidget</span><span class="p">,</span> <span class="n">setLayout</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_AIwidget</span> <span class="o">=</span> <span class="n">Widget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">settingsWidget</span><span class="p">,</span> <span class="n">setLayout</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
                                 <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">vAlign</span><span class="o">=</span><span class="s1">&#39;top&#39;</span><span class="p">,</span> <span class="n">hAlign</span><span class="o">=</span><span class="s1">&#39;left&#39;</span><span class="p">)</span>
 
         <span class="c1"># cannot set a notifier for displays, as these are not (yet?) implemented and the Notifier routines</span>
@@ -172,7 +162,7 @@
                                                  <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">vAlign</span><span class="o">=</span><span class="s1">&#39;top&#39;</span><span class="p">,</span> <span class="n">stretch</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">hAlign</span><span class="o">=</span><span class="s1">&#39;left&#39;</span><span class="p">,</span>
                                                  <span class="n">vPolicy</span><span class="o">=</span><span class="s1">&#39;minimal&#39;</span><span class="p">,</span>
                                                  <span class="c1">#minimumWidths=(colwidth, 0, 0),</span>
-                                                 <span class="n">fixedWidths</span><span class="o">=</span><span class="p">(</span><span class="n">colwidth</span><span class="p">,</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">colwidth</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span>
+                                                 <span class="n">fixedWidths</span><span class="o">=</span><span class="p">(</span><span class="n">colwidth</span><span class="p">,</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">colwidth</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
                                                  <span class="n">orientation</span><span class="o">=</span><span class="s1">&#39;left&#39;</span><span class="p">,</span>
                                                  <span class="n">labelText</span><span class="o">=</span><span class="s1">&#39;Display(s):&#39;</span><span class="p">,</span>
                                                  <span class="n">tipText</span><span class="o">=</span><span class="s1">&#39;SpectrumDisplay modules to respond to double-click&#39;</span><span class="p">,</span>
@@ -180,7 +170,7 @@
                                                  <span class="n">defaults</span><span class="o">=</span><span class="p">[</span><span class="n">ALL</span><span class="p">]</span>
                                                  <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">displaysWidget</span><span class="o">.</span><span class="n">setPreSelect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_fillDisplayWidget</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">displaysWidget</span><span class="o">.</span><span class="n">setFixedHeights</span><span class="p">((</span><span class="bp">None</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="mi">40</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">displaysWidget</span><span class="o">.</span><span class="n">setFixedHeights</span><span class="p">((</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="mi">40</span><span class="p">))</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">sequentialStripsWidget</span> <span class="o">=</span> <span class="n">CheckBoxCompoundWidget</span><span class="p">(</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_AIwidget</span><span class="p">,</span>
@@ -189,7 +179,7 @@
                 <span class="n">fixedWidths</span><span class="o">=</span><span class="p">(</span><span class="n">colwidth</span><span class="p">,</span> <span class="mi">30</span><span class="p">),</span>
                 <span class="n">orientation</span><span class="o">=</span><span class="s1">&#39;left&#39;</span><span class="p">,</span>
                 <span class="n">labelText</span><span class="o">=</span><span class="s1">&#39;Show sequential strips:&#39;</span><span class="p">,</span>
-                <span class="n">checked</span><span class="o">=</span><span class="bp">False</span>
+                <span class="n">checked</span><span class="o">=</span><span class="kc">False</span>
                 <span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">markPositionsWidget</span> <span class="o">=</span> <span class="n">CheckBoxCompoundWidget</span><span class="p">(</span>
@@ -199,7 +189,7 @@
                 <span class="n">fixedWidths</span><span class="o">=</span><span class="p">(</span><span class="n">colwidth</span><span class="p">,</span> <span class="mi">30</span><span class="p">),</span>
                 <span class="n">orientation</span><span class="o">=</span><span class="s1">&#39;left&#39;</span><span class="p">,</span>
                 <span class="n">labelText</span><span class="o">=</span><span class="s1">&#39;Mark positions:&#39;</span><span class="p">,</span>
-                <span class="n">checked</span><span class="o">=</span><span class="bp">True</span>
+                <span class="n">checked</span><span class="o">=</span><span class="kc">True</span>
                 <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">autoClearMarksWidget</span> <span class="o">=</span> <span class="n">CheckBoxCompoundWidget</span><span class="p">(</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_AIwidget</span><span class="p">,</span>
@@ -208,7 +198,7 @@
                 <span class="n">fixedWidths</span><span class="o">=</span><span class="p">(</span><span class="n">colwidth</span><span class="p">,</span> <span class="mi">30</span><span class="p">),</span>
                 <span class="n">orientation</span><span class="o">=</span><span class="s1">&#39;left&#39;</span><span class="p">,</span>
                 <span class="n">labelText</span><span class="o">=</span><span class="s1">&#39;Auto clear marks:&#39;</span><span class="p">,</span>
-                <span class="n">checked</span><span class="o">=</span><span class="bp">True</span>
+                <span class="n">checked</span><span class="o">=</span><span class="kc">True</span>
                 <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">showNmrAtomListWidget</span> <span class="o">=</span> <span class="n">CheckBoxCompoundWidget</span><span class="p">(</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_AIwidget</span><span class="p">,</span>
@@ -217,7 +207,7 @@
                 <span class="n">fixedWidths</span><span class="o">=</span><span class="p">(</span><span class="n">colwidth</span><span class="p">,</span> <span class="mi">30</span><span class="p">),</span>
                 <span class="n">orientation</span><span class="o">=</span><span class="s1">&#39;left&#39;</span><span class="p">,</span>
                 <span class="n">labelText</span><span class="o">=</span><span class="s1">&#39;Show nmrAtom list:&#39;</span><span class="p">,</span>
-                <span class="n">checked</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+                <span class="n">checked</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
                 <span class="n">callback</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_setNmrAtomListVisible</span><span class="p">,</span>
                 <span class="p">)</span>
 
@@ -228,7 +218,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">assignedPeaksTable</span> <span class="o">=</span> <span class="n">AssignmentInspectorTable</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_assignmentFrame</span><span class="p">,</span>
                                                            <span class="n">mainWindow</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span><span class="p">,</span>
                                                            <span class="n">moduleParent</span><span class="o">=</span><span class="bp">self</span><span class="p">,</span>
-                                                           <span class="n">setLayout</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+                                                           <span class="n">setLayout</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
                                                            <span class="n">selectionCallback</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_setCurrentPeak</span><span class="p">,</span>
                                                            <span class="n">actionCallback</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_navigateToPeak</span><span class="p">,</span>
                                                            <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
@@ -236,19 +226,19 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">chemicalShiftTable</span> <span class="o">=</span> <span class="n">ChemicalShiftTable</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_chemicalShiftFrame</span><span class="p">,</span>
                                                      <span class="n">mainWindow</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span><span class="p">,</span>
                                                      <span class="n">moduleParent</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">assignedPeaksTable</span><span class="p">,</span>  <span class="c1"># just to give a unique id</span>
-                                                     <span class="n">setLayout</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+                                                     <span class="n">setLayout</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
                                                      <span class="n">actionCallback</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">navigateToNmrResidueCallBack</span><span class="p">,</span>
                                                      <span class="n">selectionCallback</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_selectionCallback</span><span class="p">,</span>
                                                      <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
                                                      <span class="n">hiddenColumns</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;Pid&#39;</span><span class="p">,</span> <span class="s1">&#39;Shift list peaks&#39;</span><span class="p">,</span> <span class="s1">&#39;All peaks&#39;</span><span class="p">])</span>
 
         <span class="c1"># settingsWidget</span>
-        <span class="k">if</span> <span class="n">chemicalShiftList</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">chemicalShiftList</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">chemicalShiftTable</span><span class="o">.</span><span class="n">selectChemicalShiftList</span><span class="p">(</span><span class="n">chemicalShiftList</span><span class="p">)</span>
 
         <span class="c1"># install the event filter to handle maximising from floated dock</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">installMaximiseEventHandler</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_maximise</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_closeModule</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_setNmrAtomListVisible</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_setNmrAtomListVisible</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_registerNotifiers</span><span class="p">()</span>
 
@@ -298,10 +288,10 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_closeModule</span><span class="p">()</span></div>
 
-    <span class="k">def</span> <span class="nf">_setNmrAtomListVisible</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">visible</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_setNmrAtomListVisible</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">visible</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;change the visibility of the nmrAtom list in the peak tables widget</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="n">visible</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">visible</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">visible</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">showNmrAtomListWidget</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">visible</span><span class="p">,</span> <span class="nb">bool</span><span class="p">):</span>
@@ -324,7 +314,7 @@
     <span class="k">def</span> <span class="nf">_notifierBlanking</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;block nmrAtom and nmrResidue notifiers for this module only</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">setBlankingAllNotifiers</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setBlankingAllNotifiers</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="c1"># transfer control to the calling function</span>
             <span class="k">yield</span>
@@ -334,7 +324,7 @@
 
         <span class="k">finally</span><span class="p">:</span>
             <span class="c1"># reset notifiers</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">setBlankingAllNotifiers</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">setBlankingAllNotifiers</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
 
 <div class="viewcode-block" id="AssignmentInspectorModule.navigateToNmrResidueCallBack"><a class="viewcode-back" href="../../../../ccpn/ccpn.AnalysisAssign.modules.html#ccpn.AnalysisAssign.modules.AssignmentInspectorModule.AssignmentInspectorModule.navigateToNmrResidueCallBack">[docs]</a>    <span class="k">def</span> <span class="nf">navigateToNmrResidueCallBack</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Navigate in selected displays to nmrResidue; skip if none defined</span>
@@ -440,7 +430,7 @@
 
                     <span class="bp">self</span><span class="o">.</span><span class="n">assignedPeaksTable</span><span class="o">.</span><span class="n">_updateModuleCallback</span><span class="p">({</span><span class="n">NMRRESIDUES</span><span class="p">:</span> <span class="n">nmrResidues</span><span class="p">,</span>
                                                                    <span class="n">NMRATOMS</span>   <span class="p">:</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">nmrAtoms</span><span class="p">)},</span>
-                                                                  <span class="n">updateFromNmrResidues</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+                                                                  <span class="n">updateFromNmrResidues</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_highlightChemicalShifts</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nmrResidues</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -494,13 +484,13 @@
                         <span class="n">validPeakListViews</span> <span class="o">=</span> <span class="p">[</span><span class="n">pp</span><span class="o">.</span><span class="n">peakList</span> <span class="k">for</span> <span class="n">pp</span> <span class="ow">in</span> <span class="n">strip</span><span class="o">.</span><span class="n">peakListViews</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">pp</span><span class="o">.</span><span class="n">peakList</span><span class="p">,</span> <span class="n">PeakList</span><span class="p">)]</span>
 
                         <span class="k">if</span> <span class="n">peak</span><span class="o">.</span><span class="n">peakList</span> <span class="ow">in</span> <span class="n">validPeakListViews</span><span class="p">:</span>
-                            <span class="n">widths</span> <span class="o">=</span> <span class="bp">None</span>
+                            <span class="n">widths</span> <span class="o">=</span> <span class="kc">None</span>
                             <span class="k">if</span> <span class="n">peak</span><span class="o">.</span><span class="n">peakList</span><span class="o">.</span><span class="n">spectrum</span><span class="o">.</span><span class="n">dimensionCount</span> <span class="o">&lt;=</span> <span class="mi">2</span><span class="p">:</span>
                                 <span class="n">widths</span> <span class="o">=</span> <span class="n">_getCurrentZoomRatio</span><span class="p">(</span><span class="n">strip</span><span class="o">.</span><span class="n">viewRange</span><span class="p">())</span>
 
                             <span class="n">navigateToNmrAtomsInStrip</span><span class="p">(</span><span class="n">strip</span><span class="p">,</span> <span class="n">makeIterableList</span><span class="p">(</span><span class="n">peak</span><span class="o">.</span><span class="n">assignedNmrAtoms</span><span class="p">),</span>
                                                       <span class="n">widths</span><span class="o">=</span><span class="n">widths</span><span class="p">,</span> <span class="n">markPositions</span><span class="o">=</span><span class="n">markPositions</span><span class="p">,</span>
-                                                      <span class="n">setNmrResidueLabel</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+                                                      <span class="n">setNmrResidueLabel</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_highlightNmrResidues</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -521,7 +511,7 @@
 
             <span class="c1"># will respond to selection of nmrAtom in sequenceGraph</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">assignedPeaksTable</span><span class="o">.</span><span class="n">_updateModuleCallback</span><span class="p">({</span><span class="n">NMRRESIDUES</span><span class="p">:</span> <span class="n">nmrResidues</span><span class="p">},</span>
-                                                          <span class="n">updateFromNmrResidues</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+                                                          <span class="n">updateFromNmrResidues</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_highlightNmrAtoms</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -544,7 +534,7 @@
             <span class="c1"># will respond to selection of nmrAtom in sequenceGraph</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">assignedPeaksTable</span><span class="o">.</span><span class="n">_updateModuleCallback</span><span class="p">({</span><span class="n">NMRRESIDUES</span><span class="p">:</span> <span class="n">nmrResidues</span><span class="p">,</span>
                                                            <span class="n">NMRATOMS</span>   <span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">nmrAtoms</span><span class="p">},</span>
-                                                          <span class="n">updateFromNmrResidues</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+                                                          <span class="n">updateFromNmrResidues</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 
         <span class="k">return</span></div>
 
@@ -570,8 +560,8 @@
     <span class="n">OBJECT</span> <span class="o">=</span> <span class="s1">&#39;object&#39;</span>
     <span class="n">TABLE</span> <span class="o">=</span> <span class="s1">&#39;table&#39;</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">mainWindow</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">moduleParent</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">actionCallback</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">selectionCallback</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
-                 <span class="n">checkBoxCallback</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">nmrChain</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">multiSelect</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">mainWindow</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">moduleParent</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">actionCallback</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">selectionCallback</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="n">checkBoxCallback</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">nmrChain</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">multiSelect</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
                  <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Initialise the widgets for the module.</span>
@@ -583,9 +573,9 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">project</span> <span class="o">=</span> <span class="n">mainWindow</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">project</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">current</span> <span class="o">=</span> <span class="n">mainWindow</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">current</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">application</span> <span class="o">=</span> <span class="bp">None</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">project</span> <span class="o">=</span> <span class="bp">None</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">current</span> <span class="o">=</span> <span class="bp">None</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">application</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">project</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">current</span> <span class="o">=</span> <span class="kc">None</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">sampledDims</span> <span class="o">=</span> <span class="p">{}</span>  <span class="c1">#GWV: not sure what this is supposed to do</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">ids</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># list of currently displayed NmrAtom ids + &lt;all&gt;</span>
@@ -594,26 +584,26 @@
 
         <span class="c1"># Frame-1: NmrAtoms list, hidden when table first opens</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_nmrAtomListFrameWidth</span> <span class="o">=</span> <span class="mi">130</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">nmrAtomListFrame</span> <span class="o">=</span> <span class="n">Frame</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">gridSpan</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">setLayout</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>  <span class="c1"># ejb</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nmrAtomListFrame</span> <span class="o">=</span> <span class="n">Frame</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">gridSpan</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">setLayout</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>  <span class="c1"># ejb</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">nmrAtomListFrame</span><span class="o">.</span><span class="n">setFixedWidth</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_nmrAtomListFrameWidth</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">nmrAtomLabel</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nmrAtomListFrame</span><span class="p">,</span> <span class="s1">&#39;NmrAtom(s):&#39;</span><span class="p">,</span> <span class="n">bold</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nmrAtomLabel</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nmrAtomListFrame</span><span class="p">,</span> <span class="s1">&#39;NmrAtom(s):&#39;</span><span class="p">,</span> <span class="n">bold</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
                                   <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">gridSpan</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">vAlign</span><span class="o">=</span><span class="s1">&#39;center&#39;</span><span class="p">,</span> <span class="n">margins</span><span class="o">=</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">5</span><span class="p">])</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">attachedNmrAtomsList</span> <span class="o">=</span> <span class="n">ListWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nmrAtomListFrame</span><span class="p">,</span>
-                                               <span class="n">contextMenu</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
+                                               <span class="n">contextMenu</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
                                                <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">gridSpan</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
                                                <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">attachedNmrAtomsList</span><span class="o">.</span><span class="n">itemSelectionChanged</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_updatePeakTableCallback</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">attachedNmrAtomsList</span><span class="o">.</span><span class="n">setDragEnabled</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">attachedNmrAtomsList</span><span class="o">.</span><span class="n">setDragEnabled</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">attachedNmrAtomsList</span><span class="o">.</span><span class="n">setFixedWidth</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_nmrAtomListFrameWidth</span> <span class="o">-</span> <span class="mi">2</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">attachedNmrAtomsList</span><span class="o">.</span><span class="n">setSizePolicy</span><span class="p">(</span><span class="n">QtWidgets</span><span class="o">.</span><span class="n">QSizePolicy</span><span class="o">.</span><span class="n">Ignored</span><span class="p">,</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QSizePolicy</span><span class="o">.</span><span class="n">MinimumExpanding</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">nmrAtomListFrame</span><span class="o">.</span><span class="n">setSizePolicy</span><span class="p">(</span><span class="n">QtWidgets</span><span class="o">.</span><span class="n">QSizePolicy</span><span class="o">.</span><span class="n">Ignored</span><span class="p">,</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QSizePolicy</span><span class="o">.</span><span class="n">Ignored</span><span class="p">)</span>
 
         <span class="c1"># Frame-2: peaks</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">frame2</span> <span class="o">=</span> <span class="n">Frame</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">gridSpan</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">setLayout</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>  <span class="c1"># ejb</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">peaksLabel</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">frame2</span><span class="p">,</span> <span class="s1">&#39;Peaks assigned to NmrAtom(s):&#39;</span><span class="p">,</span> <span class="n">bold</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">frame2</span> <span class="o">=</span> <span class="n">Frame</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">gridSpan</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">setLayout</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>  <span class="c1"># ejb</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">peaksLabel</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">frame2</span><span class="p">,</span> <span class="s1">&#39;Peaks assigned to NmrAtom(s):&#39;</span><span class="p">,</span> <span class="n">bold</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
                                 <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">gridSpan</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span> <span class="n">margins</span><span class="o">=</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">5</span><span class="p">])</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">peaksLabel</span><span class="o">.</span><span class="n">setFixedHeight</span><span class="p">(</span><span class="mi">24</span><span class="p">)</span>
@@ -622,44 +612,44 @@
 
         <span class="c1"># initialise the currently attached dataFrame</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_hiddenColumns</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Pid&#39;</span><span class="p">]</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">dataFrameObject</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dataFrameObject</span> <span class="o">=</span> <span class="kc">None</span>
 
         <span class="c1"># initialise the table and put in the second column (first hidden at start)</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">frame2</span><span class="p">,</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">frame2</span><span class="p">,</span>
                          <span class="n">mainWindow</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span><span class="p">,</span>
-                         <span class="n">dataFrameObject</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
-                         <span class="n">setLayout</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
-                         <span class="n">autoResize</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">multiSelect</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+                         <span class="n">dataFrameObject</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                         <span class="n">setLayout</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                         <span class="n">autoResize</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">multiSelect</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
                          <span class="n">selectionCallback</span><span class="o">=</span><span class="n">selectionCallback</span><span class="p">,</span>
                          <span class="n">actionCallback</span><span class="o">=</span><span class="n">actionCallback</span><span class="p">,</span>
                          <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">gridSpan</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span>
-                         <span class="n">enableDelete</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">enableSearch</span><span class="o">=</span><span class="bp">False</span>
+                         <span class="n">enableDelete</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">enableSearch</span><span class="o">=</span><span class="kc">False</span>
                          <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">moduleParent</span> <span class="o">=</span> <span class="n">moduleParent</span>
 
         <span class="c1"># self._registerNotifiers() - removed for testing</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">_peakList</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_peakList</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="c1"># update if current.nmrResidue is defined</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">nmrResidue</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">chemicalShiftList</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">nmrResidue</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">chemicalShiftList</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_updateModuleCallback</span><span class="p">({</span><span class="n">NMRRESIDUES</span><span class="p">:</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">nmrResidue</span><span class="p">]},</span>
-                                       <span class="n">updateFromNmrResidues</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+                                       <span class="n">updateFromNmrResidues</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
         <span class="c1"># set the required table notifiers</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">setTableNotifiers</span><span class="p">(</span><span class="n">tableClass</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setTableNotifiers</span><span class="p">(</span><span class="n">tableClass</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                                <span class="n">rowClass</span><span class="o">=</span><span class="n">Peak</span><span class="p">,</span>
-                               <span class="n">cellClassNames</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                               <span class="n">cellClassNames</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                                <span class="n">tableName</span><span class="o">=</span><span class="s1">&#39;peakList&#39;</span><span class="p">,</span> <span class="n">rowName</span><span class="o">=</span><span class="s1">&#39;peak&#39;</span><span class="p">,</span>
                                <span class="n">changeFunc</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_refreshTable</span><span class="p">,</span>
                                <span class="n">className</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">attributeName</span><span class="p">,</span>
                                <span class="n">updateFunc</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_refreshTable</span><span class="p">,</span>
                                <span class="n">tableSelection</span><span class="o">=</span><span class="s1">&#39;_peakList&#39;</span><span class="p">,</span>
-                               <span class="n">pullDownWidget</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>  <span class="c1">#self.ncWidget</span>
+                               <span class="n">pullDownWidget</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>  <span class="c1">#self.ncWidget</span>
                                <span class="n">callBackClass</span><span class="o">=</span><span class="n">Peak</span><span class="p">,</span>
                                <span class="n">selectCurrentCallBack</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_selectOnTableCurrentPeaksNotifierCallback</span><span class="p">,</span>
                                <span class="n">moduleParent</span><span class="o">=</span><span class="n">moduleParent</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">_updateModuleCallback</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">updateFromNmrResidues</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_updateModuleCallback</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">updateFromNmrResidues</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Callback function: Module responsive to nmrResidues; updates the list widget with nmrAtoms and updates peakTable if</span>
 <span class="sd">        current.nmrAtom belongs to nmrResidue</span>
@@ -733,7 +723,7 @@
         <span class="c1"># else:</span>
         <span class="c1">#     self.clearSelection()</span>
 
-    <span class="k">def</span> <span class="nf">_updatePeakTableCallback</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_updatePeakTableCallback</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Update the peakTable using item.text (which contains a NmrAtom pid or &lt;all&gt;)</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -743,8 +733,8 @@
         <span class="n">nmrAtoms</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">getByPid</span><span class="p">(</span><span class="s1">&#39;NA:&#39;</span> <span class="o">+</span> <span class="nb">id</span><span class="p">)</span> <span class="k">for</span> <span class="nb">id</span> <span class="ow">in</span> <span class="n">selectedTexts</span><span class="p">]</span>
 
         <span class="c1"># populate the table with valid nmrAtoms</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_updatePeakTable</span><span class="p">([</span><span class="n">atm</span> <span class="k">for</span> <span class="n">atm</span> <span class="ow">in</span> <span class="n">nmrAtoms</span> <span class="k">if</span> <span class="n">atm</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">],</span>
-                              <span class="n">messageAll</span><span class="o">=</span><span class="bp">True</span> <span class="k">if</span> <span class="n">numTexts</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">nmrAtoms</span><span class="p">)</span> <span class="k">else</span> <span class="bp">False</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_updatePeakTable</span><span class="p">([</span><span class="n">atm</span> <span class="k">for</span> <span class="n">atm</span> <span class="ow">in</span> <span class="n">nmrAtoms</span> <span class="k">if</span> <span class="n">atm</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">],</span>
+                              <span class="n">messageAll</span><span class="o">=</span><span class="kc">True</span> <span class="k">if</span> <span class="n">numTexts</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">nmrAtoms</span><span class="p">)</span> <span class="k">else</span> <span class="kc">False</span><span class="p">)</span>
 
     <span class="c1"># @contextmanager</span>
     <span class="c1"># def _projectBlanking(self):</span>
@@ -765,7 +755,7 @@
     <span class="c1">#         self._highLightObjs(objs)</span>
     <span class="c1">#         self.project.unblankNotification()</span>
 
-    <span class="k">def</span> <span class="nf">_updatePeakTable</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nmrAtoms</span><span class="p">,</span> <span class="n">messageAll</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_updatePeakTable</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nmrAtoms</span><span class="p">,</span> <span class="n">messageAll</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Update peak table depending on value of id;</span>
 <span class="sd">        clears peakTable if pid is None</span>
@@ -832,10 +822,10 @@
 
 <div class="viewcode-block" id="AssignmentInspectorTable.getColumns"><a class="viewcode-back" href="../../../../ccpn/ccpn.AnalysisAssign.modules.html#ccpn.AnalysisAssign.modules.AssignmentInspectorModule.AssignmentInspectorTable.getColumns">[docs]</a>    <span class="k">def</span> <span class="nf">getColumns</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="s2">&quot;get columns for initialisation of table&quot;</span>
-        <span class="n">columns</span> <span class="o">=</span> <span class="n">ColumnClass</span><span class="p">([(</span><span class="s1">&#39;Peak&#39;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">pk</span><span class="p">:</span> <span class="n">pk</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span>
-                               <span class="p">(</span><span class="s1">&#39;Pid&#39;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">pk</span><span class="p">:</span> <span class="n">pk</span><span class="o">.</span><span class="n">pid</span><span class="p">,</span> <span class="s1">&#39;Pid of peak&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span>
-                               <span class="p">(</span><span class="s1">&#39;_object&#39;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">pk</span><span class="p">:</span> <span class="n">pk</span><span class="p">,</span> <span class="s1">&#39;Object&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span>
-                               <span class="p">(</span><span class="s1">&#39;serial&#39;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">pk</span><span class="p">:</span> <span class="n">pk</span><span class="o">.</span><span class="n">serial</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)])</span>
+        <span class="n">columns</span> <span class="o">=</span> <span class="n">ColumnClass</span><span class="p">([(</span><span class="s1">&#39;Peak&#39;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">pk</span><span class="p">:</span> <span class="n">pk</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
+                               <span class="p">(</span><span class="s1">&#39;Pid&#39;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">pk</span><span class="p">:</span> <span class="n">pk</span><span class="o">.</span><span class="n">pid</span><span class="p">,</span> <span class="s1">&#39;Pid of peak&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
+                               <span class="p">(</span><span class="s1">&#39;_object&#39;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">pk</span><span class="p">:</span> <span class="n">pk</span><span class="p">,</span> <span class="s1">&#39;Object&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
+                               <span class="p">(</span><span class="s1">&#39;serial&#39;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">pk</span><span class="p">:</span> <span class="n">pk</span><span class="o">.</span><span class="n">serial</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">)])</span>
         <span class="n">tipTexts</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="c1"># get the maxmimum number of dimensions from all spectra in the project</span>
         <span class="n">numDim</span> <span class="o">=</span> <span class="nb">max</span><span class="p">([</span><span class="n">sp</span><span class="o">.</span><span class="n">dimensionCount</span> <span class="k">for</span> <span class="n">sp</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">spectra</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="mi">1</span><span class="p">])</span>
@@ -845,7 +835,8 @@
             <span class="n">c</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="s1">&#39;Assign F</span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">j</span><span class="p">,</span>
                        <span class="k">lambda</span> <span class="n">pk</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="n">i</span><span class="p">:</span> <span class="n">getPeakAnnotation</span><span class="p">(</span><span class="n">pk</span><span class="p">,</span> <span class="n">dim</span><span class="p">),</span>
                        <span class="s1">&#39;NmrAtom assignments of peak in dimension </span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">j</span><span class="p">,</span>
-                       <span class="bp">None</span><span class="p">)</span>
+                       <span class="kc">None</span><span class="p">,</span>
+                       <span class="kc">None</span><span class="p">)</span>
             <span class="n">columns</span><span class="o">.</span><span class="n">_columns</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">c</span><span class="p">)</span>
 
             <span class="c1"># columns.append(c)</span>
@@ -865,13 +856,14 @@
             <span class="n">c</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">text</span><span class="p">,</span>
                        <span class="k">lambda</span> <span class="n">pk</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="n">i</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="n">unit</span><span class="p">:</span> <span class="n">getPeakPosition</span><span class="p">(</span><span class="n">pk</span><span class="p">,</span> <span class="n">dim</span><span class="p">,</span> <span class="n">unit</span><span class="p">),</span>
                        <span class="n">tipText</span><span class="p">,</span>
-                       <span class="bp">None</span><span class="p">)</span>
+                       <span class="kc">None</span><span class="p">,</span>
+                       <span class="s1">&#39;</span><span class="si">%0.3f</span><span class="s1">&#39;</span><span class="p">)</span>
             <span class="n">columns</span><span class="o">.</span><span class="n">_columns</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">c</span><span class="p">)</span>
 
             <span class="c1"># columns.append(c)</span>
             <span class="c1"># tipTexts.append(tipText)</span>
-        <span class="n">columns</span><span class="o">.</span><span class="n">_columns</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Column</span><span class="p">(</span><span class="s1">&#39;height&#39;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">pk</span><span class="p">:</span> <span class="n">pk</span><span class="o">.</span><span class="n">height</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">))</span>
-        <span class="n">columns</span><span class="o">.</span><span class="n">_columns</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Column</span><span class="p">(</span><span class="s1">&#39;volume&#39;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">pk</span><span class="p">:</span> <span class="n">pk</span><span class="o">.</span><span class="n">volume</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">))</span>
+        <span class="n">columns</span><span class="o">.</span><span class="n">_columns</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Column</span><span class="p">(</span><span class="s1">&#39;height&#39;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">pk</span><span class="p">:</span> <span class="n">pk</span><span class="o">.</span><span class="n">height</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">))</span>
+        <span class="n">columns</span><span class="o">.</span><span class="n">_columns</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Column</span><span class="p">(</span><span class="s1">&#39;volume&#39;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">pk</span><span class="p">:</span> <span class="n">pk</span><span class="o">.</span><span class="n">volume</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">))</span>
         <span class="k">return</span> <span class="n">columns</span></div>
 
     <span class="c1"># def _setCurrentPeak(self, data):</span>
@@ -937,7 +929,7 @@
         <span class="k">if</span> <span class="n">peak</span><span class="o">.</span><span class="n">height</span><span class="p">:</span>
             <span class="k">return</span> <span class="s1">&#39;</span><span class="si">%7.2E</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">float</span><span class="p">(</span><span class="n">peak</span><span class="o">.</span><span class="n">height</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">return</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="bp">None</span>
+            <span class="k">return</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="kc">None</span>
 
     <span class="c1"># def _getSearchWidget(self):</span>
     <span class="c1">#   &quot;&quot;&quot;</span>
@@ -961,15 +953,15 @@
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
 <div id="searchbox" style="display: none" role="search">
-  <h3>Quick search</h3>
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
     <form class="search" action="../../../../search.html" method="get">
-      <input type="text" name="q" />
+      <input type="text" name="q" aria-labelledby="searchlabel" />
       <input type="submit" value="Go" />
-      <input type="hidden" name="check_keywords" value="yes" />
-      <input type="hidden" name="area" value="default" />
     </form>
+    </div>
 </div>
-<script type="text/javascript">$('#searchbox').show(0);</script>
+<script>$('#searchbox').show(0);</script>
         </div>
       </div>
       <div class="clearer"></div>
@@ -983,13 +975,13 @@
         <li class="right" >
           <a href="../../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../../index.html">Python  documentation</a> &raquo;</li>
-          <li class="nav-item nav-item-1"><a href="../../../index.html" >Module code</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="../../../../index.html">Python  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../../index.html" >Module code</a> &#187;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
-        &copy; Copyright .
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.1.
+        &#169; Copyright .
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.4.0.
     </div>
   </body>
 </html>

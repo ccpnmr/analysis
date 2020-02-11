@@ -1,32 +1,22 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
+<!DOCTYPE html>
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    
-    <title>ccpn.ui.gui.popups.SpectrumGroupEditor &mdash; Python  documentation</title>
-    
+    <meta charset="utf-8" />
+    <title>ccpn.ui.gui.popups.SpectrumGroupEditor &#8212; Python  documentation</title>
     <link rel="stylesheet" href="../../../../../_static/classic.css" type="text/css" />
     <link rel="stylesheet" href="../../../../../_static/pygments.css" type="text/css" />
     
-    <script type="text/javascript">
-      var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    '../../../../../',
-        VERSION:     '',
-        COLLAPSE_INDEX: false,
-        FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true
-      };
-    </script>
-    <script type="text/javascript" src="../../../../../_static/jquery.js"></script>
-    <script type="text/javascript" src="../../../../../_static/underscore.js"></script>
-    <script type="text/javascript" src="../../../../../_static/doctools.js"></script>
-    <link rel="top" title="Python  documentation" href="../../../../../index.html" />
-    <link rel="up" title="Module code" href="../../../../index.html" /> 
-  </head>
-  <body role="document">
+    <script id="documentation_options" data-url_root="../../../../../" src="../../../../../_static/documentation_options.js"></script>
+    <script src="../../../../../_static/jquery.js"></script>
+    <script src="../../../../../_static/underscore.js"></script>
+    <script src="../../../../../_static/doctools.js"></script>
+    <script src="../../../../../_static/language_data.js"></script>
+    
+    <link rel="index" title="Index" href="../../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../../search.html" /> 
+  </head><body>
     <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
@@ -36,8 +26,8 @@
         <li class="right" >
           <a href="../../../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../../../index.html">Python  documentation</a> &raquo;</li>
-          <li class="nav-item nav-item-1"><a href="../../../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="../../../../../index.html">Python  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../../../index.html" accesskey="U">Module code</a> &#187;</li> 
       </ul>
     </div>  
 
@@ -53,7 +43,7 @@
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Licence, Reference and Credits</span>
 <span class="c1">#=========================================================================================</span>
-<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019&quot;</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020&quot;</span>
 <span class="n">__credits__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Ed Brooksbank, Luca Mureddu, Timothy J Ragan &amp; Geerten W Vuister&quot;</span><span class="p">)</span>
 <span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">)</span>
 <span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., &amp; Vuister, G.W.&quot;</span><span class="p">,</span>
@@ -62,9 +52,9 @@
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Last code modification</span>
 <span class="c1">#=========================================================================================</span>
-<span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: CCPN $&quot;</span>
-<span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2017-07-07 16:32:50 +0100 (Fri, July 07, 2017) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.0 $&quot;</span>
+<span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: Ed Brooksbank $&quot;</span>
+<span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2020-02-06 18:27:17 +0000 (Thu, February 06, 2020) $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.1 $&quot;</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Created</span>
 <span class="c1">#=========================================================================================</span>
@@ -74,12 +64,46 @@
 <span class="c1"># Start of code</span>
 <span class="c1">#=========================================================================================</span>
 
-
-<span class="kn">from</span> <span class="nn">ccpn.core.SpectrumGroup</span> <span class="kn">import</span> <span class="n">SpectrumGroup</span>
+<span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">partial</span>
+<span class="kn">from</span> <span class="nn">PyQt5</span> <span class="kn">import</span> <span class="n">QtWidgets</span><span class="p">,</span> <span class="n">QtGui</span><span class="p">,</span> <span class="n">QtCore</span>
+<span class="kn">from</span> <span class="nn">ast</span> <span class="kn">import</span> <span class="n">literal_eval</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Any</span>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">OrderedDict</span><span class="p">,</span> <span class="n">Iterable</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.LineEdit</span> <span class="kn">import</span> <span class="n">LineEdit</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.MessageDialog</span> <span class="kn">import</span> <span class="n">showWarning</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.popups.Dialog</span> <span class="kn">import</span> <span class="n">handleDialogApply</span><span class="p">,</span> <span class="n">_verifyPopupChangesApply</span>
+<span class="kn">from</span> <span class="nn">ccpn.core.lib.ContextManagers</span> <span class="kn">import</span> <span class="n">undoStackBlocking</span>
+<span class="kn">from</span> <span class="nn">ccpn.core.lib.ContextManagers</span> <span class="kn">import</span> <span class="n">queueStateChange</span>
+<span class="kn">from</span> <span class="nn">ccpn.core.Spectrum</span> <span class="kn">import</span> <span class="n">Spectrum</span>
+<span class="kn">from</span> <span class="nn">ccpn.core.SpectrumGroup</span> <span class="kn">import</span> <span class="n">SpectrumGroup</span><span class="p">,</span> <span class="n">SERIESTYPES</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Tabs</span> <span class="kn">import</span> <span class="n">Tabs</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Widget</span> <span class="kn">import</span> <span class="n">Widget</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Label</span> <span class="kn">import</span> <span class="n">Label</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Frame</span> <span class="kn">import</span> <span class="n">Frame</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.PulldownListsForObjects</span> <span class="kn">import</span> <span class="n">SpectrumGroupPulldown</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Spacer</span> <span class="kn">import</span> <span class="n">Spacer</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.TextEditor</span> <span class="kn">import</span> <span class="n">PlainTextEditor</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.RadioButtons</span> <span class="kn">import</span> <span class="n">RadioButtons</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.CompoundWidgets</span> <span class="kn">import</span> <span class="n">PulldownListCompoundWidget</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Icon</span> <span class="kn">import</span> <span class="n">Icon</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.popups._GroupEditorPopupABC</span> <span class="kn">import</span> <span class="n">_GroupEditorPopupABC</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.popups.SpectrumPropertiesPopup</span> <span class="kn">import</span> <span class="n">ColourTab</span><span class="p">,</span> <span class="n">ContoursTab</span>
+<span class="kn">from</span> <span class="nn">ccpn.util.AttrDict</span> <span class="kn">import</span> <span class="n">AttrDict</span>
+<span class="kn">from</span> <span class="nn">ccpn.util.Constants</span> <span class="kn">import</span> <span class="n">ALL_UNITS</span>
 
-<span class="kn">from</span> <span class="nn">ccpn.util.Logging</span> <span class="kn">import</span> <span class="n">getLogger</span>
+
+<span class="n">DEFAULTSPACING</span> <span class="o">=</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+<span class="n">TABMARGINS</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>  <span class="c1"># l, t, r, b</span>
+<span class="n">INVALIDROWCOLOUR</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QColor</span><span class="p">(</span><span class="s1">&#39;lightpink&#39;</span><span class="p">)</span>
+<span class="n">SPECTRATABNUM</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="n">GENERAL1DTABNUM</span> <span class="o">=</span> <span class="mi">1</span>
+<span class="n">GENERALNDTABNUM</span> <span class="o">=</span> <span class="mi">2</span>
+<span class="n">SERIESTABNUM</span> <span class="o">=</span> <span class="mi">3</span>
+<span class="n">NUMTABS</span> <span class="o">=</span> <span class="mi">4</span>
+<span class="n">SPECTRA_LABEL</span> <span class="o">=</span> <span class="s1">&#39;Spectra&#39;</span>
+<span class="n">GENERALTAB1D_LABEL</span> <span class="o">=</span> <span class="s1">&#39;General 1d&#39;</span>
+<span class="n">GENERALTABND_LABEL</span> <span class="o">=</span> <span class="s1">&#39;General Nd&#39;</span>
+<span class="n">SERIES_LABEL</span> <span class="o">=</span> <span class="s1">&#39;Series&#39;</span>
 
 
 <div class="viewcode-block" id="SpectrumGroupEditor"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.popups.html#ccpn.ui.gui.popups.SpectrumGroupEditor.SpectrumGroupEditor">[docs]</a><span class="k">class</span> <span class="nc">SpectrumGroupEditor</span><span class="p">(</span><span class="n">_GroupEditorPopupABC</span><span class="p">):</span>
@@ -98,11 +122,857 @@
 
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">KLASS</span> <span class="o">=</span> <span class="n">SpectrumGroup</span>
-    <span class="n">KLASS_ITEM_ATTRIBUTE</span> <span class="o">=</span> <span class="s1">&#39;spectra&#39;</span> <span class="c1"># Attribute in KLASS containing items</span>
+    <span class="n">KLASS_ITEM_ATTRIBUTE</span> <span class="o">=</span> <span class="s1">&#39;spectra&#39;</span>  <span class="c1"># Attribute in KLASS containing items</span>
     <span class="n">KLASS_PULLDOWN</span> <span class="o">=</span> <span class="n">SpectrumGroupPulldown</span>
 
     <span class="n">PROJECT_NEW_METHOD</span> <span class="o">=</span> <span class="s1">&#39;newSpectrumGroup&#39;</span>  <span class="c1"># Method of Project to create new KLASS instance</span>
-    <span class="n">PROJECT_ITEM_ATTRIBUTE</span> <span class="o">=</span> <span class="s1">&#39;spectra&#39;</span>  <span class="c1"># Attribute of Project containing items</span></div>
+    <span class="n">PROJECT_ITEM_ATTRIBUTE</span> <span class="o">=</span> <span class="s1">&#39;spectra&#39;</span>  <span class="c1"># Attribute of Project containing items</span>
+    <span class="n">PLURAL_GROUPED_NAME</span> <span class="o">=</span> <span class="s1">&#39;Spectrum Groups&#39;</span>
+    <span class="n">SINGULAR_GROUP_NAME</span> <span class="o">=</span> <span class="s1">&#39;Spectrum Group&#39;</span>
+
+    <span class="n">GROUP_PID_KEY</span> <span class="o">=</span> <span class="s1">&#39;SG&#39;</span>
+    <span class="n">ITEM_PID_KEY</span> <span class="o">=</span> <span class="s1">&#39;SP&#39;</span>
+
+    <span class="k">def</span> <span class="nf">_applyChanges</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        The apply button has been clicked</span>
+<span class="sd">        Define an undo block for setting the properties of the object</span>
+<span class="sd">        If there is an error setting any values then generate an error message</span>
+<span class="sd">          If anything has been added to the undo queue then remove it with application.undo()</span>
+<span class="sd">          repopulate the popup widgets</span>
+
+<span class="sd">        This is controlled by a series of dicts that contain change functions - operations that are scheduled</span>
+<span class="sd">        by changing items in the popup. These functions are executed when the Apply or OK buttons are clicked</span>
+
+<span class="sd">        Return True unless any errors occurred</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">_colourTabs1d</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_colourTabs1d</span><span class="o">.</span><span class="n">widget</span><span class="p">(</span><span class="n">tt</span><span class="p">)</span> <span class="k">for</span> <span class="n">tt</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_colourTabs1d</span><span class="o">.</span><span class="n">count</span><span class="p">())]</span>
+        <span class="n">_colourTabsNd</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_colourTabsNd</span><span class="o">.</span><span class="n">widget</span><span class="p">(</span><span class="n">tt</span><span class="p">)</span> <span class="k">for</span> <span class="n">tt</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_colourTabsNd</span><span class="o">.</span><span class="n">count</span><span class="p">())]</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">_colourTabs1d</span> <span class="ow">or</span> <span class="n">_colourTabsNd</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;Code error: tabs not implemented&quot;</span><span class="p">)</span>
+
+        <span class="n">_allTabs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getActiveTabList</span><span class="p">()</span>
+
+        <span class="c1"># get the list of widgets that have been changed - exit if all empty</span>
+        <span class="n">allChanges</span> <span class="o">=</span> <span class="nb">any</span><span class="p">(</span><span class="n">t</span><span class="o">.</span><span class="n">_changes</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">_allTabs</span> <span class="k">if</span> <span class="n">t</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="kc">True</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_currentEditorState</span><span class="p">()</span> <span class="k">else</span> <span class="kc">False</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">allChanges</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">True</span>
+
+        <span class="c1"># handle clicking of the Apply/OK button</span>
+        <span class="k">with</span> <span class="n">handleDialogApply</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="k">as</span> <span class="n">error</span><span class="p">:</span>
+
+            <span class="c1"># get the list of spectra that have changed - for refreshing the displays</span>
+            <span class="n">spectrumList</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="p">(</span><span class="n">_colourTabs1d</span> <span class="o">+</span> <span class="n">_colourTabsNd</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">t</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="n">changes</span> <span class="o">=</span> <span class="n">t</span><span class="o">.</span><span class="n">_changes</span>
+                    <span class="k">if</span> <span class="n">changes</span><span class="p">:</span>
+                        <span class="n">spectrumList</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">t</span><span class="o">.</span><span class="n">spectrum</span><span class="p">)</span>
+
+            <span class="c1"># add an undo item to redraw these spectra</span>
+            <span class="k">with</span> <span class="n">undoStackBlocking</span><span class="p">()</span> <span class="k">as</span> <span class="n">addUndoItem</span><span class="p">:</span>
+                <span class="n">addUndoItem</span><span class="p">(</span><span class="n">undo</span><span class="o">=</span><span class="n">partial</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_updateGl</span><span class="p">,</span> <span class="n">spectrumList</span><span class="p">))</span>
+
+            <span class="c1"># call the _groupEditor _applyChanges method which sets the group items</span>
+            <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_applyChanges</span><span class="p">()</span>
+
+            <span class="c1"># add a redo item to redraw these spectra</span>
+            <span class="k">with</span> <span class="n">undoStackBlocking</span><span class="p">()</span> <span class="k">as</span> <span class="n">addUndoItem</span><span class="p">:</span>
+                <span class="n">addUndoItem</span><span class="p">(</span><span class="n">redo</span><span class="o">=</span><span class="n">partial</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_updateGl</span><span class="p">,</span> <span class="n">spectrumList</span><span class="p">))</span>
+
+            <span class="c1"># rebuild the contours as required</span>
+            <span class="k">for</span> <span class="n">spec</span> <span class="ow">in</span> <span class="n">spectrumList</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">specViews</span> <span class="ow">in</span> <span class="n">spec</span><span class="o">.</span><span class="n">spectrumViews</span><span class="p">:</span>
+                    <span class="n">specViews</span><span class="o">.</span><span class="n">buildContours</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_updateGl</span><span class="p">(</span><span class="n">spectrumList</span><span class="p">)</span>
+
+        <span class="c1"># everything has happened - disable the apply button</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_applyButton</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+
+        <span class="c1"># check for any errors</span>
+        <span class="k">if</span> <span class="n">error</span><span class="o">.</span><span class="n">errorValue</span><span class="p">:</span>
+            <span class="c1"># repopulate popup on an error</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_populate</span><span class="p">()</span>
+            <span class="k">return</span> <span class="kc">False</span>
+
+        <span class="c1"># remove all changes</span>
+        <span class="k">for</span> <span class="n">tab</span> <span class="ow">in</span> <span class="p">(</span><span class="n">_colourTabs1d</span> <span class="o">+</span> <span class="n">_colourTabsNd</span><span class="p">):</span>
+            <span class="n">tab</span><span class="o">.</span><span class="n">_changes</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="c1"># self._currentNumApplies += 1</span>
+        <span class="c1"># self._revertButton.setEnabled(True)</span>
+        <span class="k">return</span> <span class="kc">True</span>
+
+    <span class="k">def</span> <span class="nf">_groupInit</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1"># apply the changes to the listed spectra spectraTab._changes</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectraTab</span><span class="o">.</span><span class="n">_changes</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_applyAllChanges</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">spectraTab</span><span class="o">.</span><span class="n">_changes</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">tt</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_colourTabs1d</span><span class="o">.</span><span class="n">count</span><span class="p">()):</span>
+            <span class="n">_changes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_colourTabs1d</span><span class="o">.</span><span class="n">widget</span><span class="p">(</span><span class="n">tt</span><span class="p">)</span><span class="o">.</span><span class="n">_changes</span>
+            <span class="k">if</span> <span class="n">_changes</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_applyAllChanges</span><span class="p">(</span><span class="n">_changes</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">tt</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_colourTabsNd</span><span class="o">.</span><span class="n">count</span><span class="p">()):</span>
+            <span class="n">_changes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_colourTabsNd</span><span class="o">.</span><span class="n">widget</span><span class="p">(</span><span class="n">tt</span><span class="p">)</span><span class="o">.</span><span class="n">_changes</span>
+            <span class="k">if</span> <span class="n">_changes</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_applyAllChanges</span><span class="p">(</span><span class="n">_changes</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_spectrumGroupSeriesEdited</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_spectrumGroupSeriesValues</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">obj</span><span class="o">.</span><span class="n">series</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_spectrumGroupSeriesUnitsEdited</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_spectrumGroupSeriesTypeEdited</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="c1"># set the series values - this may crash</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">seriesTab</span><span class="o">.</span><span class="n">_changes</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_applyAllChanges</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">seriesTab</span><span class="o">.</span><span class="n">_changes</span><span class="p">)</span>
+
+        <span class="n">specList</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_currentEditorState</span><span class="p">()[</span><span class="bp">self</span><span class="o">.</span><span class="n">obj</span><span class="o">.</span><span class="n">id</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">dim</span><span class="p">,</span> <span class="n">specPid</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">specList</span><span class="p">):</span>
+            <span class="n">spec</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">getByPid</span><span class="p">(</span><span class="n">specPid</span><span class="p">)</span>
+
+            <span class="c1"># read the value from the edits dict - bit of a hack from _changeSpectrumSeriesValues</span>
+            <span class="k">if</span> <span class="n">spec</span> <span class="ow">and</span> <span class="n">dim</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_spectrumGroupSeriesEdited</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_spectrumGroupSeriesValues</span><span class="p">[</span><span class="n">dim</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_spectrumGroupSeriesEdited</span><span class="p">[</span><span class="n">dim</span><span class="p">]</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_spectrumGroupSeriesEdited</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">obj</span><span class="o">.</span><span class="n">series</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_spectrumGroupSeriesValues</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">es</span><span class="p">:</span>
+                <span class="n">showWarning</span><span class="p">(</span><span class="s1">&#39;Error settings seriesValues&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">es</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_spectrumGroupSeriesUnitsEdited</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">obj</span><span class="o">.</span><span class="n">seriesUnits</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_spectrumGroupSeriesUnitsEdited</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_spectrumGroupSeriesTypeEdited</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">obj</span><span class="o">.</span><span class="n">seriesType</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_spectrumGroupSeriesTypeEdited</span>
+
+    <span class="n">GROUPEDITOR_INIT_METHOD</span> <span class="o">=</span> <span class="n">_groupInit</span>
+
+    <span class="c1"># make this a tabbed dialog, with the default widget going into tab 0</span>
+    <span class="n">USE_TAB</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">NUMBER_TABS</span> <span class="o">=</span> <span class="mi">4</span>  <span class="c1"># create the first tab</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">mainWindow</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">editMode</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">obj</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">defaultItems</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Initialise the widget, note defaultItems is only used for create</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="n">parent</span><span class="p">,</span> <span class="n">mainWindow</span><span class="o">=</span><span class="n">mainWindow</span><span class="p">,</span> <span class="n">editMode</span><span class="o">=</span><span class="n">editMode</span><span class="p">,</span> <span class="n">obj</span><span class="o">=</span><span class="n">obj</span><span class="p">,</span> <span class="n">defaultItems</span><span class="o">=</span><span class="n">defaultItems</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">TAB_NAMES</span> <span class="o">=</span> <span class="p">((</span><span class="n">SPECTRA_LABEL</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_initSpectraTab</span><span class="p">),</span>
+                          <span class="p">(</span><span class="n">GENERALTAB1D_LABEL</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_initGeneralTab1d</span><span class="p">),</span>
+                          <span class="p">(</span><span class="n">GENERALTABND_LABEL</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_initGeneralTabNd</span><span class="p">),</span>
+                          <span class="p">(</span><span class="n">SERIES_LABEL</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_initSeriesTab</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="n">obj</span> <span class="ow">and</span> <span class="n">editMode</span><span class="p">:</span>
+            <span class="n">defaultItems</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">spectra</span>
+        <span class="c1"># replace the tab widget with a new seriesWidget</span>
+        <span class="n">seriesTabContents</span> <span class="o">=</span> <span class="n">SeriesFrame</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="bp">self</span><span class="p">,</span> <span class="n">mainWindow</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span><span class="p">,</span> <span class="n">spectrumGroup</span><span class="o">=</span><span class="n">obj</span><span class="p">,</span> <span class="n">editMode</span><span class="o">=</span><span class="n">editMode</span><span class="p">,</span>
+                                        <span class="n">showCopyOptions</span><span class="o">=</span><span class="kc">True</span> <span class="k">if</span> <span class="n">defaultItems</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">defaultItems</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="k">else</span> <span class="kc">False</span><span class="p">,</span>
+                                        <span class="n">defaultItems</span><span class="o">=</span><span class="n">defaultItems</span> <span class="ow">or</span> <span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_tabWidget</span><span class="o">.</span><span class="n">widget</span><span class="p">(</span><span class="n">SERIESTABNUM</span><span class="p">)</span><span class="o">.</span><span class="n">setWidget</span><span class="p">(</span><span class="n">seriesTabContents</span><span class="p">)</span>
+
+        <span class="c1"># get pointers to the tabs</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">spectraTab</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tabWidget</span><span class="o">.</span><span class="n">widget</span><span class="p">(</span><span class="n">SPECTRATABNUM</span><span class="p">)</span><span class="o">.</span><span class="n">_scrollContents</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">generalTab1d</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tabWidget</span><span class="o">.</span><span class="n">widget</span><span class="p">(</span><span class="n">GENERAL1DTABNUM</span><span class="p">)</span><span class="o">.</span><span class="n">_scrollContents</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">generalTabNd</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tabWidget</span><span class="o">.</span><span class="n">widget</span><span class="p">(</span><span class="n">GENERALNDTABNUM</span><span class="p">)</span><span class="o">.</span><span class="n">_scrollContents</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">seriesTab</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tabWidget</span><span class="o">.</span><span class="n">widget</span><span class="p">(</span><span class="n">SERIESTABNUM</span><span class="p">)</span><span class="o">.</span><span class="n">_scrollContents</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_generalTabWidget1d</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tabWidget</span><span class="o">.</span><span class="n">widget</span><span class="p">(</span><span class="n">GENERAL1DTABNUM</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_generalTabWidgetNd</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tabWidget</span><span class="o">.</span><span class="n">widget</span><span class="p">(</span><span class="n">GENERALNDTABNUM</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">currentSpectra</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getSpectraFromList</span><span class="p">()</span>
+
+        <span class="c1"># set the labels in the first pass</span>
+        <span class="k">for</span> <span class="n">tNum</span><span class="p">,</span> <span class="p">(</span><span class="n">tabName</span><span class="p">,</span> <span class="n">tabFunc</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">TAB_NAMES</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_tabWidget</span><span class="o">.</span><span class="n">setTabText</span><span class="p">(</span><span class="n">tNum</span><span class="p">,</span> <span class="n">tabName</span><span class="p">)</span>
+
+        <span class="c1"># call the tab initialise functions (may show/hide tabs)</span>
+        <span class="k">for</span> <span class="n">tNum</span><span class="p">,</span> <span class="p">(</span><span class="n">tabName</span><span class="p">,</span> <span class="n">tabFunc</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">TAB_NAMES</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">tabFunc</span><span class="p">:</span>
+                <span class="n">tabFunc</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_populate</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setDefaultButton</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setMinimumSize</span><span class="p">(</span><span class="mi">600</span><span class="p">,</span> <span class="mi">550</span><span class="p">)</span>  <span class="c1"># change to a calculation rather than a guess</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">connectSignals</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setSizeGripEnabled</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+
+<div class="viewcode-block" id="SpectrumGroupEditor.connectSignals"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.popups.html#ccpn.ui.gui.popups.SpectrumGroupEditor.SpectrumGroupEditor.connectSignals">[docs]</a>    <span class="k">def</span> <span class="nf">connectSignals</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1"># connect to changes in the spectrumGroup</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">leftListWidget</span><span class="o">.</span><span class="n">model</span><span class="p">()</span><span class="o">.</span><span class="n">dataChanged</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_spectraChanged</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">leftListWidget</span><span class="o">.</span><span class="n">model</span><span class="p">()</span><span class="o">.</span><span class="n">rowsRemoved</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_spectraChanged</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">leftListWidget</span><span class="o">.</span><span class="n">model</span><span class="p">()</span><span class="o">.</span><span class="n">rowsInserted</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_spectraChanged</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">leftListWidget</span><span class="o">.</span><span class="n">model</span><span class="p">()</span><span class="o">.</span><span class="n">rowsMoved</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_spectraChanged</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="SpectrumGroupEditor.getActiveTabList"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.popups.html#ccpn.ui.gui.popups.SpectrumGroupEditor.SpectrumGroupEditor.getActiveTabList">[docs]</a>    <span class="k">def</span> <span class="nf">getActiveTabList</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return the list of active tabs</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># test the colour tabs for the moment</span>
+        <span class="n">tabs</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_colourTabs1d</span><span class="o">.</span><span class="n">widget</span><span class="p">(</span><span class="n">ii</span><span class="p">)</span> <span class="k">for</span> <span class="n">ii</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_colourTabs1d</span><span class="o">.</span><span class="n">count</span><span class="p">()))</span> <span class="o">+</span> \
+               <span class="nb">tuple</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_colourTabsNd</span><span class="o">.</span><span class="n">widget</span><span class="p">(</span><span class="n">ii</span><span class="p">)</span> <span class="k">for</span> <span class="n">ii</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_colourTabsNd</span><span class="o">.</span><span class="n">count</span><span class="p">()))</span> <span class="o">+</span> \
+               <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">spectraTab</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">seriesTab</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">tabs</span></div>
+
+    <span class="k">def</span> <span class="nf">_initSpectraTab</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">thisTab</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectraTab</span>
+        <span class="n">thisTab</span><span class="o">.</span><span class="n">_changes</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">_initGeneralTab1d</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">thisTab</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">generalTab1d</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_colourTabs1d</span> <span class="o">=</span> <span class="n">Tabs</span><span class="p">(</span><span class="n">thisTab</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+
+        <span class="c1"># remember the state when switching tabs</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">copyCheckBoxState</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="n">spectra1d</span> <span class="o">=</span> <span class="p">[</span><span class="n">spec</span> <span class="k">for</span> <span class="n">spec</span> <span class="ow">in</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">currentSpectra</span> <span class="ow">or</span> <span class="p">[])</span> <span class="k">if</span> <span class="n">spec</span><span class="o">.</span><span class="n">dimensionCount</span> <span class="o">==</span> <span class="mi">1</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">specNum</span><span class="p">,</span> <span class="n">thisSpec</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">spectra1d</span><span class="p">):</span>
+
+            <span class="k">if</span> <span class="n">thisSpec</span><span class="o">.</span><span class="n">dimensionCount</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">contoursTab</span> <span class="o">=</span> <span class="n">ColourTab</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="bp">self</span><span class="p">,</span> <span class="n">mainWindow</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span><span class="p">,</span> <span class="n">spectrum</span><span class="o">=</span><span class="n">thisSpec</span><span class="p">,</span>
+                                          <span class="n">showCopyOptions</span><span class="o">=</span><span class="kc">True</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">spectra1d</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="k">else</span> <span class="kc">False</span><span class="p">,</span>
+                                          <span class="n">copyToSpectra</span><span class="o">=</span><span class="n">spectra1d</span><span class="p">)</span>
+
+                <span class="bp">self</span><span class="o">.</span><span class="n">_colourTabs1d</span><span class="o">.</span><span class="n">addTab</span><span class="p">(</span><span class="n">contoursTab</span><span class="p">,</span> <span class="n">thisSpec</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+                <span class="n">contoursTab</span><span class="o">.</span><span class="n">setContentsMargins</span><span class="p">(</span><span class="o">*</span><span class="n">TABMARGINS</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_colourTabs1d</span><span class="o">.</span><span class="n">setTabClickCallback</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_tabClicked1d</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_colourTabs1d</span><span class="o">.</span><span class="n">tabCloseRequested</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_closeColourTab1d</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_oldTabs</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">()</span>
+
+        <span class="n">index</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tabWidget</span><span class="o">.</span><span class="n">indexOf</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_generalTabWidget1d</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_colourTabs1d</span><span class="o">.</span><span class="n">count</span><span class="p">()</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">if</span> <span class="p">(</span><span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">index</span> <span class="o">&lt;</span> <span class="n">NUMTABS</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_tabWidget</span><span class="o">.</span><span class="n">removeTab</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_initGeneralTabNd</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">thisTab</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">generalTabNd</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_colourTabsNd</span> <span class="o">=</span> <span class="n">Tabs</span><span class="p">(</span><span class="n">thisTab</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+
+        <span class="c1"># remember the state when switching tabs</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">copyCheckBoxState</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="n">spectraNd</span> <span class="o">=</span> <span class="p">[</span><span class="n">spec</span> <span class="k">for</span> <span class="n">spec</span> <span class="ow">in</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">currentSpectra</span> <span class="ow">or</span> <span class="p">[])</span> <span class="k">if</span> <span class="n">spec</span><span class="o">.</span><span class="n">dimensionCount</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">specNum</span><span class="p">,</span> <span class="n">thisSpec</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">spectraNd</span><span class="p">):</span>
+
+            <span class="k">if</span> <span class="n">thisSpec</span><span class="o">.</span><span class="n">dimensionCount</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">contoursTab</span> <span class="o">=</span> <span class="n">ContoursTab</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="bp">self</span><span class="p">,</span> <span class="n">mainWindow</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span><span class="p">,</span> <span class="n">spectrum</span><span class="o">=</span><span class="n">thisSpec</span><span class="p">,</span>
+                                          <span class="n">showCopyOptions</span><span class="o">=</span><span class="kc">True</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">spectraNd</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="k">else</span> <span class="kc">False</span><span class="p">,</span>
+                                          <span class="n">copyToSpectra</span><span class="o">=</span><span class="n">spectraNd</span><span class="p">)</span>
+
+                <span class="bp">self</span><span class="o">.</span><span class="n">_colourTabsNd</span><span class="o">.</span><span class="n">addTab</span><span class="p">(</span><span class="n">contoursTab</span><span class="p">,</span> <span class="n">thisSpec</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+                <span class="n">contoursTab</span><span class="o">.</span><span class="n">setContentsMargins</span><span class="p">(</span><span class="o">*</span><span class="n">TABMARGINS</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_colourTabsNd</span><span class="o">.</span><span class="n">setTabClickCallback</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_tabClickedNd</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_colourTabsNd</span><span class="o">.</span><span class="n">tabCloseRequested</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_closeColourTabNd</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_oldTabs</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">()</span>
+
+        <span class="n">index</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tabWidget</span><span class="o">.</span><span class="n">indexOf</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_generalTabWidgetNd</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_colourTabsNd</span><span class="o">.</span><span class="n">count</span><span class="p">()</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">if</span> <span class="p">(</span><span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">index</span> <span class="o">&lt;</span> <span class="n">NUMTABS</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_tabWidget</span><span class="o">.</span><span class="n">removeTab</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_initSeriesTab</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">thisTab</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">seriesTab</span>
+        <span class="n">thisTab</span><span class="o">.</span><span class="n">_changes</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">()</span>
+        <span class="n">thisTab</span><span class="o">.</span><span class="n">_populate</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">_populate</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Populate the widgets in the tabs</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">blockWidgetSignals</span><span class="p">():</span>
+            <span class="k">for</span> <span class="n">colourTab</span> <span class="ow">in</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_colourTabs1d</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_colourTabsNd</span><span class="p">):</span>
+                <span class="k">for</span> <span class="n">aTab</span> <span class="ow">in</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">colourTab</span><span class="o">.</span><span class="n">widget</span><span class="p">(</span><span class="n">ii</span><span class="p">)</span> <span class="k">for</span> <span class="n">ii</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">colourTab</span><span class="o">.</span><span class="n">count</span><span class="p">())):</span>
+                    <span class="n">aTab</span><span class="o">.</span><span class="n">_populateColour</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">_tabClicked1d</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Callback for clicking a tab - needed for refilling the checkboxes and populating the pulldown</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">colourTab</span> <span class="ow">in</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_colourTabs1d</span><span class="p">,):</span>
+            <span class="n">aTabs</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">colourTab</span><span class="o">.</span><span class="n">widget</span><span class="p">(</span><span class="n">ii</span><span class="p">)</span> <span class="k">for</span> <span class="n">ii</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">colourTab</span><span class="o">.</span><span class="n">count</span><span class="p">()))</span>
+            <span class="k">if</span> <span class="n">aTabs</span> <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">aTabs</span><span class="p">[</span><span class="n">index</span><span class="p">],</span> <span class="s1">&#39;_populateCheckBoxes&#39;</span><span class="p">):</span>
+                <span class="n">aTabs</span><span class="p">[</span><span class="n">index</span><span class="p">]</span><span class="o">.</span><span class="n">_populateCheckBoxes</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">_tabClickedNd</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Callback for clicking a tab - needed for refilling the checkboxes and populating the pulldown</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">colourTab</span> <span class="ow">in</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_colourTabsNd</span><span class="p">,):</span>
+            <span class="n">aTabs</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">colourTab</span><span class="o">.</span><span class="n">widget</span><span class="p">(</span><span class="n">ii</span><span class="p">)</span> <span class="k">for</span> <span class="n">ii</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">colourTab</span><span class="o">.</span><span class="n">count</span><span class="p">()))</span>
+            <span class="k">if</span> <span class="n">aTabs</span> <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">aTabs</span><span class="p">[</span><span class="n">index</span><span class="p">],</span> <span class="s1">&#39;_populateCheckBoxes&#39;</span><span class="p">):</span>
+                <span class="n">aTabs</span><span class="p">[</span><span class="n">index</span><span class="p">]</span><span class="o">.</span><span class="n">_populateCheckBoxes</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">_getSpectraFromList</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Get the list of spectra from the list</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">spec</span> <span class="k">for</span> <span class="n">spec</span> <span class="ow">in</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">getByPid</span><span class="p">(</span><span class="n">spectrum</span><span class="p">)</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">spectrum</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="k">else</span> <span class="n">spectrum</span> <span class="k">for</span> <span class="n">spectrum</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_groupedObjects</span><span class="p">]</span> <span class="k">if</span> <span class="n">spec</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="nf">_cleanColourTab</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">spectrum</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Remove the unwanted queue items from spectra reomved from the spectrumQueue</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">blockWidgetSignals</span><span class="p">():</span>
+            <span class="k">for</span> <span class="n">colourTab</span> <span class="ow">in</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_colourTabs1d</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_colourTabsNd</span><span class="p">):</span>
+                <span class="k">for</span> <span class="n">aTab</span> <span class="ow">in</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">colourTab</span><span class="o">.</span><span class="n">widget</span><span class="p">(</span><span class="n">ii</span><span class="p">)</span> <span class="k">for</span> <span class="n">ii</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">colourTab</span><span class="o">.</span><span class="n">count</span><span class="p">())):</span>
+                    <span class="k">if</span> <span class="n">aTab</span><span class="o">.</span><span class="n">spectrum</span> <span class="o">==</span> <span class="n">spectrum</span><span class="p">:</span>
+                        <span class="n">aTab</span><span class="o">.</span><span class="n">_cleanWidgetQueue</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">_removeTab</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">spectrum</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Remove the unwanted queue items from spectra reomved from the spectrumQueue</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">colourTab</span> <span class="ow">in</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_colourTabs1d</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_colourTabsNd</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">aTab</span> <span class="ow">in</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">colourTab</span><span class="o">.</span><span class="n">widget</span><span class="p">(</span><span class="n">ii</span><span class="p">)</span> <span class="k">for</span> <span class="n">ii</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">colourTab</span><span class="o">.</span><span class="n">count</span><span class="p">())):</span>
+                <span class="k">if</span> <span class="n">aTab</span><span class="o">.</span><span class="n">spectrum</span> <span class="o">==</span> <span class="n">spectrum</span><span class="p">:</span>
+                    <span class="k">pass</span>
+
+    <span class="k">def</span> <span class="nf">_closeColourTab1d</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_colourTabs1d</span><span class="o">.</span><span class="n">removeTab</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_closeColourTabNd</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_colourTabsNd</span><span class="o">.</span><span class="n">removeTab</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_spectraChanged</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Respond to a change in the list of spectra to add the spectrumGroup</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_spectraChanged1d</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_spectraChangedNd</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">_spectraChanged1d</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_newSpectra</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getSpectraFromList</span><span class="p">()</span>
+
+        <span class="n">deleteSet</span> <span class="o">=</span> <span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">currentSpectra</span><span class="p">)</span> <span class="o">-</span> <span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_newSpectra</span><span class="p">))</span>
+        <span class="n">newSet</span> <span class="o">=</span> <span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">currentSpectra</span><span class="p">)</span> <span class="o">-</span> <span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_newSpectra</span><span class="p">))</span>
+
+        <span class="c1"># only select the 1d spectra</span>
+        <span class="n">deleteSet</span> <span class="o">=</span> <span class="p">[</span><span class="n">spec</span> <span class="k">for</span> <span class="n">spec</span> <span class="ow">in</span> <span class="n">deleteSet</span> <span class="k">if</span> <span class="n">spec</span><span class="o">.</span><span class="n">dimensionCount</span> <span class="o">==</span> <span class="mi">1</span><span class="p">]</span>
+        <span class="n">spectra1d</span> <span class="o">=</span> <span class="p">[</span><span class="n">spec</span> <span class="k">for</span> <span class="n">spec</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_newSpectra</span> <span class="k">if</span> <span class="n">spec</span><span class="o">.</span><span class="n">dimensionCount</span> <span class="o">==</span> <span class="mi">1</span><span class="p">]</span>
+
+        <span class="k">for</span> <span class="n">spec</span> <span class="ow">in</span> <span class="n">deleteSet</span><span class="p">:</span>
+            <span class="c1"># remove tab widget</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_cleanColourTab</span><span class="p">(</span><span class="n">spec</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">spec</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">seriesTab</span><span class="o">.</span><span class="n">_currentSeriesValues</span><span class="p">:</span>
+                <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">seriesTab</span><span class="o">.</span><span class="n">_currentSeriesValues</span><span class="p">[</span><span class="n">spec</span><span class="p">]</span>
+
+        <span class="c1"># remove all in reverse order, keep old ones</span>
+        <span class="k">for</span> <span class="n">ii</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_colourTabs1d</span><span class="o">.</span><span class="n">count</span><span class="p">()</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+            <span class="n">tab</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_colourTabs1d</span><span class="o">.</span><span class="n">widget</span><span class="p">(</span><span class="n">ii</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_oldTabs</span><span class="p">[</span><span class="n">tab</span><span class="o">.</span><span class="n">spectrum</span><span class="p">]</span> <span class="o">=</span> <span class="n">tab</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_colourTabs1d</span><span class="o">.</span><span class="n">removeTab</span><span class="p">(</span><span class="n">ii</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">spec</span> <span class="ow">in</span> <span class="n">spectra1d</span><span class="p">:</span>
+            <span class="c1"># add new tab widget here</span>
+            <span class="k">if</span> <span class="n">spec</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_oldTabs</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_colourTabs1d</span><span class="o">.</span><span class="n">addTab</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_oldTabs</span><span class="p">[</span><span class="n">spec</span><span class="p">],</span> <span class="n">spec</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_oldTabs</span><span class="p">[</span><span class="n">spec</span><span class="p">]</span><span class="o">.</span><span class="n">setCopyOptionsVisible</span><span class="p">(</span><span class="kc">True</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">spectra1d</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="k">else</span> <span class="kc">False</span><span class="p">)</span>
+
+                <span class="c1"># make sure the new spectrum lists are up-to-date</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_oldTabs</span><span class="p">[</span><span class="n">spec</span><span class="p">]</span><span class="o">.</span><span class="n">_updateSpectra</span><span class="p">(</span><span class="n">spec</span><span class="p">,</span> <span class="n">spectra1d</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_oldTabs</span><span class="p">[</span><span class="n">spec</span><span class="p">]</span><span class="o">.</span><span class="n">_populateColour</span><span class="p">()</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">spec</span><span class="o">.</span><span class="n">dimensionCount</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                    <span class="n">contoursTab</span> <span class="o">=</span> <span class="n">ColourTab</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="bp">self</span><span class="p">,</span> <span class="n">mainWindow</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span><span class="p">,</span> <span class="n">spectrum</span><span class="o">=</span><span class="n">spec</span><span class="p">,</span>
+                                              <span class="n">showCopyOptions</span><span class="o">=</span><span class="kc">True</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">spectra1d</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="k">else</span> <span class="kc">False</span><span class="p">,</span>
+                                              <span class="n">copyToSpectra</span><span class="o">=</span><span class="n">spectra1d</span><span class="p">)</span>
+
+                <span class="bp">self</span><span class="o">.</span><span class="n">_colourTabs1d</span><span class="o">.</span><span class="n">addTab</span><span class="p">(</span><span class="n">contoursTab</span><span class="p">,</span> <span class="n">spec</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+                <span class="n">contoursTab</span><span class="o">.</span><span class="n">setContentsMargins</span><span class="p">(</span><span class="o">*</span><span class="n">TABMARGINS</span><span class="p">)</span>
+                <span class="n">contoursTab</span><span class="o">.</span><span class="n">_populateColour</span><span class="p">()</span>
+
+        <span class="c1"># set the visibility of the general 1d tab</span>
+        <span class="n">index</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tabWidget</span><span class="o">.</span><span class="n">indexOf</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_generalTabWidget1d</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_colourTabs1d</span><span class="o">.</span><span class="n">count</span><span class="p">()</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">if</span> <span class="p">(</span><span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">index</span> <span class="o">&lt;</span> <span class="n">NUMTABS</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_tabWidget</span><span class="o">.</span><span class="n">removeTab</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">index</span> <span class="o">&lt;</span> <span class="n">NUMTABS</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_tabWidget</span><span class="o">.</span><span class="n">insertTab</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_generalTabWidget1d</span><span class="p">,</span> <span class="n">GENERALTAB1D_LABEL</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">seriesTab</span><span class="o">.</span><span class="n">_fillSeriesFrame</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_newSpectra</span><span class="p">)</span>
+
+        <span class="c1"># update the current list</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">currentSpectra</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_newSpectra</span>
+
+    <span class="k">def</span> <span class="nf">_spectraChangedNd</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_newSpectra</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getSpectraFromList</span><span class="p">()</span>
+
+        <span class="n">deleteSet</span> <span class="o">=</span> <span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">currentSpectra</span><span class="p">)</span> <span class="o">-</span> <span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_newSpectra</span><span class="p">))</span>
+        <span class="n">newSet</span> <span class="o">=</span> <span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">currentSpectra</span><span class="p">)</span> <span class="o">-</span> <span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_newSpectra</span><span class="p">))</span>
+
+        <span class="c1"># only select the 1d spectra</span>
+        <span class="n">deleteSet</span> <span class="o">=</span> <span class="p">[</span><span class="n">spec</span> <span class="k">for</span> <span class="n">spec</span> <span class="ow">in</span> <span class="n">deleteSet</span> <span class="k">if</span> <span class="n">spec</span><span class="o">.</span><span class="n">dimensionCount</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">]</span>
+        <span class="n">spectraNd</span> <span class="o">=</span> <span class="p">[</span><span class="n">spec</span> <span class="k">for</span> <span class="n">spec</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_newSpectra</span> <span class="k">if</span> <span class="n">spec</span><span class="o">.</span><span class="n">dimensionCount</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">]</span>
+
+        <span class="k">for</span> <span class="n">spec</span> <span class="ow">in</span> <span class="n">deleteSet</span><span class="p">:</span>
+            <span class="c1"># remove tab widget</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_cleanColourTab</span><span class="p">(</span><span class="n">spec</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">spec</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">seriesTab</span><span class="o">.</span><span class="n">_currentSeriesValues</span><span class="p">:</span>
+                <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">seriesTab</span><span class="o">.</span><span class="n">_currentSeriesValues</span><span class="p">[</span><span class="n">spec</span><span class="p">]</span>
+
+        <span class="c1"># remove all in reverse order, keep old ones</span>
+        <span class="k">for</span> <span class="n">ii</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_colourTabsNd</span><span class="o">.</span><span class="n">count</span><span class="p">()</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+            <span class="n">tab</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_colourTabsNd</span><span class="o">.</span><span class="n">widget</span><span class="p">(</span><span class="n">ii</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_oldTabs</span><span class="p">[</span><span class="n">tab</span><span class="o">.</span><span class="n">spectrum</span><span class="p">]</span> <span class="o">=</span> <span class="n">tab</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_colourTabsNd</span><span class="o">.</span><span class="n">removeTab</span><span class="p">(</span><span class="n">ii</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">spec</span> <span class="ow">in</span> <span class="n">spectraNd</span><span class="p">:</span>
+            <span class="c1"># add new tab widget here</span>
+            <span class="k">if</span> <span class="n">spec</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_oldTabs</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_colourTabsNd</span><span class="o">.</span><span class="n">addTab</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_oldTabs</span><span class="p">[</span><span class="n">spec</span><span class="p">],</span> <span class="n">spec</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_oldTabs</span><span class="p">[</span><span class="n">spec</span><span class="p">]</span><span class="o">.</span><span class="n">setCopyOptionsVisible</span><span class="p">(</span><span class="kc">True</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">spectraNd</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="k">else</span> <span class="kc">False</span><span class="p">)</span>
+
+                <span class="c1"># make sure the new spectrum lists are up-to-date</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_oldTabs</span><span class="p">[</span><span class="n">spec</span><span class="p">]</span><span class="o">.</span><span class="n">_updateSpectra</span><span class="p">(</span><span class="n">spec</span><span class="p">,</span> <span class="n">spectraNd</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_oldTabs</span><span class="p">[</span><span class="n">spec</span><span class="p">]</span><span class="o">.</span><span class="n">_populateColour</span><span class="p">()</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">spec</span><span class="o">.</span><span class="n">dimensionCount</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+                    <span class="n">contoursTab</span> <span class="o">=</span> <span class="n">ContoursTab</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="bp">self</span><span class="p">,</span> <span class="n">mainWindow</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span><span class="p">,</span> <span class="n">spectrum</span><span class="o">=</span><span class="n">spec</span><span class="p">,</span>
+                                              <span class="n">showCopyOptions</span><span class="o">=</span><span class="kc">True</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">spectraNd</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="k">else</span> <span class="kc">False</span><span class="p">,</span>
+                                              <span class="n">copyToSpectra</span><span class="o">=</span><span class="n">spectraNd</span><span class="p">)</span>
+
+                <span class="bp">self</span><span class="o">.</span><span class="n">_colourTabsNd</span><span class="o">.</span><span class="n">addTab</span><span class="p">(</span><span class="n">contoursTab</span><span class="p">,</span> <span class="n">spec</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+                <span class="n">contoursTab</span><span class="o">.</span><span class="n">setContentsMargins</span><span class="p">(</span><span class="o">*</span><span class="n">TABMARGINS</span><span class="p">)</span>
+                <span class="n">contoursTab</span><span class="o">.</span><span class="n">_populateColour</span><span class="p">()</span>
+
+        <span class="c1"># set the visibility of the general 1d tab</span>
+        <span class="n">index</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tabWidget</span><span class="o">.</span><span class="n">indexOf</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_generalTabWidgetNd</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_colourTabsNd</span><span class="o">.</span><span class="n">count</span><span class="p">()</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">if</span> <span class="p">(</span><span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">index</span> <span class="o">&lt;</span> <span class="n">NUMTABS</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_tabWidget</span><span class="o">.</span><span class="n">removeTab</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">index</span> <span class="o">&lt;</span> <span class="n">NUMTABS</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_tabWidget</span><span class="o">.</span><span class="n">insertTab</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_tabWidget</span><span class="o">.</span><span class="n">count</span><span class="p">()</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_generalTabWidgetNd</span><span class="p">,</span> <span class="n">GENERALTABND_LABEL</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">seriesTab</span><span class="o">.</span><span class="n">_fillSeriesFrame</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_newSpectra</span><span class="p">)</span>
+
+        <span class="c1"># update the current list</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">currentSpectra</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_newSpectra</span>
+
+<div class="viewcode-block" id="SpectrumGroupEditor.copySpectra"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.popups.html#ccpn.ui.gui.popups.SpectrumGroupEditor.SpectrumGroupEditor.copySpectra">[docs]</a>    <span class="k">def</span> <span class="nf">copySpectra</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fromSpectrum</span><span class="p">,</span> <span class="n">toSpectra</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Copy the contents of tabs to other spectra</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">colourTabs</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_colourTabs1d</span><span class="o">.</span><span class="n">widget</span><span class="p">(</span><span class="n">ii</span><span class="p">)</span> <span class="k">for</span> <span class="n">ii</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_colourTabs1d</span><span class="o">.</span><span class="n">count</span><span class="p">())]</span> <span class="o">+</span> \
+                    <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_colourTabsNd</span><span class="o">.</span><span class="n">widget</span><span class="p">(</span><span class="n">ii</span><span class="p">)</span> <span class="k">for</span> <span class="n">ii</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_colourTabsNd</span><span class="o">.</span><span class="n">count</span><span class="p">())]</span>
+        <span class="k">for</span> <span class="n">aTab</span> <span class="ow">in</span> <span class="n">colourTabs</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">aTab</span><span class="o">.</span><span class="n">spectrum</span> <span class="o">==</span> <span class="n">fromSpectrum</span><span class="p">:</span>
+                <span class="n">fromSpectrumTab</span> <span class="o">=</span> <span class="n">aTab</span>
+                <span class="k">for</span> <span class="n">aTab</span> <span class="ow">in</span> <span class="p">[</span><span class="n">tab</span> <span class="k">for</span> <span class="n">tab</span> <span class="ow">in</span> <span class="n">colourTabs</span> <span class="k">if</span> <span class="n">tab</span> <span class="o">!=</span> <span class="n">fromSpectrumTab</span> <span class="ow">and</span> <span class="n">tab</span><span class="o">.</span><span class="n">spectrum</span> <span class="ow">in</span> <span class="n">toSpectra</span><span class="p">]:</span>
+                    <span class="n">aTab</span><span class="o">.</span><span class="n">_copySpectrumAttributes</span><span class="p">(</span><span class="n">fromSpectrumTab</span><span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="SeriesFrame"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.popups.html#ccpn.ui.gui.popups.SpectrumGroupEditor.SeriesFrame">[docs]</a><span class="k">class</span> <span class="nc">SeriesFrame</span><span class="p">(</span><span class="n">Widget</span><span class="p">):</span>
+    <span class="n">EDITMODE</span> <span class="o">=</span> <span class="kc">False</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">mainWindow</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">spectrumGroup</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">editMode</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                 <span class="n">showCopyOptions</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">defaultItems</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="n">setLayout</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">spacing</span><span class="o">=</span><span class="n">DEFAULTSPACING</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_parent</span> <span class="o">=</span> <span class="n">parent</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span> <span class="o">=</span> <span class="n">mainWindow</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">application</span> <span class="o">=</span> <span class="n">mainWindow</span><span class="o">.</span><span class="n">application</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">preferences</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">preferences</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">EDITMODE</span> <span class="o">=</span> <span class="n">editMode</span>
+
+        <span class="c1"># check that the spectrum and the copyToSpectra list are correctly defined</span>
+        <span class="n">getByPid</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">getByPid</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">spectrumGroup</span> <span class="o">=</span> <span class="n">getByPid</span><span class="p">(</span><span class="n">spectrumGroup</span><span class="p">)</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">spectrumGroup</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="k">else</span> <span class="n">spectrumGroup</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">spectrumGroup</span><span class="p">,</span> <span class="p">(</span><span class="n">SpectrumGroup</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="kc">None</span><span class="p">))):</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;spectrumGroup must be of type spectrumGroup or None&#39;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">defaultItems</span><span class="p">,</span> <span class="p">(</span><span class="n">Iterable</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="kc">None</span><span class="p">))):</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;copyToSpectra must be of type Iterable/None&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">defaultItems</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_copyToSpectra</span> <span class="o">=</span> <span class="p">[</span><span class="n">getByPid</span><span class="p">(</span><span class="n">spectrum</span><span class="p">)</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">spectrum</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="k">else</span> <span class="n">spectrum</span> <span class="k">for</span> <span class="n">spectrum</span> <span class="ow">in</span> <span class="n">defaultItems</span><span class="p">]</span>
+            <span class="k">for</span> <span class="n">spec</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_copyToSpectra</span><span class="p">:</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">spec</span><span class="p">,</span> <span class="p">(</span><span class="n">Spectrum</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="kc">None</span><span class="p">))):</span>
+                    <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;copyToSpectra is not defined correctly.&#39;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_copyToSpectra</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_changes</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_editors</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_currentSeriesValues</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">EDITMODE</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">defaultObject</span> <span class="o">=</span> <span class="n">spectrumGroup</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># create a dummy object that SHOULD contain the required attributes</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">defaultObject</span> <span class="o">=</span> <span class="n">_SpectrumGroupContainer</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">defaultObject</span><span class="o">.</span><span class="n">spectra</span> <span class="o">=</span> <span class="n">defaultItems</span>
+
+        <span class="n">row</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">col</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="c1"># seriesLabel = Label(self, text=&quot;Spectrum SeriesValues&quot;, grid=(row, col), gridSpan=(1, 3), hAlign=&#39;l&#39;)</span>
+        <span class="c1"># seriesLabel.setFixedHeight(30)</span>
+        <span class="c1"># seriesLabel.setSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Fixed)</span>
+        <span class="n">Spacer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QSizePolicy</span><span class="o">.</span><span class="n">Fixed</span><span class="p">,</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QSizePolicy</span><span class="o">.</span><span class="n">Fixed</span><span class="p">,</span>
+               <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="n">col</span><span class="p">))</span>
+
+        <span class="n">row</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="n">seriesTypeLabel</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s1">&#39;Series Type&#39;</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="n">col</span><span class="p">),</span> <span class="n">hAlign</span><span class="o">=</span><span class="s1">&#39;l&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">seriesType</span> <span class="o">=</span> <span class="n">RadioButtons</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">texts</span><span class="o">=</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">val</span><span class="o">.</span><span class="n">description</span><span class="p">)</span> <span class="k">for</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">SERIESTYPES</span><span class="p">],</span>
+                                       <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="n">col</span> <span class="o">+</span> <span class="mi">1</span><span class="p">),</span> <span class="n">gridSpan</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="n">hAlign</span><span class="o">=</span><span class="s1">&#39;l&#39;</span><span class="p">,</span>
+                                       <span class="n">callback</span><span class="o">=</span><span class="n">partial</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_queueChangeSeriesType</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">defaultObject</span><span class="p">))</span>
+
+        <span class="n">row</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_seriesFrameRow</span> <span class="o">=</span> <span class="n">row</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_seriesFrameCol</span> <span class="o">=</span> <span class="n">col</span>
+
+        <span class="c1"># self._seriesFrame = Frame(self, setLayout=True, showBorder=False, grid=(self._seriesFrameRow, self._seriesFrameCol), gridSpan=(1, 3))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_seriesFrame</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_fillSeriesFrame</span><span class="p">(</span><span class="n">defaultItems</span><span class="o">=</span><span class="n">defaultItems</span><span class="p">)</span>
+
+        <span class="n">row</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="c1"># unitsLabel = Label(self, text=&#39;Series Units&#39;, grid=(row, col), hAlign=&#39;l&#39;)</span>
+        <span class="c1"># self.unitsEditor = LineEdit(self, grid=(row, col + 1))</span>
+        <span class="c1"># unitsLabel.setFixedHeight(30)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">unitsEditor</span> <span class="o">=</span> <span class="n">PulldownListCompoundWidget</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">labelText</span><span class="o">=</span><span class="s1">&#39;Series Units&#39;</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="n">col</span><span class="p">),</span> <span class="n">gridSpan</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="n">hAlign</span><span class="o">=</span><span class="s1">&#39;l&#39;</span><span class="p">,</span>
+                                                      <span class="n">editable</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">sizeAdjustPolicy</span><span class="o">=</span><span class="n">QtWidgets</span><span class="o">.</span><span class="n">QComboBox</span><span class="o">.</span><span class="n">AdjustToContents</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">unitsEditor</span><span class="o">.</span><span class="n">pulldownList</span><span class="o">.</span><span class="n">pulldownTextEdited</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">partial</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_queueChangeSeriesUnits</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">unitsEditor</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">defaultObject</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">unitsEditor</span><span class="o">.</span><span class="n">pulldownList</span><span class="o">.</span><span class="n">pulldownTextReady</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">partial</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_updateSeriesUnitsPulldown</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">unitsEditor</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">defaultObject</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_pulldownData</span> <span class="o">=</span> <span class="n">ALL_UNITS</span>
+
+        <span class="n">row</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_errorFrameSeriesValues</span> <span class="o">=</span> <span class="n">Frame</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">setLayout</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="n">col</span><span class="p">),</span> <span class="n">gridSpan</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="n">hAlign</span><span class="o">=</span><span class="s1">&#39;l&#39;</span><span class="p">)</span>
+
+        <span class="c1"># add a frame containing an error message if the series values are not all the same type</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">errorIcon</span> <span class="o">=</span> <span class="n">Icon</span><span class="p">(</span><span class="s1">&#39;icons/exclamation_small&#39;</span><span class="p">)</span>
+        <span class="c1"># self._errorFrameSeriesValues.layout().setColumnStretch(0, 1)</span>
+        <span class="c1"># self._errorFrameSeriesValues.layout().setColumnStretch(1, 1000)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_errors</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;seriesValues must be of the same type&#39;</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">error</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_errors</span><span class="p">):</span>
+            <span class="n">iconLabel</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_errorFrameSeriesValues</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+            <span class="n">iconLabel</span><span class="o">.</span><span class="n">setPixmap</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">errorIcon</span><span class="o">.</span><span class="n">pixmap</span><span class="p">(</span><span class="mi">16</span><span class="p">,</span> <span class="mi">16</span><span class="p">))</span>
+            <span class="n">label</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_errorFrameSeriesValues</span><span class="p">,</span> <span class="n">error</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_errorFrameSeriesValues</span><span class="o">.</span><span class="n">hide</span><span class="p">()</span>
+
+        <span class="n">row</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_errorFrameDict</span> <span class="o">=</span> <span class="n">Frame</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">setLayout</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="n">col</span><span class="p">),</span> <span class="n">gridSpan</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="n">hAlign</span><span class="o">=</span><span class="s1">&#39;l&#39;</span><span class="p">)</span>
+
+        <span class="c1"># add a frame containing an error message if the dicts do not contain the same keys</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">errorIcon</span> <span class="o">=</span> <span class="n">Icon</span><span class="p">(</span><span class="s1">&#39;icons/exclamation_small&#39;</span><span class="p">)</span>
+        <span class="c1"># self._errorFrameDict.layout().setColumnStretch(0, 1)</span>
+        <span class="c1"># self._errorFrameDict.layout().setColumnStretch(1, 1000)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_errors</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;seriesValue dicts do not contain the same keys&#39;</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">error</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_errors</span><span class="p">):</span>
+            <span class="n">iconLabel</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_errorFrameDict</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+            <span class="n">iconLabel</span><span class="o">.</span><span class="n">setPixmap</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">errorIcon</span><span class="o">.</span><span class="n">pixmap</span><span class="p">(</span><span class="mi">16</span><span class="p">,</span> <span class="mi">16</span><span class="p">))</span>
+            <span class="n">label</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_errorFrameDict</span><span class="p">,</span> <span class="n">error</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_errorFrameDict</span><span class="o">.</span><span class="n">hide</span><span class="p">()</span>
+
+        <span class="n">row</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="n">Spacer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QSizePolicy</span><span class="o">.</span><span class="n">Expanding</span><span class="p">,</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QSizePolicy</span><span class="o">.</span><span class="n">Expanding</span><span class="p">,</span>
+               <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="n">col</span> <span class="o">+</span> <span class="mi">2</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">getLayout</span><span class="p">()</span><span class="o">.</span><span class="n">setRowStretch</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>
+
+        <span class="c1"># get colours from the lineEdit and copy to the plainTextEdit</span>
+        <span class="c1"># yourWidget.palette().highlight().color().name()?</span>
+
+    <span class="k">def</span> <span class="nf">_fillSeriesFrame</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">defaultItems</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Reset the contents of the series frame for changed spectrum list</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># remove previous editor values</span>
+        <span class="k">for</span> <span class="n">spec</span><span class="p">,</span> <span class="n">editor</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_editors</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">editor</span><span class="o">.</span><span class="n">textChanged</span><span class="o">.</span><span class="n">disconnect</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_currentSeriesValues</span><span class="p">[</span><span class="n">spec</span><span class="p">]</span> <span class="o">=</span> <span class="n">editor</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_changes</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_editors</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">()</span>
+
+        <span class="c1"># empty the frame</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_seriesFrame</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_seriesFrame</span><span class="o">.</span><span class="n">hide</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_seriesFrame</span><span class="o">.</span><span class="n">deleteLater</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_seriesFrame</span> <span class="o">=</span> <span class="n">Frame</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">setLayout</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">showBorder</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                                  <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_seriesFrameRow</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_seriesFrameCol</span><span class="p">),</span> <span class="n">gridSpan</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span>
+                                  <span class="n">vAlign</span><span class="o">=</span><span class="s1">&#39;t&#39;</span><span class="p">)</span>
+
+        <span class="c1"># add new editors with the new values</span>
+        <span class="k">for</span> <span class="n">sRow</span><span class="p">,</span> <span class="n">spec</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">defaultItems</span><span class="p">):</span>
+            <span class="n">seriesLabel</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_seriesFrame</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="n">spec</span><span class="o">.</span><span class="n">pid</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">sRow</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">vAlign</span><span class="o">=</span><span class="s1">&#39;t&#39;</span><span class="p">)</span>
+            <span class="n">seriesLabel</span><span class="o">.</span><span class="n">setFixedHeight</span><span class="p">(</span><span class="mi">30</span><span class="p">)</span>
+
+            <span class="n">editorFrame</span> <span class="o">=</span> <span class="n">Frame</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_seriesFrame</span><span class="p">,</span> <span class="n">setLayout</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">sRow</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">vAlign</span><span class="o">=</span><span class="s1">&#39;t&#39;</span><span class="p">)</span>
+            <span class="n">seriesEditor</span> <span class="o">=</span> <span class="n">PlainTextEditor</span><span class="p">(</span><span class="n">editorFrame</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">vAlign</span><span class="o">=</span><span class="s1">&#39;t&#39;</span><span class="p">)</span>
+            <span class="n">seriesEditor</span><span class="o">.</span><span class="n">textChanged</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">partial</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_queueChangeSpectrumSeriesValues</span><span class="p">,</span>
+                                                     <span class="n">seriesEditor</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">defaultObject</span><span class="p">,</span>
+                                                     <span class="n">spec</span><span class="p">,</span> <span class="n">sRow</span><span class="p">))</span>
+
+            <span class="n">seriesEditor</span><span class="o">.</span><span class="n">setMinimumSize</span><span class="p">(</span><span class="mi">50</span><span class="p">,</span> <span class="mi">25</span><span class="p">)</span>
+            <span class="c1"># attributes for setting size when using resize-grip</span>
+            <span class="n">seriesEditor</span><span class="o">.</span><span class="n">_minimumWidth</span> <span class="o">=</span> <span class="mi">50</span>
+            <span class="n">seriesEditor</span><span class="o">.</span><span class="n">_minimumHeight</span> <span class="o">=</span> <span class="mi">25</span>
+            <span class="n">seriesEditor</span><span class="o">.</span><span class="n">setVerticalScrollBarPolicy</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">ScrollBarAlwaysOff</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">spec</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_currentSeriesValues</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_currentSeriesValues</span><span class="p">[</span><span class="n">spec</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">seriesEditor</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_currentSeriesValues</span><span class="p">[</span><span class="n">spec</span><span class="p">])</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">_editors</span><span class="p">[</span><span class="n">spec</span><span class="p">]</span> <span class="o">=</span> <span class="n">seriesEditor</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_seriesFrame</span><span class="o">.</span><span class="n">setSizePolicy</span><span class="p">(</span><span class="n">QtWidgets</span><span class="o">.</span><span class="n">QSizePolicy</span><span class="o">.</span><span class="n">Expanding</span><span class="p">,</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QSizePolicy</span><span class="o">.</span><span class="n">Preferred</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_populate</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Populate the texteditors - seriesValues and seriesUnits for the spectrumGroup</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">seriesType</span><span class="o">.</span><span class="n">setIndex</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">defaultObject</span><span class="o">.</span><span class="n">seriesType</span> <span class="ow">or</span> <span class="mi">0</span><span class="p">))</span>
+        <span class="n">series</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">defaultObject</span><span class="o">.</span><span class="n">series</span>
+        <span class="k">if</span> <span class="n">series</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">spec</span><span class="p">,</span> <span class="n">textEditor</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_editors</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="n">ii</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">defaultObject</span><span class="o">.</span><span class="n">spectra</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">spec</span><span class="p">)</span>
+
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">seriesType</span><span class="o">.</span><span class="n">getIndex</span><span class="p">()</span> <span class="o">==</span> <span class="n">SERIESTYPES</span><span class="o">.</span><span class="n">FLOAT</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>
+                        <span class="n">seriesValue</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">series</span><span class="p">[</span><span class="n">ii</span><span class="p">])</span>
+                    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">seriesType</span><span class="o">.</span><span class="n">getIndex</span><span class="p">()</span> <span class="o">==</span> <span class="n">SERIESTYPES</span><span class="o">.</span><span class="n">INTEGER</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>
+                        <span class="n">seriesValue</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">series</span><span class="p">[</span><span class="n">ii</span><span class="p">])</span>
+                    <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">seriesType</span><span class="o">.</span><span class="n">getIndex</span><span class="p">()</span> <span class="o">==</span> <span class="n">SERIESTYPES</span><span class="o">.</span><span class="n">STRING</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>
+                        <span class="n">seriesValue</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">series</span><span class="p">[</span><span class="n">ii</span><span class="p">])</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">seriesValue</span> <span class="o">=</span> <span class="nb">repr</span><span class="p">(</span><span class="n">series</span><span class="p">[</span><span class="n">ii</span><span class="p">])</span>
+                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">es</span><span class="p">:</span>
+                    <span class="n">textEditor</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">textEditor</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">seriesValue</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">defaultObject</span><span class="o">.</span><span class="n">seriesUnits</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">defaultObject</span><span class="o">.</span><span class="n">seriesUnits</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pulldownData</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_pulldownData</span> <span class="o">+=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">defaultObject</span><span class="o">.</span><span class="n">seriesUnits</span><span class="p">,)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">unitsEditor</span><span class="o">.</span><span class="n">modifyTexts</span><span class="p">(</span><span class="n">texts</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_pulldownData</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">unitsEditor</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">defaultObject</span><span class="o">.</span><span class="n">seriesUnits</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_validateEditors</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">_getValuesFromTextEdit</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1"># read the values from the textEditors and put in dict for later</span>
+        <span class="k">for</span> <span class="n">spec</span><span class="p">,</span> <span class="n">editor</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_editors</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_currentSeriesValues</span><span class="p">[</span><span class="n">spec</span><span class="p">]</span> <span class="o">=</span> <span class="n">editor</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">_cleanSpacers</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">widget</span><span class="p">):</span>
+        <span class="c1"># remove unneeded spacers</span>
+        <span class="n">layout</span> <span class="o">=</span> <span class="n">widget</span><span class="o">.</span><span class="n">getLayout</span><span class="p">()</span>
+        <span class="n">spacers</span> <span class="o">=</span> <span class="p">[</span><span class="n">layout</span><span class="o">.</span><span class="n">itemAt</span><span class="p">(</span><span class="n">itmNum</span><span class="p">)</span> <span class="k">for</span> <span class="n">itmNum</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">layout</span><span class="o">.</span><span class="n">count</span><span class="p">())</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">layout</span><span class="o">.</span><span class="n">itemAt</span><span class="p">(</span><span class="n">itmNum</span><span class="p">),</span> <span class="n">Spacer</span><span class="p">)]</span>
+        <span class="k">for</span> <span class="n">sp</span> <span class="ow">in</span> <span class="n">spacers</span><span class="p">:</span>
+            <span class="n">layout</span><span class="o">.</span><span class="n">removeItem</span><span class="p">(</span><span class="n">sp</span><span class="p">)</span>
+
+    <span class="nd">@queueStateChange</span><span class="p">(</span><span class="n">_verifyPopupChangesApply</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">_queueChangeSpectrumSeriesValues</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">editor</span><span class="p">,</span> <span class="n">spectrumGroup</span><span class="p">,</span> <span class="n">spectrum</span><span class="p">,</span> <span class="n">dim</span><span class="p">):</span>
+        <span class="c1"># queue the value if has changed from the original</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="n">editor</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">seriesType</span><span class="o">.</span><span class="n">getIndex</span><span class="p">()</span> <span class="o">==</span> <span class="n">SERIESTYPES</span><span class="o">.</span><span class="n">FLOAT</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>
+                <span class="n">seriesValue</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">seriesType</span><span class="o">.</span><span class="n">getIndex</span><span class="p">()</span> <span class="o">==</span> <span class="n">SERIESTYPES</span><span class="o">.</span><span class="n">INTEGER</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>
+                <span class="n">seriesValue</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">seriesType</span><span class="o">.</span><span class="n">getIndex</span><span class="p">()</span> <span class="o">==</span> <span class="n">SERIESTYPES</span><span class="o">.</span><span class="n">STRING</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>
+                <span class="n">seriesValue</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">seriesValue</span> <span class="o">=</span> <span class="n">literal_eval</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">es</span><span class="p">:</span>
+            <span class="k">pass</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">specValue</span> <span class="o">=</span> <span class="n">spectrum</span><span class="o">.</span><span class="n">_getSeriesItemsById</span><span class="p">(</span><span class="n">spectrumGroup</span><span class="o">.</span><span class="n">pid</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">seriesValue</span> <span class="o">!=</span> <span class="n">specValue</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">partial</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_changeSpectrumSeriesValues</span><span class="p">,</span> <span class="n">spectrumGroup</span><span class="p">,</span> <span class="n">spectrum</span><span class="p">,</span> <span class="n">dim</span><span class="p">,</span> <span class="n">seriesValue</span><span class="p">)</span>
+
+        <span class="k">finally</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_validateEditors</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">_compareDict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">d1</span><span class="p">,</span> <span class="n">d2</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Compare the keys in two dictionaries</span>
+<span class="sd">        Routine is recursive, empty dicts are ignored</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">d1</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">k</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">d2</span><span class="p">:</span>
+                <span class="k">return</span> <span class="kc">False</span>
+            <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">d1</span><span class="p">[</span><span class="n">k</span><span class="p">])</span> <span class="o">==</span> <span class="nb">dict</span> <span class="ow">and</span> <span class="n">d1</span><span class="p">[</span><span class="n">k</span><span class="p">]:</span>
+                <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">d2</span><span class="p">[</span><span class="n">k</span><span class="p">])</span> <span class="o">==</span> <span class="nb">dict</span> <span class="ow">and</span> <span class="n">d2</span><span class="p">[</span><span class="n">k</span><span class="p">]:</span>
+                    <span class="n">compare</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_compareDict</span><span class="p">(</span><span class="n">d1</span><span class="p">[</span><span class="n">k</span><span class="p">],</span> <span class="n">d2</span><span class="p">[</span><span class="n">k</span><span class="p">])</span>
+                    <span class="k">if</span> <span class="ow">not</span> <span class="n">compare</span><span class="p">:</span>
+                        <span class="k">return</span> <span class="kc">False</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">return</span> <span class="kc">False</span>
+        <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">d2</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">k</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">d1</span><span class="p">:</span>
+                <span class="k">return</span> <span class="kc">False</span>
+            <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">d2</span><span class="p">[</span><span class="n">k</span><span class="p">])</span> <span class="o">==</span> <span class="nb">dict</span> <span class="ow">and</span> <span class="n">d2</span><span class="p">[</span><span class="n">k</span><span class="p">]:</span>
+                <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">d1</span><span class="p">[</span><span class="n">k</span><span class="p">])</span> <span class="o">==</span> <span class="nb">dict</span> <span class="ow">and</span> <span class="n">d1</span><span class="p">[</span><span class="n">k</span><span class="p">]:</span>
+                    <span class="n">compare</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_compareDict</span><span class="p">(</span><span class="n">d1</span><span class="p">[</span><span class="n">k</span><span class="p">],</span> <span class="n">d2</span><span class="p">[</span><span class="n">k</span><span class="p">])</span>
+                    <span class="k">if</span> <span class="ow">not</span> <span class="n">compare</span><span class="p">:</span>
+                        <span class="k">return</span> <span class="kc">False</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">return</span> <span class="kc">False</span>
+      
+        <span class="k">return</span> <span class="kc">True</span>
+    
+    <span class="k">def</span> <span class="nf">_validateEditors</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Check that all the editors contain the same type of seriesValues</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">errorState</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="n">errorDict</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="n">heightSum</span> <span class="o">=</span> <span class="mf">0.0</span>
+        <span class="n">literalTypes</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+        <span class="n">literalDictCompare</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">for</span> <span class="n">editor</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_editors</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="n">editor</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
+            <span class="n">palette</span> <span class="o">=</span> <span class="n">editor</span><span class="o">.</span><span class="n">viewport</span><span class="p">()</span><span class="o">.</span><span class="n">palette</span><span class="p">()</span>
+            <span class="n">colour</span> <span class="o">=</span> <span class="n">editor</span><span class="o">.</span><span class="n">_background</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">seriesValue</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">seriesType</span><span class="o">.</span><span class="n">getIndex</span><span class="p">()</span> <span class="o">==</span> <span class="n">SERIESTYPES</span><span class="o">.</span><span class="n">FLOAT</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>
+                    <span class="n">seriesValue</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">seriesType</span><span class="o">.</span><span class="n">getIndex</span><span class="p">()</span> <span class="o">==</span> <span class="n">SERIESTYPES</span><span class="o">.</span><span class="n">INTEGER</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>
+                    <span class="n">seriesValue</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+                <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">seriesType</span><span class="o">.</span><span class="n">getIndex</span><span class="p">()</span> <span class="o">==</span> <span class="n">SERIESTYPES</span><span class="o">.</span><span class="n">STRING</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>
+                    <span class="n">seriesValue</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">seriesValue</span> <span class="o">=</span> <span class="n">literal_eval</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+                    <span class="n">literalTypes</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">seriesValue</span><span class="p">))</span>
+
+                    <span class="c1"># compare whether the dicts contain the same keys - not essential</span>
+                    <span class="k">if</span> <span class="ow">not</span> <span class="n">literalDictCompare</span><span class="p">:</span>
+                        <span class="n">literalDictCompare</span> <span class="o">=</span> <span class="n">seriesValue</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="nb">cmp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_compareDict</span><span class="p">(</span><span class="n">literalDictCompare</span><span class="p">,</span> <span class="n">seriesValue</span><span class="p">)</span>
+                        <span class="k">if</span> <span class="ow">not</span> <span class="nb">cmp</span><span class="p">:</span>
+                            <span class="n">errorDict</span> <span class="o">=</span> <span class="kc">True</span>
+                        
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">es</span><span class="p">:</span>
+                <span class="c1"># catch exception raised by bad literals</span>
+                <span class="n">colour</span> <span class="o">=</span> <span class="n">INVALIDROWCOLOUR</span>
+                <span class="n">errorState</span> <span class="o">=</span> <span class="kc">True</span>
+
+            <span class="k">finally</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">literalTypes</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">literalTypes</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+                    <span class="n">errorState</span> <span class="o">=</span> <span class="kc">True</span>
+
+                <span class="n">palette</span><span class="o">.</span><span class="n">setColor</span><span class="p">(</span><span class="n">editor</span><span class="o">.</span><span class="n">viewport</span><span class="p">()</span><span class="o">.</span><span class="n">backgroundRole</span><span class="p">(),</span> <span class="n">colour</span><span class="p">)</span>
+                <span class="n">editor</span><span class="o">.</span><span class="n">viewport</span><span class="p">()</span><span class="o">.</span><span class="n">setPalette</span><span class="p">(</span><span class="n">palette</span><span class="p">)</span>
+
+            <span class="c1"># rowHeight = QtGui.QFontMetrics(editor.document().defaultFont()).height()</span>
+            <span class="c1"># lineCount = editor.document().lineCount()</span>
+            <span class="c1">#</span>
+            <span class="c1"># minHeight = (rowHeight + 1) * (lineCount + 1)</span>
+            <span class="c1"># height = max(editor._minimumHeight, minHeight)</span>
+            <span class="c1"># heightSum += height</span>
+            <span class="c1"># editor.setMaximumHeight(height)</span>
+            <span class="c1"># editor.updateGeometry()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_errorFrameSeriesValues</span><span class="o">.</span><span class="n">setVisible</span><span class="p">(</span><span class="n">errorState</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_errorFrameDict</span><span class="o">.</span><span class="n">setVisible</span><span class="p">(</span><span class="n">errorDict</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_changeSpectrumSeriesValues</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">spectrumGroup</span><span class="p">,</span> <span class="n">spectrum</span><span class="p">,</span> <span class="n">dim</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="c1"># set the spectrum series value from here</span>
+        <span class="c1"># spectrum.seriesValue = value</span>
+
+        <span class="c1"># bit of a hack here - called by _groupInit which builds the spectrumGroup series</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_parent</span><span class="o">.</span><span class="n">_spectrumGroupSeriesEdited</span><span class="p">[</span><span class="n">dim</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+
+    <span class="nd">@queueStateChange</span><span class="p">(</span><span class="n">_verifyPopupChangesApply</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">_queueChangeSeriesUnits</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">editor</span><span class="p">,</span> <span class="n">spectrumGroup</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;callback from editing the seriesUnits - respond to every keypress</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="n">editor</span><span class="o">.</span><span class="n">getText</span><span class="p">()</span>
+        <span class="n">specValue</span> <span class="o">=</span> <span class="n">spectrumGroup</span><span class="o">.</span><span class="n">seriesUnits</span>
+        <span class="k">if</span> <span class="n">value</span> <span class="o">!=</span> <span class="n">specValue</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">partial</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_changeSeriesUnits</span><span class="p">,</span> <span class="n">spectrumGroup</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_changeSeriesUnits</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">spectrumGroup</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;set the spectrumGroup seriesUnits</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_parent</span><span class="o">.</span><span class="n">_spectrumGroupSeriesUnitsEdited</span> <span class="o">=</span> <span class="n">value</span>
+
+    <span class="k">def</span> <span class="nf">_updateSeriesUnitsPulldown</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">editor</span><span class="p">,</span> <span class="n">spectrumGroup</span><span class="p">,</span> <span class="n">newText</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;callback from editing the seriesUnits pulldown</span>
+<span class="sd">         - respond to index changed/focus changed to capture new text and add to pulldown list</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># NOTE:ED - could put this into the pullDown widget as an &#39;autoUpdateContents&#39; setting</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="n">newText</span>
+        <span class="k">if</span> <span class="n">value</span> <span class="ow">and</span> <span class="n">value</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pulldownData</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_pulldownData</span> <span class="o">+=</span> <span class="p">(</span><span class="n">value</span><span class="p">,)</span>
+            <span class="n">editor</span><span class="o">.</span><span class="n">modifyTexts</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_pulldownData</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_queueChangeSeriesUnits</span><span class="p">(</span><span class="n">editor</span><span class="p">,</span> <span class="n">spectrumGroup</span><span class="p">)</span>
+
+<div class="viewcode-block" id="SeriesFrame.getChangesDict"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.popups.html#ccpn.ui.gui.popups.SpectrumGroupEditor.SeriesFrame.getChangesDict">[docs]</a>    <span class="k">def</span> <span class="nf">getChangesDict</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Define the required widgets with storing changes</span>
+<span class="sd">        returns Popup containing then apply/close buttons</span>
+<span class="sd">                dict containing current changes</span>
+<span class="sd">                stateValue, an overriding boolean that needs to be true for all else to be true</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parent</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_changes</span><span class="p">,</span> <span class="kc">True</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parent</span><span class="o">.</span><span class="n">_currentEditorState</span><span class="p">()</span> <span class="k">else</span> <span class="kc">False</span></div>
+
+    <span class="nd">@queueStateChange</span><span class="p">(</span><span class="n">_verifyPopupChangesApply</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">_queueChangeSeriesType</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">spectrumGroup</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;callback from editing the seriesType</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_validateEditors</span><span class="p">()</span>
+
+        <span class="n">index</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">seriesType</span><span class="o">.</span><span class="n">getIndex</span><span class="p">()</span>
+        <span class="n">specType</span> <span class="o">=</span> <span class="n">spectrumGroup</span><span class="o">.</span><span class="n">seriesType</span>
+        <span class="k">if</span> <span class="n">index</span> <span class="o">!=</span> <span class="n">specType</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">partial</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_changeSeriesType</span><span class="p">,</span> <span class="n">spectrumGroup</span><span class="p">,</span> <span class="n">index</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_changeSeriesType</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">spectrumGroup</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;set the spectrumGroup seriesType</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_parent</span><span class="o">.</span><span class="n">_spectrumGroupSeriesTypeEdited</span> <span class="o">=</span> <span class="n">value</span></div>
+
+
+<span class="k">class</span> <span class="nc">_SpectrumGroupContainer</span><span class="p">(</span><span class="n">AttrDict</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Class to simulate a spectrumGroup in popup.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">_SpectrumGroupContainer</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pid</span> <span class="o">=</span> <span class="nb">id</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_modifiedSpectra</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_setDefaultSeriesValues</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_seriesUnits</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_seriesType</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">series</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="o">...</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;Returns a tuple of series items for the attached spectra</span>
+
+<span class="sd">        series = (val1, val2, ..., valN)</span>
+
+<span class="sd">        where val1-valN correspond to the series items in the attached spectra associated with this group</span>
+<span class="sd">        For a spectrum with no values, returns None in place of Item</span>
+
+<span class="sd">        Duplicated from spectrumGroup.series</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">series</span> <span class="o">=</span> <span class="p">()</span>
+        <span class="k">for</span> <span class="n">spectrum</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">:</span>
+            <span class="n">series</span> <span class="o">+=</span> <span class="p">(</span><span class="n">spectrum</span><span class="o">.</span><span class="n">_getSeriesItemsById</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pid</span><span class="p">),)</span>
+
+        <span class="k">return</span> <span class="n">series</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">seriesUnits</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return the seriesUnits for the simulated spectrumGroup</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_seriesUnits</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">seriesType</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return the type for seriesValues widget entry</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_seriesType</span>
+
+    <span class="k">def</span> <span class="nf">_setDefaultSeriesValues</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">spec</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">:</span>
+            <span class="n">spec</span><span class="o">.</span><span class="n">_setSeriesItemsById</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pid</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_removeDefaultSeriesValues</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">spec</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">:</span>
+            <span class="n">spec</span><span class="o">.</span><span class="n">_removeSeriesItemsById</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pid</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="fm">__del__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;destructor required to cleanup ids in altered spectra</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_removeDefaultSeriesValues</span><span class="p">()</span>
 </pre></div>
 
           </div>
@@ -111,15 +981,15 @@
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
 <div id="searchbox" style="display: none" role="search">
-  <h3>Quick search</h3>
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
     <form class="search" action="../../../../../search.html" method="get">
-      <input type="text" name="q" />
+      <input type="text" name="q" aria-labelledby="searchlabel" />
       <input type="submit" value="Go" />
-      <input type="hidden" name="check_keywords" value="yes" />
-      <input type="hidden" name="area" value="default" />
     </form>
+    </div>
 </div>
-<script type="text/javascript">$('#searchbox').show(0);</script>
+<script>$('#searchbox').show(0);</script>
         </div>
       </div>
       <div class="clearer"></div>
@@ -133,13 +1003,13 @@
         <li class="right" >
           <a href="../../../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../../../index.html">Python  documentation</a> &raquo;</li>
-          <li class="nav-item nav-item-1"><a href="../../../../index.html" >Module code</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="../../../../../index.html">Python  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../../../index.html" >Module code</a> &#187;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
-        &copy; Copyright .
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.1.
+        &#169; Copyright .
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.4.0.
     </div>
   </body>
 </html>

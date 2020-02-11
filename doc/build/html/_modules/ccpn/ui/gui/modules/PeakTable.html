@@ -1,32 +1,22 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
+<!DOCTYPE html>
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    
-    <title>ccpn.ui.gui.modules.PeakTable &mdash; Python  documentation</title>
-    
+    <meta charset="utf-8" />
+    <title>ccpn.ui.gui.modules.PeakTable &#8212; Python  documentation</title>
     <link rel="stylesheet" href="../../../../../_static/classic.css" type="text/css" />
     <link rel="stylesheet" href="../../../../../_static/pygments.css" type="text/css" />
     
-    <script type="text/javascript">
-      var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    '../../../../../',
-        VERSION:     '',
-        COLLAPSE_INDEX: false,
-        FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true
-      };
-    </script>
-    <script type="text/javascript" src="../../../../../_static/jquery.js"></script>
-    <script type="text/javascript" src="../../../../../_static/underscore.js"></script>
-    <script type="text/javascript" src="../../../../../_static/doctools.js"></script>
-    <link rel="top" title="Python  documentation" href="../../../../../index.html" />
-    <link rel="up" title="Module code" href="../../../../index.html" /> 
-  </head>
-  <body role="document">
+    <script id="documentation_options" data-url_root="../../../../../" src="../../../../../_static/documentation_options.js"></script>
+    <script src="../../../../../_static/jquery.js"></script>
+    <script src="../../../../../_static/underscore.js"></script>
+    <script src="../../../../../_static/doctools.js"></script>
+    <script src="../../../../../_static/language_data.js"></script>
+    
+    <link rel="index" title="Index" href="../../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../../search.html" /> 
+  </head><body>
     <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
@@ -36,8 +26,8 @@
         <li class="right" >
           <a href="../../../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../../../index.html">Python  documentation</a> &raquo;</li>
-          <li class="nav-item nav-item-1"><a href="../../../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="../../../../../index.html">Python  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../../../index.html" accesskey="U">Module code</a> &#187;</li> 
       </ul>
     </div>  
 
@@ -106,15 +96,15 @@
 <span class="sd">    This class implements the module by wrapping a PeakListTable instance</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="n">includeSettingsWidget</span> <span class="o">=</span> <span class="bp">False</span>
+    <span class="n">includeSettingsWidget</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="n">maxSettingsState</span> <span class="o">=</span> <span class="mi">2</span>
     <span class="n">settingsPosition</span> <span class="o">=</span> <span class="s1">&#39;top&#39;</span>
 
     <span class="n">className</span> <span class="o">=</span> <span class="s1">&#39;PeakTableModule&#39;</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mainWindow</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;Peak Table&#39;</span><span class="p">,</span>
-                 <span class="n">peakList</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">selectFirstItem</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">mainWindow</span><span class="o">=</span><span class="n">mainWindow</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mainWindow</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;Peak Table&#39;</span><span class="p">,</span>
+                 <span class="n">peakList</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">selectFirstItem</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">mainWindow</span><span class="o">=</span><span class="n">mainWindow</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
 
         <span class="c1"># Derive application, project, and current from mainWindow</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span> <span class="o">=</span> <span class="n">mainWindow</span>
@@ -126,10 +116,10 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">peakListTable</span> <span class="o">=</span> <span class="n">PeakListTableWidget</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">mainWidget</span><span class="p">,</span>
                                                  <span class="n">mainWindow</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span><span class="p">,</span>
                                                  <span class="n">moduleParent</span><span class="o">=</span><span class="bp">self</span><span class="p">,</span>
-                                                 <span class="n">setLayout</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+                                                 <span class="n">setLayout</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
                                                  <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
 
-        <span class="k">if</span> <span class="n">peakList</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">peakList</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">selectPeakList</span><span class="p">(</span><span class="n">peakList</span><span class="p">)</span>
         <span class="k">elif</span> <span class="n">selectFirstItem</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">peakListTable</span><span class="o">.</span><span class="n">pLwidget</span><span class="o">.</span><span class="n">selectFirstItem</span><span class="p">()</span>
@@ -147,7 +137,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">peakListTable</span><span class="o">.</span><span class="n">_maximise</span><span class="p">()</span>
 
-<div class="viewcode-block" id="PeakTableModule.selectPeakList"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.modules.PeakTable.PeakTableModule.selectPeakList">[docs]</a>    <span class="k">def</span> <span class="nf">selectPeakList</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">peakList</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+<div class="viewcode-block" id="PeakTableModule.selectPeakList"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.modules.PeakTable.PeakTableModule.selectPeakList">[docs]</a>    <span class="k">def</span> <span class="nf">selectPeakList</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">peakList</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Manually select a peakList from the pullDown</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -184,11 +174,11 @@
         <span class="c1"># NmrResidueTable._project.blankNotification()</span>
 
         <span class="c1"># clip and set the figure of merit</span>
-        <span class="n">obj</span><span class="o">.</span><span class="n">figureOfMerit</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">value</span><span class="p">),</span> <span class="mf">0.0</span><span class="p">),</span> <span class="mf">1.0</span><span class="p">)</span> <span class="k">if</span> <span class="n">value</span> <span class="k">else</span> <span class="bp">None</span>
+        <span class="n">obj</span><span class="o">.</span><span class="n">figureOfMerit</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">value</span><span class="p">),</span> <span class="mf">0.0</span><span class="p">),</span> <span class="mf">1.0</span><span class="p">)</span> <span class="k">if</span> <span class="n">value</span> <span class="k">else</span> <span class="kc">None</span>
         <span class="c1"># NmrResidueTable._project.unblankNotification()</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">mainWindow</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">moduleParent</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">peakList</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">multiSelect</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
-                 <span class="n">actionCallback</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">selectionCallback</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">mainWindow</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">moduleParent</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">peakList</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">multiSelect</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                 <span class="n">actionCallback</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">selectionCallback</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Initialise the table</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -199,21 +189,21 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">project</span> <span class="o">=</span> <span class="n">mainWindow</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">project</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">current</span> <span class="o">=</span> <span class="n">mainWindow</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">current</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">application</span> <span class="o">=</span> <span class="bp">None</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">project</span> <span class="o">=</span> <span class="bp">None</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">current</span> <span class="o">=</span> <span class="bp">None</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">application</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">project</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">current</span> <span class="o">=</span> <span class="kc">None</span>
 
         <span class="n">PeakListTableWidget</span><span class="o">.</span><span class="n">project</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">settingWidgets</span> <span class="o">=</span> <span class="bp">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_selectedPeakList</span> <span class="o">=</span> <span class="bp">None</span>
-        <span class="n">kwds</span><span class="p">[</span><span class="s1">&#39;setLayout&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">True</span>  <span class="c1">## Assure we have a layout with the widget</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">settingWidgets</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_selectedPeakList</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">kwds</span><span class="p">[</span><span class="s1">&#39;setLayout&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>  <span class="c1">## Assure we have a layout with the widget</span>
 
         <span class="c1"># strange, need to do this when using scrollArea, but not a Widget</span>
         <span class="n">parent</span><span class="o">.</span><span class="n">getLayout</span><span class="p">()</span><span class="o">.</span><span class="n">setHorizontalSpacing</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_widgetScrollArea</span> <span class="o">=</span> <span class="n">ScrollArea</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="n">parent</span><span class="p">,</span> <span class="n">scrollBarPolicies</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;never&#39;</span><span class="p">,</span> <span class="s1">&#39;never&#39;</span><span class="p">),</span> <span class="o">**</span><span class="n">kwds</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_widgetScrollArea</span><span class="o">.</span><span class="n">setWidgetResizable</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_widget</span> <span class="o">=</span> <span class="n">Widget</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_widgetScrollArea</span><span class="p">,</span> <span class="n">setLayout</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_widgetScrollArea</span><span class="o">.</span><span class="n">setWidgetResizable</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_widget</span> <span class="o">=</span> <span class="n">Widget</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_widgetScrollArea</span><span class="p">,</span> <span class="n">setLayout</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_widgetScrollArea</span><span class="o">.</span><span class="n">setWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_widget</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_widget</span><span class="o">.</span><span class="n">setSizePolicy</span><span class="p">(</span><span class="n">QtWidgets</span><span class="o">.</span><span class="n">QSizePolicy</span><span class="o">.</span><span class="n">MinimumExpanding</span><span class="p">,</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QSizePolicy</span><span class="o">.</span><span class="n">Expanding</span><span class="p">)</span>
 
@@ -225,9 +215,9 @@
         <span class="n">row</span> <span class="o">+=</span> <span class="mi">1</span>
         <span class="n">gridHPos</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">pLwidget</span> <span class="o">=</span> <span class="n">PeakListPulldown</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_widget</span><span class="p">,</span>
-                                         <span class="n">project</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="p">,</span>
+                                         <span class="n">mainWindow</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span><span class="p">,</span>
                                          <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="n">gridHPos</span><span class="p">),</span> <span class="n">gridSpan</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
-                                         <span class="n">showSelectName</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+                                         <span class="n">showSelectName</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
                                          <span class="n">minimumWidths</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">100</span><span class="p">),</span>
                                          <span class="n">sizeAdjustPolicy</span><span class="o">=</span><span class="n">QtWidgets</span><span class="o">.</span><span class="n">QComboBox</span><span class="o">.</span><span class="n">AdjustToContents</span><span class="p">,</span>
                                          <span class="n">callback</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_pulldownPLcallback</span><span class="p">)</span>
@@ -248,15 +238,15 @@
         <span class="c1">#TODO constructor of the GuiTable module.</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_hiddenColumns</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Pid&#39;</span><span class="p">,</span> <span class="s1">&#39;Spectrum&#39;</span><span class="p">,</span> <span class="s1">&#39;PeakList&#39;</span><span class="p">,</span> <span class="s1">&#39;Id&#39;</span><span class="p">,</span> <span class="s1">&#39;HeightError&#39;</span><span class="p">,</span> <span class="s1">&#39;VolumeError&#39;</span><span class="p">]</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">dataFrameObject</span> <span class="o">=</span> <span class="bp">None</span>
-        <span class="n">selectionCallback</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_selectionCallback</span> <span class="k">if</span> <span class="n">selectionCallback</span> <span class="ow">is</span> <span class="bp">None</span> <span class="k">else</span> <span class="n">selectionCallback</span>
-        <span class="n">actionCallback</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_actionCallback</span> <span class="k">if</span> <span class="n">actionCallback</span> <span class="ow">is</span> <span class="bp">None</span> <span class="k">else</span> <span class="n">actionCallback</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dataFrameObject</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">selectionCallback</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_selectionCallback</span> <span class="k">if</span> <span class="n">selectionCallback</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">selectionCallback</span>
+        <span class="n">actionCallback</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_actionCallback</span> <span class="k">if</span> <span class="n">actionCallback</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">actionCallback</span>
 
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="n">parent</span><span class="p">,</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="n">parent</span><span class="p">,</span>
                             <span class="n">mainWindow</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span><span class="p">,</span>
-                            <span class="n">dataFrameObject</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
-                            <span class="n">setLayout</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
-                            <span class="n">autoResize</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">multiSelect</span><span class="o">=</span><span class="n">multiSelect</span><span class="p">,</span>
+                            <span class="n">dataFrameObject</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                            <span class="n">setLayout</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                            <span class="n">autoResize</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">multiSelect</span><span class="o">=</span><span class="n">multiSelect</span><span class="p">,</span>
                             <span class="n">actionCallback</span><span class="o">=</span><span class="n">actionCallback</span><span class="p">,</span>
                             <span class="n">selectionCallback</span><span class="o">=</span><span class="n">selectionCallback</span><span class="p">,</span>
                             <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">gridSpan</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">6</span><span class="p">))</span>
@@ -265,7 +255,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">tableMenu</span><span class="o">.</span><span class="n">addAction</span><span class="p">(</span><span class="s1">&#39;Copy Peaks...&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_copyPeaks</span><span class="p">)</span>
 
         <span class="c1">## populate the table if there are peaklists in the project</span>
-        <span class="k">if</span> <span class="n">peakList</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">peakList</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_selectPeakList</span><span class="p">(</span><span class="n">peakList</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">setTableNotifiers</span><span class="p">(</span><span class="n">tableClass</span><span class="o">=</span><span class="n">PeakList</span><span class="p">,</span>
@@ -302,28 +292,28 @@
         <span class="n">columnDefs</span> <span class="o">=</span> <span class="p">[]</span>
 
         <span class="c1"># Serial column</span>
-        <span class="n">columnDefs</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="s1">&#39;#&#39;</span><span class="p">,</span> <span class="s1">&#39;serial&#39;</span><span class="p">,</span> <span class="s1">&#39;Peak serial number&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">))</span>
-        <span class="n">columnDefs</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="s1">&#39;Pid&#39;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">pk</span><span class="p">:</span> <span class="n">pk</span><span class="o">.</span><span class="n">pid</span><span class="p">,</span> <span class="s1">&#39;Pid of the Peak&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">))</span>
-        <span class="n">columnDefs</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="s1">&#39;_object&#39;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">pk</span><span class="p">:</span> <span class="n">pk</span><span class="p">,</span> <span class="s1">&#39;Object&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">))</span>
+        <span class="n">columnDefs</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="s1">&#39;#&#39;</span><span class="p">,</span> <span class="s1">&#39;serial&#39;</span><span class="p">,</span> <span class="s1">&#39;Peak serial number&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">))</span>
+        <span class="n">columnDefs</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="s1">&#39;Pid&#39;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">pk</span><span class="p">:</span> <span class="n">pk</span><span class="o">.</span><span class="n">pid</span><span class="p">,</span> <span class="s1">&#39;Pid of the Peak&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">))</span>
+        <span class="n">columnDefs</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="s1">&#39;_object&#39;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">pk</span><span class="p">:</span> <span class="n">pk</span><span class="p">,</span> <span class="s1">&#39;Object&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">))</span>
 
-        <span class="n">columnDefs</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="s1">&#39;Spectrum&#39;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">pk</span><span class="p">:</span> <span class="n">pk</span><span class="o">.</span><span class="n">peakList</span><span class="o">.</span><span class="n">spectrum</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="s1">&#39;Spectrum containing the Peak&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">))</span>
-        <span class="n">columnDefs</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="s1">&#39;PeakList&#39;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">pk</span><span class="p">:</span> <span class="n">pk</span><span class="o">.</span><span class="n">peakList</span><span class="o">.</span><span class="n">serial</span><span class="p">,</span> <span class="s1">&#39;PeakList containing the Peak&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">))</span>
-        <span class="n">columnDefs</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="s1">&#39;Id&#39;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">pk</span><span class="p">:</span> <span class="n">pk</span><span class="o">.</span><span class="n">serial</span><span class="p">,</span> <span class="s1">&#39;Peak serial&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">))</span>
+        <span class="n">columnDefs</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="s1">&#39;Spectrum&#39;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">pk</span><span class="p">:</span> <span class="n">pk</span><span class="o">.</span><span class="n">peakList</span><span class="o">.</span><span class="n">spectrum</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="s1">&#39;Spectrum containing the Peak&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">))</span>
+        <span class="n">columnDefs</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="s1">&#39;PeakList&#39;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">pk</span><span class="p">:</span> <span class="n">pk</span><span class="o">.</span><span class="n">peakList</span><span class="o">.</span><span class="n">serial</span><span class="p">,</span> <span class="s1">&#39;PeakList containing the Peak&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">))</span>
+        <span class="n">columnDefs</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="s1">&#39;Id&#39;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">pk</span><span class="p">:</span> <span class="n">pk</span><span class="o">.</span><span class="n">serial</span><span class="p">,</span> <span class="s1">&#39;Peak serial&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">))</span>
 
         <span class="c1"># Assignment column</span>
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">peakList</span><span class="o">.</span><span class="n">spectrum</span><span class="o">.</span><span class="n">dimensionCount</span><span class="p">):</span>
             <span class="n">assignTipText</span> <span class="o">=</span> <span class="s1">&#39;NmrAtom assignments of peak in dimension </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
             <span class="n">columnDefs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-                    <span class="p">(</span><span class="s1">&#39;Assign F</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">),</span> <span class="k">lambda</span> <span class="n">pk</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="n">i</span><span class="p">:</span> <span class="n">getPeakAnnotation</span><span class="p">(</span><span class="n">pk</span><span class="p">,</span> <span class="n">dim</span><span class="p">),</span> <span class="n">assignTipText</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+                    <span class="p">(</span><span class="s1">&#39;Assign F</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">),</span> <span class="k">lambda</span> <span class="n">pk</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="n">i</span><span class="p">:</span> <span class="n">getPeakAnnotation</span><span class="p">(</span><span class="n">pk</span><span class="p">,</span> <span class="n">dim</span><span class="p">),</span> <span class="n">assignTipText</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
             <span class="p">)</span>
 
         <span class="c1"># # Expanded Assignment columns</span>
         <span class="c1"># for i in range(peakList.spectrum.dimensionCount):</span>
         <span class="c1">#     assignTipText = &#39;NmrAtom assignments of peak in dimension %s&#39; % str(i + 1)</span>
-        <span class="c1">#     columnDefs.append((&#39;Assign F%s&#39; % str(i + 1), lambda pk, dim=i: self._getNmrChain(pk, dim), assignTipText, None))</span>
-        <span class="c1">#     columnDefs.append((&#39;Assign F%s&#39; % str(i + 1), lambda pk, dim=i: self._getSequenceCode(pk, dim), assignTipText, None))</span>
-        <span class="c1">#     columnDefs.append((&#39;Assign F%s&#39; % str(i + 1), lambda pk, dim=i: self._getResidueType(pk, dim), assignTipText, None))</span>
-        <span class="c1">#     columnDefs.append((&#39;Assign F%s&#39; % str(i + 1), lambda pk, dim=i: self._getAtomType(pk, dim), assignTipText, None))</span>
+        <span class="c1">#     columnDefs.append((&#39;Assign F%s&#39; % str(i + 1), lambda pk, dim=i: self._getNmrChain(pk, dim), assignTipText, None, None))</span>
+        <span class="c1">#     columnDefs.append((&#39;Assign F%s&#39; % str(i + 1), lambda pk, dim=i: self._getSequenceCode(pk, dim), assignTipText, None, None))</span>
+        <span class="c1">#     columnDefs.append((&#39;Assign F%s&#39; % str(i + 1), lambda pk, dim=i: self._getResidueType(pk, dim), assignTipText, None, None))</span>
+        <span class="c1">#     columnDefs.append((&#39;Assign F%s&#39; % str(i + 1), lambda pk, dim=i: self._getAtomType(pk, dim), assignTipText, None, None))</span>
 
         <span class="c1"># Peak positions column</span>
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">peakList</span><span class="o">.</span><span class="n">spectrum</span><span class="o">.</span><span class="n">dimensionCount</span><span class="p">):</span>
@@ -331,36 +321,37 @@
             <span class="n">columnDefs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
                     <span class="p">(</span><span class="s1">&#39;Pos F</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">),</span>
                                <span class="k">lambda</span> <span class="n">pk</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="n">i</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">positionsUnit</span><span class="p">:</span> <span class="n">getPeakPosition</span><span class="p">(</span><span class="n">pk</span><span class="p">,</span> <span class="n">dim</span><span class="p">,</span> <span class="n">unit</span><span class="p">),</span>
-                               <span class="n">positionTipText</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+                               <span class="n">positionTipText</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="s1">&#39;</span><span class="si">%0.3f</span><span class="s1">&#39;</span><span class="p">)</span>
             <span class="p">)</span>
 
         <span class="c1"># linewidth column TODO remove hardcoded Hz unit</span>
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">peakList</span><span class="o">.</span><span class="n">spectrum</span><span class="o">.</span><span class="n">dimensionCount</span><span class="p">):</span>
             <span class="n">linewidthTipTexts</span> <span class="o">=</span> <span class="s1">&#39;Peak line width </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
             <span class="n">columnDefs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-                    <span class="p">(</span><span class="s1">&#39;LW F</span><span class="si">%s</span><span class="s1"> (Hz)&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">),</span> <span class="k">lambda</span> <span class="n">pk</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="n">i</span><span class="p">:</span> <span class="n">getPeakLinewidth</span><span class="p">(</span><span class="n">pk</span><span class="p">,</span> <span class="n">dim</span><span class="p">),</span> <span class="n">linewidthTipTexts</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+                    <span class="p">(</span><span class="s1">&#39;LW F</span><span class="si">%s</span><span class="s1"> (Hz)&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">),</span> <span class="k">lambda</span> <span class="n">pk</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="n">i</span><span class="p">:</span> <span class="n">getPeakLinewidth</span><span class="p">(</span><span class="n">pk</span><span class="p">,</span> <span class="n">dim</span><span class="p">),</span> <span class="n">linewidthTipTexts</span><span class="p">,</span>
+                     <span class="kc">None</span><span class="p">,</span> <span class="s1">&#39;</span><span class="si">%0.3f</span><span class="s1">&#39;</span><span class="p">)</span>
             <span class="p">)</span>
 
         <span class="c1"># height column</span>
         <span class="n">heightTipText</span> <span class="o">=</span> <span class="s1">&#39;Magnitude of spectrum intensity at peak center (interpolated), unless user edited&#39;</span>
-        <span class="n">columnDefs</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="s1">&#39;Height&#39;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">pk</span><span class="p">:</span> <span class="n">pk</span><span class="o">.</span><span class="n">height</span> <span class="k">if</span> <span class="n">pk</span><span class="o">.</span><span class="n">height</span> <span class="k">else</span> <span class="s1">&#39;None&#39;</span><span class="p">,</span> <span class="n">heightTipText</span><span class="p">,</span> <span class="bp">None</span><span class="p">))</span>
-        <span class="n">columnDefs</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="s1">&#39;HeightError&#39;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">pk</span><span class="p">:</span> <span class="n">pk</span><span class="o">.</span><span class="n">heightError</span><span class="p">,</span> <span class="s1">&#39;Error of the height&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">))</span>
+        <span class="n">columnDefs</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="s1">&#39;Height&#39;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">pk</span><span class="p">:</span> <span class="n">pk</span><span class="o">.</span><span class="n">height</span> <span class="k">if</span> <span class="n">pk</span><span class="o">.</span><span class="n">height</span> <span class="k">else</span> <span class="s1">&#39;None&#39;</span><span class="p">,</span> <span class="n">heightTipText</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">))</span>
+        <span class="n">columnDefs</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="s1">&#39;HeightError&#39;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">pk</span><span class="p">:</span> <span class="n">pk</span><span class="o">.</span><span class="n">heightError</span><span class="p">,</span> <span class="s1">&#39;Error of the height&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">))</span>
 
         <span class="c1"># volume column</span>
         <span class="n">volumeTipText</span> <span class="o">=</span> <span class="s1">&#39;Integral of spectrum intensity around peak location, according to chosen volume method&#39;</span>
-        <span class="n">columnDefs</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="s1">&#39;Volume&#39;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">pk</span><span class="p">:</span> <span class="n">pk</span><span class="o">.</span><span class="n">volume</span> <span class="k">if</span> <span class="n">pk</span><span class="o">.</span><span class="n">volume</span> <span class="k">else</span> <span class="s1">&#39;None&#39;</span><span class="p">,</span> <span class="n">volumeTipText</span><span class="p">,</span> <span class="bp">None</span><span class="p">))</span>
-        <span class="n">columnDefs</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="s1">&#39;VolumeError&#39;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">pk</span><span class="p">:</span> <span class="n">pk</span><span class="o">.</span><span class="n">volumeError</span><span class="p">,</span> <span class="s1">&#39;Error of the volume&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">))</span>
+        <span class="n">columnDefs</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="s1">&#39;Volume&#39;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">pk</span><span class="p">:</span> <span class="n">pk</span><span class="o">.</span><span class="n">volume</span> <span class="k">if</span> <span class="n">pk</span><span class="o">.</span><span class="n">volume</span> <span class="k">else</span> <span class="s1">&#39;None&#39;</span><span class="p">,</span> <span class="n">volumeTipText</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">))</span>
+        <span class="n">columnDefs</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="s1">&#39;VolumeError&#39;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">pk</span><span class="p">:</span> <span class="n">pk</span><span class="o">.</span><span class="n">volumeError</span><span class="p">,</span> <span class="s1">&#39;Error of the volume&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">))</span>
 
         <span class="c1"># figureOfMerit column</span>
         <span class="n">figureOfMeritTipText</span> <span class="o">=</span> <span class="s1">&#39;Figure of merit&#39;</span>
         <span class="n">columnDefs</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="s1">&#39;Merit&#39;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">pk</span><span class="p">:</span> <span class="n">pk</span><span class="o">.</span><span class="n">figureOfMerit</span><span class="p">,</span> <span class="n">figureOfMeritTipText</span><span class="p">,</span>
-                           <span class="k">lambda</span> <span class="n">pk</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_setFigureOfMerit</span><span class="p">(</span><span class="n">pk</span><span class="p">,</span> <span class="n">value</span><span class="p">))</span>
+                           <span class="k">lambda</span> <span class="n">pk</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_setFigureOfMerit</span><span class="p">(</span><span class="n">pk</span><span class="p">,</span> <span class="n">value</span><span class="p">),</span> <span class="kc">None</span><span class="p">)</span>
         <span class="p">)</span>
 
         <span class="c1"># comment column</span>
         <span class="n">commentsTipText</span> <span class="o">=</span> <span class="s1">&#39;Textual notes about the peak&#39;</span>
         <span class="n">columnDefs</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="s1">&#39;Comment&#39;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">pk</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getCommentText</span><span class="p">(</span><span class="n">pk</span><span class="p">),</span> <span class="n">commentsTipText</span><span class="p">,</span>
-                           <span class="k">lambda</span> <span class="n">pk</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_setComment</span><span class="p">(</span><span class="n">pk</span><span class="p">,</span> <span class="n">value</span><span class="p">))</span>
+                           <span class="k">lambda</span> <span class="n">pk</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_setComment</span><span class="p">(</span><span class="n">pk</span><span class="p">,</span> <span class="n">value</span><span class="p">),</span> <span class="kc">None</span><span class="p">)</span>
         <span class="p">)</span>
 
         <span class="k">return</span> <span class="n">ColumnClass</span><span class="p">(</span><span class="n">columnDefs</span><span class="p">)</span>
@@ -372,12 +363,12 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_updateTable</span><span class="p">()</span>
 
-    <span class="k">def</span> <span class="nf">_updateAllModule</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_updateAllModule</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Updates the table and the settings widgets</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_updateTable</span><span class="p">()</span>
 
-    <span class="k">def</span> <span class="nf">_updateTable</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">useSelectedPeakList</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">peaks</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">peakList</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_updateTable</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">useSelectedPeakList</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">peaks</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">peakList</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Display the peaks on the table for the selected PeakList.</span>
 <span class="sd">        Obviously, If the peak has not been previously deleted and flagged isDeleted</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -443,12 +434,12 @@
         <span class="c1">#   else:</span>
         <span class="c1">#     self.setObjects([]) #if not peaks, make the table empty</span>
 
-    <span class="k">def</span> <span class="nf">_selectPeakList</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">peakList</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_selectPeakList</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">peakList</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Manually select a PeakList from the pullDown</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># print(&#39;&gt;&gt;&gt;PeakTable _selectPeakList&#39;, repr(self))</span>
 
-        <span class="k">if</span> <span class="n">peakList</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">peakList</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="c1"># logger.warning(&#39;select: No PeakList selected&#39;)</span>
             <span class="c1"># raise ValueError(&#39;select: No PeakList selected&#39;)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">pLwidget</span><span class="o">.</span><span class="n">selectFirstItem</span><span class="p">()</span>
@@ -496,11 +487,11 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="n">peak</span> <span class="o">=</span> <span class="n">objs</span>
 
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">strip</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">strip</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">validPeakListViews</span> <span class="o">=</span> <span class="p">[</span><span class="n">pp</span><span class="o">.</span><span class="n">peakList</span> <span class="k">for</span> <span class="n">pp</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">strip</span><span class="o">.</span><span class="n">peakListViews</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">pp</span><span class="o">.</span><span class="n">peakList</span><span class="p">,</span> <span class="n">PeakList</span><span class="p">)]</span>
 
             <span class="k">if</span> <span class="n">peak</span> <span class="ow">and</span> <span class="n">peak</span><span class="o">.</span><span class="n">peakList</span> <span class="ow">in</span> <span class="n">validPeakListViews</span><span class="p">:</span>
-                <span class="n">widths</span> <span class="o">=</span> <span class="bp">None</span>
+                <span class="n">widths</span> <span class="o">=</span> <span class="kc">None</span>
 
                 <span class="k">if</span> <span class="n">peak</span><span class="o">.</span><span class="n">peakList</span><span class="o">.</span><span class="n">spectrum</span><span class="o">.</span><span class="n">dimensionCount</span> <span class="o">&lt;=</span> <span class="mi">2</span><span class="p">:</span>
                     <span class="n">widths</span> <span class="o">=</span> <span class="n">_getCurrentZoomRatio</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">strip</span><span class="o">.</span><span class="n">viewRange</span><span class="p">())</span>
@@ -517,7 +508,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># print(&#39;&gt;&gt;&gt;PeakTable _selectionCallback&#39;, repr(self))</span>
         <span class="n">peaks</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">CallBack</span><span class="o">.</span><span class="n">OBJECT</span><span class="p">]</span>
-        <span class="k">if</span> <span class="n">peaks</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">peaks</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">clearPeaks</span><span class="p">()</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">peaks</span> <span class="o">=</span> <span class="n">peaks</span>
@@ -537,11 +528,11 @@
 
         <span class="n">popup</span> <span class="o">=</span> <span class="n">CopyPeaks</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span><span class="p">,</span> <span class="n">mainWindow</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_selectedPeakList</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">getByPid</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pLwidget</span><span class="o">.</span><span class="n">getText</span><span class="p">())</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_selectedPeakList</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_selectedPeakList</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">spectrum</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_selectedPeakList</span><span class="o">.</span><span class="n">spectrum</span>
             <span class="n">popup</span><span class="o">.</span><span class="n">_selectSpectrum</span><span class="p">(</span><span class="n">spectrum</span><span class="p">)</span>
             <span class="n">popup</span><span class="o">.</span><span class="n">_selectPeaks</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">peaks</span><span class="p">)</span>
-        <span class="n">popup</span><span class="o">.</span><span class="k">exec</span><span class="p">()</span>
+        <span class="n">popup</span><span class="o">.</span><span class="n">exec</span><span class="p">()</span>
         <span class="n">popup</span><span class="o">.</span><span class="n">raise_</span><span class="p">()</span>
 
     <span class="c1">##################   Notifiers callbacks  ##################</span>
@@ -617,15 +608,15 @@
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
 <div id="searchbox" style="display: none" role="search">
-  <h3>Quick search</h3>
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
     <form class="search" action="../../../../../search.html" method="get">
-      <input type="text" name="q" />
+      <input type="text" name="q" aria-labelledby="searchlabel" />
       <input type="submit" value="Go" />
-      <input type="hidden" name="check_keywords" value="yes" />
-      <input type="hidden" name="area" value="default" />
     </form>
+    </div>
 </div>
-<script type="text/javascript">$('#searchbox').show(0);</script>
+<script>$('#searchbox').show(0);</script>
         </div>
       </div>
       <div class="clearer"></div>
@@ -639,13 +630,13 @@
         <li class="right" >
           <a href="../../../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../../../index.html">Python  documentation</a> &raquo;</li>
-          <li class="nav-item nav-item-1"><a href="../../../../index.html" >Module code</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="../../../../../index.html">Python  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../../../index.html" >Module code</a> &#187;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
-        &copy; Copyright .
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.1.
+        &#169; Copyright .
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.4.0.
     </div>
   </body>
 </html>

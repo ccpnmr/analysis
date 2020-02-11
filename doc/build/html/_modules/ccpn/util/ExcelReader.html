@@ -1,32 +1,22 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
+<!DOCTYPE html>
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    
-    <title>ccpn.util.ExcelReader &mdash; Python  documentation</title>
-    
+    <meta charset="utf-8" />
+    <title>ccpn.util.ExcelReader &#8212; Python  documentation</title>
     <link rel="stylesheet" href="../../../_static/classic.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
     
-    <script type="text/javascript">
-      var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    '../../../',
-        VERSION:     '',
-        COLLAPSE_INDEX: false,
-        FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true
-      };
-    </script>
-    <script type="text/javascript" src="../../../_static/jquery.js"></script>
-    <script type="text/javascript" src="../../../_static/underscore.js"></script>
-    <script type="text/javascript" src="../../../_static/doctools.js"></script>
-    <link rel="top" title="Python  documentation" href="../../../index.html" />
-    <link rel="up" title="Module code" href="../../index.html" /> 
-  </head>
-  <body role="document">
+    <script id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/jquery.js"></script>
+    <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/language_data.js"></script>
+    
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+  </head><body>
     <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
@@ -36,8 +26,8 @@
         <li class="right" >
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../index.html">Python  documentation</a> &raquo;</li>
-          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="../../../index.html">Python  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &#187;</li> 
       </ul>
     </div>  
 
@@ -75,7 +65,7 @@
 <span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">from</span> <span class="nn">os.path</span> <span class="kn">import</span> <span class="n">isfile</span><span class="p">,</span> <span class="n">join</span>
 <span class="kn">import</span> <span class="nn">pathlib</span>
-<span class="kn">import</span> <span class="nn">pandas</span> <span class="kn">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 <span class="kn">from</span> <span class="nn">ccpn.util.Logging</span> <span class="kn">import</span> <span class="n">getLogger</span><span class="p">,</span> <span class="n">_debug3</span>
 <span class="kn">from</span> <span class="nn">ccpnmodel.ccpncore.lib.Io</span> <span class="kn">import</span> <span class="n">Formats</span> <span class="k">as</span> <span class="n">ioFormats</span>
 
@@ -149,12 +139,12 @@
 <span class="sd">    :param fileName: name of template</span>
 <span class="sd">    :return:  the file path where is saved</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="n">path</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">path</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">path</span> <span class="o">=</span> <span class="n">path</span><span class="o">+</span> <span class="s1">&#39;/&#39;</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">path</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">)</span> <span class="k">else</span> <span class="n">path</span>
-    <span class="nb">file</span> <span class="o">=</span> <span class="n">path</span><span class="o">+</span><span class="n">fileName</span>
+    <span class="n">file</span> <span class="o">=</span> <span class="n">path</span><span class="o">+</span><span class="n">fileName</span>
     <span class="n">substanceDf</span> <span class="o">=</span> <span class="n">getDefaultSubstancesDF</span><span class="p">()</span>
     <span class="n">sampleDF</span> <span class="o">=</span> <span class="n">getDefaultSampleDF</span><span class="p">()</span>
-    <span class="n">writer</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">ExcelWriter</span><span class="p">(</span><span class="nb">file</span><span class="p">,</span> <span class="n">engine</span><span class="o">=</span><span class="s1">&#39;xlsxwriter&#39;</span><span class="p">)</span>
+    <span class="n">writer</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">ExcelWriter</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="n">engine</span><span class="o">=</span><span class="s1">&#39;xlsxwriter&#39;</span><span class="p">)</span>
     <span class="n">substanceDf</span><span class="o">.</span><span class="n">to_excel</span><span class="p">(</span><span class="n">writer</span><span class="p">,</span> <span class="n">sheet_name</span><span class="o">=</span><span class="n">SUBSTANCE</span><span class="p">)</span>
     <span class="n">sampleDF</span><span class="o">.</span><span class="n">to_excel</span><span class="p">(</span><span class="n">writer</span><span class="p">,</span> <span class="n">sheet_name</span><span class="o">=</span><span class="n">SAMPLE</span><span class="p">)</span>
     <span class="n">writer</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
@@ -167,7 +157,7 @@
     <span class="k">return</span>  <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="n">SAMPLE_SHEET_COLUMNS</span><span class="p">)</span></div>
 
 
-<span class="k">def</span> <span class="nf">_filterBrukerExperiments</span><span class="p">(</span><span class="n">brukerFilePaths</span><span class="p">,</span> <span class="n">fileType</span> <span class="o">=</span> <span class="s1">&#39;1r&#39;</span><span class="p">,</span> <span class="n">multipleExp</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">expDirName</span><span class="o">=</span><span class="s1">&#39;1&#39;</span><span class="p">,</span> <span class="n">procDirName</span><span class="o">=</span><span class="s1">&#39;1&#39;</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">_filterBrukerExperiments</span><span class="p">(</span><span class="n">brukerFilePaths</span><span class="p">,</span> <span class="n">fileType</span> <span class="o">=</span> <span class="s1">&#39;1r&#39;</span><span class="p">,</span> <span class="n">multipleExp</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">expDirName</span><span class="o">=</span><span class="s1">&#39;1&#39;</span><span class="p">,</span> <span class="n">procDirName</span><span class="o">=</span><span class="s1">&#39;1&#39;</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 
 <span class="sd">    :param brukerFilePaths:</span>
@@ -205,7 +195,7 @@
 
     <span class="c1"># from ccpn.util.decorators import profile</span>
     <span class="c1"># @profile</span>
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">project</span><span class="p">,</span> <span class="n">excelPath</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">project</span><span class="p">,</span> <span class="n">excelPath</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        :param project: the ccpnmr Project object</span>
 <span class="sd">        :param excelPath: excel file path</span>
@@ -263,7 +253,7 @@
     <span class="k">def</span> <span class="nf">_getDataFrameFromSheet</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sheetName</span><span class="p">):</span>
         <span class="s1">&#39;Creates the dataframe for the sheet. If Values are not set, fills None with NOTGIVEN (otherwise can give errors)&#39;</span>
         <span class="n">dataFrame</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pandasFile</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">sheetName</span><span class="p">)</span>
-        <span class="n">dataFrame</span><span class="o">.</span><span class="n">fillna</span><span class="p">(</span><span class="n">NOTGIVEN</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+        <span class="n">dataFrame</span><span class="o">.</span><span class="n">fillna</span><span class="p">(</span><span class="n">NOTGIVEN</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">dataFrame</span>
 
     <span class="k">def</span> <span class="nf">_getDataFrameFromSheets</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sheetNamesList</span><span class="p">):</span>
@@ -291,7 +281,7 @@
                 <span class="k">if</span> <span class="n">SUBSTANCE_NAME</span> <span class="ow">in</span> <span class="n">dataFrame</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
                     <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">dataFrameAsDict</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
                         <span class="k">if</span> <span class="n">key</span> <span class="o">==</span> <span class="n">SUBSTANCE_NAME</span><span class="p">:</span>
-                            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                                 <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">getByPid</span><span class="p">(</span><span class="s1">&#39;SU:&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;.&#39;</span><span class="p">):</span>
                                     <span class="n">substance</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">newSubstance</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">))</span>
                                     <span class="n">substancesDataFrames</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="n">substance</span><span class="p">:</span> <span class="n">dataFrameAsDict</span><span class="p">})</span>
@@ -318,9 +308,9 @@
                     <span class="k">if</span> <span class="n">SAMPLE_NAME</span> <span class="ow">in</span> <span class="n">dataFrame</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
                         <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">dataFrameAsDict</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
                             <span class="k">if</span> <span class="n">key</span> <span class="o">==</span> <span class="n">SAMPLE_NAME</span><span class="p">:</span>
-                                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                                     <span class="n">sample</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">getByPid</span><span class="p">(</span><span class="s1">&#39;SA:&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">))</span>
-                                    <span class="k">if</span> <span class="n">sample</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                                    <span class="k">if</span> <span class="n">sample</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                                         <span class="n">samplesDataFrames</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="n">sample</span><span class="p">:</span> <span class="n">dataFrameAsDict</span><span class="p">})</span>
 
         <span class="k">return</span> <span class="n">samplesDataFrames</span>
@@ -386,7 +376,7 @@
 <span class="sd">        of the excel file.</span>
 <span class="sd">        If the full path is given, from the root to the spectrum file name, then it uses that.</span>
 <span class="sd">        &#39;&#39;&#39;</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">for</span> <span class="n">objDict</span> <span class="ow">in</span> <span class="n">dictLists</span><span class="p">:</span>
                 <span class="k">for</span> <span class="n">obj</span><span class="p">,</span> <span class="n">dct</span> <span class="ow">in</span> <span class="n">objDict</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
                     <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">dct</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
@@ -431,14 +421,14 @@
             <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">loadSpectrum</span><span class="p">(</span><span class="n">filePath</span><span class="p">,</span> <span class="s1">&#39;Bruker&#39;</span><span class="p">,</span><span class="n">name</span> <span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">loadData</span><span class="p">(</span><span class="n">filePath</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">data</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">data</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_linkSpectrumToObj</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">dct</span><span class="p">)</span>
                 <span class="k">if</span> <span class="n">EXP_TYPE</span> <span class="ow">in</span> <span class="n">dct</span><span class="p">:</span>
                     <span class="k">try</span><span class="p">:</span>
                         <span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">experimentType</span> <span class="o">=</span> <span class="n">dct</span><span class="p">[</span><span class="n">EXP_TYPE</span><span class="p">]</span>
                     <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-                        <span class="k">print</span><span class="p">(</span><span class="n">e</span><span class="p">,</span> <span class="n">dct</span><span class="p">)</span>
+                        <span class="nb">print</span><span class="p">(</span><span class="n">e</span><span class="p">,</span> <span class="n">dct</span><span class="p">)</span>
                         <span class="c1"># _debug3(getLogger(), msg=(e, data[0], dct[EXP_TYPE]))</span>
 
     <span class="c1">######################################################################################################################</span>
@@ -458,7 +448,7 @@
         <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">dct</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
             <span class="k">if</span> <span class="n">key</span> <span class="o">==</span> <span class="n">SPECTRUM_GROUP_NAME</span><span class="p">:</span>
                 <span class="n">spectrumGroup</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">getByPid</span><span class="p">(</span><span class="s1">&#39;SG:&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">))</span>
-                <span class="k">if</span> <span class="n">spectrumGroup</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">spectrumGroup</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                     <span class="n">spectrumGroup</span><span class="o">.</span><span class="n">spectra</span> <span class="o">+=</span> <span class="p">(</span><span class="n">spectrum</span><span class="p">,)</span>
 
     <span class="c1">######################################################################################################################</span>
@@ -482,20 +472,20 @@
         <span class="k">for</span> <span class="n">attr</span> <span class="ow">in</span> <span class="n">properties</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">attr</span> <span class="o">==</span> <span class="n">synonyms</span><span class="p">:</span>
                 <span class="n">value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getDFValue</span><span class="p">(</span><span class="n">attr</span><span class="p">,</span> <span class="n">dataframe</span><span class="p">)</span>
-                <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                     <span class="nb">setattr</span><span class="p">(</span><span class="n">wrapperObject</span><span class="p">,</span> <span class="n">attr</span><span class="p">,</span> <span class="p">(</span><span class="n">value</span><span class="p">,))</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">try</span><span class="p">:</span>
-                    <span class="k">if</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">wrapperObject</span><span class="p">,</span> <span class="n">attr</span><span class="p">)</span> <span class="ow">is</span> <span class="bp">None</span> <span class="ow">or</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">wrapperObject</span><span class="p">,</span> <span class="n">attr</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">wrapperObject</span><span class="p">,</span> <span class="n">attr</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">wrapperObject</span><span class="p">,</span> <span class="n">attr</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
                         <span class="nb">setattr</span><span class="p">(</span><span class="n">wrapperObject</span><span class="p">,</span> <span class="n">attr</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getDFValue</span><span class="p">(</span><span class="n">attr</span><span class="p">,</span> <span class="n">dataframe</span><span class="p">))</span>
 
                 <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>  <span class="c1">#wrapper needs a int</span>
                     <span class="n">value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getDFValue</span><span class="p">(</span><span class="n">attr</span><span class="p">,</span> <span class="n">dataframe</span><span class="p">)</span>
-                    <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                         <span class="nb">setattr</span><span class="p">(</span><span class="n">wrapperObject</span><span class="p">,</span> <span class="n">attr</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">value</span><span class="p">))</span>
 
                 <span class="k">except</span><span class="p">:</span>
-                    <span class="k">print</span><span class="p">(</span><span class="s1">&#39;Value  not set for </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">attr</span><span class="p">)</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Value  not set for </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">attr</span><span class="p">)</span>
                     <span class="n">_debug3</span><span class="p">(</span><span class="n">getLogger</span><span class="p">(),</span> <span class="n">msg</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;Value  not set for </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">attr</span><span class="p">))</span>
 
     <span class="k">def</span> <span class="nf">_getDFValue</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">header</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
@@ -525,15 +515,15 @@
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
 <div id="searchbox" style="display: none" role="search">
-  <h3>Quick search</h3>
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
     <form class="search" action="../../../search.html" method="get">
-      <input type="text" name="q" />
+      <input type="text" name="q" aria-labelledby="searchlabel" />
       <input type="submit" value="Go" />
-      <input type="hidden" name="check_keywords" value="yes" />
-      <input type="hidden" name="area" value="default" />
     </form>
+    </div>
 </div>
-<script type="text/javascript">$('#searchbox').show(0);</script>
+<script>$('#searchbox').show(0);</script>
         </div>
       </div>
       <div class="clearer"></div>
@@ -547,13 +537,13 @@
         <li class="right" >
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../index.html">Python  documentation</a> &raquo;</li>
-          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="../../../index.html">Python  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &#187;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
-        &copy; Copyright .
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.1.
+        &#169; Copyright .
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.4.0.
     </div>
   </body>
 </html>

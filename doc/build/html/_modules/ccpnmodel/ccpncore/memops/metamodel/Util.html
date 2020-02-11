@@ -1,32 +1,22 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
+<!DOCTYPE html>
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    
-    <title>ccpnmodel.ccpncore.memops.metamodel.Util &mdash; Python  documentation</title>
-    
+    <meta charset="utf-8" />
+    <title>ccpnmodel.ccpncore.memops.metamodel.Util &#8212; Python  documentation</title>
     <link rel="stylesheet" href="../../../../../_static/classic.css" type="text/css" />
     <link rel="stylesheet" href="../../../../../_static/pygments.css" type="text/css" />
     
-    <script type="text/javascript">
-      var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    '../../../../../',
-        VERSION:     '',
-        COLLAPSE_INDEX: false,
-        FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true
-      };
-    </script>
-    <script type="text/javascript" src="../../../../../_static/jquery.js"></script>
-    <script type="text/javascript" src="../../../../../_static/underscore.js"></script>
-    <script type="text/javascript" src="../../../../../_static/doctools.js"></script>
-    <link rel="top" title="Python  documentation" href="../../../../../index.html" />
-    <link rel="up" title="Module code" href="../../../../index.html" /> 
-  </head>
-  <body role="document">
+    <script id="documentation_options" data-url_root="../../../../../" src="../../../../../_static/documentation_options.js"></script>
+    <script src="../../../../../_static/jquery.js"></script>
+    <script src="../../../../../_static/underscore.js"></script>
+    <script src="../../../../../_static/doctools.js"></script>
+    <script src="../../../../../_static/language_data.js"></script>
+    
+    <link rel="index" title="Index" href="../../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../../search.html" /> 
+  </head><body>
     <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
@@ -36,8 +26,8 @@
         <li class="right" >
           <a href="../../../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../../../index.html">Python  documentation</a> &raquo;</li>
-          <li class="nav-item nav-item-1"><a href="../../../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="../../../../../index.html">Python  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../../../index.html" accesskey="U">Module code</a> &#187;</li> 
       </ul>
     </div>  
 
@@ -147,8 +137,8 @@
 <span class="c1"># hack for Python 2.1 compatibility                                                        #</span>
 <span class="c1">######################################################################</span>
 <span class="k">try</span><span class="p">:</span>
-  <span class="n">junk</span> <span class="o">=</span> <span class="bp">True</span>
-  <span class="n">junk</span> <span class="o">=</span> <span class="bp">False</span>
+  <span class="n">junk</span> <span class="o">=</span> <span class="kc">True</span>
+  <span class="n">junk</span> <span class="o">=</span> <span class="kc">False</span>
 <span class="k">except</span> <span class="ne">NameError</span><span class="p">:</span>
   <span class="nb">globals</span><span class="p">()[</span><span class="s1">&#39;True&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
   <span class="nb">globals</span><span class="p">()[</span><span class="s1">&#39;False&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
@@ -165,7 +155,7 @@
 
 <span class="c1"># Python 2.1 compatibility</span>
 <span class="k">try</span><span class="p">:</span>
-  <span class="n">StringType</span> <span class="o">=</span> <span class="nb">basestring</span>
+  <span class="n">StringType</span> <span class="o">=</span> <span class="n">basestring</span>
 <span class="k">except</span> <span class="ne">NameError</span><span class="p">:</span>
   <span class="n">StringType</span> <span class="o">=</span> <span class="nb">str</span>
 
@@ -234,7 +224,7 @@
   <span class="sd">&quot;&quot;&quot; check for circular relationships in -to-one links</span>
 <span class="sd">  &quot;&quot;&quot;</span>
   <span class="n">target</span> <span class="o">=</span> <span class="n">myself</span>
-  <span class="k">while</span> <span class="n">target</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+  <span class="k">while</span> <span class="n">target</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
     <span class="n">prev</span> <span class="o">=</span> <span class="n">target</span>
     <span class="n">target</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">prev</span><span class="p">,</span><span class="n">tag</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">target</span> <span class="ow">is</span> <span class="n">myself</span><span class="p">:</span>
@@ -264,7 +254,7 @@
   <span class="c1"># populate inLinkCount dictionary, ignoring out-of-subgraph links</span>
   <span class="k">for</span> <span class="n">obj</span> <span class="ow">in</span> <span class="n">objList</span><span class="p">:</span>
     <span class="k">for</span> <span class="n">obj2</span> <span class="ow">in</span> <span class="n">func</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span><span class="n">tag</span><span class="p">):</span>
-      <span class="k">if</span> <span class="n">inLinkCount</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">obj2</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+      <span class="k">if</span> <span class="n">inLinkCount</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">obj2</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">inLinkCount</span><span class="p">[</span><span class="n">obj2</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
   
   <span class="c1"># prime result list</span>
@@ -277,7 +267,7 @@
   <span class="k">for</span> <span class="n">obj</span> <span class="ow">in</span> <span class="n">result</span><span class="p">:</span>
     <span class="k">del</span> <span class="n">inLinkCount</span><span class="p">[</span><span class="n">obj</span><span class="p">]</span>
     <span class="k">for</span> <span class="n">obj2</span> <span class="ow">in</span> <span class="n">func</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span><span class="n">tag</span><span class="p">):</span>
-      <span class="k">if</span> <span class="n">inLinkCount</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">obj2</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+      <span class="k">if</span> <span class="n">inLinkCount</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">obj2</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">inLinkCount</span><span class="p">[</span><span class="n">obj2</span><span class="p">]</span> <span class="o">-=</span> <span class="mi">1</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">inLinkCount</span><span class="p">[</span><span class="n">obj2</span><span class="p">]:</span>
           <span class="n">result</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">obj2</span><span class="p">)</span>
@@ -346,7 +336,7 @@
 <span class="sd">  (operator_organisation_timeStamp_serial)</span>
 <span class="sd">  Only appropriate for controlled environments.&quot;&quot;&quot;</span>
   
-  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">operator</span><span class="p">,</span> <span class="n">organisation</span><span class="p">,</span> <span class="n">initialSerial</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+  <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">operator</span><span class="p">,</span> <span class="n">organisation</span><span class="p">,</span> <span class="n">initialSerial</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
     
     <span class="bp">self</span><span class="o">.</span><span class="n">initialSerial</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">initialSerial</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">operator</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">operator</span><span class="p">)</span>
@@ -406,9 +396,9 @@
   <span class="n">result</span> <span class="o">=</span> <span class="p">[]</span>
   <span class="k">for</span> <span class="n">pp</span> <span class="ow">in</span> <span class="n">ll</span><span class="p">:</span>
     <span class="n">cc</span> <span class="o">=</span> <span class="n">pp</span><span class="o">.</span><span class="n">topObjectClass</span>
-    <span class="k">if</span> <span class="n">cc</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">cc</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
       <span class="n">pr</span> <span class="o">=</span> <span class="n">cc</span><span class="o">.</span><span class="n">parentRole</span>
-      <span class="k">if</span> <span class="n">pr</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+      <span class="k">if</span> <span class="n">pr</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">ot</span> <span class="o">=</span> <span class="n">pr</span><span class="o">.</span><span class="n">otherRole</span>
         <span class="n">result</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ot</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
   <span class="c1">#</span>
@@ -421,13 +411,13 @@
 
 <span class="c1">###########################################################################</span>
   
-<div class="viewcode-block" id="getOperation"><a class="viewcode-back" href="../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.metamodel.html#ccpnmodel.ccpncore.memops.metamodel.Util.getOperation">[docs]</a><span class="k">def</span> <span class="nf">getOperation</span><span class="p">(</span><span class="n">target</span><span class="p">,</span> <span class="n">opType</span><span class="p">,</span> <span class="n">inClass</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">opSubType</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+<div class="viewcode-block" id="getOperation"><a class="viewcode-back" href="../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.metamodel.html#ccpnmodel.ccpncore.memops.metamodel.Util.getOperation">[docs]</a><span class="k">def</span> <span class="nf">getOperation</span><span class="p">(</span><span class="n">target</span><span class="p">,</span> <span class="n">opType</span><span class="p">,</span> <span class="n">inClass</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">opSubType</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
   <span class="sd">&quot;&quot;&quot; get existing operation. If none found return None</span>
 <span class="sd">  &quot;&quot;&quot;</span>
 
-  <span class="k">if</span> <span class="n">inClass</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+  <span class="k">if</span> <span class="n">inClass</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
     <span class="n">container</span> <span class="o">=</span> <span class="n">target</span><span class="o">.</span><span class="n">container</span>
-    <span class="k">if</span> <span class="n">container</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span> <span class="o">==</span> <span class="s1">&#39;MetaPackage&#39;</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">container</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;MetaPackage&#39;</span><span class="p">:</span>
       <span class="n">inClass</span> <span class="o">=</span> <span class="n">target</span>
     <span class="k">else</span><span class="p">:</span>
       <span class="n">inClass</span> <span class="o">=</span> <span class="n">target</span><span class="o">.</span><span class="n">container</span>
@@ -437,25 +427,25 @@
         <span class="ow">and</span> <span class="n">op</span><span class="o">.</span><span class="n">opSubType</span> <span class="o">==</span> <span class="n">opSubType</span><span class="p">):</span>
       <span class="k">return</span> <span class="n">op</span>
   <span class="c1">#</span>
-  <span class="k">return</span> <span class="bp">None</span></div>
+  <span class="k">return</span> <span class="kc">None</span></div>
 
 <span class="c1">###########################################################################</span>
     
-<div class="viewcode-block" id="getFuncname"><a class="viewcode-back" href="../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.metamodel.html#ccpnmodel.ccpncore.memops.metamodel.Util.getFuncname">[docs]</a><span class="k">def</span> <span class="nf">getFuncname</span><span class="p">(</span><span class="n">op</span><span class="p">,</span> <span class="n">inClass</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+<div class="viewcode-block" id="getFuncname"><a class="viewcode-back" href="../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.metamodel.html#ccpnmodel.ccpncore.memops.metamodel.Util.getFuncname">[docs]</a><span class="k">def</span> <span class="nf">getFuncname</span><span class="p">(</span><span class="n">op</span><span class="p">,</span> <span class="n">inClass</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
   <span class="sd">&quot;&quot;&quot; get function calling name for operation</span>
 <span class="sd">  </span>
 <span class="sd">  the name is the operation name of the corresponding operation with</span>
 <span class="sd">  opSubType==None</span>
 <span class="sd">  &quot;&quot;&quot;</span>
-  <span class="k">if</span> <span class="n">inClass</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+  <span class="k">if</span> <span class="n">inClass</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
     <span class="n">inClass</span> <span class="o">=</span> <span class="n">op</span><span class="o">.</span><span class="n">container</span>
   
-  <span class="k">if</span> <span class="ow">not</span> <span class="n">op</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span> <span class="o">==</span> <span class="s1">&#39;MetaOperation&#39;</span><span class="p">:</span>
+  <span class="k">if</span> <span class="ow">not</span> <span class="n">op</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;MetaOperation&#39;</span><span class="p">:</span>
     <span class="k">raise</span> <span class="n">MemopsError</span><span class="p">(</span><span class="s2">&quot;Illegal parameter for getFuncname : </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">op</span><span class="p">)</span>
   
-  <span class="k">if</span> <span class="n">op</span><span class="o">.</span><span class="n">opSubType</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+  <span class="k">if</span> <span class="n">op</span><span class="o">.</span><span class="n">opSubType</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
     <span class="n">op</span> <span class="o">=</span> <span class="n">getOperation</span><span class="p">(</span><span class="n">op</span><span class="o">.</span><span class="n">target</span><span class="p">,</span> <span class="n">op</span><span class="o">.</span><span class="n">opType</span><span class="p">,</span> <span class="n">inClass</span><span class="p">)</span>
-  <span class="k">if</span> <span class="n">op</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+  <span class="k">if</span> <span class="n">op</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
     <span class="k">raise</span> <span class="n">MemopsError</span><span class="p">(</span><span class="s2">&quot;No operation with opSubType None corresponds to </span><span class="si">%s</span><span class="s2">&quot;</span>
      <span class="o">%</span> <span class="n">op</span><span class="o">.</span><span class="n">qualifiedName</span><span class="p">()</span>
     <span class="p">)</span>
@@ -475,13 +465,13 @@
     <span class="k">if</span> <span class="n">par</span><span class="o">.</span><span class="n">direction</span> <span class="o">==</span> <span class="n">metaConstants</span><span class="o">.</span><span class="n">return_direction</span><span class="p">:</span>
       <span class="k">return</span> <span class="n">par</span>
 
-  <span class="k">return</span> <span class="bp">None</span></div>
+  <span class="k">return</span> <span class="kc">None</span></div>
 
 <span class="c1">###########################################################################</span>
 
 <span class="c1">###########################################################################</span>
 
-<div class="viewcode-block" id="getReferenceName"><a class="viewcode-back" href="../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.metamodel.html#ccpnmodel.ccpncore.memops.metamodel.Util.getReferenceName">[docs]</a><span class="k">def</span> <span class="nf">getReferenceName</span><span class="p">(</span><span class="n">oo</span><span class="p">,</span> <span class="n">pp</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">subDirs</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+<div class="viewcode-block" id="getReferenceName"><a class="viewcode-back" href="../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.metamodel.html#ccpnmodel.ccpncore.memops.metamodel.Util.getReferenceName">[docs]</a><span class="k">def</span> <span class="nf">getReferenceName</span><span class="p">(</span><span class="n">oo</span><span class="p">,</span> <span class="n">pp</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">subDirs</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
   <span class="sd">&quot;&quot;&quot; get name to refer to an object oo from package pp</span>
 <span class="sd">  If pp is not None the routine will return a short form of the name whenever</span>
 <span class="sd">  oo is contained within pp.</span>
@@ -492,7 +482,7 @@
 <span class="sd">  &quot;&quot;&quot;</span>
   <span class="n">pathStart</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;ccpnmodel.ccpncore&#39;</span><span class="p">]</span>
 
-  <span class="k">if</span> <span class="n">pp</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> <span class="p">(</span><span class="n">oo</span><span class="o">.</span><span class="n">container</span> <span class="ow">is</span> <span class="n">pp</span><span class="p">):</span>
+  <span class="k">if</span> <span class="n">pp</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="p">(</span><span class="n">oo</span><span class="o">.</span><span class="n">container</span> <span class="ow">is</span> <span class="n">pp</span><span class="p">):</span>
     <span class="c1"># pp passed in and oo directly available from pp. Return short name</span>
     <span class="n">name</span> <span class="o">=</span> <span class="n">oo</span><span class="o">.</span><span class="n">name</span>
   <span class="k">else</span><span class="p">:</span>
@@ -501,7 +491,7 @@
     <span class="k">if</span> <span class="n">qname</span> <span class="o">==</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>
       <span class="n">name</span> <span class="o">=</span> <span class="n">qname</span>
     <span class="k">else</span><span class="p">:</span>
-      <span class="k">if</span> <span class="n">subDirs</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+      <span class="k">if</span> <span class="n">subDirs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">subDirs</span> <span class="o">=</span> <span class="p">[]</span>
       <span class="n">pathList</span> <span class="o">=</span> <span class="n">qname</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)</span>
       <span class="n">name</span> <span class="o">=</span> <span class="s1">&#39;.&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">pathStart</span> <span class="o">+</span> <span class="n">subDirs</span> <span class="o">+</span> <span class="n">pathList</span><span class="p">)</span>
@@ -517,7 +507,7 @@
 <div class="viewcode-block" id="coerceToList"><a class="viewcode-back" href="../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.metamodel.html#ccpnmodel.ccpncore.memops.metamodel.Util.coerceToList">[docs]</a><span class="k">def</span> <span class="nf">coerceToList</span><span class="p">(</span><span class="n">params</span><span class="p">):</span>
   
   <span class="c1"># wrap non-iterables into list</span>
-  <span class="k">if</span> <span class="n">params</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+  <span class="k">if</span> <span class="n">params</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
     <span class="n">params</span> <span class="o">=</span> <span class="p">[]</span>
   <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">StringType</span><span class="p">):</span>
     <span class="n">params</span> <span class="o">=</span> <span class="p">[</span><span class="n">params</span><span class="p">]</span>
@@ -531,7 +521,7 @@
 
 <span class="c1">###########################################################################</span>
 
-<div class="viewcode-block" id="semideepcopy"><a class="viewcode-back" href="../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.metamodel.html#ccpnmodel.ccpncore.memops.metamodel.Util.semideepcopy">[docs]</a><span class="k">def</span> <span class="nf">semideepcopy</span><span class="p">(</span><span class="n">dd</span><span class="p">,</span> <span class="n">doneDict</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+<div class="viewcode-block" id="semideepcopy"><a class="viewcode-back" href="../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.metamodel.html#ccpnmodel.ccpncore.memops.metamodel.Util.semideepcopy">[docs]</a><span class="k">def</span> <span class="nf">semideepcopy</span><span class="p">(</span><span class="n">dd</span><span class="p">,</span> <span class="n">doneDict</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
   <span class="sd">&quot;&quot;&quot; does a semi-deep copy of a nested dictionary, for copying mappings.</span>
 <span class="sd">  Dictionaries are copied recursively, .</span>
 <span class="sd">  Lists are copied, but not recursively.</span>
@@ -540,12 +530,12 @@
 <span class="sd">  Keys and other values are passed unchanged</span>
 <span class="sd">  &quot;&quot;&quot;</span>
 
-  <span class="k">if</span> <span class="n">doneDict</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+  <span class="k">if</span> <span class="n">doneDict</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
     <span class="n">doneDict</span> <span class="o">=</span> <span class="p">{}</span>
 
   <span class="n">key</span> <span class="o">=</span> <span class="nb">id</span><span class="p">(</span><span class="n">dd</span><span class="p">)</span>
   <span class="n">result</span> <span class="o">=</span> <span class="n">doneDict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
-  <span class="k">if</span> <span class="n">result</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+  <span class="k">if</span> <span class="n">result</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
     <span class="n">doneDict</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">result</span> <span class="o">=</span> <span class="p">{}</span>
 
     <span class="k">for</span> <span class="n">kk</span><span class="p">,</span><span class="n">val</span> <span class="ow">in</span> <span class="n">dd</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
@@ -556,7 +546,7 @@
       <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="n">ListType</span><span class="p">):</span>
         <span class="n">key2</span> <span class="o">=</span> <span class="nb">id</span><span class="p">(</span><span class="n">val</span><span class="p">)</span>
         <span class="n">newval</span> <span class="o">=</span> <span class="n">doneDict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">key2</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">newval</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">newval</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
           <span class="n">newval</span> <span class="o">=</span> <span class="n">val</span><span class="p">[:]</span>
           <span class="n">doneDict</span><span class="p">[</span><span class="n">key2</span><span class="p">]</span> <span class="o">=</span> <span class="n">newval</span>
 
@@ -647,15 +637,15 @@
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
 <div id="searchbox" style="display: none" role="search">
-  <h3>Quick search</h3>
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
     <form class="search" action="../../../../../search.html" method="get">
-      <input type="text" name="q" />
+      <input type="text" name="q" aria-labelledby="searchlabel" />
       <input type="submit" value="Go" />
-      <input type="hidden" name="check_keywords" value="yes" />
-      <input type="hidden" name="area" value="default" />
     </form>
+    </div>
 </div>
-<script type="text/javascript">$('#searchbox').show(0);</script>
+<script>$('#searchbox').show(0);</script>
         </div>
       </div>
       <div class="clearer"></div>
@@ -669,13 +659,13 @@
         <li class="right" >
           <a href="../../../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../../../index.html">Python  documentation</a> &raquo;</li>
-          <li class="nav-item nav-item-1"><a href="../../../../index.html" >Module code</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="../../../../../index.html">Python  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../../../index.html" >Module code</a> &#187;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
-        &copy; Copyright .
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.1.
+        &#169; Copyright .
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.4.0.
     </div>
   </body>
 </html>

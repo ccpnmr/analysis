@@ -1,32 +1,22 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
+<!DOCTYPE html>
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    
-    <title>ccpn.util.Colour &mdash; Python  documentation</title>
-    
+    <meta charset="utf-8" />
+    <title>ccpn.util.Colour &#8212; Python  documentation</title>
     <link rel="stylesheet" href="../../../_static/classic.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
     
-    <script type="text/javascript">
-      var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    '../../../',
-        VERSION:     '',
-        COLLAPSE_INDEX: false,
-        FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true
-      };
-    </script>
-    <script type="text/javascript" src="../../../_static/jquery.js"></script>
-    <script type="text/javascript" src="../../../_static/underscore.js"></script>
-    <script type="text/javascript" src="../../../_static/doctools.js"></script>
-    <link rel="top" title="Python  documentation" href="../../../index.html" />
-    <link rel="up" title="Module code" href="../../index.html" /> 
-  </head>
-  <body role="document">
+    <script id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/jquery.js"></script>
+    <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/language_data.js"></script>
+    
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+  </head><body>
     <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
@@ -36,8 +26,8 @@
         <li class="right" >
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../index.html">Python  documentation</a> &raquo;</li>
-          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="../../../index.html">Python  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &#187;</li> 
       </ul>
     </div>  
 
@@ -53,7 +43,7 @@
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Licence, Reference and Credits</span>
 <span class="c1">#=========================================================================================</span>
-<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019&quot;</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020&quot;</span>
 <span class="n">__credits__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Ed Brooksbank, Luca Mureddu, Timothy J Ragan &amp; Geerten W Vuister&quot;</span><span class="p">)</span>
 <span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">)</span>
 <span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., &amp; Vuister, G.W.&quot;</span><span class="p">,</span>
@@ -62,8 +52,8 @@
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Last code modification</span>
 <span class="c1">#=========================================================================================</span>
-<span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: CCPN $&quot;</span>
-<span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2017-07-07 16:32:57 +0100 (Fri, July 07, 2017) $&quot;</span>
+<span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: Ed Brooksbank $&quot;</span>
+<span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2020-01-23 13:20:54 +0000 (Thu, January 23, 2020) $&quot;</span>
 <span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.0 $&quot;</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Created</span>
@@ -78,13 +68,13 @@
 
 <span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">OrderedDict</span>
 <span class="kn">from</span> <span class="nn">PyQt5</span> <span class="kn">import</span> <span class="n">QtGui</span><span class="p">,</span> <span class="n">QtCore</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 
 
 <span class="k">def</span> <span class="nf">_ccpnHex</span><span class="p">(</span><span class="n">val</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Generate hex value with padded leading zeroes</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">val</span> <span class="o">=</span> <span class="s1">&#39;{0:#0{1}x}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">val</span><span class="p">),</span> <span class="mi">4</span><span class="p">)</span>
+    <span class="n">val</span> <span class="o">=</span> <span class="s1">&#39;{0:#0</span><span class="si">{1}</span><span class="s1">x}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">val</span><span class="p">),</span> <span class="mi">4</span><span class="p">)</span>
     <span class="k">return</span> <span class="s1">&#39;0x&#39;</span> <span class="o">+</span> <span class="n">val</span><span class="p">[</span><span class="mi">2</span><span class="p">:]</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
 
 
@@ -709,7 +699,7 @@
 <span class="sd">    &gt;&gt;&gt; c = Colour((255, 0, 255))</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; value can be name or #rrggbb or #rrggbbaa or (r, g, b) or (r, g, b, a) tuple/list &quot;&quot;&quot;</span>
         <span class="c1"># print(value, &#39;color init&#39;)</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">value</span><span class="p">:</span>
@@ -761,13 +751,13 @@
 
         <span class="k">return</span> <span class="s1">&#39;#&#39;</span> <span class="o">+</span> <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">_ccpnHex</span><span class="p">(</span><span class="n">x</span><span class="p">)[</span><span class="mi">2</span><span class="p">:]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">r</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">g</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">b</span><span class="p">)])</span></div>
 
-    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span>
 
-    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__repr__</span><span class="p">()</span></div>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="fm">__repr__</span><span class="p">()</span></div>
 
 
 <div class="viewcode-block" id="rgba"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Colour.rgba">[docs]</a><span class="k">def</span> <span class="nf">rgba</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
@@ -784,6 +774,11 @@
     <span class="n">spectrumColours</span><span class="p">[</span><span class="n">newColour</span><span class="o">.</span><span class="n">name</span><span class="p">()]</span> <span class="o">=</span> <span class="s1">&#39;Colour </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">newIndex</span></div>
 
 
+<div class="viewcode-block" id="isSpectrumColour"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Colour.isSpectrumColour">[docs]</a><span class="k">def</span> <span class="nf">isSpectrumColour</span><span class="p">(</span><span class="n">colourString</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Return true if the colourString is in the list</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">colourString</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">spectrumColours</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span></div>
+
 <div class="viewcode-block" id="addNewColourString"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Colour.addNewColourString">[docs]</a><span class="k">def</span> <span class="nf">addNewColourString</span><span class="p">(</span><span class="n">colourString</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Add a new Hex colour to the colourlist</span>
 <span class="sd">    New colour has the name &#39;Colour &lt;n&gt;&#39; where n is the next free number</span>
@@ -794,7 +789,7 @@
         <span class="n">spectrumColours</span><span class="p">[</span><span class="n">colourString</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;Colour </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">newIndex</span></div>
 
 
-<div class="viewcode-block" id="autoCorrectHexColour"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Colour.autoCorrectHexColour">[docs]</a><span class="k">def</span> <span class="nf">autoCorrectHexColour</span><span class="p">(</span><span class="n">colour</span><span class="p">,</span> <span class="n">referenceHexColour</span><span class="o">=</span><span class="s1">&#39;#ffffff&#39;</span><span class="p">,</span> <span class="n">addNewColour</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+<div class="viewcode-block" id="autoCorrectHexColour"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Colour.autoCorrectHexColour">[docs]</a><span class="k">def</span> <span class="nf">autoCorrectHexColour</span><span class="p">(</span><span class="n">colour</span><span class="p">,</span> <span class="n">referenceHexColour</span><span class="o">=</span><span class="s1">&#39;#ffffff&#39;</span><span class="p">,</span> <span class="n">addNewColour</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Autocorrect colours if too close to the reference value</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="n">colour</span> <span class="o">==</span> <span class="s1">&#39;#&#39;</span><span class="p">:</span>
@@ -834,7 +829,7 @@
 <span class="c1">#     colList.addItem(icon=QtGui.QIcon(pix), text=&#39;Colour %s&#39; % newIndex)</span>
 <span class="c1">#     colList.setCurrentIndex(int(newIndex) - 1)</span>
 
-<div class="viewcode-block" id="selectPullDownColour"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Colour.selectPullDownColour">[docs]</a><span class="k">def</span> <span class="nf">selectPullDownColour</span><span class="p">(</span><span class="n">pulldown</span><span class="p">,</span> <span class="n">colourString</span><span class="p">,</span> <span class="n">allowAuto</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+<div class="viewcode-block" id="selectPullDownColour"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Colour.selectPullDownColour">[docs]</a><span class="k">def</span> <span class="nf">selectPullDownColour</span><span class="p">(</span><span class="n">pulldown</span><span class="p">,</span> <span class="n">colourString</span><span class="p">,</span> <span class="n">allowAuto</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="n">pulldown</span><span class="o">.</span><span class="n">setCurrentText</span><span class="p">(</span><span class="n">spectrumColours</span><span class="p">[</span><span class="n">colourString</span><span class="p">])</span>
     <span class="k">except</span><span class="p">:</span>
@@ -842,29 +837,46 @@
             <span class="n">pulldown</span><span class="o">.</span><span class="n">setCurrentText</span><span class="p">(</span><span class="s1">&#39;#&#39;</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="fillColourPulldown"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Colour.fillColourPulldown">[docs]</a><span class="k">def</span> <span class="nf">fillColourPulldown</span><span class="p">(</span><span class="n">pulldown</span><span class="p">,</span> <span class="n">allowAuto</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+<div class="viewcode-block" id="fillColourPulldown"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Colour.fillColourPulldown">[docs]</a><span class="k">def</span> <span class="nf">fillColourPulldown</span><span class="p">(</span><span class="n">pulldown</span><span class="p">,</span> <span class="n">allowAuto</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
     <span class="n">currText</span> <span class="o">=</span> <span class="n">pulldown</span><span class="o">.</span><span class="n">currentText</span><span class="p">()</span>
     <span class="c1"># currIndex = pulldown.currentIndex()</span>
     <span class="c1"># print (&#39;&gt;&gt;&gt;&#39;, currText, currIndex)</span>
-    <span class="n">pulldown</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
-    <span class="k">if</span> <span class="n">allowAuto</span><span class="p">:</span>
-        <span class="n">pulldown</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="s1">&#39;&lt;auto&gt;&#39;</span><span class="p">)</span>
-    <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">spectrumColours</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-        <span class="c1"># if item[1] not in pulldown.texts:</span>
+    <span class="k">with</span> <span class="n">pulldown</span><span class="o">.</span><span class="n">blockWidgetSignals</span><span class="p">():</span>
+        <span class="n">pulldown</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">allowAuto</span><span class="p">:</span>
+            <span class="n">pulldown</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="s1">&#39;&lt;auto&gt;&#39;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">spectrumColours</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="c1"># if item[1] not in pulldown.texts:</span>
 
-        <span class="n">colName</span> <span class="o">=</span> <span class="n">item</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>  <span class="c1"># colourNameWithSpace(item[1])</span>
+            <span class="n">colName</span> <span class="o">=</span> <span class="n">item</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>  <span class="c1"># colourNameWithSpace(item[1])</span>
 
-        <span class="k">if</span> <span class="n">item</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="s1">&#39;#&#39;</span><span class="p">:</span>
-            <span class="n">pix</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QPixmap</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">QSize</span><span class="p">(</span><span class="mi">20</span><span class="p">,</span> <span class="mi">20</span><span class="p">))</span>
-            <span class="n">pix</span><span class="o">.</span><span class="n">fill</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QColor</span><span class="p">(</span><span class="n">item</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
-            <span class="n">pulldown</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="n">icon</span><span class="o">=</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QIcon</span><span class="p">(</span><span class="n">pix</span><span class="p">),</span> <span class="n">text</span><span class="o">=</span><span class="n">colName</span><span class="p">)</span>
-        <span class="k">elif</span> <span class="n">allowAuto</span><span class="p">:</span>
-            <span class="n">pulldown</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="n">colName</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">item</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="s1">&#39;#&#39;</span><span class="p">:</span>
+                <span class="n">pix</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QPixmap</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">QSize</span><span class="p">(</span><span class="mi">20</span><span class="p">,</span> <span class="mi">20</span><span class="p">))</span>
+                <span class="n">pix</span><span class="o">.</span><span class="n">fill</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QColor</span><span class="p">(</span><span class="n">item</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+                <span class="n">pulldown</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="n">icon</span><span class="o">=</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QIcon</span><span class="p">(</span><span class="n">pix</span><span class="p">),</span> <span class="n">text</span><span class="o">=</span><span class="n">colName</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">allowAuto</span><span class="p">:</span>
+                <span class="n">pulldown</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="n">colName</span><span class="p">)</span>
 
-    <span class="n">pulldown</span><span class="o">.</span><span class="n">setCurrentText</span><span class="p">(</span><span class="n">currText</span><span class="p">)</span></div>
+        <span class="n">pulldown</span><span class="o">.</span><span class="n">setCurrentText</span><span class="p">(</span><span class="n">currText</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="getSpectrumColour"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Colour.getSpectrumColour">[docs]</a><span class="k">def</span> <span class="nf">getSpectrumColour</span><span class="p">(</span><span class="n">colourName</span><span class="p">,</span> <span class="n">defaultReturn</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">_setColourPulldown</span><span class="p">(</span><span class="n">pulldown</span><span class="p">,</span> <span class="n">attrib</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Populate colour pulldown and set to the current colour</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">spectrumColourKeys</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">spectrumColours</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+    <span class="n">fillColourPulldown</span><span class="p">(</span><span class="n">pulldown</span><span class="p">,</span> <span class="n">allowAuto</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="n">c</span> <span class="o">=</span> <span class="n">attrib</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span> <span class="k">if</span> <span class="n">attrib</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;#&#39;</span><span class="p">)</span> <span class="k">else</span> <span class="n">attrib</span>
+    <span class="k">if</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">spectrumColourKeys</span><span class="p">:</span>
+        <span class="n">col</span> <span class="o">=</span> <span class="n">spectrumColours</span><span class="p">[</span><span class="n">c</span><span class="p">]</span>
+        <span class="n">pulldown</span><span class="o">.</span><span class="n">setCurrentText</span><span class="p">(</span><span class="n">col</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">addNewColourString</span><span class="p">(</span><span class="n">c</span><span class="p">)</span>
+        <span class="n">fillColourPulldown</span><span class="p">(</span><span class="n">pulldown</span><span class="p">,</span> <span class="n">allowAuto</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="n">col</span> <span class="o">=</span> <span class="n">spectrumColours</span><span class="p">[</span><span class="n">c</span><span class="p">]</span>
+        <span class="n">pulldown</span><span class="o">.</span><span class="n">setCurrentText</span><span class="p">(</span><span class="n">col</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="getSpectrumColour"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Colour.getSpectrumColour">[docs]</a><span class="k">def</span> <span class="nf">getSpectrumColour</span><span class="p">(</span><span class="n">colourName</span><span class="p">,</span> <span class="n">defaultReturn</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    return the hex colour of the named colour</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -872,13 +884,13 @@
         <span class="n">colName</span> <span class="o">=</span> <span class="n">colourName</span>  <span class="c1"># colourNameNoSpace(colourName)</span>
 
         <span class="n">col</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">spectrumColours</span><span class="o">.</span><span class="n">keys</span><span class="p">())[</span><span class="nb">list</span><span class="p">(</span><span class="n">spectrumColours</span><span class="o">.</span><span class="n">values</span><span class="p">())</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">colName</span><span class="p">)]</span>
-        <span class="k">return</span> <span class="n">col</span>
+        <span class="k">return</span> <span class="n">col</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span> <span class="k">if</span> <span class="n">col</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;#&#39;</span><span class="p">)</span> <span class="k">else</span> <span class="n">col</span>
     <span class="k">except</span><span class="p">:</span>
         <span class="c1"># colour not found in the list</span>
         <span class="k">return</span> <span class="n">defaultReturn</span></div>
 
 
-<div class="viewcode-block" id="getAutoColourRgbRatio"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Colour.getAutoColourRgbRatio">[docs]</a><span class="k">def</span> <span class="nf">getAutoColourRgbRatio</span><span class="p">(</span><span class="n">inColour</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">sourceObject</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">colourAttribute</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">defaultColour</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+<div class="viewcode-block" id="getAutoColourRgbRatio"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Colour.getAutoColourRgbRatio">[docs]</a><span class="k">def</span> <span class="nf">getAutoColourRgbRatio</span><span class="p">(</span><span class="n">inColour</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">sourceObject</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">colourAttribute</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">defaultColour</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="n">listColour</span> <span class="o">=</span> <span class="n">inColour</span>
     <span class="k">if</span> <span class="n">listColour</span> <span class="o">==</span> <span class="s1">&#39;#&#39;</span><span class="p">:</span>
         <span class="n">listColour</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">sourceObject</span><span class="p">,</span> <span class="n">colourAttribute</span><span class="p">,</span> <span class="n">defaultColour</span><span class="p">)</span>
@@ -889,7 +901,7 @@
     <span class="n">weights</span> <span class="o">=</span> <span class="p">(</span><span class="mf">0.3</span><span class="p">,</span> <span class="mf">0.59</span><span class="p">,</span> <span class="mf">0.11</span><span class="p">)</span>  <span class="c1"># assuming rgb</span>
     <span class="n">rgbIn</span> <span class="o">=</span> <span class="n">hexToRgb</span><span class="p">(</span><span class="n">hexCol</span><span class="p">)</span>
 
-    <span class="n">lastCol</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="n">lastCol</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">colourHexList</span><span class="p">:</span>
 
         <span class="n">rgbTest</span> <span class="o">=</span> <span class="n">hexToRgb</span><span class="p">(</span><span class="n">col</span><span class="p">)</span>
@@ -899,17 +911,17 @@
         <span class="k">for</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">w</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">rgbIn</span><span class="p">,</span> <span class="n">rgbTest</span><span class="p">,</span> <span class="n">weights</span><span class="p">):</span>
             <span class="n">num</span> <span class="o">+=</span> <span class="nb">pow</span><span class="p">((</span><span class="n">a</span> <span class="o">-</span> <span class="n">b</span><span class="p">)</span> <span class="o">*</span> <span class="n">w</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="n">lastCol</span> <span class="ow">is</span> <span class="bp">None</span> <span class="ow">or</span> <span class="n">num</span> <span class="o">&lt;</span> <span class="n">lastDiff</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">lastCol</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">num</span> <span class="o">&lt;</span> <span class="n">lastDiff</span><span class="p">:</span>
             <span class="n">lastDiff</span> <span class="o">=</span> <span class="n">num</span>
             <span class="n">lastCol</span> <span class="o">=</span> <span class="p">(</span><span class="n">col</span><span class="p">,</span> <span class="n">num</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">lastCol</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span></div>
 
 
-<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;Simple routine to plot all the named colors in the matplotlib colorspace</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="kn">as</span> <span class="nn">plt</span>
+    <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
     <span class="kn">from</span> <span class="nn">matplotlib</span> <span class="kn">import</span> <span class="n">colors</span> <span class="k">as</span> <span class="n">mcolors</span>
 
 
@@ -976,7 +988,7 @@
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">colors</span><span class="p">[</span><span class="n">col</span><span class="p">],</span> <span class="nb">str</span><span class="p">):</span>
             <span class="c1"># col = colourNameWithSpace(col)</span>
 
-            <span class="k">print</span><span class="p">(</span><span class="s1">&#39;(&#39;</span> <span class="o">+</span> <span class="nb">repr</span><span class="p">(</span><span class="n">colors</span><span class="p">[</span><span class="n">col</span><span class="p">])</span> <span class="o">+</span> <span class="s1">&#39;, &#39;</span> <span class="o">+</span> <span class="nb">repr</span><span class="p">(</span><span class="n">col</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;),&#39;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;(&#39;</span> <span class="o">+</span> <span class="nb">repr</span><span class="p">(</span><span class="n">colors</span><span class="p">[</span><span class="n">col</span><span class="p">])</span> <span class="o">+</span> <span class="s1">&#39;, &#39;</span> <span class="o">+</span> <span class="nb">repr</span><span class="p">(</span><span class="n">col</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;),&#39;</span><span class="p">)</span>
 
     <span class="n">colourPlot</span><span class="p">(</span><span class="n">spectrumDarkColours</span><span class="o">.</span><span class="n">values</span><span class="p">(),</span> <span class="n">title</span><span class="o">=</span><span class="s1">&#39;Dark Spectrum Colours&#39;</span><span class="p">)</span>
     <span class="n">colourPlot</span><span class="p">(</span><span class="n">spectrumMediumColours</span><span class="o">.</span><span class="n">values</span><span class="p">(),</span> <span class="n">title</span><span class="o">=</span><span class="s1">&#39;Medium Spectrum Colours&#39;</span><span class="p">)</span>
@@ -1015,15 +1027,15 @@
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
 <div id="searchbox" style="display: none" role="search">
-  <h3>Quick search</h3>
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
     <form class="search" action="../../../search.html" method="get">
-      <input type="text" name="q" />
+      <input type="text" name="q" aria-labelledby="searchlabel" />
       <input type="submit" value="Go" />
-      <input type="hidden" name="check_keywords" value="yes" />
-      <input type="hidden" name="area" value="default" />
     </form>
+    </div>
 </div>
-<script type="text/javascript">$('#searchbox').show(0);</script>
+<script>$('#searchbox').show(0);</script>
         </div>
       </div>
       <div class="clearer"></div>
@@ -1037,13 +1049,13 @@
         <li class="right" >
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../index.html">Python  documentation</a> &raquo;</li>
-          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="../../../index.html">Python  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &#187;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
-        &copy; Copyright .
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.1.
+        &#169; Copyright .
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.4.0.
     </div>
   </body>
 </html>

@@ -1,32 +1,22 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
+<!DOCTYPE html>
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    
-    <title>ccpnmodel.ccpncore.memops.metamodel.ModelTraverse_py_2_1 &mdash; Python  documentation</title>
-    
+    <meta charset="utf-8" />
+    <title>ccpnmodel.ccpncore.memops.metamodel.ModelTraverse_py_2_1 &#8212; Python  documentation</title>
     <link rel="stylesheet" href="../../../../../_static/classic.css" type="text/css" />
     <link rel="stylesheet" href="../../../../../_static/pygments.css" type="text/css" />
     
-    <script type="text/javascript">
-      var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    '../../../../../',
-        VERSION:     '',
-        COLLAPSE_INDEX: false,
-        FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true
-      };
-    </script>
-    <script type="text/javascript" src="../../../../../_static/jquery.js"></script>
-    <script type="text/javascript" src="../../../../../_static/underscore.js"></script>
-    <script type="text/javascript" src="../../../../../_static/doctools.js"></script>
-    <link rel="top" title="Python  documentation" href="../../../../../index.html" />
-    <link rel="up" title="Module code" href="../../../../index.html" /> 
-  </head>
-  <body role="document">
+    <script id="documentation_options" data-url_root="../../../../../" src="../../../../../_static/documentation_options.js"></script>
+    <script src="../../../../../_static/jquery.js"></script>
+    <script src="../../../../../_static/underscore.js"></script>
+    <script src="../../../../../_static/doctools.js"></script>
+    <script src="../../../../../_static/language_data.js"></script>
+    
+    <link rel="index" title="Index" href="../../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../../search.html" /> 
+  </head><body>
     <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
@@ -36,8 +26,8 @@
         <li class="right" >
           <a href="../../../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../../../index.html">Python  documentation</a> &raquo;</li>
-          <li class="nav-item nav-item-1"><a href="../../../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="../../../../../index.html">Python  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../../../index.html" accesskey="U">Module code</a> &#187;</li> 
       </ul>
     </div>  
 
@@ -96,12 +86,12 @@
 <span class="c1"># hack for Python 2.1 compatibility  NBNB                            #</span>
 <span class="c1">######################################################################</span>
 <span class="k">try</span><span class="p">:</span>
-  <span class="n">junk</span> <span class="o">=</span> <span class="bp">True</span>
-  <span class="n">junk</span> <span class="o">=</span> <span class="bp">False</span>
+  <span class="n">junk</span> <span class="o">=</span> <span class="kc">True</span>
+  <span class="n">junk</span> <span class="o">=</span> <span class="kc">False</span>
 <span class="k">except</span> <span class="ne">NameError</span><span class="p">:</span>
   <span class="n">dd</span> <span class="o">=</span> <span class="nb">globals</span><span class="p">()</span>
   <span class="n">dd</span><span class="p">[</span><span class="s1">&#39;True&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="ow">not</span> <span class="mi">0</span>
-  <span class="n">dd</span><span class="p">[</span><span class="s1">&#39;False&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="ow">not</span> <span class="bp">True</span>
+  <span class="n">dd</span><span class="p">[</span><span class="s1">&#39;False&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="ow">not</span> <span class="kc">True</span>
   <span class="k">del</span> <span class="n">dd</span>
  
 <span class="n">mandatoryAttributes</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;modelPortal&#39;</span><span class="p">,)</span>
@@ -425,7 +415,7 @@
     <span class="n">flav</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">modelFlavours</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">flav</span> <span class="o">==</span> <span class="n">val</span><span class="p">:</span>
       <span class="k">return</span>
-    <span class="k">elif</span> <span class="n">flav</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+    <span class="k">elif</span> <span class="n">flav</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">modelFlavours</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">val</span>
     <span class="k">else</span><span class="p">:</span>
       <span class="k">raise</span> <span class="n">MemopsError</span><span class="p">(</span>
@@ -443,7 +433,7 @@
 
   <span class="c1">###########################################################################</span>
     
-<div class="viewcode-block" id="ModelTraverse_py_2_1.getFuncname"><a class="viewcode-back" href="../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.metamodel.html#ccpnmodel.ccpncore.memops.metamodel.ModelTraverse_py_2_1.ModelTraverse_py_2_1.getFuncname">[docs]</a>  <span class="k">def</span> <span class="nf">getFuncname</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">op</span><span class="p">,</span> <span class="n">inClass</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+<div class="viewcode-block" id="ModelTraverse_py_2_1.getFuncname"><a class="viewcode-back" href="../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.metamodel.html#ccpnmodel.ccpncore.memops.metamodel.ModelTraverse_py_2_1.ModelTraverse_py_2_1.getFuncname">[docs]</a>  <span class="k">def</span> <span class="nf">getFuncname</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">op</span><span class="p">,</span> <span class="n">inClass</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; get function calling name for operation</span>
 <span class="sd">    </span>
 <span class="sd">    the name is the operation name of the corresponding operation with</span>
@@ -455,7 +445,7 @@
 
   <span class="c1">###########################################################################</span>
 
-<div class="viewcode-block" id="ModelTraverse_py_2_1.valueVar"><a class="viewcode-back" href="../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.metamodel.html#ccpnmodel.ccpncore.memops.metamodel.ModelTraverse_py_2_1.ModelTraverse_py_2_1.valueVar">[docs]</a>  <span class="k">def</span> <span class="nf">valueVar</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">element</span><span class="p">,</span> <span class="n">doInstance</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">prefix</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">):</span>
+<div class="viewcode-block" id="ModelTraverse_py_2_1.valueVar"><a class="viewcode-back" href="../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.metamodel.html#ccpnmodel.ccpncore.memops.metamodel.ModelTraverse_py_2_1.ModelTraverse_py_2_1.valueVar">[docs]</a>  <span class="k">def</span> <span class="nf">valueVar</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">element</span><span class="p">,</span> <span class="n">doInstance</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">prefix</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">):</span>
 
     <span class="n">var</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">varNames</span><span class="p">[</span><span class="s1">&#39;value&#39;</span><span class="p">]</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">doInstance</span> <span class="ow">and</span> <span class="n">element</span><span class="o">.</span><span class="n">hicard</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
@@ -487,10 +477,10 @@
 
   <span class="c1">###########################################################################</span>
 
-<div class="viewcode-block" id="ModelTraverse_py_2_1.getImportName"><a class="viewcode-back" href="../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.metamodel.html#ccpnmodel.ccpncore.memops.metamodel.ModelTraverse_py_2_1.ModelTraverse_py_2_1.getImportName">[docs]</a>  <span class="k">def</span> <span class="nf">getImportName</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">oo</span><span class="p">,</span> <span class="n">pp</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">subDirs</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+<div class="viewcode-block" id="ModelTraverse_py_2_1.getImportName"><a class="viewcode-back" href="../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.metamodel.html#ccpnmodel.ccpncore.memops.metamodel.ModelTraverse_py_2_1.ModelTraverse_py_2_1.getImportName">[docs]</a>  <span class="k">def</span> <span class="nf">getImportName</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">oo</span><span class="p">,</span> <span class="n">pp</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">subDirs</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     
-    <span class="k">if</span> <span class="n">subDirs</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
-      <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">codeDirName</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">subDirs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+      <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">codeDirName</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">subDirs</span> <span class="o">=</span> <span class="p">[]</span>
       <span class="k">else</span><span class="p">:</span>
         <span class="n">subDirs</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">codeDirName</span><span class="p">]</span>
@@ -550,7 +540,7 @@
       <span class="n">cl</span> <span class="o">=</span> <span class="n">classes</span><span class="p">[</span><span class="n">ic</span><span class="p">]</span>
       <span class="n">cc</span> <span class="o">=</span> <span class="n">startClasses</span><span class="p">[</span><span class="n">ic</span><span class="p">]</span>
       <span class="n">pr</span> <span class="o">=</span> <span class="n">cc</span><span class="o">.</span><span class="n">parentRole</span>
-      <span class="k">if</span> <span class="n">pr</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+      <span class="k">if</span> <span class="n">pr</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="c1"># class has no parent link </span>
         <span class="c1"># the best we can do is to go directly to the TopObject</span>
         <span class="c1"># we will miss some things, but it cannot be helped</span>
@@ -583,8 +573,8 @@
     <span class="n">separate</span> <span class="o">=</span> <span class="p">(</span><span class="n">classes</span><span class="p">[</span><span class="mi">0</span><span class="p">][:</span><span class="n">indexcc</span><span class="p">],</span> <span class="n">classes</span><span class="p">[</span><span class="mi">1</span><span class="p">][:</span><span class="n">indexcc</span><span class="p">])</span>
 
     <span class="c1"># find partitioning links, if any</span>
-    <span class="n">partitionRoles</span> <span class="o">=</span> <span class="p">[</span><span class="bp">None</span><span class="p">,</span><span class="bp">None</span><span class="p">]</span>
-    <span class="n">indices</span> <span class="o">=</span> <span class="p">[[</span><span class="bp">None</span><span class="p">,</span> <span class="bp">None</span><span class="p">],[</span><span class="bp">None</span><span class="p">,</span> <span class="bp">None</span><span class="p">]]</span>
+    <span class="n">partitionRoles</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">,</span><span class="kc">None</span><span class="p">]</span>
+    <span class="n">indices</span> <span class="o">=</span> <span class="p">[[</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">],[</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">]]</span>
     <span class="k">for</span> <span class="n">ic</span> <span class="ow">in</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">):</span>
       <span class="n">spx</span> <span class="o">=</span> <span class="n">separate</span><span class="p">[</span><span class="n">ic</span><span class="p">]</span>
       <span class="n">spz</span> <span class="o">=</span> <span class="n">separate</span><span class="p">[</span><span class="mi">1</span><span class="o">-</span><span class="n">ic</span><span class="p">]</span>
@@ -620,16 +610,16 @@
       <span class="c1"># break</span>
      
     <span class="c1"># select partitioning link, get both roles, and further check compatibility</span>
-    <span class="k">if</span> <span class="n">partitionRoles</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">is</span> <span class="bp">None</span> <span class="ow">and</span> <span class="n">partitionRoles</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">partitionRoles</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">partitionRoles</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
       <span class="c1"># no link </span>
       <span class="n">resultIndices</span> <span class="o">=</span> <span class="p">(</span><span class="n">indexcc</span><span class="p">,</span> <span class="n">indexcc</span><span class="p">)</span>
     
-    <span class="k">elif</span> <span class="n">partitionRoles</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+    <span class="k">elif</span> <span class="n">partitionRoles</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
       <span class="c1"># one-way link</span>
       <span class="n">resultIndices</span> <span class="o">=</span> <span class="n">indices</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
       <span class="n">resultIndices</span><span class="o">.</span><span class="n">reverse</span><span class="p">()</span>
     
-    <span class="k">elif</span> <span class="n">partitionRoles</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+    <span class="k">elif</span> <span class="n">partitionRoles</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
       <span class="c1"># one-way link</span>
       <span class="n">resultIndices</span> <span class="o">=</span> <span class="n">indices</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
       
@@ -700,15 +690,15 @@
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
 <div id="searchbox" style="display: none" role="search">
-  <h3>Quick search</h3>
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
     <form class="search" action="../../../../../search.html" method="get">
-      <input type="text" name="q" />
+      <input type="text" name="q" aria-labelledby="searchlabel" />
       <input type="submit" value="Go" />
-      <input type="hidden" name="check_keywords" value="yes" />
-      <input type="hidden" name="area" value="default" />
     </form>
+    </div>
 </div>
-<script type="text/javascript">$('#searchbox').show(0);</script>
+<script>$('#searchbox').show(0);</script>
         </div>
       </div>
       <div class="clearer"></div>
@@ -722,13 +712,13 @@
         <li class="right" >
           <a href="../../../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../../../index.html">Python  documentation</a> &raquo;</li>
-          <li class="nav-item nav-item-1"><a href="../../../../index.html" >Module code</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="../../../../../index.html">Python  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../../../index.html" >Module code</a> &#187;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
-        &copy; Copyright .
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.1.
+        &#169; Copyright .
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.4.0.
     </div>
   </body>
 </html>

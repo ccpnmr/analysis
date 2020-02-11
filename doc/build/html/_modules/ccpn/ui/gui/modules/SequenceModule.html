@@ -1,32 +1,22 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
+<!DOCTYPE html>
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    
-    <title>ccpn.ui.gui.modules.SequenceModule &mdash; Python  documentation</title>
-    
+    <meta charset="utf-8" />
+    <title>ccpn.ui.gui.modules.SequenceModule &#8212; Python  documentation</title>
     <link rel="stylesheet" href="../../../../../_static/classic.css" type="text/css" />
     <link rel="stylesheet" href="../../../../../_static/pygments.css" type="text/css" />
     
-    <script type="text/javascript">
-      var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    '../../../../../',
-        VERSION:     '',
-        COLLAPSE_INDEX: false,
-        FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true
-      };
-    </script>
-    <script type="text/javascript" src="../../../../../_static/jquery.js"></script>
-    <script type="text/javascript" src="../../../../../_static/underscore.js"></script>
-    <script type="text/javascript" src="../../../../../_static/doctools.js"></script>
-    <link rel="top" title="Python  documentation" href="../../../../../index.html" />
-    <link rel="up" title="Module code" href="../../../../index.html" /> 
-  </head>
-  <body role="document">
+    <script id="documentation_options" data-url_root="../../../../../" src="../../../../../_static/documentation_options.js"></script>
+    <script src="../../../../../_static/jquery.js"></script>
+    <script src="../../../../../_static/underscore.js"></script>
+    <script src="../../../../../_static/doctools.js"></script>
+    <script src="../../../../../_static/language_data.js"></script>
+    
+    <link rel="index" title="Index" href="../../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../../search.html" /> 
+  </head><body>
     <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
@@ -36,8 +26,8 @@
         <li class="right" >
           <a href="../../../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../../../index.html">Python  documentation</a> &raquo;</li>
-          <li class="nav-item nav-item-1"><a href="../../../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="../../../../../index.html">Python  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../../../index.html" accesskey="U">Module code</a> &#187;</li> 
       </ul>
     </div>  
 
@@ -113,17 +103,17 @@
 <span class="sd">    stretch of residues matches a given stretch of connected NmrResidues. The QGraphicsScene and</span>
 <span class="sd">    QGraphicsView instances provide the canvas on to which the amino acids representations are drawn.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">includeSettingsWidget</span> <span class="o">=</span> <span class="bp">False</span>
+    <span class="n">includeSettingsWidget</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="n">maxSettingsState</span> <span class="o">=</span> <span class="mi">2</span>  <span class="c1"># states are defined as: 0: invisible, 1: both visible, 2: only settings visible</span>
     <span class="n">settingsPosition</span> <span class="o">=</span> <span class="s1">&#39;left&#39;</span>
 
-    <span class="n">_alreadyOpened</span> <span class="o">=</span> <span class="bp">False</span>
-    <span class="n">_onlySingleInstance</span> <span class="o">=</span> <span class="bp">True</span>
-    <span class="n">_currentModule</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="n">_alreadyOpened</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">_onlySingleInstance</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="n">_currentModule</span> <span class="o">=</span> <span class="kc">None</span>
 
     <span class="n">className</span> <span class="o">=</span> <span class="s1">&#39;SequenceModule&#39;</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">moduleParent</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">mainWindow</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;Sequence&#39;</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">moduleParent</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">mainWindow</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;Sequence&#39;</span><span class="p">):</span>
         <span class="c1">#CcpnModule.__init__(self, size=(10, 30), name=&#39;Sequence&#39;, closable=False)</span>
         <span class="c1">#TODO: make closable</span>
         <span class="c1"># CcpnModule.__init__(self, mainWindow=mainWindow, name=name)</span>
@@ -137,14 +127,14 @@
         <span class="c1">#self.label.hide()</span>
 
         <span class="c1"># self.setAcceptDrops(True)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_parent</span><span class="o">.</span><span class="n">setAcceptDrops</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_parent</span><span class="o">.</span><span class="n">setAcceptDrops</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">scrollArea</span> <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QScrollArea</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">scrollArea</span><span class="o">.</span><span class="n">setWidgetResizable</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">scrollArea</span><span class="o">.</span><span class="n">setWidgetResizable</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">scrollArea</span><span class="o">.</span><span class="n">scene</span> <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QGraphicsScene</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_parent</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">scrollContents</span> <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QGraphicsView</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scrollArea</span><span class="o">.</span><span class="n">scene</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parent</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">scrollContents</span><span class="o">.</span><span class="n">setAcceptDrops</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">scrollContents</span><span class="o">.</span><span class="n">setInteractive</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">scrollContents</span><span class="o">.</span><span class="n">setAcceptDrops</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">scrollContents</span><span class="o">.</span><span class="n">setInteractive</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">scrollContents</span><span class="o">.</span><span class="n">setAlignment</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">AlignTop</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">scrollContents</span><span class="o">.</span><span class="n">setGeometry</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">QRect</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">380</span><span class="p">,</span> <span class="mi">1000</span><span class="p">))</span>
@@ -165,7 +155,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">scrollArea</span><span class="o">.</span><span class="n">scene</span><span class="o">.</span><span class="n">dragMoveEvent</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dragMoveEvent</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">scrollArea</span><span class="o">.</span><span class="n">scene</span><span class="o">.</span><span class="n">dropEvent</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dropEvent</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">chainLabels</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_highlight</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_highlight</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_initialiseChainLabels</span><span class="p">()</span>
 
         <span class="c1">#GWV: removed fixed height restrictions but maximum height instead</span>
@@ -175,9 +165,9 @@
         <span class="c1"># self.scrollContents.setMaximumHeight(100)</span>
 
         <span class="c1">#GWV: explicit intialisation to prevent crashes</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_chainNotifier</span> <span class="o">=</span> <span class="bp">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_residueNotifier</span> <span class="o">=</span> <span class="bp">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_chainDeleteNotifier</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_chainNotifier</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_residueNotifier</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_chainDeleteNotifier</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_registerNotifiers</span><span class="p">()</span>
 
         <span class="c1"># TODO:ED add highlight if an nmrChain already selected</span>
@@ -190,7 +180,7 @@
                     <span class="c1"># self._highlight.setPlainText(item.toPlainText())</span>
                     <span class="k">return</span> <span class="n">item</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">return</span> <span class="bp">None</span>
+            <span class="k">return</span> <span class="kc">None</span>
 
     <span class="k">def</span> <span class="nf">_dragMoveEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
         <span class="n">pos</span> <span class="o">=</span> <span class="n">event</span><span class="o">.</span><span class="n">scenePos</span><span class="p">()</span>
@@ -315,12 +305,12 @@
 
                 <span class="k">with</span> <span class="n">progressManager</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span><span class="p">,</span> <span class="s1">&#39;Assigning </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">idStr</span><span class="p">):</span>
 
-                    <span class="n">update</span> <span class="o">=</span> <span class="bp">False</span>
+                    <span class="n">update</span> <span class="o">=</span> <span class="kc">False</span>
                     <span class="k">if</span> <span class="n">nmrChain</span><span class="o">.</span><span class="n">id</span> <span class="o">==</span> <span class="s1">&#39;@-&#39;</span><span class="p">:</span>
                         <span class="c1"># assume that it is the only one</span>
                         <span class="k">try</span><span class="p">:</span>
                             <span class="n">nmrChain</span><span class="o">.</span><span class="n">assignSingleResidue</span><span class="p">(</span><span class="n">selectedNmrResidue</span><span class="p">,</span> <span class="n">residues</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
-                            <span class="n">update</span> <span class="o">=</span> <span class="bp">True</span>
+                            <span class="n">update</span> <span class="o">=</span> <span class="kc">True</span>
                         <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">es</span><span class="p">:</span>
                             <span class="n">showWarning</span><span class="p">(</span><span class="s1">&#39;Sequence Graph&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">es</span><span class="p">))</span>
                             <span class="k">return</span>
@@ -334,7 +324,7 @@
 
                         <span class="k">try</span><span class="p">:</span>
                             <span class="n">nmrChain</span><span class="o">.</span><span class="n">assignConnectedResidues</span><span class="p">(</span><span class="n">residues</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
-                            <span class="n">update</span> <span class="o">=</span> <span class="bp">True</span>
+                            <span class="n">update</span> <span class="o">=</span> <span class="kc">True</span>
                         <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">es</span><span class="p">:</span>
                             <span class="n">showWarning</span><span class="p">(</span><span class="s1">&#39;Sequence Graph&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">es</span><span class="p">))</span>
 
@@ -391,7 +381,7 @@
                 <span class="n">guiResidue</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">chainLabels</span><span class="p">[</span><span class="n">chainNum</span><span class="p">]</span><span class="o">.</span><span class="n">residueDict</span><span class="p">[</span><span class="n">residue</span><span class="o">.</span><span class="n">sequenceCode</span><span class="p">]</span>
                 <span class="n">guiResidues</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">guiResidue</span><span class="p">)</span>
 
-                <span class="k">if</span> <span class="n">guiResidue</span><span class="o">.</span><span class="n">residue</span><span class="o">.</span><span class="n">nmrResidue</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">guiResidue</span><span class="o">.</span><span class="n">residue</span><span class="o">.</span><span class="n">nmrResidue</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                     <span class="n">guiResidue</span><span class="o">.</span><span class="n">_setStyleWarningAssigned</span><span class="p">()</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="n">guiResidue</span><span class="o">.</span><span class="n">_setStylePossibleAssigned</span><span class="p">()</span>
@@ -408,7 +398,7 @@
         <span class="n">chain</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">Notifier</span><span class="o">.</span><span class="n">OBJECT</span><span class="p">]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_addChainLabel</span><span class="p">(</span><span class="n">chain</span><span class="o">=</span><span class="n">chain</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">_addChainLabel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">chain</span><span class="p">:</span> <span class="n">Chain</span><span class="p">,</span> <span class="n">placeholder</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">tryToUseSequenceCodes</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_addChainLabel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">chain</span><span class="p">:</span> <span class="n">Chain</span><span class="p">,</span> <span class="n">placeholder</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">tryToUseSequenceCodes</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Creates and adds a GuiChainLabel to the sequence module.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">chains</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">chainLabels</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
@@ -460,32 +450,40 @@
                                          <span class="p">[</span><span class="n">Notifier</span><span class="o">.</span><span class="n">CREATE</span><span class="p">,</span> <span class="n">Notifier</span><span class="o">.</span><span class="n">CHANGE</span><span class="p">],</span>
                                          <span class="s1">&#39;Residue&#39;</span><span class="p">,</span>
                                          <span class="bp">self</span><span class="o">.</span><span class="n">_addChainResidueCallback</span><span class="p">,</span>
-                                         <span class="n">onceOnly</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+                                         <span class="n">onceOnly</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_residueDeleteNotifier</span> <span class="o">=</span> <span class="n">Notifier</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="p">,</span>
                                                <span class="p">[</span><span class="n">Notifier</span><span class="o">.</span><span class="n">DELETE</span><span class="p">],</span>
                                                <span class="s1">&#39;Residue&#39;</span><span class="p">,</span>
                                                <span class="bp">self</span><span class="o">.</span><span class="n">_deleteChainResidueCallback</span><span class="p">,</span>
-                                               <span class="n">onceOnly</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+                                               <span class="n">onceOnly</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_chainDeleteNotifier</span> <span class="o">=</span> <span class="n">Notifier</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="p">,</span>
                                              <span class="p">[</span><span class="n">Notifier</span><span class="o">.</span><span class="n">DELETE</span><span class="p">],</span>
                                              <span class="s1">&#39;Chain&#39;</span><span class="p">,</span>
                                              <span class="bp">self</span><span class="o">.</span><span class="n">_refreshChainLabels</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_nmrResidueNotifier</span> <span class="o">=</span> <span class="n">Notifier</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="p">,</span>
+                                         <span class="p">[</span><span class="n">Notifier</span><span class="o">.</span><span class="n">CHANGE</span><span class="p">],</span>
+                                         <span class="s1">&#39;NmrResidue&#39;</span><span class="p">,</span>
+                                         <span class="bp">self</span><span class="o">.</span><span class="n">_refreshChainLabels</span><span class="p">,</span>
+                                         <span class="n">onceOnly</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_unRegisterNotifiers</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;unregister notifiers</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_chainNotifier</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_chainNotifier</span><span class="o">.</span><span class="n">unRegister</span><span class="p">()</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_chainNotifier</span> <span class="o">=</span> <span class="bp">None</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_chainNotifier</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_residueNotifier</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_residueNotifier</span><span class="o">.</span><span class="n">unRegister</span><span class="p">()</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_residueNotifier</span> <span class="o">=</span> <span class="bp">None</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_residueNotifier</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_residueDeleteNotifier</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_residueDeleteNotifier</span><span class="o">.</span><span class="n">unRegister</span><span class="p">()</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_residueDeleteNotifier</span> <span class="o">=</span> <span class="bp">None</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_residueDeleteNotifier</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_chainDeleteNotifier</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_chainDeleteNotifier</span><span class="o">.</span><span class="n">unRegister</span><span class="p">()</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_chainDeleteNotifier</span> <span class="o">=</span> <span class="bp">None</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_chainDeleteNotifier</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_nmrResidueNotifier</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_nmrResidueNotifier</span><span class="o">.</span><span class="n">unRegister</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_nmrResidueNotifier</span> <span class="o">=</span> <span class="kc">None</span>
 
     <span class="k">def</span> <span class="nf">_closeModule</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -510,10 +508,11 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">widgetHeight</span> <span class="o">=</span> <span class="mi">0</span>  <span class="c1"># dynamically calculated from the number of chains</span>
 
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">chains</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_addChainLabel</span><span class="p">(</span><span class="n">chain</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">placeholder</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_addChainLabel</span><span class="p">(</span><span class="n">chain</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">placeholder</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">for</span> <span class="n">chain</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">chains</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_addChainLabel</span><span class="p">(</span><span class="n">chain</span><span class="p">,</span> <span class="n">tryToUseSequenceCodes</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">chain</span><span class="o">.</span><span class="n">_flaggedForDelete</span> <span class="ow">or</span> <span class="n">chain</span><span class="o">.</span><span class="n">isDeleted</span><span class="p">):</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_addChainLabel</span><span class="p">(</span><span class="n">chain</span><span class="p">,</span> <span class="n">tryToUseSequenceCodes</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_highlight</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">scrollArea</span><span class="o">.</span><span class="n">scene</span><span class="o">.</span><span class="n">removeItem</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_highlight</span><span class="p">)</span>
@@ -524,7 +523,7 @@
         <span class="c1"># self._highlight.setAttribute(QtCore.Qt.WA_TransparentForMouseEvents, True)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">scrollArea</span><span class="o">.</span><span class="n">scene</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_highlight</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">_refreshChainLabels</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_refreshChainLabels</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;callback to refresh chains notifier</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_initialiseChainLabels</span><span class="p">()</span>
@@ -539,8 +538,8 @@
 <span class="sd">    along with a dictionary mapping Residue objects and GuiChainResidues, which is required for assignment.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sequenceModule</span><span class="p">,</span> <span class="n">mainWindow</span><span class="p">,</span> <span class="n">scene</span><span class="p">,</span> <span class="n">position</span><span class="p">,</span> <span class="n">chain</span><span class="p">,</span> <span class="n">placeholder</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">tryToUseSequenceCodes</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
-        <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QGraphicsTextItem</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sequenceModule</span><span class="p">,</span> <span class="n">mainWindow</span><span class="p">,</span> <span class="n">scene</span><span class="p">,</span> <span class="n">position</span><span class="p">,</span> <span class="n">chain</span><span class="p">,</span> <span class="n">placeholder</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">tryToUseSequenceCodes</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QGraphicsTextItem</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">sequenceModule</span> <span class="o">=</span> <span class="n">sequenceModule</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span> <span class="o">=</span> <span class="n">mainWindow</span>
@@ -625,7 +624,7 @@
         <span class="n">jsonData</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">mimeData</span><span class="o">.</span><span class="n">text</span><span class="p">())</span>
         <span class="n">pids</span> <span class="o">=</span> <span class="n">jsonData</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;pids&#39;</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="n">pids</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">pids</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="c1"># internal data transfer - series of pids</span>
             <span class="k">return</span> <span class="p">(</span><span class="n">pids</span><span class="p">,</span> <span class="s1">&#39;pids&#39;</span><span class="p">)</span>
 
@@ -638,16 +637,16 @@
     <span class="k">elif</span> <span class="n">event</span><span class="o">.</span><span class="n">mimeData</span><span class="p">()</span><span class="o">.</span><span class="n">hasText</span><span class="p">():</span>
         <span class="k">return</span> <span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">mimeData</span><span class="p">()</span><span class="o">.</span><span class="n">text</span><span class="p">(),</span> <span class="s1">&#39;text&#39;</span><span class="p">)</span>
 
-    <span class="k">return</span> <span class="p">(</span><span class="bp">None</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+    <span class="k">return</span> <span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="GuiChainResidue"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.modules.SequenceModule.GuiChainResidue">[docs]</a><span class="k">class</span> <span class="nc">GuiChainResidue</span><span class="p">(</span><span class="n">QtWidgets</span><span class="o">.</span><span class="n">QGraphicsTextItem</span><span class="p">,</span> <span class="n">Base</span><span class="p">):</span>
     <span class="n">fontSize</span> <span class="o">=</span> <span class="mi">20</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">guiChainLabel</span><span class="p">,</span> <span class="n">mainWindow</span><span class="p">,</span> <span class="n">residue</span><span class="p">,</span> <span class="n">scene</span><span class="p">,</span> <span class="n">labelPosition</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">yPosition</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">guiChainLabel</span><span class="p">,</span> <span class="n">mainWindow</span><span class="p">,</span> <span class="n">residue</span><span class="p">,</span> <span class="n">scene</span><span class="p">,</span> <span class="n">labelPosition</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">yPosition</span><span class="p">):</span>
 
-        <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QGraphicsTextItem</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
-        <span class="n">Base</span><span class="o">.</span><span class="n">_init</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">acceptDrops</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+        <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QGraphicsTextItem</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="n">Base</span><span class="o">.</span><span class="n">_init</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">acceptDrops</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">guiChainLabel</span> <span class="o">=</span> <span class="n">guiChainLabel</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span> <span class="o">=</span> <span class="n">mainWindow</span>
@@ -674,7 +673,7 @@
 <span class="sd">        A convenience function for applying the correct styling to GuiChainResidues depending on their state.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">try</span><span class="p">:</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">residue</span><span class="o">.</span><span class="n">nmrResidue</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">residue</span><span class="o">.</span><span class="n">nmrResidue</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_setStyleAssigned</span><span class="p">()</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_setStyleUnAssigned</span><span class="p">()</span>
@@ -703,9 +702,9 @@
 <span class="sd">        Sets font to bold, necessary as QtWidgets.QGraphicsTextItems are used for display of residue</span>
 <span class="sd">        one letter codes.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">format</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QTextCharFormat</span><span class="p">()</span>
-        <span class="n">format</span><span class="o">.</span><span class="n">setFontWeight</span><span class="p">(</span><span class="mi">75</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">textCursor</span><span class="p">()</span><span class="o">.</span><span class="n">mergeCharFormat</span><span class="p">(</span><span class="n">format</span><span class="p">)</span></div>
+        <span class="nb">format</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QTextCharFormat</span><span class="p">()</span>
+        <span class="nb">format</span><span class="o">.</span><span class="n">setFontWeight</span><span class="p">(</span><span class="mi">75</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">textCursor</span><span class="p">()</span><span class="o">.</span><span class="n">mergeCharFormat</span><span class="p">(</span><span class="nb">format</span><span class="p">)</span></div>
 </pre></div>
 
           </div>
@@ -714,15 +713,15 @@
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
 <div id="searchbox" style="display: none" role="search">
-  <h3>Quick search</h3>
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
     <form class="search" action="../../../../../search.html" method="get">
-      <input type="text" name="q" />
+      <input type="text" name="q" aria-labelledby="searchlabel" />
       <input type="submit" value="Go" />
-      <input type="hidden" name="check_keywords" value="yes" />
-      <input type="hidden" name="area" value="default" />
     </form>
+    </div>
 </div>
-<script type="text/javascript">$('#searchbox').show(0);</script>
+<script>$('#searchbox').show(0);</script>
         </div>
       </div>
       <div class="clearer"></div>
@@ -736,13 +735,13 @@
         <li class="right" >
           <a href="../../../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../../../index.html">Python  documentation</a> &raquo;</li>
-          <li class="nav-item nav-item-1"><a href="../../../../index.html" >Module code</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="../../../../../index.html">Python  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../../../index.html" >Module code</a> &#187;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
-        &copy; Copyright .
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.1.
+        &#169; Copyright .
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.4.0.
     </div>
   </body>
 </html>

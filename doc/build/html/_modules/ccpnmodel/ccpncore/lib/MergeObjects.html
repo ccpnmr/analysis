@@ -1,32 +1,22 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
+<!DOCTYPE html>
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    
-    <title>ccpnmodel.ccpncore.lib.MergeObjects &mdash; Python  documentation</title>
-    
+    <meta charset="utf-8" />
+    <title>ccpnmodel.ccpncore.lib.MergeObjects &#8212; Python  documentation</title>
     <link rel="stylesheet" href="../../../../_static/classic.css" type="text/css" />
     <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
     
-    <script type="text/javascript">
-      var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    '../../../../',
-        VERSION:     '',
-        COLLAPSE_INDEX: false,
-        FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true
-      };
-    </script>
-    <script type="text/javascript" src="../../../../_static/jquery.js"></script>
-    <script type="text/javascript" src="../../../../_static/underscore.js"></script>
-    <script type="text/javascript" src="../../../../_static/doctools.js"></script>
-    <link rel="top" title="Python  documentation" href="../../../../index.html" />
-    <link rel="up" title="Module code" href="../../../index.html" /> 
-  </head>
-  <body role="document">
+    <script id="documentation_options" data-url_root="../../../../" src="../../../../_static/documentation_options.js"></script>
+    <script src="../../../../_static/jquery.js"></script>
+    <script src="../../../../_static/underscore.js"></script>
+    <script src="../../../../_static/doctools.js"></script>
+    <script src="../../../../_static/language_data.js"></script>
+    
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+  </head><body>
     <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
@@ -36,8 +26,8 @@
         <li class="right" >
           <a href="../../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../../index.html">Python  documentation</a> &raquo;</li>
-          <li class="nav-item nav-item-1"><a href="../../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="../../../../index.html">Python  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../../index.html" accesskey="U">Module code</a> &#187;</li> 
       </ul>
     </div>  
 
@@ -150,16 +140,16 @@
       <span class="k">continue</span>
  
     <span class="k">elif</span> <span class="n">a</span><span class="o">.</span><span class="n">hicard</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-      <span class="k">if</span> <span class="n">targetObj</span><span class="o">.</span><span class="n">__dict__</span><span class="p">[</span><span class="n">attrName</span><span class="p">]</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
-        <span class="nb">setattr</span><span class="p">(</span><span class="n">targetObj</span><span class="p">,</span><span class="n">attrName</span><span class="p">,</span><span class="n">sourceObj</span><span class="o">.</span><span class="n">__dict__</span><span class="p">[</span><span class="n">attrName</span><span class="p">])</span>
+      <span class="k">if</span> <span class="n">targetObj</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="n">attrName</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="nb">setattr</span><span class="p">(</span><span class="n">targetObj</span><span class="p">,</span><span class="n">attrName</span><span class="p">,</span><span class="n">sourceObj</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="n">attrName</span><span class="p">])</span>
 
     <span class="k">else</span><span class="p">:</span>
       <span class="c1"># find add operation</span>
       <span class="n">addfunc</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">targetObj</span><span class="p">,</span> <span class="s1">&#39;add&#39;</span> <span class="o">+</span> <span class="n">metaUtil</span><span class="o">.</span><span class="n">upperFirst</span><span class="p">(</span><span class="n">a</span><span class="o">.</span><span class="n">baseName</span><span class="p">))</span>
       
       <span class="c1"># Thisd is OK, as we iterate over list2 but modify list1</span>
-      <span class="n">attrList1</span> <span class="o">=</span> <span class="n">targetObj</span><span class="o">.</span><span class="n">__dict__</span><span class="p">[</span><span class="n">attrName</span><span class="p">]</span>
-      <span class="n">attrList2</span> <span class="o">=</span> <span class="n">sourceObj</span><span class="o">.</span><span class="n">__dict__</span><span class="p">[</span><span class="n">attrName</span><span class="p">]</span>
+      <span class="n">attrList1</span> <span class="o">=</span> <span class="n">targetObj</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="n">attrName</span><span class="p">]</span>
+      <span class="n">attrList2</span> <span class="o">=</span> <span class="n">sourceObj</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="n">attrName</span><span class="p">]</span>
       
       <span class="k">if</span> <span class="n">a</span><span class="o">.</span><span class="n">isUnique</span><span class="p">:</span>
         <span class="c1"># no duplicates = might be list or set</span>
@@ -204,7 +194,7 @@
     <span class="k">if</span> <span class="n">a</span><span class="o">.</span><span class="n">hierarchy</span> <span class="o">==</span> <span class="n">metaConstants</span><span class="o">.</span><span class="n">child_hierarchy</span><span class="p">:</span>
       <span class="n">childLinks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
     
-    <span class="k">elif</span> <span class="n">o</span> <span class="ow">is</span> <span class="bp">None</span> <span class="ow">or</span> <span class="n">o</span><span class="o">.</span><span class="n">changeability</span> <span class="o">!=</span> <span class="n">metaConstants</span><span class="o">.</span><span class="n">frozen</span><span class="p">:</span>
+    <span class="k">elif</span> <span class="n">o</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">o</span><span class="o">.</span><span class="n">changeability</span> <span class="o">!=</span> <span class="n">metaConstants</span><span class="o">.</span><span class="n">frozen</span><span class="p">:</span>
       <span class="c1"># links that can be handled without bypassing API</span>
       <span class="n">niceLinks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
@@ -216,11 +206,11 @@
  
     <span class="n">linkName</span> <span class="o">=</span> <span class="n">a</span><span class="o">.</span><span class="n">name</span>
     <span class="n">o</span> <span class="o">=</span> <span class="n">a</span><span class="o">.</span><span class="n">otherRole</span>
-    <span class="k">if</span> <span class="n">o</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">o</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
       <span class="n">backName</span> <span class="o">=</span> <span class="n">o</span><span class="o">.</span><span class="n">name</span>
       <span class="c1">#print linkName, a.locard, a.hicard, o.locard, o.hicard  </span>
       
-    <span class="k">if</span> <span class="n">o</span> <span class="ow">is</span> <span class="bp">None</span> <span class="ow">or</span> <span class="n">o</span><span class="o">.</span><span class="n">hicard</span> <span class="o">!=</span> <span class="n">o</span><span class="o">.</span><span class="n">locard</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">o</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">o</span><span class="o">.</span><span class="n">hicard</span> <span class="o">!=</span> <span class="n">o</span><span class="o">.</span><span class="n">locard</span><span class="p">:</span>
       <span class="c1">#</span>
       <span class="c1">#print &quot;C3&quot;, linkName</span>
       <span class="c1">#</span>
@@ -242,10 +232,10 @@
         <span class="c1"># Whatever the number of objects, you will either be able to</span>
         <span class="c1"># remove sourceObj from attrObj or to add targetObj.</span>
         <span class="c1">#</span>
-        <span class="k">if</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">targetObj</span><span class="p">,</span><span class="n">linkName</span><span class="p">)</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">targetObj</span><span class="p">,</span><span class="n">linkName</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
           <span class="n">attrObj</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">sourceObj</span><span class="p">,</span><span class="n">linkName</span><span class="p">)</span>
           <span class="k">try</span><span class="p">:</span>
-            <span class="nb">setattr</span><span class="p">(</span><span class="n">sourceObj</span><span class="p">,</span><span class="n">linkName</span><span class="p">,</span><span class="bp">None</span><span class="p">)</span>
+            <span class="nb">setattr</span><span class="p">(</span><span class="n">sourceObj</span><span class="p">,</span><span class="n">linkName</span><span class="p">,</span><span class="kc">None</span><span class="p">)</span>
           <span class="k">except</span><span class="p">:</span>
             <span class="k">pass</span>
           <span class="nb">setattr</span><span class="p">(</span><span class="n">targetObj</span><span class="p">,</span><span class="n">linkName</span><span class="p">,</span><span class="n">attrObj</span><span class="p">)</span>
@@ -285,7 +275,7 @@
       <span class="k">if</span> <span class="n">a</span><span class="o">.</span><span class="n">hicard</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
         <span class="c1">#assert a.locard == 0</span>
         <span class="n">oldVal</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">targetObj</span><span class="p">,</span><span class="n">linkName</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">oldVal</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">oldVal</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
           <span class="n">newVal</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">sourceObj</span><span class="p">,</span><span class="n">linkName</span><span class="p">)</span>
           <span class="nb">setattr</span><span class="p">(</span><span class="n">newVal</span><span class="p">,</span> <span class="n">backName</span><span class="p">,</span> <span class="n">targetObj</span><span class="p">)</span>
       
@@ -329,7 +319,7 @@
 
   <span class="n">undo</span> <span class="o">=</span> <span class="n">sourceObj</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">_undo</span>
   <span class="k">if</span> <span class="n">nastyLinks</span> <span class="ow">or</span> <span class="n">childLinks</span><span class="p">:</span>
-    <span class="k">if</span> <span class="n">undo</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">undo</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
       <span class="c1"># This is not undoable - at least it would be immense work to make it so</span>
       <span class="n">undo</span><span class="o">.</span><span class="n">increaseBlocking</span><span class="p">()</span>
     <span class="k">try</span><span class="p">:</span>
@@ -337,7 +327,7 @@
       <span class="k">if</span> <span class="n">nastyLinks</span><span class="p">:</span>
         <span class="n">root</span> <span class="o">=</span> <span class="n">targetObj</span><span class="o">.</span><span class="n">root</span>
         <span class="k">try</span><span class="p">:</span>
-          <span class="n">root</span><span class="o">.</span><span class="n">override</span> <span class="o">=</span> <span class="bp">True</span>
+          <span class="n">root</span><span class="o">.</span><span class="n">override</span> <span class="o">=</span> <span class="kc">True</span>
 
           <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">nastyLinks</span><span class="p">:</span>
             <span class="c1"># links that can *NOT* be handled without bypassing API</span>
@@ -353,24 +343,24 @@
             <span class="k">if</span> <span class="n">a</span><span class="o">.</span><span class="n">hicard</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
               <span class="c1">#print &quot;C1&quot;, linkName</span>
 
-              <span class="k">if</span>  <span class="nb">getattr</span><span class="p">(</span><span class="n">targetObj</span><span class="p">,</span><span class="n">linkName</span><span class="p">)</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+              <span class="k">if</span>  <span class="nb">getattr</span><span class="p">(</span><span class="n">targetObj</span><span class="p">,</span><span class="n">linkName</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
 
                 <span class="c1">#do</span>
                 <span class="n">childDict</span> <span class="o">=</span> <span class="p">{}</span>
-                <span class="n">oldKey</span> <span class="o">=</span> <span class="bp">None</span>
-                <span class="n">newKey</span> <span class="o">=</span> <span class="bp">None</span>
+                <span class="n">oldKey</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="n">newKey</span> <span class="o">=</span> <span class="kc">None</span>
                 <span class="n">attrObj</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">sourceObj</span><span class="p">,</span><span class="n">linkName</span><span class="p">)</span>
                 <span class="k">if</span> <span class="n">backName</span> <span class="ow">in</span> <span class="n">keyNames</span><span class="p">:</span>
                   <span class="n">oldKey</span> <span class="o">=</span> <span class="n">attrObj</span><span class="o">.</span><span class="n">getLocalKey</span><span class="p">()</span>
-                <span class="nb">setattr</span><span class="p">(</span><span class="n">sourceObj</span><span class="p">,</span> <span class="n">linkName</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+                <span class="nb">setattr</span><span class="p">(</span><span class="n">sourceObj</span><span class="p">,</span> <span class="n">linkName</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
                 <span class="nb">setattr</span><span class="p">(</span><span class="n">targetObj</span><span class="p">,</span> <span class="n">linkName</span><span class="p">,</span> <span class="n">attrObj</span><span class="p">)</span>
                 <span class="k">if</span> <span class="n">backName</span> <span class="ow">in</span> <span class="n">keyNames</span><span class="p">:</span>
                   <span class="n">newKey</span> <span class="o">=</span> <span class="n">attrObj</span><span class="o">.</span><span class="n">getLocalKey</span><span class="p">()</span>
                   <span class="c1"># this changes key for attrObj - fix it.</span>
-                  <span class="n">childDict</span> <span class="o">=</span> <span class="n">attrObj</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">__dict__</span><span class="p">[</span><span class="n">downlink</span><span class="p">]</span>
+                  <span class="n">childDict</span> <span class="o">=</span> <span class="n">attrObj</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="n">downlink</span><span class="p">]</span>
                   <span class="k">if</span> <span class="n">newKey</span> <span class="ow">in</span> <span class="n">childDict</span><span class="p">:</span>
                     <span class="c1"># key already taken - undo</span>
-                    <span class="nb">setattr</span><span class="p">(</span><span class="n">targetObj</span><span class="p">,</span> <span class="n">linkName</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+                    <span class="nb">setattr</span><span class="p">(</span><span class="n">targetObj</span><span class="p">,</span> <span class="n">linkName</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
                     <span class="nb">setattr</span><span class="p">(</span><span class="n">sourceObj</span><span class="p">,</span> <span class="n">linkName</span><span class="p">,</span> <span class="n">attrObj</span><span class="p">)</span>
                     <span class="k">raise</span> <span class="n">ApiError</span><span class="p">(</span><span class="s2">&quot;Merge failure: </span><span class="si">%s</span><span class="s2"> key </span><span class="si">%s</span><span class="s2"> already in use&quot;</span>
                                    <span class="o">%</span> <span class="p">(</span><span class="n">attrObj</span><span class="o">.</span><span class="n">qualifiedName</span><span class="p">(),</span> <span class="n">newKey</span><span class="p">))</span>
@@ -385,12 +375,12 @@
 
                 <span class="c1"># undo</span>
                 <span class="k">except</span><span class="p">:</span>
-                  <span class="nb">setattr</span><span class="p">(</span><span class="n">targetObj</span><span class="p">,</span> <span class="n">linkName</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+                  <span class="nb">setattr</span><span class="p">(</span><span class="n">targetObj</span><span class="p">,</span> <span class="n">linkName</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
                   <span class="nb">setattr</span><span class="p">(</span><span class="n">sourceObj</span><span class="p">,</span> <span class="n">linkName</span><span class="p">,</span> <span class="n">attrObj</span><span class="p">)</span>
                   <span class="k">if</span> <span class="n">backName</span> <span class="ow">in</span> <span class="n">keyNames</span><span class="p">:</span>
                     <span class="k">del</span> <span class="n">childDict</span><span class="p">[</span><span class="n">newKey</span><span class="p">]</span>
                     <span class="n">childDict</span><span class="p">[</span><span class="n">oldKey</span><span class="p">]</span> <span class="o">=</span> <span class="n">attrObj</span>
-                  <span class="k">print</span> <span class="p">(</span><span class="s2">&quot;Merge failure: </span><span class="si">%s</span><span class="s2">, </span><span class="si">%s</span><span class="s2"> result is not valid&quot;</span>
+                  <span class="nb">print</span> <span class="p">(</span><span class="s2">&quot;Merge failure: </span><span class="si">%s</span><span class="s2">, </span><span class="si">%s</span><span class="s2"> result is not valid&quot;</span>
                          <span class="o">%</span> <span class="p">(</span><span class="n">targetObj</span><span class="p">,</span> <span class="n">attrObj</span><span class="p">))</span>
                   <span class="k">raise</span>
 
@@ -434,15 +424,15 @@
               <span class="k">if</span> <span class="n">backName</span> <span class="ow">in</span> <span class="n">keyNames</span><span class="p">:</span>
                 <span class="n">newKeys</span> <span class="o">=</span> <span class="p">[]</span>
                 <span class="k">for</span> <span class="n">ii</span><span class="p">,</span> <span class="n">attrObj</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">moveList</span><span class="p">):</span>
-                  <span class="n">childDict</span> <span class="o">=</span> <span class="n">attrObj</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">__dict__</span><span class="p">[</span><span class="n">downlink</span><span class="p">]</span>
+                  <span class="n">childDict</span> <span class="o">=</span> <span class="n">attrObj</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="n">downlink</span><span class="p">]</span>
                   <span class="n">newKey</span> <span class="o">=</span> <span class="n">attrObj</span><span class="o">.</span><span class="n">getLocalKey</span><span class="p">()</span>
                   <span class="k">if</span> <span class="n">newKey</span> <span class="ow">in</span> <span class="n">childDict</span><span class="p">:</span>
                     <span class="c1"># key already taken - undo</span>
-                    <span class="nb">setattr</span><span class="p">(</span><span class="n">targetObj</span><span class="p">,</span> <span class="n">linkName</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+                    <span class="nb">setattr</span><span class="p">(</span><span class="n">targetObj</span><span class="p">,</span> <span class="n">linkName</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
                     <span class="nb">setattr</span><span class="p">(</span><span class="n">sourceObj</span><span class="p">,</span> <span class="n">linkName</span><span class="p">,</span> <span class="n">attrObj</span><span class="p">)</span>
                     <span class="k">for</span> <span class="n">jj</span><span class="p">,</span> <span class="n">nk</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">newKeys</span><span class="p">):</span>
                       <span class="n">ao</span> <span class="o">=</span> <span class="n">moveList</span><span class="p">[</span><span class="n">jj</span><span class="p">]</span>
-                      <span class="n">cd</span> <span class="o">=</span> <span class="n">ao</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">__dict__</span><span class="p">[</span><span class="n">downlink</span><span class="p">]</span>
+                      <span class="n">cd</span> <span class="o">=</span> <span class="n">ao</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="n">downlink</span><span class="p">]</span>
                       <span class="n">cd</span><span class="p">[</span><span class="n">oldKeys</span><span class="p">[</span><span class="n">jj</span><span class="p">]]</span> <span class="o">=</span> <span class="n">ao</span>
                       <span class="k">del</span> <span class="n">cd</span><span class="p">[</span><span class="n">nk</span><span class="p">]</span>
                     <span class="k">raise</span> <span class="n">ApiError</span><span class="p">(</span><span class="s2">&quot;Merge failure: </span><span class="si">%s</span><span class="s2"> key </span><span class="si">%s</span><span class="s2"> already in use&quot;</span>
@@ -467,40 +457,40 @@
                 <span class="k">if</span> <span class="n">backName</span> <span class="ow">in</span> <span class="n">keyNames</span><span class="p">:</span>
                   <span class="k">for</span> <span class="n">jj</span><span class="p">,</span> <span class="n">nk</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">newKeys</span><span class="p">):</span>
                     <span class="n">ao</span> <span class="o">=</span> <span class="n">moveList</span><span class="p">[</span><span class="n">jj</span><span class="p">]</span>
-                    <span class="n">cd</span> <span class="o">=</span> <span class="n">ao</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">__dict__</span><span class="p">[</span><span class="n">downlink</span><span class="p">]</span>
+                    <span class="n">cd</span> <span class="o">=</span> <span class="n">ao</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="n">downlink</span><span class="p">]</span>
                     <span class="n">cd</span><span class="p">[</span><span class="n">oldKeys</span><span class="p">[</span><span class="n">jj</span><span class="p">]]</span> <span class="o">=</span> <span class="n">ao</span>
                     <span class="k">del</span> <span class="n">cd</span><span class="p">[</span><span class="n">nk</span><span class="p">]</span>
                 <span class="k">raise</span>
 
 
         <span class="k">finally</span><span class="p">:</span>
-          <span class="n">root</span><span class="o">.</span><span class="n">override</span> <span class="o">=</span> <span class="bp">False</span>
+          <span class="n">root</span><span class="o">.</span><span class="n">override</span> <span class="o">=</span> <span class="kc">False</span>
 
 
       <span class="k">if</span> <span class="n">childLinks</span><span class="p">:</span>
         <span class="c1"># now move children. This is a full bypass, no overrides</span>
         <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">childLinks</span><span class="p">:</span>
           <span class="n">parentName</span> <span class="o">=</span> <span class="n">a</span><span class="o">.</span><span class="n">otherRole</span><span class="o">.</span><span class="n">name</span>
-          <span class="n">sourceDd</span> <span class="o">=</span> <span class="n">sourceObj</span><span class="o">.</span><span class="n">__dict__</span><span class="p">[</span><span class="n">a</span><span class="o">.</span><span class="n">name</span><span class="p">]</span>
-          <span class="n">targetDd</span> <span class="o">=</span> <span class="n">targetObj</span><span class="o">.</span><span class="n">__dict__</span><span class="p">[</span><span class="n">a</span><span class="o">.</span><span class="n">name</span><span class="p">]</span>
+          <span class="n">sourceDd</span> <span class="o">=</span> <span class="n">sourceObj</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="n">a</span><span class="o">.</span><span class="n">name</span><span class="p">]</span>
+          <span class="n">targetDd</span> <span class="o">=</span> <span class="n">targetObj</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="n">a</span><span class="o">.</span><span class="n">name</span><span class="p">]</span>
           <span class="n">topObj</span> <span class="o">=</span> <span class="n">targetObj</span><span class="o">.</span><span class="n">topObject</span>
 
           <span class="k">if</span> <span class="n">a</span><span class="o">.</span><span class="n">hicard</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
             <span class="c1"># single kid (rare case)</span>
-            <span class="n">targetObj</span><span class="o">.</span><span class="n">__dict__</span><span class="p">[</span><span class="n">a</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">oo</span> <span class="o">=</span> <span class="n">sourceObj</span><span class="o">.</span><span class="n">__dict__</span><span class="p">[</span><span class="n">a</span><span class="o">.</span><span class="n">name</span><span class="p">]</span>
-            <span class="n">sourceObj</span><span class="o">.</span><span class="n">__dict__</span><span class="p">[</span><span class="n">a</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="bp">None</span>
-            <span class="n">oo</span><span class="o">.</span><span class="n">__dict__</span><span class="p">[</span><span class="n">parentName</span><span class="p">]</span> <span class="o">=</span> <span class="n">targetObj</span>
-            <span class="n">oo</span><span class="o">.</span><span class="n">__dict__</span><span class="p">[</span><span class="s1">&#39;topObject&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">topObj</span>
+            <span class="n">targetObj</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="n">a</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">oo</span> <span class="o">=</span> <span class="n">sourceObj</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="n">a</span><span class="o">.</span><span class="n">name</span><span class="p">]</span>
+            <span class="n">sourceObj</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="n">a</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="n">oo</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="n">parentName</span><span class="p">]</span> <span class="o">=</span> <span class="n">targetObj</span>
+            <span class="n">oo</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="s1">&#39;topObject&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">topObj</span>
 
           <span class="k">elif</span> <span class="n">a</span><span class="o">.</span><span class="n">valueType</span><span class="o">.</span><span class="n">keyNames</span> <span class="o">==</span> <span class="p">[</span><span class="s1">&#39;serial&#39;</span><span class="p">]:</span>
             <span class="c1"># multiple kid with serial key</span>
-            <span class="n">nextSerial</span> <span class="o">=</span> <span class="n">targetObj</span><span class="o">.</span><span class="n">__dict__</span><span class="p">[</span><span class="s1">&#39;_serialDict&#39;</span><span class="p">][</span><span class="n">a</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span>
+            <span class="n">nextSerial</span> <span class="o">=</span> <span class="n">targetObj</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="s1">&#39;_serialDict&#39;</span><span class="p">][</span><span class="n">a</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span>
             <span class="k">for</span> <span class="n">junk</span><span class="p">,</span> <span class="n">oo</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">sourceDd</span><span class="o">.</span><span class="n">items</span><span class="p">()):</span>
               <span class="n">targetDd</span><span class="p">[</span><span class="n">nextSerial</span><span class="p">]</span> <span class="o">=</span> <span class="n">oo</span>
               <span class="k">del</span> <span class="n">sourceDd</span><span class="p">[</span><span class="n">nextSerial</span><span class="p">]</span>
-              <span class="n">oo</span><span class="o">.</span><span class="n">__dict__</span><span class="p">[</span><span class="n">parentName</span><span class="p">]</span> <span class="o">=</span> <span class="n">targetObj</span>
-              <span class="n">oo</span><span class="o">.</span><span class="n">__dict__</span><span class="p">[</span><span class="s1">&#39;topObject&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">topObj</span>
-            <span class="n">targetObj</span><span class="o">.</span><span class="n">__dict__</span><span class="p">[</span><span class="s1">&#39;_serialDict&#39;</span><span class="p">][</span><span class="n">a</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">nextSerial</span>
+              <span class="n">oo</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="n">parentName</span><span class="p">]</span> <span class="o">=</span> <span class="n">targetObj</span>
+              <span class="n">oo</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="s1">&#39;topObject&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">topObj</span>
+            <span class="n">targetObj</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="s1">&#39;_serialDict&#39;</span><span class="p">][</span><span class="n">a</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">nextSerial</span>
 
 
           <span class="k">else</span><span class="p">:</span>
@@ -512,13 +502,13 @@
               <span class="k">else</span><span class="p">:</span>
                 <span class="n">targetDd</span><span class="p">[</span><span class="n">localKey</span><span class="p">]</span> <span class="o">=</span> <span class="n">oo</span>
                 <span class="k">del</span> <span class="n">sourceDd</span><span class="p">[</span><span class="n">localKey</span><span class="p">]</span>
-                <span class="n">oo</span><span class="o">.</span><span class="n">__dict__</span><span class="p">[</span><span class="n">parentName</span><span class="p">]</span> <span class="o">=</span> <span class="n">targetObj</span>
-                <span class="n">oo</span><span class="o">.</span><span class="n">__dict__</span><span class="p">[</span><span class="s1">&#39;topObject&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">topObj</span>
+                <span class="n">oo</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="n">parentName</span><span class="p">]</span> <span class="o">=</span> <span class="n">targetObj</span>
+                <span class="n">oo</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="s1">&#39;topObject&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">topObj</span>
 
       <span class="n">targetObj</span><span class="o">.</span><span class="n">checkValid</span><span class="p">()</span>
       <span class="n">sourceObj</span><span class="o">.</span><span class="n">delete</span><span class="p">()</span>
     <span class="k">finally</span><span class="p">:</span>
-      <span class="k">if</span> <span class="n">undo</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+      <span class="k">if</span> <span class="n">undo</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">undo</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
 
   <span class="k">else</span><span class="p">:</span>
@@ -535,15 +525,15 @@
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
 <div id="searchbox" style="display: none" role="search">
-  <h3>Quick search</h3>
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
     <form class="search" action="../../../../search.html" method="get">
-      <input type="text" name="q" />
+      <input type="text" name="q" aria-labelledby="searchlabel" />
       <input type="submit" value="Go" />
-      <input type="hidden" name="check_keywords" value="yes" />
-      <input type="hidden" name="area" value="default" />
     </form>
+    </div>
 </div>
-<script type="text/javascript">$('#searchbox').show(0);</script>
+<script>$('#searchbox').show(0);</script>
         </div>
       </div>
       <div class="clearer"></div>
@@ -557,13 +547,13 @@
         <li class="right" >
           <a href="../../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../../index.html">Python  documentation</a> &raquo;</li>
-          <li class="nav-item nav-item-1"><a href="../../../index.html" >Module code</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="../../../../index.html">Python  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../../index.html" >Module code</a> &#187;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
-        &copy; Copyright .
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.1.
+        &#169; Copyright .
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.4.0.
     </div>
   </body>
 </html>

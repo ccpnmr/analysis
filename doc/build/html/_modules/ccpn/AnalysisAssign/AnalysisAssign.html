@@ -1,32 +1,22 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
+<!DOCTYPE html>
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    
-    <title>ccpn.AnalysisAssign.AnalysisAssign &mdash; Python  documentation</title>
-    
+    <meta charset="utf-8" />
+    <title>ccpn.AnalysisAssign.AnalysisAssign &#8212; Python  documentation</title>
     <link rel="stylesheet" href="../../../_static/classic.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
     
-    <script type="text/javascript">
-      var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    '../../../',
-        VERSION:     '',
-        COLLAPSE_INDEX: false,
-        FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true
-      };
-    </script>
-    <script type="text/javascript" src="../../../_static/jquery.js"></script>
-    <script type="text/javascript" src="../../../_static/underscore.js"></script>
-    <script type="text/javascript" src="../../../_static/doctools.js"></script>
-    <link rel="top" title="Python  documentation" href="../../../index.html" />
-    <link rel="up" title="Module code" href="../../index.html" /> 
-  </head>
-  <body role="document">
+    <script id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/jquery.js"></script>
+    <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/language_data.js"></script>
+    
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+  </head><body>
     <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
@@ -36,8 +26,8 @@
         <li class="right" >
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../index.html">Python  documentation</a> &raquo;</li>
-          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="../../../index.html">Python  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &#187;</li> 
       </ul>
     </div>  
 
@@ -83,8 +73,8 @@
 <div class="viewcode-block" id="Assign"><a class="viewcode-back" href="../../../ccpn/ccpn.AnalysisAssign.html#ccpn.AnalysisAssign.AnalysisAssign.Assign">[docs]</a><span class="k">class</span> <span class="nc">Assign</span><span class="p">(</span><span class="n">Framework</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Root class for Assign application&quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">applicationName</span><span class="p">,</span> <span class="n">applicationVersion</span><span class="p">,</span> <span class="n">commandLineArguments</span><span class="p">):</span>
-        <span class="n">Framework</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">applicationName</span><span class="p">,</span> <span class="n">applicationVersion</span><span class="p">,</span> <span class="n">commandLineArguments</span><span class="p">)</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">applicationName</span><span class="p">,</span> <span class="n">applicationVersion</span><span class="p">,</span> <span class="n">commandLineArguments</span><span class="p">):</span>
+        <span class="n">Framework</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">applicationName</span><span class="p">,</span> <span class="n">applicationVersion</span><span class="p">,</span> <span class="n">commandLineArguments</span><span class="p">)</span>
         <span class="c1"># self.components.add(&#39;Assignment&#39;)</span>
 
 <div class="viewcode-block" id="Assign.setupMenus"><a class="viewcode-back" href="../../../ccpn/ccpn.AnalysisAssign.html#ccpn.AnalysisAssign.AnalysisAssign.Assign.setupMenus">[docs]</a>    <span class="k">def</span> <span class="nf">setupMenus</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -93,7 +83,7 @@
                                <span class="p">(</span><span class="s2">&quot;Pick and Assign&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">showPickAndAssignModule</span><span class="p">,</span> <span class="p">[(</span><span class="s1">&#39;shortcut&#39;</span><span class="p">,</span> <span class="s1">&#39;pa&#39;</span><span class="p">)]),</span>
                                <span class="p">(),</span>
                                <span class="p">(</span><span class="s2">&quot;Backbone Assignment&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">showBackboneAssignmentModule</span><span class="p">,</span> <span class="p">[(</span><span class="s1">&#39;shortcut&#39;</span><span class="p">,</span> <span class="s1">&#39;bb&#39;</span><span class="p">)]),</span>
-                               <span class="p">(</span><span class="s2">&quot;Sidechain Assignment&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">showSidechainAssignmentModule</span><span class="p">,</span> <span class="p">[(</span><span class="s1">&#39;shortcut&#39;</span><span class="p">,</span> <span class="s1">&#39;sc&#39;</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;enabled&#39;</span><span class="p">,</span> <span class="bp">False</span><span class="p">)]),</span>
+                               <span class="p">(</span><span class="s2">&quot;Sidechain Assignment&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">showSidechainAssignmentModule</span><span class="p">,</span> <span class="p">[(</span><span class="s1">&#39;shortcut&#39;</span><span class="p">,</span> <span class="s1">&#39;sc&#39;</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;enabled&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)]),</span>
                                <span class="p">(),</span>
                                <span class="p">(</span><span class="s2">&quot;Peak Assigner&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">showPeakAssigner</span><span class="p">,</span> <span class="p">[(</span><span class="s1">&#39;shortcut&#39;</span><span class="p">,</span> <span class="s1">&#39;ap&#39;</span><span class="p">)]),</span>
                                <span class="p">(</span><span class="s2">&quot;NmrAtom Assigner&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">showAtomSelector</span><span class="p">,</span> <span class="p">[(</span><span class="s1">&#39;shortcut&#39;</span><span class="p">,</span> <span class="s1">&#39;an&#39;</span><span class="p">)]),</span>
@@ -128,7 +118,7 @@
             <span class="n">popup</span> <span class="o">=</span> <span class="n">SetupNmrResiduesPopup</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">mainWindow</span><span class="p">,</span> <span class="n">mainWindow</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">mainWindow</span><span class="p">)</span>
             <span class="n">popup</span><span class="o">.</span><span class="n">exec_</span><span class="p">()</span></div>
 
-<div class="viewcode-block" id="Assign.showPickAndAssignModule"><a class="viewcode-back" href="../../../ccpn/ccpn.AnalysisAssign.html#ccpn.AnalysisAssign.AnalysisAssign.Assign.showPickAndAssignModule">[docs]</a>    <span class="k">def</span> <span class="nf">showPickAndAssignModule</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">position</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;bottom&#39;</span><span class="p">,</span> <span class="n">relativeTo</span><span class="p">:</span> <span class="n">CcpnModule</span> <span class="o">=</span> <span class="bp">None</span><span class="p">):</span>
+<div class="viewcode-block" id="Assign.showPickAndAssignModule"><a class="viewcode-back" href="../../../ccpn/ccpn.AnalysisAssign.html#ccpn.AnalysisAssign.AnalysisAssign.Assign.showPickAndAssignModule">[docs]</a>    <span class="k">def</span> <span class="nf">showPickAndAssignModule</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">position</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;bottom&#39;</span><span class="p">,</span> <span class="n">relativeTo</span><span class="p">:</span> <span class="n">CcpnModule</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Displays Pick and Assign module.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -144,7 +134,7 @@
         <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;application.showPickAndAssignModule()&quot;</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">pickAndAssignModule</span></div>
 
-<div class="viewcode-block" id="Assign.showBackboneAssignmentModule"><a class="viewcode-back" href="../../../ccpn/ccpn.AnalysisAssign.html#ccpn.AnalysisAssign.AnalysisAssign.Assign.showBackboneAssignmentModule">[docs]</a>    <span class="k">def</span> <span class="nf">showBackboneAssignmentModule</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">position</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;bottom&#39;</span><span class="p">,</span> <span class="n">relativeTo</span><span class="p">:</span> <span class="n">CcpnModule</span> <span class="o">=</span> <span class="bp">None</span><span class="p">):</span>
+<div class="viewcode-block" id="Assign.showBackboneAssignmentModule"><a class="viewcode-back" href="../../../ccpn/ccpn.AnalysisAssign.html#ccpn.AnalysisAssign.AnalysisAssign.Assign.showBackboneAssignmentModule">[docs]</a>    <span class="k">def</span> <span class="nf">showBackboneAssignmentModule</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">position</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;bottom&#39;</span><span class="p">,</span> <span class="n">relativeTo</span><span class="p">:</span> <span class="n">CcpnModule</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Displays Backbone Assignment module.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -160,7 +150,7 @@
         <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;application.showBackboneAssignmentModule()&quot;</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">backboneModule</span></div>
 
-<div class="viewcode-block" id="Assign.showSidechainAssignmentModule"><a class="viewcode-back" href="../../../ccpn/ccpn.AnalysisAssign.html#ccpn.AnalysisAssign.AnalysisAssign.Assign.showSidechainAssignmentModule">[docs]</a>    <span class="k">def</span> <span class="nf">showSidechainAssignmentModule</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">position</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;bottom&#39;</span><span class="p">,</span> <span class="n">relativeTo</span><span class="p">:</span> <span class="n">CcpnModule</span> <span class="o">=</span> <span class="bp">None</span><span class="p">):</span>
+<div class="viewcode-block" id="Assign.showSidechainAssignmentModule"><a class="viewcode-back" href="../../../ccpn/ccpn.AnalysisAssign.html#ccpn.AnalysisAssign.AnalysisAssign.Assign.showSidechainAssignmentModule">[docs]</a>    <span class="k">def</span> <span class="nf">showSidechainAssignmentModule</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">position</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;bottom&#39;</span><span class="p">,</span> <span class="n">relativeTo</span><span class="p">:</span> <span class="n">CcpnModule</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Displays Backbone Assignment module.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -185,7 +175,7 @@
         <span class="c1">#</span>
         <span class="c1"># return self.sidechainAssignmentModule</span>
 
-<div class="viewcode-block" id="Assign.showPeakAssigner"><a class="viewcode-back" href="../../../ccpn/ccpn.AnalysisAssign.html#ccpn.AnalysisAssign.AnalysisAssign.Assign.showPeakAssigner">[docs]</a>    <span class="k">def</span> <span class="nf">showPeakAssigner</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">position</span><span class="o">=</span><span class="s1">&#39;bottom&#39;</span><span class="p">,</span> <span class="n">relativeTo</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+<div class="viewcode-block" id="Assign.showPeakAssigner"><a class="viewcode-back" href="../../../ccpn/ccpn.AnalysisAssign.html#ccpn.AnalysisAssign.AnalysisAssign.Assign.showPeakAssigner">[docs]</a>    <span class="k">def</span> <span class="nf">showPeakAssigner</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">position</span><span class="o">=</span><span class="s1">&#39;bottom&#39;</span><span class="p">,</span> <span class="n">relativeTo</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Displays peak assignment module.&quot;&quot;&quot;</span>
         <span class="kn">from</span> <span class="nn">ccpn.AnalysisAssign.modules.PeakAssigner</span> <span class="kn">import</span> <span class="n">PeakAssigner</span>
 
@@ -198,7 +188,7 @@
         <span class="n">mainWindow</span><span class="o">.</span><span class="n">pythonConsole</span><span class="o">.</span><span class="n">writeConsoleCommand</span><span class="p">(</span><span class="s2">&quot;application.showAssignmentModule()&quot;</span><span class="p">)</span>
         <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;application.showAssignmentModule()&quot;</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Assign.showAssignmentInspectorModule"><a class="viewcode-back" href="../../../ccpn/ccpn.AnalysisAssign.html#ccpn.AnalysisAssign.AnalysisAssign.Assign.showAssignmentInspectorModule">[docs]</a>    <span class="k">def</span> <span class="nf">showAssignmentInspectorModule</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nmrAtom</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">position</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;bottom&#39;</span><span class="p">,</span> <span class="n">relativeTo</span><span class="p">:</span> <span class="n">CcpnModule</span> <span class="o">=</span> <span class="bp">None</span><span class="p">):</span>
+<div class="viewcode-block" id="Assign.showAssignmentInspectorModule"><a class="viewcode-back" href="../../../ccpn/ccpn.AnalysisAssign.html#ccpn.AnalysisAssign.AnalysisAssign.Assign.showAssignmentInspectorModule">[docs]</a>    <span class="k">def</span> <span class="nf">showAssignmentInspectorModule</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nmrAtom</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">position</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;bottom&#39;</span><span class="p">,</span> <span class="n">relativeTo</span><span class="p">:</span> <span class="n">CcpnModule</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
         <span class="kn">from</span> <span class="nn">ccpn.AnalysisAssign.modules.AssignmentInspectorModule</span> <span class="kn">import</span> <span class="n">AssignmentInspectorModule</span>
 
         <span class="n">mainWindow</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">mainWindow</span>
@@ -210,7 +200,7 @@
         <span class="n">mainWindow</span><span class="o">.</span><span class="n">pythonConsole</span><span class="o">.</span><span class="n">writeConsoleCommand</span><span class="p">(</span><span class="s2">&quot;application.showAssignmentInspectorModule()&quot;</span><span class="p">)</span>
         <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;application.showAssignmentInspectorModule()&quot;</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Assign.showSequenceGraph"><a class="viewcode-back" href="../../../ccpn/ccpn.AnalysisAssign.html#ccpn.AnalysisAssign.AnalysisAssign.Assign.showSequenceGraph">[docs]</a>    <span class="k">def</span> <span class="nf">showSequenceGraph</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">position</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;bottom&#39;</span><span class="p">,</span> <span class="n">relativeTo</span><span class="p">:</span> <span class="n">CcpnModule</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="n">nmrChain</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+<div class="viewcode-block" id="Assign.showSequenceGraph"><a class="viewcode-back" href="../../../ccpn/ccpn.AnalysisAssign.html#ccpn.AnalysisAssign.AnalysisAssign.Assign.showSequenceGraph">[docs]</a>    <span class="k">def</span> <span class="nf">showSequenceGraph</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">position</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;bottom&#39;</span><span class="p">,</span> <span class="n">relativeTo</span><span class="p">:</span> <span class="n">CcpnModule</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">nmrChain</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Displays sequence graph at the bottom of the screen, relative to another module if nextTo is specified.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -226,7 +216,7 @@
         <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;application.showSequenceGraph()&quot;</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">sequenceGraphModule</span></div>
 
-<div class="viewcode-block" id="Assign.showAtomSelector"><a class="viewcode-back" href="../../../ccpn/ccpn.AnalysisAssign.html#ccpn.AnalysisAssign.AnalysisAssign.Assign.showAtomSelector">[docs]</a>    <span class="k">def</span> <span class="nf">showAtomSelector</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">position</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;bottom&#39;</span><span class="p">,</span> <span class="n">relativeTo</span><span class="p">:</span> <span class="n">CcpnModule</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="n">nmrAtom</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+<div class="viewcode-block" id="Assign.showAtomSelector"><a class="viewcode-back" href="../../../ccpn/ccpn.AnalysisAssign.html#ccpn.AnalysisAssign.AnalysisAssign.Assign.showAtomSelector">[docs]</a>    <span class="k">def</span> <span class="nf">showAtomSelector</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">position</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;bottom&#39;</span><span class="p">,</span> <span class="n">relativeTo</span><span class="p">:</span> <span class="n">CcpnModule</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">nmrAtom</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Displays Atom Selector.&quot;&quot;&quot;</span>
         <span class="kn">from</span> <span class="nn">ccpn.AnalysisAssign.modules.NmrAtomAssigner</span> <span class="kn">import</span> <span class="n">NmrAtomAssignerModule</span>
 
@@ -247,15 +237,15 @@
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
 <div id="searchbox" style="display: none" role="search">
-  <h3>Quick search</h3>
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
     <form class="search" action="../../../search.html" method="get">
-      <input type="text" name="q" />
+      <input type="text" name="q" aria-labelledby="searchlabel" />
       <input type="submit" value="Go" />
-      <input type="hidden" name="check_keywords" value="yes" />
-      <input type="hidden" name="area" value="default" />
     </form>
+    </div>
 </div>
-<script type="text/javascript">$('#searchbox').show(0);</script>
+<script>$('#searchbox').show(0);</script>
         </div>
       </div>
       <div class="clearer"></div>
@@ -269,13 +259,13 @@
         <li class="right" >
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../index.html">Python  documentation</a> &raquo;</li>
-          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="../../../index.html">Python  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &#187;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
-        &copy; Copyright .
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.1.
+        &#169; Copyright .
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.4.0.
     </div>
   </body>
 </html>

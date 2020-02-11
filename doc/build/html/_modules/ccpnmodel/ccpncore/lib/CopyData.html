@@ -1,32 +1,22 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
+<!DOCTYPE html>
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    
-    <title>ccpnmodel.ccpncore.lib.CopyData &mdash; Python  documentation</title>
-    
+    <meta charset="utf-8" />
+    <title>ccpnmodel.ccpncore.lib.CopyData &#8212; Python  documentation</title>
     <link rel="stylesheet" href="../../../../_static/classic.css" type="text/css" />
     <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
     
-    <script type="text/javascript">
-      var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    '../../../../',
-        VERSION:     '',
-        COLLAPSE_INDEX: false,
-        FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true
-      };
-    </script>
-    <script type="text/javascript" src="../../../../_static/jquery.js"></script>
-    <script type="text/javascript" src="../../../../_static/underscore.js"></script>
-    <script type="text/javascript" src="../../../../_static/doctools.js"></script>
-    <link rel="top" title="Python  documentation" href="../../../../index.html" />
-    <link rel="up" title="Module code" href="../../../index.html" /> 
-  </head>
-  <body role="document">
+    <script id="documentation_options" data-url_root="../../../../" src="../../../../_static/documentation_options.js"></script>
+    <script src="../../../../_static/jquery.js"></script>
+    <script src="../../../../_static/underscore.js"></script>
+    <script src="../../../../_static/doctools.js"></script>
+    <script src="../../../../_static/language_data.js"></script>
+    
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+  </head><body>
     <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
@@ -36,8 +26,8 @@
         <li class="right" >
           <a href="../../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../../index.html">Python  documentation</a> &raquo;</li>
-          <li class="nav-item nav-item-1"><a href="../../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="../../../../index.html">Python  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../../index.html" accesskey="U">Module code</a> &#187;</li> 
       </ul>
     </div>  
 
@@ -86,8 +76,8 @@
 <span class="kn">from</span> <span class="nn">ccpn.util</span> <span class="kn">import</span> <span class="n">Logging</span>
 
 
-<div class="viewcode-block" id="copySubTree"><a class="viewcode-back" href="../../../../ccpnmodel/ccpnmodel.ccpncore.lib.html#ccpnmodel.ccpncore.lib.CopyData.copySubTree">[docs]</a><span class="k">def</span> <span class="nf">copySubTree</span><span class="p">(</span><span class="n">sourceObj</span><span class="p">,</span> <span class="n">newParent</span><span class="p">,</span> <span class="n">maySkipCrosslinks</span><span class="p">:</span><span class="nb">bool</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
-                <span class="n">topObjectParameters</span><span class="p">:</span><span class="nb">dict</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">objectMap</span><span class="p">:</span><span class="nb">dict</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+<div class="viewcode-block" id="copySubTree"><a class="viewcode-back" href="../../../../ccpnmodel/ccpnmodel.ccpncore.lib.html#ccpnmodel.ccpncore.lib.CopyData.copySubTree">[docs]</a><span class="k">def</span> <span class="nf">copySubTree</span><span class="p">(</span><span class="n">sourceObj</span><span class="p">,</span> <span class="n">newParent</span><span class="p">,</span> <span class="n">maySkipCrosslinks</span><span class="p">:</span><span class="nb">bool</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                <span class="n">topObjectParameters</span><span class="p">:</span><span class="nb">dict</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">objectMap</span><span class="p">:</span><span class="nb">dict</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
   <span class="sd">&quot;&quot;&quot; Copy an api object and all its descendants within or between projects</span>
 
 <span class="sd">  :param sourceObj: CCPN api object to be copied</span>
@@ -131,21 +121,21 @@
   <span class="c1"># Copy objectMap as it is modified lower down</span>
   <span class="c1"># NB topObjectParameters may be modified too if the top object has a serial key</span>
   <span class="c1"># but in that case we need to keep teh modification for redo</span>
-  <span class="n">oldToNew</span> <span class="o">=</span> <span class="bp">None</span> <span class="k">if</span> <span class="n">objectMap</span> <span class="ow">is</span> <span class="bp">None</span> <span class="k">else</span> <span class="n">objectMap</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+  <span class="n">oldToNew</span> <span class="o">=</span> <span class="kc">None</span> <span class="k">if</span> <span class="n">objectMap</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">objectMap</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
 
   <span class="n">undo</span> <span class="o">=</span> <span class="n">sourceObj</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">_undo</span>
-  <span class="k">if</span> <span class="n">undo</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+  <span class="k">if</span> <span class="n">undo</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
     <span class="n">undo</span><span class="o">.</span><span class="n">increaseBlocking</span><span class="p">()</span>
 
   <span class="k">try</span><span class="p">:</span>
     <span class="n">result</span> <span class="o">=</span> <span class="n">_transferData</span><span class="p">(</span><span class="n">newParent</span><span class="p">,</span> <span class="n">sourceObj</span><span class="p">,</span> <span class="n">oldToNew</span><span class="o">=</span><span class="n">oldToNew</span><span class="p">,</span>
                            <span class="n">targetObjParams</span><span class="o">=</span><span class="n">topObjectParameters</span><span class="p">,</span>
-                           <span class="n">ignoreMissing</span><span class="o">=</span><span class="n">maySkipCrosslinks</span><span class="p">,</span> <span class="n">useOptLinks</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+                           <span class="n">ignoreMissing</span><span class="o">=</span><span class="n">maySkipCrosslinks</span><span class="p">,</span> <span class="n">useOptLinks</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
   <span class="k">finally</span><span class="p">:</span>
-    <span class="k">if</span> <span class="n">undo</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">undo</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
       <span class="n">undo</span><span class="o">.</span><span class="n">decreaseBlocking</span><span class="p">()</span>
 
-  <span class="k">if</span> <span class="n">undo</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> <span class="n">result</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+  <span class="k">if</span> <span class="n">undo</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">result</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
     <span class="n">undo</span><span class="o">.</span><span class="n">newItem</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">delete</span><span class="p">,</span> <span class="n">copySubTree</span><span class="p">,</span> <span class="n">redoArgs</span><span class="o">=</span><span class="p">(</span><span class="n">sourceObj</span><span class="p">,</span> <span class="n">newParent</span><span class="p">),</span>
                  <span class="n">redoKwargs</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;maySkipCrosslinks&#39;</span><span class="p">:</span><span class="n">maySkipCrosslinks</span><span class="p">,</span>
                                <span class="s1">&#39;topObjectParameters&#39;</span><span class="p">:</span><span class="n">topObjectParameters</span><span class="p">,</span>
@@ -169,9 +159,9 @@
   <span class="k">return</span> <span class="n">guid</span></div>
 
 
-<span class="k">def</span> <span class="nf">_transferData</span><span class="p">(</span><span class="n">newParent</span><span class="p">,</span> <span class="n">sourceObj</span><span class="p">,</span> <span class="n">oldToNew</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
-                 <span class="n">oldVersionStr</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">targetObjParams</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
-                 <span class="n">ignoreMissing</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">useOptLinks</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">_transferData</span><span class="p">(</span><span class="n">newParent</span><span class="p">,</span> <span class="n">sourceObj</span><span class="p">,</span> <span class="n">oldToNew</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="n">oldVersionStr</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">targetObjParams</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="n">ignoreMissing</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">useOptLinks</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
   <span class="sd">&quot;&quot;&quot; Copy sourceObj and recursively all its children,</span>
 <span class="sd">  to a new tree where the new targetObj is a child of newParent</span>
 
@@ -205,10 +195,10 @@
   
   <span class="c1"># mapsByGuid = globalMapping[&#39;mapsByGuid&#39;]</span>
   
-  <span class="k">if</span> <span class="n">targetObjParams</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+  <span class="k">if</span> <span class="n">targetObjParams</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
     <span class="n">targetObjParams</span> <span class="o">=</span> <span class="p">{}</span>
   
-  <span class="k">if</span> <span class="n">oldToNew</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+  <span class="k">if</span> <span class="n">oldToNew</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
     <span class="n">oldToNew</span> <span class="o">=</span> <span class="p">{}</span>
   
   <span class="c1"># decide which links to follow</span>
@@ -219,7 +209,7 @@
   
   <span class="n">localOldToNew</span> <span class="o">=</span> <span class="p">{}</span>
   <span class="n">emptyList</span> <span class="o">=</span> <span class="p">[]</span>
-  <span class="n">oneElemList</span> <span class="o">=</span> <span class="p">[</span><span class="bp">None</span><span class="p">]</span>
+  <span class="n">oneElemList</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span>
   <span class="c1"># emptySet = set()</span>
   <span class="n">crossLinkData</span> <span class="o">=</span> <span class="p">[]</span>
   <span class="n">appCrossLinkData</span> <span class="o">=</span> <span class="n">crossLinkData</span><span class="o">.</span><span class="n">append</span>
@@ -233,7 +223,7 @@
   <span class="c1">#notifyObjects = [newParent]</span>
   <span class="n">notifyObjects</span> <span class="o">=</span> <span class="p">[]</span>
   
-  <span class="n">targetObj</span> <span class="o">=</span> <span class="bp">None</span>
+  <span class="n">targetObj</span> <span class="o">=</span> <span class="kc">None</span>
   <span class="k">try</span><span class="p">:</span>
  
     <span class="n">nextDd</span> <span class="o">=</span> <span class="p">{}</span>
@@ -244,7 +234,7 @@
  
         <span class="c1"># current object map</span>
         <span class="n">ss</span> <span class="o">=</span> <span class="n">oldObj</span><span class="o">.</span><span class="n">packageShortName</span>
-        <span class="n">curMap</span> <span class="o">=</span> <span class="n">globalMapping</span><span class="p">[</span><span class="n">ss</span><span class="p">][</span><span class="s1">&#39;abstractTypes&#39;</span><span class="p">][</span><span class="n">oldObj</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span><span class="p">]</span>
+        <span class="n">curMap</span> <span class="o">=</span> <span class="n">globalMapping</span><span class="p">[</span><span class="n">ss</span><span class="p">][</span><span class="s1">&#39;abstractTypes&#39;</span><span class="p">][</span><span class="n">oldObj</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">]</span>
 
         <span class="k">if</span> <span class="n">curMap</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;proc&#39;</span><span class="p">)</span> <span class="o">==</span> <span class="s1">&#39;skip&#39;</span><span class="p">:</span>
           <span class="c1"># skip this one</span>
@@ -257,25 +247,25 @@
           <span class="c1"># this is the target object - special case</span>
              
           <span class="c1"># fix serial key for sourceObj if copying subtree</span>
-          <span class="k">if</span> <span class="n">oldVersionStr</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+          <span class="k">if</span> <span class="n">oldVersionStr</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="c1"># we are copying a subtree</span>
             <span class="k">if</span> <span class="n">serialTag</span> <span class="ow">in</span> <span class="n">sourceObj</span><span class="o">.</span><span class="n">metaclass</span><span class="o">.</span><span class="n">keyNames</span><span class="p">:</span>
               <span class="c1"># serial key for top</span>
               <span class="k">if</span> <span class="n">serialTag</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">targetObjParams</span><span class="p">:</span>
                 <span class="c1"># not being passed in explicitly - we must fix it (special case)</span>
                 <span class="c1"># NB _serialDict is hardwired to avoid using the varNames di</span>
-                <span class="n">serialDict</span> <span class="o">=</span> <span class="n">newParent</span><span class="o">.</span><span class="n">__dict__</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">serialDictTag</span><span class="p">,{})</span>
+                <span class="n">serialDict</span> <span class="o">=</span> <span class="n">newParent</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">serialDictTag</span><span class="p">,{})</span>
                 <span class="n">oldSerial</span> <span class="o">=</span> <span class="n">serialDict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">curMap</span><span class="p">[</span><span class="s1">&#39;fromParent&#39;</span><span class="p">],</span><span class="mi">0</span><span class="p">)</span>
                 <span class="n">targetObjParams</span><span class="p">[</span><span class="n">serialTag</span><span class="p">]</span> <span class="o">=</span> <span class="n">oldSerial</span> <span class="o">+</span> <span class="mi">1</span>
           
           <span class="c1"># new object not already there - make it and transfer from old</span>
           <span class="k">if</span> <span class="n">parent</span><span class="o">.</span><span class="n">root</span> <span class="ow">is</span> <span class="n">newParent</span><span class="p">:</span>
             <span class="c1"># targetObj is a TopObject</span>
-            <span class="n">obj</span> <span class="o">=</span> <span class="n">targetObj</span> <span class="o">=</span> <span class="n">curMap</span><span class="p">[</span><span class="s1">&#39;class&#39;</span><span class="p">](</span><span class="n">parent</span><span class="p">,</span> <span class="n">isReading</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+            <span class="n">obj</span> <span class="o">=</span> <span class="n">targetObj</span> <span class="o">=</span> <span class="n">curMap</span><span class="p">[</span><span class="s1">&#39;class&#39;</span><span class="p">](</span><span class="n">parent</span><span class="p">,</span> <span class="n">isReading</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
                                               <span class="o">**</span><span class="n">targetObjParams</span><span class="p">)</span>
           <span class="k">else</span><span class="p">:</span>
             <span class="c1"># targetObj is not a TopObject (and we are doing subtree copying)</span>
-            <span class="n">parent</span><span class="o">.</span><span class="n">topObject</span><span class="o">.</span><span class="n">__dict__</span><span class="p">[</span><span class="s1">&#39;isReading&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">True</span>
+            <span class="n">parent</span><span class="o">.</span><span class="n">topObject</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="s1">&#39;isReading&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
             <span class="n">obj</span> <span class="o">=</span> <span class="n">targetObj</span> <span class="o">=</span> <span class="n">curMap</span><span class="p">[</span><span class="s1">&#39;class&#39;</span><span class="p">](</span><span class="n">parent</span><span class="p">,</span> <span class="o">**</span><span class="n">targetObjParams</span><span class="p">)</span>
           
           <span class="n">notifyObjects</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
@@ -299,7 +289,7 @@
  
           <span class="k">if</span> <span class="n">curMap</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;cplx&#39;</span><span class="p">:</span>
             <span class="c1"># complex data type</span>
-            <span class="n">obj</span> <span class="o">=</span> <span class="n">curMap</span><span class="p">[</span><span class="s1">&#39;class&#39;</span><span class="p">](</span><span class="n">override</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+            <span class="n">obj</span> <span class="o">=</span> <span class="n">curMap</span><span class="p">[</span><span class="s1">&#39;class&#39;</span><span class="p">](</span><span class="n">override</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
  
             <span class="n">objId</span> <span class="o">=</span> <span class="nb">id</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
             <span class="n">delayDataDict</span><span class="p">[</span><span class="n">objId</span><span class="p">]</span> <span class="o">=</span> <span class="n">nextDd</span>
@@ -347,20 +337,20 @@
             <span class="n">name</span> <span class="o">=</span> <span class="n">tmpMap</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span>
             <span class="n">val</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">oldObj</span><span class="p">,</span> <span class="n">tag</span><span class="p">)</span>
  
-            <span class="k">if</span> <span class="n">val</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">val</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
               <span class="c1"># no value - skip empties</span>
               <span class="k">continue</span>
  
             <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="p">(</span><span class="nb">tuple</span><span class="p">,</span> <span class="nb">frozenset</span><span class="p">)):</span>
               <span class="c1"># convert to list for future processing</span>
               <span class="k">if</span> <span class="n">val</span><span class="p">:</span>
-                <span class="n">valIsList</span> <span class="o">=</span> <span class="bp">True</span>
+                <span class="n">valIsList</span> <span class="o">=</span> <span class="kc">True</span>
               <span class="k">else</span><span class="p">:</span>
                 <span class="c1"># no values - skip empties</span>
                 <span class="k">continue</span>
  
             <span class="k">else</span><span class="p">:</span>
-              <span class="n">valIsList</span> <span class="o">=</span> <span class="bp">False</span>
+              <span class="n">valIsList</span> <span class="o">=</span> <span class="kc">False</span>
  
             <span class="n">typ</span> <span class="o">=</span> <span class="n">tmpMap</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]</span>
             
@@ -385,8 +375,8 @@
                     <span class="n">val</span> <span class="o">=</span> <span class="n">vv</span>
                   <span class="k">if</span> <span class="n">proc</span> <span class="o">==</span> <span class="s1">&#39;direct&#39;</span><span class="p">:</span>
                     <span class="c1"># direct setting if simple non-constrained attribute</span>
-                    <span class="n">obj</span><span class="o">.</span><span class="n">__dict__</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">val</span>
-                  <span class="k">elif</span> <span class="n">oldVersionStr</span> <span class="ow">is</span> <span class="bp">None</span> <span class="ow">and</span> <span class="n">name</span> <span class="o">==</span> <span class="s1">&#39;_ID&#39;</span><span class="p">:</span>
+                    <span class="n">obj</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">val</span>
+                  <span class="k">elif</span> <span class="n">oldVersionStr</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">name</span> <span class="o">==</span> <span class="s1">&#39;_ID&#39;</span><span class="p">:</span>
                     <span class="c1"># We are doing tree copy, not compatibility. Reset _ID.</span>
                     <span class="nb">setattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
                   <span class="k">else</span><span class="p">:</span>
@@ -440,14 +430,14 @@
                 <span class="n">appCrossLinkData</span><span class="p">(</span><span class="n">val</span><span class="p">)</span>
                 <span class="n">appCrossLinkData</span><span class="p">(</span><span class="n">tmpMap</span><span class="p">)</span>
  
-        <span class="k">if</span> <span class="n">oldVersionStr</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">oldVersionStr</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
           <span class="c1"># this is tree copying</span>
           <span class="n">nextDd</span> <span class="o">=</span> <span class="p">{}</span>
           
         <span class="k">else</span><span class="p">:</span>
           <span class="c1"># this is backwards compatibility</span>
           <span class="c1"># clear old object to keep memory use down</span>
-          <span class="n">nextDd</span> <span class="o">=</span> <span class="n">oldObj</span><span class="o">.</span><span class="n">__dict__</span>
+          <span class="n">nextDd</span> <span class="o">=</span> <span class="n">oldObj</span><span class="o">.</span><span class="vm">__dict__</span>
           <span class="n">nextDd</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
  
  
@@ -455,7 +445,7 @@
         <span class="c1"># no children left - go up a step</span>
         <span class="n">oldChildStack</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
         <span class="n">lastParent</span> <span class="o">=</span> <span class="n">newParentStack</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
-        <span class="k">if</span> <span class="n">lastParent</span><span class="o">.</span><span class="n">metaclass</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span> <span class="o">==</span> <span class="s1">&#39;MetaDataObjType&#39;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">lastParent</span><span class="o">.</span><span class="n">metaclass</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;MetaDataObjType&#39;</span><span class="p">:</span>
           <span class="c1"># parent is complex data type</span>
           <span class="n">lastParent</span><span class="o">.</span><span class="n">endOverride</span><span class="p">()</span>
  
@@ -467,7 +457,7 @@
     <span class="n">localOldToNew</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">oldToNew</span><span class="p">)</span>
 
     <span class="c1"># postprocess objects - set links now all objects are done</span>
-    <span class="k">if</span> <span class="n">oldVersionStr</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">oldVersionStr</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
       <span class="c1"># copy subtree</span>
       <span class="n">_delayedLoadLinksCopy</span><span class="p">(</span><span class="n">localOldToNew</span><span class="p">,</span> <span class="n">crossLinkData</span><span class="p">,</span>
                        <span class="n">ignoreMissing</span><span class="o">=</span><span class="n">ignoreMissing</span><span class="p">)</span>
@@ -483,13 +473,13 @@
       <span class="n">minorPostProcess</span><span class="p">(</span><span class="n">oldVersionStr</span><span class="p">,</span> <span class="n">targetObj</span><span class="p">,</span> <span class="n">delayDataDict</span><span class="p">,</span> <span class="n">localOldToNew</span><span class="p">)</span>
  
       <span class="c1"># set TopObjects into TopObjects dictionary.</span>
-      <span class="n">newTopObjByGuid</span> <span class="o">=</span> <span class="n">newParent</span><span class="o">.</span><span class="n">__dict__</span><span class="p">[</span><span class="s1">&#39;topObjects&#39;</span><span class="p">]</span>
-      <span class="n">guid</span> <span class="o">=</span> <span class="n">targetObj</span><span class="o">.</span><span class="n">__dict__</span><span class="p">[</span><span class="s1">&#39;guid&#39;</span><span class="p">]</span>
+      <span class="n">newTopObjByGuid</span> <span class="o">=</span> <span class="n">newParent</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="s1">&#39;topObjects&#39;</span><span class="p">]</span>
+      <span class="n">guid</span> <span class="o">=</span> <span class="n">targetObj</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="s1">&#39;guid&#39;</span><span class="p">]</span>
       <span class="k">if</span> <span class="n">guid</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">newTopObjByGuid</span><span class="p">:</span>
         <span class="n">newTopObjByGuid</span><span class="p">[</span><span class="n">guid</span><span class="p">]</span> <span class="o">=</span> <span class="n">targetObj</span>
       <span class="k">else</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;CCPN API error: </span><span class="si">%s</span><span class="s2">: guid </span><span class="si">%s</span><span class="s2"> already in use&quot;</span>
-                       <span class="o">%</span> <span class="p">(</span><span class="n">targetObj</span><span class="p">,</span> <span class="n">targetObj</span><span class="o">.</span><span class="n">__dict__</span><span class="p">[</span><span class="s1">&#39;guid&#39;</span><span class="p">]))</span>
+                       <span class="o">%</span> <span class="p">(</span><span class="n">targetObj</span><span class="p">,</span> <span class="n">targetObj</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="s1">&#39;guid&#39;</span><span class="p">]))</span>
  
     <span class="n">newTopObj</span> <span class="o">=</span> <span class="n">targetObj</span><span class="o">.</span><span class="n">topObject</span>
     
@@ -498,7 +488,7 @@
     <span class="k">if</span> <span class="ow">not</span> <span class="n">targetObj</span><span class="o">.</span><span class="n">isDeleted</span><span class="p">:</span>
       <span class="c1"># filter out deleted targetObj - could happen in minor postprocessing</span>
       <span class="n">xmlImplementation</span><span class="o">.</span><span class="n">linkChildData</span><span class="p">(</span><span class="n">delayDataDict</span><span class="p">,</span> <span class="n">targetObj</span><span class="p">,</span> <span class="n">mapping</span><span class="p">,</span>
-                                      <span class="n">linkTopToParent</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+                                      <span class="n">linkTopToParent</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
   
   
   <span class="k">except</span><span class="p">:</span>
@@ -507,21 +497,21 @@
     <span class="n">exc_info</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">exc_info</span><span class="p">()</span>
     <span class="c1"># NB &#39;[]&#39; only put in for Python 2.1</span>
     <span class="n">objsToBeDeleted</span> <span class="o">=</span> <span class="nb">set</span><span class="p">([</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">delayDataDict</span> <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="nb">int</span><span class="p">,)])</span>
-    <span class="n">deleteFailed</span> <span class="o">=</span> <span class="bp">False</span>
+    <span class="n">deleteFailed</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="k">for</span> <span class="n">obj</span> <span class="ow">in</span> <span class="n">objsToBeDeleted</span><span class="p">:</span>
       <span class="k">try</span><span class="p">:</span>
         <span class="n">obj</span><span class="o">.</span><span class="n">_singleDelete</span><span class="p">(</span><span class="n">objsToBeDeleted</span><span class="p">)</span>
       <span class="k">except</span><span class="p">:</span>
-        <span class="n">deleteFailed</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="n">deleteFailed</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;WARNING Error in deleting object of class </span><span class="si">%s</span><span class="s2">, id </span><span class="si">%s</span><span class="s2">&quot;</span>
-               <span class="o">%</span> <span class="p">(</span><span class="n">obj</span><span class="o">.</span><span class="n">__class__</span><span class="p">,</span> <span class="nb">id</span><span class="p">(</span><span class="n">obj</span><span class="p">)))</span>
+               <span class="o">%</span> <span class="p">(</span><span class="n">obj</span><span class="o">.</span><span class="vm">__class__</span><span class="p">,</span> <span class="nb">id</span><span class="p">(</span><span class="n">obj</span><span class="p">)))</span>
   
-    <span class="k">if</span> <span class="n">targetObj</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">targetObj</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
       <span class="k">try</span><span class="p">:</span>
         <span class="n">topObj</span> <span class="o">=</span> <span class="n">targetObj</span><span class="o">.</span><span class="n">topObject</span>
-        <span class="n">topObj</span><span class="o">.</span><span class="n">__dict__</span><span class="p">[</span><span class="s1">&#39;isReading&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="n">topObj</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="s1">&#39;isReading&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
       <span class="k">except</span><span class="p">:</span>
-        <span class="n">deleteFailed</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="n">deleteFailed</span> <span class="o">=</span> <span class="kc">True</span>
     
     <span class="k">if</span> <span class="n">deleteFailed</span><span class="p">:</span>
       <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;&#39;&#39;Error in clean-up of incorrectly copied data tree.</span>
@@ -534,27 +524,27 @@
 
   
   <span class="c1"># unset isReading and set to modified</span>
-  <span class="n">newTopObj</span><span class="o">.</span><span class="n">__dict__</span><span class="p">[</span><span class="s1">&#39;isReading&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">False</span>
-  <span class="n">newTopObj</span><span class="o">.</span><span class="n">__dict__</span><span class="p">[</span><span class="s1">&#39;isModified&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">True</span>
+  <span class="n">newTopObj</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="s1">&#39;isReading&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
+  <span class="n">newTopObj</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="s1">&#39;isModified&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
     
  
-  <span class="k">if</span> <span class="n">oldVersionStr</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+  <span class="k">if</span> <span class="n">oldVersionStr</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
     <span class="c1"># we are copying a subtree</span>
     
     <span class="k">if</span> <span class="n">targetObj</span> <span class="ow">is</span> <span class="n">newTopObj</span><span class="p">:</span>
       <span class="c1"># root is a TopObject - we need to set isLoaded</span>
       <span class="n">root</span> <span class="o">=</span> <span class="n">newTopObj</span><span class="o">.</span><span class="n">root</span>
-      <span class="n">newTopObj</span><span class="o">.</span><span class="n">__dict__</span><span class="p">[</span><span class="s1">&#39;isLoaded&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">True</span>
+      <span class="n">newTopObj</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="s1">&#39;isLoaded&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
       <span class="n">guid</span> <span class="o">=</span> <span class="n">root</span><span class="o">.</span><span class="n">newGuid</span><span class="p">()</span>
-      <span class="n">newTopObj</span><span class="o">.</span><span class="n">__dict__</span><span class="p">[</span><span class="s1">&#39;guid&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">guid</span>
-      <span class="n">root</span><span class="o">.</span><span class="n">__dict__</span><span class="p">[</span><span class="s1">&#39;topObjects&#39;</span><span class="p">][</span><span class="n">guid</span><span class="p">]</span> <span class="o">=</span> <span class="n">newTopObj</span>
+      <span class="n">newTopObj</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="s1">&#39;guid&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">guid</span>
+      <span class="n">root</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="s1">&#39;topObjects&#39;</span><span class="p">][</span><span class="n">guid</span><span class="p">]</span> <span class="o">=</span> <span class="n">newTopObj</span>
       
     <span class="c1">#check validity</span>
     <span class="n">targetObj</span><span class="o">.</span><span class="n">checkAllValid</span><span class="p">()</span>
  
     <span class="c1"># notify - list gicves you parent-before-child order</span>
     <span class="k">for</span> <span class="n">xx</span> <span class="ow">in</span> <span class="n">notifyObjects</span><span class="p">:</span>
-      <span class="k">for</span> <span class="n">notify</span> <span class="ow">in</span> <span class="n">xx</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">_notifies</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;__init__&#39;</span><span class="p">,</span> <span class="p">()):</span>
+      <span class="k">for</span> <span class="n">notify</span> <span class="ow">in</span> <span class="n">xx</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="n">_notifies</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;__init__&#39;</span><span class="p">,</span> <span class="p">()):</span>
         <span class="n">notify</span><span class="p">(</span><span class="n">xx</span><span class="p">)</span>
     <span class="k">del</span> <span class="n">notifyObjects</span>
     
@@ -562,7 +552,7 @@
   <span class="k">else</span><span class="p">:</span>
     <span class="c1"># we are doing backwards compatibility.</span>
     <span class="c1"># Set to loaded and leave teh rest to others</span>
-    <span class="n">newTopObj</span><span class="o">.</span><span class="n">__dict__</span><span class="p">[</span><span class="s1">&#39;isLoaded&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">True</span>
+    <span class="n">newTopObj</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="s1">&#39;isLoaded&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
  
   <span class="c1"># clean up</span>
   <span class="n">delayDataDict</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
@@ -592,7 +582,7 @@
       <span class="n">valueList</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
       <span class="k">for</span> <span class="n">vv</span> <span class="ow">in</span> <span class="n">val</span><span class="p">:</span>
         <span class="n">oo</span> <span class="o">=</span> <span class="n">getObj</span><span class="p">(</span><span class="n">vv</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">oo</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">oo</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
           <span class="n">valueList</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">oo</span><span class="p">)</span>
 
       <span class="k">if</span> <span class="n">valueList</span><span class="p">:</span>
@@ -615,7 +605,7 @@
     <span class="k">raise</span>
 
 
-<span class="k">def</span> <span class="nf">_delayedLoadLinksCopy</span><span class="p">(</span><span class="n">objectDict</span><span class="p">,</span> <span class="n">linkData</span><span class="p">,</span> <span class="n">ignoreMissing</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">_delayedLoadLinksCopy</span><span class="p">(</span><span class="n">objectDict</span><span class="p">,</span> <span class="n">linkData</span><span class="p">,</span> <span class="n">ignoreMissing</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
   <span class="sd">&quot;&quot;&quot; Set links (of whatever kind) derefencing as you go using objectDict.</span>
 <span class="sd">  For copySubTree rather than compatibility </span>
 <span class="sd">  &quot;&quot;&quot;</span>
@@ -670,23 +660,23 @@
       <span class="c1"># get new values</span>
       <span class="n">others</span> <span class="o">=</span> <span class="p">[]</span>
       <span class="n">newies</span> <span class="o">=</span> <span class="p">[]</span>
-      <span class="n">foundAll</span> <span class="o">=</span> <span class="bp">True</span>
+      <span class="n">foundAll</span> <span class="o">=</span> <span class="kc">True</span>
       <span class="k">for</span> <span class="n">vv</span> <span class="ow">in</span> <span class="n">val</span><span class="p">:</span>
         <span class="n">other</span> <span class="o">=</span> <span class="n">getObj</span><span class="p">(</span><span class="n">vv</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">other</span><span class="p">:</span>
           <span class="n">newies</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">other</span><span class="p">)</span>
           <span class="n">others</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">other</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-          <span class="n">foundAll</span> <span class="o">=</span> <span class="bp">False</span>
+          <span class="n">foundAll</span> <span class="o">=</span> <span class="kc">False</span>
           <span class="n">others</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">vv</span><span class="p">)</span>
       
-      <span class="n">done</span> <span class="o">=</span> <span class="bp">False</span>
+      <span class="n">done</span> <span class="o">=</span> <span class="kc">False</span>
           
       <span class="k">if</span> <span class="n">foundAll</span> <span class="ow">or</span> <span class="n">copyOverride</span><span class="p">:</span>
         <span class="c1"># try making link to full set of objects</span>
         <span class="k">try</span><span class="p">:</span>
           <span class="nb">setattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">others</span><span class="p">)</span>
-          <span class="n">done</span> <span class="o">=</span> <span class="bp">True</span>
+          <span class="n">done</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="k">except</span><span class="p">:</span>
           <span class="k">pass</span>
       
@@ -694,7 +684,7 @@
         <span class="c1"># try making link to the subset of objects found in subtree</span>
         <span class="k">try</span><span class="p">:</span>
           <span class="nb">setattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">newies</span><span class="p">)</span>
-          <span class="n">done</span> <span class="o">=</span> <span class="bp">True</span>
+          <span class="n">done</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="k">except</span><span class="p">:</span>
           <span class="k">pass</span>
           
@@ -712,15 +702,15 @@
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
 <div id="searchbox" style="display: none" role="search">
-  <h3>Quick search</h3>
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
     <form class="search" action="../../../../search.html" method="get">
-      <input type="text" name="q" />
+      <input type="text" name="q" aria-labelledby="searchlabel" />
       <input type="submit" value="Go" />
-      <input type="hidden" name="check_keywords" value="yes" />
-      <input type="hidden" name="area" value="default" />
     </form>
+    </div>
 </div>
-<script type="text/javascript">$('#searchbox').show(0);</script>
+<script>$('#searchbox').show(0);</script>
         </div>
       </div>
       <div class="clearer"></div>
@@ -734,13 +724,13 @@
         <li class="right" >
           <a href="../../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../../index.html">Python  documentation</a> &raquo;</li>
-          <li class="nav-item nav-item-1"><a href="../../../index.html" >Module code</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="../../../../index.html">Python  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../../index.html" >Module code</a> &#187;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
-        &copy; Copyright .
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.1.
+        &#169; Copyright .
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.4.0.
     </div>
   </body>
 </html>

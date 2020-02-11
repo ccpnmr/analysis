@@ -1,32 +1,22 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
+<!DOCTYPE html>
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    
-    <title>ccpn.core.lib.SpectrumLib &mdash; Python  documentation</title>
-    
+    <meta charset="utf-8" />
+    <title>ccpn.core.lib.SpectrumLib &#8212; Python  documentation</title>
     <link rel="stylesheet" href="../../../../_static/classic.css" type="text/css" />
     <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
     
-    <script type="text/javascript">
-      var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    '../../../../',
-        VERSION:     '',
-        COLLAPSE_INDEX: false,
-        FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true
-      };
-    </script>
-    <script type="text/javascript" src="../../../../_static/jquery.js"></script>
-    <script type="text/javascript" src="../../../../_static/underscore.js"></script>
-    <script type="text/javascript" src="../../../../_static/doctools.js"></script>
-    <link rel="top" title="Python  documentation" href="../../../../index.html" />
-    <link rel="up" title="Module code" href="../../../index.html" /> 
-  </head>
-  <body role="document">
+    <script id="documentation_options" data-url_root="../../../../" src="../../../../_static/documentation_options.js"></script>
+    <script src="../../../../_static/jquery.js"></script>
+    <script src="../../../../_static/underscore.js"></script>
+    <script src="../../../../_static/doctools.js"></script>
+    <script src="../../../../_static/language_data.js"></script>
+    
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+  </head><body>
     <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
@@ -36,8 +26,8 @@
         <li class="right" >
           <a href="../../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../../index.html">Python  documentation</a> &raquo;</li>
-          <li class="nav-item nav-item-1"><a href="../../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="../../../../index.html">Python  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../../index.html" accesskey="U">Module code</a> &#187;</li> 
       </ul>
     </div>  
 
@@ -80,7 +70,7 @@
 <span class="kn">from</span> <span class="nn">ccpnmodel.ccpncore.lib.spectrum.NmrExpPrototype</span> <span class="kn">import</span> <span class="n">getExpClassificationDict</span>
 <span class="kn">from</span> <span class="nn">ccpnmodel.ccpncore.lib.Io</span> <span class="kn">import</span> <span class="n">Formats</span>
 
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">from</span> <span class="nn">ccpn.util.Logging</span> <span class="kn">import</span> <span class="n">getLogger</span>
 
 
@@ -117,7 +107,7 @@
 <span class="sd">    only noise is present. To increase the threshold value: increase the factor.</span>
 <span class="sd">    return:  float of estimated noise threshold</span>
 <span class="sd">    &#39;&#39;&#39;</span>
-    <span class="k">if</span> <span class="n">y</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">y</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="c1"># print(&#39;_oldEstimateNoiseLevel1D&#39;,max(y[:int(len(y)/20)]) * factor, &#39;STD, &#39;)</span>
         <span class="k">return</span> <span class="nb">max</span><span class="p">(</span><span class="n">y</span><span class="p">[:</span><span class="nb">int</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">y</span><span class="p">)</span> <span class="o">/</span> <span class="mi">20</span><span class="p">)])</span> <span class="o">*</span> <span class="n">factor</span>
     <span class="k">else</span><span class="p">:</span>
@@ -189,7 +179,7 @@
     <span class="c1"># Create numpy arrays containing the peak positions of</span>
     <span class="c1"># each peakList</span>
 
-    <span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+    <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 
     <span class="n">refPeakPositions</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">peak</span><span class="o">.</span><span class="n">position</span> <span class="k">for</span> <span class="n">peak</span> <span class="ow">in</span>
                                  <span class="n">refPeakList</span><span class="o">.</span><span class="n">peaks</span><span class="p">])</span>
@@ -243,7 +233,7 @@
 
 
 <span class="k">def</span> <span class="nf">_getProjection</span><span class="p">(</span><span class="n">spectrum</span><span class="p">:</span> <span class="s1">&#39;Spectrum&#39;</span><span class="p">,</span> <span class="n">axisCodes</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">,</span>
-                   <span class="n">method</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;max&#39;</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+                   <span class="n">method</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;max&#39;</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Get projected plane defined by axisCodes using method and optional threshold</span>
 <span class="sd">    return projected data array</span>
 
@@ -253,11 +243,11 @@
     <span class="k">if</span> <span class="n">method</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">PROJECTION_METHODS</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;For spectrum projection, method must be one of </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">PROJECTION_METHODS</span><span class="p">,))</span>
 
-    <span class="k">if</span> <span class="n">method</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;threshold&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">threshold</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">method</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;threshold&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">threshold</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;For spectrum projection method &quot;</span><span class="si">%s</span><span class="s1">&quot;, threshold parameter must be defined&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">method</span><span class="p">,))</span>
 
-    <span class="n">projectedData</span> <span class="o">=</span> <span class="bp">None</span>
-    <span class="k">for</span> <span class="n">position</span><span class="p">,</span> <span class="n">planeData</span> <span class="ow">in</span> <span class="n">spectrum</span><span class="o">.</span><span class="n">allPlanes</span><span class="p">(</span><span class="n">axisCodes</span><span class="p">,</span> <span class="n">exactMatch</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+    <span class="n">projectedData</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">for</span> <span class="n">position</span><span class="p">,</span> <span class="n">planeData</span> <span class="ow">in</span> <span class="n">spectrum</span><span class="o">.</span><span class="n">allPlanes</span><span class="p">(</span><span class="n">axisCodes</span><span class="p">,</span> <span class="n">exactMatch</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
 
         <span class="k">if</span> <span class="n">method</span> <span class="o">==</span> <span class="s1">&#39;sum above threshold&#39;</span> <span class="ow">or</span> <span class="n">method</span> <span class="o">==</span> <span class="s1">&#39;max above threshold&#39;</span><span class="p">:</span>
             <span class="n">lowIndices</span> <span class="o">=</span> <span class="n">planeData</span> <span class="o">&lt;</span> <span class="n">threshold</span>
@@ -266,7 +256,7 @@
             <span class="n">lowIndices</span> <span class="o">=</span> <span class="n">planeData</span> <span class="o">&gt;</span> <span class="o">-</span><span class="n">threshold</span>
             <span class="n">planeData</span><span class="p">[</span><span class="n">lowIndices</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
 
-        <span class="k">if</span> <span class="n">projectedData</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">projectedData</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="c1"># first plane</span>
             <span class="n">projectedData</span> <span class="o">=</span> <span class="n">planeData</span>
         <span class="k">elif</span> <span class="n">method</span> <span class="o">==</span> <span class="s1">&#39;max&#39;</span> <span class="ow">or</span> <span class="n">method</span> <span class="o">==</span> <span class="s1">&#39;max above threshold&#39;</span><span class="p">:</span>
@@ -362,7 +352,7 @@
     <span class="n">X</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">matrix</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
     <span class="n">m</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">size</span>
     <span class="n">i</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">m</span><span class="p">)</span>
-    <span class="n">E</span> <span class="o">=</span> <span class="n">eye</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="n">format</span><span class="o">=</span><span class="s1">&#39;csc&#39;</span><span class="p">)</span>
+    <span class="n">E</span> <span class="o">=</span> <span class="n">eye</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;csc&#39;</span><span class="p">)</span>
     <span class="n">D</span> <span class="o">=</span> <span class="n">E</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span> <span class="o">-</span> <span class="n">E</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>  <span class="c1"># numpy.diff() does not work with sparse matrix. This is a workaround.</span>
     <span class="n">W</span> <span class="o">=</span> <span class="n">diags</span><span class="p">(</span><span class="n">w</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="n">m</span><span class="p">))</span>
     <span class="n">A</span> <span class="o">=</span> <span class="n">csc_matrix</span><span class="p">(</span><span class="n">W</span> <span class="o">+</span> <span class="p">(</span><span class="n">lambda_</span> <span class="o">*</span> <span class="n">D</span><span class="o">.</span><span class="n">T</span> <span class="o">*</span> <span class="n">D</span><span class="p">))</span>
@@ -398,7 +388,7 @@
         <span class="n">d</span> <span class="o">=</span> <span class="n">y</span> <span class="o">-</span> <span class="n">z</span>
         <span class="n">dssn</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">d</span><span class="p">[</span><span class="n">d</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">sum</span><span class="p">())</span>
         <span class="k">if</span> <span class="p">(</span><span class="n">dssn</span> <span class="o">&lt;</span> <span class="mf">0.001</span> <span class="o">*</span> <span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">y</span><span class="p">))</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="ow">or</span> <span class="n">i</span> <span class="o">==</span> <span class="n">itermax</span><span class="p">):</span>
-            <span class="k">if</span> <span class="p">(</span><span class="n">i</span> <span class="o">==</span> <span class="n">itermax</span><span class="p">):</span> <span class="k">print</span><span class="p">(</span><span class="s1">&#39;WARING max iteration reached!&#39;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">i</span> <span class="o">==</span> <span class="n">itermax</span><span class="p">):</span> <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;WARING max iteration reached!&#39;</span><span class="p">)</span>
             <span class="k">break</span>
         <span class="n">w</span><span class="p">[</span><span class="n">d</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>  <span class="c1"># d&gt;0 means that this point is part of a peak, so its weight is set to 0 in order to ignore it</span>
         <span class="n">w</span><span class="p">[</span><span class="n">d</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">i</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">d</span><span class="p">[</span><span class="n">d</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">])</span> <span class="o">/</span> <span class="n">dssn</span><span class="p">)</span>
@@ -457,7 +447,7 @@
 
     <span class="n">N</span> <span class="o">=</span> <span class="n">y</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
 
-    <span class="n">E</span> <span class="o">=</span> <span class="n">eye</span><span class="p">(</span><span class="n">N</span><span class="p">,</span> <span class="n">format</span><span class="o">=</span><span class="s1">&#39;csc&#39;</span><span class="p">)</span>
+    <span class="n">E</span> <span class="o">=</span> <span class="n">eye</span><span class="p">(</span><span class="n">N</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;csc&#39;</span><span class="p">)</span>
     <span class="c1"># numpy.diff() does not work with sparse matrix. This is a workaround.</span>
     <span class="c1"># It creates the second order difference matrix.</span>
     <span class="c1"># [1 -2 1 ......]</span>
@@ -524,7 +514,7 @@
 <span class="sd">&#39;&#39;&#39;</span>
 
 
-<div class="viewcode-block" id="arPLS_Implementation"><a class="viewcode-back" href="../../../../ccpn/ccpn.core.lib.html#ccpn.core.lib.SpectrumLib.arPLS_Implementation">[docs]</a><span class="k">def</span> <span class="nf">arPLS_Implementation</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">lambdaValue</span><span class="o">=</span><span class="mf">5.e4</span><span class="p">,</span> <span class="n">maxValue</span><span class="o">=</span><span class="mf">1e6</span><span class="p">,</span> <span class="n">minValue</span><span class="o">=-</span><span class="mf">1e6</span><span class="p">,</span> <span class="n">itermax</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">interpolate</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+<div class="viewcode-block" id="arPLS_Implementation"><a class="viewcode-back" href="../../../../ccpn/ccpn.core.lib.html#ccpn.core.lib.SpectrumLib.arPLS_Implementation">[docs]</a><span class="k">def</span> <span class="nf">arPLS_Implementation</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">lambdaValue</span><span class="o">=</span><span class="mf">5.e4</span><span class="p">,</span> <span class="n">maxValue</span><span class="o">=</span><span class="mf">1e6</span><span class="p">,</span> <span class="n">minValue</span><span class="o">=-</span><span class="mf">1e6</span><span class="p">,</span> <span class="n">itermax</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">interpolate</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    maxValue = maxValue of the baseline noise</span>
 <span class="sd">    minValue = minValue of the baseline noise</span>
@@ -533,7 +523,7 @@
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">lenghtY</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
-    <span class="n">sparseMatrix</span> <span class="o">=</span> <span class="n">eye</span><span class="p">(</span><span class="n">lenghtY</span><span class="p">,</span> <span class="n">format</span><span class="o">=</span><span class="s1">&#39;csc&#39;</span><span class="p">)</span>
+    <span class="n">sparseMatrix</span> <span class="o">=</span> <span class="n">eye</span><span class="p">(</span><span class="n">lenghtY</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;csc&#39;</span><span class="p">)</span>
     <span class="n">differenceMatrix</span> <span class="o">=</span> <span class="n">sparseMatrix</span><span class="p">[:</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span> <span class="o">-</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">sparseMatrix</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">sparseMatrix</span><span class="p">[</span><span class="mi">2</span><span class="p">:]</span>
     <span class="n">H</span> <span class="o">=</span> <span class="n">lambdaValue</span> <span class="o">*</span> <span class="n">differenceMatrix</span><span class="o">.</span><span class="n">T</span> <span class="o">*</span> <span class="n">differenceMatrix</span>
 
@@ -566,7 +556,7 @@
 <span class="sd">    &#39;&#39;&#39;</span>
 
     <span class="kn">from</span> <span class="nn">scipy.interpolate</span> <span class="kn">import</span> <span class="n">interp1d</span>
-    <span class="kn">import</span> <span class="nn">statsmodels.api</span> <span class="kn">as</span> <span class="nn">sm</span>
+    <span class="kn">import</span> <span class="nn">statsmodels.api</span> <span class="k">as</span> <span class="nn">sm</span>
 
     <span class="c1"># introduce some floats in our x-values</span>
 
@@ -578,7 +568,7 @@
     <span class="n">lowess_y</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="n">lowess</span><span class="p">))[</span><span class="mi">1</span><span class="p">]</span>
 
     <span class="c1"># run scipy&#39;s interpolation. There is also extrapolation I believe</span>
-    <span class="n">f</span> <span class="o">=</span> <span class="n">interp1d</span><span class="p">(</span><span class="n">lowess_x</span><span class="p">,</span> <span class="n">lowess_y</span><span class="p">,</span> <span class="n">bounds_error</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+    <span class="n">f</span> <span class="o">=</span> <span class="n">interp1d</span><span class="p">(</span><span class="n">lowess_x</span><span class="p">,</span> <span class="n">lowess_y</span><span class="p">,</span> <span class="n">bounds_error</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 
     <span class="c1"># this this generate y values for our xvalues by our interpolator</span>
     <span class="c1"># it will MISS values outsite of the x window (less than 3, greater than 33)</span>
@@ -595,7 +585,7 @@
 <span class="sd">        wd : float  Median window size in pts.</span>
 <span class="sd">    :return: same as data</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="kn">import</span> <span class="nn">nmrglue</span> <span class="kn">as</span> <span class="nn">ng</span>
+    <span class="kn">import</span> <span class="nn">nmrglue</span> <span class="k">as</span> <span class="nn">ng</span>
 
     <span class="n">data</span> <span class="o">=</span> <span class="n">ng</span><span class="o">.</span><span class="n">process</span><span class="o">.</span><span class="n">proc_bl</span><span class="o">.</span><span class="n">baseline_corrector</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">wd</span><span class="o">=</span><span class="n">wd</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">data</span></div>
@@ -682,7 +672,7 @@
 <span class="sd">    :return: x,y within the xRange (minXrange,maxXrange)</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="n">xRange</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">xRange</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span>
     <span class="n">point1</span><span class="p">,</span> <span class="n">point2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">xRange</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">xRange</span><span class="p">)</span>
     <span class="n">x_filtered</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">((</span><span class="n">x</span> <span class="o">&lt;=</span> <span class="n">point1</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">x</span> <span class="o">&gt;=</span> <span class="n">point2</span><span class="p">))</span>
@@ -727,9 +717,9 @@
             <span class="n">_recurseData</span><span class="p">(</span><span class="n">ii</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">newData</span><span class="p">,</span> <span class="n">startCondition</span><span class="p">,</span> <span class="n">endCondition</span><span class="p">)</span>
 
 
-<span class="k">def</span> <span class="nf">_setApiContourLevelsFromNoise</span><span class="p">(</span><span class="n">apiSpectrum</span><span class="p">,</span> <span class="n">setNoiseLevel</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
-                                  <span class="n">setPositiveContours</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">setNegativeContours</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
-                                  <span class="n">useSameMultiplier</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">_setApiContourLevelsFromNoise</span><span class="p">(</span><span class="n">apiSpectrum</span><span class="p">,</span> <span class="n">setNoiseLevel</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                                  <span class="n">setPositiveContours</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">setNegativeContours</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                                  <span class="n">useSameMultiplier</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Calculate the noise level, base contour level and positive/negative multipliers for the given apiSpectrum</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
@@ -749,10 +739,10 @@
 <span class="n">DEFAULTCONTOURBASE</span> <span class="o">=</span> <span class="mf">10000.0</span>
 
 
-<div class="viewcode-block" id="setContourLevelsFromNoise"><a class="viewcode-back" href="../../../../ccpn/ccpn.core.lib.html#ccpn.core.lib.SpectrumLib.setContourLevelsFromNoise">[docs]</a><span class="k">def</span> <span class="nf">setContourLevelsFromNoise</span><span class="p">(</span><span class="n">spectrum</span><span class="p">,</span> <span class="n">setNoiseLevel</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
-                              <span class="n">setPositiveContours</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">setNegativeContours</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
-                              <span class="n">useDefaultMultiplier</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">useDefaultLevels</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">useDefaultContourBase</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
-                              <span class="n">useSameMultiplier</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+<div class="viewcode-block" id="setContourLevelsFromNoise"><a class="viewcode-back" href="../../../../ccpn/ccpn.core.lib.html#ccpn.core.lib.SpectrumLib.setContourLevelsFromNoise">[docs]</a><span class="k">def</span> <span class="nf">setContourLevelsFromNoise</span><span class="p">(</span><span class="n">spectrum</span><span class="p">,</span> <span class="n">setNoiseLevel</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                              <span class="n">setPositiveContours</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">setNegativeContours</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                              <span class="n">useDefaultMultiplier</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">useDefaultLevels</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">useDefaultContourBase</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                              <span class="n">useSameMultiplier</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
                               <span class="n">defaultMultiplier</span> <span class="o">=</span> <span class="n">DEFAULTMULTIPLIER</span><span class="p">,</span> <span class="n">defaultLevels</span><span class="o">=</span><span class="n">DEFAULTLEVELS</span><span class="p">,</span> <span class="n">defaultContourBase</span><span class="o">=</span><span class="n">DEFAULTCONTOURBASE</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Calculate the noise level, base contour level and positive/negative multipliers for the given spectrum</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -879,10 +869,10 @@
 
                     <span class="n">spectrum</span><span class="o">.</span><span class="n">negativeContourCount</span> <span class="o">=</span> <span class="n">negLevels</span></div>
 
-<div class="viewcode-block" id="getContourLevelsFromNoise"><a class="viewcode-back" href="../../../../ccpn/ccpn.core.lib.html#ccpn.core.lib.SpectrumLib.getContourLevelsFromNoise">[docs]</a><span class="k">def</span> <span class="nf">getContourLevelsFromNoise</span><span class="p">(</span><span class="n">spectrum</span><span class="p">,</span> <span class="n">setNoiseLevel</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
-                              <span class="n">setPositiveContours</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">setNegativeContours</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
-                              <span class="n">useDefaultMultiplier</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">useDefaultLevels</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">useDefaultContourBase</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
-                              <span class="n">useSameMultiplier</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+<div class="viewcode-block" id="getContourLevelsFromNoise"><a class="viewcode-back" href="../../../../ccpn/ccpn.core.lib.html#ccpn.core.lib.SpectrumLib.getContourLevelsFromNoise">[docs]</a><span class="k">def</span> <span class="nf">getContourLevelsFromNoise</span><span class="p">(</span><span class="n">spectrum</span><span class="p">,</span> <span class="n">setNoiseLevel</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                              <span class="n">setPositiveContours</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">setNegativeContours</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                              <span class="n">useDefaultMultiplier</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">useDefaultLevels</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">useDefaultContourBase</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                              <span class="n">useSameMultiplier</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
                               <span class="n">defaultMultiplier</span> <span class="o">=</span> <span class="n">DEFAULTMULTIPLIER</span><span class="p">,</span> <span class="n">defaultLevels</span><span class="o">=</span><span class="n">DEFAULTLEVELS</span><span class="p">,</span> <span class="n">defaultContourBase</span><span class="o">=</span><span class="n">DEFAULTCONTOURBASE</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Calculate the noise level, base contour level and positive/negative multipliers for the given spectrum</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -911,7 +901,7 @@
         <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;defaultContourBase is not a positive float.&#39;</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">spectrum</span><span class="o">.</span><span class="n">dimensionCount</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-        <span class="k">return</span> <span class="p">[</span><span class="bp">None</span><span class="p">]</span> <span class="o">*</span> <span class="mi">6</span>
+        <span class="k">return</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span> <span class="o">*</span> <span class="mi">6</span>
 
     <span class="c1"># # exit if nothing set</span>
     <span class="c1"># if not (setNoiseLevel or setPositiveContours or setNegativeContours):</span>
@@ -985,14 +975,14 @@
                         <span class="n">negMult</span> <span class="o">=</span> <span class="nb">pow</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">mn</span> <span class="o">/</span> <span class="n">negBase</span><span class="p">),</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">negLevels</span><span class="p">)</span> <span class="k">if</span> <span class="n">negBase</span> <span class="k">else</span> <span class="mf">0.0</span>
 
                 <span class="k">if</span> <span class="ow">not</span> <span class="n">setPositiveContours</span><span class="p">:</span>
-                    <span class="n">posBase</span> <span class="o">=</span> <span class="n">posMult</span> <span class="o">=</span> <span class="n">posLevels</span> <span class="o">=</span>  <span class="bp">None</span>
+                    <span class="n">posBase</span> <span class="o">=</span> <span class="n">posMult</span> <span class="o">=</span> <span class="n">posLevels</span> <span class="o">=</span>  <span class="kc">None</span>
 
                 <span class="k">if</span> <span class="ow">not</span> <span class="n">setNegativeContours</span><span class="p">:</span>
-                    <span class="n">negBase</span> <span class="o">=</span> <span class="n">negMult</span> <span class="o">=</span> <span class="n">negLevels</span> <span class="o">=</span> <span class="bp">None</span>
+                    <span class="n">negBase</span> <span class="o">=</span> <span class="n">negMult</span> <span class="o">=</span> <span class="n">negLevels</span> <span class="o">=</span> <span class="kc">None</span>
 
                 <span class="k">return</span> <span class="n">posBase</span><span class="p">,</span> <span class="n">negBase</span><span class="p">,</span> <span class="n">posMult</span><span class="p">,</span> <span class="n">negMult</span><span class="p">,</span> <span class="n">posLevels</span><span class="p">,</span> <span class="n">negLevels</span>
 
-    <span class="k">return</span> <span class="p">[</span><span class="bp">None</span><span class="p">]</span> <span class="o">*</span> <span class="mi">6</span></div>
+    <span class="k">return</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span> <span class="o">*</span> <span class="mi">6</span></div>
 </pre></div>
 
           </div>
@@ -1001,15 +991,15 @@
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
 <div id="searchbox" style="display: none" role="search">
-  <h3>Quick search</h3>
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
     <form class="search" action="../../../../search.html" method="get">
-      <input type="text" name="q" />
+      <input type="text" name="q" aria-labelledby="searchlabel" />
       <input type="submit" value="Go" />
-      <input type="hidden" name="check_keywords" value="yes" />
-      <input type="hidden" name="area" value="default" />
     </form>
+    </div>
 </div>
-<script type="text/javascript">$('#searchbox').show(0);</script>
+<script>$('#searchbox').show(0);</script>
         </div>
       </div>
       <div class="clearer"></div>
@@ -1023,13 +1013,13 @@
         <li class="right" >
           <a href="../../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../../index.html">Python  documentation</a> &raquo;</li>
-          <li class="nav-item nav-item-1"><a href="../../../index.html" >Module code</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="../../../../index.html">Python  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../../index.html" >Module code</a> &#187;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
-        &copy; Copyright .
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.1.
+        &#169; Copyright .
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.4.0.
     </div>
   </body>
 </html>

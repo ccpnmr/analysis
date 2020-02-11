@@ -1,32 +1,22 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
+<!DOCTYPE html>
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    
-    <title>ccpn.ui.gui.widgets.CcpnModuleArea &mdash; Python  documentation</title>
-    
+    <meta charset="utf-8" />
+    <title>ccpn.ui.gui.widgets.CcpnModuleArea &#8212; Python  documentation</title>
     <link rel="stylesheet" href="../../../../../_static/classic.css" type="text/css" />
     <link rel="stylesheet" href="../../../../../_static/pygments.css" type="text/css" />
     
-    <script type="text/javascript">
-      var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    '../../../../../',
-        VERSION:     '',
-        COLLAPSE_INDEX: false,
-        FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true
-      };
-    </script>
-    <script type="text/javascript" src="../../../../../_static/jquery.js"></script>
-    <script type="text/javascript" src="../../../../../_static/underscore.js"></script>
-    <script type="text/javascript" src="../../../../../_static/doctools.js"></script>
-    <link rel="top" title="Python  documentation" href="../../../../../index.html" />
-    <link rel="up" title="Module code" href="../../../../index.html" /> 
-  </head>
-  <body role="document">
+    <script id="documentation_options" data-url_root="../../../../../" src="../../../../../_static/documentation_options.js"></script>
+    <script src="../../../../../_static/jquery.js"></script>
+    <script src="../../../../../_static/underscore.js"></script>
+    <script src="../../../../../_static/doctools.js"></script>
+    <script src="../../../../../_static/language_data.js"></script>
+    
+    <link rel="index" title="Index" href="../../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../../search.html" /> 
+  </head><body>
     <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
@@ -36,8 +26,8 @@
         <li class="right" >
           <a href="../../../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../../../index.html">Python  documentation</a> &raquo;</li>
-          <li class="nav-item nav-item-1"><a href="../../../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="../../../../../index.html">Python  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../../../index.html" accesskey="U">Module code</a> &#187;</li> 
       </ul>
     </div>  
 
@@ -50,7 +40,7 @@
 <span></span><span class="c1">#=========================================================================================</span>
 <span class="c1"># Licence, Reference and Credits</span>
 <span class="c1">#=========================================================================================</span>
-<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019&quot;</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020&quot;</span>
 <span class="n">__credits__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Ed Brooksbank, Luca Mureddu, Timothy J Ragan &amp; Geerten W Vuister&quot;</span><span class="p">)</span>
 <span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">)</span>
 <span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., &amp; Vuister, G.W.&quot;</span><span class="p">,</span>
@@ -59,9 +49,9 @@
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Last code modification</span>
 <span class="c1">#=========================================================================================</span>
-<span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: CCPN $&quot;</span>
-<span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2017-07-07 16:32:51 +0100 (Fri, July 07, 2017) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.0 $&quot;</span>
+<span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: Ed Brooksbank $&quot;</span>
+<span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2020-02-10 16:59:38 +0000 (Mon, February 10, 2020) $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.1 $&quot;</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Created</span>
 <span class="c1">#=========================================================================================</span>
@@ -103,9 +93,9 @@
 
 
 <div class="viewcode-block" id="TempAreaWindow"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.CcpnModuleArea.TempAreaWindow">[docs]</a><span class="k">class</span> <span class="nc">TempAreaWindow</span><span class="p">(</span><span class="n">GuiWindow</span><span class="p">,</span> <span class="n">MainWindow</span><span class="p">):</span>
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">area</span><span class="p">,</span> <span class="n">mainWindow</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="n">MainWindow</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-        <span class="n">GuiWindow</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mainWindow</span><span class="o">.</span><span class="n">application</span><span class="p">)</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">area</span><span class="p">,</span> <span class="n">mainWindow</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">MainWindow</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="n">GuiWindow</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mainWindow</span><span class="o">.</span><span class="n">application</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">setCentralWidget</span><span class="p">(</span><span class="n">area</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">tempModuleArea</span> <span class="o">=</span> <span class="n">area</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">mainModuleArea</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tempModuleArea</span><span class="o">.</span><span class="n">home</span>
@@ -114,8 +104,6 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">application</span> <span class="o">=</span> <span class="n">mainWindow</span><span class="o">.</span><span class="n">application</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">project</span> <span class="o">=</span> <span class="n">mainWindow</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">project</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">current</span> <span class="o">=</span> <span class="n">mainWindow</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">current</span>
-        <span class="c1"># self._startCommandEchoBlock = self.project._startCommandEchoBlock</span>
-        <span class="c1"># self._endCommandEchoBlock = self.project._endCommandEchoBlock</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_setShortcuts</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">setMouseMode</span><span class="p">(</span><span class="n">SELECT</span><span class="p">)</span>
@@ -135,21 +123,28 @@
             <span class="k">for</span> <span class="n">strip</span> <span class="ow">in</span> <span class="n">spectrumDisplay</span><span class="o">.</span><span class="n">strips</span><span class="p">:</span>
                 <span class="n">strip</span><span class="o">.</span><span class="n">refreshDevicePixelRatio</span><span class="p">()</span>
 
+            <span class="c1"># NOTE:ED - set pixelratio for extra axes</span>
+            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">spectrumDisplay</span><span class="p">,</span> <span class="s1">&#39;_rightGLAxis&#39;</span><span class="p">):</span>
+                <span class="n">spectrumDisplay</span><span class="o">.</span><span class="n">_rightGLAxis</span><span class="o">.</span><span class="n">refreshDevicePixelRatio</span><span class="p">()</span>
+            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">spectrumDisplay</span><span class="p">,</span> <span class="s1">&#39;_bottomGLAxis&#39;</span><span class="p">):</span>
+                <span class="n">spectrumDisplay</span><span class="o">.</span><span class="n">_bottomGLAxis</span><span class="o">.</span><span class="n">refreshDevicePixelRatio</span><span class="p">()</span>
+
 <div class="viewcode-block" id="TempAreaWindow.closeEvent"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.CcpnModuleArea.TempAreaWindow.closeEvent">[docs]</a>    <span class="k">def</span> <span class="nf">closeEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="k">for</span> <span class="n">module</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">tempModuleArea</span><span class="o">.</span><span class="n">ccpnModules</span><span class="p">:</span>
             <span class="n">module</span><span class="o">.</span><span class="n">_closeModule</span><span class="p">()</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">tempModuleArea</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">mainModuleArea</span><span class="o">.</span><span class="n">tempAreas</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">mainModuleArea</span><span class="o">.</span><span class="n">tempAreas</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tempModuleArea</span><span class="p">)</span>
+
+        <span class="c1"># minimise event required here to notify Qt to exit from fullscreen mode</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">showNormal</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">close</span><span class="p">()</span></div></div>
-        <span class="c1"># MainWindow.closeEvent(self, *args, **kwargs)</span>
 
+<div class="viewcode-block" id="CcpnModuleArea"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.CcpnModuleArea.CcpnModuleArea">[docs]</a><span class="k">class</span> <span class="nc">CcpnModuleArea</span><span class="p">(</span><span class="n">ModuleArea</span><span class="p">,</span> <span class="n">DropBase</span><span class="p">):</span>
 
-<div class="viewcode-block" id="CcpnModuleArea"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.CcpnModuleArea.CcpnModuleArea">[docs]</a><span class="k">class</span> <span class="nc">CcpnModuleArea</span><span class="p">(</span><span class="n">ModuleArea</span><span class="p">,</span> <span class="n">DropBase</span><span class="p">):</span>  <span class="c1">#, DropBase):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mainWindow</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mainWindow</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-
-        <span class="n">ModuleArea</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mainWindow</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-        <span class="n">DropBase</span><span class="o">.</span><span class="n">_init</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">acceptDrops</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">mainWindow</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="n">DropBase</span><span class="o">.</span><span class="n">_init</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">acceptDrops</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span> <span class="o">=</span> <span class="n">mainWindow</span>  <span class="c1"># a link back to the parent MainWindow</span>
 
@@ -163,31 +158,30 @@
         <span class="c1"># self.setAcceptDrops(True) GWV not needed; handled by DropBase init</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">textLabel</span> <span class="o">=</span> <span class="n">DropAreaLabel</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">fontLabel</span> <span class="o">=</span> <span class="n">Font</span><span class="p">(</span><span class="s1">&#39;Helvetica&#39;</span><span class="p">,</span> <span class="mi">36</span><span class="p">,</span> <span class="n">bold</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fontLabel</span> <span class="o">=</span> <span class="n">Font</span><span class="p">(</span><span class="s1">&#39;Helvetica&#39;</span><span class="p">,</span> <span class="mi">36</span><span class="p">,</span> <span class="n">bold</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 
         <span class="n">colours</span> <span class="o">=</span> <span class="n">getColours</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">colourLabel</span> <span class="o">=</span> <span class="n">hexToRgb</span><span class="p">(</span><span class="n">colours</span><span class="p">[</span><span class="n">LABEL_FOREGROUND</span><span class="p">])</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">_dropArea</span> <span class="o">=</span> <span class="bp">None</span>  <span class="c1"># Needed to know where to add a newmodule when dropping a pid from sideBar</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_container</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_dropArea</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># Needed to know where to add a newmodule when dropping a pid from sideBar</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_container</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">children</span><span class="p">():</span>
                 <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">Container</span><span class="p">):</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">_container</span> <span class="o">=</span> <span class="n">i</span>
 
-        <span class="c1"># self.label.sigDragEntered.connect(self._dragEntered)</span>
+<div class="viewcode-block" id="CcpnModuleArea.moveDock"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.CcpnModuleArea.CcpnModuleArea.moveDock">[docs]</a>    <span class="k">def</span> <span class="nf">moveDock</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">module</span><span class="p">,</span> <span class="n">position</span><span class="p">,</span> <span class="n">neighbor</span><span class="p">,</span> <span class="n">initTime</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Move an existing Dock to a new location.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
 
-    <span class="c1"># def _dragEntered(self, module):</span>
-    <span class="c1">#   # print(&#39;&gt;&gt;&gt;sigDragEntered from:&#39;, module)</span>
-    <span class="c1">#   # for mod in self.modules.values():</span>
-    <span class="c1">#   #   mod.setWidgetTransparency(True)</span>
-    <span class="c1">#</span>
-    <span class="c1">#   self.update()</span>
-    <span class="c1">#</span>
-    <span class="c1"># def _dragFinished(self, ev):</span>
-    <span class="c1">#   # print(&#39;&gt;&gt;&gt;sigDragFinished&#39;, self)</span>
-    <span class="c1">#   # for mod in self.modules.values():</span>
-    <span class="c1">#   #   mod.setWidgetTransparency(False)</span>
-    <span class="c1">#   pass</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">initTime</span><span class="p">:</span>
+            <span class="n">previousArea</span> <span class="o">=</span>  <span class="n">module</span><span class="o">.</span><span class="n">getDockArea</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">previousArea</span> <span class="o">!=</span> <span class="bp">self</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">module</span><span class="o">.</span><span class="n">maximised</span><span class="p">:</span>
+                    <span class="n">module</span><span class="o">.</span><span class="n">toggleMaximised</span><span class="p">()</span>
+
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">moveDock</span><span class="p">(</span><span class="n">module</span><span class="p">,</span><span class="n">position</span><span class="p">,</span><span class="n">neighbor</span><span class="p">)</span></div>
+
 
 <div class="viewcode-block" id="CcpnModuleArea.dropEvent"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.CcpnModuleArea.CcpnModuleArea.dropEvent">[docs]</a>    <span class="k">def</span> <span class="nf">dropEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
         <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parseEvent</span><span class="p">(</span><span class="n">event</span><span class="p">)</span>
@@ -210,12 +204,34 @@
             <span class="n">DockArea</span><span class="o">.</span><span class="n">dropEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">)</span>
 
         <span class="c1"># reset the dock area</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">dropArea</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dropArea</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">overlay</span><span class="o">.</span><span class="n">setDropArea</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dropArea</span><span class="p">)</span>
 
         <span class="n">event</span><span class="o">.</span><span class="n">accept</span><span class="p">()</span></div>
 
+<div class="viewcode-block" id="CcpnModuleArea.findMaximisedDock"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.CcpnModuleArea.CcpnModuleArea.findMaximisedDock">[docs]</a>    <span class="k">def</span> <span class="nf">findMaximisedDock</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">maximisedWidget</span> <span class="o">=</span> <span class="p">[</span><span class="n">widget</span> <span class="k">for</span> <span class="n">widget</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">findChildren</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QWidget</span><span class="p">)</span> <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">widget</span><span class="p">,</span> <span class="s1">&#39;maximised&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">widget</span><span class="o">.</span><span class="n">maximised</span><span class="o">==</span><span class="kc">True</span><span class="p">]</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">maximisedWidget</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="n">maximisedWidget</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">result</span></div>
+
 <div class="viewcode-block" id="CcpnModuleArea.dragEnterEvent"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.CcpnModuleArea.CcpnModuleArea.dragEnterEvent">[docs]</a>    <span class="k">def</span> <span class="nf">dragEnterEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
+        <span class="n">event</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">maximisedModule</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">findMaximisedDock</span><span class="p">(</span><span class="n">event</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">maximisedModule</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">source</span> <span class="o">=</span> <span class="n">event</span><span class="o">.</span><span class="n">source</span><span class="p">()</span>
+            <span class="n">sourceParentModule</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">sourceParentModule</span> <span class="o">=</span> <span class="n">source</span><span class="o">.</span><span class="n">_findModule</span><span class="p">()</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="k">pass</span>
+
+            <span class="k">if</span> <span class="n">sourceParentModule</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">maximisedModule</span><span class="p">:</span>
+                <span class="n">maximisedModule</span><span class="o">.</span><span class="n">handleDragToMaximisedModule</span><span class="p">(</span><span class="n">event</span><span class="p">)</span>
+
+            <span class="k">return</span>
+
         <span class="n">event</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
         <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parseEvent</span><span class="p">(</span><span class="n">event</span><span class="p">)</span>
 
@@ -231,10 +247,21 @@
 
 <div class="viewcode-block" id="CcpnModuleArea.dragLeaveEvent"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.CcpnModuleArea.CcpnModuleArea.dragLeaveEvent">[docs]</a>    <span class="k">def</span> <span class="nf">dragLeaveEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
         <span class="n">event</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="n">maximisedWidget</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">findMaximisedDock</span><span class="p">(</span><span class="n">event</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">maximisedWidget</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">maximisedWidget</span><span class="o">.</span><span class="n">finishDragToMaximisedModule</span><span class="p">(</span><span class="n">event</span><span class="p">)</span>
+
         <span class="n">DockArea</span><span class="o">.</span><span class="n">dragLeaveEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">)</span>
         <span class="n">event</span><span class="o">.</span><span class="n">accept</span><span class="p">()</span></div>
 
 <div class="viewcode-block" id="CcpnModuleArea.dragMoveEvent"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.CcpnModuleArea.CcpnModuleArea.dragMoveEvent">[docs]</a>    <span class="k">def</span> <span class="nf">dragMoveEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
+        <span class="n">event</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">maximisedWidget</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">findMaximisedDock</span><span class="p">(</span><span class="n">event</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">maximisedWidget</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">maximisedWidget</span><span class="o">.</span><span class="n">handleDragToMaximisedModule</span><span class="p">(</span><span class="n">event</span><span class="p">)</span>
+            <span class="k">return</span>
+
         <span class="n">event</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
         <span class="n">DockArea</span><span class="o">.</span><span class="n">dragMoveEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">)</span>
         <span class="n">event</span><span class="o">.</span><span class="n">accept</span><span class="p">()</span></div>
@@ -286,9 +313,9 @@
         <span class="s1">&#39;return all current modules in area&#39;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ccpnModules</span>
 
-    <span class="nd">@ccpnModules.getter</span>
+    <span class="nd">@ccpnModules</span><span class="o">.</span><span class="n">getter</span>
     <span class="k">def</span> <span class="nf">ccpnModules</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">if</span> <span class="bp">self</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">ccpnModules</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">findAll</span><span class="p">()[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
             <span class="k">return</span> <span class="n">ccpnModules</span>
 
@@ -305,10 +332,18 @@
         <span class="sd">&#39;&#39;&#39;:return list of modules in temp Areas &#39;&#39;&#39;</span>
         <span class="k">return</span> <span class="p">[</span><span class="n">a</span><span class="o">.</span><span class="n">ccpnModules</span> <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">tempAreas</span><span class="p">]</span>
 
-<div class="viewcode-block" id="CcpnModuleArea.addModule"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.CcpnModuleArea.CcpnModuleArea.addModule">[docs]</a>    <span class="k">def</span> <span class="nf">addModule</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">module</span><span class="p">,</span> <span class="n">position</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">relativeTo</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
+<div class="viewcode-block" id="CcpnModuleArea.addModule"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.CcpnModuleArea.CcpnModuleArea.addModule">[docs]</a>    <span class="k">def</span> <span class="nf">addModule</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">module</span><span class="p">,</span> <span class="n">position</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">relativeTo</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;With these settings the user can close all the modules from the label &#39;close module&#39; or pop up and</span>
 <span class="sd">         when re-add a new module it makes sure there is a container available.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">wasMaximised</span> <span class="o">=</span> <span class="kc">False</span>
+
+        <span class="k">for</span> <span class="n">oldModule</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">modules</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">oldModule</span><span class="o">.</span><span class="n">maximised</span><span class="p">:</span>
+                <span class="n">oldModule</span><span class="o">.</span><span class="n">toggleMaximised</span><span class="p">()</span>
+                <span class="n">wasMaximised</span><span class="o">=</span><span class="kc">True</span>
+
+
         <span class="bp">self</span><span class="o">.</span><span class="n">_updateModuleNames</span><span class="p">()</span>
 
         <span class="k">if</span> <span class="ow">not</span> <span class="n">module</span><span class="o">.</span><span class="n">_restored</span><span class="p">:</span>
@@ -321,17 +356,17 @@
         <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">module</span><span class="p">),</span> <span class="s1">&#39;_alreadyOpened&#39;</span><span class="p">):</span>
             <span class="n">_alreadyOpened</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">module</span><span class="p">),</span> <span class="s1">&#39;_alreadyOpened&#39;</span><span class="p">)</span>
 
-            <span class="k">if</span> <span class="n">_alreadyOpened</span> <span class="ow">is</span> <span class="bp">True</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">_alreadyOpened</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
                 <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">module</span><span class="p">),</span> <span class="s1">&#39;_onlySingleInstance&#39;</span><span class="p">):</span>
                     <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;Only one instance of </span><span class="si">%s</span><span class="s1"> allowed&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">module</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
                     <span class="k">return</span>
-            <span class="nb">setattr</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">module</span><span class="p">),</span> <span class="s1">&#39;_alreadyOpened&#39;</span><span class="p">,</span> <span class="bp">True</span><span class="p">)</span>
+            <span class="nb">setattr</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">module</span><span class="p">),</span> <span class="s1">&#39;_alreadyOpened&#39;</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
             <span class="nb">setattr</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">module</span><span class="p">),</span> <span class="s1">&#39;_currentModule&#39;</span><span class="p">,</span> <span class="n">module</span><span class="p">)</span>  <span class="c1"># remember the module</span>
 
-        <span class="k">if</span> <span class="n">module</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">module</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;No module given&#39;</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="n">position</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">position</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">position</span> <span class="o">=</span> <span class="s1">&#39;top&#39;</span>
 
         <span class="n">neededContainer</span> <span class="o">=</span> <span class="p">{</span>
@@ -343,36 +378,40 @@
             <span class="s1">&#39;below&#39;</span> <span class="p">:</span> <span class="s1">&#39;tab&#39;</span>
             <span class="p">}[</span><span class="n">position</span><span class="p">]</span>
 
-        <span class="k">if</span> <span class="n">relativeTo</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
-            <span class="n">neighbor</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="k">if</span> <span class="n">relativeTo</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">neighbor</span> <span class="o">=</span> <span class="kc">None</span>
             <span class="n">container</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">addContainer</span><span class="p">(</span><span class="n">neededContainer</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">topContainer</span><span class="p">)</span>
 
         <span class="c1">## Determine the container to insert this module into.</span>
         <span class="c1">## If there is no neighbor, then the container is the top.</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">relativeTo</span> <span class="ow">is</span> <span class="bp">None</span> <span class="ow">or</span> <span class="n">relativeTo</span> <span class="ow">is</span> <span class="bp">self</span><span class="p">:</span>
-                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">topContainer</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">relativeTo</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">relativeTo</span> <span class="ow">is</span> <span class="bp">self</span><span class="p">:</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">topContainer</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                     <span class="n">container</span> <span class="o">=</span> <span class="bp">self</span>
-                    <span class="n">neighbor</span> <span class="o">=</span> <span class="bp">None</span>
+                    <span class="n">neighbor</span> <span class="o">=</span> <span class="kc">None</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="n">container</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">topContainer</span>
-                    <span class="n">neighbor</span> <span class="o">=</span> <span class="bp">None</span>
+                    <span class="n">neighbor</span> <span class="o">=</span> <span class="kc">None</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">relativeTo</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
                     <span class="n">relativeTo</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">modules</span><span class="p">[</span><span class="n">relativeTo</span><span class="p">]</span>
                 <span class="n">container</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getContainer</span><span class="p">(</span><span class="n">relativeTo</span><span class="p">)</span>
                 <span class="n">neighbor</span> <span class="o">=</span> <span class="n">relativeTo</span>
 
-        <span class="k">if</span> <span class="n">neededContainer</span> <span class="o">!=</span> <span class="n">container</span><span class="o">.</span><span class="n">type</span><span class="p">()</span> <span class="ow">and</span> <span class="n">container</span><span class="o">.</span><span class="n">type</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;tab&#39;</span><span class="p">:</span>
-            <span class="n">neighbor</span> <span class="o">=</span> <span class="n">container</span>
-            <span class="n">container</span> <span class="o">=</span> <span class="n">container</span><span class="o">.</span><span class="n">container</span><span class="p">()</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">container</span><span class="p">:</span>
+            <span class="n">container</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">addContainer</span><span class="p">(</span><span class="n">neededContainer</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">topContainer</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="n">neededContainer</span> <span class="o">!=</span> <span class="n">container</span><span class="o">.</span><span class="n">type</span><span class="p">():</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">neededContainer</span> <span class="o">!=</span> <span class="n">container</span><span class="o">.</span><span class="n">type</span><span class="p">()</span> <span class="ow">and</span> <span class="n">container</span><span class="o">.</span><span class="n">type</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;tab&#39;</span><span class="p">:</span>
+                <span class="n">neighbor</span> <span class="o">=</span> <span class="n">container</span>
+                <span class="n">container</span> <span class="o">=</span> <span class="n">container</span><span class="o">.</span><span class="n">container</span><span class="p">()</span>
 
-            <span class="k">if</span> <span class="n">neighbor</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
-                <span class="n">container</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">addContainer</span><span class="p">(</span><span class="n">neededContainer</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">topContainer</span><span class="p">)</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">container</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">addContainer</span><span class="p">(</span><span class="n">neededContainer</span><span class="p">,</span> <span class="n">neighbor</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">neededContainer</span> <span class="o">!=</span> <span class="n">container</span><span class="o">.</span><span class="n">type</span><span class="p">():</span>
+
+                <span class="k">if</span> <span class="n">neighbor</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="n">container</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">addContainer</span><span class="p">(</span><span class="n">neededContainer</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">topContainer</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">container</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">addContainer</span><span class="p">(</span><span class="n">neededContainer</span><span class="p">,</span> <span class="n">neighbor</span><span class="p">)</span>
 
         <span class="n">insertPos</span> <span class="o">=</span> <span class="p">{</span>
             <span class="s1">&#39;bottom&#39;</span><span class="p">:</span> <span class="s1">&#39;after&#39;</span><span class="p">,</span>
@@ -382,7 +421,7 @@
             <span class="s1">&#39;above&#39;</span> <span class="p">:</span> <span class="s1">&#39;before&#39;</span><span class="p">,</span>
             <span class="s1">&#39;below&#39;</span> <span class="p">:</span> <span class="s1">&#39;after&#39;</span>
             <span class="p">}[</span><span class="n">position</span><span class="p">]</span>
-        <span class="k">if</span> <span class="n">container</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">container</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">container</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="n">insertPos</span><span class="p">,</span> <span class="n">neighbor</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">container</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">topContainer</span>
@@ -398,16 +437,18 @@
         <span class="c1"># self.modules[CcpnModule.name(module)] = module</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">modules</span><span class="p">[</span><span class="n">module</span><span class="o">.</span><span class="n">name</span><span class="p">()]</span> <span class="o">=</span> <span class="n">module</span>  <span class="c1"># ejb - testing</span>
         <span class="c1"># self.movePythonConsole()</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">ccpnModules</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ccpnModules</span>
 
-        <span class="c1"># module.label.sigDragEntered.connect(self._dragEntered)</span>
+        <span class="c1">#module.label.sigDragEntered.connect(self._dragEntered)</span>
+        <span class="k">if</span> <span class="n">wasMaximised</span><span class="p">:</span>
+            <span class="n">module</span><span class="o">.</span><span class="n">toggleMaximised</span><span class="p">()</span>
         <span class="k">return</span> <span class="n">module</span></div>
 
 <div class="viewcode-block" id="CcpnModuleArea.getContainer"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.CcpnModuleArea.CcpnModuleArea.getContainer">[docs]</a>    <span class="k">def</span> <span class="nf">getContainer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">):</span>
-        <span class="k">if</span> <span class="n">obj</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">obj</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">self</span>
-        <span class="k">if</span> <span class="n">obj</span><span class="o">.</span><span class="n">container</span><span class="p">()</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">obj</span><span class="o">.</span><span class="n">container</span><span class="p">()</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">children</span><span class="p">():</span>
                 <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">Container</span><span class="p">):</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">_container</span> <span class="o">=</span> <span class="n">i</span>
@@ -415,7 +456,7 @@
 
 <div class="viewcode-block" id="CcpnModuleArea.apoptose"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.CcpnModuleArea.CcpnModuleArea.apoptose">[docs]</a>    <span class="k">def</span> <span class="nf">apoptose</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">temporary</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">topContainer</span><span class="o">.</span><span class="n">count</span><span class="p">()</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">topContainer</span> <span class="o">=</span> <span class="bp">None</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">topContainer</span> <span class="o">=</span> <span class="kc">None</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">home</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">home</span><span class="o">.</span><span class="n">removeTempArea</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span></div>
 
@@ -428,44 +469,58 @@
         <span class="k">for</span> <span class="n">module</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">ccpnModules</span><span class="p">:</span>
             <span class="n">module</span><span class="o">.</span><span class="n">_closeModule</span><span class="p">()</span>
 
-<div class="viewcode-block" id="CcpnModuleArea.saveState"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.CcpnModuleArea.CcpnModuleArea.saveState">[docs]</a>    <span class="k">def</span> <span class="nf">saveState</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="c1">## docksOnly is used for in memory save and restore for the module maximise save and restore system</span>
+    <span class="c1">## if docksOnly we are saving state to memory and are maximising or restoring docks</span>
+<div class="viewcode-block" id="CcpnModuleArea.saveState"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.CcpnModuleArea.CcpnModuleArea.saveState">[docs]</a>    <span class="k">def</span> <span class="nf">saveState</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">docksOnly</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return a serialized (storable) representation of the state of</span>
 <span class="sd">        all Docks in this DockArea.&quot;&quot;&quot;</span>
 
         <span class="n">state</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="k">try</span><span class="p">:</span>
-            <span class="n">state</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;main&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">childState</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">topContainer</span><span class="p">),</span> <span class="s1">&#39;float&#39;</span><span class="p">:</span> <span class="p">[]}</span>
+            <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Saving V3.1 Layout&#39;</span><span class="p">)</span>
+            <span class="n">state</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;main&#39;</span><span class="p">:</span> <span class="p">(</span><span class="s1">&#39;area&#39;</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">childState</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">topContainer</span><span class="p">,</span><span class="n">docksOnly</span><span class="p">),</span> <span class="p">{</span><span class="s1">&#39;id&#39;</span><span class="p">:</span> <span class="nb">id</span><span class="p">(</span><span class="bp">self</span><span class="p">)}),</span> <span class="s1">&#39;floats&#39;</span><span class="p">:</span> <span class="p">[],</span>
+                     <span class="s1">&#39;version&#39;</span><span class="p">:</span> <span class="s2">&quot;3.1&quot;</span><span class="p">,</span> <span class="s1">&#39;inMemory&#39;</span> <span class="p">:</span> <span class="n">docksOnly</span><span class="p">}</span>
+
             <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">tempAreas</span><span class="p">:</span>
-                <span class="k">if</span> <span class="n">a</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">a</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                     <span class="n">geo</span> <span class="o">=</span> <span class="n">a</span><span class="o">.</span><span class="n">win</span><span class="o">.</span><span class="n">geometry</span><span class="p">()</span>
                     <span class="n">geo</span> <span class="o">=</span> <span class="p">(</span><span class="n">geo</span><span class="o">.</span><span class="n">x</span><span class="p">(),</span> <span class="n">geo</span><span class="o">.</span><span class="n">y</span><span class="p">(),</span> <span class="n">geo</span><span class="o">.</span><span class="n">width</span><span class="p">(),</span> <span class="n">geo</span><span class="o">.</span><span class="n">height</span><span class="p">())</span>
-                    <span class="n">state</span><span class="p">[</span><span class="s1">&#39;float&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">a</span><span class="o">.</span><span class="n">saveState</span><span class="p">(),</span> <span class="n">geo</span><span class="p">))</span>
+                    <span class="n">areaState</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;area&#39;</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">childState</span><span class="p">(</span><span class="n">a</span><span class="o">.</span><span class="n">topContainer</span><span class="p">,</span><span class="n">docksOnly</span><span class="p">),</span> <span class="p">{</span><span class="s1">&#39;geo&#39;</span> <span class="p">:</span> <span class="n">geo</span><span class="p">,</span> <span class="s1">&#39;id&#39;</span><span class="p">:</span> <span class="nb">id</span><span class="p">(</span><span class="n">a</span><span class="p">)})</span>
+                    <span class="n">state</span><span class="p">[</span><span class="s1">&#39;floats&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">areaState</span><span class="p">)</span>
         <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
             <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;Impossible to save layout. </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">e</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">state</span></div>
 
-<div class="viewcode-block" id="CcpnModuleArea.childState"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.CcpnModuleArea.CcpnModuleArea.childState">[docs]</a>    <span class="k">def</span> <span class="nf">childState</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">):</span>
+<div class="viewcode-block" id="CcpnModuleArea.childState"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.CcpnModuleArea.CcpnModuleArea.childState">[docs]</a>    <span class="k">def</span> <span class="nf">childState</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">,</span> <span class="n">docksOnly</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">Dock</span><span class="p">):</span>
-            <span class="k">return</span> <span class="p">(</span><span class="s1">&#39;dock&#39;</span><span class="p">,</span> <span class="n">obj</span><span class="o">.</span><span class="n">name</span><span class="p">(),</span> <span class="n">obj</span><span class="o">.</span><span class="n">widgetsState</span><span class="p">)</span>
+            <span class="c1"># GST for maximise restore syste</span>
+            <span class="c1"># maximiseState = {&#39;maximised&#39; : obj.maximised, &#39;maximiseRestoreState&#39; : obj.maximiseRestoreState, &#39;titleBarHidden&#39; : obj.titleBarHidden}</span>
+            <span class="n">maximiseState</span> <span class="o">=</span>  <span class="p">{}</span>
+            <span class="c1"># if docksOnly:</span>
+            <span class="c1">#     objWidgetsState = maximiseState</span>
+            <span class="c1"># else:</span>
+            <span class="n">objWidgetsState</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">obj</span><span class="o">.</span><span class="n">widgetsState</span><span class="p">,</span> <span class="o">**</span><span class="n">maximiseState</span><span class="p">)</span>
+            <span class="k">return</span> <span class="p">(</span><span class="s1">&#39;dock&#39;</span><span class="p">,</span> <span class="n">obj</span><span class="o">.</span><span class="n">name</span><span class="p">(),</span> <span class="n">objWidgetsState</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">childs</span> <span class="o">=</span> <span class="p">[]</span>
-            <span class="k">if</span> <span class="n">obj</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">obj</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">obj</span><span class="o">.</span><span class="n">count</span><span class="p">()):</span>
                     <span class="k">try</span><span class="p">:</span>
                         <span class="n">widg</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">widget</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
-                        <span class="n">childList</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">childState</span><span class="p">(</span><span class="n">widg</span><span class="p">)</span>
-                        <span class="n">childs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">childList</span><span class="p">)</span>
+                        <span class="k">if</span> <span class="ow">not</span> <span class="n">docksOnly</span> <span class="ow">or</span> <span class="p">(</span><span class="n">docksOnly</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">widg</span><span class="p">,(</span><span class="n">Dock</span><span class="p">,</span><span class="n">Container</span><span class="p">))):</span>
+                            <span class="n">childList</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">childState</span><span class="p">(</span><span class="n">widg</span><span class="p">,</span> <span class="n">docksOnly</span><span class="p">)</span>
+                            <span class="n">childs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">childList</span><span class="p">)</span>
                     <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">es</span><span class="p">:</span>
                         <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;Error accessing widget: </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">es</span><span class="p">),</span> <span class="n">widg</span><span class="p">,</span> <span class="n">obj</span><span class="p">))</span>
 
                 <span class="k">return</span> <span class="p">(</span><span class="n">obj</span><span class="o">.</span><span class="n">type</span><span class="p">(),</span> <span class="n">childs</span><span class="p">,</span> <span class="n">obj</span><span class="o">.</span><span class="n">saveState</span><span class="p">())</span></div>
 
 <div class="viewcode-block" id="CcpnModuleArea.addTempArea"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.CcpnModuleArea.CcpnModuleArea.addTempArea">[docs]</a>    <span class="k">def</span> <span class="nf">addTempArea</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">home</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">home</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">area</span> <span class="o">=</span> <span class="n">CcpnModuleArea</span><span class="p">(</span><span class="n">mainWindow</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span><span class="p">)</span>
-            <span class="n">area</span><span class="o">.</span><span class="n">temporary</span> <span class="o">=</span> <span class="bp">True</span>
+            <span class="n">area</span><span class="o">.</span><span class="n">temporary</span> <span class="o">=</span> <span class="kc">True</span>
             <span class="n">area</span><span class="o">.</span><span class="n">home</span> <span class="o">=</span> <span class="bp">self</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">tempAreas</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">area</span><span class="p">)</span>
             <span class="n">win</span> <span class="o">=</span> <span class="n">TempAreaWindow</span><span class="p">(</span><span class="n">area</span><span class="p">,</span> <span class="n">mainWindow</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span><span class="p">)</span>
@@ -486,34 +541,65 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">modulesNames</span> <span class="o">=</span> <span class="p">[</span><span class="n">m</span><span class="o">.</span><span class="n">name</span><span class="p">()</span> <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">ccpnModules</span><span class="p">]</span>
 
+        <span class="n">version</span> <span class="o">=</span> <span class="s2">&quot;3.0&quot;</span>
+        <span class="n">floatContainer</span> <span class="o">=</span> <span class="s1">&#39;float&#39;</span>
+        <span class="k">if</span> <span class="s1">&#39;version&#39;</span> <span class="ow">in</span> <span class="n">state</span><span class="p">:</span>
+            <span class="n">version</span> <span class="o">=</span> <span class="n">state</span><span class="p">[</span><span class="s1">&#39;version&#39;</span><span class="p">]</span>
+            <span class="n">floatContainer</span><span class="o">=</span><span class="s1">&#39;floats&#39;</span>
+            <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Reading from V</span><span class="si">%s</span><span class="s1"> layout format.&#39;</span> <span class="o">%</span> <span class="n">version</span> <span class="p">)</span>
+
         <span class="k">if</span> <span class="s1">&#39;main&#39;</span> <span class="ow">in</span> <span class="n">state</span><span class="p">:</span>
             <span class="c1">## 1) make dict of all docks and list of existing containers</span>
             <span class="n">containers</span><span class="p">,</span> <span class="n">docks</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">findAll</span><span class="p">()</span>
-            <span class="n">oldTemps</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tempAreas</span><span class="p">[:]</span>
-            <span class="k">if</span> <span class="n">state</span><span class="p">[</span><span class="s1">&#39;main&#39;</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+
+            <span class="c1"># GST this appears to be important for the in memory save and restore code</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">home</span> <span class="ow">is</span>  <span class="kc">None</span><span class="p">:</span>
+                <span class="n">oldTemps</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tempAreas</span><span class="p">[:]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">oldTemps</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">home</span><span class="o">.</span><span class="n">tempAreas</span><span class="p">[:]</span>
+
+            <span class="k">if</span> <span class="n">state</span><span class="p">[</span><span class="s1">&#39;main&#39;</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="c1"># 2) create container structure, move docks into new containers</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_buildFromState</span><span class="p">(</span><span class="n">modulesNames</span><span class="p">,</span> <span class="n">state</span><span class="p">[</span><span class="s1">&#39;main&#39;</span><span class="p">],</span> <span class="n">docks</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
 
             <span class="c1">## 3) create floating areas, populate</span>
-            <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">state</span><span class="p">[</span><span class="s1">&#39;float&#39;</span><span class="p">]:</span>
-                <span class="n">a</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">addTempArea</span><span class="p">()</span>
-                <span class="c1"># a._buildFromState = self._buildFromState</span>
-                <span class="n">a</span><span class="o">.</span><span class="n">_buildFromState</span><span class="p">(</span><span class="n">modulesNames</span><span class="p">,</span> <span class="n">s</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;main&#39;</span><span class="p">],</span> <span class="n">docks</span><span class="p">,</span> <span class="n">a</span><span class="p">)</span>
-                <span class="n">a</span><span class="o">.</span><span class="n">win</span><span class="o">.</span><span class="n">setGeometry</span><span class="p">(</span><span class="o">*</span><span class="n">s</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+            <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">state</span><span class="p">[</span><span class="n">floatContainer</span><span class="p">]:</span>
+                <span class="n">a</span> <span class="o">=</span> <span class="kc">None</span>
+
+
+                <span class="c1"># for maximise and restore code</span>
+                <span class="k">if</span> <span class="n">version</span> <span class="o">==</span> <span class="s2">&quot;3.1&quot;</span><span class="p">:</span>
+                    <span class="n">stateId</span> <span class="o">=</span> <span class="n">s</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="s1">&#39;id&#39;</span><span class="p">]</span>
+
+                    <span class="k">if</span> <span class="n">state</span><span class="p">[</span><span class="s1">&#39;inMemory&#39;</span><span class="p">]:</span>
+                        <span class="k">for</span> <span class="n">temp</span> <span class="ow">in</span> <span class="n">oldTemps</span><span class="p">:</span>
+                            <span class="k">if</span> <span class="nb">id</span><span class="p">(</span><span class="n">temp</span><span class="p">)</span> <span class="o">==</span> <span class="n">stateId</span><span class="p">:</span>
+                                <span class="n">a</span> <span class="o">=</span> <span class="n">temp</span>
+                                <span class="n">oldTemps</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">temp</span><span class="p">)</span>
+                                <span class="k">break</span>
+                <span class="k">if</span> <span class="n">a</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="n">a</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">addTempArea</span><span class="p">()</span>
+
+                <span class="c1"># GST this indicates a new format file</span>
+                <span class="k">if</span> <span class="n">version</span> <span class="o">==</span> <span class="s2">&quot;3.1&quot;</span><span class="p">:</span>
+                    <span class="n">a</span><span class="o">.</span><span class="n">_buildFromState</span><span class="p">(</span><span class="n">modulesNames</span><span class="p">,</span> <span class="n">s</span><span class="p">,</span> <span class="n">docks</span><span class="p">,</span> <span class="n">a</span><span class="p">)</span>
+                    <span class="n">a</span><span class="o">.</span><span class="n">win</span><span class="o">.</span><span class="n">setGeometry</span><span class="p">(</span><span class="o">*</span><span class="n">s</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="s1">&#39;geo&#39;</span><span class="p">])</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">a</span><span class="o">.</span><span class="n">_buildFromState</span><span class="p">(</span><span class="n">modulesNames</span><span class="p">,</span> <span class="n">s</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;main&#39;</span><span class="p">],</span> <span class="n">docks</span><span class="p">,</span> <span class="n">a</span><span class="p">)</span>
+                    <span class="n">a</span><span class="o">.</span><span class="n">win</span><span class="o">.</span><span class="n">setGeometry</span><span class="p">(</span><span class="o">*</span><span class="n">s</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
 
             <span class="c1">## 4) Add any remaining docks to the bottom</span>
             <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">docks</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">moveDock</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="s1">&#39;below&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">moveDock</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="s1">&#39;below&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">initTime</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
-            <span class="c1"># print &quot;\nKill old containers:&quot;</span>
             <span class="c1">## 5) kill old containers</span>
             <span class="c1"># if is not none  delete</span>
-            <span class="k">if</span> <span class="n">state</span><span class="p">[</span><span class="s1">&#39;main&#39;</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">state</span><span class="p">[</span><span class="s1">&#39;main&#39;</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">containers</span><span class="p">:</span>
-                    <span class="k">if</span> <span class="n">c</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">c</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                         <span class="n">c</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
             <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">oldTemps</span><span class="p">:</span>
-                <span class="k">if</span> <span class="n">a</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">a</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                     <span class="n">a</span><span class="o">.</span><span class="n">apoptose</span><span class="p">()</span>
 
             <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">ccpnModules</span><span class="p">:</span>
@@ -524,7 +610,7 @@
 
     <span class="k">def</span> <span class="nf">_buildFromState</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">openedModulesNames</span><span class="p">,</span> <span class="n">state</span><span class="p">,</span> <span class="n">docks</span><span class="p">,</span> <span class="n">root</span><span class="p">,</span> <span class="n">depth</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
         <span class="n">typ</span><span class="p">,</span> <span class="n">contents</span><span class="p">,</span> <span class="n">state</span> <span class="o">=</span> <span class="n">state</span>
-        <span class="n">pfx</span> <span class="o">=</span> <span class="s2">&quot;  &quot;</span> <span class="o">*</span> <span class="n">depth</span>
+
         <span class="k">if</span> <span class="n">typ</span> <span class="o">==</span> <span class="s1">&#39;dock&#39;</span><span class="p">:</span>
             <span class="c1"># try:</span>
             <span class="k">if</span> <span class="n">contents</span> <span class="ow">in</span> <span class="n">openedModulesNames</span><span class="p">:</span>
@@ -538,20 +624,27 @@
                 <span class="n">obj</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">label</span><span class="p">)</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">addModule</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
 
+        <span class="c1"># GST only present in v 3.1 layouts</span>
+        <span class="k">elif</span> <span class="n">typ</span> <span class="o">==</span> <span class="s1">&#39;area&#39;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">contents</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_buildFromState</span><span class="p">(</span><span class="n">openedModulesNames</span><span class="p">,</span><span class="n">contents</span><span class="p">,</span><span class="n">docks</span><span class="p">,</span><span class="n">root</span><span class="p">,</span><span class="n">depth</span><span class="p">)</span>
+            <span class="n">obj</span> <span class="o">=</span> <span class="kc">None</span>
+
+
             <span class="c1"># except KeyError:</span>
             <span class="c1">#   raise Exception(&#39;Cannot restore dock state; no dock with name &quot;%s&quot;&#39; % contents)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">obj</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">makeContainer</span><span class="p">(</span><span class="n">typ</span><span class="p">)</span>
 
-        <span class="c1"># if issubclass(root, Container):</span>
-        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">root</span><span class="p">,</span> <span class="s1">&#39;type&#39;</span><span class="p">):</span>
-            <span class="n">root</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">obj</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">root</span><span class="p">,</span> <span class="s1">&#39;type&#39;</span><span class="p">):</span>
+                <span class="n">root</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="n">typ</span> <span class="o">!=</span> <span class="s1">&#39;dock&#39;</span><span class="p">:</span>
-            <span class="k">for</span> <span class="n">o</span> <span class="ow">in</span> <span class="n">contents</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_buildFromState</span><span class="p">(</span><span class="n">openedModulesNames</span><span class="p">,</span> <span class="n">o</span><span class="p">,</span> <span class="n">docks</span><span class="p">,</span> <span class="n">obj</span><span class="p">,</span> <span class="n">depth</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
-            <span class="n">obj</span><span class="o">.</span><span class="n">apoptose</span><span class="p">(</span><span class="n">propagate</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
-            <span class="n">obj</span><span class="o">.</span><span class="n">restoreState</span><span class="p">(</span><span class="n">state</span><span class="p">)</span>  <span class="c1">## this has to be done later?</span></div>
+            <span class="k">if</span> <span class="n">typ</span> <span class="o">!=</span> <span class="s1">&#39;dock&#39;</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">o</span> <span class="ow">in</span> <span class="n">contents</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_buildFromState</span><span class="p">(</span><span class="n">openedModulesNames</span><span class="p">,</span> <span class="n">o</span><span class="p">,</span> <span class="n">docks</span><span class="p">,</span> <span class="n">obj</span><span class="p">,</span> <span class="n">depth</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+                <span class="n">obj</span><span class="o">.</span><span class="n">apoptose</span><span class="p">(</span><span class="n">propagate</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+                <span class="n">obj</span><span class="o">.</span><span class="n">restoreState</span><span class="p">(</span><span class="n">state</span><span class="p">)</span>  <span class="c1">## this has to be done later?</span></div>
 </pre></div>
 
           </div>
@@ -560,15 +653,15 @@
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
 <div id="searchbox" style="display: none" role="search">
-  <h3>Quick search</h3>
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
     <form class="search" action="../../../../../search.html" method="get">
-      <input type="text" name="q" />
+      <input type="text" name="q" aria-labelledby="searchlabel" />
       <input type="submit" value="Go" />
-      <input type="hidden" name="check_keywords" value="yes" />
-      <input type="hidden" name="area" value="default" />
     </form>
+    </div>
 </div>
-<script type="text/javascript">$('#searchbox').show(0);</script>
+<script>$('#searchbox').show(0);</script>
         </div>
       </div>
       <div class="clearer"></div>
@@ -582,13 +675,13 @@
         <li class="right" >
           <a href="../../../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../../../index.html">Python  documentation</a> &raquo;</li>
-          <li class="nav-item nav-item-1"><a href="../../../../index.html" >Module code</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="../../../../../index.html">Python  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../../../index.html" >Module code</a> &#187;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
-        &copy; Copyright .
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.1.
+        &#169; Copyright .
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.4.0.
     </div>
   </body>
 </html>

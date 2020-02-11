@@ -1,32 +1,22 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
+<!DOCTYPE html>
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    
-    <title>ccpn.core.lib.DataIo &mdash; Python  documentation</title>
-    
+    <meta charset="utf-8" />
+    <title>ccpn.core.lib.DataIo &#8212; Python  documentation</title>
     <link rel="stylesheet" href="../../../../_static/classic.css" type="text/css" />
     <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
     
-    <script type="text/javascript">
-      var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    '../../../../',
-        VERSION:     '',
-        COLLAPSE_INDEX: false,
-        FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true
-      };
-    </script>
-    <script type="text/javascript" src="../../../../_static/jquery.js"></script>
-    <script type="text/javascript" src="../../../../_static/underscore.js"></script>
-    <script type="text/javascript" src="../../../../_static/doctools.js"></script>
-    <link rel="top" title="Python  documentation" href="../../../../index.html" />
-    <link rel="up" title="Module code" href="../../../index.html" /> 
-  </head>
-  <body role="document">
+    <script id="documentation_options" data-url_root="../../../../" src="../../../../_static/documentation_options.js"></script>
+    <script src="../../../../_static/jquery.js"></script>
+    <script src="../../../../_static/underscore.js"></script>
+    <script src="../../../../_static/doctools.js"></script>
+    <script src="../../../../_static/language_data.js"></script>
+    
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+  </head><body>
     <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
@@ -36,8 +26,8 @@
         <li class="right" >
           <a href="../../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../../index.html">Python  documentation</a> &raquo;</li>
-          <li class="nav-item nav-item-1"><a href="../../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="../../../../index.html">Python  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../../index.html" accesskey="U">Module code</a> &#187;</li> 
       </ul>
     </div>  
 
@@ -101,7 +91,7 @@
                 <span class="k">if</span> <span class="n">tag</span><span class="p">[:</span><span class="mi">2</span><span class="p">]</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;-x&#39;</span><span class="p">,</span> <span class="s1">&#39;-y&#39;</span><span class="p">,</span> <span class="s1">&#39;-z&#39;</span><span class="p">):</span>
                     <span class="n">indx</span> <span class="o">=</span> <span class="s1">&#39;xyz&#39;</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">tag</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
                     <span class="n">tag</span> <span class="o">=</span> <span class="n">tag</span><span class="p">[</span><span class="mi">2</span><span class="p">:]</span>
-                    <span class="n">ll</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">tag</span><span class="p">,</span> <span class="p">[</span><span class="bp">None</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="bp">None</span><span class="p">])</span>
+                    <span class="n">ll</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">tag</span><span class="p">,</span> <span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">])</span>
                     <span class="n">ii</span> <span class="o">+=</span> <span class="mi">1</span>
                     <span class="n">ll</span><span class="p">[</span><span class="n">indx</span><span class="p">]</span> <span class="o">=</span> <span class="n">tokens</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span>
                     <span class="n">result</span><span class="p">[</span><span class="n">tag</span><span class="p">]</span> <span class="o">=</span> <span class="n">ll</span>
@@ -257,14 +247,14 @@
             <span class="k">continue</span>
 
         <span class="n">ll</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">()[:</span><span class="mi">5</span><span class="p">]</span>
-        <span class="n">lower</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">ll</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span> <span class="ow">or</span> <span class="bp">None</span>
+        <span class="n">lower</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">ll</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span> <span class="ow">or</span> <span class="kc">None</span>
         <span class="n">upper</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">ll</span><span class="p">[</span><span class="mi">3</span><span class="p">])</span>
         <span class="k">if</span> <span class="n">upper</span> <span class="o">&gt;</span> <span class="mi">90</span><span class="p">:</span>
-            <span class="n">upper</span> <span class="o">=</span> <span class="bp">None</span>
+            <span class="n">upper</span> <span class="o">=</span> <span class="kc">None</span>
 
         <span class="n">target</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">ll</span><span class="p">[</span><span class="mi">4</span><span class="p">])</span>
         <span class="k">if</span> <span class="n">target</span> <span class="o">&gt;</span> <span class="mi">90</span><span class="p">:</span>
-            <span class="n">target</span> <span class="o">=</span> <span class="bp">None</span>
+            <span class="n">target</span> <span class="o">=</span> <span class="kc">None</span>
 
         <span class="n">items</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">atomId</span> <span class="ow">in</span> <span class="n">ll</span><span class="p">[:</span><span class="mi">2</span><span class="p">]:</span>
@@ -273,9 +263,9 @@
             <span class="n">tt</span> <span class="o">=</span> <span class="n">sequenceCodeMap</span><span class="p">[</span><span class="n">sequenceCode</span><span class="p">]</span>
 
             <span class="n">ss</span> <span class="o">=</span> <span class="n">conversion</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">atomName</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">ss</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">ss</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="n">ss2</span> <span class="o">=</span> <span class="n">conditionalConversion</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">atomName</span><span class="p">)</span>
-                <span class="k">if</span> <span class="p">(</span><span class="n">ss2</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">ss2</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
                         <span class="ow">and</span> <span class="ow">not</span> <span class="p">[</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">conditionalResidueTypes</span> <span class="k">if</span> <span class="n">residueType</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">x</span><span class="p">)]):</span>
                     <span class="c1"># do conditional name conversion</span>
                     <span class="n">atomName</span> <span class="o">=</span> <span class="n">ss2</span>
@@ -291,13 +281,13 @@
                                             <span class="n">restraintItems</span><span class="o">=</span><span class="p">(</span><span class="n">items</span><span class="p">,))</span>
 
     <span class="k">for</span> <span class="n">tt</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">allAtomNames</span><span class="p">):</span>
-        <span class="k">print</span><span class="p">(</span><span class="s1">&#39;  </span><span class="si">%s</span><span class="s1">:&quot;&quot;,&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">tt</span><span class="p">,))</span></div>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;  </span><span class="si">%s</span><span class="s1">:&quot;&quot;,&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">tt</span><span class="p">,))</span></div>
 
 
 <div class="viewcode-block" id="parseCyanaPeakList"><a class="viewcode-back" href="../../../../ccpn/ccpn.core.lib.html#ccpn.core.lib.DataIo.parseCyanaPeakList">[docs]</a><span class="k">def</span> <span class="nf">parseCyanaPeakList</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Parse cyana peakList, returning labels (in order) and a list of lines, one per peak&quot;&quot;&quot;</span>
 
-    <span class="n">labels</span> <span class="o">=</span> <span class="p">[</span><span class="bp">None</span><span class="p">]</span> <span class="o">*</span> <span class="mi">3</span>
+    <span class="n">labels</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span> <span class="o">*</span> <span class="mi">3</span>
     <span class="n">lines</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="nb">open</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
         <span class="n">line</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
@@ -306,7 +296,7 @@
             <span class="k">if</span> <span class="s1">&#39; DIMENSIONS&#39;</span> <span class="ow">in</span> <span class="n">upperline</span><span class="p">:</span>
                 <span class="n">ll</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
                 <span class="n">dimensionCount</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">ll</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
-                <span class="n">labels</span> <span class="o">=</span> <span class="p">[</span><span class="bp">None</span><span class="p">]</span> <span class="o">*</span> <span class="n">dimensionCount</span>
+                <span class="n">labels</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span> <span class="o">*</span> <span class="n">dimensionCount</span>
             <span class="k">elif</span> <span class="s1">&#39;INAME&#39;</span> <span class="ow">in</span> <span class="n">upperline</span><span class="p">:</span>
                 <span class="n">ll</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
                 <span class="n">labels</span><span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">ll</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">])</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">ll</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
@@ -360,7 +350,7 @@
         <span class="n">project</span><span class="o">.</span><span class="n">_appBase</span><span class="o">.</span><span class="n">_echoBlocking</span> <span class="o">-=</span> <span class="mi">1</span></div>
 
 
-<div class="viewcode-block" id="loadSimplePeakList"><a class="viewcode-back" href="../../../../ccpn/ccpn.core.lib.html#ccpn.core.lib.DataIo.loadSimplePeakList">[docs]</a><span class="k">def</span> <span class="nf">loadSimplePeakList</span><span class="p">(</span><span class="n">spectrum</span><span class="p">,</span> <span class="n">peakFile</span><span class="p">,</span> <span class="n">axisCodes</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">skipColumns</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+<div class="viewcode-block" id="loadSimplePeakList"><a class="viewcode-back" href="../../../../ccpn/ccpn.core.lib.html#ccpn.core.lib.DataIo.loadSimplePeakList">[docs]</a><span class="k">def</span> <span class="nf">loadSimplePeakList</span><span class="p">(</span><span class="n">spectrum</span><span class="p">,</span> <span class="n">peakFile</span><span class="p">,</span> <span class="n">axisCodes</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">skipColumns</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Ad-hoc HACK - load simple peak table file</span>
 
 <span class="sd">    columns are hardwired&quot;&quot;&quot;</span>
@@ -388,7 +378,7 @@
         <span class="n">project</span><span class="o">.</span><span class="n">_appBase</span><span class="o">.</span><span class="n">_echoBlocking</span> <span class="o">-=</span> <span class="mi">1</span></div>
 
 
-<div class="viewcode-block" id="loadCyanaPeakList"><a class="viewcode-back" href="../../../../ccpn/ccpn.core.lib.html#ccpn.core.lib.DataIo.loadCyanaPeakList">[docs]</a><span class="k">def</span> <span class="nf">loadCyanaPeakList</span><span class="p">(</span><span class="n">spectrum</span><span class="p">,</span> <span class="n">peakFile</span><span class="p">,</span> <span class="n">axisCodes</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+<div class="viewcode-block" id="loadCyanaPeakList"><a class="viewcode-back" href="../../../../ccpn/ccpn.core.lib.html#ccpn.core.lib.DataIo.loadCyanaPeakList">[docs]</a><span class="k">def</span> <span class="nf">loadCyanaPeakList</span><span class="p">(</span><span class="n">spectrum</span><span class="p">,</span> <span class="n">peakFile</span><span class="p">,</span> <span class="n">axisCodes</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Load unassigned Cyana peak file into spectrum.</span>
 <span class="sd">    axisCodes (or spectrum.axisCodes) must be the axisCodes of the sepctrum</span>
 <span class="sd">    in the order dimensions appear in the cyana peak file&quot;&quot;&quot;</span>
@@ -418,10 +408,10 @@
         <span class="n">project</span><span class="o">.</span><span class="n">_appBase</span><span class="o">.</span><span class="n">_echoBlocking</span> <span class="o">-=</span> <span class="mi">1</span></div>
 
 
-<div class="viewcode-block" id="loadCasdPeakList"><a class="viewcode-back" href="../../../../ccpn/ccpn.core.lib.html#ccpn.core.lib.DataIo.loadCasdPeakList">[docs]</a><span class="k">def</span> <span class="nf">loadCasdPeakList</span><span class="p">(</span><span class="n">project</span><span class="p">,</span> <span class="n">nmrPipeScriptFile</span><span class="p">,</span> <span class="n">peakFile</span><span class="p">,</span> <span class="n">spectrumName</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+<div class="viewcode-block" id="loadCasdPeakList"><a class="viewcode-back" href="../../../../ccpn/ccpn.core.lib.html#ccpn.core.lib.DataIo.loadCasdPeakList">[docs]</a><span class="k">def</span> <span class="nf">loadCasdPeakList</span><span class="p">(</span><span class="n">project</span><span class="p">,</span> <span class="n">nmrPipeScriptFile</span><span class="p">,</span> <span class="n">peakFile</span><span class="p">,</span> <span class="n">spectrumName</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;NB this assumes unassigned, cyana format peak lists, and uses the nmrpipe</span>
 <span class="sd">    script file to extract spectrum parameters&quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="n">spectrumName</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">spectrumName</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">dirname</span><span class="p">,</span> <span class="n">basename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">peakFile</span><span class="p">)</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">basename</span><span class="p">:</span>
             <span class="n">dirname</span><span class="p">,</span> <span class="n">basename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">dirname</span><span class="p">)</span>
@@ -505,7 +495,7 @@
     <span class="sd">&quot;&quot;&quot;Read chemical shifts from star file at path into project</span>
 
 <span class="sd">    chainOrder are the vhsinCOdes to use, in order of the BMRB entity codes&quot;&quot;&quot;</span>
-    <span class="n">dataExtent</span> <span class="o">=</span> <span class="n">StarIo</span><span class="o">.</span><span class="n">parseNmrStarFile</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">wrapInDataBlock</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    <span class="n">dataExtent</span> <span class="o">=</span> <span class="n">StarIo</span><span class="o">.</span><span class="n">parseNmrStarFile</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">wrapInDataBlock</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="n">dataBlock</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">dataExtent</span><span class="o">.</span><span class="n">values</span><span class="p">())[</span><span class="mi">0</span><span class="p">]</span>
     <span class="n">newShiftLists</span> <span class="o">=</span> <span class="n">loadNmrStarChemicalShifts</span><span class="p">(</span><span class="n">project</span><span class="p">,</span> <span class="n">dataBlock</span><span class="p">,</span> <span class="n">chainOrder</span><span class="o">=</span><span class="n">chainOrder</span><span class="p">)</span>
     <span class="k">for</span> <span class="n">nmrChain</span> <span class="ow">in</span> <span class="n">project</span><span class="o">.</span><span class="n">nmrChains</span><span class="p">:</span>
@@ -522,13 +512,13 @@
 <span class="sd">    situation, and will choose the smallest (most negative) value of offset that achieves this.&quot;&quot;&quot;</span>
 
     <span class="n">chain</span> <span class="o">=</span> <span class="n">nmrChain</span><span class="o">.</span><span class="n">chain</span>
-    <span class="k">if</span> <span class="n">chain</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">chain</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">return</span>
 
     <span class="n">reference</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">(((</span><span class="n">x</span><span class="o">.</span><span class="n">sequenceCode</span><span class="p">,</span> <span class="n">x</span><span class="o">.</span><span class="n">residueType</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">chain</span><span class="o">.</span><span class="n">residues</span>
-                             <span class="k">if</span> <span class="n">x</span><span class="o">.</span><span class="n">residueType</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">))</span>
+                             <span class="k">if</span> <span class="n">x</span><span class="o">.</span><span class="n">residueType</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">))</span>
     <span class="n">sequence</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">(((</span><span class="n">x</span><span class="o">.</span><span class="n">sequenceCode</span><span class="p">,</span> <span class="n">x</span><span class="o">.</span><span class="n">residueType</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">nmrChain</span><span class="o">.</span><span class="n">nmrResidues</span>
-                            <span class="k">if</span> <span class="n">x</span><span class="o">.</span><span class="n">residueType</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">))</span>
+                            <span class="k">if</span> <span class="n">x</span><span class="o">.</span><span class="n">residueType</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">))</span>
     <span class="n">offset</span> <span class="o">=</span> <span class="n">MoleculeLib</span><span class="o">.</span><span class="n">sequenceMatchOffset</span><span class="p">(</span><span class="n">reference</span><span class="p">,</span> <span class="n">sequence</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">offset</span><span class="p">:</span>
@@ -543,7 +533,7 @@
                                 <span class="n">residueType</span><span class="o">=</span><span class="n">residueType</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="loadNmrStarChemicalShifts"><a class="viewcode-back" href="../../../../ccpn/ccpn.core.lib.html#ccpn.core.lib.DataIo.loadNmrStarChemicalShifts">[docs]</a><span class="k">def</span> <span class="nf">loadNmrStarChemicalShifts</span><span class="p">(</span><span class="n">project</span><span class="p">,</span> <span class="n">nmrStarDatablock</span><span class="p">,</span> <span class="n">chainOrder</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="bp">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;ChemicalShiftList&#39;</span><span class="p">:</span>
+<div class="viewcode-block" id="loadNmrStarChemicalShifts"><a class="viewcode-back" href="../../../../ccpn/ccpn.core.lib.html#ccpn.core.lib.DataIo.loadNmrStarChemicalShifts">[docs]</a><span class="k">def</span> <span class="nf">loadNmrStarChemicalShifts</span><span class="p">(</span><span class="n">project</span><span class="p">,</span> <span class="n">nmrStarDatablock</span><span class="p">,</span> <span class="n">chainOrder</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;ChemicalShiftList&#39;</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;Extract NmrStar ChemicalShifts to new ChemicalShiftList.</span>
 <span class="sd">    Chains will be named A, B, ... taking the next free letter</span>
 
@@ -561,7 +551,7 @@
     <span class="k">if</span> <span class="ow">not</span> <span class="n">shiftFrames</span><span class="p">:</span>
         <span class="k">return</span>
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">shiftFrames</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
-        <span class="k">print</span><span class="p">(</span><span class="s1">&#39;WARNING, multiple shift lists:&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">shiftFrames</span><span class="p">))</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;WARNING, multiple shift lists:&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">shiftFrames</span><span class="p">))</span>
 
     <span class="n">blockName</span> <span class="o">=</span> <span class="n">nmrStarDatablock</span><span class="o">.</span><span class="n">name</span>
     <span class="k">for</span> <span class="n">shiftSaveFrame</span> <span class="ow">in</span> <span class="n">shiftFrames</span><span class="p">:</span>
@@ -575,17 +565,17 @@
             <span class="n">name</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">_</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">blockName</span><span class="p">,</span> <span class="n">shiftSaveFrame</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
 
         <span class="n">chemicalShiftList</span> <span class="o">=</span> <span class="n">project</span><span class="o">.</span><span class="n">newChemicalShiftList</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
-                                                         <span class="n">autoUpdate</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
+                                                         <span class="n">autoUpdate</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
                                                          <span class="n">comment</span><span class="o">=</span><span class="s1">&#39;Loaded from NmrStar&#39;</span><span class="p">)</span>
         <span class="n">result</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">chemicalShiftList</span><span class="p">)</span>
         <span class="n">project</span><span class="o">.</span><span class="n">_appBase</span><span class="o">.</span><span class="n">_echoBlocking</span> <span class="o">+=</span> <span class="mi">1</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">loop</span><span class="o">.</span><span class="n">data</span><span class="p">:</span>
                 <span class="n">entityId</span> <span class="o">=</span> <span class="n">row</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;entity_assembly_id&#39;</span><span class="p">)</span>
-                <span class="k">if</span> <span class="n">entityId</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">entityId</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                     <span class="n">entityId</span> <span class="o">=</span> <span class="n">row</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;entity_id&#39;</span><span class="p">)</span>
                 <span class="n">chainCode</span> <span class="o">=</span> <span class="n">chainCodes</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">entityId</span><span class="p">)</span>
-                <span class="k">if</span> <span class="n">chainCode</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">chainCode</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                     <span class="n">chainCode</span> <span class="o">=</span> <span class="n">chainCodeValues</span><span class="p">[</span><span class="n">chainCodeIndex</span><span class="p">]</span>
                     <span class="n">chainCodeIndex</span> <span class="o">+=</span> <span class="mi">1</span>
                     <span class="n">chainCodes</span><span class="p">[</span><span class="n">entityId</span><span class="p">]</span> <span class="o">=</span> <span class="n">chainCode</span>
@@ -602,7 +592,7 @@
                 <span class="k">if</span> <span class="n">nucleus</span> <span class="ow">and</span> <span class="n">massNumber</span><span class="p">:</span>
                     <span class="n">isotopeCode</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">massNumber</span><span class="p">,</span> <span class="n">nucleus</span><span class="o">.</span><span class="n">upper</span><span class="p">())</span>
                 <span class="k">else</span><span class="p">:</span>
-                    <span class="n">isotopeCode</span> <span class="o">=</span> <span class="bp">None</span>
+                    <span class="n">isotopeCode</span> <span class="o">=</span> <span class="kc">None</span>
                 <span class="n">ambiguityCode</span> <span class="o">=</span> <span class="n">row</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;ambiguity_code&#39;</span><span class="p">)</span>
                 <span class="k">if</span> <span class="n">ambiguityCode</span><span class="p">:</span>
                     <span class="n">ambiguityCode</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">ambiguityCode</span><span class="p">)</span>
@@ -674,11 +664,11 @@
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">group</span><span class="p">)</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
                 <span class="n">newName</span> <span class="o">=</span> <span class="n">prefix</span> <span class="o">+</span> <span class="s1">&#39;%&#39;</span>
                 <span class="n">previous</span> <span class="o">=</span> <span class="n">nmrResidue</span><span class="o">.</span><span class="n">getNmrAtom</span><span class="p">(</span><span class="n">newName</span><span class="p">)</span>
-                <span class="k">if</span> <span class="n">previous</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">previous</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                     <span class="c1"># NB by the nature of the preceding loop the names CAN ONLY be</span>
                     <span class="c1"># `prefix&gt;`1, `prefix`2, `prefix`3</span>
                     <span class="k">for</span> <span class="n">nmrAtom</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">group</span><span class="p">):</span>
-                        <span class="n">nmrAtom</span><span class="o">.</span><span class="n">assignTo</span><span class="p">(</span><span class="n">chainCode</span><span class="p">,</span> <span class="n">sequenceCode</span><span class="p">,</span> <span class="n">residueType</span><span class="p">,</span> <span class="n">newName</span><span class="p">,</span> <span class="n">mergeToExisting</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+                        <span class="n">nmrAtom</span><span class="o">.</span><span class="n">assignTo</span><span class="p">(</span><span class="n">chainCode</span><span class="p">,</span> <span class="n">sequenceCode</span><span class="p">,</span> <span class="n">residueType</span><span class="p">,</span> <span class="n">newName</span><span class="p">,</span> <span class="n">mergeToExisting</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="n">nmrChain</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Cannot create new XH3 group </span><span class="si">%s</span><span class="s2"> - group already exists&quot;</span>
                                                    <span class="o">%</span> <span class="n">previous</span><span class="o">.</span><span class="n">pid</span><span class="p">)</span></div>
@@ -761,7 +751,7 @@
                 <span class="n">nucleus</span> <span class="o">=</span> <span class="n">name</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
                 <span class="n">dd</span> <span class="o">=</span> <span class="n">groups</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">locator</span><span class="p">,</span> <span class="p">{})</span>
                 <span class="n">groups</span><span class="p">[</span><span class="n">locator</span><span class="p">]</span> <span class="o">=</span> <span class="n">dd</span>
-                <span class="n">ll</span> <span class="o">=</span> <span class="n">dd</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">nucleus</span><span class="p">,</span> <span class="p">[</span><span class="bp">None</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="bp">None</span><span class="p">])</span>
+                <span class="n">ll</span> <span class="o">=</span> <span class="n">dd</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">nucleus</span><span class="p">,</span> <span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">])</span>
                 <span class="n">dd</span><span class="p">[</span><span class="n">nucleus</span><span class="p">]</span> <span class="o">=</span> <span class="n">ll</span>
                 <span class="n">ll</span><span class="p">[</span><span class="n">indx</span><span class="p">]</span> <span class="o">=</span> <span class="n">nmrAtom</span>
 
@@ -778,12 +768,12 @@
         <span class="k">for</span> <span class="n">locator</span><span class="p">,</span> <span class="n">dd</span> <span class="ow">in</span> <span class="n">groups</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
 
             <span class="c1"># Remove indices where there are no NmrAtoms, and check for ambiguity codes:</span>
-            <span class="n">ambiguityCode</span> <span class="o">=</span> <span class="bp">None</span>
+            <span class="n">ambiguityCode</span> <span class="o">=</span> <span class="kc">None</span>
             <span class="k">for</span> <span class="n">ii</span> <span class="ow">in</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">):</span>
                 <span class="k">for</span> <span class="n">ll</span> <span class="ow">in</span> <span class="n">dd</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
 
                     <span class="n">na</span> <span class="o">=</span> <span class="n">ll</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span>
-                    <span class="k">if</span> <span class="n">na</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">na</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                         <span class="n">xx</span> <span class="o">=</span> <span class="n">na</span><span class="o">.</span><span class="n">_ccpnInternalData</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;ambiguityCode&#39;</span><span class="p">)</span>
                         <span class="k">if</span> <span class="n">xx</span> <span class="ow">in</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">):</span>
                             <span class="n">ambiguityCode</span> <span class="o">=</span> <span class="n">xx</span>
@@ -802,7 +792,7 @@
                     <span class="n">tags</span> <span class="o">=</span> <span class="s1">&#39;xy&#39;</span>
                     <span class="k">for</span> <span class="n">ll</span> <span class="ow">in</span> <span class="n">dd</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
                         <span class="k">for</span> <span class="n">ii</span><span class="p">,</span> <span class="n">nmrAtom</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">ll</span><span class="p">):</span>
-                            <span class="k">if</span> <span class="n">nmrAtom</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                            <span class="k">if</span> <span class="n">nmrAtom</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                                 <span class="n">name</span> <span class="o">=</span> <span class="n">nmrAtom</span><span class="o">.</span><span class="n">name</span>
                                 <span class="k">if</span> <span class="n">name</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="ow">in</span> <span class="s1">&#39;%*&#39;</span><span class="p">:</span>
                                     <span class="n">newName</span> <span class="o">=</span> <span class="n">name</span><span class="p">[:</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span> <span class="o">+</span> <span class="n">tags</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39;%&#39;</span>
@@ -816,7 +806,7 @@
                     <span class="c1"># This is not a clear case - do nothing</span>
                     <span class="n">nmrChain</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
                             <span class="s2">&quot;ambigous assignments, code </span><span class="si">%s</span><span class="s2">, not renamed to &#39;xy&#39; name - inconsistent set: </span><span class="si">%s</span><span class="s2">&quot;</span>
-                            <span class="o">%</span> <span class="p">(</span><span class="n">ambiguityCode</span><span class="p">,</span> <span class="p">[</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">ll</span> <span class="k">for</span> <span class="n">ll</span> <span class="ow">in</span> <span class="n">dd</span><span class="o">.</span><span class="n">values</span><span class="p">()</span> <span class="k">if</span> <span class="n">x</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">])</span>
+                            <span class="o">%</span> <span class="p">(</span><span class="n">ambiguityCode</span><span class="p">,</span> <span class="p">[</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">ll</span> <span class="k">for</span> <span class="n">ll</span> <span class="ow">in</span> <span class="n">dd</span><span class="o">.</span><span class="n">values</span><span class="p">()</span> <span class="k">if</span> <span class="n">x</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">])</span>
                             <span class="p">)</span></div>
 
 
@@ -848,7 +838,7 @@
             <span class="n">ll</span> <span class="o">=</span> <span class="p">[]</span>
             <span class="k">for</span> <span class="n">ss</span> <span class="ow">in</span> <span class="n">tt</span><span class="p">:</span>
                 <span class="n">val</span> <span class="o">=</span> <span class="n">remap</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">ss</span><span class="p">)</span>
-                <span class="k">if</span> <span class="n">val</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">val</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                     <span class="k">if</span> <span class="n">ss</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="s1">&#39;O%&#39;</span><span class="p">:</span>
                         <span class="n">project</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;---&gt; Restraint item </span><span class="si">%s</span><span class="s2"> could not be found in restraint map - </span><span class="si">%s</span><span class="s2">&quot;</span>
                                              <span class="o">%</span> <span class="p">(</span><span class="n">ss</span><span class="p">,</span> <span class="n">contribution</span><span class="p">))</span>
@@ -858,8 +848,8 @@
         <span class="n">contribution</span><span class="o">.</span><span class="n">restraintItems</span> <span class="o">=</span> <span class="n">items</span></div>
 
 
-<div class="viewcode-block" id="loadDocrProject"><a class="viewcode-back" href="../../../../ccpn/ccpn.core.lib.html#ccpn.core.lib.DataIo.loadDocrProject">[docs]</a><span class="k">def</span> <span class="nf">loadDocrProject</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">projectPath</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">bmrbEntryPath</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">casdDirectory</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
-                    <span class="n">chainOrder</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="bp">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Project&#39;</span><span class="p">:</span>
+<div class="viewcode-block" id="loadDocrProject"><a class="viewcode-back" href="../../../../ccpn/ccpn.core.lib.html#ccpn.core.lib.DataIo.loadDocrProject">[docs]</a><span class="k">def</span> <span class="nf">loadDocrProject</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">projectPath</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">bmrbEntryPath</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">casdDirectory</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                    <span class="n">chainOrder</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Project&#39;</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;Load DOCR project, reading chemical shifts from bmrbEntryPath,</span>
 <span class="sd">    with allowance for ambiguity codes 2 and 3, mapping  restraints to match</span>
 <span class="sd">    NmrAtom names</span>
@@ -881,13 +871,13 @@
     <span class="n">project</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">projectPath</span><span class="p">)</span>
 
     <span class="n">nefPath</span> <span class="o">=</span> <span class="n">project</span><span class="o">.</span><span class="n">path</span> <span class="o">+</span> <span class="s1">&#39;.raw.nef&#39;</span>
-    <span class="n">CcpnNefIo</span><span class="o">.</span><span class="n">saveNefProject</span><span class="p">(</span><span class="n">project</span><span class="p">,</span> <span class="n">nefPath</span><span class="p">,</span> <span class="n">overwriteExisting</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">skipPrefixes</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;ccpn&#39;</span><span class="p">,))</span>
+    <span class="n">CcpnNefIo</span><span class="o">.</span><span class="n">saveNefProject</span><span class="p">(</span><span class="n">project</span><span class="p">,</span> <span class="n">nefPath</span><span class="p">,</span> <span class="n">overwriteExisting</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">skipPrefixes</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;ccpn&#39;</span><span class="p">,))</span>
 
     <span class="c1"># Correct restraint item names to avoid ambiguous CCPN names</span>
     <span class="n">cleanUpDocrProject</span><span class="p">(</span><span class="n">project</span><span class="p">)</span>
 
     <span class="n">nefPath</span> <span class="o">=</span> <span class="n">project</span><span class="o">.</span><span class="n">path</span> <span class="o">+</span> <span class="s1">&#39;.cleaned.nef&#39;</span>
-    <span class="n">CcpnNefIo</span><span class="o">.</span><span class="n">saveNefProject</span><span class="p">(</span><span class="n">project</span><span class="p">,</span> <span class="n">nefPath</span><span class="p">,</span> <span class="n">overwriteExisting</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">skipPrefixes</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;ccpn&#39;</span><span class="p">,))</span>
+    <span class="n">CcpnNefIo</span><span class="o">.</span><span class="n">saveNefProject</span><span class="p">(</span><span class="n">project</span><span class="p">,</span> <span class="n">nefPath</span><span class="p">,</span> <span class="n">overwriteExisting</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">skipPrefixes</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;ccpn&#39;</span><span class="p">,))</span>
 
     <span class="c1"># Load chemical shifts from BMRB file</span>
     <span class="n">readNmrStarChemicalShifts</span><span class="p">(</span><span class="n">project</span><span class="p">,</span> <span class="n">bmrbEntryPath</span><span class="p">,</span> <span class="n">chainOrder</span><span class="o">=</span><span class="n">chainOrder</span><span class="p">)</span>
@@ -957,7 +947,7 @@
         <span class="n">contribution</span><span class="o">.</span><span class="n">restraintItems</span> <span class="o">=</span> <span class="n">items</span></div>
 
 
-<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
 
     <span class="n">name</span><span class="p">,</span> <span class="n">projectPath</span><span class="p">,</span> <span class="n">bmrbEntryPath</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="mi">4</span><span class="p">]</span>
     <span class="n">projectPath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">normpath</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">projectPath</span><span class="p">))</span>
@@ -978,7 +968,7 @@
     <span class="c1"># project.save()</span>
 
     <span class="n">nefPath</span> <span class="o">=</span> <span class="n">project</span><span class="o">.</span><span class="n">path</span> <span class="o">+</span> <span class="s1">&#39;.nef&#39;</span>
-    <span class="n">CcpnNefIo</span><span class="o">.</span><span class="n">saveNefProject</span><span class="p">(</span><span class="n">project</span><span class="p">,</span> <span class="n">nefPath</span><span class="p">,</span> <span class="n">overwriteExisting</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">skipPrefixes</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;ccpn&#39;</span><span class="p">,))</span>
+    <span class="n">CcpnNefIo</span><span class="o">.</span><span class="n">saveNefProject</span><span class="p">(</span><span class="n">project</span><span class="p">,</span> <span class="n">nefPath</span><span class="p">,</span> <span class="n">overwriteExisting</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">skipPrefixes</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;ccpn&#39;</span><span class="p">,))</span>
 </pre></div>
 
           </div>
@@ -987,15 +977,15 @@
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
 <div id="searchbox" style="display: none" role="search">
-  <h3>Quick search</h3>
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
     <form class="search" action="../../../../search.html" method="get">
-      <input type="text" name="q" />
+      <input type="text" name="q" aria-labelledby="searchlabel" />
       <input type="submit" value="Go" />
-      <input type="hidden" name="check_keywords" value="yes" />
-      <input type="hidden" name="area" value="default" />
     </form>
+    </div>
 </div>
-<script type="text/javascript">$('#searchbox').show(0);</script>
+<script>$('#searchbox').show(0);</script>
         </div>
       </div>
       <div class="clearer"></div>
@@ -1009,13 +999,13 @@
         <li class="right" >
           <a href="../../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../../index.html">Python  documentation</a> &raquo;</li>
-          <li class="nav-item nav-item-1"><a href="../../../index.html" >Module code</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="../../../../index.html">Python  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../../index.html" >Module code</a> &#187;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
-        &copy; Copyright .
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.1.
+        &#169; Copyright .
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.4.0.
     </div>
   </body>
 </html>

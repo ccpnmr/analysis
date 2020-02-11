@@ -1,32 +1,22 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
+<!DOCTYPE html>
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    
-    <title>ccpnmodel.ccpncore.memops.scripts.xmlio.PyXmlMapWrite &mdash; Python  documentation</title>
-    
+    <meta charset="utf-8" />
+    <title>ccpnmodel.ccpncore.memops.scripts.xmlio.PyXmlMapWrite &#8212; Python  documentation</title>
     <link rel="stylesheet" href="../../../../../../_static/classic.css" type="text/css" />
     <link rel="stylesheet" href="../../../../../../_static/pygments.css" type="text/css" />
     
-    <script type="text/javascript">
-      var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    '../../../../../../',
-        VERSION:     '',
-        COLLAPSE_INDEX: false,
-        FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true
-      };
-    </script>
-    <script type="text/javascript" src="../../../../../../_static/jquery.js"></script>
-    <script type="text/javascript" src="../../../../../../_static/underscore.js"></script>
-    <script type="text/javascript" src="../../../../../../_static/doctools.js"></script>
-    <link rel="top" title="Python  documentation" href="../../../../../../index.html" />
-    <link rel="up" title="Module code" href="../../../../../index.html" /> 
-  </head>
-  <body role="document">
+    <script id="documentation_options" data-url_root="../../../../../../" src="../../../../../../_static/documentation_options.js"></script>
+    <script src="../../../../../../_static/jquery.js"></script>
+    <script src="../../../../../../_static/underscore.js"></script>
+    <script src="../../../../../../_static/doctools.js"></script>
+    <script src="../../../../../../_static/language_data.js"></script>
+    
+    <link rel="index" title="Index" href="../../../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../../../search.html" /> 
+  </head><body>
     <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
@@ -36,8 +26,8 @@
         <li class="right" >
           <a href="../../../../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../../../../index.html">Python  documentation</a> &raquo;</li>
-          <li class="nav-item nav-item-1"><a href="../../../../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="../../../../../../index.html">Python  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../../../../index.html" accesskey="U">Module code</a> &#187;</li> 
       </ul>
     </div>  
 
@@ -139,8 +129,8 @@
 <span class="n">MemopsError</span> <span class="o">=</span> <span class="n">MetaModel</span><span class="o">.</span><span class="n">MemopsError</span>
 
 
-<div class="viewcode-block" id="writeXmlIo"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.xmlio.html#ccpnmodel.ccpncore.memops.scripts.xmlio.PyXmlMapWrite.writeXmlIo">[docs]</a><span class="k">def</span> <span class="nf">writeXmlIo</span><span class="p">(</span><span class="n">modelPortal</span><span class="p">,</span> <span class="n">rootFileName</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">rootDirName</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
-             <span class="n">releaseVersion</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">):</span>
+<div class="viewcode-block" id="writeXmlIo"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.xmlio.html#ccpnmodel.ccpncore.memops.scripts.xmlio.PyXmlMapWrite.writeXmlIo">[docs]</a><span class="k">def</span> <span class="nf">writeXmlIo</span><span class="p">(</span><span class="n">modelPortal</span><span class="p">,</span> <span class="n">rootFileName</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">rootDirName</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+             <span class="n">releaseVersion</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">):</span>
   <span class="sd">&quot;&quot;&quot;write Python XML I/O mappings and code </span>
 <span class="sd">  </span>
 <span class="sd">  Only function that should be called directly by &#39;make&#39; scripts etc.</span>
@@ -154,7 +144,7 @@
 
 <div class="viewcode-block" id="PyXmlMapWrite"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.xmlio.html#ccpnmodel.ccpncore.memops.scripts.xmlio.PyXmlMapWrite.PyXmlMapWrite">[docs]</a><span class="k">class</span> <span class="nc">PyXmlMapWrite</span><span class="p">(</span><span class="n">PyLanguage</span><span class="p">,</span> <span class="n">PyType</span><span class="p">,</span> <span class="n">XmlMapWrite</span><span class="p">):</span>
 
-  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">):</span>
+  <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">):</span>
   
     <span class="bp">self</span><span class="o">.</span><span class="n">addModelFlavour</span><span class="p">(</span><span class="s1">&#39;language&#39;</span><span class="p">,</span> <span class="s1">&#39;python&#39;</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">baseName</span> <span class="o">=</span> <span class="s1">&#39;xml&#39;</span>
@@ -163,7 +153,7 @@
       <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tag</span><span class="p">):</span>
         <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tag</span><span class="p">,</span> <span class="n">val</span><span class="p">)</span>
     
-    <span class="nb">super</span><span class="p">(</span><span class="n">PyXmlMapWrite</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">()</span>
+    <span class="nb">super</span><span class="p">(</span><span class="n">PyXmlMapWrite</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
 
   <span class="c1">###########################################################################</span>
 
@@ -192,9 +182,9 @@
   <span class="c1">###########################################################################</span>
   
   <span class="c1"># overrides XmlMapWrite</span>
-<div class="viewcode-block" id="PyXmlMapWrite.addXmlClassCreation"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.xmlio.html#ccpnmodel.ccpncore.memops.scripts.xmlio.PyXmlMapWrite.PyXmlMapWrite.addXmlClassCreation">[docs]</a>  <span class="k">def</span> <span class="nf">addXmlClassCreation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dictName</span><span class="p">,</span> <span class="n">clazz</span><span class="p">,</span> <span class="n">package</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+<div class="viewcode-block" id="PyXmlMapWrite.addXmlClassCreation"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.xmlio.html#ccpnmodel.ccpncore.memops.scripts.xmlio.PyXmlMapWrite.PyXmlMapWrite.addXmlClassCreation">[docs]</a>  <span class="k">def</span> <span class="nf">addXmlClassCreation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dictName</span><span class="p">,</span> <span class="n">clazz</span><span class="p">,</span> <span class="n">package</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     
-    <span class="k">if</span> <span class="n">package</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">package</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
       <span class="n">pp</span> <span class="o">=</span> <span class="n">clazz</span><span class="o">.</span><span class="n">container</span>
       <span class="k">if</span> <span class="n">pp</span> <span class="ow">in</span> <span class="n">package</span><span class="o">.</span><span class="n">accessedPackages</span><span class="p">:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;import </span><span class="si">%s</span><span class="s2">&quot;</span> 
@@ -213,7 +203,7 @@
 <div class="viewcode-block" id="PyXmlMapWrite.addDefaultValues"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.xmlio.html#ccpnmodel.ccpncore.memops.scripts.xmlio.PyXmlMapWrite.PyXmlMapWrite.addDefaultValues">[docs]</a>  <span class="k">def</span> <span class="nf">addDefaultValues</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dictName</span><span class="p">,</span> <span class="n">elemMap</span><span class="p">,</span> <span class="n">elem</span><span class="p">):</span>
     
     <span class="n">val</span> <span class="o">=</span> <span class="n">elemMap</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;default&#39;</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">val</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">val</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">setDictEntry</span><span class="p">(</span><span class="n">dictName</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">toLiteral</span><span class="p">(</span><span class="s1">&#39;default&#39;</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">toLiteral</span><span class="p">(</span><span class="n">val</span><span class="p">))</span></div>
 
   <span class="c1">###########################################################################</span>
@@ -260,7 +250,7 @@
       
       <span class="c1"># define global functions</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;</span>
-<span class="s2">_globalMapping = {}</span>
+<span class="s2">_globalMapping = </span><span class="si">{}</span><span class="s2"></span>
 
 <span class="s2">def getGlobalMap(oldVersionStr=None):</span>
 
@@ -272,7 +262,7 @@
 
 <span class="s2">  versionMapping = _globalMapping.get(oldVersionStr)</span>
 <span class="s2">  if versionMapping is None:</span>
-<span class="s2">    versionMapping = {}</span>
+<span class="s2">    versionMapping = </span><span class="si">{}</span><span class="s2"></span>
 <span class="s2">    _globalMapping[oldVersionStr] = versionMapping</span>
 <span class="s2">    </span>
 <span class="s2">    makeMapping(versionMapping)</span>
@@ -321,7 +311,7 @@
      <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">getVersionString</span><span class="p">(</span><span class="n">metaobj</span><span class="o">=</span><span class="n">package</span><span class="p">)</span> <span class="o">+</span> 
      <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">+</span> 
      <span class="bp">self</span><span class="o">.</span><span class="n">getCreditsString</span><span class="p">(</span><span class="n">metaobj</span><span class="o">=</span><span class="n">package</span><span class="p">,</span> <span class="n">programType</span><span class="o">=</span><span class="s1">&#39;XML-I/O-mapping&#39;</span><span class="p">)),</span>
-     <span class="n">compress</span><span class="o">=</span><span class="bp">False</span>
+     <span class="n">compress</span><span class="o">=</span><span class="kc">False</span>
     <span class="p">)</span></div>
 
   <span class="c1">###########################################################################</span>
@@ -378,7 +368,7 @@
 
   <span class="c1"># SaveToStream function</span>
   <span class="c1"># implements XmlMapWrite</span>
-<div class="viewcode-block" id="PyXmlMapWrite.streamWriteStartElement"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.xmlio.html#ccpnmodel.ccpncore.memops.scripts.xmlio.PyXmlMapWrite.PyXmlMapWrite.streamWriteStartElement">[docs]</a>  <span class="k">def</span> <span class="nf">streamWriteStartElement</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">element</span><span class="p">,</span> <span class="n">closeElement</span> <span class="o">=</span> <span class="bp">True</span><span class="p">,</span> <span class="n">newLine</span> <span class="o">=</span> <span class="bp">True</span><span class="p">,</span> <span class="o">**</span><span class="n">attrs</span><span class="p">):</span>
+<div class="viewcode-block" id="PyXmlMapWrite.streamWriteStartElement"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.xmlio.html#ccpnmodel.ccpncore.memops.scripts.xmlio.PyXmlMapWrite.PyXmlMapWrite.streamWriteStartElement">[docs]</a>  <span class="k">def</span> <span class="nf">streamWriteStartElement</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">element</span><span class="p">,</span> <span class="n">closeElement</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">newLine</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="o">**</span><span class="n">attrs</span><span class="p">):</span>
 
     <span class="n">keys</span> <span class="o">=</span> <span class="n">attrs</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
     <span class="n">strs</span> <span class="o">=</span> <span class="p">[]</span>
@@ -406,7 +396,7 @@
 
   <span class="c1"># SaveToStream function</span>
   <span class="c1"># implements XmlMapWrite</span>
-<div class="viewcode-block" id="PyXmlMapWrite.streamWriteEndElement"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.xmlio.html#ccpnmodel.ccpncore.memops.scripts.xmlio.PyXmlMapWrite.PyXmlMapWrite.streamWriteEndElement">[docs]</a>  <span class="k">def</span> <span class="nf">streamWriteEndElement</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">element</span><span class="p">,</span> <span class="n">newLine</span> <span class="o">=</span> <span class="bp">True</span><span class="p">,</span> <span class="n">doIndent</span> <span class="o">=</span> <span class="bp">False</span><span class="p">):</span>
+<div class="viewcode-block" id="PyXmlMapWrite.streamWriteEndElement"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.xmlio.html#ccpnmodel.ccpncore.memops.scripts.xmlio.PyXmlMapWrite.PyXmlMapWrite.streamWriteEndElement">[docs]</a>  <span class="k">def</span> <span class="nf">streamWriteEndElement</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">element</span><span class="p">,</span> <span class="n">newLine</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">doIndent</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
 
     <span class="k">if</span> <span class="n">newLine</span><span class="p">:</span>
       <span class="n">t</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="se">\\</span><span class="s1">n&#39;</span>
@@ -678,7 +668,7 @@
 
   <span class="c1"># LoadFromStream function</span>
   <span class="c1"># implements XmlMapWrite</span>
-<div class="viewcode-block" id="PyXmlMapWrite.streamElementSplitText"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.xmlio.html#ccpnmodel.ccpncore.memops.scripts.xmlio.PyXmlMapWrite.PyXmlMapWrite.streamElementSplitText">[docs]</a>  <span class="k">def</span> <span class="nf">streamElementSplitText</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">var</span><span class="p">,</span> <span class="n">cnvrt</span> <span class="o">=</span> <span class="bp">None</span><span class="p">):</span>
+<div class="viewcode-block" id="PyXmlMapWrite.streamElementSplitText"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.xmlio.html#ccpnmodel.ccpncore.memops.scripts.xmlio.PyXmlMapWrite.PyXmlMapWrite.streamElementSplitText">[docs]</a>  <span class="k">def</span> <span class="nf">streamElementSplitText</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">var</span><span class="p">,</span> <span class="n">cnvrt</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
 
     <span class="k">if</span> <span class="n">cnvrt</span><span class="p">:</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;&#39;&#39;</span>
@@ -707,7 +697,7 @@
 
   <span class="c1"># LoadFromStream function</span>
   <span class="c1"># implements XmlMapWrite</span>
-<div class="viewcode-block" id="PyXmlMapWrite.streamElementSetSkip"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.xmlio.html#ccpnmodel.ccpncore.memops.scripts.xmlio.PyXmlMapWrite.PyXmlMapWrite.streamElementSetSkip">[docs]</a>  <span class="k">def</span> <span class="nf">streamElementSetSkip</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">setToNone</span> <span class="o">=</span> <span class="bp">False</span><span class="p">):</span>
+<div class="viewcode-block" id="PyXmlMapWrite.streamElementSetSkip"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.xmlio.html#ccpnmodel.ccpncore.memops.scripts.xmlio.PyXmlMapWrite.PyXmlMapWrite.streamElementSetSkip">[docs]</a>  <span class="k">def</span> <span class="nf">streamElementSetSkip</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">setToNone</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
 
     <span class="k">if</span> <span class="n">setToNone</span><span class="p">:</span>
       <span class="n">elem</span> <span class="o">=</span> <span class="s1">&#39;None&#39;</span>
@@ -726,7 +716,7 @@
 
   <span class="c1"># LoadFromStream function</span>
   <span class="c1"># implements XmlMapWrite</span>
-<div class="viewcode-block" id="PyXmlMapWrite.streamElementIsSkip"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.xmlio.html#ccpnmodel.ccpncore.memops.scripts.xmlio.PyXmlMapWrite.PyXmlMapWrite.streamElementIsSkip">[docs]</a>  <span class="k">def</span> <span class="nf">streamElementIsSkip</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">doReset</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+<div class="viewcode-block" id="PyXmlMapWrite.streamElementIsSkip"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.xmlio.html#ccpnmodel.ccpncore.memops.scripts.xmlio.PyXmlMapWrite.PyXmlMapWrite.streamElementIsSkip">[docs]</a>  <span class="k">def</span> <span class="nf">streamElementIsSkip</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">doReset</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
 
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">comparison</span><span class="p">(</span><span class="s1">&#39;elem&#39;</span><span class="p">,</span> <span class="s1">&#39;is&#39;</span><span class="p">,</span> <span class="s1">&#39;skipElement&#39;</span><span class="p">)</span></div>
 
@@ -748,7 +738,7 @@
   <span class="c1"># implements XmlMapWrite</span>
 <div class="viewcode-block" id="PyXmlMapWrite.streamStartAttributeLoop"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.xmlio.html#ccpnmodel.ccpncore.memops.scripts.xmlio.PyXmlMapWrite.PyXmlMapWrite.streamStartAttributeLoop">[docs]</a>  <span class="k">def</span> <span class="nf">streamStartAttributeLoop</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tag</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
 
-    <span class="bp">self</span><span class="o">.</span><span class="n">startLoop</span><span class="p">(</span><span class="s1">&#39;(</span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1">)&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">tag</span><span class="p">,</span> <span class="n">value</span><span class="p">),</span> <span class="s1">&#39;elem.items()&#39;</span><span class="p">,</span> <span class="n">isUnique</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">isOrdered</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span></div>
+    <span class="bp">self</span><span class="o">.</span><span class="n">startLoop</span><span class="p">(</span><span class="s1">&#39;(</span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1">)&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">tag</span><span class="p">,</span> <span class="n">value</span><span class="p">),</span> <span class="s1">&#39;elem.items()&#39;</span><span class="p">,</span> <span class="n">isUnique</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">isOrdered</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></div>
 
   <span class="c1">###########################################################################</span>
 
@@ -757,8 +747,8 @@
   <span class="c1"># SaveToStream function</span>
   <span class="c1"># LoadFromStream function</span>
   <span class="c1"># implements XmlMapWrite</span>
-<div class="viewcode-block" id="PyXmlMapWrite.streamGetValue"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.xmlio.html#ccpnmodel.ccpncore.memops.scripts.xmlio.PyXmlMapWrite.PyXmlMapWrite.streamGetValue">[docs]</a>  <span class="k">def</span> <span class="nf">streamGetValue</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">var</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">defaultValue</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span>
-                     <span class="n">keyIsMandatory</span> <span class="o">=</span> <span class="bp">False</span><span class="p">,</span> <span class="n">getChildAsDict</span> <span class="o">=</span> <span class="bp">False</span><span class="p">):</span>
+<div class="viewcode-block" id="PyXmlMapWrite.streamGetValue"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.xmlio.html#ccpnmodel.ccpncore.memops.scripts.xmlio.PyXmlMapWrite.PyXmlMapWrite.streamGetValue">[docs]</a>  <span class="k">def</span> <span class="nf">streamGetValue</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">var</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">defaultValue</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                     <span class="n">keyIsMandatory</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">getChildAsDict</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
 
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">getDictEntry</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">.__dict__&#39;</span> <span class="o">%</span> <span class="n">var</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span>
               <span class="n">defaultValue</span><span class="o">=</span><span class="n">defaultValue</span><span class="p">,</span> <span class="n">keyIsMandatory</span><span class="o">=</span><span class="n">keyIsMandatory</span><span class="p">)</span></div>
@@ -769,7 +759,7 @@
 
   <span class="c1"># LoadFromStream function</span>
   <span class="c1"># implements XmlMapWrite</span>
-<div class="viewcode-block" id="PyXmlMapWrite.streamSetValue"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.xmlio.html#ccpnmodel.ccpncore.memops.scripts.xmlio.PyXmlMapWrite.PyXmlMapWrite.streamSetValue">[docs]</a>  <span class="k">def</span> <span class="nf">streamSetValue</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">var</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">useDirectSet</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+<div class="viewcode-block" id="PyXmlMapWrite.streamSetValue"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.xmlio.html#ccpnmodel.ccpncore.memops.scripts.xmlio.PyXmlMapWrite.PyXmlMapWrite.streamSetValue">[docs]</a>  <span class="k">def</span> <span class="nf">streamSetValue</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">var</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">useDirectSet</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
 
     <span class="k">if</span> <span class="n">useDirectSet</span><span class="p">:</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">writeOne</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">.__dict__[</span><span class="si">%s</span><span class="s1">] = </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">var</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">))</span>
@@ -854,7 +844,7 @@
 
   <span class="c1"># LoadFromStream function</span>
   <span class="c1"># implements XmlMapWrite</span>
-<div class="viewcode-block" id="PyXmlMapWrite.streamCallConstructor"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.xmlio.html#ccpnmodel.ccpncore.memops.scripts.xmlio.PyXmlMapWrite.PyXmlMapWrite.streamCallConstructor">[docs]</a>  <span class="k">def</span> <span class="nf">streamCallConstructor</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">var</span><span class="p">,</span> <span class="n">constructor</span><span class="p">,</span> <span class="n">parent</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="n">castType</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">attrlinks</span><span class="p">):</span>
+<div class="viewcode-block" id="PyXmlMapWrite.streamCallConstructor"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.xmlio.html#ccpnmodel.ccpncore.memops.scripts.xmlio.PyXmlMapWrite.PyXmlMapWrite.streamCallConstructor">[docs]</a>  <span class="k">def</span> <span class="nf">streamCallConstructor</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">var</span><span class="p">,</span> <span class="n">constructor</span><span class="p">,</span> <span class="n">parent</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">castType</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">attrlinks</span><span class="p">):</span>
 
     <span class="n">ss</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span> <span class="k">for</span> <span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span> <span class="ow">in</span> <span class="n">attrlinks</span><span class="o">.</span><span class="n">items</span><span class="p">()]</span>
     <span class="n">ss</span> <span class="o">=</span> <span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">ss</span><span class="p">)</span>
@@ -919,8 +909,8 @@
   <span class="c1"># SaveToStream function</span>
   <span class="c1"># LoadFromStream function</span>
   <span class="c1"># implements XmlMapWrite</span>
-<div class="viewcode-block" id="PyXmlMapWrite.streamStartFunc"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.xmlio.html#ccpnmodel.ccpncore.memops.scripts.xmlio.PyXmlMapWrite.PyXmlMapWrite.streamStartFunc">[docs]</a>  <span class="k">def</span> <span class="nf">streamStartFunc</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">funcname</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">docString</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span>
-                      <span class="n">returnString</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">returnType</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">throwsApiError</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+<div class="viewcode-block" id="PyXmlMapWrite.streamStartFunc"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.xmlio.html#ccpnmodel.ccpncore.memops.scripts.xmlio.PyXmlMapWrite.PyXmlMapWrite.streamStartFunc">[docs]</a>  <span class="k">def</span> <span class="nf">streamStartFunc</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">funcname</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">docString</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span>
+                      <span class="n">returnString</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">returnType</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">throwsApiError</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
 
    <span class="k">if</span> <span class="ow">not</span> <span class="n">params</span><span class="p">:</span>
      <span class="n">params</span> <span class="o">=</span> <span class="p">()</span>
@@ -942,9 +932,9 @@
   <span class="c1"># must be here because if in XmlMapWrite then not picked up</span>
   <span class="c1"># because of order of superclasses</span>
   <span class="c1"># overrides LanguageInterface</span>
-<div class="viewcode-block" id="PyXmlMapWrite.raiseApiError"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.xmlio.html#ccpnmodel.ccpncore.memops.scripts.xmlio.PyXmlMapWrite.PyXmlMapWrite.raiseApiError">[docs]</a>  <span class="k">def</span> <span class="nf">raiseApiError</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">errorMsg</span><span class="p">,</span> <span class="n">obj</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="n">obj2</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="n">obj3</span> <span class="o">=</span> <span class="bp">None</span><span class="p">):</span>
+<div class="viewcode-block" id="PyXmlMapWrite.raiseApiError"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.xmlio.html#ccpnmodel.ccpncore.memops.scripts.xmlio.PyXmlMapWrite.PyXmlMapWrite.raiseApiError">[docs]</a>  <span class="k">def</span> <span class="nf">raiseApiError</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">errorMsg</span><span class="p">,</span> <span class="n">obj</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">obj2</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">obj3</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
 
-    <span class="nb">super</span><span class="p">(</span><span class="n">PyXmlMapWrite</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">raiseApiError</span><span class="p">(</span><span class="n">errorMsg</span><span class="p">,</span> <span class="n">obj</span><span class="o">=</span><span class="n">obj</span><span class="p">,</span> <span class="n">obj2</span><span class="o">=</span><span class="n">obj2</span><span class="p">,</span> <span class="n">obj3</span><span class="o">=</span><span class="n">obj3</span><span class="p">,</span> <span class="n">inOp</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span></div></div>
+    <span class="nb">super</span><span class="p">(</span><span class="n">PyXmlMapWrite</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">raiseApiError</span><span class="p">(</span><span class="n">errorMsg</span><span class="p">,</span> <span class="n">obj</span><span class="o">=</span><span class="n">obj</span><span class="p">,</span> <span class="n">obj2</span><span class="o">=</span><span class="n">obj2</span><span class="p">,</span> <span class="n">obj3</span><span class="o">=</span><span class="n">obj3</span><span class="p">,</span> <span class="n">inOp</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></div></div>
 
 </pre></div>
 
@@ -954,15 +944,15 @@
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
 <div id="searchbox" style="display: none" role="search">
-  <h3>Quick search</h3>
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
     <form class="search" action="../../../../../../search.html" method="get">
-      <input type="text" name="q" />
+      <input type="text" name="q" aria-labelledby="searchlabel" />
       <input type="submit" value="Go" />
-      <input type="hidden" name="check_keywords" value="yes" />
-      <input type="hidden" name="area" value="default" />
     </form>
+    </div>
 </div>
-<script type="text/javascript">$('#searchbox').show(0);</script>
+<script>$('#searchbox').show(0);</script>
         </div>
       </div>
       <div class="clearer"></div>
@@ -976,13 +966,13 @@
         <li class="right" >
           <a href="../../../../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../../../../index.html">Python  documentation</a> &raquo;</li>
-          <li class="nav-item nav-item-1"><a href="../../../../../index.html" >Module code</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="../../../../../../index.html">Python  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../../../../index.html" >Module code</a> &#187;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
-        &copy; Copyright .
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.1.
+        &#169; Copyright .
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.4.0.
     </div>
   </body>
 </html>

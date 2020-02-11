@@ -1,32 +1,22 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
+<!DOCTYPE html>
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    
-    <title>ccpn.util.StructureData &mdash; Python  documentation</title>
-    
+    <meta charset="utf-8" />
+    <title>ccpn.util.StructureData &#8212; Python  documentation</title>
     <link rel="stylesheet" href="../../../_static/classic.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
     
-    <script type="text/javascript">
-      var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    '../../../',
-        VERSION:     '',
-        COLLAPSE_INDEX: false,
-        FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true
-      };
-    </script>
-    <script type="text/javascript" src="../../../_static/jquery.js"></script>
-    <script type="text/javascript" src="../../../_static/underscore.js"></script>
-    <script type="text/javascript" src="../../../_static/doctools.js"></script>
-    <link rel="top" title="Python  documentation" href="../../../index.html" />
-    <link rel="up" title="Module code" href="../../index.html" /> 
-  </head>
-  <body role="document">
+    <script id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/jquery.js"></script>
+    <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/language_data.js"></script>
+    
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+  </head><body>
     <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
@@ -36,8 +26,8 @@
         <li class="right" >
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../index.html">Python  documentation</a> &raquo;</li>
-          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="../../../index.html">Python  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &#187;</li> 
       </ul>
     </div>  
 
@@ -79,7 +69,7 @@
 <span class="kn">import</span> <span class="nn">numbers</span>
 <span class="kn">import</span> <span class="nn">typing</span>
 <span class="kn">import</span> <span class="nn">numpy</span>
-<span class="kn">import</span> <span class="nn">pandas</span> <span class="kn">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 <span class="kn">from</span> <span class="nn">ccpn.util</span> <span class="kn">import</span> <span class="n">Sorting</span>
 <span class="kn">from</span> <span class="nn">ccpn.util.ListFromString</span> <span class="kn">import</span> <span class="n">listFromString</span>
 <span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">partial</span>
@@ -273,22 +263,22 @@
     <span class="c1"># Key is column name, value is (type, customSetterName) tuple</span>
     <span class="n">_reservedColumns</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">OrderedDict</span><span class="p">((</span>
         <span class="p">(</span><span class="s1">&#39;modelNumber&#39;</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="s1">&#39;_modelNumberConversion&#39;</span><span class="p">)),</span>
-        <span class="p">(</span><span class="s1">&#39;chainCode&#39;</span><span class="p">,</span> <span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="bp">None</span><span class="p">)),</span>
-        <span class="p">(</span><span class="s1">&#39;sequenceId&#39;</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="bp">None</span><span class="p">)),</span>
-        <span class="p">(</span><span class="s1">&#39;insertionCode&#39;</span><span class="p">,</span> <span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="bp">None</span><span class="p">)),</span>
-        <span class="p">(</span><span class="s1">&#39;residueName&#39;</span><span class="p">,</span> <span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="bp">None</span><span class="p">)),</span>
-        <span class="p">(</span><span class="s1">&#39;atomName&#39;</span><span class="p">,</span> <span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="bp">None</span><span class="p">)),</span>
-        <span class="p">(</span><span class="s1">&#39;altLocationCode&#39;</span><span class="p">,</span> <span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="bp">None</span><span class="p">)),</span>
-        <span class="p">(</span><span class="s1">&#39;element&#39;</span><span class="p">,</span> <span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="bp">None</span><span class="p">)),</span>
-        <span class="p">(</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="p">(</span><span class="nb">float</span><span class="p">,</span> <span class="bp">None</span><span class="p">)),</span>
-        <span class="p">(</span><span class="s1">&#39;y&#39;</span><span class="p">,</span> <span class="p">(</span><span class="nb">float</span><span class="p">,</span> <span class="bp">None</span><span class="p">)),</span>
-        <span class="p">(</span><span class="s1">&#39;z&#39;</span><span class="p">,</span> <span class="p">(</span><span class="nb">float</span><span class="p">,</span> <span class="bp">None</span><span class="p">)),</span>
+        <span class="p">(</span><span class="s1">&#39;chainCode&#39;</span><span class="p">,</span> <span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="kc">None</span><span class="p">)),</span>
+        <span class="p">(</span><span class="s1">&#39;sequenceId&#39;</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="kc">None</span><span class="p">)),</span>
+        <span class="p">(</span><span class="s1">&#39;insertionCode&#39;</span><span class="p">,</span> <span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="kc">None</span><span class="p">)),</span>
+        <span class="p">(</span><span class="s1">&#39;residueName&#39;</span><span class="p">,</span> <span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="kc">None</span><span class="p">)),</span>
+        <span class="p">(</span><span class="s1">&#39;atomName&#39;</span><span class="p">,</span> <span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="kc">None</span><span class="p">)),</span>
+        <span class="p">(</span><span class="s1">&#39;altLocationCode&#39;</span><span class="p">,</span> <span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="kc">None</span><span class="p">)),</span>
+        <span class="p">(</span><span class="s1">&#39;element&#39;</span><span class="p">,</span> <span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="kc">None</span><span class="p">)),</span>
+        <span class="p">(</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="p">(</span><span class="nb">float</span><span class="p">,</span> <span class="kc">None</span><span class="p">)),</span>
+        <span class="p">(</span><span class="s1">&#39;y&#39;</span><span class="p">,</span> <span class="p">(</span><span class="nb">float</span><span class="p">,</span> <span class="kc">None</span><span class="p">)),</span>
+        <span class="p">(</span><span class="s1">&#39;z&#39;</span><span class="p">,</span> <span class="p">(</span><span class="nb">float</span><span class="p">,</span> <span class="kc">None</span><span class="p">)),</span>
         <span class="p">(</span><span class="s1">&#39;occupancy&#39;</span><span class="p">,</span> <span class="p">(</span><span class="nb">float</span><span class="p">,</span> <span class="s1">&#39;_occupancyConversion&#39;</span><span class="p">)),</span>
-        <span class="p">(</span><span class="s1">&#39;bFactor&#39;</span><span class="p">,</span> <span class="p">(</span><span class="nb">float</span><span class="p">,</span> <span class="bp">None</span><span class="p">)),</span>
-        <span class="p">(</span><span class="s1">&#39;nmrChainCode&#39;</span><span class="p">,</span> <span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="bp">None</span><span class="p">)),</span>
+        <span class="p">(</span><span class="s1">&#39;bFactor&#39;</span><span class="p">,</span> <span class="p">(</span><span class="nb">float</span><span class="p">,</span> <span class="kc">None</span><span class="p">)),</span>
+        <span class="p">(</span><span class="s1">&#39;nmrChainCode&#39;</span><span class="p">,</span> <span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="kc">None</span><span class="p">)),</span>
         <span class="p">(</span><span class="s1">&#39;nmrSequenceCode&#39;</span><span class="p">,</span> <span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="s1">&#39;_nmrSequenceCodeConversion&#39;</span><span class="p">)),</span>
-        <span class="p">(</span><span class="s1">&#39;nmrResidueName&#39;</span><span class="p">,</span> <span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="bp">None</span><span class="p">)),</span>
-        <span class="p">(</span><span class="s1">&#39;nmrAtomName&#39;</span><span class="p">,</span> <span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="bp">None</span><span class="p">))</span>
+        <span class="p">(</span><span class="s1">&#39;nmrResidueName&#39;</span><span class="p">,</span> <span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="kc">None</span><span class="p">)),</span>
+        <span class="p">(</span><span class="s1">&#39;nmrAtomName&#39;</span><span class="p">,</span> <span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="kc">None</span><span class="p">))</span>
         <span class="p">))</span>
 
     <span class="nd">@property</span>
@@ -296,10 +286,10 @@
         <span class="sd">&quot;&quot;&quot;CCPN wrapper object containing instance. &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__containingObject</span>
 
-    <span class="nd">@_containingObject.setter</span>
+    <span class="nd">@_containingObject</span><span class="o">.</span><span class="n">setter</span>
     <span class="k">def</span> <span class="nf">_containingObject</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Get containing object&quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="p">(</span><span class="n">value</span> <span class="ow">is</span> <span class="bp">None</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">value</span> <span class="ow">is</span> <span class="kc">None</span>
                 <span class="ow">or</span> <span class="p">(</span><span class="nb">hasattr</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="s1">&#39;className&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">value</span><span class="o">.</span><span class="n">className</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;StructureEnsemble&#39;</span><span class="p">,</span> <span class="s1">&#39;Model&#39;</span><span class="p">))):</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">__containingObject</span> <span class="o">=</span> <span class="n">value</span>
         <span class="k">else</span><span class="p">:</span>
@@ -317,12 +307,12 @@
 
         <span class="k">return</span> <span class="n">result</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="bp">None</span><span class="p">:</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
         <span class="c1"># Link to containing StructureEnsemble - to allow logging, echoing, and undo</span>
         <span class="c1"># NB ModelData temporarily resets this to a Model object</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">__containingObject</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__containingObject</span> <span class="o">=</span> <span class="kc">None</span>
 
     <span class="c1">### Making selections</span>
 
@@ -343,15 +333,15 @@
         <span class="sd">&quot;&quot;&quot;finalise an action on the containing structureEnsemble.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">structureEnsemble</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_structureEnsemble</span>
-        <span class="k">if</span> <span class="n">structureEnsemble</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">structureEnsemble</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">structureEnsemble</span><span class="o">.</span><span class="n">_finaliseAction</span><span class="p">(</span><span class="n">action</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_finaliseAction</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">action</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_finaliseAction</span><span class="p">(</span><span class="n">action</span><span class="p">)</span>
 
-<div class="viewcode-block" id="EnsembleData.selector"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.StructureData.EnsembleData.selector">[docs]</a>    <span class="k">def</span> <span class="nf">selector</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">chainCodes</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">residueNames</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">sequenceIds</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
-                 <span class="n">atomNames</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">modelNumbers</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">ids</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
-                 <span class="n">elements</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">func</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">inverse</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">:</span>
+<div class="viewcode-block" id="EnsembleData.selector"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.StructureData.EnsembleData.selector">[docs]</a>    <span class="k">def</span> <span class="nf">selector</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">chainCodes</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">residueNames</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">sequenceIds</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="n">atomNames</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">modelNumbers</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ids</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="n">elements</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">func</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">inverse</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Make a boolean selector restricted to rows matching the parameters specified.</span>
 
@@ -359,25 +349,25 @@
 
 <span class="sd">        Returns Pandas Series of booleans</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">s</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">((</span><span class="bp">True</span><span class="p">,)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">index</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">index</span><span class="p">)</span>  <span class="c1">#range(1,self.shape[0]+1))      # ejb</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">((</span><span class="kc">True</span><span class="p">,)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">index</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">index</span><span class="p">)</span>  <span class="c1">#range(1,self.shape[0]+1))      # ejb</span>
         <span class="c1"># s = pd.Series((True,) * self.shape[0], index=range(1,self.shape[0]+1))      # ejb</span>
-        <span class="k">if</span> <span class="n">index</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">index</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">s</span> <span class="o">=</span> <span class="n">s</span> <span class="o">&amp;</span> <span class="bp">self</span><span class="o">.</span><span class="n">_indexSelector</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">chainCodes</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">chainCodes</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">s</span> <span class="o">=</span> <span class="n">s</span> <span class="o">&amp;</span> <span class="bp">self</span><span class="o">.</span><span class="n">_stringSelector</span><span class="p">(</span><span class="n">chainCodes</span><span class="p">,</span> <span class="s1">&#39;chainCode&#39;</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">residueNames</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">residueNames</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">s</span> <span class="o">=</span> <span class="n">s</span> <span class="o">&amp;</span> <span class="bp">self</span><span class="o">.</span><span class="n">_stringSelector</span><span class="p">(</span><span class="n">residueNames</span><span class="p">,</span> <span class="s1">&#39;residueName&#39;</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">sequenceIds</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">sequenceIds</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">s</span> <span class="o">=</span> <span class="n">s</span> <span class="o">&amp;</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sequenceIdsSelector</span><span class="p">(</span><span class="n">sequenceIds</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">atomNames</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">atomNames</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">s</span> <span class="o">=</span> <span class="n">s</span> <span class="o">&amp;</span> <span class="bp">self</span><span class="o">.</span><span class="n">_stringSelector</span><span class="p">(</span><span class="n">atomNames</span><span class="p">,</span> <span class="s1">&#39;atomName&#39;</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">modelNumbers</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">modelNumbers</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">s</span> <span class="o">=</span> <span class="n">s</span> <span class="o">&amp;</span> <span class="bp">self</span><span class="o">.</span><span class="n">_modelsSelector</span><span class="p">(</span><span class="n">modelNumbers</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">ids</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">ids</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">s</span> <span class="o">=</span> <span class="n">s</span> <span class="o">&amp;</span> <span class="bp">self</span><span class="o">.</span><span class="n">_idsSelector</span><span class="p">(</span><span class="n">ids</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">func</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">func</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">s</span> <span class="o">=</span> <span class="n">s</span> <span class="o">&amp;</span> <span class="bp">self</span><span class="o">.</span><span class="n">_funcSelector</span><span class="p">(</span><span class="n">func</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">elements</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">elements</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">s</span> <span class="o">=</span> <span class="n">s</span> <span class="o">&amp;</span> <span class="bp">self</span><span class="o">.</span><span class="n">_stringSelector</span><span class="p">(</span><span class="n">elements</span><span class="p">,</span> <span class="s1">&#39;element&#39;</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">inverse</span><span class="p">:</span>
             <span class="k">return</span> <span class="o">~</span><span class="n">s</span>
@@ -427,7 +417,7 @@
         <span class="sd">&quot;&quot;&quot;Select records based on &#39;expression&#39;,</span>
 <span class="sd">        which must either be or convert to a sequence of string atom IDs</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">s</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">((</span><span class="bp">False</span><span class="p">,)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">index</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">index</span><span class="p">)</span>  <span class="c1"># ejb</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">((</span><span class="kc">False</span><span class="p">,)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">index</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">index</span><span class="p">)</span>  <span class="c1"># ejb</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">expression</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
             <span class="n">expression</span> <span class="o">=</span> <span class="n">listFromString</span><span class="p">(</span><span class="n">expression</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">expression</span><span class="p">:</span>
@@ -436,7 +426,7 @@
                                   <span class="n">atomNames</span><span class="o">=</span><span class="p">[</span><span class="n">atom</span><span class="p">,</span> <span class="p">])</span>
         <span class="k">return</span> <span class="n">s</span>
 
-    <span class="k">def</span> <span class="nf">_funcSelector</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">func</span><span class="p">:</span> <span class="nb">callable</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">_funcSelector</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">func</span><span class="p">:</span> <span class="n">callable</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">:</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
 
     <span class="c1">### Protein specific automatically generated selectors</span>
@@ -488,7 +478,7 @@
 
     <span class="c1">### extracting selections</span>
 
-<div class="viewcode-block" id="EnsembleData.extract"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.StructureData.EnsembleData.extract">[docs]</a>    <span class="k">def</span> <span class="nf">extract</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">selector</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="o">*</span><span class="n">columnNames</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;EnsembleData&#39;</span><span class="p">:</span>
+<div class="viewcode-block" id="EnsembleData.extract"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.StructureData.EnsembleData.extract">[docs]</a>    <span class="k">def</span> <span class="nf">extract</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">selector</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="n">columnNames</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;EnsembleData&#39;</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Extracts a copy of a subset of atoms from the EnsembleData</span>
 
@@ -508,7 +498,7 @@
         <span class="k">if</span> <span class="ow">not</span> <span class="n">columnNames</span><span class="p">:</span>
             <span class="n">columnNames</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">columns</span>
 
-        <span class="k">if</span> <span class="n">selector</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">selector</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">extract</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">selector</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">),</span> <span class="o">*</span><span class="n">columnNames</span><span class="p">)</span>  <span class="c1"># ejb</span>
 
         <span class="k">else</span><span class="p">:</span>
@@ -573,7 +563,7 @@
         <span class="c1">#     if containingObject is not None:</span>
         <span class="c1">#         undo.decreaseBlocking()</span>
 
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_containingObject</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_containingObject</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="c1"># process without undoStack</span>
             <span class="n">insertSet</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;iSR&#39;</span><span class="p">]</span>
             <span class="k">for</span> <span class="n">thisInsertSet</span> <span class="ow">in</span> <span class="n">insertSet</span><span class="p">:</span>
@@ -619,15 +609,15 @@
 
         <span class="n">deleteRows</span> <span class="o">=</span> <span class="n">selection</span><span class="o">.</span><span class="n">as_namedtuples</span><span class="p">()</span>
 
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_containingObject</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_containingObject</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="c1"># process without undoStack</span>
             <span class="n">colData</span> <span class="o">=</span> <span class="p">[]</span>
             <span class="k">for</span> <span class="n">rows</span> <span class="ow">in</span> <span class="n">deleteRows</span><span class="p">:</span>
                 <span class="n">colInd</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">rows</span><span class="p">,</span> <span class="s1">&#39;Index&#39;</span><span class="p">)</span>
                 <span class="n">colData</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="nb">str</span><span class="p">(</span><span class="n">colInd</span><span class="p">):</span> <span class="nb">dict</span><span class="p">((</span><span class="n">x</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">colInd</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">x</span><span class="p">))</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">columns</span><span class="p">)})</span>
 
-            <span class="bp">self</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="bp">self</span><span class="p">[</span><span class="n">rowSelector</span><span class="p">]</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">drop</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="bp">self</span><span class="p">[</span><span class="n">rowSelector</span><span class="p">]</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">drop</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
             
             <span class="bp">self</span><span class="o">.</span><span class="n">_finaliseStructureEnsemble</span><span class="p">(</span><span class="s1">&#39;change&#39;</span><span class="p">)</span>
 
@@ -638,8 +628,8 @@
                     <span class="n">colInd</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">rows</span><span class="p">,</span> <span class="s1">&#39;Index&#39;</span><span class="p">)</span>
                     <span class="n">colData</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="nb">str</span><span class="p">(</span><span class="n">colInd</span><span class="p">):</span> <span class="nb">dict</span><span class="p">((</span><span class="n">x</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">colInd</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">x</span><span class="p">))</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">columns</span><span class="p">)})</span>
 
-                <span class="bp">self</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="bp">self</span><span class="p">[</span><span class="n">rowSelector</span><span class="p">]</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">drop</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="bp">self</span><span class="p">[</span><span class="n">rowSelector</span><span class="p">]</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">drop</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
                 <span class="k">with</span> <span class="n">undoStackBlocking</span><span class="p">()</span> <span class="k">as</span> <span class="n">addUndoItem</span><span class="p">:</span>
                     <span class="n">addUndoItem</span><span class="p">(</span><span class="n">undo</span><span class="o">=</span><span class="n">partial</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_insertSelectedRows</span><span class="p">,</span> <span class="n">iSR</span><span class="o">=</span><span class="n">colData</span><span class="p">),</span>
@@ -678,7 +668,7 @@
         <span class="c1">#     if containingObject is not None:</span>
         <span class="c1">#         undo.decreaseBlocking()</span>
 
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_containingObject</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_containingObject</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="c1"># process without undoStack</span>
             <span class="n">index</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
             <span class="nb">len</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>  <span class="c1"># current rows</span>
@@ -687,7 +677,7 @@
 
             <span class="n">neworder</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">index</span><span class="p">)]</span> <span class="o">+</span> <span class="p">[</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">index</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="nb">len</span> <span class="o">+</span> <span class="mi">2</span><span class="p">)]</span> <span class="o">+</span> <span class="p">[</span><span class="n">index</span><span class="p">]</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">index</span> <span class="o">=</span> <span class="n">neworder</span>  <span class="c1"># set the new index</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">sort_index</span><span class="p">(</span><span class="n">inplace</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>  <span class="c1"># and re-sort the table</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">sort_index</span><span class="p">(</span><span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>  <span class="c1"># and re-sort the table</span>
 
             <span class="bp">self</span><span class="o">.</span><span class="n">_finaliseStructureEnsemble</span><span class="p">(</span><span class="s1">&#39;change&#39;</span><span class="p">)</span>
 
@@ -701,12 +691,12 @@
 
                 <span class="n">neworder</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">index</span><span class="p">)]</span> <span class="o">+</span> <span class="p">[</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">index</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="nb">len</span> <span class="o">+</span> <span class="mi">2</span><span class="p">)]</span> <span class="o">+</span> <span class="p">[</span><span class="n">index</span><span class="p">]</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">index</span> <span class="o">=</span> <span class="n">neworder</span>  <span class="c1"># set the new index</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">sort_index</span><span class="p">(</span><span class="n">inplace</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>  <span class="c1"># and re-sort the table</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">sort_index</span><span class="p">(</span><span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>  <span class="c1"># and re-sort the table</span>
 
                 <span class="bp">self</span><span class="o">.</span><span class="n">_finaliseStructureEnsemble</span><span class="p">(</span><span class="s1">&#39;change&#39;</span><span class="p">)</span>
 
 
-<div class="viewcode-block" id="EnsembleData.deleteRow"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.StructureData.EnsembleData.deleteRow">[docs]</a>    <span class="k">def</span> <span class="nf">deleteRow</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rowNumber</span><span class="p">:</span> <span class="bp">None</span><span class="p">):</span>  <span class="c1"># ejb - *args, **kwargs):</span>
+<div class="viewcode-block" id="EnsembleData.deleteRow"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.StructureData.EnsembleData.deleteRow">[docs]</a>    <span class="k">def</span> <span class="nf">deleteRow</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rowNumber</span><span class="p">:</span> <span class="kc">None</span><span class="p">):</span>  <span class="c1"># ejb - *args, **kwargs):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Delete a numbered row of the table.</span>
 <span class="sd">        Row must be an integer and exist in the table.</span>
@@ -716,19 +706,19 @@
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">rowNumber</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
             <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;deleteRow: Row is not an int&#39;</span><span class="p">)</span>
 
-        <span class="n">rowExists</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="n">rowExists</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="k">if</span> <span class="n">rowNumber</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">index</span><span class="p">:</span>  <span class="c1"># the index must exist</span>
-            <span class="n">rowExists</span> <span class="o">=</span> <span class="bp">True</span>
+            <span class="n">rowExists</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;deleteRow: Row does not exist&#39;</span><span class="p">)</span>
 
         <span class="n">index</span> <span class="o">=</span> <span class="n">rowNumber</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_containingObject</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_containingObject</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="c1"># process without undoStack</span>
             <span class="c1"># colData = dict((x, self.loc[index].get(x)) for x in self.columns)  # grab the original values</span>
 
-            <span class="bp">self</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>  <span class="c1"># delete the row</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">drop</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>  <span class="c1"># ejb - reset the index</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>  <span class="c1"># delete the row</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">drop</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>  <span class="c1"># ejb - reset the index</span>
 
             <span class="bp">self</span><span class="o">.</span><span class="n">_finaliseStructureEnsemble</span><span class="p">(</span><span class="s1">&#39;change&#39;</span><span class="p">)</span>
 
@@ -737,8 +727,8 @@
 
                 <span class="n">colData</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">((</span><span class="n">x</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">index</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">x</span><span class="p">))</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">columns</span><span class="p">)</span>  <span class="c1"># grab the original values</span>
 
-                <span class="bp">self</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>  <span class="c1"># delete the row</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">drop</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>  <span class="c1"># ejb - reset the index</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>  <span class="c1"># delete the row</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">drop</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>  <span class="c1"># ejb - reset the index</span>
 
                 <span class="k">with</span> <span class="n">undoStackBlocking</span><span class="p">()</span> <span class="k">as</span> <span class="n">addUndoItem</span><span class="p">:</span>
                     <span class="n">addUndoItem</span><span class="p">(</span><span class="n">undo</span><span class="o">=</span><span class="n">partial</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_insertRow</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="o">**</span><span class="n">colData</span><span class="p">),</span>
@@ -771,7 +761,7 @@
         <span class="c1">#     if containingObject is not None:</span>
         <span class="c1">#         undo.decreaseBlocking()</span>
 
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_containingObject</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_containingObject</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="c1"># process without undoStack</span>
             <span class="n">colIndex</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>  <span class="c1"># get the index from the first arg value</span>
             <span class="k">for</span> <span class="n">sInd</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
@@ -788,36 +778,36 @@
                 <span class="bp">self</span><span class="o">.</span><span class="n">_finaliseStructureEnsemble</span><span class="p">(</span><span class="s1">&#39;change&#39;</span><span class="p">)</span>
 
     <span class="c1"># @logCommand__Container(get=&#39;self&#39;)</span>
-<div class="viewcode-block" id="EnsembleData.deleteCol"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.StructureData.EnsembleData.deleteCol">[docs]</a>    <span class="k">def</span> <span class="nf">deleteCol</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">columnName</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>  <span class="c1"># ejb - , *args, **kwargs):</span>
+<div class="viewcode-block" id="EnsembleData.deleteCol"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.StructureData.EnsembleData.deleteCol">[docs]</a>    <span class="k">def</span> <span class="nf">deleteCol</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">columnName</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>  <span class="c1"># ejb - , *args, **kwargs):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Delete a named column from the table, the columnName must be a string and exist in the table.</span>
 
 <span class="sd">        :param columnName:  name of the column</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="n">columnName</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">columnName</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;deleteCol: required positional argument&#39;</span><span class="p">)</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">columnName</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
             <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;deleteCol: Column is not a string&#39;</span><span class="p">)</span>
 
-        <span class="n">colExists</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="n">colExists</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="k">if</span> <span class="n">columnName</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>  <span class="c1"># the index must exist</span>
-            <span class="n">colExists</span> <span class="o">=</span> <span class="bp">True</span>
+            <span class="n">colExists</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;deleteCol: Column does not exist.&#39;</span><span class="p">)</span>
 
         <span class="n">colIndex</span> <span class="o">=</span> <span class="n">columnName</span>
 
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_containingObject</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_containingObject</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="c1"># process without undoStack</span>
             <span class="n">colData</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">((</span><span class="nb">str</span><span class="p">(</span><span class="n">sInd</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">sInd</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">colIndex</span><span class="p">))</span> <span class="k">for</span> <span class="n">sInd</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">index</span><span class="p">)</span>  <span class="c1"># grab the original values</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">colIndex</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">colIndex</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
             <span class="bp">self</span><span class="o">.</span><span class="n">_finaliseStructureEnsemble</span><span class="p">(</span><span class="s1">&#39;change&#39;</span><span class="p">)</span>
 
         <span class="k">else</span><span class="p">:</span>
             <span class="k">with</span> <span class="n">undoBlock</span><span class="p">():</span>
                 <span class="n">colData</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">((</span><span class="nb">str</span><span class="p">(</span><span class="n">sInd</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">sInd</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">colIndex</span><span class="p">))</span> <span class="k">for</span> <span class="n">sInd</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">index</span><span class="p">)</span>  <span class="c1"># grab the original values</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">colIndex</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">colIndex</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
                 <span class="k">with</span> <span class="n">undoStackBlocking</span><span class="p">()</span> <span class="k">as</span> <span class="n">addUndoItem</span><span class="p">:</span>
                     <span class="n">addUndoItem</span><span class="p">(</span><span class="n">undo</span><span class="o">=</span><span class="n">partial</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_insertCol</span><span class="p">,</span> <span class="n">colIndex</span><span class="p">,</span> <span class="o">**</span><span class="n">colData</span><span class="p">),</span>
@@ -826,7 +816,7 @@
                 <span class="bp">self</span><span class="o">.</span><span class="n">_finaliseStructureEnsemble</span><span class="p">(</span><span class="s1">&#39;change&#39;</span><span class="p">)</span></div>
 
     <span class="c1"># @logCommand__Container(get=&#39;self&#39;)</span>
-<div class="viewcode-block" id="EnsembleData.setValues"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.StructureData.EnsembleData.setValues">[docs]</a>    <span class="k">def</span> <span class="nf">setValues</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">accessor</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="s1">&#39;EnsembleData&#39;</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">],</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="bp">None</span><span class="p">:</span>
+<div class="viewcode-block" id="EnsembleData.setValues"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.StructureData.EnsembleData.setValues">[docs]</a>    <span class="k">def</span> <span class="nf">setValues</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">accessor</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="s1">&#39;EnsembleData&#39;</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">],</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Allows you to easily set values (in place) for fields in the EnsembleData</span>
 
@@ -851,7 +841,7 @@
         <span class="c1"># Row selection:</span>
         <span class="n">Real</span> <span class="o">=</span> <span class="n">numbers</span><span class="o">.</span><span class="n">Real</span>
 
-        <span class="n">rowExists</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="n">rowExists</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">accessor</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">Int64Index</span><span class="p">):</span>
             <span class="n">accessor</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">accessor</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>  <span class="c1"># ejb - accessor becomes the wrong type on undo</span>
 
@@ -860,9 +850,9 @@
             <span class="c1"># Shows again that numpy is an alien growth within python.</span>
             <span class="n">index</span> <span class="o">=</span> <span class="n">accessor</span>
             <span class="k">if</span> <span class="n">index</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">index</span><span class="p">:</span>
-                <span class="n">rowExists</span> <span class="o">=</span> <span class="bp">True</span>
+                <span class="n">rowExists</span> <span class="o">=</span> <span class="kc">True</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">rowExists</span> <span class="o">=</span> <span class="bp">False</span>
+                <span class="n">rowExists</span> <span class="o">=</span> <span class="kc">False</span>
                 <span class="n">nextIndex</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">index</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">else</span> <span class="mi">1</span>
                 <span class="k">if</span> <span class="n">index</span> <span class="o">!=</span> <span class="n">nextIndex</span><span class="p">:</span>
                     <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;setValues cannot create a new row, &quot;</span>
@@ -904,7 +894,7 @@
             <span class="c1"># )</span>
             <span class="c1">#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ejb</span>
         <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">accessor</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">):</span>  <span class="c1"># selector</span>
-            <span class="n">rows</span> <span class="o">=</span> <span class="n">accessor</span><span class="p">[</span><span class="n">accessor</span> <span class="o">==</span> <span class="bp">True</span><span class="p">]</span>
+            <span class="n">rows</span> <span class="o">=</span> <span class="n">accessor</span><span class="p">[</span><span class="n">accessor</span> <span class="o">==</span> <span class="kc">True</span><span class="p">]</span>
             <span class="k">assert</span> <span class="n">rows</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;Boolean selector must select a single row.&quot;</span>
             <span class="n">index</span> <span class="o">=</span> <span class="n">rows</span><span class="o">.</span><span class="n">index</span>
             <span class="k">assert</span> <span class="n">index</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="s2">&quot;Boolean selector must select an existing row&quot;</span>  <span class="c1"># ejb</span>
@@ -939,14 +929,14 @@
             <span class="k">elif</span> <span class="ow">not</span> <span class="n">rowExists</span><span class="p">:</span>
                 <span class="c1"># For new rows we want None rather than NaN as the default values</span>
                 <span class="c1"># For existing rows we leave the existing value</span>
-                <span class="n">values</span><span class="p">[</span><span class="n">col</span><span class="p">]</span> <span class="o">=</span> <span class="bp">None</span>
+                <span class="n">values</span><span class="p">[</span><span class="n">col</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
 
         <span class="k">if</span> <span class="n">kwargsCopy</span><span class="p">:</span>
             <span class="c1"># Some input did not match columns</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Attempt to set columns not present in DataFrame: </span><span class="si">%s</span><span class="s2">&quot;</span>
                              <span class="o">%</span> <span class="nb">list</span><span class="p">(</span><span class="n">kwargsCopy</span><span class="p">))</span>
 
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_containingObject</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_containingObject</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="c1"># process without undoStack</span>
             <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">values</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">index</span><span class="p">,</span> <span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">val</span>
@@ -973,21 +963,21 @@
                                     <span class="n">redo</span><span class="o">=</span><span class="n">partial</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">setValues</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">))</span>
                     <span class="k">else</span><span class="p">:</span>
                         <span class="c1"># undo addition of new row</span>
-                        <span class="n">addUndoItem</span><span class="p">(</span><span class="n">undo</span><span class="o">=</span><span class="n">partial</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">drop</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="bp">True</span><span class="p">),</span>
+                        <span class="n">addUndoItem</span><span class="p">(</span><span class="n">undo</span><span class="o">=</span><span class="n">partial</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">drop</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
                                     <span class="n">redo</span><span class="o">=</span><span class="n">partial</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">setValues</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">))</span>
 
                     <span class="bp">self</span><span class="o">.</span><span class="n">_finaliseStructureEnsemble</span><span class="p">(</span><span class="s1">&#39;change&#39;</span><span class="p">)</span></div>
 
     <span class="c1">### PDB mapping</span>
 
-    <span class="nd">@classmethod</span>
-<div class="viewcode-block" id="EnsembleData.from_pdb"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.StructureData.EnsembleData.from_pdb">[docs]</a>    <span class="k">def</span> <span class="nf">from_pdb</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+<div class="viewcode-block" id="EnsembleData.from_pdb"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.StructureData.EnsembleData.from_pdb">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">from_pdb</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Create an EnsembleData from a pdb file.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">dfs</span> <span class="o">=</span> <span class="n">pdb2df</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
 
-        <span class="n">ensemble</span> <span class="o">=</span> <span class="n">cls</span><span class="p">()</span>
+        <span class="n">ensemble</span> <span class="o">=</span> <span class="bp">cls</span><span class="p">()</span>
 
         <span class="n">ensemble</span><span class="p">[</span><span class="s1">&#39;modelNumber&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">dfs</span><span class="p">[</span><span class="s1">&#39;model&#39;</span><span class="p">]</span>
         <span class="n">ensemble</span><span class="p">[</span><span class="s1">&#39;chainCode&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">dfs</span><span class="p">[</span><span class="s1">&#39;chainID&#39;</span><span class="p">]</span>
@@ -1002,24 +992,24 @@
         <span class="n">ensemble</span><span class="p">[</span><span class="s1">&#39;z&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">dfs</span><span class="p">[</span><span class="s1">&#39;z&#39;</span><span class="p">]</span>
         <span class="n">ensemble</span><span class="p">[</span><span class="s1">&#39;occupancy&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">dfs</span><span class="p">[</span><span class="s1">&#39;occupancy&#39;</span><span class="p">]</span>
         <span class="n">ensemble</span><span class="p">[</span><span class="s1">&#39;bFactor&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">dfs</span><span class="p">[</span><span class="s1">&#39;tempFactor&#39;</span><span class="p">]</span>
-        <span class="n">ensemble</span><span class="p">[</span><span class="s1">&#39;nmrChainCode&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">None</span>
-        <span class="n">ensemble</span><span class="p">[</span><span class="s1">&#39;nmrSequenceCode&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">None</span>
-        <span class="n">ensemble</span><span class="p">[</span><span class="s1">&#39;nmrResidueName&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">None</span>
-        <span class="n">ensemble</span><span class="p">[</span><span class="s1">&#39;nmrAtomName&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">None</span>
-        <span class="k">return</span> <span class="n">cls</span><span class="p">(</span><span class="n">ensemble</span><span class="p">)</span></div>
+        <span class="n">ensemble</span><span class="p">[</span><span class="s1">&#39;nmrChainCode&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">ensemble</span><span class="p">[</span><span class="s1">&#39;nmrSequenceCode&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">ensemble</span><span class="p">[</span><span class="s1">&#39;nmrResidueName&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">ensemble</span><span class="p">[</span><span class="s1">&#39;nmrAtomName&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">ensemble</span><span class="p">)</span></div>
 
     <span class="c1">### Pandas compatibility methods</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">_constructor</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;EnsembleData&#39;</span><span class="p">:</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__class__</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span>
 
-    <span class="k">def</span> <span class="nf">__setattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="bp">None</span><span class="p">:</span>
+    <span class="k">def</span> <span class="fm">__setattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_reservedColumns</span><span class="p">:</span>
             <span class="c1"># notification done at the __setitem__ level</span>
             <span class="bp">self</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__setattr__</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+            <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__setattr__</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_finaliseStructureEnsemble</span><span class="p">(</span><span class="s1">&#39;change&#39;</span><span class="p">)</span>
 
     <span class="c1">### Property type checking</span>
@@ -1027,8 +1017,8 @@
     <span class="k">def</span> <span class="nf">_ccpnUnSort</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">oldIndex</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Custom Unsort: revert the table to its presorted state&quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">index</span> <span class="o">=</span> <span class="n">oldIndex</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">sort_index</span><span class="p">(</span><span class="n">inplace</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">drop</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>  <span class="c1"># use the correct reset_index</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sort_index</span><span class="p">(</span><span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">drop</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>  <span class="c1"># use the correct reset_index</span>
 
         <span class="k">pass</span>
 
@@ -1057,11 +1047,11 @@
         <span class="n">ll</span> <span class="o">=</span> <span class="nb">list</span><span class="p">((</span><span class="n">prev</span><span class="p">,</span> <span class="n">new</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="k">for</span> <span class="n">new</span><span class="p">,</span> <span class="n">prev</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">reordered</span><span class="p">))</span>
         <span class="n">newIndex</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">tt</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">tt</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">ll</span><span class="p">))</span>
 
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_containingObject</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_containingObject</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="c1"># process without undoStack</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">index</span> <span class="o">=</span> <span class="n">newIndex</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">sort_index</span><span class="p">(</span><span class="n">inplace</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">drop</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>  <span class="c1"># use the correct reset_index</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">sort_index</span><span class="p">(</span><span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">drop</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>  <span class="c1"># use the correct reset_index</span>
 
             <span class="bp">self</span><span class="o">.</span><span class="n">_finaliseStructureEnsemble</span><span class="p">(</span><span class="s1">&#39;change&#39;</span><span class="p">)</span>
 
@@ -1069,24 +1059,24 @@
             <span class="k">with</span> <span class="n">undoBlock</span><span class="p">():</span>
                 <span class="k">with</span> <span class="n">undoStackBlocking</span><span class="p">()</span> <span class="k">as</span> <span class="n">addUndoItem</span><span class="p">:</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">index</span> <span class="o">=</span> <span class="n">newIndex</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">sort_index</span><span class="p">(</span><span class="n">inplace</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">sort_index</span><span class="p">(</span><span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
                     <span class="c1"># reset index to one-origin successive integers</span>
                     <span class="c1"># self.index = range(1, len(reordered) + 1)   # old indexing</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">drop</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>  <span class="c1"># use the correct reset_index</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">drop</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>  <span class="c1"># use the correct reset_index</span>
 
                     <span class="n">addUndoItem</span><span class="p">(</span><span class="n">undo</span><span class="o">=</span><span class="n">partial</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_ccpnUnSort</span><span class="p">,</span> <span class="n">reordered</span><span class="p">),</span>
                                 <span class="n">redo</span><span class="o">=</span><span class="n">partial</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ccpnSort</span><span class="p">,</span> <span class="o">*</span><span class="n">columns</span><span class="p">))</span>
 
                 <span class="bp">self</span><span class="o">.</span><span class="n">_finaliseStructureEnsemble</span><span class="p">(</span><span class="s1">&#39;change&#39;</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="EnsembleData.reset_index"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.StructureData.EnsembleData.reset_index">[docs]</a>    <span class="k">def</span> <span class="nf">reset_index</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<div class="viewcode-block" id="EnsembleData.reset_index"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.StructureData.EnsembleData.reset_index">[docs]</a>    <span class="k">def</span> <span class="nf">reset_index</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;reset_index - overridden to generate index starting at one.&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">inplace</span><span class="p">:</span>
             <span class="n">new_obj</span> <span class="o">=</span> <span class="bp">self</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">new_obj</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
-        <span class="n">new_obj</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__bases__</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">new_obj</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="n">inplace</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="n">new_obj</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__bases__</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">new_obj</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="n">inplace</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
         <span class="c1"># new_obj.index = range(1, self.shape[0] + 1)</span>
         <span class="n">new_obj</span><span class="o">.</span><span class="n">index</span> <span class="o">=</span> <span class="n">new_obj</span><span class="o">.</span><span class="n">index</span> <span class="o">+</span> <span class="mi">1</span>
 
@@ -1095,7 +1085,7 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">new_obj</span></div>
 
-    <span class="k">def</span> <span class="nf">__setitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="bp">None</span><span class="p">:</span>
+    <span class="k">def</span> <span class="fm">__setitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;If the key is a single string with a reserved column name</span>
 <span class="sd">        the value(s) must be of the right type, and the operation is echoed and undoable.</span>
 <span class="sd">        Other keys are treated like native Pandas operations: no echoing, no undoing,</span>
@@ -1105,9 +1095,9 @@
         <span class="n">firstData</span> <span class="o">=</span> <span class="ow">not</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
 
         <span class="n">columnTypeData</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_reservedColumns</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">columnTypeData</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">columnTypeData</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="c1"># Not a reserved column name - set the value. No echoing or undo.</span>
-            <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__setitem__</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+            <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__setitem__</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
 
         <span class="k">else</span><span class="p">:</span>
             <span class="c1"># Reserved column name (which must be a plain string)</span>
@@ -1119,18 +1109,18 @@
 
             <span class="c1"># with logCommandBlock(get=&#39;self&#39;) as log:</span>
             <span class="c1">#     log(&#39;__setitem__&#39;)</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_containingObject</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_containingObject</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="c1"># process without any blocking or undoStack</span>
 
                 <span class="n">oldValue</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
-                <span class="k">if</span> <span class="n">oldValue</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">oldValue</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                     <span class="n">oldValue</span> <span class="o">=</span> <span class="n">oldValue</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
                 <span class="c1"># NBNB copy.copy returns a VIEW!!!</span>
 
                 <span class="c1"># Set the value using normal pandas behaviour.</span>
                 <span class="c1"># Anyway it is impossible to modify the input, as it could take so many forms</span>
                 <span class="c1"># We clean up the type castings etc. lower down</span>
-                <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__setitem__</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+                <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__setitem__</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
 
                 <span class="n">dataType</span><span class="p">,</span> <span class="n">typeConverterName</span> <span class="o">=</span> <span class="n">columnTypeData</span>
                 <span class="k">try</span><span class="p">:</span>
@@ -1145,22 +1135,22 @@
                     <span class="k">else</span><span class="p">:</span>
                         <span class="c1"># We set again to make sure of the dataType</span>
                         <span class="n">ll</span> <span class="o">=</span> <span class="n">fitToDataType</span><span class="p">(</span><span class="bp">self</span><span class="p">[</span><span class="n">key</span><span class="p">],</span> <span class="n">dataType</span><span class="p">)</span>
-                        <span class="k">if</span> <span class="n">dataType</span> <span class="ow">is</span> <span class="nb">int</span> <span class="ow">and</span> <span class="bp">None</span> <span class="ow">in</span> <span class="n">ll</span><span class="p">:</span>
-                            <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__setitem__</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">ll</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">object</span><span class="p">))</span>
+                        <span class="k">if</span> <span class="n">dataType</span> <span class="ow">is</span> <span class="nb">int</span> <span class="ow">and</span> <span class="kc">None</span> <span class="ow">in</span> <span class="n">ll</span><span class="p">:</span>
+                            <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__setitem__</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">ll</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">object</span><span class="p">))</span>
                         <span class="k">else</span><span class="p">:</span>
-                            <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__setitem__</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">ll</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dataType</span><span class="p">))</span>
+                            <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__setitem__</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">ll</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dataType</span><span class="p">))</span>
 
                     <span class="k">if</span> <span class="n">firstData</span><span class="p">:</span>
-                        <span class="bp">self</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">drop</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">drop</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
                     <span class="bp">self</span><span class="o">.</span><span class="n">_finaliseStructureEnsemble</span><span class="p">(</span><span class="s1">&#39;change&#39;</span><span class="p">)</span>
 
                 <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">es</span><span class="p">:</span>
                     <span class="c1"># We set the new value before the try:, so we need to go back to the previous state</span>
-                    <span class="k">if</span> <span class="n">oldValue</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
-                        <span class="bp">self</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">oldValue</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
                     <span class="k">else</span><span class="p">:</span>
-                        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__setitem__</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">oldValue</span><span class="p">)</span>
+                        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__setitem__</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">oldValue</span><span class="p">)</span>
                     <span class="k">raise</span>
 
             <span class="k">else</span><span class="p">:</span>
@@ -1169,14 +1159,14 @@
                         <span class="k">with</span> <span class="n">undoStackBlocking</span><span class="p">()</span> <span class="k">as</span> <span class="n">addUndoItem</span><span class="p">:</span>
                             <span class="c1"># WE need a copy, not a view, as this is used for undoing etc.</span>
                             <span class="n">oldValue</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
-                            <span class="k">if</span> <span class="n">oldValue</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                            <span class="k">if</span> <span class="n">oldValue</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                                 <span class="n">oldValue</span> <span class="o">=</span> <span class="n">oldValue</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
                             <span class="c1"># NBNB copy.copy returns a VIEW!!!</span>
 
                             <span class="c1"># Set the value using normal pandas behaviour.</span>
                             <span class="c1"># Anyway it is impossible to modify the input, as it could take so many forms</span>
                             <span class="c1"># We clean up the type castings etc. lower down</span>
-                            <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__setitem__</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+                            <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__setitem__</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
 
                             <span class="n">dataType</span><span class="p">,</span> <span class="n">typeConverterName</span> <span class="o">=</span> <span class="n">columnTypeData</span>
                             <span class="k">try</span><span class="p">:</span>
@@ -1191,35 +1181,35 @@
                                 <span class="k">else</span><span class="p">:</span>
                                     <span class="c1"># We set again to make sure of the dataType</span>
                                     <span class="n">ll</span> <span class="o">=</span> <span class="n">fitToDataType</span><span class="p">(</span><span class="bp">self</span><span class="p">[</span><span class="n">key</span><span class="p">],</span> <span class="n">dataType</span><span class="p">)</span>
-                                    <span class="k">if</span> <span class="n">dataType</span> <span class="ow">is</span> <span class="nb">int</span> <span class="ow">and</span> <span class="bp">None</span> <span class="ow">in</span> <span class="n">ll</span><span class="p">:</span>
-                                        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__setitem__</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">ll</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">object</span><span class="p">))</span>
+                                    <span class="k">if</span> <span class="n">dataType</span> <span class="ow">is</span> <span class="nb">int</span> <span class="ow">and</span> <span class="kc">None</span> <span class="ow">in</span> <span class="n">ll</span><span class="p">:</span>
+                                        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__setitem__</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">ll</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">object</span><span class="p">))</span>
                                     <span class="k">else</span><span class="p">:</span>
-                                        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__setitem__</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">ll</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dataType</span><span class="p">))</span>
+                                        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__setitem__</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">ll</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dataType</span><span class="p">))</span>
 
                                 <span class="k">if</span> <span class="n">firstData</span><span class="p">:</span>
-                                    <span class="bp">self</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">drop</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+                                    <span class="bp">self</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">drop</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
                                 <span class="c1"># add item to the undo stack</span>
-                                <span class="k">if</span> <span class="n">oldValue</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+                                <span class="k">if</span> <span class="n">oldValue</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                                     <span class="c1"># undo addition of new column</span>
-                                    <span class="n">addUndoItem</span><span class="p">(</span><span class="n">undo</span><span class="o">=</span><span class="n">partial</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">drop</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="bp">True</span><span class="p">),</span>
-                                                <span class="n">redo</span><span class="o">=</span><span class="n">partial</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__setitem__</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">))</span>
+                                    <span class="n">addUndoItem</span><span class="p">(</span><span class="n">undo</span><span class="o">=</span><span class="n">partial</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">drop</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
+                                                <span class="n">redo</span><span class="o">=</span><span class="n">partial</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="fm">__setitem__</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">))</span>
                                 <span class="k">else</span><span class="p">:</span>
                                     <span class="c1"># Undo overwrite of existing column</span>
-                                    <span class="n">addUndoItem</span><span class="p">(</span><span class="n">undo</span><span class="o">=</span><span class="n">partial</span><span class="p">(</span><span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__setitem__</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">oldValue</span><span class="p">),</span>
-                                                <span class="n">redo</span><span class="o">=</span><span class="n">partial</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__setitem__</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">))</span>
+                                    <span class="n">addUndoItem</span><span class="p">(</span><span class="n">undo</span><span class="o">=</span><span class="n">partial</span><span class="p">(</span><span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__setitem__</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">oldValue</span><span class="p">),</span>
+                                                <span class="n">redo</span><span class="o">=</span><span class="n">partial</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="fm">__setitem__</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">))</span>
 
                                 <span class="bp">self</span><span class="o">.</span><span class="n">_finaliseStructureEnsemble</span><span class="p">(</span><span class="s1">&#39;change&#39;</span><span class="p">)</span>
 
                             <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">es</span><span class="p">:</span>
                                 <span class="c1"># We set the new value before the try:, so we need to go back to the previous state</span>
-                                <span class="k">if</span> <span class="n">oldValue</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
-                                    <span class="bp">self</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+                                <span class="k">if</span> <span class="n">oldValue</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                                    <span class="bp">self</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
                                 <span class="k">else</span><span class="p">:</span>
-                                    <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__setitem__</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">oldValue</span><span class="p">)</span>
+                                    <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__setitem__</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">oldValue</span><span class="p">)</span>
                                 <span class="k">raise</span>
 
-    <span class="k">def</span> <span class="nf">_modelNumberConversion</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">force</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="bp">False</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_modelNumberConversion</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">force</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Convert modelNumber series to valid data, changing value *in place*</span>
 <span class="sd">        and update containingObject - or raise an error&quot;&quot;&quot;</span>
 
@@ -1227,19 +1217,19 @@
 
         <span class="n">ll</span> <span class="o">=</span> <span class="n">fitToDataType</span><span class="p">(</span><span class="bp">self</span><span class="p">[</span><span class="n">key</span><span class="p">],</span> <span class="nb">int</span><span class="p">,</span> <span class="n">force</span><span class="o">=</span><span class="n">force</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">force</span><span class="p">:</span>
-            <span class="n">ll</span> <span class="o">=</span> <span class="p">[(</span><span class="n">x</span> <span class="k">if</span> <span class="p">(</span><span class="n">x</span> <span class="ow">and</span> <span class="n">x</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span> <span class="k">else</span> <span class="bp">None</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">ll</span><span class="p">]</span>
+            <span class="n">ll</span> <span class="o">=</span> <span class="p">[(</span><span class="n">x</span> <span class="k">if</span> <span class="p">(</span><span class="n">x</span> <span class="ow">and</span> <span class="n">x</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span> <span class="k">else</span> <span class="kc">None</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">ll</span><span class="p">]</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">if</span> <span class="nb">any</span><span class="p">((</span><span class="n">x</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> <span class="n">x</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">ll</span><span class="p">):</span>
+            <span class="k">if</span> <span class="nb">any</span><span class="p">((</span><span class="n">x</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">x</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">ll</span><span class="p">):</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Model numbers must be integers &gt;= 1 or None&quot;</span><span class="p">)</span>
-        <span class="k">if</span> <span class="bp">None</span> <span class="ow">in</span> <span class="n">ll</span><span class="p">:</span>
-            <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__setitem__</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">ll</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">object</span><span class="p">))</span>
+        <span class="k">if</span> <span class="kc">None</span> <span class="ow">in</span> <span class="n">ll</span><span class="p">:</span>
+            <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__setitem__</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">ll</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">object</span><span class="p">))</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__setitem__</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">ll</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">))</span>
+            <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__setitem__</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">ll</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">))</span>
 
         <span class="c1"># Reset models to match model numbers in data</span>
         <span class="c1"># NBNB resetModels currently removes rows with modelNumber == None. To change??</span>
         <span class="n">containingObject</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_containingObject</span>
-        <span class="k">if</span> <span class="n">containingObject</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">containingObject</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">containingObject</span><span class="p">,</span> <span class="s1">&#39;resetModels&#39;</span><span class="p">):</span>
                 <span class="c1"># assert(containingObject.className == &#39;StructureEnsemble&#39;)</span>
                 <span class="n">containingObject</span><span class="o">.</span><span class="n">resetModels</span><span class="p">()</span>
@@ -1247,7 +1237,7 @@
                 <span class="c1"># assert(containingObject.className == &#39;Model&#39;)</span>
                 <span class="n">containingObject</span><span class="o">.</span><span class="n">structureEnsemble</span><span class="o">.</span><span class="n">resetModels</span><span class="p">()</span>
 
-    <span class="k">def</span> <span class="nf">_nmrSequenceCodeConversion</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">force</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="bp">False</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_nmrSequenceCodeConversion</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">force</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Convert nmrSequenceCode series to valid data, changing value *in place*</span>
 
 <span class="sd">        NB this is needed to convert integers and integer-valued floats</span>
@@ -1260,13 +1250,13 @@
         <span class="n">ll</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="n">appnd</span> <span class="o">=</span> <span class="n">ll</span><span class="o">.</span><span class="n">append</span>
         <span class="k">for</span> <span class="n">val</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">[</span><span class="n">key</span><span class="p">]:</span>
-            <span class="k">if</span> <span class="n">val</span> <span class="ow">is</span> <span class="bp">None</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">val</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
                 <span class="n">appnd</span><span class="p">(</span><span class="n">val</span><span class="p">)</span>
             <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="n">numpy</span><span class="o">.</span><span class="n">integer</span><span class="p">)):</span>
                 <span class="n">appnd</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">val</span><span class="p">))</span>
             <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="n">Real</span><span class="p">):</span>
                 <span class="k">if</span> <span class="n">isnan</span><span class="p">(</span><span class="n">val</span><span class="p">):</span>
-                    <span class="n">appnd</span><span class="p">(</span><span class="bp">None</span><span class="p">)</span>
+                    <span class="n">appnd</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
                 <span class="k">elif</span> <span class="ow">not</span> <span class="n">fmod</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="mi">1</span><span class="p">):</span>
                     <span class="n">appnd</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">val</span><span class="p">)))</span>
                 <span class="k">elif</span> <span class="n">force</span><span class="p">:</span>
@@ -1278,9 +1268,9 @@
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;nmrSequenceCode must be set as strings or integer values&quot;</span><span class="p">)</span>
         <span class="c1">#</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__setitem__</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">ll</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">str</span><span class="p">))</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__setitem__</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">ll</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">str</span><span class="p">))</span>
 
-    <span class="k">def</span> <span class="nf">_occupancyConversion</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">force</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="bp">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">]:</span>
+    <span class="k">def</span> <span class="nf">_occupancyConversion</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">force</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">]:</span>
         <span class="sd">&quot;&quot;&quot;Convert occupancy series to valid data, changing value *in place*&quot;&quot;&quot;</span>
 
         <span class="n">key</span> <span class="o">=</span> <span class="s1">&#39;occupancy&#39;</span>
@@ -1292,10 +1282,10 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="k">if</span> <span class="nb">any</span><span class="p">((</span><span class="n">x</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">x</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">ll</span><span class="p">):</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Occupancies must be in the range 0 &lt;= x &lt;= 1&quot;</span><span class="p">)</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__setitem__</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">ll</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">))</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__setitem__</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">ll</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">))</span>
 
     <span class="c1"># Custom string representation</span>
-    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
         <span class="n">d</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">d</span><span class="p">[</span><span class="s1">&#39;models&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">[</span><span class="s1">&#39;modelNumber&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">unique</span><span class="p">())</span>
@@ -1315,11 +1305,11 @@
             <span class="n">d</span><span class="p">[</span><span class="s1">&#39;atoms&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
         <span class="c1"># Just count atoms...?</span>
 
-        <span class="k">return</span> <span class="s1">&#39;&lt;EnsembleData (M:{models},C:{chains},R:{residues},A:{atoms})&gt;&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="o">**</span><span class="n">d</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="s1">&#39;&lt;EnsembleData (M:</span><span class="si">{models}</span><span class="s1">,C:</span><span class="si">{chains}</span><span class="s1">,R:</span><span class="si">{residues}</span><span class="s1">,A:</span><span class="si">{atoms}</span><span class="s1">)&gt;&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="o">**</span><span class="n">d</span><span class="p">)</span></div>
 
 
 <span class="c1"># NBNB TODO this should be Collection, not Sequence (from python 3.6 only)</span>
-<div class="viewcode-block" id="fitToDataType"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.StructureData.fitToDataType">[docs]</a><span class="k">def</span> <span class="nf">fitToDataType</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="n">collections</span><span class="o">.</span><span class="n">Sequence</span><span class="p">,</span> <span class="n">dataType</span><span class="p">:</span> <span class="nb">type</span><span class="p">,</span> <span class="n">force</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="bp">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
+<div class="viewcode-block" id="fitToDataType"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.StructureData.fitToDataType">[docs]</a><span class="k">def</span> <span class="nf">fitToDataType</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="n">collections</span><span class="o">.</span><span class="n">Sequence</span><span class="p">,</span> <span class="n">dataType</span><span class="p">:</span> <span class="nb">type</span><span class="p">,</span> <span class="n">force</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;Convert any data sequence to a list of dataType.</span>
 
 <span class="sd">    If force will convert all values to type, if possible, and set None otherwise.</span>
@@ -1339,7 +1329,7 @@
             <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="n">pd</span><span class="o">.</span><span class="n">to_numeric</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">errors</span><span class="o">=</span><span class="s1">&#39;coerce&#39;</span><span class="p">))</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="c1"># Convert None to NaN and return if all-float</span>
-            <span class="n">dd</span> <span class="o">=</span> <span class="p">{</span><span class="bp">None</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="s1">&#39;NaN&#39;</span><span class="p">)}</span>
+            <span class="n">dd</span> <span class="o">=</span> <span class="p">{</span><span class="kc">None</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="s1">&#39;NaN&#39;</span><span class="p">)}</span>
             <span class="k">try</span><span class="p">:</span>
                 <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="n">x</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">Real</span><span class="p">)</span> <span class="k">else</span> <span class="n">dd</span><span class="p">[</span><span class="n">x</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">data</span><span class="p">)</span>
             <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
@@ -1356,16 +1346,16 @@
         <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="n">valueToOptionalType</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">dataType</span><span class="p">,</span> <span class="n">force</span><span class="o">=</span><span class="n">force</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">data</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="valueToOptionalType"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.StructureData.valueToOptionalType">[docs]</a><span class="k">def</span> <span class="nf">valueToOptionalType</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">dataType</span><span class="p">:</span> <span class="nb">type</span><span class="p">,</span> <span class="n">force</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="s1">&#39;dataType&#39;</span><span class="p">]:</span>
+<div class="viewcode-block" id="valueToOptionalType"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.StructureData.valueToOptionalType">[docs]</a><span class="k">def</span> <span class="nf">valueToOptionalType</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">dataType</span><span class="p">:</span> <span class="nb">type</span><span class="p">,</span> <span class="n">force</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="s1">&#39;dataType&#39;</span><span class="p">]:</span>
     <span class="sd">&quot;&quot;&quot;Converts  None and NaN to None, and returns list of optional dataType</span>
 
 <span class="sd">    if force is True tries to coerce value to dataType&quot;&quot;&quot;</span>
 
-    <span class="k">if</span> <span class="n">x</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
-        <span class="k">return</span> <span class="bp">None</span>
+    <span class="k">if</span> <span class="n">x</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span>
 
     <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">numbers</span><span class="o">.</span><span class="n">Real</span><span class="p">)</span> <span class="ow">and</span> <span class="n">math</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">None</span>
+        <span class="k">return</span> <span class="kc">None</span>
 
     <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">dataType</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">x</span>
@@ -1384,21 +1374,21 @@
         <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Value </span><span class="si">%s</span><span class="s2"> does not correspond to type </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">dataType</span><span class="p">))</span></div>
 
 
-<div class="viewcode-block" id="valueToOptionalInt"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.StructureData.valueToOptionalInt">[docs]</a><span class="k">def</span> <span class="nf">valueToOptionalInt</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">force</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="bp">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]:</span>
+<div class="viewcode-block" id="valueToOptionalInt"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.StructureData.valueToOptionalInt">[docs]</a><span class="k">def</span> <span class="nf">valueToOptionalInt</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">force</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]:</span>
     <span class="sd">&quot;&quot;&quot;Converts  None and NaN to None, and integer-valued floats to their int value</span>
 
 <span class="sd">    if force is True calls float(x) before testing&quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="n">x</span> <span class="ow">is</span> <span class="bp">None</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">numbers</span><span class="o">.</span><span class="n">Real</span><span class="p">)</span> <span class="ow">and</span> <span class="n">math</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">None</span>
+    <span class="k">if</span> <span class="n">x</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">numbers</span><span class="o">.</span><span class="n">Real</span><span class="p">)</span> <span class="ow">and</span> <span class="n">math</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+        <span class="k">return</span> <span class="kc">None</span>
 
     <span class="k">if</span> <span class="n">force</span><span class="p">:</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">x</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
         <span class="k">except</span><span class="p">:</span>
-            <span class="k">return</span> <span class="bp">None</span>
+            <span class="k">return</span> <span class="kc">None</span>
         <span class="k">if</span> <span class="n">math</span><span class="o">.</span><span class="n">fmod</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="mi">1</span><span class="p">):</span>
             <span class="c1"># assert bool(math.fmod(float(&#39;NaN&#39;))) is True</span>
-            <span class="k">return</span> <span class="bp">None</span>
+            <span class="k">return</span> <span class="kc">None</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
 
@@ -1423,12 +1413,12 @@
     <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
         <span class="n">pdbString</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="n">modelNumber</span> <span class="o">=</span> <span class="mi">1</span>
-        <span class="n">dfs</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="n">dfs</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="n">f</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">l</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;MODEL&#39;</span><span class="p">):</span>
                 <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">pdbString</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
                     <span class="n">df</span> <span class="o">=</span> <span class="n">_pdbStringToDf</span><span class="p">(</span><span class="n">pdbString</span><span class="p">,</span> <span class="n">modelNumber</span><span class="p">)</span>
-                    <span class="k">if</span> <span class="n">dfs</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">dfs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                         <span class="n">dfs</span> <span class="o">=</span> <span class="n">df</span>
                     <span class="k">else</span><span class="p">:</span>
                         <span class="n">dfs</span> <span class="o">=</span> <span class="n">dfs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
@@ -1437,13 +1427,13 @@
             <span class="k">elif</span> <span class="n">l</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;ATOM&#39;</span><span class="p">):</span>
                 <span class="n">pdbString</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">l</span><span class="p">)</span>
         <span class="n">df</span> <span class="o">=</span> <span class="n">_pdbStringToDf</span><span class="p">(</span><span class="n">pdbString</span><span class="p">,</span> <span class="n">modelNumber</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">dfs</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">dfs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="c1"># print(&#39;new dfs&#39;)</span>
             <span class="n">dfs</span> <span class="o">=</span> <span class="n">df</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">dfs</span> <span class="o">=</span> <span class="n">dfs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
     <span class="n">dfs</span><span class="p">[</span><span class="s1">&#39;idx&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">dfs</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">+</span> <span class="mi">1</span>
-    <span class="n">dfs</span><span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="s1">&#39;idx&#39;</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    <span class="n">dfs</span><span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="s1">&#39;idx&#39;</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">dfs</span></div>
 
 
@@ -1457,7 +1447,7 @@
 
     <span class="n">pdbString</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">modelLines</span><span class="p">)</span>
 
-    <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_fwf</span><span class="p">(</span><span class="n">StringIO</span><span class="p">(</span><span class="n">pdbString</span><span class="p">),</span> <span class="n">header</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">colspecs</span><span class="o">=</span><span class="n">colspecs</span><span class="p">,</span> <span class="n">names</span><span class="o">=</span><span class="n">colnames</span><span class="p">)</span>
+    <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_fwf</span><span class="p">(</span><span class="n">StringIO</span><span class="p">(</span><span class="n">pdbString</span><span class="p">),</span> <span class="n">header</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">colspecs</span><span class="o">=</span><span class="n">colspecs</span><span class="p">,</span> <span class="n">names</span><span class="o">=</span><span class="n">colnames</span><span class="p">)</span>
     <span class="n">df</span><span class="p">[</span><span class="s1">&#39;model&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">modelNumber</span>
     <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;ATOM&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;ATOM&#39;</span><span class="p">]</span>
     <span class="k">return</span> <span class="n">df</span>
@@ -1496,15 +1486,15 @@
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
 <div id="searchbox" style="display: none" role="search">
-  <h3>Quick search</h3>
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
     <form class="search" action="../../../search.html" method="get">
-      <input type="text" name="q" />
+      <input type="text" name="q" aria-labelledby="searchlabel" />
       <input type="submit" value="Go" />
-      <input type="hidden" name="check_keywords" value="yes" />
-      <input type="hidden" name="area" value="default" />
     </form>
+    </div>
 </div>
-<script type="text/javascript">$('#searchbox').show(0);</script>
+<script>$('#searchbox').show(0);</script>
         </div>
       </div>
       <div class="clearer"></div>
@@ -1518,13 +1508,13 @@
         <li class="right" >
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../index.html">Python  documentation</a> &raquo;</li>
-          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="../../../index.html">Python  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &#187;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
-        &copy; Copyright .
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.1.
+        &#169; Copyright .
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.4.0.
     </div>
   </body>
 </html>

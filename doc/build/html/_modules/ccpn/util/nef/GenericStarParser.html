@@ -1,32 +1,22 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
+<!DOCTYPE html>
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    
-    <title>ccpn.util.nef.GenericStarParser &mdash; Python  documentation</title>
-    
+    <meta charset="utf-8" />
+    <title>ccpn.util.nef.GenericStarParser &#8212; Python  documentation</title>
     <link rel="stylesheet" href="../../../../_static/classic.css" type="text/css" />
     <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
     
-    <script type="text/javascript">
-      var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    '../../../../',
-        VERSION:     '',
-        COLLAPSE_INDEX: false,
-        FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true
-      };
-    </script>
-    <script type="text/javascript" src="../../../../_static/jquery.js"></script>
-    <script type="text/javascript" src="../../../../_static/underscore.js"></script>
-    <script type="text/javascript" src="../../../../_static/doctools.js"></script>
-    <link rel="top" title="Python  documentation" href="../../../../index.html" />
-    <link rel="up" title="Module code" href="../../../index.html" /> 
-  </head>
-  <body role="document">
+    <script id="documentation_options" data-url_root="../../../../" src="../../../../_static/documentation_options.js"></script>
+    <script src="../../../../_static/jquery.js"></script>
+    <script src="../../../../_static/underscore.js"></script>
+    <script src="../../../../_static/doctools.js"></script>
+    <script src="../../../../_static/language_data.js"></script>
+    
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+  </head><body>
     <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
@@ -36,8 +26,8 @@
         <li class="right" >
           <a href="../../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../../index.html">Python  documentation</a> &raquo;</li>
-          <li class="nav-item nav-item-1"><a href="../../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="../../../../index.html">Python  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../../index.html" accesskey="U">Module code</a> &#187;</li> 
       </ul>
     </div>  
 
@@ -235,28 +225,28 @@
 <span class="c1"># Options corresponding to the supported parser modes: &#39;standard&#39;, &#39;lenient&#39;, &#39;strict&#39;, and &#39;IUCr&#39;</span>
 <span class="n">_parserModeOptions</span> <span class="o">=</span> <span class="p">{</span>
     <span class="s1">&#39;lenient&#39;</span> <span class="p">:</span> <span class="p">{</span>
-        <span class="s1">&#39;enforceSaveFrameStop&#39;</span>     <span class="p">:</span> <span class="bp">False</span><span class="p">,</span>
-        <span class="s1">&#39;enforceLoopStop&#39;</span>          <span class="p">:</span> <span class="bp">False</span><span class="p">,</span>
-        <span class="s1">&#39;padIncompleteLoops&#39;</span>       <span class="p">:</span> <span class="bp">True</span><span class="p">,</span>
-        <span class="s1">&#39;allowSquareBracketStrings&#39;</span><span class="p">:</span> <span class="bp">True</span>
+        <span class="s1">&#39;enforceSaveFrameStop&#39;</span>     <span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="s1">&#39;enforceLoopStop&#39;</span>          <span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="s1">&#39;padIncompleteLoops&#39;</span>       <span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="s1">&#39;allowSquareBracketStrings&#39;</span><span class="p">:</span> <span class="kc">True</span>
         <span class="p">},</span>
     <span class="s1">&#39;strict&#39;</span>  <span class="p">:</span> <span class="p">{</span>
-        <span class="s1">&#39;enforceSaveFrameStop&#39;</span>     <span class="p">:</span> <span class="bp">True</span><span class="p">,</span>
-        <span class="s1">&#39;enforceLoopStop&#39;</span>          <span class="p">:</span> <span class="bp">True</span><span class="p">,</span>
-        <span class="s1">&#39;padIncompleteLoops&#39;</span>       <span class="p">:</span> <span class="bp">False</span><span class="p">,</span>
-        <span class="s1">&#39;allowSquareBracketStrings&#39;</span><span class="p">:</span> <span class="bp">False</span>
+        <span class="s1">&#39;enforceSaveFrameStop&#39;</span>     <span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="s1">&#39;enforceLoopStop&#39;</span>          <span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="s1">&#39;padIncompleteLoops&#39;</span>       <span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="s1">&#39;allowSquareBracketStrings&#39;</span><span class="p">:</span> <span class="kc">False</span>
         <span class="p">},</span>
     <span class="s1">&#39;standard&#39;</span><span class="p">:</span> <span class="p">{</span>
-        <span class="s1">&#39;enforceSaveFrameStop&#39;</span>     <span class="p">:</span> <span class="bp">True</span><span class="p">,</span>
-        <span class="s1">&#39;enforceLoopStop&#39;</span>          <span class="p">:</span> <span class="bp">False</span><span class="p">,</span>
-        <span class="s1">&#39;padIncompleteLoops&#39;</span>       <span class="p">:</span> <span class="bp">False</span><span class="p">,</span>
-        <span class="s1">&#39;allowSquareBracketStrings&#39;</span><span class="p">:</span> <span class="bp">True</span>
+        <span class="s1">&#39;enforceSaveFrameStop&#39;</span>     <span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="s1">&#39;enforceLoopStop&#39;</span>          <span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="s1">&#39;padIncompleteLoops&#39;</span>       <span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="s1">&#39;allowSquareBracketStrings&#39;</span><span class="p">:</span> <span class="kc">True</span>
         <span class="p">},</span>
     <span class="s1">&#39;IUCr&#39;</span>    <span class="p">:</span> <span class="p">{</span>
-        <span class="s1">&#39;enforceSaveFrameStop&#39;</span>     <span class="p">:</span> <span class="bp">True</span><span class="p">,</span>
-        <span class="s1">&#39;enforceLoopStop&#39;</span>          <span class="p">:</span> <span class="bp">False</span><span class="p">,</span>
-        <span class="s1">&#39;padIncompleteLoops&#39;</span>       <span class="p">:</span> <span class="bp">False</span><span class="p">,</span>
-        <span class="s1">&#39;allowSquareBracketStrings&#39;</span><span class="p">:</span> <span class="bp">False</span><span class="p">},</span>
+        <span class="s1">&#39;enforceSaveFrameStop&#39;</span>     <span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="s1">&#39;enforceLoopStop&#39;</span>          <span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="s1">&#39;padIncompleteLoops&#39;</span>       <span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="s1">&#39;allowSquareBracketStrings&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">},</span>
     <span class="p">}</span>
 
 
@@ -315,15 +305,15 @@
 
 <div class="viewcode-block" id="NamedOrderedDict"><a class="viewcode-back" href="../../../../ccpn/ccpn.util.nef.html#ccpn.util.nef.GenericStarParser.NamedOrderedDict">[docs]</a><span class="k">class</span> <span class="nc">NamedOrderedDict</span><span class="p">(</span><span class="n">OrderedDict</span><span class="p">):</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
-        <span class="nb">super</span><span class="p">(</span><span class="n">NamedOrderedDict</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">()</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">NamedOrderedDict</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
 
-    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">(name=</span><span class="si">%s</span><span class="s1">)&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">(name=</span><span class="si">%s</span><span class="s1">)&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">(</span><span class="si">%s</span><span class="s1">, name=</span><span class="si">%s</span><span class="s1">)&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span><span class="p">,</span> <span class="nb">list</span><span class="p">(</span><span class="n">tt</span> <span class="k">for</span> <span class="n">tt</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">items</span><span class="p">()),</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">(</span><span class="si">%s</span><span class="s1">, name=</span><span class="si">%s</span><span class="s1">)&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="nb">list</span><span class="p">(</span><span class="n">tt</span> <span class="k">for</span> <span class="n">tt</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">items</span><span class="p">()),</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
 
 <div class="viewcode-block" id="NamedOrderedDict.addItem"><a class="viewcode-back" href="../../../../ccpn/ccpn.util.nef.html#ccpn.util.nef.GenericStarParser.NamedOrderedDict.addItem">[docs]</a>    <span class="k">def</span> <span class="nf">addItem</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tag</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">tag</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">:</span>
@@ -343,10 +333,10 @@
 <span class="sd">        If no column matches return None</span>
 <span class="sd">        If columns match more than one loop throw an error&quot;&quot;&quot;</span>
         <span class="n">valueDict</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">((</span><span class="n">x</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">x</span><span class="p">))</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">columns</span><span class="p">)</span>
-        <span class="n">testSet</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">valueDict</span><span class="o">.</span><span class="n">values</span><span class="p">()</span> <span class="k">if</span> <span class="n">x</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">)</span>
+        <span class="n">testSet</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">valueDict</span><span class="o">.</span><span class="n">values</span><span class="p">()</span> <span class="k">if</span> <span class="n">x</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">)</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">testSet</span><span class="p">:</span>
             <span class="c1"># None of the column names match</span>
-            <span class="k">return</span> <span class="bp">None</span>
+            <span class="k">return</span> <span class="kc">None</span>
         <span class="k">elif</span> <span class="nb">any</span><span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">Loop</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">testSet</span><span class="p">):</span>
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">testSet</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
                 <span class="c1"># All columns match a single loop (or nothing) return the loop data</span>
@@ -395,8 +385,8 @@
 <div class="viewcode-block" id="DataExtent"><a class="viewcode-back" href="../../../../ccpn/ccpn.util.nef.html#ccpn.util.nef.GenericStarParser.DataExtent">[docs]</a><span class="k">class</span> <span class="nc">DataExtent</span><span class="p">(</span><span class="n">NamedOrderedDict</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Top level container for general STAR object tree&quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;Root&#39;</span><span class="p">):</span>
-        <span class="nb">super</span><span class="p">(</span><span class="n">DataExtent</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;Root&#39;</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">DataExtent</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
 
 <div class="viewcode-block" id="DataExtent.toString"><a class="viewcode-back" href="../../../../ccpn/ccpn.util.nef.html#ccpn.util.nef.GenericStarParser.DataExtent.toString">[docs]</a>    <span class="k">def</span> <span class="nf">toString</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">separator</span><span class="o">=</span><span class="n">_defaultSeparator</span><span class="p">):</span>
         <span class="n">blockSeparator</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="se">\n\n\n\n</span><span class="s1">&#39;</span>
@@ -418,7 +408,7 @@
 
     <span class="c1"># Tag prefix for string output, which is prefixed to item names before writing.</span>
     <span class="c1"># Can be set in subclass instances</span>
-    <span class="n">tagPrefix</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="n">tagPrefix</span> <span class="o">=</span> <span class="kc">None</span>
 
 <div class="viewcode-block" id="DataBlock.toString"><a class="viewcode-back" href="../../../../ccpn/ccpn.util.nef.html#ccpn.util.nef.GenericStarParser.DataBlock.toString">[docs]</a>    <span class="k">def</span> <span class="nf">toString</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">separator</span><span class="o">=</span><span class="n">_defaultSeparator</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Convert DataBlock to string, for writing&quot;&quot;&quot;</span>
@@ -436,7 +426,7 @@
 
     <span class="c1"># Tag prefix for string output, which is prefixed to item names before writing.</span>
     <span class="c1"># Can be set in subclass instances</span>
-    <span class="n">tagPrefix</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="n">tagPrefix</span> <span class="o">=</span> <span class="kc">None</span>
 
 <div class="viewcode-block" id="SaveFrame.toString"><a class="viewcode-back" href="../../../../ccpn/ccpn.util.nef.html#ccpn.util.nef.GenericStarParser.SaveFrame.toString">[docs]</a>    <span class="k">def</span> <span class="nf">toString</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="n">_defaultIndent</span><span class="p">,</span> <span class="n">separator</span><span class="o">=</span><span class="n">_defaultSeparator</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Convert SaveFrame to string, for writing&quot;&quot;&quot;</span>
@@ -485,7 +475,7 @@
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;tag </span><span class="si">%s</span><span class="s2">, values </span><span class="si">%s</span><span class="s2"> do not match columns: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">tags</span><span class="p">))</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="c1">#</span>
-            <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2"> has no attribute(s) matching </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span><span class="p">,</span> <span class="n">name</span><span class="p">))</span></div>
+            <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2"> has no attribute(s) matching </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="n">name</span><span class="p">))</span></div>
 
 
 <div class="viewcode-block" id="Loop"><a class="viewcode-back" href="../../../../ccpn/ccpn.util.nef.html#ccpn.util.nef.GenericStarParser.Loop">[docs]</a><span class="k">class</span> <span class="nc">Loop</span><span class="p">:</span>
@@ -500,9 +490,9 @@
 
     <span class="c1"># Tag prefix for string output, which is prefixed to column names before writing.</span>
     <span class="c1"># Can be set in subclass instances.</span>
-    <span class="n">tagPrefix</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="n">tagPrefix</span> <span class="o">=</span> <span class="kc">None</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="p">[]</span>
@@ -513,22 +503,22 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_columns</span> <span class="o">=</span> <span class="p">[]</span>
 
-    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="s1">&#39;&lt;</span><span class="si">%s</span><span class="s1">:</span><span class="si">%s</span><span class="s1">&gt;&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s1">&#39;&lt;</span><span class="si">%s</span><span class="s1">:</span><span class="si">%s</span><span class="s1">&gt;&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">columns</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Column names&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_columns</span><span class="p">)</span>
 
-<div class="viewcode-block" id="Loop.newRow"><a class="viewcode-back" href="../../../../ccpn/ccpn.util.nef.html#ccpn.util.nef.GenericStarParser.Loop.newRow">[docs]</a>    <span class="k">def</span> <span class="nf">newRow</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">values</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+<div class="viewcode-block" id="Loop.newRow"><a class="viewcode-back" href="../../../../ccpn/ccpn.util.nef.html#ccpn.util.nef.GenericStarParser.Loop.newRow">[docs]</a>    <span class="k">def</span> <span class="nf">newRow</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">values</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Add new row, initialised from values&quot;&quot;&quot;</span>
 
         <span class="c1"># Use internal attribute for speed, columns do not change</span>
         <span class="n">columns</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_columns</span>
 
-        <span class="k">if</span> <span class="n">values</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
-            <span class="n">row</span> <span class="o">=</span> <span class="n">LoopRow</span><span class="p">((</span><span class="n">x</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">columns</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">values</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">row</span> <span class="o">=</span> <span class="n">LoopRow</span><span class="p">((</span><span class="n">x</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">columns</span><span class="p">)</span>
 
         <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">values</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
             <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">values</span> <span class="k">if</span> <span class="n">x</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">columns</span><span class="p">):</span>
@@ -560,7 +550,7 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="n">columns</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">columnName</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Loop.removeColumn"><a class="viewcode-back" href="../../../../ccpn/ccpn.util.nef.html#ccpn.util.nef.GenericStarParser.Loop.removeColumn">[docs]</a>    <span class="k">def</span> <span class="nf">removeColumn</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">columnName</span><span class="p">,</span> <span class="n">removeData</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+<div class="viewcode-block" id="Loop.removeColumn"><a class="viewcode-back" href="../../../../ccpn/ccpn.util.nef.html#ccpn.util.nef.GenericStarParser.Loop.removeColumn">[docs]</a>    <span class="k">def</span> <span class="nf">removeColumn</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">columnName</span><span class="p">,</span> <span class="n">removeData</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Remove column from loop. Will NOT work properly if called during parsing.&quot;&quot;&quot;</span>
         <span class="n">columns</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_columns</span>
         <span class="k">if</span> <span class="n">columnName</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">columns</span><span class="p">:</span>
@@ -623,19 +613,19 @@
         <span class="k">return</span> <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">lines</span><span class="p">)</span></div></div>
 
 
-<div class="viewcode-block" id="valueToStarString"><a class="viewcode-back" href="../../../../ccpn/ccpn.util.nef.html#ccpn.util.nef.GenericStarParser.valueToStarString">[docs]</a><span class="k">def</span> <span class="nf">valueToStarString</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">quoteNumberStrings</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+<div class="viewcode-block" id="valueToStarString"><a class="viewcode-back" href="../../../../ccpn/ccpn.util.nef.html#ccpn.util.nef.GenericStarParser.valueToStarString">[docs]</a><span class="k">def</span> <span class="nf">valueToStarString</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">quoteNumberStrings</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; Convert value to properly quoted STAR string</span>
 
 <span class="sd">    if quoteNumberStrings, strings that evaluate to a float (e.g. &#39;1&#39;, &#39;2.7e5&#39;, ...)</span>
 <span class="sd">    are put in quotes&quot;&quot;&quot;</span>
 
-    <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">NULLSTRING</span>
 
-    <span class="k">elif</span> <span class="n">value</span> <span class="ow">is</span> <span class="bp">True</span><span class="p">:</span>
+    <span class="k">elif</span> <span class="n">value</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">TRUESTRING</span>
 
-    <span class="k">elif</span> <span class="n">value</span> <span class="ow">is</span> <span class="bp">False</span><span class="p">:</span>
+    <span class="k">elif</span> <span class="n">value</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">FALSESTRING</span>
 
     <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">UnquotedValue</span><span class="p">):</span>
@@ -667,11 +657,11 @@
             <span class="k">try</span><span class="p">:</span>
                 <span class="n">junk</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
             <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
-                <span class="n">matchesNumber</span> <span class="o">=</span> <span class="bp">False</span>
+                <span class="n">matchesNumber</span> <span class="o">=</span> <span class="kc">False</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">matchesNumber</span> <span class="o">=</span> <span class="bp">True</span>
+                <span class="n">matchesNumber</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">matchesNumber</span> <span class="o">=</span> <span class="bp">False</span>
+            <span class="n">matchesNumber</span> <span class="o">=</span> <span class="kc">False</span>
 
         <span class="k">if</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">value</span><span class="p">:</span>
 
@@ -738,8 +728,8 @@
 
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="p">,</span> <span class="n">enforceSaveFrameStop</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">enforceLoopStop</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
-                 <span class="n">padIncompleteLoops</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">allowSquareBracketStrings</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">lowerCaseTags</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="p">,</span> <span class="n">enforceSaveFrameStop</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">enforceLoopStop</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                 <span class="n">padIncompleteLoops</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">allowSquareBracketStrings</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">lowerCaseTags</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">enforceSaveFrameStop</span> <span class="o">=</span> <span class="n">enforceSaveFrameStop</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">enforceLoopStop</span> <span class="o">=</span> <span class="n">enforceLoopStop</span>
@@ -784,7 +774,7 @@
 
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">%</span> <span class="n">columnCount</span><span class="p">:</span>
                 <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">padIncompleteLoops</span><span class="p">:</span>
-                    <span class="k">print</span><span class="p">(</span><span class="s2">&quot;WARNING Token </span><span class="si">%s</span><span class="s2">: </span><span class="si">%s</span><span class="s2"> in </span><span class="si">%s</span><span class="s2"> is missing </span><span class="si">%s</span><span class="s2"> values. Last row was: </span><span class="si">%s</span><span class="s2">&quot;</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;WARNING Token </span><span class="si">%s</span><span class="s2">: </span><span class="si">%s</span><span class="s2"> in </span><span class="si">%s</span><span class="s2"> is missing </span><span class="si">%s</span><span class="s2"> values. Last row was: </span><span class="si">%s</span><span class="s2">&quot;</span>
                           <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">counter</span><span class="p">,</span> <span class="n">loop</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">stack</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">],</span>
                              <span class="n">columnCount</span> <span class="o">-</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">%</span> <span class="n">columnCount</span><span class="p">),</span> <span class="n">data</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]))</span>
                 <span class="k">else</span><span class="p">:</span>
@@ -985,7 +975,7 @@
         <span class="n">processValue</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">processValue</span>
 
         <span class="c1"># NBNB This list must be in sync with numerical values of tk.type, as returned from the tokeniser</span>
-        <span class="n">processFunctions</span> <span class="o">=</span> <span class="p">[</span><span class="bp">None</span><span class="p">]</span> <span class="o">*</span> <span class="mi">20</span>
+        <span class="n">processFunctions</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span> <span class="o">*</span> <span class="mi">20</span>
         <span class="n">processFunctions</span><span class="p">[</span><span class="n">TOKEN_SQUOTE_STRING</span><span class="p">]</span> <span class="o">=</span> <span class="n">processValue</span>
         <span class="n">processFunctions</span><span class="p">[</span><span class="n">TOKEN_DQUOTE_STRING</span><span class="p">]</span> <span class="o">=</span> <span class="n">processValue</span>
         <span class="n">processFunctions</span><span class="p">[</span><span class="n">TOKEN_MULTILINE</span><span class="p">]</span> <span class="o">=</span> <span class="n">processValue</span>
@@ -1004,7 +994,7 @@
         <span class="n">result</span> <span class="o">=</span> <span class="n">DataExtent</span><span class="p">()</span>
         <span class="n">stack</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
 
-        <span class="n">value</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">counter</span> <span class="o">=</span> <span class="mi">0</span>  <span class="c1"># Token counter</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="k">for</span> <span class="n">tk</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">tokeniser</span><span class="p">:</span>
@@ -1018,7 +1008,7 @@
                 <span class="k">else</span><span class="p">:</span>
                     <span class="n">func</span> <span class="o">=</span> <span class="n">processFunctions</span><span class="p">[</span><span class="n">typ</span><span class="p">]</span>
 
-                    <span class="k">if</span> <span class="n">func</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">func</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
 
                         <span class="k">if</span> <span class="n">typ</span> <span class="o">==</span> <span class="n">TOKEN_SAVE_FRAME</span><span class="p">:</span>
                             <span class="c1"># save_ string</span>
@@ -1059,7 +1049,7 @@
             <span class="k">if</span> <span class="n">stack</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_errorMessage</span><span class="p">(</span><span class="s2">&quot;stack not empty at end of file&quot;</span><span class="p">,</span> <span class="n">value</span><span class="p">))</span>
         <span class="k">except</span><span class="p">:</span>
-            <span class="k">print</span><span class="p">(</span><span class="s2">&quot;ERROR at token </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">counter</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;ERROR at token </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">counter</span><span class="p">)</span>
             <span class="k">raise</span>
         <span class="c1">#</span>
         <span class="k">return</span> <span class="n">result</span></div>
@@ -1104,11 +1094,11 @@
     <span class="k">if</span> <span class="p">[</span><span class="n">tt</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">tt</span> <span class="ow">in</span> <span class="n">ll</span><span class="p">]</span> <span class="o">==</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">ll</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)):</span>
         <span class="k">return</span> <span class="p">[</span><span class="n">tt</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">tt</span> <span class="ow">in</span> <span class="n">ll</span><span class="p">]</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="k">return</span> <span class="bp">None</span></div>
+        <span class="k">return</span> <span class="kc">None</span></div>
 
 
-<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
-    <span class="k">print</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">)</span>
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">)</span>
     <span class="n">cif</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
     <span class="n">result</span> <span class="o">=</span> <span class="n">parse</span><span class="p">(</span><span class="n">cif</span><span class="o">.</span><span class="n">read</span><span class="p">())</span>
 </pre></div>
@@ -1119,15 +1109,15 @@
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
 <div id="searchbox" style="display: none" role="search">
-  <h3>Quick search</h3>
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
     <form class="search" action="../../../../search.html" method="get">
-      <input type="text" name="q" />
+      <input type="text" name="q" aria-labelledby="searchlabel" />
       <input type="submit" value="Go" />
-      <input type="hidden" name="check_keywords" value="yes" />
-      <input type="hidden" name="area" value="default" />
     </form>
+    </div>
 </div>
-<script type="text/javascript">$('#searchbox').show(0);</script>
+<script>$('#searchbox').show(0);</script>
         </div>
       </div>
       <div class="clearer"></div>
@@ -1141,13 +1131,13 @@
         <li class="right" >
           <a href="../../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../../index.html">Python  documentation</a> &raquo;</li>
-          <li class="nav-item nav-item-1"><a href="../../../index.html" >Module code</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="../../../../index.html">Python  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../../index.html" >Module code</a> &#187;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
-        &copy; Copyright .
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.1.
+        &#169; Copyright .
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.4.0.
     </div>
   </body>
 </html>

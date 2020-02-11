@@ -1,32 +1,22 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
+<!DOCTYPE html>
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    
-    <title>ccpnmodel.ccpncore.memops.scripts.core.ModelAdapt &mdash; Python  documentation</title>
-    
+    <meta charset="utf-8" />
+    <title>ccpnmodel.ccpncore.memops.scripts.core.ModelAdapt &#8212; Python  documentation</title>
     <link rel="stylesheet" href="../../../../../../_static/classic.css" type="text/css" />
     <link rel="stylesheet" href="../../../../../../_static/pygments.css" type="text/css" />
     
-    <script type="text/javascript">
-      var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    '../../../../../../',
-        VERSION:     '',
-        COLLAPSE_INDEX: false,
-        FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true
-      };
-    </script>
-    <script type="text/javascript" src="../../../../../../_static/jquery.js"></script>
-    <script type="text/javascript" src="../../../../../../_static/underscore.js"></script>
-    <script type="text/javascript" src="../../../../../../_static/doctools.js"></script>
-    <link rel="top" title="Python  documentation" href="../../../../../../index.html" />
-    <link rel="up" title="Module code" href="../../../../../index.html" /> 
-  </head>
-  <body role="document">
+    <script id="documentation_options" data-url_root="../../../../../../" src="../../../../../../_static/documentation_options.js"></script>
+    <script src="../../../../../../_static/jquery.js"></script>
+    <script src="../../../../../../_static/underscore.js"></script>
+    <script src="../../../../../../_static/doctools.js"></script>
+    <script src="../../../../../../_static/language_data.js"></script>
+    
+    <link rel="index" title="Index" href="../../../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../../../search.html" /> 
+  </head><body>
     <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
@@ -36,8 +26,8 @@
         <li class="right" >
           <a href="../../../../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../../../../index.html">Python  documentation</a> &raquo;</li>
-          <li class="nav-item nav-item-1"><a href="../../../../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="../../../../../../index.html">Python  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../../../../index.html" accesskey="U">Module code</a> &#187;</li> 
       </ul>
     </div>  
 
@@ -234,7 +224,7 @@
   <span class="n">parDocTemplate</span> <span class="o">=</span> <span class="s2">&quot; the </span><span class="si">%s</span><span class="s2">&quot;</span>
   
   
-  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+  <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Class constructor.</span>
 <span class="sd">    &quot;&quot;&quot;</span> 
     
@@ -243,7 +233,7 @@
     <span class="bp">self</span><span class="o">.</span><span class="n">operationData</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">OpTypes</span><span class="o">.</span><span class="n">operationData</span><span class="p">)</span>
     
     <span class="c1"># initialise ModelTraverse</span>
-    <span class="nb">super</span><span class="p">(</span><span class="n">ModelAdapt</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">()</span>
+    <span class="nb">super</span><span class="p">(</span><span class="n">ModelAdapt</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
     
     <span class="c1"># link varNames to modelPortal, for transport.</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">modelPortal</span><span class="o">.</span><span class="n">varNames</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">varNames</span>
@@ -280,7 +270,7 @@
     <span class="n">t0</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">modelPortal</span><span class="o">.</span><span class="n">topPackage</span><span class="o">.</span><span class="n">checkValid</span><span class="p">()</span>
     <span class="n">t1</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
-    <span class="k">print</span><span class="p">(</span><span class="s2">&quot;ModelAdapt - Model validity check took </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">t1</span><span class="o">-</span><span class="n">t0</span><span class="p">))</span></div>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;ModelAdapt - Model validity check took </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">t1</span><span class="o">-</span><span class="n">t0</span><span class="p">))</span></div>
     
   <span class="c1">###########################################################################</span>
   
@@ -305,7 +295,7 @@
         
         <span class="c1"># remove classes specific to other implementations</span>
         <span class="n">forImpl</span> <span class="o">=</span> <span class="n">xx</span><span class="o">.</span><span class="n">taggedValues</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;specificImplementation&#39;</span><span class="p">)</span>
-        <span class="k">if</span> <span class="p">(</span><span class="n">forImpl</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> 
+        <span class="k">if</span> <span class="p">(</span><span class="n">forImpl</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> 
             <span class="ow">and</span> <span class="n">forImpl</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">modelFlavours</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;implementation&#39;</span><span class="p">)):</span>
           <span class="n">xx</span><span class="o">.</span><span class="n">delete</span><span class="p">()</span>
       
@@ -507,7 +497,7 @@
     <span class="sd">&quot;&quot;&quot; Add operations not linked to an element (e.g. init, delete, checkValid)</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     
-    <span class="n">isNotRootClass</span> <span class="o">=</span> <span class="bp">True</span>
+    <span class="n">isNotRootClass</span> <span class="o">=</span> <span class="kc">True</span>
     
     <span class="k">if</span> <span class="n">inClass</span><span class="o">.</span><span class="n">container</span><span class="o">.</span><span class="n">qualifiedName</span><span class="p">()</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">implPackageName</span><span class="p">:</span>
       
@@ -532,7 +522,7 @@
       <span class="k">elif</span> <span class="n">inClass</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="n">metaConstants</span><span class="o">.</span><span class="n">dataRootName</span><span class="p">:</span>
         <span class="c1"># MemopsRoot</span>
         
-        <span class="n">isNotRootClass</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="n">isNotRootClass</span> <span class="o">=</span> <span class="kc">False</span>
 
         <span class="c1"># full undelete</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">makeOperations</span><span class="p">(</span><span class="n">inClass</span><span class="p">,</span> <span class="s1">&#39;fullUnDelete&#39;</span><span class="p">,</span> <span class="n">inClass</span><span class="p">)</span>
@@ -567,7 +557,7 @@
     <span class="n">parentRole</span> <span class="o">=</span> <span class="n">inClass</span><span class="o">.</span><span class="n">parentRole</span>
     <span class="k">if</span> <span class="n">parentRole</span><span class="p">:</span>
       <span class="n">ot</span> <span class="o">=</span> <span class="n">parentRole</span><span class="o">.</span><span class="n">otherRole</span>
-      <span class="k">if</span> <span class="n">inClass</span><span class="o">.</span><span class="n">keyNames</span> <span class="ow">or</span> <span class="p">(</span><span class="n">ot</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> <span class="n">ot</span><span class="o">.</span><span class="n">hicard</span> <span class="o">==</span> <span class="mi">1</span><span class="p">):</span>
+      <span class="k">if</span> <span class="n">inClass</span><span class="o">.</span><span class="n">keyNames</span> <span class="ow">or</span> <span class="p">(</span><span class="n">ot</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">ot</span><span class="o">.</span><span class="n">hicard</span> <span class="o">==</span> <span class="mi">1</span><span class="p">):</span>
         <span class="c1"># any class with a full key defined, also if inherited.</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">makeOperations</span><span class="p">(</span><span class="n">inClass</span><span class="p">,</span> <span class="s1">&#39;getByKey&#39;</span><span class="p">,</span> <span class="n">inClass</span><span class="p">)</span>
  
@@ -577,7 +567,7 @@
           <span class="bp">self</span><span class="o">.</span><span class="n">makeOperations</span><span class="p">(</span><span class="n">inClass</span><span class="p">,</span> <span class="s1">&#39;getLocalKey&#39;</span><span class="p">,</span> <span class="n">inClass</span><span class="p">)</span>
           
     
-    <span class="k">elif</span> <span class="n">parentRole</span> <span class="ow">is</span> <span class="bp">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">inClass</span><span class="o">.</span><span class="n">isAbstract</span><span class="p">:</span>
+    <span class="k">elif</span> <span class="n">parentRole</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">inClass</span><span class="o">.</span><span class="n">isAbstract</span><span class="p">:</span>
       <span class="c1"># specific for MemopsRoot</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">makeOperations</span><span class="p">(</span><span class="n">inClass</span><span class="p">,</span> <span class="s1">&#39;getFullKey&#39;</span><span class="p">,</span> <span class="n">inClass</span><span class="p">)</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">makeOperations</span><span class="p">(</span><span class="n">inClass</span><span class="p">,</span> <span class="s1">&#39;getLocalKey&#39;</span><span class="p">,</span> <span class="n">inClass</span><span class="p">)</span></div>
@@ -627,7 +617,7 @@
     <span class="n">result</span> <span class="o">=</span> <span class="n">clazz</span><span class="p">(</span><span class="o">**</span><span class="n">params</span><span class="p">)</span>
     
     <span class="k">if</span> <span class="s1">&#39;isImplicit&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">params</span><span class="p">:</span>
-      <span class="n">result</span><span class="o">.</span><span class="n">isImplicit</span><span class="o">=</span><span class="bp">True</span>
+      <span class="n">result</span><span class="o">.</span><span class="n">isImplicit</span><span class="o">=</span><span class="kc">True</span>
     
     <span class="k">if</span> <span class="s1">&#39;guid&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">params</span><span class="p">:</span>
       <span class="n">result</span><span class="o">.</span><span class="n">guid</span> <span class="o">=</span> <span class="s1">&#39;temporary_</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">result</span><span class="o">.</span><span class="n">qualifiedName</span><span class="p">()</span>
@@ -647,11 +637,11 @@
     
     <span class="c1"># Add &#39;parent&#39; link NB must be treated as special case later</span>
     <span class="n">parentRole</span> <span class="o">=</span> <span class="n">clazz</span><span class="o">.</span><span class="n">parentRole</span>
-    <span class="k">if</span> <span class="p">(</span><span class="n">parentRole</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> <span class="n">parentRole</span><span class="o">.</span><span class="n">container</span> <span class="ow">is</span> <span class="n">clazz</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">parentRole</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">parentRole</span><span class="o">.</span><span class="n">container</span> <span class="ow">is</span> <span class="n">clazz</span>
         <span class="ow">and</span> <span class="ow">not</span> <span class="n">parentRole</span><span class="o">.</span><span class="n">isAbstract</span> <span class="p">):</span>
       <span class="n">baseRole</span> <span class="o">=</span> <span class="n">parentRole</span>
       
-    <span class="k">elif</span> <span class="n">parentRole</span> <span class="ow">is</span> <span class="bp">None</span> <span class="ow">and</span> <span class="n">clazz</span><span class="o">.</span><span class="n">qualifiedName</span><span class="p">()</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataRootName</span><span class="p">:</span>
+    <span class="k">elif</span> <span class="n">parentRole</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">clazz</span><span class="o">.</span><span class="n">qualifiedName</span><span class="p">()</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataRootName</span><span class="p">:</span>
       <span class="c1"># special case - dataRoot</span>
       <span class="n">baseRole</span> <span class="o">=</span> <span class="n">clazz</span><span class="o">.</span><span class="n">getElement</span><span class="p">(</span><span class="s1">&#39;root&#39;</span><span class="p">)</span>
     
@@ -674,12 +664,12 @@
      <span class="s1">&#39;baseName&#39;</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">varNames</span><span class="p">[</span><span class="s1">&#39;parent&#39;</span><span class="p">],</span>
      <span class="s1">&#39;documentation&#39;</span><span class="p">:</span><span class="s1">&#39;link to parent object&#39;</span>
                      <span class="s1">&#39; - synonym for </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">baseRole</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
-     <span class="s1">&#39;isImplementation&#39;</span><span class="p">:</span><span class="bp">True</span><span class="p">,</span>
+     <span class="s1">&#39;isImplementation&#39;</span><span class="p">:</span><span class="kc">True</span><span class="p">,</span>
      <span class="s1">&#39;aggregation&#39;</span><span class="p">:</span><span class="n">metaConstants</span><span class="o">.</span><span class="n">no_aggregation</span><span class="p">,</span>
      <span class="s1">&#39;hierarchy&#39;</span><span class="p">:</span><span class="n">metaConstants</span><span class="o">.</span><span class="n">no_hierarchy</span><span class="p">,</span>
     <span class="p">})</span>
     
-    <span class="k">if</span> <span class="n">parentRole</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">parentRole</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
       <span class="c1"># special case - dataRoot</span>
       <span class="n">dd</span><span class="p">[</span><span class="s1">&#39;container&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">dd</span><span class="p">[</span><span class="s1">&#39;valueType&#39;</span><span class="p">]</span>
       <span class="n">dd</span><span class="p">[</span><span class="s1">&#39;documentation&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;link to parent object - returns None&quot;</span>
@@ -710,7 +700,7 @@
 <span class="sd">    &quot;&quot;&quot;</span>
       
     <span class="c1"># set</span>
-    <span class="n">makeModifiers</span> <span class="o">=</span> <span class="bp">False</span>
+    <span class="n">makeModifiers</span> <span class="o">=</span> <span class="kc">False</span>
     
     <span class="k">if</span> <span class="n">elem</span><span class="o">.</span><span class="n">isImplementation</span><span class="p">:</span>
       <span class="k">pass</span>
@@ -718,12 +708,12 @@
     <span class="k">elif</span> <span class="n">elem</span><span class="o">.</span><span class="n">isDerived</span><span class="p">:</span>         
       <span class="k">if</span> <span class="n">elem</span><span class="o">.</span><span class="n">changeability</span> <span class="o">!=</span> <span class="n">metaConstants</span><span class="o">.</span><span class="n">frozen</span><span class="p">:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">checkOpForDerived</span><span class="p">(</span><span class="n">elem</span><span class="p">,</span> <span class="n">inClass</span><span class="p">,</span> <span class="s1">&#39;set&#39;</span><span class="p">)</span>
-        <span class="n">makeModifiers</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="n">makeModifiers</span> <span class="o">=</span> <span class="kc">True</span>
     
     <span class="k">elif</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">elem</span><span class="p">,</span> <span class="n">MetaModel</span><span class="o">.</span><span class="n">MetaAttribute</span><span class="p">)</span> <span class="ow">or</span>
           <span class="n">elem</span><span class="o">.</span><span class="n">hierarchy</span> <span class="o">==</span> <span class="n">metaConstants</span><span class="o">.</span><span class="n">no_hierarchy</span><span class="p">):</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">makeOperations</span><span class="p">(</span><span class="n">elem</span><span class="p">,</span> <span class="s1">&#39;set&#39;</span><span class="p">,</span> <span class="n">inClass</span><span class="p">)</span>
-      <span class="n">makeModifiers</span> <span class="o">=</span> <span class="bp">True</span>
+      <span class="n">makeModifiers</span> <span class="o">=</span> <span class="kc">True</span>
     
     <span class="k">if</span> <span class="n">makeModifiers</span> <span class="ow">and</span> <span class="n">elem</span><span class="o">.</span><span class="n">hicard</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
       <span class="c1"># add, remove</span>
@@ -733,7 +723,7 @@
       <span class="n">elems</span> <span class="o">=</span> <span class="p">[</span><span class="n">elem</span><span class="p">]</span>
       <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">elem</span><span class="p">,</span> <span class="n">MetaModel</span><span class="o">.</span><span class="n">MetaRole</span><span class="p">):</span>
         <span class="n">otherRole</span> <span class="o">=</span> <span class="n">elem</span><span class="o">.</span><span class="n">otherRole</span>
-        <span class="k">if</span> <span class="n">otherRole</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">otherRole</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
           <span class="n">elems</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">otherRole</span><span class="p">)</span>
       
       <span class="c1"># check if functions should be generated</span>
@@ -755,7 +745,7 @@
     <span class="bp">self</span><span class="o">.</span><span class="n">currentOpData</span> <span class="o">=</span> <span class="n">opData</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getOpData</span><span class="p">(</span><span class="n">elem</span><span class="p">,</span> <span class="n">opType</span><span class="p">,</span> <span class="n">inClass</span><span class="p">)</span>
     <span class="n">op</span> <span class="o">=</span> <span class="n">metaUtil</span><span class="o">.</span><span class="n">getOperation</span><span class="p">(</span><span class="n">elem</span><span class="p">,</span> <span class="n">opType</span><span class="p">)</span>
     
-    <span class="k">if</span> <span class="n">op</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">op</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
       <span class="k">raise</span> <span class="n">MemopsError</span><span class="p">(</span><span class="s2">&quot;no </span><span class="si">%s</span><span class="s2"> function found in </span><span class="si">%s</span><span class="s2"> for derived element </span><span class="si">%s</span><span class="s2">&quot;</span>
                         <span class="o">%</span> <span class="p">(</span><span class="n">opType</span><span class="p">,</span> <span class="n">inClass</span><span class="o">.</span><span class="n">qualifiedName</span><span class="p">(),</span> <span class="n">elem</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
     
@@ -806,7 +796,7 @@
 
   <span class="c1">###########################################################################</span>
     
-<div class="viewcode-block" id="ModelAdapt.makeOperations"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.core.html#ccpnmodel.ccpncore.memops.scripts.core.ModelAdapt.ModelAdapt.makeOperations">[docs]</a>  <span class="k">def</span> <span class="nf">makeOperations</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">target</span><span class="p">,</span> <span class="n">opType</span><span class="p">,</span> <span class="n">inClass</span><span class="p">,</span> <span class="n">elem</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+<div class="viewcode-block" id="ModelAdapt.makeOperations"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.core.html#ccpnmodel.ccpncore.memops.scripts.core.ModelAdapt.ModelAdapt.makeOperations">[docs]</a>  <span class="k">def</span> <span class="nf">makeOperations</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">target</span><span class="p">,</span> <span class="n">opType</span><span class="p">,</span> <span class="n">inClass</span><span class="p">,</span> <span class="n">elem</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; get existing operation and check it, or create a new one</span>
 <span class="sd">    Some error checking and bookkeeping for existing operations</span>
 <span class="sd">    </span>
@@ -815,14 +805,14 @@
 <span class="sd">    Otherwise it is set equal to the target.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
         
-    <span class="k">if</span> <span class="n">elem</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">elem</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
       <span class="n">elem</span> <span class="o">=</span> <span class="n">target</span>
     
     <span class="bp">self</span><span class="o">.</span><span class="n">currentOpData</span> <span class="o">=</span> <span class="n">opData</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getOpData</span><span class="p">(</span><span class="n">target</span><span class="p">,</span> <span class="n">opType</span><span class="p">,</span> <span class="n">inClass</span><span class="p">)</span>
     <span class="n">opSubTypes</span> <span class="o">=</span> <span class="n">opData</span><span class="p">[</span><span class="s1">&#39;subOps&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
     <span class="k">for</span> <span class="n">opSubType</span> <span class="ow">in</span> <span class="n">opSubTypes</span><span class="p">:</span>
       <span class="n">op</span> <span class="o">=</span> <span class="n">metaUtil</span><span class="o">.</span><span class="n">getOperation</span><span class="p">(</span><span class="n">target</span><span class="p">,</span> <span class="n">opType</span><span class="p">,</span> <span class="n">inClass</span><span class="p">,</span> <span class="n">opSubType</span><span class="p">)</span>
-      <span class="k">if</span> <span class="n">op</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+      <span class="k">if</span> <span class="n">op</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">operationData</span><span class="p">[</span><span class="n">opType</span><span class="p">][</span><span class="s1">&#39;targetTag&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;container&#39;</span>
             <span class="ow">or</span> <span class="n">elem</span><span class="o">.</span><span class="n">container</span> <span class="ow">is</span> <span class="n">inClass</span><span class="p">):</span>
           <span class="bp">self</span><span class="o">.</span><span class="n">newOperation</span><span class="p">(</span><span class="n">opData</span><span class="p">,</span> <span class="n">inClass</span><span class="p">,</span> <span class="n">opSubType</span><span class="p">)</span>
@@ -846,7 +836,7 @@
 
   <span class="c1">###########################################################################</span>
     
-<div class="viewcode-block" id="ModelAdapt.newOperation"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.core.html#ccpnmodel.ccpncore.memops.scripts.core.ModelAdapt.ModelAdapt.newOperation">[docs]</a>  <span class="k">def</span> <span class="nf">newOperation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">opData</span><span class="p">,</span> <span class="n">inClass</span><span class="p">,</span> <span class="n">opSubType</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+<div class="viewcode-block" id="ModelAdapt.newOperation"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.core.html#ccpnmodel.ccpncore.memops.scripts.core.ModelAdapt.ModelAdapt.newOperation">[docs]</a>  <span class="k">def</span> <span class="nf">newOperation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">opData</span><span class="p">,</span> <span class="n">inClass</span><span class="p">,</span> <span class="n">opSubType</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; create a new operation</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     
@@ -869,7 +859,7 @@
 
   <span class="c1">###########################################################################</span>
     
-<div class="viewcode-block" id="ModelAdapt.checkOperation"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.core.html#ccpnmodel.ccpncore.memops.scripts.core.ModelAdapt.ModelAdapt.checkOperation">[docs]</a>  <span class="k">def</span> <span class="nf">checkOperation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">op</span><span class="p">,</span> <span class="n">opData</span><span class="p">,</span> <span class="n">inClass</span><span class="p">,</span> <span class="n">opSubType</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+<div class="viewcode-block" id="ModelAdapt.checkOperation"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.core.html#ccpnmodel.ccpncore.memops.scripts.core.ModelAdapt.ModelAdapt.checkOperation">[docs]</a>  <span class="k">def</span> <span class="nf">checkOperation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">op</span><span class="p">,</span> <span class="n">opData</span><span class="p">,</span> <span class="n">inClass</span><span class="p">,</span> <span class="n">opSubType</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;check an existing operation conforms to the rules, and adds missing</span>
 <span class="sd">    information (target, parameters) where it can be deduced from context.</span>
 <span class="sd">    &quot;&quot;&quot;</span> 
@@ -904,7 +894,7 @@
         
   <span class="c1">###########################################################################</span>
   
-<div class="viewcode-block" id="ModelAdapt.stdOperationData"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.core.html#ccpnmodel.ccpncore.memops.scripts.core.ModelAdapt.ModelAdapt.stdOperationData">[docs]</a>  <span class="k">def</span> <span class="nf">stdOperationData</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">opData</span><span class="p">,</span> <span class="n">opSubType</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+<div class="viewcode-block" id="ModelAdapt.stdOperationData"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.core.html#ccpnmodel.ccpncore.memops.scripts.core.ModelAdapt.ModelAdapt.stdOperationData">[docs]</a>  <span class="k">def</span> <span class="nf">stdOperationData</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">opData</span><span class="p">,</span> <span class="n">opSubType</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; get data describing a normal operation for checking or creation</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     
@@ -927,22 +917,22 @@
       <span class="n">result</span><span class="p">[</span><span class="s1">&#39;taggedValues&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">dd</span>
     
     <span class="n">isAbstract</span> <span class="o">=</span> <span class="n">opData</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;isAbstract&#39;</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">isAbstract</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">isAbstract</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
       <span class="n">result</span><span class="p">[</span><span class="s1">&#39;isAbstract&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">isAbstract</span>
     <span class="k">elif</span> <span class="n">opType</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;getByKey&#39;</span><span class="p">,</span> <span class="s1">&#39;getFullKey&#39;</span><span class="p">,</span> <span class="s1">&#39;getLocalKey&#39;</span><span class="p">,</span> <span class="s1">&#39;fullDelete&#39;</span><span class="p">,</span> <span class="s1">&#39;fullUnDelete&#39;</span><span class="p">):</span>
-      <span class="n">result</span><span class="p">[</span><span class="s1">&#39;isAbstract&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">False</span>
+      <span class="n">result</span><span class="p">[</span><span class="s1">&#39;isAbstract&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="k">elif</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">target</span><span class="p">,</span> <span class="n">MetaModel</span><span class="o">.</span><span class="n">ClassElement</span><span class="p">)</span> <span class="ow">or</span>
           <span class="bp">self</span><span class="o">.</span><span class="n">operationData</span><span class="p">[</span><span class="n">opType</span><span class="p">][</span><span class="s1">&#39;targetTag&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;container&#39;</span><span class="p">):</span>
       <span class="n">result</span><span class="p">[</span><span class="s1">&#39;isAbstract&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">target</span><span class="o">.</span><span class="n">isAbstract</span>
     <span class="k">else</span><span class="p">:</span>
-      <span class="n">result</span><span class="p">[</span><span class="s1">&#39;isAbstract&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">False</span>
+      <span class="n">result</span><span class="p">[</span><span class="s1">&#39;isAbstract&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
     
     <span class="n">scope</span> <span class="o">=</span> <span class="n">opData</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;scope&#39;</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">scope</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">scope</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
       <span class="n">result</span><span class="p">[</span><span class="s1">&#39;scope&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">scope</span>
 
     <span class="n">visibility</span> <span class="o">=</span> <span class="n">opData</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;visibility&#39;</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">visibility</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">visibility</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
       <span class="n">result</span><span class="p">[</span><span class="s1">&#39;visibility&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">visibility</span>
 
     <span class="k">return</span> <span class="n">result</span></div>
@@ -951,7 +941,7 @@
 
   <span class="c1">###########################################################################</span>
     
-<div class="viewcode-block" id="ModelAdapt.getOperationName"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.core.html#ccpnmodel.ccpncore.memops.scripts.core.ModelAdapt.ModelAdapt.getOperationName">[docs]</a>  <span class="k">def</span> <span class="nf">getOperationName</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">target</span><span class="p">,</span> <span class="n">opType</span><span class="p">,</span> <span class="n">opSubType</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+<div class="viewcode-block" id="ModelAdapt.getOperationName"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.core.html#ccpnmodel.ccpncore.memops.scripts.core.ModelAdapt.ModelAdapt.getOperationName">[docs]</a>  <span class="k">def</span> <span class="nf">getOperationName</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">target</span><span class="p">,</span> <span class="n">opType</span><span class="p">,</span> <span class="n">opSubType</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; get name of operation - NB does not use actual operation object, </span>
 <span class="sd">    which may not exist yet</span>
 <span class="sd">    </span>
@@ -982,11 +972,11 @@
         <span class="n">opName</span> <span class="o">=</span> <span class="n">opName</span> <span class="o">+</span> <span class="n">metaUtil</span><span class="o">.</span><span class="n">upperFirst</span><span class="p">(</span><span class="n">targetName</span><span class="p">)</span>
     
     <span class="c1"># handle subTypes</span>
-    <span class="k">if</span> <span class="n">opSubType</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">opSubType</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
       <span class="k">return</span> <span class="n">opName</span>
     <span class="k">else</span><span class="p">:</span>
       <span class="n">subOp</span> <span class="o">=</span> <span class="n">opData</span><span class="p">[</span><span class="s1">&#39;subOps&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">opSubType</span><span class="p">)</span>
-      <span class="k">if</span> <span class="n">subOp</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+      <span class="k">if</span> <span class="n">subOp</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">suffix</span> <span class="o">=</span> <span class="n">opSubType</span>
       <span class="k">else</span><span class="p">:</span>
         <span class="n">suffix</span> <span class="o">=</span> <span class="n">subOp</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;suffix&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="n">opSubType</span>
@@ -996,11 +986,11 @@
 
   <span class="c1">###########################################################################</span>
 
-<div class="viewcode-block" id="ModelAdapt.getOpData"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.core.html#ccpnmodel.ccpncore.memops.scripts.core.ModelAdapt.ModelAdapt.getOpData">[docs]</a>  <span class="k">def</span> <span class="nf">getOpData</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">target</span><span class="p">,</span> <span class="n">opType</span><span class="p">,</span> <span class="n">inClass</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+<div class="viewcode-block" id="ModelAdapt.getOpData"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.core.html#ccpnmodel.ccpncore.memops.scripts.core.ModelAdapt.ModelAdapt.getOpData">[docs]</a>  <span class="k">def</span> <span class="nf">getOpData</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">target</span><span class="p">,</span> <span class="n">opType</span><span class="p">,</span> <span class="n">inClass</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; Get opData for opType, taking special cases into account</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     
-    <span class="k">if</span> <span class="n">inClass</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">inClass</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
       <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">target</span><span class="p">,</span> <span class="n">MetaModel</span><span class="o">.</span><span class="n">ComplexDataType</span><span class="p">):</span>
         <span class="n">inClass</span> <span class="o">=</span> <span class="n">target</span>
       <span class="k">else</span><span class="p">:</span>
@@ -1015,7 +1005,7 @@
     
     <span class="k">if</span> <span class="n">opType</span> <span class="o">==</span> <span class="s1">&#39;init&#39;</span><span class="p">:</span>
       <span class="k">if</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">inClass</span><span class="p">,</span> <span class="n">MetaModel</span><span class="o">.</span><span class="n">MetaDataObjType</span><span class="p">)</span>
-          <span class="ow">or</span> <span class="p">(</span><span class="ow">not</span> <span class="n">inClass</span><span class="o">.</span><span class="n">isAbstract</span> <span class="ow">and</span> <span class="n">inClass</span><span class="o">.</span><span class="n">parentRole</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">)):</span>
+          <span class="ow">or</span> <span class="p">(</span><span class="ow">not</span> <span class="n">inClass</span><span class="o">.</span><span class="n">isAbstract</span> <span class="ow">and</span> <span class="n">inClass</span><span class="o">.</span><span class="n">parentRole</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">)):</span>
         <span class="c1"># remove &#39;parent&#39; parameter for MemopsRoot and DataObjTypes</span>
 
         <span class="k">for</span> <span class="n">subData</span> <span class="ow">in</span> <span class="n">result</span><span class="p">[</span><span class="s1">&#39;subOps&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
@@ -1024,8 +1014,8 @@
     
     <span class="k">elif</span> <span class="n">opType</span> <span class="o">==</span> <span class="s1">&#39;getByKey&#39;</span><span class="p">:</span>
       <span class="n">pr1</span> <span class="o">=</span> <span class="n">inClass</span><span class="o">.</span><span class="n">parentRole</span>
-      <span class="k">if</span> <span class="n">pr1</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> <span class="p">(</span>
-       <span class="n">pr1</span><span class="o">.</span><span class="n">valueType</span><span class="o">.</span><span class="n">parentRole</span> <span class="ow">is</span> <span class="bp">None</span>
+      <span class="k">if</span> <span class="n">pr1</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="p">(</span>
+       <span class="n">pr1</span><span class="o">.</span><span class="n">valueType</span><span class="o">.</span><span class="n">parentRole</span> <span class="ow">is</span> <span class="kc">None</span>
        <span class="ow">or</span> <span class="n">inClass</span><span class="o">.</span><span class="n">container</span><span class="o">.</span><span class="n">qualifiedName</span><span class="p">()</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">implPackageName</span>
       <span class="p">):</span>
         <span class="c1"># TopObject or in Implementation - change startObj typing to MemopsRoot</span>
@@ -1039,8 +1029,8 @@
 
   <span class="c1">###########################################################################</span>
     
-<div class="viewcode-block" id="ModelAdapt.getOpDocumentation"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.core.html#ccpnmodel.ccpncore.memops.scripts.core.ModelAdapt.ModelAdapt.getOpDocumentation">[docs]</a>  <span class="k">def</span> <span class="nf">getOpDocumentation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">opData</span><span class="p">,</span> <span class="n">inClass</span><span class="p">,</span> <span class="n">opSubType</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> 
-                         <span class="n">copyElemDoc</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+<div class="viewcode-block" id="ModelAdapt.getOpDocumentation"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.core.html#ccpnmodel.ccpncore.memops.scripts.core.ModelAdapt.ModelAdapt.getOpDocumentation">[docs]</a>  <span class="k">def</span> <span class="nf">getOpDocumentation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">opData</span><span class="p">,</span> <span class="n">inClass</span><span class="p">,</span> <span class="n">opSubType</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> 
+                         <span class="n">copyElemDoc</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; get documentation for generated operation</span>
 <span class="sd">    &quot;&quot;&quot;</span>
   
@@ -1197,7 +1187,7 @@
     
     <span class="c1"># tagged values</span>
     <span class="n">tv</span> <span class="o">=</span> <span class="n">parData</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;taggedValues&#39;</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">tv</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">tv</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
       <span class="c1"># necessary as the dictionary may be modified elsewhere</span>
       <span class="n">result</span><span class="p">[</span><span class="s1">&#39;taggedValues&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">tv</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
     
@@ -1216,7 +1206,7 @@
   
     <span class="n">result</span> <span class="o">=</span> <span class="n">parData</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;parDocumentation&#39;</span><span class="p">)</span>
     <span class="n">name</span> <span class="o">=</span> <span class="n">parData</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span>
-    <span class="k">if</span> <span class="n">result</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">result</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
       <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parDocTemplate</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">varNames</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="p">)</span> <span class="ow">or</span> <span class="n">name</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
       <span class="n">result</span> <span class="o">=</span> <span class="n">result</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">varNames</span>
@@ -1243,15 +1233,15 @@
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
 <div id="searchbox" style="display: none" role="search">
-  <h3>Quick search</h3>
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
     <form class="search" action="../../../../../../search.html" method="get">
-      <input type="text" name="q" />
+      <input type="text" name="q" aria-labelledby="searchlabel" />
       <input type="submit" value="Go" />
-      <input type="hidden" name="check_keywords" value="yes" />
-      <input type="hidden" name="area" value="default" />
     </form>
+    </div>
 </div>
-<script type="text/javascript">$('#searchbox').show(0);</script>
+<script>$('#searchbox').show(0);</script>
         </div>
       </div>
       <div class="clearer"></div>
@@ -1265,13 +1255,13 @@
         <li class="right" >
           <a href="../../../../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../../../../index.html">Python  documentation</a> &raquo;</li>
-          <li class="nav-item nav-item-1"><a href="../../../../../index.html" >Module code</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="../../../../../../index.html">Python  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../../../../index.html" >Module code</a> &#187;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
-        &copy; Copyright .
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.1.
+        &#169; Copyright .
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.4.0.
     </div>
   </body>
 </html>

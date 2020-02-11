@@ -1,32 +1,22 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
+<!DOCTYPE html>
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    
-    <title>ccpn.ui.gui.widgets.Table &mdash; Python  documentation</title>
-    
+    <meta charset="utf-8" />
+    <title>ccpn.ui.gui.widgets.Table &#8212; Python  documentation</title>
     <link rel="stylesheet" href="../../../../../_static/classic.css" type="text/css" />
     <link rel="stylesheet" href="../../../../../_static/pygments.css" type="text/css" />
     
-    <script type="text/javascript">
-      var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    '../../../../../',
-        VERSION:     '',
-        COLLAPSE_INDEX: false,
-        FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true
-      };
-    </script>
-    <script type="text/javascript" src="../../../../../_static/jquery.js"></script>
-    <script type="text/javascript" src="../../../../../_static/underscore.js"></script>
-    <script type="text/javascript" src="../../../../../_static/doctools.js"></script>
-    <link rel="top" title="Python  documentation" href="../../../../../index.html" />
-    <link rel="up" title="Module code" href="../../../../index.html" /> 
-  </head>
-  <body role="document">
+    <script id="documentation_options" data-url_root="../../../../../" src="../../../../../_static/documentation_options.js"></script>
+    <script src="../../../../../_static/jquery.js"></script>
+    <script src="../../../../../_static/underscore.js"></script>
+    <script src="../../../../../_static/doctools.js"></script>
+    <script src="../../../../../_static/language_data.js"></script>
+    
+    <link rel="index" title="Index" href="../../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../../search.html" /> 
+  </head><body>
     <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
@@ -36,8 +26,8 @@
         <li class="right" >
           <a href="../../../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../../../index.html">Python  documentation</a> &raquo;</li>
-          <li class="nav-item nav-item-1"><a href="../../../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="../../../../../index.html">Python  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../../../index.html" accesskey="U">Module code</a> &#187;</li> 
       </ul>
     </div>  
 
@@ -183,7 +173,7 @@
 <span class="kn">import</span> <span class="nn">re</span>
 
 <span class="kn">from</span> <span class="nn">PyQt5</span> <span class="kn">import</span> <span class="n">QtGui</span><span class="p">,</span> <span class="n">QtWidgets</span><span class="p">,</span> <span class="n">QtCore</span>
-<span class="kn">import</span> <span class="nn">pandas</span> <span class="kn">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 <span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">from</span> <span class="nn">ccpn.core.lib.CcpnSorting</span> <span class="kn">import</span> <span class="n">universalSortKey</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Base</span> <span class="kn">import</span> <span class="n">Base</span>
@@ -213,29 +203,29 @@
     <span class="n">columnSizeHint</span> <span class="o">=</span> <span class="mi">30</span>  <span class="c1"># per collumn size hint (to be multiplied by number of collums)</span>
     <span class="n">rowSizeHint</span> <span class="o">=</span> <span class="mi">200</span>  <span class="c1"># total size hint (total size for all rows)</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">columns</span><span class="p">,</span>
-                 <span class="n">objects</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
-                 <span class="n">actionCallback</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">selectionCallback</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
-                 <span class="n">multiSelect</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">selectRows</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">numberRows</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">autoResize</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
-                 <span class="n">enableExport</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">enableDelete</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">columns</span><span class="p">,</span>
+                 <span class="n">objects</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="n">actionCallback</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">selectionCallback</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="n">multiSelect</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">selectRows</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">numberRows</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">autoResize</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                 <span class="n">enableExport</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">enableDelete</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
                  <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
 
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">parent</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">parent</span><span class="p">)</span>
         <span class="n">Base</span><span class="o">.</span><span class="n">_init</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_parent</span> <span class="o">=</span> <span class="n">parent</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">graphPanel</span> <span class="o">=</span> <span class="bp">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">filterPanel</span> <span class="o">=</span> <span class="bp">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">graphPanel</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">filterPanel</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">columns</span> <span class="o">=</span> <span class="n">columns</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">objects</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">objects</span> <span class="ow">or</span> <span class="p">[])</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">callback</span> <span class="o">=</span> <span class="n">actionCallback</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">fontMetric</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QFontMetricsF</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">font</span><span class="p">())</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">bbox</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fontMetric</span><span class="o">.</span><span class="n">boundingRect</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_silenceCallback</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_silenceCallback</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">selectionCallback</span> <span class="o">=</span> <span class="n">selectionCallback</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">doubleClicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">actionCallback</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">setAlternatingRowColors</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setAlternatingRowColors</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">autoResize</span> <span class="o">=</span> <span class="n">autoResize</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">setContextMenuPolicy</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">DefaultContextMenu</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">setHorizontalScrollMode</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ScrollPerItem</span><span class="p">)</span>
@@ -258,7 +248,7 @@
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_setupModel</span><span class="p">()</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">setSortingEnabled</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setSortingEnabled</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">sortByColumn</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">AscendingOrder</span><span class="p">)</span>
 
         <span class="n">delegate</span> <span class="o">=</span> <span class="n">ObjectTableItemDelegate</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
@@ -270,7 +260,7 @@
 
         <span class="n">header</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">verticalHeader</span><span class="p">()</span>
         <span class="n">header</span><span class="o">.</span><span class="n">setResizeMode</span><span class="p">(</span><span class="n">header</span><span class="o">.</span><span class="n">Interactive</span><span class="p">)</span>
-        <span class="n">header</span><span class="o">.</span><span class="n">setStretchLastSection</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
+        <span class="n">header</span><span class="o">.</span><span class="n">setStretchLastSection</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
 
         <span class="n">rowHeight</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bbox</span><span class="p">(</span><span class="s1">&#39;A&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">height</span><span class="p">()</span> <span class="o">+</span> <span class="mi">4</span>
         <span class="n">header</span><span class="o">.</span><span class="n">setMinimumSectionSize</span><span class="p">(</span><span class="n">rowHeight</span><span class="p">)</span>
@@ -279,7 +269,7 @@
         <span class="c1"># if numberRows:</span>
         <span class="c1"># header.setVisible(True)</span>
         <span class="c1"># else:</span>
-        <span class="n">header</span><span class="o">.</span><span class="n">setVisible</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
+        <span class="n">header</span><span class="o">.</span><span class="n">setVisible</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
 
         <span class="c1"># header = ObjectHeaderView(QtCore.Qt.Horizontal, self)</span>
         <span class="c1"># header.setMovable(True)</span>
@@ -290,12 +280,12 @@
         <span class="c1"># self.header = header</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">setupHeaderStretch</span><span class="p">()</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">setDragEnabled</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setDragEnabled</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">acceptDrops</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">setDragDropMode</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">InternalMove</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">setDropIndicatorShown</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setDropIndicatorShown</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">searchWidget</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">searchWidget</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_setHeaderContextMenu</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_setContextMenu</span><span class="p">(</span><span class="n">enableExport</span><span class="o">=</span><span class="n">enableExport</span><span class="p">,</span> <span class="n">enableDelete</span><span class="o">=</span><span class="n">enableDelete</span><span class="p">)</span>
 
@@ -310,7 +300,7 @@
         <span class="n">headers</span><span class="o">.</span><span class="n">setContextMenuPolicy</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">CustomContextMenu</span><span class="p">)</span>
         <span class="n">headers</span><span class="o">.</span><span class="n">customContextMenuRequested</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_raiseHeaderContextMenu</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">_setContextMenu</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">enableExport</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">enableDelete</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_setContextMenu</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">enableExport</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">enableDelete</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">tableMenu</span> <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QMenu</span><span class="p">()</span>
         <span class="k">if</span> <span class="n">enableExport</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">tableMenu</span><span class="o">.</span><span class="n">addAction</span><span class="p">(</span><span class="s2">&quot;Export Table&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">exportDialog</span><span class="p">)</span>
@@ -326,9 +316,9 @@
 
 <div class="viewcode-block" id="ObjectTable.clearTable"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.Table.ObjectTable.clearTable">[docs]</a>    <span class="k">def</span> <span class="nf">clearTable</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="s2">&quot;remove all objects from the table&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_silenceCallback</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_silenceCallback</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">setObjects</span><span class="p">([])</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_silenceCallback</span> <span class="o">=</span> <span class="bp">False</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_silenceCallback</span> <span class="o">=</span> <span class="kc">False</span></div>
 
 <div class="viewcode-block" id="ObjectTable.sizeHint"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.Table.ObjectTable.sizeHint">[docs]</a>    <span class="k">def</span> <span class="nf">sizeHint</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 
@@ -340,14 +330,14 @@
             <span class="n">sortDetails</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">sortColumn</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">sortOrder</span><span class="p">())</span>
 
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">sortDetails</span> <span class="o">=</span> <span class="bp">None</span>
+            <span class="n">sortDetails</span> <span class="o">=</span> <span class="kc">None</span>
 
         <span class="n">objModel</span> <span class="o">=</span> <span class="n">ObjectTableModel</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
 
         <span class="n">model</span> <span class="o">=</span> <span class="n">ObjectTableProxyModel</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
         <span class="n">model</span><span class="o">.</span><span class="n">setSourceModel</span><span class="p">(</span><span class="n">objModel</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="n">sortDetails</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">sortDetails</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">column</span><span class="p">,</span> <span class="n">order</span> <span class="o">=</span> <span class="n">sortDetails</span>
             <span class="n">model</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">column</span><span class="p">,</span> <span class="n">order</span><span class="p">)</span>
 
@@ -369,8 +359,8 @@
         <span class="c1"># If the table is connected to a qtgui Splitter it</span>
         <span class="c1"># should not resize unless it is specifically asked to.</span>
         <span class="c1"># This helps avoiding infinite repaint loops.</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_parent</span><span class="p">,</span> <span class="n">Splitter</span><span class="p">)</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parent</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span> <span class="o">==</span> <span class="n">Splitter</span><span class="o">.</span><span class="n">__name__</span><span class="p">)</span> <span class="ow">or</span> \
-                <span class="bp">self</span><span class="o">.</span><span class="n">_parent</span><span class="o">.</span><span class="n">doResize</span> <span class="o">==</span> <span class="bp">True</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_parent</span><span class="p">,</span> <span class="n">Splitter</span><span class="p">)</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parent</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span> <span class="o">==</span> <span class="n">Splitter</span><span class="o">.</span><span class="vm">__name__</span><span class="p">)</span> <span class="ow">or</span> \
+                <span class="bp">self</span><span class="o">.</span><span class="n">_parent</span><span class="o">.</span><span class="n">doResize</span> <span class="o">==</span> <span class="kc">True</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QTableView</span><span class="o">.</span><span class="n">resizeEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="ObjectTable.clearSelection"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.Table.ObjectTable.clearSelection">[docs]</a>    <span class="k">def</span> <span class="nf">clearSelection</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -417,7 +407,7 @@
 
 
             <span class="k">else</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">selectionCallback</span><span class="p">(</span><span class="bp">None</span><span class="p">,</span> <span class="n">row</span><span class="p">,</span> <span class="n">col</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">selectionCallback</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="n">row</span><span class="p">,</span> <span class="n">col</span><span class="p">)</span>
 
 <div class="viewcode-block" id="ObjectTable.actionCallback"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.Table.ObjectTable.actionCallback">[docs]</a>    <span class="k">def</span> <span class="nf">actionCallback</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">itemSelection</span><span class="p">):</span>
         <span class="n">index</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getCurrentIndex</span><span class="p">()</span>
@@ -516,9 +506,9 @@
 
         <span class="n">selectionModel</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">selectionModel</span><span class="p">()</span>
         <span class="n">index</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_silenceCallback</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_silenceCallback</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="n">selectionModel</span><span class="o">.</span><span class="n">clearSelection</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_silenceCallback</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_silenceCallback</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="n">selectionModel</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="n">selectionModel</span><span class="o">.</span><span class="n">Select</span> <span class="o">|</span> <span class="n">selectionModel</span><span class="o">.</span><span class="n">Rows</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">setFocus</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">OtherFocusReason</span><span class="p">)</span></div>
 
@@ -530,9 +520,9 @@
             <span class="n">index</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">sourceModel</span><span class="p">()</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
             <span class="n">index</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">mapFromSource</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
 
-            <span class="bp">self</span><span class="o">.</span><span class="n">_silenceCallback</span> <span class="o">=</span> <span class="bp">True</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_silenceCallback</span> <span class="o">=</span> <span class="kc">True</span>
             <span class="n">selectionModel</span><span class="o">.</span><span class="n">clearSelection</span><span class="p">()</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_silenceCallback</span> <span class="o">=</span> <span class="bp">False</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_silenceCallback</span> <span class="o">=</span> <span class="kc">False</span>
             <span class="n">selectionModel</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="n">selectionModel</span><span class="o">.</span><span class="n">Select</span> <span class="o">|</span> <span class="n">selectionModel</span><span class="o">.</span><span class="n">Rows</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">setFocus</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">OtherFocusReason</span><span class="p">)</span></div>
 
@@ -540,9 +530,9 @@
 
         <span class="n">selectionModel</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">selectionModel</span><span class="p">()</span>
         <span class="n">index</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_silenceCallback</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_silenceCallback</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="n">selectionModel</span><span class="o">.</span><span class="n">clearSelection</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_silenceCallback</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_silenceCallback</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="n">selectionModel</span><span class="o">.</span><span class="n">setCurrentIndex</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="n">selectionModel</span><span class="o">.</span><span class="n">SelectCurrent</span> <span class="o">|</span> <span class="n">selectionModel</span><span class="o">.</span><span class="n">Rows</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">setFocus</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">OtherFocusReason</span><span class="p">)</span></div>
 
@@ -554,9 +544,9 @@
             <span class="n">index</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">sourceModel</span><span class="p">()</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
             <span class="n">index</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">mapFromSource</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
 
-            <span class="bp">self</span><span class="o">.</span><span class="n">_silenceCallback</span> <span class="o">=</span> <span class="bp">True</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_silenceCallback</span> <span class="o">=</span> <span class="kc">True</span>
             <span class="n">selectionModel</span><span class="o">.</span><span class="n">clearSelection</span><span class="p">()</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_silenceCallback</span> <span class="o">=</span> <span class="bp">False</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_silenceCallback</span> <span class="o">=</span> <span class="kc">False</span>
             <span class="n">selectionModel</span><span class="o">.</span><span class="n">setCurrentIndex</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="n">selectionModel</span><span class="o">.</span><span class="n">SelectCurrent</span> <span class="o">|</span> <span class="n">selectionModel</span><span class="o">.</span><span class="n">Rows</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">setFocus</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">OtherFocusReason</span><span class="p">)</span></div>
 
@@ -577,9 +567,9 @@
                 <span class="n">rows</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">row</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">rows</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_silenceCallback</span> <span class="o">=</span> <span class="bp">True</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_silenceCallback</span> <span class="o">=</span> <span class="kc">True</span>
             <span class="n">selectionModel</span><span class="o">.</span><span class="n">clearSelection</span><span class="p">()</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">setUpdatesEnabled</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">setUpdatesEnabled</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
 
             <span class="n">selectMode</span> <span class="o">=</span> <span class="n">selectionModel</span><span class="o">.</span><span class="n">Select</span> <span class="o">|</span> <span class="n">selectionModel</span><span class="o">.</span><span class="n">Rows</span>
             <span class="n">select</span> <span class="o">=</span> <span class="n">selectionModel</span><span class="o">.</span><span class="n">select</span>
@@ -591,9 +581,9 @@
                 <span class="n">index</span> <span class="o">=</span> <span class="n">mapFromSource</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
                 <span class="n">select</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="n">selectMode</span><span class="p">)</span>
 
-            <span class="bp">self</span><span class="o">.</span><span class="n">_silenceCallback</span> <span class="o">=</span> <span class="bp">False</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_callback</span><span class="p">(</span><span class="bp">None</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">setUpdatesEnabled</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_silenceCallback</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_callback</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">setUpdatesEnabled</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">setFocus</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">OtherFocusReason</span><span class="p">)</span></div>
 
@@ -611,9 +601,9 @@
                 <span class="n">rows</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">row</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">rows</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_silenceCallback</span> <span class="o">=</span> <span class="bp">True</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_silenceCallback</span> <span class="o">=</span> <span class="kc">True</span>
             <span class="n">selectionModel</span><span class="o">.</span><span class="n">clearSelection</span><span class="p">()</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">setUpdatesEnabled</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">setUpdatesEnabled</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
 
             <span class="n">selectMode</span> <span class="o">=</span> <span class="n">selectionModel</span><span class="o">.</span><span class="n">Select</span> <span class="o">|</span> <span class="n">selectionModel</span><span class="o">.</span><span class="n">Rows</span>
             <span class="n">select</span> <span class="o">=</span> <span class="n">selectionModel</span><span class="o">.</span><span class="n">select</span>
@@ -625,9 +615,9 @@
                 <span class="n">index</span> <span class="o">=</span> <span class="n">mapFromSource</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
                 <span class="n">select</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="n">selectMode</span><span class="p">)</span>
 
-            <span class="bp">self</span><span class="o">.</span><span class="n">_silenceCallback</span> <span class="o">=</span> <span class="bp">False</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_silenceCallback</span> <span class="o">=</span> <span class="kc">False</span>
             <span class="c1"># self._callback(None)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">setUpdatesEnabled</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">setUpdatesEnabled</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
 
             <span class="bp">self</span><span class="o">.</span><span class="n">setFocus</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">OtherFocusReason</span><span class="p">)</span>
 
@@ -645,7 +635,7 @@
 
         <span class="n">columns</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">columns</span>
         <span class="n">header</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">horizontalHeader</span><span class="p">()</span>
-        <span class="n">stretch</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="n">stretch</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="n">objects</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">objects</span>
         <span class="n">setColumnWidth</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">setColumnWidth</span>
         <span class="n">bbox</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bbox</span>
@@ -653,7 +643,7 @@
         <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">column</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">columns</span><span class="p">):</span>
             <span class="k">if</span> <span class="n">column</span><span class="o">.</span><span class="n">stretch</span><span class="p">:</span>
                 <span class="n">header</span><span class="o">.</span><span class="n">setResizeMode</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">header</span><span class="o">.</span><span class="n">Stretch</span><span class="p">)</span>
-                <span class="n">stretch</span> <span class="o">=</span> <span class="bp">True</span>
+                <span class="n">stretch</span> <span class="o">=</span> <span class="kc">True</span>
 
         <span class="k">if</span> <span class="n">objects</span><span class="p">:</span>
             <span class="n">minSize</span> <span class="o">=</span> <span class="n">bbox</span><span class="p">(</span><span class="s1">&#39;MM&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">width</span><span class="p">()</span>
@@ -676,7 +666,7 @@
                 <span class="n">setColumnWidth</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">width</span> <span class="o">+</span> <span class="mi">12</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="ow">not</span> <span class="n">stretch</span><span class="p">:</span>
-            <span class="n">header</span><span class="o">.</span><span class="n">setStretchLastSection</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span></div>
+            <span class="n">header</span><span class="o">.</span><span class="n">setStretchLastSection</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="ObjectTable.closeEvent"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.Table.ObjectTable.closeEvent">[docs]</a>    <span class="k">def</span> <span class="nf">closeEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
 
@@ -695,15 +685,15 @@
         <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QTableView</span><span class="o">.</span><span class="n">destroy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">)</span></div>
 
     <span class="k">def</span> <span class="nf">_raiseHeaderContextMenu</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pos</span><span class="p">):</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">searchWidget</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">searchWidget</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_addSearchWidget</span><span class="p">()</span>
 
         <span class="n">pos</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">QPoint</span><span class="p">(</span><span class="n">pos</span><span class="o">.</span><span class="n">x</span><span class="p">(),</span> <span class="n">pos</span><span class="o">.</span><span class="n">y</span><span class="p">()</span> <span class="o">+</span> <span class="mi">10</span><span class="p">)</span>  <span class="c1">#move the popup a bit down. Otherwise can trigger an event if the pointer is just on top the first item</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">headerContextMenumenu</span> <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QMenu</span><span class="p">()</span>
         <span class="n">columnsSettings</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">headerContextMenumenu</span><span class="o">.</span><span class="n">addAction</span><span class="p">(</span><span class="s2">&quot;Column Settings...&quot;</span><span class="p">)</span>
-        <span class="n">searchSettings</span> <span class="o">=</span> <span class="bp">None</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">searchWidget</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">searchSettings</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">searchWidget</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">searchSettings</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">headerContextMenumenu</span><span class="o">.</span><span class="n">addAction</span><span class="p">(</span><span class="s2">&quot;Search&quot;</span><span class="p">)</span>
         <span class="n">action</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">headerContextMenumenu</span><span class="o">.</span><span class="n">exec_</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mapToGlobal</span><span class="p">(</span><span class="n">pos</span><span class="p">))</span>
 
@@ -717,8 +707,8 @@
 
     <span class="k">def</span> <span class="nf">_addSearchWidget</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="c1"># TODO:Luca Add search option for any table</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parent</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
-            <span class="n">parentLayout</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parent</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">parentLayout</span> <span class="o">=</span> <span class="kc">None</span>
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_parent</span><span class="p">,</span> <span class="n">Base</span><span class="p">):</span>
                 <span class="c1"># if hasattr(self._parent, &#39;getLayout&#39;):</span>
                 <span class="n">parentLayout</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parent</span><span class="o">.</span><span class="n">getLayout</span><span class="p">()</span>
@@ -726,17 +716,17 @@
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">parentLayout</span><span class="p">,</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QGridLayout</span><span class="p">):</span>
                 <span class="n">idx</span> <span class="o">=</span> <span class="n">parentLayout</span><span class="o">.</span><span class="n">indexOf</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
                 <span class="n">location</span> <span class="o">=</span> <span class="n">parentLayout</span><span class="o">.</span><span class="n">getItemPosition</span><span class="p">(</span><span class="n">idx</span><span class="p">)</span>
-                <span class="k">if</span> <span class="n">location</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">location</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">location</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
                         <span class="n">row</span><span class="p">,</span> <span class="n">column</span><span class="p">,</span> <span class="n">rowSpan</span><span class="p">,</span> <span class="n">columnSpan</span> <span class="o">=</span> <span class="n">location</span>
                         <span class="bp">self</span><span class="o">.</span><span class="n">searchWidget</span> <span class="o">=</span> <span class="n">ObjectTableFilter</span><span class="p">(</span><span class="n">table</span><span class="o">=</span><span class="bp">self</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">vAlign</span><span class="o">=</span><span class="s1">&#39;B&#39;</span><span class="p">)</span>
                         <span class="n">parentLayout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">searchWidget</span><span class="p">,</span> <span class="n">row</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span> <span class="n">column</span><span class="p">,</span> <span class="n">rowSpan</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span> <span class="n">columnSpan</span><span class="p">)</span>
                         <span class="bp">self</span><span class="o">.</span><span class="n">searchWidget</span><span class="o">.</span><span class="n">hide</span><span class="p">()</span>
-        <span class="k">return</span> <span class="bp">True</span>
+        <span class="k">return</span> <span class="kc">True</span>
 
 <div class="viewcode-block" id="ObjectTable.showSearchSettings"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.Table.ObjectTable.showSearchSettings">[docs]</a>    <span class="k">def</span> <span class="nf">showSearchSettings</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">searchWidget</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">searchWidget</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">searchWidget</span><span class="o">.</span><span class="n">show</span><span class="p">()</span></div>
 
     <span class="k">def</span> <span class="nf">_raiseTableContextMenu</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pos</span><span class="p">):</span>
@@ -750,7 +740,7 @@
                                      <span class="nb">filter</span><span class="o">=</span><span class="s2">&quot;.xlsx;; .csv;; .tsv;; .json &quot;</span><span class="p">,</span>
                                      <span class="n">text</span><span class="o">=</span><span class="s1">&#39;Save as &#39;</span><span class="p">,</span>
                                      <span class="n">acceptMode</span><span class="o">=</span><span class="n">FileDialog</span><span class="o">.</span><span class="n">AcceptSave</span><span class="p">,</span>
-                                     <span class="n">preferences</span><span class="o">=</span><span class="bp">None</span><span class="p">)</span>
+                                     <span class="n">preferences</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
         <span class="n">path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">saveDialog</span><span class="o">.</span><span class="n">selectedFile</span><span class="p">()</span>
         <span class="k">if</span> <span class="n">path</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">findExportFormats</span><span class="p">(</span><span class="n">path</span><span class="p">)</span></div>
@@ -771,10 +761,10 @@
             <span class="k">try</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">findExportFormats</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">path</span><span class="p">)</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">saveDialog</span><span class="o">.</span><span class="n">selectedNameFilter</span><span class="p">())</span>
             <span class="k">except</span><span class="p">:</span>
-                <span class="k">print</span><span class="p">(</span><span class="s1">&#39;Format file not supported&#39;</span><span class="p">)</span></div>
+                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Format file not supported&#39;</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="ObjectTable.dataFrameToExcel"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.Table.ObjectTable.dataFrameToExcel">[docs]</a>    <span class="k">def</span> <span class="nf">dataFrameToExcel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dataFrame</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
-        <span class="n">dataFrame</span><span class="o">.</span><span class="n">to_excel</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">sheet_name</span><span class="o">=</span><span class="s1">&#39;Table&#39;</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span></div>
+        <span class="n">dataFrame</span><span class="o">.</span><span class="n">to_excel</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">sheet_name</span><span class="o">=</span><span class="s1">&#39;Table&#39;</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="ObjectTable.dataFrameToCsv"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.Table.ObjectTable.dataFrameToCsv">[docs]</a>    <span class="k">def</span> <span class="nf">dataFrameToCsv</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dataFrame</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
         <span class="n">dataFrame</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">path</span><span class="p">)</span></div>
@@ -792,7 +782,7 @@
         <span class="n">rows</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">obj</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">objects</span><span class="p">:</span>
             <span class="n">rows</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">x</span><span class="o">.</span><span class="n">getValue</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">columns</span><span class="p">])</span>
-        <span class="n">dataFrame</span> <span class="o">=</span> <span class="n">DataFrame</span><span class="p">(</span><span class="n">rows</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="n">headers</span><span class="p">)</span>
+        <span class="n">dataFrame</span> <span class="o">=</span> <span class="n">DataFrame</span><span class="p">(</span><span class="n">rows</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="n">headers</span><span class="p">)</span>
         <span class="n">dataFrame</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">pd</span><span class="o">.</span><span class="n">to_numeric</span><span class="p">,</span> <span class="n">errors</span><span class="o">=</span><span class="s1">&#39;ignore&#39;</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">dataFrame</span></div>
 
@@ -813,7 +803,7 @@
                 <span class="k">with</span> <span class="n">undoBlock</span><span class="p">():</span>
                     <span class="k">try</span><span class="p">:</span>
 
-                        <span class="bp">self</span><span class="o">.</span><span class="n">blockSignals</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">blockSignals</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
 
                         <span class="k">for</span> <span class="n">obj</span> <span class="ow">in</span> <span class="n">selected</span><span class="p">:</span>
                             <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="s1">&#39;pid&#39;</span><span class="p">):</span>
@@ -824,7 +814,7 @@
                         <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">es</span><span class="p">))</span>
                     <span class="k">finally</span><span class="p">:</span>
 
-                        <span class="bp">self</span><span class="o">.</span><span class="n">blockSignals</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">blockSignals</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
                         <span class="c1"># thisProject._endCommandEchoBlock()</span>
 
             <span class="k">else</span><span class="p">:</span>
@@ -854,7 +844,7 @@
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">filterPanel</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">filterPanel</span><span class="o">.</span><span class="n">unfilterTable</span><span class="p">()</span></div>
 
-<div class="viewcode-block" id="ObjectTable.getObjects"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.Table.ObjectTable.getObjects">[docs]</a>    <span class="k">def</span> <span class="nf">getObjects</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filtered</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+<div class="viewcode-block" id="ObjectTable.getObjects"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.Table.ObjectTable.getObjects">[docs]</a>    <span class="k">def</span> <span class="nf">getObjects</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filtered</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">filterPanel</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">filtered</span><span class="p">:</span>
@@ -884,14 +874,14 @@
 
             <span class="n">cb</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="n">rowsStr</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="n">cb</span><span class="o">.</span><span class="n">Clipboard</span><span class="p">)</span></div>
 
-    <span class="k">def</span> <span class="nf">_syncFilterObjects</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">applyFilter</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_syncFilterObjects</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">applyFilter</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">filterPanel</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">applyFilter</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">applyFilter</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">filterPanel</span><span class="o">.</span><span class="n">origObjects</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">objects</span>
 
             <span class="n">status</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">filterPanel</span><span class="o">.</span><span class="n">status</span>
-            <span class="k">if</span> <span class="n">applyFilter</span> <span class="ow">and</span> <span class="p">(</span><span class="n">status</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">applyFilter</span> <span class="ow">and</span> <span class="p">(</span><span class="n">status</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">):</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">filterPanel</span><span class="o">.</span><span class="n">filterTable</span><span class="p">(</span><span class="n">status</span><span class="p">)</span>
 
 <div class="viewcode-block" id="ObjectTable.replaceCurrentObject"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.Table.ObjectTable.replaceCurrentObject">[docs]</a>    <span class="k">def</span> <span class="nf">replaceCurrentObject</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">object</span><span class="p">):</span>
@@ -946,15 +936,15 @@
         <span class="n">model</span><span class="o">.</span><span class="n">dataChanged</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">indexA</span><span class="p">,</span> <span class="n">indexB</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="ObjectTable.setObjectsAndColumns"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.Table.ObjectTable.setObjectsAndColumns">[docs]</a>    <span class="k">def</span> <span class="nf">setObjectsAndColumns</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">objects</span><span class="p">,</span> <span class="n">columns</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_silenceCallback</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_silenceCallback</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="c1"># self.setObjects([])</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">setColumns</span><span class="p">(</span><span class="n">columns</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">setObjects</span><span class="p">(</span><span class="n">objects</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_silenceCallback</span> <span class="o">=</span> <span class="bp">False</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_silenceCallback</span> <span class="o">=</span> <span class="kc">False</span></div>
 
-<div class="viewcode-block" id="ObjectTable.setObjects"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.Table.ObjectTable.setObjects">[docs]</a>    <span class="k">def</span> <span class="nf">setObjects</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">objects</span><span class="p">,</span> <span class="n">applyFilter</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">filterApplied</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+<div class="viewcode-block" id="ObjectTable.setObjects"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.Table.ObjectTable.setObjects">[docs]</a>    <span class="k">def</span> <span class="nf">setObjects</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">objects</span><span class="p">,</span> <span class="n">applyFilter</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">filterApplied</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">filterApplied</span><span class="p">:</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">searchWidget</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">searchWidget</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">searchWidget</span><span class="o">.</span><span class="n">updateSearchWidgets</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
 
         <span class="n">selectedObjects</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getSelectedObjects</span><span class="p">()</span>  <span class="c1"># get current selection</span>
@@ -989,7 +979,7 @@
             <span class="n">sourceModel</span><span class="o">.</span><span class="n">endRemoveRows</span><span class="p">()</span>
 
         <span class="k">if</span> <span class="n">selected</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_silenceCallback</span> <span class="o">=</span> <span class="bp">True</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_silenceCallback</span> <span class="o">=</span> <span class="kc">True</span>
             <span class="n">selectionModel</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">selectionModel</span><span class="p">()</span>
             <span class="n">selectionModel</span><span class="o">.</span><span class="n">clearSelection</span><span class="p">()</span>
             <span class="n">selectMode</span> <span class="o">=</span> <span class="n">selectionModel</span><span class="o">.</span><span class="n">Select</span> <span class="o">|</span> <span class="n">selectionModel</span><span class="o">.</span><span class="n">Rows</span>
@@ -1008,7 +998,7 @@
 
                     <span class="n">select</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="n">selectMode</span><span class="p">)</span>
 
-            <span class="bp">self</span><span class="o">.</span><span class="n">_silenceCallback</span> <span class="o">=</span> <span class="bp">False</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_silenceCallback</span> <span class="o">=</span> <span class="kc">False</span>
 
         <span class="n">sortCol</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">sortColumn</span><span class="p">()</span>
         <span class="n">sortOrder</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">sortOrder</span><span class="p">()</span>
@@ -1020,9 +1010,9 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">setupHeaderStretch</span><span class="p">()</span>
         <span class="c1"># if self.autoResize:</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">setVisible</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setVisible</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
         <span class="c1"># self.setEnabled(False)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">blockSignals</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">blockSignals</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
         <span class="c1"># self.horizontalHeader().setResizeMode(QtWidgets.QHeaderView.Interactive)</span>
         <span class="c1"># self.verticalHeader().setResizeMode(QtWidgets.QHeaderView.Fixed)</span>
         <span class="c1"># print (&#39;  &gt;&gt;&gt;setObjects&#39;)</span>
@@ -1032,9 +1022,9 @@
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_highLightObjs</span><span class="p">(</span><span class="n">selectedObjects</span><span class="p">)</span>  <span class="c1"># set back again if possible</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">blockSignals</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">blockSignals</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
         <span class="c1"># self.setEnabled(True)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">setVisible</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setVisible</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="ObjectTable.setColumns"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.Table.ObjectTable.setColumns">[docs]</a>    <span class="k">def</span> <span class="nf">setColumns</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">columns</span><span class="p">):</span>
 
@@ -1133,10 +1123,10 @@
 
 <div class="viewcode-block" id="ObjectTableItemDelegate"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.Table.ObjectTableItemDelegate">[docs]</a><span class="k">class</span> <span class="nc">ObjectTableItemDelegate</span><span class="p">(</span><span class="n">QtWidgets</span><span class="o">.</span><span class="n">QStyledItemDelegate</span><span class="p">):</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">):</span>
 
-        <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QStyledItemDelegate</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">customWidget</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QStyledItemDelegate</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">customWidget</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_parent</span> <span class="o">=</span> <span class="n">parent</span>
 
 <div class="viewcode-block" id="ObjectTableItemDelegate.createEditor"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.Table.ObjectTableItemDelegate.createEditor">[docs]</a>    <span class="k">def</span> <span class="nf">createEditor</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parentWidget</span><span class="p">,</span> <span class="n">itemStyle</span><span class="p">,</span> <span class="n">index</span><span class="p">):</span>  <span class="c1"># returns the edit widget</span>
@@ -1145,9 +1135,9 @@
         <span class="n">objCol</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parent</span><span class="o">.</span><span class="n">columns</span><span class="p">[</span><span class="n">col</span><span class="p">]</span>
 
         <span class="k">if</span> <span class="n">objCol</span><span class="o">.</span><span class="n">editClass</span><span class="p">:</span>
-            <span class="n">widget</span> <span class="o">=</span> <span class="n">objCol</span><span class="o">.</span><span class="n">editClass</span><span class="p">(</span><span class="bp">None</span><span class="p">,</span> <span class="o">*</span><span class="n">objCol</span><span class="o">.</span><span class="n">editArgs</span><span class="p">,</span> <span class="o">**</span><span class="n">objCol</span><span class="o">.</span><span class="n">editKw</span><span class="p">)</span>
+            <span class="n">widget</span> <span class="o">=</span> <span class="n">objCol</span><span class="o">.</span><span class="n">editClass</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="n">objCol</span><span class="o">.</span><span class="n">editArgs</span><span class="p">,</span> <span class="o">**</span><span class="n">objCol</span><span class="o">.</span><span class="n">editKw</span><span class="p">)</span>
             <span class="n">widget</span><span class="o">.</span><span class="n">setParent</span><span class="p">(</span><span class="n">parentWidget</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">customWidget</span> <span class="o">=</span> <span class="bp">True</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">customWidget</span> <span class="o">=</span> <span class="kc">True</span>
             <span class="k">return</span> <span class="n">widget</span>
 
         <span class="k">else</span><span class="p">:</span>
@@ -1155,21 +1145,21 @@
             <span class="n">editValue</span> <span class="o">=</span> <span class="n">objCol</span><span class="o">.</span><span class="n">getEditValue</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
 
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">editValue</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)):</span>
-                <span class="n">widget</span> <span class="o">=</span> <span class="n">PulldownList</span><span class="p">(</span><span class="bp">None</span><span class="p">)</span>
+                <span class="n">widget</span> <span class="o">=</span> <span class="n">PulldownList</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
                 <span class="n">widget</span><span class="o">.</span><span class="n">setParent</span><span class="p">(</span><span class="n">parentWidget</span><span class="p">)</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">customWidget</span> <span class="o">=</span> <span class="bp">True</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">customWidget</span> <span class="o">=</span> <span class="kc">True</span>
                 <span class="k">return</span> <span class="n">widget</span>
 
             <span class="k">else</span><span class="p">:</span>
                 <span class="c1"># Use the default, type-dependant factory</span>
                 <span class="c1"># Deals with strings, bools, date time etc.</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">customWidget</span> <span class="o">=</span> <span class="bp">None</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">customWidget</span> <span class="o">=</span> <span class="kc">None</span>
                 <span class="n">editor</span> <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QStyledItemDelegate</span><span class="o">.</span><span class="n">createEditor</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parentWidget</span><span class="p">,</span> <span class="n">itemStyle</span><span class="p">,</span> <span class="n">index</span><span class="p">)</span>
 
                 <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">editor</span><span class="p">,</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QDoubleSpinBox</span><span class="p">):</span>
                     <span class="n">numDecimals</span> <span class="o">=</span> <span class="n">objCol</span><span class="o">.</span><span class="n">editDecimals</span>
 
-                    <span class="k">if</span> <span class="n">numDecimals</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">numDecimals</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                         <span class="n">editor</span><span class="o">.</span><span class="n">setDecimals</span><span class="p">(</span><span class="n">numDecimals</span><span class="p">)</span>
 
                         <span class="k">if</span> <span class="n">objCol</span><span class="o">.</span><span class="n">editStep</span><span class="p">:</span>
@@ -1276,8 +1266,8 @@
 
 <div class="viewcode-block" id="ObjectHeaderView"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.Table.ObjectHeaderView">[docs]</a><span class="k">class</span> <span class="nc">ObjectHeaderView</span><span class="p">(</span><span class="n">QtWidgets</span><span class="o">.</span><span class="n">QHeaderView</span><span class="p">):</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">orient</span><span class="p">,</span> <span class="n">parent</span><span class="p">):</span>
-        <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QHeaderView</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">orient</span><span class="p">,</span> <span class="n">parent</span><span class="p">)</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">orient</span><span class="p">,</span> <span class="n">parent</span><span class="p">):</span>
+        <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QHeaderView</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">orient</span><span class="p">,</span> <span class="n">parent</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">table</span> <span class="o">=</span> <span class="n">parent</span></div>
 
     <span class="c1">#def sizeHint(self):</span>
@@ -1294,9 +1284,9 @@
 
 <div class="viewcode-block" id="ObjectTableProxyModel"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.Table.ObjectTableProxyModel">[docs]</a><span class="k">class</span> <span class="nc">ObjectTableProxyModel</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">QSortFilterProxyModel</span><span class="p">):</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">):</span>
 
-        <span class="n">QtCore</span><span class="o">.</span><span class="n">QSortFilterProxyModel</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="n">parent</span><span class="p">)</span>
+        <span class="n">QtCore</span><span class="o">.</span><span class="n">QSortFilterProxyModel</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="n">parent</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">table</span> <span class="o">=</span> <span class="n">parent</span>
 
 <div class="viewcode-block" id="ObjectTableProxyModel.lessThan"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.Table.ObjectTableProxyModel.lessThan">[docs]</a>    <span class="k">def</span> <span class="nf">lessThan</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">leftIndex</span><span class="p">,</span> <span class="n">rightIndex</span><span class="p">):</span>
@@ -1323,8 +1313,8 @@
 
 <div class="viewcode-block" id="ObjectTableExport"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.Table.ObjectTableExport">[docs]</a><span class="k">class</span> <span class="nc">ObjectTableExport</span><span class="p">(</span><span class="n">QtWidgets</span><span class="o">.</span><span class="n">QDialog</span><span class="p">,</span> <span class="n">Base</span><span class="p">):</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">table</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">table</span><span class="p">)</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">table</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">table</span><span class="p">)</span>
         <span class="n">Base</span><span class="o">.</span><span class="n">_init</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">setWindowFlags</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">Tool</span><span class="p">)</span>
@@ -1332,15 +1322,15 @@
         <span class="n">label</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;Columns to export:&#39;</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">gridSpan</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
 
         <span class="n">labels</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Row Number&#39;</span><span class="p">,</span> <span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="n">c</span><span class="o">.</span><span class="n">heading</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">,</span> <span class="s1">&#39; &#39;</span><span class="p">)</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">table</span><span class="o">.</span><span class="n">columns</span><span class="p">]</span>
-        <span class="n">values</span> <span class="o">=</span> <span class="p">[</span><span class="bp">True</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">labels</span><span class="p">)</span>
+        <span class="n">values</span> <span class="o">=</span> <span class="p">[</span><span class="kc">True</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">labels</span><span class="p">)</span>
         <span class="n">label</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;Export format:&#39;</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">formatPulldown</span> <span class="o">=</span> <span class="n">PulldownList</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">EXPORT_FORMATS</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">setMaximumWidth</span><span class="p">(</span><span class="mi">300</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="ColumnViewSettingsPopup"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.Table.ColumnViewSettingsPopup">[docs]</a><span class="k">class</span> <span class="nc">ColumnViewSettingsPopup</span><span class="p">(</span><span class="n">CcpnDialog</span><span class="p">):</span>
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">table</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">hideColumns</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s1">&#39;Column Settings&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
-        <span class="n">CcpnDialog</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">setLayout</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">windowTitle</span><span class="o">=</span><span class="n">title</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">)</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">table</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">hideColumns</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s1">&#39;Column Settings&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
+        <span class="n">CcpnDialog</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">setLayout</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">windowTitle</span><span class="o">=</span><span class="n">title</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">setContentsMargins</span><span class="p">(</span><span class="mi">20</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">20</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">table</span> <span class="o">=</span> <span class="n">table</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">widgetColumnViewSettings</span> <span class="o">=</span> <span class="n">ColumnViewSettings</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="bp">self</span><span class="p">,</span> <span class="n">table</span><span class="o">=</span><span class="n">table</span><span class="p">,</span> <span class="n">hideColumns</span><span class="o">=</span><span class="n">hideColumns</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
@@ -1362,8 +1352,8 @@
 <div class="viewcode-block" id="ColumnViewSettings"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.Table.ColumnViewSettings">[docs]</a><span class="k">class</span> <span class="nc">ColumnViewSettings</span><span class="p">(</span><span class="n">Widget</span><span class="p">):</span>
     <span class="sd">&#39;&#39;&#39; hide show check boxes corresponding to the table columns &#39;&#39;&#39;</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">table</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">direction</span><span class="o">=</span><span class="s1">&#39;v&#39;</span><span class="p">,</span> <span class="n">hideColumns</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
-        <span class="n">Widget</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">setLayout</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">)</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">table</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">direction</span><span class="o">=</span><span class="s1">&#39;v&#39;</span><span class="p">,</span> <span class="n">hideColumns</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
+        <span class="n">Widget</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">setLayout</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">direction</span> <span class="o">=</span> <span class="n">direction</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">table</span> <span class="o">=</span> <span class="n">table</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">checkBoxes</span> <span class="o">=</span> <span class="p">[]</span>
@@ -1382,11 +1372,11 @@
                 <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">direction</span> <span class="o">==</span> <span class="s1">&#39;v&#39;</span><span class="p">:</span>
                     <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
                     <span class="n">cb</span> <span class="o">=</span> <span class="n">CheckBox</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="n">colum</span><span class="o">.</span><span class="n">heading</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">callback</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">checkBoxCallBack</span><span class="p">,</span>
-                                  <span class="n">checked</span><span class="o">=</span><span class="bp">True</span> <span class="k">if</span> <span class="n">colum</span><span class="o">.</span><span class="n">heading</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">hideColumns</span> <span class="k">else</span> <span class="bp">False</span><span class="p">,</span>
+                                  <span class="n">checked</span><span class="o">=</span><span class="kc">True</span> <span class="k">if</span> <span class="n">colum</span><span class="o">.</span><span class="n">heading</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">hideColumns</span> <span class="k">else</span> <span class="kc">False</span><span class="p">,</span>
                                   <span class="n">hAlign</span><span class="o">=</span><span class="s1">&#39;l&#39;</span><span class="p">,</span> <span class="n">tipText</span><span class="o">=</span><span class="n">CheckboxTipText</span><span class="p">,</span> <span class="p">)</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="n">cb</span> <span class="o">=</span> <span class="n">CheckBox</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="n">colum</span><span class="o">.</span><span class="n">heading</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">i</span><span class="p">),</span> <span class="n">callback</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">checkBoxCallBack</span><span class="p">,</span>
-                                  <span class="n">checked</span><span class="o">=</span><span class="bp">True</span> <span class="k">if</span> <span class="n">colum</span><span class="o">.</span><span class="n">heading</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">hideColumns</span> <span class="k">else</span> <span class="bp">False</span><span class="p">,</span>
+                                  <span class="n">checked</span><span class="o">=</span><span class="kc">True</span> <span class="k">if</span> <span class="n">colum</span><span class="o">.</span><span class="n">heading</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">hideColumns</span> <span class="k">else</span> <span class="kc">False</span><span class="p">,</span>
                                   <span class="n">hAlign</span><span class="o">=</span><span class="s1">&#39;l&#39;</span><span class="p">,</span> <span class="n">tipText</span><span class="o">=</span><span class="n">CheckboxTipText</span><span class="p">,</span> <span class="p">)</span>
 
                 <span class="n">cb</span><span class="o">.</span><span class="n">setMinimumSize</span><span class="p">(</span><span class="n">cb</span><span class="o">.</span><span class="n">sizeHint</span><span class="p">()</span> <span class="o">*</span> <span class="mf">1.3</span><span class="p">)</span>
@@ -1407,7 +1397,7 @@
         <span class="n">checkedBoxes</span> <span class="o">=</span> <span class="p">[]</span>
 
         <span class="k">for</span> <span class="n">checkBox</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">checkBoxes</span><span class="p">:</span>
-            <span class="n">checkBox</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+            <span class="n">checkBox</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">checkBox</span><span class="o">.</span><span class="n">isChecked</span><span class="p">():</span>
                 <span class="n">checkedBoxes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">checkBox</span><span class="p">)</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">checkedBoxes</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
@@ -1416,8 +1406,8 @@
             <span class="k">else</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_hideColumn</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>  <span class="c1">#always display at least one columns, disables the last checkbox</span>
-            <span class="n">currentCheckBox</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
-            <span class="n">currentCheckBox</span><span class="o">.</span><span class="n">setChecked</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span></div>
+            <span class="n">currentCheckBox</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+            <span class="n">currentCheckBox</span><span class="o">.</span><span class="n">setChecked</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="ColumnViewSettings.updateWidgets"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.Table.ColumnViewSettings.updateWidgets">[docs]</a>    <span class="k">def</span> <span class="nf">updateWidgets</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">table</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">table</span> <span class="o">=</span> <span class="n">table</span>
@@ -1445,8 +1435,8 @@
 
 <div class="viewcode-block" id="ObjectTableFilter"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.Table.ObjectTableFilter">[docs]</a><span class="k">class</span> <span class="nc">ObjectTableFilter</span><span class="p">(</span><span class="n">Widget</span><span class="p">):</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">table</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
-        <span class="n">Widget</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">setLayout</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">)</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">table</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
+        <span class="n">Widget</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">setLayout</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">table</span> <span class="o">=</span> <span class="n">table</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">origObjects</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">table</span><span class="o">.</span><span class="n">objects</span>
@@ -1459,7 +1449,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">searchButtons</span> <span class="o">=</span> <span class="n">ButtonList</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">texts</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;Close&#39;</span><span class="p">,</span> <span class="s1">&#39;Reset&#39;</span><span class="p">,</span> <span class="s1">&#39;Search&#39;</span><span class="p">],</span> <span class="n">tipTexts</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;Close Search&#39;</span><span class="p">,</span> <span class="s1">&#39;Restore Table&#39;</span><span class="p">,</span> <span class="s1">&#39;Search&#39;</span><span class="p">],</span>
                                         <span class="n">callbacks</span><span class="o">=</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">hideSearch</span><span class="p">,</span> <span class="n">partial</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">restoreTable</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">table</span><span class="p">),</span>
                                                    <span class="n">partial</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">findOnTable</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">table</span><span class="p">)])</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">searchButtons</span><span class="o">.</span><span class="n">buttons</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">searchButtons</span><span class="o">.</span><span class="n">buttons</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">widgetLayout</span> <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QHBoxLayout</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">setLayout</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">widgetLayout</span><span class="p">)</span>
@@ -1474,7 +1464,7 @@
         <span class="n">objectsRange</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">columns</span><span class="p">))</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">columnOptions</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">columnOptions</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="s1">&#39;Whole Table&#39;</span><span class="p">,</span> <span class="nb">object</span><span class="o">=</span><span class="bp">None</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">columnOptions</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="s1">&#39;Whole Table&#39;</span><span class="p">,</span> <span class="nb">object</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">text</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">texts</span><span class="p">):</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">columnOptions</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">objectsRange</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">columnOptions</span><span class="o">.</span><span class="n">setIndex</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span></div>
@@ -1483,11 +1473,11 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">table</span> <span class="o">=</span> <span class="n">table</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">origObjects</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">table</span><span class="o">.</span><span class="n">objects</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">setColumnOptions</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">searchButtons</span><span class="o">.</span><span class="n">buttons</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">searchButtons</span><span class="o">.</span><span class="n">buttons</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="ObjectTableFilter.hideSearch"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.Table.ObjectTableFilter.hideSearch">[docs]</a>    <span class="k">def</span> <span class="nf">hideSearch</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">restoreTable</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">table</span><span class="p">)</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">table</span><span class="o">.</span><span class="n">searchWidget</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">table</span><span class="o">.</span><span class="n">searchWidget</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">table</span><span class="o">.</span><span class="n">searchWidget</span><span class="o">.</span><span class="n">hide</span><span class="p">()</span></div>
 
 <div class="viewcode-block" id="ObjectTableFilter.restoreTable"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.Table.ObjectTableFilter.restoreTable">[docs]</a>    <span class="k">def</span> <span class="nf">restoreTable</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">table</span><span class="p">):</span>
@@ -1497,7 +1487,7 @@
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">table</span><span class="o">.</span><span class="n">objects</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
             <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">table</span><span class="o">.</span><span class="n">objects</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="s1">&#39;_parent&#39;</span><span class="p">):</span>
                 <span class="n">parentObjects</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">table</span><span class="o">.</span><span class="n">objects</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">_parent</span>
-                <span class="k">if</span> <span class="n">parentObjects</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">parentObjects</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                     <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">parentObjects</span><span class="p">,</span> <span class="s1">&#39;_childClasses&#39;</span><span class="p">):</span>
                         <span class="n">cC</span> <span class="o">=</span> <span class="n">parentObjects</span><span class="o">.</span><span class="n">_childClasses</span>
                         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">cC</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
@@ -1507,22 +1497,22 @@
                                 <span class="n">table</span><span class="o">.</span><span class="n">setObjects</span><span class="p">(</span><span class="n">originalObjects</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">edit</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">searchButtons</span><span class="o">.</span><span class="n">buttons</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">searchButtons</span><span class="o">.</span><span class="n">buttons</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="ObjectTableFilter.findOnTable"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.Table.ObjectTableFilter.findOnTable">[docs]</a>    <span class="k">def</span> <span class="nf">findOnTable</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">table</span><span class="p">):</span>
 
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">edit</span><span class="o">.</span><span class="n">text</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;&#39;</span> <span class="ow">or</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">edit</span><span class="o">.</span><span class="n">text</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;&#39;</span> <span class="ow">or</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">restoreTable</span><span class="p">(</span><span class="n">table</span><span class="p">)</span>
             <span class="k">return</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">table</span> <span class="o">=</span> <span class="n">table</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">origObjects</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">table</span><span class="o">.</span><span class="n">objects</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">table</span><span class="o">.</span><span class="n">setObjects</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">origObjects</span><span class="p">,</span> <span class="n">filterApplied</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">table</span><span class="o">.</span><span class="n">setObjects</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">origObjects</span><span class="p">,</span> <span class="n">filterApplied</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
         <span class="n">text</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">edit</span><span class="o">.</span><span class="n">text</span><span class="p">()</span>
         <span class="n">columns</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">table</span><span class="o">.</span><span class="n">columns</span>
 
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">columnOptions</span><span class="o">.</span><span class="n">currentObject</span><span class="p">()</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">columnOptions</span><span class="o">.</span><span class="n">currentObject</span><span class="p">()</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">allMatched</span> <span class="o">=</span> <span class="p">[]</span>
             <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">columns</span><span class="p">)):</span>
                 <span class="n">objCol</span> <span class="o">=</span> <span class="n">columns</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
@@ -1535,10 +1525,10 @@
             <span class="n">matched</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">searchMatches</span><span class="p">(</span><span class="n">objCol</span><span class="p">,</span> <span class="n">text</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">matched</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">table</span><span class="o">.</span><span class="n">setObjects</span><span class="p">(</span><span class="n">matched</span><span class="p">,</span> <span class="n">filterApplied</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">searchButtons</span><span class="o">.</span><span class="n">buttons</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">table</span><span class="o">.</span><span class="n">setObjects</span><span class="p">(</span><span class="n">matched</span><span class="p">,</span> <span class="n">filterApplied</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">searchButtons</span><span class="o">.</span><span class="n">buttons</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">searchButtons</span><span class="o">.</span><span class="n">buttons</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">searchButtons</span><span class="o">.</span><span class="n">buttons</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">restoreTable</span><span class="p">(</span><span class="n">table</span><span class="p">)</span>
             <span class="n">MessageDialog</span><span class="o">.</span><span class="n">showWarning</span><span class="p">(</span><span class="s1">&#39;Not found&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span></div>
 
@@ -1546,7 +1536,7 @@
         <span class="n">matched</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="n">objs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">table</span><span class="o">.</span><span class="n">objects</span>
         <span class="k">for</span> <span class="n">obj</span> <span class="ow">in</span> <span class="n">objs</span><span class="p">:</span>
-            <span class="n">value</span> <span class="o">=</span> <span class="s1">u&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">objCol</span><span class="o">.</span><span class="n">getValue</span><span class="p">(</span><span class="n">obj</span><span class="p">))</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="sa">u</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">objCol</span><span class="o">.</span><span class="n">getValue</span><span class="p">(</span><span class="n">obj</span><span class="p">))</span>
             <span class="k">if</span> <span class="nb">str</span><span class="p">(</span><span class="n">text</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
                 <span class="n">matched</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
             <span class="k">elif</span> <span class="nb">str</span><span class="p">(</span><span class="n">text</span><span class="p">)</span> <span class="o">==</span> <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
@@ -1560,10 +1550,10 @@
 
 <div class="viewcode-block" id="Column"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.Table.Column">[docs]</a><span class="k">class</span> <span class="nc">Column</span><span class="p">:</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">heading</span><span class="p">,</span> <span class="n">getValue</span><span class="p">,</span> <span class="n">getEditValue</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">setEditValue</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
-                 <span class="n">editClass</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">editArgs</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">editKw</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">tipText</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
-                 <span class="n">getColor</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">getIcon</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">stretch</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">format</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
-                 <span class="n">editDecimals</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">editStep</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">alignment</span><span class="o">=</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">AlignLeft</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">heading</span><span class="p">,</span> <span class="n">getValue</span><span class="p">,</span> <span class="n">getEditValue</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">setEditValue</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="n">editClass</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">editArgs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">editKw</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">tipText</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="n">getColor</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">getIcon</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">stretch</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="n">editDecimals</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">editStep</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">alignment</span><span class="o">=</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">AlignLeft</span><span class="p">):</span>
         <span class="c1"># editDecimals=None, editStep=None, alignment=QtCore.Qt.AlignLeft,</span>
         <span class="c1"># orderFunc=None):</span>
 
@@ -1575,10 +1565,10 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">editArgs</span> <span class="o">=</span> <span class="n">editArgs</span> <span class="ow">or</span> <span class="p">[]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">editKw</span> <span class="o">=</span> <span class="n">editKw</span> <span class="ow">or</span> <span class="p">{}</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">stretch</span> <span class="o">=</span> <span class="n">stretch</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">format</span> <span class="o">=</span> <span class="n">format</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">format</span> <span class="o">=</span> <span class="nb">format</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">editDecimals</span> <span class="o">=</span> <span class="n">editDecimals</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">editStep</span> <span class="o">=</span> <span class="n">editStep</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">defaultIcon</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">defaultIcon</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="c1">#self.alignment = ALIGN_OPTS.get(alignment, alignment) | Qt.AlignVCenter</span>
         <span class="c1"># Alignment combinations broken in PyQt5 v1.1.1</span>
         <span class="c1"># Use better default than top left</span>
@@ -1597,9 +1587,9 @@
 <div class="viewcode-block" id="Column.getFormatValue"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.Table.Column.getFormatValue">[docs]</a>    <span class="k">def</span> <span class="nf">getFormatValue</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">):</span>
 
         <span class="n">value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getValue</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
-        <span class="n">format</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">format</span>
-        <span class="k">if</span> <span class="n">format</span> <span class="ow">and</span> <span class="p">(</span><span class="n">value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">):</span>
-            <span class="k">return</span> <span class="n">format</span> <span class="o">%</span> <span class="n">value</span>
+        <span class="nb">format</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">format</span>
+        <span class="k">if</span> <span class="nb">format</span> <span class="ow">and</span> <span class="p">(</span><span class="n">value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">):</span>
+            <span class="k">return</span> <span class="nb">format</span> <span class="o">%</span> <span class="n">value</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">value</span></div>
 
@@ -1634,7 +1624,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">defaultIcon</span></div>
 
 
-<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
     <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Icon</span> <span class="kn">import</span> <span class="n">Icon</span>
 
     <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Application</span> <span class="kn">import</span> <span class="n">TestApplication</span>
@@ -1650,7 +1640,7 @@
         <span class="n">exampleStr</span> <span class="o">=</span> <span class="s1">&#39;exampleStr&#39;</span>
         <span class="n">integer</span> <span class="o">=</span> <span class="mi">3</span>
         <span class="n">exampleFloat</span> <span class="o">=</span> <span class="mf">3.1</span>  <span class="c1"># This will create a double spin box</span>
-        <span class="n">exampleBool</span> <span class="o">=</span> <span class="bp">True</span>  <span class="c1"># This will create a check box</span>
+        <span class="n">exampleBool</span> <span class="o">=</span> <span class="kc">True</span>  <span class="c1"># This will create a check box</span>
         <span class="n">string</span> <span class="o">=</span> <span class="s1">&#39;white&#39;</span>  <span class="c1"># This will create a line Edit</span>
         <span class="n">exampleList</span> <span class="o">=</span> <span class="p">((</span><span class="s1">&#39;Mock&#39;</span><span class="p">,</span> <span class="s1">&#39;Test&#39;</span><span class="p">),)</span>  <span class="c1"># This will create a pulldown</span>
         <span class="n">color</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QColor</span><span class="p">(</span><span class="s1">&#39;Red&#39;</span><span class="p">)</span>
@@ -1658,7 +1648,7 @@
         <span class="n">r</span> <span class="o">=</span> <span class="n">Colour</span><span class="o">.</span><span class="n">colourNameToHexDict</span><span class="p">[</span><span class="s1">&#39;red&#39;</span><span class="p">]</span>
         <span class="n">y</span> <span class="o">=</span> <span class="n">Colour</span><span class="o">.</span><span class="n">colourNameToHexDict</span><span class="p">[</span><span class="s1">&#39;yellow&#39;</span><span class="p">]</span>
         <span class="n">b</span> <span class="o">=</span> <span class="n">Colour</span><span class="o">.</span><span class="n">colourNameToHexDict</span><span class="p">[</span><span class="s1">&#39;blue&#39;</span><span class="p">]</span>
-        <span class="n">colouredIcons</span> <span class="o">=</span> <span class="p">[</span><span class="bp">None</span><span class="p">,</span> <span class="n">Icon</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="n">r</span><span class="p">),</span> <span class="n">Icon</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="n">y</span><span class="p">),</span> <span class="n">Icon</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="n">b</span><span class="p">)]</span>
+        <span class="n">colouredIcons</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="n">Icon</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="n">r</span><span class="p">),</span> <span class="n">Icon</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="n">y</span><span class="p">),</span> <span class="n">Icon</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="n">b</span><span class="p">)]</span>
 
         <span class="n">flagsList</span> <span class="o">=</span> <span class="p">[[</span><span class="s1">&#39;&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">colouredIcons</span><span class="p">),</span> <span class="p">[</span><span class="n">Icon</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">colouredIcons</span><span class="p">),</span> <span class="mi">1</span><span class="p">,</span> <span class="n">colouredIcons</span><span class="p">]</span>  <span class="c1"># This will create a pulldown. Make a list with the</span>
 
@@ -1678,10 +1668,10 @@
             <span class="n">mockObj</span><span class="o">.</span><span class="n">exampleStr</span> <span class="o">=</span> <span class="n">value</span>
 
         <span class="k">def</span> <span class="nf">editFlags</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
-            <span class="k">print</span><span class="p">(</span><span class="s1">&#39;test&#39;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;test&#39;</span><span class="p">)</span>
 
 
-    <span class="n">popup</span> <span class="o">=</span> <span class="n">CcpnDialog</span><span class="p">(</span><span class="n">windowTitle</span><span class="o">=</span><span class="s1">&#39;Test Table&#39;</span><span class="p">,</span> <span class="n">setLayout</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    <span class="n">popup</span> <span class="o">=</span> <span class="n">CcpnDialog</span><span class="p">(</span><span class="n">windowTitle</span><span class="o">=</span><span class="s1">&#39;Test Table&#39;</span><span class="p">,</span> <span class="n">setLayout</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
     <span class="n">cString</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">heading</span><span class="o">=</span><span class="s1">&#39;Str&#39;</span><span class="p">,</span>
                      <span class="n">getValue</span><span class="o">=</span><span class="k">lambda</span> <span class="n">i</span><span class="p">:</span> <span class="n">mockObj</span><span class="o">.</span><span class="n">exampleStr</span><span class="p">,</span>
@@ -1706,7 +1696,7 @@
                        <span class="n">setEditValue</span><span class="o">=</span><span class="k">lambda</span> <span class="n">mockObj</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">mockObj</span><span class="o">.</span><span class="n">editPulldown</span><span class="p">(</span><span class="n">mockObj</span><span class="p">,</span> <span class="n">value</span><span class="p">),</span>
                        <span class="p">)</span>
     <span class="n">cIcon</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">heading</span><span class="o">=</span><span class="s1">&#39;Icon&#39;</span><span class="p">,</span>
-                   <span class="n">getValue</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                   <span class="n">getValue</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                    <span class="n">getIcon</span><span class="o">=</span><span class="k">lambda</span> <span class="n">i</span><span class="p">:</span> <span class="n">mockObj</span><span class="o">.</span><span class="n">icon</span><span class="p">,</span>
                    <span class="p">)</span>
     <span class="n">cFlags</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">heading</span><span class="o">=</span><span class="s1">&#39;Flags&#39;</span><span class="p">,</span>
@@ -1715,9 +1705,9 @@
                     <span class="n">getColor</span><span class="o">=</span><span class="k">lambda</span> <span class="n">i</span><span class="p">:</span> <span class="n">mockObj</span><span class="o">.</span><span class="n">color</span><span class="p">,</span>
                     <span class="p">)</span>
 
-    <span class="n">table</span> <span class="o">=</span> <span class="n">ObjectTable</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="n">popup</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="n">cString</span><span class="p">,</span> <span class="n">cFloat</span><span class="p">,</span> <span class="n">cBool</span><span class="p">,</span> <span class="n">cPulldown</span><span class="p">,</span> <span class="n">cIcon</span><span class="p">,</span> <span class="n">cFlags</span><span class="p">],</span> <span class="n">objects</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+    <span class="n">table</span> <span class="o">=</span> <span class="n">ObjectTable</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="n">popup</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="n">cString</span><span class="p">,</span> <span class="n">cFloat</span><span class="p">,</span> <span class="n">cBool</span><span class="p">,</span> <span class="n">cPulldown</span><span class="p">,</span> <span class="n">cIcon</span><span class="p">,</span> <span class="n">cFlags</span><span class="p">],</span> <span class="n">objects</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
     <span class="n">table</span><span class="o">.</span><span class="n">setObjects</span><span class="p">([</span><span class="n">mockObj</span><span class="p">]</span> <span class="o">*</span> <span class="mi">5</span><span class="p">)</span>
-    <span class="k">print</span><span class="p">(</span><span class="n">table</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">index</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">table</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">index</span><span class="p">)</span>
     <span class="n">popup</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
     <span class="n">popup</span><span class="o">.</span><span class="n">raise_</span><span class="p">()</span>
     <span class="n">app</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
@@ -1729,15 +1719,15 @@
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
 <div id="searchbox" style="display: none" role="search">
-  <h3>Quick search</h3>
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
     <form class="search" action="../../../../../search.html" method="get">
-      <input type="text" name="q" />
+      <input type="text" name="q" aria-labelledby="searchlabel" />
       <input type="submit" value="Go" />
-      <input type="hidden" name="check_keywords" value="yes" />
-      <input type="hidden" name="area" value="default" />
     </form>
+    </div>
 </div>
-<script type="text/javascript">$('#searchbox').show(0);</script>
+<script>$('#searchbox').show(0);</script>
         </div>
       </div>
       <div class="clearer"></div>
@@ -1751,13 +1741,13 @@
         <li class="right" >
           <a href="../../../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../../../index.html">Python  documentation</a> &raquo;</li>
-          <li class="nav-item nav-item-1"><a href="../../../../index.html" >Module code</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="../../../../../index.html">Python  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../../../index.html" >Module code</a> &#187;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
-        &copy; Copyright .
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.1.
+        &#169; Copyright .
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.4.0.
     </div>
   </body>
 </html>

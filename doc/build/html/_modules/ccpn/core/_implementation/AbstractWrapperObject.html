@@ -1,32 +1,22 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
+<!DOCTYPE html>
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    
-    <title>ccpn.core._implementation.AbstractWrapperObject &mdash; Python  documentation</title>
-    
+    <meta charset="utf-8" />
+    <title>ccpn.core._implementation.AbstractWrapperObject &#8212; Python  documentation</title>
     <link rel="stylesheet" href="../../../../_static/classic.css" type="text/css" />
     <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
     
-    <script type="text/javascript">
-      var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    '../../../../',
-        VERSION:     '',
-        COLLAPSE_INDEX: false,
-        FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true
-      };
-    </script>
-    <script type="text/javascript" src="../../../../_static/jquery.js"></script>
-    <script type="text/javascript" src="../../../../_static/underscore.js"></script>
-    <script type="text/javascript" src="../../../../_static/doctools.js"></script>
-    <link rel="top" title="Python  documentation" href="../../../../index.html" />
-    <link rel="up" title="Module code" href="../../../index.html" /> 
-  </head>
-  <body role="document">
+    <script id="documentation_options" data-url_root="../../../../" src="../../../../_static/documentation_options.js"></script>
+    <script src="../../../../_static/jquery.js"></script>
+    <script src="../../../../_static/underscore.js"></script>
+    <script src="../../../../_static/doctools.js"></script>
+    <script src="../../../../_static/language_data.js"></script>
+    
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+  </head><body>
     <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
@@ -36,8 +26,8 @@
         <li class="right" >
           <a href="../../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../../index.html">Python  documentation</a> &raquo;</li>
-          <li class="nav-item nav-item-1"><a href="../../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="../../../../index.html">Python  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../../index.html" accesskey="U">Module code</a> &#187;</li> 
       </ul>
     </div>  
 
@@ -80,7 +70,7 @@
 <span class="kn">import</span> <span class="nn">operator</span>
 <span class="kn">import</span> <span class="nn">typing</span>
 <span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">OrderedDict</span>
-
+<span class="kn">from</span> <span class="nn">copy</span> <span class="kn">import</span> <span class="n">deepcopy</span>
 <span class="kn">from</span> <span class="nn">ccpn.core</span> <span class="kn">import</span> <span class="n">_importOrder</span>
 <span class="c1"># from ccpn.core.lib import CcpnSorting</span>
 <span class="kn">from</span> <span class="nn">ccpn.core.lib</span> <span class="kn">import</span> <span class="n">Util</span> <span class="k">as</span> <span class="n">coreUtil</span>
@@ -88,11 +78,11 @@
 <span class="kn">from</span> <span class="nn">ccpn.core.lib</span> <span class="kn">import</span> <span class="n">Pid</span>
 <span class="kn">from</span> <span class="nn">ccpnmodel.ccpncore.api.memops</span> <span class="kn">import</span> <span class="n">Implementation</span> <span class="k">as</span> <span class="n">ApiImplementation</span>
 <span class="kn">from</span> <span class="nn">ccpn.util.Logging</span> <span class="kn">import</span> <span class="n">getLogger</span>
-<span class="kn">from</span> <span class="nn">ccpn.core.lib.ContextManagers</span> <span class="kn">import</span> <span class="n">deleteObject</span><span class="p">,</span> <span class="n">notificationBlanking</span>
+<span class="kn">from</span> <span class="nn">ccpn.core.lib.ContextManagers</span> <span class="kn">import</span> <span class="n">deleteObject</span><span class="p">,</span> <span class="n">notificationBlanking</span><span class="p">,</span> <span class="n">undoStackBlocking</span>
 <span class="kn">from</span> <span class="nn">ccpn.core.lib.Notifiers</span> <span class="kn">import</span> <span class="n">NotifierBase</span><span class="p">,</span> <span class="n">Notifier</span>
 
 
-<span class="nd">@functools.total_ordering</span>
+<span class="nd">@functools</span><span class="o">.</span><span class="n">total_ordering</span>
 <span class="k">class</span> <span class="nc">AbstractWrapperObject</span><span class="p">(</span><span class="n">NotifierBase</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Abstract class containing common functionality for subclasses.</span>
 
@@ -150,12 +140,12 @@
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="c1">#: Short class name, for PID. Must be overridden for each subclass</span>
-    <span class="n">shortClassName</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="n">shortClassName</span> <span class="o">=</span> <span class="kc">None</span>
 
     <span class="c1"># Class name - necessary since the actual objects may be of a subclass.</span>
     <span class="n">className</span> <span class="o">=</span> <span class="s1">&#39;AbstractWrapperObject&#39;</span>
 
-    <span class="n">_parentClass</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="n">_parentClass</span> <span class="o">=</span> <span class="kc">None</span>
 
     <span class="c1">#: Name of plural link to instances of class</span>
     <span class="n">_pluralLinkName</span> <span class="o">=</span> <span class="s1">&#39;abstractWrapperClasses&#39;</span>
@@ -163,7 +153,7 @@
     <span class="c1">#: List of child classes. Must be overridden for each subclass.</span>
     <span class="n">_childClasses</span> <span class="o">=</span> <span class="p">[]</span>
 
-    <span class="n">_isGuiClass</span> <span class="o">=</span> <span class="bp">False</span>  <span class="c1"># Overridden by Gui classes</span>
+    <span class="n">_isGuiClass</span> <span class="o">=</span> <span class="kc">False</span>  <span class="c1"># Overridden by Gui classes</span>
 
     <span class="c1"># Wrapper-level notifiers that are set up on code import and</span>
     <span class="c1"># registered afresh for every new project</span>
@@ -172,13 +162,13 @@
     <span class="c1"># Should notifiers be registered separately for this class?</span>
     <span class="c1"># Set to False if multiple wrapper classes wrap the same API class (e.g. PeakList, IntegralList;</span>
     <span class="c1"># Peak, Integral) so that API level notifiers are only registered once.</span>
-    <span class="n">_registerClassNotifiers</span> <span class="o">=</span> <span class="bp">True</span>
+    <span class="n">_registerClassNotifiers</span> <span class="o">=</span> <span class="kc">True</span>
 
     <span class="c1"># Function to generate custom subclass instances -= overridden in some subclasses</span>
-    <span class="n">_factoryFunction</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="n">_factoryFunction</span> <span class="o">=</span> <span class="kc">None</span>
 
     <span class="c1"># Default values for parameters to &#39;new&#39; function. Overridden in subclasses</span>
-    <span class="n">_defaultInitValues</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="n">_defaultInitValues</span> <span class="o">=</span> <span class="kc">None</span>
 
     <span class="c1"># Number of fields that comprise the object&#39;s pid; usually 1 but overridden in some subclasses</span>
     <span class="c1"># e.g. NmrResidue and Residue. Used to get parent id&#39;s</span>
@@ -186,7 +176,7 @@
 
     <span class="c1"># Implementation methods</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">project</span><span class="p">:</span> <span class="s1">&#39;Project&#39;</span><span class="p">,</span> <span class="n">wrappedData</span><span class="p">:</span> <span class="n">ApiImplementation</span><span class="o">.</span><span class="n">DataObject</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">project</span><span class="p">:</span> <span class="s1">&#39;Project&#39;</span><span class="p">,</span> <span class="n">wrappedData</span><span class="p">:</span> <span class="n">ApiImplementation</span><span class="o">.</span><span class="n">DataObject</span><span class="p">):</span>
 
         <span class="c1"># NB project parameter type is Project. Set in Project.py</span>
 
@@ -204,11 +194,11 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span> <span class="o">=</span> <span class="n">wrappedData</span>
         <span class="n">data2Obj</span><span class="p">[</span><span class="n">wrappedData</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">_id</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_id</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_resetIds</span><span class="p">()</span>
 
         <span class="c1">#EJB 20181217: test for preDelete</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_flaggedForDelete</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_flaggedForDelete</span> <span class="o">=</span> <span class="kc">False</span>
 
     <span class="k">def</span> <span class="nf">_resetIds</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="c1"># reset id</span>
@@ -216,7 +206,7 @@
         <span class="n">project</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span>
         <span class="n">parent</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parent</span>
         <span class="n">className</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">className</span>
-        <span class="k">if</span> <span class="n">parent</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">parent</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="c1"># This is the project</span>
             <span class="n">_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">name</span>
             <span class="n">sortKey</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">,)</span>
@@ -235,7 +225,7 @@
 
         <span class="c1"># update pid:object mapping dictionary</span>
         <span class="n">dd</span> <span class="o">=</span> <span class="n">project</span><span class="o">.</span><span class="n">_pid2Obj</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">className</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">dd</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">dd</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">dd</span> <span class="o">=</span> <span class="p">{}</span>
             <span class="n">project</span><span class="o">.</span><span class="n">_pid2Obj</span><span class="p">[</span><span class="n">className</span><span class="p">]</span> <span class="o">=</span> <span class="n">dd</span>
             <span class="n">project</span><span class="o">.</span><span class="n">_pid2Obj</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">shortClassName</span><span class="p">]</span> <span class="o">=</span> <span class="n">dd</span>
@@ -244,11 +234,11 @@
             <span class="k">del</span> <span class="n">dd</span><span class="p">[</span><span class="n">oldId</span><span class="p">]</span>
         <span class="n">dd</span><span class="p">[</span><span class="n">_id</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span>
 
-    <span class="k">def</span> <span class="nf">__bool__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__bool__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Truth value: true - wrapper classes are never empty&quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">True</span>
+        <span class="k">return</span> <span class="kc">True</span>
 
-    <span class="k">def</span> <span class="nf">__lt__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__lt__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Ordering implementation function, necessary for making lists sortable.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
@@ -257,25 +247,25 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="nb">id</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">&lt;</span> <span class="nb">id</span><span class="p">(</span><span class="n">other</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Python 2 behaviour - objects equal only to themselves.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span> <span class="ow">is</span> <span class="n">other</span>
 
-    <span class="k">def</span> <span class="nf">__ne__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__ne__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Python 2 behaviour - objects equal only to themselves.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">other</span>
 
-    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Object string representation; compatible with application.get()</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="s2">&quot;&lt;</span><span class="si">%s</span><span class="s2">&gt;&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">longPid</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Readable string representation; potentially subclassed</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="s2">&quot;&lt;</span><span class="si">%s</span><span class="s2">&gt;&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">pid</span>
 
-    <span class="n">__hash__</span> <span class="o">=</span> <span class="nb">object</span><span class="o">.</span><span class="n">__hash__</span>
+    <span class="fm">__hash__</span> <span class="o">=</span> <span class="nb">object</span><span class="o">.</span><span class="fm">__hash__</span>
 
     <span class="c1">#=========================================================================================</span>
     <span class="c1"># CCPN Properties</span>
@@ -284,12 +274,12 @@
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">className</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Class name - necessary since the actual objects may be of a subclass..&quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">className</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="n">className</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">shortClassName</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Short class name, for PID. Must be overridden for each subclass.&quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">shortClassName</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="n">shortClassName</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">project</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Project&#39;</span><span class="p">:</span>
@@ -320,13 +310,13 @@
         <span class="sd">&quot;&quot;&quot;True if this object is deleted.&quot;&quot;&quot;</span>
         <span class="c1"># The many variants are to make sure this catches deleted objects</span>
         <span class="c1"># also during the deletion process, for filtering</span>
-        <span class="k">return</span> <span class="p">(</span><span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;_wrappedData&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span> <span class="ow">is</span> <span class="bp">None</span>
+        <span class="k">return</span> <span class="p">(</span><span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;_wrappedData&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span> <span class="ow">is</span> <span class="kc">None</span>
                 <span class="ow">or</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="p">,</span> <span class="s1">&#39;_data2Obj&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">isDeleted</span><span class="p">)</span>
 
     <span class="c1"># default name to use for objects with a name/title</span>
     <span class="c1"># @property</span>
-    <span class="k">def</span> <span class="nf">_defaultName</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cls</span><span class="p">):</span>
-        <span class="k">return</span> <span class="n">cls</span><span class="o">.</span><span class="n">className</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+    <span class="k">def</span> <span class="nf">_defaultName</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="bp">cls</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">className</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">_ccpnInternalData</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
@@ -342,12 +332,13 @@
 <span class="sd">        Data are kept on save and reload, but there is NO guarantee against</span>
 <span class="sd">        trampling by other code&quot;&quot;&quot;</span>
         <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">ccpnInternalData</span>
-        <span class="k">if</span> <span class="n">result</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
-            <span class="k">with</span> <span class="n">notificationBlanking</span><span class="p">():</span>
-                <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">ccpnInternalData</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">if</span> <span class="n">result</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="c1"># with notificationBlanking():</span>
+            <span class="c1">#     result = self._wrappedData.ccpnInternalData = {}</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="k">return</span> <span class="n">result</span>
 
-    <span class="nd">@_ccpnInternalData.setter</span>
+    <span class="nd">@_ccpnInternalData</span><span class="o">.</span><span class="n">setter</span>
     <span class="k">def</span> <span class="nf">_ccpnInternalData</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)):</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;_ccpnInternalData must be a dictionary, was </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">value</span><span class="p">)</span>
@@ -358,7 +349,7 @@
         <span class="sd">&quot;&quot;&quot;Free-form text comment&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_none2str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">details</span><span class="p">)</span>
 
-    <span class="nd">@comment.setter</span>
+    <span class="nd">@comment</span><span class="o">.</span><span class="n">setter</span>
     <span class="k">def</span> <span class="nf">comment</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">details</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_str2none</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
 
@@ -381,46 +372,56 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">hasParameter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">CCPNMR_NAMESPACE</span><span class="p">,</span> <span class="n">parameterName</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">setParameter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">namespace</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span> <span class="n">parameterName</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Sets parameterName for namespace to value; value must be json seriliasable&quot;&quot;&quot;</span>
-        <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ccpnInternalData</span>
+        <span class="sd">&quot;&quot;&quot;Sets parameterName for namespace to value; value must be json serialisable&quot;&quot;&quot;</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_ccpnInternalData</span><span class="p">)</span>
         <span class="n">space</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">namespace</span><span class="p">,</span> <span class="p">{})</span>
         <span class="n">space</span><span class="p">[</span><span class="n">parameterName</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
         <span class="c1"># Explicit assignment to force saving</span>
         <span class="c1"># self._wrappedData.__dict__[&#39;isModfied&#39;] = True</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_ccpnInternalData</span> <span class="o">=</span> <span class="p">{}</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_ccpnInternalData</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+        <span class="c1"># self._ccpnInternalData = {}</span>
+        <span class="c1"># self._ccpnInternalData.update(data)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">ccpnInternalData</span> <span class="o">=</span> <span class="n">data</span>
 
     <span class="k">def</span> <span class="nf">getParameter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">namespace</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span> <span class="n">parameterName</span><span class="p">:</span><span class="nb">str</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Returns value of parameterName for namespace; returns None if not present&quot;&quot;&quot;</span>
         <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ccpnInternalData</span>
         <span class="n">space</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">namespace</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">space</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
-            <span class="k">return</span> <span class="bp">None</span>
+        <span class="k">if</span> <span class="n">space</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>
         <span class="k">return</span> <span class="n">space</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">parameterName</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">hasParameter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">namespace</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span> <span class="n">parameterName</span><span class="p">:</span><span class="nb">str</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Returns true if parameterName for namespace exists&quot;&quot;&quot;</span>
         <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ccpnInternalData</span>
         <span class="n">space</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">namespace</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">space</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
-            <span class="k">return</span> <span class="bp">False</span>
+        <span class="k">if</span> <span class="n">space</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">False</span>
         <span class="k">return</span> <span class="n">parameterName</span> <span class="ow">in</span> <span class="n">space</span>
+
+    <span class="k">def</span> <span class="nf">_setNonApiAttributes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attribs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Set the non-api attributes that are stored in ccpnInternal</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">attribs</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;ERROR: </span><span class="si">%s</span><span class="s1"> must be a dict&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">attribs</span><span class="p">))</span>
+
+        <span class="k">for</span> <span class="n">att</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">attribs</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">att</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
 
     <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">_str2none</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Covenience to convert an empty string to None; V2 requirement for some attributes</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
-            <span class="k">return</span> <span class="bp">None</span>
+        <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Non-string type for value argument&#39;</span><span class="p">)</span>
-        <span class="k">return</span> <span class="bp">None</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span> <span class="k">else</span> <span class="n">value</span>
+        <span class="k">return</span> <span class="kc">None</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span> <span class="k">else</span> <span class="n">value</span>
 
     <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">_none2str</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Covenience to None return to an empty string; V2 requirement for some attributes</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="s1">&#39;&#39;</span> <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="bp">None</span> <span class="k">else</span> <span class="n">value</span>
+        <span class="k">return</span> <span class="s1">&#39;&#39;</span> <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">value</span>
 
     <span class="k">def</span> <span class="nf">_saveObjectOrder</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">objs</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Convenience: save pids of objects under key in the CcpNmr internal space.</span>
@@ -439,14 +440,13 @@
         <span class="n">result</span> <span class="o">=</span> <span class="n">objs</span>
         <span class="n">pids</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getInternalParameter</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
         <span class="c1"># see if we can use the pids to reconstruct the order</span>
-        <span class="k">if</span> <span class="n">pids</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">pids</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">objectsDict</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">([(</span><span class="n">s</span><span class="o">.</span><span class="n">pid</span><span class="p">,</span> <span class="n">s</span><span class="p">)</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">objs</span><span class="p">])</span>
             <span class="n">result</span> <span class="o">=</span> <span class="p">[</span><span class="n">objectsDict</span><span class="p">[</span><span class="n">p</span><span class="p">]</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">pids</span> <span class="k">if</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">objectsDict</span><span class="p">]</span>
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">result</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">objs</span><span class="p">):</span>
                 <span class="c1"># we failed</span>
                 <span class="n">result</span> <span class="o">=</span> <span class="n">objs</span>
         <span class="k">return</span> <span class="n">result</span>
-
 
     <span class="c1">#=========================================================================================</span>
     <span class="c1"># CCPN abstract properties</span>
@@ -503,15 +503,15 @@
     <span class="c1"># Abstract /Api methods</span>
     <span class="c1">#=========================================================================================</span>
 
-    <span class="k">def</span> <span class="nf">_printClassTree</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">tabs</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_printClassTree</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">tabs</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Simple Class-tree printing method</span>
 <span class="sd">         &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="n">node</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">node</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">node</span> <span class="o">=</span> <span class="bp">self</span>
         <span class="n">s</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="se">\t</span><span class="s1">&#39;</span> <span class="o">*</span> <span class="n">tabs</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">className</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">node</span><span class="o">.</span><span class="n">_isGuiClass</span><span class="p">:</span>
             <span class="n">s</span> <span class="o">+=</span> <span class="s1">&#39;  (GuiClass)&#39;</span>
-        <span class="k">print</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">child</span> <span class="ow">in</span> <span class="n">node</span><span class="o">.</span><span class="n">_childClasses</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_printClassTree</span><span class="p">(</span><span class="n">child</span><span class="p">,</span> <span class="n">tabs</span><span class="o">=</span><span class="n">tabs</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
 
@@ -522,7 +522,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">klass</span> <span class="o">=</span> <span class="n">klass</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">klass</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="k">else</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">klass</span><span class="p">,</span> <span class="s1">&#39;className&#39;</span><span class="p">)</span>
         <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getChildren</span><span class="p">(</span><span class="n">classes</span><span class="o">=</span><span class="p">[</span><span class="n">klass</span><span class="p">])</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">klass</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">result</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">result</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">return</span> <span class="p">[]</span>
         <span class="k">return</span> <span class="n">result</span>
 
@@ -537,7 +537,7 @@
             <span class="n">children</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">className</span><span class="p">,</span> <span class="p">[])</span>
             <span class="k">for</span> <span class="n">apiChild</span> <span class="ow">in</span> <span class="n">apiChildren</span><span class="p">:</span>
                 <span class="n">child</span> <span class="o">=</span> <span class="n">_get</span><span class="p">(</span><span class="n">apiChild</span><span class="p">)</span>
-                <span class="k">if</span> <span class="n">child</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">child</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                     <span class="n">children</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">child</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">data</span>
 
@@ -564,7 +564,7 @@
         <span class="sd">&quot;&quot;&quot;GWV; Return a list of apiSiblings of self</span>
 <span class="sd">         CCPNINTERNAL: used throughout</span>
 <span class="sd">         &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parent</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parent</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="c1"># We are at the root (i.e. Project), no siblings</span>
             <span class="k">return</span> <span class="p">[]</span>
         <span class="k">else</span><span class="p">:</span>
@@ -574,7 +574,7 @@
         <span class="sd">&quot;&quot;&quot;GWV; Return a list of siblings of self</span>
 <span class="sd">         CCPNINTERNAL: used throughout</span>
 <span class="sd">         &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parent</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parent</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="c1"># We are at the root (i.e. Project), no siblings</span>
             <span class="k">return</span> <span class="p">[]</span>
         <span class="k">else</span><span class="p">:</span>
@@ -592,19 +592,19 @@
 <span class="sd">        classes is either &#39;gui&#39; or &#39;nonGui&#39; or &#39;all&#39; or explicit enumeration of classNames</span>
 <span class="sd">        For restore 3.1 branch</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">_classMap</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">([(</span><span class="n">cls</span><span class="o">.</span><span class="n">className</span><span class="p">,</span> <span class="n">cls</span><span class="p">)</span> <span class="k">for</span> <span class="n">cls</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_childClasses</span><span class="p">])</span>
+        <span class="n">_classMap</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">([(</span><span class="bp">cls</span><span class="o">.</span><span class="n">className</span><span class="p">,</span> <span class="bp">cls</span><span class="p">)</span> <span class="k">for</span> <span class="bp">cls</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_childClasses</span><span class="p">])</span>
 
         <span class="c1"># loop over all the child-classses</span>
         <span class="k">for</span> <span class="n">clsName</span><span class="p">,</span> <span class="n">apiChildren</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getApiChildren</span><span class="p">(</span><span class="n">classes</span><span class="o">=</span><span class="n">classes</span><span class="p">)</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
 
-            <span class="n">cls</span> <span class="o">=</span> <span class="n">_classMap</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">clsName</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">cls</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="bp">cls</span> <span class="o">=</span> <span class="n">_classMap</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">clsName</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">cls</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;Undefined class &quot;</span><span class="si">%s</span><span class="s1">&quot;&#39;</span> <span class="o">%</span> <span class="n">clsName</span><span class="p">)</span>
 
             <span class="k">for</span> <span class="n">apiChild</span> <span class="ow">in</span> <span class="n">apiChildren</span><span class="p">:</span>
 
-                <span class="n">newInstance</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_newInstanceWithApiData</span><span class="p">(</span><span class="n">cls</span><span class="o">=</span><span class="n">cls</span><span class="p">,</span> <span class="n">apiData</span><span class="o">=</span><span class="n">apiChild</span><span class="p">)</span>
-                <span class="k">if</span> <span class="n">newInstance</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="n">newInstance</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_newInstanceWithApiData</span><span class="p">(</span><span class="bp">cls</span><span class="o">=</span><span class="bp">cls</span><span class="p">,</span> <span class="n">apiData</span><span class="o">=</span><span class="n">apiChild</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">newInstance</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                     <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;Error creating new instance of class &quot;</span><span class="si">%s</span><span class="s1">&quot;&#39;</span> <span class="o">%</span> <span class="n">clsName</span><span class="p">)</span>
 
                 <span class="c1"># add the newInstance to the appropriate mapping dictionaries</span>
@@ -615,7 +615,7 @@
                 <span class="c1"># recursively do the children of newInstance</span>
                 <span class="n">newInstance</span><span class="o">.</span><span class="n">_restoreChildren</span><span class="p">(</span><span class="n">classes</span><span class="o">=</span><span class="n">classes</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">_newInstanceWithApiData</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cls</span><span class="p">,</span> <span class="n">apiData</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_newInstanceWithApiData</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="bp">cls</span><span class="p">,</span> <span class="n">apiData</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Return a new instance of cls, initialised with apiData</span>
 <span class="sd">        For restore 3.1 branch</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -624,14 +624,14 @@
             <span class="c1"># more as child of Project</span>
             <span class="n">newInstance</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_data2Obj</span><span class="p">[</span><span class="n">apiData</span><span class="p">]</span>
 
-        <span class="k">elif</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="s1">&#39;_factoryFunction&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="s1">&#39;_factoryFunction&#39;</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
-            <span class="n">newInstance</span> <span class="o">=</span> <span class="n">cls</span><span class="o">.</span><span class="n">_factoryFunction</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="p">,</span> <span class="n">apiData</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s1">&#39;_factoryFunction&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s1">&#39;_factoryFunction&#39;</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">newInstance</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_factoryFunction</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="p">,</span> <span class="n">apiData</span><span class="p">)</span>
 
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">newInstance</span> <span class="o">=</span> <span class="n">cls</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="p">,</span> <span class="n">apiData</span><span class="p">)</span>
+            <span class="n">newInstance</span> <span class="o">=</span> <span class="bp">cls</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="p">,</span> <span class="n">apiData</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="n">newInstance</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;Error creating new instance of class &quot;</span><span class="si">%s</span><span class="s1">&quot;&#39;</span> <span class="o">%</span> <span class="n">cls</span><span class="o">.</span><span class="n">className</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">newInstance</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;Error creating new instance of class &quot;</span><span class="si">%s</span><span class="s1">&quot;&#39;</span> <span class="o">%</span> <span class="bp">cls</span><span class="o">.</span><span class="n">className</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">newInstance</span>
 
@@ -663,7 +663,7 @@
                 <span class="n">obj</span><span class="o">.</span><span class="n">_checkDelete</span><span class="p">(</span><span class="n">apiObjectlist</span><span class="p">,</span> <span class="n">objsToBeChecked</span><span class="p">,</span> <span class="n">linkCounter</span><span class="p">,</span> <span class="n">topObjectsToCheck</span><span class="p">)</span>  <span class="c1"># This builds the list/set</span>
 
         <span class="k">for</span> <span class="n">topObjectToCheck</span> <span class="ow">in</span> <span class="n">topObjectsToCheck</span><span class="p">:</span>
-            <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="p">(</span><span class="n">topObjectToCheck</span><span class="o">.</span><span class="n">__dict__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;isModifiable&#39;</span><span class="p">))):</span>
+            <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="p">(</span><span class="n">topObjectToCheck</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;isModifiable&#39;</span><span class="p">))):</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;</span><span class="si">%s</span><span class="s2">.delete:</span>
 <span class="s2">           Storage not modifiable&quot;&quot;&quot;</span> <span class="o">%</span> <span class="n">apiObject</span><span class="o">.</span><span class="n">qualifiedName</span>
                                  <span class="o">+</span> <span class="s2">&quot;: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">topObjectToCheck</span><span class="p">,)</span>
@@ -672,7 +672,7 @@
         <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">apiObjectlist</span><span class="p">)</span>
 
     <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">_getAllWrappedData</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">parent</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">_getAllWrappedData</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">parent</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;get list of wrapped data objects for each class that is a child of parent</span>
 
 <span class="sd">        List must be sorted at the API level 1) to give a reproducible order,</span>
@@ -680,7 +680,7 @@
 <span class="sd">        Wrapper level sorting may be (and sometimes is) different.</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="n">cls</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">parent</span><span class="o">.</span><span class="n">_childClasses</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">cls</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">parent</span><span class="o">.</span><span class="n">_childClasses</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">Exception</span>
         <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;Code error: function not implemented&quot;</span><span class="p">)</span>
 
@@ -688,7 +688,7 @@
         <span class="sd">&quot;&quot;&quot;Change the object name or other key attribute(s), changing the object pid,</span>
 <span class="sd">           and all internal references to maintain consistency.</span>
 <span class="sd">           Some Objects (Chain, Residue, Atom) cannot be renamed&quot;&quot;&quot;</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2"> objects cannot be renamed&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2"> objects cannot be renamed&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">)</span>
 
     <span class="c1"># In addition each class (except for Project) must define a  newClass method</span>
     <span class="c1"># The function (e.g. Project.newMolecule), ... must create a new child object</span>
@@ -717,20 +717,20 @@
 
 <span class="sd">        Returns None for invalid or unrecognised input strings.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="n">pid</span> <span class="ow">is</span> <span class="bp">None</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">pid</span><span class="p">)</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
-            <span class="k">return</span> <span class="bp">None</span>
+        <span class="k">if</span> <span class="n">pid</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">pid</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>
 
-        <span class="n">obj</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="n">obj</span> <span class="o">=</span> <span class="kc">None</span>
 
         <span class="c1"># return if the pid does not conform to a pid definition</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">Pid</span><span class="o">.</span><span class="n">Pid</span><span class="o">.</span><span class="n">isValid</span><span class="p">(</span><span class="n">pid</span><span class="p">):</span>
-            <span class="k">return</span> <span class="bp">None</span>
+            <span class="k">return</span> <span class="kc">None</span>
 
         <span class="n">pid</span> <span class="o">=</span> <span class="n">Pid</span><span class="o">.</span><span class="n">Pid</span><span class="p">(</span><span class="n">pid</span><span class="p">)</span>
         <span class="n">dd</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_pid2Obj</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">pid</span><span class="o">.</span><span class="n">type</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">dd</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">dd</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">obj</span> <span class="o">=</span> <span class="n">dd</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">pid</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">obj</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> <span class="n">obj</span><span class="o">.</span><span class="n">isDeleted</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">obj</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">obj</span><span class="o">.</span><span class="n">isDeleted</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;Pid &quot;</span><span class="si">%s</span><span class="s1">&quot; defined a deleted object&#39;</span> <span class="o">%</span> <span class="n">pid</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">obj</span>
 
@@ -758,62 +758,62 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getDescendant</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="p">,</span> <span class="n">newName</span><span class="p">)</span>
 
     <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">_linkWrapperClasses</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">ancestors</span><span class="p">:</span> <span class="nb">list</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="n">Project</span><span class="p">:</span> <span class="s1">&#39;Project&#39;</span> <span class="o">=</span> <span class="bp">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_linkWrapperClasses</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">ancestors</span><span class="p">:</span> <span class="nb">list</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">Project</span><span class="p">:</span> <span class="s1">&#39;Project&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Recursively set up links and functions involving children for wrapper classes</span>
 
 <span class="sd">        NB classes that have already been linked are ignored, but their children are still processed&quot;&quot;&quot;</span>
 
         <span class="k">if</span> <span class="n">Project</span><span class="p">:</span>
             <span class="k">assert</span> <span class="n">ancestors</span><span class="p">,</span> <span class="s2">&quot;Code errors, _linkWrapperClasses called with Project but no ancestors&quot;</span>
-            <span class="n">newAncestors</span> <span class="o">=</span> <span class="n">ancestors</span> <span class="o">+</span> <span class="p">[</span><span class="n">cls</span><span class="p">]</span>
-            <span class="k">if</span> <span class="n">cls</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">Project</span><span class="o">.</span><span class="n">_allLinkedWrapperClasses</span><span class="p">:</span>
-                <span class="n">Project</span><span class="o">.</span><span class="n">_allLinkedWrapperClasses</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cls</span><span class="p">)</span>
+            <span class="n">newAncestors</span> <span class="o">=</span> <span class="n">ancestors</span> <span class="o">+</span> <span class="p">[</span><span class="bp">cls</span><span class="p">]</span>
+            <span class="k">if</span> <span class="bp">cls</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">Project</span><span class="o">.</span><span class="n">_allLinkedWrapperClasses</span><span class="p">:</span>
+                <span class="n">Project</span><span class="o">.</span><span class="n">_allLinkedWrapperClasses</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span>
 
-                <span class="n">classFullName</span> <span class="o">=</span> <span class="nb">repr</span><span class="p">(</span><span class="n">cls</span><span class="p">)[</span><span class="mi">7</span><span class="p">:</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span>
+                <span class="n">classFullName</span> <span class="o">=</span> <span class="nb">repr</span><span class="p">(</span><span class="bp">cls</span><span class="p">)[</span><span class="mi">7</span><span class="p">:</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span>
 
                 <span class="c1"># add getCls in all ancestors</span>
-                <span class="n">funcName</span> <span class="o">=</span> <span class="s1">&#39;get&#39;</span> <span class="o">+</span> <span class="n">cls</span><span class="o">.</span><span class="n">className</span>
+                <span class="n">funcName</span> <span class="o">=</span> <span class="s1">&#39;get&#39;</span> <span class="o">+</span> <span class="bp">cls</span><span class="o">.</span><span class="n">className</span>
                 <span class="c1">#  NB Ancestors is never None at this point</span>
                 <span class="k">for</span> <span class="n">ancestor</span> <span class="ow">in</span> <span class="n">ancestors</span><span class="p">:</span>
                     <span class="c1"># Add getDescendant function</span>
-                    <span class="k">def</span> <span class="nf">func</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">relativeId</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">cls</span><span class="p">:</span>
-                        <span class="k">return</span> <span class="n">cls</span><span class="o">.</span><span class="n">_getDescendant</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">relativeId</span><span class="p">)</span>
+                    <span class="k">def</span> <span class="nf">func</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">relativeId</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="bp">cls</span><span class="p">:</span>
+                        <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_getDescendant</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">relativeId</span><span class="p">)</span>
 
-                    <span class="n">func</span><span class="o">.</span><span class="n">__doc__</span> <span class="o">=</span> <span class="s2">&quot;Get contained </span><span class="si">%s</span><span class="s2"> object by relative ID&quot;</span> <span class="o">%</span> <span class="n">classFullName</span>
+                    <span class="n">func</span><span class="o">.</span><span class="vm">__doc__</span> <span class="o">=</span> <span class="s2">&quot;Get contained </span><span class="si">%s</span><span class="s2"> object by relative ID&quot;</span> <span class="o">%</span> <span class="n">classFullName</span>
                     <span class="nb">setattr</span><span class="p">(</span><span class="n">ancestor</span><span class="p">,</span> <span class="n">funcName</span><span class="p">,</span> <span class="n">func</span><span class="p">)</span>
 
                 <span class="c1"># Add descendant links</span>
-                <span class="n">linkName</span> <span class="o">=</span> <span class="n">cls</span><span class="o">.</span><span class="n">_pluralLinkName</span>
+                <span class="n">linkName</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_pluralLinkName</span>
                 <span class="k">for</span> <span class="n">ii</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">newAncestors</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">):</span>
                     <span class="n">ancestor</span> <span class="o">=</span> <span class="n">newAncestors</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span>
                     <span class="n">func</span> <span class="o">=</span> <span class="n">functools</span><span class="o">.</span><span class="n">partial</span><span class="p">(</span><span class="n">AbstractWrapperObject</span><span class="o">.</span><span class="n">_allDescendants</span><span class="p">,</span>
                                              <span class="n">descendantClasses</span><span class="o">=</span><span class="n">newAncestors</span><span class="p">[</span><span class="n">ii</span> <span class="o">+</span> <span class="mi">1</span><span class="p">:])</span>
                     <span class="c1"># func.__annotations__[&#39;return&#39;] = typing.Tuple[cls, ...]</span>
-                    <span class="k">if</span> <span class="n">cls</span><span class="o">.</span><span class="n">className</span> <span class="o">==</span> <span class="s1">&#39;NmrResidue&#39;</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="bp">cls</span><span class="o">.</span><span class="n">className</span> <span class="o">==</span> <span class="s1">&#39;NmrResidue&#39;</span><span class="p">:</span>
                         <span class="n">docTemplate</span> <span class="o">=</span> <span class="p">(</span>
                                 <span class="s2">&quot;\- *(</span><span class="si">%s</span><span class="s2">,)*  - contained </span><span class="si">%s</span><span class="s2"> objects in sequential order &quot;</span>
                                 <span class="o">+</span> <span class="s2">&quot;(for assigned or connected NmrChains), otherwise in creation order. &quot;</span>
                                 <span class="o">+</span> <span class="s2">&quot;This is identical to the standard sorting order.&quot;</span>
                         <span class="p">)</span>
-                    <span class="k">elif</span> <span class="n">cls</span><span class="o">.</span><span class="n">className</span> <span class="o">==</span> <span class="s1">&#39;ChemicalShift&#39;</span><span class="p">:</span>
+                    <span class="k">elif</span> <span class="bp">cls</span><span class="o">.</span><span class="n">className</span> <span class="o">==</span> <span class="s1">&#39;ChemicalShift&#39;</span><span class="p">:</span>
                         <span class="n">docTemplate</span> <span class="o">=</span> <span class="p">(</span>
                                 <span class="s2">&quot;\- *(</span><span class="si">%s</span><span class="s2">,)*  - contained </span><span class="si">%s</span><span class="s2"> objects in NmrAtom creation order &quot;</span>
                                 <span class="o">+</span> <span class="s2">&quot;This is different from the standard sorting order&quot;</span>
                         <span class="p">)</span>
-                    <span class="k">elif</span> <span class="n">cls</span><span class="o">.</span><span class="n">className</span> <span class="o">==</span> <span class="s1">&#39;Spectrum&#39;</span><span class="p">:</span>
+                    <span class="k">elif</span> <span class="bp">cls</span><span class="o">.</span><span class="n">className</span> <span class="o">==</span> <span class="s1">&#39;Spectrum&#39;</span><span class="p">:</span>
                         <span class="n">docTemplate</span> <span class="o">=</span> <span class="p">(</span>
                                 <span class="s2">&quot;\- *(</span><span class="si">%s</span><span class="s2">,)*  - contained </span><span class="si">%s</span><span class="s2"> objects in approximate creation order &quot;</span>
                                 <span class="o">+</span> <span class="s2">&quot;This is different from the standard sorting order&quot;</span>
                         <span class="p">)</span>
-                    <span class="k">elif</span> <span class="n">cls</span><span class="o">.</span><span class="n">className</span> <span class="o">==</span> <span class="s1">&#39;Residue&#39;</span><span class="p">:</span>
+                    <span class="k">elif</span> <span class="bp">cls</span><span class="o">.</span><span class="n">className</span> <span class="o">==</span> <span class="s1">&#39;Residue&#39;</span><span class="p">:</span>
                         <span class="n">docTemplate</span> <span class="o">=</span> <span class="p">(</span>
                                 <span class="s2">&quot;\- *(</span><span class="si">%s</span><span class="s2">,)*  - contained </span><span class="si">%s</span><span class="s2"> objects in sequential order &quot;</span>
                                 <span class="o">+</span> <span class="s2">&quot;This is identical to the standard sorting order&quot;</span>
                         <span class="p">)</span>
-                    <span class="k">elif</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="s1">&#39;serial&#39;</span><span class="p">):</span>
+                    <span class="k">elif</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s1">&#39;serial&#39;</span><span class="p">):</span>
                         <span class="n">docTemplate</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;\- *(</span><span class="si">%s</span><span class="s2">,)*  - contained </span><span class="si">%s</span><span class="s2"> objects in creation order. &quot;</span>
                                        <span class="o">+</span> <span class="s2">&quot;This may differ from the standard sorting order&quot;</span><span class="p">)</span>
-                    <span class="k">elif</span> <span class="n">cls</span><span class="o">.</span><span class="n">className</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;Data&#39;</span><span class="p">,</span> <span class="s1">&#39;Atom&#39;</span><span class="p">,</span> <span class="s1">&#39;Chain&#39;</span><span class="p">,</span> <span class="s1">&#39;Substance&#39;</span><span class="p">,</span> <span class="s1">&#39;SampleComponent&#39;</span><span class="p">):</span>
+                    <span class="k">elif</span> <span class="bp">cls</span><span class="o">.</span><span class="n">className</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;Data&#39;</span><span class="p">,</span> <span class="s1">&#39;Atom&#39;</span><span class="p">,</span> <span class="s1">&#39;Chain&#39;</span><span class="p">,</span> <span class="s1">&#39;Substance&#39;</span><span class="p">,</span> <span class="s1">&#39;SampleComponent&#39;</span><span class="p">):</span>
                         <span class="n">docTemplate</span> <span class="o">=</span> <span class="p">(</span>
                                 <span class="s2">&quot;\- *(</span><span class="si">%s</span><span class="s2">,)*  - contained </span><span class="si">%s</span><span class="s2"> objects in name order &quot;</span>
                                 <span class="o">+</span> <span class="s2">&quot;This is identical to the standard sorting order.&quot;</span>
@@ -822,14 +822,14 @@
                         <span class="n">docTemplate</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;\- *(</span><span class="si">%s</span><span class="s2">,)*  - contained </span><span class="si">%s</span><span class="s2"> objects in order of underlying key. &quot;</span>
                                        <span class="o">+</span> <span class="s2">&quot;This may differ from the standard sorting order&quot;</span><span class="p">)</span>
 
-                    <span class="n">prop</span> <span class="o">=</span> <span class="nb">property</span><span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="n">docTemplate</span> <span class="o">%</span> <span class="p">(</span><span class="n">classFullName</span><span class="p">,</span> <span class="n">cls</span><span class="o">.</span><span class="n">className</span><span class="p">))</span>
+                    <span class="n">prop</span> <span class="o">=</span> <span class="nb">property</span><span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">docTemplate</span> <span class="o">%</span> <span class="p">(</span><span class="n">classFullName</span><span class="p">,</span> <span class="bp">cls</span><span class="o">.</span><span class="n">className</span><span class="p">))</span>
                     <span class="nb">setattr</span><span class="p">(</span><span class="n">ancestor</span><span class="p">,</span> <span class="n">linkName</span><span class="p">,</span> <span class="n">prop</span><span class="p">)</span>
 
                 <span class="c1"># Add standard Notifiers:</span>
-                <span class="k">if</span> <span class="n">cls</span><span class="o">.</span><span class="n">_registerClassNotifiers</span><span class="p">:</span>
-                    <span class="n">className</span> <span class="o">=</span> <span class="n">cls</span><span class="o">.</span><span class="n">_apiClassQualifiedName</span>
+                <span class="k">if</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_registerClassNotifiers</span><span class="p">:</span>
+                    <span class="n">className</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_apiClassQualifiedName</span>
                     <span class="n">Project</span><span class="o">.</span><span class="n">_apiNotifiers</span><span class="p">[:</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span>
-                        <span class="p">(</span><span class="s1">&#39;_newApiObject&#39;</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;cls&#39;</span><span class="p">:</span> <span class="n">cls</span><span class="p">},</span> <span class="n">className</span><span class="p">,</span> <span class="s1">&#39;__init__&#39;</span><span class="p">),</span>
+                        <span class="p">(</span><span class="s1">&#39;_newApiObject&#39;</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;cls&#39;</span><span class="p">:</span> <span class="bp">cls</span><span class="p">},</span> <span class="n">className</span><span class="p">,</span> <span class="s1">&#39;__init__&#39;</span><span class="p">),</span>
                         <span class="p">(</span><span class="s1">&#39;_startDeleteCommandBlock&#39;</span><span class="p">,</span> <span class="p">{},</span> <span class="n">className</span><span class="p">,</span> <span class="s1">&#39;startDeleteBlock&#39;</span><span class="p">),</span>
                         <span class="p">(</span><span class="s1">&#39;_finaliseApiDelete&#39;</span><span class="p">,</span> <span class="p">{},</span> <span class="n">className</span><span class="p">,</span> <span class="s1">&#39;delete&#39;</span><span class="p">),</span>
                         <span class="p">(</span><span class="s1">&#39;_endDeleteCommandBlock&#39;</span><span class="p">,</span> <span class="p">{},</span> <span class="n">className</span><span class="p">,</span> <span class="s1">&#39;endDeleteBlock&#39;</span><span class="p">),</span>
@@ -838,23 +838,23 @@
                         <span class="p">]</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="c1"># Project class. Start generation here</span>
-            <span class="n">Project</span> <span class="o">=</span> <span class="n">cls</span>
+            <span class="n">Project</span> <span class="o">=</span> <span class="bp">cls</span>
             <span class="n">ll</span> <span class="o">=</span> <span class="n">Project</span><span class="o">.</span><span class="n">_allLinkedWrapperClasses</span>
             <span class="c1"># if ll:</span>
             <span class="c1">#     raise RuntimeError(&quot;ERROR: initialisation attempted more than once&quot;)</span>
-            <span class="n">newAncestors</span> <span class="o">=</span> <span class="p">[</span><span class="n">cls</span><span class="p">]</span>
+            <span class="n">newAncestors</span> <span class="o">=</span> <span class="p">[</span><span class="bp">cls</span><span class="p">]</span>
             <span class="n">ll</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Project</span><span class="p">)</span>
 
         <span class="c1"># Fill in Project._className2Class map</span>
         <span class="n">dd</span> <span class="o">=</span> <span class="n">Project</span><span class="o">.</span><span class="n">_className2Class</span>
-        <span class="n">dd</span><span class="p">[</span><span class="n">cls</span><span class="o">.</span><span class="n">className</span><span class="p">]</span> <span class="o">=</span> <span class="n">dd</span><span class="p">[</span><span class="n">cls</span><span class="o">.</span><span class="n">shortClassName</span><span class="p">]</span> <span class="o">=</span> <span class="n">cls</span>
+        <span class="n">dd</span><span class="p">[</span><span class="bp">cls</span><span class="o">.</span><span class="n">className</span><span class="p">]</span> <span class="o">=</span> <span class="n">dd</span><span class="p">[</span><span class="bp">cls</span><span class="o">.</span><span class="n">shortClassName</span><span class="p">]</span> <span class="o">=</span> <span class="bp">cls</span>
 
         <span class="c1"># recursively call next level down the tree</span>
-        <span class="k">for</span> <span class="n">cc</span> <span class="ow">in</span> <span class="n">cls</span><span class="o">.</span><span class="n">_childClasses</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">cc</span> <span class="ow">in</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_childClasses</span><span class="p">:</span>
             <span class="n">cc</span><span class="o">.</span><span class="n">_linkWrapperClasses</span><span class="p">(</span><span class="n">newAncestors</span><span class="p">,</span> <span class="n">Project</span><span class="o">=</span><span class="n">Project</span><span class="p">)</span>
 
     <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">_getChildClasses</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">recursion</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="bp">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">_getChildClasses</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">recursion</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        :param recursion: use recursion to also add child objects</span>
 <span class="sd">        :return: list of valid child classes of cls</span>
@@ -864,30 +864,30 @@
 <span class="sd">        CCPNINTERNAL: Notifier class</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">result</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="k">for</span> <span class="n">klass</span> <span class="ow">in</span> <span class="n">cls</span><span class="o">.</span><span class="n">_childClasses</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">klass</span> <span class="ow">in</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_childClasses</span><span class="p">:</span>
             <span class="n">result</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">klass</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">recursion</span><span class="p">:</span>
                 <span class="n">result</span> <span class="o">=</span> <span class="n">result</span> <span class="o">+</span> <span class="n">klass</span><span class="o">.</span><span class="n">_getChildClasses</span><span class="p">(</span><span class="n">recursion</span><span class="o">=</span><span class="n">recursion</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">result</span>
 
     <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">_getParentClasses</span><span class="p">(</span><span class="n">cls</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">_getParentClasses</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Return a list of parent classes, staring with the root (i.e. Project)</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">result</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="n">klass</span> <span class="o">=</span> <span class="n">cls</span>
-        <span class="k">while</span> <span class="n">klass</span><span class="o">.</span><span class="n">_parentClass</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">klass</span> <span class="o">=</span> <span class="bp">cls</span>
+        <span class="k">while</span> <span class="n">klass</span><span class="o">.</span><span class="n">_parentClass</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">result</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">klass</span><span class="o">.</span><span class="n">_parentClass</span><span class="p">)</span>
             <span class="n">klass</span> <span class="o">=</span> <span class="n">klass</span><span class="o">.</span><span class="n">_parentClass</span>
         <span class="n">result</span><span class="o">.</span><span class="n">reverse</span><span class="p">()</span>
         <span class="k">return</span> <span class="n">result</span>
 
     <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">_getDescendant</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="bp">self</span><span class="p">,</span> <span class="n">relativeId</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_getDescendant</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="bp">self</span><span class="p">,</span> <span class="n">relativeId</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Get descendant of class cls with relative key relativeId</span>
 <span class="sd">         Implementation function, used to generate getCls functions</span>
 <span class="sd">         &quot;&quot;&quot;</span>
-        <span class="n">dd</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_pid2Obj</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">cls</span><span class="o">.</span><span class="n">className</span><span class="p">)</span>
+        <span class="n">dd</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_pid2Obj</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="n">className</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">dd</span><span class="p">:</span>
             <span class="k">if</span> <span class="bp">self</span> <span class="ow">is</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="p">:</span>
                 <span class="n">key</span> <span class="o">=</span> <span class="n">relativeId</span>
@@ -895,7 +895,7 @@
                 <span class="n">key</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s%s%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_id</span><span class="p">,</span> <span class="n">Pid</span><span class="o">.</span><span class="n">IDSEP</span><span class="p">,</span> <span class="n">relativeId</span><span class="p">)</span>
             <span class="k">return</span> <span class="n">dd</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">return</span> <span class="bp">None</span>
+            <span class="k">return</span> <span class="kc">None</span>
 
     <span class="k">def</span> <span class="nf">_allDescendants</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">descendantClasses</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;get all descendants of type decendantClasses[-1] of self,</span>
@@ -929,7 +929,7 @@
         <span class="c1"># return objects</span>
         <span class="kn">from</span> <span class="nn">ccpn.core.NmrResidue</span> <span class="kn">import</span> <span class="n">NmrResidue</span>  <span class="c1"># Local import to avoid cycles</span>
 
-        <span class="k">if</span> <span class="n">descendantClasses</span> <span class="ow">is</span> <span class="bp">None</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">descendantClasses</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">descendantClasses</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">descendantClasses</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
             <span class="c1"># we should never be here</span>
             <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;Error getting all decendants from </span><span class="si">%s</span><span class="s1">; decendants tree is empty&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="p">)</span>
 
@@ -966,9 +966,9 @@
             <span class="c1"># recursively create children</span>
             <span class="k">for</span> <span class="n">apiObj</span> <span class="ow">in</span> <span class="n">childClass</span><span class="o">.</span><span class="n">_getAllWrappedData</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
                 <span class="n">obj</span> <span class="o">=</span> <span class="n">data2Obj</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">apiObj</span><span class="p">)</span>
-                <span class="k">if</span> <span class="n">obj</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">obj</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                     <span class="n">factoryFunction</span> <span class="o">=</span> <span class="n">childClass</span><span class="o">.</span><span class="n">_factoryFunction</span>
-                    <span class="k">if</span> <span class="n">factoryFunction</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">factoryFunction</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                         <span class="n">obj</span> <span class="o">=</span> <span class="n">childClass</span><span class="p">(</span><span class="n">project</span><span class="p">,</span> <span class="n">apiObj</span><span class="p">)</span>
                     <span class="k">else</span><span class="p">:</span>
                         <span class="n">obj</span> <span class="o">=</span> <span class="n">factoryFunction</span><span class="p">(</span><span class="n">project</span><span class="p">,</span> <span class="n">apiObj</span><span class="p">)</span>
@@ -989,7 +989,7 @@
             <span class="c1"># recursively unwrap children</span>
             <span class="k">for</span> <span class="n">apiObj</span> <span class="ow">in</span> <span class="n">childClass</span><span class="o">.</span><span class="n">_getAllWrappedData</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
                 <span class="n">obj</span> <span class="o">=</span> <span class="n">data2Obj</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">apiObj</span><span class="p">)</span>
-                <span class="k">if</span> <span class="n">obj</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">obj</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                     <span class="n">obj</span><span class="o">.</span><span class="n">_unwrapAll</span><span class="p">()</span>
                     <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pid2Obj</span><span class="p">[</span><span class="n">obj</span><span class="o">.</span><span class="n">shortClassName</span><span class="p">][</span><span class="n">obj</span><span class="o">.</span><span class="n">_id</span><span class="p">]</span>
                 <span class="k">del</span> <span class="n">data2Obj</span><span class="p">[</span><span class="n">apiObj</span><span class="p">]</span>
@@ -1001,18 +1001,18 @@
         <span class="n">wrappedData</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">wrappedData</span><span class="p">,</span> <span class="n">keyTag</span><span class="p">):</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Cannot set unique </span><span class="si">%s</span><span class="s2"> for </span><span class="si">%s</span><span class="s2">: </span><span class="si">%s</span><span class="s2"> object has no attribute </span><span class="si">%s</span><span class="s2">&quot;</span>
-                             <span class="o">%</span> <span class="p">(</span><span class="n">keyTag</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">className</span><span class="p">,</span> <span class="n">wrappedData</span><span class="o">.</span><span class="n">__class__</span><span class="p">,</span> <span class="n">keyTag</span><span class="p">))</span>
+                             <span class="o">%</span> <span class="p">(</span><span class="n">keyTag</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">className</span><span class="p">,</span> <span class="n">wrappedData</span><span class="o">.</span><span class="vm">__class__</span><span class="p">,</span> <span class="n">keyTag</span><span class="p">))</span>
 
         <span class="n">undo</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_undo</span>
-        <span class="k">if</span> <span class="n">undo</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">undo</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">undo</span><span class="o">.</span><span class="n">increaseBlocking</span><span class="p">()</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">wrappedData</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_data2Obj</span><span class="p">:</span>
                 <span class="c1"># Necessary because otherwise we likely will have notifiers - that would then break</span>
-                <span class="n">wrappedData</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">override</span> <span class="o">=</span> <span class="bp">True</span>
+                <span class="n">wrappedData</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">override</span> <span class="o">=</span> <span class="kc">True</span>
             <span class="c1"># Set default value if present value is None</span>
             <span class="n">value</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">wrappedData</span><span class="p">,</span> <span class="n">keyTag</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="n">value</span> <span class="o">=</span> <span class="n">defaultValue</span>
 
             <span class="c1"># Set to new, unique value if present value is a duplicate</span>
@@ -1033,8 +1033,8 @@
 
         <span class="k">finally</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">wrappedData</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_data2Obj</span><span class="p">:</span>
-                <span class="n">wrappedData</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">override</span> <span class="o">=</span> <span class="bp">False</span>
-            <span class="k">if</span> <span class="n">undo</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="n">wrappedData</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">override</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="k">if</span> <span class="n">undo</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="n">undo</span><span class="o">.</span><span class="n">decreaseBlocking</span><span class="p">()</span>
 
     <span class="k">def</span> <span class="nf">_getDirectChildren</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -1136,9 +1136,9 @@
         <span class="c1">#       e.g. deleting an nmrAtom from nmrResidue - &#39;delete&#39; fired but nmrAtom still exists</span>
         <span class="c1">#       so the row update must be able to ignore &#39;deleted&#39; nmrAtoms</span>
         <span class="k">if</span> <span class="n">action</span> <span class="o">==</span> <span class="s1">&#39;delete&#39;</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_flaggedForDelete</span> <span class="o">=</span> <span class="bp">True</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_flaggedForDelete</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_flaggedForDelete</span> <span class="o">=</span> <span class="bp">False</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_flaggedForDelete</span> <span class="o">=</span> <span class="kc">False</span>
 
         <span class="k">if</span> <span class="n">action</span> <span class="o">==</span> <span class="s1">&#39;rename&#39;</span><span class="p">:</span>
             <span class="c1"># Special case</span>
@@ -1173,9 +1173,9 @@
                     <span class="k">for</span> <span class="n">notifier</span> <span class="ow">in</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">dd</span><span class="p">):</span>
                         <span class="n">notifier</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">_validateName</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">attribName</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="n">allowWhitespace</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="bp">False</span><span class="p">,</span> <span class="n">allowEmpty</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="bp">False</span><span class="p">,</span> <span class="n">allowNone</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="bp">False</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_validateName</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">attribName</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">allowWhitespace</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">allowEmpty</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">allowNone</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
         <span class="n">attrib</span> <span class="o">=</span> <span class="n">attribName</span> <span class="k">if</span> <span class="n">attribName</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">className</span>
-        <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
                 <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2"> name must be a string&quot;</span> <span class="o">%</span> <span class="n">attrib</span><span class="p">)</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="n">value</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">allowEmpty</span><span class="p">:</span>
@@ -1188,11 +1188,11 @@
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;None not allowed in </span><span class="si">%s</span><span class="s2"> name&quot;</span> <span class="o">%</span> <span class="n">attrib</span><span class="p">)</span>
 
         <span class="n">previous</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getByRelativeId</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">previous</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="bp">None</span><span class="p">,</span> <span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">previous</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="bp">self</span><span class="p">):</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2"> already exists&quot;</span> <span class="o">%</span> <span class="n">previous</span><span class="o">.</span><span class="n">longPid</span><span class="p">)</span>
 
         <span class="c1"># will only get here if all the tests pass</span>
-        <span class="k">return</span> <span class="bp">True</span>
+        <span class="k">return</span> <span class="kc">True</span>
 
     <span class="k">def</span> <span class="nf">resetSerial</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">newSerial</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;ADVANCED Reset serial of object to newSerial, resetting parent link</span>
@@ -1204,7 +1204,7 @@
         <span class="n">commonUtil</span><span class="o">.</span><span class="n">resetSerial</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="p">,</span> <span class="n">newSerial</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_resetIds</span><span class="p">()</span>
 
-    <span class="k">def</span> <span class="nf">getAsDict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">_includePrivate</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">OrderedDict</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">getAsDict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">_includePrivate</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">OrderedDict</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        :return: Ordered dictionary of all class properties and their values. Key= str of property Value=any</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -1212,7 +1212,7 @@
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">dir</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
             <span class="k">try</span><span class="p">:</span> <span class="c1"># deals with badly set property which will raise an error instead of returning an attribute.</span>
                 <span class="n">att</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">i</span><span class="p">)</span>
-                <span class="k">if</span> <span class="ow">not</span> <span class="nb">callable</span><span class="p">(</span><span class="n">att</span><span class="p">):</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">callable</span><span class="p">(</span><span class="n">att</span><span class="p">):</span>
                     <span class="k">if</span> <span class="n">_includePrivate</span><span class="p">:</span>
                             <span class="n">od</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">att</span>
                     <span class="k">else</span><span class="p">:</span>
@@ -1274,7 +1274,7 @@
     <span class="c1">#     self._project._appBase._endCommandBlock()</span>
 
 
-<span class="n">AbstractWrapperObject</span><span class="o">.</span><span class="n">getByPid</span><span class="o">.</span><span class="n">__annotations__</span><span class="p">[</span><span class="s1">&#39;return&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">AbstractWrapperObject</span>
+<span class="n">AbstractWrapperObject</span><span class="o">.</span><span class="n">getByPid</span><span class="o">.</span><span class="vm">__annotations__</span><span class="p">[</span><span class="s1">&#39;return&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">AbstractWrapperObject</span>
 </pre></div>
 
           </div>
@@ -1283,15 +1283,15 @@
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
 <div id="searchbox" style="display: none" role="search">
-  <h3>Quick search</h3>
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
     <form class="search" action="../../../../search.html" method="get">
-      <input type="text" name="q" />
+      <input type="text" name="q" aria-labelledby="searchlabel" />
       <input type="submit" value="Go" />
-      <input type="hidden" name="check_keywords" value="yes" />
-      <input type="hidden" name="area" value="default" />
     </form>
+    </div>
 </div>
-<script type="text/javascript">$('#searchbox').show(0);</script>
+<script>$('#searchbox').show(0);</script>
         </div>
       </div>
       <div class="clearer"></div>
@@ -1305,13 +1305,13 @@
         <li class="right" >
           <a href="../../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../../index.html">Python  documentation</a> &raquo;</li>
-          <li class="nav-item nav-item-1"><a href="../../../index.html" >Module code</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="../../../../index.html">Python  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../../index.html" >Module code</a> &#187;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
-        &copy; Copyright .
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.1.
+        &#169; Copyright .
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.4.0.
     </div>
   </body>
 </html>

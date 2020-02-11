@@ -1,32 +1,22 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
+<!DOCTYPE html>
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    
-    <title>ccpn.util.Path &mdash; Python  documentation</title>
-    
+    <meta charset="utf-8" />
+    <title>ccpn.util.Path &#8212; Python  documentation</title>
     <link rel="stylesheet" href="../../../_static/classic.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
     
-    <script type="text/javascript">
-      var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    '../../../',
-        VERSION:     '',
-        COLLAPSE_INDEX: false,
-        FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true
-      };
-    </script>
-    <script type="text/javascript" src="../../../_static/jquery.js"></script>
-    <script type="text/javascript" src="../../../_static/underscore.js"></script>
-    <script type="text/javascript" src="../../../_static/doctools.js"></script>
-    <link rel="top" title="Python  documentation" href="../../../index.html" />
-    <link rel="up" title="Module code" href="../../index.html" /> 
-  </head>
-  <body role="document">
+    <script id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/jquery.js"></script>
+    <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/language_data.js"></script>
+    
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+  </head><body>
     <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
@@ -36,8 +26,8 @@
         <li class="right" >
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../index.html">Python  documentation</a> &raquo;</li>
-          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="../../../index.html">Python  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &#187;</li> 
       </ul>
     </div>  
 
@@ -107,6 +97,7 @@
 
 <span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span> <span class="k">as</span> <span class="n">_Path_</span><span class="p">,</span> <span class="n">_windows_flavour</span><span class="p">,</span> <span class="n">_posix_flavour</span>
 
+
 <div class="viewcode-block" id="Path"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Path.Path">[docs]</a><span class="k">class</span> <span class="nc">Path</span><span class="p">(</span><span class="n">_Path_</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Subclassed for compatibility, convenience and enhancements</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -157,13 +148,13 @@
         <span class="sd">&quot;&quot;&quot;Subclassing to catch any long file name errors that allegedly can occur on windows&quot;&quot;&quot;</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">fp</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">)</span>
-        <span class="k">except</span> <span class="n">FileNotFoundError</span><span class="p">:</span>
+        <span class="k">except</span> <span class="ne">FileNotFoundError</span><span class="p">:</span>
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">asString</span><span class="p">())</span> <span class="o">&gt;</span> <span class="mi">256</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="n">FileNotFoundError</span><span class="p">(</span><span class="s1">&#39;file &quot;</span><span class="si">%s</span><span class="s1">&quot; not found; potentially path length (</span><span class="si">%d</span><span class="s1">) is too large. Consider moving the file&#39;</span>
+                <span class="k">raise</span> <span class="ne">FileNotFoundError</span><span class="p">(</span><span class="s1">&#39;file &quot;</span><span class="si">%s</span><span class="s1">&quot; not found; potentially path length (</span><span class="si">%d</span><span class="s1">) is too large. Consider moving the file&#39;</span>
                                         <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">asString</span><span class="p">()))</span>
                                         <span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="n">FileNotFoundError</span><span class="p">(</span><span class="s1">&#39;file &quot;</span><span class="si">%s</span><span class="s1">&quot; not found&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="ne">FileNotFoundError</span><span class="p">(</span><span class="s1">&#39;file &quot;</span><span class="si">%s</span><span class="s1">&quot; not found&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">fp</span></div>
 
 <div class="viewcode-block" id="Path.removeDir"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Path.Path.removeDir">[docs]</a>    <span class="k">def</span> <span class="nf">removeDir</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -213,13 +204,13 @@
 <div class="viewcode-block" id="Path.asString"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Path.Path.asString">[docs]</a>    <span class="k">def</span> <span class="nf">asString</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span></div>
 
-    <span class="k">def</span> <span class="nf">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
         <span class="k">return</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="o">==</span> <span class="nb">str</span><span class="p">(</span><span class="n">other</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span>
 
-    <span class="k">def</span> <span class="nf">__ne__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__ne__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
         <span class="k">return</span> <span class="ow">not</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="o">==</span> <span class="nb">str</span><span class="p">(</span><span class="n">other</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span>
 
-    <span class="k">def</span> <span class="nf">__add__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__add__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">Path</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">asString</span><span class="p">()</span> <span class="o">+</span> <span class="n">other</span><span class="p">)</span></div>
 
 
@@ -244,7 +235,7 @@
 
 
 
-<div class="viewcode-block" id="normalisePath"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Path.normalisePath">[docs]</a><span class="k">def</span> <span class="nf">normalisePath</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">makeAbsolute</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+<div class="viewcode-block" id="normalisePath"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Path.normalisePath">[docs]</a><span class="k">def</span> <span class="nf">normalisePath</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">makeAbsolute</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Normalises the path, e.g. removes redundant .. and slashes and</span>
 <span class="sd">    makes sure path uses &#39;/&#39; rather than &#39;\\&#39; as can happen on Windows.</span>
@@ -301,14 +292,14 @@
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">pair</span> <span class="o">=</span> <span class="n">splitPath</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
-    <span class="n">head</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="n">head</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="n">tail</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
     <span class="k">while</span> <span class="n">pair</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">and</span> <span class="n">pair</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">,</span> <span class="s1">&#39;/&#39;</span><span class="p">):</span>
         <span class="n">head</span> <span class="o">=</span> <span class="n">pair</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
         <span class="n">tail</span> <span class="o">=</span> <span class="n">joinPath</span><span class="p">(</span><span class="n">pair</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">tail</span><span class="p">)</span>
         <span class="n">pair</span> <span class="o">=</span> <span class="n">splitPath</span><span class="p">(</span><span class="n">head</span><span class="p">)</span>
 
-    <span class="k">if</span> <span class="n">head</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">head</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="p">(</span><span class="n">head</span><span class="p">,</span> <span class="n">tail</span><span class="p">)</span> <span class="o">=</span> <span class="n">pair</span>
 
     <span class="k">return</span> <span class="n">head</span><span class="p">,</span> <span class="n">tail</span></div>
@@ -317,7 +308,7 @@
 <div class="viewcode-block" id="getPathToImport"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Path.getPathToImport">[docs]</a><span class="k">def</span> <span class="nf">getPathToImport</span><span class="p">(</span><span class="n">moduleString</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Get absolute path to module (directory or file)&quot;&quot;&quot;</span>
     <span class="n">module</span> <span class="o">=</span> <span class="n">importlib</span><span class="o">.</span><span class="n">import_module</span><span class="p">(</span><span class="n">moduleString</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">module</span><span class="o">.</span><span class="n">__file__</span><span class="p">)</span></div>
+    <span class="k">return</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">module</span><span class="o">.</span><span class="vm">__file__</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="getTopDirectory"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Path.getTopDirectory">[docs]</a><span class="k">def</span> <span class="nf">getTopDirectory</span><span class="p">():</span>
@@ -358,40 +349,40 @@
     <span class="k">return</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">commonprefix</span><span class="p">(</span><span class="n">fileNames</span><span class="p">))</span></div>
 
 
-<div class="viewcode-block" id="checkFilePath"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Path.checkFilePath">[docs]</a><span class="k">def</span> <span class="nf">checkFilePath</span><span class="p">(</span><span class="n">filePath</span><span class="p">,</span> <span class="n">allowDir</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+<div class="viewcode-block" id="checkFilePath"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Path.checkFilePath">[docs]</a><span class="k">def</span> <span class="nf">checkFilePath</span><span class="p">(</span><span class="n">filePath</span><span class="p">,</span> <span class="n">allowDir</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
     <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
-    <span class="n">isOk</span> <span class="o">=</span> <span class="bp">True</span>
+    <span class="n">isOk</span> <span class="o">=</span> <span class="kc">True</span>
 
     <span class="k">if</span> <span class="ow">not</span> <span class="n">filePath</span><span class="p">:</span>
-        <span class="n">isOk</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="n">isOk</span> <span class="o">=</span> <span class="kc">False</span>
 
     <span class="k">elif</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">filePath</span><span class="p">):</span>
         <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;Location &quot;</span><span class="si">%s</span><span class="s1">&quot; does not exist&#39;</span> <span class="o">%</span> <span class="n">filePath</span>
-        <span class="n">isOk</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="n">isOk</span> <span class="o">=</span> <span class="kc">False</span>
 
     <span class="k">elif</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">access</span><span class="p">(</span><span class="n">filePath</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">R_OK</span><span class="p">):</span>
         <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;Location &quot;</span><span class="si">%s</span><span class="s1">&quot; is not readable&#39;</span> <span class="o">%</span> <span class="n">filePath</span>
-        <span class="n">isOk</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="n">isOk</span> <span class="o">=</span> <span class="kc">False</span>
 
     <span class="k">elif</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">filePath</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">allowDir</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">isOk</span><span class="p">,</span> <span class="n">msg</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;Location &quot;</span><span class="si">%s</span><span class="s1">&quot; is a directory&#39;</span> <span class="o">%</span> <span class="n">filePath</span>
-            <span class="n">isOk</span> <span class="o">=</span> <span class="bp">False</span>
+            <span class="n">isOk</span> <span class="o">=</span> <span class="kc">False</span>
 
     <span class="k">elif</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">filePath</span><span class="p">):</span>
         <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;Location &quot;</span><span class="si">%s</span><span class="s1">&quot; is not a regular file&#39;</span> <span class="o">%</span> <span class="n">filePath</span>
-        <span class="n">isOk</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="n">isOk</span> <span class="o">=</span> <span class="kc">False</span>
 
     <span class="k">elif</span> <span class="n">os</span><span class="o">.</span><span class="n">stat</span><span class="p">(</span><span class="n">filePath</span><span class="p">)</span><span class="o">.</span><span class="n">st_size</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
         <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;File &quot;</span><span class="si">%s</span><span class="s1">&quot; is of zero size &#39;</span> <span class="o">%</span> <span class="n">filePath</span>
-        <span class="n">isOk</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="n">isOk</span> <span class="o">=</span> <span class="kc">False</span>
 
     <span class="k">return</span> <span class="n">isOk</span><span class="p">,</span> <span class="n">msg</span></div>
 
 
-<div class="viewcode-block" id="suggestFileLocations"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Path.suggestFileLocations">[docs]</a><span class="k">def</span> <span class="nf">suggestFileLocations</span><span class="p">(</span><span class="n">fileNames</span><span class="p">,</span> <span class="n">startDir</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+<div class="viewcode-block" id="suggestFileLocations"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Path.suggestFileLocations">[docs]</a><span class="k">def</span> <span class="nf">suggestFileLocations</span><span class="p">(</span><span class="n">fileNames</span><span class="p">,</span> <span class="n">startDir</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; From a list of files, return a common superdirectory and a list of</span>
 <span class="sd">    relative file names. If any of the files do not exist, search for an</span>
 <span class="sd">    alternative superdirectory that does contain the set of relative file names.</span>
@@ -405,15 +396,15 @@
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">if</span> <span class="ow">not</span> <span class="n">fileNames</span><span class="p">:</span>
-        <span class="k">return</span> <span class="bp">None</span><span class="p">,</span> <span class="p">[]</span>
+        <span class="k">return</span> <span class="kc">None</span><span class="p">,</span> <span class="p">[]</span>
 
     <span class="c1"># set up startDir</span>
-    <span class="k">if</span> <span class="n">startDir</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">startDir</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">startDir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">()</span>
-    <span class="n">startDir</span> <span class="o">=</span> <span class="n">normalisePath</span><span class="p">(</span><span class="n">startDir</span><span class="p">,</span> <span class="n">makeAbsolute</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    <span class="n">startDir</span> <span class="o">=</span> <span class="n">normalisePath</span><span class="p">(</span><span class="n">startDir</span><span class="p">,</span> <span class="n">makeAbsolute</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
     <span class="c1"># find common baseDir and paths</span>
-    <span class="n">files</span> <span class="o">=</span> <span class="p">[</span><span class="n">normalisePath</span><span class="p">(</span><span class="n">fp</span><span class="p">,</span> <span class="n">makeAbsolute</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span> <span class="k">for</span> <span class="n">fp</span> <span class="ow">in</span> <span class="n">fileNames</span><span class="p">]</span>
+    <span class="n">files</span> <span class="o">=</span> <span class="p">[</span><span class="n">normalisePath</span><span class="p">(</span><span class="n">fp</span><span class="p">,</span> <span class="n">makeAbsolute</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="k">for</span> <span class="n">fp</span> <span class="ow">in</span> <span class="n">fileNames</span><span class="p">]</span>
     <span class="n">baseDir</span> <span class="o">=</span> <span class="n">commonSuperDirectory</span><span class="p">(</span><span class="o">*</span><span class="n">files</span><span class="p">)</span>
     <span class="n">prefix</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">baseDir</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
     <span class="n">lenPrefix</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">prefix</span><span class="p">)</span>
@@ -452,7 +443,7 @@
                     <span class="k">break</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="c1"># we give up</span>
-                <span class="n">baseDir</span> <span class="o">=</span> <span class="bp">None</span>
+                <span class="n">baseDir</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="c1">#</span>
     <span class="k">return</span> <span class="n">baseDir</span><span class="p">,</span> <span class="n">paths</span></div>
 
@@ -464,7 +455,7 @@
 <span class="sd">    :param dirName: str of the new sub dir</span>
 <span class="sd">    :return: if not already existing, creates a new folder with the given name, return the full path as str</span>
 <span class="sd">    &#39;&#39;&#39;</span>
-    <span class="k">if</span> <span class="n">path</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">path</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">newPath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">dirName</span><span class="p">)</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">newPath</span><span class="p">):</span>
             <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">newPath</span><span class="p">)</span>
@@ -479,15 +470,15 @@
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
 <div id="searchbox" style="display: none" role="search">
-  <h3>Quick search</h3>
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
     <form class="search" action="../../../search.html" method="get">
-      <input type="text" name="q" />
+      <input type="text" name="q" aria-labelledby="searchlabel" />
       <input type="submit" value="Go" />
-      <input type="hidden" name="check_keywords" value="yes" />
-      <input type="hidden" name="area" value="default" />
     </form>
+    </div>
 </div>
-<script type="text/javascript">$('#searchbox').show(0);</script>
+<script>$('#searchbox').show(0);</script>
         </div>
       </div>
       <div class="clearer"></div>
@@ -501,13 +492,13 @@
         <li class="right" >
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../index.html">Python  documentation</a> &raquo;</li>
-          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="../../../index.html">Python  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &#187;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
-        &copy; Copyright .
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.1.
+        &#169; Copyright .
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.4.0.
     </div>
   </body>
 </html>

@@ -1,32 +1,22 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
+<!DOCTYPE html>
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    
-    <title>ccpnmodel.ccpncore.lib.V2Upgrade &mdash; Python  documentation</title>
-    
+    <meta charset="utf-8" />
+    <title>ccpnmodel.ccpncore.lib.V2Upgrade &#8212; Python  documentation</title>
     <link rel="stylesheet" href="../../../../_static/classic.css" type="text/css" />
     <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
     
-    <script type="text/javascript">
-      var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    '../../../../',
-        VERSION:     '',
-        COLLAPSE_INDEX: false,
-        FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true
-      };
-    </script>
-    <script type="text/javascript" src="../../../../_static/jquery.js"></script>
-    <script type="text/javascript" src="../../../../_static/underscore.js"></script>
-    <script type="text/javascript" src="../../../../_static/doctools.js"></script>
-    <link rel="top" title="Python  documentation" href="../../../../index.html" />
-    <link rel="up" title="Module code" href="../../../index.html" /> 
-  </head>
-  <body role="document">
+    <script id="documentation_options" data-url_root="../../../../" src="../../../../_static/documentation_options.js"></script>
+    <script src="../../../../_static/jquery.js"></script>
+    <script src="../../../../_static/underscore.js"></script>
+    <script src="../../../../_static/doctools.js"></script>
+    <script src="../../../../_static/language_data.js"></script>
+    
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+  </head><body>
     <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
@@ -36,8 +26,8 @@
         <li class="right" >
           <a href="../../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../../index.html">Python  documentation</a> &raquo;</li>
-          <li class="nav-item nav-item-1"><a href="../../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="../../../../index.html">Python  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../../index.html" accesskey="U">Module code</a> &#187;</li> 
       </ul>
     </div>  
 
@@ -82,21 +72,21 @@
 <span class="kn">from</span> <span class="nn">ccpnmodel.ccpncore.lib.chemComp.Util</span> <span class="kn">import</span> <span class="n">chemAtomSetFromAtoms</span>
 
 
-<div class="viewcode-block" id="mapResonanceGroupResidues"><a class="viewcode-back" href="../../../../ccpnmodel/ccpnmodel.ccpncore.lib.html#ccpnmodel.ccpncore.lib.V2Upgrade.mapResonanceGroupResidues">[docs]</a><span class="k">def</span> <span class="nf">mapResonanceGroupResidues</span><span class="p">(</span><span class="n">apiNmrProject</span><span class="p">,</span> <span class="n">molSystem</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">chainMap</span><span class="o">=</span><span class="bp">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+<div class="viewcode-block" id="mapResonanceGroupResidues"><a class="viewcode-back" href="../../../../ccpnmodel/ccpnmodel.ccpncore.lib.html#ccpnmodel.ccpncore.lib.V2Upgrade.mapResonanceGroupResidues">[docs]</a><span class="k">def</span> <span class="nf">mapResonanceGroupResidues</span><span class="p">(</span><span class="n">apiNmrProject</span><span class="p">,</span> <span class="n">molSystem</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">chainMap</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
   <span class="sd">&quot;&quot;&quot;Map resonanceGroup:assignmentTuple for fully assigned ResonanceGroups &quot;&quot;&quot;</span>
 
   <span class="n">result</span> <span class="o">=</span> <span class="p">{}</span>
 
   <span class="c1"># We need either chainMap or molSystem, and chainMap takes precedence</span>
   <span class="k">if</span> <span class="n">chainMap</span><span class="p">:</span>
-    <span class="n">molSystem</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="n">molSystem</span> <span class="o">=</span> <span class="kc">None</span>
 
   <span class="c1"># Handle properly assigned ResonanceGroups</span>
   <span class="k">for</span> <span class="n">resonanceGroup</span> <span class="ow">in</span> <span class="n">apiNmrProject</span><span class="o">.</span><span class="n">sortedResonanceGroups</span><span class="p">():</span>
 
     <span class="c1"># Find residue</span>
     <span class="n">residue</span> <span class="o">=</span> <span class="n">resonanceGroup</span><span class="o">.</span><span class="n">residue</span>
-    <span class="k">if</span> <span class="n">residue</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">residue</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
       <span class="n">ll</span> <span class="o">=</span> <span class="p">[]</span>
       <span class="k">for</span> <span class="n">residueProb</span> <span class="ow">in</span> <span class="n">resonanceGroup</span><span class="o">.</span><span class="n">residueProbs</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">residueProb</span><span class="o">.</span><span class="n">weight</span><span class="p">:</span>
@@ -174,7 +164,7 @@
         <span class="k">if</span> <span class="n">ss</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">name</span><span class="p">:</span>
           <span class="n">name</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s%s%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">separator</span><span class="p">,</span> <span class="n">serial</span><span class="p">)</span>
         <span class="c1">#</span>
-        <span class="n">result</span><span class="p">[</span><span class="n">resonance</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="bp">None</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+        <span class="n">result</span><span class="p">[</span><span class="n">resonance</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
   <span class="c1">#</span>
   <span class="k">return</span> <span class="n">result</span></div>
 
@@ -184,22 +174,22 @@
   <span class="sd">&quot;&quot;&quot;Add addGroup as satellite to addToGroup with offset offset. Return True if successful&quot;&quot;&quot;</span>
   <span class="n">previous</span> <span class="o">=</span> <span class="n">addToGroup</span><span class="o">.</span><span class="n">nmrProject</span><span class="o">.</span><span class="n">findFirstResonanceGroup</span><span class="p">(</span><span class="n">mainGroupSerial</span><span class="o">=</span><span class="n">addToGroup</span><span class="o">.</span><span class="n">serial</span><span class="p">,</span>
                                                            <span class="n">relativeOffset</span><span class="o">=</span><span class="n">offset</span><span class="p">)</span>
-  <span class="k">if</span> <span class="n">previous</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+  <span class="k">if</span> <span class="n">previous</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
     <span class="c1"># New. Set as offset. Multisteps to avoid name clashes and ensure undo.</span>
     <span class="c1"># We do not need to guard against connected stretches etc. in V2 conversion</span>
-    <span class="n">addGroup</span><span class="o">.</span><span class="n">sequenceCode</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="n">addGroup</span><span class="o">.</span><span class="n">sequenceCode</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="n">addGroup</span><span class="o">.</span><span class="n">directNmrChain</span> <span class="o">=</span> <span class="n">addToGroup</span><span class="o">.</span><span class="n">nmrChain</span>
     <span class="n">addGroup</span><span class="o">.</span><span class="n">sequenceCode</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s%+d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">addToGroup</span><span class="o">.</span><span class="n">sequenceCode</span><span class="p">,</span> <span class="n">offset</span><span class="p">)</span>
 
     <span class="c1"># set offset residueType</span>
     <span class="n">residueType</span> <span class="o">=</span> <span class="n">addGroup</span><span class="o">.</span><span class="n">residueType</span>
-    <span class="k">if</span> <span class="n">residueType</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">residueType</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
       <span class="n">chemComp</span> <span class="o">=</span> <span class="n">addToGroup</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">findFirstChemComp</span><span class="p">(</span><span class="n">molType</span><span class="o">=</span><span class="n">addGroup</span><span class="o">.</span><span class="n">molType</span><span class="p">,</span>
                                                          <span class="n">ccpCode</span><span class="o">=</span><span class="n">addGroup</span><span class="o">.</span><span class="n">ccpCode</span><span class="p">)</span>
       <span class="k">if</span> <span class="n">chemComp</span><span class="p">:</span>
         <span class="n">addGroup</span><span class="o">.</span><span class="n">residueType</span> <span class="o">=</span> <span class="n">chemComp</span><span class="o">.</span><span class="n">code3Letter</span>
 
-    <span class="k">return</span> <span class="bp">True</span>
+    <span class="k">return</span> <span class="kc">True</span>
 
   <span class="k">else</span><span class="p">:</span>
     <span class="c1"># Duplicate. Merge.</span>
@@ -208,11 +198,11 @@
       <span class="n">resonance</span><span class="o">.</span><span class="n">resonanceGroup</span> <span class="o">=</span> <span class="n">previous</span>
     <span class="n">addGroup</span><span class="o">.</span><span class="n">delete</span><span class="p">()</span>
 
-    <span class="k">return</span> <span class="bp">False</span></div>
+    <span class="k">return</span> <span class="kc">False</span></div>
 
 
 
-<div class="viewcode-block" id="mapAssignedResonances"><a class="viewcode-back" href="../../../../ccpnmodel/ccpnmodel.ccpncore.lib.html#ccpnmodel.ccpncore.lib.V2Upgrade.mapAssignedResonances">[docs]</a><span class="k">def</span> <span class="nf">mapAssignedResonances</span><span class="p">(</span><span class="n">topObject</span><span class="p">,</span> <span class="n">molSystem</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">chainMap</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+<div class="viewcode-block" id="mapAssignedResonances"><a class="viewcode-back" href="../../../../ccpnmodel/ccpnmodel.ccpncore.lib.html#ccpnmodel.ccpncore.lib.V2Upgrade.mapAssignedResonances">[docs]</a><span class="k">def</span> <span class="nf">mapAssignedResonances</span><span class="p">(</span><span class="n">topObject</span><span class="p">,</span> <span class="n">molSystem</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">chainMap</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
   <span class="sd">&quot;&quot;&quot;Make/extend {resonance:assignmentTuple} map in V2 for either Resonances or fixedResonances</span>
 <span class="sd">  chainMap remaps chains to new ones with different chainCodes (for V2-V3 upgrade).</span>
 
@@ -229,12 +219,12 @@
 
     <span class="c1"># set up loop-level parameters</span>
     <span class="n">resonances</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">resonanceSet</span><span class="o">.</span><span class="n">resonances</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">resonanceSet</span><span class="o">.</span><span class="n">findFirstResonance</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">resonanceSet</span><span class="o">.</span><span class="n">findFirstResonance</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
       <span class="n">resonances</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="n">operator</span><span class="o">.</span><span class="n">attrgetter</span><span class="p">(</span><span class="s1">&#39;serial&#39;</span><span class="p">))</span>
     <span class="k">else</span><span class="p">:</span>
       <span class="n">resonances</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="n">operator</span><span class="o">.</span><span class="n">attrgetter</span><span class="p">(</span><span class="s1">&#39;name&#39;</span><span class="p">))</span>
     <span class="n">atomSets</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">resonanceSet</span><span class="o">.</span><span class="n">atomSets</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">resonanceSet</span><span class="o">.</span><span class="n">findFirstAtomSet</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">resonanceSet</span><span class="o">.</span><span class="n">findFirstAtomSet</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
       <span class="n">atomSets</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="n">operator</span><span class="o">.</span><span class="n">attrgetter</span><span class="p">(</span><span class="s1">&#39;serial&#39;</span><span class="p">))</span>
     <span class="k">else</span><span class="p">:</span>
       <span class="n">atomSets</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="n">operator</span><span class="o">.</span><span class="n">attrgetter</span><span class="p">(</span><span class="s1">&#39;name&#39;</span><span class="p">))</span>
@@ -243,7 +233,7 @@
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">residue</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">allAtoms</span><span class="p">))</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
       <span class="n">residue</span> <span class="o">=</span> <span class="n">allAtoms</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">residue</span>
     <span class="k">else</span><span class="p">:</span>
-      <span class="n">residue</span> <span class="o">=</span> <span class="bp">None</span>
+      <span class="n">residue</span> <span class="o">=</span> <span class="kc">None</span>
 
     <span class="k">if</span> <span class="n">residue</span><span class="p">:</span>
 
@@ -264,7 +254,7 @@
 
       <span class="c1"># We have the residue - and we need the ChemCompVar below</span>
       <span class="n">chemComp</span> <span class="o">=</span> <span class="n">residue</span><span class="o">.</span><span class="n">molResidue</span><span class="o">.</span><span class="n">chemComp</span>
-      <span class="n">chemCompVar</span> <span class="o">=</span> <span class="n">residue</span><span class="o">.</span><span class="n">chemCompVar</span> <span class="ow">or</span> <span class="n">chemComp</span><span class="o">.</span><span class="n">findFirstChemCompVar</span><span class="p">(</span><span class="n">isDefaultVar</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+      <span class="n">chemCompVar</span> <span class="o">=</span> <span class="n">residue</span><span class="o">.</span><span class="n">chemCompVar</span> <span class="ow">or</span> <span class="n">chemComp</span><span class="o">.</span><span class="n">findFirstChemCompVar</span><span class="p">(</span><span class="n">isDefaultVar</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
       <span class="c1"># Now for the atom name</span>
       <span class="k">if</span> <span class="n">chemAtomSet</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">atomSets</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">resonances</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="mi">2</span><span class="p">:</span>
@@ -317,7 +307,7 @@
             <span class="c1"># assert len(resonances) == 1</span>
             <span class="n">resonance</span> <span class="o">=</span> <span class="n">resonances</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
 
-            <span class="k">if</span> <span class="n">resonance</span><span class="o">.</span><span class="n">name</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">resonance</span><span class="o">.</span><span class="n">name</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
               <span class="c1"># Aribtratily pck the first one. Wnat else?</span>
               <span class="n">indx</span> <span class="o">=</span> <span class="mi">0</span>
 
@@ -381,7 +371,7 @@
           <span class="c1"># NB we do it this way because it must work in pure V2 as well as the intermediate model</span>
           <span class="n">nuc</span> <span class="o">=</span> <span class="n">allAtoms</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">elementSymbol</span>
           <span class="n">residueChemAtoms</span> <span class="o">=</span> <span class="p">[</span><span class="n">chemCompVar</span><span class="o">.</span><span class="n">findFirstChemAtom</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">x</span><span class="o">.</span><span class="n">name</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">residue</span><span class="o">.</span><span class="n">atoms</span><span class="p">]</span>
-          <span class="n">residueChemAtoms</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">residueChemAtoms</span> <span class="k">if</span> <span class="n">x</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">]</span>
+          <span class="n">residueChemAtoms</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">residueChemAtoms</span> <span class="k">if</span> <span class="n">x</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">]</span>
           <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">allAtoms</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">residueChemAtoms</span><span class="p">):</span>
             <span class="c1"># All single atoms in residue</span>
             <span class="n">resonanceName</span> <span class="o">=</span> <span class="s1">&#39;*&#39;</span>
@@ -418,7 +408,7 @@
       <span class="k">for</span> <span class="n">resonance</span> <span class="ow">in</span> <span class="n">resonances</span><span class="p">:</span>
         <span class="n">resonanceName</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">@</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">ss</span><span class="p">,</span> <span class="n">resonance</span><span class="o">.</span><span class="n">serial</span><span class="p">)</span>
 
-        <span class="n">result</span><span class="p">[</span><span class="n">resonance</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="bp">None</span><span class="p">,</span> <span class="n">resonanceName</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;*&#39;</span><span class="p">,</span><span class="s1">&#39;%&#39;</span><span class="p">))</span>
+        <span class="n">result</span><span class="p">[</span><span class="n">resonance</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="n">resonanceName</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;*&#39;</span><span class="p">,</span><span class="s1">&#39;%&#39;</span><span class="p">))</span>
   <span class="c1">#</span>
   <span class="k">return</span> <span class="n">result</span></div>
 
@@ -439,12 +429,12 @@
 
   <span class="c1"># get elementCode</span>
   <span class="n">isotope</span> <span class="o">=</span> <span class="n">resonance</span><span class="o">.</span><span class="n">isotope</span>
-  <span class="k">if</span> <span class="n">isotope</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+  <span class="k">if</span> <span class="n">isotope</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
     <span class="n">elementCode</span> <span class="o">=</span> <span class="s1">&#39;?&#39;</span>
   <span class="k">else</span><span class="p">:</span>
     <span class="n">elementCode</span> <span class="o">=</span> <span class="n">isotope</span><span class="o">.</span><span class="n">chemElement</span><span class="o">.</span><span class="n">symbol</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
 
-  <span class="n">result</span> <span class="o">=</span> <span class="bp">None</span>
+  <span class="n">result</span> <span class="o">=</span> <span class="kc">None</span>
 
   <span class="k">if</span> <span class="n">resonance</span><span class="o">.</span><span class="n">className</span> <span class="o">==</span> <span class="s1">&#39;Resonance&#39;</span><span class="p">:</span>
 
@@ -468,12 +458,12 @@
           <span class="c1"># NB &#39;x&#39; will not always match the lowest sorting - it fails for</span>
           <span class="c1"># ordinary HB2/HB3 methylenes and must be caught later</span>
           <span class="c1"># But the crucial isopropyl and aromatic cases should work</span>
-          <span class="n">newChar</span> <span class="o">=</span> <span class="bp">None</span>
+          <span class="n">newChar</span> <span class="o">=</span> <span class="kc">None</span>
           <span class="k">for</span> <span class="n">char</span> <span class="ow">in</span> <span class="nb">reversed</span><span class="p">(</span><span class="n">resonanceName</span><span class="p">):</span>
             <span class="k">if</span> <span class="n">char</span><span class="o">.</span><span class="n">isdigit</span><span class="p">():</span>
               <span class="k">break</span>
           <span class="k">else</span><span class="p">:</span>
-            <span class="n">char</span> <span class="o">=</span> <span class="bp">None</span>
+            <span class="n">char</span> <span class="o">=</span> <span class="kc">None</span>
           <span class="k">if</span> <span class="n">assignNames</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="n">lenPrefix</span><span class="p">]</span> <span class="o">==</span> <span class="n">char</span><span class="p">:</span>
             <span class="n">newChar</span> <span class="o">=</span> <span class="s1">&#39;x&#39;</span>
           <span class="k">elif</span> <span class="n">assignNames</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="n">lenPrefix</span><span class="p">]</span> <span class="o">==</span> <span class="n">char</span><span class="p">:</span>
@@ -483,12 +473,12 @@
           <span class="k">elif</span> <span class="s1">&#39;b&#39;</span> <span class="ow">in</span> <span class="n">resonanceName</span> <span class="ow">and</span> <span class="ow">not</span> <span class="s1">&#39;a&#39;</span> <span class="ow">in</span> <span class="n">resonanceName</span><span class="p">:</span>
             <span class="n">newChar</span> <span class="o">=</span> <span class="s1">&#39;y&#39;</span>
 
-          <span class="k">if</span> <span class="n">newChar</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+          <span class="k">if</span> <span class="n">newChar</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">ll</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">assignNames</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
             <span class="n">ll</span><span class="p">[</span><span class="n">lenPrefix</span><span class="p">]</span> <span class="o">=</span> <span class="n">newChar</span>
             <span class="n">result</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">ll</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;*&#39;</span><span class="p">,</span> <span class="s1">&#39;%&#39;</span><span class="p">)</span>
 
-  <span class="k">if</span> <span class="n">result</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+  <span class="k">if</span> <span class="n">result</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
     <span class="c1"># If we are still here, assignNames did not help. Use resonanceName only</span>
 
     <span class="k">if</span> <span class="n">resonanceName</span><span class="p">:</span>
@@ -546,7 +536,7 @@
               <span class="s1">&#39;tensorRhombicity&#39;</span><span class="p">,</span> <span class="s1">&#39;tensorChainCode&#39;</span><span class="p">,</span> <span class="s1">&#39;tensorSequenceCode&#39;</span><span class="p">,</span> <span class="s1">&#39;tensorResidueType&#39;</span><span class="p">):</span>
     <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">constraintList</span><span class="p">,</span> <span class="n">tag</span><span class="p">):</span>
       <span class="n">val</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">constraintList</span><span class="p">,</span> <span class="n">tag</span><span class="p">)</span>
-      <span class="k">if</span> <span class="n">val</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+      <span class="k">if</span> <span class="n">val</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">params</span><span class="p">[</span><span class="n">tag</span><span class="p">]</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">constraintList</span><span class="p">,</span> <span class="n">tag</span><span class="p">)</span>
   <span class="c1"># RESETS:</span>
   <span class="c1"># reset name to unique string, to free the name to give to new ConstraintList:</span>
@@ -558,7 +548,7 @@
 
   <span class="n">newList</span> <span class="o">=</span> <span class="n">constraintStore</span><span class="o">.</span><span class="n">newGenericConstraintList</span><span class="p">(</span><span class="o">**</span><span class="n">params</span><span class="p">)</span>
 
-  <span class="n">constraintStore</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">override</span> <span class="o">=</span> <span class="bp">True</span>
+  <span class="n">constraintStore</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">override</span> <span class="o">=</span> <span class="kc">True</span>
   <span class="n">constraintTags</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;serial&#39;</span><span class="p">,</span> <span class="s1">&#39;origData&#39;</span><span class="p">,</span> <span class="s1">&#39;details&#39;</span><span class="p">)</span>
   <span class="n">contributionTags</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;serial&#39;</span><span class="p">,</span> <span class="s1">&#39;weight&#39;</span><span class="p">,</span> <span class="s1">&#39;targetValue&#39;</span><span class="p">,</span> <span class="s1">&#39;error&#39;</span><span class="p">,</span>
                       <span class="s1">&#39;upperLimit&#39;</span><span class="p">,</span> <span class="s1">&#39;lowerLimit&#39;</span><span class="p">,</span> <span class="s1">&#39;additionalUpperLimit&#39;</span><span class="p">,</span> <span class="s1">&#39;additionalLowerLimit&#39;</span><span class="p">,</span>
@@ -572,7 +562,7 @@
       <span class="k">for</span> <span class="n">tag</span> <span class="ow">in</span> <span class="n">constraintTags</span><span class="p">:</span>
         <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">constraint</span><span class="p">,</span> <span class="n">tag</span><span class="p">):</span>
           <span class="n">val</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">constraint</span><span class="p">,</span> <span class="n">tag</span><span class="p">)</span>
-          <span class="k">if</span> <span class="n">val</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+          <span class="k">if</span> <span class="n">val</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">params</span><span class="p">[</span><span class="n">tag</span><span class="p">]</span> <span class="o">=</span> <span class="n">val</span>
       <span class="c1"># params = {tag:getattr(constraint,tag) for tag in constraintTags}</span>
       <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">constraint</span><span class="p">,</span> <span class="s1">&#39;vectorLength&#39;</span><span class="p">):</span>
@@ -591,7 +581,7 @@
         <span class="k">for</span> <span class="n">tag</span> <span class="ow">in</span> <span class="n">contributionTags</span> <span class="o">+</span> <span class="n">contributionTags2</span><span class="p">:</span>
           <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">contribution</span><span class="p">,</span> <span class="n">tag</span><span class="p">):</span>
             <span class="n">val</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">contribution</span><span class="p">,</span> <span class="n">tag</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">val</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">val</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
               <span class="n">params</span><span class="p">[</span><span class="n">tag</span><span class="p">]</span> <span class="o">=</span> <span class="n">val</span>
         <span class="c1"># params = {tag:getattr(contribution,tag) for tag in contributionTags}</span>
         <span class="c1"># for tag in contributionTags2:</span>
@@ -613,12 +603,12 @@
     <span class="n">serial</span> <span class="o">=</span> <span class="n">constraintList</span><span class="o">.</span><span class="n">serial</span>
     <span class="n">tempSerial</span> <span class="o">=</span> <span class="n">newList</span><span class="o">.</span><span class="n">serial</span>
     <span class="n">constraintList</span><span class="o">.</span><span class="n">delete</span><span class="p">()</span>
-    <span class="n">newList</span><span class="o">.</span><span class="n">__dict__</span><span class="p">[</span><span class="s1">&#39;serial&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">serial</span>
-    <span class="n">constraintStore</span><span class="o">.</span><span class="n">__dict__</span><span class="p">[</span><span class="s1">&#39;constraintLists&#39;</span><span class="p">][</span><span class="n">serial</span><span class="p">]</span> <span class="o">=</span> <span class="n">newList</span>
-    <span class="k">del</span> <span class="n">constraintStore</span><span class="o">.</span><span class="n">__dict__</span><span class="p">[</span><span class="s1">&#39;constraintLists&#39;</span><span class="p">][</span><span class="n">tempSerial</span><span class="p">]</span>
-    <span class="n">constraintStore</span><span class="o">.</span><span class="n">__dict__</span><span class="p">[</span><span class="s1">&#39;_serialDict&#39;</span><span class="p">][</span><span class="s1">&#39;constraintLists&#39;</span><span class="p">]</span> <span class="o">-=</span> <span class="mi">1</span>
+    <span class="n">newList</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="s1">&#39;serial&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">serial</span>
+    <span class="n">constraintStore</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="s1">&#39;constraintLists&#39;</span><span class="p">][</span><span class="n">serial</span><span class="p">]</span> <span class="o">=</span> <span class="n">newList</span>
+    <span class="k">del</span> <span class="n">constraintStore</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="s1">&#39;constraintLists&#39;</span><span class="p">][</span><span class="n">tempSerial</span><span class="p">]</span>
+    <span class="n">constraintStore</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="s1">&#39;_serialDict&#39;</span><span class="p">][</span><span class="s1">&#39;constraintLists&#39;</span><span class="p">]</span> <span class="o">-=</span> <span class="mi">1</span>
   <span class="k">finally</span><span class="p">:</span>
-    <span class="n">constraintStore</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">override</span> <span class="o">=</span> <span class="bp">False</span></div>
+    <span class="n">constraintStore</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">override</span> <span class="o">=</span> <span class="kc">False</span></div>
 
 
 
@@ -655,7 +645,7 @@
   <span class="k">return</span> <span class="n">result</span></div>
 
 
-<div class="viewcode-block" id="getSeqSpinSystemLinks"><a class="viewcode-back" href="../../../../ccpnmodel/ccpnmodel.ccpncore.lib.html#ccpnmodel.ccpncore.lib.V2Upgrade.getSeqSpinSystemLinks">[docs]</a><span class="k">def</span> <span class="nf">getSeqSpinSystemLinks</span><span class="p">(</span><span class="n">spinSystem</span><span class="p">,</span> <span class="n">delta</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+<div class="viewcode-block" id="getSeqSpinSystemLinks"><a class="viewcode-back" href="../../../../ccpnmodel/ccpnmodel.ccpncore.lib.html#ccpnmodel.ccpncore.lib.V2Upgrade.getSeqSpinSystemLinks">[docs]</a><span class="k">def</span> <span class="nf">getSeqSpinSystemLinks</span><span class="p">(</span><span class="n">spinSystem</span><span class="p">,</span> <span class="n">delta</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
   <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">  Get any sequential spin system links (resonanceGroupProbs).</span>
 <span class="sd">  An optional sequence offset may be specified.</span>
@@ -670,24 +660,24 @@
 <span class="sd">  &quot;&quot;&quot;</span>
 
   <span class="n">seqLinks</span> <span class="o">=</span> <span class="p">{}</span>
-  <span class="k">for</span> <span class="n">link</span> <span class="ow">in</span> <span class="n">spinSystem</span><span class="o">.</span><span class="n">findAllResonanceGroupProbs</span><span class="p">(</span><span class="n">linkType</span><span class="o">=</span><span class="s1">&#39;sequential&#39;</span><span class="p">,</span> <span class="n">isSelected</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
-    <span class="k">if</span> <span class="n">delta</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
-      <span class="n">seqLinks</span><span class="p">[</span><span class="n">link</span><span class="p">]</span> <span class="o">=</span> <span class="bp">None</span>
+  <span class="k">for</span> <span class="n">link</span> <span class="ow">in</span> <span class="n">spinSystem</span><span class="o">.</span><span class="n">findAllResonanceGroupProbs</span><span class="p">(</span><span class="n">linkType</span><span class="o">=</span><span class="s1">&#39;sequential&#39;</span><span class="p">,</span> <span class="n">isSelected</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">delta</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+      <span class="n">seqLinks</span><span class="p">[</span><span class="n">link</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
 
     <span class="k">elif</span> <span class="n">link</span><span class="o">.</span><span class="n">sequenceOffset</span> <span class="o">==</span> <span class="n">delta</span><span class="p">:</span>
-      <span class="n">seqLinks</span><span class="p">[</span><span class="n">link</span><span class="p">]</span> <span class="o">=</span> <span class="bp">None</span>
+      <span class="n">seqLinks</span><span class="p">[</span><span class="n">link</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
 
-  <span class="k">for</span> <span class="n">link</span> <span class="ow">in</span> <span class="n">spinSystem</span><span class="o">.</span><span class="n">findAllFromResonanceGroups</span><span class="p">(</span><span class="n">linkType</span><span class="o">=</span><span class="s1">&#39;sequential&#39;</span><span class="p">,</span> <span class="n">isSelected</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
-    <span class="k">if</span> <span class="n">delta</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
-      <span class="n">seqLinks</span><span class="p">[</span><span class="n">link</span><span class="p">]</span> <span class="o">=</span> <span class="bp">None</span>
+  <span class="k">for</span> <span class="n">link</span> <span class="ow">in</span> <span class="n">spinSystem</span><span class="o">.</span><span class="n">findAllFromResonanceGroups</span><span class="p">(</span><span class="n">linkType</span><span class="o">=</span><span class="s1">&#39;sequential&#39;</span><span class="p">,</span> <span class="n">isSelected</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">delta</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+      <span class="n">seqLinks</span><span class="p">[</span><span class="n">link</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
 
     <span class="k">elif</span> <span class="n">link</span><span class="o">.</span><span class="n">sequenceOffset</span> <span class="o">==</span> <span class="o">-</span><span class="n">delta</span><span class="p">:</span>
-      <span class="n">seqLinks</span><span class="p">[</span><span class="n">link</span><span class="p">]</span> <span class="o">=</span> <span class="bp">None</span>
+      <span class="n">seqLinks</span><span class="p">[</span><span class="n">link</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
 
   <span class="k">return</span> <span class="n">seqLinks</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span></div>
 
 
-<div class="viewcode-block" id="findConnectedSpinSystems"><a class="viewcode-back" href="../../../../ccpnmodel/ccpnmodel.ccpncore.lib.html#ccpnmodel.ccpncore.lib.V2Upgrade.findConnectedSpinSystems">[docs]</a><span class="k">def</span> <span class="nf">findConnectedSpinSystems</span><span class="p">(</span><span class="n">spinSystem</span><span class="p">,</span> <span class="n">delta</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+<div class="viewcode-block" id="findConnectedSpinSystems"><a class="viewcode-back" href="../../../../ccpnmodel/ccpnmodel.ccpncore.lib.html#ccpnmodel.ccpncore.lib.V2Upgrade.findConnectedSpinSystems">[docs]</a><span class="k">def</span> <span class="nf">findConnectedSpinSystems</span><span class="p">(</span><span class="n">spinSystem</span><span class="p">,</span> <span class="n">delta</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
   <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">  Find spin systems sequentially connected to the input one with given sequence offset.</span>
 
@@ -713,15 +703,15 @@
 <div class="viewcode-block" id="findIdentityResonanceGroup"><a class="viewcode-back" href="../../../../ccpnmodel/ccpnmodel.ccpncore.lib.html#ccpnmodel.ccpncore.lib.V2Upgrade.findIdentityResonanceGroup">[docs]</a><span class="k">def</span>  <span class="nf">findIdentityResonanceGroup</span><span class="p">(</span><span class="n">resonanceGroup</span><span class="p">):</span>
   <span class="sd">&quot;&quot;&quot;V2: find unique resonanceGroup linked as identical to teh input&quot;&quot;&quot;</span>
   <span class="n">ll</span> <span class="o">=</span> <span class="n">resonanceGroup</span><span class="o">.</span><span class="n">findAllResonanceGroupProbs</span><span class="p">(</span><span class="n">linkType</span><span class="o">=</span><span class="s1">&#39;identity&#39;</span><span class="p">,</span>
-                                                  <span class="n">isSelected</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+                                                  <span class="n">isSelected</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
   <span class="n">identicals</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">possibility</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">ll</span><span class="p">)</span>
   <span class="n">ll2</span> <span class="o">=</span> <span class="n">resonanceGroup</span><span class="o">.</span><span class="n">findAllFromResonanceGroups</span><span class="p">(</span><span class="n">linkType</span><span class="o">=</span><span class="s1">&#39;identity&#39;</span><span class="p">,</span>
-                                                  <span class="n">isSelected</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+                                                  <span class="n">isSelected</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
   <span class="n">identicals</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">parent</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">ll2</span><span class="p">)</span>
   <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">identicals</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
     <span class="k">return</span> <span class="n">identicals</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
   <span class="k">else</span><span class="p">:</span>
-    <span class="k">return</span> <span class="bp">None</span></div>
+    <span class="k">return</span> <span class="kc">None</span></div>
 
 <span class="k">def</span> <span class="nf">_getAmbigProchiralLabel</span><span class="p">(</span><span class="n">resonance</span><span class="p">):</span>
   <span class="sd">&quot;&quot;&quot;</span>
@@ -800,7 +790,7 @@
   <span class="k">return</span> <span class="n">letter</span>
 
 
-<span class="k">def</span> <span class="nf">_getOnebondResonance</span><span class="p">(</span><span class="n">resonance</span><span class="p">,</span> <span class="n">isotopeCode</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">_getOnebondResonance</span><span class="p">(</span><span class="n">resonance</span><span class="p">,</span> <span class="n">isotopeCode</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
   <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">  V2: Find any resonance that may have a single bond connection to the input resonance</span>
 <span class="sd">  Option to specify the isotope type</span>
@@ -824,7 +814,7 @@
     <span class="k">else</span><span class="p">:</span>
       <span class="k">return</span> <span class="n">resonances</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
 
-  <span class="n">resonance2</span> <span class="o">=</span> <span class="bp">None</span>
+  <span class="n">resonance2</span> <span class="o">=</span> <span class="kc">None</span>
 
   <span class="k">for</span> <span class="n">contrib</span> <span class="ow">in</span> <span class="n">resonance</span><span class="o">.</span><span class="n">peakDimContribs</span><span class="p">:</span>
     <span class="n">peakDim</span>      <span class="o">=</span> <span class="n">contrib</span><span class="o">.</span><span class="n">peakDim</span>
@@ -833,7 +823,7 @@
 
     <span class="k">for</span> <span class="n">expTransfer</span> <span class="ow">in</span> <span class="n">expTransfers</span><span class="p">:</span>
       <span class="k">if</span> <span class="n">expTransfer</span><span class="o">.</span><span class="n">transferType</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;onebond&#39;</span><span class="p">,</span><span class="s1">&#39;CP&#39;</span><span class="p">):</span>
-        <span class="n">expDimRef2</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="n">expDimRef2</span> <span class="o">=</span> <span class="kc">None</span>
 
         <span class="k">for</span> <span class="n">expDimRef</span> <span class="ow">in</span> <span class="n">expTransfer</span><span class="o">.</span><span class="n">expDimRefs</span><span class="p">:</span>
           <span class="k">if</span> <span class="n">expDimRef</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">expDimRef1</span><span class="p">:</span>
@@ -857,7 +847,7 @@
 
 
 
-<span class="k">def</span> <span class="nf">_getBoundResonances</span><span class="p">(</span><span class="n">resonance</span><span class="p">,</span> <span class="n">recalculate</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">contribs</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">recursiveCall</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">_getBoundResonances</span><span class="p">(</span><span class="n">resonance</span><span class="p">,</span> <span class="n">recalculate</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">contribs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">recursiveCall</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
   <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">  V2: Find all resonances that have a single bond connection to the input resonance</span>
 <span class="sd">  Option to recalculate given assignment status (e.g. if something changes)</span>
@@ -894,7 +884,7 @@
 
         <span class="k">if</span> <span class="n">atomSet2</span> <span class="ow">and</span> <span class="n">atomSet2</span><span class="o">.</span><span class="n">resonanceSets</span><span class="p">:</span>
 
-          <span class="n">usePaired</span> <span class="o">=</span> <span class="bp">False</span>
+          <span class="n">usePaired</span> <span class="o">=</span> <span class="kc">False</span>
           <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">atomSets</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
             <span class="n">chemAtomSet</span> <span class="o">=</span> <span class="n">atom2</span><span class="o">.</span><span class="n">chemAtom</span><span class="o">.</span><span class="n">chemAtomSet</span>
             <span class="k">if</span> <span class="n">chemAtomSet</span><span class="p">:</span>
@@ -918,7 +908,7 @@
     <span class="n">contribs</span> <span class="o">=</span> <span class="n">resonance</span><span class="o">.</span><span class="n">peakDimContribs</span>
 
   <span class="n">expResonances</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
-  <span class="n">foundBothPaired</span> <span class="o">=</span> <span class="bp">False</span>
+  <span class="n">foundBothPaired</span> <span class="o">=</span> <span class="kc">False</span>
   <span class="k">for</span> <span class="n">contrib</span> <span class="ow">in</span> <span class="n">contribs</span><span class="p">:</span>
     <span class="n">peakDim</span>      <span class="o">=</span> <span class="n">contrib</span><span class="o">.</span><span class="n">peakDim</span>
     <span class="n">expDimRef1</span>   <span class="o">=</span> <span class="n">peakDim</span><span class="o">.</span><span class="n">dataDimRef</span><span class="o">.</span><span class="n">expDimRef</span>
@@ -926,7 +916,7 @@
 
     <span class="k">for</span> <span class="n">expTransfer</span> <span class="ow">in</span> <span class="n">expTransfers</span><span class="p">:</span>
       <span class="k">if</span> <span class="n">expTransfer</span><span class="o">.</span><span class="n">transferType</span> <span class="o">==</span> <span class="s1">&#39;onebond&#39;</span><span class="p">:</span>
-        <span class="n">expDimRef2</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="n">expDimRef2</span> <span class="o">=</span> <span class="kc">None</span>
 
         <span class="k">for</span> <span class="n">expDimRef</span> <span class="ow">in</span> <span class="n">expTransfer</span><span class="o">.</span><span class="n">expDimRefs</span><span class="p">:</span>
           <span class="k">if</span> <span class="n">expDimRef</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">expDimRef1</span><span class="p">:</span>
@@ -973,7 +963,7 @@
                     <span class="c1"># check presence of prochiral pairs</span>
                     <span class="n">ll</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">pairResonances</span> <span class="k">if</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">expBound</span><span class="p">]</span>
                     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">pairResonances</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">ll</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
-                      <span class="n">foundBothPaired</span><span class="o">=</span> <span class="bp">True</span>
+                      <span class="n">foundBothPaired</span><span class="o">=</span> <span class="kc">True</span>
                     <span class="k">elif</span> <span class="n">ll</span><span class="p">:</span>
                       <span class="c1"># found some prochiral pair resonances - use them</span>
                       <span class="n">expResonances</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">ll</span><span class="p">)</span>
@@ -996,8 +986,8 @@
         <span class="c1"># there are sister resonances</span>
         <span class="n">resons</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">resonance</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">reson</span> <span class="ow">in</span> <span class="n">resons</span><span class="p">:</span>
-          <span class="n">boundResons</span> <span class="o">=</span> <span class="n">_getBoundResonances</span><span class="p">(</span><span class="n">reson</span><span class="p">,</span> <span class="n">recalculate</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">contribs</span><span class="o">=</span><span class="n">contribs</span><span class="p">,</span>
-                                            <span class="n">recursiveCall</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+          <span class="n">boundResons</span> <span class="o">=</span> <span class="n">_getBoundResonances</span><span class="p">(</span><span class="n">reson</span><span class="p">,</span> <span class="n">recalculate</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">contribs</span><span class="o">=</span><span class="n">contribs</span><span class="p">,</span>
+                                            <span class="n">recursiveCall</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
           <span class="n">ll</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">pairResonances</span> <span class="k">if</span> <span class="n">x</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">boundResons</span><span class="p">]</span>
           <span class="k">if</span> <span class="ow">not</span> <span class="n">ll</span><span class="p">:</span>
             <span class="c1"># One sister was bound to both. Incorrect data. Bind to both here too</span>
@@ -1092,15 +1082,15 @@
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
 <div id="searchbox" style="display: none" role="search">
-  <h3>Quick search</h3>
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
     <form class="search" action="../../../../search.html" method="get">
-      <input type="text" name="q" />
+      <input type="text" name="q" aria-labelledby="searchlabel" />
       <input type="submit" value="Go" />
-      <input type="hidden" name="check_keywords" value="yes" />
-      <input type="hidden" name="area" value="default" />
     </form>
+    </div>
 </div>
-<script type="text/javascript">$('#searchbox').show(0);</script>
+<script>$('#searchbox').show(0);</script>
         </div>
       </div>
       <div class="clearer"></div>
@@ -1114,13 +1104,13 @@
         <li class="right" >
           <a href="../../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../../index.html">Python  documentation</a> &raquo;</li>
-          <li class="nav-item nav-item-1"><a href="../../../index.html" >Module code</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="../../../../index.html">Python  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../../index.html" >Module code</a> &#187;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
-        &copy; Copyright .
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.1.
+        &#169; Copyright .
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.4.0.
     </div>
   </body>
 </html>

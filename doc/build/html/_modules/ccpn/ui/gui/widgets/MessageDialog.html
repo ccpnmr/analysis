@@ -1,32 +1,22 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
+<!DOCTYPE html>
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    
-    <title>ccpn.ui.gui.widgets.MessageDialog &mdash; Python  documentation</title>
-    
+    <meta charset="utf-8" />
+    <title>ccpn.ui.gui.widgets.MessageDialog &#8212; Python  documentation</title>
     <link rel="stylesheet" href="../../../../../_static/classic.css" type="text/css" />
     <link rel="stylesheet" href="../../../../../_static/pygments.css" type="text/css" />
     
-    <script type="text/javascript">
-      var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    '../../../../../',
-        VERSION:     '',
-        COLLAPSE_INDEX: false,
-        FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true
-      };
-    </script>
-    <script type="text/javascript" src="../../../../../_static/jquery.js"></script>
-    <script type="text/javascript" src="../../../../../_static/underscore.js"></script>
-    <script type="text/javascript" src="../../../../../_static/doctools.js"></script>
-    <link rel="top" title="Python  documentation" href="../../../../../index.html" />
-    <link rel="up" title="Module code" href="../../../../index.html" /> 
-  </head>
-  <body role="document">
+    <script id="documentation_options" data-url_root="../../../../../" src="../../../../../_static/documentation_options.js"></script>
+    <script src="../../../../../_static/jquery.js"></script>
+    <script src="../../../../../_static/underscore.js"></script>
+    <script src="../../../../../_static/doctools.js"></script>
+    <script src="../../../../../_static/language_data.js"></script>
+    
+    <link rel="index" title="Index" href="../../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../../search.html" /> 
+  </head><body>
     <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
@@ -36,8 +26,8 @@
         <li class="right" >
           <a href="../../../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../../../index.html">Python  documentation</a> &raquo;</li>
-          <li class="nav-item nav-item-1"><a href="../../../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="../../../../../index.html">Python  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../../../index.html" accesskey="U">Module code</a> &#187;</li> 
       </ul>
     </div>  
 
@@ -53,7 +43,7 @@
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Licence, Reference and Credits</span>
 <span class="c1">#=========================================================================================</span>
-<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019&quot;</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020&quot;</span>
 <span class="n">__credits__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Ed Brooksbank, Luca Mureddu, Timothy J Ragan &amp; Geerten W Vuister&quot;</span><span class="p">)</span>
 <span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">)</span>
 <span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., &amp; Vuister, G.W.&quot;</span><span class="p">,</span>
@@ -62,8 +52,8 @@
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Last code modification</span>
 <span class="c1">#=========================================================================================</span>
-<span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: CCPN $&quot;</span>
-<span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2017-07-07 16:32:54 +0100 (Fri, July 07, 2017) $&quot;</span>
+<span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: Ed Brooksbank $&quot;</span>
+<span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2020-01-28 09:52:40 +0000 (Tue, January 28, 2020) $&quot;</span>
 <span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.0 $&quot;</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Created</span>
@@ -78,6 +68,8 @@
 
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.guiSettings</span> <span class="kn">import</span> <span class="n">messageFont</span><span class="p">,</span> <span class="n">messageFontBold</span>
 
+<span class="k">def</span> <span class="nf">_isDarwin</span><span class="p">():</span>
+    <span class="k">return</span> <span class="s1">&#39;darwin&#39;</span> <span class="ow">in</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">QSysInfo</span><span class="p">()</span><span class="o">.</span><span class="n">kernelType</span><span class="p">()</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
 
 <span class="n">Ok</span>            <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QMessageBox</span><span class="o">.</span><span class="n">Ok</span>
 <span class="n">Cancel</span>        <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QMessageBox</span><span class="o">.</span><span class="n">Cancel</span>
@@ -88,12 +80,17 @@
 <span class="n">Abort</span>         <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QMessageBox</span><span class="o">.</span><span class="n">Abort</span>
 <span class="n">Close</span>         <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QMessageBox</span><span class="o">.</span><span class="n">Close</span>
 <span class="n">Information</span>   <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QMessageBox</span><span class="o">.</span><span class="n">Information</span>
-<span class="n">Question</span>      <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QMessageBox</span><span class="o">.</span><span class="n">Question</span>
 <span class="ne">Warning</span>       <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QMessageBox</span><span class="o">.</span><span class="n">Warning</span>
+<span class="n">Question</span>      <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QMessageBox</span><span class="o">.</span><span class="n">Question</span>
 <span class="n">Critical</span>      <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QMessageBox</span><span class="o">.</span><span class="n">Critical</span>
 <span class="n">Save</span>          <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QMessageBox</span><span class="o">.</span><span class="n">Save</span>
 <span class="n">Discard</span>       <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QMessageBox</span><span class="o">.</span><span class="n">Discard</span>
 
+<span class="n">default_icons</span> <span class="o">=</span> <span class="p">(</span><span class="n">Information</span><span class="p">,</span><span class="n">Question</span><span class="p">,</span><span class="ne">Warning</span><span class="p">,</span><span class="n">Critical</span><span class="p">)</span>
+
+
+<span class="k">if</span> <span class="n">_isDarwin</span><span class="p">():</span>
+    <span class="n">Question</span> <span class="o">=</span> <span class="ne">Warning</span>
 
 <div class="viewcode-block" id="MessageDialog"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.MessageDialog.MessageDialog">[docs]</a><span class="k">class</span> <span class="nc">MessageDialog</span><span class="p">(</span><span class="n">QtWidgets</span><span class="o">.</span><span class="n">QMessageBox</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
@@ -101,8 +98,8 @@
 <span class="sd">    Using the &#39;multiline&#39; to emulate the windowTitle, as on Mac the windows do not get their title</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">title</span><span class="p">,</span> <span class="n">basicText</span><span class="p">,</span> <span class="n">message</span><span class="p">,</span> <span class="n">icon</span><span class="o">=</span><span class="n">Information</span><span class="p">,</span> <span class="n">iconPath</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
-        <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QMessageBox</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">title</span><span class="p">,</span> <span class="n">basicText</span><span class="p">,</span> <span class="n">message</span><span class="p">,</span> <span class="n">icon</span><span class="o">=</span><span class="n">Information</span><span class="p">,</span> <span class="n">iconPath</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QMessageBox</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">setWindowModality</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">WindowModal</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_parent</span> <span class="o">=</span> <span class="n">parent</span>
@@ -129,7 +126,7 @@
         <span class="k">if</span> <span class="n">item</span><span class="p">:</span>
             <span class="n">widget</span> <span class="o">=</span> <span class="n">item</span><span class="o">.</span><span class="n">widget</span><span class="p">()</span>
             <span class="c1"># GWV: Estimating minimumwidth</span>
-            <span class="n">widget</span><span class="o">.</span><span class="n">setMinimumWidth</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">message</span><span class="p">)</span> <span class="o">*</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">200</span><span class="p">))</span>
+            <span class="n">widget</span><span class="o">.</span><span class="n">setMinimumWidth</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">message</span><span class="p">)</span> <span class="o">*</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">200</span><span class="p">))</span>
             <span class="n">widget</span><span class="o">.</span><span class="n">setFont</span><span class="p">(</span><span class="n">messageFont</span><span class="p">)</span>
 
         <span class="c1"># textEdit = self.findChild(QtGui.QTextEdit)</span>
@@ -159,7 +156,7 @@
                       <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">frameGeometry</span><span class="p">()</span><span class="o">.</span><span class="n">topLeft</span><span class="p">())</span></div></div>
 
 
-<div class="viewcode-block" id="showInfo"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.MessageDialog.showInfo">[docs]</a><span class="k">def</span> <span class="nf">showInfo</span><span class="p">(</span><span class="n">title</span><span class="p">,</span> <span class="n">message</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">iconPath</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+<div class="viewcode-block" id="showInfo"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.MessageDialog.showInfo">[docs]</a><span class="k">def</span> <span class="nf">showInfo</span><span class="p">(</span><span class="n">title</span><span class="p">,</span> <span class="n">message</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">iconPath</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Display an info message</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">dialog</span> <span class="o">=</span> <span class="n">MessageDialog</span><span class="p">(</span><span class="s1">&#39;Information&#39;</span><span class="p">,</span> <span class="n">title</span><span class="p">,</span> <span class="n">message</span><span class="p">,</span> <span class="n">Information</span><span class="p">,</span> <span class="n">iconPath</span><span class="p">,</span> <span class="n">parent</span><span class="p">)</span>
@@ -176,7 +173,7 @@
              <span class="s1">&#39;This function has not been implemented in the current version&#39;</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="showOkCancel"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.MessageDialog.showOkCancel">[docs]</a><span class="k">def</span> <span class="nf">showOkCancel</span><span class="p">(</span><span class="n">title</span><span class="p">,</span> <span class="n">message</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">iconPath</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+<div class="viewcode-block" id="showOkCancel"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.MessageDialog.showOkCancel">[docs]</a><span class="k">def</span> <span class="nf">showOkCancel</span><span class="p">(</span><span class="n">title</span><span class="p">,</span> <span class="n">message</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">iconPath</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="n">dialog</span> <span class="o">=</span> <span class="n">MessageDialog</span><span class="p">(</span><span class="s1">&#39;Query&#39;</span><span class="p">,</span> <span class="n">title</span><span class="p">,</span> <span class="n">message</span><span class="p">,</span> <span class="n">Question</span><span class="p">,</span> <span class="n">iconPath</span><span class="p">,</span> <span class="n">parent</span><span class="p">)</span>
 
     <span class="n">dialog</span><span class="o">.</span><span class="n">setStandardButtons</span><span class="p">(</span><span class="n">Ok</span> <span class="o">|</span> <span class="n">Cancel</span><span class="p">)</span>
@@ -186,7 +183,7 @@
     <span class="k">return</span> <span class="n">dialog</span><span class="o">.</span><span class="n">exec_</span><span class="p">()</span> <span class="o">==</span> <span class="n">Ok</span></div>
 
 
-<div class="viewcode-block" id="showYesNo"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.MessageDialog.showYesNo">[docs]</a><span class="k">def</span> <span class="nf">showYesNo</span><span class="p">(</span><span class="n">title</span><span class="p">,</span> <span class="n">message</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">iconPath</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+<div class="viewcode-block" id="showYesNo"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.MessageDialog.showYesNo">[docs]</a><span class="k">def</span> <span class="nf">showYesNo</span><span class="p">(</span><span class="n">title</span><span class="p">,</span> <span class="n">message</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">iconPath</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="n">dialog</span> <span class="o">=</span> <span class="n">MessageDialog</span><span class="p">(</span><span class="s1">&#39;Query&#39;</span><span class="p">,</span> <span class="n">title</span><span class="p">,</span> <span class="n">message</span><span class="p">,</span> <span class="n">Question</span><span class="p">,</span> <span class="n">iconPath</span><span class="p">,</span> <span class="n">parent</span><span class="p">)</span>
 
     <span class="n">dialog</span><span class="o">.</span><span class="n">setStandardButtons</span><span class="p">(</span><span class="n">Yes</span> <span class="o">|</span> <span class="n">No</span><span class="p">)</span>
@@ -196,7 +193,7 @@
     <span class="k">return</span> <span class="n">dialog</span><span class="o">.</span><span class="n">exec_</span><span class="p">()</span> <span class="o">==</span> <span class="n">Yes</span></div>
 
 
-<div class="viewcode-block" id="showRetryIgnoreCancel"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.MessageDialog.showRetryIgnoreCancel">[docs]</a><span class="k">def</span> <span class="nf">showRetryIgnoreCancel</span><span class="p">(</span><span class="n">title</span><span class="p">,</span> <span class="n">message</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">iconPath</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+<div class="viewcode-block" id="showRetryIgnoreCancel"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.MessageDialog.showRetryIgnoreCancel">[docs]</a><span class="k">def</span> <span class="nf">showRetryIgnoreCancel</span><span class="p">(</span><span class="n">title</span><span class="p">,</span> <span class="n">message</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">iconPath</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="n">dialog</span> <span class="o">=</span> <span class="n">MessageDialog</span><span class="p">(</span><span class="s1">&#39;Retry&#39;</span><span class="p">,</span> <span class="n">title</span><span class="p">,</span> <span class="n">message</span><span class="p">,</span> <span class="n">Question</span><span class="p">,</span> <span class="n">iconPath</span><span class="p">,</span> <span class="n">parent</span><span class="p">)</span>
 
     <span class="n">dialog</span><span class="o">.</span><span class="n">setStandardButtons</span><span class="p">(</span><span class="n">Retry</span> <span class="o">|</span> <span class="n">Ignore</span> <span class="o">|</span> <span class="n">Cancel</span><span class="p">)</span>
@@ -206,16 +203,16 @@
     <span class="n">result</span> <span class="o">=</span> <span class="n">dialog</span><span class="o">.</span><span class="n">exec_</span><span class="p">()</span>
 
     <span class="k">if</span> <span class="n">result</span> <span class="o">==</span> <span class="n">Retry</span><span class="p">:</span>
-        <span class="k">return</span> <span class="bp">True</span>
+        <span class="k">return</span> <span class="kc">True</span>
 
     <span class="k">elif</span> <span class="n">result</span> <span class="o">==</span> <span class="n">Cancel</span><span class="p">:</span>
-        <span class="k">return</span> <span class="bp">False</span>
+        <span class="k">return</span> <span class="kc">False</span>
 
     <span class="k">else</span><span class="p">:</span>
-        <span class="k">return</span> <span class="bp">None</span></div>
+        <span class="k">return</span> <span class="kc">None</span></div>
 
 
-<div class="viewcode-block" id="showSaveDiscardCancel"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.MessageDialog.showSaveDiscardCancel">[docs]</a><span class="k">def</span> <span class="nf">showSaveDiscardCancel</span><span class="p">(</span><span class="n">title</span><span class="p">,</span> <span class="n">message</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">iconPath</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+<div class="viewcode-block" id="showSaveDiscardCancel"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.MessageDialog.showSaveDiscardCancel">[docs]</a><span class="k">def</span> <span class="nf">showSaveDiscardCancel</span><span class="p">(</span><span class="n">title</span><span class="p">,</span> <span class="n">message</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">iconPath</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="n">dialog</span> <span class="o">=</span> <span class="n">MessageDialog</span><span class="p">(</span><span class="s1">&#39;Query&#39;</span><span class="p">,</span> <span class="n">title</span><span class="p">,</span> <span class="n">message</span><span class="p">,</span> <span class="n">Question</span><span class="p">,</span> <span class="n">iconPath</span><span class="p">,</span> <span class="n">parent</span><span class="p">)</span>
 
     <span class="n">dialog</span><span class="o">.</span><span class="n">setStandardButtons</span><span class="p">(</span><span class="n">Save</span> <span class="o">|</span> <span class="n">Discard</span> <span class="o">|</span> <span class="n">Cancel</span><span class="p">)</span>
@@ -225,16 +222,16 @@
     <span class="n">result</span> <span class="o">=</span> <span class="n">dialog</span><span class="o">.</span><span class="n">exec_</span><span class="p">()</span>
 
     <span class="k">if</span> <span class="n">result</span> <span class="o">==</span> <span class="n">Save</span><span class="p">:</span>
-        <span class="k">return</span> <span class="bp">True</span>
+        <span class="k">return</span> <span class="kc">True</span>
 
     <span class="k">elif</span> <span class="n">result</span> <span class="o">==</span> <span class="n">Discard</span><span class="p">:</span>
-        <span class="k">return</span> <span class="bp">False</span>
+        <span class="k">return</span> <span class="kc">False</span>
 
     <span class="k">else</span><span class="p">:</span>
-        <span class="k">return</span> <span class="bp">None</span></div>
+        <span class="k">return</span> <span class="kc">None</span></div>
 
 
-<div class="viewcode-block" id="showWarning"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.MessageDialog.showWarning">[docs]</a><span class="k">def</span> <span class="nf">showWarning</span><span class="p">(</span><span class="n">title</span><span class="p">,</span> <span class="n">message</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">iconPath</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+<div class="viewcode-block" id="showWarning"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.MessageDialog.showWarning">[docs]</a><span class="k">def</span> <span class="nf">showWarning</span><span class="p">(</span><span class="n">title</span><span class="p">,</span> <span class="n">message</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">iconPath</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="n">dialog</span> <span class="o">=</span> <span class="n">MessageDialog</span><span class="p">(</span><span class="s1">&#39;Warning&#39;</span><span class="p">,</span> <span class="n">title</span><span class="p">,</span> <span class="n">message</span><span class="p">,</span> <span class="ne">Warning</span><span class="p">,</span> <span class="n">iconPath</span><span class="p">,</span> <span class="n">parent</span><span class="p">)</span>
 
     <span class="n">dialog</span><span class="o">.</span><span class="n">setStandardButtons</span><span class="p">(</span><span class="n">Close</span><span class="p">)</span>
@@ -243,7 +240,7 @@
     <span class="k">return</span></div>
 
 
-<div class="viewcode-block" id="showOkCancelWarning"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.MessageDialog.showOkCancelWarning">[docs]</a><span class="k">def</span> <span class="nf">showOkCancelWarning</span><span class="p">(</span><span class="n">title</span><span class="p">,</span> <span class="n">message</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">iconPath</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+<div class="viewcode-block" id="showOkCancelWarning"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.MessageDialog.showOkCancelWarning">[docs]</a><span class="k">def</span> <span class="nf">showOkCancelWarning</span><span class="p">(</span><span class="n">title</span><span class="p">,</span> <span class="n">message</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">iconPath</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="n">dialog</span> <span class="o">=</span> <span class="n">MessageDialog</span><span class="p">(</span><span class="s1">&#39;Warning&#39;</span><span class="p">,</span> <span class="n">title</span><span class="p">,</span> <span class="n">message</span><span class="p">,</span> <span class="ne">Warning</span><span class="p">,</span> <span class="n">iconPath</span><span class="p">,</span> <span class="n">parent</span><span class="p">)</span>
 
     <span class="n">dialog</span><span class="o">.</span><span class="n">setStandardButtons</span><span class="p">(</span><span class="n">Ok</span> <span class="o">|</span> <span class="n">Cancel</span><span class="p">)</span>
@@ -253,7 +250,7 @@
     <span class="k">return</span> <span class="n">dialog</span><span class="o">.</span><span class="n">exec_</span><span class="p">()</span> <span class="o">==</span> <span class="n">Ok</span></div>
 
 
-<div class="viewcode-block" id="showYesNoWarning"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.MessageDialog.showYesNoWarning">[docs]</a><span class="k">def</span> <span class="nf">showYesNoWarning</span><span class="p">(</span><span class="n">title</span><span class="p">,</span> <span class="n">message</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">iconPath</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+<div class="viewcode-block" id="showYesNoWarning"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.MessageDialog.showYesNoWarning">[docs]</a><span class="k">def</span> <span class="nf">showYesNoWarning</span><span class="p">(</span><span class="n">title</span><span class="p">,</span> <span class="n">message</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">iconPath</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="n">dialog</span> <span class="o">=</span> <span class="n">MessageDialog</span><span class="p">(</span><span class="s1">&#39;Warning&#39;</span><span class="p">,</span> <span class="n">title</span><span class="p">,</span> <span class="n">message</span><span class="p">,</span> <span class="ne">Warning</span><span class="p">,</span> <span class="n">iconPath</span><span class="p">,</span> <span class="n">parent</span><span class="p">)</span>
 
     <span class="n">dialog</span><span class="o">.</span><span class="n">setStandardButtons</span><span class="p">(</span><span class="n">Yes</span> <span class="o">|</span> <span class="n">No</span><span class="p">)</span>
@@ -263,26 +260,69 @@
     <span class="k">return</span> <span class="n">dialog</span><span class="o">.</span><span class="n">exec_</span><span class="p">()</span> <span class="o">==</span> <span class="n">Yes</span></div>
 
 
-<div class="viewcode-block" id="showMulti"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.MessageDialog.showMulti">[docs]</a><span class="k">def</span> <span class="nf">showMulti</span><span class="p">(</span><span class="n">title</span><span class="p">,</span> <span class="n">message</span><span class="p">,</span> <span class="n">texts</span><span class="p">,</span> <span class="n">objects</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">iconPath</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+<div class="viewcode-block" id="showMulti"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.MessageDialog.showMulti">[docs]</a><span class="k">def</span> <span class="nf">showMulti</span><span class="p">(</span><span class="n">title</span><span class="p">,</span> <span class="n">message</span><span class="p">,</span> <span class="n">texts</span><span class="p">,</span> <span class="n">objects</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">iconPath</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">okText</span><span class="o">=</span><span class="s1">&#39;OK&#39;</span><span class="p">,</span> <span class="n">cancelText</span><span class="o">=</span><span class="s1">&#39;Cancel&#39;</span><span class="p">,</span> <span class="n">destructive</span><span class="o">=</span><span class="p">(),</span> <span class="n">checkbox</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">checked</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
     <span class="k">if</span> <span class="n">objects</span><span class="p">:</span>
         <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">objects</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">texts</span><span class="p">)</span>
 
     <span class="n">dialog</span> <span class="o">=</span> <span class="n">MessageDialog</span><span class="p">(</span><span class="s1">&#39;Query&#39;</span><span class="p">,</span> <span class="n">title</span><span class="p">,</span> <span class="n">message</span><span class="p">,</span> <span class="n">Question</span><span class="p">,</span> <span class="n">iconPath</span><span class="p">,</span> <span class="n">parent</span><span class="p">)</span>
 
+    <span class="n">_checkbox</span> <span class="o">=</span> <span class="kc">None</span>
+
     <span class="k">for</span> <span class="n">text</span> <span class="ow">in</span> <span class="n">texts</span><span class="p">:</span>
-        <span class="n">dialog</span><span class="o">.</span><span class="n">addButton</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QMessageBox</span><span class="o">.</span><span class="n">AcceptRole</span><span class="p">)</span>
+        <span class="n">lower_text</span> <span class="o">=</span> <span class="n">text</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+
+
+        <span class="k">if</span> <span class="n">checkbox</span> <span class="ow">and</span> <span class="p">(</span><span class="n">lower_text</span> <span class="ow">in</span> <span class="n">checkbox</span> <span class="ow">or</span> <span class="n">checkbox</span> <span class="ow">in</span> <span class="n">lower_text</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;Checkboxes and buttons cannot have the same name!&#39;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">role</span> <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QMessageBox</span><span class="o">.</span><span class="n">ActionRole</span>
+
+            <span class="k">if</span> <span class="n">lower_text</span> <span class="o">==</span> <span class="s1">&#39;cancel&#39;</span> <span class="ow">or</span> <span class="n">lower_text</span> <span class="o">==</span> <span class="n">cancelText</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">lower</span><span class="p">():</span>
+                <span class="n">role</span> <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QMessageBox</span><span class="o">.</span><span class="n">RejectRole</span>
+
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">destructive</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+                <span class="n">destructive</span> <span class="o">=</span> <span class="p">[</span><span class="n">item</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">destructive</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">destructive</span> <span class="o">=</span> <span class="n">destructive</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">lower_text</span> <span class="ow">in</span> <span class="n">destructive</span><span class="p">:</span>
+                <span class="n">role</span> <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QMessageBox</span><span class="o">.</span><span class="n">DestructiveRole</span>
+
+            <span class="k">if</span> <span class="n">lower_text</span> <span class="o">==</span> <span class="s1">&#39;ok&#39;</span> <span class="ow">or</span> <span class="n">lower_text</span> <span class="o">==</span> <span class="n">okText</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">lower</span><span class="p">():</span>
+                <span class="n">role</span> <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QMessageBox</span><span class="o">.</span><span class="n">AcceptRole</span>
+
+            <span class="n">button</span> <span class="o">=</span> <span class="n">dialog</span><span class="o">.</span><span class="n">addButton</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">role</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">lower_text</span> <span class="o">==</span> <span class="s1">&#39;ok&#39;</span> <span class="ow">or</span> <span class="n">lower_text</span> <span class="o">==</span> <span class="n">okText</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">lower</span><span class="p">():</span>
+                <span class="n">dialog</span><span class="o">.</span><span class="n">setDefaultButton</span><span class="p">(</span><span class="n">button</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">checkbox</span> <span class="o">!=</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">_checkbox</span> <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QCheckBox</span><span class="p">(</span><span class="n">checkbox</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="n">dialog</span><span class="p">)</span>
+            <span class="n">_checkbox</span><span class="o">.</span><span class="n">setChecked</span><span class="p">(</span><span class="n">checked</span><span class="p">)</span>
+            <span class="n">dialog</span><span class="o">.</span><span class="n">setCheckBox</span><span class="p">(</span><span class="n">_checkbox</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">_checkbox</span> <span class="o">!=</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">_checkbox</span><span class="o">.</span><span class="n">setFocus</span><span class="p">()</span>
 
     <span class="n">dialog</span><span class="o">.</span><span class="n">raise_</span><span class="p">()</span>
     <span class="n">index</span> <span class="o">=</span> <span class="n">dialog</span><span class="o">.</span><span class="n">exec_</span><span class="p">()</span>
 
-    <span class="k">if</span> <span class="n">objects</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">objects</span><span class="p">[</span><span class="n">index</span><span class="p">]</span>
 
-    <span class="k">else</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">texts</span><span class="p">[</span><span class="n">index</span><span class="p">]</span></div>
+    <span class="n">result</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+    <span class="k">if</span> <span class="n">dialog</span><span class="o">.</span><span class="n">clickedButton</span><span class="p">()</span> <span class="o">!=</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">objects</span><span class="p">:</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="n">objects</span><span class="p">[</span><span class="n">index</span><span class="p">]</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="n">texts</span><span class="p">[</span><span class="n">index</span><span class="p">]</span>
+
+    <span class="k">if</span> <span class="n">checkbox</span> <span class="o">!=</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">_checkbox</span><span class="o">.</span><span class="n">isChecked</span><span class="p">():</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="s1">&#39; </span><span class="si">%s</span><span class="s1"> </span><span class="si">%s</span><span class="s1"> &#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">checkbox</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">result</span></div>
 
 
-<div class="viewcode-block" id="showError"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.MessageDialog.showError">[docs]</a><span class="k">def</span> <span class="nf">showError</span><span class="p">(</span><span class="n">title</span><span class="p">,</span> <span class="n">message</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">iconPath</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+<div class="viewcode-block" id="showError"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.MessageDialog.showError">[docs]</a><span class="k">def</span> <span class="nf">showError</span><span class="p">(</span><span class="n">title</span><span class="p">,</span> <span class="n">message</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">iconPath</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="n">dialog</span> <span class="o">=</span> <span class="n">MessageDialog</span><span class="p">(</span><span class="s1">&#39;Error&#39;</span><span class="p">,</span> <span class="n">title</span><span class="p">,</span> <span class="n">message</span><span class="p">,</span> <span class="n">Critical</span><span class="p">,</span> <span class="n">iconPath</span><span class="p">,</span> <span class="n">parent</span><span class="p">)</span>
 
     <span class="n">dialog</span><span class="o">.</span><span class="n">setStandardButtons</span><span class="p">(</span><span class="n">Close</span><span class="p">)</span>
@@ -291,7 +331,7 @@
     <span class="k">return</span></div>
 
 
-<div class="viewcode-block" id="showMessage"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.MessageDialog.showMessage">[docs]</a><span class="k">def</span> <span class="nf">showMessage</span><span class="p">(</span><span class="n">title</span><span class="p">,</span> <span class="n">message</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">iconPath</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+<div class="viewcode-block" id="showMessage"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.MessageDialog.showMessage">[docs]</a><span class="k">def</span> <span class="nf">showMessage</span><span class="p">(</span><span class="n">title</span><span class="p">,</span> <span class="n">message</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">iconPath</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="n">dialog</span> <span class="o">=</span> <span class="n">MessageDialog</span><span class="p">(</span><span class="s1">&#39;Message&#39;</span><span class="p">,</span> <span class="n">title</span><span class="p">,</span> <span class="n">message</span><span class="p">,</span> <span class="n">Information</span><span class="p">,</span> <span class="n">iconPath</span><span class="p">,</span> <span class="n">parent</span><span class="p">)</span>
 
     <span class="n">dialog</span><span class="o">.</span><span class="n">setStandardButtons</span><span class="p">(</span><span class="n">Close</span><span class="p">)</span>
@@ -317,12 +357,12 @@
 <span class="sd">    Open a small popup to allow changing the name of a Note</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">mainWindow</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s1">&#39;busy&#39;</span><span class="p">,</span> <span class="n">busyFunc</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">progressMax</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">mainWindow</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s1">&#39;busy&#39;</span><span class="p">,</span> <span class="n">busyFunc</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">progressMax</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
                  <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Initialise the widget</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="n">setLayout</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">windowTitle</span><span class="o">=</span><span class="s1">&#39;busy&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="n">setLayout</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">windowTitle</span><span class="o">=</span><span class="s1">&#39;busy&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">)</span>
 
         <span class="c1"># self.mainWindow = mainWindow</span>
         <span class="c1"># self.application = mainWindow.application</span>
@@ -362,11 +402,11 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">setSizePolicy</span><span class="p">(</span><span class="n">QtWidgets</span><span class="o">.</span><span class="n">QSizePolicy</span><span class="o">.</span><span class="n">Minimum</span><span class="p">,</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QSizePolicy</span><span class="o">.</span><span class="n">Minimum</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">raise_</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">setModal</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setModal</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
 
     <span class="c1"># &#39;progress_simulation()&#39; slot</span>
-    <span class="nd">@pyqtSlot</span><span class="p">()</span>
-<div class="viewcode-block" id="progressPopup.progress_simulation"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.MessageDialog.progressPopup.progress_simulation">[docs]</a>    <span class="k">def</span> <span class="nf">progress_simulation</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="progressPopup.progress_simulation"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.MessageDialog.progressPopup.progress_simulation">[docs]</a>    <span class="nd">@pyqtSlot</span><span class="p">()</span>
+    <span class="k">def</span> <span class="nf">progress_simulation</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">progressbar</span><span class="o">.</span><span class="n">value</span><span class="p">()</span>  <span class="c1"># gets the current value of the progress bar</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">progressbar</span><span class="o">.</span><span class="n">setValue</span><span class="p">(</span><span class="n">value</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>  <span class="c1"># adds 1 to the current value</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">progressbar</span><span class="o">.</span><span class="n">update</span><span class="p">()</span></div>
@@ -378,15 +418,15 @@
     <span class="c1">#     self.timer.start(40)  # interval of 40 milliseconds</span>
 
     <span class="c1"># &#39;progress_changed()&#39; slot</span>
-    <span class="nd">@pyqtSlot</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
-<div class="viewcode-block" id="progressPopup.progress_changed"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.MessageDialog.progressPopup.progress_changed">[docs]</a>    <span class="k">def</span> <span class="nf">progress_changed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+<div class="viewcode-block" id="progressPopup.progress_changed"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.MessageDialog.progressPopup.progress_changed">[docs]</a>    <span class="nd">@pyqtSlot</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">progress_changed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
         <span class="c1"># stops the timer if the progress bar reaches its maximum value</span>
         <span class="k">if</span> <span class="n">value</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">progressbar</span><span class="o">.</span><span class="n">maximum</span><span class="p">():</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">timer</span><span class="o">.</span><span class="n">stop</span><span class="p">()</span></div></div>
 
 
-<span class="nd">@contextmanager</span>
-<div class="viewcode-block" id="progressManager"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.MessageDialog.progressManager">[docs]</a><span class="k">def</span> <span class="nf">progressManager</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">progressMax</span><span class="o">=</span><span class="mi">100</span><span class="p">):</span>
+<div class="viewcode-block" id="progressManager"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.MessageDialog.progressManager">[docs]</a><span class="nd">@contextmanager</span>
+<span class="k">def</span> <span class="nf">progressManager</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">progressMax</span><span class="o">=</span><span class="mi">100</span><span class="p">):</span>
     <span class="n">thisProg</span> <span class="o">=</span> <span class="n">progressPopup</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="n">parent</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="n">title</span><span class="p">,</span> <span class="n">progressMax</span><span class="o">=</span><span class="n">progressMax</span><span class="p">)</span>
 
     <span class="k">try</span><span class="p">:</span>
@@ -413,7 +453,7 @@
 <span class="sd">    &#39;&#39;&#39;</span>
 
     <span class="n">widget</span> <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QProgressDialog</span><span class="p">(</span><span class="n">title</span><span class="p">,</span> <span class="n">buttonText</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">))</span>  <span class="c1"># starts = 0, ends = len(data)</span>
-    <span class="n">widget</span><span class="o">.</span><span class="n">setAutoClose</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+    <span class="n">widget</span><span class="o">.</span><span class="n">setAutoClose</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
     <span class="n">widget</span><span class="o">.</span><span class="n">raise_</span><span class="p">()</span>
     <span class="n">c</span> <span class="o">=</span> <span class="mi">0</span>
     <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="nb">iter</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
@@ -431,9 +471,9 @@
 
 
 <div class="viewcode-block" id="busyOverlay"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.MessageDialog.busyOverlay">[docs]</a><span class="k">class</span> <span class="nc">busyOverlay</span><span class="p">(</span><span class="n">QtWidgets</span><span class="o">.</span><span class="n">QWidget</span><span class="p">):</span>
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 
-        <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QWidget</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">)</span>
+        <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QWidget</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">)</span>
         <span class="n">palette</span> <span class="o">=</span> <span class="n">QPalette</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">palette</span><span class="p">())</span>
         <span class="n">palette</span><span class="o">.</span><span class="n">setColor</span><span class="p">(</span><span class="n">palette</span><span class="o">.</span><span class="n">Background</span><span class="p">,</span> <span class="n">Qt</span><span class="o">.</span><span class="n">transparent</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">setPalette</span><span class="p">(</span><span class="n">palette</span><span class="p">)</span>
@@ -494,7 +534,7 @@
 <span class="c1">#       self.overlay.resize(event.size())</span>
 <span class="c1">#       event.accept()</span>
 
-<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
     <span class="kn">import</span> <span class="nn">sys</span>
     <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Application</span> <span class="kn">import</span> <span class="n">TestApplication</span>
     <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.BasePopup</span> <span class="kn">import</span> <span class="n">BasePopup</span>
@@ -509,13 +549,13 @@
     <span class="c1">#     time.sleep(0.2)</span>
 
     <span class="k">def</span> <span class="nf">callback</span><span class="p">():</span>
-        <span class="k">print</span><span class="p">(</span><span class="n">showInfo</span><span class="p">(</span><span class="s1">&#39;My info window&#39;</span><span class="p">,</span> <span class="s1">&#39;test info&#39;</span><span class="p">))</span>
-        <span class="k">print</span><span class="p">(</span><span class="n">showMulti</span><span class="p">(</span><span class="s1">&#39;Test&#39;</span><span class="p">,</span> <span class="s1">&#39;Multi Choice&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;Apples&#39;</span><span class="p">,</span> <span class="s1">&#39;Bananas&#39;</span><span class="p">,</span> <span class="s1">&#39;Pears&#39;</span><span class="p">]))</span>
-        <span class="k">print</span><span class="p">(</span><span class="n">showError</span><span class="p">(</span><span class="s1">&#39;Test&#39;</span><span class="p">,</span> <span class="s1">&#39;This is a test error message&#39;</span><span class="p">))</span>
-        <span class="k">print</span><span class="p">(</span><span class="n">showYesNo</span><span class="p">(</span><span class="s1">&#39;Test&#39;</span><span class="p">,</span> <span class="s1">&#39;Yes or No message&#39;</span><span class="p">))</span>
-        <span class="k">print</span><span class="p">(</span><span class="n">showOkCancel</span><span class="p">(</span><span class="s1">&#39;Test&#39;</span><span class="p">,</span> <span class="s1">&#39;Ok or Cancel message&#39;</span><span class="p">))</span>
-        <span class="k">print</span><span class="p">(</span><span class="n">showRetryIgnoreCancel</span><span class="p">(</span><span class="s1">&#39;Test&#39;</span><span class="p">,</span> <span class="s1">&#39;Some message&#39;</span><span class="p">))</span>
-        <span class="k">print</span><span class="p">(</span><span class="n">showWarning</span><span class="p">(</span><span class="s1">&#39;Test&#39;</span><span class="p">,</span> <span class="s1">&#39;Warning message&#39;</span><span class="p">))</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">showInfo</span><span class="p">(</span><span class="s1">&#39;My info window&#39;</span><span class="p">,</span> <span class="s1">&#39;test info&#39;</span><span class="p">))</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">showMulti</span><span class="p">(</span><span class="s1">&#39;Test&#39;</span><span class="p">,</span> <span class="s1">&#39;Multi Choice&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;Apples&#39;</span><span class="p">,</span> <span class="s1">&#39;Bananas&#39;</span><span class="p">,</span> <span class="s1">&#39;Pears&#39;</span><span class="p">]))</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">showError</span><span class="p">(</span><span class="s1">&#39;Test&#39;</span><span class="p">,</span> <span class="s1">&#39;This is a test error message&#39;</span><span class="p">))</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">showYesNo</span><span class="p">(</span><span class="s1">&#39;Test&#39;</span><span class="p">,</span> <span class="s1">&#39;Yes or No message&#39;</span><span class="p">))</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">showOkCancel</span><span class="p">(</span><span class="s1">&#39;Test&#39;</span><span class="p">,</span> <span class="s1">&#39;Ok or Cancel message&#39;</span><span class="p">))</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">showRetryIgnoreCancel</span><span class="p">(</span><span class="s1">&#39;Test&#39;</span><span class="p">,</span> <span class="s1">&#39;Some message&#39;</span><span class="p">))</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">showWarning</span><span class="p">(</span><span class="s1">&#39;Test&#39;</span><span class="p">,</span> <span class="s1">&#39;Warning message&#39;</span><span class="p">))</span>
 
 
     <span class="c1"># app = TestApplication()</span>
@@ -538,15 +578,15 @@
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
 <div id="searchbox" style="display: none" role="search">
-  <h3>Quick search</h3>
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
     <form class="search" action="../../../../../search.html" method="get">
-      <input type="text" name="q" />
+      <input type="text" name="q" aria-labelledby="searchlabel" />
       <input type="submit" value="Go" />
-      <input type="hidden" name="check_keywords" value="yes" />
-      <input type="hidden" name="area" value="default" />
     </form>
+    </div>
 </div>
-<script type="text/javascript">$('#searchbox').show(0);</script>
+<script>$('#searchbox').show(0);</script>
         </div>
       </div>
       <div class="clearer"></div>
@@ -560,13 +600,13 @@
         <li class="right" >
           <a href="../../../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../../../index.html">Python  documentation</a> &raquo;</li>
-          <li class="nav-item nav-item-1"><a href="../../../../index.html" >Module code</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="../../../../../index.html">Python  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../../../index.html" >Module code</a> &#187;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
-        &copy; Copyright .
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.1.
+        &#169; Copyright .
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.4.0.
     </div>
   </body>
 </html>

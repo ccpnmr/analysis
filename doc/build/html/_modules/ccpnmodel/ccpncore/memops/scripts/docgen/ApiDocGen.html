@@ -1,32 +1,22 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
+<!DOCTYPE html>
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    
-    <title>ccpnmodel.ccpncore.memops.scripts.docgen.ApiDocGen &mdash; Python  documentation</title>
-    
+    <meta charset="utf-8" />
+    <title>ccpnmodel.ccpncore.memops.scripts.docgen.ApiDocGen &#8212; Python  documentation</title>
     <link rel="stylesheet" href="../../../../../../_static/classic.css" type="text/css" />
     <link rel="stylesheet" href="../../../../../../_static/pygments.css" type="text/css" />
     
-    <script type="text/javascript">
-      var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    '../../../../../../',
-        VERSION:     '',
-        COLLAPSE_INDEX: false,
-        FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true
-      };
-    </script>
-    <script type="text/javascript" src="../../../../../../_static/jquery.js"></script>
-    <script type="text/javascript" src="../../../../../../_static/underscore.js"></script>
-    <script type="text/javascript" src="../../../../../../_static/doctools.js"></script>
-    <link rel="top" title="Python  documentation" href="../../../../../../index.html" />
-    <link rel="up" title="Module code" href="../../../../../index.html" /> 
-  </head>
-  <body role="document">
+    <script id="documentation_options" data-url_root="../../../../../../" src="../../../../../../_static/documentation_options.js"></script>
+    <script src="../../../../../../_static/jquery.js"></script>
+    <script src="../../../../../../_static/underscore.js"></script>
+    <script src="../../../../../../_static/doctools.js"></script>
+    <script src="../../../../../../_static/language_data.js"></script>
+    
+    <link rel="index" title="Index" href="../../../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../../../search.html" /> 
+  </head><body>
     <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
@@ -36,8 +26,8 @@
         <li class="right" >
           <a href="../../../../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../../../../index.html">Python  documentation</a> &raquo;</li>
-          <li class="nav-item nav-item-1"><a href="../../../../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="../../../../../../index.html">Python  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../../../../index.html" accesskey="U">Module code</a> &#187;</li> 
       </ul>
     </div>  
 
@@ -209,7 +199,7 @@
 
   <span class="c1">###########################################################################</span>
 
-  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+  <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     
     <span class="n">settings</span> <span class="o">=</span> <span class="n">TextWriter</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s1">&#39;html&#39;</span><span class="p">]</span>
     <span class="k">for</span> <span class="p">(</span><span class="n">tag</span><span class="p">,</span> <span class="n">val</span><span class="p">)</span> <span class="ow">in</span> <span class="n">settings</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
@@ -233,12 +223,12 @@
     <span class="bp">self</span><span class="o">.</span><span class="n">indexFile</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">indexPrefix</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">fileSuffix</span><span class="p">)</span>
 
     <span class="bp">self</span><span class="o">.</span><span class="n">handCodeKey</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">typeCodeKey</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">modelFlavours</span><span class="p">[</span><span class="s1">&#39;language&#39;</span><span class="p">]</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">impPackage</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">impPackage</span> <span class="o">=</span> <span class="kc">None</span>
 
     <span class="c1"># init handling</span>
     <span class="c1">#super(ApiDocGen, self).__init__()</span>
-    <span class="n">Documentation</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
-    <span class="n">ModelTraverse</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+    <span class="n">Documentation</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+    <span class="n">ModelTraverse</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
     
     <span class="bp">self</span><span class="o">.</span><span class="n">diagramOrderedPackages</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getDiagramOrderedPackages</span><span class="p">()</span>
     
@@ -248,11 +238,11 @@
       <span class="k">for</span> <span class="n">cc</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">modelPortal</span><span class="o">.</span><span class="n">classesByInheritance</span><span class="p">(</span><span class="n">pp</span><span class="p">):</span>
         <span class="c1"># add one-way roles</span>
         <span class="k">for</span> <span class="n">role</span> <span class="ow">in</span> <span class="n">cc</span><span class="o">.</span><span class="n">roles</span><span class="p">:</span>
-          <span class="k">if</span> <span class="n">role</span><span class="o">.</span><span class="n">otherRole</span> <span class="ow">is</span> <span class="bp">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">role</span><span class="o">.</span><span class="n">isImplicit</span><span class="p">:</span>
+          <span class="k">if</span> <span class="n">role</span><span class="o">.</span><span class="n">otherRole</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">role</span><span class="o">.</span><span class="n">isImplicit</span><span class="p">:</span>
             <span class="c1"># one-way link</span>
             <span class="n">valueType</span> <span class="o">=</span> <span class="n">role</span><span class="o">.</span><span class="n">valueType</span>
             <span class="n">ll</span> <span class="o">=</span> <span class="n">valueTypeUse</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">valueType</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">ll</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">ll</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
               <span class="n">valueTypeUse</span><span class="p">[</span><span class="n">valueType</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">role</span><span class="p">]</span>
             <span class="k">else</span><span class="p">:</span>
               <span class="n">ll</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">role</span><span class="p">)</span>
@@ -262,7 +252,7 @@
           <span class="k">if</span> <span class="ow">not</span> <span class="n">attr</span><span class="o">.</span><span class="n">isImplicit</span><span class="p">:</span>
             <span class="n">valueType</span> <span class="o">=</span> <span class="n">attr</span><span class="o">.</span><span class="n">valueType</span>
             <span class="n">ll</span> <span class="o">=</span> <span class="n">valueTypeUse</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">valueType</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">ll</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">ll</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
               <span class="n">valueTypeUse</span><span class="p">[</span><span class="n">valueType</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">attr</span><span class="p">]</span>
             <span class="k">else</span><span class="p">:</span>
               <span class="n">ll</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">attr</span><span class="p">)</span>
@@ -273,7 +263,7 @@
           <span class="k">if</span> <span class="ow">not</span> <span class="n">attr</span><span class="o">.</span><span class="n">isImplicit</span><span class="p">:</span>
             <span class="n">valueType</span> <span class="o">=</span> <span class="n">attr</span><span class="o">.</span><span class="n">valueType</span>
             <span class="n">ll</span> <span class="o">=</span> <span class="n">valueTypeUse</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">valueType</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">ll</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">ll</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
               <span class="n">valueTypeUse</span><span class="p">[</span><span class="n">valueType</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">attr</span><span class="p">]</span>
             <span class="k">else</span><span class="p">:</span>
               <span class="n">ll</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">attr</span><span class="p">)</span>
@@ -394,8 +384,8 @@
 
     <span class="n">elems</span> <span class="o">=</span> <span class="n">package</span><span class="o">.</span><span class="n">classes</span> <span class="o">+</span> <span class="n">package</span><span class="o">.</span><span class="n">dataObjTypes</span> <span class="o">+</span> <span class="n">package</span><span class="o">.</span><span class="n">dataTypes</span>
     <span class="n">elems</span> <span class="o">=</span> <span class="n">metaUtil</span><span class="o">.</span><span class="n">sortByAttribute</span><span class="p">(</span><span class="n">elems</span><span class="p">,</span> <span class="s1">&#39;name&#39;</span><span class="p">)</span>
-    <span class="n">elems</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
-    <span class="n">elems</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">None</span><span class="p">)</span>
+    <span class="n">elems</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+    <span class="n">elems</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
 
     <span class="k">for</span> <span class="n">ii</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">elems</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">):</span>
       <span class="n">elem</span> <span class="o">=</span> <span class="n">elems</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span>
@@ -819,7 +809,7 @@
         <span class="n">pkgGroup</span> <span class="o">=</span> <span class="n">pp</span><span class="o">.</span><span class="n">taggedValues</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;packageGroup&#39;</span><span class="p">,</span><span class="s1">&#39;core&#39;</span><span class="p">)</span>
         <span class="n">lists</span><span class="p">[</span><span class="n">pkgGroup</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pp</span><span class="p">)</span>
 
-    <span class="n">fileName</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getDiagramFileName</span><span class="p">(</span><span class="n">package</span><span class="p">,</span> <span class="n">isAbsolute</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    <span class="n">fileName</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getDiagramFileName</span><span class="p">(</span><span class="n">package</span><span class="p">,</span> <span class="n">isAbsolute</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="n">pathList</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getElementPathList</span><span class="p">(</span><span class="n">package</span><span class="p">)</span>
     <span class="n">pathList</span> <span class="o">=</span> <span class="n">pathList</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
     <span class="n">topPath</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">upDir</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">pathList</span><span class="p">))</span>
@@ -916,7 +906,7 @@
     <span class="sd">&quot;&quot;&quot; write code for diagram for non-root branch packages</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="n">fileName</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getDiagramFileName</span><span class="p">(</span><span class="n">package</span><span class="p">,</span> <span class="n">isAbsolute</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    <span class="n">fileName</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getDiagramFileName</span><span class="p">(</span><span class="n">package</span><span class="p">,</span> <span class="n">isAbsolute</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="n">pathList</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getElementPathList</span><span class="p">(</span><span class="n">package</span><span class="p">)</span>
     <span class="n">topPath</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">upDir</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">pathList</span><span class="p">))</span>
     <span class="n">docDirName</span> <span class="o">=</span> <span class="n">Path</span><span class="o">.</span><span class="n">joinPath</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rootDirName</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">modelDiagramDir</span><span class="p">)</span>
@@ -943,9 +933,9 @@
       <span class="k">for</span> <span class="n">diagName</span> <span class="ow">in</span> <span class="n">diagNames</span><span class="p">:</span>
         <span class="n">diagFile</span> <span class="o">=</span> <span class="n">Path</span><span class="o">.</span><span class="n">joinPath</span><span class="p">(</span><span class="n">package</span><span class="o">.</span><span class="n">qualifiedName</span><span class="p">()</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">,</span> <span class="s1">&#39;_&#39;</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;_&#39;</span> <span class="o">+</span> <span class="n">diagName</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">diagFileExt</span><span class="p">)</span>
         <span class="c1"># diagFile = Path.joinPath(self.diagImgDir, package.qualifiedName().replace(&#39;.&#39;, &#39;_&#39;) + &#39;_&#39; + diagName + self.diagFileExt)</span>
-        <span class="nb">file</span> <span class="o">=</span> <span class="n">Path</span><span class="o">.</span><span class="n">joinPath</span><span class="p">(</span><span class="n">docDirName</span><span class="p">,</span> <span class="n">diagFile</span><span class="p">)</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="nb">file</span><span class="p">):</span>
-          <span class="k">print</span><span class="p">(</span><span class="s2">&quot;WARNING1: File </span><span class="si">%s</span><span class="s2"> does not exist&quot;</span> <span class="o">%</span> <span class="nb">file</span><span class="p">)</span>
+        <span class="n">file</span> <span class="o">=</span> <span class="n">Path</span><span class="o">.</span><span class="n">joinPath</span><span class="p">(</span><span class="n">docDirName</span><span class="p">,</span> <span class="n">diagFile</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">file</span><span class="p">):</span>
+          <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;WARNING1: File </span><span class="si">%s</span><span class="s2"> does not exist&quot;</span> <span class="o">%</span> <span class="n">file</span><span class="p">)</span>
         <span class="n">diagFile</span> <span class="o">=</span> <span class="n">Path</span><span class="o">.</span><span class="n">joinPath</span><span class="p">(</span><span class="n">topPath</span><span class="p">,</span> <span class="n">diagFile</span><span class="p">)</span>
         <span class="n">diagAlt</span>  <span class="o">=</span> <span class="n">package</span><span class="o">.</span><span class="n">qualifiedName</span><span class="p">()</span>
         <span class="k">if</span> <span class="n">diagName</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;_&#39;</span><span class="p">:</span>
@@ -1040,7 +1030,7 @@
       <span class="bp">self</span><span class="o">.</span><span class="n">writeStartCell</span><span class="p">(</span><span class="n">align</span><span class="o">=</span><span class="s1">&#39;left&#39;</span><span class="p">,</span> <span class="n">valign</span><span class="o">=</span><span class="s1">&#39;bottom&#39;</span><span class="p">)</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;Class diagrams: { &#39;</span><span class="p">)</span>
 
-      <span class="n">tt</span> <span class="o">=</span> <span class="bp">None</span>
+      <span class="n">tt</span> <span class="o">=</span> <span class="kc">None</span>
       <span class="k">for</span> <span class="n">ss</span> <span class="ow">in</span> <span class="n">diagramTags</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">ss</span> <span class="o">==</span> <span class="n">pkgName</span><span class="p">:</span>
           <span class="n">name2</span> <span class="o">=</span> <span class="n">ss</span>
@@ -1070,27 +1060,27 @@
    <span class="c1"># dDiagFile = Path.joinPath(self.diagImgDir,</span>
    <span class="c1">#   package.qualifiedName().replace(&#39;.&#39;, &#39;_&#39;) + &#39;__&#39; + tag + self.detailDiagExt + self.diagFileExt)</span>
 
-    <span class="nb">file</span> <span class="o">=</span> <span class="n">Path</span><span class="o">.</span><span class="n">joinPath</span><span class="p">(</span><span class="n">docDirName</span><span class="p">,</span> <span class="n">dDiagFile</span><span class="p">)</span>
+    <span class="n">file</span> <span class="o">=</span> <span class="n">Path</span><span class="o">.</span><span class="n">joinPath</span><span class="p">(</span><span class="n">docDirName</span><span class="p">,</span> <span class="n">dDiagFile</span><span class="p">)</span>
 
-    <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="nb">file</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">file</span><span class="p">):</span>
       <span class="n">path</span> <span class="o">=</span> <span class="n">Path</span><span class="o">.</span><span class="n">joinPath</span><span class="p">(</span><span class="n">topPath</span><span class="p">,</span> <span class="n">dDiagFile</span><span class="p">)</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">writeLink</span><span class="p">(</span><span class="s2">&quot;javascript:wopn(&#39;</span><span class="si">%s</span><span class="s2">&#39;)&quot;</span> <span class="o">%</span> <span class="n">path</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">getItalicString</span><span class="p">(</span><span class="s1">&#39;click here to see the detailed diagram&#39;</span><span class="p">))</span>
     <span class="k">else</span><span class="p">:</span>
-      <span class="k">print</span><span class="p">(</span><span class="s1">&#39;WARNING2: File &quot;</span><span class="si">%s</span><span class="s1">&quot; does not exist&#39;</span> <span class="o">%</span> <span class="nb">file</span><span class="p">)</span>
+      <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;WARNING2: File &quot;</span><span class="si">%s</span><span class="s1">&quot; does not exist&#39;</span> <span class="o">%</span> <span class="n">file</span><span class="p">)</span>
    
     <span class="c1"># normal diagram</span>
     <span class="c1"># dDiagFile = Path.joinPath(self.diagImgDir,</span>
     <span class="c1">#  package.qualifiedName().replace(&#39;.&#39;, &#39;_&#39;) + &#39;__&#39; + tag + self.diagFileExt)</span>
     <span class="n">dDiagFile</span> <span class="o">=</span> <span class="n">package</span><span class="o">.</span><span class="n">qualifiedName</span><span class="p">()</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">,</span> <span class="s1">&#39;_&#39;</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;__&#39;</span> <span class="o">+</span> <span class="n">tag</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">diagFileExt</span>
 
-    <span class="nb">file</span> <span class="o">=</span> <span class="n">Path</span><span class="o">.</span><span class="n">joinPath</span><span class="p">(</span><span class="n">docDirName</span><span class="p">,</span> <span class="n">dDiagFile</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="nb">file</span><span class="p">):</span>
+    <span class="n">file</span> <span class="o">=</span> <span class="n">Path</span><span class="o">.</span><span class="n">joinPath</span><span class="p">(</span><span class="n">docDirName</span><span class="p">,</span> <span class="n">dDiagFile</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">file</span><span class="p">):</span>
       <span class="n">src</span> <span class="o">=</span> <span class="n">Path</span><span class="o">.</span><span class="n">joinPath</span><span class="p">(</span><span class="n">topPath</span><span class="p">,</span> <span class="n">dDiagFile</span><span class="p">)</span>
       <span class="n">alt</span> <span class="o">=</span> <span class="n">package</span><span class="o">.</span><span class="n">qualifiedName</span><span class="p">()</span> <span class="o">+</span> <span class="n">tag</span> <span class="o">+</span> <span class="s1">&#39; class diagram&#39;</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">writeBreak</span><span class="p">()</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">getImageString</span><span class="p">(</span><span class="n">src</span><span class="o">=</span><span class="n">src</span><span class="p">,</span> <span class="n">alt</span><span class="o">=</span><span class="n">alt</span><span class="p">,</span> <span class="n">border</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span>
     <span class="k">else</span><span class="p">:</span>
-      <span class="k">print</span><span class="p">(</span><span class="s1">&#39;WARNING3: File &quot;</span><span class="si">%s</span><span class="s1">&quot; does not exist&#39;</span> <span class="o">%</span> <span class="nb">file</span><span class="p">)</span>
+      <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;WARNING3: File &quot;</span><span class="si">%s</span><span class="s1">&quot; does not exist&#39;</span> <span class="o">%</span> <span class="n">file</span><span class="p">)</span>
 
     <span class="bp">self</span><span class="o">.</span><span class="n">writeEndCenter</span><span class="p">()</span>
 
@@ -1170,7 +1160,7 @@
 
   <span class="c1">###########################################################################</span>
 
-<div class="viewcode-block" id="ApiDocGen.writeDiagramLeftBar"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.docgen.html#ccpnmodel.ccpncore.memops.scripts.docgen.ApiDocGen.ApiDocGen.writeDiagramLeftBar">[docs]</a>  <span class="k">def</span> <span class="nf">writeDiagramLeftBar</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">package</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="n">topPath</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="p">):</span>
+<div class="viewcode-block" id="ApiDocGen.writeDiagramLeftBar"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.docgen.html#ccpnmodel.ccpncore.memops.scripts.docgen.ApiDocGen.ApiDocGen.writeDiagramLeftBar">[docs]</a>  <span class="k">def</span> <span class="nf">writeDiagramLeftBar</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">package</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">topPath</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; write bar at left for diagram pages</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
@@ -1178,7 +1168,7 @@
     <span class="bp">self</span><span class="o">.</span><span class="n">writeStartDiv</span><span class="p">(</span><span class="n">_class</span><span class="o">=</span><span class="s1">&#39;leftbanner&#39;</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">writeStartTable</span><span class="p">(</span><span class="n">width</span><span class="o">=</span><span class="mi">130</span><span class="p">)</span>
 
-    <span class="n">firstTime</span> <span class="o">=</span> <span class="bp">True</span>
+    <span class="n">firstTime</span> <span class="o">=</span> <span class="kc">True</span>
     <span class="k">for</span> <span class="n">pp</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">diagramOrderedPackages</span><span class="p">:</span>
 
       <span class="k">if</span> <span class="n">pp</span><span class="o">.</span><span class="n">container</span><span class="p">:</span>
@@ -1222,7 +1212,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">writeCell</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">getLinkString</span><span class="p">(</span><span class="n">href</span><span class="p">,</span> <span class="n">label</span><span class="p">))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">writeEndRow</span><span class="p">()</span>
 
-      <span class="n">firstTime</span> <span class="o">=</span> <span class="bp">False</span>
+      <span class="n">firstTime</span> <span class="o">=</span> <span class="kc">False</span>
 
     <span class="bp">self</span><span class="o">.</span><span class="n">writeEndTable</span><span class="p">()</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">writeEndDiv</span><span class="p">()</span>
@@ -1270,16 +1260,16 @@
     <span class="n">ll</span> <span class="o">=</span> <span class="n">clazz</span><span class="o">.</span><span class="n">attributes</span> <span class="o">+</span> <span class="n">clazz</span><span class="o">.</span><span class="n">roles</span>
     <span class="n">ll</span> <span class="o">=</span> <span class="n">metaUtil</span><span class="o">.</span><span class="n">sortByAttribute</span><span class="p">(</span><span class="n">ll</span><span class="p">,</span> <span class="s1">&#39;name&#39;</span><span class="p">)</span>
 
-    <span class="n">ll</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="bp">None</span><span class="p">)</span>
-    <span class="n">ll</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">None</span><span class="p">)</span>
+    <span class="n">ll</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="kc">None</span><span class="p">)</span>
+    <span class="n">ll</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
     <span class="k">for</span> <span class="n">ii</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">ll</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">):</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">writeAttrDocumentation</span><span class="p">(</span><span class="n">ll</span><span class="p">[</span><span class="n">ii</span><span class="p">],</span> <span class="n">ll</span><span class="p">[</span><span class="n">ii</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">ll</span><span class="p">[</span><span class="n">ii</span><span class="o">+</span><span class="mi">1</span><span class="p">])</span>
 
     <span class="n">ll</span> <span class="o">=</span> <span class="p">[</span> <span class="n">op</span> <span class="k">for</span> <span class="n">op</span> <span class="ow">in</span> <span class="n">clazz</span><span class="o">.</span><span class="n">operations</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">methodHasOwnPage</span><span class="p">(</span><span class="n">op</span><span class="p">)</span> <span class="p">]</span>
     <span class="n">ll</span> <span class="o">=</span> <span class="n">metaUtil</span><span class="o">.</span><span class="n">sortByAttribute</span><span class="p">(</span><span class="n">ll</span><span class="p">,</span> <span class="s1">&#39;name&#39;</span><span class="p">)</span>
 
-    <span class="n">ll</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="bp">None</span><span class="p">)</span>
-    <span class="n">ll</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">None</span><span class="p">)</span>
+    <span class="n">ll</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="kc">None</span><span class="p">)</span>
+    <span class="n">ll</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
     <span class="k">for</span> <span class="n">ii</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">ll</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">):</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">writeMethodDocumentation</span><span class="p">(</span><span class="n">ll</span><span class="p">[</span><span class="n">ii</span><span class="p">],</span> <span class="n">ll</span><span class="p">[</span><span class="n">ii</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">ll</span><span class="p">[</span><span class="n">ii</span><span class="o">+</span><span class="mi">1</span><span class="p">])</span></div>
 
@@ -1307,16 +1297,16 @@
     <span class="n">ll</span> <span class="o">=</span> <span class="n">dataObjType</span><span class="o">.</span><span class="n">attributes</span>
     <span class="n">ll</span> <span class="o">=</span> <span class="n">metaUtil</span><span class="o">.</span><span class="n">sortByAttribute</span><span class="p">(</span><span class="n">ll</span><span class="p">,</span> <span class="s1">&#39;name&#39;</span><span class="p">)</span>
 
-    <span class="n">ll</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="bp">None</span><span class="p">)</span>
-    <span class="n">ll</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">None</span><span class="p">)</span>
+    <span class="n">ll</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="kc">None</span><span class="p">)</span>
+    <span class="n">ll</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
     <span class="k">for</span> <span class="n">ii</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">ll</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">):</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">writeAttrDocumentation</span><span class="p">(</span><span class="n">ll</span><span class="p">[</span><span class="n">ii</span><span class="p">],</span> <span class="n">ll</span><span class="p">[</span><span class="n">ii</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">ll</span><span class="p">[</span><span class="n">ii</span><span class="o">+</span><span class="mi">1</span><span class="p">])</span>
 
     <span class="n">ll</span> <span class="o">=</span> <span class="p">[</span> <span class="n">op</span> <span class="k">for</span> <span class="n">op</span> <span class="ow">in</span> <span class="n">dataObjType</span><span class="o">.</span><span class="n">operations</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">methodHasOwnPage</span><span class="p">(</span><span class="n">op</span><span class="p">)</span> <span class="p">]</span>
     <span class="n">ll</span> <span class="o">=</span> <span class="n">metaUtil</span><span class="o">.</span><span class="n">sortByAttribute</span><span class="p">(</span><span class="n">ll</span><span class="p">,</span> <span class="s1">&#39;name&#39;</span><span class="p">)</span>
 
-    <span class="n">ll</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="bp">None</span><span class="p">)</span>
-    <span class="n">ll</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">None</span><span class="p">)</span>
+    <span class="n">ll</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="kc">None</span><span class="p">)</span>
+    <span class="n">ll</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
     <span class="k">for</span> <span class="n">ii</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">ll</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">):</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">writeMethodDocumentation</span><span class="p">(</span><span class="n">ll</span><span class="p">[</span><span class="n">ii</span><span class="p">],</span> <span class="n">ll</span><span class="p">[</span><span class="n">ii</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">ll</span><span class="p">[</span><span class="n">ii</span><span class="o">+</span><span class="mi">1</span><span class="p">])</span></div>
 
@@ -1686,7 +1676,7 @@
 
     <span class="k">if</span> <span class="n">typeCode</span> <span class="o">==</span> <span class="n">metaConstants</span><span class="o">.</span><span class="n">string_code</span><span class="p">:</span>
       <span class="n">maxlength</span> <span class="o">=</span> <span class="n">dataType</span><span class="o">.</span><span class="n">length</span>
-      <span class="k">if</span> <span class="n">maxlength</span> <span class="ow">is</span> <span class="bp">None</span> <span class="ow">or</span> <span class="n">maxlength</span> <span class="o">==</span> <span class="n">metaConstants</span><span class="o">.</span><span class="n">infinity</span><span class="p">:</span>
+      <span class="k">if</span> <span class="n">maxlength</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">maxlength</span> <span class="o">==</span> <span class="n">metaConstants</span><span class="o">.</span><span class="n">infinity</span><span class="p">:</span>
         <span class="n">maxlength</span> <span class="o">=</span> <span class="s1">&#39;unlimited&#39;</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">writeStartRow</span><span class="p">()</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">writeCell</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">Maximum</span><span class="si">%s</span><span class="s1">length:&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">getBreakString</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">getNonBreakingSpaces</span><span class="p">()))</span>
@@ -1775,11 +1765,11 @@
     <span class="bp">self</span><span class="o">.</span><span class="n">writeEndRow</span><span class="p">()</span>
 
     <span class="n">valueType</span> <span class="o">=</span> <span class="n">elem</span><span class="o">.</span><span class="n">valueType</span>
-    <span class="n">haveImplType</span> <span class="o">=</span> <span class="bp">False</span>
+    <span class="n">haveImplType</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">valueType</span><span class="p">,</span> <span class="n">MetaModel</span><span class="o">.</span><span class="n">MetaDataType</span><span class="p">):</span>
       <span class="n">typeCode</span> <span class="o">=</span> <span class="n">valueType</span><span class="o">.</span><span class="n">typeCodes</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">typeCodeKey</span><span class="p">]</span>
       <span class="k">if</span> <span class="n">valueType</span><span class="o">.</span><span class="n">name</span> <span class="o">!=</span> <span class="n">typeCode</span><span class="p">:</span>
-        <span class="n">haveImplType</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="n">haveImplType</span> <span class="o">=</span> <span class="kc">True</span>
 
     <span class="c1"># Model Type (or just Type)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">writeStartRow</span><span class="p">()</span>
@@ -1864,7 +1854,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">writeEndRow</span><span class="p">()</span>
 
       <span class="n">otherRole</span> <span class="o">=</span> <span class="n">elem</span><span class="o">.</span><span class="n">otherRole</span>
-      <span class="k">if</span> <span class="n">otherRole</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+      <span class="k">if</span> <span class="n">otherRole</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">writeStartRow</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">writeCell</span><span class="p">(</span><span class="s1">&#39;Inverse role:&#39;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">writeCell</span><span class="p">(</span><span class="s1">&#39;None&#39;</span><span class="p">)</span>
@@ -1891,13 +1881,13 @@
           <span class="bp">self</span><span class="o">.</span><span class="n">writeCell</span><span class="p">(</span><span class="n">ss</span><span class="p">)</span>
           <span class="bp">self</span><span class="o">.</span><span class="n">writeEndRow</span><span class="p">()</span>
 
-        <span class="k">if</span> <span class="n">otherRole</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> <span class="n">otherRole</span><span class="o">.</span><span class="n">getAllConstraints</span><span class="p">():</span>
+        <span class="k">if</span> <span class="n">otherRole</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">otherRole</span><span class="o">.</span><span class="n">getAllConstraints</span><span class="p">():</span>
           <span class="bp">self</span><span class="o">.</span><span class="n">writeStartRow</span><span class="p">()</span>
           <span class="bp">self</span><span class="o">.</span><span class="n">writeCell</span><span class="p">(</span><span class="s1">&#39;Constraints:&#39;</span><span class="p">)</span>
           <span class="bp">self</span><span class="o">.</span><span class="n">writeCell</span><span class="p">(</span><span class="s1">&#39;See also Inverse Role&#39;</span><span class="p">)</span>
           <span class="bp">self</span><span class="o">.</span><span class="n">writeEndRow</span><span class="p">()</span>
 
-      <span class="k">elif</span> <span class="n">otherRole</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> <span class="n">otherRole</span><span class="o">.</span><span class="n">getAllConstraints</span><span class="p">():</span>
+      <span class="k">elif</span> <span class="n">otherRole</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">otherRole</span><span class="o">.</span><span class="n">getAllConstraints</span><span class="p">():</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">writeStartRow</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">writeCell</span><span class="p">(</span><span class="s1">&#39;Constraints:&#39;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">writeCell</span><span class="p">(</span><span class="s1">&#39;See Inverse Role&#39;</span><span class="p">)</span>
@@ -2168,7 +2158,7 @@
       <span class="bp">self</span><span class="o">.</span><span class="n">writeEndIndent</span><span class="p">()</span>
     <span class="c1">#elif isinstance(elem, MetaModel.MetaPackage) or isinstance(elem, MetaModel.MetaClass):</span>
     <span class="k">elif</span> <span class="n">elem</span><span class="o">.</span><span class="n">container</span> <span class="ow">and</span> <span class="n">elem</span><span class="o">.</span><span class="n">container</span><span class="o">.</span><span class="n">documentation</span><span class="p">:</span>
-      <span class="k">print</span><span class="p">(</span><span class="s2">&quot;WARNING, </span><span class="si">%s</span><span class="s2"> has no documentation&quot;</span> <span class="o">%</span> <span class="n">elem</span><span class="o">.</span><span class="n">qualifiedName</span><span class="p">())</span></div>
+      <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;WARNING, </span><span class="si">%s</span><span class="s2"> has no documentation&quot;</span> <span class="o">%</span> <span class="n">elem</span><span class="o">.</span><span class="n">qualifiedName</span><span class="p">())</span></div>
 
   <span class="c1">###########################################################################</span>
 
@@ -2188,7 +2178,7 @@
     <span class="k">while</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">diapackage</span><span class="p">,</span><span class="n">MetaModel</span><span class="o">.</span><span class="n">MetaPackage</span><span class="p">):</span>
       <span class="n">diapackage</span> <span class="o">=</span> <span class="n">diapackage</span><span class="o">.</span><span class="n">container</span>
   
-    <span class="k">if</span> <span class="n">elem</span><span class="o">.</span><span class="n">container</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">elem</span><span class="o">.</span><span class="n">container</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
       <span class="c1"># root package</span>
       <span class="n">diapath</span> <span class="o">=</span> <span class="n">Path</span><span class="o">.</span><span class="n">joinPath</span><span class="p">(</span><span class="n">topPath</span><span class="p">,</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">modelDiagramDir</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">indexPrefix</span><span class="p">))</span>
     <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">elem</span><span class="p">,</span><span class="n">MetaModel</span><span class="o">.</span><span class="n">MetaPackage</span><span class="p">)</span> <span class="ow">and</span> <span class="n">elem</span><span class="o">.</span><span class="n">containedPackages</span><span class="p">:</span>
@@ -2208,7 +2198,7 @@
   <span class="c1">###########################################################################</span>
 
   <span class="c1">###def writeNavigatorBar(self, elem, prev = None, foll = None, special = None, upDir = 0, attributeLetter = &#39;A&#39;):</span>
-<div class="viewcode-block" id="ApiDocGen.writeNavigatorBar"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.docgen.html#ccpnmodel.ccpncore.memops.scripts.docgen.ApiDocGen.ApiDocGen.writeNavigatorBar">[docs]</a>  <span class="k">def</span> <span class="nf">writeNavigatorBar</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">elem</span><span class="p">,</span> <span class="n">prev</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="n">foll</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="n">special</span> <span class="o">=</span> <span class="bp">None</span><span class="p">):</span>
+<div class="viewcode-block" id="ApiDocGen.writeNavigatorBar"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.docgen.html#ccpnmodel.ccpncore.memops.scripts.docgen.ApiDocGen.ApiDocGen.writeNavigatorBar">[docs]</a>  <span class="k">def</span> <span class="nf">writeNavigatorBar</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">elem</span><span class="p">,</span> <span class="n">prev</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">foll</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">special</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
 
     <span class="sd">&quot;&quot;&quot;write javastyle navigator bar</span>
 <span class="sd">  </span>
@@ -2224,7 +2214,7 @@
     <span class="c1">##topPath = self.pathToTop(elem, upDir=upDir)</span>
     <span class="n">topPath</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pathToTop</span><span class="p">(</span><span class="n">elem</span><span class="p">,</span> <span class="n">upDir</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
     <span class="n">topDocPath</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pathToTop</span><span class="p">(</span><span class="n">elem</span><span class="p">)</span>
-    <span class="n">diapath</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getDiagramFileName</span><span class="p">(</span><span class="n">elem</span><span class="p">,</span> <span class="n">isAbsolute</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+    <span class="n">diapath</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getDiagramFileName</span><span class="p">(</span><span class="n">elem</span><span class="p">,</span> <span class="n">isAbsolute</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
     <span class="n">apiFileDir</span> <span class="o">=</span> <span class="n">Path</span><span class="o">.</span><span class="n">joinPath</span><span class="p">(</span><span class="n">topPath</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">baseDirName</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">apiFileDir</span><span class="p">)</span>
     <span class="n">apiDocDir</span> <span class="o">=</span> <span class="n">Path</span><span class="o">.</span><span class="n">joinPath</span><span class="p">(</span><span class="n">topPath</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">topDocDir</span><span class="p">)</span>
 
@@ -2272,7 +2262,7 @@
     <span class="bp">self</span><span class="o">.</span><span class="n">writeStartRow</span><span class="p">(</span><span class="n">valign</span><span class="o">=</span><span class="s1">&#39;top&#39;</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">writeStartCell</span><span class="p">(</span><span class="n">align</span><span class="o">=</span><span class="s1">&#39;center&#39;</span><span class="p">,</span> <span class="n">valign</span><span class="o">=</span><span class="s1">&#39;bottom&#39;</span><span class="p">)</span>
   
-    <span class="k">if</span> <span class="n">elem</span><span class="o">.</span><span class="n">container</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">elem</span><span class="o">.</span><span class="n">container</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
       <span class="c1"># root package</span>
       <span class="k">if</span> <span class="n">special</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;Class Map&#39;</span><span class="p">,</span> <span class="s1">&#39;Attribute Map&#39;</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">writeLink</span><span class="p">(</span><span class="n">Path</span><span class="o">.</span><span class="n">joinPath</span><span class="p">(</span><span class="n">topPath</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">topDocDir</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">topApiFile</span><span class="p">),</span> <span class="s1">&#39;Home&#39;</span><span class="p">)</span>
@@ -2358,12 +2348,12 @@
 
   <span class="c1">###########################################################################</span>
 
-<div class="viewcode-block" id="ApiDocGen.writeDiagramNavigatorBar"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.docgen.html#ccpnmodel.ccpncore.memops.scripts.docgen.ApiDocGen.ApiDocGen.writeDiagramNavigatorBar">[docs]</a>  <span class="k">def</span> <span class="nf">writeDiagramNavigatorBar</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">package</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="n">special</span> <span class="o">=</span> <span class="bp">None</span><span class="p">):</span>
+<div class="viewcode-block" id="ApiDocGen.writeDiagramNavigatorBar"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.docgen.html#ccpnmodel.ccpncore.memops.scripts.docgen.ApiDocGen.ApiDocGen.writeDiagramNavigatorBar">[docs]</a>  <span class="k">def</span> <span class="nf">writeDiagramNavigatorBar</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">package</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">special</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
 
     <span class="sd">&quot;&quot;&quot;write javastyle navigator bar for diagrams</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     
-    <span class="bp">self</span><span class="o">.</span><span class="n">writeCommonNavigatorBar</span><span class="p">(</span><span class="n">package</span><span class="p">,</span> <span class="n">isDiagram</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">writeCommonNavigatorBar</span><span class="p">(</span><span class="n">package</span><span class="p">,</span> <span class="n">isDiagram</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">package</span><span class="p">:</span>
       <span class="n">topPath</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pathToTop</span><span class="p">(</span><span class="n">package</span><span class="p">,</span> <span class="n">upDir</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
@@ -2413,7 +2403,7 @@
   <span class="c1">###########################################################################</span>
 
   <span class="c1">###def writeCommonNavigatorBar(self, elem = None, isDiagram = False, upDir = 0):</span>
-<div class="viewcode-block" id="ApiDocGen.writeCommonNavigatorBar"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.docgen.html#ccpnmodel.ccpncore.memops.scripts.docgen.ApiDocGen.ApiDocGen.writeCommonNavigatorBar">[docs]</a>  <span class="k">def</span> <span class="nf">writeCommonNavigatorBar</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">elem</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">isDiagram</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+<div class="viewcode-block" id="ApiDocGen.writeCommonNavigatorBar"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.docgen.html#ccpnmodel.ccpncore.memops.scripts.docgen.ApiDocGen.ApiDocGen.writeCommonNavigatorBar">[docs]</a>  <span class="k">def</span> <span class="nf">writeCommonNavigatorBar</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">elem</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">isDiagram</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 
     <span class="c1">## upDir is hack to get Attribute Map pages to work</span>
 
@@ -2687,7 +2677,7 @@
       <span class="bp">self</span><span class="o">.</span><span class="n">writeEndRow</span><span class="p">()</span>
 
       <span class="k">if</span> <span class="n">methods</span><span class="p">:</span>
-        <span class="n">target</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="n">target</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">methods</span><span class="p">)):</span>
           <span class="n">method</span> <span class="o">=</span> <span class="n">methods</span><span class="p">[</span><span class="n">n</span><span class="p">]</span>
           <span class="bp">self</span><span class="o">.</span><span class="n">writeStartRow</span><span class="p">(</span><span class="n">valign</span><span class="o">=</span><span class="s1">&#39;top&#39;</span><span class="p">)</span>
@@ -2793,7 +2783,7 @@
     <span class="n">indent</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
 
     <span class="n">supertypes</span> <span class="o">=</span> <span class="n">supers</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
-    <span class="k">while</span> <span class="bp">True</span><span class="p">:</span>
+    <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
       <span class="n">ll</span> <span class="o">=</span> <span class="p">[]</span>
       <span class="k">for</span> <span class="n">supertype</span> <span class="ow">in</span> <span class="n">supertypes</span><span class="p">:</span>
         <span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">ref</span><span class="p">)</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getLinkInfo</span> <span class="p">(</span><span class="n">complexDataType</span><span class="p">,</span> <span class="n">supertype</span><span class="p">)</span>
@@ -2827,7 +2817,7 @@
 
     <span class="n">strs</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">for</span> <span class="n">tag</span><span class="p">,</span><span class="n">xx</span> <span class="ow">in</span> <span class="p">((</span><span class="s1">&#39;prev&#39;</span><span class="p">,</span><span class="n">prev</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;foll&#39;</span><span class="p">,</span><span class="n">foll</span><span class="p">)):</span>
-      <span class="k">if</span> <span class="n">xx</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+      <span class="k">if</span> <span class="n">xx</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">strs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tag</span><span class="p">)</span>
       <span class="k">else</span><span class="p">:</span>
         <span class="n">link</span> <span class="o">=</span> <span class="n">Path</span><span class="o">.</span><span class="n">joinPath</span><span class="p">(</span><span class="n">topPath</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">fileFromTop</span><span class="p">(</span><span class="n">xx</span><span class="p">))</span>
@@ -2855,12 +2845,12 @@
   <span class="c1">###########################################################################</span>
 
   <span class="c1">###def writeElementHeader(self, elem, title, prev=None, foll=None, special = None, upDir = 0, attributeLetter = &#39;A&#39;):</span>
-<div class="viewcode-block" id="ApiDocGen.writeElementHeader"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.docgen.html#ccpnmodel.ccpncore.memops.scripts.docgen.ApiDocGen.ApiDocGen.writeElementHeader">[docs]</a>  <span class="k">def</span> <span class="nf">writeElementHeader</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">elem</span><span class="p">,</span> <span class="n">title</span><span class="p">,</span> <span class="n">prev</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">foll</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">special</span> <span class="o">=</span> <span class="bp">None</span><span class="p">):</span>
+<div class="viewcode-block" id="ApiDocGen.writeElementHeader"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.docgen.html#ccpnmodel.ccpncore.memops.scripts.docgen.ApiDocGen.ApiDocGen.writeElementHeader">[docs]</a>  <span class="k">def</span> <span class="nf">writeElementHeader</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">elem</span><span class="p">,</span> <span class="n">title</span><span class="p">,</span> <span class="n">prev</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">foll</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">special</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
 
     <span class="c1"># upDir is hack to get Attribute Map pages to work</span>
 
     <span class="c1">##self.writeBasicHeader(elem, title, isDiagram=False, upDir=upDir)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">writeBasicHeader</span><span class="p">(</span><span class="n">elem</span><span class="p">,</span> <span class="n">title</span><span class="p">,</span> <span class="n">isDiagram</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">writeBasicHeader</span><span class="p">(</span><span class="n">elem</span><span class="p">,</span> <span class="n">title</span><span class="p">,</span> <span class="n">isDiagram</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 
     <span class="c1"># write navigator bar</span>
     <span class="c1">##self.writeNavigatorBar(elem, prev=prev, foll=foll, special=special, upDir=upDir, attributeLetter=attributeLetter)</span>
@@ -2870,7 +2860,7 @@
 
   <span class="c1">###########################################################################</span>
 
-<div class="viewcode-block" id="ApiDocGen.writeDiagramElementHeader"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.docgen.html#ccpnmodel.ccpncore.memops.scripts.docgen.ApiDocGen.ApiDocGen.writeDiagramElementHeader">[docs]</a>  <span class="k">def</span> <span class="nf">writeDiagramElementHeader</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">package</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="n">special</span> <span class="o">=</span> <span class="bp">None</span><span class="p">):</span>
+<div class="viewcode-block" id="ApiDocGen.writeDiagramElementHeader"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.docgen.html#ccpnmodel.ccpncore.memops.scripts.docgen.ApiDocGen.ApiDocGen.writeDiagramElementHeader">[docs]</a>  <span class="k">def</span> <span class="nf">writeDiagramElementHeader</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">package</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">special</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
 
     <span class="k">if</span> <span class="n">special</span><span class="p">:</span>
       <span class="n">ss</span> <span class="o">=</span> <span class="n">special</span>
@@ -2880,7 +2870,7 @@
       <span class="n">ss</span> <span class="o">=</span> <span class="s1">&#39;Home&#39;</span>
     <span class="n">title</span> <span class="o">=</span> <span class="s1">&#39;UML Diagram Doc - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">ss</span>
 
-    <span class="bp">self</span><span class="o">.</span><span class="n">writeBasicHeader</span><span class="p">(</span><span class="n">package</span><span class="p">,</span> <span class="n">title</span><span class="p">,</span> <span class="n">isDiagram</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">writeBasicHeader</span><span class="p">(</span><span class="n">package</span><span class="p">,</span> <span class="n">title</span><span class="p">,</span> <span class="n">isDiagram</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
     <span class="c1"># write navigator bar</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">writeDiagramNavigatorBar</span><span class="p">(</span><span class="n">package</span><span class="p">,</span> <span class="n">special</span><span class="o">=</span><span class="n">special</span><span class="p">)</span></div>
@@ -2927,7 +2917,7 @@
     <span class="k">if</span> <span class="ow">not</span> <span class="n">elem</span> <span class="ow">or</span> <span class="n">elem</span> <span class="o">!=</span> <span class="n">package</span><span class="p">:</span>
       <span class="nb">dict</span><span class="p">[</span><span class="s1">&#39;useLicense&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;brief&#39;</span>
       <span class="nb">dict</span><span class="p">[</span><span class="s1">&#39;references&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">()</span>
-      <span class="nb">dict</span><span class="p">[</span><span class="s1">&#39;credits&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">None</span>
+      <span class="nb">dict</span><span class="p">[</span><span class="s1">&#39;credits&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
 
 
     <span class="bp">self</span><span class="o">.</span><span class="n">writeHeader</span><span class="p">(</span><span class="n">scriptName</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">scriptName</span><span class="p">,</span>
@@ -2939,7 +2929,7 @@
 
   <span class="c1">###########################################################################</span>
 
-<div class="viewcode-block" id="ApiDocGen.writeObjectFooter"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.docgen.html#ccpnmodel.ccpncore.memops.scripts.docgen.ApiDocGen.ApiDocGen.writeObjectFooter">[docs]</a>  <span class="k">def</span> <span class="nf">writeObjectFooter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span> <span class="o">=</span> <span class="bp">None</span><span class="p">):</span>
+<div class="viewcode-block" id="ApiDocGen.writeObjectFooter"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.docgen.html#ccpnmodel.ccpncore.memops.scripts.docgen.ApiDocGen.ApiDocGen.writeObjectFooter">[docs]</a>  <span class="k">def</span> <span class="nf">writeObjectFooter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
 
     <span class="k">if</span> <span class="ow">not</span> <span class="n">obj</span><span class="p">:</span>
       <span class="n">objName</span> <span class="o">=</span> <span class="s1">&#39;n/a&#39;</span>
@@ -3110,13 +3100,13 @@
       <span class="k">if</span> <span class="n">m</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
         <span class="n">prev</span> <span class="o">=</span> <span class="n">containedPackages</span><span class="p">[</span><span class="n">m</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
       <span class="k">else</span><span class="p">:</span>
-        <span class="n">prev</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="n">prev</span> <span class="o">=</span> <span class="kc">None</span>
       <span class="k">if</span> <span class="n">m</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">containedPackages</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">:</span>
         <span class="n">foll</span> <span class="o">=</span> <span class="n">containedPackages</span><span class="p">[</span><span class="n">m</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span>
       <span class="k">else</span><span class="p">:</span>
-        <span class="n">foll</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="n">foll</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="k">else</span><span class="p">:</span>
-      <span class="n">prev</span> <span class="o">=</span> <span class="n">foll</span> <span class="o">=</span> <span class="bp">None</span>
+      <span class="n">prev</span> <span class="o">=</span> <span class="n">foll</span> <span class="o">=</span> <span class="kc">None</span>
 
     <span class="k">return</span> <span class="p">(</span><span class="n">prev</span><span class="p">,</span> <span class="n">foll</span><span class="p">)</span></div>
 
@@ -3140,7 +3130,7 @@
     <span class="sd">&quot;&quot;&quot;return tuple of relName, relDirectory.</span>
 <span class="sd">       see code for details</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="n">toElem</span><span class="o">.</span><span class="n">container</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">toElem</span><span class="o">.</span><span class="n">container</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
       <span class="k">raise</span> <span class="n">MemopsError</span><span class="p">(</span><span class="s1">&#39;getLinkInfo callled with containerless element </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">toElem</span><span class="p">)</span>
 
     <span class="c1"># logic moved to bottom because path was not always coming out correctly</span>
@@ -3150,7 +3140,7 @@
     <span class="c1">###  return (toElem.name, &#39;../%s&#39; % toElem.name)</span>
 
     <span class="k">else</span><span class="p">:</span>
-      <span class="n">path</span> <span class="o">=</span> <span class="n">Path</span><span class="o">.</span><span class="n">joinPath</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pathToTop</span><span class="p">(</span><span class="n">fromElem</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">directoryFromTop</span><span class="p">(</span><span class="n">toElem</span><span class="p">,</span> <span class="n">ignoreElemType</span><span class="o">=</span><span class="bp">True</span><span class="p">))</span>
+      <span class="n">path</span> <span class="o">=</span> <span class="n">Path</span><span class="o">.</span><span class="n">joinPath</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pathToTop</span><span class="p">(</span><span class="n">fromElem</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">directoryFromTop</span><span class="p">(</span><span class="n">toElem</span><span class="p">,</span> <span class="n">ignoreElemType</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
 
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">toElem</span><span class="p">,</span><span class="n">MetaModel</span><span class="o">.</span><span class="n">MetaDataType</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">toElem</span><span class="p">,</span> <span class="n">MetaModel</span><span class="o">.</span><span class="n">MetaDataObjType</span><span class="p">):</span>
 
@@ -3159,7 +3149,7 @@
       <span class="k">if</span> <span class="n">pp</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">impPackage</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">toElem</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">path</span>
 
-    <span class="k">if</span> <span class="n">fromElem</span><span class="o">.</span><span class="n">container</span> <span class="ow">is</span> <span class="n">toElem</span><span class="o">.</span><span class="n">container</span> <span class="ow">and</span> <span class="n">toElem</span><span class="o">.</span><span class="n">container</span><span class="o">.</span><span class="n">container</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">fromElem</span><span class="o">.</span><span class="n">container</span> <span class="ow">is</span> <span class="n">toElem</span><span class="o">.</span><span class="n">container</span> <span class="ow">and</span> <span class="n">toElem</span><span class="o">.</span><span class="n">container</span><span class="o">.</span><span class="n">container</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
       <span class="n">name</span> <span class="o">=</span> <span class="n">toElem</span><span class="o">.</span><span class="n">name</span>
     <span class="k">else</span><span class="p">:</span>
       <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getImportName</span><span class="p">(</span><span class="n">toElem</span><span class="p">,</span> <span class="n">fromElem</span><span class="p">)</span>
@@ -3170,13 +3160,13 @@
 
   <span class="c1">###########################################################################</span>
 
-<div class="viewcode-block" id="ApiDocGen.pathToTop"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.docgen.html#ccpnmodel.ccpncore.memops.scripts.docgen.ApiDocGen.ApiDocGen.pathToTop">[docs]</a>  <span class="k">def</span> <span class="nf">pathToTop</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">element</span><span class="p">,</span> <span class="n">isDiagram</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">upDir</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+<div class="viewcode-block" id="ApiDocGen.pathToTop"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.docgen.html#ccpnmodel.ccpncore.memops.scripts.docgen.ApiDocGen.ApiDocGen.pathToTop">[docs]</a>  <span class="k">def</span> <span class="nf">pathToTop</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">element</span><span class="p">,</span> <span class="n">isDiagram</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">upDir</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; return relative directory path from a given element to the top directory</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">length</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">getElementPathList</span><span class="p">(</span><span class="n">element</span><span class="p">))</span> <span class="o">+</span> <span class="n">upDir</span>
 
-    <span class="k">if</span> <span class="n">element</span><span class="o">.</span><span class="n">container</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">element</span><span class="o">.</span><span class="n">container</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
       <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">element</span><span class="p">,</span> <span class="s1">&#39;topPackage&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">element</span> <span class="ow">is</span> <span class="n">element</span><span class="o">.</span><span class="n">topPackage</span><span class="p">():</span>
         <span class="c1"># this is the root package</span>
         <span class="n">length</span> <span class="o">=</span> <span class="n">upDir</span>
@@ -3219,7 +3209,7 @@
 
   <span class="c1"># TBD: not sure why ignoreElemType comes into use in one case</span>
   <span class="c1"># something probably wrong with that use, look at again</span>
-<div class="viewcode-block" id="ApiDocGen.directoryFromTop"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.docgen.html#ccpnmodel.ccpncore.memops.scripts.docgen.ApiDocGen.ApiDocGen.directoryFromTop">[docs]</a>  <span class="k">def</span> <span class="nf">directoryFromTop</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">element</span><span class="p">,</span> <span class="n">ignoreElemType</span> <span class="o">=</span> <span class="bp">False</span><span class="p">):</span>
+<div class="viewcode-block" id="ApiDocGen.directoryFromTop"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.docgen.html#ccpnmodel.ccpncore.memops.scripts.docgen.ApiDocGen.ApiDocGen.directoryFromTop">[docs]</a>  <span class="k">def</span> <span class="nf">directoryFromTop</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">element</span><span class="p">,</span> <span class="n">ignoreElemType</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; Generate directory name relative to top directory of an element</span>
 <span class="sd">    &quot;&quot;&quot;</span>
   
@@ -3261,7 +3251,7 @@
 
   <span class="c1">###########################################################################</span>
 
-<div class="viewcode-block" id="ApiDocGen.getObjDocFileName"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.docgen.html#ccpnmodel.ccpncore.memops.scripts.docgen.ApiDocGen.ApiDocGen.getObjDocFileName">[docs]</a>  <span class="k">def</span> <span class="nf">getObjDocFileName</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">metaObj</span><span class="p">,</span> <span class="n">absoluteName</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">addSuffix</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+<div class="viewcode-block" id="ApiDocGen.getObjDocFileName"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.docgen.html#ccpnmodel.ccpncore.memops.scripts.docgen.ApiDocGen.ApiDocGen.getObjDocFileName">[docs]</a>  <span class="k">def</span> <span class="nf">getObjDocFileName</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">metaObj</span><span class="p">,</span> <span class="n">absoluteName</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">addSuffix</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 
     <span class="sd">&quot;&quot;&quot; Get filename for metaObj</span>
 <span class="sd">    If absoluteName is True the file name is absolute</span>
@@ -3275,7 +3265,7 @@
     <span class="k">else</span><span class="p">:</span>
       <span class="n">pathList</span> <span class="o">=</span> <span class="p">[]</span>
    
-    <span class="k">if</span> <span class="n">metaObj</span><span class="o">.</span><span class="n">container</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">metaObj</span><span class="o">.</span><span class="n">container</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
       <span class="c1"># Root package only</span>
       <span class="n">pathList</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">metaConstants</span><span class="o">.</span><span class="n">modellingPackageName</span><span class="p">)</span>
       <span class="c1">#pathList.append(self.codeDirName)</span>
@@ -3334,7 +3324,7 @@
       <span class="n">target</span> <span class="o">=</span> <span class="n">elem</span><span class="o">.</span><span class="n">valueType</span>
       <span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">ref</span><span class="p">)</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getLinkInfo</span><span class="p">(</span><span class="n">elem</span><span class="o">.</span><span class="n">container</span><span class="p">,</span><span class="n">target</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
-      <span class="k">raise</span> <span class="n">MemopsError</span><span class="p">(</span><span class="s1">&#39;getElemTypeString called with object of class </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">elem</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span><span class="p">)</span>
+      <span class="k">raise</span> <span class="n">MemopsError</span><span class="p">(</span><span class="s1">&#39;getElemTypeString called with object of class </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">elem</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">elemHasOwnDirectory</span><span class="p">(</span><span class="n">target</span><span class="p">):</span>
       <span class="k">return</span> <span class="s1">&#39;&lt;a href =&quot;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">.html&quot;&gt;</span><span class="si">%s</span><span class="s1">&lt;/a&gt;&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">ref</span><span class="p">,</span> <span class="n">ApiDocGen</span><span class="o">.</span><span class="n">indexPrefix</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
@@ -3364,7 +3354,7 @@
 <span class="sd">    All elements with locard == hicard are mandatory</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="n">hasOptionals</span> <span class="o">=</span> <span class="bp">False</span>
+    <span class="n">hasOptionals</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="n">mandatories</span> <span class="o">=</span> <span class="p">[]</span>
 
     <span class="k">for</span> <span class="n">ee</span> <span class="ow">in</span> <span class="n">elem</span><span class="o">.</span><span class="n">getAllAttributes</span><span class="p">():</span>
@@ -3373,7 +3363,7 @@
           <span class="k">if</span> <span class="ow">not</span> <span class="n">ee</span><span class="o">.</span><span class="n">defaultValue</span><span class="p">:</span>
             <span class="n">mandatories</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ee</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-          <span class="n">hasOptionals</span> <span class="o">=</span> <span class="bp">True</span>
+          <span class="n">hasOptionals</span> <span class="o">=</span> <span class="kc">True</span>
 
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">elem</span><span class="p">,</span> <span class="n">MetaModel</span><span class="o">.</span><span class="n">MetaClass</span><span class="p">):</span>
       <span class="k">for</span> <span class="n">ee</span> <span class="ow">in</span> <span class="n">elem</span><span class="o">.</span><span class="n">getAllRoles</span><span class="p">():</span>
@@ -3382,7 +3372,7 @@
           <span class="k">if</span> <span class="n">ee</span><span class="o">.</span><span class="n">locard</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
             <span class="n">mandatories</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ee</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
           <span class="k">else</span><span class="p">:</span>
-            <span class="n">hasOptionals</span> <span class="o">=</span> <span class="bp">True</span>
+            <span class="n">hasOptionals</span> <span class="o">=</span> <span class="kc">True</span>
 
     <span class="k">return</span> <span class="n">mandatories</span><span class="p">,</span> <span class="n">hasOptionals</span></div>
 
@@ -3395,9 +3385,9 @@
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">elem</span><span class="p">,</span> <span class="n">MetaModel</span><span class="o">.</span><span class="n">MetaPackage</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">elem</span><span class="p">,</span> <span class="n">MetaModel</span><span class="o">.</span><span class="n">MetaClass</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">elem</span><span class="p">,</span> <span class="n">MetaModel</span><span class="o">.</span><span class="n">MetaDataObjType</span><span class="p">):</span>
-      <span class="k">return</span> <span class="bp">True</span>
+      <span class="k">return</span> <span class="kc">True</span>
     <span class="k">else</span><span class="p">:</span>
-      <span class="k">return</span> <span class="bp">False</span></div>
+      <span class="k">return</span> <span class="kc">False</span></div>
 
   <span class="c1">###########################################################################</span>
 
@@ -3506,15 +3496,15 @@
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
 <div id="searchbox" style="display: none" role="search">
-  <h3>Quick search</h3>
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
     <form class="search" action="../../../../../../search.html" method="get">
-      <input type="text" name="q" />
+      <input type="text" name="q" aria-labelledby="searchlabel" />
       <input type="submit" value="Go" />
-      <input type="hidden" name="check_keywords" value="yes" />
-      <input type="hidden" name="area" value="default" />
     </form>
+    </div>
 </div>
-<script type="text/javascript">$('#searchbox').show(0);</script>
+<script>$('#searchbox').show(0);</script>
         </div>
       </div>
       <div class="clearer"></div>
@@ -3528,13 +3518,13 @@
         <li class="right" >
           <a href="../../../../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../../../../index.html">Python  documentation</a> &raquo;</li>
-          <li class="nav-item nav-item-1"><a href="../../../../../index.html" >Module code</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="../../../../../../index.html">Python  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../../../../index.html" >Module code</a> &#187;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
-        &copy; Copyright .
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.1.
+        &#169; Copyright .
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.4.0.
     </div>
   </body>
 </html>

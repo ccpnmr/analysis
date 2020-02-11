@@ -1,32 +1,22 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
+<!DOCTYPE html>
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    
-    <title>ccpnmodel.ccpncore.lib.ApiPath &mdash; Python  documentation</title>
-    
+    <meta charset="utf-8" />
+    <title>ccpnmodel.ccpncore.lib.ApiPath &#8212; Python  documentation</title>
     <link rel="stylesheet" href="../../../../_static/classic.css" type="text/css" />
     <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
     
-    <script type="text/javascript">
-      var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    '../../../../',
-        VERSION:     '',
-        COLLAPSE_INDEX: false,
-        FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true
-      };
-    </script>
-    <script type="text/javascript" src="../../../../_static/jquery.js"></script>
-    <script type="text/javascript" src="../../../../_static/underscore.js"></script>
-    <script type="text/javascript" src="../../../../_static/doctools.js"></script>
-    <link rel="top" title="Python  documentation" href="../../../../index.html" />
-    <link rel="up" title="Module code" href="../../../index.html" /> 
-  </head>
-  <body role="document">
+    <script id="documentation_options" data-url_root="../../../../" src="../../../../_static/documentation_options.js"></script>
+    <script src="../../../../_static/jquery.js"></script>
+    <script src="../../../../_static/underscore.js"></script>
+    <script src="../../../../_static/doctools.js"></script>
+    <script src="../../../../_static/language_data.js"></script>
+    
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+  </head><body>
     <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
@@ -36,8 +26,8 @@
         <li class="right" >
           <a href="../../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../../index.html">Python  documentation</a> &raquo;</li>
-          <li class="nav-item nav-item-1"><a href="../../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="../../../../index.html">Python  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../../index.html" accesskey="U">Module code</a> &#187;</li> 
       </ul>
     </div>  
 
@@ -103,7 +93,7 @@
     <span class="n">path</span> <span class="o">=</span> <span class="n">path</span><span class="p">[:</span><span class="o">-</span><span class="nb">len</span><span class="p">(</span><span class="n">CCPN_DIRECTORY_SUFFIX</span><span class="p">)]</span>
   <span class="k">return</span> <span class="n">path</span></div>
 
-<div class="viewcode-block" id="getProjectFile"><a class="viewcode-back" href="../../../../ccpnmodel/ccpnmodel.ccpncore.lib.html#ccpnmodel.ccpncore.lib.ApiPath.getProjectFile">[docs]</a><span class="k">def</span> <span class="nf">getProjectFile</span><span class="p">(</span><span class="n">repositoryPath</span><span class="p">,</span> <span class="n">projectName</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+<div class="viewcode-block" id="getProjectFile"><a class="viewcode-back" href="../../../../ccpnmodel/ccpnmodel.ccpncore.lib.html#ccpnmodel.ccpncore.lib.ApiPath.getProjectFile">[docs]</a><span class="k">def</span> <span class="nf">getProjectFile</span><span class="p">(</span><span class="n">repositoryPath</span><span class="p">,</span> <span class="n">projectName</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
   <span class="sd">&quot;&quot;&quot;Get project file given the repositoryPath and optionally the projectName</span>
 <span class="sd">     (if none given then determined from repositoryPath)</span>
 <span class="sd">  &quot;&quot;&quot;</span>
@@ -206,7 +196,7 @@
   <span class="n">allLocations</span> <span class="o">=</span> <span class="p">{}</span>
   
   <span class="c1"># check for topObject presence</span>
-  <span class="n">result</span> <span class="o">=</span> <span class="bp">True</span>
+  <span class="n">result</span> <span class="o">=</span> <span class="kc">True</span>
   <span class="k">for</span> <span class="n">topObject</span> <span class="ow">in</span> <span class="n">project</span><span class="o">.</span><span class="n">topObjects</span><span class="p">:</span>
  
     <span class="k">if</span> <span class="n">topObject</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">project</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">topObject</span><span class="o">.</span><span class="n">isLoaded</span><span class="p">:</span>
@@ -214,7 +204,7 @@
       <span class="c1"># get locations</span>
       <span class="n">locator</span> <span class="o">=</span> <span class="n">findLocator</span><span class="p">(</span><span class="n">targetName</span><span class="o">=</span><span class="n">topObject</span><span class="o">.</span><span class="n">packageName</span><span class="p">)</span> <span class="ow">or</span> <span class="n">anyLocator</span>
       <span class="n">locations</span> <span class="o">=</span> <span class="n">allLocations</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">locator</span><span class="p">)</span>
-      <span class="k">if</span> <span class="n">locations</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+      <span class="k">if</span> <span class="n">locations</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">locations</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span><span class="o">.</span><span class="n">url</span><span class="o">.</span><span class="n">getDataLocation</span><span class="p">()</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">locator</span><span class="o">.</span><span class="n">repositories</span><span class="p">]</span>
         <span class="n">allLocations</span><span class="p">[</span><span class="n">locator</span><span class="p">]</span> <span class="o">=</span> <span class="n">locations</span>
  
@@ -228,13 +218,13 @@
           
       <span class="k">else</span><span class="p">:</span>
         <span class="c1"># no file found</span>
-        <span class="n">result</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="k">break</span>
   
   <span class="c1"># </span>
   <span class="k">return</span> <span class="n">result</span></div>
 
-<div class="viewcode-block" id="doesRepositoryContainProject"><a class="viewcode-back" href="../../../../ccpnmodel/ccpnmodel.ccpncore.lib.html#ccpnmodel.ccpncore.lib.ApiPath.doesRepositoryContainProject">[docs]</a><span class="k">def</span> <span class="nf">doesRepositoryContainProject</span><span class="p">(</span><span class="n">repositoryPath</span><span class="p">,</span> <span class="n">projectName</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+<div class="viewcode-block" id="doesRepositoryContainProject"><a class="viewcode-back" href="../../../../ccpnmodel/ccpnmodel.ccpncore.lib.html#ccpnmodel.ccpncore.lib.ApiPath.doesRepositoryContainProject">[docs]</a><span class="k">def</span> <span class="nf">doesRepositoryContainProject</span><span class="p">(</span><span class="n">repositoryPath</span><span class="p">,</span> <span class="n">projectName</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
   <span class="sd">&quot;&quot;&quot;Does repositoryPath contain project with specified projectName</span>
 <span class="sd">     (or default projectName if not specified)?</span>
 <span class="sd">  &quot;&quot;&quot;</span>
@@ -251,20 +241,20 @@
     <span class="n">implDirectory</span> <span class="o">=</span> <span class="n">getImplementationDirectory</span><span class="p">(</span><span class="n">repositoryPath</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">implDirectory</span><span class="p">):</span>
       <span class="n">files</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">implDirectory</span><span class="p">)</span>
-      <span class="n">files</span> <span class="o">=</span> <span class="p">[</span><span class="n">Path</span><span class="o">.</span><span class="n">joinPath</span><span class="p">(</span><span class="n">implDirectory</span><span class="p">,</span> <span class="nb">file</span><span class="p">)</span> <span class="k">for</span> <span class="nb">file</span> <span class="ow">in</span> <span class="n">files</span> <span class="k">if</span> <span class="nb">file</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="n">fileSuffix</span><span class="p">)]</span>
+      <span class="n">files</span> <span class="o">=</span> <span class="p">[</span><span class="n">Path</span><span class="o">.</span><span class="n">joinPath</span><span class="p">(</span><span class="n">implDirectory</span><span class="p">,</span> <span class="n">file</span><span class="p">)</span> <span class="k">for</span> <span class="n">file</span> <span class="ow">in</span> <span class="n">files</span> <span class="k">if</span> <span class="n">file</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="n">fileSuffix</span><span class="p">)]</span>
 
       <span class="k">return</span> <span class="n">files</span>
 
   <span class="k">return</span> <span class="p">[]</span></div>
 
-<div class="viewcode-block" id="getTopObjIdFromFileName"><a class="viewcode-back" href="../../../../ccpnmodel/ccpnmodel.ccpncore.lib.html#ccpnmodel.ccpncore.lib.ApiPath.getTopObjIdFromFileName">[docs]</a><span class="k">def</span> <span class="nf">getTopObjIdFromFileName</span><span class="p">(</span><span class="n">fileName</span><span class="p">,</span> <span class="n">mustBeMultipart</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+<div class="viewcode-block" id="getTopObjIdFromFileName"><a class="viewcode-back" href="../../../../ccpnmodel/ccpnmodel.ccpncore.lib.html#ccpnmodel.ccpncore.lib.ApiPath.getTopObjIdFromFileName">[docs]</a><span class="k">def</span> <span class="nf">getTopObjIdFromFileName</span><span class="p">(</span><span class="n">fileName</span><span class="p">,</span> <span class="n">mustBeMultipart</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
   <span class="sd">&quot;&quot;&quot;Get project name or TopObject guid from file name (relative or absolute)</span>
 <span class="sd">  Note: TopObject ID is constrained to not need decoding</span>
 <span class="sd">  &quot;&quot;&quot;</span>
   <span class="n">basename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">fileName</span><span class="p">)</span>
   <span class="n">ll</span> <span class="o">=</span> <span class="n">basename</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">keySep</span><span class="p">)</span>
   
-  <span class="k">if</span> <span class="n">mustBeMultipart</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+  <span class="k">if</span> <span class="n">mustBeMultipart</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
     <span class="c1"># no check on number of fields</span>
     <span class="k">pass</span>
     
@@ -310,7 +300,7 @@
     <span class="n">value</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="n">key</span><span class="p">)</span>
     <span class="c1"># second condition below excludes functions defined in imported modules (like os, etc.)</span>
     <span class="c1"># third condition checks whether this is a function (rather than a class, etc.)</span>
-    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="s1">&#39;__module__&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">value</span><span class="o">.</span><span class="n">__module__</span> <span class="o">==</span> <span class="n">moduleName</span> <span class="ow">and</span> <span class="nb">callable</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
+    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="s1">&#39;__module__&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">value</span><span class="o">.</span><span class="vm">__module__</span> <span class="o">==</span> <span class="n">moduleName</span> <span class="ow">and</span> <span class="n">callable</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
       <span class="nb">setattr</span><span class="p">(</span><span class="n">apiClass</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
 </pre></div>
 
@@ -320,15 +310,15 @@
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
 <div id="searchbox" style="display: none" role="search">
-  <h3>Quick search</h3>
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
     <form class="search" action="../../../../search.html" method="get">
-      <input type="text" name="q" />
+      <input type="text" name="q" aria-labelledby="searchlabel" />
       <input type="submit" value="Go" />
-      <input type="hidden" name="check_keywords" value="yes" />
-      <input type="hidden" name="area" value="default" />
     </form>
+    </div>
 </div>
-<script type="text/javascript">$('#searchbox').show(0);</script>
+<script>$('#searchbox').show(0);</script>
         </div>
       </div>
       <div class="clearer"></div>
@@ -342,13 +332,13 @@
         <li class="right" >
           <a href="../../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../../index.html">Python  documentation</a> &raquo;</li>
-          <li class="nav-item nav-item-1"><a href="../../../index.html" >Module code</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="../../../../index.html">Python  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../../index.html" >Module code</a> &#187;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
-        &copy; Copyright .
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.1.
+        &#169; Copyright .
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.4.0.
     </div>
   </body>
 </html>

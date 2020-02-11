@@ -1,32 +1,22 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
+<!DOCTYPE html>
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    
-    <title>ccpn.ui.gui.modules.StructureTable &mdash; Python  documentation</title>
-    
+    <meta charset="utf-8" />
+    <title>ccpn.ui.gui.modules.StructureTable &#8212; Python  documentation</title>
     <link rel="stylesheet" href="../../../../../_static/classic.css" type="text/css" />
     <link rel="stylesheet" href="../../../../../_static/pygments.css" type="text/css" />
     
-    <script type="text/javascript">
-      var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    '../../../../../',
-        VERSION:     '',
-        COLLAPSE_INDEX: false,
-        FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true
-      };
-    </script>
-    <script type="text/javascript" src="../../../../../_static/jquery.js"></script>
-    <script type="text/javascript" src="../../../../../_static/underscore.js"></script>
-    <script type="text/javascript" src="../../../../../_static/doctools.js"></script>
-    <link rel="top" title="Python  documentation" href="../../../../../index.html" />
-    <link rel="up" title="Module code" href="../../../../index.html" /> 
-  </head>
-  <body role="document">
+    <script id="documentation_options" data-url_root="../../../../../" src="../../../../../_static/documentation_options.js"></script>
+    <script src="../../../../../_static/jquery.js"></script>
+    <script src="../../../../../_static/underscore.js"></script>
+    <script src="../../../../../_static/doctools.js"></script>
+    <script src="../../../../../_static/language_data.js"></script>
+    
+    <link rel="index" title="Index" href="../../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../../search.html" /> 
+  </head><body>
     <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
@@ -36,8 +26,8 @@
         <li class="right" >
           <a href="../../../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../../../index.html">Python  documentation</a> &raquo;</li>
-          <li class="nav-item nav-item-1"><a href="../../../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="../../../../../index.html">Python  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../../../index.html" accesskey="U">Module code</a> &#187;</li> 
       </ul>
     </div>  
 
@@ -74,9 +64,9 @@
 <span class="c1"># Start of code</span>
 <span class="c1">#=========================================================================================</span>
 
-<span class="kn">import</span> <span class="nn">pyqtgraph</span> <span class="kn">as</span> <span class="nn">pg</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">pandas</span> <span class="kn">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">pyqtgraph</span> <span class="k">as</span> <span class="nn">pg</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 <span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">OrderedDict</span>
 <span class="kn">from</span> <span class="nn">ccpn.core.lib.CallBack</span> <span class="kn">import</span> <span class="n">CallBack</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.modules.CcpnModule</span> <span class="kn">import</span> <span class="n">CcpnModule</span>
@@ -109,23 +99,23 @@
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    This class implements the module by wrapping a StructureTable instance</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">includeSettingsWidget</span> <span class="o">=</span> <span class="bp">True</span>
+    <span class="n">includeSettingsWidget</span> <span class="o">=</span> <span class="kc">True</span>
     <span class="n">maxSettingsState</span> <span class="o">=</span> <span class="mi">2</span>  <span class="c1"># states are defined as: 0: invisible, 1: both visible, 2: only settings visible</span>
     <span class="n">settingsPosition</span> <span class="o">=</span> <span class="s1">&#39;left&#39;</span>
 
-    <span class="n">includePeakLists</span> <span class="o">=</span> <span class="bp">False</span>
-    <span class="n">includeNmrChains</span> <span class="o">=</span> <span class="bp">False</span>
-    <span class="n">includeSpectrumTable</span> <span class="o">=</span> <span class="bp">False</span>
+    <span class="n">includePeakLists</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">includeNmrChains</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">includeSpectrumTable</span> <span class="o">=</span> <span class="kc">False</span>
 
     <span class="n">className</span> <span class="o">=</span> <span class="s1">&#39;StructureTableModule&#39;</span>
 
     <span class="c1"># we are subclassing this Module, hence some more arguments to the init</span>
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mainWindow</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;Structure Table&#39;</span><span class="p">,</span>
-                 <span class="n">structureEnsemble</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">selectFirstItem</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mainWindow</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;Structure Table&#39;</span><span class="p">,</span>
+                 <span class="n">structureEnsemble</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">selectFirstItem</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Initialise the Module widgets</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">mainWindow</span><span class="o">=</span><span class="n">mainWindow</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">mainWindow</span><span class="o">=</span><span class="n">mainWindow</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
 
         <span class="c1"># Derive application, project, and current from mainWindow</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span> <span class="o">=</span> <span class="n">mainWindow</span>
@@ -134,9 +124,9 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">project</span> <span class="o">=</span> <span class="n">mainWindow</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">project</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">current</span> <span class="o">=</span> <span class="n">mainWindow</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">current</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">application</span> <span class="o">=</span> <span class="bp">None</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">project</span> <span class="o">=</span> <span class="bp">None</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">current</span> <span class="o">=</span> <span class="bp">None</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">application</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">project</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">current</span> <span class="o">=</span> <span class="kc">None</span>
 
         <span class="c1"># #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ejb</span>
         <span class="c1"># # add test structure Ensembles</span>
@@ -218,15 +208,15 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">structureTable</span> <span class="o">=</span> <span class="n">StructureTable</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">mainWidget</span><span class="p">,</span>
                                              <span class="n">mainWindow</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span><span class="p">,</span>
                                              <span class="n">moduleParent</span><span class="o">=</span><span class="bp">self</span><span class="p">,</span>
-                                             <span class="n">setLayout</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+                                             <span class="n">setLayout</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
                                              <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
 
-        <span class="k">if</span> <span class="n">structureEnsemble</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">structureEnsemble</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">selectStructureEnsemble</span><span class="p">(</span><span class="n">structureEnsemble</span><span class="p">)</span>
         <span class="k">elif</span> <span class="n">selectFirstItem</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">structureTable</span><span class="o">.</span><span class="n">stWidget</span><span class="o">.</span><span class="n">selectFirstItem</span><span class="p">()</span>
 
-<div class="viewcode-block" id="StructureTableModule.selectStructureEnsemble"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.modules.StructureTable.StructureTableModule.selectStructureEnsemble">[docs]</a>    <span class="k">def</span> <span class="nf">selectStructureEnsemble</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">structureEnsemble</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+<div class="viewcode-block" id="StructureTableModule.selectStructureEnsemble"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.modules.StructureTable.StructureTableModule.selectStructureEnsemble">[docs]</a>    <span class="k">def</span> <span class="nf">selectStructureEnsemble</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">structureEnsemble</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Manually select a StructureEnsemble from the pullDown</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -327,8 +317,8 @@
 <span class="sd">    GuiTable specific to tables that only contain a single pid for the pandas dataframe</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="nb">super</span><span class="p">(</span><span class="n">GuiTableStructure</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">GuiTableStructure</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_selectionTableCallback</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">itemSelection</span><span class="p">):</span>
         <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tableBlockSignals</span><span class="p">(</span><span class="s1">&#39;_selectionTableCallback&#39;</span><span class="p">):</span>
@@ -345,12 +335,12 @@
             <span class="k">if</span> <span class="n">rowList</span><span class="p">:</span>
                 <span class="n">data</span> <span class="o">=</span> <span class="n">CallBack</span><span class="p">(</span><span class="n">theObject</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_dataFrameObject</span><span class="p">,</span>
                                 <span class="nb">object</span><span class="o">=</span><span class="n">newPd</span><span class="p">,</span>
-                                <span class="n">index</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                                <span class="n">index</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                                 <span class="n">targetName</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">className</span><span class="p">,</span>
                                 <span class="n">trigger</span><span class="o">=</span><span class="n">CallBack</span><span class="o">.</span><span class="n">DOUBLECLICK</span><span class="p">,</span>
-                                <span class="n">row</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
-                                <span class="n">col</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
-                                <span class="n">rowItem</span><span class="o">=</span><span class="bp">None</span><span class="p">)</span>
+                                <span class="n">row</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                                <span class="n">col</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                                <span class="n">rowItem</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
 
                 <span class="bp">self</span><span class="o">.</span><span class="n">_selectionCallback</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
 
@@ -379,7 +369,7 @@
 
             <span class="n">data</span> <span class="o">=</span> <span class="n">CallBack</span><span class="p">(</span><span class="n">theObject</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_dataFrameObject</span><span class="p">,</span>
                             <span class="nb">object</span><span class="o">=</span><span class="n">newPd</span><span class="p">,</span>
-                            <span class="n">index</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                            <span class="n">index</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                             <span class="n">targetName</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">className</span><span class="p">,</span>
                             <span class="n">trigger</span><span class="o">=</span><span class="n">CallBack</span><span class="o">.</span><span class="n">DOUBLECLICK</span><span class="p">,</span>
                             <span class="n">row</span><span class="o">=</span><span class="n">row</span><span class="p">,</span>
@@ -390,7 +380,7 @@
                 <span class="bp">self</span><span class="o">.</span><span class="n">_actionCallback</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
             <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dataFrameObject</span><span class="o">.</span><span class="n">columnDefinitions</span><span class="o">.</span><span class="n">setEditValues</span><span class="p">[</span><span class="n">col</span><span class="p">]:</span>  <span class="c1"># ejb - editable fields don&#39;t actionCallback:</span>
                 <span class="n">item</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">item</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="n">col</span><span class="p">)</span>
-                <span class="n">item</span><span class="o">.</span><span class="n">setEditable</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+                <span class="n">item</span><span class="o">.</span><span class="n">setEditable</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
                 <span class="c1"># self.itemDelegate().closeEditor.connect(partial(self._changeMe, row, col))</span>
                 <span class="c1"># item.textChanged.connect(partial(self._changeMe, item))</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">editItem</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>  <span class="c1"># enter the editing mode</span></div>
@@ -407,7 +397,7 @@
     <span class="n">OBJECT</span> <span class="o">=</span> <span class="s1">&#39;object&#39;</span>
     <span class="n">TABLE</span> <span class="o">=</span> <span class="s1">&#39;table&#39;</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">mainWindow</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">moduleParent</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">structureEnsemble</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">mainWindow</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">moduleParent</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">structureEnsemble</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
         <span class="c1"># Derive application, project, and current from mainWindow</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_mainWindow</span> <span class="o">=</span> <span class="n">mainWindow</span>
         <span class="k">if</span> <span class="n">mainWindow</span><span class="p">:</span>
@@ -415,50 +405,51 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">_project</span> <span class="o">=</span> <span class="n">mainWindow</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">project</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_current</span> <span class="o">=</span> <span class="n">mainWindow</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">current</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_application</span> <span class="o">=</span> <span class="bp">None</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_project</span> <span class="o">=</span> <span class="bp">None</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_current</span> <span class="o">=</span> <span class="bp">None</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_application</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_project</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_current</span> <span class="o">=</span> <span class="kc">None</span>
 
         <span class="n">parent</span><span class="o">.</span><span class="n">getLayout</span><span class="p">()</span><span class="o">.</span><span class="n">setHorizontalSpacing</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_widgetScrollArea</span> <span class="o">=</span> <span class="n">ScrollArea</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="n">parent</span><span class="p">,</span> <span class="n">scrollBarPolicies</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;never&#39;</span><span class="p">,</span> <span class="s1">&#39;never&#39;</span><span class="p">),</span> <span class="o">**</span><span class="n">kwds</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_widgetScrollArea</span><span class="o">.</span><span class="n">setWidgetResizable</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_widget</span> <span class="o">=</span> <span class="n">Widget</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_widgetScrollArea</span><span class="p">,</span> <span class="n">setLayout</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_widgetScrollArea</span><span class="o">.</span><span class="n">setWidgetResizable</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_widget</span> <span class="o">=</span> <span class="n">Widget</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_widgetScrollArea</span><span class="p">,</span> <span class="n">setLayout</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_widgetScrollArea</span><span class="o">.</span><span class="n">setWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_widget</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_widget</span><span class="o">.</span><span class="n">setSizePolicy</span><span class="p">(</span><span class="n">QtWidgets</span><span class="o">.</span><span class="n">QSizePolicy</span><span class="o">.</span><span class="n">MinimumExpanding</span><span class="p">,</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QSizePolicy</span><span class="o">.</span><span class="n">Expanding</span><span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">thisObj</span> <span class="o">=</span> <span class="bp">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">thisDataSet</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">thisObj</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">thisDataSet</span> <span class="o">=</span> <span class="kc">None</span>
 
         <span class="n">StructureTable</span><span class="o">.</span><span class="n">_project</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span>
 
         <span class="c1"># create the column objects</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">structureColumns</span> <span class="o">=</span> <span class="p">[</span>
-            <span class="p">(</span><span class="s1">&#39;#&#39;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">row</span><span class="p">:</span> <span class="n">StructureTable</span><span class="o">.</span><span class="n">_stLamInt</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="s1">&#39;Index&#39;</span><span class="p">),</span> <span class="s1">&#39;Index&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span>
-            <span class="p">(</span><span class="s1">&#39;modelNumber&#39;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">row</span><span class="p">:</span> <span class="n">StructureTable</span><span class="o">.</span><span class="n">_stLamInt</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="s1">&#39;modelNumber&#39;</span><span class="p">),</span> <span class="s1">&#39;modelNumber&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span>
-            <span class="p">(</span><span class="s1">&#39;chainCode&#39;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">row</span><span class="p">:</span> <span class="n">StructureTable</span><span class="o">.</span><span class="n">_stLamStr</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="s1">&#39;chainCode&#39;</span><span class="p">),</span> <span class="s1">&#39;chainCode&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span>
-            <span class="p">(</span><span class="s1">&#39;sequenceId&#39;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">row</span><span class="p">:</span> <span class="n">StructureTable</span><span class="o">.</span><span class="n">_stLamInt</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="s1">&#39;sequenceId&#39;</span><span class="p">),</span> <span class="s1">&#39;sequenceId&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span>
+            <span class="p">(</span><span class="s1">&#39;#&#39;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">row</span><span class="p">:</span> <span class="n">StructureTable</span><span class="o">.</span><span class="n">_stLamInt</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="s1">&#39;Index&#39;</span><span class="p">),</span> <span class="s1">&#39;Index&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
+            <span class="p">(</span><span class="s1">&#39;modelNumber&#39;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">row</span><span class="p">:</span> <span class="n">StructureTable</span><span class="o">.</span><span class="n">_stLamInt</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="s1">&#39;modelNumber&#39;</span><span class="p">),</span> <span class="s1">&#39;modelNumber&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
+            <span class="p">(</span><span class="s1">&#39;chainCode&#39;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">row</span><span class="p">:</span> <span class="n">StructureTable</span><span class="o">.</span><span class="n">_stLamStr</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="s1">&#39;chainCode&#39;</span><span class="p">),</span> <span class="s1">&#39;chainCode&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
+            <span class="p">(</span><span class="s1">&#39;sequenceId&#39;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">row</span><span class="p">:</span> <span class="n">StructureTable</span><span class="o">.</span><span class="n">_stLamInt</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="s1">&#39;sequenceId&#39;</span><span class="p">),</span> <span class="s1">&#39;sequenceId&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
             <span class="p">(</span><span class="s1">&#39;insertionCode&#39;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">row</span><span class="p">:</span> <span class="n">StructureTable</span><span class="o">.</span><span class="n">_stLamStr</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="s1">&#39;insertionCode&#39;</span><span class="p">),</span> <span class="s1">&#39;insertionCode&#39;</span><span class="p">,</span>
-             <span class="bp">None</span><span class="p">),</span>
-            <span class="p">(</span><span class="s1">&#39;residueName&#39;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">row</span><span class="p">:</span> <span class="n">StructureTable</span><span class="o">.</span><span class="n">_stLamStr</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="s1">&#39;residueName&#39;</span><span class="p">),</span> <span class="s1">&#39;residueName&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span>
-            <span class="p">(</span><span class="s1">&#39;atomName&#39;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">row</span><span class="p">:</span> <span class="n">StructureTable</span><span class="o">.</span><span class="n">_stLamStr</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="s1">&#39;atomName&#39;</span><span class="p">),</span> <span class="s1">&#39;atomName&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span>
+             <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
+            <span class="p">(</span><span class="s1">&#39;residueName&#39;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">row</span><span class="p">:</span> <span class="n">StructureTable</span><span class="o">.</span><span class="n">_stLamStr</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="s1">&#39;residueName&#39;</span><span class="p">),</span> <span class="s1">&#39;residueName&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
+            <span class="p">(</span><span class="s1">&#39;atomName&#39;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">row</span><span class="p">:</span> <span class="n">StructureTable</span><span class="o">.</span><span class="n">_stLamStr</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="s1">&#39;atomName&#39;</span><span class="p">),</span> <span class="s1">&#39;atomName&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
             <span class="p">(</span><span class="s1">&#39;altLocationCode&#39;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">row</span><span class="p">:</span> <span class="n">StructureTable</span><span class="o">.</span><span class="n">_stLamStr</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="s1">&#39;altLocationCode&#39;</span><span class="p">),</span>
-             <span class="s1">&#39;altLocationCode&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span>
-            <span class="p">(</span><span class="s1">&#39;element&#39;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">row</span><span class="p">:</span> <span class="n">StructureTable</span><span class="o">.</span><span class="n">_stLamStr</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="s1">&#39;element&#39;</span><span class="p">),</span> <span class="s1">&#39;element&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span>
-            <span class="p">(</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">row</span><span class="p">:</span> <span class="n">StructureTable</span><span class="o">.</span><span class="n">_stLamFloat</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="s1">&#39;x&#39;</span><span class="p">),</span> <span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span>
-            <span class="p">(</span><span class="s1">&#39;y&#39;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">row</span><span class="p">:</span> <span class="n">StructureTable</span><span class="o">.</span><span class="n">_stLamFloat</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="s1">&#39;y&#39;</span><span class="p">),</span> <span class="s1">&#39;y&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span>
-            <span class="p">(</span><span class="s1">&#39;z&#39;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">row</span><span class="p">:</span> <span class="n">StructureTable</span><span class="o">.</span><span class="n">_stLamFloat</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="s1">&#39;z&#39;</span><span class="p">),</span> <span class="s1">&#39;z&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span>
-            <span class="p">(</span><span class="s1">&#39;occupancy&#39;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">row</span><span class="p">:</span> <span class="n">StructureTable</span><span class="o">.</span><span class="n">_stLamFloat</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="s1">&#39;occupancy&#39;</span><span class="p">),</span> <span class="s1">&#39;occupancy&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span>
-            <span class="p">(</span><span class="s1">&#39;bFactor&#39;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">row</span><span class="p">:</span> <span class="n">StructureTable</span><span class="o">.</span><span class="n">_stLamFloat</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="s1">&#39;bFactor&#39;</span><span class="p">),</span> <span class="s1">&#39;bFactor&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span>
+             <span class="s1">&#39;altLocationCode&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
+            <span class="p">(</span><span class="s1">&#39;element&#39;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">row</span><span class="p">:</span> <span class="n">StructureTable</span><span class="o">.</span><span class="n">_stLamStr</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="s1">&#39;element&#39;</span><span class="p">),</span> <span class="s1">&#39;element&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
+            <span class="p">(</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">row</span><span class="p">:</span> <span class="n">StructureTable</span><span class="o">.</span><span class="n">_stLamFloat</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="s1">&#39;x&#39;</span><span class="p">),</span> <span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="s1">&#39;</span><span class="si">%0.3f</span><span class="s1">&#39;</span><span class="p">),</span>
+            <span class="p">(</span><span class="s1">&#39;y&#39;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">row</span><span class="p">:</span> <span class="n">StructureTable</span><span class="o">.</span><span class="n">_stLamFloat</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="s1">&#39;y&#39;</span><span class="p">),</span> <span class="s1">&#39;y&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="s1">&#39;</span><span class="si">%0.3f</span><span class="s1">&#39;</span><span class="p">),</span>
+            <span class="p">(</span><span class="s1">&#39;z&#39;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">row</span><span class="p">:</span> <span class="n">StructureTable</span><span class="o">.</span><span class="n">_stLamFloat</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="s1">&#39;z&#39;</span><span class="p">),</span> <span class="s1">&#39;z&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="s1">&#39;</span><span class="si">%0.3f</span><span class="s1">&#39;</span><span class="p">),</span>
+            <span class="p">(</span><span class="s1">&#39;occupancy&#39;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">row</span><span class="p">:</span> <span class="n">StructureTable</span><span class="o">.</span><span class="n">_stLamFloat</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="s1">&#39;occupancy&#39;</span><span class="p">),</span> <span class="s1">&#39;occupancy&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
+            <span class="p">(</span><span class="s1">&#39;bFactor&#39;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">row</span><span class="p">:</span> <span class="n">StructureTable</span><span class="o">.</span><span class="n">_stLamFloat</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="s1">&#39;bFactor&#39;</span><span class="p">),</span> <span class="s1">&#39;bFactor&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
             <span class="p">(</span><span class="s1">&#39;nmrChainCode&#39;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">row</span><span class="p">:</span> <span class="n">StructureTable</span><span class="o">.</span><span class="n">_stLamStr</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="s1">&#39;nmrChainCode&#39;</span><span class="p">),</span> <span class="s1">&#39;nmrChainCode&#39;</span><span class="p">,</span>
-             <span class="bp">None</span><span class="p">),</span>
+             <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
             <span class="p">(</span><span class="s1">&#39;nmrSequenceCode&#39;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">row</span><span class="p">:</span> <span class="n">StructureTable</span><span class="o">.</span><span class="n">_stLamStr</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="s1">&#39;nmrSequenceCode&#39;</span><span class="p">),</span>
-             <span class="s1">&#39;nmrSequenceCode&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span>
+             <span class="s1">&#39;nmrSequenceCode&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
             <span class="p">(</span><span class="s1">&#39;nmrResidueName&#39;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">row</span><span class="p">:</span> <span class="n">StructureTable</span><span class="o">.</span><span class="n">_stLamStr</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="s1">&#39;nmrResidueName&#39;</span><span class="p">),</span>
-             <span class="s1">&#39;nmrResidueName&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span>
-            <span class="p">(</span><span class="s1">&#39;nmrAtomName&#39;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">row</span><span class="p">:</span> <span class="n">StructureTable</span><span class="o">.</span><span class="n">_stLamStr</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="s1">&#39;nmrAtomName&#39;</span><span class="p">),</span> <span class="s1">&#39;nmrAtomName&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span>
+             <span class="s1">&#39;nmrResidueName&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
+            <span class="p">(</span><span class="s1">&#39;nmrAtomName&#39;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">row</span><span class="p">:</span> <span class="n">StructureTable</span><span class="o">.</span><span class="n">_stLamStr</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="s1">&#39;nmrAtomName&#39;</span><span class="p">),</span> <span class="s1">&#39;nmrAtomName&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
             <span class="p">(</span><span class="s1">&#39;Comment&#39;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">row</span><span class="p">:</span> <span class="n">StructureTable</span><span class="o">.</span><span class="n">_getCommentText</span><span class="p">(</span><span class="n">row</span><span class="p">),</span> <span class="s1">&#39;Notes&#39;</span><span class="p">,</span>
-             <span class="k">lambda</span> <span class="n">row</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">StructureTable</span><span class="o">.</span><span class="n">_setComment</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="s1">&#39;comment&#39;</span><span class="p">,</span> <span class="n">value</span><span class="p">))</span>
-            <span class="p">]</span>  <span class="c1"># [Column(colName, func, tipText, editValue) for colName, func, tipText, editValue in self.columnDefs]</span>
+             <span class="k">lambda</span> <span class="n">row</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">StructureTable</span><span class="o">.</span><span class="n">_setComment</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="s1">&#39;comment&#39;</span><span class="p">,</span> <span class="n">value</span><span class="p">),</span> <span class="kc">None</span><span class="p">)</span>
+            <span class="p">]</span>  <span class="c1"># [Column(colName, func, tipText, editValue, columnFormat)</span>
+                <span class="c1"># for colName, func, tipText, editValue, columnFormat in self.columnDefs]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">STcolumns</span> <span class="o">=</span> <span class="n">ColumnClass</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">structureColumns</span><span class="p">)</span>
 
         <span class="c1"># create the table; objects are added later via the displayTableForStructure method</span>
@@ -466,16 +457,16 @@
                              <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QSizePolicy</span><span class="o">.</span><span class="n">Fixed</span><span class="p">,</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QSizePolicy</span><span class="o">.</span><span class="n">Fixed</span><span class="p">,</span>
                              <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">gridSpan</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">stWidget</span> <span class="o">=</span> <span class="n">StructureEnsemblePulldown</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_widget</span><span class="p">,</span>
-                                                  <span class="n">project</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>  <span class="c1"># first Structure in project (if present),</span>
+                                                  <span class="n">mainWindow</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_mainWindow</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>  <span class="c1"># first Structure in project (if present),</span>
                                                   <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">gridSpan</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">minimumWidths</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">100</span><span class="p">),</span>
-                                                  <span class="n">showSelectName</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+                                                  <span class="n">showSelectName</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
                                                   <span class="n">sizeAdjustPolicy</span><span class="o">=</span><span class="n">QtWidgets</span><span class="o">.</span><span class="n">QComboBox</span><span class="o">.</span><span class="n">AdjustToContents</span><span class="p">,</span>
                                                   <span class="n">callback</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_selectionPulldownCallback</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">stButtons</span> <span class="o">=</span> <span class="n">RadioButtons</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_widget</span><span class="p">,</span> <span class="n">texts</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;Ensemble&#39;</span><span class="p">,</span> <span class="s1">&#39;average&#39;</span><span class="p">],</span>
                                       <span class="n">selectedInd</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
                                       <span class="n">callback</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_selectionButtonCallback</span><span class="p">,</span>
                                       <span class="n">direction</span><span class="o">=</span><span class="s1">&#39;h&#39;</span><span class="p">,</span>
-                                      <span class="n">tipTexts</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                                      <span class="n">tipTexts</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                                       <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="n">gridSpan</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">spacer</span> <span class="o">=</span> <span class="n">Spacer</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_widget</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span>
                              <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QSizePolicy</span><span class="o">.</span><span class="n">Expanding</span><span class="p">,</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QSizePolicy</span><span class="o">.</span><span class="n">Fixed</span><span class="p">,</span>
@@ -484,27 +475,27 @@
 
         <span class="c1"># self._columnNames = [header.headerText for header in self.STcolumns]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_hiddenColumns</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;altLocationCode&#39;</span><span class="p">,</span> <span class="s1">&#39;element&#39;</span><span class="p">,</span> <span class="s1">&#39;occupancy&#39;</span><span class="p">]</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">dataFrameObject</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dataFrameObject</span> <span class="o">=</span> <span class="kc">None</span>
 
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="n">parent</span><span class="p">,</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="n">parent</span><span class="p">,</span>
                             <span class="n">mainWindow</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_mainWindow</span><span class="p">,</span>
-                            <span class="n">dataFrameObject</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>  <span class="c1"># class collating table and objects and headings,</span>
-                            <span class="n">setLayout</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
-                            <span class="n">autoResize</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">multiSelect</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+                            <span class="n">dataFrameObject</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>  <span class="c1"># class collating table and objects and headings,</span>
+                            <span class="n">setLayout</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                            <span class="n">autoResize</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">multiSelect</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
                             <span class="n">selectionCallback</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_selectionCallback</span><span class="p">,</span>
                             <span class="n">actionCallback</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_actionCallback</span><span class="p">,</span>
                             <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">gridSpan</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">6</span><span class="p">)</span>
                             <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">moduleParent</span> <span class="o">=</span> <span class="n">moduleParent</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">_ensembleNotifier</span> <span class="o">=</span> <span class="bp">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_updateSilence</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_ensembleNotifier</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_updateSilence</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_setNotifiers</span><span class="p">()</span>
 
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">stButtons</span><span class="o">.</span><span class="n">radioButtons</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">stButtons</span><span class="o">.</span><span class="n">radioButtons</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">stButtons</span><span class="o">.</span><span class="n">radioButtons</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="n">structureEnsemble</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">structureEnsemble</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_selectStructureEnsemble</span><span class="p">(</span><span class="n">structureEnsemble</span><span class="p">)</span>
 
         <span class="c1"># data = np.array([</span>
@@ -535,11 +526,11 @@
             <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;Col has to be &gt;= 2&#39;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_widget</span><span class="o">.</span><span class="n">getLayout</span><span class="p">()</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">widget</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">col</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">colSpan</span><span class="p">)</span></div>
 
-    <span class="k">def</span> <span class="nf">_selectStructureEnsemble</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">structureEnsemble</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_selectStructureEnsemble</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">structureEnsemble</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Manually select a StructureEnsemble from the pullDown</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="n">structureEnsemble</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">structureEnsemble</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="c1"># getLogger().warning(&#39;select: No StructureEnsemble selected&#39;)</span>
             <span class="c1"># raise ValueError(&#39;select: No StructureEnsemble selected&#39;)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">stWidget</span><span class="o">.</span><span class="n">selectFirstItem</span><span class="p">()</span>
@@ -551,9 +542,9 @@
                 <span class="k">for</span> <span class="n">widgetObj</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">stWidget</span><span class="o">.</span><span class="n">textList</span><span class="p">:</span>
                     <span class="k">if</span> <span class="n">structureEnsemble</span><span class="o">.</span><span class="n">pid</span> <span class="o">==</span> <span class="n">widgetObj</span><span class="p">:</span>
                         <span class="bp">self</span><span class="o">.</span><span class="n">thisObj</span> <span class="o">=</span> <span class="n">structureEnsemble</span>
-                        <span class="bp">self</span><span class="o">.</span><span class="n">thisDataSet</span> <span class="o">=</span> <span class="bp">None</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">thisDataSet</span> <span class="o">=</span> <span class="kc">None</span>
                         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">stButtons</span><span class="o">.</span><span class="n">radioButtons</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-                            <span class="bp">self</span><span class="o">.</span><span class="n">stButtons</span><span class="o">.</span><span class="n">radioButtons</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">stButtons</span><span class="o">.</span><span class="n">radioButtons</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
                         <span class="c1"># find the matching dataset if exists</span>
 
                         <span class="bp">self</span><span class="o">.</span><span class="n">stWidget</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">thisObj</span><span class="o">.</span><span class="n">pid</span><span class="p">)</span>
@@ -594,7 +585,7 @@
         <span class="c1"># self.stWidget.select(structureEnsemble.pid)</span>
 
         <span class="c1"># ejb - doesn&#39;t work, can&#39;t store in a DataSet</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">thisDataSet</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">thisDataSet</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_updateDataSet</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">thisDataSet</span><span class="p">)</span></div>
 
     <span class="k">def</span> <span class="nf">_getAttachedDataSet</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">thisObj</span><span class="p">):</span>
@@ -602,26 +593,26 @@
 <span class="sd">        Get the DataSet object attached to this StructureEnsemble</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">stButtons</span><span class="o">.</span><span class="n">radioButtons</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">stButtons</span><span class="o">.</span><span class="n">radioButtons</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">stButtons</span><span class="o">.</span><span class="n">radioButtons</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
         <span class="k">try</span><span class="p">:</span>
-            <span class="n">Found</span> <span class="o">=</span> <span class="bp">False</span>
-            <span class="n">dd</span> <span class="o">=</span> <span class="n">dt</span> <span class="o">=</span> <span class="bp">None</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">thisDataSet</span> <span class="o">=</span> <span class="bp">None</span>
+            <span class="n">Found</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="n">dd</span> <span class="o">=</span> <span class="n">dt</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">thisDataSet</span> <span class="o">=</span> <span class="kc">None</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">dataSets</span><span class="p">:</span>
                 <span class="k">for</span> <span class="n">dd</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">dataSets</span><span class="p">:</span>
                     <span class="k">if</span> <span class="n">dd</span><span class="o">.</span><span class="n">title</span> <span class="o">==</span> <span class="n">thisObj</span><span class="o">.</span><span class="n">name</span><span class="p">:</span>
                         <span class="k">for</span> <span class="n">dt</span> <span class="ow">in</span> <span class="n">dd</span><span class="o">.</span><span class="n">data</span><span class="p">:</span>
-                            <span class="k">if</span> <span class="n">dt</span><span class="o">.</span><span class="n">name</span> <span class="ow">is</span> <span class="s1">&#39;Derived&#39;</span><span class="p">:</span>
-                                <span class="n">Found</span> <span class="o">=</span> <span class="bp">True</span>
+                            <span class="k">if</span> <span class="n">dt</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s1">&#39;Derived&#39;</span><span class="p">:</span>
+                                <span class="n">Found</span> <span class="o">=</span> <span class="kc">True</span>
 
             <span class="c1"># if not Found:</span>
             <span class="c1">#   dd = self._project.newDataSet(thisObj.longPid)  # title - should be ensemble name/title/longPid</span>
             <span class="c1">#   dt = dd.newData(&#39;Derived&#39;)</span>
             <span class="c1"># self.thisDataSet = dd</span>
 
-            <span class="k">if</span> <span class="n">Found</span> <span class="ow">is</span> <span class="bp">True</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">Found</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
                 <span class="k">if</span> <span class="s1">&#39;average&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">dt</span><span class="o">.</span><span class="n">parameters</span><span class="p">:</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">thisDataSet</span> <span class="o">=</span> <span class="bp">None</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">thisDataSet</span> <span class="o">=</span> <span class="kc">None</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">thisDataSet</span> <span class="o">=</span> <span class="n">dt</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;average&#39;</span><span class="p">]</span>
 
@@ -630,11 +621,11 @@
                     <span class="bp">self</span><span class="o">.</span><span class="n">AVcolumns</span> <span class="o">=</span> <span class="n">ColumnClass</span><span class="p">([</span><span class="n">col</span> <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">structureColumns</span> <span class="k">if</span> <span class="n">col</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">in</span> <span class="n">AVheadings</span> <span class="ow">or</span> <span class="n">col</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;#&#39;</span><span class="p">])</span>
 
                     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">stButtons</span><span class="o">.</span><span class="n">radioButtons</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-                        <span class="bp">self</span><span class="o">.</span><span class="n">stButtons</span><span class="o">.</span><span class="n">radioButtons</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">stButtons</span><span class="o">.</span><span class="n">radioButtons</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">thisDataSet</span> <span class="o">=</span> <span class="bp">None</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">thisDataSet</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="k">except</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">thisDataSet</span> <span class="o">=</span> <span class="bp">None</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">thisDataSet</span> <span class="o">=</span> <span class="kc">None</span>
 
             <span class="c1"># from ccpn.util.StructureData import averageStructure</span>
             <span class="c1"># dt.parameters[&#39;average&#39;] = averageStructure(item.data)</span>
@@ -824,7 +815,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">stButtons</span><span class="o">.</span><span class="n">setIndex</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">thisObj</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">getByPid</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
         <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;&gt;selectionPulldownCallback&gt;&#39;</span><span class="p">,</span> <span class="n">item</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="n">item</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">thisObj</span><span class="p">)</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">thisObj</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">thisObj</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_getAttachedDataSet</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">thisObj</span><span class="p">)</span>  <span class="c1"># check for a matching dataset, DS.title=SE.label</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">displayTableForStructure</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">thisObj</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
@@ -836,10 +827,10 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">item</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">stButtons</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
         <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;&gt;selectionPulldownCallback&gt;&#39;</span><span class="p">,</span> <span class="n">item</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="n">item</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">thisObj</span><span class="p">)</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">thisObj</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">item</span> <span class="ow">is</span> <span class="s1">&#39;Ensemble&#39;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">thisObj</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">item</span> <span class="o">==</span> <span class="s1">&#39;Ensemble&#39;</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">displayTableForStructure</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">thisObj</span><span class="p">)</span>
-            <span class="k">elif</span> <span class="n">item</span> <span class="ow">is</span> <span class="s1">&#39;average&#39;</span><span class="p">:</span>
+            <span class="k">elif</span> <span class="n">item</span> <span class="o">==</span> <span class="s1">&#39;average&#39;</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">displayTableForDataSetStructure</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">thisObj</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
@@ -853,23 +844,23 @@
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">thisObj</span> <span class="ow">in</span> <span class="n">thisEnsembleList</span><span class="p">:</span>
             <span class="n">item</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">stButtons</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
             <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;&gt;selectionPulldownCallback&gt; </span><span class="si">%s</span><span class="s1"> </span><span class="si">%s</span><span class="s1"> </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="n">item</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">thisObj</span><span class="p">))</span>
-            <span class="k">if</span> <span class="n">item</span> <span class="ow">is</span> <span class="s1">&#39;Ensemble&#39;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">item</span> <span class="o">==</span> <span class="s1">&#39;Ensemble&#39;</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">displayTableForStructure</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">thisObj</span><span class="p">)</span>
-            <span class="k">elif</span> <span class="n">item</span> <span class="ow">is</span> <span class="s1">&#39;average&#39;</span><span class="p">:</span>
+            <span class="k">elif</span> <span class="n">item</span> <span class="o">==</span> <span class="s1">&#39;average&#39;</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">displayTableForDataSetStructure</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">thisObj</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="c1"># self.clearTable()</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
 
-<div class="viewcode-block" id="StructureTable.navigateToStructureInDisplay"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.modules.StructureTable.StructureTable.navigateToStructureInDisplay">[docs]</a>    <span class="k">def</span> <span class="nf">navigateToStructureInDisplay</span><span class="p">(</span><span class="n">structureEnsemble</span><span class="p">,</span> <span class="n">display</span><span class="p">,</span> <span class="n">stripIndex</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">widths</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
-                                     <span class="n">showSequentialStructures</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">markPositions</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+<div class="viewcode-block" id="StructureTable.navigateToStructureInDisplay"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.modules.StructureTable.StructureTable.navigateToStructureInDisplay">[docs]</a>    <span class="k">def</span> <span class="nf">navigateToStructureInDisplay</span><span class="p">(</span><span class="n">structureEnsemble</span><span class="p">,</span> <span class="n">display</span><span class="p">,</span> <span class="n">stripIndex</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">widths</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                                     <span class="n">showSequentialStructures</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">markPositions</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Notifier Callback for selecting Object from item in the table</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;display=</span><span class="si">%r</span><span class="s1">, nmrResidue=</span><span class="si">%r</span><span class="s1">, showSequentialResidues=</span><span class="si">%s</span><span class="s1">, markPositions=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span>
                           <span class="p">(</span><span class="n">display</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">structureEnsemble</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">showSequentialStructures</span><span class="p">,</span> <span class="n">markPositions</span><span class="p">)</span>
                           <span class="p">)</span>
-        <span class="k">return</span> <span class="bp">None</span></div>
+        <span class="k">return</span> <span class="kc">None</span></div>
 
     <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">_getCommentText</span><span class="p">(</span><span class="n">structure</span><span class="p">):</span>
@@ -941,7 +932,7 @@
         <span class="k">try</span><span class="p">:</span>
             <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="n">name</span><span class="p">))</span>
         <span class="k">except</span><span class="p">:</span>
-            <span class="k">return</span> <span class="bp">None</span>
+            <span class="k">return</span> <span class="kc">None</span>
 
     <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">_stLamFloat</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
@@ -951,7 +942,7 @@
         <span class="k">try</span><span class="p">:</span>
             <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="n">name</span><span class="p">))</span>
         <span class="k">except</span><span class="p">:</span>
-            <span class="k">return</span> <span class="bp">None</span>
+            <span class="k">return</span> <span class="kc">None</span>
 
     <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">_stLamStr</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
@@ -961,7 +952,7 @@
         <span class="k">try</span><span class="p">:</span>
             <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="n">name</span><span class="p">))</span>
         <span class="k">except</span><span class="p">:</span>
-            <span class="k">return</span> <span class="bp">None</span>
+            <span class="k">return</span> <span class="kc">None</span>
 
 <div class="viewcode-block" id="StructureTable.initialiseButtons"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.modules.StructureTable.StructureTable.initialiseButtons">[docs]</a>    <span class="k">def</span> <span class="nf">initialiseButtons</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -978,9 +969,9 @@
         <span class="c1"># self._clearNotifiers()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_ensembleNotifier</span> <span class="o">=</span> <span class="n">Notifier</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="p">,</span>
                                           <span class="p">[</span><span class="n">Notifier</span><span class="o">.</span><span class="n">CREATE</span><span class="p">,</span> <span class="n">Notifier</span><span class="o">.</span><span class="n">DELETE</span><span class="p">,</span> <span class="n">Notifier</span><span class="o">.</span><span class="n">RENAME</span><span class="p">,</span> <span class="n">Notifier</span><span class="o">.</span><span class="n">CHANGE</span><span class="p">],</span>
-                                          <span class="n">StructureEnsemble</span><span class="o">.</span><span class="n">__name__</span><span class="p">,</span>
+                                          <span class="n">StructureEnsemble</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span>
                                           <span class="bp">self</span><span class="o">.</span><span class="n">_updateCallback</span><span class="p">,</span>
-                                          <span class="n">onceOnly</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span></div>
+                                          <span class="n">onceOnly</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div>
 
     <span class="c1"># def _clearNotifiers(self):</span>
     <span class="c1">#   &quot;&quot;&quot;</span>
@@ -1012,15 +1003,15 @@
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
 <div id="searchbox" style="display: none" role="search">
-  <h3>Quick search</h3>
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
     <form class="search" action="../../../../../search.html" method="get">
-      <input type="text" name="q" />
+      <input type="text" name="q" aria-labelledby="searchlabel" />
       <input type="submit" value="Go" />
-      <input type="hidden" name="check_keywords" value="yes" />
-      <input type="hidden" name="area" value="default" />
     </form>
+    </div>
 </div>
-<script type="text/javascript">$('#searchbox').show(0);</script>
+<script>$('#searchbox').show(0);</script>
         </div>
       </div>
       <div class="clearer"></div>
@@ -1034,13 +1025,13 @@
         <li class="right" >
           <a href="../../../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../../../index.html">Python  documentation</a> &raquo;</li>
-          <li class="nav-item nav-item-1"><a href="../../../../index.html" >Module code</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="../../../../../index.html">Python  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../../../index.html" >Module code</a> &#187;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
-        &copy; Copyright .
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.1.
+        &#169; Copyright .
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.4.0.
     </div>
   </body>
 </html>

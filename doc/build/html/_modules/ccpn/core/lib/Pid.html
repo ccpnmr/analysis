@@ -1,32 +1,22 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
+<!DOCTYPE html>
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    
-    <title>ccpn.core.lib.Pid &mdash; Python  documentation</title>
-    
+    <meta charset="utf-8" />
+    <title>ccpn.core.lib.Pid &#8212; Python  documentation</title>
     <link rel="stylesheet" href="../../../../_static/classic.css" type="text/css" />
     <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
     
-    <script type="text/javascript">
-      var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    '../../../../',
-        VERSION:     '',
-        COLLAPSE_INDEX: false,
-        FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true
-      };
-    </script>
-    <script type="text/javascript" src="../../../../_static/jquery.js"></script>
-    <script type="text/javascript" src="../../../../_static/underscore.js"></script>
-    <script type="text/javascript" src="../../../../_static/doctools.js"></script>
-    <link rel="top" title="Python  documentation" href="../../../../index.html" />
-    <link rel="up" title="Module code" href="../../../index.html" /> 
-  </head>
-  <body role="document">
+    <script id="documentation_options" data-url_root="../../../../" src="../../../../_static/documentation_options.js"></script>
+    <script src="../../../../_static/jquery.js"></script>
+    <script src="../../../../_static/underscore.js"></script>
+    <script src="../../../../_static/doctools.js"></script>
+    <script src="../../../../_static/language_data.js"></script>
+    
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+  </head><body>
     <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
@@ -36,8 +26,8 @@
         <li class="right" >
           <a href="../../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../../index.html">Python  documentation</a> &raquo;</li>
-          <li class="nav-item nav-item-1"><a href="../../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="../../../../index.html">Python  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../../index.html" accesskey="U">Module code</a> &#187;</li> 
       </ul>
     </div>  
 
@@ -117,7 +107,7 @@
 <span class="sd">    Keys are converted to string, and illegal characters are converted to altCharacter&quot;&quot;&quot;</span>
 
     <span class="c1"># map args to corrected strings</span>
-    <span class="k">return</span> <span class="n">IDSEP</span><span class="o">.</span><span class="n">join</span><span class="p">((</span><span class="s1">&#39;&#39;</span> <span class="k">if</span> <span class="n">val</span> <span class="ow">is</span> <span class="bp">None</span> <span class="k">else</span> <span class="nb">str</span><span class="p">(</span><span class="n">val</span><span class="p">)</span><span class="o">.</span><span class="n">translate</span><span class="p">(</span><span class="n">remapSeparators</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">IDSEP</span><span class="o">.</span><span class="n">join</span><span class="p">((</span><span class="s1">&#39;&#39;</span> <span class="k">if</span> <span class="n">val</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="nb">str</span><span class="p">(</span><span class="n">val</span><span class="p">)</span><span class="o">.</span><span class="n">translate</span><span class="p">(</span><span class="n">remapSeparators</span><span class="p">))</span>
                       <span class="k">for</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">args</span><span class="p">)</span></div>
 
 
@@ -126,7 +116,7 @@
 <span class="sd">    mapping altCharacter back to separator and replacing empty strings with None&quot;&quot;&quot;</span>
 
     <span class="c1"># map args to corrected strings</span>
-    <span class="k">return</span> <span class="nb">list</span><span class="p">((</span><span class="n">val</span><span class="o">.</span><span class="n">translate</span><span class="p">(</span><span class="n">unmapSeparators</span><span class="p">)</span> <span class="ow">or</span> <span class="bp">None</span><span class="p">)</span> <span class="k">for</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">idString</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">IDSEP</span><span class="p">))</span></div>
+    <span class="k">return</span> <span class="nb">list</span><span class="p">((</span><span class="n">val</span><span class="o">.</span><span class="n">translate</span><span class="p">(</span><span class="n">unmapSeparators</span><span class="p">)</span> <span class="ow">or</span> <span class="kc">None</span><span class="p">)</span> <span class="k">for</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">idString</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">IDSEP</span><span class="p">))</span></div>
 
 
 <div class="viewcode-block" id="decodePid"><a class="viewcode-back" href="../../../../ccpn/ccpn.core.lib.html#ccpn.core.lib.Pid.decodePid">[docs]</a><span class="k">def</span> <span class="nf">decodePid</span><span class="p">(</span><span class="n">sourceObject</span><span class="p">,</span> <span class="n">thePid</span><span class="p">:</span> <span class="s1">&#39;Pid&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Optional[Pid]&#39;</span><span class="p">:</span>
@@ -137,10 +127,10 @@
 
     <span class="c1"># REFACTOR. This DOES decode PID parts. TBD NBNB</span>
 
-    <span class="kn">import</span> <span class="nn">cing.Libs.io</span> <span class="kn">as</span> <span class="nn">io</span>
+    <span class="kn">import</span> <span class="nn">cing.Libs.io</span> <span class="k">as</span> <span class="nn">io</span>
 
-    <span class="k">if</span> <span class="n">thePid</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
-        <span class="k">return</span> <span class="bp">None</span>
+    <span class="k">if</span> <span class="n">thePid</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span>
 
     <span class="c1"># assure a Pid object</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">thePid</span><span class="p">,</span> <span class="n">Pid</span><span class="p">):</span>
@@ -158,14 +148,14 @@
                 <span class="c1"># just try it as a string</span>
                 <span class="n">thePid</span> <span class="o">=</span> <span class="n">Pid</span><span class="p">(</span><span class="n">strPid</span><span class="p">)</span>
         <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
-            <span class="n">io</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;decodePid: pid &quot;{0}&quot; is invalid&#39;</span><span class="p">,</span> <span class="n">thePid</span><span class="p">)</span>
+            <span class="n">io</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;decodePid: pid &quot;</span><span class="si">{0}</span><span class="s1">&quot; is invalid&#39;</span><span class="p">,</span> <span class="n">thePid</span><span class="p">)</span>
 
         <span class="c1">#end if</span>
     <span class="c1">#end if</span>
 
     <span class="k">if</span> <span class="ow">not</span> <span class="n">thePid</span><span class="o">.</span><span class="n">isValid</span><span class="p">:</span>
-        <span class="n">io</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;decodePid: pid &quot;{0}&quot; is invalid&#39;</span><span class="p">,</span> <span class="n">thePid</span><span class="p">)</span>
-        <span class="k">return</span> <span class="bp">None</span>
+        <span class="n">io</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;decodePid: pid &quot;</span><span class="si">{0}</span><span class="s1">&quot; is invalid&#39;</span><span class="p">,</span> <span class="n">thePid</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">None</span>
     <span class="c1">#end if</span>
 
     <span class="c1"># check if thePid describes the source object</span>
@@ -178,16 +168,16 @@
     <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">thePid</span><span class="p">:</span>
         <span class="c1">#print( &#39;decodePid&gt;&gt;&#39;, p, object)</span>
         <span class="k">if</span> <span class="n">p</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">obj</span><span class="p">:</span>
-            <span class="k">return</span> <span class="bp">None</span>
+            <span class="k">return</span> <span class="kc">None</span>
         <span class="n">obj</span> <span class="o">=</span> <span class="n">obj</span><span class="p">[</span><span class="n">p</span><span class="p">]</span>
     <span class="c1">#end for</span>
     <span class="c1"># found an object, check if it is the right kind</span>
     <span class="c1"># Necessary as ccpn wrapper objects use .className insteaad of .__class__.__name__</span>
-    <span class="n">objType</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">className</span> <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="s1">&#39;className&#39;</span><span class="p">)</span> <span class="k">else</span> <span class="n">obj</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span>
+    <span class="n">objType</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">className</span> <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="s1">&#39;className&#39;</span><span class="p">)</span> <span class="k">else</span> <span class="n">obj</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span>
     <span class="k">if</span> <span class="n">thePid</span><span class="o">.</span><span class="n">type</span> <span class="o">!=</span> <span class="n">objType</span><span class="p">:</span>
-        <span class="n">io</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;decodePid: type &quot;{0}&quot; does not match object type &quot;{1}&quot;&#39;</span><span class="p">,</span>
+        <span class="n">io</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;decodePid: type &quot;</span><span class="si">{0}</span><span class="s1">&quot; does not match object type &quot;</span><span class="si">{1}</span><span class="s1">&quot;&#39;</span><span class="p">,</span>
                  <span class="n">thePid</span><span class="o">.</span><span class="n">type</span><span class="p">,</span> <span class="n">objType</span><span class="p">)</span>
-        <span class="k">return</span> <span class="bp">None</span>
+        <span class="k">return</span> <span class="kc">None</span>
     <span class="k">return</span> <span class="n">obj</span></div>
 
 
@@ -265,16 +255,16 @@
             <span class="n">MO</span><span class="o">=</span><span class="s1">&#39;Molecule&#39;</span>
     <span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">string</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">string</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;First argument (&#39;string&#39; must be a valid pid string with at least one, non-initial PREFIXSEP</span>
 <span class="sd">        Additional arguments are converted to string with disallowed characters changed to altCharacter</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">kwds</span><span class="p">)</span>  <span class="c1"># GWV does not understand this</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">kwds</span><span class="p">)</span>  <span class="c1"># GWV does not understand this</span>
 
         <span class="c1"># inlining this here is 1) faster, 2) guarantees that we never get invalid Pids.</span>
         <span class="c1"># We can then assume validity for the rest of the functions</span>
         <span class="k">if</span> <span class="n">PREFIXSEP</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">PREFIXSEP</span><span class="p">):</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;String </span><span class="si">%s</span><span class="s2"> is not a valid Pid&quot;</span> <span class="o">%</span> <span class="nb">str</span><span class="o">.</span><span class="n">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">))</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;String </span><span class="si">%s</span><span class="s2"> is not a valid Pid&quot;</span> <span class="o">%</span> <span class="nb">str</span><span class="o">.</span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">))</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_version</span> <span class="o">=</span> <span class="s1">&#39;CcpNmr:</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">__version__</span>
 
@@ -293,8 +283,8 @@
         <span class="sd">&quot;&quot;&quot;id part of pid as a tuple of fields&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_split</span><span class="p">()[</span><span class="mi">1</span><span class="p">:])</span>
 
-    <span class="nd">@staticmethod</span>
-<div class="viewcode-block" id="Pid.isValid"><a class="viewcode-back" href="../../../../ccpn/ccpn.core.lib.html#ccpn.core.lib.Pid.Pid.isValid">[docs]</a>    <span class="k">def</span> <span class="nf">isValid</span><span class="p">(</span><span class="n">text</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<div class="viewcode-block" id="Pid.isValid"><a class="viewcode-back" href="../../../../ccpn/ccpn.core.lib.html#ccpn.core.lib.Pid.Pid.isValid">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">isValid</span><span class="p">(</span><span class="n">text</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">PREFIXSEP</span> <span class="ow">in</span> <span class="n">text</span> <span class="ow">and</span> <span class="n">text</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="n">PREFIXSEP</span></div>
 
     <span class="c1"># NBNB TODO function name &#39;str&#39; confuses Sphinx documentation and is bad for, Change it?</span>
@@ -314,8 +304,8 @@
             <span class="n">result</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">parts</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">IDSEP</span><span class="p">))</span>
         <span class="k">return</span> <span class="n">result</span>
 
-    <span class="nd">@staticmethod</span>
-<div class="viewcode-block" id="Pid.new"><a class="viewcode-back" href="../../../../ccpn/ccpn.core.lib.html#ccpn.core.lib.Pid.Pid.new">[docs]</a>    <span class="k">def</span> <span class="nf">new</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="nb">object</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Pid&#39;</span><span class="p">:</span>
+<div class="viewcode-block" id="Pid.new"><a class="viewcode-back" href="../../../../ccpn/ccpn.core.lib.html#ccpn.core.lib.Pid.Pid.new">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">new</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="nb">object</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Pid&#39;</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return Pid object from arguments</span>
 <span class="sd">        Apply str() on all arguments</span>
@@ -341,7 +331,7 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="s1">&#39;&#39;</span>
 
-<div class="viewcode-block" id="Pid.modify"><a class="viewcode-back" href="../../../../ccpn/ccpn.core.lib.html#ccpn.core.lib.Pid.Pid.modify">[docs]</a>    <span class="k">def</span> <span class="nf">modify</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">newId</span><span class="p">:</span> <span class="nb">object</span><span class="p">,</span> <span class="n">newType</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="bp">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Pid&#39;</span><span class="p">:</span>
+<div class="viewcode-block" id="Pid.modify"><a class="viewcode-back" href="../../../../ccpn/ccpn.core.lib.html#ccpn.core.lib.Pid.Pid.modify">[docs]</a>    <span class="k">def</span> <span class="nf">modify</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">newId</span><span class="p">:</span> <span class="nb">object</span><span class="p">,</span> <span class="n">newType</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Pid&#39;</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Return new pid with position index modified by newId or newType replaced</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">parts</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_split</span><span class="p">()</span>
@@ -351,11 +341,11 @@
             <span class="c1"># NB this allows negative indices also, according to normal Python rules</span>
             <span class="n">idparts</span><span class="p">[</span><span class="n">index</span><span class="p">]</span> <span class="o">=</span> <span class="n">newId</span>
         <span class="k">except</span> <span class="ne">IndexError</span><span class="p">:</span>
-            <span class="kn">import</span> <span class="nn">cing.Libs.io</span> <span class="kn">as</span> <span class="nn">io</span>
-            <span class="n">io</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;Pid.modify: invalid index ({0})</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">index</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+            <span class="kn">import</span> <span class="nn">cing.Libs.io</span> <span class="k">as</span> <span class="nn">io</span>
+            <span class="n">io</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;Pid.modify: invalid index (</span><span class="si">{0}</span><span class="s1">)</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">index</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
         <span class="n">parts</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span> <span class="o">=</span> <span class="n">idparts</span>
 
-        <span class="k">if</span> <span class="n">newType</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">newType</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">parts</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">newType</span>
 
         <span class="k">return</span> <span class="n">Pid</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="o">*</span><span class="n">parts</span><span class="p">)</span></div>
@@ -389,10 +379,10 @@
         <span class="sd">&quot;&quot;&quot;Returns True if pid.type defines an instance of V3-object klass</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">klass</span><span class="p">,</span> <span class="s1">&#39;shortClassName&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="n">klass</span><span class="o">.</span><span class="n">shortClassName</span><span class="p">:</span>
-            <span class="k">return</span> <span class="bp">True</span>
+            <span class="k">return</span> <span class="kc">True</span>
         <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">klass</span><span class="p">,</span> <span class="s1">&#39;className&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="n">klass</span><span class="o">.</span><span class="n">className</span><span class="p">:</span>
-            <span class="k">return</span> <span class="bp">True</span>
-        <span class="k">return</span> <span class="bp">False</span></div></div>
+            <span class="k">return</span> <span class="kc">True</span>
+        <span class="k">return</span> <span class="kc">False</span></div></div>
 </pre></div>
 
           </div>
@@ -401,15 +391,15 @@
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
 <div id="searchbox" style="display: none" role="search">
-  <h3>Quick search</h3>
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
     <form class="search" action="../../../../search.html" method="get">
-      <input type="text" name="q" />
+      <input type="text" name="q" aria-labelledby="searchlabel" />
       <input type="submit" value="Go" />
-      <input type="hidden" name="check_keywords" value="yes" />
-      <input type="hidden" name="area" value="default" />
     </form>
+    </div>
 </div>
-<script type="text/javascript">$('#searchbox').show(0);</script>
+<script>$('#searchbox').show(0);</script>
         </div>
       </div>
       <div class="clearer"></div>
@@ -423,13 +413,13 @@
         <li class="right" >
           <a href="../../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../../index.html">Python  documentation</a> &raquo;</li>
-          <li class="nav-item nav-item-1"><a href="../../../index.html" >Module code</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="../../../../index.html">Python  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../../index.html" >Module code</a> &#187;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
-        &copy; Copyright .
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.1.
+        &#169; Copyright .
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.4.0.
     </div>
   </body>
 </html>

@@ -1,32 +1,22 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
+<!DOCTYPE html>
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    
-    <title>ccpnmodel.ccpncore.lib.spectrum.formats.Azara &mdash; Python  documentation</title>
-    
+    <meta charset="utf-8" />
+    <title>ccpnmodel.ccpncore.lib.spectrum.formats.Azara &#8212; Python  documentation</title>
     <link rel="stylesheet" href="../../../../../../_static/classic.css" type="text/css" />
     <link rel="stylesheet" href="../../../../../../_static/pygments.css" type="text/css" />
     
-    <script type="text/javascript">
-      var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    '../../../../../../',
-        VERSION:     '',
-        COLLAPSE_INDEX: false,
-        FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true
-      };
-    </script>
-    <script type="text/javascript" src="../../../../../../_static/jquery.js"></script>
-    <script type="text/javascript" src="../../../../../../_static/underscore.js"></script>
-    <script type="text/javascript" src="../../../../../../_static/doctools.js"></script>
-    <link rel="top" title="Python  documentation" href="../../../../../../index.html" />
-    <link rel="up" title="Module code" href="../../../../../index.html" /> 
-  </head>
-  <body role="document">
+    <script id="documentation_options" data-url_root="../../../../../../" src="../../../../../../_static/documentation_options.js"></script>
+    <script src="../../../../../../_static/jquery.js"></script>
+    <script src="../../../../../../_static/underscore.js"></script>
+    <script src="../../../../../../_static/doctools.js"></script>
+    <script src="../../../../../../_static/language_data.js"></script>
+    
+    <link rel="index" title="Index" href="../../../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../../../search.html" /> 
+  </head><body>
     <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
@@ -36,8 +26,8 @@
         <li class="right" >
           <a href="../../../../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../../../../index.html">Python  documentation</a> &raquo;</li>
-          <li class="nav-item nav-item-1"><a href="../../../../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="../../../../../../index.html">Python  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../../../../index.html" accesskey="U">Module code</a> &#187;</li> 
       </ul>
     </div>  
 
@@ -110,7 +100,7 @@
           <span class="c1"># showError(&#39;Error&#39;, msg % filePath)</span>
           <span class="k">return</span>
     <span class="k">else</span><span class="p">:</span>
-      <span class="n">dataFile</span> <span class="o">=</span> <span class="bp">None</span>
+      <span class="n">dataFile</span> <span class="o">=</span> <span class="kc">None</span>
       
 
   <span class="c1"># Format invariant</span>
@@ -118,7 +108,7 @@
   <span class="n">wordSize</span> <span class="o">=</span> <span class="mi">4</span>
   <span class="n">headerSize</span> <span class="o">=</span> <span class="mi">0</span>
   <span class="n">blockHeaderSize</span> <span class="o">=</span> <span class="mi">0</span>
-  <span class="n">pulseProgram</span> <span class="o">=</span> <span class="bp">None</span>
+  <span class="n">pulseProgram</span> <span class="o">=</span> <span class="kc">None</span>
   <span class="n">dataScale</span> <span class="o">=</span> <span class="mf">1.0</span>
 
   <span class="c1"># Params</span>
@@ -133,7 +123,7 @@
   <span class="n">sampledValues</span> <span class="o">=</span> <span class="p">[]</span>
   <span class="n">sampledSigmas</span> <span class="o">=</span> <span class="p">[]</span>
 
-  <span class="n">isFloatData</span> <span class="o">=</span> <span class="bp">True</span>
+  <span class="n">isFloatData</span> <span class="o">=</span> <span class="kc">True</span>
   <span class="n">isBigEndian</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">byteorder</span> <span class="o">==</span> <span class="s1">&#39;big&#39;</span>
 
   <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">filePath</span><span class="p">,</span> <span class="s1">&#39;rU&#39;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fileObj</span><span class="p">:</span>
@@ -159,20 +149,20 @@
           <span class="n">dataFile</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
 
       <span class="k">elif</span> <span class="n">keyword</span> <span class="o">==</span> <span class="s1">&#39;int&#39;</span><span class="p">:</span>
-        <span class="n">isFloatData</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="n">isFloatData</span> <span class="o">=</span> <span class="kc">False</span>
 
       <span class="k">elif</span> <span class="n">keyword</span> <span class="o">==</span> <span class="s1">&#39;swap&#39;</span><span class="p">:</span>
         <span class="n">isBigEndian</span> <span class="o">=</span> <span class="ow">not</span> <span class="n">isBigEndian</span>
 
       <span class="k">elif</span> <span class="n">keyword</span> <span class="o">==</span> <span class="s1">&#39;big_endian&#39;</span><span class="p">:</span>
-        <span class="n">isBigEndian</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="n">isBigEndian</span> <span class="o">=</span> <span class="kc">True</span>
 
       <span class="k">elif</span> <span class="n">keyword</span> <span class="o">==</span> <span class="s1">&#39;little_endian&#39;</span><span class="p">:</span>
-        <span class="n">isBigEndian</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="n">isBigEndian</span> <span class="o">=</span> <span class="kc">False</span>
 
       <span class="k">elif</span> <span class="n">keyword</span> <span class="o">==</span> <span class="s1">&#39;ndim&#39;</span><span class="p">:</span>
         <span class="n">nDim</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
-        <span class="n">numPoints</span> <span class="o">=</span> <span class="p">[</span><span class="bp">None</span><span class="p">]</span> <span class="o">*</span> <span class="n">nDim</span>
+        <span class="n">numPoints</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span> <span class="o">*</span> <span class="n">nDim</span>
         <span class="n">blockSizes</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">nDim</span>
         <span class="n">refPpms</span> <span class="o">=</span> <span class="p">[</span><span class="mf">1.0</span><span class="p">]</span> <span class="o">*</span> <span class="n">nDim</span>
         <span class="n">refPoints</span> <span class="o">=</span> <span class="p">[</span><span class="mf">1.0</span><span class="p">]</span> <span class="o">*</span> <span class="n">nDim</span>
@@ -208,12 +198,12 @@
 
       <span class="k">elif</span> <span class="n">keyword</span> <span class="o">==</span> <span class="s1">&#39;params&#39;</span><span class="p">:</span>
         <span class="n">sampledValues</span><span class="p">[</span><span class="n">dim</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="nb">float</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">data</span><span class="p">[</span><span class="mi">1</span><span class="p">:]]</span>
-        <span class="n">isotopes</span><span class="p">[</span><span class="n">dim</span><span class="p">]</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="n">isotopes</span><span class="p">[</span><span class="n">dim</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
 
       <span class="k">elif</span> <span class="n">keyword</span> <span class="o">==</span> <span class="s1">&#39;sigmas&#39;</span><span class="p">:</span>
         <span class="n">sampledSigmas</span><span class="p">[</span><span class="n">dim</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="nb">float</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">data</span><span class="p">[</span><span class="mi">1</span><span class="p">:]]</span>
 
-  <span class="k">if</span> <span class="n">dataFile</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+  <span class="k">if</span> <span class="n">dataFile</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
     <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;AZARA spectrum file not set in parameters&quot;</span>
     <span class="c1"># showError(&#39;Error&#39;, msg)</span>
     <span class="k">return</span>
@@ -245,15 +235,15 @@
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
 <div id="searchbox" style="display: none" role="search">
-  <h3>Quick search</h3>
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
     <form class="search" action="../../../../../../search.html" method="get">
-      <input type="text" name="q" />
+      <input type="text" name="q" aria-labelledby="searchlabel" />
       <input type="submit" value="Go" />
-      <input type="hidden" name="check_keywords" value="yes" />
-      <input type="hidden" name="area" value="default" />
     </form>
+    </div>
 </div>
-<script type="text/javascript">$('#searchbox').show(0);</script>
+<script>$('#searchbox').show(0);</script>
         </div>
       </div>
       <div class="clearer"></div>
@@ -267,13 +257,13 @@
         <li class="right" >
           <a href="../../../../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../../../../index.html">Python  documentation</a> &raquo;</li>
-          <li class="nav-item nav-item-1"><a href="../../../../../index.html" >Module code</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="../../../../../../index.html">Python  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../../../../index.html" >Module code</a> &#187;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
-        &copy; Copyright .
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.1.
+        &#169; Copyright .
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.4.0.
     </div>
   </body>
 </html>

@@ -1,32 +1,22 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
+<!DOCTYPE html>
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    
-    <title>ccpn.core.Peak &mdash; Python  documentation</title>
-    
+    <meta charset="utf-8" />
+    <title>ccpn.core.Peak &#8212; Python  documentation</title>
     <link rel="stylesheet" href="../../../_static/classic.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
     
-    <script type="text/javascript">
-      var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    '../../../',
-        VERSION:     '',
-        COLLAPSE_INDEX: false,
-        FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true
-      };
-    </script>
-    <script type="text/javascript" src="../../../_static/jquery.js"></script>
-    <script type="text/javascript" src="../../../_static/underscore.js"></script>
-    <script type="text/javascript" src="../../../_static/doctools.js"></script>
-    <link rel="top" title="Python  documentation" href="../../../index.html" />
-    <link rel="up" title="Module code" href="../../index.html" /> 
-  </head>
-  <body role="document">
+    <script id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/jquery.js"></script>
+    <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/language_data.js"></script>
+    
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+  </head><body>
     <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
@@ -36,8 +26,8 @@
         <li class="right" >
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../index.html">Python  documentation</a> &raquo;</li>
-          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="../../../index.html">Python  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &#187;</li> 
       </ul>
     </div>  
 
@@ -75,7 +65,7 @@
 
 <span class="kn">import</span> <span class="nn">itertools</span>
 <span class="kn">import</span> <span class="nn">operator</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">,</span> <span class="n">TypeVar</span><span class="p">,</span> <span class="n">Any</span>
 <span class="kn">from</span> <span class="nn">ccpn.util</span> <span class="kn">import</span> <span class="n">Common</span> <span class="k">as</span> <span class="n">commonUtil</span>
 <span class="kn">from</span> <span class="nn">ccpn.core._implementation.AbstractWrapperObject</span> <span class="kn">import</span> <span class="n">AbstractWrapperObject</span>
@@ -85,11 +75,14 @@
 <span class="kn">from</span> <span class="nn">ccpnmodel.ccpncore.api.ccp.nmr</span> <span class="kn">import</span> <span class="n">Nmr</span>
 <span class="kn">from</span> <span class="nn">ccpn.core.lib.peakUtils</span> <span class="kn">import</span> <span class="n">snapToExtremum</span> <span class="k">as</span> <span class="n">peakUtilsSnapToExtremum</span>
 <span class="kn">from</span> <span class="nn">ccpn.util.decorators</span> <span class="kn">import</span> <span class="n">logCommand</span>
-<span class="kn">from</span> <span class="nn">ccpn.core.lib.ContextManagers</span> <span class="kn">import</span> <span class="n">newObject</span><span class="p">,</span> <span class="n">deleteObject</span><span class="p">,</span> <span class="n">ccpNmrV3CoreSetter</span><span class="p">,</span> <span class="n">undoBlock</span>
+<span class="kn">from</span> <span class="nn">ccpn.core.lib.ContextManagers</span> <span class="kn">import</span> <span class="n">newObject</span><span class="p">,</span> \
+    <span class="n">ccpNmrV3CoreSetter</span><span class="p">,</span> <span class="n">ccpNmrV3CoreUndoBlock</span><span class="p">,</span> <span class="n">undoBlock</span>
 <span class="kn">from</span> <span class="nn">ccpn.util.Logging</span> <span class="kn">import</span> <span class="n">getLogger</span>
+<span class="kn">from</span> <span class="nn">ccpn.util.Common</span> <span class="kn">import</span> <span class="n">makeIterableList</span>
 
 
 <span class="n">ALIASINGCHANGED</span> <span class="o">=</span> <span class="s1">&#39;_aliasingChanged&#39;</span>
+<span class="n">DIMENSIONNMRATOMSCHANGED</span> <span class="o">=</span> <span class="s1">&#39;_dimensionNmrAtomsChanged&#39;</span>
 
 
 <div class="viewcode-block" id="Peak"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.Peak.Peak">[docs]</a><span class="k">class</span> <span class="nc">Peak</span><span class="p">(</span><span class="n">AbstractWrapperObject</span><span class="p">):</span>
@@ -143,7 +136,7 @@
     <span class="k">def</span> <span class="nf">_parent</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">PeakList</span><span class="p">]:</span>
         <span class="sd">&quot;&quot;&quot;PeakList containing Peak.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_data2Obj</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">peakList</span><span class="p">]</span> \
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">peakList</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_data2Obj</span> <span class="k">else</span> <span class="bp">None</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">peakList</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_data2Obj</span> <span class="k">else</span> <span class="kc">None</span>
 
     <span class="n">peakList</span> <span class="o">=</span> <span class="n">_parent</span>
 
@@ -152,7 +145,7 @@
         <span class="sd">&quot;&quot;&quot;height of Peak.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">height</span>
 
-    <span class="nd">@height.setter</span>
+    <span class="nd">@height</span><span class="o">.</span><span class="n">setter</span>
     <span class="k">def</span> <span class="nf">height</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">height</span> <span class="o">=</span> <span class="n">value</span>
 
@@ -161,7 +154,7 @@
         <span class="sd">&quot;&quot;&quot;height error of Peak.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">heightError</span>
 
-    <span class="nd">@heightError.setter</span>
+    <span class="nd">@heightError</span><span class="o">.</span><span class="n">setter</span>
     <span class="k">def</span> <span class="nf">heightError</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">heightError</span> <span class="o">=</span> <span class="n">value</span>
 
@@ -170,7 +163,7 @@
         <span class="sd">&quot;&quot;&quot;volume of Peak.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">volume</span>
 
-    <span class="nd">@volume.setter</span>
+    <span class="nd">@volume</span><span class="o">.</span><span class="n">setter</span>
     <span class="k">def</span> <span class="nf">volume</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">volume</span> <span class="o">=</span> <span class="n">value</span>
 
@@ -179,7 +172,7 @@
         <span class="sd">&quot;&quot;&quot;volume error of Peak.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">volumeError</span>
 
-    <span class="nd">@volumeError.setter</span>
+    <span class="nd">@volumeError</span><span class="o">.</span><span class="n">setter</span>
     <span class="k">def</span> <span class="nf">volumeError</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">volumeError</span> <span class="o">=</span> <span class="n">value</span>
 
@@ -188,7 +181,7 @@
         <span class="sd">&quot;&quot;&quot;figureOfMerit of Peak, between 0.0 and 1.0 inclusive.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">figOfMerit</span>
 
-    <span class="nd">@figureOfMerit.setter</span>
+    <span class="nd">@figureOfMerit</span><span class="o">.</span><span class="n">setter</span>
     <span class="k">def</span> <span class="nf">figureOfMerit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">figOfMerit</span> <span class="o">=</span> <span class="n">value</span>
 
@@ -197,7 +190,7 @@
         <span class="sd">&quot;&quot;&quot;Peak text annotation.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">annotation</span>
 
-    <span class="nd">@annotation.setter</span>
+    <span class="nd">@annotation</span><span class="o">.</span><span class="n">setter</span>
     <span class="k">def</span> <span class="nf">annotation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">annotation</span> <span class="o">=</span> <span class="n">value</span>
 
@@ -220,8 +213,8 @@
         <span class="sd">&quot;&quot;&quot;Peak position in ppm (or other relevant unit) in dimension order.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">value</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">sortedPeakDims</span><span class="p">())</span>
 
-    <span class="nd">@position.setter</span>
-    <span class="nd">@logCommand</span><span class="p">(</span><span class="n">get</span><span class="o">=</span><span class="s1">&#39;self&#39;</span><span class="p">,</span> <span class="n">isProperty</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    <span class="nd">@position</span><span class="o">.</span><span class="n">setter</span>
+    <span class="nd">@logCommand</span><span class="p">(</span><span class="n">get</span><span class="o">=</span><span class="s1">&#39;self&#39;</span><span class="p">,</span> <span class="n">isProperty</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="nd">@ccpNmrV3CoreSetter</span><span class="p">()</span>
     <span class="k">def</span> <span class="nf">position</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">):</span>
         <span class="c1"># call api changes</span>
@@ -230,13 +223,13 @@
         <span class="k">for</span> <span class="n">ii</span><span class="p">,</span> <span class="n">peakDim</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">sortedPeakDims</span><span class="p">()):</span>
             <span class="n">currentAlias</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">peakDim</span><span class="o">.</span><span class="n">numAliasing</span><span class="p">)</span>
             <span class="n">peakDim</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">value</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span>
-            <span class="n">peakDim</span><span class="o">.</span><span class="n">realValue</span> <span class="o">=</span> <span class="bp">None</span>
+            <span class="n">peakDim</span><span class="o">.</span><span class="n">realValue</span> <span class="o">=</span> <span class="kc">None</span>
             <span class="n">newAlias</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">peakDim</span><span class="o">.</span><span class="n">numAliasing</span><span class="p">)</span>
 
         <span class="c1"># aliasing may have changed here</span>
         <span class="k">if</span> <span class="n">currentAlias</span> <span class="o">!=</span> <span class="n">newAlias</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_checkAliasing</span><span class="p">()</span>
-            <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ALIASINGCHANGED</span><span class="p">,</span> <span class="bp">True</span><span class="p">)</span>
+            <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ALIASINGCHANGED</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
 
     <span class="n">ppmPositions</span> <span class="o">=</span> <span class="n">position</span>
 
@@ -259,8 +252,8 @@
         <span class="sd">&quot;&quot;&quot;Peak position error in ppm (or other relevant unit).&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">valueError</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">sortedPeakDims</span><span class="p">())</span>
 
-    <span class="nd">@positionError.setter</span>
-    <span class="nd">@logCommand</span><span class="p">(</span><span class="n">get</span><span class="o">=</span><span class="s1">&#39;self&#39;</span><span class="p">,</span> <span class="n">isProperty</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    <span class="nd">@positionError</span><span class="o">.</span><span class="n">setter</span>
+    <span class="nd">@logCommand</span><span class="p">(</span><span class="n">get</span><span class="o">=</span><span class="s1">&#39;self&#39;</span><span class="p">,</span> <span class="n">isProperty</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="nd">@ccpNmrV3CoreSetter</span><span class="p">()</span>
     <span class="k">def</span> <span class="nf">positionError</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">):</span>
         <span class="k">for</span> <span class="n">ii</span><span class="p">,</span> <span class="n">peakDim</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">sortedPeakDims</span><span class="p">()):</span>
@@ -271,8 +264,8 @@
         <span class="sd">&quot;&quot;&quot;Peak position in points.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">position</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">sortedPeakDims</span><span class="p">())</span>
 
-    <span class="nd">@pointPosition.setter</span>
-    <span class="nd">@logCommand</span><span class="p">(</span><span class="n">get</span><span class="o">=</span><span class="s1">&#39;self&#39;</span><span class="p">,</span> <span class="n">isProperty</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    <span class="nd">@pointPosition</span><span class="o">.</span><span class="n">setter</span>
+    <span class="nd">@logCommand</span><span class="p">(</span><span class="n">get</span><span class="o">=</span><span class="s1">&#39;self&#39;</span><span class="p">,</span> <span class="n">isProperty</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="nd">@ccpNmrV3CoreSetter</span><span class="p">()</span>
     <span class="k">def</span> <span class="nf">pointPosition</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">):</span>
         <span class="n">currentAlias</span> <span class="o">=</span> <span class="p">[]</span>
@@ -285,7 +278,7 @@
         <span class="c1"># aliasing may have changed here</span>
         <span class="k">if</span> <span class="n">currentAlias</span> <span class="o">!=</span> <span class="n">newAlias</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_checkAliasing</span><span class="p">()</span>
-            <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ALIASINGCHANGED</span><span class="p">,</span> <span class="bp">True</span><span class="p">)</span>
+            <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ALIASINGCHANGED</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">boxWidths</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span> <span class="o">...</span><span class="p">]:</span>
@@ -293,8 +286,8 @@
 <span class="sd">        i.e. the width of the area that should be considered for integration, fitting, etc.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">boxWidth</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">sortedPeakDims</span><span class="p">())</span>
 
-    <span class="nd">@boxWidths.setter</span>
-    <span class="nd">@logCommand</span><span class="p">(</span><span class="n">get</span><span class="o">=</span><span class="s1">&#39;self&#39;</span><span class="p">,</span> <span class="n">isProperty</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    <span class="nd">@boxWidths</span><span class="o">.</span><span class="n">setter</span>
+    <span class="nd">@logCommand</span><span class="p">(</span><span class="n">get</span><span class="o">=</span><span class="s1">&#39;self&#39;</span><span class="p">,</span> <span class="n">isProperty</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="nd">@ccpNmrV3CoreSetter</span><span class="p">()</span>
     <span class="k">def</span> <span class="nf">boxWidths</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">):</span>
         <span class="k">for</span> <span class="n">ii</span><span class="p">,</span> <span class="n">peakDim</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">sortedPeakDims</span><span class="p">()):</span>
@@ -305,8 +298,8 @@
         <span class="sd">&quot;&quot;&quot;Full-width-half-height of peak for each dimension, in Hz.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">lineWidth</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">sortedPeakDims</span><span class="p">())</span>
 
-    <span class="nd">@lineWidths.setter</span>
-    <span class="nd">@logCommand</span><span class="p">(</span><span class="n">get</span><span class="o">=</span><span class="s1">&#39;self&#39;</span><span class="p">,</span> <span class="n">isProperty</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    <span class="nd">@lineWidths</span><span class="o">.</span><span class="n">setter</span>
+    <span class="nd">@logCommand</span><span class="p">(</span><span class="n">get</span><span class="o">=</span><span class="s1">&#39;self&#39;</span><span class="p">,</span> <span class="n">isProperty</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="nd">@ccpNmrV3CoreSetter</span><span class="p">()</span>
     <span class="k">def</span> <span class="nf">lineWidths</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">):</span>
         <span class="k">for</span> <span class="n">ii</span><span class="p">,</span> <span class="n">peakDim</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">sortedPeakDims</span><span class="p">()):</span>
@@ -319,8 +312,8 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span> <span class="o">*</span> <span class="n">x</span><span class="o">.</span><span class="n">numAliasing</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">sortedPeakDims</span><span class="p">())</span>
 
-    <span class="nd">@aliasing.setter</span>
-    <span class="nd">@logCommand</span><span class="p">(</span><span class="n">get</span><span class="o">=</span><span class="s1">&#39;self&#39;</span><span class="p">,</span> <span class="n">isProperty</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    <span class="nd">@aliasing</span><span class="o">.</span><span class="n">setter</span>
+    <span class="nd">@logCommand</span><span class="p">(</span><span class="n">get</span><span class="o">=</span><span class="s1">&#39;self&#39;</span><span class="p">,</span> <span class="n">isProperty</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="nd">@ccpNmrV3CoreSetter</span><span class="p">()</span>
     <span class="k">def</span> <span class="nf">aliasing</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">):</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">sortedPeakDims</span><span class="p">()):</span>
@@ -338,7 +331,7 @@
         <span class="c1"># aliasing may/may not have changed here</span>
         <span class="k">if</span> <span class="n">currentAlias</span> <span class="o">!=</span> <span class="n">newAlias</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_checkAliasing</span><span class="p">()</span>
-            <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ALIASINGCHANGED</span><span class="p">,</span> <span class="bp">True</span><span class="p">)</span>
+            <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ALIASINGCHANGED</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">dimensionNmrAtoms</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="s1">&#39;NmrAtom&#39;</span><span class="p">,</span> <span class="o">...</span><span class="p">],</span> <span class="o">...</span><span class="p">]:</span>
@@ -369,21 +362,26 @@
         <span class="c1">#</span>
         <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
 
-    <span class="nd">@dimensionNmrAtoms.setter</span>
-    <span class="nd">@logCommand</span><span class="p">(</span><span class="n">get</span><span class="o">=</span><span class="s1">&#39;self&#39;</span><span class="p">,</span> <span class="n">isProperty</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
-    <span class="nd">@ccpNmrV3CoreSetter</span><span class="p">()</span>
+    <span class="nd">@dimensionNmrAtoms</span><span class="o">.</span><span class="n">setter</span>
+    <span class="nd">@logCommand</span><span class="p">(</span><span class="n">get</span><span class="o">=</span><span class="s1">&#39;self&#39;</span><span class="p">,</span> <span class="n">isProperty</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="c1"># TODO:ED Check this decorator</span>
+    <span class="c1"># @ccpNmrV3CoreSetter()</span>
+    <span class="nd">@ccpNmrV3CoreUndoBlock</span><span class="p">()</span>
     <span class="k">def</span> <span class="nf">dimensionNmrAtoms</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">):</span>
 
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">):</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;dimensionNmrAtoms must be set to a sequence of list/tuples&quot;</span><span class="p">)</span>
+
+        <span class="c1"># store the currently attached nmrAtoms</span>
+        <span class="n">assigned</span> <span class="o">=</span> <span class="n">makeIterableList</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">assignedNmrAtoms</span><span class="p">)</span>
 
         <span class="n">isotopeCodes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">peakList</span><span class="o">.</span><span class="n">spectrum</span><span class="o">.</span><span class="n">isotopeCodes</span>
 
         <span class="n">apiPeak</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span>
         <span class="n">dimResonances</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">ii</span><span class="p">,</span> <span class="n">atoms</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
-            <span class="k">if</span> <span class="n">atoms</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
-                <span class="n">dimResonances</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">None</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">atoms</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">dimResonances</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
 
             <span class="k">else</span><span class="p">:</span>
 
@@ -395,7 +393,7 @@
                     <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;dimensionNmrAtoms must be set to a sequence of list/tuples&quot;</span><span class="p">)</span>
 
                 <span class="n">atoms</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">getByPid</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="k">else</span> <span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">atoms</span><span class="p">)</span>
-                <span class="n">resonances</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">_wrappedData</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">atoms</span> <span class="k">if</span> <span class="n">x</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">)</span>
+                <span class="n">resonances</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">_wrappedData</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">atoms</span> <span class="k">if</span> <span class="n">x</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">)</span>
                 <span class="k">if</span> <span class="n">isotopeCode</span> <span class="ow">and</span> <span class="n">isotopeCode</span> <span class="o">!=</span> <span class="s1">&#39;?&#39;</span><span class="p">:</span>
                     <span class="c1"># check for isotope match</span>
                     <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">isotopeCode</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="n">isotopeCode</span><span class="p">,</span> <span class="s1">&#39;?&#39;</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">resonances</span><span class="p">):</span>
@@ -403,7 +401,15 @@
                                          <span class="o">%</span> <span class="p">(</span><span class="n">ii</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">isotopeCode</span><span class="p">))</span>
                 <span class="n">dimResonances</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">resonances</span><span class="p">)</span>
 
+        <span class="c1"># fixme:ED this creates a new chemicalShift that is not caught by the undo stack</span>
+        <span class="c1"># caught be the new decorator ccpNmrV3CoreUndoBlock</span>
+        <span class="c1"># original misses creation of api chemicalShift</span>
         <span class="n">apiPeak</span><span class="o">.</span><span class="n">assignByDimensions</span><span class="p">(</span><span class="n">dimResonances</span><span class="p">)</span>
+
+        <span class="c1"># insert the new attached nmrAtoms - deleted and new will be included so tables can update with deleted peaks/nmrAtoms</span>
+        <span class="c1"># hopefully traitlets will solve notifier problems</span>
+        <span class="n">changedAssigned</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">assigned</span><span class="p">)</span> <span class="o">|</span> <span class="nb">set</span><span class="p">(</span><span class="n">makeIterableList</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">assignedNmrAtoms</span><span class="p">)))</span>
+        <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">DIMENSIONNMRATOMSCHANGED</span><span class="p">,</span> <span class="n">changedAssigned</span><span class="p">)</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">assignedNmrAtoms</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="n">Optional</span><span class="p">[</span><span class="s1">&#39;NmrAtom&#39;</span><span class="p">],</span> <span class="o">...</span><span class="p">],</span> <span class="o">...</span><span class="p">]:</span>
@@ -438,26 +444,26 @@
                 <span class="n">nmrAtoms</span> <span class="o">=</span> <span class="p">[</span><span class="n">data2Obj</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">resonance</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">mainPeakDimContribs</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span>
                             <span class="k">if</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">peakDimContribs</span> <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="s1">&#39;resonance&#39;</span><span class="p">)]</span>
                 <span class="k">if</span> <span class="ow">not</span> <span class="n">nmrAtoms</span><span class="p">:</span>
-                    <span class="n">nmrAtoms</span> <span class="o">=</span> <span class="p">[</span><span class="bp">None</span><span class="p">]</span>
+                    <span class="n">nmrAtoms</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span>
                 <span class="n">allAtoms</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">nmrAtoms</span><span class="p">)</span>
 
             <span class="c1"># NB this gives a list of tuples</span>
             <span class="c1"># Remove all-None tuples</span>
             <span class="n">result</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">tt</span> <span class="k">for</span> <span class="n">tt</span> <span class="ow">in</span> <span class="n">itertools</span><span class="o">.</span><span class="n">product</span><span class="p">(</span><span class="o">*</span><span class="n">allAtoms</span><span class="p">)</span>
-                          <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">x</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">tt</span><span class="p">))</span>
+                          <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">x</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">tt</span><span class="p">))</span>
             <span class="c1"># result += itertools.product(*allAtoms)</span>
 
         <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">result</span><span class="p">))</span>
 
-    <span class="nd">@assignedNmrAtoms.setter</span>
-    <span class="nd">@logCommand</span><span class="p">(</span><span class="n">get</span><span class="o">=</span><span class="s1">&#39;self&#39;</span><span class="p">,</span> <span class="n">isProperty</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    <span class="nd">@assignedNmrAtoms</span><span class="o">.</span><span class="n">setter</span>
+    <span class="nd">@logCommand</span><span class="p">(</span><span class="n">get</span><span class="o">=</span><span class="s1">&#39;self&#39;</span><span class="p">,</span> <span class="n">isProperty</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="nd">@ccpNmrV3CoreSetter</span><span class="p">()</span>
     <span class="k">def</span> <span class="nf">assignedNmrAtoms</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">):</span>
 
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">):</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;assignedNmrAtoms must be set to a sequence of list/tuples&quot;</span><span class="p">)</span>
 
-        <span class="n">isotopeCodes</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="bp">None</span> <span class="k">if</span> <span class="n">x</span> <span class="o">==</span> <span class="s1">&#39;?&#39;</span> <span class="k">else</span> <span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">peakList</span><span class="o">.</span><span class="n">spectrum</span><span class="o">.</span><span class="n">isotopeCodes</span><span class="p">)</span>
+        <span class="n">isotopeCodes</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="kc">None</span> <span class="k">if</span> <span class="n">x</span> <span class="o">==</span> <span class="s1">&#39;?&#39;</span> <span class="k">else</span> <span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">peakList</span><span class="o">.</span><span class="n">spectrum</span><span class="o">.</span><span class="n">isotopeCodes</span><span class="p">)</span>
 
         <span class="n">apiPeak</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span>
         <span class="n">peakDims</span> <span class="o">=</span> <span class="n">apiPeak</span><span class="o">.</span><span class="n">sortedPeakDims</span><span class="p">()</span>
@@ -466,7 +472,7 @@
         <span class="c1"># get resonance, all tuples and per dimension</span>
         <span class="n">resonances</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">tt</span> <span class="ow">in</span> <span class="n">value</span><span class="p">:</span>
-            <span class="n">ll</span> <span class="o">=</span> <span class="n">dimensionCount</span> <span class="o">*</span> <span class="p">[</span><span class="bp">None</span><span class="p">]</span>
+            <span class="n">ll</span> <span class="o">=</span> <span class="n">dimensionCount</span> <span class="o">*</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span>
             <span class="n">resonances</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ll</span><span class="p">)</span>
             <span class="k">for</span> <span class="n">ii</span><span class="p">,</span> <span class="n">atom</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">tt</span><span class="p">):</span>
                 <span class="n">atom</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getByPid</span><span class="p">(</span><span class="n">atom</span><span class="p">)</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">atom</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="k">else</span> <span class="n">atom</span>
@@ -478,7 +484,7 @@
 
                     <span class="n">ll</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span> <span class="o">=</span> <span class="n">resonance</span>
 
-                <span class="k">elif</span> <span class="n">atom</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="k">elif</span> <span class="n">atom</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                     <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;Error assigning NmrAtom </span><span class="si">%s</span><span class="s1"> to dimension </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">atom</span><span class="p">),</span> <span class="n">ii</span> <span class="o">+</span> <span class="mi">1</span><span class="p">))</span>
 
         <span class="c1"># set assignments</span>
@@ -494,8 +500,8 @@
         <span class="k">return</span> <span class="nb">tuple</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_data2Obj</span><span class="p">[</span><span class="n">mt</span><span class="p">]</span> <span class="k">for</span> <span class="n">mt</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">sortedMultiplets</span><span class="p">()</span>
                       <span class="k">if</span> <span class="n">mt</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_data2Obj</span><span class="p">])</span>
 
-    <span class="nd">@logCommand</span><span class="p">(</span><span class="n">get</span><span class="o">=</span><span class="s1">&#39;self&#39;</span><span class="p">)</span>
-<div class="viewcode-block" id="Peak.addAssignment"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.Peak.Peak.addAssignment">[docs]</a>    <span class="k">def</span> <span class="nf">addAssignment</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="s1">&#39;NmrAtom&#39;</span><span class="p">]]):</span>
+<div class="viewcode-block" id="Peak.addAssignment"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.Peak.Peak.addAssignment">[docs]</a>    <span class="nd">@logCommand</span><span class="p">(</span><span class="n">get</span><span class="o">=</span><span class="s1">&#39;self&#39;</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">addAssignment</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="s1">&#39;NmrAtom&#39;</span><span class="p">]]):</span>
         <span class="sd">&quot;&quot;&quot;Add a peak assignment - a list of one NmrAtom or Pid for each dimension&quot;&quot;&quot;</span>
 
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">peakList</span><span class="o">.</span><span class="n">spectrum</span><span class="o">.</span><span class="n">dimensionCount</span><span class="p">:</span>
@@ -507,7 +513,7 @@
         <span class="k">for</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">value</span><span class="p">:</span>
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
                 <span class="n">vv</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getByPid</span><span class="p">(</span><span class="n">val</span><span class="p">)</span>
-                <span class="k">if</span> <span class="n">vv</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">vv</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                     <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;No NmrAtom matching string pid </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">val</span><span class="p">)</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="n">ll</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">vv</span><span class="p">)</span>
@@ -523,9 +529,9 @@
             <span class="n">assignedNmrAtoms</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">assignedNmrAtoms</span> <span class="o">=</span> <span class="n">assignedNmrAtoms</span></div>
 
-    <span class="nd">@logCommand</span><span class="p">(</span><span class="n">get</span><span class="o">=</span><span class="s1">&#39;self&#39;</span><span class="p">)</span>
-<div class="viewcode-block" id="Peak.assignDimension"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.Peak.Peak.assignDimension">[docs]</a>    <span class="k">def</span> <span class="nf">assignDimension</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">axisCode</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="s1">&#39;NmrAtom&#39;</span><span class="p">],</span>
-                                                          <span class="n">Sequence</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="s1">&#39;NmrAtom&#39;</span><span class="p">]]]</span> <span class="o">=</span> <span class="bp">None</span><span class="p">):</span>
+<div class="viewcode-block" id="Peak.assignDimension"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.Peak.Peak.assignDimension">[docs]</a>    <span class="nd">@logCommand</span><span class="p">(</span><span class="n">get</span><span class="o">=</span><span class="s1">&#39;self&#39;</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">assignDimension</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">axisCode</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="s1">&#39;NmrAtom&#39;</span><span class="p">],</span>
+                                                          <span class="n">Sequence</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="s1">&#39;NmrAtom&#39;</span><span class="p">]]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Assign dimension with axisCode to value (NmrAtom, or Pid or sequence of either, or None).&quot;&quot;&quot;</span>
 
         <span class="n">axisCodes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parent</span><span class="o">.</span><span class="n">_parent</span><span class="o">.</span><span class="n">axisCodes</span>
@@ -534,7 +540,7 @@
         <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;axisCode </span><span class="si">%s</span><span class="s2"> not recognised&quot;</span> <span class="o">%</span> <span class="n">axisCode</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">value</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
             <span class="n">value</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">getByPid</span><span class="p">(</span><span class="n">value</span><span class="p">)]</span>
@@ -551,7 +557,7 @@
     <span class="c1">#=========================================================================================</span>
 
     <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">_getAllWrappedData</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">parent</span><span class="p">:</span> <span class="n">PeakList</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Nmr</span><span class="o">.</span><span class="n">Peak</span><span class="p">,</span> <span class="o">...</span><span class="p">]:</span>
+    <span class="k">def</span> <span class="nf">_getAllWrappedData</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">parent</span><span class="p">:</span> <span class="n">PeakList</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Nmr</span><span class="o">.</span><span class="n">Peak</span><span class="p">,</span> <span class="o">...</span><span class="p">]:</span>
         <span class="sd">&quot;&quot;&quot;Get wrappedData (Peaks) for all Peak children of parent PeakList.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">parent</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">sortedPeaks</span><span class="p">()</span>
 
@@ -568,10 +574,19 @@
             <span class="c1"># NOTE:ED does integral need to be notified? - and reverse notifiers in multiplet/integral</span>
 
         <span class="k">if</span> <span class="n">action</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;change&#39;</span><span class="p">]:</span>
+
             <span class="c1"># check whether the peak aliasing has changed and notify containing spectrum</span>
-            <span class="k">if</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ALIASINGCHANGED</span><span class="p">,</span> <span class="bp">None</span><span class="p">):</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_aliasingChanged</span> <span class="o">=</span> <span class="bp">False</span>
+            <span class="k">if</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ALIASINGCHANGED</span><span class="p">,</span> <span class="kc">None</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_aliasingChanged</span> <span class="o">=</span> <span class="kc">False</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">peakList</span><span class="o">.</span><span class="n">spectrum</span><span class="o">.</span><span class="n">_finaliseAction</span><span class="p">(</span><span class="n">action</span><span class="o">=</span><span class="n">action</span><span class="p">)</span>
+
+            <span class="c1"># if the assignedNmrAtoms have changed then notifier the nmrAtoms</span>
+            <span class="c1"># This contains the pre-post set to handle updating the chemicalShift table</span>
+            <span class="n">nmrAtoms</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">DIMENSIONNMRATOMSCHANGED</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">nmrAtoms</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">nmrAtom</span> <span class="ow">in</span> <span class="n">nmrAtoms</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">nmrAtom</span><span class="o">.</span><span class="n">isDeleted</span> <span class="ow">or</span> <span class="n">nmrAtom</span><span class="o">.</span><span class="n">_flaggedForDelete</span><span class="p">):</span>
+                        <span class="n">nmrAtom</span><span class="o">.</span><span class="n">_finaliseAction</span><span class="p">(</span><span class="n">action</span><span class="o">=</span><span class="n">action</span><span class="p">)</span>
 
     <span class="c1">#=========================================================================================</span>
     <span class="c1"># CCPN functions</span>
@@ -585,8 +600,8 @@
         <span class="sd">&quot;&quot;&quot;Whether peak is fully assigned.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="nb">all</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dimensionNmrAtoms</span><span class="p">)</span></div>
 
-    <span class="nd">@logCommand</span><span class="p">(</span><span class="n">get</span><span class="o">=</span><span class="s1">&#39;self&#39;</span><span class="p">)</span>
-<div class="viewcode-block" id="Peak.copyTo"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.Peak.Peak.copyTo">[docs]</a>    <span class="k">def</span> <span class="nf">copyTo</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">targetPeakList</span><span class="p">:</span> <span class="n">PeakList</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Peak&#39;</span><span class="p">:</span>
+<div class="viewcode-block" id="Peak.copyTo"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.Peak.Peak.copyTo">[docs]</a>    <span class="nd">@logCommand</span><span class="p">(</span><span class="n">get</span><span class="o">=</span><span class="s1">&#39;self&#39;</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">copyTo</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">targetPeakList</span><span class="p">:</span> <span class="n">PeakList</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Peak&#39;</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Make (and return) a copy of the Peak in targetPeakList.&quot;&quot;&quot;</span>
 
         <span class="n">singleValueTags</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;height&#39;</span><span class="p">,</span> <span class="s1">&#39;volume&#39;</span><span class="p">,</span> <span class="s1">&#39;heightError&#39;</span><span class="p">,</span> <span class="s1">&#39;volumeError&#39;</span><span class="p">,</span> <span class="s1">&#39;figureOfMerit&#39;</span><span class="p">,</span>
@@ -603,7 +618,7 @@
 
         <span class="n">dimensionMapping</span> <span class="o">=</span> <span class="n">commonUtil</span><span class="o">.</span><span class="n">_axisCodeMapIndices</span><span class="p">(</span><span class="n">peakList</span><span class="o">.</span><span class="n">spectrum</span><span class="o">.</span><span class="n">axisCodes</span><span class="p">,</span>
                                                           <span class="n">targetPeakList</span><span class="o">.</span><span class="n">spectrum</span><span class="o">.</span><span class="n">axisCodes</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">dimensionMapping</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">dimensionMapping</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2"> axisCodes </span><span class="si">%s</span><span class="s2"> not compatible with target axisCodes </span><span class="si">%s</span><span class="s2">&quot;</span>
                              <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">peakList</span><span class="o">.</span><span class="n">spectrum</span><span class="o">.</span><span class="n">axisCodes</span><span class="p">,</span> <span class="n">targetPeakList</span><span class="o">.</span><span class="n">spectrum</span><span class="o">.</span><span class="n">axisCodes</span><span class="p">))</span>
 
@@ -627,26 +642,26 @@
 <span class="sd">        by matching newAxisCodeOrder to spectrum axis code order.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">commonUtil</span><span class="o">.</span><span class="n">reorder</span><span class="p">(</span><span class="n">values</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parent</span><span class="o">.</span><span class="n">_parent</span><span class="o">.</span><span class="n">axisCodes</span><span class="p">,</span> <span class="n">newAxisCodeOrder</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Peak.getInAxisOrder"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.Peak.Peak.getInAxisOrder">[docs]</a>    <span class="k">def</span> <span class="nf">getInAxisOrder</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attributeName</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">axisCodes</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="bp">None</span><span class="p">):</span>
+<div class="viewcode-block" id="Peak.getInAxisOrder"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.Peak.Peak.getInAxisOrder">[docs]</a>    <span class="k">def</span> <span class="nf">getInAxisOrder</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attributeName</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">axisCodes</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Get attributeName in order defined by axisCodes :</span>
 <span class="sd">           (default order if None)&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attributeName</span><span class="p">):</span>
             <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="s1">&#39;Peak object does not have attribute &quot;</span><span class="si">%s</span><span class="s1">&quot;&#39;</span> <span class="o">%</span> <span class="n">attributeName</span><span class="p">)</span>
 
         <span class="n">values</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attributeName</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">axisCodes</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">axisCodes</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">values</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="c1"># change to order defined by axisCodes</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">reorderValues</span><span class="p">(</span><span class="n">values</span><span class="p">,</span> <span class="n">axisCodes</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Peak.setInAxisOrder"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.Peak.Peak.setInAxisOrder">[docs]</a>    <span class="k">def</span> <span class="nf">setInAxisOrder</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attributeName</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">values</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">Any</span><span class="p">],</span> <span class="n">axisCodes</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="bp">None</span><span class="p">):</span>
+<div class="viewcode-block" id="Peak.setInAxisOrder"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.Peak.Peak.setInAxisOrder">[docs]</a>    <span class="k">def</span> <span class="nf">setInAxisOrder</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attributeName</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">values</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">Any</span><span class="p">],</span> <span class="n">axisCodes</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Set attributeName from values in order defined by axisCodes</span>
 <span class="sd">           (default order if None)&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attributeName</span><span class="p">):</span>
             <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="s1">&#39;Peak object does not have attribute &quot;</span><span class="si">%s</span><span class="s1">&quot;&#39;</span> <span class="o">%</span> <span class="n">attributeName</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="n">axisCodes</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">axisCodes</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="c1"># change values to the order appropriate for spectrum</span>
             <span class="n">values</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">reorderValues</span><span class="p">(</span><span class="n">values</span><span class="p">,</span> <span class="n">axisCodes</span><span class="p">)</span>
         <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attributeName</span><span class="p">,</span> <span class="n">values</span><span class="p">)</span></div>
@@ -664,12 +679,12 @@
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">integral</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Return the integral attached to the peak.&quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_data2Obj</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">integral</span><span class="p">]</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">integral</span> <span class="k">else</span> <span class="bp">None</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_data2Obj</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">integral</span><span class="p">]</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">integral</span> <span class="k">else</span> <span class="kc">None</span>
 
-    <span class="nd">@integral.setter</span>
-    <span class="nd">@logCommand</span><span class="p">(</span><span class="n">get</span><span class="o">=</span><span class="s1">&#39;self&#39;</span><span class="p">,</span> <span class="n">isProperty</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    <span class="nd">@integral</span><span class="o">.</span><span class="n">setter</span>
+    <span class="nd">@logCommand</span><span class="p">(</span><span class="n">get</span><span class="o">=</span><span class="s1">&#39;self&#39;</span><span class="p">,</span> <span class="n">isProperty</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="nd">@ccpNmrV3CoreSetter</span><span class="p">()</span>
-    <span class="k">def</span> <span class="nf">integral</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">integral</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="s1">&#39;Integral&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">integral</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">integral</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="s1">&#39;Integral&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Link an integral to the peak.</span>
 <span class="sd">        The peak must belong to the spectrum containing the peakList.</span>
 <span class="sd">        :param integral: single integral.&quot;&quot;&quot;</span>
@@ -682,7 +697,7 @@
             <span class="k">if</span> <span class="n">integral</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">spectrum</span><span class="o">.</span><span class="n">integrals</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> does not belong to spectrum: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">integral</span><span class="o">.</span><span class="n">pid</span><span class="p">,</span> <span class="n">spectrum</span><span class="o">.</span><span class="n">pid</span><span class="p">))</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">integral</span> <span class="o">=</span> <span class="n">integral</span><span class="o">.</span><span class="n">_wrappedData</span> <span class="k">if</span> <span class="n">integral</span> <span class="k">else</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">integral</span> <span class="o">=</span> <span class="n">integral</span><span class="o">.</span><span class="n">_wrappedData</span> <span class="k">if</span> <span class="n">integral</span> <span class="k">else</span> <span class="kc">None</span>
 
     <span class="k">def</span> <span class="nf">_linkPeaks</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">peaks</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -709,7 +724,7 @@
 <span class="sd">        :return: a list of peaks</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">pids</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ccpnInternalData</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_linkedPeaksName</span><span class="p">)</span> <span class="ow">or</span> <span class="p">[]</span>
-        <span class="n">peaks</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">getByPid</span><span class="p">(</span><span class="n">pid</span><span class="p">)</span> <span class="k">for</span> <span class="n">pid</span> <span class="ow">in</span> <span class="n">pids</span> <span class="k">if</span> <span class="n">pid</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">]</span>
+        <span class="n">peaks</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">getByPid</span><span class="p">(</span><span class="n">pid</span><span class="p">)</span> <span class="k">for</span> <span class="n">pid</span> <span class="ow">in</span> <span class="n">pids</span> <span class="k">if</span> <span class="n">pid</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">]</span>
         <span class="k">return</span> <span class="n">peaks</span>
 
     <span class="k">def</span> <span class="nf">_getSNRatio</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ratio</span><span class="o">=</span><span class="mf">2.5</span><span class="p">):</span>
@@ -718,17 +733,17 @@
         <span class="n">spectrum</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parent</span><span class="o">.</span><span class="n">spectrum</span>
         <span class="n">noiseLevel</span> <span class="o">=</span> <span class="n">spectrum</span><span class="o">.</span><span class="n">noiseLevel</span>
         <span class="n">negativeNoiseLevel</span> <span class="o">=</span> <span class="n">spectrum</span><span class="o">.</span><span class="n">negativeNoiseLevel</span>
-        <span class="k">if</span> <span class="n">noiseLevel</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">noiseLevel</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;Spectrum noise level not defined for </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">spectrum</span><span class="o">.</span><span class="n">pid</span><span class="p">)</span>
-            <span class="k">return</span> <span class="bp">None</span>
-        <span class="k">if</span> <span class="n">negativeNoiseLevel</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="n">negativeNoiseLevel</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;Spectrum negative noise level not defined </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">spectrum</span><span class="o">.</span><span class="n">pid</span><span class="p">)</span>
-            <span class="k">return</span> <span class="bp">None</span>
+            <span class="k">return</span> <span class="kc">None</span>
         <span class="n">snr</span> <span class="o">=</span> <span class="n">estimateSNR_1D</span><span class="p">(</span><span class="n">noiseLevels</span><span class="o">=</span><span class="p">[</span><span class="n">noiseLevel</span><span class="p">,</span> <span class="n">negativeNoiseLevel</span><span class="p">],</span> <span class="n">signalPoints</span><span class="o">=</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">height</span><span class="p">],</span> <span class="n">ratio</span><span class="o">=</span><span class="n">ratio</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">snr</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
 
-    <span class="nd">@logCommand</span><span class="p">(</span><span class="n">get</span><span class="o">=</span><span class="s1">&#39;self&#39;</span><span class="p">)</span>
-<div class="viewcode-block" id="Peak.estimateVolume"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.Peak.Peak.estimateVolume">[docs]</a>    <span class="k">def</span> <span class="nf">estimateVolume</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">volumeIntegralLimit</span><span class="o">=</span><span class="mf">2.0</span><span class="p">):</span>
+<div class="viewcode-block" id="Peak.estimateVolume"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.Peak.Peak.estimateVolume">[docs]</a>    <span class="nd">@logCommand</span><span class="p">(</span><span class="n">get</span><span class="o">=</span><span class="s1">&#39;self&#39;</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">estimateVolume</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">volumeIntegralLimit</span><span class="o">=</span><span class="mf">2.0</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Estimate the volume of the peak from a gaussian distribution.</span>
 <span class="sd">        The width of the volume integral in each dimension is the lineWidth (FWHM) * volumeIntegralLimit,</span>
 <span class="sd">        the default is 2.0 * FWHM of the peak.</span>
@@ -753,7 +768,7 @@
             <span class="k">return</span> <span class="n">k</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">s</span> <span class="o">*</span> <span class="p">(</span><span class="n">N</span> <span class="o">-</span> <span class="n">mu</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">N</span> <span class="o">-</span> <span class="n">mu</span><span class="p">))</span>
 
         <span class="n">lineWidths</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lineWidths</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">lineWidths</span> <span class="ow">or</span> <span class="bp">None</span> <span class="ow">in</span> <span class="n">lineWidths</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">lineWidths</span> <span class="ow">or</span> <span class="kc">None</span> <span class="ow">in</span> <span class="n">lineWidths</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;cannot estimate volume, lineWidths not defined or contain None.&#39;</span><span class="p">)</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">height</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;cannot estimate volume, height not defined.&#39;</span><span class="p">)</span>
@@ -787,7 +802,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">spectrum</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">peakList</span><span class="o">.</span><span class="n">spectrum</span>
         <span class="n">alias</span> <span class="o">=</span> <span class="n">spectrum</span><span class="o">.</span><span class="n">_getAliasingRange</span><span class="p">()</span>
-        <span class="k">if</span> <span class="n">alias</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">alias</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">spectrum</span><span class="o">.</span><span class="n">aliasingRange</span> <span class="o">=</span> <span class="n">alias</span></div>
 
     <span class="c1">#===========================================================================================</span>
@@ -801,12 +816,12 @@
 <span class="c1">#=========================================================================================</span>
 
 <span class="nd">@newObject</span><span class="p">(</span><span class="n">Peak</span><span class="p">)</span>
-<span class="k">def</span> <span class="nf">_newPeak</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">PeakList</span><span class="p">,</span> <span class="n">height</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="n">volume</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span>
-             <span class="n">heightError</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="n">volumeError</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span>
-             <span class="n">figureOfMerit</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span> <span class="n">annotation</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="n">comment</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span>
-             <span class="n">ppmPositions</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="p">(),</span> <span class="n">position</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="n">positionError</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="p">(),</span>
+<span class="k">def</span> <span class="nf">_newPeak</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">PeakList</span><span class="p">,</span> <span class="n">height</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">volume</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+             <span class="n">heightError</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">volumeError</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+             <span class="n">figureOfMerit</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span> <span class="n">annotation</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">comment</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+             <span class="n">ppmPositions</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="p">(),</span> <span class="n">position</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">positionError</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="p">(),</span>
              <span class="n">pointPosition</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="p">(),</span> <span class="n">boxWidths</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="p">(),</span>
-             <span class="n">lineWidths</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="p">(),</span> <span class="n">serial</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="bp">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Peak</span><span class="p">:</span>
+             <span class="n">lineWidths</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="p">(),</span> <span class="n">serial</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Peak</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;Create a new Peak within a peakList</span>
 
 <span class="sd">    NB you must create the peak before you can assign it. The assignment attributes are:</span>
@@ -832,7 +847,7 @@
 <span class="sd">    :return: a new Peak instance.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">if</span> <span class="n">position</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">position</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">ppmPositions</span> <span class="o">=</span> <span class="n">position</span>  <span class="c1"># Backward compatibility</span>
 
     <span class="n">apiPeakList</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_apiPeakList</span>
@@ -840,10 +855,10 @@
                                   <span class="n">heightError</span><span class="o">=</span><span class="n">heightError</span><span class="p">,</span> <span class="n">volumeError</span><span class="o">=</span><span class="n">volumeError</span><span class="p">,</span>
                                   <span class="n">figOfMerit</span><span class="o">=</span><span class="n">figureOfMerit</span><span class="p">,</span> <span class="n">annotation</span><span class="o">=</span><span class="n">annotation</span><span class="p">,</span> <span class="n">details</span><span class="o">=</span><span class="n">comment</span><span class="p">)</span>
     <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_data2Obj</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">apiPeak</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">result</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">result</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;Unable to generate new Peak item&#39;</span><span class="p">)</span>
 
-    <span class="k">if</span> <span class="n">serial</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">serial</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">result</span><span class="o">.</span><span class="n">resetSerial</span><span class="p">(</span><span class="n">serial</span><span class="p">)</span>
         <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
@@ -871,8 +886,8 @@
 
 
 <span class="nd">@newObject</span><span class="p">(</span><span class="n">Peak</span><span class="p">)</span>
-<span class="k">def</span> <span class="nf">_newPickedPeak</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">PeakList</span><span class="p">,</span> <span class="n">pointPositions</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="n">height</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span>
-                   <span class="n">lineWidths</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="p">(),</span> <span class="n">fitMethod</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;gaussian&#39;</span><span class="p">,</span> <span class="n">serial</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="bp">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Peak</span><span class="p">:</span>
+<span class="k">def</span> <span class="nf">_newPickedPeak</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">PeakList</span><span class="p">,</span> <span class="n">pointPositions</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">height</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                   <span class="n">lineWidths</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="p">(),</span> <span class="n">fitMethod</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;gaussian&#39;</span><span class="p">,</span> <span class="n">serial</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Peak</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;Create a new Peak within a peakList from a picked peak</span>
 
 <span class="sd">    See the Peak class for details.</span>
@@ -888,10 +903,10 @@
     <span class="n">apiPeakList</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_apiPeakList</span>
     <span class="n">apiPeak</span> <span class="o">=</span> <span class="n">apiPeakList</span><span class="o">.</span><span class="n">newPeak</span><span class="p">()</span>
     <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_data2Obj</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">apiPeak</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">result</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">result</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;Unable to generate new Peak item&#39;</span><span class="p">)</span>
 
-    <span class="k">if</span> <span class="n">serial</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">serial</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">result</span><span class="o">.</span><span class="n">resetSerial</span><span class="p">(</span><span class="n">serial</span><span class="p">)</span>
         <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
@@ -908,7 +923,7 @@
         <span class="k">if</span> <span class="n">dataDim</span><span class="o">.</span><span class="n">className</span> <span class="o">==</span> <span class="s1">&#39;FreqDataDim&#39;</span><span class="p">:</span>
             <span class="n">dataDimRef</span> <span class="o">=</span> <span class="n">dataDim</span><span class="o">.</span><span class="n">primaryDataDimRef</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">dataDimRef</span> <span class="o">=</span> <span class="bp">None</span>
+            <span class="n">dataDimRef</span> <span class="o">=</span> <span class="kc">None</span>
 
         <span class="k">if</span> <span class="n">dataDimRef</span><span class="p">:</span>
             <span class="n">peakDim</span><span class="o">.</span><span class="n">numAliasing</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">divmod</span><span class="p">(</span><span class="n">pointPositions</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">dataDim</span><span class="o">.</span><span class="n">numPointsOrig</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span>
@@ -917,7 +932,7 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="n">peakDim</span><span class="o">.</span><span class="n">position</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">pointPositions</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="n">fitMethod</span> <span class="ow">and</span> <span class="n">lineWidths</span> <span class="ow">and</span> <span class="n">lineWidths</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">fitMethod</span> <span class="ow">and</span> <span class="n">lineWidths</span> <span class="ow">and</span> <span class="n">lineWidths</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">peakDim</span><span class="o">.</span><span class="n">lineWidth</span> <span class="o">=</span> <span class="n">dataDim</span><span class="o">.</span><span class="n">valuePerPoint</span> <span class="o">*</span> <span class="n">lineWidths</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>  <span class="c1"># conversion from points to Hz</span>
 
     <span class="n">apiPeak</span><span class="o">.</span><span class="n">height</span> <span class="o">=</span> <span class="n">apiDataSource</span><span class="o">.</span><span class="n">scale</span> <span class="o">*</span> <span class="n">height</span>
@@ -956,15 +971,15 @@
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
 <div id="searchbox" style="display: none" role="search">
-  <h3>Quick search</h3>
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
     <form class="search" action="../../../search.html" method="get">
-      <input type="text" name="q" />
+      <input type="text" name="q" aria-labelledby="searchlabel" />
       <input type="submit" value="Go" />
-      <input type="hidden" name="check_keywords" value="yes" />
-      <input type="hidden" name="area" value="default" />
     </form>
+    </div>
 </div>
-<script type="text/javascript">$('#searchbox').show(0);</script>
+<script>$('#searchbox').show(0);</script>
         </div>
       </div>
       <div class="clearer"></div>
@@ -978,13 +993,13 @@
         <li class="right" >
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../index.html">Python  documentation</a> &raquo;</li>
-          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="../../../index.html">Python  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &#187;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
-        &copy; Copyright .
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.1.
+        &#169; Copyright .
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.4.0.
     </div>
   </body>
 </html>

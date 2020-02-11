@@ -1,32 +1,22 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
+<!DOCTYPE html>
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    
-    <title>ccpn.ui.gui.widgets.SpectrumToolBar &mdash; Python  documentation</title>
-    
+    <meta charset="utf-8" />
+    <title>ccpn.ui.gui.widgets.SpectrumToolBar &#8212; Python  documentation</title>
     <link rel="stylesheet" href="../../../../../_static/classic.css" type="text/css" />
     <link rel="stylesheet" href="../../../../../_static/pygments.css" type="text/css" />
     
-    <script type="text/javascript">
-      var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    '../../../../../',
-        VERSION:     '',
-        COLLAPSE_INDEX: false,
-        FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true
-      };
-    </script>
-    <script type="text/javascript" src="../../../../../_static/jquery.js"></script>
-    <script type="text/javascript" src="../../../../../_static/underscore.js"></script>
-    <script type="text/javascript" src="../../../../../_static/doctools.js"></script>
-    <link rel="top" title="Python  documentation" href="../../../../../index.html" />
-    <link rel="up" title="Module code" href="../../../../index.html" /> 
-  </head>
-  <body role="document">
+    <script id="documentation_options" data-url_root="../../../../../" src="../../../../../_static/documentation_options.js"></script>
+    <script src="../../../../../_static/jquery.js"></script>
+    <script src="../../../../../_static/underscore.js"></script>
+    <script src="../../../../../_static/doctools.js"></script>
+    <script src="../../../../../_static/language_data.js"></script>
+    
+    <link rel="index" title="Index" href="../../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../../search.html" /> 
+  </head><body>
     <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
@@ -36,8 +26,8 @@
         <li class="right" >
           <a href="../../../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../../../index.html">Python  documentation</a> &raquo;</li>
-          <li class="nav-item nav-item-1"><a href="../../../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="../../../../../index.html">Python  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../../../index.html" accesskey="U">Module code</a> &#187;</li> 
       </ul>
     </div>  
 
@@ -76,7 +66,6 @@
 
 <span class="kn">from</span> <span class="nn">contextlib</span> <span class="kn">import</span> <span class="n">contextmanager</span>
 <span class="kn">from</span> <span class="nn">PyQt5</span> <span class="kn">import</span> <span class="n">QtCore</span><span class="p">,</span> <span class="n">QtGui</span><span class="p">,</span> <span class="n">QtWidgets</span>
-
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Menu</span> <span class="kn">import</span> <span class="n">Menu</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.ToolBar</span> <span class="kn">import</span> <span class="n">ToolBar</span>
 <span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">partial</span>
@@ -92,6 +81,7 @@
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.lib.GuiSpectrumView</span> <span class="kn">import</span> <span class="n">_spectrumViewHasChanged</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.popups.SpectrumPropertiesPopup</span> <span class="kn">import</span> <span class="n">SpectrumPropertiesPopup</span>
 <span class="kn">from</span> <span class="nn">ccpn.core.lib</span> <span class="kn">import</span> <span class="n">Pid</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.lib.GuiStripContextMenus</span> <span class="kn">import</span> <span class="n">_SCMitem</span><span class="p">,</span> <span class="n">ItemTypes</span><span class="p">,</span> <span class="n">ITEM</span><span class="p">,</span> <span class="n">_addMenuItems</span><span class="p">,</span> <span class="n">_createMenu</span><span class="p">,</span> <span class="n">_separator</span>
 
 
 <span class="n">TOOLBAR_EXTENSIONNAME</span> <span class="o">=</span> <span class="s1">&#39;qt_toolbar_ext_button&#39;</span>
@@ -99,14 +89,14 @@
 
 <div class="viewcode-block" id="SpectrumToolBar"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.SpectrumToolBar.SpectrumToolBar">[docs]</a><span class="k">class</span> <span class="nc">SpectrumToolBar</span><span class="p">(</span><span class="n">ToolBar</span><span class="p">):</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">widget</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">widget</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
 
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="n">parent</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="n">parent</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">widget</span> <span class="o">=</span> <span class="n">widget</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_parent</span> <span class="o">=</span> <span class="n">parent</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">setToolButtonStyle</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">ToolButtonTextUnderIcon</span><span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">setMouseTracking</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setMouseTracking</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_spectrumToolBarBlockingLevel</span> <span class="o">=</span> <span class="mi">0</span>
 
         <span class="k">for</span> <span class="n">child</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">children</span><span class="p">():</span>
@@ -124,17 +114,17 @@
     <span class="k">def</span> <span class="nf">_blockSpectrumToolBarEvents</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Block all updates/signals/notifiers on the spectrumToolBar</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">setUpdatesEnabled</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">blockSignals</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setUpdatesEnabled</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">blockSignals</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_unblockSpectrumToolBarEvents</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Unblock all updates/signals/notifiers on the spectrumToolBar</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">blockSignals</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">setUpdatesEnabled</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">blockSignals</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setUpdatesEnabled</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
 
-    <span class="nd">@contextmanager</span>
-<div class="viewcode-block" id="SpectrumToolBar.spectrumToolBarBlocking"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.SpectrumToolBar.SpectrumToolBar.spectrumToolBarBlocking">[docs]</a>    <span class="k">def</span> <span class="nf">spectrumToolBarBlocking</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+<div class="viewcode-block" id="SpectrumToolBar.spectrumToolBarBlocking"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.SpectrumToolBar.SpectrumToolBar.spectrumToolBarBlocking">[docs]</a>    <span class="nd">@contextmanager</span>
+    <span class="k">def</span> <span class="nf">spectrumToolBarBlocking</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Context manager to handle blocking of the spectrumToolBar events.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">increaseSpectrumToolBarBlocking</span><span class="p">(</span><span class="n">node</span><span class="p">)</span>
@@ -145,14 +135,14 @@
         <span class="k">finally</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">decreaseSpectrumToolBarBlocking</span><span class="p">(</span><span class="n">node</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="SpectrumToolBar.increaseSpectrumToolBarBlocking"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.SpectrumToolBar.SpectrumToolBar.increaseSpectrumToolBarBlocking">[docs]</a>    <span class="k">def</span> <span class="nf">increaseSpectrumToolBarBlocking</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+<div class="viewcode-block" id="SpectrumToolBar.increaseSpectrumToolBarBlocking"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.SpectrumToolBar.SpectrumToolBar.increaseSpectrumToolBarBlocking">[docs]</a>    <span class="k">def</span> <span class="nf">increaseSpectrumToolBarBlocking</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;increase level of blocking</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_spectrumToolBarBlockingLevel</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_blockSpectrumToolBarEvents</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_spectrumToolBarBlockingLevel</span> <span class="o">+=</span> <span class="mi">1</span></div>
 
-<div class="viewcode-block" id="SpectrumToolBar.decreaseSpectrumToolBarBlocking"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.SpectrumToolBar.SpectrumToolBar.decreaseSpectrumToolBarBlocking">[docs]</a>    <span class="k">def</span> <span class="nf">decreaseSpectrumToolBarBlocking</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+<div class="viewcode-block" id="SpectrumToolBar.decreaseSpectrumToolBarBlocking"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.SpectrumToolBar.SpectrumToolBar.decreaseSpectrumToolBarBlocking">[docs]</a>    <span class="k">def</span> <span class="nf">decreaseSpectrumToolBarBlocking</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Reduce level of blocking - when level reaches zero, SpectrumToolBar is unblocked</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_spectrumToolBarBlockingLevel</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
@@ -186,10 +176,10 @@
 
         <span class="kn">from</span> <span class="nn">ccpn.ui.gui.lib.OpenGL.CcpnOpenGL</span> <span class="kn">import</span> <span class="n">GLNotifier</span>
 
-        <span class="n">GLSignals</span> <span class="o">=</span> <span class="n">GLNotifier</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">)</span>
+        <span class="n">GLSignals</span> <span class="o">=</span> <span class="n">GLNotifier</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
 
         <span class="c1"># GLSignals.emitPaintEvent()</span>
-        <span class="n">GLSignals</span><span class="o">.</span><span class="n">_emitAxisUnitsChanged</span><span class="p">(</span><span class="n">source</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">strip</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">widget</span><span class="o">.</span><span class="n">strips</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">dataDict</span><span class="o">=</span><span class="p">{})</span>
+        <span class="n">GLSignals</span><span class="o">.</span><span class="n">_emitAxisUnitsChanged</span><span class="p">(</span><span class="n">source</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">strip</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">widget</span><span class="o">.</span><span class="n">strips</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">dataDict</span><span class="o">=</span><span class="p">{})</span>
 
     <span class="k">def</span> <span class="nf">_addSubMenusToContext</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">contextMenu</span><span class="p">,</span> <span class="n">button</span><span class="p">):</span>
 
@@ -210,46 +200,93 @@
                                     <span class="n">allViews</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">view</span><span class="p">)</span>
                     <span class="n">views</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">allViews</span><span class="p">))</span>
                     <span class="n">smenu</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">views</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span>
-                    <span class="n">smenu</span><span class="o">.</span><span class="n">addAction</span><span class="p">(</span><span class="s1">&#39;Show All&#39;</span><span class="p">,</span> <span class="n">partial</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_setVisibleAllFromList</span><span class="p">,</span> <span class="bp">True</span><span class="p">,</span> <span class="n">smenu</span><span class="p">,</span> <span class="n">views</span><span class="p">))</span>
-                    <span class="n">smenu</span><span class="o">.</span><span class="n">addAction</span><span class="p">(</span><span class="s1">&#39;Hide All&#39;</span><span class="p">,</span> <span class="n">partial</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_setVisibleAllFromList</span><span class="p">,</span> <span class="bp">False</span><span class="p">,</span> <span class="n">smenu</span><span class="p">,</span> <span class="n">views</span><span class="p">))</span>
+
+                    <span class="n">menuItems</span> <span class="o">=</span> <span class="p">[</span><span class="n">_SCMitem</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;Show All&#39;</span><span class="p">,</span>
+                                          <span class="n">typeItem</span><span class="o">=</span><span class="n">ItemTypes</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">ITEM</span><span class="p">),</span> <span class="n">icon</span><span class="o">=</span><span class="s1">&#39;icons/null&#39;</span><span class="p">,</span>
+                                          <span class="n">callback</span><span class="o">=</span><span class="n">partial</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_setVisibleAllFromList</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="n">smenu</span><span class="p">,</span> <span class="n">views</span><span class="p">)),</span>
+                                 <span class="n">_SCMitem</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;Hide All&#39;</span><span class="p">,</span>
+                                          <span class="n">typeItem</span><span class="o">=</span><span class="n">ItemTypes</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">ITEM</span><span class="p">),</span> <span class="n">icon</span><span class="o">=</span><span class="s1">&#39;icons/null&#39;</span><span class="p">,</span>
+                                          <span class="n">callback</span><span class="o">=</span><span class="n">partial</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_setVisibleAllFromList</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="n">smenu</span><span class="p">,</span> <span class="n">views</span><span class="p">)),</span>
+                                 <span class="p">]</span>
+
+                    <span class="n">_addMenuItems</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">widget</span><span class="p">,</span> <span class="n">smenu</span><span class="p">,</span> <span class="n">menuItems</span><span class="p">)</span>
+
+                    <span class="c1"># smenu.addAction(&#39;Show All&#39;, partial(self._setVisibleAllFromList, True, smenu, views))</span>
+                    <span class="c1"># smenu.addAction(&#39;Hide All&#39;, partial(self._setVisibleAllFromList, False, smenu, views))</span>
+
                     <span class="n">smenu</span><span class="o">.</span><span class="n">addSeparator</span><span class="p">()</span>
-                    <span class="k">for</span> <span class="n">view</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">views</span><span class="p">,</span> <span class="n">reverse</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+                    <span class="k">for</span> <span class="n">view</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">views</span><span class="p">,</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
                         <span class="n">ccpnObj</span> <span class="o">=</span> <span class="n">view</span><span class="o">.</span><span class="n">_childClass</span>
                         <span class="n">strip</span> <span class="o">=</span> <span class="n">view</span><span class="o">.</span><span class="n">_parent</span><span class="o">.</span><span class="n">_parent</span>
-                        <span class="n">toolTip</span> <span class="o">=</span> <span class="s1">&#39;Toggle {0} {1} on strip {2}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">coreObj</span><span class="o">.</span><span class="n">className</span><span class="p">,</span> <span class="n">ccpnObj</span><span class="o">.</span><span class="n">_key</span><span class="p">,</span> <span class="n">strip</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
+                        <span class="n">toolTip</span> <span class="o">=</span> <span class="s1">&#39;Toggle </span><span class="si">{0}</span><span class="s1"> </span><span class="si">{1}</span><span class="s1"> on strip </span><span class="si">{2}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">coreObj</span><span class="o">.</span><span class="n">className</span><span class="p">,</span> <span class="n">ccpnObj</span><span class="o">.</span><span class="n">_key</span><span class="p">,</span> <span class="n">strip</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
                         <span class="k">if</span> <span class="n">ccpnObj</span><span class="p">:</span>
                             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">widget</span><span class="o">.</span><span class="n">strips</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>  <span class="c1">#add shows in which strips the view is</span>
                                 <span class="n">currentTxt</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>  <span class="c1"># add in which strip is current</span>
                                 <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">widget</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">strip</span> <span class="o">==</span> <span class="n">strip</span><span class="p">:</span>
                                     <span class="n">currentTxt</span> <span class="o">=</span> <span class="s1">&#39; Current&#39;</span>
-                                <span class="n">action</span> <span class="o">=</span> <span class="n">smenu</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="s1">&#39;{0} ({1}{2})&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">ccpnObj</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">strip</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">currentTxt</span><span class="p">),</span> <span class="n">toolTip</span><span class="o">=</span><span class="n">toolTip</span><span class="p">)</span>
+                                <span class="n">action</span> <span class="o">=</span> <span class="n">smenu</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{0}</span><span class="s1"> (</span><span class="si">{1}{2}</span><span class="s1">)&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">ccpnObj</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">strip</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">currentTxt</span><span class="p">),</span> <span class="n">toolTip</span><span class="o">=</span><span class="n">toolTip</span><span class="p">)</span>
                             <span class="k">else</span><span class="p">:</span>
                                 <span class="n">action</span> <span class="o">=</span> <span class="n">smenu</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="n">ccpnObj</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">toolTip</span><span class="o">=</span><span class="n">toolTip</span><span class="p">)</span>
 
-                            <span class="n">action</span><span class="o">.</span><span class="n">setCheckable</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+                            <span class="n">action</span><span class="o">.</span><span class="n">setCheckable</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
                             <span class="k">if</span> <span class="n">view</span><span class="o">.</span><span class="n">isVisible</span><span class="p">():</span>
-                                <span class="n">action</span><span class="o">.</span><span class="n">setChecked</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+                                <span class="n">action</span><span class="o">.</span><span class="n">setChecked</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
                             <span class="n">action</span><span class="o">.</span><span class="n">toggled</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">view</span><span class="o">.</span><span class="n">setVisible</span><span class="p">)</span>
                             <span class="n">action</span><span class="o">.</span><span class="n">toggled</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_updateGl</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_spectrumToolBarItem</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">button</span><span class="p">):</span>
+        <span class="n">spectrum</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">widget</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">getByPid</span><span class="p">(</span><span class="n">button</span><span class="o">.</span><span class="n">actions</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">objectName</span><span class="p">())</span>
+        <span class="n">specViews</span> <span class="o">=</span> <span class="p">[</span><span class="n">spv</span> <span class="k">for</span> <span class="n">spv</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">widget</span><span class="o">.</span><span class="n">spectrumViews</span>
+                     <span class="k">if</span> <span class="n">spv</span><span class="o">.</span><span class="n">spectrum</span> <span class="o">==</span> <span class="n">spectrum</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">specViews</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">_SCMitem</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;Contours&#39;</span><span class="p">,</span>
+                            <span class="n">typeItem</span><span class="o">=</span><span class="n">ItemTypes</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">ITEM</span><span class="p">),</span> <span class="n">toolTip</span><span class="o">=</span><span class="s1">&#39;Toggle Spectrum Contours On/Off&#39;</span><span class="p">,</span>
+                            <span class="n">callback</span><span class="o">=</span><span class="n">partial</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_toggleSpectrumContours</span><span class="p">,</span> <span class="n">button</span><span class="o">.</span><span class="n">actions</span><span class="p">()[</span><span class="mi">0</span><span class="p">],</span> <span class="n">specViews</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span>
+                            <span class="n">checkable</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                            <span class="n">checked</span><span class="o">=</span><span class="n">specViews</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">_showContours</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_toggleSpectrumContours</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">buttonAction</span><span class="p">,</span> <span class="n">specView</span><span class="p">):</span>
+        <span class="kn">from</span> <span class="nn">ccpn.ui.gui.lib.OpenGL.CcpnOpenGL</span> <span class="kn">import</span> <span class="n">GLNotifier</span>
+
+        <span class="n">specView</span><span class="o">.</span><span class="n">_showContours</span> <span class="o">=</span> <span class="ow">not</span> <span class="n">specView</span><span class="o">.</span><span class="n">_showContours</span>
+        <span class="n">_spectrumViewHasChanged</span><span class="p">({</span><span class="n">Notifier</span><span class="o">.</span><span class="n">OBJECT</span><span class="p">:</span> <span class="n">specView</span><span class="p">})</span>
+
+        <span class="n">GLSignals</span> <span class="o">=</span> <span class="n">GLNotifier</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="bp">self</span><span class="p">)</span>
+        <span class="n">GLSignals</span><span class="o">.</span><span class="n">emitPaintEvent</span><span class="p">()</span>
 
     <span class="k">def</span> <span class="nf">_createContextMenu</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">button</span><span class="p">:</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QToolButton</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Creates a context menu containing a command to delete the spectrum from the display and its</span>
 <span class="sd">        button from the toolbar.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-
         <span class="k">if</span> <span class="ow">not</span> <span class="n">button</span><span class="p">:</span>
-            <span class="k">return</span> <span class="bp">None</span>
+            <span class="k">return</span> <span class="kc">None</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">button</span><span class="o">.</span><span class="n">actions</span><span class="p">())</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
-            <span class="k">return</span> <span class="bp">None</span>
+            <span class="k">return</span> <span class="kc">None</span>
 
-        <span class="n">contextMenu</span> <span class="o">=</span> <span class="n">Menu</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="p">,</span> <span class="n">isFloatWidget</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_addSubMenusToContext</span><span class="p">(</span><span class="n">contextMenu</span><span class="p">,</span> <span class="n">button</span><span class="p">)</span>
+        <span class="n">contextMenu</span> <span class="o">=</span> <span class="n">Menu</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">widget</span><span class="p">,</span> <span class="n">isFloatWidget</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="n">_addMenuItems</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">widget</span><span class="p">,</span> <span class="n">contextMenu</span><span class="p">,</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_spectrumToolBarItem</span><span class="p">(</span><span class="n">button</span><span class="p">)])</span>
 
         <span class="n">contextMenu</span><span class="o">.</span><span class="n">addSeparator</span><span class="p">()</span>
-        <span class="n">contextMenu</span><span class="o">.</span><span class="n">addAction</span><span class="p">(</span><span class="s1">&#39;Jump on SideBar&#39;</span><span class="p">,</span> <span class="n">partial</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_jumpOnSideBar</span><span class="p">,</span> <span class="n">button</span><span class="p">))</span>
-        <span class="n">contextMenu</span><span class="o">.</span><span class="n">addAction</span><span class="p">(</span><span class="s1">&#39;Properties...&#39;</span><span class="p">,</span> <span class="n">partial</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_showSpectrumProperties</span><span class="p">,</span> <span class="n">button</span><span class="p">))</span>
-        <span class="n">contextMenu</span><span class="o">.</span><span class="n">addAction</span><span class="p">(</span><span class="s1">&#39;Remove Spectrum&#39;</span><span class="p">,</span> <span class="n">partial</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_removeSpectrum</span><span class="p">,</span> <span class="n">button</span><span class="p">))</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_addSubMenusToContext</span><span class="p">(</span><span class="n">contextMenu</span><span class="p">,</span> <span class="n">button</span><span class="p">)</span>
+        <span class="n">contextMenu</span><span class="o">.</span><span class="n">addSeparator</span><span class="p">()</span>
+
+        <span class="n">menuItems</span> <span class="o">=</span> <span class="p">[</span><span class="n">_SCMitem</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;Jump on SideBar&#39;</span><span class="p">,</span>
+                              <span class="n">typeItem</span><span class="o">=</span><span class="n">ItemTypes</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">ITEM</span><span class="p">),</span> <span class="n">icon</span><span class="o">=</span><span class="s1">&#39;icons/null&#39;</span><span class="p">,</span>
+                              <span class="n">callback</span><span class="o">=</span><span class="n">partial</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_jumpOnSideBar</span><span class="p">,</span> <span class="n">button</span><span class="p">)),</span>
+                     <span class="n">_SCMitem</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;Properties...&#39;</span><span class="p">,</span>
+                              <span class="n">typeItem</span><span class="o">=</span><span class="n">ItemTypes</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">ITEM</span><span class="p">),</span> <span class="n">icon</span><span class="o">=</span><span class="s1">&#39;icons/null&#39;</span><span class="p">,</span>
+                              <span class="n">callback</span><span class="o">=</span><span class="n">partial</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_showSpectrumProperties</span><span class="p">,</span> <span class="n">button</span><span class="p">)),</span>
+                     <span class="n">_SCMitem</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;Remove Spectrum&#39;</span><span class="p">,</span>
+                              <span class="n">typeItem</span><span class="o">=</span><span class="n">ItemTypes</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">ITEM</span><span class="p">),</span> <span class="n">icon</span><span class="o">=</span><span class="s1">&#39;icons/null&#39;</span><span class="p">,</span>
+                              <span class="n">callback</span><span class="o">=</span><span class="n">partial</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_removeSpectrum</span><span class="p">,</span> <span class="n">button</span><span class="p">)),</span>
+                     <span class="p">]</span>
+
+        <span class="n">_addMenuItems</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">widget</span><span class="p">,</span> <span class="n">contextMenu</span><span class="p">,</span> <span class="n">menuItems</span><span class="p">)</span>
+
         <span class="k">return</span> <span class="n">contextMenu</span>
 
     <span class="k">def</span> <span class="nf">_jumpOnSideBar</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">button</span><span class="p">):</span>
@@ -272,7 +309,7 @@
         <span class="n">GLSignals</span> <span class="o">=</span> <span class="n">GLNotifier</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="bp">self</span><span class="p">)</span>
 
         <span class="c1"># GLSignals.emitPaintEvent()</span>
-        <span class="n">GLSignals</span><span class="o">.</span><span class="n">_emitAxisUnitsChanged</span><span class="p">(</span><span class="n">source</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">strip</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">widget</span><span class="o">.</span><span class="n">strips</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">dataDict</span><span class="o">=</span><span class="p">{})</span>
+        <span class="n">GLSignals</span><span class="o">.</span><span class="n">_emitAxisUnitsChanged</span><span class="p">(</span><span class="n">source</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">strip</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">widget</span><span class="o">.</span><span class="n">strips</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">dataDict</span><span class="o">=</span><span class="p">{})</span>
 
     <span class="k">def</span> <span class="nf">_getSpectrumViewFromButton</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">button</span><span class="p">):</span>
         <span class="n">spvs</span> <span class="o">=</span> <span class="p">[]</span>
@@ -340,7 +377,7 @@
         <span class="c1"># spawn a redraw of the GL windows</span>
         <span class="kn">from</span> <span class="nn">ccpn.ui.gui.lib.OpenGL.CcpnOpenGL</span> <span class="kn">import</span> <span class="n">GLNotifier</span>
 
-        <span class="n">GLSignals</span> <span class="o">=</span> <span class="n">GLNotifier</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">)</span>
+        <span class="n">GLSignals</span> <span class="o">=</span> <span class="n">GLNotifier</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
         <span class="n">GLSignals</span><span class="o">.</span><span class="n">emitPaintEvent</span><span class="p">()</span>
 
     <span class="k">def</span> <span class="nf">_dragButton</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
@@ -409,7 +446,8 @@
                 <span class="n">menu</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_createContextMenu</span><span class="p">(</span><span class="n">toolButton</span><span class="p">)</span>
                 <span class="k">if</span> <span class="n">menu</span><span class="p">:</span>
                     <span class="n">menu</span><span class="o">.</span><span class="n">move</span><span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">globalPos</span><span class="p">()</span><span class="o">.</span><span class="n">x</span><span class="p">(),</span> <span class="n">event</span><span class="o">.</span><span class="n">globalPos</span><span class="p">()</span><span class="o">.</span><span class="n">y</span><span class="p">()</span> <span class="o">+</span> <span class="mi">10</span><span class="p">)</span>
-                    <span class="n">menu</span><span class="o">.</span><span class="k">exec</span><span class="p">()</span>
+                    <span class="n">menu</span><span class="o">.</span><span class="n">exec_</span><span class="p">()</span>
+
             <span class="k">if</span> <span class="n">event</span><span class="o">.</span><span class="n">button</span><span class="p">()</span> <span class="o">==</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">MiddleButton</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_dragButton</span><span class="p">(</span><span class="n">event</span><span class="p">)</span>
 
@@ -426,6 +464,9 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_addSpectrumViewToolButtons</span><span class="p">(</span><span class="n">spectrum</span><span class="o">.</span><span class="n">spectrumViews</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_addSpectrumViewToolButtons</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">spectrumView</span><span class="p">):</span>
+        <span class="n">spectrumDisplay</span> <span class="o">=</span> <span class="n">spectrumView</span><span class="o">.</span><span class="n">strip</span><span class="o">.</span><span class="n">spectrumDisplay</span>
+        <span class="k">if</span> <span class="n">spectrumDisplay</span><span class="o">.</span><span class="n">isGrouped</span><span class="p">:</span>
+            <span class="k">return</span>
 
         <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectrumToolBarBlocking</span><span class="p">():</span>
             <span class="n">spectrumDisplay</span> <span class="o">=</span> <span class="n">spectrumView</span><span class="o">.</span><span class="n">strip</span><span class="o">.</span><span class="n">spectrumDisplay</span>
@@ -464,8 +505,8 @@
                     <span class="n">action</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">addAction</span><span class="p">(</span><span class="n">spectrumName</span><span class="p">)</span>
                     <span class="n">action</span><span class="o">.</span><span class="n">setObjectName</span><span class="p">(</span><span class="n">spectrum</span><span class="o">.</span><span class="n">pid</span><span class="p">)</span>
 
-                <span class="n">action</span><span class="o">.</span><span class="n">setCheckable</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
-                <span class="n">action</span><span class="o">.</span><span class="n">setChecked</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+                <span class="n">action</span><span class="o">.</span><span class="n">setCheckable</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+                <span class="n">action</span><span class="o">.</span><span class="n">setChecked</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
                 <span class="n">action</span><span class="o">.</span><span class="n">setToolTip</span><span class="p">(</span><span class="n">spectrum</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
                 <span class="n">widget</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">widgetForAction</span><span class="p">(</span><span class="n">action</span><span class="p">)</span>
                 <span class="n">widget</span><span class="o">.</span><span class="n">setIconSize</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">QSize</span><span class="p">(</span><span class="mi">120</span><span class="p">,</span> <span class="mi">10</span><span class="p">))</span>
@@ -481,6 +522,7 @@
         <span class="c1"># if spectrumDisplay.is1D:</span>
         <span class="c1">#     action.toggled.connect(spectrumView.plot.setVisible)</span>
         <span class="n">action</span><span class="o">.</span><span class="n">toggled</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">spectrumView</span><span class="o">.</span><span class="n">setVisible</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">action</span>
 
     <span class="k">def</span> <span class="nf">_setSizes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">action</span><span class="p">):</span>
 
@@ -539,15 +581,15 @@
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
 <div id="searchbox" style="display: none" role="search">
-  <h3>Quick search</h3>
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
     <form class="search" action="../../../../../search.html" method="get">
-      <input type="text" name="q" />
+      <input type="text" name="q" aria-labelledby="searchlabel" />
       <input type="submit" value="Go" />
-      <input type="hidden" name="check_keywords" value="yes" />
-      <input type="hidden" name="area" value="default" />
     </form>
+    </div>
 </div>
-<script type="text/javascript">$('#searchbox').show(0);</script>
+<script>$('#searchbox').show(0);</script>
         </div>
       </div>
       <div class="clearer"></div>
@@ -561,13 +603,13 @@
         <li class="right" >
           <a href="../../../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../../../index.html">Python  documentation</a> &raquo;</li>
-          <li class="nav-item nav-item-1"><a href="../../../../index.html" >Module code</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="../../../../../index.html">Python  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../../../index.html" >Module code</a> &#187;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
-        &copy; Copyright .
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.1.
+        &#169; Copyright .
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.4.0.
     </div>
   </body>
 </html>

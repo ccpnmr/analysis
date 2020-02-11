@@ -1,32 +1,22 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
+<!DOCTYPE html>
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    
-    <title>ccpn.ui.gui.modules.CcpnModule &mdash; Python  documentation</title>
-    
+    <meta charset="utf-8" />
+    <title>ccpn.ui.gui.modules.CcpnModule &#8212; Python  documentation</title>
     <link rel="stylesheet" href="../../../../../_static/classic.css" type="text/css" />
     <link rel="stylesheet" href="../../../../../_static/pygments.css" type="text/css" />
     
-    <script type="text/javascript">
-      var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    '../../../../../',
-        VERSION:     '',
-        COLLAPSE_INDEX: false,
-        FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true
-      };
-    </script>
-    <script type="text/javascript" src="../../../../../_static/jquery.js"></script>
-    <script type="text/javascript" src="../../../../../_static/underscore.js"></script>
-    <script type="text/javascript" src="../../../../../_static/doctools.js"></script>
-    <link rel="top" title="Python  documentation" href="../../../../../index.html" />
-    <link rel="up" title="Module code" href="../../../../index.html" /> 
-  </head>
-  <body role="document">
+    <script id="documentation_options" data-url_root="../../../../../" src="../../../../../_static/documentation_options.js"></script>
+    <script src="../../../../../_static/jquery.js"></script>
+    <script src="../../../../../_static/underscore.js"></script>
+    <script src="../../../../../_static/doctools.js"></script>
+    <script src="../../../../../_static/language_data.js"></script>
+    
+    <link rel="index" title="Index" href="../../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../../search.html" /> 
+  </head><body>
     <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
@@ -36,8 +26,8 @@
         <li class="right" >
           <a href="../../../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../../../index.html">Python  documentation</a> &raquo;</li>
-          <li class="nav-item nav-item-1"><a href="../../../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="../../../../../index.html">Python  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../../../index.html" accesskey="U">Module code</a> &#187;</li> 
       </ul>
     </div>  
 
@@ -54,7 +44,7 @@
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Licence, Reference and Credits</span>
 <span class="c1">#=========================================================================================</span>
-<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019&quot;</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020&quot;</span>
 <span class="n">__credits__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Ed Brooksbank, Luca Mureddu, Timothy J Ragan &amp; Geerten W Vuister&quot;</span><span class="p">)</span>
 <span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">)</span>
 <span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., &amp; Vuister, G.W.&quot;</span><span class="p">,</span>
@@ -63,41 +53,36 @@
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Last code modification</span>
 <span class="c1">#=========================================================================================</span>
-<span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: CCPN $&quot;</span>
-<span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2017-07-07 16:32:43 +0100 (Fri, July 07, 2017) $&quot;</span>
+<span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: Ed Brooksbank $&quot;</span>
+<span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2020-01-28 16:27:16 +0000 (Tue, January 28, 2020) $&quot;</span>
 <span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.0 $&quot;</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Created</span>
 <span class="c1">#=========================================================================================</span>
 <span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;$Author: Geerten Vuister $&quot;</span>
 <span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;$Date: 2016-07-09 14:17:30 +0100 (Sat, 09 Jul 2016) $&quot;</span>
+
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Start of code</span>
 <span class="c1">#=========================================================================================</span>
 
 <span class="kn">from</span> <span class="nn">ccpn.util</span> <span class="kn">import</span> <span class="n">Logging</span>
 <span class="kn">from</span> <span class="nn">ccpn.util.Logging</span> <span class="kn">import</span> <span class="n">getLogger</span>
-<span class="kn">from</span> <span class="nn">weakref</span> <span class="kn">import</span> <span class="n">ref</span>
-<span class="kn">from</span> <span class="nn">contextlib</span> <span class="kn">import</span> <span class="n">contextmanager</span>
 <span class="kn">import</span> <span class="nn">itertools</span>
 <span class="kn">import</span> <span class="nn">collections</span>
 <span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">partial</span>
-
 <span class="kn">from</span> <span class="nn">pyqtgraph.dockarea.Container</span> <span class="kn">import</span> <span class="n">Container</span>
 <span class="kn">from</span> <span class="nn">pyqtgraph.dockarea.DockDrop</span> <span class="kn">import</span> <span class="n">DockDrop</span>
 <span class="kn">from</span> <span class="nn">pyqtgraph.dockarea.Dock</span> <span class="kn">import</span> <span class="n">DockLabel</span><span class="p">,</span> <span class="n">Dock</span>
-<span class="kn">from</span> <span class="nn">pyqtgraph.dockarea.DockArea</span> <span class="kn">import</span> <span class="n">TempAreaWindow</span>
-
+<span class="kn">from</span> <span class="nn">pyqtgraph.dockarea.DockArea</span> <span class="kn">import</span> <span class="n">DockArea</span>
 <span class="kn">from</span> <span class="nn">PyQt5</span> <span class="kn">import</span> <span class="n">QtCore</span><span class="p">,</span> <span class="n">QtGui</span><span class="p">,</span> <span class="n">QtWidgets</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.DropBase</span> <span class="kn">import</span> <span class="n">DropBase</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.CheckBox</span> <span class="kn">import</span> <span class="n">CheckBox</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Menu</span> <span class="kn">import</span> <span class="n">Menu</span>
-
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.guiSettings</span> <span class="kn">import</span> <span class="n">getColours</span><span class="p">,</span> <span class="n">CCPNMODULELABEL_BACKGROUND</span><span class="p">,</span> <span class="n">CCPNMODULELABEL_FOREGROUND</span><span class="p">,</span> \
     <span class="n">CCPNMODULELABEL_BACKGROUND_ACTIVE</span><span class="p">,</span> <span class="n">CCPNMODULELABEL_FOREGROUND_ACTIVE</span><span class="p">,</span> <span class="n">CCPNMODULELABEL_BORDER</span><span class="p">,</span> <span class="n">CCPNMODULELABEL_BORDER_ACTIVE</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.ColourDialog</span> <span class="kn">import</span> <span class="n">ColourDialog</span>
-<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.DoubleSpinbox</span> <span class="kn">import</span> <span class="n">DoubleSpinbox</span>
-<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Label</span> <span class="kn">import</span> <span class="n">Label</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.DoubleSpinbox</span> <span class="kn">import</span> <span class="n">DoubleSpinbox</span><span class="p">,</span> <span class="n">ScientificDoubleSpinBox</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.LineEdit</span> <span class="kn">import</span> <span class="n">LineEdit</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.PulldownList</span> <span class="kn">import</span> <span class="n">PulldownList</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.RadioButton</span> <span class="kn">import</span> <span class="n">RadioButton</span>
@@ -106,54 +91,95 @@
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Spinbox</span> <span class="kn">import</span> <span class="n">Spinbox</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.TextEditor</span> <span class="kn">import</span> <span class="n">TextEditor</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.FileDialog</span> <span class="kn">import</span> <span class="n">LineEditButtonDialog</span>
-<span class="kn">from</span> <span class="nn">ccpn.ui.gui.popups.PickPeaks1DPopup</span> <span class="kn">import</span> <span class="n">ExcludeRegions</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.GLLinearRegionsPlot</span> <span class="kn">import</span> <span class="n">GLTargetButtonSpinBoxes</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.ScrollArea</span> <span class="kn">import</span> <span class="n">ScrollArea</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Splitter</span> <span class="kn">import</span> <span class="n">Splitter</span>
-<span class="kn">from</span> <span class="nn">ccpn.ui.gui.lib.MenuActions</span> <span class="kn">import</span> <span class="n">_openItemObject</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.ToolButton</span> <span class="kn">import</span> <span class="n">ToolButton</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Icon</span> <span class="kn">import</span> <span class="n">Icon</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.guiSettings</span> <span class="kn">import</span> <span class="n">moduleLabelFont</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Widget</span> <span class="kn">import</span> <span class="n">Widget</span>
-<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.SideBar</span> <span class="kn">import</span> <span class="n">SideBar</span>  <span class="c1">#,SideBar</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.SideBar</span> <span class="kn">import</span> <span class="n">SideBar</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.PythonEditor</span> <span class="kn">import</span> <span class="n">QCodeEditor</span>
-
-<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Frame</span> <span class="kn">import</span> <span class="n">ScrollableFrame</span><span class="p">,</span> <span class="n">Frame</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Frame</span> <span class="kn">import</span> <span class="n">Frame</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.CompoundWidgets</span> <span class="kn">import</span> <span class="n">PulldownListCompoundWidget</span><span class="p">,</span> <span class="n">CheckBoxCompoundWidget</span><span class="p">,</span> \
     <span class="n">DoubleSpinBoxCompoundWidget</span><span class="p">,</span> <span class="n">SelectorWidget</span><span class="p">,</span> <span class="n">InputPulldown</span><span class="p">,</span> \
     <span class="n">ColourSelectionWidget</span><span class="p">,</span> <span class="n">LineEditPopup</span><span class="p">,</span> <span class="n">ListCompoundWidget</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.PulldownListsForObjects</span> <span class="kn">import</span> <span class="n">_PulldownABC</span>
-
-<span class="kn">from</span> <span class="nn">ccpn.core.lib.Notifiers</span> <span class="kn">import</span> <span class="n">Notifier</span><span class="p">,</span> <span class="n">NotifierBase</span>
-<span class="kn">from</span> <span class="nn">ccpn.ui.gui.lib.GuiNotifier</span> <span class="kn">import</span> <span class="n">GuiNotifier</span>
-<span class="kn">from</span> <span class="nn">ccpn.core.lib.ContextManagers</span> <span class="kn">import</span> <span class="n">undoBlock</span>
+<span class="kn">from</span> <span class="nn">ccpn.core.lib.Notifiers</span> <span class="kn">import</span> <span class="n">NotifierBase</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.CompoundWidgets</span> <span class="kn">import</span> <span class="n">EntryCompoundWidget</span><span class="p">,</span> <span class="n">RadioButtonsCompoundWidget</span><span class="p">,</span> <span class="n">ScientificSpinBoxCompoundWidget</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.PulldownListsForObjects</span> <span class="kn">import</span> <span class="n">NmrChainPulldown</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Entry</span> <span class="kn">import</span> <span class="n">Entry</span>
 
 
 <span class="n">CommonWidgets</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="n">CheckBox</span><span class="o">.</span><span class="n">__name__</span>                   <span class="p">:</span> <span class="p">(</span><span class="n">CheckBox</span><span class="o">.</span><span class="n">get</span><span class="p">,</span> <span class="n">CheckBox</span><span class="o">.</span><span class="n">setChecked</span><span class="p">),</span>
-    <span class="n">ColourDialog</span><span class="o">.</span><span class="n">__name__</span>               <span class="p">:</span> <span class="p">(</span><span class="n">ColourDialog</span><span class="o">.</span><span class="n">getColor</span><span class="p">,</span> <span class="n">ColourDialog</span><span class="o">.</span><span class="n">setColour</span><span class="p">),</span>
-    <span class="n">DoubleSpinbox</span><span class="o">.</span><span class="n">__name__</span>              <span class="p">:</span> <span class="p">(</span><span class="n">DoubleSpinbox</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="n">DoubleSpinbox</span><span class="o">.</span><span class="n">setValue</span><span class="p">),</span>
+    <span class="n">CheckBox</span><span class="o">.</span><span class="vm">__name__</span>                   <span class="p">:</span> <span class="p">(</span><span class="n">CheckBox</span><span class="o">.</span><span class="n">get</span><span class="p">,</span> <span class="n">CheckBox</span><span class="o">.</span><span class="n">setChecked</span><span class="p">),</span>
+    <span class="n">ColourDialog</span><span class="o">.</span><span class="vm">__name__</span>               <span class="p">:</span> <span class="p">(</span><span class="n">ColourDialog</span><span class="o">.</span><span class="n">getColor</span><span class="p">,</span> <span class="n">ColourDialog</span><span class="o">.</span><span class="n">setColour</span><span class="p">),</span>
+    <span class="n">DoubleSpinbox</span><span class="o">.</span><span class="vm">__name__</span>              <span class="p">:</span> <span class="p">(</span><span class="n">DoubleSpinbox</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="n">DoubleSpinbox</span><span class="o">.</span><span class="n">setValue</span><span class="p">),</span>
     <span class="c1"># Label.__name__:                   (Label.get,                   Label.setText),</span>
-    <span class="n">LineEdit</span><span class="o">.</span><span class="n">__name__</span>                   <span class="p">:</span> <span class="p">(</span><span class="n">LineEdit</span><span class="o">.</span><span class="n">get</span><span class="p">,</span> <span class="n">LineEdit</span><span class="o">.</span><span class="n">setText</span><span class="p">),</span>
-    <span class="n">LineEditButtonDialog</span><span class="o">.</span><span class="n">__name__</span>       <span class="p">:</span> <span class="p">(</span><span class="n">LineEditButtonDialog</span><span class="o">.</span><span class="n">get</span><span class="p">,</span> <span class="n">LineEditButtonDialog</span><span class="o">.</span><span class="n">setText</span><span class="p">),</span>
-    <span class="n">PulldownList</span><span class="o">.</span><span class="n">__name__</span>               <span class="p">:</span> <span class="p">(</span><span class="n">PulldownList</span><span class="o">.</span><span class="n">currentText</span><span class="p">,</span> <span class="n">PulldownList</span><span class="o">.</span><span class="n">set</span><span class="p">),</span>
-    <span class="n">RadioButtons</span><span class="o">.</span><span class="n">__name__</span>               <span class="p">:</span> <span class="p">(</span><span class="n">RadioButtons</span><span class="o">.</span><span class="n">get</span><span class="p">,</span> <span class="n">RadioButtons</span><span class="o">.</span><span class="n">set</span><span class="p">),</span>
-    <span class="n">RadioButton</span><span class="o">.</span><span class="n">__name__</span>                <span class="p">:</span> <span class="p">(</span><span class="n">RadioButton</span><span class="o">.</span><span class="n">isChecked</span><span class="p">,</span> <span class="n">RadioButton</span><span class="o">.</span><span class="n">setChecked</span><span class="p">),</span>
+    <span class="n">LineEdit</span><span class="o">.</span><span class="vm">__name__</span>                   <span class="p">:</span> <span class="p">(</span><span class="n">LineEdit</span><span class="o">.</span><span class="n">get</span><span class="p">,</span> <span class="n">LineEdit</span><span class="o">.</span><span class="n">setText</span><span class="p">),</span>
+    <span class="n">LineEditButtonDialog</span><span class="o">.</span><span class="vm">__name__</span>       <span class="p">:</span> <span class="p">(</span><span class="n">LineEditButtonDialog</span><span class="o">.</span><span class="n">get</span><span class="p">,</span> <span class="n">LineEditButtonDialog</span><span class="o">.</span><span class="n">setText</span><span class="p">),</span>
+    <span class="n">PulldownList</span><span class="o">.</span><span class="vm">__name__</span>               <span class="p">:</span> <span class="p">(</span><span class="n">PulldownList</span><span class="o">.</span><span class="n">currentText</span><span class="p">,</span> <span class="n">PulldownList</span><span class="o">.</span><span class="n">set</span><span class="p">),</span>
+    <span class="n">RadioButtons</span><span class="o">.</span><span class="vm">__name__</span>               <span class="p">:</span> <span class="p">(</span><span class="n">RadioButtons</span><span class="o">.</span><span class="n">get</span><span class="p">,</span> <span class="n">RadioButtons</span><span class="o">.</span><span class="n">set</span><span class="p">),</span>
+    <span class="n">RadioButton</span><span class="o">.</span><span class="vm">__name__</span>                <span class="p">:</span> <span class="p">(</span><span class="n">RadioButton</span><span class="o">.</span><span class="n">isChecked</span><span class="p">,</span> <span class="n">RadioButton</span><span class="o">.</span><span class="n">setChecked</span><span class="p">),</span>
 
-    <span class="n">Slider</span><span class="o">.</span><span class="n">__name__</span>                     <span class="p">:</span> <span class="p">(</span><span class="n">Slider</span><span class="o">.</span><span class="n">get</span><span class="p">,</span> <span class="n">Slider</span><span class="o">.</span><span class="n">setValue</span><span class="p">),</span>
-    <span class="n">Spinbox</span><span class="o">.</span><span class="n">__name__</span>                    <span class="p">:</span> <span class="p">(</span><span class="n">Spinbox</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="n">Spinbox</span><span class="o">.</span><span class="n">set</span><span class="p">),</span>
-    <span class="n">TextEditor</span><span class="o">.</span><span class="n">__name__</span>                 <span class="p">:</span> <span class="p">(</span><span class="n">TextEditor</span><span class="o">.</span><span class="n">get</span><span class="p">,</span> <span class="n">TextEditor</span><span class="o">.</span><span class="n">setText</span><span class="p">),</span>
-    <span class="n">GLTargetButtonSpinBoxes</span><span class="o">.</span><span class="n">__name__</span>    <span class="p">:</span> <span class="p">(</span><span class="n">GLTargetButtonSpinBoxes</span><span class="o">.</span><span class="n">get</span><span class="p">,</span> <span class="n">GLTargetButtonSpinBoxes</span><span class="o">.</span><span class="n">setValues</span><span class="p">),</span>
+    <span class="n">Slider</span><span class="o">.</span><span class="vm">__name__</span>                     <span class="p">:</span> <span class="p">(</span><span class="n">Slider</span><span class="o">.</span><span class="n">get</span><span class="p">,</span> <span class="n">Slider</span><span class="o">.</span><span class="n">setValue</span><span class="p">),</span>
+    <span class="n">Spinbox</span><span class="o">.</span><span class="vm">__name__</span>                    <span class="p">:</span> <span class="p">(</span><span class="n">Spinbox</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="n">Spinbox</span><span class="o">.</span><span class="n">set</span><span class="p">),</span>
+    <span class="n">TextEditor</span><span class="o">.</span><span class="vm">__name__</span>                 <span class="p">:</span> <span class="p">(</span><span class="n">TextEditor</span><span class="o">.</span><span class="n">get</span><span class="p">,</span> <span class="n">TextEditor</span><span class="o">.</span><span class="n">setText</span><span class="p">),</span>
+    <span class="n">GLTargetButtonSpinBoxes</span><span class="o">.</span><span class="vm">__name__</span>    <span class="p">:</span> <span class="p">(</span><span class="n">GLTargetButtonSpinBoxes</span><span class="o">.</span><span class="n">get</span><span class="p">,</span> <span class="n">GLTargetButtonSpinBoxes</span><span class="o">.</span><span class="n">setValues</span><span class="p">),</span>
 
-    <span class="n">PulldownListCompoundWidget</span><span class="o">.</span><span class="n">__name__</span> <span class="p">:</span> <span class="p">(</span><span class="n">PulldownListCompoundWidget</span><span class="o">.</span><span class="n">getText</span><span class="p">,</span> <span class="n">PulldownListCompoundWidget</span><span class="o">.</span><span class="n">select</span><span class="p">),</span>  <span class="c1">#PulldownList</span>
-    <span class="n">ListCompoundWidget</span><span class="o">.</span><span class="n">__name__</span>         <span class="p">:</span> <span class="p">(</span><span class="n">ListCompoundWidget</span><span class="o">.</span><span class="n">getTexts</span><span class="p">,</span> <span class="n">ListCompoundWidget</span><span class="o">.</span><span class="n">setTexts</span><span class="p">),</span>  <span class="c1">#PulldownList based</span>
-    <span class="n">CheckBoxCompoundWidget</span><span class="o">.</span><span class="n">__name__</span>     <span class="p">:</span> <span class="p">(</span><span class="n">CheckBoxCompoundWidget</span><span class="o">.</span><span class="n">get</span><span class="p">,</span> <span class="n">CheckBoxCompoundWidget</span><span class="o">.</span><span class="n">set</span><span class="p">),</span>
-    <span class="n">DoubleSpinBoxCompoundWidget</span><span class="o">.</span><span class="n">__name__</span><span class="p">:</span> <span class="p">(</span><span class="n">DoubleSpinBoxCompoundWidget</span><span class="o">.</span><span class="n">getValue</span><span class="p">,</span> <span class="n">DoubleSpinBoxCompoundWidget</span><span class="o">.</span><span class="n">setValue</span><span class="p">),</span>  <span class="c1">#D oubleSpinbox</span>
-    <span class="n">SelectorWidget</span><span class="o">.</span><span class="n">__name__</span>             <span class="p">:</span> <span class="p">(</span><span class="n">SelectorWidget</span><span class="o">.</span><span class="n">getText</span><span class="p">,</span> <span class="n">SelectorWidget</span><span class="o">.</span><span class="n">select</span><span class="p">),</span>  <span class="c1">#PulldownList</span>
-    <span class="n">InputPulldown</span><span class="o">.</span><span class="n">__name__</span>              <span class="p">:</span> <span class="p">(</span><span class="n">InputPulldown</span><span class="o">.</span><span class="n">currentText</span><span class="p">,</span> <span class="n">InputPulldown</span><span class="o">.</span><span class="n">set</span><span class="p">),</span>  <span class="c1">#PulldownList</span>
-    <span class="n">ColourSelectionWidget</span><span class="o">.</span><span class="n">__name__</span>      <span class="p">:</span> <span class="p">(</span><span class="n">ColourSelectionWidget</span><span class="o">.</span><span class="n">currentText</span><span class="p">,</span> <span class="n">ColourSelectionWidget</span><span class="o">.</span><span class="n">setColour</span><span class="p">),</span>  <span class="c1">#PulldownList</span>
-    <span class="n">LineEditPopup</span><span class="o">.</span><span class="n">__name__</span>              <span class="p">:</span> <span class="p">(</span><span class="n">LineEditPopup</span><span class="o">.</span><span class="n">get</span><span class="p">,</span> <span class="n">LineEditPopup</span><span class="o">.</span><span class="n">set</span><span class="p">),</span>
-    <span class="n">QCodeEditor</span><span class="o">.</span><span class="n">__name__</span>                <span class="p">:</span> <span class="p">(</span><span class="n">QCodeEditor</span><span class="o">.</span><span class="n">get</span><span class="p">,</span> <span class="n">QCodeEditor</span><span class="o">.</span><span class="n">set</span><span class="p">)</span>
+    <span class="n">PulldownListCompoundWidget</span><span class="o">.</span><span class="vm">__name__</span> <span class="p">:</span> <span class="p">(</span><span class="n">PulldownListCompoundWidget</span><span class="o">.</span><span class="n">getText</span><span class="p">,</span> <span class="n">PulldownListCompoundWidget</span><span class="o">.</span><span class="n">select</span><span class="p">),</span>  <span class="c1">#PulldownList</span>
+    <span class="n">ListCompoundWidget</span><span class="o">.</span><span class="vm">__name__</span>         <span class="p">:</span> <span class="p">(</span><span class="n">ListCompoundWidget</span><span class="o">.</span><span class="n">getTexts</span><span class="p">,</span> <span class="n">ListCompoundWidget</span><span class="o">.</span><span class="n">setTexts</span><span class="p">),</span>  <span class="c1">#PulldownList based</span>
+    <span class="n">CheckBoxCompoundWidget</span><span class="o">.</span><span class="vm">__name__</span>     <span class="p">:</span> <span class="p">(</span><span class="n">CheckBoxCompoundWidget</span><span class="o">.</span><span class="n">get</span><span class="p">,</span> <span class="n">CheckBoxCompoundWidget</span><span class="o">.</span><span class="n">set</span><span class="p">),</span>
+    <span class="n">DoubleSpinBoxCompoundWidget</span><span class="o">.</span><span class="vm">__name__</span><span class="p">:</span> <span class="p">(</span><span class="n">DoubleSpinBoxCompoundWidget</span><span class="o">.</span><span class="n">getValue</span><span class="p">,</span> <span class="n">DoubleSpinBoxCompoundWidget</span><span class="o">.</span><span class="n">setValue</span><span class="p">),</span>  <span class="c1">#D oubleSpinbox</span>
+    <span class="n">SelectorWidget</span><span class="o">.</span><span class="vm">__name__</span>             <span class="p">:</span> <span class="p">(</span><span class="n">SelectorWidget</span><span class="o">.</span><span class="n">getText</span><span class="p">,</span> <span class="n">SelectorWidget</span><span class="o">.</span><span class="n">select</span><span class="p">),</span>  <span class="c1">#PulldownList</span>
+    <span class="n">InputPulldown</span><span class="o">.</span><span class="vm">__name__</span>              <span class="p">:</span> <span class="p">(</span><span class="n">InputPulldown</span><span class="o">.</span><span class="n">currentText</span><span class="p">,</span> <span class="n">InputPulldown</span><span class="o">.</span><span class="n">set</span><span class="p">),</span>  <span class="c1">#PulldownList</span>
+    <span class="n">ColourSelectionWidget</span><span class="o">.</span><span class="vm">__name__</span>      <span class="p">:</span> <span class="p">(</span><span class="n">ColourSelectionWidget</span><span class="o">.</span><span class="n">currentText</span><span class="p">,</span> <span class="n">ColourSelectionWidget</span><span class="o">.</span><span class="n">setColour</span><span class="p">),</span>  <span class="c1">#PulldownList</span>
+    <span class="n">LineEditPopup</span><span class="o">.</span><span class="vm">__name__</span>              <span class="p">:</span> <span class="p">(</span><span class="n">LineEditPopup</span><span class="o">.</span><span class="n">get</span><span class="p">,</span> <span class="n">LineEditPopup</span><span class="o">.</span><span class="n">set</span><span class="p">),</span>
+    <span class="n">QCodeEditor</span><span class="o">.</span><span class="vm">__name__</span>                <span class="p">:</span> <span class="p">(</span><span class="n">QCodeEditor</span><span class="o">.</span><span class="n">get</span><span class="p">,</span> <span class="n">QCodeEditor</span><span class="o">.</span><span class="n">set</span><span class="p">),</span>
+
+    <span class="n">EntryCompoundWidget</span><span class="o">.</span><span class="vm">__name__</span>        <span class="p">:</span> <span class="p">(</span><span class="n">EntryCompoundWidget</span><span class="o">.</span><span class="n">getText</span><span class="p">,</span> <span class="n">EntryCompoundWidget</span><span class="o">.</span><span class="n">setText</span><span class="p">),</span>
+    <span class="n">NmrChainPulldown</span><span class="o">.</span><span class="vm">__name__</span>           <span class="p">:</span> <span class="p">(</span><span class="n">NmrChainPulldown</span><span class="o">.</span><span class="n">getText</span><span class="p">,</span> <span class="n">NmrChainPulldown</span><span class="o">.</span><span class="n">select</span><span class="p">),</span>
+
+    <span class="c1"># ADD TABLES</span>
+    <span class="c1"># ADD Others</span>
+    <span class="p">}</span>
+
+<span class="n">CommonWidgetsEdits</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="n">CheckBox</span><span class="o">.</span><span class="vm">__name__</span>                       <span class="p">:</span> <span class="p">(</span><span class="n">CheckBox</span><span class="o">.</span><span class="n">get</span><span class="p">,</span> <span class="n">CheckBox</span><span class="o">.</span><span class="n">setChecked</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
+    <span class="n">ColourDialog</span><span class="o">.</span><span class="vm">__name__</span>                   <span class="p">:</span> <span class="p">(</span><span class="n">ColourDialog</span><span class="o">.</span><span class="n">getColor</span><span class="p">,</span> <span class="n">ColourDialog</span><span class="o">.</span><span class="n">setColour</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
+    <span class="n">DoubleSpinbox</span><span class="o">.</span><span class="vm">__name__</span>                  <span class="p">:</span> <span class="p">(</span><span class="n">DoubleSpinbox</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="n">DoubleSpinbox</span><span class="o">.</span><span class="n">setValue</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
+
+    <span class="n">LineEdit</span><span class="o">.</span><span class="vm">__name__</span>                       <span class="p">:</span> <span class="p">(</span><span class="n">LineEdit</span><span class="o">.</span><span class="n">get</span><span class="p">,</span> <span class="n">LineEdit</span><span class="o">.</span><span class="n">setText</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
+    <span class="n">LineEditButtonDialog</span><span class="o">.</span><span class="vm">__name__</span>           <span class="p">:</span> <span class="p">(</span><span class="n">LineEditButtonDialog</span><span class="o">.</span><span class="n">get</span><span class="p">,</span> <span class="n">LineEditButtonDialog</span><span class="o">.</span><span class="n">setText</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
+    <span class="n">PulldownList</span><span class="o">.</span><span class="vm">__name__</span>                   <span class="p">:</span> <span class="p">(</span><span class="n">PulldownList</span><span class="o">.</span><span class="n">currentText</span><span class="p">,</span> <span class="n">PulldownList</span><span class="o">.</span><span class="n">set</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
+    <span class="n">RadioButtons</span><span class="o">.</span><span class="vm">__name__</span>                   <span class="p">:</span> <span class="p">(</span><span class="n">RadioButtons</span><span class="o">.</span><span class="n">get</span><span class="p">,</span> <span class="n">RadioButtons</span><span class="o">.</span><span class="n">set</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
+    <span class="n">RadioButton</span><span class="o">.</span><span class="vm">__name__</span>                    <span class="p">:</span> <span class="p">(</span><span class="n">RadioButton</span><span class="o">.</span><span class="n">isChecked</span><span class="p">,</span> <span class="n">RadioButton</span><span class="o">.</span><span class="n">setChecked</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
+
+    <span class="n">Slider</span><span class="o">.</span><span class="vm">__name__</span>                         <span class="p">:</span> <span class="p">(</span><span class="n">Slider</span><span class="o">.</span><span class="n">get</span><span class="p">,</span> <span class="n">Slider</span><span class="o">.</span><span class="n">setValue</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
+    <span class="n">Spinbox</span><span class="o">.</span><span class="vm">__name__</span>                        <span class="p">:</span> <span class="p">(</span><span class="n">Spinbox</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="n">Spinbox</span><span class="o">.</span><span class="n">set</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
+    <span class="n">TextEditor</span><span class="o">.</span><span class="vm">__name__</span>                     <span class="p">:</span> <span class="p">(</span><span class="n">TextEditor</span><span class="o">.</span><span class="n">get</span><span class="p">,</span> <span class="n">TextEditor</span><span class="o">.</span><span class="n">setText</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
+    <span class="n">GLTargetButtonSpinBoxes</span><span class="o">.</span><span class="vm">__name__</span>        <span class="p">:</span> <span class="p">(</span><span class="n">GLTargetButtonSpinBoxes</span><span class="o">.</span><span class="n">get</span><span class="p">,</span> <span class="n">GLTargetButtonSpinBoxes</span><span class="o">.</span><span class="n">setValues</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
+
+    <span class="n">PulldownListCompoundWidget</span><span class="o">.</span><span class="vm">__name__</span>     <span class="p">:</span> <span class="p">(</span><span class="n">PulldownListCompoundWidget</span><span class="o">.</span><span class="n">getText</span><span class="p">,</span> <span class="n">PulldownListCompoundWidget</span><span class="o">.</span><span class="n">select</span><span class="p">,</span>
+                                               <span class="p">(</span><span class="s1">&#39;pulldownList.activated&#39;</span><span class="p">,</span> <span class="s1">&#39;pulldownList.pulldownTextEdited&#39;</span><span class="p">)),</span>
+
+    <span class="n">ListCompoundWidget</span><span class="o">.</span><span class="vm">__name__</span>             <span class="p">:</span> <span class="p">(</span><span class="n">ListCompoundWidget</span><span class="o">.</span><span class="n">getTexts</span><span class="p">,</span> <span class="n">ListCompoundWidget</span><span class="o">.</span><span class="n">setTexts</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
+    <span class="n">CheckBoxCompoundWidget</span><span class="o">.</span><span class="vm">__name__</span>         <span class="p">:</span> <span class="p">(</span><span class="n">CheckBoxCompoundWidget</span><span class="o">.</span><span class="n">get</span><span class="p">,</span> <span class="n">CheckBoxCompoundWidget</span><span class="o">.</span><span class="n">set</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
+    <span class="n">DoubleSpinBoxCompoundWidget</span><span class="o">.</span><span class="vm">__name__</span>    <span class="p">:</span> <span class="p">(</span><span class="n">DoubleSpinBoxCompoundWidget</span><span class="o">.</span><span class="n">getValue</span><span class="p">,</span> <span class="n">DoubleSpinBoxCompoundWidget</span><span class="o">.</span><span class="n">setValue</span><span class="p">,</span>
+                                               <span class="p">(</span><span class="s1">&#39;doubleSpinBox.valueChanged&#39;</span><span class="p">)),</span>
+    <span class="n">ScientificSpinBoxCompoundWidget</span><span class="o">.</span><span class="vm">__name__</span><span class="p">:</span> <span class="p">(</span><span class="n">ScientificSpinBoxCompoundWidget</span><span class="o">.</span><span class="n">getValue</span><span class="p">,</span> <span class="n">ScientificSpinBoxCompoundWidget</span><span class="o">.</span><span class="n">setValue</span><span class="p">,</span>
+                                               <span class="p">(</span><span class="s1">&#39;scientificSpinBox.valueChanged&#39;</span><span class="p">)),</span>
+
+    <span class="n">SelectorWidget</span><span class="o">.</span><span class="vm">__name__</span>                 <span class="p">:</span> <span class="p">(</span><span class="n">SelectorWidget</span><span class="o">.</span><span class="n">getText</span><span class="p">,</span> <span class="n">SelectorWidget</span><span class="o">.</span><span class="n">select</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
+    <span class="n">InputPulldown</span><span class="o">.</span><span class="vm">__name__</span>                  <span class="p">:</span> <span class="p">(</span><span class="n">InputPulldown</span><span class="o">.</span><span class="n">currentText</span><span class="p">,</span> <span class="n">InputPulldown</span><span class="o">.</span><span class="n">set</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
+    <span class="n">ColourSelectionWidget</span><span class="o">.</span><span class="vm">__name__</span>          <span class="p">:</span> <span class="p">(</span><span class="n">ColourSelectionWidget</span><span class="o">.</span><span class="n">currentText</span><span class="p">,</span> <span class="n">ColourSelectionWidget</span><span class="o">.</span><span class="n">setColour</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
+    <span class="n">LineEditPopup</span><span class="o">.</span><span class="vm">__name__</span>                  <span class="p">:</span> <span class="p">(</span><span class="n">LineEditPopup</span><span class="o">.</span><span class="n">get</span><span class="p">,</span> <span class="n">LineEditPopup</span><span class="o">.</span><span class="n">set</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
+    <span class="n">QCodeEditor</span><span class="o">.</span><span class="vm">__name__</span>                    <span class="p">:</span> <span class="p">(</span><span class="n">QCodeEditor</span><span class="o">.</span><span class="n">get</span><span class="p">,</span> <span class="n">QCodeEditor</span><span class="o">.</span><span class="n">set</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
+
+    <span class="n">EntryCompoundWidget</span><span class="o">.</span><span class="vm">__name__</span>            <span class="p">:</span> <span class="p">(</span><span class="n">EntryCompoundWidget</span><span class="o">.</span><span class="n">getText</span><span class="p">,</span> <span class="n">EntryCompoundWidget</span><span class="o">.</span><span class="n">setText</span><span class="p">,</span> <span class="s1">&#39;entry.textEdited&#39;</span><span class="p">),</span>
+    <span class="n">NmrChainPulldown</span><span class="o">.</span><span class="vm">__name__</span>               <span class="p">:</span> <span class="p">(</span><span class="n">NmrChainPulldown</span><span class="o">.</span><span class="n">getText</span><span class="p">,</span> <span class="n">NmrChainPulldown</span><span class="o">.</span><span class="n">select</span><span class="p">,</span> <span class="s1">&#39;pulldownList.activated&#39;</span><span class="p">),</span>
+    <span class="n">RadioButtonsCompoundWidget</span><span class="o">.</span><span class="vm">__name__</span>     <span class="p">:</span> <span class="p">(</span>
+    <span class="n">RadioButtonsCompoundWidget</span><span class="o">.</span><span class="n">getIndex</span><span class="p">,</span> <span class="n">RadioButtonsCompoundWidget</span><span class="o">.</span><span class="n">setIndex</span><span class="p">,</span> <span class="s1">&#39;radioButtons.buttonGroup.buttonClicked&#39;</span><span class="p">),</span>
 
     <span class="c1"># ADD TABLES</span>
     <span class="c1"># ADD Others</span>
@@ -200,38 +226,42 @@
     <span class="n">labelOrientation</span> <span class="o">=</span> <span class="n">HORIZONTAL</span>  <span class="c1"># toplabel orientation</span>
 
     <span class="c1"># overide in specific module implementations</span>
-    <span class="n">includeSettingsWidget</span> <span class="o">=</span> <span class="bp">False</span>
+    <span class="n">includeSettingsWidget</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="n">maxSettingsState</span> <span class="o">=</span> <span class="mi">3</span>  <span class="c1"># states are defined as: 0: invisible, 1: both visible, 2: only settings visible</span>
     <span class="n">defaultSettingsState</span> <span class="o">=</span> <span class="mi">0</span>  <span class="c1"># default state of the settings widget</span>
     <span class="n">settingsPosition</span> <span class="o">=</span> <span class="s1">&#39;top&#39;</span>
     <span class="n">settingsMinimumSizes</span> <span class="o">=</span> <span class="p">(</span><span class="mi">100</span><span class="p">,</span> <span class="mi">50</span><span class="p">)</span>
-    <span class="n">_restored</span> <span class="o">=</span> <span class="bp">False</span>
+    <span class="n">_restored</span> <span class="o">=</span> <span class="kc">False</span>
 
     <span class="c1"># _instances = set()</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mainWindow</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">closable</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">closeFunc</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mainWindow</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">closable</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">closeFunc</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">maximised</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">maximiseRestoreState</span> <span class="o">=</span> <span class="kc">None</span>
 
         <span class="c1">#TODO:GEERTEN: make mainWindow actually do something</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">area</span> <span class="o">=</span> <span class="bp">None</span>
-        <span class="k">if</span> <span class="n">mainWindow</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">area</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="n">mainWindow</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">area</span> <span class="o">=</span> <span class="n">mainWindow</span><span class="o">.</span><span class="n">moduleArea</span>
 
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">area</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">area</span><span class="p">,</span>
-                         <span class="n">autoOrientation</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">area</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">area</span><span class="p">,</span>
+                         <span class="n">autoOrientation</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
                          <span class="n">closable</span><span class="o">=</span><span class="n">closable</span><span class="p">)</span>
-        <span class="n">DropBase</span><span class="o">.</span><span class="n">_init</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">acceptDrops</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+        <span class="n">DropBase</span><span class="o">.</span><span class="n">_init</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">acceptDrops</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">hStyle</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">                  </span>
 <span class="s2">                  Dock &gt; QWidget {</span>
-<span class="s2">                      border: 0px solid #000;</span>
-<span class="s2">                      border-radius: 0px;</span>
+<span class="s2">                      border: 1px solid #a9a9a9;</span>
+<span class="s2">                      border-radius: 2px;</span>
 <span class="s2">                      border-top-left-radius: 0px;</span>
 <span class="s2">                      border-top-right-radius: 0px;</span>
 <span class="s2">                      border-top-width: 0px;</span>
 <span class="s2">                  }&quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">vStyle</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span>
 <span class="s2">                  Dock &gt; QWidget {</span>
-<span class="s2">                      border: 0px solid #000;</span>
+<span class="s2">                      border: 1px solid #000;</span>
 <span class="s2">                      border-radius: 0px;</span>
 <span class="s2">                      border-top-left-radius: 0px;</span>
 <span class="s2">                      border-bottom-left-radius: 0px;</span>
@@ -256,16 +286,22 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span> <span class="o">=</span> <span class="n">mainWindow</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">closeFunc</span> <span class="o">=</span> <span class="n">closeFunc</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_nameSplitter</span> <span class="o">=</span> <span class="s1">&#39;:&#39;</span>  <span class="c1">#used to create the serial</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_serial</span> <span class="o">=</span> <span class="bp">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_titleName</span> <span class="o">=</span> <span class="bp">None</span>  <span class="c1"># name without serial</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_serial</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_titleName</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># name without serial</span>
         <span class="n">CcpnModule</span><span class="o">.</span><span class="n">moduleName</span> <span class="o">=</span> <span class="n">name</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">widgetArea</span><span class="o">.</span><span class="n">setContentsMargins</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
 
         <span class="c1"># remove old label, so it can be redefined</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">topLayout</span><span class="o">.</span><span class="n">removeWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">label</span><span class="p">)</span>
+        <span class="c1"># GST this wasn&#39;t deleting the widget it was leaving it still attached to the qt hierrchy which was causing all</span>
+        <span class="c1"># sorts of graphical hickups later on</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">label</span><span class="o">.</span><span class="n">deleteLater</span><span class="p">()</span>
         <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">label</span>
 
+        <span class="c1"># GST other way to do this would be to</span>
+        <span class="c1"># 1. replace the super class init with our own and not call it 2. replace the methods of DockLabel we have</span>
+        <span class="c1"># problems with 3. ask the pyqtgraph guys to add a factory method...</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">label</span> <span class="o">=</span> <span class="n">CcpnModuleLabel</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="bp">self</span><span class="p">,</span>
                                      <span class="n">showCloseButton</span><span class="o">=</span><span class="n">closable</span><span class="p">,</span> <span class="n">closeCallback</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_closeModule</span><span class="p">,</span>
                                      <span class="n">showSettingsButton</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">includeSettingsWidget</span><span class="p">,</span>
@@ -274,19 +310,19 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">topLayout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">label</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>  <span class="c1"># ejb - swap out the old widget, keeps hierarchy</span>
         <span class="c1"># except it doesn&#39;t work properly</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">setOrientation</span><span class="p">(</span><span class="n">o</span><span class="o">=</span><span class="s1">&#39;horizontal&#39;</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">setAutoFillBackground</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setAutoFillBackground</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
 
         <span class="c1"># main widget area</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">mainWidget</span> <span class="o">=</span> <span class="n">Frame</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">setLayout</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">acceptDrops</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mainWidget</span> <span class="o">=</span> <span class="n">Frame</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">setLayout</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">acceptDrops</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
         <span class="c1"># optional settings widget area</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">settingsWidget</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">settingsWidget</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">includeSettingsWidget</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_settingsScrollArea</span> <span class="o">=</span> <span class="n">ScrollArea</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">widgetArea</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">settingsWidget</span> <span class="o">=</span> <span class="n">Widget</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">acceptDrops</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">settingsWidget</span> <span class="o">=</span> <span class="n">Widget</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">acceptDrops</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_settingsScrollArea</span><span class="o">.</span><span class="n">setWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">settingsWidget</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">settingsWidget</span><span class="o">.</span><span class="n">setGridLayout</span><span class="p">()</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_settingsScrollArea</span><span class="o">.</span><span class="n">setWidgetResizable</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_settingsScrollArea</span><span class="o">.</span><span class="n">setWidgetResizable</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
 
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">settingsPosition</span> <span class="ow">in</span> <span class="n">settingsWidgetPositions</span><span class="p">:</span>
                 <span class="n">hSettings</span><span class="p">,</span> <span class="n">vSettings</span> <span class="o">=</span> <span class="n">settingsWidgetPositions</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">settingsPosition</span><span class="p">][</span><span class="s1">&#39;settings&#39;</span><span class="p">]</span>
@@ -303,19 +339,19 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">layout</span><span class="o">.</span><span class="n">removeWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mainWidget</span><span class="p">)</span>
 
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">settingsPosition</span> <span class="o">==</span> <span class="s1">&#39;left&#39;</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_splitter</span> <span class="o">=</span> <span class="n">Splitter</span><span class="p">(</span><span class="n">setLayout</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">horizontal</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_splitter</span> <span class="o">=</span> <span class="n">Splitter</span><span class="p">(</span><span class="n">setLayout</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">horizontal</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_splitter</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_settingsScrollArea</span><span class="p">)</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_splitter</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mainWidget</span><span class="p">)</span>
             <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">settingsPosition</span> <span class="o">==</span> <span class="s1">&#39;right&#39;</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_splitter</span> <span class="o">=</span> <span class="n">Splitter</span><span class="p">(</span><span class="n">setLayout</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">horizontal</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_splitter</span> <span class="o">=</span> <span class="n">Splitter</span><span class="p">(</span><span class="n">setLayout</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">horizontal</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_splitter</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mainWidget</span><span class="p">)</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_splitter</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_settingsScrollArea</span><span class="p">)</span>
             <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">settingsPosition</span> <span class="o">==</span> <span class="s1">&#39;top&#39;</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_splitter</span> <span class="o">=</span> <span class="n">Splitter</span><span class="p">(</span><span class="n">setLayout</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">horizontal</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_splitter</span> <span class="o">=</span> <span class="n">Splitter</span><span class="p">(</span><span class="n">setLayout</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">horizontal</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_splitter</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_settingsScrollArea</span><span class="p">)</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_splitter</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mainWidget</span><span class="p">)</span>
             <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">settingsPosition</span> <span class="o">==</span> <span class="s1">&#39;bottom&#39;</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_splitter</span> <span class="o">=</span> <span class="n">Splitter</span><span class="p">(</span><span class="n">setLayout</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">horizontal</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_splitter</span> <span class="o">=</span> <span class="n">Splitter</span><span class="p">(</span><span class="n">setLayout</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">horizontal</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_splitter</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mainWidget</span><span class="p">)</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_splitter</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_settingsScrollArea</span><span class="p">)</span>
 
@@ -323,14 +359,14 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">_splitter</span><span class="o">.</span><span class="n">setStretchFactor</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>
 
         <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">settingsWidget</span> <span class="o">=</span> <span class="bp">None</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">settingsWidget</span> <span class="o">=</span> <span class="kc">None</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mainWidget</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
 
         <span class="c1"># add an event filter to check when the dock has been floated - it needs to have a callback</span>
         <span class="c1"># that fires when the window has been maximised</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_maximiseFunc</span> <span class="o">=</span> <span class="bp">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_closeFunc</span> <span class="o">=</span> <span class="bp">None</span>
-        <span class="n">CcpnModule</span><span class="o">.</span><span class="n">_lastActionWasDrop</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_maximiseFunc</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_closeFunc</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">CcpnModule</span><span class="o">.</span><span class="n">_lastActionWasDrop</span> <span class="o">=</span> <span class="kc">False</span>
 
         <span class="c1"># always explicitly show the mainWidget and/or settings widget</span>
         <span class="c1"># default state (increased by one by settingsCallback)</span>
@@ -339,7 +375,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_settingsCallback</span><span class="p">()</span>
 
         <span class="c1"># set parenting relations</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">setParent</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">moduleArea</span><span class="p">)</span>  <span class="c1"># ejb</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">widgetArea</span><span class="o">.</span><span class="n">setParent</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
 
@@ -358,6 +394,152 @@
     <span class="c1">#         print(&#39;&gt;&gt;&gt;Override&#39;)</span>
     <span class="c1">#     else:</span>
     <span class="c1">#         super(CcpnModule, self).event(event)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">titleBarHidden</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">labelHidden</span>
+
+    <span class="nd">@titleBarHidden</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">titleBarHidden</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">hidden</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">hidden</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">hideTitleBar</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">showTitleBar</span><span class="p">()</span>
+
+    <span class="c1">#GST super class show and hide titlebar have central as an allowed area we don&#39;t use it</span>
+    <span class="c1">#    so remove it as a choice</span>
+<div class="viewcode-block" id="CcpnModule.hideTitleBar"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.Gui.CcpnModule.hideTitleBar">[docs]</a>    <span class="k">def</span> <span class="nf">hideTitleBar</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Hide the title bar for this Dock.</span>
+<span class="sd">        This will prevent the Dock being moved by the user.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">label</span><span class="o">.</span><span class="n">hide</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">labelHidden</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">updateStyle</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="CcpnModule.showTitleBar"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.Gui.CcpnModule.showTitleBar">[docs]</a>    <span class="k">def</span> <span class="nf">showTitleBar</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Show the title bar for this Dock.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">label</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">labelHidden</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">updateStyle</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="CcpnModule.getDockArea"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.Gui.CcpnModule.getDockArea">[docs]</a>    <span class="k">def</span> <span class="nf">getDockArea</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">target</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">target</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">current</span> <span class="o">=</span> <span class="bp">self</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">current</span> <span class="o">=</span> <span class="n">target</span>
+
+        <span class="k">while</span> <span class="n">current</span><span class="o">.</span><span class="n">parent</span><span class="p">()</span> <span class="o">!=</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">current</span><span class="p">,</span> <span class="n">DockArea</span><span class="p">):</span>
+                <span class="k">break</span>
+            <span class="n">current</span> <span class="o">=</span> <span class="n">current</span><span class="o">.</span><span class="n">parent</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">current</span></div>
+
+<div class="viewcode-block" id="CcpnModule.getDock"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.Gui.CcpnModule.getDock">[docs]</a>    <span class="k">def</span> <span class="nf">getDock</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">target</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">target</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">current</span> <span class="o">=</span> <span class="bp">self</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">current</span> <span class="o">=</span> <span class="n">target</span>
+
+        <span class="k">while</span> <span class="n">current</span><span class="o">.</span><span class="n">parent</span><span class="p">()</span> <span class="o">!=</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">current</span><span class="p">,</span> <span class="n">Dock</span><span class="p">):</span>
+                <span class="k">break</span>
+            <span class="n">current</span> <span class="o">=</span> <span class="n">current</span><span class="o">.</span><span class="n">parent</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">current</span><span class="p">,</span> <span class="n">Dock</span><span class="p">):</span>
+            <span class="n">current</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">return</span> <span class="n">current</span></div>
+
+<div class="viewcode-block" id="CcpnModule.docksByDockArea"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.Gui.CcpnModule.docksByDockArea">[docs]</a>    <span class="k">def</span> <span class="nf">docksByDockArea</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">docks</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">area</span><span class="o">.</span><span class="n">docks</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+        <span class="k">for</span> <span class="n">dock</span> <span class="ow">in</span> <span class="n">docks</span><span class="p">:</span>
+            <span class="n">parent</span> <span class="o">=</span> <span class="n">dock</span><span class="o">.</span><span class="n">getDockArea</span><span class="p">()</span>
+            <span class="n">result</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="p">[])</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">dock</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">result</span></div>
+
+<div class="viewcode-block" id="CcpnModule.float"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.Gui.CcpnModule.float">[docs]</a>    <span class="k">def</span> <span class="nf">float</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">maximised</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">toggleMaximised</span><span class="p">()</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">float</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="CcpnModule.mergeState"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.Gui.CcpnModule.mergeState">[docs]</a>    <span class="k">def</span> <span class="nf">mergeState</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">):</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getHome</span><span class="p">()</span><span class="o">.</span><span class="n">saveState</span><span class="p">(</span><span class="n">docksOnly</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">state</span><span class="p">[</span><span class="s1">&#39;main&#39;</span><span class="p">]</span> <span class="o">!=</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">result</span><span class="p">[</span><span class="s1">&#39;main&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">state</span><span class="p">[</span><span class="s1">&#39;main&#39;</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">state</span><span class="p">[</span><span class="s1">&#39;floats&#39;</span><span class="p">])</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">toMerge</span> <span class="o">=</span> <span class="n">state</span><span class="p">[</span><span class="s1">&#39;floats&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">mergeId</span> <span class="o">=</span> <span class="n">toMerge</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="s1">&#39;id&#39;</span><span class="p">]</span>
+
+            <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">currentState</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">result</span><span class="p">[</span><span class="s1">&#39;floats&#39;</span><span class="p">]):</span>
+                <span class="n">currentId</span> <span class="o">=</span> <span class="n">currentState</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="s1">&#39;id&#39;</span><span class="p">]</span>
+
+                <span class="k">if</span> <span class="n">currentId</span> <span class="o">==</span> <span class="n">mergeId</span><span class="p">:</span>
+                    <span class="n">result</span><span class="p">[</span><span class="s1">&#39;floats&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">toMerge</span>
+
+        <span class="k">return</span> <span class="n">result</span></div>
+
+<div class="viewcode-block" id="CcpnModule.filterState"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.Gui.CcpnModule.filterState">[docs]</a>    <span class="k">def</span> <span class="nf">filterState</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">,</span> <span class="n">id_</span><span class="p">):</span>
+
+        <span class="n">result</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;main&#39;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span> <span class="s1">&#39;floats&#39;</span><span class="p">:</span> <span class="p">[]}</span>
+
+        <span class="k">if</span> <span class="n">state</span><span class="p">[</span><span class="s1">&#39;main&#39;</span><span class="p">][</span><span class="mi">2</span><span class="p">][</span><span class="s1">&#39;id&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="n">id_</span><span class="p">:</span>
+            <span class="n">result</span><span class="p">[</span><span class="s1">&#39;main&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">state</span><span class="p">[</span><span class="s1">&#39;main&#39;</span><span class="p">]</span>
+
+        <span class="k">for</span> <span class="nb">float</span> <span class="ow">in</span> <span class="n">state</span><span class="p">[</span><span class="s1">&#39;floats&#39;</span><span class="p">]:</span>
+            <span class="k">if</span> <span class="nb">float</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="s1">&#39;id&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="n">id_</span><span class="p">:</span>
+                <span class="n">result</span><span class="p">[</span><span class="s1">&#39;floats&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">result</span></div>
+
+<div class="viewcode-block" id="CcpnModule.getDocksInParentArea"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.Gui.CcpnModule.getDocksInParentArea">[docs]</a>    <span class="k">def</span> <span class="nf">getDocksInParentArea</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">docksByDockArea</span><span class="p">()[</span><span class="bp">self</span><span class="o">.</span><span class="n">getDockArea</span><span class="p">()]</span></div>
+
+<div class="viewcode-block" id="CcpnModule.getHome"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.Gui.CcpnModule.getHome">[docs]</a>    <span class="k">def</span> <span class="nf">getHome</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">area</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">area</span><span class="o">.</span><span class="n">home</span> <span class="o">!=</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">area</span><span class="o">.</span><span class="n">home</span>
+        <span class="k">return</span> <span class="n">result</span></div>
+
+<div class="viewcode-block" id="CcpnModule.toggleMaximised"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.Gui.CcpnModule.toggleMaximised">[docs]</a>    <span class="k">def</span> <span class="nf">toggleMaximised</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="n">docks</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getDocksInParentArea</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">docks</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">maximised</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">maximiseRestoreState</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">maximised</span><span class="p">:</span>
+            <span class="n">dockArea</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getDockArea</span><span class="p">()</span>
+            <span class="n">dockAreaId</span> <span class="o">=</span> <span class="nb">id</span><span class="p">(</span><span class="n">dockArea</span><span class="p">)</span>
+            <span class="n">state</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mergeState</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">maximiseRestoreState</span><span class="p">)</span>
+            <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">area</span><span class="o">.</span><span class="n">home</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">area</span><span class="o">.</span><span class="n">home</span><span class="o">.</span><span class="n">restoreState</span><span class="p">(</span><span class="n">state</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">area</span><span class="o">.</span><span class="n">restoreState</span><span class="p">(</span><span class="n">state</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">dock</span> <span class="ow">in</span> <span class="n">docks</span><span class="p">:</span>
+                <span class="n">dock</span><span class="o">.</span><span class="n">showTitleBar</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">maximised</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">maximiseRestoreState</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">state</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getHome</span><span class="p">()</span><span class="o">.</span><span class="n">saveState</span><span class="p">(</span><span class="n">docksOnly</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="n">dockArea</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getDockArea</span><span class="p">()</span>
+            <span class="n">dockAreaId</span> <span class="o">=</span> <span class="nb">id</span><span class="p">(</span><span class="n">dockArea</span><span class="p">)</span>
+            <span class="n">state</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">filterState</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="n">dockAreaId</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">maximiseRestoreState</span> <span class="o">=</span> <span class="n">state</span>
+
+            <span class="n">docks</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">docksByDockArea</span><span class="p">()[</span><span class="bp">self</span><span class="o">.</span><span class="n">getDockArea</span><span class="p">()]</span>
+            <span class="n">docks</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">dock</span> <span class="ow">in</span> <span class="n">docks</span><span class="p">:</span>
+                <span class="n">dock</span><span class="o">.</span><span class="n">hideTitleBar</span><span class="p">()</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">area</span><span class="o">.</span><span class="n">moveDock</span><span class="p">(</span><span class="n">dock</span><span class="p">,</span> <span class="s1">&#39;below&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">_container</span><span class="o">.</span><span class="n">raiseDock</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">maximised</span> <span class="o">=</span> <span class="kc">True</span></div>
 
     <span class="k">def</span> <span class="nf">_findChildren</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">widget</span><span class="p">):</span>
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">widget</span><span class="o">.</span><span class="n">children</span><span class="p">():</span>
@@ -379,7 +561,7 @@
     <span class="k">def</span> <span class="nf">serial</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_serial</span>
 
-    <span class="nd">@serial.setter</span>
+    <span class="nd">@serial</span><span class="o">.</span><span class="n">setter</span>
     <span class="k">def</span> <span class="nf">serial</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
             <span class="k">try</span><span class="p">:</span>
@@ -408,11 +590,11 @@
         <span class="n">allStorableWidgets</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_findChildren</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">num</span><span class="p">,</span> <span class="n">w</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_allChildren</span><span class="p">):</span>
-            <span class="k">if</span> <span class="n">w</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span> <span class="ow">in</span> <span class="n">CommonWidgets</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">w</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span> <span class="ow">in</span> <span class="n">CommonWidgets</span><span class="p">:</span>
                 <span class="n">allStorableWidgets</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">w</span><span class="p">)</span>
         <span class="n">widgetsWithinSelf</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">varName</span><span class="p">,</span> <span class="n">varObj</span> <span class="ow">in</span> <span class="nb">vars</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-            <span class="k">if</span> <span class="n">varObj</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span> <span class="ow">in</span> <span class="n">CommonWidgets</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">varObj</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span> <span class="ow">in</span> <span class="n">CommonWidgets</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
                 <span class="n">widgetsWithinSelf</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">varObj</span><span class="p">)</span>
 
         <span class="n">nestedWidgets</span> <span class="o">=</span> <span class="p">[</span><span class="n">widget</span> <span class="k">for</span> <span class="n">widget</span> <span class="ow">in</span> <span class="n">allStorableWidgets</span> <span class="k">if</span> <span class="n">widget</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">widgetsWithinSelf</span><span class="p">]</span>
@@ -424,16 +606,16 @@
             <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">es</span><span class="p">:</span>
                 <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">debug2</span><span class="p">(</span><span class="s1">&#39;ignoring bad widget </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">widg</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">es</span><span class="p">)))</span>
 
-        <span class="n">nestedWidgs</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">x</span><span class="p">)),</span> <span class="n">reverse</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+        <span class="n">nestedWidgs</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">x</span><span class="p">)),</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
         <span class="n">groupednestedWidgets</span> <span class="o">=</span> <span class="p">[</span><span class="nb">list</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">itertools</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">nestedWidgs</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">x</span><span class="p">)),</span> <span class="p">)]</span>
         <span class="k">for</span> <span class="n">widgetsGroup</span> <span class="ow">in</span> <span class="n">groupednestedWidgets</span><span class="p">:</span>
             <span class="k">for</span> <span class="n">count</span><span class="p">,</span> <span class="n">widget</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">widgetsGroup</span><span class="p">):</span>
                 <span class="k">if</span> <span class="n">widget</span><span class="o">.</span><span class="n">objectName</span><span class="p">():</span>
                     <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">DoubleUnderscore</span> <span class="o">+</span> <span class="n">widget</span><span class="o">.</span><span class="n">objectName</span><span class="p">(),</span> <span class="n">widget</span><span class="p">)</span>
                 <span class="k">else</span><span class="p">:</span>
-                    <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">DoubleUnderscore</span> <span class="o">+</span> <span class="n">widget</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">count</span><span class="p">),</span> <span class="n">widget</span><span class="p">)</span>
+                    <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">DoubleUnderscore</span> <span class="o">+</span> <span class="n">widget</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">count</span><span class="p">),</span> <span class="n">widget</span><span class="p">)</span>
 
-    <span class="nd">@widgetsState.getter</span>
+    <span class="nd">@widgetsState</span><span class="o">.</span><span class="n">getter</span>
     <span class="k">def</span> <span class="nf">widgetsState</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;return  {&quot;variableName&quot;:&quot;value&quot;}  of all gui Variables  &#39;&#39;&#39;</span>
         <span class="n">widgetsState</span> <span class="o">=</span> <span class="p">{}</span>
@@ -442,9 +624,9 @@
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">varObj</span><span class="p">,</span> <span class="n">_PulldownABC</span><span class="p">):</span>
                 <span class="n">widgetsState</span><span class="p">[</span><span class="n">varName</span><span class="p">]</span> <span class="o">=</span> <span class="n">varObj</span><span class="o">.</span><span class="n">getText</span><span class="p">()</span>
                 <span class="k">continue</span>
-            <span class="k">if</span> <span class="n">varObj</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span> <span class="ow">in</span> <span class="n">CommonWidgets</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">varObj</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span> <span class="ow">in</span> <span class="n">CommonWidgets</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
                 <span class="k">try</span><span class="p">:</span>  <span class="c1"># try because widgets can be dinamically deleted</span>
-                    <span class="n">widgetsState</span><span class="p">[</span><span class="n">varName</span><span class="p">]</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">varObj</span><span class="p">,</span> <span class="n">CommonWidgets</span><span class="p">[</span><span class="n">varObj</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">__name__</span><span class="p">)()</span>
+                    <span class="n">widgetsState</span><span class="p">[</span><span class="n">varName</span><span class="p">]</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">varObj</span><span class="p">,</span> <span class="n">CommonWidgets</span><span class="p">[</span><span class="n">varObj</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="vm">__name__</span><span class="p">)()</span>
                 <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
                     <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Error </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span>
         <span class="c1"># self._kwargs = collections.OrderedDict(sorted(widgetsState.items()))</span>
@@ -473,8 +655,8 @@
                 <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">widget</span><span class="p">,</span> <span class="n">_PulldownABC</span><span class="p">):</span>
                     <span class="n">widget</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
                     <span class="k">continue</span>
-                <span class="k">if</span> <span class="n">widget</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span> <span class="ow">in</span> <span class="n">CommonWidgets</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
-                    <span class="n">setWidget</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">widget</span><span class="p">,</span> <span class="n">CommonWidgets</span><span class="p">[</span><span class="n">widget</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">__name__</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">widget</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span> <span class="ow">in</span> <span class="n">CommonWidgets</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                    <span class="n">setWidget</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">widget</span><span class="p">,</span> <span class="n">CommonWidgets</span><span class="p">[</span><span class="n">widget</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="vm">__name__</span><span class="p">)</span>
                     <span class="n">setWidget</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
 
             <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
@@ -493,7 +675,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">event</span><span class="o">.</span><span class="n">type</span><span class="p">()</span> <span class="o">==</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">QEvent</span><span class="o">.</span><span class="n">ParentChange</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_maximiseFunc</span><span class="p">:</span>
             <span class="k">try</span><span class="p">:</span>
-                <span class="n">found</span> <span class="o">=</span> <span class="bp">False</span>
+                <span class="n">found</span> <span class="o">=</span> <span class="kc">False</span>
                 <span class="n">searchWidget</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="p">()</span>
 
                 <span class="c1"># while searchWidget is not None and not found:</span>
@@ -527,8 +709,8 @@
 <span class="sd">        Clear the attached maximise function</span>
 <span class="sd">        :return:</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_maximiseFunc</span> <span class="o">=</span> <span class="bp">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_closeFunc</span> <span class="o">=</span> <span class="bp">None</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_maximiseFunc</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_closeFunc</span> <span class="o">=</span> <span class="kc">None</span></div>
 
     <span class="k">def</span> <span class="nf">_tempAreaWindowEventFilter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -548,12 +730,12 @@
                 <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_closeFunc</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">CcpnModule</span><span class="o">.</span><span class="n">_lastActionWasDrop</span><span class="p">:</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">_closeFunc</span><span class="p">()</span>
                 <span class="k">else</span><span class="p">:</span>
-                    <span class="n">CcpnModule</span><span class="o">.</span><span class="n">_lastActionWasDrop</span> <span class="o">=</span> <span class="bp">False</span>
+                    <span class="n">CcpnModule</span><span class="o">.</span><span class="n">_lastActionWasDrop</span> <span class="o">=</span> <span class="kc">False</span>
 
         <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">es</span><span class="p">:</span>
             <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;TempWindow Error </span><span class="si">%s</span><span class="s1">; </span><span class="si">%s</span><span class="s1">; </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">obj</span><span class="p">,</span> <span class="n">event</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">es</span><span class="p">))</span>
         <span class="k">finally</span><span class="p">:</span>
-            <span class="k">return</span> <span class="bp">False</span>
+            <span class="k">return</span> <span class="kc">False</span>
 
     <span class="k">def</span> <span class="nf">_settingsCallback</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -606,10 +788,14 @@
         <span class="c1">#     pass</span>
 
         <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Closing </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">container</span><span class="p">()))</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">maximised</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">toggleMaximised</span><span class="p">()</span>
+
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_container</span><span class="p">:</span>
             <span class="n">area</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">moduleArea</span>
             <span class="k">if</span> <span class="n">area</span><span class="p">:</span>
-                <span class="k">if</span> <span class="n">area</span><span class="o">.</span><span class="n">_container</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">area</span><span class="o">.</span><span class="n">_container</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">area</span><span class="o">.</span><span class="n">children</span><span class="p">():</span>
                         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">Container</span><span class="p">):</span>
                             <span class="bp">self</span><span class="o">.</span><span class="n">_container</span> <span class="o">=</span> <span class="n">i</span>
@@ -620,24 +806,36 @@
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span><span class="p">:</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">preferences</span><span class="o">.</span><span class="n">general</span><span class="o">.</span><span class="n">focusFollowsMouse</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">setFocus</span><span class="p">()</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">label</span><span class="o">.</span><span class="n">setModuleHighlight</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">label</span><span class="o">.</span><span class="n">setModuleHighlight</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">enterEvent</span><span class="p">(</span><span class="n">event</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="CcpnModule.leaveEvent"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.Gui.CcpnModule.leaveEvent">[docs]</a>    <span class="k">def</span> <span class="nf">leaveEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span><span class="p">:</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">preferences</span><span class="o">.</span><span class="n">general</span><span class="o">.</span><span class="n">focusFollowsMouse</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">label</span><span class="o">.</span><span class="n">setModuleHighlight</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">label</span><span class="o">.</span><span class="n">setModuleHighlight</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">enterEvent</span><span class="p">(</span><span class="n">event</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="CcpnModule.dragMoveEvent"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.Gui.CcpnModule.dragMoveEvent">[docs]</a>    <span class="k">def</span> <span class="nf">dragMoveEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
+        <span class="n">ev</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">isDragToMaximisedModule</span><span class="p">(</span><span class="n">ev</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">handleDragToMaximisedModule</span><span class="p">(</span><span class="n">ev</span><span class="p">)</span>
+            <span class="k">return</span>
+
         <span class="n">DockDrop</span><span class="o">.</span><span class="n">dragMoveEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="CcpnModule.dragLeaveEvent"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.Gui.CcpnModule.dragLeaveEvent">[docs]</a>    <span class="k">def</span> <span class="nf">dragLeaveEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
+        <span class="n">ev</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
         <span class="n">DockDrop</span><span class="o">.</span><span class="n">dragLeaveEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="CcpnModule.dragEnterEvent"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.Gui.CcpnModule.dragEnterEvent">[docs]</a>    <span class="k">def</span> <span class="nf">dragEnterEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
+        <span class="n">ev</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">isDragToMaximisedModule</span><span class="p">(</span><span class="n">ev</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">handleDragToMaximisedModule</span><span class="p">(</span><span class="n">ev</span><span class="p">)</span>
+            <span class="k">return</span>
+
         <span class="k">if</span> <span class="n">args</span><span class="p">:</span>
-            <span class="n">ev</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
             <span class="c1"># print (&#39;&gt;&gt;&gt;&#39;, ev.source())</span>
             <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parseEvent</span><span class="p">(</span><span class="n">ev</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">DropBase</span><span class="o">.</span><span class="n">PIDS</span> <span class="ow">in</span> <span class="n">data</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;event&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">source</span><span class="p">(),</span> <span class="n">SideBar</span><span class="p">):</span>  <span class="c1">#(SideBar, SideBar)):</span>
@@ -679,11 +877,11 @@
 
                     <span class="k">if</span> <span class="n">ev</span><span class="o">.</span><span class="n">source</span><span class="p">()</span> <span class="ow">is</span> <span class="bp">self</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">dropArea</span> <span class="o">==</span> <span class="s1">&#39;center&#39;</span><span class="p">:</span>
                         <span class="c1"># print &quot;  no self-center&quot;</span>
-                        <span class="bp">self</span><span class="o">.</span><span class="n">dropArea</span> <span class="o">=</span> <span class="bp">None</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">dropArea</span> <span class="o">=</span> <span class="kc">None</span>
                         <span class="n">ev</span><span class="o">.</span><span class="n">ignore</span><span class="p">()</span>
                     <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">dropArea</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">allowedAreas</span><span class="p">:</span>
                         <span class="c1"># print &quot;  not allowed&quot;</span>
-                        <span class="bp">self</span><span class="o">.</span><span class="n">dropArea</span> <span class="o">=</span> <span class="bp">None</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">dropArea</span> <span class="o">=</span> <span class="kc">None</span>
                         <span class="n">ev</span><span class="o">.</span><span class="n">ignore</span><span class="p">()</span>
                     <span class="k">else</span><span class="p">:</span>
                         <span class="c1"># print &quot;  ok&quot;</span>
@@ -702,23 +900,24 @@
                 <span class="n">DockDrop</span><span class="o">.</span><span class="n">dragEnterEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="CcpnModule.dropEvent"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.Gui.CcpnModule.dropEvent">[docs]</a>    <span class="k">def</span> <span class="nf">dropEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">inDragToMaximisedModule</span><span class="p">:</span>
+            <span class="k">return</span>
 
         <span class="k">if</span> <span class="n">event</span><span class="p">:</span>
             <span class="n">source</span> <span class="o">=</span> <span class="n">event</span><span class="o">.</span><span class="n">source</span><span class="p">()</span>
             <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parseEvent</span><span class="p">(</span><span class="n">event</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">DropBase</span><span class="o">.</span><span class="n">PIDS</span> <span class="ow">in</span> <span class="n">data</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="s1">&#39;implements&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">source</span><span class="o">.</span><span class="n">implements</span><span class="p">(</span><span class="s1">&#39;dock&#39;</span><span class="p">):</span>
+                <span class="n">CcpnModule</span><span class="o">.</span><span class="n">_lastActionWasDrop</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="n">DockDrop</span><span class="o">.</span><span class="n">dropEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">DropBase</span><span class="o">.</span><span class="n">PIDS</span> <span class="ow">in</span> <span class="n">data</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">DropBase</span><span class="o">.</span><span class="n">PIDS</span><span class="p">])</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
                 <span class="c1"># process Pids</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">_processPids</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">position</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">dropArea</span><span class="p">,</span> <span class="n">relativeTo</span><span class="o">=</span><span class="bp">self</span><span class="p">)</span>
                 <span class="n">event</span><span class="o">.</span><span class="n">accept</span><span class="p">()</span>
 
                 <span class="c1"># reset the dock area</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">dropArea</span> <span class="o">=</span> <span class="bp">None</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">dropArea</span> <span class="o">=</span> <span class="kc">None</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">overlay</span><span class="o">.</span><span class="n">setDropArea</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dropArea</span><span class="p">)</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_selectedOverlay</span><span class="o">.</span><span class="n">setDropArea</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dropArea</span><span class="p">)</span>
-
-            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="s1">&#39;implements&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">source</span><span class="o">.</span><span class="n">implements</span><span class="p">(</span><span class="s1">&#39;dock&#39;</span><span class="p">):</span>
-                <span class="n">CcpnModule</span><span class="o">.</span><span class="n">_lastActionWasDrop</span> <span class="o">=</span> <span class="bp">True</span>
-                <span class="n">DockDrop</span><span class="o">.</span><span class="n">dropEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">event</span><span class="o">.</span><span class="n">ignore</span><span class="p">()</span>
                 <span class="k">return</span></div>
@@ -758,28 +957,112 @@
 <span class="s2">                   }&quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">setStyleSheet</span><span class="p">(</span><span class="n">tempStyle</span><span class="p">)</span>
 
+<div class="viewcode-block" id="CcpnModule.findWindow"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.Gui.CcpnModule.findWindow">[docs]</a>    <span class="k">def</span> <span class="nf">findWindow</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">current</span> <span class="o">=</span> <span class="bp">self</span>
+        <span class="k">while</span> <span class="n">current</span><span class="o">.</span><span class="n">parent</span><span class="p">()</span> <span class="o">!=</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">current</span> <span class="o">=</span> <span class="n">current</span><span class="o">.</span><span class="n">parent</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">current</span></div>
+
+<div class="viewcode-block" id="CcpnModule.flashMessage"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.Gui.CcpnModule.flashMessage">[docs]</a>    <span class="k">def</span> <span class="nf">flashMessage</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">message</span><span class="p">):</span>
+        <span class="k">def</span> <span class="nf">center</span><span class="p">(</span><span class="n">window</span><span class="p">,</span> <span class="n">rect</span><span class="p">):</span>
+            <span class="c1"># https://wiki.qt.io/How_to_Center_a_Window_on_the_Screen</span>
+
+            <span class="n">window</span><span class="o">.</span><span class="n">setGeometry</span><span class="p">(</span>
+                    <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QStyle</span><span class="o">.</span><span class="n">alignedRect</span><span class="p">(</span>
+                            <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">LeftToRight</span><span class="p">,</span>
+                            <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">AlignCenter</span><span class="p">,</span>
+                            <span class="n">window</span><span class="o">.</span><span class="n">size</span><span class="p">(),</span>
+                            <span class="n">rect</span><span class="p">,</span>
+                            <span class="p">)</span>
+                    <span class="p">)</span>
+
+        <span class="n">messageBox</span> <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QMessageBox</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="n">messageBox</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
+        <span class="n">messageBox</span><span class="o">.</span><span class="n">setWindowFlag</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">FramelessWindowHint</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">button</span> <span class="ow">in</span> <span class="n">messageBox</span><span class="o">.</span><span class="n">findChildren</span><span class="p">(</span><span class="n">QtWidgets</span><span class="o">.</span><span class="n">QDialogButtonBox</span><span class="p">):</span>
+            <span class="n">button</span><span class="o">.</span><span class="n">setVisible</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+
+        <span class="n">messageBox</span><span class="o">.</span><span class="n">update</span><span class="p">()</span>
+
+        <span class="n">globalRect</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">QRect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mapToGlobal</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rect</span><span class="p">()</span><span class="o">.</span><span class="n">topLeft</span><span class="p">()),</span> <span class="bp">self</span><span class="o">.</span><span class="n">rect</span><span class="p">()</span><span class="o">.</span><span class="n">size</span><span class="p">())</span>
+        <span class="n">wrapper</span> <span class="o">=</span> <span class="n">partial</span><span class="p">(</span><span class="n">center</span><span class="p">,</span> <span class="n">messageBox</span><span class="p">,</span> <span class="n">globalRect</span><span class="p">)</span>
+        <span class="n">QtCore</span><span class="o">.</span><span class="n">QTimer</span><span class="o">.</span><span class="n">singleShot</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">wrapper</span><span class="p">)</span>
+
+        <span class="n">timer</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">QTimer</span><span class="p">()</span>
+        <span class="n">timer</span><span class="o">.</span><span class="n">setSingleShot</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">timer</span><span class="o">.</span><span class="n">timeout</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">messageBox</span><span class="o">.</span><span class="n">close</span><span class="p">)</span>
+        <span class="n">timer</span><span class="o">.</span><span class="n">start</span><span class="p">(</span><span class="mi">1500</span><span class="p">)</span>
+
+        <span class="n">messageBox</span><span class="o">.</span><span class="n">exec</span><span class="p">()</span></div>
+
 <div class="viewcode-block" id="CcpnModule.startDrag"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.Gui.CcpnModule.startDrag">[docs]</a>    <span class="k">def</span> <span class="nf">startDrag</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
         <span class="bp">self</span><span class="o">.</span><span class="n">drag</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QDrag</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
         <span class="n">mime</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">QMimeData</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">drag</span><span class="o">.</span><span class="n">setMimeData</span><span class="p">(</span><span class="n">mime</span><span class="p">)</span>
+        <span class="n">dragPixmap</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">grab</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">drag</span><span class="o">.</span><span class="n">setPixmap</span><span class="p">(</span><span class="n">dragPixmap</span><span class="o">.</span><span class="n">scaledToWidth</span><span class="p">(</span><span class="mi">128</span><span class="p">)</span> <span class="k">if</span> <span class="n">dragPixmap</span><span class="o">.</span><span class="n">width</span><span class="p">()</span> <span class="o">&lt;</span> <span class="n">dragPixmap</span><span class="o">.</span><span class="n">height</span><span class="p">()</span> <span class="k">else</span> <span class="n">dragPixmap</span><span class="o">.</span><span class="n">scaledToHeight</span><span class="p">(</span><span class="mi">128</span><span class="p">))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">widgetArea</span><span class="o">.</span><span class="n">setStyleSheet</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dragStyle</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_raiseSelectedOverlay</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">updateStyle</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">update</span><span class="p">()</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">drag</span><span class="o">.</span><span class="n">destroyed</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_destroyed</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_raiseSelectedOverlay</span><span class="p">()</span>
-        <span class="n">action</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">drag</span><span class="o">.</span><span class="n">exec_</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">updateStyle</span><span class="p">()</span></div>
+
+        <span class="c1"># GST doesn&#39;t work in the current version but should work in 5.13</span>
+        <span class="n">forbiddenCursorPixmap</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QCursor</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">ForbiddenCursor</span><span class="p">)</span><span class="o">.</span><span class="n">pixmap</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">drag</span><span class="o">.</span><span class="n">setDragCursor</span><span class="p">(</span><span class="n">forbiddenCursorPixmap</span><span class="p">,</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">IgnoreAction</span><span class="p">)</span>
+
+        <span class="n">dragResult</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">drag</span><span class="o">.</span><span class="n">exec_</span><span class="p">()</span>
+        <span class="n">endPosition</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QCursor</span><span class="o">.</span><span class="n">pos</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">updateStyle</span><span class="p">()</span>
+
+        <span class="c1"># GST we have to assume the drag succeeded currently as we don&#39;t get any events</span>
+        <span class="c1"># that report on whether the drag has failed. Indeed this effectivley a failed drag...</span>
+        <span class="n">globalDockRect</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getDockArea</span><span class="p">()</span><span class="o">.</span><span class="n">frameGeometry</span><span class="p">()</span>
+
+        <span class="n">targetWidget</span> <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QApplication</span><span class="o">.</span><span class="n">instance</span><span class="p">()</span><span class="o">.</span><span class="n">widgetAt</span><span class="p">(</span><span class="n">endPosition</span><span class="p">)</span>
+        <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">drag</span><span class="o">.</span><span class="n">target</span><span class="p">()</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="ow">not</span> <span class="n">globalDockRect</span><span class="o">.</span><span class="n">contains</span><span class="p">(</span><span class="n">endPosition</span><span class="p">)):</span>
+            <span class="k">if</span> <span class="n">targetWidget</span> <span class="o">==</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">float</span><span class="p">()</span>
+                <span class="n">window</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">findWindow</span><span class="p">()</span>
+                <span class="n">window</span><span class="o">.</span><span class="n">move</span><span class="p">(</span><span class="n">endPosition</span><span class="p">)</span>
+
+                <span class="c1"># this is because we could have have dragged into another application</span>
+                <span class="c1"># this may not work under windows</span>
+                <span class="n">originalWindow</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">findWindow</span><span class="p">()</span>
+                <span class="n">originalWindow</span><span class="o">.</span><span class="n">raise_</span><span class="p">()</span>
+                <span class="n">originalWindow</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+                <span class="n">originalWindow</span><span class="o">.</span><span class="n">activateWindow</span><span class="p">()</span>
+
+                <span class="n">window</span><span class="o">.</span><span class="n">raise_</span><span class="p">()</span>
+                <span class="n">window</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+                <span class="n">window</span><span class="o">.</span><span class="n">activateWindow</span><span class="p">()</span></div>
 
     <span class="k">def</span> <span class="nf">_destroyed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ev</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_selectedOverlay</span><span class="o">.</span><span class="n">setDropArea</span><span class="p">(</span><span class="bp">None</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_selectedOverlay</span><span class="o">.</span><span class="n">setDropArea</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_raiseSelectedOverlay</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_selectedOverlay</span><span class="o">.</span><span class="n">setDropArea</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_selectedOverlay</span><span class="o">.</span><span class="n">setDropArea</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_selectedOverlay</span><span class="o">.</span><span class="n">raise_</span><span class="p">()</span>
 
 <div class="viewcode-block" id="CcpnModule.resizeEvent"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.Gui.CcpnModule.resizeEvent">[docs]</a>    <span class="k">def</span> <span class="nf">resizeEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ev</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_selectedOverlay</span><span class="o">.</span><span class="n">_resize</span><span class="p">()</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">resizeEvent</span><span class="p">(</span><span class="n">ev</span><span class="p">)</span></div></div>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">resizeEvent</span><span class="p">(</span><span class="n">ev</span><span class="p">)</span></div>
+
+    <span class="c1">#=========================================================================================</span>
+    <span class="c1"># CCPN Properties</span>
+    <span class="c1">#=========================================================================================</span>
+
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s2">&quot;&lt;Module:</span><span class="si">%s</span><span class="s2">&gt;&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">()</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">pid</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Identifier for the object, unique within the project - added to give label to ccpnModules</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="s2">&quot;Module:</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">()</span></div>
 
 
 <div class="viewcode-block" id="CcpnModuleLabel"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.Gui.CcpnModuleLabel">[docs]</a><span class="k">class</span> <span class="nc">CcpnModuleLabel</span><span class="p">(</span><span class="n">DockLabel</span><span class="p">):</span>
@@ -788,6 +1071,8 @@
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">labelSize</span> <span class="o">=</span> <span class="mi">16</span>
+    <span class="n">TOP_LEFT</span> <span class="o">=</span> <span class="s1">&#39;TOP_LEFT&#39;</span>
+    <span class="n">TOP_RIGHT</span> <span class="o">=</span> <span class="s1">&#39;TOP_RIGHT&#39;</span>
 
     <span class="c1"># TODO:GEERTEN check colours handling</span>
     <span class="c1"># defined here, as the updateStyle routine is called from the</span>
@@ -795,30 +1080,49 @@
 
     <span class="n">sigDragEntered</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Signal</span><span class="p">(</span><span class="nb">object</span><span class="p">,</span> <span class="nb">object</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">module</span><span class="p">,</span> <span class="n">showCloseButton</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">closeCallback</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">showSettingsButton</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">settingsCallback</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
-        <span class="nb">super</span><span class="p">(</span><span class="n">CcpnModuleLabel</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">module</span><span class="p">,</span> <span class="n">showCloseButton</span><span class="o">=</span><span class="n">showCloseButton</span><span class="p">)</span>
+<div class="viewcode-block" id="CcpnModuleLabel.getMaxIconSize"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.Gui.CcpnModuleLabel.getMaxIconSize">[docs]</a>    <span class="k">def</span> <span class="nf">getMaxIconSize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">icon</span><span class="p">):</span>
+        <span class="n">iconSizes</span> <span class="o">=</span> <span class="p">[</span><span class="nb">max</span><span class="p">((</span><span class="n">size</span><span class="o">.</span><span class="n">height</span><span class="p">(),</span> <span class="n">size</span><span class="o">.</span><span class="n">width</span><span class="p">()))</span> <span class="k">for</span> <span class="n">size</span> <span class="ow">in</span> <span class="n">icon</span><span class="o">.</span><span class="n">availableSizes</span><span class="p">()]</span>
+        <span class="k">return</span> <span class="nb">max</span><span class="p">(</span><span class="n">iconSizes</span><span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">module</span><span class="p">,</span> <span class="n">showCloseButton</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">closeCallback</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">showSettingsButton</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">settingsCallback</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">buttonBorderWidth</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">buttonIconMargin</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">buttonCornerRadius</span> <span class="o">=</span> <span class="mi">3</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">labelRadius</span> <span class="o">=</span> <span class="mi">3</span>
+
+        <span class="nb">super</span><span class="p">(</span><span class="n">CcpnModuleLabel</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">module</span><span class="p">,</span> <span class="n">showCloseButton</span><span class="o">=</span><span class="n">showCloseButton</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">module</span> <span class="o">=</span> <span class="n">module</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">fixedWidth</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fixedWidth</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">setFont</span><span class="p">(</span><span class="n">moduleLabelFont</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">setAlignment</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">AlignVCenter</span> <span class="o">|</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">AlignHCenter</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">closeButton</span><span class="o">.</span><span class="n">setStyleSheet</span><span class="p">(</span><span class="s1">&#39;&#39;&#39;border: 0px solid #a9a9a9;</span>
+<span class="s1">                                          border-radius: 1px;</span>
+<span class="s1">                                          background-color: transparent; &#39;&#39;&#39;</span><span class="p">)</span>
+
+        <span class="c1"># self.setStyleSheet(&#39;margin : 2&#39;)</span>
+
+        <span class="n">layout</span> <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QGridLayout</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="n">layout</span><span class="o">.</span><span class="n">setContentsMargins</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setLineWidth</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">showCloseButton</span><span class="p">:</span>
             <span class="c1"># button is already there because of the DockLabel init</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">closeButton</span><span class="o">.</span><span class="n">setIconSize</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">QSize</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">labelSize</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">labelSize</span><span class="p">))</span>
 
-            <span class="k">if</span> <span class="n">closeCallback</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">closeCallback</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;Requested closeButton without callback&#39;</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">closeButton</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">closeCallback</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">setupLabelButton</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">closeButton</span><span class="p">,</span> <span class="s1">&#39;close_cross&#39;</span><span class="p">,</span> <span class="n">CcpnModuleLabel</span><span class="o">.</span><span class="n">TOP_RIGHT</span><span class="p">)</span>
 
         <span class="c1"># Settings</span>
         <span class="k">if</span> <span class="n">showSettingsButton</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">settingsButton</span> <span class="o">=</span> <span class="n">ToolButton</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">settingsButton</span><span class="o">.</span><span class="n">setIcon</span><span class="p">(</span><span class="n">Icon</span><span class="p">(</span><span class="s1">&#39;icons/settings&#39;</span><span class="p">))</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">settingsButton</span><span class="o">.</span><span class="n">setIconSize</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">QSize</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">labelSize</span> <span class="o">-</span> <span class="mi">5</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">labelSize</span> <span class="o">-</span> <span class="mi">5</span><span class="p">))</span>  <span class="c1"># GWV hack to make it work</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">setupLabelButton</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">settingsButton</span><span class="p">,</span> <span class="s1">&#39;settings_cog&#39;</span><span class="p">,</span> <span class="n">CcpnModuleLabel</span><span class="o">.</span><span class="n">TOP_LEFT</span><span class="p">)</span>
 
-            <span class="k">if</span> <span class="n">settingsCallback</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">settingsCallback</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;Requested settingsButton without callback&#39;</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">settingsButton</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">settingsCallback</span><span class="p">)</span>
@@ -826,36 +1130,59 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">updateStyle</span><span class="p">()</span>
 
         <span class="c1"># flag to disable dragMoveEvent during a doubleClick</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_inDoubleClick</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_inDoubleClick</span> <span class="o">=</span> <span class="kc">False</span>
 
-<div class="viewcode-block" id="CcpnModuleLabel.setModuleHighlight"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.Gui.CcpnModuleLabel.setModuleHighlight">[docs]</a>    <span class="k">def</span> <span class="nf">setModuleHighlight</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">hightlighted</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+<div class="viewcode-block" id="CcpnModuleLabel.setupLabelButton"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.Gui.CcpnModuleLabel.setupLabelButton">[docs]</a>    <span class="k">def</span> <span class="nf">setupLabelButton</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">button</span><span class="p">,</span> <span class="n">iconName</span><span class="p">,</span> <span class="n">position</span><span class="p">):</span>
+        <span class="n">icon</span> <span class="o">=</span> <span class="n">Icon</span><span class="p">(</span><span class="s1">&#39;icons/</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">iconName</span><span class="p">)</span>
+
+        <span class="n">button</span><span class="o">.</span><span class="n">setIcon</span><span class="p">(</span><span class="n">icon</span><span class="p">)</span>
+        <span class="n">retinaIconSize</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getMaxIconSize</span><span class="p">(</span><span class="n">icon</span><span class="p">)</span> <span class="o">//</span> <span class="mi">2</span>
+        <span class="n">button</span><span class="o">.</span><span class="n">setIconSize</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">QSize</span><span class="p">(</span><span class="n">retinaIconSize</span><span class="p">,</span> <span class="n">retinaIconSize</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="n">position</span> <span class="o">==</span> <span class="n">CcpnModuleLabel</span><span class="o">.</span><span class="n">TOP_RIGHT</span><span class="p">:</span>
+            <span class="n">styleInfo</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">buttonBorderWidth</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">buttonCornerRadius</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">position</span> <span class="o">==</span> <span class="n">CcpnModuleLabel</span><span class="o">.</span><span class="n">TOP_LEFT</span><span class="p">:</span>
+            <span class="n">styleInfo</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">buttonBorderWidth</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">buttonCornerRadius</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;button position must be one of </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">CcpnModule</span><span class="o">.</span><span class="n">TOP_LEFT</span><span class="p">,</span> <span class="n">CcpnModule</span><span class="o">.</span><span class="n">TOP_RIGHT</span><span class="p">))</span>
+
+        <span class="c1"># GST colours are hard coded... help please I need  a central source for</span>
+        <span class="c1"># these presumably a color palette or scheme</span>
+        <span class="n">button</span><span class="o">.</span><span class="n">setStyleSheet</span><span class="p">(</span><span class="s1">&#39;&#39;&#39; border: </span><span class="si">%i</span><span class="s1">px solid #a9a9a9 ;</span>
+<span class="s1">                                 border-top-left-radius: </span><span class="si">%i</span><span class="s1">px;</span>
+<span class="s1">                                 border-top-right-radius: </span><span class="si">%i</span><span class="s1">px;</span>
+<span class="s1">                                 border-bottom-left-radius: 0px;</span>
+<span class="s1">                                 border-bottom-right-radius: 0px;</span>
+<span class="s1">                                 background-color: #ececec ;  &#39;&#39;&#39;</span> <span class="o">%</span> <span class="n">styleInfo</span><span class="p">)</span>
+        <span class="n">buttonSize</span> <span class="o">=</span> <span class="n">retinaIconSize</span> <span class="o">+</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">buttonBorderWidth</span> <span class="o">*</span> <span class="mi">2</span><span class="p">)</span> <span class="o">+</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">buttonIconMargin</span> <span class="o">*</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="n">button</span><span class="o">.</span><span class="n">setMinimumSize</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">QSize</span><span class="p">(</span><span class="n">buttonSize</span><span class="p">,</span> <span class="n">buttonSize</span><span class="p">))</span>
+        <span class="n">button</span><span class="o">.</span><span class="n">setMaximumSize</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">QSize</span><span class="p">(</span><span class="n">buttonSize</span><span class="p">,</span> <span class="n">buttonSize</span><span class="p">))</span>
+        <span class="n">button</span><span class="o">.</span><span class="n">setSizePolicy</span><span class="p">(</span><span class="n">QtWidgets</span><span class="o">.</span><span class="n">QSizePolicy</span><span class="o">.</span><span class="n">Fixed</span><span class="p">,</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QSizePolicy</span><span class="o">.</span><span class="n">Fixed</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="CcpnModuleLabel.setModuleHighlight"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.Gui.CcpnModuleLabel.setModuleHighlight">[docs]</a>    <span class="k">def</span> <span class="nf">setModuleHighlight</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">hightlighted</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">setDim</span><span class="p">(</span><span class="n">hightlighted</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="CcpnModuleLabel.updateStyle"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.Gui.CcpnModuleLabel.updateStyle">[docs]</a>    <span class="k">def</span> <span class="nf">updateStyle</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="n">r</span> <span class="o">=</span> <span class="s1">&#39;3px&#39;</span>
+
         <span class="c1"># get the colours from the colourScheme</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">dim</span><span class="p">:</span>
-            <span class="n">fg</span> <span class="o">=</span> <span class="n">getColours</span><span class="p">()[</span><span class="n">CCPNMODULELABEL_FOREGROUND_ACTIVE</span><span class="p">]</span>
-            <span class="n">bg</span> <span class="o">=</span> <span class="n">getColours</span><span class="p">()[</span><span class="n">CCPNMODULELABEL_BACKGROUND_ACTIVE</span><span class="p">]</span>
-            <span class="n">border</span> <span class="o">=</span> <span class="n">getColours</span><span class="p">()[</span><span class="n">CCPNMODULELABEL_BORDER_ACTIVE</span><span class="p">]</span>
-        <span class="k">else</span><span class="p">:</span>
             <span class="n">fg</span> <span class="o">=</span> <span class="n">getColours</span><span class="p">()[</span><span class="n">CCPNMODULELABEL_FOREGROUND</span><span class="p">]</span>
             <span class="n">bg</span> <span class="o">=</span> <span class="n">getColours</span><span class="p">()[</span><span class="n">CCPNMODULELABEL_BACKGROUND</span><span class="p">]</span>
             <span class="n">border</span> <span class="o">=</span> <span class="n">getColours</span><span class="p">()[</span><span class="n">CCPNMODULELABEL_BORDER</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">fg</span> <span class="o">=</span> <span class="n">getColours</span><span class="p">()[</span><span class="n">CCPNMODULELABEL_FOREGROUND_ACTIVE</span><span class="p">]</span>
+            <span class="n">bg</span> <span class="o">=</span> <span class="n">getColours</span><span class="p">()[</span><span class="n">CCPNMODULELABEL_BACKGROUND_ACTIVE</span><span class="p">]</span>
+            <span class="n">border</span> <span class="o">=</span> <span class="n">getColours</span><span class="p">()[</span><span class="n">CCPNMODULELABEL_BORDER_ACTIVE</span><span class="p">]</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">orientation</span> <span class="o">==</span> <span class="s1">&#39;vertical&#39;</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">vStyle</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;DockLabel {</span>
 <span class="s2">                background-color : </span><span class="si">%s</span><span class="s2">;</span>
 <span class="s2">                color : </span><span class="si">%s</span><span class="s2">;</span>
-<span class="s2">                border-top-right-radius: 0px;</span>
+<span class="s2">                border-top-right-radius: 2px;</span>
 <span class="s2">                border-top-left-radius: </span><span class="si">%s</span><span class="s2">;</span>
-<span class="s2">                border-bottom-right-radius: 0px;</span>
+<span class="s2">                border-bottom-right-radius: 2px;</span>
 <span class="s2">                border-bottom-left-radius: </span><span class="si">%s</span><span class="s2">;</span>
-<span class="s2">                border-width: 0px;</span>
-<span class="s2">                border-right: 2px solid </span><span class="si">%s</span><span class="s2">;</span>
-<span class="s2">                padding-top: 3px;</span>
-<span class="s2">                padding-bottom: 3px;</span>
-<span class="s2">            }&quot;&quot;&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">bg</span><span class="p">,</span> <span class="n">fg</span><span class="p">,</span> <span class="n">r</span><span class="p">,</span> <span class="n">r</span><span class="p">,</span> <span class="n">border</span><span class="p">)</span>
+<span class="s2">            }&quot;&quot;&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">bg</span><span class="p">,</span> <span class="n">fg</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">labelRadius</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">labelRadius</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">setStyleSheet</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">vStyle</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">hStyle</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;DockLabel {</span>
@@ -865,28 +1192,33 @@
 <span class="s2">                border-top-left-radius: </span><span class="si">%s</span><span class="s2">;</span>
 <span class="s2">                border-bottom-right-radius: 0px;</span>
 <span class="s2">                border-bottom-left-radius: 0px;</span>
-<span class="s2">                border-width: 0px;</span>
-<span class="s2">                border-bottom: 2px solid </span><span class="si">%s</span><span class="s2">;</span>
-<span class="s2">                padding-left: 3px;</span>
-<span class="s2">                padding-right: 3px;</span>
-<span class="s2">            }&quot;&quot;&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">bg</span><span class="p">,</span> <span class="n">fg</span><span class="p">,</span> <span class="n">r</span><span class="p">,</span> <span class="n">r</span><span class="p">,</span> <span class="n">border</span><span class="p">)</span>
+<span class="s2">            }&quot;&quot;&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">bg</span><span class="p">,</span> <span class="n">fg</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">labelRadius</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">labelRadius</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">setStyleSheet</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">hStyle</span><span class="p">)</span></div>
 
     <span class="k">def</span> <span class="nf">_createContextMenu</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 
-        <span class="n">contextMenu</span> <span class="o">=</span> <span class="n">Menu</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="p">,</span> <span class="n">isFloatWidget</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
-        <span class="n">close</span> <span class="o">=</span> <span class="n">contextMenu</span><span class="o">.</span><span class="n">addAction</span><span class="p">(</span><span class="s1">&#39;Close&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">module</span><span class="o">.</span><span class="n">_closeModule</span><span class="p">)</span>
+        <span class="n">contextMenu</span> <span class="o">=</span> <span class="n">Menu</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="p">,</span> <span class="n">isFloatWidget</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">contextMenu</span><span class="o">.</span><span class="n">addAction</span><span class="p">(</span><span class="s1">&#39;Close&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">module</span><span class="o">.</span><span class="n">_closeModule</span><span class="p">)</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">module</span><span class="o">.</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">moduleArea</span><span class="o">.</span><span class="n">ccpnModules</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
-            <span class="n">closeOthers</span> <span class="o">=</span> <span class="n">contextMenu</span><span class="o">.</span><span class="n">addAction</span><span class="p">(</span><span class="s1">&#39;Close Others&#39;</span><span class="p">,</span> <span class="n">partial</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">module</span><span class="o">.</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">moduleArea</span><span class="o">.</span><span class="n">_closeOthers</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">module</span><span class="p">))</span>
-            <span class="n">closeAllModules</span> <span class="o">=</span> <span class="n">contextMenu</span><span class="o">.</span><span class="n">addAction</span><span class="p">(</span><span class="s1">&#39;Close All&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">module</span><span class="o">.</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">moduleArea</span><span class="o">.</span><span class="n">_closeAll</span><span class="p">)</span>
+            <span class="n">contextMenu</span><span class="o">.</span><span class="n">addAction</span><span class="p">(</span><span class="s1">&#39;Close Others&#39;</span><span class="p">,</span> <span class="n">partial</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">module</span><span class="o">.</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">moduleArea</span><span class="o">.</span><span class="n">_closeOthers</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">module</span><span class="p">))</span>
+            <span class="n">contextMenu</span><span class="o">.</span><span class="n">addAction</span><span class="p">(</span><span class="s1">&#39;Close All&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">module</span><span class="o">.</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">moduleArea</span><span class="o">.</span><span class="n">_closeAll</span><span class="p">)</span>
+
+        <span class="n">numDocks</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">module</span><span class="o">.</span><span class="n">getDocksInParentArea</span><span class="p">())</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">module</span><span class="o">.</span><span class="n">maximised</span> <span class="ow">and</span> <span class="n">numDocks</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">contextMenu</span><span class="o">.</span><span class="n">addAction</span><span class="p">(</span><span class="s1">&#39;Maximise&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">module</span><span class="o">.</span><span class="n">toggleMaximised</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">module</span><span class="o">.</span><span class="n">maximised</span><span class="p">:</span>
+            <span class="n">contextMenu</span><span class="o">.</span><span class="n">addAction</span><span class="p">(</span><span class="s1">&#39;Restore&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">module</span><span class="o">.</span><span class="n">toggleMaximised</span><span class="p">)</span>
+
+        <span class="n">contextMenu</span><span class="o">.</span><span class="n">addAction</span><span class="p">(</span><span class="s1">&#39;Float&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">module</span><span class="o">.</span><span class="n">float</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">contextMenu</span>
 
     <span class="k">def</span> <span class="nf">_modulesMenu</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">menuName</span><span class="p">,</span> <span class="n">module</span><span class="p">):</span>
 
-        <span class="n">menu</span> <span class="o">=</span> <span class="n">Menu</span><span class="p">(</span><span class="n">menuName</span><span class="o">.</span><span class="n">title</span><span class="p">(),</span> <span class="bp">self</span><span class="p">,</span> <span class="n">isFloatWidget</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+        <span class="n">menu</span> <span class="o">=</span> <span class="n">Menu</span><span class="p">(</span><span class="n">menuName</span><span class="o">.</span><span class="n">title</span><span class="p">(),</span> <span class="bp">self</span><span class="p">,</span> <span class="n">isFloatWidget</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">module</span><span class="p">:</span>
-            <span class="n">toAll</span> <span class="o">=</span> <span class="n">menu</span><span class="o">.</span><span class="n">addAction</span><span class="p">(</span><span class="s1">&#39;All&#39;</span><span class="p">,</span> <span class="n">partial</span><span class="p">(</span><span class="n">module</span><span class="o">.</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">moduleArea</span><span class="o">.</span><span class="n">moveModule</span><span class="p">,</span> <span class="n">module</span><span class="p">,</span> <span class="n">menuName</span><span class="p">,</span> <span class="bp">None</span><span class="p">))</span>
+            <span class="n">toAll</span> <span class="o">=</span> <span class="n">menu</span><span class="o">.</span><span class="n">addAction</span><span class="p">(</span><span class="s1">&#39;All&#39;</span><span class="p">,</span> <span class="n">partial</span><span class="p">(</span><span class="n">module</span><span class="o">.</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">moduleArea</span><span class="o">.</span><span class="n">moveModule</span><span class="p">,</span> <span class="n">module</span><span class="p">,</span> <span class="n">menuName</span><span class="p">,</span> <span class="kc">None</span><span class="p">))</span>
             <span class="k">for</span> <span class="n">availableModule</span> <span class="ow">in</span> <span class="n">module</span><span class="o">.</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">moduleArea</span><span class="o">.</span><span class="n">ccpnModules</span><span class="p">:</span>
                 <span class="k">if</span> <span class="n">availableModule</span> <span class="o">!=</span> <span class="n">module</span><span class="p">:</span>
                     <span class="n">toModule</span> <span class="o">=</span> <span class="n">menu</span><span class="o">.</span><span class="n">addAction</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">availableModule</span><span class="o">.</span><span class="n">name</span><span class="p">()),</span>
@@ -901,7 +1233,7 @@
             <span class="n">menu</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_createContextMenu</span><span class="p">()</span>
             <span class="k">if</span> <span class="n">menu</span><span class="p">:</span>
                 <span class="n">menu</span><span class="o">.</span><span class="n">move</span><span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">globalPos</span><span class="p">()</span><span class="o">.</span><span class="n">x</span><span class="p">(),</span> <span class="n">event</span><span class="o">.</span><span class="n">globalPos</span><span class="p">()</span><span class="o">.</span><span class="n">y</span><span class="p">()</span> <span class="o">+</span> <span class="mi">10</span><span class="p">)</span>
-                <span class="n">menu</span><span class="o">.</span><span class="k">exec</span><span class="p">()</span>
+                <span class="n">menu</span><span class="o">.</span><span class="n">exec</span><span class="p">()</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="nb">super</span><span class="p">(</span><span class="n">CcpnModuleLabel</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">mousePressEvent</span><span class="p">(</span><span class="n">event</span><span class="p">)</span></div>
 
@@ -952,27 +1284,43 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># start a small timer when doubleClicked</span>
         <span class="c1"># disables the dragMoveEvent whilst in a doubleClick</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_inDoubleClick</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_inDoubleClick</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="n">QtCore</span><span class="o">.</span><span class="n">QTimer</span><span class="o">.</span><span class="n">singleShot</span><span class="p">(</span><span class="n">QtWidgets</span><span class="o">.</span><span class="n">QApplication</span><span class="o">.</span><span class="n">instance</span><span class="p">()</span><span class="o">.</span><span class="n">doubleClickInterval</span><span class="p">()</span> <span class="o">*</span> <span class="mi">2</span><span class="p">,</span>
                                  <span class="bp">self</span><span class="o">.</span><span class="n">_resetDoubleClick</span><span class="p">)</span>
 
-        <span class="nb">super</span><span class="p">(</span><span class="n">CcpnModuleLabel</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">mouseDoubleClickEvent</span><span class="p">(</span><span class="n">ev</span><span class="p">)</span></div>
+        <span class="k">if</span> <span class="n">ev</span><span class="o">.</span><span class="n">button</span><span class="p">()</span> <span class="o">==</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">LeftButton</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">dock</span><span class="o">.</span><span class="n">toggleMaximised</span><span class="p">()</span></div>
 
     <span class="k">def</span> <span class="nf">_resetDoubleClick</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;reset the double click flag</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_inDoubleClick</span> <span class="o">=</span> <span class="bp">False</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_inDoubleClick</span> <span class="o">=</span> <span class="kc">False</span>
+
+<div class="viewcode-block" id="CcpnModuleLabel.resizeEvent"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.Gui.CcpnModuleLabel.resizeEvent">[docs]</a>    <span class="k">def</span> <span class="nf">resizeEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ev</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;closeButton&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">closeButton</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">orientation</span> <span class="o">==</span> <span class="s1">&#39;vertical&#39;</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">layout</span><span class="p">()</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">closeButton</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">alignment</span><span class="o">=</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">AlignTop</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">layout</span><span class="p">()</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">closeButton</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="n">alignment</span><span class="o">=</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">AlignRight</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;settingsButton&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">settingsButton</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">orientation</span> <span class="o">==</span> <span class="s1">&#39;vertical&#39;</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">layout</span><span class="p">()</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">settingsButton</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">alignment</span><span class="o">=</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">AlignBottom</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">layout</span><span class="p">()</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">settingsButton</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">alignment</span><span class="o">=</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">AlignLeft</span><span class="p">)</span>
+
+        <span class="nb">super</span><span class="p">(</span><span class="n">DockLabel</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">resizeEvent</span><span class="p">(</span><span class="n">ev</span><span class="p">)</span></div></div>
 
 
 <div class="viewcode-block" id="DropAreaSelectedOverlay"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.Gui.DropAreaSelectedOverlay">[docs]</a><span class="k">class</span> <span class="nc">DropAreaSelectedOverlay</span><span class="p">(</span><span class="n">QtWidgets</span><span class="o">.</span><span class="n">QWidget</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Overlay widget that draws highlight over the current module during a drag-drop operation</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Initialise widget</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QWidget</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">dropArea</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QWidget</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dropArea</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">hide</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">setAttribute</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">WA_TransparentForMouseEvents</span><span class="p">)</span>
 
@@ -980,7 +1328,7 @@
         <span class="sd">&quot;&quot;&quot;Set the widget coverage, either hidden, or a rectangle covering the module</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">dropArea</span> <span class="o">=</span> <span class="n">area</span>
-        <span class="k">if</span> <span class="n">area</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">area</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">hide</span><span class="p">()</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">prgn</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="p">()</span><span class="o">.</span><span class="n">rect</span><span class="p">()</span>
@@ -1000,7 +1348,7 @@
 <div class="viewcode-block" id="DropAreaSelectedOverlay.paintEvent"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.Gui.DropAreaSelectedOverlay.paintEvent">[docs]</a>    <span class="k">def</span> <span class="nf">paintEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ev</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Paint the overlay to the screen</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">dropArea</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">dropArea</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">return</span>
 
         <span class="c1"># create a transparent rectangle and painter over the widget</span>
@@ -1018,15 +1366,15 @@
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
 <div id="searchbox" style="display: none" role="search">
-  <h3>Quick search</h3>
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
     <form class="search" action="../../../../../search.html" method="get">
-      <input type="text" name="q" />
+      <input type="text" name="q" aria-labelledby="searchlabel" />
       <input type="submit" value="Go" />
-      <input type="hidden" name="check_keywords" value="yes" />
-      <input type="hidden" name="area" value="default" />
     </form>
+    </div>
 </div>
-<script type="text/javascript">$('#searchbox').show(0);</script>
+<script>$('#searchbox').show(0);</script>
         </div>
       </div>
       <div class="clearer"></div>
@@ -1040,13 +1388,13 @@
         <li class="right" >
           <a href="../../../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../../../index.html">Python  documentation</a> &raquo;</li>
-          <li class="nav-item nav-item-1"><a href="../../../../index.html" >Module code</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="../../../../../index.html">Python  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../../../index.html" >Module code</a> &#187;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
-        &copy; Copyright .
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.1.
+        &#169; Copyright .
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.4.0.
     </div>
   </body>
 </html>

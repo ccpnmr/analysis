@@ -2,14 +2,13 @@ ccpn.AnalysisMetabolomics.ui package
 ====================================
 
 .. automodule:: ccpn.AnalysisMetabolomics.ui
-    :members:
-    :undoc-members:
-    :show-inheritance:
+   :members:
+   :undoc-members:
+   :show-inheritance:
 
 Subpackages
 -----------
 
 .. toctree::
 
-    ccpn.AnalysisMetabolomics.ui.gui
-
+   ccpn.AnalysisMetabolomics.ui.gui

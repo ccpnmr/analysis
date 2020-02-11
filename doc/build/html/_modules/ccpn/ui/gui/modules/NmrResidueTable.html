@@ -1,32 +1,22 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
+<!DOCTYPE html>
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    
-    <title>ccpn.ui.gui.modules.NmrResidueTable &mdash; Python  documentation</title>
-    
+    <meta charset="utf-8" />
+    <title>ccpn.ui.gui.modules.NmrResidueTable &#8212; Python  documentation</title>
     <link rel="stylesheet" href="../../../../../_static/classic.css" type="text/css" />
     <link rel="stylesheet" href="../../../../../_static/pygments.css" type="text/css" />
     
-    <script type="text/javascript">
-      var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    '../../../../../',
-        VERSION:     '',
-        COLLAPSE_INDEX: false,
-        FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true
-      };
-    </script>
-    <script type="text/javascript" src="../../../../../_static/jquery.js"></script>
-    <script type="text/javascript" src="../../../../../_static/underscore.js"></script>
-    <script type="text/javascript" src="../../../../../_static/doctools.js"></script>
-    <link rel="top" title="Python  documentation" href="../../../../../index.html" />
-    <link rel="up" title="Module code" href="../../../../index.html" /> 
-  </head>
-  <body role="document">
+    <script id="documentation_options" data-url_root="../../../../../" src="../../../../../_static/documentation_options.js"></script>
+    <script src="../../../../../_static/jquery.js"></script>
+    <script src="../../../../../_static/underscore.js"></script>
+    <script src="../../../../../_static/doctools.js"></script>
+    <script src="../../../../../_static/language_data.js"></script>
+    
+    <link rel="index" title="Index" href="../../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../../search.html" /> 
+  </head><body>
     <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
@@ -36,8 +26,8 @@
         <li class="right" >
           <a href="../../../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../../../index.html">Python  documentation</a> &raquo;</li>
-          <li class="nav-item nav-item-1"><a href="../../../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="../../../../../index.html">Python  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../../../index.html" accesskey="U">Module code</a> &#187;</li> 
       </ul>
     </div>  
 
@@ -59,7 +49,7 @@
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Licence, Reference and Credits</span>
 <span class="c1">#=========================================================================================</span>
-<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019&quot;</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020&quot;</span>
 <span class="n">__credits__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Ed Brooksbank, Luca Mureddu, Timothy J Ragan &amp; Geerten W Vuister&quot;</span><span class="p">)</span>
 <span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">)</span>
 <span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., &amp; Vuister, G.W.&quot;</span><span class="p">,</span>
@@ -68,8 +58,8 @@
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Last code modification</span>
 <span class="c1">#=========================================================================================</span>
-<span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: CCPN $&quot;</span>
-<span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2017-07-07 16:32:45 +0100 (Fri, July 07, 2017) $&quot;</span>
+<span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: Ed Brooksbank $&quot;</span>
+<span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2020-01-28 09:52:40 +0000 (Tue, January 28, 2020) $&quot;</span>
 <span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.0 $&quot;</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Created</span>
@@ -114,25 +104,25 @@
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    This class implements the module by wrapping a NmrResidueTable instance</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">includeSettingsWidget</span> <span class="o">=</span> <span class="bp">True</span>
+    <span class="n">includeSettingsWidget</span> <span class="o">=</span> <span class="kc">True</span>
     <span class="n">maxSettingsState</span> <span class="o">=</span> <span class="mi">2</span>  <span class="c1"># states are defined as: 0: invisible, 1: both visible, 2: only settings visible</span>
     <span class="n">settingsPosition</span> <span class="o">=</span> <span class="s1">&#39;left&#39;</span>
 
-    <span class="n">includeDisplaySettings</span> <span class="o">=</span> <span class="bp">False</span>
-    <span class="n">includePeakLists</span> <span class="o">=</span> <span class="bp">False</span>
-    <span class="n">includeNmrChains</span> <span class="o">=</span> <span class="bp">False</span>
-    <span class="n">includeSpectrumTable</span> <span class="o">=</span> <span class="bp">False</span>
+    <span class="n">includeDisplaySettings</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">includePeakLists</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">includeNmrChains</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">includeSpectrumTable</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="n">activePulldownClass</span> <span class="o">=</span> <span class="n">NmrChain</span>
 
     <span class="n">className</span> <span class="o">=</span> <span class="s1">&#39;NmrResidueTableModule&#39;</span>
 
     <span class="c1"># we are subclassing this Module, hence some more arguments to the init</span>
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mainWindow</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;NmrResidue Table&#39;</span><span class="p">,</span>
-                 <span class="n">nmrChain</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">selectFirstItem</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mainWindow</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;NmrResidue Table&#39;</span><span class="p">,</span>
+                 <span class="n">nmrChain</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">selectFirstItem</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Initialise the Module widgets</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">mainWindow</span><span class="o">=</span><span class="n">mainWindow</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">mainWindow</span><span class="o">=</span><span class="n">mainWindow</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
 
         <span class="c1"># Derive application, project, and current from mainWindow</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span> <span class="o">=</span> <span class="n">mainWindow</span>
@@ -141,9 +131,9 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">project</span> <span class="o">=</span> <span class="n">mainWindow</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">project</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">current</span> <span class="o">=</span> <span class="n">mainWindow</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">current</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">application</span> <span class="o">=</span> <span class="bp">None</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">project</span> <span class="o">=</span> <span class="bp">None</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">current</span> <span class="o">=</span> <span class="bp">None</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">application</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">project</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">current</span> <span class="o">=</span> <span class="kc">None</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">nmrResidueTableSettings</span> <span class="o">=</span> <span class="n">StripPlot</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">settingsWidget</span><span class="p">,</span> <span class="n">mainWindow</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span><span class="p">,</span>
                                                  <span class="n">includeDisplaySettings</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">includeDisplaySettings</span><span class="p">,</span>
@@ -157,12 +147,12 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">nmrResidueTable</span> <span class="o">=</span> <span class="n">NmrResidueTable</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">mainWidget</span><span class="p">,</span>
                                                <span class="n">mainWindow</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span><span class="p">,</span>
                                                <span class="n">moduleParent</span><span class="o">=</span><span class="bp">self</span><span class="p">,</span>
-                                               <span class="n">setLayout</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+                                               <span class="n">setLayout</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
                                                <span class="n">actionCallback</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">navigateToNmrResidueCallBack</span><span class="p">,</span>
-                                               <span class="n">multiSelect</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+                                               <span class="n">multiSelect</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
                                                <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
 
-        <span class="k">if</span> <span class="n">nmrChain</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">nmrChain</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">selectNmrChain</span><span class="p">(</span><span class="n">nmrChain</span><span class="p">)</span>
         <span class="k">elif</span> <span class="n">selectFirstItem</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">nmrResidueTable</span><span class="o">.</span><span class="n">ncWidget</span><span class="o">.</span><span class="n">selectFirstItem</span><span class="p">()</span>
@@ -179,7 +169,7 @@
         <span class="c1"># put these in a smaller additional class</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">activePulldownClass</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">nmrResidueTable</span><span class="o">.</span><span class="n">_activePulldownClass</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">activePulldownClass</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">nmrResidueTable</span><span class="o">.</span><span class="n">_activeCheckbox</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nmrResidueTableSettings</span><span class="p">,</span> <span class="n">LINKTOPULLDOWNCLASS</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">nmrResidueTable</span><span class="o">.</span><span class="n">_activeCheckbox</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nmrResidueTableSettings</span><span class="p">,</span> <span class="n">LINKTOPULLDOWNCLASS</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_maximise</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -193,7 +183,7 @@
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">activePulldownClass</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">nmrResidueTable</span><span class="o">.</span><span class="n">_activeCheckbox</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">nmrResidueTable</span><span class="o">.</span><span class="n">_activeCheckbox</span><span class="o">.</span><span class="n">isChecked</span><span class="p">():</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">selectNmrChain</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">nmrChain</span><span class="p">)</span>
 
-<div class="viewcode-block" id="NmrResidueTableModule.selectNmrChain"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.modules.NmrResidueTable.NmrResidueTableModule.selectNmrChain">[docs]</a>    <span class="k">def</span> <span class="nf">selectNmrChain</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nmrChain</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+<div class="viewcode-block" id="NmrResidueTableModule.selectNmrChain"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.modules.NmrResidueTable.NmrResidueTableModule.selectNmrChain">[docs]</a>    <span class="k">def</span> <span class="nf">selectNmrChain</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nmrChain</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Manually select an NmrChain from the pullDown</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -235,7 +225,7 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="n">nmrResidue</span> <span class="o">=</span> <span class="n">objs</span>
 
-        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;nmrResidue=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">nmrResidue</span><span class="o">.</span><span class="n">id</span> <span class="k">if</span> <span class="n">nmrResidue</span> <span class="k">else</span> <span class="bp">None</span><span class="p">))</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;nmrResidue=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">nmrResidue</span><span class="o">.</span><span class="n">id</span> <span class="k">if</span> <span class="n">nmrResidue</span> <span class="k">else</span> <span class="kc">None</span><span class="p">))</span>
 
         <span class="n">displays</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getDisplays</span><span class="p">()</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">displays</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">nmrResidueTableSettings</span><span class="o">.</span><span class="n">displaysWidget</span><span class="p">:</span>
@@ -260,7 +250,7 @@
                                               <span class="n">nmrResidue</span><span class="o">.</span><span class="n">nmrAtoms</span><span class="p">,</span>
                                               <span class="n">widths</span><span class="o">=</span><span class="n">newWidths</span><span class="p">,</span>
                                               <span class="n">markPositions</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">nmrResidueTableSettings</span><span class="o">.</span><span class="n">markPositionsWidget</span><span class="o">.</span><span class="n">checkBox</span><span class="o">.</span><span class="n">isChecked</span><span class="p">(),</span>
-                                              <span class="n">setNmrResidueLabel</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+                                              <span class="n">setNmrResidueLabel</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
                 <span class="k">else</span><span class="p">:</span>
                     <span class="c1">#navigate to the specDisplay (and remove excess strips)</span>
@@ -277,7 +267,7 @@
                 <span class="k">for</span> <span class="n">strip</span> <span class="ow">in</span> <span class="n">specDisplay</span><span class="o">.</span><span class="n">strips</span><span class="p">:</span>
                     <span class="k">if</span> <span class="n">strip</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">strip</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">strip</span><span class="o">.</span><span class="n">header</span><span class="o">.</span><span class="n">headerVisible</span><span class="p">:</span>
                         <span class="n">strip</span><span class="o">.</span><span class="n">header</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span>
-                        <span class="n">strip</span><span class="o">.</span><span class="n">header</span><span class="o">.</span><span class="n">headerVisible</span> <span class="o">=</span> <span class="bp">True</span></div>
+                        <span class="n">strip</span><span class="o">.</span><span class="n">header</span><span class="o">.</span><span class="n">headerVisible</span> <span class="o">=</span> <span class="kc">True</span></div>
 
             <span class="c1"># # navigate the displays</span>
             <span class="c1"># for display in displays:</span>
@@ -302,8 +292,8 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_closeModule</span><span class="p">()</span></div>
 
-    <span class="nd">@staticmethod</span>  <span class="c1"># has to be a static method</span>
-<div class="viewcode-block" id="NmrResidueTableModule.onDestroyed"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.modules.NmrResidueTable.NmrResidueTableModule.onDestroyed">[docs]</a>    <span class="k">def</span> <span class="nf">onDestroyed</span><span class="p">(</span><span class="n">widget</span><span class="p">):</span>
+<div class="viewcode-block" id="NmrResidueTableModule.onDestroyed"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.modules.NmrResidueTable.NmrResidueTableModule.onDestroyed">[docs]</a>    <span class="nd">@staticmethod</span>  <span class="c1"># has to be a static method</span>
+    <span class="k">def</span> <span class="nf">onDestroyed</span><span class="p">(</span><span class="n">widget</span><span class="p">):</span>
         <span class="c1"># print(&quot;DEBUG on destroyed:&quot;, widget)</span>
         <span class="n">widget</span><span class="o">.</span><span class="n">self</span><span class="o">.</span><span class="n">nmrResidueTable</span><span class="o">.</span><span class="n">_close</span><span class="p">()</span>
         <span class="n">widget</span><span class="o">.</span><span class="n">nmrResidueTableSettings</span><span class="o">.</span><span class="n">_cleanupWidget</span><span class="p">()</span></div>
@@ -331,7 +321,7 @@
             <span class="k">return</span> <span class="n">_getNmrIndex</span><span class="p">(</span><span class="n">nmrRes</span><span class="p">)</span>
             <span class="c1"># return nmrRes.nmrChain.nmrResidues.index(nmrRes)                # ED: THIS IS VERY SLOW</span>
         <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">es</span><span class="p">:</span>
-            <span class="k">return</span> <span class="bp">None</span>
+            <span class="k">return</span> <span class="kc">None</span>
 
     <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">_nmrLamInt</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
@@ -341,10 +331,10 @@
         <span class="k">try</span><span class="p">:</span>
             <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="n">name</span><span class="p">))</span>
         <span class="k">except</span><span class="p">:</span>
-            <span class="k">return</span> <span class="bp">None</span>
+            <span class="k">return</span> <span class="kc">None</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">mainWindow</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">moduleParent</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">actionCallback</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">selectionCallback</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
-                 <span class="n">checkBoxCallback</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">nmrChain</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">multiSelect</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">mainWindow</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">moduleParent</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">actionCallback</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">selectionCallback</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="n">checkBoxCallback</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">_pulldownKwds</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">nmrChain</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">multiSelect</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
                  <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Initialise the widgets for the module. kwds passed to the scrollArea widget</span>
@@ -356,53 +346,57 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">project</span> <span class="o">=</span> <span class="n">mainWindow</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">project</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">current</span> <span class="o">=</span> <span class="n">mainWindow</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">current</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">application</span> <span class="o">=</span> <span class="bp">None</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">project</span> <span class="o">=</span> <span class="bp">None</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">current</span> <span class="o">=</span> <span class="bp">None</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">application</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">project</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">current</span> <span class="o">=</span> <span class="kc">None</span>
 
         <span class="c1"># strange, need to do this when using scrollArea, but not a Widget</span>
         <span class="n">parent</span><span class="o">.</span><span class="n">getLayout</span><span class="p">()</span><span class="o">.</span><span class="n">setHorizontalSpacing</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_widgetScrollArea</span> <span class="o">=</span> <span class="n">ScrollArea</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="n">parent</span><span class="p">,</span> <span class="n">scrollBarPolicies</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;never&#39;</span><span class="p">,</span> <span class="s1">&#39;never&#39;</span><span class="p">),</span> <span class="o">**</span><span class="n">kwds</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_widgetScrollArea</span><span class="o">.</span><span class="n">setWidgetResizable</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_widget</span> <span class="o">=</span> <span class="n">Widget</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_widgetScrollArea</span><span class="p">,</span> <span class="n">setLayout</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_widgetScrollArea</span><span class="o">.</span><span class="n">setWidgetResizable</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_widgetScrollArea</span><span class="o">.</span><span class="n">setStyleSheet</span><span class="p">(</span><span class="s1">&#39;&#39;&#39;</span>
+<span class="s1">                                    margin-left : 2px;</span>
+<span class="s1">                                    margin-right : 2px;</span>
+<span class="s1">                                    padding : 2px&#39;&#39;&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_widget</span> <span class="o">=</span> <span class="n">Widget</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_widgetScrollArea</span><span class="p">,</span> <span class="n">setLayout</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_widgetScrollArea</span><span class="o">.</span><span class="n">setWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_widget</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_widget</span><span class="o">.</span><span class="n">setSizePolicy</span><span class="p">(</span><span class="n">QtWidgets</span><span class="o">.</span><span class="n">QSizePolicy</span><span class="o">.</span><span class="n">MinimumExpanding</span><span class="p">,</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QSizePolicy</span><span class="o">.</span><span class="n">Expanding</span><span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">_nmrChain</span> <span class="o">=</span> <span class="bp">None</span>
-        <span class="k">if</span> <span class="n">actionCallback</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_nmrChain</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="n">actionCallback</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">actionCallback</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">defaultActionCallback</span>
 
         <span class="n">NmrResidueTable</span><span class="o">.</span><span class="n">project</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span>
 
         <span class="c1"># create the column objects</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">NMRcolumns</span> <span class="o">=</span> <span class="n">ColumnClass</span><span class="p">([</span>
-            <span class="p">(</span><span class="s1">&#39;#&#39;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">nmrResidue</span><span class="p">:</span> <span class="n">nmrResidue</span><span class="o">.</span><span class="n">serial</span><span class="p">,</span> <span class="s1">&#39;NmrResidue serial number&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span>
-            <span class="p">(</span><span class="s1">&#39;Index&#39;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">nmrResidue</span><span class="p">:</span> <span class="n">NmrResidueTable</span><span class="o">.</span><span class="n">_nmrIndex</span><span class="p">(</span><span class="n">nmrResidue</span><span class="p">),</span> <span class="s1">&#39;Index of NmrResidue in the NmrChain&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span>
-            <span class="c1"># (&#39;Index&#39;, lambda nmrResidue: NmrResidueTable._nmrLamInt(nmrResidue, &#39;Index&#39;), &#39;Index of NmrResidue in the NmrChain&#39;, None),</span>
+            <span class="p">(</span><span class="s1">&#39;#&#39;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">nmrResidue</span><span class="p">:</span> <span class="n">nmrResidue</span><span class="o">.</span><span class="n">serial</span><span class="p">,</span> <span class="s1">&#39;NmrResidue serial number&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
+            <span class="p">(</span><span class="s1">&#39;Index&#39;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">nmrResidue</span><span class="p">:</span> <span class="n">NmrResidueTable</span><span class="o">.</span><span class="n">_nmrIndex</span><span class="p">(</span><span class="n">nmrResidue</span><span class="p">),</span> <span class="s1">&#39;Index of NmrResidue in the NmrChain&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
+            <span class="c1"># (&#39;Index&#39;, lambda nmrResidue: NmrResidueTable._nmrLamInt(nmrResidue, &#39;Index&#39;), &#39;Index of NmrResidue in the NmrChain&#39;, None, None),</span>
 
-            <span class="c1"># (&#39;Index&#39;,      lambda nmrResidue: nmrResidue.nmrChain.nmrResidues.index(nmrResidue), &#39;Index of NmrResidue in the NmrChain&#39;, None),</span>
-            <span class="c1"># (&#39;NmrChain&#39;,   lambda nmrResidue: nmrResidue.nmrChain.id, &#39;NmrChain id&#39;, None),</span>
-            <span class="p">(</span><span class="s1">&#39;Pid&#39;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">nmrResidue</span><span class="p">:</span> <span class="n">nmrResidue</span><span class="o">.</span><span class="n">pid</span><span class="p">,</span> <span class="s1">&#39;Pid of NmrResidue&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span>
-            <span class="p">(</span><span class="s1">&#39;_object&#39;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">nmrResidue</span><span class="p">:</span> <span class="n">nmrResidue</span><span class="p">,</span> <span class="s1">&#39;Object&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span>
-            <span class="p">(</span><span class="s1">&#39;NmrChain&#39;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">nmrResidue</span><span class="p">:</span> <span class="n">nmrResidue</span><span class="o">.</span><span class="n">nmrChain</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="s1">&#39;NmrChain containing the nmrResidue&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span>        <span class="c1"># just add the nmrChain for clarity</span>
-            <span class="p">(</span><span class="s1">&#39;Sequence&#39;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">nmrResidue</span><span class="p">:</span> <span class="n">nmrResidue</span><span class="o">.</span><span class="n">sequenceCode</span><span class="p">,</span> <span class="s1">&#39;Sequence code of NmrResidue&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span>
-            <span class="p">(</span><span class="s1">&#39;Type&#39;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">nmrResidue</span><span class="p">:</span> <span class="n">nmrResidue</span><span class="o">.</span><span class="n">residueType</span><span class="p">,</span> <span class="s1">&#39;NmrResidue type&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span>
-            <span class="p">(</span><span class="s1">&#39;NmrAtoms&#39;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">nmrResidue</span><span class="p">:</span> <span class="n">NmrResidueTable</span><span class="o">.</span><span class="n">_getNmrAtomNames</span><span class="p">(</span><span class="n">nmrResidue</span><span class="p">),</span> <span class="s1">&#39;NmrAtoms in NmrResidue&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span>
+            <span class="c1"># (&#39;Index&#39;,      lambda nmrResidue: nmrResidue.nmrChain.nmrResidues.index(nmrResidue), &#39;Index of NmrResidue in the NmrChain&#39;, None, None),</span>
+            <span class="c1"># (&#39;NmrChain&#39;,   lambda nmrResidue: nmrResidue.nmrChain.id, &#39;NmrChain id&#39;, None, None),</span>
+            <span class="p">(</span><span class="s1">&#39;Pid&#39;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">nmrResidue</span><span class="p">:</span> <span class="n">nmrResidue</span><span class="o">.</span><span class="n">pid</span><span class="p">,</span> <span class="s1">&#39;Pid of NmrResidue&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
+            <span class="p">(</span><span class="s1">&#39;_object&#39;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">nmrResidue</span><span class="p">:</span> <span class="n">nmrResidue</span><span class="p">,</span> <span class="s1">&#39;Object&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
+            <span class="p">(</span><span class="s1">&#39;NmrChain&#39;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">nmrResidue</span><span class="p">:</span> <span class="n">nmrResidue</span><span class="o">.</span><span class="n">nmrChain</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="s1">&#39;NmrChain containing the nmrResidue&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>        <span class="c1"># just add the nmrChain for clarity</span>
+            <span class="p">(</span><span class="s1">&#39;Sequence&#39;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">nmrResidue</span><span class="p">:</span> <span class="n">nmrResidue</span><span class="o">.</span><span class="n">sequenceCode</span><span class="p">,</span> <span class="s1">&#39;Sequence code of NmrResidue&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
+            <span class="p">(</span><span class="s1">&#39;Type&#39;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">nmrResidue</span><span class="p">:</span> <span class="n">nmrResidue</span><span class="o">.</span><span class="n">residueType</span><span class="p">,</span> <span class="s1">&#39;NmrResidue type&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
+            <span class="p">(</span><span class="s1">&#39;NmrAtoms&#39;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">nmrResidue</span><span class="p">:</span> <span class="n">NmrResidueTable</span><span class="o">.</span><span class="n">_getNmrAtomNames</span><span class="p">(</span><span class="n">nmrResidue</span><span class="p">),</span> <span class="s1">&#39;NmrAtoms in NmrResidue&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
             <span class="p">(</span><span class="s1">&#39;Peak count&#39;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">nmrResidue</span><span class="p">:</span> <span class="s1">&#39;</span><span class="si">%3d</span><span class="s1"> &#39;</span> <span class="o">%</span> <span class="n">NmrResidueTable</span><span class="o">.</span><span class="n">_getNmrResiduePeakCount</span><span class="p">(</span><span class="n">nmrResidue</span><span class="p">),</span>
-             <span class="s1">&#39;Number of peaks assigned to NmrResidue&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span>
+             <span class="s1">&#39;Number of peaks assigned to NmrResidue&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
             <span class="p">(</span><span class="s1">&#39;Comment&#39;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">nmr</span><span class="p">:</span> <span class="n">NmrResidueTable</span><span class="o">.</span><span class="n">_getCommentText</span><span class="p">(</span><span class="n">nmr</span><span class="p">),</span> <span class="s1">&#39;Notes&#39;</span><span class="p">,</span>
-             <span class="k">lambda</span> <span class="n">nmr</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">NmrResidueTable</span><span class="o">.</span><span class="n">_setComment</span><span class="p">(</span><span class="n">nmr</span><span class="p">,</span> <span class="n">value</span><span class="p">))</span>
+             <span class="k">lambda</span> <span class="n">nmr</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">NmrResidueTable</span><span class="o">.</span><span class="n">_setComment</span><span class="p">(</span><span class="n">nmr</span><span class="p">,</span> <span class="n">value</span><span class="p">),</span> <span class="kc">None</span><span class="p">)</span>
             <span class="p">])</span>
 
-        <span class="n">selectionCallback</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_selectionCallback</span> <span class="k">if</span> <span class="n">selectionCallback</span> <span class="ow">is</span> <span class="bp">None</span> <span class="k">else</span> <span class="n">selectionCallback</span>
+        <span class="n">selectionCallback</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_selectionCallback</span> <span class="k">if</span> <span class="n">selectionCallback</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">selectionCallback</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">spacer</span> <span class="o">=</span> <span class="n">Spacer</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_widget</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span>
                              <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QSizePolicy</span><span class="o">.</span><span class="n">Fixed</span><span class="p">,</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QSizePolicy</span><span class="o">.</span><span class="n">Fixed</span><span class="p">,</span>
                              <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">gridSpan</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">ncWidget</span> <span class="o">=</span> <span class="n">NmrChainPulldown</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_widget</span><span class="p">,</span>
-                                         <span class="n">project</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>  <span class="c1">#first NmrChain in project (if present)</span>
+                                         <span class="n">mainWindow</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>  <span class="c1">#first NmrChain in project (if present)</span>
                                          <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">gridSpan</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">minimumWidths</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">100</span><span class="p">),</span>
-                                         <span class="n">showSelectName</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+                                         <span class="n">showSelectName</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
                                          <span class="n">sizeAdjustPolicy</span><span class="o">=</span><span class="n">QtWidgets</span><span class="o">.</span><span class="n">QComboBox</span><span class="o">.</span><span class="n">AdjustToContents</span><span class="p">,</span>
                                          <span class="n">callback</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_selectionPulldownCallback</span>
                                          <span class="p">)</span>
@@ -413,26 +407,27 @@
 
         <span class="c1"># initialise the currently attached dataFrame</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_hiddenColumns</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Pid&#39;</span><span class="p">,</span> <span class="s1">&#39;NmrChain&#39;</span><span class="p">]</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">dataFrameObject</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dataFrameObject</span> <span class="o">=</span> <span class="kc">None</span>
 
         <span class="c1"># initialise the table</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="n">parent</span><span class="p">,</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="n">parent</span><span class="p">,</span>
                          <span class="n">mainWindow</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span><span class="p">,</span>
-                         <span class="n">dataFrameObject</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
-                         <span class="n">setLayout</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
-                         <span class="n">autoResize</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">multiSelect</span><span class="o">=</span><span class="n">multiSelect</span><span class="p">,</span>
+                         <span class="n">dataFrameObject</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                         <span class="n">setLayout</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                         <span class="n">autoResize</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">multiSelect</span><span class="o">=</span><span class="n">multiSelect</span><span class="p">,</span>
                          <span class="n">actionCallback</span><span class="o">=</span><span class="n">actionCallback</span><span class="p">,</span>
                          <span class="n">selectionCallback</span><span class="o">=</span><span class="n">selectionCallback</span><span class="p">,</span>
                          <span class="n">checkBoxCallback</span><span class="o">=</span><span class="n">checkBoxCallback</span><span class="p">,</span>
+                         <span class="n">_pulldownKwds</span><span class="o">=</span><span class="n">_pulldownKwds</span><span class="p">,</span>
                          <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">gridSpan</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">6</span><span class="p">),</span>
-                         <span class="n">enableDelete</span><span class="o">=</span><span class="bp">True</span>
+                         <span class="n">enableDelete</span><span class="o">=</span><span class="kc">True</span>
                          <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">moduleParent</span> <span class="o">=</span> <span class="n">moduleParent</span>
 
         <span class="c1"># Notifier object to update the table if the peaks change</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_peakNotifier</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_peakNotifier</span> <span class="o">=</span> <span class="kc">None</span>
 
-        <span class="k">if</span> <span class="n">nmrChain</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">nmrChain</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_selectNmrChain</span><span class="p">(</span><span class="n">nmrChain</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">setTableNotifiers</span><span class="p">(</span><span class="n">tableClass</span><span class="o">=</span><span class="n">NmrChain</span><span class="p">,</span>
@@ -453,8 +448,8 @@
                                            <span class="bp">self</span><span class="o">.</span><span class="n">_processDroppedItems</span><span class="p">)</span>
 
         <span class="c1"># put into subclass</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_activePulldownClass</span> <span class="o">=</span> <span class="bp">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_activeCheckbox</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_activePulldownClass</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_activeCheckbox</span> <span class="o">=</span> <span class="kc">None</span>
 
     <span class="k">def</span> <span class="nf">_processDroppedItems</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -473,7 +468,7 @@
         <span class="n">widget</span><span class="o">.</span><span class="n">setFixedSize</span><span class="p">(</span><span class="n">widget</span><span class="o">.</span><span class="n">sizeHint</span><span class="p">())</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_widget</span><span class="o">.</span><span class="n">setFixedSize</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_widget</span><span class="o">.</span><span class="n">sizeHint</span><span class="p">())</span></div>
 
-<div class="viewcode-block" id="NmrResidueTable.addWidgetToPos"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.modules.NmrResidueTable.NmrResidueTable.addWidgetToPos">[docs]</a>    <span class="k">def</span> <span class="nf">addWidgetToPos</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">widget</span><span class="p">,</span> <span class="n">row</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">col</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">rowSpan</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">colSpan</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">overrideMinimum</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+<div class="viewcode-block" id="NmrResidueTable.addWidgetToPos"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.modules.NmrResidueTable.NmrResidueTable.addWidgetToPos">[docs]</a>    <span class="k">def</span> <span class="nf">addWidgetToPos</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">widget</span><span class="p">,</span> <span class="n">row</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">col</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">rowSpan</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">colSpan</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">overrideMinimum</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Convenience to add a widget to the top of the table; col &gt;= 2</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -486,11 +481,11 @@
     <span class="k">def</span> <span class="nf">_setWidgetHeight</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">height</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_widgetScrollArea</span><span class="o">.</span><span class="n">setFixedHeight</span><span class="p">(</span><span class="n">height</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">_selectNmrChain</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nmrChain</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_selectNmrChain</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nmrChain</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Manually select a NmrChain from the pullDown</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="n">nmrChain</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">nmrChain</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="c1"># logger.warning(&#39;select: No NmrChain selected&#39;)</span>
             <span class="c1"># raise ValueError(&#39;select: No NmrChain selected&#39;)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">ncWidget</span><span class="o">.</span><span class="n">selectFirstItem</span><span class="p">()</span>
@@ -504,23 +499,25 @@
                         <span class="bp">self</span><span class="o">.</span><span class="n">_nmrChain</span> <span class="o">=</span> <span class="n">nmrChain</span>
                         <span class="bp">self</span><span class="o">.</span><span class="n">ncWidget</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_nmrChain</span><span class="o">.</span><span class="n">pid</span><span class="p">)</span>
 
-<div class="viewcode-block" id="NmrResidueTable.defaultActionCallback"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.modules.NmrResidueTable.NmrResidueTable.defaultActionCallback">[docs]</a>    <span class="k">def</span> <span class="nf">defaultActionCallback</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nmrResidue</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
+<div class="viewcode-block" id="NmrResidueTable.defaultActionCallback"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.modules.NmrResidueTable.NmrResidueTable.defaultActionCallback">[docs]</a>    <span class="k">def</span> <span class="nf">defaultActionCallback</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        default Action Callback if not defined in the parent Module</span>
 <span class="sd">        If current strip contains the double clicked nmrResidue will navigateToPositionInStrip</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="kn">from</span> <span class="nn">ccpn.ui.gui.lib.Strip</span> <span class="kn">import</span> <span class="n">navigateToPositionInStrip</span><span class="p">,</span> <span class="n">_getCurrentZoomRatio</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">clearMarks</span><span class="p">()</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">strip</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">nmrResidue</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">Notifier</span><span class="o">.</span><span class="n">OBJECT</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">strip</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">clearMarks</span><span class="p">()</span>
             <span class="n">strip</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">strip</span>
             <span class="n">newWidths</span> <span class="o">=</span> <span class="n">_getCurrentZoomRatio</span><span class="p">(</span><span class="n">strip</span><span class="o">.</span><span class="n">viewRange</span><span class="p">())</span>
             <span class="n">navigateToNmrResidueInDisplay</span><span class="p">(</span><span class="n">nmrResidue</span><span class="p">,</span> <span class="n">strip</span><span class="o">.</span><span class="n">spectrumDisplay</span><span class="p">,</span> <span class="n">stripIndex</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
-                                          <span class="n">widths</span><span class="o">=</span><span class="bp">None</span><span class="p">)</span>
+                                          <span class="n">widths</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
             <span class="c1"># widths=[&#39;default&#39;] * len(strip.axisCodes))</span>
 
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;Impossible to navigate to peak position. Set a current strip first&#39;</span><span class="p">)</span></div>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;Impossible to navigate to position. Set a current strip first&#39;</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="NmrResidueTable.displayTableForNmrChain"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.modules.NmrResidueTable.NmrResidueTable.displayTableForNmrChain">[docs]</a>    <span class="k">def</span> <span class="nf">displayTableForNmrChain</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nmrChain</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -680,7 +677,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_nmrChain</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">getByPid</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;&gt;selectionPulldownCallback&gt;&#39;</span><span class="p">,</span> <span class="n">item</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="n">item</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">_nmrChain</span><span class="p">)</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_nmrChain</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_nmrChain</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">displayTableForNmrChain</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_nmrChain</span><span class="p">)</span>
 
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_activePulldownClass</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_activeCheckbox</span> <span class="ow">and</span> \
@@ -825,37 +822,38 @@
   <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">  Custom nmrResidue Table with extra columns used in the ChemicalShiftsMapping Module</span>
 <span class="sd">  &quot;&quot;&quot;</span>
-  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">mainWindow</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">moduleParent</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">actionCallback</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">selectionCallback</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
-               <span class="n">checkBoxCallback</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">nmrChain</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
+  <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">mainWindow</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">moduleParent</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">actionCallback</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">selectionCallback</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+               <span class="n">checkBoxCallback</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">nmrChain</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
 
-    <span class="n">NmrResidueTable</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="n">parent</span><span class="p">,</span> <span class="n">mainWindow</span><span class="o">=</span><span class="n">mainWindow</span><span class="p">,</span>
+    <span class="n">NmrResidueTable</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="n">parent</span><span class="p">,</span> <span class="n">mainWindow</span><span class="o">=</span><span class="n">mainWindow</span><span class="p">,</span>
                              <span class="n">moduleParent</span><span class="o">=</span><span class="n">moduleParent</span><span class="p">,</span>
                              <span class="n">actionCallback</span><span class="o">=</span><span class="n">actionCallback</span><span class="p">,</span>
                              <span class="n">selectionCallback</span><span class="o">=</span><span class="n">selectionCallback</span><span class="p">,</span>
                              <span class="n">checkBoxCallback</span> <span class="o">=</span> <span class="n">checkBoxCallback</span><span class="p">,</span>
                              <span class="n">nmrChain</span><span class="o">=</span><span class="n">nmrChain</span><span class="p">,</span>
-                             <span class="n">multiSelect</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+                             <span class="n">multiSelect</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
                              <span class="o">**</span><span class="n">kwds</span><span class="p">)</span>
 
     <span class="bp">self</span><span class="o">.</span><span class="n">NMRcolumns</span> <span class="o">=</span> <span class="n">ColumnClass</span><span class="p">([</span>
-        <span class="p">(</span><span class="s1">&#39;#&#39;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">nmrResidue</span><span class="p">:</span> <span class="n">nmrResidue</span><span class="o">.</span><span class="n">serial</span><span class="p">,</span> <span class="s1">&#39;NmrResidue serial number&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span>
-        <span class="p">(</span><span class="s1">&#39;Pid&#39;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">nmrResidue</span><span class="p">:</span><span class="n">nmrResidue</span><span class="o">.</span><span class="n">pid</span><span class="p">,</span> <span class="s1">&#39;Pid of NmrResidue&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span>
-        <span class="p">(</span><span class="s1">&#39;_object&#39;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">nmrResidue</span><span class="p">:</span><span class="n">nmrResidue</span><span class="p">,</span> <span class="s1">&#39;Object&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span>
-        <span class="p">(</span><span class="s1">&#39;Index&#39;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">nmrResidue</span><span class="p">:</span> <span class="n">NmrResidueTable</span><span class="o">.</span><span class="n">_nmrIndex</span><span class="p">(</span><span class="n">nmrResidue</span><span class="p">),</span> <span class="s1">&#39;Index of NmrResidue in the NmrChain&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span>
-        <span class="p">(</span><span class="s1">&#39;Sequence&#39;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">nmrResidue</span><span class="p">:</span> <span class="n">nmrResidue</span><span class="o">.</span><span class="n">sequenceCode</span><span class="p">,</span> <span class="s1">&#39;Sequence code of NmrResidue&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span>
-        <span class="p">(</span><span class="s1">&#39;Type&#39;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">nmrResidue</span><span class="p">:</span> <span class="n">nmrResidue</span><span class="o">.</span><span class="n">residueType</span><span class="p">,</span> <span class="s1">&#39;NmrResidue type&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span>
-        <span class="p">(</span><span class="s1">&#39;Selected&#39;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">nmrResidue</span><span class="p">:</span> <span class="n">_CSMNmrResidueTable</span><span class="o">.</span><span class="n">_getSelectedNmrAtomNames</span><span class="p">(</span><span class="n">nmrResidue</span><span class="p">),</span> <span class="s1">&#39;NmrAtoms selected in NmrResidue&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span>
+        <span class="p">(</span><span class="s1">&#39;#&#39;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">nmrResidue</span><span class="p">:</span> <span class="n">nmrResidue</span><span class="o">.</span><span class="n">serial</span><span class="p">,</span> <span class="s1">&#39;NmrResidue serial number&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
+        <span class="p">(</span><span class="s1">&#39;Pid&#39;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">nmrResidue</span><span class="p">:</span><span class="n">nmrResidue</span><span class="o">.</span><span class="n">pid</span><span class="p">,</span> <span class="s1">&#39;Pid of NmrResidue&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
+        <span class="p">(</span><span class="s1">&#39;_object&#39;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">nmrResidue</span><span class="p">:</span><span class="n">nmrResidue</span><span class="p">,</span> <span class="s1">&#39;Object&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
+        <span class="p">(</span><span class="s1">&#39;Index&#39;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">nmrResidue</span><span class="p">:</span> <span class="n">NmrResidueTable</span><span class="o">.</span><span class="n">_nmrIndex</span><span class="p">(</span><span class="n">nmrResidue</span><span class="p">),</span> <span class="s1">&#39;Index of NmrResidue in the NmrChain&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
+        <span class="p">(</span><span class="s1">&#39;Sequence&#39;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">nmrResidue</span><span class="p">:</span> <span class="n">nmrResidue</span><span class="o">.</span><span class="n">sequenceCode</span><span class="p">,</span> <span class="s1">&#39;Sequence code of NmrResidue&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
+        <span class="p">(</span><span class="s1">&#39;Type&#39;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">nmrResidue</span><span class="p">:</span> <span class="n">nmrResidue</span><span class="o">.</span><span class="n">residueType</span><span class="p">,</span> <span class="s1">&#39;NmrResidue type&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
+        <span class="p">(</span><span class="s1">&#39;Selected&#39;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">nmrResidue</span><span class="p">:</span> <span class="n">_CSMNmrResidueTable</span><span class="o">.</span><span class="n">_getSelectedNmrAtomNames</span><span class="p">(</span><span class="n">nmrResidue</span><span class="p">),</span> <span class="s1">&#39;NmrAtoms selected in NmrResidue&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
         <span class="p">(</span><span class="s1">&#39;Spectra&#39;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">nmrResidue</span><span class="p">:</span> <span class="n">_CSMNmrResidueTable</span><span class="o">.</span><span class="n">_getNmrResidueSpectraCount</span><span class="p">(</span><span class="n">nmrResidue</span><span class="p">)</span>
-         <span class="p">,</span> <span class="s1">&#39;Number of spectra selected for calculating the deltas&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span>
-        <span class="p">(</span><span class="n">Deltas</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">nmrResidue</span><span class="p">:</span> <span class="n">nmrResidue</span><span class="o">.</span><span class="n">_delta</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span>
-        <span class="p">(</span><span class="n">KD</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">nmrResidue</span><span class="p">:</span> <span class="n">nmrResidue</span><span class="o">.</span><span class="n">_estimatedKd</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span>
-        <span class="p">(</span><span class="s1">&#39;Include&#39;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">nmrResidue</span><span class="p">:</span> <span class="n">nmrResidue</span><span class="o">.</span><span class="n">_includeInDeltaShift</span><span class="p">,</span> <span class="s1">&#39;Include this residue in the Mapping calculation&#39;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">nmr</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">_CSMNmrResidueTable</span><span class="o">.</span><span class="n">_setChecked</span><span class="p">(</span><span class="n">nmr</span><span class="p">,</span> <span class="n">value</span><span class="p">)),</span>
-        <span class="c1"># (&#39;Flag&#39;, lambda nmrResidue: nmrResidue._flag,  &#39;&#39;,  None),</span>
-        <span class="p">(</span><span class="s1">&#39;Comment&#39;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">nmr</span><span class="p">:</span> <span class="n">NmrResidueTable</span><span class="o">.</span><span class="n">_getCommentText</span><span class="p">(</span><span class="n">nmr</span><span class="p">),</span> <span class="s1">&#39;Notes&#39;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">nmr</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">NmrResidueTable</span><span class="o">.</span><span class="n">_setComment</span><span class="p">(</span><span class="n">nmr</span><span class="p">,</span> <span class="n">value</span><span class="p">))</span>
-      <span class="p">])</span>        <span class="c1">#[Column(colName, func, tipText=tipText, setEditValue=editValue) for colName, func, tipText, editValue in self.columnDefs]</span>
+         <span class="p">,</span> <span class="s1">&#39;Number of spectra selected for calculating the deltas&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
+        <span class="p">(</span><span class="n">Deltas</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">nmrResidue</span><span class="p">:</span> <span class="n">nmrResidue</span><span class="o">.</span><span class="n">_delta</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
+        <span class="p">(</span><span class="n">KD</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">nmrResidue</span><span class="p">:</span> <span class="n">nmrResidue</span><span class="o">.</span><span class="n">_estimatedKd</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
+        <span class="p">(</span><span class="s1">&#39;Include&#39;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">nmrResidue</span><span class="p">:</span> <span class="n">nmrResidue</span><span class="o">.</span><span class="n">_includeInDeltaShift</span><span class="p">,</span> <span class="s1">&#39;Include this residue in the Mapping calculation&#39;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">nmr</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">_CSMNmrResidueTable</span><span class="o">.</span><span class="n">_setChecked</span><span class="p">(</span><span class="n">nmr</span><span class="p">,</span> <span class="n">value</span><span class="p">),</span> <span class="kc">None</span><span class="p">),</span>
+        <span class="c1"># (&#39;Flag&#39;, lambda nmrResidue: nmrResidue._flag,  &#39;&#39;,  None, None),</span>
+        <span class="p">(</span><span class="s1">&#39;Comment&#39;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">nmr</span><span class="p">:</span> <span class="n">NmrResidueTable</span><span class="o">.</span><span class="n">_getCommentText</span><span class="p">(</span><span class="n">nmr</span><span class="p">),</span> <span class="s1">&#39;Notes&#39;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">nmr</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">NmrResidueTable</span><span class="o">.</span><span class="n">_setComment</span><span class="p">(</span><span class="n">nmr</span><span class="p">,</span> <span class="n">value</span><span class="p">),</span> <span class="kc">None</span><span class="p">)</span>
+      <span class="p">])</span>        <span class="c1">#[Column(colName, func, tipText=tipText, setEditValue=editValue, format=columnFormat)</span>
+                <span class="c1"># for colName, func, tipText, editValue, columnFormat in self.columnDefs]</span>
 
     <span class="bp">self</span><span class="o">.</span><span class="n">_widget</span><span class="o">.</span><span class="n">setFixedHeight</span><span class="p">(</span><span class="mi">45</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">chemicalShiftsMappingModule</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">chemicalShiftsMappingModule</span> <span class="o">=</span> <span class="kc">None</span>
 
 
   <span class="nd">@staticmethod</span>
@@ -876,7 +874,7 @@
     <span class="k">try</span><span class="p">:</span>
       <span class="k">return</span> <span class="n">nmrResidue</span><span class="o">.</span><span class="n">spectraCount</span>
     <span class="k">except</span><span class="p">:</span>
-      <span class="k">return</span> <span class="bp">None</span>
+      <span class="k">return</span> <span class="kc">None</span>
 
   <span class="nd">@staticmethod</span>
   <span class="k">def</span> <span class="nf">_getSelectedNmrAtomNames</span><span class="p">(</span><span class="n">nmrResidue</span><span class="p">):</span>
@@ -887,13 +885,13 @@
     <span class="k">try</span><span class="p">:</span>
       <span class="k">return</span> <span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">nmrResidue</span><span class="o">.</span><span class="n">selectedNmrAtomNames</span><span class="p">)</span>
     <span class="k">except</span><span class="p">:</span>
-      <span class="k">return</span> <span class="bp">None</span>
+      <span class="k">return</span> <span class="kc">None</span>
 
   <span class="k">def</span> <span class="nf">_selectPullDown</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
     <span class="sd">&#39;&#39;&#39; Used for automatic restoring of widgets &#39;&#39;&#39;</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">ncWidget</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
     <span class="k">try</span><span class="p">:</span>
-      <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">chemicalShiftsMappingModule</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+      <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">chemicalShiftsMappingModule</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">chemicalShiftsMappingModule</span><span class="o">.</span><span class="n">_updateModule</span><span class="p">()</span>
     <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
       <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s1">&#39;Impossible update chemicalShiftsMappingModule from restoring </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span><span class="n">e</span><span class="p">)</span>
@@ -907,15 +905,15 @@
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
 <div id="searchbox" style="display: none" role="search">
-  <h3>Quick search</h3>
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
     <form class="search" action="../../../../../search.html" method="get">
-      <input type="text" name="q" />
+      <input type="text" name="q" aria-labelledby="searchlabel" />
       <input type="submit" value="Go" />
-      <input type="hidden" name="check_keywords" value="yes" />
-      <input type="hidden" name="area" value="default" />
     </form>
+    </div>
 </div>
-<script type="text/javascript">$('#searchbox').show(0);</script>
+<script>$('#searchbox').show(0);</script>
         </div>
       </div>
       <div class="clearer"></div>
@@ -929,13 +927,13 @@
         <li class="right" >
           <a href="../../../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../../../index.html">Python  documentation</a> &raquo;</li>
-          <li class="nav-item nav-item-1"><a href="../../../../index.html" >Module code</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="../../../../../index.html">Python  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../../../index.html" >Module code</a> &#187;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
-        &copy; Copyright .
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.1.
+        &#169; Copyright .
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.4.0.
     </div>
   </body>
 </html>

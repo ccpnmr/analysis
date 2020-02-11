@@ -55,7 +55,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-02-10 16:59:37 +0000 (Mon, February 10, 2020) $"
+__dateModified__ = "$dateModified: 2020-02-11 03:17:19 +0000 (Tue, February 11, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -149,7 +149,7 @@ from ccpn.core.lib.ContextManagers import undoBlock
 from ccpn.util.decorators import profile
 from ccpn.core.lib.Notifiers import Notifier
 from ccpn.core.lib import Pid
-
+from ccpn.util import Path
 
 UNITS_PPM = 'ppm'
 UNITS_HZ = 'Hz'
@@ -7124,6 +7124,12 @@ class CcpnGLWidget(QOpenGLWidget):
         return GLExporter(self, self.strip, filename, params)
 
     def exportToSVG(self, filename='default.svg', params=None):
+        return GLExporter(self, self.strip, filename, params)
+
+    def exportToPNG(self, filename='default.png', params=None):
+        return GLExporter(self, self.strip, filename, params)
+
+    def exportToPS(self, filename='default.ps', params=None):
         return GLExporter(self, self.strip, filename, params)
 
     # def cohenSutherlandClip(self, x0, y0, x1, y1):

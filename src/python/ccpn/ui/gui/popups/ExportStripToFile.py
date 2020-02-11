@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-01-10 11:21:55 +0000 (Fri, January 10, 2020) $"
-__version__ = "$Revision: 3.0.0 $"
+__dateModified__ = "$dateModified: 2020-02-11 03:17:19 +0000 (Tue, February 11, 2020) $"
+__version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -26,6 +26,7 @@ __date__ = "$Date: 2017-07-06 15:51:11 +0000 (Thu, July 06, 2017) $"
 #=========================================================================================
 
 import os
+from collections import OrderedDict as OD
 from ccpn.ui.gui.widgets.FileDialog import FileDialog
 from ccpn.ui.gui.widgets.Spacer import Spacer
 from PyQt5 import QtGui, QtWidgets, QtCore
@@ -51,13 +52,27 @@ from ccpn.ui.gui.widgets.CompoundWidgets import DoubleSpinBoxCompoundWidget
 from ccpn.ui.gui.widgets.MessageDialog import progressManager
 
 
+EXPORTEXT = 'EXT'
+EXPORTFILTER = 'FILTER'
 EXPORTPDF = 'PDF'
-EXPORTSVG = 'SVG'
 EXPORTPDFEXTENSION = '.pdf'
-EXPORTSVGEXTENSION = '.svg'
 EXPORTPDFFILTER = 'pdf files (*.pdf)'
+EXPORTSVG = 'SVG'
+EXPORTSVGEXTENSION = '.svg'
 EXPORTSVGFILTER = 'svg files (*.svg)'
-EXPORTTYPES = [EXPORTPDF, EXPORTSVG]
+EXPORTPNG = 'PNG'
+EXPORTPNGEXTENSION = '.png'
+EXPORTPNGFILTER = 'png files (*.png)'
+EXPORTPS = 'PS'
+EXPORTPSEXTENSION = '.ps'
+EXPORTPSFILTER = 'ps files (*.ps)'
+EXPORTTYPES = OD(((EXPORTPDF, {EXPORTEXT   : EXPORTPDFEXTENSION,
+                               EXPORTFILTER: EXPORTPDFFILTER}),
+                  (EXPORTSVG, {EXPORTEXT   : EXPORTSVGEXTENSION,
+                               EXPORTFILTER: EXPORTSVGFILTER}),
+                  (EXPORTPNG, {EXPORTEXT   : EXPORTPNGEXTENSION,
+                               EXPORTFILTER: EXPORTPNGFILTER}),
+                  ))
 EXPORTFILTERS = EXPORTPDFFILTER
 PAGEPORTRAIT = 'portrait'
 PAGELANDSCAPE = 'landscape'
@@ -146,7 +161,7 @@ class ExportStripToFilePopup(ExportDialog):
         Label(userFrame, text='Print Type', grid=(row, 0), hAlign='left', vAlign='centre')
 
         # row += 1
-        self.exportType = RadioButtons(userFrame, EXPORTTYPES,
+        self.exportType = RadioButtons(userFrame, list(EXPORTTYPES.keys()),
                                        grid=(row, 1), direction='h', hAlign='left', spacing=(20, 0),
                                        callback=self._changePrintType)
         self.exportType.set(EXPORTPDF)
@@ -243,10 +258,11 @@ class ExportStripToFilePopup(ExportDialog):
         # currentPath = self.getPathHistory()
         # currentPath = currentPath if currentPath else os.path.expanduser(self.project.path)
 
-        if self.exportType.get() == EXPORTPDF:
-            exportExtension = EXPORTPDFEXTENSION
+        exType = self.exportType.get()
+        if exType in EXPORTTYPES:
+            exportExtension = EXPORTTYPES[exType][EXPORTEXT]
         else:
-            exportExtension = EXPORTSVGEXTENSION
+            raise ValueError('bad export type')
 
         currentPath = os.path.expanduser(self.project.path)
         self.updateFilename(os.path.join(currentPath, self.objectPulldown.getText() + exportExtension))
@@ -288,10 +304,11 @@ class ExportStripToFilePopup(ExportDialog):
 
     def _changePulldown(self, int):
         selected = self.objectPulldown.getText()
-        if self.exportType.get() == EXPORTPDF:
-            exportExtension = EXPORTPDFEXTENSION
+        exType = self.exportType.get()
+        if exType in EXPORTTYPES:
+            exportExtension = EXPORTTYPES[exType][EXPORTEXT]
         else:
-            exportExtension = EXPORTSVGEXTENSION
+            raise ValueError('bad export type')
 
         if 'SpectrumDisplay' in selected:
             self.spectrumDisplay = self.objects[selected][0]
@@ -453,25 +470,41 @@ class ExportStripToFilePopup(ExportDialog):
     def _changePrintType(self):
         selected = self.exportType.get()
         lastPath = self.saveText.text().strip()
-        if selected == EXPORTPDF:
-            if not lastPath.endswith(EXPORTPDFEXTENSION):
+
+        if selected in EXPORTTYPES:
+            ext = EXPORTTYPES[selected][EXPORTEXT]
+            filt = EXPORTTYPES[selected][EXPORTFILTER]
+
+            if not lastPath.endswith(ext):
                 # remove other extension
-                if lastPath.endswith(EXPORTSVGEXTENSION):
-                    lastPath = os.path.splitext(lastPath)[0]
-                lastPath += EXPORTPDFEXTENSION
-            self._dialogFilter = EXPORTPDFFILTER
+                lastPath = os.path.splitext(lastPath)[0]
+                lastPath += ext
+            self._dialogFilter = filt
             self.updateDialog()
             self.updateFilename(lastPath)
 
-        elif selected == EXPORTSVG:
-            if not lastPath.endswith(EXPORTSVGEXTENSION):
-                # remove other extension
-                if lastPath.endswith(EXPORTPDFEXTENSION):
-                    lastPath = os.path.splitext(lastPath)[0]
-                lastPath += EXPORTSVGEXTENSION
-            self._dialogFilter = EXPORTSVGFILTER
-            self.updateDialog()
-            self.updateFilename(lastPath)
+        else:
+            raise TypeError('bad export type')
+
+        # if selected == EXPORTPDF:
+        #     if not lastPath.endswith(EXPORTPDFEXTENSION):
+        #         # remove other extension
+        #         if lastPath.endswith(EXPORTSVGEXTENSION):
+        #             lastPath = os.path.splitext(lastPath)[0]
+        #         lastPath += EXPORTPDFEXTENSION
+        #     self._dialogFilter = EXPORTPDFFILTER
+        #     self.updateDialog()
+        #     self.updateFilename(lastPath)
+        #
+        # elif selected == EXPORTSVG:
+        #     if not lastPath.endswith(EXPORTSVGEXTENSION):
+        #         # remove other extension
+        #         if lastPath.endswith(EXPORTPDFEXTENSION):
+        #             lastPath = os.path.splitext(lastPath)[0]
+        #         lastPath += EXPORTSVGEXTENSION
+        #     self._dialogFilter = EXPORTSVGFILTER
+        #     self.updateDialog()
+        #     self.updateFilename(lastPath)
 
     def buildParameters(self):
         """build parameters dict from the user widgets, to be passed to the export method.
@@ -553,6 +586,10 @@ class ExportStripToFilePopup(ExportDialog):
                 svgExport = glWidget.exportToSVG(filename, params)
                 if svgExport:
                     svgExport.writeSVGFile()
+            elif prType == EXPORTPNG:
+                pngExport = glWidget.exportToPNG(filename, params)
+                if pngExport:
+                    pngExport.writePNGFile()
 
     def actionButtons(self):
         self.buttonFrame.addSpacer(0, 10, grid=(0, 1))

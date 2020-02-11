@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-02-10 16:59:38 +0000 (Mon, February 10, 2020) $"
+__dateModified__ = "$dateModified: 2020-02-11 03:17:19 +0000 (Tue, February 11, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -44,7 +44,7 @@ except ImportError:
                                    "PyOpenGL must be installed to run this example.")
     sys.exit(1)
 from reportlab.lib import colors
-from reportlab.graphics import renderSVG, renderPS
+from reportlab.graphics import renderSVG, renderPS, renderPM
 from reportlab.graphics.shapes import Drawing, Rect, String, PolyLine, Line, Group, Path
 from reportlab.graphics.shapes import definePath
 from reportlab.graphics.renderSVG import draw, renderScaledDrawing, SVGCanvas
@@ -180,6 +180,20 @@ class GLExporter():
 
         # set a default fontName
         self.fontName = self._parent.getSmallFont().fontName
+
+        # load a .pfb/.afm font for the png exporter
+        afmdir = fontsPath+'/open-sans/'
+        pfbdir = fontsPath+'/open-sans/'
+        afmFile = os.path.join(afmdir, 'OpenSans.afm')
+        pfbFile = os.path.join(pfbdir, 'OpenSans.pfb')
+
+        justFace = pdfmetrics.EmbeddedType1Face(afmFile, pfbFile)
+        faceName = 'OpenSans'  # pulled from AFM file
+        pdfmetrics.registerTypeFace(justFace)
+
+        # this needs to have a space
+        justFont = pdfmetrics.Font('Open Sans', faceName, 'WinAnsiEncoding')
+        pdfmetrics.registerFont(justFont)
 
     def _buildPage(self, singleStrip=True):
         """Build the main sections of the pdf file from a drawing object
@@ -1406,6 +1420,13 @@ class GLExporter():
             heights = self.stripHeights[:]
             self._report.story.append(Table(table, rowHeights=heights))
 
+    def writePNGFile(self):
+        """
+        Output a PNG file for the GL widget.
+        """
+        self._mainPlot.scale(0.95, 0.95)
+        renderPM.drawToFile(self._mainPlot, self.filename, fmt='PNG', dpi=300, showBoundary=False)
+
     def writeSVGFile(self):
         """
         Output an SVG file for the GL widget.
@@ -1418,8 +1439,14 @@ class GLExporter():
         """
         self._report.writeDocument()
 
+    def writePSFile(self):
+        """
+        Output a PS file for the GL widget.
+        """
+        renderPS.drawToFile(self._mainPlot, self.filename, showBoundary = False)
+
     def _appendVertexLineGroup(self, indArray, colourGroups, plotDim, name, mat=None,
-                               includeLastVertex=False, lineWidth=0.5):
+                           includeLastVertex=False, lineWidth=0.5):
         for vv in range(0, len(indArray.vertices) - 2, 2):
 
             if mat is not None:

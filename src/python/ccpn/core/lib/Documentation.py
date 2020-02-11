@@ -4,7 +4,7 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -13,9 +13,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: CCPN $"
-__dateModified__ = "$dateModified: 2017-07-07 16:32:32 +0100 (Fri, July 07, 2017) $"
-__version__ = "$Revision: 3.0.0 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2020-02-11 17:32:53 +0000 (Tue, February 11, 2020) $"
+__version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -32,7 +32,7 @@ import subprocess
 import os
 import re
 import shutil
-from sphinx import apidoc
+from sphinx.ext import apidoc
 from ccpn.framework import Version
 from ccpn.util import Path as corePath
 
@@ -73,10 +73,36 @@ def refreshSphinxDocumentation():
     # clean builds
     subprocess.call(['make', '-C', docDirectory, 'clean'])
 
+    # # Recreate apidoc
+    # precommand = ['sphinx-apidoc']
+    # # documentation target - filled in below
+    # precommand.extend(('-o', 'output TBD'))
+    # # Put module documentation before submodule documentation:
+    # precommand.append('--module-first')
+    # # Project name header:
+    # precommand.extend(('-A', Version.authors))
+    # # Project name header:
+    # precommand.extend(('-V', Version.applicationVersion))
+    # # Project name header:
+    # precommand.extend(('-R', Version.revision))
+    #
+    # # Generate documentation - ccpn:
+    # for dirEntry in inputDirectories:
+    #     module = dirEntry.name
+    #     target = dirEntry.path
+    #     skipDirs = getNamedSubdirectories(target, skipSubDirectories)
+    #     command = precommand + ['-H', 'CCPN', target] + skipDirs
+    #     if module == 'ccpnmodel':
+    #         # Skip an additional directory
+    #         command.append(os.path.join(target, 'ccpncore', 'memops', 'scripts', 'model'))
+    #     command[2] = outputDirs[module]
+    #     apidoc.main(command)
+
+    # NOTE:ED - ordering is incorrect
+
     # Recreate apidoc
-    precommand = ['sphinx-apidoc']
-    # documentation target - filled in below
-    precommand.extend(('-o', 'output TBD'))
+    # precommand = ['sphinx-apidoc']
+    precommand = []
     # Put module documentation before submodule documentation:
     precommand.append('--module-first')
     # Project name header:
@@ -86,16 +112,23 @@ def refreshSphinxDocumentation():
     # Project name header:
     precommand.extend(('-R', Version.revision))
 
+    # # documentation target - filled in below
+    # precommand.extend(('-o', 'output TBD'))
+
     # Generate documentation - ccpn:
     for dirEntry in inputDirectories:
         module = dirEntry.name
         target = dirEntry.path
         skipDirs = getNamedSubdirectories(target, skipSubDirectories)
-        command = precommand + ['-H', 'CCPN', target] + skipDirs
+
+        # command = precommand + ['-H', 'CCPN', target] + skipDirs
+        command = precommand + ['-H', 'CCPN'] + ['-o', outputDirs[module], target] + skipDirs
+
         if module == 'ccpnmodel':
             # Skip an additional directory
             command.append(os.path.join(target, 'ccpncore', 'memops', 'scripts', 'model'))
-        command[2] = outputDirs[module]
+
+        # command[2] = outputDirs[module]
         apidoc.main(command)
 
     # rebuild docs

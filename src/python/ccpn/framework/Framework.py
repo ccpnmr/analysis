@@ -11,7 +11,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-02-10 18:38:00 +0000 (Mon, February 10, 2020) $"
+__dateModified__ = "$dateModified: 2020-02-11 17:32:53 +0000 (Tue, February 11, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -253,6 +253,8 @@ class Framework(NotifierBase):
         self.args = args
         self.applicationName = applicationName
         self.applicationVersion = applicationVersion
+
+        # NOTE:ED - what is revision for? there are no uses and causes a new error for sphinx documentation unless a string
         self.revision = Version.revision
         self.plugins = []  # Hack for now, how should we store these?
         self.ccpnModules = []
@@ -304,12 +306,13 @@ class Framework(NotifierBase):
             ccpnDir.mkdir()
         self._getUserPrefs()
 
-        # set the preferences if added from the commandline
-        # this causes errors when running the nose_tests
-        if self.args.darkColourScheme:
-            self.preferences.general.colourScheme = 'dark'
-        elif self.args.lightColourScheme:
-            self.preferences.general.colourScheme = 'light'
+        if hasattr(self.args, 'darkColourScheme') and hasattr(self.args, 'lightColourScheme'):
+            # set the preferences if added from the commandline
+            # this causes errors when running the nose_tests
+            if self.args.darkColourScheme:
+                self.preferences.general.colourScheme = 'dark'
+            elif self.args.lightColourScheme:
+                self.preferences.general.colourScheme = 'light'
 
         self._registrationDict = {}
         self._setLanguage()

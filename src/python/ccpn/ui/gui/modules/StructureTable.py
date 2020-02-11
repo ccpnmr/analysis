@@ -4,7 +4,7 @@ This file contains StructureTableModule and StructureTable classes
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -13,9 +13,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: CCPN $"
-__dateModified__ = "$dateModified: 2017-07-07 16:32:47 +0100 (Fri, July 07, 2017) $"
-__version__ = "$Revision: 3.0.0 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2020-02-11 17:32:54 +0000 (Tue, February 11, 2020) $"
+__version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -563,7 +563,7 @@ class StructureTable(GuiTableStructure):
                 for dd in self._project.dataSets:
                     if dd.title == thisObj.name:
                         for dt in dd.data:
-                            if dt.name is 'Derived':
+                            if dt.name == 'Derived':
                                 Found = True
 
             # if not Found:
@@ -789,9 +789,9 @@ class StructureTable(GuiTableStructure):
         item = self.stButtons.get()
         getLogger().debug('>selectionPulldownCallback>', item, type(item), self.thisObj)
         if self.thisObj is not None:
-            if item is 'Ensemble':
+            if item == 'Ensemble':
                 self.displayTableForStructure(self.thisObj)
-            elif item is 'average':
+            elif item == 'average':
                 self.displayTableForDataSetStructure(self.thisObj)
         else:
             self.clear()
@@ -805,9 +805,9 @@ class StructureTable(GuiTableStructure):
         if self.thisObj in thisEnsembleList:
             item = self.stButtons.get()
             getLogger().debug('>selectionPulldownCallback> %s %s %s' % (item, type(item), self.thisObj))
-            if item is 'Ensemble':
+            if item == 'Ensemble':
                 self.displayTableForStructure(self.thisObj)
-            elif item is 'average':
+            elif item == 'average':
                 self.displayTableForDataSetStructure(self.thisObj)
         else:
             # self.clearTable()

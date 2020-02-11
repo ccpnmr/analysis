@@ -1,9 +1,10 @@
 #!/usr/bin/env bash
 
-export CCPNMR_TOP_DIR="$(cd "$(dirname "$0")/.." || exit; pwd)"
-NOSETESTS="${ANACONDA3}"/bin/nosetests
-
+CCPNMR_TOP_DIR="$(cd "$(dirname "$0")/.." || exit; pwd)"
+export CCPNMR_TOP_DIR
 source "${CCPNMR_TOP_DIR}"/bin/paths.sh
+
+NOSETESTS="${ANACONDA3}"/bin/nosetests
 
 FILENAME=$*
 FILENAME=${FILENAME##*/};FILENAME=${FILENAME%.*}

@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-02-11 13:49:45 +0000 (Tue, February 11, 2020) $"
+__dateModified__ = "$dateModified: 2020-02-11 14:54:30 +0000 (Tue, February 11, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -154,10 +154,6 @@ class GLExporter():
         # self.foregroundColour = colors.Color(*self._parent.foreground[0:3],
         #                                      alpha=alphaClip(self._parent.foreground[3]))
         self.foregroundColour = colors.Color(*self.params[GLFOREGROUND], alpha=alphaClip(1.0))
-
-        self.baseThickness = self.params[GLBASETHICKNESS]
-        self.symbolThickness = self.params[GLSYMBOLTHICKNESS]
-        self.contourThickness = self.params[GLCONTOURTHICKNESS]
 
         # build all the sections of the pdf
         self.stripReports = []
@@ -1215,29 +1211,29 @@ class GLExporter():
                                                ratioLine=True,
                                                lineWidth=0.5 * self.baseThickness)
 
-            # add the right axis border line if needed
-            if self.params[GLPLOTBORDER] or (self.rAxis and self.params[GLAXISLINES]):
-                from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLArrays import GLVertexArray
-
-                # dummy list with non-visible line
-                tempVertexArray = GLVertexArray(numLists=1, drawMode=GL.GL_LINE, dimension=2)
-                tempVertexArray.indices = [0, 1]
-                tempVertexArray.vertices = [0.0, 0.0, 0.0, 0.0]
-
-                # return the colour list defined by self.foreColour - needs setColour to be defined in the function call
-                setGroup = self._appendIndexLineGroup(indArray=tempVertexArray,
-                                                      colourGroups=colourGroups,
-                                                      plotDim={PLOTLEFT  : self.displayScale * self.rAxisMarkView.left,
-                                                               PLOTBOTTOM: self.displayScale * self.rAxisMarkView.bottom,
-                                                               PLOTWIDTH : self.displayScale * self.rAxisMarkView.width,
-                                                               PLOTHEIGHT: self.displayScale * self.rAxisMarkView.height},
-                                                      name='gridAxes',
-                                                      setColour=self.foregroundColour,
-                                                      ratioLine=True,
-                                                      lineWidth=0.5 * self.baseThickness)
-                if setGroup in colourGroups:
-                    colourGroups[setGroup][PDFLINES].append([self.displayScale * self.mainView.width, self.displayScale * self.mainView.bottom,
-                                                             self.displayScale * self.mainView.width, self.pixHeight])
+            # # add the right axis border line if needed
+            # if self.params[GLPLOTBORDER] or (self.rAxis and self.params[GLAXISLINES]):
+            #     from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLArrays import GLVertexArray
+            #
+            #     # dummy list with non-visible line
+            #     tempVertexArray = GLVertexArray(numLists=1, drawMode=GL.GL_LINE, dimension=2)
+            #     tempVertexArray.indices = [0, 1]
+            #     tempVertexArray.vertices = [0.0, 0.0, 0.0, 0.0]
+            #
+            #     # return the colour list defined by self.foreColour - needs setColour to be defined in the function call
+            #     setGroup = self._appendIndexLineGroup(indArray=tempVertexArray,
+            #                                           colourGroups=colourGroups,
+            #                                           plotDim={PLOTLEFT  : self.displayScale * self.rAxisMarkView.left,
+            #                                                    PLOTBOTTOM: self.displayScale * self.rAxisMarkView.bottom,
+            #                                                    PLOTWIDTH : self.displayScale * self.rAxisMarkView.width,
+            #                                                    PLOTHEIGHT: self.displayScale * self.rAxisMarkView.height},
+            #                                           name='gridAxes',
+            #                                           setColour=self.foregroundColour,
+            #                                           ratioLine=True,
+            #                                           lineWidth=0.5 * self.baseThickness)
+            #     if setGroup in colourGroups:
+            #         colourGroups[setGroup][PDFLINES].append([self.displayScale * self.mainView.width, self.displayScale * self.mainView.bottom,
+            #                                                  self.displayScale * self.mainView.width, self.pixHeight])
 
             # add the bottom axis if visible
             if self.bAxis and self.params[GLAXISMARKS]:
@@ -1256,29 +1252,29 @@ class GLExporter():
                                                ratioLine=True,
                                                lineWidth=0.5 * self.baseThickness)
 
-            # add the bottom axis border line if needed
-            if self.params[GLPLOTBORDER] or (self.bAxis and self.params[GLAXISLINES]):
-                from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLArrays import GLVertexArray
-
-                tempVertexArray = GLVertexArray(numLists=1, drawMode=GL.GL_LINE, dimension=2)
-                tempVertexArray.indices = [0, 1]
-                tempVertexArray.vertices = [0.0, 0.0, 0.0, 0.0]
-
-                # dummy list with non-visible line
-                setGroup = self._appendIndexLineGroup(indArray=tempVertexArray,
-                                                      colourGroups=colourGroups,
-                                                      plotDim={PLOTLEFT  : self.displayScale * self.bAxisMarkView.left,
-                                                               PLOTBOTTOM: self.displayScale * self.bAxisMarkView.bottom,
-                                                               PLOTWIDTH : self.displayScale * self.bAxisMarkView.width,
-                                                               PLOTHEIGHT: self.displayScale * self.bAxisMarkView.height},
-                                                      name='gridAxes',
-                                                      setColour=self.foregroundColour,
-                                                      ratioLine=True,
-                                                      lineWidth=0.5 * self.baseThickness)
-
-                if setGroup in colourGroups:
-                    colourGroups[setGroup][PDFLINES].append([self.displayScale * self.mainView.left, self.displayScale * self.mainView.bottom,
-                                                             self.displayScale * self.mainView.width, self.displayScale * self.mainView.bottom])
+            # # add the bottom axis border line if needed
+            # if self.params[GLPLOTBORDER] or (self.bAxis and self.params[GLAXISLINES]):
+            #     from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLArrays import GLVertexArray
+            #
+            #     tempVertexArray = GLVertexArray(numLists=1, drawMode=GL.GL_LINE, dimension=2)
+            #     tempVertexArray.indices = [0, 1]
+            #     tempVertexArray.vertices = [0.0, 0.0, 0.0, 0.0]
+            #
+            #     # dummy list with non-visible line
+            #     setGroup = self._appendIndexLineGroup(indArray=tempVertexArray,
+            #                                           colourGroups=colourGroups,
+            #                                           plotDim={PLOTLEFT  : self.displayScale * self.bAxisMarkView.left,
+            #                                                    PLOTBOTTOM: self.displayScale * self.bAxisMarkView.bottom,
+            #                                                    PLOTWIDTH : self.displayScale * self.bAxisMarkView.width,
+            #                                                    PLOTHEIGHT: self.displayScale * self.bAxisMarkView.height},
+            #                                           name='gridAxes',
+            #                                           setColour=self.foregroundColour,
+            #                                           ratioLine=True,
+            #                                           lineWidth=0.5 * self.baseThickness)
+            #
+            #     if setGroup in colourGroups:
+            #         colourGroups[setGroup][PDFLINES].append([self.displayScale * self.mainView.left, self.displayScale * self.mainView.bottom,
+            #                                                  self.displayScale * self.mainView.width, self.displayScale * self.mainView.bottom])
 
             self._appendGroup(drawing=self._mainPlot, colourGroups=colourGroups, name='gridAxes')
 

@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-02-11 15:10:57 +0000 (Tue, February 11, 2020) $"
+__dateModified__ = "$dateModified: 2020-02-11 15:11:09 +0000 (Tue, February 11, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -1465,7 +1465,7 @@ class GLExporter():
         """
         dpi = self.params[GLEXPORTDPI]
 
-        # NOTE:ED - need to look at this as only saves the las created drawing, how to concatenate?
+        # NOTE:ED - need to look at this as only saves the last created drawing, how to concatenate?
         self._mainPlot.scale(dpi / 72, dpi / 72)
         renderPM.drawToFile(self._mainPlot, self.filename, fmt='PNG', dpi=dpi, showBoundary=False)
 

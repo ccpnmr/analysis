@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-02-11 14:54:30 +0000 (Tue, February 11, 2020) $"
+__dateModified__ = "$dateModified: 2020-02-11 23:09:54 +0000 (Tue, February 11, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -1683,6 +1683,9 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
 
     @pyqtSlot(dict)
     def _glXAxisChanged(self, aDict):
+        if self._useLockedAspect or self._useDefaultAspect:
+            self._glAllAxesChanged(aDict)
+
         if self.spectrumDisplay.isDeleted:
             return
 
@@ -1806,6 +1809,9 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
 
     @pyqtSlot(dict)
     def _glYAxisChanged(self, aDict):
+        if self._useLockedAspect or self._useDefaultAspect:
+            self._glAllAxesChanged(aDict)
+
         if self.spectrumDisplay.isDeleted:
             return
 
@@ -2682,8 +2688,10 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
                 ax0 = self.pixelX
                 ax1 = self.pixelY
 
-            width = (self.w - self.AXIS_MARGINRIGHT) if self._drawRightAxis else self.w
-            height = (self.h - self.AXIS_MARGINBOTTOM) if self._drawBottomAxis else self.h
+            # width = (self.w - self.AXIS_MARGINRIGHT) if self._drawRightAxis else self.w
+            # height = (self.h - self.AXIS_MARGINBOTTOM) if self._drawBottomAxis else self.h
+
+            width, height = self.spectrumDisplay.strips[0].mainViewSize()
 
             ratio = (height / width) * 0.5 * abs((self.axisL - self.axisR) * ax1 / ax0)
             self.axisB = mby + ratio * self.sign(self.axisB - mby)
@@ -2704,8 +2712,10 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
                 ax0 = self.pixelX
                 ax1 = self.pixelY
 
-            width = (self.w - self.AXIS_MARGINRIGHT) if self._drawRightAxis else self.w
-            height = (self.h - self.AXIS_MARGINBOTTOM) if self._drawBottomAxis else self.h
+            # width = (self.w - self.AXIS_MARGINRIGHT) if self._drawRightAxis else self.w
+            # height = (self.h - self.AXIS_MARGINBOTTOM) if self._drawBottomAxis else self.h
+
+            width, height = self.spectrumDisplay.strips[0].mainViewSize()
 
             ratio = (width / height) * 0.5 * abs((self.axisT - self.axisB) * ax0 / ax1)
             self.axisL = mbx + ratio * self.sign(self.axisL - mbx)

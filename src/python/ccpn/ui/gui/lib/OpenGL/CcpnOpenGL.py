@@ -55,7 +55,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-02-11 03:17:19 +0000 (Tue, February 11, 2020) $"
+__dateModified__ = "$dateModified: 2020-02-11 23:09:53 +0000 (Tue, February 11, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -372,8 +372,6 @@ class CcpnGLWidget(QOpenGLWidget):
         self._xUnits = 0
         self._yUnits = 0
 
-        self._drawRightAxis = True
-        self._drawBottomAxis = True
         self.modeDecimal = [False, False]
 
         # here for completeness, although they should be updated in rescale
@@ -410,6 +408,9 @@ class CcpnGLWidget(QOpenGLWidget):
 
         # define a new class holding the entire peaklist symbols and labelling
         if self.is1D:
+            self._drawRightAxis = True
+            self._drawBottomAxis = True
+
             self._GLPeaks = GLpeak1dLabelling(parent=self, strip=self.strip,
                                               name='peaks', resizeGL=True)
             self._GLIntegrals = GLintegral1dLabelling(parent=self, strip=self.strip,
@@ -417,6 +418,9 @@ class CcpnGLWidget(QOpenGLWidget):
             self._GLMultiplets = GLmultiplet1dLabelling(parent=self, strip=self.strip,
                                                         name='multiplets', resizeGL=True)
         else:
+            self._drawRightAxis = False
+            self._drawBottomAxis = True
+
             self._GLPeaks = GLpeakNdLabelling(parent=self, strip=self.strip,
                                               name='peaks', resizeGL=True)
             self._GLIntegrals = GLintegralNdLabelling(parent=self, strip=self.strip,
@@ -972,6 +976,12 @@ class CcpnGLWidget(QOpenGLWidget):
     def viewRange(self):
         return ((self.axisL, self.axisR),
                 (self.axisT, self.axisB))
+
+    def mainViewSize(self):
+        """Return the width/height for the mainView of the OpenGL widget
+        """
+        mw = self.viewports.getViewportFromWH(GLDefs.MAINVIEW, self.w, self.h)
+        return (mw.width, mw.height)
 
     def wheelEvent(self, event):
         # def between(val, l, r):

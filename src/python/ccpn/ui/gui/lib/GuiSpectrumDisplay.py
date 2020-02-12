@@ -415,6 +415,7 @@ class GuiSpectrumDisplay(CcpnModule):
                                                         'Spectrum',
                                                         self._spectrumRenameChanged)
 
+        # FIXME _toolbarNotifier is a nasty notifier.
         self._toolbarNotifier = self.setNotifier(self.project,
                                                  [Notifier.CHANGE],
                                                  'SpectrumDisplay',
@@ -750,6 +751,7 @@ class GuiSpectrumDisplay(CcpnModule):
     def _toolbarChange(self, data):
         """Respond to a change in the spectrum Icon toolbar denoting that clicked or spectrum created/deleted
         """
+        # FIXME this is called 1000s when dropping more spectra then usual
         trigger = data[Notifier.TRIGGER]
         if trigger == Notifier.CHANGE:
             # self.spectrumToolBar._toolbarChange(self.strips[0].orderedSpectrumViews())

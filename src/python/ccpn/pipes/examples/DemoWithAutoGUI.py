@@ -84,7 +84,7 @@ class DemoPipe2(Pipe):
         result = myAlgorithm(data, *self._kwargs)
         return data
 
-DemoPipe2.register()  # Registers the pipe in the pipeline
+# DemoPipe2.register()  # Registers the pipe in the pipeline
 
 ########################################################################################################################
 ##########################################      RUN TEST GUI PIPE     ##################################################

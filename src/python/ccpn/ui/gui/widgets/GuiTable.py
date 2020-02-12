@@ -171,6 +171,8 @@ class GuiTable(TableWidget, Base):
 GuiTable {
     background-color: %(GUITABLE_BACKGROUND)s;
     alternate-background-color: %(GUITABLE_ALT_BACKGROUND)s;
+    border: 1px solid #a9a9a9;
+    border-radius: 2px;
 }
 
 GuiTable::item {

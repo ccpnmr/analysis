@@ -116,10 +116,9 @@ class NmrResidueTableModule(CcpnModule):
                                                multiSelect=True,
                                                grid=(0, 0))
 
-        if nmrChain is not None:
-            self.selectNmrChain(nmrChain)
-        elif selectFirstItem:
-            self.nmrResidueTable.ncWidget.selectFirstItem()
+
+
+
 
         # install the event filter to handle maximising from floated dock
         self.installMaximiseEventHandler(self._maximise, self._closeModule)
@@ -134,6 +133,14 @@ class NmrResidueTableModule(CcpnModule):
         if self.activePulldownClass:
             self.nmrResidueTable._activePulldownClass = self.activePulldownClass
             self.nmrResidueTable._activeCheckbox = getattr(self.nmrResidueTableSettings, LINKTOPULLDOWNCLASS, None)
+
+        if nmrChain is not None:
+            self.selectNmrChain(nmrChain)
+        elif selectFirstItem:
+            self.nmrResidueTable.ncWidget.selectFirstItem()
+            chain = self.nmrResidueTable.ncWidget.getCurrentObject()
+            self.nmrResidueTable._update(chain)
+
 
     def _maximise(self):
         """
@@ -419,9 +426,9 @@ class NmrResidueTable(GuiTable):
         self.ncWidget = NmrChainPulldown(parent=self._widget,
                                          mainWindow=self.mainWindow, default=None,  #first NmrChain in project (if present)
                                          grid=(1, 0), gridSpan=(1, 1), minimumWidths=(0, 100),
-                                         showSelectName=True,
                                          sizeAdjustPolicy=QtWidgets.QComboBox.AdjustToContents,
-                                         callback=self._selectionPulldownCallback
+                                         callback=self._selectionPulldownCallback,
+                                         showSelectName=False, selectNoneText='none',
                                          )
         self.spacer = Spacer(self._widget, 5, 5,
                              QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed,
@@ -504,13 +511,15 @@ class NmrResidueTable(GuiTable):
         widget.setFixedSize(widget.sizeHint())
         self._widget.setFixedSize(self._widget.sizeHint())
 
-    def addWidgetToPos(self, widget, row=0, col=2, rowSpan=1, colSpan=1, overrideMinimum=False):
+    def addWidgetToPos(self, widget, row=0, col=2, rowSpan=1, colSpan=1, overrideMinimum=False, alignment=None):
         """
         Convenience to add a widget to the top of the table; col >= 2
         """
         if col < 2 and not overrideMinimum:
             raise RuntimeError('Col has to be >= 2')
         self._widget.getLayout().addWidget(widget, row, col, rowSpan, colSpan)
+        if alignment is not None:
+            self._widget.getLayout().setAlignment(widget,alignment)
         widget.setFixedSize(widget.sizeHint())
         self._widget.setFixedSize(self._widget.sizeHint())
 
@@ -711,6 +720,7 @@ class NmrResidueTable(GuiTable):
         """
         Notifier Callback for selecting NmrChain
         """
+        print('item', item)
         self._nmrChain = self.project.getByPid(item)
         logger.debug('>selectionPulldownCallback>', item, type(item), self._nmrChain)
         if self._nmrChain is not None:

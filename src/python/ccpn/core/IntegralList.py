@@ -178,14 +178,15 @@ class IntegralList(PMIListABC):
             const = int(len(y) * 0.0039)
             y2 = signal.correlate(y, np.ones(const), mode='same') / const
             yy = y-y2
-            # if noiseThreshold is None:
-            maxNL, minNL = estimateNoiseLevel1D(yy, f=20, stdFactor=0.001)
-            maxNL, minNL = estimateNoiseLevel1D(yy, f=20, stdFactor=0.001)
-            intersectingLine = [maxNL] * len(x)
+            if noiseThreshold is None:
+                # maxNL, minNL = estimateNoiseLevel1D(yy, f=20, stdFactor=0.001)
+                noiseThreshold, minNL = estimateNoiseLevel1D(yy, f=20, stdFactor=0.001)
+
+            intersectingLine = [noiseThreshold] * len(x)
             # else:
             #     intersectingLine = [noiseThreshold] * len(x)
-            limitsPairs = _getPeaksLimits(x, yy, intersectingLine)
-            spectrum.noiseLevel = maxNL
+            limitsPairs = _getPeaksLimits(x, y, intersectingLine)
+            spectrum.noiseLevel = noiseThreshold
 
             integrals = []
 
@@ -197,11 +198,11 @@ class IntegralList(PMIListABC):
                 lineWidth = abs(maxI - minI)
                 if lineWidth:
                     newIntegral = self.newIntegral(value=None, limits=[[minI, maxI], ])
-                    newIntegral._baseline = maxNL
+                    newIntegral._baseline = noiseThreshold
                     filteredX = np.where((x <= i[0]) & (x >= i[1]))
                     filteredY = spectrum.intensities[filteredX]
                     if findPeak:  # pick peaks and link to integral
-                        maxValues, minValues = simple1DPeakPicker(y=filteredY, x=filteredX[0], delta=noiseThreshold / deltaFactor)
+                        maxValues, minValues = simple1DPeakPicker(y=filteredY, x=filteredX[0], delta=noiseThreshold)
                         if len(maxValues) > 1:  #calculate centre of mass or     #   add to multiplet ??
 
                             positions = []

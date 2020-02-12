@@ -70,6 +70,8 @@ from ccpn.util.decorators import logCommand
 from ccpn.core.lib.ContextManagers import catchExceptions
 from ccpn.ui.gui.widgets.Menu import SHOWMODULESMENU, CCPNMACROSMENU, TUTORIALSMENU, PLUGINSMENU, CCPNPLUGINSMENU
 
+import faulthandler
+faulthandler.enable()
 
 # from functools import partial
 

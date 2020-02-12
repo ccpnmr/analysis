@@ -668,7 +668,7 @@ class PeakList(PMIListABC):
                     spectrum.noiseLevel = float(maxNoiseLevel)
                     spectrum.negativeNoiseLevel = float(minNoiseLevel)
                 deltaAdjustment = percentage(deltaPercent, maxNoiseLevel)
-                maxValues, minValues = simple1DPeakPicker(y=filteredY, x=filteredX, delta=maxNoiseLevel + deltaAdjustment, negative=False)
+                maxValues, minValues = simple1DPeakPicker(y=filteredY, x=filteredX, delta=maxNoiseLevel + deltaAdjustment, negDelta=minNoiseLevel + deltaAdjustment, negative=negativePeaks)
                 spectrum.noiseLevel = float(maxNoiseLevel)
                 spectrum.negativeNoiseLevel = float(minNoiseLevel)
                 snr_ratios = []

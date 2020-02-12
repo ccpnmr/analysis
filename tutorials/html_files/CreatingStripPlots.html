@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Creating Strip Plots</title>
+    <style >.action {color: #803594; font-weight:bold;}</style>
+    <link rel="stylesheet" href="CcpnVideoTutorials.css">
+</head>
+<body>
+<h2>Creating Strip Plots</h2>
+<h3>Manually</h3>
+<p>You can add strips to your Spectrum Display manually by clicking on the <span class="action">+</span> button in the toolbar. <span class="action">-</span> will remove them again - see our <a href="https://www.ccpn.ac.uk/forums/misc.php?action=help&hid=51">Working with Strips tutorial</a> for more information on the basics of using strips in AnalysisAssign V3.</p>
+<h3>Automatically from peaks</h3>
+<p>Select peaks belonging to your 2D base spectrum (typically a <sup>1</sup>H-<sup>15</sup>N HSQC or <sup>1</sup>H-<sup>13</sup>C HMQC spectrum), either directly in the spectrum or in the peak table, and then type <span class="action">SP</span> or in the menus go to <span class="action">Spectrum / Make Strip Plot...</span>. The pop-up will allow you to select the Spectrum Display(s) in which you want to display your strips, then select the <span class="action">use peak selection</span> option and click on <span class="action">Okay</span>. The strips will be plotted in the Spectrum Display of your choice and headers at the top of each strip will contain the Peak PID, so you know which peak the strip has been derived from.</p>
+<h3>Automatically from NmrResidues</h3>
+<p>Select one or more NmrResidues in any NmrResidue table. This could be the NmrResidue table in the <span class="action">Pick and Assign</span> or <span class="action">Backbone Assignment</span> modules, or it could be a straightforward NmrResidue table you bring up with <span class="action">NT</span> or by going to <span class="action">View / NmrResidue Table</span>. Then type <span class="action">SP</span> or in the menus go to <span class="action">Spectrum / Make Strip Plot...</span>. The pop-up will allow you to select the Spectrum Display(s) in which you want to display your strips, then select the <span class="action">use NmrResidue selection</span> option and click on <span class="action">Okay</span>. The strips will be plotted in the Spectrum Display of your choice and headers at the top of each strip will contain the NmrResidue PID, so you know which NmrResidue the strip has been derived from.</p>
+<h3>Automatically from NmrChains</h3>
+<p>Type <span class="action">SP</span> or in the menus go to <span class="action">Spectrum / Make Strip Plot...</span>. The pop-up will allow you to select the Spectrum Display(s) in which you want to display your strips, then select the <span class="action">use NmrChain selection</span> option and select the NmrChain of your choice using the drop-down menu. Click on <span class="action">Okay</span>. The strips will be plotted in the Spectrum Display of your choice and headers at the top of each strip will contain the NmrResidue PID, so you know which NmrResidue and NmrChain the strip has been derived from.</p>
+<h3>Automatically using NmrAtoms from selected peaks</h3>
+<p>This is not typically an option you will need to use very much. But occasionally it is useful, e.g. in making strips from a 2D homonuclear spectrum (e.g. CC or HH) when you might find that the axes are matched the wrong way round if you use the <span class="action">use selected peaks</span> option. Select peaks belonging to your base spectrum (e.g. 2D CC spectrum), either directly in the spectrum or in the peak table, and then type <span class="action">SP</span> or in the menus go to <span class="action">Spectrum / Make Strip Plot...</span>. The pop-up will allow you to select the Spectrum Display(s) in which you want to display your strips, then select the <span class="action">use NmrAtoms from peak selection</span> option and click on <span class="action">Okay</span>. The strips will be plotted in the Spectrum Display of your choice and headers at the top of each strip will contain the NmrResidue PID, so you know which NmrResidue the strip has been derived from.</p>
+</body>
+</html>

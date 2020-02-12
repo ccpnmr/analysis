@@ -721,7 +721,9 @@ def _openItemObjects(mainWindow, objs, **kwds):
     """
     spectrumDisplay = None
     with undoBlockWithoutSideBar():
-
+        if spectrumDisplay:
+            spectrumDisplay.spectrumToolBar.increaseSpectrumToolBarBlocking()
+            # FIXME STOP TOOLBAR REBUILDING EVERY SPECTRUM DROPPED
         for obj in objs:
             if obj:
                 try:

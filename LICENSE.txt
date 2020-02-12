@@ -1,172 +1,1 @@
-CcpNmr Analysis version 3 - Terms and conditions
-
-1. Preamble
-This agreement version 1.0 (hereafter: Agreement) governs the relationship between the user of CcpNmr Analysis
-version-3, (hereinafter: Licensee) and Collaborative Computational Project for NMR (CCPN), a organisation hosted
-by the University of Leicester and whose principal place of business is Fielding Johnson building, University Road, Leicester LE17 RH (hereinafter: Licensor).
-
-This Agreement sets the terms, rights, restrictions and obligations (hereafter: Terms and Conditions) on using
-CcpNmr Analysis version 3, in any form, including source or binary code, programs or program fragments, updates,
-patches, bug fixes, documentation, tutorials, data and other additions (hereinafter: The Software) created and
-owned by Licensor, as detailed herein. Any elements such as code or data, contained within The Software but
-distributed by Licensor on behalf of third parties, will be subject to the appropriate license decided by the
-owner of said elements. Such elements will be clearly marked.
-
-In downloading or using The Software, Licensee implicitly accepts the Terms and Conditions set forth in this
-document.
-
-For the purpose of this document, the following terms shall be defined:
-Workplace: The laboratory, group, or work unit where the Licensee is based (hereafter: Workplace);
-Organisation: The legal entity that includes the Workplace (hereafter: Organisation); CCPN User: A person that
-has bought a licence to use CcpNmr Analysis version 3 and in effect signed up for CCPN membership and that currently fulfills the conditions for membership (hereafter: Member);
-CCPN Premium user: A Member that has signed up for premium membership (hereafter: Premium Member); CCPN developer:
-a Member given access to The Software’s full code repository (hereafter: Developer).
-
-All references to the male gender shall include female or gender-neutral Licensees as well.
-
-2. License and usage
-Licensor hereby grants Licensee a revocable, personal, non-assignable & non-transferable,including the
-rights to create but not distribute derivative works, non-exclusive license to the Software, all with accordance with the terms
-set forth and other legal restrictions set forth in 3rd party software used while running The Software.
-
-2.1. Acceptable Usage
-Licensee may use The Software for the purpose of:
-•	Running The Software on Licensee’s computer[s] and server[s];
-•	Allowing 3rd Parties to run The Software on Licensee’s computer[s] and server[s], including for training purposes;
-•	Publishing The Software’s output to Licensee and 3rd parties;
-•	Distribute verbatim copies of The Software’s output;
-•	Modify The Software to suit Licensee’s needs and specifications compliant with clause 2.5.
-This license is granted as long as Licensee does not materially breach it.
-The Licensee understands and agrees that the License is for a single User only. In the event that Licensee requires more of its employees to use the Licence they agree to pay additional User fees, as appropriate for their Membership level.
-
-2.2. Binary Restricted
-Licensee may not sub-license The Software, neither as a part of a larger work containing more than The Software,
-nor distributed solely in object or binary form.
-
-2.3. Non Assignable & Non-Transferable
-Licensee may not assign or transfer his rights and duties under this license.
-
-2.4. Derivative Works
-2.4.1. With exception of code relating to The Software’s credits, copyright, authors, registration and licensing,
-Licensee may create derivative works based on The Software, including amending The Software’s source code, modifying
-it, or integrating it into a larger work, as long as no distribution of the derivative works is made, other than to
-the Licensee’s Workplace or Licensor.
-2.4.2. Any derivative works returned to the Licensor shall be free of charge and with transfer of all copyrights to
-the Licensor and without the obligation to amend or augment The Software with such works.
-2.4.3. A Developer cannot claim any right, ownership, copyright or intellectual property right, for any contribution
-made by him to the repository of The Software.
-
-2.5. Registration and Attribution Requirements
-2.5.1. Licensee shall register The Software upon first usage using the popup box generated automatically by The
-Software, providing valid and accurate information regarding name, Email, Workplace and Organisation.
-2.5.2. Wherever and whenever appropriate, The Software shall be referenced as “obtained from http://www.ccpn.ac.uk,
-CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis, Skinner et al. J Biomol NMR 66 (2016) 111-124”.
-
-3. Terms & Termination
-The terms of this license shall be active until terminated.
-
-3.1. Termination by Licensee
-Licensee may terminate this Agreement, including Licensee’s license, by removal of all instance The Software and
-any derived work from Licensee’s Computer[s] and Server[s].
-
-3.2 Termination by Licensor
-This license shall be deemed immediately terminated in case:
-•	The Software is exported to any jurisdiction where Licensor may not enforce his rights under this agreements; or
-•	Licensee was in breach of any of this license's terms and conditions and such breach was not cured, immediately
-    upon notification; or
-•	Licensee in breach of any of the terms of clause 2 to this license; or
-•	Licensee otherwise entered into any arrangement which causes Licensor to be unable to enforce his rights under
-    this License.
-
-4. CCPN membership and Fees
-
-4.1. Membership
-By purchase of the Software, as outlined in clause 2.6.1, Licensee is automatically entered as a Member.Members are allowed to use the Software for non-commercial purposes only. 
-
-4.2. Premium membership
-Premium Members are given higher priority with respect to assistance, problem solving, and attention to feature
-requests. Premium members are charged a fee, negotiated for each individual case. Premium Members will be able to use the Software for non-commercial as well as for commercial  purposes. For the purpose of this License, commercial purposes shall be deemed to include all, but not restricted to, activities for which a 3rd party  has to pay in order to access The Software or activities supported by The Software with the aim to develop or leading to the development of other commercial products.
-
-4.3. Membership fee
-Membership is free of charge if Licensee belongs to a non-profit or academic Institution, and does not use The
-Software for commercial activities. In all other cases, a membership fee shall be charged according to the fee
-schedule outlined on http://www.ccpn.ac.uk. Failure to perform payment of the fee shall construe as material breach
-of this Agreement.
-
-4.4. No Refunds
-Licensee warrants that he will use The Software “AS-IS” and that it is adequate to his needs. Accordingly, as The
-Software is intangible goods, Licensee shall not be, ever, entitled to any refund, rebate, compensation or
-restitution of any fee for any reason whatsoever, even if The Software contains material flaws.
-
-5. Support, Upgrades, Updates, and Fixes
-Software is provided under an AS-IS basis and without any implicit or explicit requirement for the Licensor to
-provide support, updates, fixes, maintenance or new features, irrespective of any bug, failure, mis-performance
-or other defect in The Software.
-
-5.1. Upgrades, Updates or Fixes
-Licensor may provide Licensee, from time to time, with upgrades, updates or fixes, as detailed herein and according
-to his sole discretion. Licensee hereby warrants to keep The Software up-to-date and install all relevant updates
-and fixes. Nothing in this Agreement shall require Licensor to provide upgrades, updates or fixes.
-
-5.2. Bug Notification
-Licensee may provide Licensor of details regarding any bug, defect or failure in The Software promptly and with no
-delay from such event; Licensee shall comply with Licensor's request for information regarding bugs, defects or
-failures and furnish him with information, screenshots and try to reproduce such bugs, defects or failures.
-
-5.3. Feature Requests
-Licensee may request additional features in Software, provided, however, that (i) Licensee shall waive any claim
-or right in such feature should feature be developed by Licensor; (ii) Licensee warrants that feature does not
-infringe any 3rd party patent, trademark, trade-secret or any other intellectual property right; and (iii) Licensee
-developed, envisioned or created the feature solely by himself.
-
-6. Liability
-The Software is provided by the Licensor “AS-IS” and any express or implied warranties, including but not limited
-to, the implied warranties of merchantability, fitness for a particular purpose, are disclaimed. Licensor shall
-never, and without any limit, be liable for any direct, indirect, incidental, special or consequential damages,
-cost, expense or any other payment incurred by Licensee, loss of use, data, profits, or business, as a result of
-The Software’s actions, failure, bugs and/or any other interaction between The Software and Licensee’s end-equipment,
-computers, data, other software or any 3rd party, end-equipment, computer or services or however otherwise caused.
-Moreover, Licensor shall never be liable for any defect in code written by Licensee when relying on The Software or
-using The Software’s source code.
-
-7. Warranty
-
-7.1 Intellectual Property
-Licensor hereby warrants, to the best of its knowledge and belief, that The Software does not violate or infringe any 3rd party claims in regards to intellectual
-property, patents and/or trademarks and that to the best of its knowledge no legal action has been taken against it
-for any infringement or violation of any 3rd party intellectual property rights.
-
-7.2. No-Warranty
-The Software is provided without any warranty; Licensor hereby disclaims any warranty that The Software shall be error
-free, without defects or code which may cause damage to Licensee’s computers or to Licensee, and that Software shall
-be functional. Licensee shall be solely liable to any damage, defect or loss incurred as a result of operating software
-and undertake the risks contained in running The Software on License’s Computer[s] or Server[s]. Licensee hereby waives
-any claims regarding The Software's incompatibility, performance, results and features.
-
-8. General
-
-8.1
-This Agreement may not be amended or modified in any way.
-
-8.2
-The failure or delay of either Party to exercise or enforce any right under this Agreement shall not operate as a
-waiver of that right or preclude the exercise or enforcement of it at any time thereafter.
-
-8.3
-This Agreement constitutes the entire agreement and understanding of the Parties and supersedes all prior versions
-of the Agreement relating to the Terms and Conditions of The Software.
-
-8.4
-If any provision of this Agreement shall be held to be unlawful, invalid or unenforceable, in whole or in part,
-under any enactment or rule of law, such provision or part shall to that extent be severed from this Agreement and
-rendered ineffective as far as possible without modifying or affecting the legality, validity or enforceability or
-the remaining provisions of this Agreement which will remain in full force and effect.
-
-8.5
-The Contracts (Rights of Third Parties) Act 1999 shall not apply to this Agreement, and nothing in this Agreement
-shall confer or purport to confer on any third party any benefit or any right to enforce any term of this Agreement.
-
-8.6
-This Agreement shall be governed by and construed and interpreted in accordance with the laws of England and Wales
-and the Parties hereby submit to the non-exclusive jurisdiction of the Courts of England and Wales.
-
+=====================================================================================================================CcpNmr Analysis version-3:Subject to CCPN End User Licence Agreement (EULA) (https://www.ccpn.ac.uk/v3-software/licences/non-profit-licence)=====================================================================================================================1. PreambleThe software in this package is provided by the copyright holders, i.e. the Collaborative Computational Project for NMR (CCPN), a organisation hosted by the University of Leicester and whose principal place of business is Fielding Jonhson building, University Road, Leicester LE1 7RH, UK (hereinafter: Licensor).This EULA sets the terms, rights, restrictions and obligations (hereafter: Terms and Conditions) on using CcpNmr Analysis version-3, in any form, including source or binary code, programs or program fragments, updates, patches, bug fixes, documentation, tutorials, data and other additions (hereinafter: the Software) created and owned by Licensor, as detailed herein. Any elements such as code or data, contained within the Software but distributed by Licensor on behalf of third parties, will be subject to the appropriate licence decided by the owner of said elements. Such elements will be clearly marked.The user of the Software will be referred to hereinafter as the Licensee.All references to the male gender shall include female or gender-neutral Licensee as well.2. Permission for Non-commercial UsageWith exception of those parts of the Software covered by other terms and conditions (detailed below), the Licensor grants permission to the Licensee for usage of the Software for non-commercial purposes under the terms of the Non-Profit Open Software License version 3.0 (NPOSL-3.0; https://opensource.org/licenses/NPOSL-3.0), augmented with the clauses set forth in this EULA.For the purpose of this EULA, commercial purposes shall be deemed to include all, but not restricted to, activities for which a 3rd party has to pay in order to access the Software or activities supported by the Software with the aim to develop or leading to the development of other commercial products.2.1 In downloading or using the Software, Licensee implicitly accepts the Terms and Conditions set forth in this document.2.2 This EULA shall be retained with all copies, whether original or modified, of the Software.3. RegistrationLicensee shall register The Software upon first usage using the popup box automatically generated by the Software, providing valid and accurate information regarding name, Email, Workplace and Organisation and other relevant information (hereafter: the Information)3.1. Wherever and whenever appropriate, the Software shall be referenced as “obtained from http://www.ccpn.ac.uk, CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis, Skinner et al. J Biomol NMR 66 (2016) 111-124”.3.2 Licensee grants permission to Licensor to store the Information on its server for the duration of usage of the Software by the Licensee. The licensee can request removal of the Information with the Licensor; consequently, usage of the Software will be invalidated.4. Performance, Warranty, Support, Upgrades and FixesThe Software is provided by the CCPN “AS-IS” and any express or implied warranties, including but not limited to, the implied warranties of merchantability, fitness for a particular purpose, are disclaimed. CCPN, the authors, the Department of Molecular and Cell Biology, and the University of Leicester shall never, and without any limit, be liable for any direct, indirect, incidental, special or consequential damages, cost, expense or any other payment incurred by Licensee, loss of use, data, profits, or business, as a result of the Software’s actions, failure, bugs and/or any other interaction between the Software and Licensee’s end-equipment, computers, data, other software or any 3rd party, end-equipment, computer or services or however otherwise caused.  Moreover, CCPN, the authors, and the University of Leicester shall never be liable for any defect in code written by Licensee when relying on the Software or using the Software’s source code.4.1. Support, Upgrades, Updates, and FixesSoftware is provided under an AS-IS basis and without any implicit or explicit requirement for the Licensor to provide support, updates, fixes, maintenance or new features, irrespective of any bug, failure, mis-performance or other defect in the Software. From time to time, Licensor may provide Licensee with reasonable upgrades, updates or fixes, as detailed herein and at his sole discretion. Licensee hereby and agrees to keep the Software up-to-date and install all relevant updates and fixes.4.2. Bug NotificationLicensee may provide Licensor of details regarding any bug, defect or failure in the Software promptly and with no delay from such event; Licensee shall comply with Licensor's request for information regarding bugs, defects or failures and furnish him with information, screenshots and try to reproduce such bugs, defects or failures.4.3. Feature RequestsLicensee may request additional features in Software, provided, however, that (i) Licensee shall waive any claim or right in such feature should such feature be developed by Licensor; (ii) Licensee warrants that feature does not infringe any 3rd party patent, trademark, trade-secret or any other intellectual property right; and (iii) Licensee developed, envisioned or created the feature solely by himself.=====================================================================================================================minicoda distribution:Subject to Anaconda End User Licence Agreement (https://docs.continuum.io/anaconda/eula)=====================================================================================================================Copyright 2016, Continuum Analytics, Inc.All rights reserved under the 3-clause BSD License:THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS “AS IS” AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL CONTINUUM ANALYTICS, INC. BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.

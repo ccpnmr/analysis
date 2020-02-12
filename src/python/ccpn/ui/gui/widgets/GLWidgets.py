@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-02-11 23:09:54 +0000 (Tue, February 11, 2020) $"
+__dateModified__ = "$dateModified: 2020-02-12 00:23:40 +0000 (Wed, February 12, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -1034,7 +1034,7 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
                 if _includeAxis:
                     for ax in axisList:
 
-                        offset = 0.05 if self.AXIS_INSIDE else 0.95
+                        offset = 0.02 if self.AXIS_INSIDE else 0.98
                         if ax == 0:
                             # add the x axis line
                             indexList += (index, index + 1)

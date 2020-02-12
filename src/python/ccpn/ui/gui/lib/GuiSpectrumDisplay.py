@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-02-11 23:09:53 +0000 (Tue, February 11, 2020) $"
+__dateModified__ = "$dateModified: 2020-02-12 00:23:40 +0000 (Wed, February 12, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -599,7 +599,7 @@ class GuiSpectrumDisplay(CcpnModule):
         #           Need to think about tiles later
         # leave a gap for overlaying the axis widgets
 
-        if not self.lastAxisOnly:
+        if not self.lastAxisOnly or len(self.strips) < 2:
             # remove the margins and hide the axes
             self._stripFrameScrollArea.setViewportMargins(0, 0, 0, 0)
             self._rightGLAxis.hide()
@@ -1215,7 +1215,7 @@ class GuiSpectrumDisplay(CcpnModule):
         """
         layout = spectrumDisplay.stripFrame.getLayout()
 
-        if layout and layout.count() > 1:
+        if layout and layout.count() > 0:
             spectrumDisplay.stripFrame.blockSignals(True)
             spectrumDisplay.stripFrame.setUpdatesEnabled(False)
 
@@ -1533,7 +1533,7 @@ class GuiSpectrumDisplay(CcpnModule):
             if self.stripArrangement == 'Y':
 
                 # strips are arranged in a row
-                if self.lastAxisOnly:
+                if self.lastAxisOnly and len(currentStrips) > 1:
                     # for ss in currentStrips[:-1]:
                     #     ss.setAxesVisible(rightAxisVisible=False, bottomAxisVisible=True)
                     #
@@ -1550,7 +1550,7 @@ class GuiSpectrumDisplay(CcpnModule):
             elif self.stripArrangement == 'X':
 
                 # strips are arranged in a column
-                if self.lastAxisOnly:
+                if self.lastAxisOnly and len(currentStrips) > 1:
                     # for ss in currentStrips[:-1]:
                     #     ss.setAxesVisible(rightAxisVisible=True, bottomAxisVisible=False)
                     #

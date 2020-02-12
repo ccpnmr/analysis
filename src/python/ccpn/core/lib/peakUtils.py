@@ -162,11 +162,11 @@ import sys
 from numpy import NaN, Inf, arange
 from numba import jit
 @jit(nopython=True, nogil=True)
-def simple1DPeakPicker(y, x, delta, negative=False):
+def simple1DPeakPicker(y, x, delta, negDelta=None, negative=False):
     """
-    Converted from MATLAB script at http://billauer.co.il/peakdet.html
-    % Eli Billauer, 3.4.05 (Explicitly not copyrighted).
-    % This function is released to the public domain; Any use is allowed.
+    from https://gist.github.com/endolith/250860#file-readme-md which was translated from
+    http://billauer.co.il/peakdet.html Eli Billauer, 3.4.05.
+    Explicitly not copyrighted and any uses allowed.
     """
 
     maxtab = []
@@ -174,6 +174,7 @@ def simple1DPeakPicker(y, x, delta, negative=False):
     mn, mx = Inf, -Inf
     mnpos, mxpos = NaN, NaN
     lookformax = True
+    if negDelta: negDelta = 0
 
     for i in arange(len(y)):
             this = y[i]
@@ -198,7 +199,18 @@ def simple1DPeakPicker(y, x, delta, negative=False):
                     mxpos = x[i]
                     lookformax = True
 
-    return maxtab, mintab
+    filteredNeg = []
+    for p in mintab:
+        pos, height = p
+        if height <= negDelta:
+            filteredNeg.append(p)
+    filtered = []
+    for p in maxtab:
+        pos, height = p
+        if height >= delta:
+            filtered.append(p)
+
+    return filtered, filteredNeg
 
 
 def _estimateDeltaPeakDetect(y, xPercent=10):

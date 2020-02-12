@@ -55,7 +55,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-02-12 20:29:21 +0000 (Wed, February 12, 2020) $"
+__dateModified__ = "$dateModified: 2020-02-12 20:34:39 +0000 (Wed, February 12, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -1907,7 +1907,7 @@ class CcpnGLWidget(QOpenGLWidget):
 
         # get the current buffering mode and set the required length to the number of buffers
         format = self.format()
-        self._numBuffers = int(format.swapBehavior())
+        self._numBuffers = int(format.swapBehavior()) or 2
         self._glCursorQueue = ()
         for buf in range(self._numBuffers):
             self._glCursorQueue += (GLVertexArray(numLists=1,

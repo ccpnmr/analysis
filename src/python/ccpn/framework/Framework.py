@@ -11,7 +11,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-02-11 17:32:53 +0000 (Tue, February 11, 2020) $"
+__dateModified__ = "$dateModified: 2020-02-12 11:08:41 +0000 (Wed, February 12, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -1301,7 +1301,7 @@ class Framework(NotifierBase):
                 ("None", None, [('checkable', True),
                                 ('checked', False)])
                 ])),
-            ("Python Console", self._toggleConsole, [('shortcut', 'pr'),
+            ("Python Console", self._toggleConsole, [('shortcut', '  '),
                                                      ('checkable', True),
                                                      ('checked', False)])
             ]

@@ -694,28 +694,31 @@ def _openItemObjects(mainWindow, objs, **kwds):
     """
     spectrumDisplay = None
     with undoBlockWithoutSideBar():
-            for obj in objs:
-                if obj:
-                    try:
-                        if obj.__class__ in OpenObjAction:
+        if spectrumDisplay:
+            spectrumDisplay.spectrumToolBar.increaseSpectrumToolBarBlocking()
+            # FIXME STOP TOOLBAR REBUILDING EVERY SPECTRUM DROPPED
+        for obj in objs:
+            if obj:
+                try:
+                    if obj.__class__ in OpenObjAction:
 
-                            # if a spectrum object has already been opened then attach to that spectrumDisplay
-                            if isinstance(obj, Spectrum) and spectrumDisplay:
-                                spectrumDisplay.displaySpectrum(obj)
-
-                            else:
-
-                                # process objects to open
-                                func = OpenObjAction[obj.__class__](useNone=True, **kwds)
-                                returnObj = func._execOpenItem(mainWindow, obj)
-
-                                # if the first spectrum then set the spectrumDisplay
-                                if isinstance(obj, Spectrum):
-                                    spectrumDisplay = returnObj
+                        # if a spectrum object has already been opened then attach to that spectrumDisplay
+                        if isinstance(obj, Spectrum) and spectrumDisplay:
+                            spectrumDisplay.displaySpectrum(obj)
 
                         else:
-                            info = showInfo('Not implemented yet!',
-                                            'This function has not been implemented in the current version')
-                    except Exception as e:
-                        getLogger().warning('Error: %s' % e)
-                        # raise e
+
+                            # process objects to open
+                            func = OpenObjAction[obj.__class__](useNone=True, **kwds)
+                            returnObj = func._execOpenItem(mainWindow, obj)
+
+                            # if the first spectrum then set the spectrumDisplay
+                            if isinstance(obj, Spectrum):
+                                spectrumDisplay = returnObj
+
+                    else:
+                        info = showInfo('Not implemented yet!',
+                                        'This function has not been implemented in the current version')
+                except Exception as e:
+                    getLogger().warning('Error: %s' % e)
+                    # raise e

@@ -55,7 +55,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-02-12 11:08:41 +0000 (Wed, February 12, 2020) $"
+__dateModified__ = "$dateModified: 2020-02-12 20:29:21 +0000 (Wed, February 12, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -493,6 +493,8 @@ class CcpnGLWidget(QOpenGLWidget):
         self._visibleSpectrumViewsChange = False
         self._matchingIsotopeCodes = False
 
+        self.viewports = None
+
         self._glClientIndex = 0
         self._menuActive = False
         self.glReady = True
@@ -525,6 +527,9 @@ class CcpnGLWidget(QOpenGLWidget):
         to improve display speed
         """
         if self.strip.isDeleted or not self.globalGL:
+            return
+
+        if not self.viewports:
             return
 
         # use the updated size

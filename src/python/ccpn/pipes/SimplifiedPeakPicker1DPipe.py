@@ -99,7 +99,7 @@ class PeakPicker1DPipe(SpectraPipe):
         else:
             self._kwargs.update({ExcludeRegions: DefaultExcludeRegions})
             excludeRegions = self._kwargs[ExcludeRegions]
-        simple1DPeakPicker([1], [1], 1)# just compile
+        # simple1DPeakPicker([1], [1], 1)# just compile
         from ccpn.core.lib.ContextManagers import  undoBlockWithoutSideBar, notificationEchoBlocking
         with undoBlockWithoutSideBar():
             with notificationEchoBlocking():
@@ -107,7 +107,7 @@ class PeakPicker1DPipe(SpectraPipe):
                     if len(spectrum.peakLists) > 0:
                         spectrum.peakLists[DefaultPeakListIndex].peakFinder1D(maxNoiseLevel=spectrum.noiseLevel,
                                                                               minNoiseLevel=spectrum.negativeNoiseLevel,
-                                                                              ignoredRegions=excludeRegions,
+                                                                              ignoredRegions=excludeRegions, negativePeaks=False,
                                                                               )
                     else:
                         getLogger().warning('Error: PeakList not found for Spectrum: %s. Add a new PeakList first' % spectrum.pid)

@@ -57,7 +57,7 @@ class PulldownList(QtWidgets.QComboBox, Base):
         :param icons:
         :param callback:
         :param index:
-        :param backgroundText: a transparent text that will disapear as soon as you click to type.
+        :param backgroundText: a transparent text that will disappear as soon as you click to type.
                                 the place holder or the transparent "backgroundText" will work only if the pulldown is editable.
                                 Otherwise use HeaderText and enabled = False if you need only a title inside the pulldown
         :param headerText: text of first item of the pullDown. E.g. '-- Select Item --'
@@ -86,6 +86,8 @@ class PulldownList(QtWidgets.QComboBox, Base):
             if self.backgroundText:
                 self.lineEdit().setPlaceholderText(str(self.backgroundText))
             self.lineEdit().textEdited.connect(self._emitPulldownTextEdited)
+            #GST this cures a bug where the text background overwrites the popup button...
+            self.lineEdit().setStyleSheet('background: transparent')
 
         # self.setIconSize(QtCore.QSize(22,22))
 
@@ -293,7 +295,7 @@ class PulldownList(QtWidgets.QComboBox, Base):
         self.setEnabled(True)
 
     def disableLabelsOnPullDown(self, texts, colour=None):
-        ''' Disable items from pulldon (not selectable, not clickable). And if given, changes the colour '''
+        ''' Disable items from pulldown (not selectable, not clickable). And if given, changes the colour '''
         for text in texts:
             if text is not None:
                 item = self.model().item(self.getItemIndex(text))

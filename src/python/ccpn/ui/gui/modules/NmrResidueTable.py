@@ -137,9 +137,11 @@ class NmrResidueTableModule(CcpnModule):
         if nmrChain is not None:
             self.selectNmrChain(nmrChain)
         elif selectFirstItem:
-            self.nmrResidueTable.ncWidget.selectFirstItem()
-            chain = self.nmrResidueTable.ncWidget.getCurrentObject()
-            self.nmrResidueTable._update(chain)
+            firstItemText = self.nmrResidueTable.ncWidget.getFirstItemText()
+            if firstItemText:
+                self.nmrResidueTable.ncWidget.selectFirstItem()
+                chain = self.nmrResidueTable.ncWidget.getCurrentObject()
+                self.nmrResidueTable._update(chain)
 
 
     def _maximise(self):

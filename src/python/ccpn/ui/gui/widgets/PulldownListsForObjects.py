@@ -195,12 +195,19 @@ class _PulldownABC(PulldownListCompoundWidget):
         #sys.stderr.write('>>> currentObject:\n', obj)
         return obj
 
+    def getFirstItemText(self):
+        result = None
+        texts = [txt for txt in self.pulldownList.texts if txt != SELECT]
+        if texts:
+            result = texts[0]
+        return result
+
     def selectFirstItem(self):
         """Set the table to the first item.
         """
-        texts = [txt for txt in self.pulldownList.texts if txt != SELECT]
-        if texts:
-            self.select(texts[0])
+        firstItemName = self.getFirstItemText()
+        if firstItemName:
+            self.select(firstItemName)
 
     def object2value(self, obj):
         """Convert object to a value (pid or id), to be displayed

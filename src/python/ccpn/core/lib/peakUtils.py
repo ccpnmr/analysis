@@ -484,11 +484,12 @@ def getNmrResidueDeltas(nmrResidue, nmrAtomsNames, spectra, mode=POSITIONS, atom
 def _getKd(func, x, y):
     if len(x) <= 1:
         return
-    param = curve_fit(func, x, y)
-    bindingUnscaled, bmax = param[0]
-    yScaled = y / bmax
     try:
-        paramScaled = curve_fit(func, x, yScaled)
+        param = curve_fit(func, x, y, maxfev = 6000)
+        bindingUnscaled, bmax = param[0]
+        yScaled = y / bmax
+
+        paramScaled = curve_fit(func, x, yScaled, maxfev = 6000)
         kd, bmax = paramScaled[0]
     except Exception as err:
         getLogger().warning('Impossible to estimate Kd values. %s' % err)

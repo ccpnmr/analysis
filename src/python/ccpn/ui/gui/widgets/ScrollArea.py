@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-02-10 16:59:38 +0000 (Mon, February 10, 2020) $"
+__dateModified__ = "$dateModified: 2020-03-10 01:04:58 +0000 (Tue, March 10, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -39,7 +39,7 @@ SCROLLBAR_POLICY_DICT = dict(
 class ScrollArea(QtWidgets.QScrollArea, Base):
 
     def __init__(self, parent, scrollBarPolicies=('asNeeded', 'asNeeded'),
-                 setLayout=True, minimumSizes=(50, 50), **kwds):
+                 setLayout=True, minimumSizes=(50, 50), scrollDirections = ('horizontal','vertical'), **kwds):
         super().__init__(parent)
 
         # kwds['setLayout'] = True  # A scrollable area always needs a layout to function
@@ -47,6 +47,7 @@ class ScrollArea(QtWidgets.QScrollArea, Base):
 
         self.setScrollBarPolicies(scrollBarPolicies)
         self.setMinimumSizes(minimumSizes)
+        self._scrollDirections = scrollDirections
 
     def setMinimumSizes(self, minimumSizes):
         """Set (minimumWidth, minimumHeight)
@@ -67,6 +68,16 @@ class ScrollArea(QtWidgets.QScrollArea, Base):
         """
         super(ScrollArea, self).setWidget(widget)
         self._scrollContents = widget
+
+    def resizeEvent(self, event: QtGui.QResizeEvent) -> None:
+        super().resizeEvent(event)
+        if None in self._scrollDirections or len(self._scrollDirections) != 2:
+            widget = self.widget()
+            if 'horizontal' not in self._scrollDirections:
+                widget.setMaximumWidtht(self.viewport().width())
+
+            if 'vertical' not in self._scrollDirections:
+                widget.setMaximumHeight(self.viewport().height())
 
 
 class SpectrumDisplayScrollArea(ScrollArea):

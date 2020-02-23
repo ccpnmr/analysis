@@ -124,12 +124,18 @@ class ListCompoundWidget(CompoundBaseWidget):
         self._addWidget(self.pulldownList)
 
         # listWidget
-        self.listWidget = ListWidget(parent=self, callback=callback)
+        self.listWidget = ListWidget(parent=self, callback=callback, infinitleyTallVertically=True)
+        self.listWidget.setSizePolicy(QtWidgets.QSizePolicy.Expanding,QtWidgets.QSizePolicy.Expanding)
         self._uniqueList = uniqueList
         if defaults is not None:
             for dft in defaults:
                 self.addPulldownItem(dft)
         self._addWidget(self.listWidget)
+
+        styleSheet = '.ListWidget {border: %ipx solid %s; border-radius: 3px}'
+        styleSheet  =  styleSheet  % (self.LIST_BORDER_WIDTH, self.LIST_BORDER_COLOR)
+        self.listWidget.setStyleSheet(styleSheet)
+
 
         if minimumWidths is not None:
             self.setMinimumWidths(minimumWidths)

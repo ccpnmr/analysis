@@ -149,6 +149,18 @@ class ListCompoundWidget(CompoundBaseWidget):
         if fixedWidths is not None:
             self.setFixedWidths(fixedWidths)
 
+    def minimumSizeHint(self) -> QtCore.QSize:
+        result = super().minimumSizeHint()
+
+        margins = self.listWidget.contentsMargins().top() + self.listWidget.contentsMargins().bottom() + \
+                  self.pulldownList.contentsMargins().top() + self.pulldownList.contentsMargins().bottom()
+        spacing =self.layout().spacing()
+        minHeightHint = self.listWidget.minimumSizeHint().height()+self.pulldownList.minimumSizeHint().height() + \
+                        margins + spacing
+        result.setHeight(minHeightHint)
+
+        return result
+
     # def setPreSelect(self, callBack=None):
     #     """
     #     Add a user callback to the pulldown that fires on a mouse click.

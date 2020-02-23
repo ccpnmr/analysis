@@ -712,12 +712,19 @@ class CcpnModule(Dock, DropBase, NotifierBase):
                 self.mainWidget.show()
                 # self.settingsWidget._sequenceGraphScrollArea.hide()
                 self._settingsScrollArea.show()
+                self._setSettingsWidgetHeight()
             elif self.settingsState == 2:
                 # self.settingsWidget._sequenceGraphScrollArea.hide()
                 self._settingsScrollArea.hide()
                 self.mainWidget.hide()
         else:
             RuntimeError('Settings widget inclusion is false, please set includeSettingsWidget boolean to True at class level ')
+
+    def _setSettingsWidgetHeight(self):
+        sizes = self._splitter.sizes()
+        sizes[0] = self._settingsScrollArea.minimumSize().height()
+        sizes[1] = sizes[1] - self._settingsScrollArea.minimumSize().height()
+        self._splitter.setSizes(sizes)
 
     def _closeModule(self):
         """

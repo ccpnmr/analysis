@@ -60,6 +60,7 @@ class ListWidget(QtWidgets.QListWidget, Base):
                  sortOnDrop=False,
                  allowDuplicates=False,
                  copyDrop=True,
+                 infinitleyTallVertically= False,
                  **kwds):
 
         super().__init__(parent)
@@ -97,7 +98,15 @@ class ListWidget(QtWidgets.QListWidget, Base):
         self.contextMenuItem = 'Remove'
         self.currentContextMenu = self.getContextMenu
 
+        self.infinitleyTallVerically = infinitleyTallVertically
         # self.setStyleSheet(self._styleSheet)
+
+    def sizeHint(self):
+        result = super().sizeHint()
+
+        if self.infinitleyTallVerically:
+            result.setHeight(QtWidgets.QWIDGETSIZE_MAX)
+        return result
 
     def contextCallback(self, remove=True):
 

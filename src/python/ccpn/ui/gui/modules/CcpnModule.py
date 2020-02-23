@@ -196,7 +196,7 @@ class CcpnModule(Dock, DropBase, NotifierBase):
 
     # _instances = set()
 
-    def __init__(self, mainWindow, name, closable=True, closeFunc=None, **kwds):
+    def __init__(self, mainWindow, name, closable=True, closeFunc=None, settingsScrollDirections = ('horizontal','vertical'), **kwds):
 
         self.maximised = False
         self.maximiseRestoreState = None
@@ -279,7 +279,7 @@ class CcpnModule(Dock, DropBase, NotifierBase):
         # optional settings widget area
         self.settingsWidget = None
         if self.includeSettingsWidget:
-            self._settingsScrollArea = ScrollArea(parent=self.widgetArea)
+            self._settingsScrollArea = ScrollArea(parent=self.widgetArea, scrollDirections=settingsScrollDirections)
             self.settingsWidget = Widget(parent=None, acceptDrops=True)
             self._settingsScrollArea.setWidget(self.settingsWidget)
             self.settingsWidget.setGridLayout()

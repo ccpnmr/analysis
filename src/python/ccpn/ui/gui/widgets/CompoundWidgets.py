@@ -87,6 +87,9 @@ class ListCompoundWidget(CompoundBaseWidget):
             horizontal=[(0, 0), (0, 1), (0, 2)],
             )
 
+    LIST_BORDER_WIDTH = 1
+    LIST_BORDER_COLOR = '#a9a9a9'
+
     def __init__(self, parent=None, showBorder=False, orientation='left',
                  minimumWidths=None, maximumWidths=None, fixedWidths=None,
                  labelText='', texts=None, callback=None,

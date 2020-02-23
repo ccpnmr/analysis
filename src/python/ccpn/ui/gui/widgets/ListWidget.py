@@ -61,6 +61,7 @@ class ListWidget(QtWidgets.QListWidget, Base):
                  allowDuplicates=False,
                  copyDrop=True,
                  infinitleyTallVertically= False,
+                 minRowsVisible = 4,
                  **kwds):
 
         super().__init__(parent)
@@ -99,7 +100,17 @@ class ListWidget(QtWidgets.QListWidget, Base):
         self.currentContextMenu = self.getContextMenu
 
         self.infinitleyTallVerically = infinitleyTallVertically
+        self.minRowsVisible = minRowsVisible
+
         # self.setStyleSheet(self._styleSheet)
+
+    def minimumSizeHint(self) -> QtCore.QSize:
+        result =  super().minimumSizeHint()
+        if self.count()  > 0:
+            result.setHeight(self.sizeHintForRow(0)* self.minRowsVisible)
+        else:
+            result.setHeight(self.fontMetrics().height()* self.minRowsVisible)
+        return result
 
     def sizeHint(self):
         result = super().sizeHint()

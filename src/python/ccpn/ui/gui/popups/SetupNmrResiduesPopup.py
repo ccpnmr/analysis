@@ -48,7 +48,7 @@ class SetupNmrResiduesPopup(CcpnDialogMainWidget):
         label1a = Label(self.mainWidget, text="NmrChain ", grid=(0, 2))
         self.nmrChainPulldown = PulldownList(self.mainWidget, grid=(0, 3))
         self.nmrChainPulldown.setData([nmrChain.pid for nmrChain in self.project.nmrChains])
-        self.assignmentCheckBox = CheckBox(self.mainWidget, text="Keep existing assignments", checked=True, grid=(1, 0))
+        self.assignmentCheckBox = CheckBox(self.mainWidget, text="Keep existing assignments", checked=True, grid=(1, 0), gridSpan=(1,3))
 
         self._acceptButtonText = 'Setup NMR Residues'
         self.BUTTON_CANCEL = 'Cancel'

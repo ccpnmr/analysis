@@ -1,6 +1,8 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
+from ccpn.ui.gui.widgets.Frame import Frame
+
 __copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
@@ -45,24 +47,32 @@ class ReferenceChemicalShifts(CcpnModule):  # DropBase needs to be first, else t
 
         self.preferences = self.mainWindow.application.preferences
 
+        self.mainWindow = mainWindow
+        self.project = self.mainWindow.project
+
+        self._settingsFrame = Frame(self, setLayout=True)
+        self._settingsFrame.setStyleSheet('.Frame {padding: 4px}')
+        # GST this isn't very consistent in terms of api...
+        # GST shouldn't CcpnModule have a base so we can use grid etc
+        self.addWidget(self._settingsFrame, 0, 0, 1, 4)
+
         bc = getColours()[CCPNGLWIDGET_HEXBACKGROUND]
         self.plotWidget = pg.PlotWidget(background=bc)
         self.plotWidget.invertX()
-        self.mainWindow = mainWindow
-        self.project = self.mainWindow.project
         self.addWidget(self.plotWidget, 1, 0, 1, 4)
         self.plotWidget.plotItem.addLegend(offset=[1, 10])
-        self.residueTypeLabel = Label(self, "Residue Type")
-        self.addWidget(self.residueTypeLabel, 0, 0)
-        self.residueTypePulldown = PulldownList(self, callback=self._updateModule)
+
+        self.residueTypeLabel = Label(self._settingsFrame, "Residue Type:", grid=(0,0))
+        self.residueTypePulldown = PulldownList(self._settingsFrame, callback=self._updateModule, grid=(0,1))
         self.residueTypePulldown.setData(CCP_CODES)
-        self.addWidget(self.residueTypePulldown, 0, 1)
-        self.atomTypeLabel = Label(self, 'Atom Type')
-        self.addWidget(self.atomTypeLabel, 0, 2)
-        self.atomTypePulldown = PulldownList(self, callback=self._updateModule)
+        self.atomTypeLabel = Label(self._settingsFrame, 'Atom Type:', grid=(0,2))
+        self.atomTypePulldown = PulldownList(self._settingsFrame, callback=self._updateModule, grid=(0,3))
         self.atomTypePulldown.setData(['Hydrogen', 'Heavy'])
-        self.addWidget(self.atomTypePulldown, 0, 3)
+
+        self._settingsFrame.layout().setColumnStretch(4,10000)
+
         self._updateModule()
+
 
     def _getDistributionForResidue(self, ccpCode: str, atomType: str):
         """

@@ -1,7 +1,7 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -10,9 +10,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Chris Spronk $"
-__dateModified__ = "$dateModified: 2017-11-28 16:32:26 +0100 (Tue, Nov 28, 2017) $"
-__version__ = "$Revision: 3.0.0 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2020-02-25 18:27:46 +0000 (Tue, February 25, 2020) $"
+__version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -364,11 +364,11 @@ class FilterNoisePeaksGuiPlugin(PluginModule):
         # Determine cutoff for noise/peak separation.
         # Calculate the noise score average and sd for the 20 first ranking peaks
 
-        # nTrainingPeaks = 60
-        # noiseScoreReferenceList = []
-        # for peak in sortedPeakScores[1:nTrainingPeaks]:
-        #     noiseScoreReferenceList.append(peak[1])
-        #     print (peak[0],peak[1])
+        nTrainingPeaks = 20
+        noiseScoreReferenceList = []
+        for peak in sortedPeakScores[1:nTrainingPeaks]:
+            noiseScoreReferenceList.append(peak[1])
+            print (peak[0],peak[1])
 
         # For all peaks in the sorted peak list, calculate the derivative
         # and update the average and standard deviation of the derivatives
@@ -387,8 +387,8 @@ class FilterNoisePeaksGuiPlugin(PluginModule):
             derivatives.append(derivative)
 
         # noiseScoreThreshold = numpy.mean(noiseScoreReferenceList) + 4 * numpy.std(noiseScoreReferenceList)
-        # print (noiseScoreThreshold)
-        # print (len(sortedPeakScores))
+        print (noiseScoreThreshold)
+        print (len(sortedPeakScores))
         #spectrum = self._spectrumId2Spectrum(self.settings['Spectrum']['SpectrumId'])
         #spectrum.newPeakList()
         #newPeakList = spectrum.peakLists[-1]
@@ -404,7 +404,7 @@ class FilterNoisePeaksGuiPlugin(PluginModule):
             #     self.project.deleteObjects(peakId)
             # if peak[3] > noiseScoreThreshold and peak[3] != 1e100:
             if peak[3] > noiseScoreThreshold:
-                # print (peak[0].lineWidths,peak[0].height, peak[1])
+                print (peak[0].lineWidths,peak[0].height, peak[1])
                 peakId = 'PK:{0}.{1}.{2}'.format(self.settings['Spectrum']['SpectrumId'],
                                                  self.settings['Spectrum']['Peak list'],peak[0].serial)
                 self.project.deleteObjects(peakId)
@@ -452,5 +452,5 @@ class FilterNoisePeaksPlugin(Plugin):
         print('Filtering noise peaks', kwargs)
 
 
-# FilterNoisePeaksPlugin.register()  # Registers the pipe in the pluginList
+FilterNoisePeaksPlugin.register()  # Registers the pipe in the pluginList
 # Set tolerances from project.spectrum.tolerances by default

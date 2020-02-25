@@ -29,30 +29,42 @@ from ccpn.ui.gui.widgets.ButtonList import ButtonList
 from ccpn.ui.gui.widgets.CheckBox import CheckBox
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
-from ccpn.ui.gui.popups.Dialog import CcpnDialog
+from ccpn.ui.gui.popups.Dialog import CcpnDialogMainWidget
 from ccpn.core.lib.ContextManagers import undoBlock
 
 
-class SetupNmrResiduesPopup(CcpnDialog):
+class SetupNmrResiduesPopup(CcpnDialogMainWidget):
     def __init__(self, parent=None, mainWindow=None,
                  title='Set up nmrResidues', **kwds):
-        CcpnDialog.__init__(self, parent, setLayout=True, windowTitle=title, **kwds)
+        CcpnDialogMainWidget.__init__(self, parent, setLayout=True, windowTitle=title, **kwds)
 
         self._parent = parent
         self.mainWindow = mainWindow
         self.project = self.mainWindow.project
 
-        label1a = Label(self, text="Source PeakList ", grid=(0, 0))
-        self.peakListPulldown = PulldownList(self, grid=(0, 1))
+        label1a = Label(self.mainWidget, text="Source PeakList ", grid=(0, 0))
+        self.peakListPulldown = PulldownList(self.mainWidget, grid=(0, 1))
         self.peakListPulldown.setData([peakList.pid for peakList in self.project.peakLists if len(peakList.peaks) > 0])
-        label1a = Label(self, text="NmrChain ", grid=(0, 2))
-        self.nmrChainPulldown = PulldownList(self, grid=(0, 3))
+        label1a = Label(self.mainWidget, text="NmrChain ", grid=(0, 2))
+        self.nmrChainPulldown = PulldownList(self.mainWidget, grid=(0, 3))
         self.nmrChainPulldown.setData([nmrChain.pid for nmrChain in self.project.nmrChains])
-        self.assignmentCheckBox = CheckBox(self, text="Keep existing assignments", checked=True, grid=(1, 0))
+        self.assignmentCheckBox = CheckBox(self.mainWidget, text="Keep existing assignments", checked=True, grid=(1, 0))
 
+        self._acceptButtonText = 'Setup NMR Residues'
+        self.BUTTON_CANCEL = 'Cancel'
+
+        self.setApplyButton(callback=self._setupNmrResidues, text=self._acceptButtonText, tipText='Setup Nmr Residues and close')
+        self.setCancelButton(callback=self.reject, text=self.BUTTON_CANCEL, tipText='Cancel and close')
+        self.setDefaultButton(CcpnDialogMainWidget.APPLYBUTTON)
+
+
+        self.__postInit__()
+        self._applyButton = self.getButton(self.APPLYBUTTON)
+        self._applyButton.setEnabled(True)
+        self._cancelButton = self.getButton(self.CANCELBUTTON)
         # self.assignmentCheckBox.setEnabled(False) #This option is broken.
-        self.buttonBox = ButtonList(self, grid=(1, 3), texts=['Cancel', 'Ok'],
-                                    callbacks=[self.reject, self._setupNmrResidues])
+        # self.buttonBox = ButtonList(self, grid=(1, 3), texts=['Cancel', 'Ok'],
+        #                             callbacks=[self.reject, ])
 
     def _setupNmrResidues(self):
         with undoBlock():

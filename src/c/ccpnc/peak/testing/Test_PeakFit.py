@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-02-25 17:28:18 +0000 (Tue, February 25, 2020) $"
+__dateModified__ = "$dateModified: 2020-02-25 17:39:58 +0000 (Tue, February 25, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -324,7 +324,7 @@ if __name__ == '__main__':
             actualPos.append(mi + (centerGuess[dim] / (dataArray.shape[dim] - 1)) * ww)
 
         # ax.scatter(*actualPos, height, c='green', marker='x', s=500, linewidth=5, zorder=-1)
-        ax.plot([actualPos[0]], [actualPos[1]], [height], c='g', marker=10, lw=1, ms=15, zorder=20)
+        ax.plot([actualPos[0]], [actualPos[1]], [height], c='mediumseagreen', marker=matplotlib.markers.CARETUPBASE, lw=1, ms=15, zorder=20)
 
         # x2, y2, _ = mplot3d.proj3d.proj_transform(1, 1, 1, ax.get_proj())
 
@@ -363,6 +363,6 @@ if __name__ == '__main__':
         ax2.text(*actualPos, height, '  %i: %.4f, %.4f, %.4f' % (peakNum, actualPos[0], actualPos[1], height), fontsize=20, zorder=40)
 
         # ax2.scatter(*actualPos, height, c='red', marker='+', s=500, linewidth=3, zorder=40)
-        ax2.plot([actualPos[0]], [actualPos[1]], [height], c='g', marker=10, lw=1, ms=15, zorder=20)
+        ax2.plot([actualPos[0]], [actualPos[1]], [height], c='mediumseagreen', marker=matplotlib.markers.CARETUPBASE, lw=1, ms=15, zorder=20)
 
     plt.show()

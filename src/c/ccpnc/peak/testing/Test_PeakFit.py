@@ -4,7 +4,7 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -13,9 +13,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: CCPN $"
-__dateModified__ = "$dateModified: 2017-07-07 16:32:20 +0100 (Fri, July 07, 2017) $"
-__version__ = "$Revision: 3.0.0 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2020-02-25 17:28:18 +0000 (Tue, February 25, 2020) $"
+__version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -100,6 +100,12 @@ if __name__ == '__main__':
                  (1.0, 2.4, 2.0, 10.0, 1.7),
                  (2.5, 1.7, 10.0, 1.0, 1.7),
                  (4.2, 1.8, 7.0, 7.0, 1.1)
+                 )
+
+    testPeaks = ((3.5, 4.0, 0.0, 0.0, 1.0),
+                 (3.0, 2.5, 2.0, 10.0, 2.0),
+                 (2.5, 3.0, 10.0, 1.0, 2.0),
+                 # (4.2, 1.8, 7.0, 7.0, 1.1)
                  )
 
     # h = 1.0
@@ -250,14 +256,22 @@ if __name__ == '__main__':
 
     # make a plot
     fig = plt.figure(figsize=(10, 8), dpi=100)
-    ax = fig.gca(projection='3d')
+    # ax = fig.gca(projection='3d')
+    ax = plt.axes(projection='3d')
 
     ax.plot_wireframe(xm, ym, dataArray)
 
     # make a plot
     fig = plt.figure(figsize=(10, 8), dpi=100)
-    ax2 = fig.gca(projection='3d')
+    # ax2 = fig.gca(projection='3d')
+    # ax2 = fig.add_subplot(111, projection='3d')
+    # ax2.plot_wireframe(xm, ym, dataArraySigma, zorder=-1)
 
+
+    # testing new bit
+    # fig = plt.figure(figsize=(8, 6))
+    ax2 = plt.axes(projection='3d')
+    # ax.plot(xx, yy, zz, 'ro', alpha=0.5)
     ax2.plot_wireframe(xm, ym, dataArraySigma)
 
     peakPoints = [(np.array(position), height) for position, height in peakPoints]
@@ -309,10 +323,12 @@ if __name__ == '__main__':
 
             actualPos.append(mi + (centerGuess[dim] / (dataArray.shape[dim] - 1)) * ww)
 
-        ax.scatter(*actualPos, height, c='g', marker='^', s=50)
-        x2, y2, _ = mplot3d.proj3d.proj_transform(1, 1, 1, ax.get_proj())
+        # ax.scatter(*actualPos, height, c='green', marker='x', s=500, linewidth=5, zorder=-1)
+        ax.plot([actualPos[0]], [actualPos[1]], [height], c='g', marker=10, lw=1, ms=15, zorder=20)
 
-        ax.text(*actualPos, height, '%i: %.4f, %.4f, %.4f' % (peakNum, actualPos[0], actualPos[1], height), fontsize=20)
+        # x2, y2, _ = mplot3d.proj3d.proj_transform(1, 1, 1, ax.get_proj())
+
+        ax.text(*actualPos, height, '  %i: %.4f, %.4f, %.4f' % (peakNum, actualPos[0], actualPos[1], height), fontsize=20, zorder=40)
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     # fit all peaks in individual operations (not correct)
@@ -343,9 +359,10 @@ if __name__ == '__main__':
 
             actualPos.append(mi + (centerGuess[dim] / (dataArray.shape[dim] - 1)) * ww)
 
-        ax2.scatter(*actualPos, height, c='r', marker='^', s=50)
-        x2, y2, _ = mplot3d.proj3d.proj_transform(1, 1, 1, ax2.get_proj())
+        # x2, y2, _ = mplot3d.proj3d.proj_transform(1, 1, 1, ax2.get_proj())
+        ax2.text(*actualPos, height, '  %i: %.4f, %.4f, %.4f' % (peakNum, actualPos[0], actualPos[1], height), fontsize=20, zorder=40)
 
-        ax2.text(*actualPos, height, '%i: %.4f, %.4f, %.4f' % (peakNum, actualPos[0], actualPos[1], height), fontsize=20)
+        # ax2.scatter(*actualPos, height, c='red', marker='+', s=500, linewidth=3, zorder=40)
+        ax2.plot([actualPos[0]], [actualPos[1]], [height], c='g', marker=10, lw=1, ms=15, zorder=20)
 
     plt.show()

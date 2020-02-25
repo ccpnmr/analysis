@@ -450,13 +450,10 @@ class _GroupEditorPopupABC(CcpnDialogMainWidget):
         self.LEFT_EMPTY_TEXT = 'Drag or double click %s to add here' % self.PROJECT_ITEM_ATTRIBUTE
         self.RIGHT_EMPTY_TEXT = "No %s: try 'Filter by' settings" % self.PROJECT_ITEM_ATTRIBUTE
 
-        if editMode:
-            self._acceptButtonText = 'Apply Changes'
-        else:
-            self._acceptButtonText = 'Create %s' % self.GROUP_NAME
+        self._acceptButtonText = 'Save changes to %ss' % self.GROUP_NAME
 
         super().__init__(parent=parent, windowTitle=title, setLayout=True, margins=(0, 0, 0, 0),
-                         spacing=(5, 5), **kwds)
+                         spacing=(5, 5), size=(900,1600), **kwds)
 
         self.errorIcon = Icon('icons/exclamation_small')
 
@@ -476,6 +473,7 @@ class _GroupEditorPopupABC(CcpnDialogMainWidget):
             # define the destination for the widgets - Dialog has mainWidget, will change for tabbed widgets
             self._dialogWidget = self.mainWidget
         else:
+            # hPolicy='expanding' gives wierd results
             self._tabWidget = Tabs(self.mainWidget, grid=(0, 0))
 
             # define the new tab widget
@@ -494,12 +492,12 @@ class _GroupEditorPopupABC(CcpnDialogMainWidget):
         self._setRightWidgets()
 
         # enable the buttons
-        self.setApplyButton(callback=self._applyAndClose, text=self._acceptButtonText, tipText='Apply according to current settings and close')
-        self.setCancelButton(callback=self._cancel, text=self.BUTTON_CANCEL, tipText='Cancel the New/Edit operation')
-        self.setDefaultButton(CcpnDialogMainWidget.CANCELBUTTON)
+        self.setOkButton(callback=self._applyAndClose, text=self._acceptButtonText, tipText='Apply according to current settings and close')
+        self.setDiscardButton(callback=self._cancel, text=self.BUTTON_CANCEL, tipText='Cancel the New/Edit operation')
+        self.setDefaultButton(CcpnDialogMainWidget.OKBUTTON)
 
         self.__postInit__()
-        self._applyButton = self.getButton(self.APPLYBUTTON)
+        self._actionButton = self.getButton(self.OKBUTTON)
         self._cancelButton = self.getButton(self.CANCELBUTTON)
 
         # self._setApplyButtons()
@@ -734,7 +732,8 @@ class _GroupEditorPopupABC(CcpnDialogMainWidget):
     def _setAcceptButtonState(self):
         if self.self.editMode and self._dirty:
             # self.applyButtons.setButtonEnabled(self._acceptButtonText, True)
-            self._applyButton.setEnabled(True)
+            self._actionButton.setEnabled(True)
+
 
     def _currentEditorState(self):
         result = {}
@@ -975,7 +974,7 @@ class _GroupEditorPopupABC(CcpnDialogMainWidget):
                 self.errors.append(message)
 
         # self.applyButtons.setButtonEnabled(self._acceptButtonText, enabled)
-        self._applyButton.setEnabled(enabled)
+        self._actionButton.setEnabled(enabled)
 
         self._emptyErrorFrame()
 

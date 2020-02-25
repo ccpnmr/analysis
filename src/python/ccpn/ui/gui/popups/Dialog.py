@@ -62,6 +62,7 @@ class CcpnDialogMainWidget(QtWidgets.QDialog, Base):
     RESETBUTTON = QtWidgets.QDialogButtonBox.Reset
     CLOSEBUTTON = QtWidgets.QDialogButtonBox.Close
     CANCELBUTTON = QtWidgets.QDialogButtonBox.Cancel
+    DISCARDBUTTON = QtWidgets.QDialogButtonBox.Discard
     APPLYBUTTON = QtWidgets.QDialogButtonBox.Apply
     OKBUTTON = QtWidgets.QDialogButtonBox.Ok
     HELPBUTTON = QtWidgets.QDialogButtonBox.Help
@@ -210,6 +211,16 @@ class CcpnDialogMainWidget(QtWidgets.QDialog, Base):
         """Add a Help button to the dialog box
         """
         return self._addButton(buttons=self.HELPBUTTON, callbacks=callback,
+                               texts=text, tipTexts=tipText, icons=icon,
+                               enabledStates=enabled, visibleStates=visible)
+
+    def  setDiscardButton(self, callback=None, text=None,
+                           tipText='Discard changes',
+                           icon='icons/orange-apply',
+                           enabled=True, visible=True):
+        """Add an Apply button to the dialog box
+        """
+        return self._addButton(buttons=self.DISCARDBUTTON, callbacks=callback,
                                texts=text, tipTexts=tipText, icons=icon,
                                enabledStates=enabled, visibleStates=visible)
 

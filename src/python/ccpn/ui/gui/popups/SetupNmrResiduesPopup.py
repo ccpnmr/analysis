@@ -53,13 +53,13 @@ class SetupNmrResiduesPopup(CcpnDialogMainWidget):
         self._acceptButtonText = 'Setup NMR Residues'
         self.BUTTON_CANCEL = 'Cancel'
 
-        self.setApplyButton(callback=self._setupNmrResidues, text=self._acceptButtonText, tipText='Setup Nmr Residues and close')
+        self.setOkButton(callback=self._setupNmrResidues, text=self._acceptButtonText, tipText='Setup Nmr Residues and close')
         self.setCancelButton(callback=self.reject, text=self.BUTTON_CANCEL, tipText='Cancel and close')
-        self.setDefaultButton(CcpnDialogMainWidget.APPLYBUTTON)
+        self.setDefaultButton(CcpnDialogMainWidget.OKBUTTON)
 
 
         self.__postInit__()
-        self._applyButton = self.getButton(self.APPLYBUTTON)
+        self._applyButton = self.getButton(self.OKBUTTON)
         self._applyButton.setEnabled(True)
         self._cancelButton = self.getButton(self.CANCELBUTTON)
         # self.assignmentCheckBox.setEnabled(False) #This option is broken.

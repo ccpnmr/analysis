@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-02-26 16:52:08 +0000 (Wed, February 26, 2020) $"
+__dateModified__ = "$dateModified: 2020-02-26 17:33:18 +0000 (Wed, February 26, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -96,40 +96,35 @@ if __name__ == '__main__':
 
     res = 45
     span = ((-(res // 2), res // 2), (-(res // 2), res // 2))
-    plotRange = ((-5, 15), (-5, 15))
+    plotMax = 20
+    plotRange = ((0, plotMax), (0, plotMax))
 
     # testPeaks = ((1.0, 2.0, 0.0, 0.0, 1.0),
     #              (1.0, 2.4, 2.0, 10.0, 1.7),
     #              (2.5, 1.7, 10.0, 1.0, 1.7),
     #              (4.2, 1.8, 7.0, 7.0, 1.1)
     #              )
-    #
+
     # testPeaks = ((3.5, 4.0, 0.0, 0.0, 1.0),
     #              (3.0, 2.5, 2.0, 10.0, 2.0),
     #              (2.5, 3.0, 10.0, 1.0, 2.0),
     #              # (4.2, 1.8, 7.0, 7.0, 1.1)
     #              )
 
-    # distinct peaks - discrete
-    plotMax = 20
-    plotRange = ((0, plotMax), (0, plotMax))
-    testPeaks = ((1.0, 1.0, 7.0, 7.0, 1.0),
-                 (1.0, 1.0, 13.0, 13.0, 1.25),
-                 )
+    # # distinct peaks - discrete
+    # testPeaks = ((1.0, 1.0, 7.0, 7.0, 1.0),
+    #              (1.0, 1.0, 13.0, 13.0, 1.25),
+    #              )
 
     # # distinct peaks - overlapped
-    # plotMax = 20
-    # plotRange = ((0, plotMax), (0, plotMax))
     # testPeaks = ((2.5, 2.5, 7.0, 7.0, 1.0),
     #              (2.5, 2.5, 13.0, 13.0, 1.25),
     #              )
 
-    # # merged peaks - only single maxima
-    # plotMax = 20
-    # plotRange = ((0, plotMax), (0, plotMax))
-    # testPeaks = ((2.5, 2.5, 8.0, 8.0, 1.0),
-    #              (2.5, 2.5, 12.0, 12.0, 1.5),
-    #              )
+    # merged peaks - only single maxima
+    testPeaks = ((2.5, 2.5, 8.0, 8.0, 1.0),
+                 (2.5, 2.5, 12.0, 12.0, 1.5),
+                 )
 
     # h = 1.0
     # x0 = 2.245
@@ -145,7 +140,6 @@ if __name__ == '__main__':
     nonadjacent = 1
     dropFactor = 0.01
     minLinewidth = [0.0, 0.0]
-
 
     def sigma2fwhm(sigma):
         return sigma * np.sqrt(8 * np.log(2))
@@ -208,7 +202,7 @@ if __name__ == '__main__':
     peakPoints = Peak.findPeaks(dataArray, haveLow, haveHigh, low, high, buffer, nonadjacent, dropFactor, minLinewidth, [], [], [])
 
     # OR use the data given
-    # peakPoints = [((int(pp[2] * res/plotMax), int(pp[3]*res/plotMax)), pp[4]) for pp in testPeaks]
+    originalPeakPoints = [((int(pp[2] * res/plotMax), int(pp[3]*res/plotMax)), pp[4]) for pp in testPeaks]
 
     print('number of peaks found = %d' % len(peakPoints))
     peakPoints.sort(key=itemgetter(1), reverse=True)
@@ -261,7 +255,7 @@ if __name__ == '__main__':
     lim = plotMax
     xxSig = np.linspace(0, lim, res)
 
-    colors = ('orange', 'green', 'pink', 'lightpurple')
+    colors = ('orange', 'purple', 'pink', 'green')
     fig = plt.figure(figsize=(10, 8), dpi=100)
     axS1 = fig.gca()
     vals = np.zeros(shape=(res, ), dtype=np.float32)
@@ -274,12 +268,11 @@ if __name__ == '__main__':
         valsArrayFWHM = make_gauss(xxSig, sigmax/(2**0.5), mx, h)
         vals = np.add(vals, valsArrayFWHM)
 
-        axS1.plot(xxSig, valsArrayFWHM, c=colors[ii])
-        axS1.axvline(linewidth=2, x=mx, c=colors[ii])
+        axS1.plot(xxSig, valsArrayFWHM, c=colors[ii], linewidth=2.0)
+        axS1.axvline(linewidth=2.0, x=mx, c=colors[ii], linestyle='dashed')
 
-    axS1.plot(xxSig, vals)
-    axS1.grid()
-
+    axS1.plot(xxSig, vals, linewidth=2.0)
+    axS1.grid(False)
 
     # test from peakTable
     # height = 1.32e6                           # sign doesn't matter
@@ -305,6 +298,29 @@ if __name__ == '__main__':
 
     # actually area will be area * FWHM * height / thisFWHM
 
+
+    # make a plot
+    # fig = plt.figure(figsize=(10, 8), dpi=100)
+    # ax2 = fig.gca(projection='3d')
+    # ax2 = fig.add_subplot(111, projection='3d')
+    # ax2.plot_wireframe(xm, ym, dataArraySigma, zorder=-1)
+
+
+    # # testing new bit
+    # # fig = plt.figure(figsize=(8, 6))
+    # ax2 = plt.axes(projection='3d')
+    #
+    # # ax.plot(xx, yy, zz, 'ro', alpha=0.5)
+    # # ax2.plot_wireframe(xm, ym, dataArraySigma, rcount=res, ccount=res)        # why?
+    # ax2.plot_wireframe(xm, ym, dataArray, rcount=res, ccount=res)
+    # plt.axis('off')
+    # plt.grid(b=None)
+    # plt.subplots_adjust(left=-0.1, right=1.1, top=1.2, bottom=-0.1)
+
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    # fit all peaks in single operation 1
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
     # make a plot
     fig = plt.figure(figsize=(10, 8), dpi=100)
     # ax = fig.gca(projection='3d')
@@ -314,31 +330,82 @@ if __name__ == '__main__':
     plt.grid(b=None)
     plt.subplots_adjust(left=-0.1, right=1.1, top=1.2, bottom=-0.1)
 
-    # make a plot
-    fig = plt.figure(figsize=(10, 8), dpi=100)
-    # ax2 = fig.gca(projection='3d')
-    # ax2 = fig.add_subplot(111, projection='3d')
-    # ax2.plot_wireframe(xm, ym, dataArraySigma, zorder=-1)
-
-
-    # testing new bit
-    # fig = plt.figure(figsize=(8, 6))
-    ax2 = plt.axes(projection='3d')
-
-    # ax.plot(xx, yy, zz, 'ro', alpha=0.5)
-    # ax2.plot_wireframe(xm, ym, dataArraySigma, rcount=res, ccount=res)        # why?
-    ax2.plot_wireframe(xm, ym, dataArray, rcount=res, ccount=res)
-    plt.axis('off')
-    plt.grid(b=None)
-    plt.subplots_adjust(left=-0.1, right=1.1, top=1.2, bottom=-0.1)
-
     peakPoints = [(np.array(position), height) for position, height in peakPoints]
 
     allPeaksArray = None
     regionArray = None
 
+    for peakNum, (position, height) in enumerate(peakPoints):
+
+        numDim = len(position)
+        numPointInt = np.array([dataArray.shape[1], dataArray.shape[0]])
+        firstArray = np.maximum(position - REGIONOFFSET, 0)
+        lastArray = np.minimum(position + (REGIONOFFSET+1), numPointInt)
+
+        if regionArray is not None:
+            firstArray = np.minimum(firstArray, regionArray[0])
+            lastArray = np.maximum(lastArray, regionArray[1])
+
+        peakArrayFWHM = position.reshape((1, numDim))
+        peakArrayFWHM = peakArrayFWHM.astype('float32')
+        firstArray = firstArray.astype('int32')
+        lastArray = lastArray.astype('int32')
+
+        regionArray = np.array((firstArray, lastArray))
+
+        if allPeaksArray is None:
+            allPeaksArray = peakArrayFWHM
+        else:
+            allPeaksArray = np.append(allPeaksArray, peakArrayFWHM, axis=0)
+
+    result = Peak.fitPeaks(dataArray, regionArray, allPeaksArray, 0)
+
+    anno = ''
+    for peakNum in range(len(result)):
+        height, centerGuess, linewidth = result[peakNum]
+
+        actualPos = []
+
+        for dim in range(len(dataArray.shape)):
+            mi, ma = plotRange[dim]
+            ww = ma - mi
+
+            actualPos.append(mi + (centerGuess[dim] / (dataArray.shape[dim] - 1)) * ww)
+
+        # ax.scatter(*actualPos, height, c='green', marker='x', s=500, linewidth=5, zorder=-1)
+        ax.plot([actualPos[0]], [actualPos[1]], [height], c='mediumseagreen', marker=matplotlib.markers.CARETUPBASE, lw=1, ms=15, zorder=20)
+
+        # x2, y2, _ = mplot3d.proj3d.proj_transform(1, 1, 1, ax.get_proj())
+
+        anno += 'x: %.4f\ny: %.4f\nh: %.4f\n\n' % (actualPos[0], actualPos[1], height)
+        # ax.text(*actualPos, height, ' x %.4f\n y %.4f\n h %.4f' % (actualPos[0], actualPos[1], height), fontsize=20, zorder=40)
+
+        if len(result) == 1:
+            # only a single peak has been found - incorrect
+            axS1.axvline(linewidth=2.0, x=actualPos[0], linestyle='dashed')
+
+    ax.text2D(0.15, 0.8, anno, fontSize=16, transform=ax.transAxes, ha='left', va='top')
+
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    # fit all peaks in single operation
+    # fit all peaks in single operation 2
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    # testing new bit
+    # fig = plt.figure(figsize=(8, 6))
+    fig = plt.figure(figsize=(10, 8), dpi=100)
+    ax = plt.axes(projection='3d')
+
+    # ax.plot(xx, yy, zz, 'ro', alpha=0.5)
+    # ax2.plot_wireframe(xm, ym, dataArraySigma, rcount=res, ccount=res)        # why?
+    ax.plot_wireframe(xm, ym, dataArray, rcount=res, ccount=res)
+    plt.axis('off')
+    plt.grid(b=None)
+    plt.subplots_adjust(left=-0.1, right=1.1, top=1.2, bottom=-0.1)
+
+    peakPoints = [(np.array(position), height) for position, height in originalPeakPoints]
+
+    allPeaksArray = None
+    regionArray = None
 
     for peakNum, (position, height) in enumerate(peakPoints):
 
@@ -388,6 +455,20 @@ if __name__ == '__main__':
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     # fit all peaks in individual operations (not correct)
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    # testing new bit
+    # fig = plt.figure(figsize=(8, 6))
+    fig = plt.figure(figsize=(10, 8), dpi=100)
+    ax2 = plt.axes(projection='3d')
+
+    # ax.plot(xx, yy, zz, 'ro', alpha=0.5)
+    # ax2.plot_wireframe(xm, ym, dataArraySigma, rcount=res, ccount=res)        # why?
+    ax2.plot_wireframe(xm, ym, dataArray, rcount=res, ccount=res)
+    plt.axis('off')
+    plt.grid(b=None)
+    plt.subplots_adjust(left=-0.1, right=1.1, top=1.2, bottom=-0.1)
+
 
     anno = ''
     for peakNum, (position, _) in enumerate(peakPoints):

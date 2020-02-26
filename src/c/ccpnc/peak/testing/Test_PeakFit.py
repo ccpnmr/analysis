@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-02-26 10:45:28 +0000 (Wed, February 26, 2020) $"
+__dateModified__ = "$dateModified: 2020-02-26 13:13:02 +0000 (Wed, February 26, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -32,7 +32,7 @@ import sys
 # from ccpnmodel.ccpncore.lib.ccp.nmr.Nmr import DataSource
 from ccpnc.peak import Peak
 
-REGIONOFFSET = 3
+REGIONOFFSET = 4
 
 
 class PeakFitTest():
@@ -98,21 +98,30 @@ if __name__ == '__main__':
     span = ((-(res // 2), res // 2), (-(res // 2), res // 2))
     plotRange = ((-5, 15), (-5, 15))
 
-    testPeaks = ((1.0, 2.0, 0.0, 0.0, 1.0),
-                 (1.0, 2.4, 2.0, 10.0, 1.7),
-                 (2.5, 1.7, 10.0, 1.0, 1.7),
-                 (4.2, 1.8, 7.0, 7.0, 1.1)
+    # testPeaks = ((1.0, 2.0, 0.0, 0.0, 1.0),
+    #              (1.0, 2.4, 2.0, 10.0, 1.7),
+    #              (2.5, 1.7, 10.0, 1.0, 1.7),
+    #              (4.2, 1.8, 7.0, 7.0, 1.1)
+    #              )
+    #
+    # testPeaks = ((3.5, 4.0, 0.0, 0.0, 1.0),
+    #              (3.0, 2.5, 2.0, 10.0, 2.0),
+    #              (2.5, 3.0, 10.0, 1.0, 2.0),
+    #              # (4.2, 1.8, 7.0, 7.0, 1.1)
+    #              )
+
+    # distinct peaks
+    plotMax = 20
+    plotRange = ((0, plotMax), (0, plotMax))
+    testPeaks = ((2.5, 2.5, 7.0, 7.0, 1.0),
+                 (2.5, 2.5, 13.0, 13.0, 1.25),
                  )
 
-    testPeaks = ((3.5, 4.0, 0.0, 0.0, 1.0),
-                 (3.0, 2.5, 2.0, 10.0, 2.0),
-                 (2.5, 3.0, 10.0, 1.0, 2.0),
-                 # (4.2, 1.8, 7.0, 7.0, 1.1)
-                 )
-
-    plotRange = ((0, 20), (0, 20))
-    testPeaks = ((2.2, 2.2, 7.0, 7.0, 1.0),
-                 (2.2, 2.2, 13.0, 13.0, 1.25),
+    # merged peaks
+    plotMax = 20
+    plotRange = ((0, plotMax), (0, plotMax))
+    testPeaks = ((2.5, 2.5, 8.0, 8.0, 1.0),
+                 (2.5, 2.5, 12.0, 12.0, 1.5),
                  )
 
     # h = 1.0
@@ -191,6 +200,10 @@ if __name__ == '__main__':
 
     peakPoints = Peak.findPeaks(dataArray, haveLow, haveHigh, low, high, buffer, nonadjacent, dropFactor, minLinewidth, [], [], [])
 
+    # OR use the data given
+
+    peakPoints = [((int(pp[2] * res/plotMax), int(pp[3]*res/plotMax)), pp[4]) for pp in testPeaks]
+
     print('number of peaks found = %d' % len(peakPoints))
     peakPoints.sort(key=itemgetter(1), reverse=True)
     for peak in peakPoints:
@@ -267,7 +280,7 @@ if __name__ == '__main__':
     ax = plt.axes(projection='3d')
     plt.axis('off')
     plt.grid(b=None)
-    ax.plot_wireframe(xm, ym, dataArray)
+    ax.plot_wireframe(xm, ym, dataArray, rcount=res, ccount=res)
 
     # make a plot
     fig = plt.figure(figsize=(10, 8), dpi=100)
@@ -282,7 +295,7 @@ if __name__ == '__main__':
     plt.axis('off')
     plt.grid(b=None)
     # ax.plot(xx, yy, zz, 'ro', alpha=0.5)
-    ax2.plot_wireframe(xm, ym, dataArraySigma)
+    ax2.plot_wireframe(xm, ym, dataArraySigma, rcount=res, ccount=res)
 
     peakPoints = [(np.array(position), height) for position, height in peakPoints]
 

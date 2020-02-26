@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-02-26 13:30:11 +0000 (Wed, February 26, 2020) $"
+__dateModified__ = "$dateModified: 2020-02-26 13:35:39 +0000 (Wed, February 26, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -263,7 +263,7 @@ if __name__ == '__main__':
 
         print('>>>1d testPeak', sigmax, sigmay, mx, my, h)
 
-        valsArrayFWHM = make_gauss(xxSig, sigmax/1.5, mx, h)
+        valsArrayFWHM = make_gauss(xxSig, sigmax/(2**0.5), mx, h)
         vals = np.add(vals, valsArrayFWHM)
 
         axS1.plot(xxSig, valsArrayFWHM)
@@ -370,7 +370,7 @@ if __name__ == '__main__':
 
         # x2, y2, _ = mplot3d.proj3d.proj_transform(1, 1, 1, ax.get_proj())
 
-        ax.text(*actualPos, height, ' %i: %.4f, %.4f, %.4f' % (peakNum, actualPos[0], actualPos[1], height), fontsize=20, zorder=40)
+        ax.text(*actualPos, height, ' x %.4f\n y %.4f\n h %.4f' % (actualPos[0], actualPos[1], height), fontsize=20, zorder=40)
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     # fit all peaks in individual operations (not correct)
@@ -402,7 +402,7 @@ if __name__ == '__main__':
             actualPos.append(mi + (centerGuess[dim] / (dataArray.shape[dim] - 1)) * ww)
 
         # x2, y2, _ = mplot3d.proj3d.proj_transform(1, 1, 1, ax2.get_proj())
-        ax2.text(*actualPos, height, ' %i: %.4f, %.4f, %.4f' % (peakNum, actualPos[0], actualPos[1], height), fontsize=20, zorder=40)
+        ax2.text(*actualPos, height, ' x %.4f\n y %.4f\n h %.4f' % (actualPos[0], actualPos[1], height), fontsize=20, zorder=40)
 
         # ax2.scatter(*actualPos, height, c='red', marker='+', s=500, linewidth=3, zorder=40)
         ax2.plot([actualPos[0]], [actualPos[1]], [height], c='mediumseagreen', marker=matplotlib.markers.CARETUPBASE, lw=1, ms=15, zorder=20)

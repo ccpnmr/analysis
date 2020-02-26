@@ -11,7 +11,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-02-25 18:27:47 +0000 (Tue, February 25, 2020) $"
+__dateModified__ = "$dateModified: 2020-02-26 16:21:23 +0000 (Wed, February 26, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -47,6 +47,7 @@ from ccpn.ui.gui.widgets.Frame import Frame
 from ccpn.util.nef import GenericStarParser, StarIo
 from ccpn.util.nef.GenericStarParser import SaveFrame, DataBlock, DataExtent, Loop, LoopRow
 from functools import partial
+from ccpn.core.lib.ContextManagers import undoBlock
 
 ############
 # Settings #

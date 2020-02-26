@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-02-26 13:39:00 +0000 (Wed, February 26, 2020) $"
+__dateModified__ = "$dateModified: 2020-02-26 16:21:23 +0000 (Wed, February 26, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -110,14 +110,21 @@ if __name__ == '__main__':
     #              # (4.2, 1.8, 7.0, 7.0, 1.1)
     #              )
 
-    # distinct peaks
+    # distinct peaks - discrete
     plotMax = 20
     plotRange = ((0, plotMax), (0, plotMax))
-    testPeaks = ((2.5, 2.5, 7.0, 7.0, 1.0),
-                 (2.5, 2.5, 13.0, 13.0, 1.25),
+    testPeaks = ((1.0, 1.0, 7.0, 7.0, 1.0),
+                 (1.0, 1.0, 13.0, 13.0, 1.25),
                  )
 
-    # merged peaks
+    # # distinct peaks - overlapped
+    # plotMax = 20
+    # plotRange = ((0, plotMax), (0, plotMax))
+    # testPeaks = ((2.5, 2.5, 7.0, 7.0, 1.0),
+    #              (2.5, 2.5, 13.0, 13.0, 1.25),
+    #              )
+
+    # merged peaks - only single maxima
     plotMax = 20
     plotRange = ((0, plotMax), (0, plotMax))
     testPeaks = ((2.5, 2.5, 8.0, 8.0, 1.0),
@@ -201,7 +208,7 @@ if __name__ == '__main__':
     peakPoints = Peak.findPeaks(dataArray, haveLow, haveHigh, low, high, buffer, nonadjacent, dropFactor, minLinewidth, [], [], [])
 
     # OR use the data given
-    peakPoints = [((int(pp[2] * res/plotMax), int(pp[3]*res/plotMax)), pp[4]) for pp in testPeaks]
+    # peakPoints = [((int(pp[2] * res/plotMax), int(pp[3]*res/plotMax)), pp[4]) for pp in testPeaks]
 
     print('number of peaks found = %d' % len(peakPoints))
     peakPoints.sort(key=itemgetter(1), reverse=True)
@@ -227,37 +234,38 @@ if __name__ == '__main__':
     limX = l1 * integralLimit * thisFWHM / 2.0
     limY = l2 * integralLimit * thisFWHM / 2.0
 
-    fig = plt.figure(figsize=(10, 8), dpi=100)
-    ax0 = fig.gca(projection='3d')
-    plotSigmaRange = ((0, limX), (0, limY))
-    xxS = np.linspace(*plotSigmaRange[0], numPoints)
-    yyS = np.linspace(*plotSigmaRange[1], numPoints)
-    xmS, ymS = np.meshgrid(xxS, yyS)
-    peakArrayFWHM = np.array(_gaussFWHM(xmS, ymS, sigmax=l1*sigmax, sigmay=l2*sigmax, mx=mx, my=mx, h=height), dtype=np.float32)
-    ax0.plot_wireframe(xmS, ymS, peakArrayFWHM)
+    # fig = plt.figure(figsize=(10, 8), dpi=100)
+    # ax0 = fig.gca(projection='3d')
+    # plotSigmaRange = ((0, limX), (0, limY))
+    # xxS = np.linspace(*plotSigmaRange[0], numPoints)
+    # yyS = np.linspace(*plotSigmaRange[1], numPoints)
+    # xmS, ymS = np.meshgrid(xxS, yyS)
+    # peakArrayFWHM = np.array(_gaussFWHM(xmS, ymS, sigmax=l1*sigmax, sigmay=l2*sigmax, mx=mx, my=mx, h=height), dtype=np.float32)
+    # ax0.plot_wireframe(xmS, ymS, peakArrayFWHM)
+    #
+    # # only need to use quadrant
+    # vol = 4.0*np.trapz(np.trapz(peakArrayFWHM, xxS), yyS)        # why does this work?
+    # print('>>>volume', vol)
+    #
+    # # make a 2d peak of unit height
+    # lim = integralLimit * thisFWHM / 2.0
+    # xxSig = np.linspace(0, lim, numPoints)
+    # vals = make_gauss(xxSig, sigmax, mx, 1.0)
+    # fig = plt.figure(figsize=(10, 8), dpi=100)
+    # axS = fig.gca()
+    # axS.plot(xxSig, vals)
+    # axS.grid()
 
-    # only need to use quadrant
-    vol = 4.0*np.trapz(np.trapz(peakArrayFWHM, xxS), yyS)        # why does this work?
-    print('>>>volume', vol)
 
-    # make a 2d peak of unit height
-    lim = integralLimit * thisFWHM / 2.0
-    xxSig = np.linspace(0, lim, numPoints)
-    vals = make_gauss(xxSig, sigmax, mx, 1.0)
-    fig = plt.figure(figsize=(10, 8), dpi=100)
-    axS = fig.gca()
-    axS.plot(xxSig, vals)
-    axS.grid()
-
-
-    # make a 2d peak of unit height
+    # make a 2d plot of the peaks contained in testPeaks
     lim = plotMax
     xxSig = np.linspace(0, lim, res)
 
+    colors = ('orange', 'green', 'pink', 'lightpurple')
     fig = plt.figure(figsize=(10, 8), dpi=100)
     axS1 = fig.gca()
     vals = np.zeros(shape=(res, ), dtype=np.float32)
-    for thisPeak in testPeaks:
+    for ii, thisPeak in enumerate(testPeaks):
 
         sigmax, sigmay, mx, my, h = thisPeak
 
@@ -266,7 +274,8 @@ if __name__ == '__main__':
         valsArrayFWHM = make_gauss(xxSig, sigmax/(2**0.5), mx, h)
         vals = np.add(vals, valsArrayFWHM)
 
-        axS1.plot(xxSig, valsArrayFWHM)
+        axS1.plot(xxSig, valsArrayFWHM, c=colors[ii])
+        axS1.axvline(linewidth=2, x=mx, c=colors[ii])
 
     axS1.plot(xxSig, vals)
     axS1.grid()
@@ -354,6 +363,7 @@ if __name__ == '__main__':
 
     result = Peak.fitPeaks(dataArray, regionArray, allPeaksArray, 0)
 
+    anno = ''
     for peakNum in range(len(result)):
         height, centerGuess, linewidth = result[peakNum]
 
@@ -370,11 +380,14 @@ if __name__ == '__main__':
 
         # x2, y2, _ = mplot3d.proj3d.proj_transform(1, 1, 1, ax.get_proj())
 
-        ax.text(*actualPos, height, ' x %.4f\n y %.4f\n h %.4f' % (actualPos[0], actualPos[1], height), fontsize=20, zorder=40)
+        anno += 'x: %.4f\ny: %.4f\nh: %.4f\n\n' % (actualPos[0], actualPos[1], height)
+        # ax.text(*actualPos, height, ' x %.4f\n y %.4f\n h %.4f' % (actualPos[0], actualPos[1], height), fontsize=20, zorder=40)
+    ax.text2D(0.2, 0.80, anno, fontSize=20, transform=ax.transAxes, ha='left', va='top')
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     # fit all peaks in individual operations (not correct)
 
+    anno = ''
     for peakNum, (position, _) in enumerate(peakPoints):
 
         numDim = len(position)
@@ -402,9 +415,11 @@ if __name__ == '__main__':
             actualPos.append(mi + (centerGuess[dim] / (dataArray.shape[dim] - 1)) * ww)
 
         # x2, y2, _ = mplot3d.proj3d.proj_transform(1, 1, 1, ax2.get_proj())
-        ax2.text(*actualPos, height, ' x %.4f\n y %.4f\n h %.4f' % (actualPos[0], actualPos[1], height), fontsize=20, zorder=40)
+        anno += 'x: %.4f\ny: %.4f\nh: %.4f\n\n' % (actualPos[0], actualPos[1], height)
+        # ax2.text(*actualPos, height, anno, fontsize=20, zorder=40)
 
         # ax2.scatter(*actualPos, height, c='red', marker='+', s=500, linewidth=3, zorder=40)
         ax2.plot([actualPos[0]], [actualPos[1]], [height], c='mediumseagreen', marker=matplotlib.markers.CARETUPBASE, lw=1, ms=15, zorder=20)
+    ax2.text2D(0.2, 0.80, anno, fontSize=20, transform=ax.transAxes, ha='left', va='top')
 
     plt.show()

@@ -11,7 +11,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-02-25 18:27:46 +0000 (Tue, February 25, 2020) $"
+__dateModified__ = "$dateModified: 2020-02-26 16:21:23 +0000 (Wed, February 26, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -47,6 +47,8 @@ from ccpn.ui.gui.widgets.Frame import Frame
 from ccpn.util.nef import GenericStarParser, StarIo
 from ccpn.util.nef.GenericStarParser import SaveFrame, DataBlock, DataExtent, Loop, LoopRow
 from functools import partial
+from ccpn.core.lib.ContextManagers import undoBlock
+from ccpn.util.decorators import logCommand
 
 ############
 # Settings #
@@ -163,7 +165,7 @@ class FilterNoisePeaksGuiPlugin(PluginModule):
         grid = _addColumn(grid)
         texts = ['Filter']
         tipTexts = [help['Filter']]
-        callbacks = [self._filterNoisePeaks]
+        callbacks = [self.filterNoiseButton]
         widget = ButtonList(parent=self.scrollAreaLayout, texts=texts, callbacks=callbacks, tipTexts=tipTexts, grid=grid, gridSpan=(1,2))
         _setWidgetProperties(widget,_setWidth(columnWidths,grid),heightType='Minimum')
 
@@ -272,6 +274,13 @@ class FilterNoisePeaksGuiPlugin(PluginModule):
 
         return lwDevFactor
 
+    @logCommand(get='self')
+    def filterNoiseButton(self):
+        """Call the filter function from the button
+        """
+        with undoBlock():
+            self._filterNoisePeaks()
+
     def _filterNoisePeaks(self):
         # Get values from the GUI widgets and save in the settings
         self._updateSettings(self.guiDict, self.settings)
@@ -375,7 +384,9 @@ class FilterNoisePeaksGuiPlugin(PluginModule):
         # The transition from peaks to noise peaks is where the derivative suddenly changes.
         # If the derivative changes more than n*SD of the average of the previous, this becomes the noise threshold.
 
+        noiseScoreThreshold = None
         derivatives = []
+
         for i in range(1,len(sortedPeakScores)-1):
             derivative = (sortedPeakScores[i-1][3] + sortedPeakScores[i+1][3])/2
             if len(derivatives) > minPeaks:
@@ -386,9 +397,15 @@ class FilterNoisePeaksGuiPlugin(PluginModule):
                     break
             derivatives.append(derivative)
 
-        # noiseScoreThreshold = numpy.mean(noiseScoreReferenceList) + 4 * numpy.std(noiseScoreReferenceList)
-        print (noiseScoreThreshold)
-        print (len(sortedPeakScores))
+        if not noiseScoreThreshold:
+            print('>> No threshold calculated')
+            return
+
+        npnoiseScoreThreshold = numpy.mean(noiseScoreReferenceList) + 4 * numpy.std(noiseScoreReferenceList)
+
+        print (">>>noiseScoreThreshold", noiseScoreThreshold)
+        print (">>>npnoiseScoreThreshold", npnoiseScoreThreshold)
+        print (">>>numPeakScores", len(sortedPeakScores))
         #spectrum = self._spectrumId2Spectrum(self.settings['Spectrum']['SpectrumId'])
         #spectrum.newPeakList()
         #newPeakList = spectrum.peakLists[-1]

@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-02-26 17:43:46 +0000 (Wed, February 26, 2020) $"
+__dateModified__ = "$dateModified: 2020-02-26 18:24:24 +0000 (Wed, February 26, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -111,15 +111,15 @@ if __name__ == '__main__':
     #              # (4.2, 1.8, 7.0, 7.0, 1.1)
     #              )
 
-    # # distinct peaks - discrete
-    # testPeaks = ((1.0, 1.0, 7.0, 7.0, 1.0),
-    #              (1.0, 1.0, 13.0, 13.0, 1.25),
-    #              )
+    # distinct peaks - discrete
+    testPeaks = ((1.0, 1.0, 7.0, 7.0, 1.0),
+                 (1.0, 1.0, 13.0, 13.0, 1.25),
+                 )
 
-    # # distinct peaks - overlapped
-    # testPeaks = ((2.5, 2.5, 7.0, 7.0, 1.0),
-    #              (2.5, 2.5, 13.0, 13.0, 1.25),
-    #              )
+    # distinct peaks - overlapped
+    testPeaks = ((2.5, 2.5, 7.0, 7.0, 1.0),
+                 (2.5, 2.5, 13.0, 13.0, 1.25),
+                 )
 
     # merged peaks - only single maxima
     testPeaks = ((2.5, 2.5, 8.0, 8.0, 1.0),

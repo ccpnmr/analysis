@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-02-26 13:13:02 +0000 (Wed, February 26, 2020) $"
+__dateModified__ = "$dateModified: 2020-02-26 13:30:11 +0000 (Wed, February 26, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -117,12 +117,12 @@ if __name__ == '__main__':
                  (2.5, 2.5, 13.0, 13.0, 1.25),
                  )
 
-    # merged peaks
-    plotMax = 20
-    plotRange = ((0, plotMax), (0, plotMax))
-    testPeaks = ((2.5, 2.5, 8.0, 8.0, 1.0),
-                 (2.5, 2.5, 12.0, 12.0, 1.5),
-                 )
+    # # merged peaks
+    # plotMax = 20
+    # plotRange = ((0, plotMax), (0, plotMax))
+    # testPeaks = ((2.5, 2.5, 8.0, 8.0, 1.0),
+    #              (2.5, 2.5, 12.0, 12.0, 1.5),
+    #              )
 
     # h = 1.0
     # x0 = 2.245
@@ -201,7 +201,6 @@ if __name__ == '__main__':
     peakPoints = Peak.findPeaks(dataArray, haveLow, haveHigh, low, high, buffer, nonadjacent, dropFactor, minLinewidth, [], [], [])
 
     # OR use the data given
-
     peakPoints = [((int(pp[2] * res/plotMax), int(pp[3]*res/plotMax)), pp[4]) for pp in testPeaks]
 
     print('number of peaks found = %d' % len(peakPoints))
@@ -250,6 +249,29 @@ if __name__ == '__main__':
     axS.plot(xxSig, vals)
     axS.grid()
 
+
+    # make a 2d peak of unit height
+    lim = plotMax
+    xxSig = np.linspace(0, lim, res)
+
+    fig = plt.figure(figsize=(10, 8), dpi=100)
+    axS1 = fig.gca()
+    vals = np.zeros(shape=(res, ), dtype=np.float32)
+    for thisPeak in testPeaks:
+
+        sigmax, sigmay, mx, my, h = thisPeak
+
+        print('>>>1d testPeak', sigmax, sigmay, mx, my, h)
+
+        valsArrayFWHM = make_gauss(xxSig, sigmax/1.5, mx, h)
+        vals = np.add(vals, valsArrayFWHM)
+
+        axS1.plot(xxSig, valsArrayFWHM)
+
+    axS1.plot(xxSig, vals)
+    axS1.grid()
+
+
     # test from peakTable
     # height = 1.32e6                           # sign doesn't matter
     # l1 = 21.9 / thisFWHM
@@ -295,15 +317,13 @@ if __name__ == '__main__':
     plt.axis('off')
     plt.grid(b=None)
     # ax.plot(xx, yy, zz, 'ro', alpha=0.5)
-    ax2.plot_wireframe(xm, ym, dataArraySigma, rcount=res, ccount=res)
+    # ax2.plot_wireframe(xm, ym, dataArraySigma, rcount=res, ccount=res)        # why?
+    ax2.plot_wireframe(xm, ym, dataArray, rcount=res, ccount=res)
 
     peakPoints = [(np.array(position), height) for position, height in peakPoints]
 
     allPeaksArray = None
     regionArray = None
-
-
-
 
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

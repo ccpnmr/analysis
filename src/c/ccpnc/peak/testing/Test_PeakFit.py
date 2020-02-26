@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-02-26 16:21:23 +0000 (Wed, February 26, 2020) $"
+__dateModified__ = "$dateModified: 2020-02-26 16:52:08 +0000 (Wed, February 26, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -124,12 +124,12 @@ if __name__ == '__main__':
     #              (2.5, 2.5, 13.0, 13.0, 1.25),
     #              )
 
-    # merged peaks - only single maxima
-    plotMax = 20
-    plotRange = ((0, plotMax), (0, plotMax))
-    testPeaks = ((2.5, 2.5, 8.0, 8.0, 1.0),
-                 (2.5, 2.5, 12.0, 12.0, 1.5),
-                 )
+    # # merged peaks - only single maxima
+    # plotMax = 20
+    # plotRange = ((0, plotMax), (0, plotMax))
+    # testPeaks = ((2.5, 2.5, 8.0, 8.0, 1.0),
+    #              (2.5, 2.5, 12.0, 12.0, 1.5),
+    #              )
 
     # h = 1.0
     # x0 = 2.245
@@ -309,9 +309,10 @@ if __name__ == '__main__':
     fig = plt.figure(figsize=(10, 8), dpi=100)
     # ax = fig.gca(projection='3d')
     ax = plt.axes(projection='3d')
+    ax.plot_wireframe(xm, ym, dataArray, rcount=res, ccount=res)
     plt.axis('off')
     plt.grid(b=None)
-    ax.plot_wireframe(xm, ym, dataArray, rcount=res, ccount=res)
+    plt.subplots_adjust(left=-0.1, right=1.1, top=1.2, bottom=-0.1)
 
     # make a plot
     fig = plt.figure(figsize=(10, 8), dpi=100)
@@ -323,17 +324,18 @@ if __name__ == '__main__':
     # testing new bit
     # fig = plt.figure(figsize=(8, 6))
     ax2 = plt.axes(projection='3d')
-    plt.axis('off')
-    plt.grid(b=None)
+
     # ax.plot(xx, yy, zz, 'ro', alpha=0.5)
     # ax2.plot_wireframe(xm, ym, dataArraySigma, rcount=res, ccount=res)        # why?
     ax2.plot_wireframe(xm, ym, dataArray, rcount=res, ccount=res)
+    plt.axis('off')
+    plt.grid(b=None)
+    plt.subplots_adjust(left=-0.1, right=1.1, top=1.2, bottom=-0.1)
 
     peakPoints = [(np.array(position), height) for position, height in peakPoints]
 
     allPeaksArray = None
     regionArray = None
-
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     # fit all peaks in single operation
@@ -382,7 +384,7 @@ if __name__ == '__main__':
 
         anno += 'x: %.4f\ny: %.4f\nh: %.4f\n\n' % (actualPos[0], actualPos[1], height)
         # ax.text(*actualPos, height, ' x %.4f\n y %.4f\n h %.4f' % (actualPos[0], actualPos[1], height), fontsize=20, zorder=40)
-    ax.text2D(0.2, 0.80, anno, fontSize=20, transform=ax.transAxes, ha='left', va='top')
+    ax.text2D(0.15, 0.8, anno, fontSize=16, transform=ax.transAxes, ha='left', va='top')
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     # fit all peaks in individual operations (not correct)
@@ -420,6 +422,12 @@ if __name__ == '__main__':
 
         # ax2.scatter(*actualPos, height, c='red', marker='+', s=500, linewidth=3, zorder=40)
         ax2.plot([actualPos[0]], [actualPos[1]], [height], c='mediumseagreen', marker=matplotlib.markers.CARETUPBASE, lw=1, ms=15, zorder=20)
-    ax2.text2D(0.2, 0.80, anno, fontSize=20, transform=ax.transAxes, ha='left', va='top')
+
+    ax2.text2D(0.15, 0.8, anno, fontSize=16, transform=ax.transAxes, ha='left', va='top')
+    # plt.axis('off')
+    # plt.grid(b=None)
+    # # plt.autoscale(tight=True)
+    # # plt.tight_layout()
+    # plt.subplots_adjust(left=-0.1, right=1.1, top=1.2, bottom=-0.1)
 
     plt.show()

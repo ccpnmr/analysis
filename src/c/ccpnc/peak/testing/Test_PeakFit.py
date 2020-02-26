@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-02-26 13:35:39 +0000 (Wed, February 26, 2020) $"
+__dateModified__ = "$dateModified: 2020-02-26 13:39:00 +0000 (Wed, February 26, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -117,12 +117,12 @@ if __name__ == '__main__':
                  (2.5, 2.5, 13.0, 13.0, 1.25),
                  )
 
-    # # merged peaks
-    # plotMax = 20
-    # plotRange = ((0, plotMax), (0, plotMax))
-    # testPeaks = ((2.5, 2.5, 8.0, 8.0, 1.0),
-    #              (2.5, 2.5, 12.0, 12.0, 1.5),
-    #              )
+    # merged peaks
+    plotMax = 20
+    plotRange = ((0, plotMax), (0, plotMax))
+    testPeaks = ((2.5, 2.5, 8.0, 8.0, 1.0),
+                 (2.5, 2.5, 12.0, 12.0, 1.5),
+                 )
 
     # h = 1.0
     # x0 = 2.245

@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-02-25 17:39:58 +0000 (Tue, February 25, 2020) $"
+__dateModified__ = "$dateModified: 2020-02-26 10:45:28 +0000 (Wed, February 26, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -31,6 +31,8 @@ import sys
 # from ccpnmodel.ccpncore.testing.CoreTesting import CoreTesting
 # from ccpnmodel.ccpncore.lib.ccp.nmr.Nmr import DataSource
 from ccpnc.peak import Peak
+
+REGIONOFFSET = 3
 
 
 class PeakFitTest():
@@ -106,6 +108,11 @@ if __name__ == '__main__':
                  (3.0, 2.5, 2.0, 10.0, 2.0),
                  (2.5, 3.0, 10.0, 1.0, 2.0),
                  # (4.2, 1.8, 7.0, 7.0, 1.1)
+                 )
+
+    plotRange = ((0, 20), (0, 20))
+    testPeaks = ((2.2, 2.2, 7.0, 7.0, 1.0),
+                 (2.2, 2.2, 13.0, 13.0, 1.25),
                  )
 
     # h = 1.0
@@ -258,7 +265,8 @@ if __name__ == '__main__':
     fig = plt.figure(figsize=(10, 8), dpi=100)
     # ax = fig.gca(projection='3d')
     ax = plt.axes(projection='3d')
-
+    plt.axis('off')
+    plt.grid(b=None)
     ax.plot_wireframe(xm, ym, dataArray)
 
     # make a plot
@@ -271,6 +279,8 @@ if __name__ == '__main__':
     # testing new bit
     # fig = plt.figure(figsize=(8, 6))
     ax2 = plt.axes(projection='3d')
+    plt.axis('off')
+    plt.grid(b=None)
     # ax.plot(xx, yy, zz, 'ro', alpha=0.5)
     ax2.plot_wireframe(xm, ym, dataArraySigma)
 
@@ -283,7 +293,6 @@ if __name__ == '__main__':
 
 
 
-
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     # fit all peaks in single operation
 
@@ -291,8 +300,8 @@ if __name__ == '__main__':
 
         numDim = len(position)
         numPointInt = np.array([dataArray.shape[1], dataArray.shape[0]])
-        firstArray = np.maximum(position - 3, 0)
-        lastArray = np.minimum(position + 4, numPointInt)
+        firstArray = np.maximum(position - REGIONOFFSET, 0)
+        lastArray = np.minimum(position + (REGIONOFFSET+1), numPointInt)
 
         if regionArray is not None:
             firstArray = np.minimum(firstArray, regionArray[0])
@@ -328,7 +337,7 @@ if __name__ == '__main__':
 
         # x2, y2, _ = mplot3d.proj3d.proj_transform(1, 1, 1, ax.get_proj())
 
-        ax.text(*actualPos, height, '  %i: %.4f, %.4f, %.4f' % (peakNum, actualPos[0], actualPos[1], height), fontsize=20, zorder=40)
+        ax.text(*actualPos, height, ' %i: %.4f, %.4f, %.4f' % (peakNum, actualPos[0], actualPos[1], height), fontsize=20, zorder=40)
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     # fit all peaks in individual operations (not correct)
@@ -337,8 +346,8 @@ if __name__ == '__main__':
 
         numDim = len(position)
         numPointInt = np.array([dataArray.shape[1], dataArray.shape[0]])
-        firstArray = np.maximum(position - 3, 0)
-        lastArray = np.minimum(position + 4, numPointInt)
+        firstArray = np.maximum(position - REGIONOFFSET, 0)
+        lastArray = np.minimum(position + (REGIONOFFSET+1), numPointInt)
 
         peakArrayFWHM = position.reshape((1, numDim))
         peakArrayFWHM = peakArrayFWHM.astype('float32')
@@ -360,7 +369,7 @@ if __name__ == '__main__':
             actualPos.append(mi + (centerGuess[dim] / (dataArray.shape[dim] - 1)) * ww)
 
         # x2, y2, _ = mplot3d.proj3d.proj_transform(1, 1, 1, ax2.get_proj())
-        ax2.text(*actualPos, height, '  %i: %.4f, %.4f, %.4f' % (peakNum, actualPos[0], actualPos[1], height), fontsize=20, zorder=40)
+        ax2.text(*actualPos, height, ' %i: %.4f, %.4f, %.4f' % (peakNum, actualPos[0], actualPos[1], height), fontsize=20, zorder=40)
 
         # ax2.scatter(*actualPos, height, c='red', marker='+', s=500, linewidth=3, zorder=40)
         ax2.plot([actualPos[0]], [actualPos[1]], [height], c='mediumseagreen', marker=matplotlib.markers.CARETUPBASE, lw=1, ms=15, zorder=20)

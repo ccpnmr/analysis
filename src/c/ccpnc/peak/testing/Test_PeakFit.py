@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-02-28 10:41:31 +0000 (Fri, February 28, 2020) $"
+__dateModified__ = "$dateModified: 2020-02-28 10:45:56 +0000 (Fri, February 28, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -246,11 +246,13 @@ if __name__ == '__main__':
     lim = 3 * integralLimit * thisFWHM / 2.0
     xxSig = np.linspace(-lim, lim, res)
     vals = make_gauss(xxSig, sigmax, mx, 1.0)
+    vals2 = make_gauss(xxSig, sigmax, mx-0.1, 1.0)
     noise = np.random.normal(0.0, 0.008, len(xxSig))
-    noisy = vals + noise
+    noisy = vals2 + noise
 
     fig = plt.figure(figsize=(10, 8), dpi=100)
     axS = fig.gca()
+
     axS.plot(xxSig, vals, label = 'Best Fit')
     axS.scatter(xxSig, vals, marker='x', s=200, linewidths=2, c='green')
 
@@ -262,7 +264,7 @@ if __name__ == '__main__':
     # ax.plot(a, c + d, 'k', label='Total message length')
     # legend = ax.legend(loc='upper center', shadow=True, fontsize='x-large')
 
-    legend = axS.legend(fontsize='large')
+    legend = axS.legend(fontsize='x-large')
 
     axS.grid()
 

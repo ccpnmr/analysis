@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-02-28 10:08:12 +0000 (Fri, February 28, 2020) $"
+__dateModified__ = "$dateModified: 2020-02-28 10:37:45 +0000 (Fri, February 28, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -237,19 +237,27 @@ if __name__ == '__main__':
     # xmS, ymS = np.meshgrid(xxS, yyS)
     # peakArrayFWHM = np.array(_gaussFWHM(xmS, ymS, sigmax=l1*sigmax, sigmay=l2*sigmax, mx=mx, my=mx, h=height), dtype=np.float32)
     # ax0.plot_wireframe(xmS, ymS, peakArrayFWHM)
-    #
+
     # # only need to use quadrant
     # vol = 4.0*np.trapz(np.trapz(peakArrayFWHM, xxS), yyS)        # why does this work?
     # print('>>>volume', vol)
     #
-    # # make a 2d peak of unit height
-    # lim = integralLimit * thisFWHM / 2.0
-    # xxSig = np.linspace(0, lim, numPoints)
-    # vals = make_gauss(xxSig, sigmax, mx, 1.0)
-    # fig = plt.figure(figsize=(10, 8), dpi=100)
-    # axS = fig.gca()
-    # axS.plot(xxSig, vals)
-    # axS.grid()
+    # make a 2d peak of unit height
+    lim = 3 * integralLimit * thisFWHM / 2.0
+    xxSig = np.linspace(-lim, lim, res)
+    vals = make_gauss(xxSig, sigmax, mx, 1.0)
+    noise = np.random.normal(0.0, 0.008, len(xxSig))
+    noisy = vals + noise
+
+    fig = plt.figure(figsize=(10, 8), dpi=100)
+    axS = fig.gca()
+    axS.plot(xxSig, vals)
+    axS.scatter(xxSig, vals, marker='x', s=200, linewidths=2, c='green')
+
+    axS.plot(xxSig, noisy)
+    axS.scatter(xxSig, noisy, marker='+', s=200, linewidths=2, c='red')
+
+    axS.grid()
 
     # make a 2d plot of the peaks contained in testPeaks
     lim = plotMax

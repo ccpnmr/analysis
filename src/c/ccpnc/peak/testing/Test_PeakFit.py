@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-02-26 18:24:24 +0000 (Wed, February 26, 2020) $"
+__dateModified__ = "$dateModified: 2020-02-28 10:08:12 +0000 (Fri, February 28, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -33,6 +33,7 @@ import sys
 from ccpnc.peak import Peak
 
 REGIONOFFSET = 4
+SETNOISE = 0.001
 
 
 class PeakFitTest():
@@ -94,7 +95,7 @@ if __name__ == '__main__':
     import matplotlib.cm as cm
 
 
-    res = 45
+    res = 99
     span = ((-(res // 2), res // 2), (-(res // 2), res // 2))
     plotMax = 20
     plotRange = ((0, plotMax), (0, plotMax))
@@ -116,15 +117,15 @@ if __name__ == '__main__':
                  (1.0, 1.0, 13.0, 13.0, 1.25),
                  )
 
-    # distinct peaks - overlapped
-    testPeaks = ((2.5, 2.5, 7.0, 7.0, 1.0),
-                 (2.5, 2.5, 13.0, 13.0, 1.25),
-                 )
-
-    # merged peaks - only single maxima
-    testPeaks = ((2.5, 2.5, 8.0, 8.0, 1.0),
-                 (2.5, 2.5, 12.0, 12.0, 1.5),
-                 )
+    # # distinct peaks - overlapped
+    # testPeaks = ((2.5, 2.5, 7.0, 7.0, 1.0),
+    #              (2.5, 2.5, 13.0, 13.0, 1.25),
+    #              )
+    #
+    # # merged peaks - only single maxima
+    # testPeaks = ((2.5, 2.5, 8.0, 8.0, 1.0),
+    #              (2.5, 2.5, 12.0, 12.0, 1.5),
+    #              )
 
     # h = 1.0
     # x0 = 2.245
@@ -258,6 +259,12 @@ if __name__ == '__main__':
     fig = plt.figure(figsize=(10, 8), dpi=100)
     axS1 = fig.gca()
     vals = np.zeros(shape=(res, ), dtype=np.float32)
+
+    if SETNOISE:
+        mean_noise = 0
+        target_noise_watts = SETNOISE
+        vals = np.random.normal(mean_noise, np.sqrt(target_noise_watts), len(xxSig))
+
     for ii, thisPeak in enumerate(testPeaks):
 
         sigmax, sigmay, mx, my, h = thisPeak

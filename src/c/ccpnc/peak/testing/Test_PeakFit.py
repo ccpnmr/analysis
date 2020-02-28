@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-02-28 10:37:45 +0000 (Fri, February 28, 2020) $"
+__dateModified__ = "$dateModified: 2020-02-28 10:41:31 +0000 (Fri, February 28, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -251,11 +251,18 @@ if __name__ == '__main__':
 
     fig = plt.figure(figsize=(10, 8), dpi=100)
     axS = fig.gca()
-    axS.plot(xxSig, vals)
+    axS.plot(xxSig, vals, label = 'Best Fit')
     axS.scatter(xxSig, vals, marker='x', s=200, linewidths=2, c='green')
 
-    axS.plot(xxSig, noisy)
+    axS.plot(xxSig, noisy, label = 'Original Signal')
     axS.scatter(xxSig, noisy, marker='+', s=200, linewidths=2, c='red')
+
+    # ax.plot(a, c, 'k--', label='Model length')
+    # ax.plot(a, d, 'k:', label='Data length')
+    # ax.plot(a, c + d, 'k', label='Total message length')
+    # legend = ax.legend(loc='upper center', shadow=True, fontsize='x-large')
+
+    legend = axS.legend(fontsize='large')
 
     axS.grid()
 

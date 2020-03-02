@@ -34,7 +34,7 @@ from ccpn.util.AttributeDict import AttributeDict
 from ccpn.util.traits.TraitBase import TraitBase
 from ccpn.util.traits.TraitJsonHandlerBase import TraitJsonHandlerBase
 from ccpn.util.traits.CcpNmrTraits import default, Dict
-from sandbox.Geerten.Refactored.logger import getLogger
+from ccpn.util.Logging import getLogger
 from sandbox.Geerten.Refactored.decorators import debug2Enter, debug3Enter, debug3Leave
 
 

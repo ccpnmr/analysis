@@ -55,7 +55,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-02-12 20:34:39 +0000 (Wed, February 12, 2020) $"
+__dateModified__ = "$dateModified: 2020-03-06 16:39:24 +0000 (Fri, March 06, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -200,6 +200,7 @@ class CcpnGLWidget(QOpenGLWidget):
     SHOWSPECTRUMONPHASING = True
     XAXES = GLDefs.XAXISUNITS
     YAXES = GLDefs.YAXISUNITS
+    AXIS_MOUSEYOFFSET = AXIS_MARGINBOTTOM + (0 if AXIS_INSIDE else AXIS_LINE)
 
     def __init__(self, strip=None, mainWindow=None, stripIDLabel=None, antiAlias=4):
         # TODO:ED add documentation
@@ -554,12 +555,12 @@ class CcpnGLWidget(QOpenGLWidget):
 
             # vp = self.viewports.getViewportFromWH(self._currentView, w, h)
             #
-            # # currentShader.setViewportMatrix(self._uVMatrix, 0, w - self.AXIS_MARGINRIGHT, 0, h - self.AXIS_MARGINBOTTOM,
+            # # currentShader.setViewportMatrix(self._uVMatrix, 0, w - self.AXIS_MARGINRIGHT, 0, h - self.AXIS_MOUSEYOFFSET,
             # #                                 -1.0, 1.0)
             # # self.pixelX = (self.axisR - self.axisL) / max((w - self.AXIS_MARGINRIGHT), 1)
-            # # self.pixelY = (self.axisT - self.axisB) / max((h - self.AXIS_MARGINBOTTOM), 1)
+            # # self.pixelY = (self.axisT - self.axisB) / max((h - self.AXIS_MOUSEYOFFSET), 1)
             # # self.deltaX = 1.0 / max((w - self.AXIS_MARGINRIGHT), 1)
-            # # self.deltaY = 1.0 / max((h - self.AXIS_MARGINBOTTOM), 1)
+            # # self.deltaY = 1.0 / max((h - self.AXIS_MOUSEYOFFSET), 1)
             #
             # currentShader.setViewportMatrix(self._uVMatrix, 0, vp.width, 0, vp.height,
             #                                 -1.0, 1.0)
@@ -596,11 +597,11 @@ class CcpnGLWidget(QOpenGLWidget):
 
             # vp = self.viewports.getViewportFromWH(self._currentView, w, h)
             #
-            # # currentShader.setViewportMatrix(self._uVMatrix, 0, w, 0, h - self.AXIS_MARGINBOTTOM, -1.0, 1.0)
+            # # currentShader.setViewportMatrix(self._uVMatrix, 0, w, 0, h - self.AXIS_MOUSEYOFFSET, -1.0, 1.0)
             # # self.pixelX = (self.axisR - self.axisL) / w
-            # # self.pixelY = (self.axisT - self.axisB) / max((h - self.AXIS_MARGINBOTTOM), 1)
+            # # self.pixelY = (self.axisT - self.axisB) / max((h - self.AXIS_MOUSEYOFFSET), 1)
             # # self.deltaX = 1.0 / w
-            # # self.deltaY = 1.0 / max((h - self.AXIS_MARGINBOTTOM), 1)
+            # # self.deltaY = 1.0 / max((h - self.AXIS_MOUSEYOFFSET), 1)
             #
             # currentShader.setViewportMatrix(self._uVMatrix, 0, w, 0, vp.height, -1.0, 1.0)
             # self.pixelX = (self.axisR - self.axisL) / w
@@ -657,7 +658,7 @@ class CcpnGLWidget(QOpenGLWidget):
         currentShader.setGLUniformMatrix4fv('pTexMatrix', 1, GL.GL_FALSE, self._uPMatrix)
 
         self._axisScale[0:4] = [self.pixelX, self.pixelY, 1.0, 1.0]
-        # self._view[0:4] = [w - self.AXIS_MARGINRIGHT, h - self.AXIS_MARGINBOTTOM, 1.0, 1.0]
+        # self._view[0:4] = [w - self.AXIS_MARGINRIGHT, h - self.AXIS_MOUSEYOFFSET, 1.0, 1.0]
         self._view[0:4] = [vp.width, vp.height, 1.0, 1.0]
 
         # self._axisScale[0:4] = [1.0/(self.axisR-self.axisL), 1.0/(self.axisT-self.axisB), 1.0, 1.0]
@@ -1239,7 +1240,7 @@ class CcpnGLWidget(QOpenGLWidget):
                 ax1 = self.pixelY
 
             width = (self.w - self.AXIS_MARGINRIGHT) if self._drawRightAxis else self.w
-            height = (self.h - self.AXIS_MARGINBOTTOM) if self._drawBottomAxis else self.h
+            height = (self.h - self.AXIS_MOUSEYOFFSET) if self._drawBottomAxis else self.h
 
             ratio = (height / width) * 0.5 * abs((self.axisL - self.axisR) * ax1 / ax0)
             self.axisB = mby + ratio * self.sign(self.axisB - mby)
@@ -1261,7 +1262,7 @@ class CcpnGLWidget(QOpenGLWidget):
                 ax1 = self.pixelY
 
             width = (self.w - self.AXIS_MARGINRIGHT) if self._drawRightAxis else self.w
-            height = (self.h - self.AXIS_MARGINBOTTOM) if self._drawBottomAxis else self.h
+            height = (self.h - self.AXIS_MOUSEYOFFSET) if self._drawBottomAxis else self.h
 
             ratio = (width / height) * 0.5 * abs((self.axisT - self.axisB) * ax0 / ax1)
             self.axisL = mbx + ratio * self.sign(self.axisL - mbx)
@@ -1997,6 +1998,7 @@ class CcpnGLWidget(QOpenGLWidget):
 
         # This is the correct blend function to ignore stray surface blending functions
         GL.glBlendFuncSeparate(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA, GL.GL_ONE, GL.GL_ONE)
+
         self.setBackgroundColour(self.background, silent=True)
         self.globalGL._shaderProgramTex.setBlendEnabled(0)
 
@@ -2200,7 +2202,7 @@ class CcpnGLWidget(QOpenGLWidget):
         if isinstance(pnt, QPoint):
             mx = pnt.x()
             if self._drawBottomAxis:
-                my = self.height() - pnt.y() - self.AXIS_MARGINBOTTOM
+                my = self.height() - pnt.y() - self.AXIS_MOUSEYOFFSET
             else:
                 my = self.height() - pnt.y()
 
@@ -2461,8 +2463,8 @@ class CcpnGLWidget(QOpenGLWidget):
 
         mx = ev.pos().x()
         if self._drawBottomAxis:
-            my = self.height() - ev.pos().y() - self.AXIS_MARGINBOTTOM
-            top = self.height() - self.AXIS_MARGINBOTTOM
+            my = self.height() - ev.pos().y() - self.AXIS_MOUSEYOFFSET
+            top = self.height() - self.AXIS_MOUSEYOFFSET
         else:
             my = self.height() - ev.pos().y()
             top = self.height()
@@ -2534,7 +2536,7 @@ class CcpnGLWidget(QOpenGLWidget):
 
         mx = ev.pos().x()
         if self._drawBottomAxis:
-            my = self.height() - ev.pos().y() - self.AXIS_MARGINBOTTOM
+            my = self.height() - ev.pos().y() - self.AXIS_MOUSEYOFFSET
         else:
             my = self.height() - ev.pos().y()
         self._mouseEnd = (mx, my)
@@ -2681,8 +2683,8 @@ class CcpnGLWidget(QOpenGLWidget):
         # calculate mouse coordinate within the mainView
         _mouseX = point.x()
         if self._drawBottomAxis:
-            _mouseY = self.height() - point.y() - self.AXIS_MARGINBOTTOM
-            _top = self.height() - self.AXIS_MARGINBOTTOM
+            _mouseY = self.height() - point.y() - self.AXIS_MOUSEYOFFSET
+            _top = self.height() - self.AXIS_MOUSEYOFFSET
         else:
             _mouseY = self.height() - point.y()
             _top = self.height()
@@ -3191,6 +3193,7 @@ class CcpnGLWidget(QOpenGLWidget):
 
         GL.glClear(GL.GL_COLOR_BUFFER_BIT)
         GL.glEnable(GL.GL_MULTISAMPLE)
+        GL.glColorMask(GL.GL_TRUE, GL.GL_TRUE, GL.GL_TRUE, GL.GL_TRUE)
 
         currentShader = self.globalGL._shaderProgram1.makeCurrent()
 
@@ -3280,7 +3283,12 @@ class CcpnGLWidget(QOpenGLWidget):
 
             GL.glEnable(GL.GL_COLOR_LOGIC_OP)
             GL.glLogicOp(GL.GL_INVERT)
+
+            # NOTE:ED needed to cure that strange pyqt5 window-mask
+            GL.glColorMask(GL.GL_TRUE, GL.GL_TRUE, GL.GL_TRUE, GL.GL_FALSE)
             self.drawCursors()
+            GL.glColorMask(GL.GL_TRUE, GL.GL_TRUE, GL.GL_TRUE, GL.GL_TRUE)
+
             GL.glDisable(GL.GL_COLOR_LOGIC_OP)
 
         currentShader = self.globalGL._shaderProgramTex.makeCurrent()
@@ -3302,7 +3310,7 @@ class CcpnGLWidget(QOpenGLWidget):
 
         # # use the current viewport matrix to display the last bit of the axes
         # currentShader = self.globalGL._shaderProgram1.makeCurrent()
-        # currentShader.setProjectionAxes(self._uVMatrix, 0, w - self.AXIS_MARGINRIGHT, -1, h - self.AXIS_MARGINBOTTOM,
+        # currentShader.setProjectionAxes(self._uVMatrix, 0, w - self.AXIS_MARGINRIGHT, -1, h - self.AXIS_MOUSEYOFFSET,
         #                                 -1.0, 1.0)
         #
         # self.viewports.setViewport(self._currentView)
@@ -3328,7 +3336,7 @@ class CcpnGLWidget(QOpenGLWidget):
         #
         #     if self._drawRightAxis:
         #         GL.glVertex2d(w - self.AXIS_MARGINRIGHT, 0)
-        #         GL.glVertex2d(w - self.AXIS_MARGINRIGHT, h - self.AXIS_MARGINBOTTOM)
+        #         GL.glVertex2d(w - self.AXIS_MARGINRIGHT, h - self.AXIS_MOUSEYOFFSET)
         #
         #     GL.glEnd()
 
@@ -4386,8 +4394,8 @@ class CcpnGLWidget(QOpenGLWidget):
             # calculate mouse coordinate within the mainView
             _mouseX = currentPos.x()
             if self._drawBottomAxis:
-                _mouseY = self.height() - currentPos.y() - self.AXIS_MARGINBOTTOM
-                _top = self.height() - self.AXIS_MARGINBOTTOM
+                _mouseY = self.height() - currentPos.y() - self.AXIS_MOUSEYOFFSET
+                _top = self.height() - self.AXIS_MOUSEYOFFSET
             else:
                 _mouseY = self.height() - currentPos.y()
                 _top = self.height()
@@ -5785,7 +5793,7 @@ class CcpnGLWidget(QOpenGLWidget):
 
         # check if the width is too small to draw too many grid levels
         boundX = (self.w - self.AXIS_MARGINRIGHT) if self._drawRightAxis else self.w
-        boundY = (self.h - self.AXIS_MARGINBOTTOM) if self._drawBottomAxis else self.h
+        boundY = (self.h - self.AXIS_MOUSEYOFFSET) if self._drawBottomAxis else self.h
         scaleBounds = (boundX, boundY)
 
         if gridGLList.renderMode == GLRENDERMODE_REBUILD:

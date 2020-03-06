@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-02-12 00:23:40 +0000 (Wed, February 12, 2020) $"
+__dateModified__ = "$dateModified: 2020-03-06 16:39:25 +0000 (Fri, March 06, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -598,6 +598,7 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
     SHOWSPECTRUMONPHASING = False
     XAXES = GLDefs.XAXISUNITS
     YAXES = YAXISUNITS1D
+    AXIS_MOUSEYOFFSET = AXIS_MARGINBOTTOM + (0 if AXIS_INSIDE else AXIS_LINE)
 
     def __init__(self, parent, spectrumDisplay=None, mainWindow=None, antiAlias=4):
 
@@ -837,7 +838,7 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
 
         # check if the width is too small to draw too many grid levels
         boundX = (self.w - self.AXIS_MARGINRIGHT) if self._drawRightAxis else self.w
-        boundY = (self.h - self.AXIS_MARGINBOTTOM) if self._drawBottomAxis else self.h
+        boundY = (self.h - self.AXIS_MOUSEYOFFSET) if self._drawBottomAxis else self.h
         scaleBounds = (boundX, boundY)
 
         if gridGLList.renderMode == GLRENDERMODE_REBUILD:
@@ -1392,7 +1393,7 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
 
         # # use the current viewport matrix to display the last bit of the axes
         # currentShader = self.globalGL._shaderProgram1.makeCurrent()
-        # currentShader.setProjectionAxes(self._uVMatrix, 0, w - self.AXIS_MARGINRIGHT, -1, h - self.AXIS_MARGINBOTTOM,
+        # currentShader.setProjectionAxes(self._uVMatrix, 0, w - self.AXIS_MARGINRIGHT, -1, h - self.AXIS_MOUSEYOFFSET,
         #                                 -1.0, 1.0)
         #
         # self.viewports.setViewport(self._currentView)
@@ -2559,8 +2560,8 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
             # calculate mouse coordinate within the mainView
             _mouseX = currentPos.x()
             if self._drawBottomAxis:
-                _mouseY = self.height() - currentPos.y() - self.AXIS_MARGINBOTTOM
-                _top = self.height() - self.AXIS_MARGINBOTTOM
+                _mouseY = self.height() - currentPos.y() - self.AXIS_MOUSEYOFFSET
+                _top = self.height() - self.AXIS_MOUSEYOFFSET
             else:
                 _mouseY = self.height() - currentPos.y()
                 _top = self.height()
@@ -2689,7 +2690,7 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
                 ax1 = self.pixelY
 
             # width = (self.w - self.AXIS_MARGINRIGHT) if self._drawRightAxis else self.w
-            # height = (self.h - self.AXIS_MARGINBOTTOM) if self._drawBottomAxis else self.h
+            # height = (self.h - self.AXIS_MOUSEYOFFSET) if self._drawBottomAxis else self.h
 
             width, height = self.spectrumDisplay.strips[0].mainViewSize()
 
@@ -2713,7 +2714,7 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
                 ax1 = self.pixelY
 
             # width = (self.w - self.AXIS_MARGINRIGHT) if self._drawRightAxis else self.w
-            # height = (self.h - self.AXIS_MARGINBOTTOM) if self._drawBottomAxis else self.h
+            # height = (self.h - self.AXIS_MOUSEYOFFSET) if self._drawBottomAxis else self.h
 
             width, height = self.spectrumDisplay.strips[0].mainViewSize()
 
@@ -2766,12 +2767,12 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
 
             # vp = self.viewports.getViewportFromWH(self._currentView, w, h)
             #
-            # # currentShader.setViewportMatrix(self._uVMatrix, 0, w - self.AXIS_MARGINRIGHT, 0, h - self.AXIS_MARGINBOTTOM,
+            # # currentShader.setViewportMatrix(self._uVMatrix, 0, w - self.AXIS_MARGINRIGHT, 0, h - self.AXIS_MOUSEYOFFSET,
             # #                                 -1.0, 1.0)
             # # self.pixelX = (self.axisR - self.axisL) / max((w - self.AXIS_MARGINRIGHT), 1)
-            # # self.pixelY = (self.axisT - self.axisB) / max((h - self.AXIS_MARGINBOTTOM), 1)
+            # # self.pixelY = (self.axisT - self.axisB) / max((h - self.AXIS_MOUSEYOFFSET), 1)
             # # self.deltaX = 1.0 / max((w - self.AXIS_MARGINRIGHT), 1)
-            # # self.deltaY = 1.0 / max((h - self.AXIS_MARGINBOTTOM), 1)
+            # # self.deltaY = 1.0 / max((h - self.AXIS_MOUSEYOFFSET), 1)
             #
             # currentShader.setViewportMatrix(self._uVMatrix, 0, vp.width, 0, vp.height,
             #                                 -1.0, 1.0)
@@ -2808,11 +2809,11 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
 
             # vp = self.viewports.getViewportFromWH(self._currentView, w, h)
             #
-            # # currentShader.setViewportMatrix(self._uVMatrix, 0, w, 0, h - self.AXIS_MARGINBOTTOM, -1.0, 1.0)
+            # # currentShader.setViewportMatrix(self._uVMatrix, 0, w, 0, h - self.AXIS_MOUSEYOFFSET, -1.0, 1.0)
             # # self.pixelX = (self.axisR - self.axisL) / w
-            # # self.pixelY = (self.axisT - self.axisB) / max((h - self.AXIS_MARGINBOTTOM), 1)
+            # # self.pixelY = (self.axisT - self.axisB) / max((h - self.AXIS_MOUSEYOFFSET), 1)
             # # self.deltaX = 1.0 / w
-            # # self.deltaY = 1.0 / max((h - self.AXIS_MARGINBOTTOM), 1)
+            # # self.deltaY = 1.0 / max((h - self.AXIS_MOUSEYOFFSET), 1)
             #
             # currentShader.setViewportMatrix(self._uVMatrix, 0, w, 0, vp.height, -1.0, 1.0)
             # self.pixelX = (self.axisR - self.axisL) / w
@@ -2869,7 +2870,7 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
         currentShader.setGLUniformMatrix4fv('pTexMatrix', 1, GL.GL_FALSE, self._uPMatrix)
 
         self._axisScale[0:4] = [self.pixelX, self.pixelY, 1.0, 1.0]
-        # self._view[0:4] = [w - self.AXIS_MARGINRIGHT, h - self.AXIS_MARGINBOTTOM, 1.0, 1.0]
+        # self._view[0:4] = [w - self.AXIS_MARGINRIGHT, h - self.AXIS_MOUSEYOFFSET, 1.0, 1.0]
         self._view[0:4] = [vp.width, vp.height, 1.0, 1.0]
 
         # self._axisScale[0:4] = [1.0/(self.axisR-self.axisL), 1.0/(self.axisT-self.axisB), 1.0, 1.0]
@@ -3109,3 +3110,4 @@ class GuiNdWidgetAxis(Gui1dWidgetAxis):
     SHOWSPECTRUMONPHASING = True
     XAXES = GLDefs.XAXISUNITS
     YAXES = GLDefs.YAXISUNITS
+    AXIS_MOUSEYOFFSET = AXIS_MARGINBOTTOM + (0 if AXIS_INSIDE else AXIS_LINE)

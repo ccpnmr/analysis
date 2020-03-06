@@ -55,7 +55,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-02-10 16:59:38 +0000 (Mon, February 10, 2020) $"
+__dateModified__ = "$dateModified: 2020-03-06 16:39:25 +0000 (Fri, March 06, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -146,9 +146,10 @@ class CcpnGLWidgetABC(QOpenGLWidget):
     """Widget to handle all visible spectra/peaks/integrals/multiplets
     """
     AXIS_MARGINRIGHT = 50
-    AXIS_MARGINBOTTOM = 24
+    AXIS_MARGINBOTTOM = 25
     AXIS_LINE = 7
     AXIS_OFFSET = 3
+    AXIS_INSIDE = False
     YAXISUSEEFORMAT = False
     INVERTXAXIS = True
     INVERTYAXIS = True
@@ -158,6 +159,7 @@ class CcpnGLWidgetABC(QOpenGLWidget):
     SHOWSPECTRUMONPHASING = True
     XAXES = GLDefs.XAXISUNITS
     YAXES = GLDefs.YAXISUNITS
+    AXIS_MOUSEYOFFSET = AXIS_MARGINBOTTOM + (0 if AXIS_INSIDE else AXIS_LINE)
 
     def __init__(self, parent=None, mainWindow=None, **kwds):
         super().__init__(parent=parent)
@@ -568,7 +570,7 @@ class CcpnGLWidgetABC(QOpenGLWidget):
 
         # use the current viewport matrix to display the last bit of the axes
         currentShader = self.globalGL._shaderProgram1.makeCurrent()
-        currentShader.setProjectionAxes(self._uVMatrix, 0, w - self.AXIS_MARGINRIGHT, -1, h - self.AXIS_MARGINBOTTOM,
+        currentShader.setProjectionAxes(self._uVMatrix, 0, w - self.AXIS_MARGINRIGHT, -1, h - self.AXIS_MOUSEYOFFSET,
                                         -1.0, 1.0)
 
         self.viewports.setViewport(self._currentView)
@@ -593,7 +595,7 @@ class CcpnGLWidgetABC(QOpenGLWidget):
 
         if self._drawRightAxis:
             GL.glVertex2d(w - self.AXIS_MARGINRIGHT, 0)
-            GL.glVertex2d(w - self.AXIS_MARGINRIGHT, h - self.AXIS_MARGINBOTTOM)
+            GL.glVertex2d(w - self.AXIS_MARGINRIGHT, h - self.AXIS_MOUSEYOFFSET)
 
         GL.glEnd()
 

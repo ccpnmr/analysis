@@ -55,7 +55,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-03-06 16:39:24 +0000 (Fri, March 06, 2020) $"
+__dateModified__ = "$dateModified: 2020-03-06 18:08:52 +0000 (Fri, March 06, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -3350,14 +3350,8 @@ class CcpnGLWidget(QOpenGLWidget):
         GL.glActiveTexture(GL.GL_TEXTURE1)
         GL.glBindTexture(GL.GL_TEXTURE_2D, self.getSmallFont(transparent=True).textureId)
 
-        # # specific blend function for text overlay
-        # GL.glBlendFuncSeparate(GL.GL_SRC_ALPHA, GL.GL_DST_COLOR, GL.GL_ONE, GL.GL_ONE)
-
     def disableTexture(self):
         GL.glDisable(GL.GL_BLEND)
-
-        # # reset blend function
-        # GL.glBlendFuncSeparate(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA, GL.GL_ONE, GL.GL_ONE)
 
     def buildAllContours(self):
         for spectrumView in self._ordering:  # strip.spectrumViews:

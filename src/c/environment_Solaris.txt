@@ -1,9 +1,10 @@
-PYTHON_DIR = <pythonDir, edit or inserted from compileCCode>
+# PYTHON_DIR WILL INSERT HERE
+# CONDA_ENV WILL INSERT HERE
 
 # should work if suitably edited for Linux, Irix, Solaris, OSX, Windows
 
 # general rules:
-# *_LIB = required library or libraries (use -l or equivalen)
+# *_LIB = required library or libraries (use -l or equivalent)
 # *_INCLUDE_FLAGS = where to find include files (use -I)
 # *_LIB_FLAGS = where to find libraries (use -L)
 
@@ -32,13 +33,10 @@ FPIC_FLAG = -fPIC
 # use below for everything without -fPIC option (e.g. Windows)
 #FPIC_FLAG =
 
-# disable warning messages flag
-NOWARNING_FLAG = -w
-
 # optimisation flag
 OPT_FLAG = -O
 
-CC_FLAGS = $(WIN_FLAG) $(OPT_FLAG) $(FPIC_FLAG) $(MALLOC_FLAG) $(NOWARNING_FLAG)
+CC_FLAGS = $(WIN_FLAG) $(OPT_FLAG) $(FPIC_FLAG) $(MALLOC_FLAG)
 LINK_FLAGS = $(WIN_FLAG) $(OPT_FLAG) $(FPIC_FLAG)
 
 # linking command for C libraries into Python world
@@ -55,21 +53,21 @@ PYTHON_VERSION = 3.5
 
 # for Unix do not seem to need PYTHON_LIB
 # for Windows seem to need below (or similar)
-#PYTHON_LIB = -lpython$(PYTHON_VERSION)m
+PYTHON_LIB = -lpython$(PYTHON_VERSION)m
 PYTHON_INCLUDE_FLAGS = -I$(PYTHON_DIR)/include/python$(PYTHON_VERSION)m -I$(PYTHON_DIR)/lib/python$(PYTHON_VERSION)/site-packages/numpy/core/include/numpy
 
 # for Unix do not seem to need PYTHON_LIB_FLAGS
-#PYTHON_LIB_FLAGS = -L$(PYTHON_DIR)/lib/python$(PYTHON_VERSION)/config-$(PYTHON_VERSION)m
+PYTHON_LIB_FLAGS = -L$(PYTHON_DIR)/lib/python$(PYTHON_VERSION)/config-$(PYTHON_VERSION)m
 
 # for Windows seem to need below (or similar)
 #PYTHON_LIB_FLAGS = -L$(PYTHON_DIR)/libs
 
 # shared library flags
 # use below for Linux or Irix
-SHARED_FLAGS = -shared
+#SHARED_FLAGS = -shared
 
 # use below for OSX
 #SHARED_FLAGS = -L$(PYTHON_DIR)/lib -bundle -bundle_loader $(PYTHON_DIR)/bin/python
 
 # use below for Solaris
-#SHARED_FLAGS = -G
+SHARED_FLAGS = -G

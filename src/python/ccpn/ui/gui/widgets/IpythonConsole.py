@@ -49,6 +49,10 @@ class IpythonConsole(Widget):
         super().__init__(parent=mainWindow, setLayout=True, **kwds)
         # Base._init(self, setLayout=True, **kwds)
 
+        # NOTE:ED - check that this is working for Linux/MacOS
+        import asyncio
+        asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+
         km = QtInProcessKernelManager()
         km.start_kernel()
         km.kernel.gui = 'qt4'

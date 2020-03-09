@@ -30,6 +30,7 @@ import sys
 import tarfile
 import tempfile
 import re
+import subprocess
 from PyQt5 import QtWidgets
 from distutils.dir_util import copy_tree
 from functools import partial
@@ -2872,11 +2873,11 @@ class Framework(NotifierBase):
     ###################################################################################################################
 
     def _systemOpen(self, path):
-        "Open path on system"
-        if 'linux' in sys.platform.lower():
-            os.system("xdg-open %s" % path)
+        """Open path on system"""
+        if 'win' in sys.platform.lower():
+            os.startfile(path)
         else:
-            os.system('open %s' % path)
+            subprocess.run(['open', path], check=True)
 
     def _showHtmlFile(self, title, path):
         "Displays html files in program QT viewer or using native webbrowser depending on useNativeWebbrowser option"

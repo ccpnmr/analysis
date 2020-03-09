@@ -192,7 +192,6 @@ if __name__ == '__main__':
     import sys
     from PyQt5 import QtGui, QtWidgets
 
-
     def myCallback(ph0, ph1, pivot, direction):
         print(ph0, ph1, pivot, direction)
 
@@ -207,4 +206,4 @@ if __name__ == '__main__':
     widget.show()
     widget.raise_()
 
-    sys.exit(qtApp.exec_())
+    os._exit(qtApp.exec_())

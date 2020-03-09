@@ -125,7 +125,7 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
         # Module area
         self.moduleArea = CcpnModuleArea(mainWindow=self)
         self._hiddenModules = CcpnModuleArea(mainWindow=self)
-        # self._hiddenModules.setVisible(False)
+        self._hiddenModules.setVisible(False)
 
         logger.debug('GuiMainWindow.moduleArea: layout: %s' % self.moduleArea.layout)  ## pyqtgraph object
         self.moduleArea.setGeometry(0, 0, 1000, 800)

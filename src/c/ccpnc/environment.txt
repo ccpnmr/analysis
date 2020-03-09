@@ -1,13 +1,16 @@
+# PYTHON_DIR WILL INSERT HERE
+# CONDA_ENV WILL INSERT HERE
+
 # should work if suitably edited for Linux, Irix, Solaris, OSX, Windows
 
 # Python interpreter root directory.
 # Use this line for building the c code from the command line
 # PYTHON_DIR = $(ANACONDA3)
 # Use this line for building the c code from within pycharm
-PYTHON_DIR = $(HOME)/Documents/PycharmProjects/Analysis3/ccpnv3/miniconda
+# PYTHON_DIR = $(HOME)/Documents/PycharmProjects/Analysis3/ccpnv3/miniconda
 
 # general rules:
-# *_LIB = required library or libraries (use -l or equivalen)
+# *_LIB = required library or libraries (use -l or equivalent)
 # *_INCLUDE_FLAGS = where to find include files (use -I)
 # *_LIB_FLAGS = where to find libraries (use -L)
 

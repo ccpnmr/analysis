@@ -262,7 +262,9 @@ class DropBase:
                     data[self.PIDS] = newPids
 
             elif event.mimeData().hasUrls():
-                filePaths = [url.path() for url in event.mimeData().urls()]
+                # NOTE:ED - not sure which is correct
+                # filePaths = [url.path() for url in event.mimeData().urls()]
+                filePaths = [url.toLocalFile() for url in event.mimeData().urls()]
                 data[self.URLS] = filePaths
 
             elif event.mimeData().hasText():

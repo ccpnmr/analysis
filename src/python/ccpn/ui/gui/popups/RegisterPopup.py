@@ -263,6 +263,7 @@ Please read and accept to continue using the software.
 
 if __name__ == '__main__':
     import sys
+    import os
 
     qtApp = QtWidgets.QApplication(['Test Register'])
 
@@ -273,4 +274,4 @@ if __name__ == '__main__':
     popup.show()
     popup.raise_()
 
-    sys.exit(qtApp.exec_())
+    os._exit(qtApp.exec_())

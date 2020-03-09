@@ -1374,6 +1374,9 @@ class CcpnGLWidget(QOpenGLWidget):
     def _rescaleAllZoom(self, rescale=True):
         """Reset the zoomto fit the spectra, including aspect checking
         """
+        if self.strip.isDeleted or self.strip._flaggedForDelete:
+            return
+
         _useFirstDefault = getattr(self.strip.spectrumDisplay, '_useFirstDefault', False)
         if (self._useLockedAspect or self._useDefaultAspect or _useFirstDefault):
 

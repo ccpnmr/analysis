@@ -80,5 +80,6 @@ if __name__ == '__main__':
   chemBuild = ChemBuildMain(None, fileName)
   chemBuild.show()
   
-  sys.exit(qtApp.exec_())
+  # sys.exit(qtApp.exec_())
+  os._exit(qtApp.exec_())
   

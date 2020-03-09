@@ -1,9 +1,10 @@
-PYTHON_DIR = /Users/ejb66/PycharmProjects/Git/AnalysisV3/miniconda
+# PYTHON_DIR WILL INSERT HERE
+# CONDA_ENV WILL INSERT HERE
 
 # should work if suitably edited for Linux, Irix, Solaris, OSX, Windows
 
 # general rules:
-# *_LIB = required library or libraries (use -l or equivalen)
+# *_LIB = required library or libraries (use -l or equivalent)
 # *_INCLUDE_FLAGS = where to find include files (use -I)
 # *_LIB_FLAGS = where to find libraries (use -L)
 

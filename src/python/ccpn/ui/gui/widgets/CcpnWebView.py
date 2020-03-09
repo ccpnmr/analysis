@@ -26,7 +26,8 @@ from PyQt5 import QtGui, QtWidgets, QtCore
 from PyQt5.QtCore import QUrl
 from PyQt5.QtWebEngineWidgets import QWebEngineView
 from ccpn.ui.gui.modules.CcpnModule import CcpnModule
-
+import os
+import posixpath
 
 class CcpnWebView(CcpnModule):
     className = 'CcpnWebView'
@@ -41,10 +42,18 @@ class CcpnWebView(CcpnModule):
 
         self.webView = QWebEngineView()
         self.addWidget(self.webView, 0, 0, 1, 1)  # make it the first item
+        # self.webView.loadFinished.connect(self._on_load_finished)
 
-        urlPath = 'file://' + urlPath  # webEngine needs to prefix
+        # NOTE:ED - need to remove windows separators
+        urlPath = urlPath.replace(os.sep, posixpath.sep)
+        # urlPath = 'file://' + urlPath  # webEngine needs to prefix
+
         self.webView.load(QUrl(urlPath))
         self.webView.show()
+
+    # def _on_load_finished(self, *args):
+    #     print('>>>_on_load_finished')
+    #     self.webView.show()
 
     # def _closeModule(self):
     #   """

@@ -147,7 +147,7 @@ class UpdatePopup(CcpnDialog, UpdateAgent):
 
 if __name__ == '__main__':
     import sys
-
+    import os
 
     qtApp = QtWidgets.QApplication(['Update'])
 
@@ -158,4 +158,4 @@ if __name__ == '__main__':
     popup.raise_()
     popup.show()
 
-    sys.exit(qtApp.exec_())
+    os._exit(qtApp.exec_())

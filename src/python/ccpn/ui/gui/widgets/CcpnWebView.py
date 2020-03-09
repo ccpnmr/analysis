@@ -1,7 +1,7 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -10,9 +10,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: CCPN $"
-__dateModified__ = "$dateModified: 2017-07-07 16:32:52 +0100 (Fri, July 07, 2017) $"
-__version__ = "$Revision: 3.0.0 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2020-03-09 19:05:49 +0000 (Mon, March 09, 2020) $"
+__version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -26,6 +26,7 @@ from PyQt5 import QtGui, QtWidgets, QtCore
 from PyQt5.QtCore import QUrl
 from PyQt5.QtWebEngineWidgets import QWebEngineView
 from ccpn.ui.gui.modules.CcpnModule import CcpnModule
+from ccpn.util.Common import isWindowsOS
 import os
 import posixpath
 
@@ -46,7 +47,8 @@ class CcpnWebView(CcpnModule):
 
         # NOTE:ED - need to remove windows separators
         urlPath = urlPath.replace(os.sep, posixpath.sep)
-        # urlPath = 'file://' + urlPath  # webEngine needs to prefix
+        if not isWindowsOS():
+            urlPath = 'file://' + urlPath  # webEngine needs to prefix
 
         self.webView.load(QUrl(urlPath))
         self.webView.show()

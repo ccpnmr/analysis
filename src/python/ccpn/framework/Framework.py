@@ -11,7 +11,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-02-12 11:08:41 +0000 (Wed, February 12, 2020) $"
+__dateModified__ = "$dateModified: 2020-03-09 19:05:49 +0000 (Mon, March 09, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -58,7 +58,7 @@ from ccpn.ui.gui.lib.GuiSpectrumView import _createdSpectrumView
 from ccpn.util import Logging
 from ccpn.util import Path
 from ccpn.util.AttrDict import AttrDict
-from ccpn.util.Common import uniquify
+from ccpn.util.Common import uniquify, isWindowsOS
 from ccpn.util.Logging import getLogger
 from ccpn.util import Layout
 from ccpn.ui.gui.Gui import Gui
@@ -2874,7 +2874,7 @@ class Framework(NotifierBase):
 
     def _systemOpen(self, path):
         """Open path on system"""
-        if 'win' in sys.platform.lower():
+        if isWindowsOS():
             os.startfile(path)
         else:
             subprocess.run(['open', path], check=True)

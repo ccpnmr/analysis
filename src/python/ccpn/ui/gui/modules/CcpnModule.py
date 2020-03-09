@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-01-28 16:27:16 +0000 (Tue, January 28, 2020) $"
-__version__ = "$Revision: 3.0.0 $"
+__dateModified__ = "$dateModified: 2020-03-09 23:44:10 +0000 (Mon, March 09, 2020) $"
+__version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -356,35 +356,35 @@ class CcpnModule(Dock, DropBase, NotifierBase):
     #     else:
     #         super(CcpnModule, self).event(event)
 
-    @property
-    def titleBarHidden(self):
-        return self.labelHidden
-
-    @titleBarHidden.setter
-    def titleBarHidden(self, hidden):
-        if hidden:
-            self.hideTitleBar()
-        else:
-            self.showTitleBar()
-
-    #GST super class show and hide titlebar have central as an allowed area we don't use it
-    #    so remove it as a choice
-    def hideTitleBar(self):
-        """
-        Hide the title bar for this Dock.
-        This will prevent the Dock being moved by the user.
-        """
-        self.label.hide()
-        self.labelHidden = True
-        self.updateStyle()
-
-    def showTitleBar(self):
-        """
-        Show the title bar for this Dock.
-        """
-        self.label.show()
-        self.labelHidden = False
-        self.updateStyle()
+    # @property
+    # def titleBarHidden(self):
+    #     return self.labelHidden
+    #
+    # @titleBarHidden.setter
+    # def titleBarHidden(self, hidden):
+    #     if hidden:
+    #         self.hideTitleBar()
+    #     else:
+    #         self.showTitleBar()
+    #
+    # #GST super class show and hide titlebar have central as an allowed area we don't use it
+    # #    so remove it as a choice
+    # def hideTitleBar(self):
+    #     """
+    #     Hide the title bar for this Dock.
+    #     This will prevent the Dock being moved by the user.
+    #     """
+    #     self.label.hide()
+    #     self.labelHidden = True
+    #     self.updateStyle()
+    #
+    # def showTitleBar(self):
+    #     """
+    #     Show the title bar for this Dock.
+    #     """
+    #     self.label.show()
+    #     self.labelHidden = False
+    #     self.updateStyle()
 
     def getDockArea(self, target=None):
         if target is None:
@@ -398,109 +398,109 @@ class CcpnModule(Dock, DropBase, NotifierBase):
             current = current.parent()
         return current
 
-    def getDock(self, target=None):
-        if target is None:
-            current = self
-        else:
-            current = target
-
-        while current.parent() != None:
-            if isinstance(current, Dock):
-                break
-            current = current.parent()
-
-        if not isinstance(current, Dock):
-            current = None
-        return current
-
-    def docksByDockArea(self):
-        result = {}
-        docks = list(self.area.docks.values())
-        for dock in docks:
-            parent = dock.getDockArea()
-            result.setdefault(parent, []).append(dock)
-        return result
-
-    def float(self):
-        if self.maximised:
-            self.toggleMaximised()
-        super().float()
-
-    def mergeState(self, state):
-        result = self.getHome().saveState(docksOnly=True)
-
-        if state['main'] != None:
-            result['main'] = state['main']
-
-        if len(state['floats']) != 0:
-            toMerge = state['floats'][0]
-            mergeId = toMerge[2]['id']
-
-            for i, currentState in enumerate(result['floats']):
-                currentId = currentState[2]['id']
-
-                if currentId == mergeId:
-                    result['floats'][i] = toMerge
-
-        return result
-
-    def filterState(self, state, id_):
-
-        result = {'main': None, 'floats': []}
-
-        if state['main'][2]['id'] == id_:
-            result['main'] = state['main']
-
-        for float in state['floats']:
-            if float[2]['id'] == id_:
-                result['floats'].append(float)
-
-        return result
-
-    def getDocksInParentArea(self):
-        return self.docksByDockArea()[self.getDockArea()]
-
-    def getHome(self):
-        result = self.area
-        if self.area.home != None:
-            result = self.area.home
-        return result
-
-    def toggleMaximised(self):
-
-        docks = self.getDocksInParentArea()
-
-        if len(docks) < 2:
-            self.maximised = False
-            self.maximiseRestoreState = None
-        elif self.maximised:
-            dockArea = self.getDockArea()
-            dockAreaId = id(dockArea)
-            state = self.mergeState(self.maximiseRestoreState)
-            if (self.area.home):
-                self.area.home.restoreState(state)
-            else:
-                self.area.restoreState(state)
-            for dock in docks:
-                dock.showTitleBar()
-            self.maximised = False
-            self.maximiseRestoreState = None
-        else:
-            state = self.getHome().saveState(docksOnly=True)
-            dockArea = self.getDockArea()
-            dockAreaId = id(dockArea)
-            state = self.filterState(state, dockAreaId)
-            self.maximiseRestoreState = state
-
-            docks = self.docksByDockArea()[self.getDockArea()]
-            docks.remove(self)
-            for dock in docks:
-                dock.hideTitleBar()
-                self.area.moveDock(dock, 'below', self)
-
-            self._container.raiseDock(self)
-
-            self.maximised = True
+    # def getDock(self, target=None):
+    #     if target is None:
+    #         current = self
+    #     else:
+    #         current = target
+    #
+    #     while current.parent() != None:
+    #         if isinstance(current, Dock):
+    #             break
+    #         current = current.parent()
+    #
+    #     if not isinstance(current, Dock):
+    #         current = None
+    #     return current
+    #
+    # def docksByDockArea(self):
+    #     result = {}
+    #     docks = list(self.area.docks.values())
+    #     for dock in docks:
+    #         parent = dock.getDockArea()
+    #         result.setdefault(parent, []).append(dock)
+    #     return result
+    #
+    # def float(self):
+    #     if self.maximised:
+    #         self.toggleMaximised()
+    #     super().float()
+    #
+    # def mergeState(self, state):
+    #     result = self.getHome().saveState(docksOnly=True)
+    #
+    #     if state['main'] != None:
+    #         result['main'] = state['main']
+    #
+    #     if len(state['floats']) != 0:
+    #         toMerge = state['floats'][0]
+    #         mergeId = toMerge[2]['id']
+    #
+    #         for i, currentState in enumerate(result['floats']):
+    #             currentId = currentState[2]['id']
+    #
+    #             if currentId == mergeId:
+    #                 result['floats'][i] = toMerge
+    #
+    #     return result
+    #
+    # def filterState(self, state, id_):
+    #
+    #     result = {'main': None, 'floats': []}
+    #
+    #     if state['main'][2]['id'] == id_:
+    #         result['main'] = state['main']
+    #
+    #     for float in state['floats']:
+    #         if float[2]['id'] == id_:
+    #             result['floats'].append(float)
+    #
+    #     return result
+    #
+    # def getDocksInParentArea(self):
+    #     return self.docksByDockArea()[self.getDockArea()]
+    #
+    # def getHome(self):
+    #     result = self.area
+    #     if self.area.home != None:
+    #         result = self.area.home
+    #     return result
+    #
+    # def toggleMaximised(self):
+    #
+    #     docks = self.getDocksInParentArea()
+    #
+    #     if len(docks) < 2:
+    #         self.maximised = False
+    #         self.maximiseRestoreState = None
+    #     elif self.maximised:
+    #         dockArea = self.getDockArea()
+    #         dockAreaId = id(dockArea)
+    #         state = self.mergeState(self.maximiseRestoreState)
+    #         if (self.area.home):
+    #             self.area.home.restoreState(state)
+    #         else:
+    #             self.area.restoreState(state)
+    #         for dock in docks:
+    #             dock.showTitleBar()
+    #         self.maximised = False
+    #         self.maximiseRestoreState = None
+    #     else:
+    #         state = self.getHome().saveState(docksOnly=True)
+    #         dockArea = self.getDockArea()
+    #         dockAreaId = id(dockArea)
+    #         state = self.filterState(state, dockAreaId)
+    #         self.maximiseRestoreState = state
+    #
+    #         docks = self.docksByDockArea()[self.getDockArea()]
+    #         docks.remove(self)
+    #         for dock in docks:
+    #             dock.hideTitleBar()
+    #             self.area.moveDock(dock, 'below', self)
+    #
+    #         self._container.raiseDock(self)
+    #
+    #         self.maximised = True
 
     def _findChildren(self, widget):
         for i in widget.children():
@@ -1164,14 +1164,14 @@ class CcpnModuleLabel(DockLabel):
             contextMenu.addAction('Close Others', partial(self.module.mainWindow.moduleArea._closeOthers, self.module))
             contextMenu.addAction('Close All', self.module.mainWindow.moduleArea._closeAll)
 
-        numDocks = len(self.module.getDocksInParentArea())
-
-        if not self.module.maximised and numDocks > 1:
-            contextMenu.addAction('Maximise', self.module.toggleMaximised)
-        elif self.module.maximised:
-            contextMenu.addAction('Restore', self.module.toggleMaximised)
-
-        contextMenu.addAction('Float', self.module.float)
+        # numDocks = len(self.module.getDocksInParentArea())
+        #
+        # if not self.module.maximised and numDocks > 1:
+        #     contextMenu.addAction('Maximise', self.module.toggleMaximised)
+        # elif self.module.maximised:
+        #     contextMenu.addAction('Restore', self.module.toggleMaximised)
+        #
+        # contextMenu.addAction('Float', self.module.float)
 
         return contextMenu
 
@@ -1249,8 +1249,10 @@ class CcpnModuleLabel(DockLabel):
         QtCore.QTimer.singleShot(QtWidgets.QApplication.instance().doubleClickInterval() * 2,
                                  self._resetDoubleClick)
 
-        if ev.button() == QtCore.Qt.LeftButton:
-            self.dock.toggleMaximised()
+        super(CcpnModuleLabel, self).mouseDoubleClickEvent(ev)
+
+        # if ev.button() == QtCore.Qt.LeftButton:
+        #     self.dock.toggleMaximised()
 
     def _resetDoubleClick(self):
         """reset the double click flag

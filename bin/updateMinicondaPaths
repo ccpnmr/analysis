@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 # Configure the paths inside the release miniconda directory
 
-export CCPNMR_TOP_DIR="$(cd "$(dirname "$0")/.." || exit; pwd)"
+CCPNMR_TOP_DIR="$(cd "$(dirname "$0")/.." || exit; pwd)"
+export CCPNMR_TOP_DIR
 CONVERT="${CCPNMR_TOP_DIR}"/src/python/ccpn/util/convertPaths.py
 
 ROOT="${HOME}/release/ccpnmr3.0.0/miniconda"

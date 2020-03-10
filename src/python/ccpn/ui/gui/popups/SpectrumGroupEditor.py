@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-02-06 18:27:17 +0000 (Thu, February 06, 2020) $"
+__dateModified__ = "$dateModified: 2020-03-10 02:13:11 +0000 (Tue, March 10, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -519,7 +519,7 @@ class SpectrumGroupEditor(_GroupEditorPopupABC):
                     aTab._copySpectrumAttributes(fromSpectrumTab)
 
 
-class SeriesFrame(Widget):
+class SeriesFrame(Frame):
     EDITMODE = False
 
     def __init__(self, parent=None, mainWindow=None, spectrumGroup=None, editMode=False,
@@ -624,6 +624,10 @@ class SeriesFrame(Widget):
         Spacer(self, 1, 1, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding,
                grid=(row, col + 2))
         self.getLayout().setRowStretch(row, 10)
+
+        # set the background to transparent so matches the colour of the tab
+        self.setAutoFillBackground(False)
+        self.setStyleSheet('Frame { background: transparent; }')
 
         # get colours from the lineEdit and copy to the plainTextEdit
         # yourWidget.palette().highlight().color().name()?

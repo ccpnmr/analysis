@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-01-28 10:04:26 +0000 (Tue, January 28, 2020) $"
-__version__ = "$Revision: 3.0.0 $"
+__dateModified__ = "$dateModified: 2020-03-10 01:57:06 +0000 (Tue, March 10, 2020) $"
+__version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -51,7 +51,8 @@ HORIZONTAL = 'horizontal'
 VERTICAL = 'vertical'
 ORIENTATIONLIST = (HORIZONTAL, VERTICAL)
 DEFAULTSPACING = 3
-DEFAULTMARGINS = (24, 8, 24, 18)
+# DEFAULTMARGINS = (24, 8, 24, 18)
+DEFAULTMARGINS = (14, 14, 14, 14)
 GETCHANGESDICT = 'getChangesDict'
 
 

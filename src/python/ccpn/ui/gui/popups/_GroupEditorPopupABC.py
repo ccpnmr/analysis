@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-01-28 16:27:17 +0000 (Tue, January 28, 2020) $"
-__version__ = "$Revision: 3.0.0 $"
+__dateModified__ = "$dateModified: 2020-03-10 01:57:06 +0000 (Tue, March 10, 2020) $"
+__version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -220,6 +220,8 @@ class _ListWidget(ListWidget):
             self._itemFactory = DefaultItemFactory()
 
         self._feedbackWidget.highlight(False)
+
+        self.setMinimumSize(256, 64)
 
     def startDrag(self, *args, **kwargs):
         super().startDrag(*args, **kwargs)

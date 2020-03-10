@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-02-12 00:23:40 +0000 (Wed, February 12, 2020) $"
+__dateModified__ = "$dateModified: 2020-03-10 01:57:05 +0000 (Tue, March 10, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -245,6 +245,7 @@ class GuiSpectrumDisplay(CcpnModule):
                                                                     _useDefaultAspectRatio=self.application.preferences.general.useDefaultAspectRatio)
 
         self._spectrumDisplaySettings.settingsChanged.connect(self._settingsChanged)
+        self.settingsWidget.setSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum)
 
         # respond to values changed in the containing spectrumDisplay settings widget
         self._spectrumDisplaySettings.stripArrangementChanged.connect(self._stripDirectionChangedInSettings)

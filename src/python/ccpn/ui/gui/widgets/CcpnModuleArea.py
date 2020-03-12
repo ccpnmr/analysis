@@ -11,7 +11,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-03-09 23:44:10 +0000 (Mon, March 09, 2020) $"
+__dateModified__ = "$dateModified: 2020-03-12 16:55:42 +0000 (Thu, March 12, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -507,7 +507,7 @@ class CcpnModuleArea(ModuleArea, DropBase):
         if 'version' in state:
             version = state['version']
             floatContainer='floats'
-            getLogger().info('Reading from V%s layout format.' % version )
+            getLogger().debug('Reading from V%s layout format.' % version )
 
         if 'main' in state:
             ## 1) make dict of all docks and list of existing containers

@@ -55,7 +55,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-03-06 18:08:52 +0000 (Fri, March 06, 2020) $"
+__dateModified__ = "$dateModified: 2020-03-12 11:47:57 +0000 (Thu, March 12, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -3181,8 +3181,11 @@ class CcpnGLWidget(QOpenGLWidget):
             GL.glLogicOp(GL.GL_INVERT)
 
             self.buildCursors()
+
+            GL.glColorMask(GL.GL_TRUE, GL.GL_TRUE, GL.GL_TRUE, GL.GL_FALSE)
             self.drawLastCursors()
             self.drawCursors()
+            GL.glColorMask(GL.GL_TRUE, GL.GL_TRUE, GL.GL_TRUE, GL.GL_TRUE)
 
             GL.glDisable(GL.GL_COLOR_LOGIC_OP)
 

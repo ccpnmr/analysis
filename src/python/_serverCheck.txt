@@ -1,1 +1,1 @@
-# Check that updates can be downloaded from the server
+# Check that updates can be downloaded from the server - check 2

@@ -59,7 +59,7 @@ import string
 def askData(func_type, prompt, initial_value, min_value = None, max_value = None):
 
   assert func_type in ('string', 'integer', 'float')
-  if (initial_value is not ''):
+  if (initial_value != ''):
     s = ' [' + str(initial_value) + ']'
   else:
     s = ''
@@ -71,7 +71,7 @@ def askData(func_type, prompt, initial_value, min_value = None, max_value = None
     done = 1 # true for most cases below, so set it here
     answer = input(prompt)
     answer = answer.strip()
-    if (initial_value is not '' and not answer):
+    if (initial_value != '' and not answer):
       answer = initial_value
 
     if (answer):

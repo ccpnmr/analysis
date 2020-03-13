@@ -31,7 +31,7 @@ import os
 import shutil
 import sys
 from datetime import datetime
-
+import json
 
 ccpn2Url = 'http://www.ccpn.ac.uk'
 
@@ -196,7 +196,8 @@ class UpdateFile:
                  fileStoredAs=None, fileHashCode=None, shouldInstall=True, shouldCommit=False,
                  isNew=False, serverDownloadScript=None, serverUploadScript=None):
 
-        self.fullFilePath = os.path.join(installLocation, filePath)
+        # self.fullFilePath = os.path.join(installLocation, filePath)
+        self.fullFilePath = os.path.abspath(os.path.join(installLocation, filePath))
 
         if fileServerTime:
             fileServerTime = float(fileServerTime)  # from server it comes as a string
@@ -256,8 +257,33 @@ class UpdateFile:
                     except OSError:
                         pass
                 else:
+                    lastHashCode = calcHashCode(fullFilePath) if os.path.isfile(fullFilePath) else '<None>'
                     with open(fullFilePath, 'w', encoding='utf-8') as fp:
                         fp.write(data)
+
+                    try:
+                        # generate the hashcode for the new file here
+                        currentHashCode = calcHashCode(fullFilePath)
+                        serverHashCode = self.fileHashCode
+                        _hashCodeCacheFolder = os.path.abspath(os.path.join(self.installLocation, '.cache'))
+                        _hashCodeCache = os.path.join(_hashCodeCacheFolder, '_hashCodeCache.txt')
+                        if not os.path.exists(_hashCodeCache):
+                            os.makedirs(_hashCodeCacheFolder)
+                            data = {}
+                        else:
+                            with open(_hashCodeCache) as fp:
+                                data = json.load(fp)
+                        if currentHashCode != serverHashCode:
+                            # should only store for windows
+                            data[currentHashCode] = serverHashCode
+                        if lastHashCode in data:
+                            del data[lastHashCode]
+                        with open(_hashCodeCache, 'w') as fp:
+                            json.dump(data, fp)
+
+                    except Exception as es:
+                        # NOTE:ED - ignore for now
+                        pass
 
         except Exception as es:
             pass
@@ -384,6 +410,21 @@ class UpdateAgent(object):
         currentFilePath = os.path.join(self.installLocation, filePath)
         if os.path.exists(currentFilePath):
             currentHashCode = calcHashCode(currentFilePath)
+
+            # get the translated hashcode from the json file in the .cache folder
+            try:
+                _hashCodeCacheFolder = os.path.abspath(os.path.join(self.installLocation, '.cache'))
+                _hashCodeCache = os.path.join(_hashCodeCacheFolder, '_hashCodeCache.txt')
+                if os.path.exists(_hashCodeCache):
+                    with open(_hashCodeCache) as fp:
+                        data = json.load(fp)
+                else:
+                    data = {}
+            except Exception as es:
+                data = {}
+            if currentHashCode in data:
+                currentHashCode = data[currentHashCode]
+
             isDifferent = (currentHashCode != fileHashCode)
         # below means that updates in new directories will be missed
         elif os.path.exists(os.path.dirname(currentFilePath)):

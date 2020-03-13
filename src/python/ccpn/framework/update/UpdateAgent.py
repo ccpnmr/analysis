@@ -96,7 +96,8 @@ def downloadFile(serverScript, serverDbRoot, fileName):
     """
     from ccpn.util.Url import fetchHttpResponse
 
-    fileName = os.path.join(serverDbRoot, fileName)
+    # fileName = os.path.join(serverDbRoot, fileName)
+    fileName = '/'.join([serverDbRoot, fileName])
 
     try:
         values = {'fileName': fileName}

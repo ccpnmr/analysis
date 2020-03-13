@@ -520,45 +520,49 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
     def _loadProjectSingleTry(self, projectDir):
         """Load/Reload project after load dialog.
         """
-        project = self.application.loadProject(projectDir)
+        from ccpn.ui.gui.widgets.MessageDialog import showWarning
 
-        if project:
-            project._mainWindow.sideBar.buildTree(project)
-            project._mainWindow.show()
-            QtWidgets.QApplication.setActiveWindow(project._mainWindow)
+        try:
+            project = self.application.loadProject(projectDir)
 
-            # if the new project contains invalid spectra then open the popup to see them
-            # badSpectra = [str(spectrum) for spectrum in project.spectra if not spectrum.isValidPath]
-            badSpectra = []
-            for spectrum in project.spectra:
-                valid = False
-                try:
-                    valid = spectrum.isValidPath        # can raise error if None
-                except:
-                    pass
-                finally:
-                    if not valid:
-                        badSpectra.append(str(spectrum))
+            if project:
+                project._mainWindow.sideBar.buildTree(project)
+                project._mainWindow.show()
+                QtWidgets.QApplication.setActiveWindow(project._mainWindow)
 
-            if badSpectra:
-                from ccpn.ui.gui.widgets.MessageDialog import showWarning
+                # if the new project contains invalid spectra then open the popup to see them
+                # badSpectra = [str(spectrum) for spectrum in project.spectra if not spectrum.isValidPath]
+                badSpectra = []
+                for spectrum in project.spectra:
+                    valid = False
+                    try:
+                        valid = spectrum.isValidPath        # can raise error if None
+                    except:
+                        pass
+                    finally:
+                        if not valid:
+                            badSpectra.append(str(spectrum))
 
-                showWarning('Spectrum file paths',
-                            '''Detected invalid Spectrum file path(s) for: 
-                            \n\t%s
-                            
-                            Use menu Spectrum-->Validate paths.. or "VP" shortcut to correct''' % '\n\t'.join(badSpectra)
-                            )
-                # project.application.showValidateSpectraPopup(defaultSelected='invalid')
-                # project.save(createFallback=False, overwriteExisting=True)
+                if badSpectra:
+                    showWarning('Spectrum file paths',
+                                '''Detected invalid Spectrum file path(s) for: 
+                                \n\t%s
+                                
+                                Use menu Spectrum-->Validate paths.. or "VP" shortcut to correct''' % '\n\t'.join(badSpectra)
+                                )
+                    # project.application.showValidateSpectraPopup(defaultSelected='invalid')
+                    # project.save(createFallback=False, overwriteExisting=True)
 
-            undo = self._project._undo
-            if undo is not None:
-                undo.markClean()
-            return project
+                undo = self._project._undo
+                if undo is not None:
+                    undo.markClean()
+                return project
 
-        else:
-            raise ValueError("Error loading project")
+            else:
+                showWarning('Load Project', 'Error loading project')
+
+        except Exception as es:
+            raise ValueError("Error loading project: %s" %  str(es))
 
     def _loadProjectLastValid(self, projectDir):
         """Try and load a new project, if error try and load the last valid project.
@@ -569,10 +573,11 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
         # try and load the new project
         # try:
         project = self._loadProjectSingleTry(projectDir)
-        undo = self._project._undo
-        if undo is not None:
-            undo.markClean()
-        return project
+        if project:
+            undo = self._project._undo
+            if undo is not None:
+                undo.markClean()
+            return project
 
         # except Exception as es:
         #     MessageDialog.showError('loadProject', 'Error loading project:\n%s\n\n%s\n\nReloading last saved position.' % (str(projectDir), str(es)))

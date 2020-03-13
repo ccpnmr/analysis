@@ -157,7 +157,8 @@ def fetchUrl(url, data=None, headers=None, timeout=2.0, decodeResponse=True):
 def downloadFile(serverScript, serverDbRoot, fileName):
     """Download a file from the server
     """
-    fileName = os.path.join(serverDbRoot, fileName)
+    # fileName = os.path.join(serverDbRoot, fileName)
+    fileName = '/'.join([serverDbRoot, fileName])
 
     try:
         values = {'fileName': fileName}

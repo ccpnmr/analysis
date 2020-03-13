@@ -1197,7 +1197,7 @@ class Project(AbstractWrapperObject):
         if dataType is None:
             # print("Skipping: file data type not recognised for %s" % usePath)
             getLogger().warning("Skipping: file data type not recognised for %s" % usePath)
-            raise ValueError("Skipping: file data type not recognised for %s" % usePath)
+            # raise ValueError("Skipping: file data type not recognised for %s" % usePath)
             return None
 
         elif dataType == 'Dirs':
@@ -1212,7 +1212,7 @@ class Project(AbstractWrapperObject):
         elif not os.path.exists(usePath):
             # print("Skipping: no file found at %s" % usePath)
             getLogger().warning("Skipping: no file found at %s" % usePath)
-            raise ValueError("Skipping: no file found at %s" % usePath)
+            # raise ValueError("Skipping: no file found at %s" % usePath)
             return []
 
         elif dataType == 'Text':

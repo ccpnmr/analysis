@@ -4,7 +4,7 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2018-12-20 15:53:01 +0000 (Thu, December 20, 2018) $"
-__version__ = "$Revision: 3.0.0 $"
+__dateModified__ = "$dateModified: 2020-03-16 17:52:18 +0000 (Mon, March 16, 2020) $"
+__version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -187,7 +187,8 @@ class DataFrameObject(object):
                 self._objects.remove(obj)
 
                 # remove from dataFrame by obj
-                self._dataFrame = self._dataFrame.ix[self._dataFrame[DATAFRAME_OBJECT] != obj]
+                # self._dataFrame = self._dataFrame.ix[self._dataFrame[DATAFRAME_OBJECT] != obj]
+                self._dataFrame = self._dataFrame.loc[self._dataFrame[DATAFRAME_OBJECT] != obj]
 
                 # remove from table by pid
                 row = self.find(self._table, str(obj.pid), column=DATAFRAME_PID)
@@ -282,8 +283,10 @@ class DataFrameObject(object):
                 for header in self._columnDefinitions.columns:
                     listDict[header.headerText] = header.getValue(obj)
 
-                self._dataFrame_foundPid = self._dataFrame.ix[self._dataFrame[DATAFRAME_OBJECT] == obj]
-                self._dataFrame = self._dataFrame.ix[self._dataFrame[DATAFRAME_OBJECT] != obj]
+                # self._dataFrame_foundPid = self._dataFrame.ix[self._dataFrame[DATAFRAME_OBJECT] == obj]
+                # self._dataFrame = self._dataFrame.ix[self._dataFrame[DATAFRAME_OBJECT] != obj]
+                self._dataFrame_foundPid = self._dataFrame.loc[self._dataFrame[DATAFRAME_OBJECT] == obj]
+                self._dataFrame = self._dataFrame.loc[self._dataFrame[DATAFRAME_OBJECT] != obj]
 
                 # keep the Index if it exists
                 if not self._dataFrame_foundPid.empty and DATAFRAME_INDEX in self._dataFrame_foundPid:
@@ -330,8 +333,10 @@ class DataFrameObject(object):
             for header in self._columnDefinitions.columns:
                 listDict[header.headerText] = header.getValue(obj)
 
-            self._dataFrame_foundPid = self._dataFrame.ix[self._dataFrame[DATAFRAME_OBJECT] == obj]
-            self._dataFrame = self._dataFrame.ix[self._dataFrame[DATAFRAME_OBJECT] != obj]
+            # self._dataFrame_foundPid = self._dataFrame.ix[self._dataFrame[DATAFRAME_OBJECT] == obj]
+            # self._dataFrame = self._dataFrame.ix[self._dataFrame[DATAFRAME_OBJECT] != obj]
+            self._dataFrame_foundPid = self._dataFrame.loc[self._dataFrame[DATAFRAME_OBJECT] == obj]
+            self._dataFrame = self._dataFrame.loc[self._dataFrame[DATAFRAME_OBJECT] != obj]
 
             # keep the Index if it exists
             if not self._dataFrame_foundPid.empty and DATAFRAME_INDEX in self._dataFrame_foundPid:

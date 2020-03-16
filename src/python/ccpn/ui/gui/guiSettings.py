@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-01-28 03:15:19 +0000 (Tue, January 28, 2020) $"
-__version__ = "$Revision: 3.0.0 $"
+__dateModified__ = "$dateModified: 2020-03-16 18:24:41 +0000 (Mon, March 16, 2020) $"
+__version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -27,7 +27,7 @@ __date__ = "$Date: 2016-11-15 21:37:50 +0000 (Tue, 15 Nov 2016) $"
 #=========================================================================================
 
 from PyQt5 import QtGui, QtWidgets, QtCore
-from ccpn.ui.gui.widgets.Font import Font
+from ccpn.ui.gui.widgets.Font import Font, DEFAULTFONT, HELVETICAFONT
 from ccpn.util.decorators import singleton
 from ccpn.util.Logging import getLogger
 from ccpn.util.Colour import allColours, hexToRgbRatio, autoCorrectHexColour, \
@@ -40,25 +40,25 @@ monaco12 = Font('Monaco', 12)
 monaco16 = Font('Monaco', 16)
 monaco20 = Font('Monaco', 20)
 
-helvetica8 = Font('Helvetica', 8)
-helveticaItalic8 = Font('Helvetica', 8, italic=True)
-helveticaBold8 = Font('Helvetica', 8, bold=True)
+helvetica8 = Font(HELVETICAFONT, 8)
+helveticaItalic8 = Font(HELVETICAFONT, 8, italic=True)
+helveticaBold8 = Font(HELVETICAFONT, 8, bold=True)
 
-helvetica10 = Font('Helvetica', 10)
-helveticaItalic10 = Font('Helvetica', 10, italic=True)
-helveticaBold10 = Font('Helvetica', 10, bold=True)
+helvetica10 = Font(HELVETICAFONT, 10)
+helveticaItalic10 = Font(HELVETICAFONT, 10, italic=True)
+helveticaBold10 = Font(HELVETICAFONT, 10, bold=True)
 
-helvetica12 = Font('Helvetica', 12)
-helveticaItalic12 = Font('Helvetica', 12, italic=True)
-helveticaBold12 = Font('Helvetica', 12, bold=True)
-helveticaUnderline12 = Font('Helvetica', 12, underline=True)
-helveticaStrikeout12 = Font('Helvetica', 12, strikeout=True)
+helvetica12 = Font(HELVETICAFONT, 12)
+helveticaItalic12 = Font(HELVETICAFONT, 12, italic=True)
+helveticaBold12 = Font(HELVETICAFONT, 12, bold=True)
+helveticaUnderline12 = Font(HELVETICAFONT, 12, underline=True)
+helveticaStrikeout12 = Font(HELVETICAFONT, 12, strikeout=True)
 
-helvetica14 = Font('Helvetica', 14)
-helveticaBold14 = Font('Helvetica', 14, bold=True)
+helvetica14 = Font(HELVETICAFONT, 14)
+helveticaBold14 = Font(HELVETICAFONT, 14, bold=True)
 
-helvetica20 = Font('Helvetica', 20)
-helveticaBold20 = Font('Helvetica', 20, bold=True)
+helvetica20 = Font(HELVETICAFONT, 20)
+helveticaBold20 = Font(HELVETICAFONT, 20, bold=True)
 
 lucidaGrande12 = Font('Lucida Grande', 12)
 lucidaGrande14 = Font('Lucida Grande', 14)

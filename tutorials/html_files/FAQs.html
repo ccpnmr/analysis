@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/html">
+<head>
+    <meta charset="UTF-8">
+    <title>FAQs</title>
+    <style >.action {color: #803594; font-weight:bold;}</style>
+    <link rel="stylesheet" href="CcpnVideoTutorials.css">
+</head>
+<p>
+<h2>FAQs</h2>
+<p><a href="#V2Feat">What has happened to my favourite V2 features?</a>
+<br><a href="#ChemBuildMol">How can I get a molecule from ChemBuild into CcpNmr Analysis V3?</a>
+<br><a href="#ChemBuildXml">How can I save a molecule created in ChemBuild as a ChemComp .xml file?</a>
+<h3><a name="V2Feat"></a>What has happened to my favourite V2 features?</h3></p>
+<p>Have a look at our <a href="https://www.ccpn.ac.uk/forums/misc.php?action=help&hid=64">Popular V2 Features in V3</a> page for a list of V2 features and how they have been implemented in V3. You may also be interested in our <a href="https://www.ccpn.ac.uk/forums/misc.php?action=help&hid=62">V2 to V3 translation</a> page which gives a direct translation of V2 mouse and keyboard commands to the new V3 commands.</p>
+<h3><a name="ChemBuildMol"></a>How can I get a molecule from ChemBuild into CcpNmr Analysis V3?</h3>
+<p>As yet, ChemBuild and Analysis V3 are not properly integrated and it may still take us a little while to get this done properly. There are one or two workarounds. Which one you should use (and indeed whether you should bother importing a molecule at all!)  depends on what your ultimate aim is (why are you trying to import what).</p>
+<p>Analysis V3 is currently able to read pdb files and SMILES, but not the CCPN ChemComp .xml files and not mol2 files.
+    <br>pdb files can simply be dragged in, and will then go into the <span class="action">Structural Ensemble</span> part of the data structure (note that currently only ATOM and not HETATM lines are recognised/read in). Once a pdb file has been read in, there is not much you can do with it at the moment. Generating an NmrChain from a Structural Model is on our ToDo list, though.
+    <br>SMILES notations (not files) can be entered in the <span class="action">Substances</span> section:
+    <li>double-click on <span class="action">New Substance</span> under <span class="action">Substances</span> in the sidebar</li>
+    <li>click on <span class="action">Show more</span></li>
+<li>copy/paste your SMILES into the <span class="action">Smiles box</span></li>
+<li>click <span class="action">Apply</span> or <span class="action">OK</span> and the molecule will be added</li>
+<br>ChemBuild will write pdb files, but not SMILES. If you want your ChemBuild molecule in SMILES notation, you will have to export it as mol2 and then use <a href="http://openbabel.org/wiki/Main_Page">OpenBabel</a> to convert it to SMILES.</p>
+<p>Now on to thinking about why you want to import something from ChemBuild into V3 and the implications for what you might want (and be able) to do:
+<ol><li>If you are wanting to import a small molecule (i.e. not a protein, peptide or DNA/RNA), then you are best off importing your molecules as a SMILES. You can then generate an NmrChain from your substance (double-click on <span class="action">New NmrChain</span> and select <span class="action">Clone from Substance</span>). You can then assign your molecule using the NmrAtoms in that NmrChain (the molecule will go into a single NmrResidue in the NmrChain).</li>
+    <li>If you have a non-standard amino acid in your peptide/protein, the easiest thing is probably to enter the chain using the natural amino acid most closely related to your non-natural one. Create an NmrChain from your Chain (double-click on <span class="action">New NmrChain</span> and select <span class="action">Clone from Chain</span>). Then delete/add NmrAtoms to the natural amino acid to create your non-natural amino acid. You can then use the NmrAtoms to do your assignment. The only drawback with this is that the program will not be able to recognise your non-natural amino acid as being assigned, because there is no equivalent in a Chain. At the moment it isn't possible to modify Chains (except to delete residues), but we will be adding such features in future.</li></ol></p>
+<p>What is worth noting is that you can make quite a few changes to your NmrChains and NmrResidues (by double-clicking on them in the sidebar). So you can import a SMILES as a substance, create an NmrChain from this (the whole molecule will go into a single NmrResidue) and then double-click on the <span class="action">NmrResidue</span> and change the NmrChain, Sequence Code (i.e. Residue Number) and Amino Acid name to those of your choice, and this will be slotted into another NmrChain. (So, in this way, you could have another NmrChain in which you had removed an NmrResidue and then you could replace it with something from a SMILES.)
+</p>
+<h3><a name="ChemBuildXml"></a>How can I save a molecule created in ChemBuild as a ChemComp .xml file?</h3>
+<p>Unfortunately, this needs a slightly odd work-around at the moment. Go to the <span class="action">Compound Info</span> tab on the right hand side. Make sure you enter a <span class="action">Name</span> and a <span class="action">CCPN Code</span>. Now create a folder in your computer's file browser where you want to save the ChemComp file - this has to have the same name as your compound's <span class="action">Name</span>. Then go to the <span class="action">Export</span> menu and select <span class="action">CCPN ChemComp XML File</span>. Navigate not to the folder you have just created, but the folder one higher, enter the compound's name under <span class="action">Save As</span> and click <span class="action">Save</span>. If asked, select to replace the folder and then your ChemComp .xml file should be saved.</p>
+</body>
+</html>

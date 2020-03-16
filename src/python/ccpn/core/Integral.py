@@ -4,7 +4,7 @@ Module documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -13,9 +13,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: CCPN $"
-__dateModified__ = "$dateModified: 2017-07-07 16:32:28 +0100 (Fri, July 07, 2017) $"
-__version__ = "$Revision: 3.0.0 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2020-03-16 17:29:23 +0000 (Mon, March 16, 2020) $"
+__version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -67,7 +67,7 @@ class Integral(AbstractWrapperObject):
     # Qualified name of matching API class - NB shared with Peak class
     _apiClassQualifiedName = ApiIntegral._metaclass.qualifiedName()
 
-    _baseline = None
+    # _baseline = None
     _linkedPeakNotifier = None
     _linkedPeaks = set()
 
@@ -137,6 +137,16 @@ class Integral(AbstractWrapperObject):
 
     @offset.setter
     def offset(self, value: float):
+        self._wrappedData.offset = value
+
+    # NOTE:ED - check, baseline is currently using offset in the model
+    @property
+    def baseline(self) -> Optional[float]:
+        """baseline of Integral"""
+        return self._wrappedData.offset
+
+    @baseline.setter
+    def baseline(self, value: float):
         self._wrappedData.offset = value
 
     @property
@@ -296,13 +306,18 @@ class Integral(AbstractWrapperObject):
         """
         :return:baseline of the integral, x regions and y regions in  separate arrays
         """
-        baseline = self._baseline
+        # baseline = self.baseline
+
+        # NOTE:ED - now using offset in the model, slope will determine the angle of the baseline
+        #           calculate slope automatically?
+        baseline = self.baseline
+
         for i in self.limits:
             x = self.integralList.spectrum.positions
             y = self.integralList.spectrum.intensities
             xRegions = np.where((x <= max(i)) & (x >= min(i)))
             for xRegion in xRegions:
-                if baseline:
+                if baseline is not None:
                     # try:
                     # baseline = min(y[xRegion])
                     return (baseline, x[xRegion], y[xRegion])

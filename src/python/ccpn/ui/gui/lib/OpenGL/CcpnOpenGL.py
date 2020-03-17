@@ -55,7 +55,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-03-12 11:47:57 +0000 (Thu, March 12, 2020) $"
+__dateModified__ = "$dateModified: 2020-03-16 17:29:24 +0000 (Mon, March 16, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -2833,7 +2833,7 @@ class CcpnGLWidget(QOpenGLWidget):
 
                         reg[0].values = values
 
-                        # # NOTE:ED check moving of _baseline
+                        # # NOTE:ED check moving of baseline
                         # if hasattr(reg[0], '_integralArea'):
                         #     # reg[0].renderMode = GLRENDERMODE_REBUILD
                         #     reg[0]._rebuildIntegral()

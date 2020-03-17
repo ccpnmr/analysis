@@ -11,7 +11,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-03-09 19:05:49 +0000 (Mon, March 09, 2020) $"
+__dateModified__ = "$dateModified: 2020-03-17 01:55:31 +0000 (Tue, March 17, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -359,6 +359,8 @@ class Framework(NotifierBase):
 
         container = ApplicationContainer()
         container.register(self)
+
+        self._initialiseFonts()
 
         # Load / create project
         projectPath = self.args.projectPath
@@ -2374,7 +2376,7 @@ class Framework(NotifierBase):
         else:
             from ccpn.ui.gui.popups.EstimateVolumes import EstimateVolumes
 
-            if self.current.strip:
+            if self.current.strip and not self.current.strip.isDeleted:
                 spectra = [specView.spectrum for specView in self.current.strip.spectrumDisplay.spectrumViews]
             else:
                 spectra = self.project.spectra
@@ -2392,13 +2394,17 @@ class Framework(NotifierBase):
             MessageDialog.showWarning('Cannot make strip plot,', 'nothing to display')
             return
         else:
-            from ccpn.ui.gui.popups.StripPlotPopup import StripPlotPopup
+            if len(self.project.spectrumDisplays) == 0:
+                MessageDialog.showWarning('', 'No SpectrumDisplay found')
 
-            popup = StripPlotPopup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow,
-                                   spectrumDisplay=self.current.strip.spectrumDisplay,
-                                   includePeakLists=includePeakLists, includeNmrChains=includeNmrChains,
-                                   includeNmrChainPullSelection=includeNmrChainPullSelection, includeSpectrumTable=False)
-            popup.exec_()
+            elif self.current.strip and not self.current.strip.isDeleted:
+                from ccpn.ui.gui.popups.StripPlotPopup import StripPlotPopup
+
+                popup = StripPlotPopup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow,
+                                       spectrumDisplay=self.current.strip.spectrumDisplay,
+                                       includePeakLists=includePeakLists, includeNmrChains=includeNmrChains,
+                                       includeNmrChainPullSelection=includeNmrChainPullSelection, includeSpectrumTable=False)
+                popup.exec_()
 
     ################################################################################################
     ## MENU callbacks:  Molecule
@@ -2489,12 +2495,15 @@ class Framework(NotifierBase):
         mainWindow.pythonConsole.writeConsoleCommand("application.showResidueInformation()")
         getLogger().info("application.showResidueInformation()")
 
-    def showRefChemicalShifts(self):
+    def showRefChemicalShifts(self, position='left', relativeTo=None):
         """Displays Reference Chemical Shifts module."""
         from ccpn.ui.gui.modules.ReferenceChemicalShifts import ReferenceChemicalShifts
 
-        self.refChemShifts = ReferenceChemicalShifts(mainWindow=self.ui.mainWindow)
-        self.ui.mainWindow.moduleArea.addModule(self.refChemShifts)
+        mainWindow = self.ui.mainWindow
+        if not relativeTo:
+            relativeTo = mainWindow.moduleArea
+        self.refChemShifts = ReferenceChemicalShifts(mainWindow=mainWindow)
+        mainWindow.moduleArea.addModule(self.refChemShifts, position=position, relativeTo=relativeTo)
 
     ###################################################################################################################
     ## MENU callbacks:  VIEW
@@ -2784,11 +2793,14 @@ class Framework(NotifierBase):
 
         self.ui.mainWindow.toggleConsole()
 
-    def showChemicalShiftMapping(self):
+    def showChemicalShiftMapping(self, position: str = 'top', relativeTo: CcpnModule = None):
         from ccpn.ui.gui.modules.ChemicalShiftsMappingModule import ChemicalShiftsMapping
 
-        cs = ChemicalShiftsMapping(mainWindow=self.ui.mainWindow)
-        self.ui.mainWindow.moduleArea.addModule(cs)
+        mainWindow = self.ui.mainWindow
+        if not relativeTo:
+            relativeTo = mainWindow.moduleArea
+        cs = ChemicalShiftsMapping(mainWindow=mainWindow)
+        mainWindow.moduleArea.addModule(cs, position=position, relativeTo=relativeTo)
 
     #################################################################################################
     ## MENU callbacks:  Macro
@@ -3053,6 +3065,11 @@ class Framework(NotifierBase):
     #     if not path:
     #       return
     #     spectrumDisplay.printToFile(path)
+
+    def _initialiseFonts(self):
+
+        from ccpn.ui.gui.guiSettings import fontSettings
+        self._fontSettings = fontSettings(self.preferences)
 
 
 def isValidPath(projectName, stripFullPath=True, stripExtension=True):

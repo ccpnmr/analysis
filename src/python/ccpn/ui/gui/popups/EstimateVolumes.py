@@ -4,21 +4,23 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = ""
-__credits__ = ""
-__licence__ = ("")
-__reference__ = ("")
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
+__credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
+__licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
+__reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
+                 "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
+                 "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
-# Last code modification:
+# Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified$"
-__version__ = "$Revision$"
+__dateModified__ = "$dateModified: 2020-03-17 01:02:52 +0000 (Tue, March 17, 2020) $"
+__version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
-# Created:
+# Created
 #=========================================================================================
 __author__ = "$Author: Ed Brooksbank $"
-__date__ = "$Date$"
+__date__ = "$Date: 2020-03-16 17:34:13 +0000 (Mon, March 16, 2020) $"
 #=========================================================================================
 # Start of code
 #=========================================================================================
@@ -59,7 +61,8 @@ class EstimateVolumes(CcpnDialog):
 
         self._createWidgets()
 
-        if self.current is not None and self.current.strip is not None and len(self.current.strip.spectra) > 0:
+        if self.current is not None and self.current.strip is not None and \
+                not self.current.strip.isDeleted and len(self.current.strip.spectra) > 0:
             self.spectrumPullDown.select(self.current.strip.spectra[0].pid)
 
         self._changePeakLists()

@@ -4,7 +4,7 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -13,9 +13,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: CCPN $"
-__dateModified__ = "$dateModified: 2017-07-07 16:32:41 +0100 (Fri, July 07, 2017) $"
-__version__ = "$Revision: 3.0.0 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2020-03-17 00:13:57 +0000 (Tue, March 17, 2020) $"
+__version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -27,10 +27,26 @@ __date__ = "$Date: 2017-03-16 18:20:01 +0000 (Thu, March 16, 2017) $"
 
 from PyQt5 import QtGui, QtWidgets
 
+SYSTEMFONTREQUEST = 'moduleFont'
+MONACOFONTREQUEST = 'editorFont'
+HELVETICAFONTREQUEST = 'moduleFont'
+LUCIDAGRANDEFONTREQUEST = 'messageFont'
+
+SYSTEMFONT = 'System'
+MONACOFONT = 'Monaco'
+HELVETICAFONT = 'Helvetica'
+LUCIDAGRANDEFONT = 'Lucida Grande'
 
 # This only works when we have a QtApp instance working; hence it need to go somewhere else.
 #from ccpn.framework.PathsAndUrls import fontsPath
 #QtGui.QFontDatabase.addApplicationFont(os.path.join(fontsPath, 'open-sans/OpenSans-Regular.ttf'))
+
+
+def _readFontFromPreferences(fontRequest, preferences):
+
+    # read font name from the preferences file
+    fontName = preferences.general.get(fontRequest) or SYSTEMFONTREQUEST
+    return fontName
 
 
 class Font(QtGui.QFont):

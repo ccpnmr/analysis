@@ -6,5 +6,5 @@ popd
 call "paths"
 
 set ENTRYMODULE="%CCPNMR_TOP_DIR%"\src\python\ccpn\AnalysisMetabolomics
-"%ANACONDA3%"\python -i -O -W ignore::DeprecationWarning "%ENTRYMODULE%" %*
+"%ANACONDA3%"\python -i -O -W ignore "%ENTRYMODULE%" %*
 endlocal

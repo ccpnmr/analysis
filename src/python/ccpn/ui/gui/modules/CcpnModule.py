@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-03-09 23:44:10 +0000 (Mon, March 09, 2020) $"
+__dateModified__ = "$dateModified: 2020-03-17 00:13:57 +0000 (Tue, March 17, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -57,7 +57,7 @@ from ccpn.ui.gui.widgets.ScrollArea import ScrollArea
 from ccpn.ui.gui.widgets.Splitter import Splitter
 from ccpn.ui.gui.widgets.ToolButton import ToolButton
 from ccpn.ui.gui.widgets.Icon import Icon
-from ccpn.ui.gui.guiSettings import moduleLabelFont
+# from ccpn.ui.gui.guiSettings import moduleLabelFont
 from ccpn.ui.gui.widgets.Widget import Widget
 from ccpn.ui.gui.widgets.SideBar import SideBar
 from ccpn.ui.gui.widgets.PythonEditor import QCodeEditor
@@ -1063,7 +1063,10 @@ class CcpnModuleLabel(DockLabel):
 
         self.module = module
         self.fixedWidth = True
-        self.setFont(moduleLabelFont)
+
+        from ccpn.framework.Application import getApplication
+        self.setFont(getApplication()._fontSettings.moduleLabelFont)
+
         self.setAlignment(QtCore.Qt.AlignVCenter | QtCore.Qt.AlignHCenter)
         self.closeButton.setStyleSheet('''border: 0px solid #a9a9a9;
                                           border-radius: 1px;

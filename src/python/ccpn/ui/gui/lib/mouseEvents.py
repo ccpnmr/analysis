@@ -4,7 +4,7 @@ various mouse event functions. See ViewBox.py for the full mouse commands descri
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -13,9 +13,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: CCPN $"
-__dateModified__ = "$dateModified: 2017-07-07 16:32:42 +0100 (Fri, July 07, 2017) $"
-__version__ = "$Revision: 3.0.0 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2020-03-17 00:13:56 +0000 (Tue, March 17, 2020) $"
+__version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -244,7 +244,8 @@ def getMouseEventDict(event: QtGui.QMouseEvent):
 
 import json
 from ccpn.ui.gui.widgets.DropBase import DropBase
-from ccpn.ui.gui.guiSettings import textFontLarge, getColours, LABEL_FOREGROUND
+# from ccpn.ui.gui.guiSettings import textFontLarge
+from ccpn.ui.gui.guiSettings import getColours, LABEL_FOREGROUND
 
 
 def makeDragEvent(self, dataDict, text, action=QtCore.Qt.CopyAction):
@@ -267,7 +268,10 @@ def makeDragEvent(self, dataDict, text, action=QtCore.Qt.CopyAction):
     # fixes labels that are very big with small text
     dragLabel = QtWidgets.QLabel()
     dragLabel.setText(text)
-    dragLabel.setFont(textFontLarge)
+
+    from ccpn.framework.Application import getApplication
+    dragLabel.setFont(getApplication()._fontSettings.textFontLarge)
+
     dragLabel.setStyleSheet('color: %s' % (getColours()[LABEL_FOREGROUND]))
 
     # set the pixmap

@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-02-10 16:59:38 +0000 (Mon, February 10, 2020) $"
+__dateModified__ = "$dateModified: 2020-03-17 00:13:57 +0000 (Tue, March 17, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -25,7 +25,7 @@ __date__ = "$Date: 2017-03-30 11:28:58 +0100 (Thu, March 30, 2017) $"
 # Start of code
 #=========================================================================================
 
-from PyQt5 import QtWidgets, QtCore
+from PyQt5 import QtWidgets, QtCore, QtGui
 
 import os
 from functools import partial
@@ -365,6 +365,22 @@ class PreferencesPopup(CcpnDialogMainWidget):
         # self.autoBackupFrequencyData.setValue(self.preferences.general.autoBackupFrequency)
         self.autoBackupFrequencyData.valueChanged.connect(self._queueSetAutoBackupFrequency)
 
+        # NOTE:ED - testing new font loader
+        row += 1
+        self._fontsLabel = Label(parent, text="Fonts (require restart)", grid=(row, 0))
+
+        row += 1
+        self.editorFontLabel = Label(parent, text="    Editor Font: ", grid=(row, 0))
+        self.editorFontData = Button(parent, grid=(row, 1), callback=self._getEditorFont)
+
+        row += 1
+        self.moduleFontLabel = Label(parent, text="    Module Font: ", grid=(row, 0))
+        self.moduleFontData = Button(parent, grid=(row, 1), callback=self._getModuleFont)
+
+        row += 1
+        self.messageFontLabel = Label(parent, text="    Message Font: ", grid=(row, 0))
+        self.messageFontData = Button(parent, grid=(row, 1), callback=self._getMessageFont)
+
         row += 1
         HLine(parent, grid=(row, 0), gridSpan=(1, 3), colour=getColours()[DIVIDER], height=15)
 
@@ -519,6 +535,10 @@ class PreferencesPopup(CcpnDialogMainWidget):
         self.useNativeFileBox.setChecked(self.preferences.general.useNative)
         self.useNativeMenus.setChecked(self.preferences.general.useNativeMenus)
         self.useNativeWebBox.setChecked(self.preferences.general.useNativeWebbrowser)
+
+        self.editorFontData.setText(self.preferences.general.editorFont)
+        self.moduleFontData.setText(self.preferences.general.moduleFont)
+        self.messageFontData.setText(self.preferences.general.messageFont)
 
         # TODO:ED disabled for testing
         # self._toggleGeneralOptions('useNativeWebbrowser', True)
@@ -1805,3 +1825,69 @@ class PreferencesPopup(CcpnDialogMainWidget):
         """
         if checked != self.preferences.general[option]:
             return partial(self._toggleGeneralOptions, option, checked)
+
+    @queueStateChange(_verifyPopupApply)
+    def _queueSetEditorFont(self):
+        value = self.editorFontData.getText()
+        if value != self.preferences.general.editorFont:
+            return partial(self._setEditorFont, value)
+
+    def _setEditorFont(self, value):
+        self.preferences.general.editorFont = value
+
+    def _getEditorFont(self):
+        # Simple font grabber from the system
+        value = self.editorFontData.getText()
+        newFont, ok = QtWidgets.QFontDialog.getFont(QtGui.QFont(value), caption='Select Editor Font')
+        if ok:
+            try:
+                fontName = newFont.toString().split(',')[0]
+            except Exception as es:
+                fontName = 'System'
+            self.editorFontData.setText(fontName)
+            # add the font change to the apply queue
+            self._queueSetEditorFont()
+            
+    @queueStateChange(_verifyPopupApply)
+    def _queueSetModuleFont(self):
+        value = self.moduleFontData.getText()
+        if value != self.preferences.general.moduleFont:
+            return partial(self._setModuleFont, value)
+
+    def _setModuleFont(self, value):
+        self.preferences.general.moduleFont = value
+
+    def _getModuleFont(self):
+        # Simple font grabber from the system
+        value = self.moduleFontData.getText()
+        newFont, ok = QtWidgets.QFontDialog.getFont(QtGui.QFont(value), caption='Select Module Font')
+        if ok:
+            try:
+                fontName = newFont.toString().split(',')[0]
+            except Exception as es:
+                fontName = 'System'
+            self.moduleFontData.setText(fontName)
+            # add the font change to the apply queue
+            self._queueSetModuleFont()
+            
+    @queueStateChange(_verifyPopupApply)
+    def _queueSetMessageFont(self):
+        value = self.messageFontData.getText()
+        if value != self.preferences.general.messageFont:
+            return partial(self._setMessageFont, value)
+
+    def _setMessageFont(self, value):
+        self.preferences.general.messageFont = value
+
+    def _getMessageFont(self):
+        # Simple font grabber from the system
+        value = self.messageFontData.getText()
+        newFont, ok = QtWidgets.QFontDialog.getFont(QtGui.QFont(value), caption='Select Message Font')
+        if ok:
+            try:
+                fontName = newFont.toString().split(',')[0]
+            except Exception as es:
+                fontName = 'System'
+            self.messageFontData.setText(fontName)
+            # add the font change to the apply queue
+            self._queueSetMessageFont()

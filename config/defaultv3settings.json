@@ -73,7 +73,10 @@
         "showSideBands"                        : false,
         "_copySpectraSettings1d"               : null,
         "_copySpectraSettingsNd"               : null,
-        "exportDpi"                            : 300
+        "exportDpi"                            : 300,
+        "editorFont"                           : "Monaco",
+        "moduleFont"                           : "Helvetica",
+        "messageFont"                          : "Lucida Grande"
     },
     "proxySettings"    : {
         "useProxy"         : false,

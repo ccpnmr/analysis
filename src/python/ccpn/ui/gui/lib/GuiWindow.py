@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-01-10 11:21:55 +0000 (Fri, January 10, 2020) $"
-__version__ = "$Revision: 3.0.0 $"
+__dateModified__ = "$dateModified: 2020-03-16 17:29:24 +0000 (Mon, March 16, 2020) $"
+__version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -315,7 +315,10 @@ class GuiWindow():
                                 validIntegralLists = [ilv.integralList for ilv in spectrumView.integralListViews if ilv.isVisible()]
 
                                 for integralList in validIntegralLists:
+
+                                    # set the limits of the integral with a default baseline of 0.0
                                     integral = integralList.newIntegral(value=None, limits=[limits, ])
+                                    integral.baseline = 0.0
                                     currentIntegrals.append(integral)
                                     if peak:
                                         integral.peak = peak

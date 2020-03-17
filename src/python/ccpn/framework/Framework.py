@@ -11,7 +11,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-03-17 01:02:52 +0000 (Tue, March 17, 2020) $"
+__dateModified__ = "$dateModified: 2020-03-17 01:55:31 +0000 (Tue, March 17, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -2495,12 +2495,15 @@ class Framework(NotifierBase):
         mainWindow.pythonConsole.writeConsoleCommand("application.showResidueInformation()")
         getLogger().info("application.showResidueInformation()")
 
-    def showRefChemicalShifts(self):
+    def showRefChemicalShifts(self, position='left', relativeTo=None):
         """Displays Reference Chemical Shifts module."""
         from ccpn.ui.gui.modules.ReferenceChemicalShifts import ReferenceChemicalShifts
 
-        self.refChemShifts = ReferenceChemicalShifts(mainWindow=self.ui.mainWindow)
-        self.ui.mainWindow.moduleArea.addModule(self.refChemShifts)
+        mainWindow = self.ui.mainWindow
+        if not relativeTo:
+            relativeTo = mainWindow.moduleArea
+        self.refChemShifts = ReferenceChemicalShifts(mainWindow=mainWindow)
+        mainWindow.moduleArea.addModule(self.refChemShifts, position=position, relativeTo=relativeTo)
 
     ###################################################################################################################
     ## MENU callbacks:  VIEW
@@ -2790,11 +2793,14 @@ class Framework(NotifierBase):
 
         self.ui.mainWindow.toggleConsole()
 
-    def showChemicalShiftMapping(self):
+    def showChemicalShiftMapping(self, position: str = 'top', relativeTo: CcpnModule = None):
         from ccpn.ui.gui.modules.ChemicalShiftsMappingModule import ChemicalShiftsMapping
 
-        cs = ChemicalShiftsMapping(mainWindow=self.ui.mainWindow)
-        self.ui.mainWindow.moduleArea.addModule(cs)
+        mainWindow = self.ui.mainWindow
+        if not relativeTo:
+            relativeTo = mainWindow.moduleArea
+        cs = ChemicalShiftsMapping(mainWindow=mainWindow)
+        mainWindow.moduleArea.addModule(cs, position=position, relativeTo=relativeTo)
 
     #################################################################################################
     ## MENU callbacks:  Macro

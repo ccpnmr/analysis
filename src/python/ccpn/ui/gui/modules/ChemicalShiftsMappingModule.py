@@ -62,7 +62,7 @@ Module Documentation
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -72,8 +72,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2019-12-05 09:40:39 +0000 (Thu, December 05, 2019) $"
-__version__ = "$Revision: 3.0.0 $"
+__dateModified__ = "$dateModified: 2020-03-17 01:55:31 +0000 (Tue, March 17, 2020) $"
+__version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -252,7 +252,7 @@ class ChemicalShiftsMapping(CcpnModule):
 
 
   def __init__(self, mainWindow, name='Chemical Shift Mapping', nmrChain= None, **kwds):
-    CcpnModule.__init__(self, mainWindow=mainWindow, name=name, settingButton=True)
+    super().__init__(mainWindow=mainWindow, name=name, settingButton=True)
 
     BarGraph.mouseClickEvent = self._barGraphClickEvent
     BarGraph.mouseDoubleClickEvent = self._navigateToNmrItems
@@ -1627,17 +1627,20 @@ class ChemicalShiftsMapping(CcpnModule):
     """
     Re-implementation of closeModule function from CcpnModule to unregister notification on current
     """
-    if self._selectCurrentNRNotifier is not None:
-      self._selectCurrentNRNotifier.unRegister()
-    # self._peakChangedNotifier.unRegister()
-    if self._peakDeletedNotifier:
-      self._peakDeletedNotifier.unRegister()
-    if self._nrChangedNotifier:
-      self._nrChangedNotifier.unRegister()
-    if self._nrDeletedNotifier:
-      self._nrDeletedNotifier.unRegister()
-
-    super(ChemicalShiftsMapping, self)._closeModule()
+    try:
+      if self._selectCurrentNRNotifier is not None:
+        self._selectCurrentNRNotifier.unRegister()
+      # self._peakChangedNotifier.unRegister()
+      if self._peakDeletedNotifier:
+        self._peakDeletedNotifier.unRegister()
+      if self._nrChangedNotifier:
+        self._nrChangedNotifier.unRegister()
+      if self._nrDeletedNotifier:
+        self._nrDeletedNotifier.unRegister()
+    except Exception as es:
+      pass
+    finally:
+      super()._closeModule()
 
 
 # if __name__ == '__main__':

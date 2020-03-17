@@ -11,7 +11,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-03-12 16:55:42 +0000 (Thu, March 12, 2020) $"
+__dateModified__ = "$dateModified: 2020-03-17 00:13:57 +0000 (Tue, March 17, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -36,6 +36,7 @@ from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.SideBar import SideBar      #,SideBar
 from ccpn.ui.gui.lib.MenuActions import _openItemObject
 from ccpn.ui.gui.widgets.Font import Font
+# from ccpn.ui.gui.guiSettings import helveticaBold36
 from ccpn.ui.gui.widgets.MainWindow import MainWindow
 from ccpn.ui.gui.lib.GuiWindow import GuiWindow
 from ccpn.ui.gui.guiSettings import getColours, LABEL_FOREGROUND
@@ -119,7 +120,8 @@ class CcpnModuleArea(ModuleArea, DropBase):
         # self.setAcceptDrops(True) GWV not needed; handled by DropBase init
 
         self.textLabel = DropAreaLabel
-        self.fontLabel = Font('Helvetica', 36, bold=False)
+        # self.fontLabel = Font('Helvetica', 36, bold=False)
+        self.fontLabel = self.mainWindow.application._fontSettings.helveticaBold36
 
         colours = getColours()
         self.colourLabel = hexToRgb(colours[LABEL_FOREGROUND])

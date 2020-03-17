@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-03-16 18:24:41 +0000 (Mon, March 16, 2020) $"
+__dateModified__ = "$dateModified: 2020-03-17 00:13:56 +0000 (Tue, March 17, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -27,7 +27,7 @@ __date__ = "$Date: 2016-11-15 21:37:50 +0000 (Tue, 15 Nov 2016) $"
 #=========================================================================================
 
 from PyQt5 import QtGui, QtWidgets, QtCore
-from ccpn.ui.gui.widgets.Font import Font, DEFAULTFONT, HELVETICAFONT
+from ccpn.ui.gui.widgets.Font import Font, HELVETICAFONTREQUEST, MONACOFONTREQUEST, LUCIDAGRANDEFONTREQUEST, _readFontFromPreferences
 from ccpn.util.decorators import singleton
 from ccpn.util.Logging import getLogger
 from ccpn.util.Colour import allColours, hexToRgbRatio, autoCorrectHexColour, \
@@ -35,60 +35,71 @@ from ccpn.util.Colour import allColours, hexToRgbRatio, autoCorrectHexColour, \
     spectrumHexDefaultLightColours, spectrumHexDefaultDarkColours, rgbRatioToHex
 
 
-# fonts
-monaco12 = Font('Monaco', 12)
-monaco16 = Font('Monaco', 16)
-monaco20 = Font('Monaco', 20)
+class fontSettings():
 
-helvetica8 = Font(HELVETICAFONT, 8)
-helveticaItalic8 = Font(HELVETICAFONT, 8, italic=True)
-helveticaBold8 = Font(HELVETICAFONT, 8, bold=True)
+    def __init__(self, preferences):
 
-helvetica10 = Font(HELVETICAFONT, 10)
-helveticaItalic10 = Font(HELVETICAFONT, 10, italic=True)
-helveticaBold10 = Font(HELVETICAFONT, 10, bold=True)
+        MONACOFONT = _readFontFromPreferences(MONACOFONTREQUEST, preferences)
+        HELVETICAFONT = _readFontFromPreferences(HELVETICAFONTREQUEST, preferences)
+        LUCIDAGRANDEFONT = _readFontFromPreferences(LUCIDAGRANDEFONTREQUEST, preferences)
 
-helvetica12 = Font(HELVETICAFONT, 12)
-helveticaItalic12 = Font(HELVETICAFONT, 12, italic=True)
-helveticaBold12 = Font(HELVETICAFONT, 12, bold=True)
-helveticaUnderline12 = Font(HELVETICAFONT, 12, underline=True)
-helveticaStrikeout12 = Font(HELVETICAFONT, 12, strikeout=True)
+        # fonts
+        self.monaco12 = Font(MONACOFONT, 12)
+        self.monaco16 = Font(MONACOFONT, 16)
+        self.monaco20 = Font(MONACOFONT, 20)
 
-helvetica14 = Font(HELVETICAFONT, 14)
-helveticaBold14 = Font(HELVETICAFONT, 14, bold=True)
+        self.helvetica8 = Font(HELVETICAFONT, 8)
+        self.helveticaItalic8 = Font(HELVETICAFONT, 8, italic=True)
+        self.helveticaBold8 = Font(HELVETICAFONT, 8, bold=True)
 
-helvetica20 = Font(HELVETICAFONT, 20)
-helveticaBold20 = Font(HELVETICAFONT, 20, bold=True)
+        self.helvetica10 = Font(HELVETICAFONT, 10)
+        self.helveticaItalic10 = Font(HELVETICAFONT, 10, italic=True)
+        self.helveticaBold10 = Font(HELVETICAFONT, 10, bold=True)
 
-lucidaGrande12 = Font('Lucida Grande', 12)
-lucidaGrande14 = Font('Lucida Grande', 14)
+        self.helvetica12 = Font(HELVETICAFONT, 12)
+        self.helveticaItalic12 = Font(HELVETICAFONT, 12, italic=True)
+        self.helveticaBold12 = Font(HELVETICAFONT, 12, bold=True)
+        self.helveticaUnderline12 = Font(HELVETICAFONT, 12, underline=True)
+        self.helveticaStrikeout12 = Font(HELVETICAFONT, 12, strikeout=True)
 
-# widgets and modules
-textFontTiny = helvetica8  # general text font
-textFontTinyBold = helveticaBold8  # general text font
-textFontSmall = helvetica10  # general text font
-textFontSmallBold = helveticaBold10  # general text font
-textFont = helvetica12  # general text font
-textFontBold = helveticaBold12  # general text font bold
-textFontLarge = helvetica14  # general text font large
-textFontLargeBold = helveticaBold14  # general text font large bold
-textFontHuge = helvetica20  # general text font huge
-textFontHugeBold = helveticaBold20  # general text font huge bold
+        self.helvetica14 = Font(HELVETICAFONT, 14)
+        self.helveticaBold14 = Font(HELVETICAFONT, 14, bold=True)
 
-textFontTinySpacing = 7
-textFontSmallSpacing = 9
-textFontSpacing = 11
-textFontLargeSpacing = 13
-textFontHugeSpacing = 18
+        self.helvetica20 = Font(HELVETICAFONT, 20)
+        self.helveticaBold20 = Font(HELVETICAFONT, 20, bold=True)
 
-fixedWidthFont = monaco12  # for TextEditor, ipythonconsole
-fixedWidthLargeFont = monaco16
-fixedWidthHugeFont = monaco20
-moduleLabelFont = helvetica12  # for text of left-label of modules
-sidebarFont = lucidaGrande12  # sidebar
-menuFont = lucidaGrande14  # Menus
-messageFont = helvetica14  # used in popup messages;
-messageFontBold = helveticaBold14  # used in popup messages;
+        self.helveticaBold36 = Font(HELVETICAFONT, 36, bold=True)
+
+        self.lucidaGrande12 = Font(LUCIDAGRANDEFONT, 12)
+        self.lucidaGrande14 = Font(LUCIDAGRANDEFONT, 14)
+
+        # widgets and modules
+        self.textFontTiny = self.helvetica8  # general text font
+        self.textFontTinyBold = self.helveticaBold8  # general text font
+        self.textFontSmall = self.helvetica10  # general text font
+        self.textFontSmallBold = self.helveticaBold10  # general text font
+        self.textFont = self.helvetica12  # general text font
+        self.textFontBold = self.helveticaBold12  # general text font bold
+        self.textFontLarge = self.helvetica14  # general text font large
+        self.textFontLargeBold = self.helveticaBold14  # general text font large bold
+        self.textFontHuge = self.helvetica20  # general text font huge
+        self.textFontHugeBold = self.helveticaBold20  # general text font huge bold
+
+        self.textFontTinySpacing = 7
+        self.textFontSmallSpacing = 9
+        self.textFontSpacing = 11
+        self.textFontLargeSpacing = 13
+        self.textFontHugeSpacing = 18
+
+        self.fixedWidthFont = self.monaco12  # for TextEditor, ipythonconsole
+        self.fixedWidthLargeFont = self.monaco16
+        self.fixedWidthHugeFont = self.monaco20
+        self.moduleLabelFont = self.helvetica12  # for text of left-label of modules
+        self.sidebarFont = self.lucidaGrande12  # sidebar
+        self.menuFont = self.lucidaGrande14  # Menus
+        self.messageFont = self.helvetica14  # used in popup messages;
+        self.messageFontBold = self.helveticaBold14  # used in popup messages;
+
 
 # Colours
 LIGHT = 'light'

@@ -9,7 +9,7 @@ GWV: 22/4/2018: New handling of colours
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -18,9 +18,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: CCPN $"
-__dateModified__ = "$dateModified: 2017-07-07 16:32:47 +0100 (Fri, July 07, 2017) $"
-__version__ = "$Revision: 3.0.0 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2020-03-17 00:13:57 +0000 (Tue, March 17, 2020) $"
+__version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -47,8 +47,8 @@ from ccpn.ui.gui.guiSettings import GUICHAINLABEL_TEXT, \
     GUICHAINRESIDUE_POSSIBLE, GUICHAINRESIDUE_WARNING, \
     SEQUENCEMODULE_DRAGMOVE, SEQUENCEMODULE_TEXT
 from ccpn.ui.gui.widgets.Base import Base
-from ccpn.ui.gui.guiSettings import fixedWidthFont, fixedWidthLargeFont, helvetica8
-from ccpn.ui.gui.guiSettings import textFontHugeSpacing as fontSpacing
+# from ccpn.ui.gui.guiSettings import fixedWidthFont, fixedWidthLargeFont, helvetica8
+# from ccpn.ui.gui.guiSettings import textFontHugeSpacing as fontSpacing
 from ccpn.ui.gui.modules.CcpnModule import CcpnModule
 from ccpn.ui.gui.widgets.MessageDialog import showYesNo
 from ccpn.util.Logging import getLogger
@@ -479,7 +479,8 @@ class SequenceModule():
             self.scrollArea.scene.removeItem(self._highlight)
         self._highlight = QtWidgets.QGraphicsTextItem()
         self._highlight.setDefaultTextColor(QtGui.QColor(self.colours[SEQUENCEMODULE_TEXT]))
-        self._highlight.setFont(fixedWidthLargeFont)
+
+        self._highlight.setFont(self.mainWindow.application._fontSettings.fixedWidthLargeFont)
         self._highlight.setPlainText('')
         # self._highlight.setAttribute(QtCore.Qt.WA_TransparentForMouseEvents, True)
         self.scrollArea.scene.addItem(self._highlight)
@@ -512,7 +513,7 @@ class GuiChainLabel(QtWidgets.QGraphicsTextItem):
 
         self.colours = getColours()
         self.setDefaultTextColor(QtGui.QColor(self.colours[GUICHAINLABEL_TEXT]))
-        self.setFont(fixedWidthLargeFont)
+        self.setFont(self.mainWindow.application._fontSettings.fixedWidthLargeFont)
 
         self.setPos(QtCore.QPointF(position[0], position[1]))
 
@@ -553,8 +554,8 @@ class GuiChainLabel(QtWidgets.QGraphicsTextItem):
         if idx % 10 == 9:  # print out every 10
             numberItem = QtWidgets.QGraphicsTextItem(residue.sequenceCode)
             numberItem.setDefaultTextColor(QtGui.QColor(self.colours[GUICHAINLABEL_TEXT]))
-            numberItem.setFont(helvetica8)
-            xPosition = self.labelPosition + (fontSpacing * self.currentIndex)
+            numberItem.setFont(self.mainWindow.application._fontSettings.helvetica8)
+            xPosition = self.labelPosition + (self.mainWindow.application._fontSettings.fontSpacing * self.currentIndex)
             numberItem.setPos(QtCore.QPointF(xPosition, self.yPosition))
             self.scene.addItem(numberItem)
             self.items.append(numberItem)
@@ -614,12 +615,12 @@ class GuiChainResidue(QtWidgets.QGraphicsTextItem, Base):
         self.residue = residue
         self.scene = scene
 
-        self.setFont(fixedWidthLargeFont)
+        self.setFont(self.mainWindow.application._fontSettings.fixedWidthLargeFont)
         self.colours = getColours()
         self.setDefaultTextColor(QtGui.QColor(self.colours[GUICHAINRESIDUE_UNASSIGNED]))
 
         self.setPlainText(residue.shortName)
-        position = labelPosition + (fontSpacing * index)
+        position = labelPosition + (self.mainWindow.application._fontSettings.fontSpacing * index)
         self.setPos(QtCore.QPointF(position, yPosition))
         self.residueNumber = residue.sequenceCode
 

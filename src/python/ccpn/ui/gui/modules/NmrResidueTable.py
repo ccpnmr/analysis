@@ -21,8 +21,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-01-28 09:52:40 +0000 (Tue, January 28, 2020) $"
-__version__ = "$Revision: 3.0.0 $"
+__dateModified__ = "$dateModified: 2020-03-17 00:13:57 +0000 (Tue, March 17, 2020) $"
+__version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -137,11 +137,11 @@ class NmrResidueTableModule(CcpnModule):
         if nmrChain is not None:
             self.selectNmrChain(nmrChain)
         elif selectFirstItem:
-            firstItemText = self.nmrResidueTable.ncWidget.getFirstItemText()
-            if firstItemText:
-                self.nmrResidueTable.ncWidget.selectFirstItem()
-                chain = self.nmrResidueTable.ncWidget.getCurrentObject()
-                self.nmrResidueTable._update(chain)
+            # firstItemText = self.nmrResidueTable.ncWidget.getFirstItemText()
+            # if firstItemText:
+            self.nmrResidueTable.ncWidget.selectFirstItem()
+                # chain = self.nmrResidueTable.ncWidget.getCurrentObject()
+                # self.nmrResidueTable._update(chain)
 
 
     def _maximise(self):
@@ -722,7 +722,6 @@ class NmrResidueTable(GuiTable):
         """
         Notifier Callback for selecting NmrChain
         """
-        print('item', item)
         self._nmrChain = self.project.getByPid(item)
         logger.debug('>selectionPulldownCallback>', item, type(item), self._nmrChain)
         if self._nmrChain is not None:

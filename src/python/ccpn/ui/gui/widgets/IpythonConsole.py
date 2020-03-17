@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-03-09 19:05:50 +0000 (Mon, March 09, 2020) $"
+__dateModified__ = "$dateModified: 2020-03-17 00:13:57 +0000 (Tue, March 17, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -29,7 +29,7 @@ from PyQt5 import QtGui, QtWidgets, QtCore
 from ccpn.ui.gui.widgets.Base import Base
 from ccpn.ui.gui.widgets.TextEditor import TextEditor
 from ccpn.ui.gui.widgets.Splitter import Splitter
-from ccpn.ui.gui.guiSettings import fixedWidthFont
+# from ccpn.ui.gui.guiSettings import fixedWidthFont
 
 from ccpn.ui.gui.widgets.Widget import Widget
 from ccpn.ui.gui.widgets.Frame import Frame
@@ -65,7 +65,9 @@ class IpythonConsole(Widget):
         self.ipythonWidget = RichJupyterWidget(self, gui_completion='plain')
         #TODO:GEERTEN: Sort Stylesheet issues
         self.setStyleSheet(self.mainWindow.styleSheet())
-        self.ipythonWidget._set_font(fixedWidthFont)
+
+        self.ipythonWidget._set_font(self.mainWindow.application._fontSettings.fixedWidthFont)
+
         self.ipythonWidget.kernel_manager = km
         # self.ipythonWidget.kernel_client = km.client()
         #TODO:LUCA:The Widget class already has a layout: can just do grid=(row,col)

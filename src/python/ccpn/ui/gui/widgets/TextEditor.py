@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-02-05 15:54:09 +0000 (Wed, February 05, 2020) $"
-__version__ = "$Revision: 3.0.0 $"
+__dateModified__ = "$dateModified: 2020-03-17 00:13:57 +0000 (Tue, March 17, 2020) $"
+__version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -31,7 +31,7 @@ from PyQt5 import QtGui, QtWidgets, QtCore, QtPrintSupport
 from ccpn.ui.gui.widgets.FileDialog import FileDialog
 from ccpn.ui.gui.widgets.Base import Base
 from ccpn.ui.gui.widgets.Action import Action
-from ccpn.ui.gui.guiSettings import fixedWidthFont
+# from ccpn.ui.gui.guiSettings import fixedWidthFont
 from ccpn.ui.gui.widgets.Icon import Icon
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.guiSettings import getColours, BORDERFOCUS, BORDERNOFOCUS
@@ -46,7 +46,10 @@ class TextEditor(QtWidgets.QTextEdit, Base):
         Base._init(self, **kwds)
 
         self.filename = filename
-        self.setFont(fixedWidthFont)
+
+        from ccpn.framework.Application import getApplication
+        self.setFont(getApplication()._fontSettings.fixedWidthFont)
+
         self._changed = False
         self.setTabChangesFocus(True)
         self.textChanged.connect(self._handle_text_changed)
@@ -178,7 +181,10 @@ class PlainTextEditor(QtWidgets.QPlainTextEdit, Base):
         Base._init(self, **kwds)
 
         self.filename = filename
-        self.setFont(fixedWidthFont)
+
+        from ccpn.framework.Application import getApplication
+        self.setFont(getApplication()._fontSettings.fixedWidthFont)
+
         self._changed = False
         self.setTabChangesFocus(True)
         self.textChanged.connect(self._handle_text_changed)

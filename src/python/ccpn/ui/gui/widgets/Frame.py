@@ -57,8 +57,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-01-10 11:21:55 +0000 (Fri, January 10, 2020) $"
-__version__ = "$Revision: 3.0.0 $"
+__dateModified__ = "$dateModified: 2020-03-17 00:13:57 +0000 (Tue, March 17, 2020) $"
+__version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -72,8 +72,8 @@ from PyQt5 import QtGui, QtWidgets, QtCore
 from ccpn.ui.gui.widgets.Base import Base
 from ccpn.ui.gui.widgets.ScrollArea import ScrollArea
 from ccpn.ui.gui.widgets.Widget import Widget
-from ccpn.ui.gui.guiSettings import textFontLarge, \
-    CCPNGLWIDGET_HEXFOREGROUND, CCPNGLWIDGET_HEXBACKGROUND, CCPNGLWIDGET_HEXHIGHLIGHT, getColours
+# from ccpn.ui.gui.guiSettings import textFontLarge, CCPNGLWIDGET_HEXFOREGROUND, CCPNGLWIDGET_HEXBACKGROUND, CCPNGLWIDGET_HEXHIGHLIGHT, getColours
+from ccpn.ui.gui.guiSettings import CCPNGLWIDGET_HEXFOREGROUND, CCPNGLWIDGET_HEXBACKGROUND, CCPNGLWIDGET_HEXHIGHLIGHT, getColours
 
 
 class Frame(QtWidgets.QFrame, Base):
@@ -256,6 +256,10 @@ class OpenGLOverlayFrame(Frame):
             self._setMask()
 
     def _setStyle(self, sl, foregroundColour=CCPNGLWIDGET_HEXFOREGROUND, backgroundColour=CCPNGLWIDGET_HEXBACKGROUND):
+
+        from ccpn.framework.Application import getApplication
+        textFontLarge = getApplication()._fontSettings.textFontLarge
+
         if self._backgroundColour is not None or self.AUTOFILLBACKGROUND:
             sl.setStyleSheet('QLabel {'
                              'padding: 0; '
@@ -290,6 +294,9 @@ class OpenGLOverlayFrame(Frame):
                                 highlightColour=CCPNGLWIDGET_HEXHIGHLIGHT):
         """Update the background colour when changing colour themes, keeping the same foreground highlighting
         """
+        from ccpn.framework.Application import getApplication
+        textFontLarge = getApplication()._fontSettings.textFontLarge
+
         sl.setStyleSheet('QLabel {'
                          'padding: 0; '
                          'margin: 0px 0px 0px 0px;'

@@ -17,8 +17,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-01-29 09:03:04 +0000 (Wed, January 29, 2020) $"
-__version__ = "$Revision: 3.0.0 $"
+__dateModified__ = "$dateModified: 2020-03-17 00:13:57 +0000 (Tue, March 17, 2020) $"
+__version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -38,9 +38,10 @@ from ccpn.ui.gui.widgets.Spinbox import Spinbox
 from ccpn.ui.gui.widgets.ToolBar import ToolBar
 from ccpn.ui.gui.widgets.Widget import Widget
 from ccpn.ui.gui.widgets.Frame import Frame, OpenGLOverlayFrame
-from ccpn.ui.gui.guiSettings import textFont, getColours, STRIPHEADER_BACKGROUND, \
-    STRIPHEADER_FOREGROUND, GUINMRRESIDUE, CCPNGLWIDGET_BACKGROUND, textFontLarge, \
+from ccpn.ui.gui.guiSettings import getColours, STRIPHEADER_BACKGROUND, \
+    STRIPHEADER_FOREGROUND, GUINMRRESIDUE, CCPNGLWIDGET_BACKGROUND, \
     CCPNGLWIDGET_HEXHIGHLIGHT, CCPNGLWIDGET_HEXFOREGROUND
+# from ccpn.ui.gui.guiSettings import textFont, textFontLarge
 from ccpn.ui.gui.widgets.DropBase import DropBase
 from ccpn.ui.gui.lib.mouseEvents import getMouseEventDict
 from PyQt5 import QtGui, QtWidgets, QtCore

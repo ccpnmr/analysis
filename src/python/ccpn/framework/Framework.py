@@ -11,7 +11,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-03-09 19:05:49 +0000 (Mon, March 09, 2020) $"
+__dateModified__ = "$dateModified: 2020-03-17 00:13:56 +0000 (Tue, March 17, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -359,6 +359,8 @@ class Framework(NotifierBase):
 
         container = ApplicationContainer()
         container.register(self)
+
+        self._initialiseFonts()
 
         # Load / create project
         projectPath = self.args.projectPath
@@ -3053,6 +3055,11 @@ class Framework(NotifierBase):
     #     if not path:
     #       return
     #     spectrumDisplay.printToFile(path)
+
+    def _initialiseFonts(self):
+
+        from ccpn.ui.gui.guiSettings import fontSettings
+        self._fontSettings = fontSettings(self.preferences)
 
 
 def isValidPath(projectName, stripFullPath=True, stripExtension=True):

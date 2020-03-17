@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-01-28 09:52:40 +0000 (Tue, January 28, 2020) $"
-__version__ = "$Revision: 3.0.0 $"
+__dateModified__ = "$dateModified: 2020-03-17 00:13:57 +0000 (Tue, March 17, 2020) $"
+__version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -27,7 +27,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 
-from ccpn.ui.gui.guiSettings import messageFont, messageFontBold
+# from ccpn.ui.gui.guiSettings import messageFont, messageFontBold
 
 def _isDarwin():
     return 'darwin' in QtCore.QSysInfo().kernelType().lower()
@@ -76,11 +76,12 @@ class MessageDialog(QtWidgets.QMessageBox):
         # Adapted from best solution so far from: http://apocalyptech.com/linux/qt/qmessagebox/
         layout = self.layout()
 
+        from ccpn.framework.Application import getApplication
         item = layout.itemAtPosition(0, 2)
         if item:
             widget = item.widget()
             # GWV: setting font of basicText widget
-            widget.setFont(messageFontBold)
+            widget.setFont(getApplication()._fontSettings.messageFontBold)
             # GWV: setting font and width of message
 
         item = layout.itemAtPosition(1, 2)
@@ -88,7 +89,7 @@ class MessageDialog(QtWidgets.QMessageBox):
             widget = item.widget()
             # GWV: Estimating minimumwidth
             widget.setMinimumWidth(max(len(message) * 7, 200))
-            widget.setFont(messageFont)
+            widget.setFont(getApplication()._fontSettings.messageFont)
 
         # textEdit = self.findChild(QtGui.QTextEdit)
         # textEdit.setFont(messageFont)
@@ -352,7 +353,10 @@ class progressPopup(CcpnDialog):
         self.timer.timeout.connect(self.progress_simulation)
 
         self.label = Label(self, title, grid=(0, 0))
-        self.label.setFont(messageFont)
+
+        from ccpn.framework.Application import getApplication
+        self.label.setFont(getApplication()._fontSettings.messageFont)
+
         # self.layout().addWidget(self.progressbar)
 
         # vlayout.addWidget(self.btn_start)

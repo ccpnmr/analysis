@@ -11,7 +11,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-03-17 00:13:56 +0000 (Tue, March 17, 2020) $"
+__dateModified__ = "$dateModified: 2020-03-17 01:02:52 +0000 (Tue, March 17, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -2376,7 +2376,7 @@ class Framework(NotifierBase):
         else:
             from ccpn.ui.gui.popups.EstimateVolumes import EstimateVolumes
 
-            if self.current.strip:
+            if self.current.strip and not self.current.strip.isDeleted:
                 spectra = [specView.spectrum for specView in self.current.strip.spectrumDisplay.spectrumViews]
             else:
                 spectra = self.project.spectra
@@ -2394,13 +2394,17 @@ class Framework(NotifierBase):
             MessageDialog.showWarning('Cannot make strip plot,', 'nothing to display')
             return
         else:
-            from ccpn.ui.gui.popups.StripPlotPopup import StripPlotPopup
+            if len(self.project.spectrumDisplays) == 0:
+                MessageDialog.showWarning('', 'No SpectrumDisplay found')
 
-            popup = StripPlotPopup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow,
-                                   spectrumDisplay=self.current.strip.spectrumDisplay,
-                                   includePeakLists=includePeakLists, includeNmrChains=includeNmrChains,
-                                   includeNmrChainPullSelection=includeNmrChainPullSelection, includeSpectrumTable=False)
-            popup.exec_()
+            elif self.current.strip and not self.current.strip.isDeleted:
+                from ccpn.ui.gui.popups.StripPlotPopup import StripPlotPopup
+
+                popup = StripPlotPopup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow,
+                                       spectrumDisplay=self.current.strip.spectrumDisplay,
+                                       includePeakLists=includePeakLists, includeNmrChains=includeNmrChains,
+                                       includeNmrChainPullSelection=includeNmrChainPullSelection, includeSpectrumTable=False)
+                popup.exec_()
 
     ################################################################################################
     ## MENU callbacks:  Molecule

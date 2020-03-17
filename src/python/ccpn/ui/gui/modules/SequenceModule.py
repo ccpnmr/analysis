@@ -19,7 +19,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-03-17 00:13:57 +0000 (Tue, March 17, 2020) $"
+__dateModified__ = "$dateModified: 2020-03-17 01:02:52 +0000 (Tue, March 17, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -555,7 +555,7 @@ class GuiChainLabel(QtWidgets.QGraphicsTextItem):
             numberItem = QtWidgets.QGraphicsTextItem(residue.sequenceCode)
             numberItem.setDefaultTextColor(QtGui.QColor(self.colours[GUICHAINLABEL_TEXT]))
             numberItem.setFont(self.mainWindow.application._fontSettings.helvetica8)
-            xPosition = self.labelPosition + (self.mainWindow.application._fontSettings.fontSpacing * self.currentIndex)
+            xPosition = self.labelPosition + (self.mainWindow.application._fontSettings.textFontHugeSpacing * self.currentIndex)
             numberItem.setPos(QtCore.QPointF(xPosition, self.yPosition))
             self.scene.addItem(numberItem)
             self.items.append(numberItem)
@@ -620,7 +620,7 @@ class GuiChainResidue(QtWidgets.QGraphicsTextItem, Base):
         self.setDefaultTextColor(QtGui.QColor(self.colours[GUICHAINRESIDUE_UNASSIGNED]))
 
         self.setPlainText(residue.shortName)
-        position = labelPosition + (self.mainWindow.application._fontSettings.fontSpacing * index)
+        position = labelPosition + (self.mainWindow.application._fontSettings.textFontHugeSpacing * index)
         self.setPos(QtCore.QPointF(position, yPosition))
         self.residueNumber = residue.sequenceCode
 

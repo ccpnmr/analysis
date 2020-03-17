@@ -11,5 +11,5 @@ set ROOT="%HOME%\release\ccpnmr3.0.0\miniconda"
 set PATHFROM="%ANACONDA3%"
 set PATHTO="%HOME%\release\ccpnmr3.0.0\miniconda"
 
-"%ANACONDA3%"\python -i -O -W ignore::DeprecationWarning "%ENTRYMODULE%" "%ROOT%" "%PATHFROM%" "%PATHTO%"
+"%ANACONDA3%"\python -i -O -W ignore "%ENTRYMODULE%" "%ROOT%" "%PATHFROM%" "%PATHTO%"
 endlocal

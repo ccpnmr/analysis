@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Configure the paths inside the release miniconda directory
 
-CCPNMR_TOP_DIR="$(cd "$(dirname "$0")/.." || exit; pwd)"
+CCPNMR_TOP_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." || exit; pwd)"
 export CCPNMR_TOP_DIR
 CONVERT="${CCPNMR_TOP_DIR}"/src/python/ccpn/util/convertPaths.py
 

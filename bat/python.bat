@@ -1,9 +1,7 @@
 @echo off
 setlocal
-pushd..
-set CCPNMR_TOP_DIR=%CD%
-popd
-call "paths"
+set CCPNMR_TOP_DIR=%~dp0\..
+call "%~dp0\paths"
 
 "%ANACONDA3%"\python %*
 endlocal

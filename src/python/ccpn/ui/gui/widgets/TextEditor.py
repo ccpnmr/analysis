@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-03-17 00:13:57 +0000 (Tue, March 17, 2020) $"
+__dateModified__ = "$dateModified: 2020-03-18 18:28:54 +0000 (Wed, March 18, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -48,7 +48,9 @@ class TextEditor(QtWidgets.QTextEdit, Base):
         self.filename = filename
 
         from ccpn.framework.Application import getApplication
-        self.setFont(getApplication()._fontSettings.fixedWidthFont)
+        getApp = getApplication()
+        if getApp:
+            self.setFont(getApp._fontSettings.fixedWidthFont)
 
         self._changed = False
         self.setTabChangesFocus(True)

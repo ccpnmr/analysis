@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-CCPNMR_TOP_DIR="$(cd "$(dirname "$0")/.." || exit; pwd)"
+CCPNMR_TOP_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." || exit; pwd)"
 export CCPNMR_TOP_DIR
 source "${CCPNMR_TOP_DIR}"/bin/paths.sh
 

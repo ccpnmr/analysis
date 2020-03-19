@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-03-17 00:13:57 +0000 (Tue, March 17, 2020) $"
+__dateModified__ = "$dateModified: 2020-03-19 17:48:51 +0000 (Thu, March 19, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -77,11 +77,13 @@ class MessageDialog(QtWidgets.QMessageBox):
         layout = self.layout()
 
         from ccpn.framework.Application import getApplication
+        getApp = getApplication()
         item = layout.itemAtPosition(0, 2)
         if item:
             widget = item.widget()
             # GWV: setting font of basicText widget
-            widget.setFont(getApplication()._fontSettings.messageFontBold)
+            if getApp:
+                widget.setFont(getApp._fontSettings.messageFontBold)
             # GWV: setting font and width of message
 
         item = layout.itemAtPosition(1, 2)
@@ -89,7 +91,8 @@ class MessageDialog(QtWidgets.QMessageBox):
             widget = item.widget()
             # GWV: Estimating minimumwidth
             widget.setMinimumWidth(max(len(message) * 7, 200))
-            widget.setFont(getApplication()._fontSettings.messageFont)
+            if getApp:
+                widget.setFont(getApp._fontSettings.messageFont)
 
         # textEdit = self.findChild(QtGui.QTextEdit)
         # textEdit.setFont(messageFont)
@@ -355,7 +358,9 @@ class progressPopup(CcpnDialog):
         self.label = Label(self, title, grid=(0, 0))
 
         from ccpn.framework.Application import getApplication
-        self.label.setFont(getApplication()._fontSettings.messageFont)
+        getApp = getApplication()
+        if getApp:
+            self.label.setFont(getApp._fontSettings.messageFont)
 
         # self.layout().addWidget(self.progressbar)
 

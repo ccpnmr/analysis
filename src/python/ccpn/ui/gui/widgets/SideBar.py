@@ -26,7 +26,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-03-17 00:13:57 +0000 (Tue, March 17, 2020) $"
+__dateModified__ = "$dateModified: 2020-03-19 17:42:33 +0000 (Thu, March 19, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -1065,7 +1065,9 @@ class SideBar(QtWidgets.QTreeWidget, SideBarStructure, Base, NotifierBase):
         self._searchResultsContainer = searchResultsContainer
 
         from ccpn.framework.Application import getApplication
-        self.setFont(getApplication()._fontSettings.sidebarFont)
+        getApp = getApplication()
+        if getApp:
+            self.setFont(getApp._fontSettings.sidebarFont)
 
         self.header().hide()
         self.setDragEnabled(True)

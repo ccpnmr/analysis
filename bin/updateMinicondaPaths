@@ -4,10 +4,10 @@
 CCPNMR_TOP_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." || exit; pwd)"
 export CCPNMR_TOP_DIR
 CONVERT="${CCPNMR_TOP_DIR}"/src/python/ccpn/util/convertPaths.py
-
-ROOT="${HOME}/release/ccpnmr3.0.0/miniconda"
-PATHFROM=/Users/ejb66/miniconda3/envs/ccpnmr_distqt5
-PATHTO="${HOME}/release/ccpnmr3.0.0/miniconda"
-
 source "${CCPNMR_TOP_DIR}"/bin/paths.sh
+
+ROOT="${HOME}/${RELEASE}/${CCPNMRPATH}/miniconda"
+PATHFROM=${ANACONDA3}
+PATHTO="${HOME}/${RELEASE}/${CCPNMRPATH}/miniconda"
+
 "${ANACONDA3}"/bin/python "${CONVERT}" "${ROOT}" "${PATHFROM}" "${PATHTO}"

@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-03-17 00:13:57 +0000 (Tue, March 17, 2020) $"
+__dateModified__ = "$dateModified: 2020-03-19 09:42:49 +0000 (Thu, March 19, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -1065,7 +1065,9 @@ class CcpnModuleLabel(DockLabel):
         self.fixedWidth = True
 
         from ccpn.framework.Application import getApplication
-        self.setFont(getApplication()._fontSettings.moduleLabelFont)
+        getApp = getApplication()
+        self.setFont(getApp._fontSettings.moduleLabelFont)
+        self.labelSize = QtGui.QFontMetrics(getApp._fontSettings.moduleLabelFont).height() + 4
 
         self.setAlignment(QtCore.Qt.AlignVCenter | QtCore.Qt.AlignHCenter)
         self.closeButton.setStyleSheet('''border: 0px solid #a9a9a9;
@@ -1108,6 +1110,8 @@ class CcpnModuleLabel(DockLabel):
 
         button.setIcon(icon)
         retinaIconSize = self.getMaxIconSize(icon) // 2
+        retinaIconSize = self.labelSize - 4
+
         button.setIconSize(QtCore.QSize(retinaIconSize, retinaIconSize))
 
         if position == CcpnModuleLabel.TOP_RIGHT:

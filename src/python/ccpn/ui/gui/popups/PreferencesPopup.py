@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-03-17 00:13:57 +0000 (Tue, March 17, 2020) $"
+__dateModified__ = "$dateModified: 2020-03-20 18:10:04 +0000 (Fri, March 20, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -603,6 +603,22 @@ class PreferencesPopup(CcpnDialogMainWidget):
         self.stripWidthZoomPercentData.setValue(int(self.preferences.general.stripWidthZoomPercent))
         self.defaultAspectRatioBox.setChecked(self.preferences.general.useDefaultAspectRatio)
 
+        self.showZoomXLimitApplyBox.setChecked(self.preferences.general.zoomXLimitApply)
+        self.showZoomYLimitApplyBox.setChecked(self.preferences.general.zoomYLimitApply)
+        self.showIntensityLimitBox.setValue(self.preferences.general.intensityLimit)
+        self.annotationsData.setIndex(self.preferences.general.annotationType)
+        self.symbol.setIndex(self.preferences.general.symbolType)
+        self.symbolSizePixelData.setValue(float('%i' % self.preferences.general.symbolSizePixel))
+        self.symbolThicknessData.setValue(int(self.preferences.general.symbolThickness))
+        self.contourThicknessData.setValue(int(self.preferences.general.contourThickness))
+        self.autoCorrectBox.setChecked(self.preferences.general.autoCorrectColours)
+        _setColourPulldown(self.marksDefaultColourBox, self.preferences.general.defaultMarksColour)
+        self.showSideBandsData.setValue(int(self.preferences.general.numSideBands))
+
+        multipletAveraging = self.preferences.general.multipletAveraging
+        self.multipletAveraging.setIndex(MULTIPLETAVERAGINGTYPES.index(multipletAveraging) if multipletAveraging in MULTIPLETAVERAGINGTYPES else 0)
+        self.singleContoursBox.setChecked(self.preferences.general.generateSinglePlaneContours)
+
         # NOTE: ED this seems a little awkward
         self.aspectLabel = {}
         self.aspectData = {}
@@ -620,21 +636,37 @@ class PreferencesPopup(CcpnDialogMainWidget):
                 self.aspectData[aspect].setEnabled(True)
                 self.aspectData[aspect].valueChanged.connect(partial(self._queueSetAspect, aspect))
 
-        self.showZoomXLimitApplyBox.setChecked(self.preferences.general.zoomXLimitApply)
-        self.showZoomYLimitApplyBox.setChecked(self.preferences.general.zoomYLimitApply)
-        self.showIntensityLimitBox.setValue(self.preferences.general.intensityLimit)
-        self.annotationsData.setIndex(self.preferences.general.annotationType)
-        self.symbol.setIndex(self.preferences.general.symbolType)
-        self.symbolSizePixelData.setValue(float('%i' % self.preferences.general.symbolSizePixel))
-        self.symbolThicknessData.setValue(int(self.preferences.general.symbolThickness))
-        self.contourThicknessData.setValue(int(self.preferences.general.contourThickness))
-        self.autoCorrectBox.setChecked(self.preferences.general.autoCorrectColours)
-        _setColourPulldown(self.marksDefaultColourBox, self.preferences.general.defaultMarksColour)
-        self.showSideBandsData.setValue(int(self.preferences.general.numSideBands))
+        self.searchBox1dLabel = {}
+        self.searchBox1dData = {}
+        self._removeWidget(self.searchBox1dLabelFrame)
+        self._removeWidget(self.searchBox1dDataFrame)
+        for ii, searchBox1d in enumerate(sorted(self.preferences.general.searchBoxWidths1d.keys())):
+            searchBox1dValue = self.preferences.general.searchBoxWidths1d[searchBox1d]
+            self.searchBox1dLabel[searchBox1d] = Label(self.searchBox1dLabelFrame, text=searchBox1d, grid=(ii, 0), hAlign='r')
+            self.searchBox1dData[searchBox1d] = ScientificDoubleSpinBox(self.searchBox1dDataFrame, min=0.0001, grid=(ii, 0), hAlign='l')
+            self.searchBox1dData[searchBox1d].setValue(searchBox1dValue)
+            self.searchBox1dData[searchBox1d].setMinimumWidth(LineEditsMinimumWidth)
+            # if searchBox1d == self.preferences.general._basesearchBox1dRatioAxisCode:
+            #     self.searchBox1dData[searchBox1d].setEnabled(False)
+            # else:
+            #     self.searchBox1dData[searchBox1d].setEnabled(True)
+            self.searchBox1dData[searchBox1d].valueChanged.connect(partial(self._queueSetSearchBox1d, searchBox1d))
 
-        multipletAveraging = self.preferences.general.multipletAveraging
-        self.multipletAveraging.setIndex(MULTIPLETAVERAGINGTYPES.index(multipletAveraging) if multipletAveraging in MULTIPLETAVERAGINGTYPES else 0)
-        self.singleContoursBox.setChecked(self.preferences.general.generateSinglePlaneContours)
+        self.searchBoxNdLabel = {}
+        self.searchBoxNdData = {}
+        self._removeWidget(self.searchBoxNdLabelFrame)
+        self._removeWidget(self.searchBoxNdDataFrame)
+        for ii, searchBoxNd in enumerate(sorted(self.preferences.general.searchBoxWidthsNd.keys())):
+            searchBoxNdValue = self.preferences.general.searchBoxWidthsNd[searchBoxNd]
+            self.searchBoxNdLabel[searchBoxNd] = Label(self.searchBoxNdLabelFrame, text=searchBoxNd, grid=(ii, 0), hAlign='r')
+            self.searchBoxNdData[searchBoxNd] = ScientificDoubleSpinBox(self.searchBoxNdDataFrame, min=0.0001, grid=(ii, 0), hAlign='l')
+            self.searchBoxNdData[searchBoxNd].setValue(searchBoxNdValue)
+            self.searchBoxNdData[searchBoxNd].setMinimumWidth(LineEditsMinimumWidth)
+            # if searchBoxNd == self.preferences.general._basesearchBoxNdRatioAxisCode:
+            #     self.searchBoxNdData[searchBoxNd].setEnabled(False)
+            # else:
+            #     self.searchBoxNdData[searchBoxNd].setEnabled(True)
+            self.searchBoxNdData[searchBoxNd].valueChanged.connect(partial(self._queueSetSearchBoxNd, searchBoxNd))
 
     def _populateExternalProgramsTab(self):
         """Populate the widgets in the externalProgramsTab
@@ -867,6 +899,24 @@ class PreferencesPopup(CcpnDialogMainWidget):
         self.aspectData = {}
         self.aspectLabelFrame = Frame(parent, setLayout=True, showBorder=False, grid=(row, 0))
         self.aspectDataFrame = Frame(parent, setLayout=True, showBorder=False, grid=(row, 1))
+
+        row += 1
+        self.defaultSearchBox1dRatioLabel = Label(parent, text="1d Search Box widths (ppm): ", grid=(row, 0))
+
+        row += 1
+        self.searchBox1dLabel = {}
+        self.searchBox1dData = {}
+        self.searchBox1dLabelFrame = Frame(parent, setLayout=True, showBorder=False, grid=(row, 0))
+        self.searchBox1dDataFrame = Frame(parent, setLayout=True, showBorder=False, grid=(row, 1))
+
+        row += 1
+        self.defaultSearchBoxNdRatioLabel = Label(parent, text="Nd Search Box widths (ppm): ", grid=(row, 0))
+
+        row += 1
+        self.searchBoxNdLabel = {}
+        self.searchBoxNdData = {}
+        self.searchBoxNdLabelFrame = Frame(parent, setLayout=True, showBorder=False, grid=(row, 0))
+        self.searchBoxNdDataFrame = Frame(parent, setLayout=True, showBorder=False, grid=(row, 1))
 
         # for aspect in sorted(self.preferences.general.aspectRatios.keys()):
         #     # aspectValue = self.preferences.general.aspectRatios[aspect]
@@ -1645,6 +1695,42 @@ class PreferencesPopup(CcpnDialogMainWidget):
         # except Exception as es:
         #     return
         self.preferences.general.aspectRatios[aspect] = value
+
+    @queueStateChange(_verifyPopupApply)
+    def _queueSetSearchBox1d(self, searchBox1d):
+        textFromValue = self.searchBox1dData[searchBox1d].textFromValue
+        value = self.searchBox1dData[searchBox1d].get()
+        prefValue = textFromValue(self.preferences.general.searchBoxWidths1d[searchBox1d])
+        if textFromValue(value) != prefValue:
+            return partial(self._setSearchBox1d, searchBox1d, value)
+
+    def _setSearchBox1d(self, searchBox1d, value):
+        """
+        Set the searchBox1d width for the axes
+        """
+        # try:
+        #     searchBox1dValue = float(self.searchBox1dData[searchBox1d].text())
+        # except Exception as es:
+        #     return
+        self.preferences.general.searchBoxWidths1d[searchBox1d] = value
+
+    @queueStateChange(_verifyPopupApply)
+    def _queueSetSearchBoxNd(self, searchBoxNd):
+        textFromValue = self.searchBoxNdData[searchBoxNd].textFromValue
+        value = self.searchBoxNdData[searchBoxNd].get()
+        prefValue = textFromValue(self.preferences.general.searchBoxWidthsNd[searchBoxNd])
+        if textFromValue(value) != prefValue:
+            return partial(self._setSearchBoxNd, searchBoxNd, value)
+
+    def _setSearchBoxNd(self, searchBoxNd, value):
+        """
+        Set the searchBoxNd width for the axes
+        """
+        # try:
+        #     searchBoxNdValue = float(self.searchBoxNdData[searchBoxNd].text())
+        # except Exception as es:
+        #     return
+        self.preferences.general.searchBoxWidthsNd[searchBoxNd] = value
 
     @queueStateChange(_verifyPopupApply)
     def _queueSetIntensityLimit(self):

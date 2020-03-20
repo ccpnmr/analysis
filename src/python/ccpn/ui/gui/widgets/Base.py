@@ -18,7 +18,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-03-19 17:19:09 +0000 (Thu, March 19, 2020) $"
+__dateModified__ = "$dateModified: 2020-03-20 18:10:04 +0000 (Fri, March 20, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -151,6 +151,8 @@ class SignalBlocking():
 
         deleteItems(widget.getLayout())
         if removeTopWidget:
+            widget.setVisible(False)
+            widget.setParent(None)
             del widget
 
 

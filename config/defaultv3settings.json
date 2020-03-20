@@ -24,7 +24,7 @@
         "autoBackupFrequency"                  : 30,
         "stripRegionPadding"                   : 0.0,
         "peakDropFactor"                       : 0.1,
-        "peakFactor1D": 15,
+        "peakFactor1D"                         : 15,
         "peakFittingMethod"                    : "parabolic",
         "annotationType"                       : 0,
         "symbolSizePixel"                      : 9,
@@ -45,11 +45,24 @@
         "restoreLayoutOnOpening"               : true,
         "useDefaultAspectRatio"                : false,
         "useLockedAspectRatio"                 : false,
+        "aspectRatioMode"                      : 0,
         "aspectRatios"                         : {
             "H"         : 1.0,
             "N"         : 4.0,
             "C"         : 16,
             "intensity" : 10000000
+        },
+        "searchBoxWidthsNd"                    : {
+            "H"         : 0.2,
+            "N"         : 0.8,
+            "C"         : 3.2,
+            "intensity" : 2000000
+        },
+        "searchBoxWidths1d"                    : {
+            "H"         : 0.02,
+            "N"         : 0.08,
+            "C"         : 0.32,
+            "intensity" : 200000
         },
         "_baseAspectRatioAxisCode"             : "H",
         "defaultMarksColour"                   : "#EE82EE",

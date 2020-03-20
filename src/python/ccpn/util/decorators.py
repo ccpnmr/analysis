@@ -4,7 +4,7 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -13,9 +13,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: CCPN $"
-__dateModified__ = "$dateModified: 2017-07-07 16:32:44 +0100 (Fri, July 07, 2017) $"
-__version__ = "$Revision: 3.0.0 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2020-03-20 18:10:04 +0000 (Fri, March 20, 2020) $"
+__version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -338,45 +338,45 @@ def logCommand(prefix='', get=None, isProperty=False):
     return theDecorator
 
 
-def logCommand__Container(prefix='', get=None, isProperty=False):
-    """A decorator to log the invocation of the call to a Framework, Project, ... method.
-    Use prefix to set the proper command context, e.g. 'application.' or 'project.'
-    Use isProperty to get ' = 'args[1]
-    """
-
-    @decorator.decorator
-    def theDecorator(*args, **kwds):
-        # def logCommand(func, self, *args, **kwds):
-        # to avoid potential conflicts with potential 'func' named keywords
-        func = args[0]
-        args = args[1:]  # Optional 'self' is now args[0]
-        self = args[0]
-
-        application = self.__container.project.application
-        blocking = application._echoBlocking
-        if blocking == 0:
-            _pref = prefix
-            if get == 'self':
-                _pref += "get('%s')." % args[0].pid
-
-            if isProperty:
-                logS = _pref + '%s = %r' % (func.__name__, args[1])
-            else:
-                logS = _makeLogString(_pref, False, func, *args, **kwds)
-
-            application.ui.echoCommands([logS])
-
-        # blocking += 1
-        application._increaseNotificationBlocking()
-        try:
-            result = func(*args, **kwds)
-        finally:
-            # blocking -= 1
-            application._decreaseNotificationBlocking()
-
-        return result
-
-    return theDecorator
+# def logCommand__Container(prefix='', get=None, isProperty=False):
+#     """A decorator to log the invocation of the call to a Framework, Project, ... method.
+#     Use prefix to set the proper command context, e.g. 'application.' or 'project.'
+#     Use isProperty to get ' = 'args[1]
+#     """
+#
+#     @decorator.decorator
+#     def theDecorator(*args, **kwds):
+#         # def logCommand(func, self, *args, **kwds):
+#         # to avoid potential conflicts with potential 'func' named keywords
+#         func = args[0]
+#         args = args[1:]  # Optional 'self' is now args[0]
+#         self = args[0]
+#
+#         application = self.__container.project.application
+#         blocking = application._echoBlocking
+#         if blocking == 0:
+#             _pref = prefix
+#             if get == 'self':
+#                 _pref += "get('%s')." % args[0].pid
+#
+#             if isProperty:
+#                 logS = _pref + '%s = %r' % (func.__name__, args[1])
+#             else:
+#                 logS = _makeLogString(_pref, False, func, *args, **kwds)
+#
+#             application.ui.echoCommands([logS])
+#
+#         # blocking += 1
+#         application._increaseNotificationBlocking()
+#         try:
+#             result = func(*args, **kwds)
+#         finally:
+#             # blocking -= 1
+#             application._decreaseNotificationBlocking()
+#
+#         return result
+#
+#     return theDecorator
 
 
 # def debugEnter(verbosityLevel=Logger.DEBUG1):

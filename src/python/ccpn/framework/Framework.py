@@ -11,7 +11,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-03-17 01:55:31 +0000 (Tue, March 17, 2020) $"
+__dateModified__ = "$dateModified: 2020-03-20 18:10:04 +0000 (Fri, March 20, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -2219,6 +2219,30 @@ class Framework(NotifierBase):
                     # wrapped C/C++ object of type StripDisplay1d has been deleted
                     pass
 
+    def _setMainWindowsVisible(self, value):
+        """Set visibility of the main windows
+        """
+        tempModules = self.ui.mainWindow.application.ccpnModules
+        if len(tempModules) > 0:
+            for tempModule in tempModules:
+                try:
+                    tempModule.setVisible(value)
+                except:
+                    # wrapped C/C++ object of type StripDisplay1d has been deleted
+                    pass
+
+    def _setExtraWindowsVisible(self, value):
+        """Set visibility of the extra windows
+        """
+        tempAreas = self.ui.mainWindow.moduleArea.tempAreas
+        if len(tempAreas) > 0:
+            for tempArea in tempAreas:
+                try:
+                    tempArea.window().setVisible(value)
+                except:
+                    # wrapped C/C++ object of type StripDisplay1d has been deleted
+                    pass
+
     def _closeProject(self):
         """Close project and clean up - when opening another or quitting application"""
 
@@ -2227,6 +2251,8 @@ class Framework(NotifierBase):
         self.deleteAllNotifiers()
         if self.ui.mainWindow:
             # ui/gui cleanup
+            self._setMainWindowsVisible(False)
+            self._setExtraWindowsVisible(False)
             self._closeMainWindows()
             self._closeExtraWindows()
             self.ui.mainWindow.sideBar.deleteLater()

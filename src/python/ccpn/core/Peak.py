@@ -3,7 +3,7 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -12,9 +12,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: CCPN $"
-__dateModified__ = "$dateModified: 2017-07-07 16:32:29 +0100 (Fri, July 07, 2017) $"
-__version__ = "$Revision: 3.0.0 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2020-03-24 18:56:59 +0000 (Tue, March 24, 2020) $"
+__version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -628,10 +628,12 @@ class Peak(AbstractWrapperObject):
         setattr(self, attributeName, values)
 
     def snapToExtremum(self, halfBoxSearchWidth: int = 4, halfBoxFitWidth: int = 4,
-                       minDropFactor: float = 0.1, fitMethod: str = PARABOLICMETHOD):
+                       minDropFactor: float = 0.1, fitMethod: str = PARABOLICMETHOD,
+                       searchBoxMode=False):
         """Snap the Peak to the closest local extrema, if within range."""
         peakUtilsSnapToExtremum(self, halfBoxSearchWidth=halfBoxSearchWidth, halfBoxFitWidth=halfBoxFitWidth,
-                                minDropFactor=minDropFactor, fitMethod=fitMethod)
+                                minDropFactor=minDropFactor, fitMethod=fitMethod,
+                                searchBoxMode=searchBoxMode)
 
     # def fitPositionHeightLineWidths(self):
     #     """Set the position, height and lineWidth of the Peak."""

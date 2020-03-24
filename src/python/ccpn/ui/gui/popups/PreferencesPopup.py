@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-03-20 18:10:04 +0000 (Fri, March 20, 2020) $"
+__dateModified__ = "$dateModified: 2020-03-24 18:57:00 +0000 (Tue, March 24, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -636,6 +636,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
                 self.aspectData[aspect].setEnabled(True)
                 self.aspectData[aspect].valueChanged.connect(partial(self._queueSetAspect, aspect))
 
+        self.useSearchBoxWidthsBox.setChecked(self.preferences.general.searchBoxMode)
         self.searchBox1dLabel = {}
         self.searchBox1dData = {}
         self._removeWidget(self.searchBox1dLabelFrame)
@@ -868,6 +869,33 @@ class PreferencesPopup(CcpnDialogMainWidget):
         self.stripWidthZoomPercentData.setMinimumWidth(LineEditsMinimumWidth)
         self.stripWidthZoomPercentData.valueChanged.connect(self._queueSetStripWidthZoomPercent)
 
+        row += 1
+        self.showZoomXLimitApplyLabel = Label(parent, text="Apply Zoom limit to X axis: ", grid=(row, 0))
+        self.showZoomXLimitApplyBox = CheckBox(parent, grid=(row, 1))  #, checked=self.preferences.general.zoomXLimitApply)
+        self.showZoomXLimitApplyBox.toggled.connect(partial(self._queueToggleGeneralOptions, 'zoomXLimitApply'))
+
+        # self._toggleGeneralOptions('zoomXLimitApply', True)
+        # self.showZoomXLimitApplyBox.setChecked(True)
+        # self.showZoomXLimitApplyBox.setEnabled(False)
+
+        row += 1
+        self.showZoomYLimitApplyLabel = Label(parent, text="Apply Zoom limit to Y axis: ", grid=(row, 0))
+        self.showZoomYLimitApplyBox = CheckBox(parent, grid=(row, 1))  #, checked=self.preferences.general.zoomYLimitApply)
+        self.showZoomYLimitApplyBox.toggled.connect(partial(self._queueToggleGeneralOptions, 'zoomYLimitApply'))
+
+        # self._toggleGeneralOptions('zoomYLimitApply', True)
+        # self.showZoomYLimitApplyBox.setChecked(True)
+        # self.showZoomYLimitApplyBox.setEnabled(False)
+
+        row += 1
+        # intensityLimit = self.preferences.general.intensityLimit
+        self.showIntensityLimitLabel = Label(parent, text='Minimum Intensity Limit', grid=(row, 0), hAlign='l')
+        self.showIntensityLimitBox = ScientificDoubleSpinBox(parent,  #step=1,
+                                                             min=1e-6, grid=(row, 1), hAlign='l')
+        # self.showIntensityLimitBox.setValue(intensityLimit)
+        self.showIntensityLimitBox.setMinimumWidth(LineEditsMinimumWidth)
+        self.showIntensityLimitBox.valueChanged.connect(self._queueSetIntensityLimit)
+
         # row += 1
         # self.matchAxisCodeLabel = Label(parent, text="Match Axis Codes", grid=(row, 0))
         # matchAxisCode = self.preferences.general.matchAxisCode
@@ -890,6 +918,9 @@ class PreferencesPopup(CcpnDialogMainWidget):
         # self.showLastAxisOnlyBox.toggled.connect(partial(self._queueToggleGeneralOptions, 'lastAxisOnly'))
 
         row += 1
+        HLine(parent, grid=(row, 0), gridSpan=(1, 3), colour=getColours()[DIVIDER], height=15)
+
+        row += 1
         self.defaultAspectRatioLabel = Label(parent, text="Fixed Aspect Ratios: ", grid=(row, 0))
         self.defaultAspectRatioBox = CheckBox(parent, grid=(row, 1))        #, checked=self.preferences.general.useDefaultAspectRatio)
         self.defaultAspectRatioBox.toggled.connect(partial(self._queueToggleGeneralOptions, 'useDefaultAspectRatio'))
@@ -901,7 +932,14 @@ class PreferencesPopup(CcpnDialogMainWidget):
         self.aspectDataFrame = Frame(parent, setLayout=True, showBorder=False, grid=(row, 1))
 
         row += 1
-        self.defaultSearchBox1dRatioLabel = Label(parent, text="1d Search Box widths (ppm): ", grid=(row, 0))
+        self.useSearchBoxWidthsLabel = Label(parent, text="Use Search Box Widths: ", grid=(row, 0))
+        self.useSearchBoxWidthsBox = CheckBox(parent, grid=(row, 1))  #, checked=self.preferences.searchBoxWidthsSettings.useSearchBoxWidths)
+        self.useSearchBoxWidthsBox.toggled.connect(self._queueSetUseSearchBoxWidths)
+        self.useSearchBoxWidthsLabel.setToolTip('Use defined search box widths (ppm)\nor default to ±4 index points.\nNote, default will depend on resolution of spectrum')
+        self.useSearchBoxWidthsBox.setToolTip('Use defined search box widths (ppm)\nor default to ±4 index points.\nNote, default will depend on resolution of spectrum')
+
+        row += 1
+        self.defaultSearchBox1dRatioLabel = Label(parent, text="1d Search Box Widths (ppm): ", grid=(row, 0), hAlign='r')
 
         row += 1
         self.searchBox1dLabel = {}
@@ -910,7 +948,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
         self.searchBox1dDataFrame = Frame(parent, setLayout=True, showBorder=False, grid=(row, 1))
 
         row += 1
-        self.defaultSearchBoxNdRatioLabel = Label(parent, text="Nd Search Box widths (ppm): ", grid=(row, 0))
+        self.defaultSearchBoxNdRatioLabel = Label(parent, text="Nd Search Box Widths (ppm): ", grid=(row, 0), hAlign='r')
 
         row += 1
         self.searchBoxNdLabel = {}
@@ -927,33 +965,6 @@ class PreferencesPopup(CcpnDialogMainWidget):
         #     self.aspectData[aspect].setMinimumWidth(LineEditsMinimumWidth)
         #     self.aspectData[aspect].valueChanged.connect(partial(self._queueSetAspect, aspect))
         #     row += 1
-
-        row += 1
-        self.showZoomXLimitApplyLabel = Label(parent, text="Apply Zoom limit to X axis: ", grid=(row, 0))
-        self.showZoomXLimitApplyBox = CheckBox(parent, grid=(row, 1))  #, checked=self.preferences.general.zoomXLimitApply)
-        self.showZoomXLimitApplyBox.toggled.connect(partial(self._queueToggleGeneralOptions, 'zoomXLimitApply'))
-
-        # self._toggleGeneralOptions('zoomXLimitApply', True)
-        # self.showZoomXLimitApplyBox.setChecked(True)
-        # self.showZoomXLimitApplyBox.setEnabled(False)
-
-        row += 1
-        self.showZoomYLimitApplyLabel = Label(parent, text="Apply Zoom limit to Y axis: ", grid=(row, 0))
-        self.showZoomYLimitApplyBox = CheckBox(parent, grid=(row, 1))  #, checked=self.preferences.general.zoomYLimitApply)
-        self.showZoomYLimitApplyBox.toggled.connect(partial(self._queueToggleGeneralOptions, 'zoomYLimitApply'))
-
-        # self._toggleGeneralOptions('zoomYLimitApply', True)
-        # self.showZoomYLimitApplyBox.setChecked(True)
-        # self.showZoomYLimitApplyBox.setEnabled(False)
-
-        row += 1
-        # intensityLimit = self.preferences.general.intensityLimit
-        self.showIntensityLimitLabel = Label(parent, text='Minimum Intensity Limit', grid=(row, 0), hAlign='r')
-        self.showIntensityLimitBox = ScientificDoubleSpinBox(parent,  #step=1,
-                                                             min=1e-6, grid=(row, 1), hAlign='l')
-        # self.showIntensityLimitBox.setValue(intensityLimit)
-        self.showIntensityLimitBox.setMinimumWidth(LineEditsMinimumWidth)
-        self.showIntensityLimitBox.valueChanged.connect(self._queueSetIntensityLimit)
 
         row += 1
         HLine(parent, grid=(row, 0), gridSpan=(1, 3), colour=getColours()[DIVIDER], height=15)
@@ -1353,10 +1364,6 @@ class PreferencesPopup(CcpnDialogMainWidget):
             # self._setPipesFilesPath()
             # self.preferences.general.userExtensionPath = directory[0]
 
-    def _setPipesFilesPath(self, value):
-        # newPath = self.pipesPathData.text()
-        self.preferences.general.userExtensionPath = value
-
     @queueStateChange(_verifyPopupApply)
     def _queueChangeLanguage(self, value):
         value = languages[value]
@@ -1695,6 +1702,19 @@ class PreferencesPopup(CcpnDialogMainWidget):
         # except Exception as es:
         #     return
         self.preferences.general.aspectRatios[aspect] = value
+
+    @queueStateChange(_verifyPopupApply)
+    def _queueSetUseSearchBoxWidths(self):
+        value = self.useSearchBoxWidthsBox.get()
+        if value != self.preferences.general.searchBoxMode:
+            return partial(self._setUseSearchBoxWidths, value)
+
+    def _setUseSearchBoxWidths(self, value):
+        # try:
+        #     value = self.useSearchBoxWidthsBox.isChecked()
+        # except:
+        #     return
+        self.preferences.general.searchBoxMode = value
 
     @queueStateChange(_verifyPopupApply)
     def _queueSetSearchBox1d(self, searchBox1d):

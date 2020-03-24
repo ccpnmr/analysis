@@ -55,7 +55,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-03-16 17:29:24 +0000 (Mon, March 16, 2020) $"
+__dateModified__ = "$dateModified: 2020-03-24 18:56:59 +0000 (Tue, March 24, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -260,16 +260,18 @@ class CcpnGLWidget(QOpenGLWidget):
         # set a minimum size so that the strips resize nicely
         self.setMinimumSize(self.AXIS_MARGINRIGHT + 10, self.AXIS_MARGINBOTTOM + 10)
 
-        # set the pyqtsignal responders
+        # initialise the pyqtsignal notifier
         self.GLSignals = GLNotifier(parent=self, strip=strip)
-        self.GLSignals.glXAxisChanged.connect(self._glXAxisChanged)
-        self.GLSignals.glYAxisChanged.connect(self._glYAxisChanged)
-        self.GLSignals.glAllAxesChanged.connect(self._glAllAxesChanged)
-        self.GLSignals.glMouseMoved.connect(self._glMouseMoved)
-        self.GLSignals.glEvent.connect(self._glEvent)
-        self.GLSignals.glAxisLockChanged.connect(self._glAxisLockChanged)
-        self.GLSignals.glAxisUnitsChanged.connect(self._glAxisUnitsChanged)
-        self.GLSignals.glKeyEvent.connect(self._glKeyEvent)
+
+        # # set the pyqtsignal responders
+        # self.GLSignals.glXAxisChanged.connect(self._glXAxisChanged)
+        # self.GLSignals.glYAxisChanged.connect(self._glYAxisChanged)
+        # self.GLSignals.glAllAxesChanged.connect(self._glAllAxesChanged)
+        # self.GLSignals.glMouseMoved.connect(self._glMouseMoved)
+        # self.GLSignals.glEvent.connect(self._glEvent)
+        # self.GLSignals.glAxisLockChanged.connect(self._glAxisLockChanged)
+        # self.GLSignals.glAxisUnitsChanged.connect(self._glAxisUnitsChanged)
+        # self.GLSignals.glKeyEvent.connect(self._glKeyEvent)
 
         self.lastPixelRatio = None
 
@@ -2018,6 +2020,16 @@ class CcpnGLWidget(QOpenGLWidget):
 
         # check that the screen device pixel ratio is correct
         self.refreshDevicePixelRatio()
+
+        # set the pyqtsignal responders
+        self.GLSignals.glXAxisChanged.connect(self._glXAxisChanged)
+        self.GLSignals.glYAxisChanged.connect(self._glYAxisChanged)
+        self.GLSignals.glAllAxesChanged.connect(self._glAllAxesChanged)
+        self.GLSignals.glMouseMoved.connect(self._glMouseMoved)
+        self.GLSignals.glEvent.connect(self._glEvent)
+        self.GLSignals.glAxisLockChanged.connect(self._glAxisLockChanged)
+        self.GLSignals.glAxisUnitsChanged.connect(self._glAxisUnitsChanged)
+        self.GLSignals.glKeyEvent.connect(self._glKeyEvent)
 
     def _clearGLCursorQueue(self):
         for glBuf in self._glCursorQueue:

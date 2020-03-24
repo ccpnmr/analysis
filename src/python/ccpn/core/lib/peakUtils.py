@@ -1,7 +1,7 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -10,9 +10,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: CCPN $"
-__dateModified__ = "$dateModified: 2017-07-07 16:32:32 +0100 (Fri, July 07, 2017) $"
-__version__ = "$Revision: 3.0.0 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2020-03-24 18:56:59 +0000 (Tue, March 24, 2020) $"
+__version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -609,17 +609,20 @@ def _fitExpDecayCurve(bindingCurves, aFunc=exponenial_func, xfStep=0.01, xfPerce
 
 
 def snapToExtremum(peak: 'Peak', halfBoxSearchWidth: int = 3, halfBoxFitWidth: int = 3,
-                   minDropFactor: float = 0.1, fitMethod: str = PARABOLICMETHOD):
+                   minDropFactor: float = 0.1, fitMethod: str = PARABOLICMETHOD,
+                   searchBoxMode=False):
     """Snap the position of the peak the nearest extremum.
     Assumes called with an existing peak, will fit within a box ±halfBoxSearchWidth about the current peak position.
     """
 
+    import math
     from ccpn.core.Peak import Peak
     from ccpnc.peak import Peak as CPeak
     from ccpn.framework.Application import getApplication
+    getApp = getApplication()
 
     # error checking - that the peak is a valid peak
-    peak = getApplication().project.getByPid(peak) if isinstance(peak, str) else peak
+    peak = getApp.project.getByPid(peak) if isinstance(peak, str) else peak
     if not isinstance(peak, Peak):
         raise TypeError('%s is not of type Peak' % peak)
 
@@ -628,6 +631,39 @@ def snapToExtremum(peak: 'Peak', halfBoxSearchWidth: int = 3, halfBoxFitWidth: i
     dataSource = apiPeak.peakList.dataSource
     numDim = dataSource.numDim
     peakDims = apiPeak.sortedPeakDims()
+
+    if searchBoxMode and dataSource.numDim > 1:
+        print('>>> useSearchBoxWidths')
+        # NOTE:ED get the peakDim axisCode here and define the new half boxwidths based on the ValuePerPoint
+        searchBoxWidths = getApp.preferences.general.searchBoxWidthsNd
+
+        boxWidths = []
+        axisCodes = peak.axisCodes
+        for peakDim, axisCode in zip(peakDims, axisCodes):
+            dataDim = peakDim.dataDim
+            if hasattr(dataDim, 'primaryDataDimRef'):
+                ddr = dataDim.primaryDataDimRef
+                pointToValue = ddr and ddr.pointToValue
+            else:
+                pointToValue = dataDim.pointToValue
+
+            letterAxisCode = (axisCode[0] if axisCode != 'intensity' else axisCode) if axisCode else None
+            if letterAxisCode in searchBoxWidths:
+                newWidth = math.floor(searchBoxWidths[letterAxisCode] / (2.0 * abs(pointToValue(1)-pointToValue(0))))
+                boxWidths.append(newWidth)
+            else:
+                # default to the given parameter value
+                boxWidths.append(halfBoxSearchWidth)
+    else:
+        boxWidths = halfBoxSearchWidth
+
+    # TODO:ED - testing irregular box size OR wrong distance
+    #           seems to be irregular box...
+    # boxWidths = np.max(boxWidths)
+
+    # add the new boxWidths array as np.int32 type
+    boxWidths = np.array(boxWidths, dtype=np.int32)
+    print('>>> boxWidths', boxWidths)
 
     # get the height - remember not to use (position-1) because function does that
     height = dataSource.getPositionValue([peakDim.position for peakDim in peakDims])
@@ -645,8 +681,12 @@ def snapToExtremum(peak: 'Peak', halfBoxSearchWidth: int = 3, halfBoxFitWidth: i
     numPoints = np.array([peakDim.dataDim.numPoints for peakDim in peakDims], dtype=np.int32)
 
     # extra plane in each direction increases accuracy of group fitting
-    startPoint = np.maximum(pLower - halfBoxSearchWidth, 0)
-    endPoint = np.minimum(pUpper + halfBoxSearchWidth, numPoints)
+    # startPoint = np.maximum(pLower - halfBoxSearchWidth, 0)
+    # endPoint = np.minimum(pUpper + halfBoxSearchWidth, numPoints)
+    startPoint = np.maximum(pLower - boxWidths, 0)
+    endPoint = np.minimum(pUpper + boxWidths, numPoints)
+
+    print('>>>   startPoint', startPoint, endPoint)
 
     # map to co-ordinates to a (0,0) cornered box
     regionArray = np.array((startPoint - startPoint, endPoint - startPoint), dtype=np.int32)
@@ -693,12 +733,25 @@ def snapToExtremum(peak: 'Peak', halfBoxSearchWidth: int = 3, halfBoxFitWidth: i
 
         # find the closest peak in the found list
         # peakPoint, height = peakPoints[0]
-        dist = peakPoint = None
+        height = dist = peakPoint = None
         for findNextPeak in peakPoints:
-            peakDist = np.linalg.norm(np.array(findNextPeak[0]) - position - startPoint)
-            if dist == None or peakDist < dist:
-                dist = peakDist
+
+            # find the closest peak to start from
+            # # peakDist = np.linalg.norm(np.array(findNextPeak[0]) - position - startPoint)
+            # peakDist = np.linalg.norm(np.array(findNextPeak[0]) - boxWidths)
+            # print('>>>     peakPoint', findNextPeak[0], findNextPeak[0]-boxWidths, peakDist)
+            # if dist == None or peakDist < dist:
+            #     dist = peakDist
+            #     peakPoint = findNextPeak[0]
+
+            # find the highest peak to start from
+            peakHeight = findNextPeak[1]
+            print('>>>     peakPoint', findNextPeak[0], findNextPeak[0]-boxWidths, peakHeight)
+            if height == None or abs(peakHeight) > height:
+                height = abs(peakHeight)
                 peakPoint = findNextPeak[0]
+
+        print('>>>   nextPeak', peakPoint, peakPoint-boxWidths, dist, height)
 
         # use this as the centre for the peak fitting
         peakPoint = np.array(peakPoint)
@@ -736,6 +789,8 @@ def snapToExtremum(peak: 'Peak', halfBoxSearchWidth: int = 3, halfBoxFitWidth: i
 
             # ignore if out of range
             if abs(newPos - center[i]) < 1e-9:
+
+                # NOTE:ED - need boxWidths in here?
                 peakDim.position = center[i] + startPoint[i] + 1.0  # API position starts at 1
             peakDim.lineWidth = dataDims[i].valuePerPoint * linewidth[i]
 

@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-03-16 17:29:24 +0000 (Mon, March 16, 2020) $"
+__dateModified__ = "$dateModified: 2020-03-24 18:56:59 +0000 (Tue, March 24, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -687,19 +687,20 @@ class GuiWindow():
 
         # get the default from the preferences
         minDropFactor = self.application.preferences.general.peakDropFactor
+        searchBoxMode = self.application.preferences.general.searchBoxMode
 
         with undoBlock():
             n = len(peaks)
 
             if n == 1:
-                peaks[0].snapToExtremum(halfBoxSearchWidth=4, halfBoxFitWidth=4, minDropFactor=minDropFactor)
+                peaks[0].snapToExtremum(halfBoxSearchWidth=4, halfBoxFitWidth=4, minDropFactor=minDropFactor, searchBoxMode=searchBoxMode)
             elif n > 1:
                 title = 'Snap Peak%s to extremum' % ('' if n == 1 else 's')
                 msg = 'Snap %sselected peak%s?' % ('' if n == 1 else '%d ' % n, '' if n == 1 else 's')
                 if MessageDialog.showYesNo(title, msg, parent):
                     with progressManager(self, 'Snapping peaks to extrema'):
                         for peak in peaks:
-                            peak.snapToExtremum(halfBoxSearchWidth=4, halfBoxFitWidth=4, minDropFactor=minDropFactor)
+                            peak.snapToExtremum(halfBoxSearchWidth=4, halfBoxFitWidth=4, minDropFactor=minDropFactor, searchBoxMode=searchBoxMode)
             else:
                 getLogger().warning('No selected peak/s. Select a peak first.')
 

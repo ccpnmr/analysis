@@ -52,11 +52,11 @@
             "C"         : 16,
             "intensity" : 10000000
         },
+        "searchBoxMode"                        : true,
         "searchBoxWidthsNd"                    : {
-            "H"         : 0.2,
-            "N"         : 0.8,
-            "C"         : 3.2,
-            "intensity" : 2000000
+            "H"         : 0.15,
+            "N"         : 0.6,
+            "C"         : 2.4
         },
         "searchBoxWidths1d"                    : {
             "H"         : 0.02,

@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-03-25 10:20:02 +0000 (Wed, March 25, 2020) $"
+__dateModified__ = "$dateModified: 2020-03-25 12:53:16 +0000 (Wed, March 25, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -1260,12 +1260,15 @@ class PeakList(PMIListABC):
 
             try:
                 result = ()
-                if fitMethod == PARABOLICMETHOD:
+                # NOTE:ED - groupMode must be gaussian
+                if fitMethod == PARABOLICMETHOD and singularMode is True:
 
                     # parabolic - generate all peaks in one operation
                     result = CPeak.fitParabolicPeaks(dataArray, regionArray, updatePeaksArray)
 
                 else:
+                    method = 1 if fitMethod == LORENTZIANMETHOD else 0
+
                     # currently gaussian or lorentzian
                     if singularMode is True:
 

@@ -4,7 +4,7 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -13,9 +13,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: CCPN $"
-__dateModified__ = "$dateModified: 2017-07-07 16:32:31 +0100 (Fri, July 07, 2017) $"
-__version__ = "$Revision: 3.0.0 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2020-03-25 12:53:16 +0000 (Wed, March 25, 2020) $"
+__version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -66,7 +66,7 @@ from ccpn.core.Chain import Chain
 from ccpn.core.ChemicalShiftList import ChemicalShiftList
 from ccpn.core.NmrResidue import NmrResidue
 from ccpn.core.Peak import Peak
-from ccpn.core.PeakList import PeakList
+from ccpn.core.PeakList import PeakList, GAUSSIANMETHOD
 from ccpn.core.Project import Project
 
 from ccpnmodel.ccpncore.lib.assignment.ChemicalShift import getSpinSystemResidueProbability, getAtomProbability, getResidueAtoms, getCcpCodes, \
@@ -717,7 +717,7 @@ def sameAxisCodes(peaks: typing.List[Peak], dim: int):
     return True
 
 
-def refitPeaks(peaks: Sequence[Peak], method: str = 'gaussian', singularMode=True):
+def refitPeaks(peaks: Sequence[Peak], fitMethod: str = GAUSSIANMETHOD, singularMode=True):
     from ccpnmodel.ccpncore.lib.spectrum import Peak as LibPeak
 
     # LibPeak.fitExistingPeaks([peak._wrappedData for peak in peaks], method)
@@ -733,7 +733,7 @@ def refitPeaks(peaks: Sequence[Peak], method: str = 'gaussian', singularMode=Tru
                 peakLists[peak.peakList] = [peak]
 
         for peakList, peaks in peakLists.items():
-            peakList.fitExistingPeaks(peaks, method, singularMode=singularMode)
+            peakList.fitExistingPeaks(peaks, fitMethod=fitMethod, singularMode=singularMode)
 
 
 def _assignNmrResiduesToPeaks(peaks, nmrResidues):

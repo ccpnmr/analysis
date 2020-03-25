@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-03-16 17:29:24 +0000 (Mon, March 16, 2020) $"
+__dateModified__ = "$dateModified: 2020-03-25 10:20:02 +0000 (Wed, March 25, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -1305,8 +1305,9 @@ class PeakList(PMIListABC):
 
                     newPos = min(max(center[i], 0.5), dataArray.shape[i] - 1.5)
 
-                    # ignore if out of range
-                    if abs(newPos - center[i]) < 1e-9:
+                    # NOTE:ED - ignore if out of range - might not need any more
+                    dist = abs(newPos - center[i])
+                    if dist < halfBoxSearchWidth:
                         peakDim.position = center[i] + firstArray[i] + 1.0  # API position starts at 1
                     peakDim.lineWidth = dataDims[i].valuePerPoint * linewidth[i]
 

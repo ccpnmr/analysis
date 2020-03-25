@@ -11,7 +11,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-03-24 18:56:59 +0000 (Tue, March 24, 2020) $"
+__dateModified__ = "$dateModified: 2020-03-25 10:20:02 +0000 (Wed, March 25, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -30,6 +30,7 @@ from scipy.optimize import curve_fit
 from ccpn.core.PeakList import GAUSSIANMETHOD, PARABOLICMETHOD
 from ccpn.util.Common import makeIterableList
 import pandas as pd
+
 
 POSITIONS = 'positions'
 HEIGHT = 'height'
@@ -86,7 +87,7 @@ def getMultipletPosition(multiplet, dim, unit='ppm'):
             return
 
         if isinstance(value, (int, float, np.float32, np.float64)):
-            return float(value)                                         # '{0:.2f}'.format(value)
+            return float(value)  # '{0:.2f}'.format(value)
 
     except Exception as e:
         getLogger().warning('Error on setting Position. %s' % e)
@@ -124,7 +125,7 @@ def getPeakPosition(peak, dim, unit='ppm'):
                              % unit)
 
         if isinstance(value, (int, float, np.float32, np.float64)):
-            return float(value)                                         # '{0:.4f}'.format(value)
+            return float(value)  # '{0:.4f}'.format(value)
 
         return None
 
@@ -150,6 +151,7 @@ def getPeakLinewidth(peak, dim):
     # need to return this as a string otherwise the table changes between 'None' and 'nan'
     return 'None'
 
+
 def _get1DPeaksPosAndHeightAsArray(peakList):
     import numpy as np
 
@@ -161,6 +163,8 @@ def _get1DPeaksPosAndHeightAsArray(peakList):
 import sys
 from numpy import NaN, Inf, arange
 from numba import jit
+
+
 @jit(nopython=True, nogil=True)
 def simple1DPeakPicker(y, x, delta, negDelta=None, negative=False):
     """
@@ -177,27 +181,27 @@ def simple1DPeakPicker(y, x, delta, negDelta=None, negative=False):
     if negDelta: negDelta = 0
 
     for i in arange(len(y)):
-            this = y[i]
-            if this > mx:
-                mx = this
-                mxpos = x[i]
-            if this < mn:
+        this = y[i]
+        if this > mx:
+            mx = this
+            mxpos = x[i]
+        if this < mn:
+            mn = this
+            mnpos = x[i]
+        if lookformax:
+            if not negative:  # just positives
+                this = abs(this)
+            if this < mx - delta:
+                maxtab.append((float(mxpos), float(mx)))
                 mn = this
                 mnpos = x[i]
-            if lookformax:
-                if not negative:  # just positives
-                    this = abs(this)
-                if this < mx - delta:
-                    maxtab.append((float(mxpos), float(mx)))
-                    mn = this
-                    mnpos = x[i]
-                    lookformax = False
-            else:
-                if this > mn + delta:
-                    mintab.append((float(mnpos), float(mn)))
-                    mx = this
-                    mxpos = x[i]
-                    lookformax = True
+                lookformax = False
+        else:
+            if this > mn + delta:
+                mintab.append((float(mnpos), float(mn)))
+                mx = this
+                mxpos = x[i]
+                lookformax = True
 
     filteredNeg = []
     for p in mintab:
@@ -338,8 +342,6 @@ def __filterPeaksBySelectedNmrAtomOption(nmrResidue, nmrAtomsNames, spectra):
     return list(OrderedDict.fromkeys(peaks))
 
 
-
-
 def getNmrResiduePeakProperty(nmrResidue, nmrAtomsNames, spectra, theProperty='height'):
     '''
 
@@ -354,8 +356,8 @@ def getNmrResiduePeakProperty(nmrResidue, nmrAtomsNames, spectra, theProperty='h
 
     if len(spectra) <= 1:
         return
-    if not theProperty in ['height','volume']:
-        getLogger().warn('Property not currently available %s' %theProperty)
+    if not theProperty in ['height', 'volume']:
+        getLogger().warn('Property not currently available %s' % theProperty)
         return
     peaks = __filterPeaksBySelectedNmrAtomOption(nmrResidue, nmrAtomsNames, spectra)
     if len(peaks) > 0:
@@ -364,6 +366,7 @@ def getNmrResiduePeakProperty(nmrResidue, nmrAtomsNames, spectra, theProperty='h
                 p = getattr(peak, theProperty)
                 ll.append(p)
     return ll, peaks
+
 
 def getNmrResiduePeakHeight(nmrResidue, nmrAtomsNames, spectra):
     '''
@@ -375,17 +378,19 @@ def getNmrResiduePeakHeight(nmrResidue, nmrAtomsNames, spectra):
     getLogger().warn('Deprecated. Used getNmrResiduePeakProperty with theProperty = "height"')
     return getNmrResiduePeakProperty(nmrResidue, nmrAtomsNames, spectra, theProperty='height')
 
+
 def getRawDataFrame(nmrResidues, nmrAtomsNames, spectra, theProperty):
     dfs = []
     names = [sp.name for sp in spectra]
     for nmrResidue in nmrResidues:
-        if not '-' in nmrResidue.sequenceCode.replace('+', '-'): # not consider the +1 and -1 residues
-            ll =  getNmrResiduePeakProperty(nmrResidue, nmrAtomsNames, spectra, theProperty)
-            if len(ll)>0:
+        if not '-' in nmrResidue.sequenceCode.replace('+', '-'):  # not consider the +1 and -1 residues
+            ll = getNmrResiduePeakProperty(nmrResidue, nmrAtomsNames, spectra, theProperty)
+            if len(ll) > 0:
                 df = pd.DataFrame([ll], index=[nmrResidue.pid], columns=names)
                 dfs.append(df)
     data = pd.concat(dfs)
     return data
+
 
 def _getPeaksForNmrResidue(nmrResidue, nmrAtomsNames, spectra):
     if len(spectra) <= 1:
@@ -397,6 +402,7 @@ def _getPeaksForNmrResidue(nmrResidue, nmrAtomsNames, spectra):
             if peak.peakList.spectrum in spectra:
                 usepeaks.append(peak)
     return usepeaks
+
 
 def getNmrResidueDeltas(nmrResidue, nmrAtomsNames, spectra, mode=POSITIONS, atomWeights=None):
     '''
@@ -420,61 +426,61 @@ def getNmrResidueDeltas(nmrResidue, nmrAtomsNames, spectra, mode=POSITIONS, atom
         for peak in peaks:
             if peak.peakList.spectrum in spectra:
                 # try:  #some None value can get in here
-                    if mode == POSITIONS:
-                        deltaTemp = []
-                        for i, axisCode in enumerate(peak.axisCodes):
-                            if len(axisCode) > 0:
-                                if any(s.startswith(axisCode[0]) for s in nmrAtomsNames):
-                                    weight = _getAtomWeight(axisCode, atomWeights)
-                                    if peaks[0] != peak:  # dont' compare to same peak
-                                        delta = peak.position[i] - peaks[0].position[i]
-                                        delta = delta ** 2
-                                        delta = delta * weight
+                if mode == POSITIONS:
+                    deltaTemp = []
+                    for i, axisCode in enumerate(peak.axisCodes):
+                        if len(axisCode) > 0:
+                            if any(s.startswith(axisCode[0]) for s in nmrAtomsNames):
+                                weight = _getAtomWeight(axisCode, atomWeights)
+                                if peaks[0] != peak:  # dont' compare to same peak
+                                    delta = peak.position[i] - peaks[0].position[i]
+                                    delta = delta ** 2
+                                    delta = delta * weight
+                                    deltaTemp.append(delta)
+                                    # deltaInts.append(((peak.position[i] - list(peaks)[0].position[i]) * weight) ** 2)
+                                    # delta += ((list(peaks)[0].position[i] - peak.position[i]) * weight) ** 2
+                    if len(deltaTemp) > 0:
+                        delta = sum(deltaTemp) ** 0.5
+                        deltas += [delta]
+
+                if mode == VOLUME:
+                    if list(peaks)[0] != peak:  # dont' compare to same peak
+                        if not peak.volume or not peaks[0].volume or peaks[0].volume == 0:
+                            getLogger().warn('Volume has to be set for peaks: %s, %s' % (peak, peaks[0]))
+                            break
+
+                        delta1Atoms = (peak.volume / list(peaks)[0].volume)
+                        deltas += [((delta1Atoms) ** 2) ** 0.5, ]
+
+                if mode == HEIGHT:
+                    if list(peaks)[0] != peak:  # dont' compare to same peak
+                        if not peak.height or not peaks[0].height or peaks[0].height == 0:
+                            getLogger().warn('Height has to be set for peaks: %s, %s' % (peak, peaks[0]))
+                            break
+
+                        delta1Atoms = (peak.height / list(peaks)[0].height)
+                        deltas += [((delta1Atoms) ** 2) ** 0.5, ]
+
+                if mode == LINEWIDTHS:
+                    deltaTemp = []
+                    for i, axisCode in enumerate(peak.axisCodes):
+                        if list(peaks)[0] != peak:  # dont' compare to same peak
+                            if axisCode:
+                                if len(axisCode) > 0:
+                                    if any(s.startswith(axisCode[0]) for s in nmrAtomsNames):
+                                        weight = _getAtomWeight(axisCode, atomWeights)
+                                        if not peak.lineWidths[i] or not peaks[0].lineWidths[i]:
+                                            getLogger().warn('lineWidth has to be set for peaks: %s, %s' % (peak, peaks[0]))
+                                            break
+                                        delta = ((peak.lineWidths[i] - list(peaks)[0].lineWidths[i]) * weight) ** 2
                                         deltaTemp.append(delta)
-                                        # deltaInts.append(((peak.position[i] - list(peaks)[0].position[i]) * weight) ** 2)
-                                        # delta += ((list(peaks)[0].position[i] - peak.position[i]) * weight) ** 2
-                        if len(deltaTemp)>0:
-                            delta = sum(deltaTemp) ** 0.5
-                            deltas += [delta]
+                    if len(deltaTemp) > 0:
+                        delta = sum(deltaTemp) ** 0.5
+                        deltas += [delta]
 
-                    if mode == VOLUME:
-                        if list(peaks)[0] != peak:  # dont' compare to same peak
-                            if not peak.volume or not peaks[0].volume or peaks[0].volume == 0:
-                                getLogger().warn('Volume has to be set for peaks: %s, %s' %(peak,peaks[0]))
-                                break
-
-                            delta1Atoms = (peak.volume / list(peaks)[0].volume)
-                            deltas += [((delta1Atoms) ** 2) ** 0.5, ]
-
-                    if mode == HEIGHT:
-                        if list(peaks)[0] != peak:  # dont' compare to same peak
-                            if not peak.height or not peaks[0].height or peaks[0].height == 0:
-                                getLogger().warn('Height has to be set for peaks: %s, %s' %(peak,peaks[0]))
-                                break
-
-                            delta1Atoms = (peak.height / list(peaks)[0].height)
-                            deltas += [((delta1Atoms) ** 2) ** 0.5, ]
-
-                    if mode == LINEWIDTHS:
-                        deltaTemp = []
-                        for i, axisCode in enumerate(peak.axisCodes):
-                            if list(peaks)[0] != peak:  # dont' compare to same peak
-                                if axisCode:
-                                    if len(axisCode) > 0:
-                                        if any(s.startswith(axisCode[0]) for s in nmrAtomsNames):
-                                            weight = _getAtomWeight(axisCode, atomWeights)
-                                            if not peak.lineWidths[i] or not peaks[0].lineWidths[i]:
-                                                getLogger().warn('lineWidth has to be set for peaks: %s, %s' % (peak, peaks[0]))
-                                                break
-                                            delta = ((peak.lineWidths[i] - list(peaks)[0].lineWidths[i]) * weight) ** 2
-                                            deltaTemp.append(delta)
-                        if len(deltaTemp)>0:
-                            delta = sum(deltaTemp) ** 0.5
-                            deltas += [delta]
-
-                # except Exception as e:
-                #     message = 'Error for calculation mode: %s on %s and %s. ' % (mode, peak.pid, list(peaks)[0].pid) + str(e)
-                #     getLogger().debug(message)
+            # except Exception as e:
+            #     message = 'Error for calculation mode: %s on %s and %s. ' % (mode, peak.pid, list(peaks)[0].pid) + str(e)
+            #     getLogger().debug(message)
 
     if deltas and not None in deltas:
         return round(float(np.mean(deltas)), 3)
@@ -485,11 +491,11 @@ def _getKd(func, x, y):
     if len(x) <= 1:
         return
     try:
-        param = curve_fit(func, x, y, maxfev = 6000)
+        param = curve_fit(func, x, y, maxfev=6000)
         bindingUnscaled, bmax = param[0]
         yScaled = y / bmax
 
-        paramScaled = curve_fit(func, x, yScaled, maxfev = 6000)
+        paramScaled = curve_fit(func, x, yScaled, maxfev=6000)
         kd, bmax = paramScaled[0]
     except Exception as err:
         getLogger().warning('Impossible to estimate Kd values. %s' % err)
@@ -619,6 +625,7 @@ def snapToExtremum(peak: 'Peak', halfBoxSearchWidth: int = 3, halfBoxFitWidth: i
     from ccpn.core.Peak import Peak
     from ccpnc.peak import Peak as CPeak
     from ccpn.framework.Application import getApplication
+
     getApp = getApplication()
 
     # error checking - that the peak is a valid peak
@@ -633,7 +640,6 @@ def snapToExtremum(peak: 'Peak', halfBoxSearchWidth: int = 3, halfBoxFitWidth: i
     peakDims = apiPeak.sortedPeakDims()
 
     if searchBoxMode and dataSource.numDim > 1:
-        print('>>> useSearchBoxWidths')
         # NOTE:ED get the peakDim axisCode here and define the new half boxwidths based on the ValuePerPoint
         searchBoxWidths = getApp.preferences.general.searchBoxWidthsNd
 
@@ -649,7 +655,7 @@ def snapToExtremum(peak: 'Peak', halfBoxSearchWidth: int = 3, halfBoxFitWidth: i
 
             letterAxisCode = (axisCode[0] if axisCode != 'intensity' else axisCode) if axisCode else None
             if letterAxisCode in searchBoxWidths:
-                newWidth = math.floor(searchBoxWidths[letterAxisCode] / (2.0 * abs(pointToValue(1)-pointToValue(0))))
+                newWidth = math.floor(searchBoxWidths[letterAxisCode] / (2.0 * abs(pointToValue(1) - pointToValue(0))))
                 boxWidths.append(newWidth)
             else:
                 # default to the given parameter value
@@ -657,13 +663,8 @@ def snapToExtremum(peak: 'Peak', halfBoxSearchWidth: int = 3, halfBoxFitWidth: i
     else:
         boxWidths = halfBoxSearchWidth
 
-    # TODO:ED - testing irregular box size OR wrong distance
-    #           seems to be irregular box...
-    # boxWidths = np.max(boxWidths)
-
     # add the new boxWidths array as np.int32 type
     boxWidths = np.array(boxWidths, dtype=np.int32)
-    print('>>> boxWidths', boxWidths)
 
     # get the height - remember not to use (position-1) because function does that
     height = dataSource.getPositionValue([peakDim.position for peakDim in peakDims])
@@ -685,8 +686,6 @@ def snapToExtremum(peak: 'Peak', halfBoxSearchWidth: int = 3, halfBoxFitWidth: i
     # endPoint = np.minimum(pUpper + halfBoxSearchWidth, numPoints)
     startPoint = np.maximum(pLower - boxWidths, 0)
     endPoint = np.minimum(pUpper + boxWidths, numPoints)
-
-    print('>>>   startPoint', startPoint, endPoint)
 
     # map to co-ordinates to a (0,0) cornered box
     regionArray = np.array((startPoint - startPoint, endPoint - startPoint), dtype=np.int32)
@@ -732,26 +731,20 @@ def snapToExtremum(peak: 'Peak', halfBoxSearchWidth: int = 3, halfBoxFitWidth: i
     try:
 
         # find the closest peak in the found list
-        # peakPoint, height = peakPoints[0]
-        height = dist = peakPoint = None
+        bestHeight = bestDist = peakPoint = None
+        bestFit = 0.0
         for findNextPeak in peakPoints:
-
-            # find the closest peak to start from
-            # # peakDist = np.linalg.norm(np.array(findNextPeak[0]) - position - startPoint)
-            # peakDist = np.linalg.norm(np.array(findNextPeak[0]) - boxWidths)
-            # print('>>>     peakPoint', findNextPeak[0], findNextPeak[0]-boxWidths, peakDist)
-            # if dist == None or peakDist < dist:
-            #     dist = peakDist
-            #     peakPoint = findNextPeak[0]
 
             # find the highest peak to start from
             peakHeight = findNextPeak[1]
-            print('>>>     peakPoint', findNextPeak[0], findNextPeak[0]-boxWidths, peakHeight)
-            if height == None or abs(peakHeight) > height:
-                height = abs(peakHeight)
-                peakPoint = findNextPeak[0]
+            peakDist = np.linalg.norm((np.array(findNextPeak[0]) - boxWidths) / boxWidths)
+            peakFit = abs(peakHeight / (1.0 + peakDist))
 
-        print('>>>   nextPeak', peakPoint, peakPoint-boxWidths, dist, height)
+            if height == None or peakFit > bestFit:
+                bestFit = peakFit
+                bestHeight = abs(peakHeight)
+                bestDist = peakDist
+                peakPoint = findNextPeak[0]
 
         # use this as the centre for the peak fitting
         peakPoint = np.array(peakPoint)
@@ -787,10 +780,9 @@ def snapToExtremum(peak: 'Peak', halfBoxSearchWidth: int = 3, halfBoxFitWidth: i
         for i, peakDim in enumerate(peakDims):
             newPos = min(max(center[i], 0.5), dataArray.shape[i] - 1.5)
 
-            # ignore if out of range
-            if abs(newPos - center[i]) < 1e-9:
-
-                # NOTE:ED - need boxWidths in here?
+            # NOTE:ED - ignore if out of range - might not need any more
+            dist = abs(newPos - center[i])
+            if dist < boxWidths[i]:
                 peakDim.position = center[i] + startPoint[i] + 1.0  # API position starts at 1
             peakDim.lineWidth = dataDims[i].valuePerPoint * linewidth[i]
 

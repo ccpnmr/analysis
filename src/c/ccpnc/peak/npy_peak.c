@@ -406,9 +406,8 @@ static CcpnBool fitParabolicToNDim(PyArrayObject *data_array, float *v, npy_intp
     COPY_VECTOR(pnt, point, ndim);
 
     if ((point[dim] > 0) && (point[dim] < (points[dim] - 1))) {
-
         // NOTE:ED - need to copy the correct vector every time?
-        COPY_VECTOR(pnt, point, ndim);
+        //        COPY_VECTOR(pnt, point, ndim);
 
         pnt[dim] = point[dim];
         vm = get_value_at_point(data_array, pnt);
@@ -421,19 +420,10 @@ static CcpnBool fitParabolicToNDim(PyArrayObject *data_array, float *v, npy_intp
 
         //        *v = fit_position_parabolic(vl, vm, vr);
         status = fit_position_x(vl, vm, vr, &peak, &height, &lineFit);
-
-        printf(">>> parabolicfit - pos: ");
-        for (int pDim = 0; pDim < ndim; pDim++)
-            printf("%i ", pnt[pDim]);
-        printf("\n>>> parabolicfit - vs, %f %f %f\n", vl, vm, vr);
-
-        if (status == CCPN_OK) {
+        if (status == CCPN_OK)
             *peakFit = peak + point[dim];
-            printf(">>> parabolicfit - %i okay, %f\n", dim, *peakFit);
-        } else {
+        else
             *peakFit = point[dim];
-            printf(">>> parabolicfit - %i X\n", dim);
-        }
 
         *v = height;
         *lineWidth = lineFit;
@@ -699,7 +689,7 @@ static CcpnStatus fit_parabolic(PyArrayObject *data_array, PyArrayObject *region
     npeaks = PyArray_DIM(peak_array, 0);
     nparams = (1 + 2 * ndim) * npeaks;
 
-    printf(">>> parabolic - npeaks: %i\n", npeaks);
+    //    printf(">>> parabolic - npeaks: %i\n", npeaks);
 
     sprintf(error_msg, "allocating memory for params, params_dev");
     MALLOC(params, float, nparams);
@@ -720,13 +710,13 @@ static CcpnStatus fit_parabolic(PyArrayObject *data_array, PyArrayObject *region
             posn = MIN(npts - 1, posn);
             grid_posn[i] = posn;
 
-            printf(">>> parabolic - npeak %i, %i -> [%i]\n", j, i, grid_posn[i]);
+            //            printf(">>> parabolic - npeak %i, %i -> [%i]\n", j, i, grid_posn[i]);
         }
 
         height = get_value_at_point(data_array, grid_posn);
         have_maximum = height > 0;  // TBD: possibly wrong
 
-        printf(">>> parabolic - height %i, %f\n", j, height);
+        //        printf(">>> parabolic - height %i, %f\n", j, height);
 
         for (i = 0; i < ndim; i++)
             status = fitParabolicToNDim(data_array, &peakHeight, grid_posn, points, &peakFit[i], &lineWidths[i], i);

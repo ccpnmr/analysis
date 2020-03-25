@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-01-23 13:20:54 +0000 (Thu, January 23, 2020) $"
-__version__ = "$Revision: 3.0.0 $"
+__dateModified__ = "$dateModified: 2020-03-25 14:47:21 +0000 (Wed, March 25, 2020) $"
+__version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -257,7 +257,7 @@ colourNameToHexDict = {
     'blue'   : '#0000ff',
     'yellow' : '#ffff00',
     'magenta': '#ff00ff',
-    'cyan'   : '#ffff00',
+    'cyan'   : '#00ffff',
     }
 
 # small set of colours

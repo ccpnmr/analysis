@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-02-12 18:17:32 +0000 (Wed, February 12, 2020) $"
+__dateModified__ = "$dateModified: 2020-03-25 19:06:29 +0000 (Wed, March 25, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -35,12 +35,14 @@ from ccpn.core.lib.CallBack import CallBack
 from ccpn.core.lib.DataFrameObject import DataFrameObject, DATAFRAME_OBJECT, \
     DATAFRAME_INDEX, DATAFRAME_HASH, DATAFRAME_PID
 
-from ccpn.ui.gui.guiSettings import getColours
+from ccpn.ui.gui.guiSettings import getColours, BORDERNOFOCUS_COLOUR
 from ccpn.ui.gui.widgets.Base import Base
+from ccpn.ui.gui.widgets.Widget import Widget
 from ccpn.ui.gui.widgets import MessageDialog
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
 from ccpn.ui.gui.widgets.FileDialog import FileDialog
-from ccpn.ui.gui.widgets.Frame import Frame
+from ccpn.ui.gui.widgets.Frame import Frame, ScrollableFrame
+from ccpn.ui.gui.widgets.ScrollArea import ScrollArea
 from ccpn.ui.gui.widgets.ColumnViewSettings import ColumnViewSettingsPopup
 from ccpn.ui.gui.widgets.SearchWidget import attachSearchWidget
 from ccpn.core.lib.Notifiers import Notifier
@@ -189,7 +191,7 @@ GuiTable::item::selected {
                  mainWindow=None,
                  dataFrameObject=None,  # collate into a single object that can be changed quickly
                  actionCallback=None, selectionCallback=None, checkBoxCallback=None,
-                 _pulldownKwds = None,
+                 _pulldownKwds=None,
                  multiSelect=False, selectRows=True, numberRows=False, autoResize=False,
                  enableExport=True, enableDelete=True, enableSearch=True,
                  hideIndex=True, stretchLastSection=True, _applyPostSort=True,
@@ -372,6 +374,36 @@ GuiTable::item::selected {
 
         # update method for ccpn sorting
         TableWidgetItem.__lt__ = __ltForTableWidgetItem__
+
+    def _initTableCommonWidgets(self, parent, height=35, setGuiNotifier=None, **kwds):
+        """Initialise the common table elements
+        """
+        # strange, need to do this when using scrollArea, but not a Widget
+        parent.getLayout().setHorizontalSpacing(0)
+
+        self._widget = ScrollableFrame(parent=parent, scrollBarPolicies=('never', 'never'), **kwds)
+        self._widgetScrollArea = self._widget._scrollArea
+        self._widgetScrollArea.setStyleSheet('''
+                    margin-left : 2px;
+                    margin-right : 2px;''')
+
+        self._widgetScrollArea.setFixedHeight(height)  # needed for the correct sizing of the table
+
+    def _initDroppedNotifier(self):
+        from ccpn.ui.gui.widgets.DropBase import DropBase
+        from ccpn.ui.gui.lib.GuiNotifier import GuiNotifier
+
+        self.droppedNotifier = GuiNotifier(self,
+                                           [GuiNotifier.DROPEVENT], [DropBase.PIDS],
+                                           self._processDroppedItems)
+
+        # self.setStyleSheet('''
+        #             NmrResidueTable {border-left-width: 1px solid  #a9a9a9;
+        #             border-right-width: 1px solid  #a9a9a9;
+        #             border-bottom-width: 1px solid  #a9a9a9;
+        #             border-bottom-right-radius: 2px;
+        #             border-bottom-left-radius: 2px;}
+        #             ''')
 
     def _blockTableEvents(self, blanking=True, _disableScroll=False):
         """Block all updates/signals/notifiers in the table.
@@ -678,11 +710,11 @@ GuiTable::item::selected {
                 pulldown.item = item
                 model = self.selectionModel()
                 # selects all the items in the row
-                selection =  model.selectedIndexes()
+                selection = model.selectedIndexes()
 
                 self.setCellWidget(row, col, pulldown)
                 self.setItem(row, col, item)
-                item.setValue('') # values are in the pulldown. Otherwise they are inserted inside the cell as str in a long list
+                item.setValue('')  # values are in the pulldown. Otherwise they are inserted inside the cell as str in a long list
 
             else:
                 self.setItem(row, col, item)
@@ -749,7 +781,7 @@ GuiTable::item::selected {
     def _checkBoxTableCallback(self, itemSelection):
 
         state = True if itemSelection.checkState() == 2 else False
-        state = not state # as to be opposite before catches the event before you clicked
+        state = not state  # as to be opposite before catches the event before you clicked
         value = itemSelection.value
         # if not state == value:
 
@@ -2366,7 +2398,7 @@ if __name__ == '__main__':
         exampleFloat = 3.1  # This will create a double spin box
         exampleBool = True  # This will create a check box
         string = 'white'  # This will create a line Edit
-        exampleList = [(' ', 'Mock','Test'), ]  # This will create a pulldown
+        exampleList = [(' ', 'Mock', 'Test'), ]  # This will create a pulldown
         color = QtGui.QColor('Red')
         icon = Icon('icons/warning')
         r = Colour.colourNameToHexDict['red']
@@ -2391,16 +2423,19 @@ if __name__ == '__main__':
         def editFlags(self, value):
             print(value)
 
-    def _comboboxCallBack(value):
 
-        print('called value =',value)
+    def _comboboxCallBack(value):
+        print('called value =', value)
+
 
     def _checkBoxCallBack(data):
         s = data['checked']
         print('called value =', s)
 
+
     def table_pulldownCallback(value):
         print('NEW', value)
+
 
     def table_pulldownCallbackShow():
         print('NEW', dir(), )
@@ -2441,7 +2476,7 @@ if __name__ == '__main__':
             None,
             )
         ])
-    table_pulldownCallbackDict = {'callback':table_pulldownCallback, 'clickToShowCallback':table_pulldownCallbackShow}
+    table_pulldownCallbackDict = {'callback': table_pulldownCallback, 'clickToShowCallback': table_pulldownCallbackShow}
     table = GuiTable(parent=popup, dataFrameObject=None, _pulldownKwds=table_pulldownCallbackDict, checkBoxCallback=_checkBoxCallBack, grid=(0, 0))
     df = table.getDataFrameFromList(table, [mockObj] * 5, colDefs=columns)
 

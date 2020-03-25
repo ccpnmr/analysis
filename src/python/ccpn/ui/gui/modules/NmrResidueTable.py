@@ -21,7 +21,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-03-17 00:13:57 +0000 (Tue, March 17, 2020) $"
+__dateModified__ = "$dateModified: 2020-03-25 19:06:29 +0000 (Wed, March 25, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -116,9 +116,10 @@ class NmrResidueTableModule(CcpnModule):
                                                multiSelect=True,
                                                grid=(0, 0))
 
-
-
-
+        if nmrChain is not None:
+            self.selectNmrChain(nmrChain)
+        elif selectFirstItem:
+            self.nmrResidueTable.ncWidget.selectFirstItem()
 
         # install the event filter to handle maximising from floated dock
         self.installMaximiseEventHandler(self._maximise, self._closeModule)
@@ -134,15 +135,14 @@ class NmrResidueTableModule(CcpnModule):
             self.nmrResidueTable._activePulldownClass = self.activePulldownClass
             self.nmrResidueTable._activeCheckbox = getattr(self.nmrResidueTableSettings, LINKTOPULLDOWNCLASS, None)
 
-        if nmrChain is not None:
-            self.selectNmrChain(nmrChain)
-        elif selectFirstItem:
-            # firstItemText = self.nmrResidueTable.ncWidget.getFirstItemText()
-            # if firstItemText:
-            self.nmrResidueTable.ncWidget.selectFirstItem()
-                # chain = self.nmrResidueTable.ncWidget.getCurrentObject()
-                # self.nmrResidueTable._update(chain)
-
+        # if nmrChain is not None:
+        #     self.selectNmrChain(nmrChain)
+        # elif selectFirstItem:
+        #     # firstItemText = self.nmrResidueTable.ncWidget.getFirstItemText()
+        #     # if firstItemText:
+        #     self.nmrResidueTable.ncWidget.selectFirstItem()
+        #         # chain = self.nmrResidueTable.ncWidget.getCurrentObject()
+        #         # self.nmrResidueTable._update(chain)
 
     def _maximise(self):
         """
@@ -382,17 +382,8 @@ class NmrResidueTable(GuiTable):
             self.project = None
             self.current = None
 
-        # strange, need to do this when using scrollArea, but not a Widget
-        parent.getLayout().setHorizontalSpacing(0)
-        self._widgetScrollArea = ScrollArea(parent=parent, scrollBarPolicies=('never', 'never'), **kwds)
-        self._widgetScrollArea.setWidgetResizable(True)
-        self._widgetScrollArea.setStyleSheet('''
-                                    margin-left : 2px;
-                                    margin-right : 2px;
-                                    padding : 2px''')
-        self._widget = Widget(parent=self._widgetScrollArea, setLayout=True)
-        self._widgetScrollArea.setWidget(self._widget)
-        self._widget.setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.Expanding)
+        # Initialise the scroll widget and common settings
+        self._initTableCommonWidgets(parent, **kwds)
 
         self._nmrChain = None
         if actionCallback is None:
@@ -428,14 +419,13 @@ class NmrResidueTable(GuiTable):
         self.ncWidget = NmrChainPulldown(parent=self._widget,
                                          mainWindow=self.mainWindow, default=None,  #first NmrChain in project (if present)
                                          grid=(1, 0), gridSpan=(1, 1), minimumWidths=(0, 100),
+                                         showSelectName=True,
                                          sizeAdjustPolicy=QtWidgets.QComboBox.AdjustToContents,
                                          callback=self._selectionPulldownCallback,
-                                         showSelectName=False, selectNoneText='none',
                                          )
         self.spacer = Spacer(self._widget, 5, 5,
                              QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed,
                              grid=(2, 1), gridSpan=(1, 1))
-        self._setWidgetHeight(35)
 
         # initialise the currently attached dataFrame
         self._hiddenColumns = ['Pid', 'NmrChain']
@@ -475,26 +465,19 @@ class NmrResidueTable(GuiTable):
                                selectCurrentCallBack=self._selectOnTableCurrentNmrResiduesNotifierCallback,
                                moduleParent=moduleParent)
 
-        self.droppedNotifier = GuiNotifier(self,
-                                           [GuiNotifier.DROPEVENT], [DropBase.PIDS],
-                                           self._processDroppedItems)
+        # Initialise the notifier for processing dropped items
+        self._initDroppedNotifier()
 
         # put into subclass
         self._activePulldownClass = None
         self._activeCheckbox = None
 
-        self.setStyleSheet('''
-                    NmrResidueTable {border: 1px solid  #a9a9a9;
-                    border-bottom-right-radius: 2px;
-                    border-bottom-left-radius: 2px;}
-                    ''')
-
-        self._corner = QWidget()
-        self._corner.setStyleSheet('''
-            border-top: 1px solid #a9a9a9;
-            border-left: 1px solid #a9a9a9;
-        ''')
-        self._cornerDisplay = NmrResidueTable.ScrollBarVisibilityWatcher(self, self._corner)
+        # self._corner = QWidget()
+        # self._corner.setStyleSheet('''
+        #     border-top: 1px solid #a9a9a9;
+        #     border-left: 1px solid #a9a9a9;
+        # ''')
+        # self._cornerDisplay = NmrResidueTable.ScrollBarVisibilityWatcher(self, self._corner)
 
     def _processDroppedItems(self, data):
         """

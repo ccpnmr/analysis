@@ -6,7 +6,7 @@ tertiary version by Ejb 9/5/17
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -15,9 +15,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: CCPN $"
-__dateModified__ = "$dateModified: 2017-07-07 16:32:43 +0100 (Fri, July 07, 2017) $"
-__version__ = "$Revision: 3.0.0 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2020-03-25 19:06:29 +0000 (Wed, March 25, 2020) $"
+__version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -210,7 +210,12 @@ class ChemicalShiftTable(GuiTable):
             self.application = None
             self.project = None
             self.current = None
-        self._widget = Widget(parent=parent, **kwds)
+
+        # self._widget = Widget(parent=parent, **kwds)
+
+        # Initialise the scroll widget and common settings
+        self._initTableCommonWidgets(parent, **kwds)
+
         self.chemicalShiftList = None
 
         # create the column objects
@@ -261,16 +266,14 @@ class ChemicalShiftTable(GuiTable):
                                                                     mainWindow=self.mainWindow, default=None,
                                                                     # first NmrChain in project (if present)
                                                                     grid=(1, 0), gridSpan=(1, 1), minimumWidths=(0, 100),
-                                                                    showSelectName=False, selectNoneText='none',
+                                                                    showSelectName=True,
                                                                     sizeAdjustPolicy=QtWidgets.QComboBox.AdjustToContents,
                                                                     callback=self._selectionPulldownCallback,
                                                                     )
 
         self.spacer = Spacer(self._widget, 5, 5,
-                             QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed,
-                             grid=(2, 0), gridSpan=(1, 1))
-
-        self._widget.setFixedHeight(30)
+                             QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed,
+                             grid=(2, 1), gridSpan=(1, 1))
 
         # initialise the currently attached dataFrame
         self._hiddenColumns = hiddenColumns
@@ -300,9 +303,8 @@ class ChemicalShiftTable(GuiTable):
                                searchCallBack=None,
                                moduleParent=moduleParent)
 
-        self._droppedNotifier = GuiNotifier(self,
-                                            [GuiNotifier.DROPEVENT], [DropBase.PIDS],
-                                            self._processDroppedItems)
+        # Initialise the notifier for processing dropped items
+        self._initDroppedNotifier()
 
     def _processDroppedItems(self, data):
         """

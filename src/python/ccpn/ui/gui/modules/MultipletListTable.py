@@ -4,7 +4,7 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -13,9 +13,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: CCPN $"
-__dateModified__ = "$dateModified: 2017-07-07 16:32:46 +0100 (Fri, July 07, 2017) $"
-__version__ = "$Revision: 3.0.0 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2020-03-25 19:06:29 +0000 (Wed, March 25, 2020) $"
+__version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -180,13 +180,8 @@ class MultipletListTableWidget(GuiTable):
         self._selectedMultipletList = None
         kwds['setLayout'] = True  ## Assure we have a layout with the widget
 
-        # strange, need to do this when using scrollArea, but not a Widget
-        # parent.getLayout().setHorizontalSpacing(0)
-        self._widgetScrollArea = ScrollArea(parent=parent, scrollBarPolicies=('never', 'never'), **kwds)
-        self._widgetScrollArea.setWidgetResizable(True)
-        self._widget = Widget(parent=self._widgetScrollArea, setLayout=True)
-        self._widgetScrollArea.setWidget(self._widget)
-        self._widget.setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.Expanding)
+        # Initialise the scroll widget and common settings
+        self._initTableCommonWidgets(parent, **kwds)
 
         row = 0
         self.spacer = Spacer(self._widget, 5, 5,
@@ -213,7 +208,6 @@ class MultipletListTableWidget(GuiTable):
         self.spacer = Spacer(self._widget, 5, 5,
                              QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed,
                              grid=(row, gridHPos + 1), gridSpan=(1, 1))
-        self._widgetScrollArea.setFixedHeight(35)  # needed for the correct sizing of the table
 
         self._hiddenColumns = ['Pid', 'Spectrum', 'MultipletList', 'Id']
         self.dataFrameObject = None
@@ -252,9 +246,8 @@ class MultipletListTableWidget(GuiTable):
                                selectCurrentCallBack=self._selectOnTableCurrentMultipletsNotifierCallback,
                                moduleParent=moduleParent)
 
-        self.droppedNotifier = GuiNotifier(self,
-                                           [GuiNotifier.DROPEVENT], [DropBase.PIDS],
-                                           self._processDroppedItems)
+        # Initialise the notifier for processing dropped items
+        self._initDroppedNotifier()
 
     def _processDroppedItems(self, data):
         """

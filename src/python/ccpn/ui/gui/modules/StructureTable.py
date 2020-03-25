@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-02-11 17:32:54 +0000 (Tue, February 11, 2020) $"
+__dateModified__ = "$dateModified: 2020-03-25 19:06:29 +0000 (Wed, March 25, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -370,12 +370,8 @@ class StructureTable(GuiTableStructure):
             self._project = None
             self._current = None
 
-        parent.getLayout().setHorizontalSpacing(0)
-        self._widgetScrollArea = ScrollArea(parent=parent, scrollBarPolicies=('never', 'never'), **kwds)
-        self._widgetScrollArea.setWidgetResizable(True)
-        self._widget = Widget(parent=self._widgetScrollArea, setLayout=True)
-        self._widgetScrollArea.setWidget(self._widget)
-        self._widget.setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.Expanding)
+        # Initialise the scroll widget and common settings
+        self._initTableCommonWidgets(parent, **kwds)
 
         self.thisObj = None
         self.thisDataSet = None
@@ -468,9 +464,8 @@ class StructureTable(GuiTableStructure):
         #
         # # self.setData(data)
 
-        self.droppedNotifier = GuiNotifier(self,
-                                           [GuiNotifier.DROPEVENT], [DropBase.PIDS],
-                                           self._processDroppedItems)
+        # Initialise the notifier for processing dropped items
+        self._initDroppedNotifier()
 
     def _processDroppedItems(self, data):
         """

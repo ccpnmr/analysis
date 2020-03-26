@@ -266,7 +266,7 @@ class UpdateFile:
                         currentHashCode = calcHashCode(fullFilePath)
                         serverHashCode = self.fileHashCode
                         _hashCodeCacheFolder = os.path.abspath(os.path.join(self.installLocation, '.cache'))
-                        _hashCodeCache = os.path.join(_hashCodeCacheFolder, '_hashCodeCache.txt')
+                        _hashCodeCache = os.path.join(_hashCodeCacheFolder, '_hashCodeCache.json')
                         if not os.path.exists(_hashCodeCache):
                             os.makedirs(_hashCodeCacheFolder)
                             data = {}
@@ -275,11 +275,11 @@ class UpdateFile:
                                 data = json.load(fp)
                         if currentHashCode != serverHashCode:
                             # should only store for windows
+                            if lastHashCode in data and lastHashCode != currentHashCode:
+                                del data[lastHashCode]
                             data[currentHashCode] = serverHashCode
-                        if lastHashCode in data:
-                            del data[lastHashCode]
                         with open(_hashCodeCache, 'w') as fp:
-                            json.dump(data, fp)
+                            json.dump(data, fp, indent=4)
 
                     except Exception as es:
                         # NOTE:ED - ignore for now
@@ -414,7 +414,7 @@ class UpdateAgent(object):
             # get the translated hashcode from the json file in the .cache folder
             try:
                 _hashCodeCacheFolder = os.path.abspath(os.path.join(self.installLocation, '.cache'))
-                _hashCodeCache = os.path.join(_hashCodeCacheFolder, '_hashCodeCache.txt')
+                _hashCodeCache = os.path.join(_hashCodeCacheFolder, '_hashCodeCache.json')
                 if os.path.exists(_hashCodeCache):
                     with open(_hashCodeCache) as fp:
                         data = json.load(fp)
@@ -640,5 +640,10 @@ class UpdateAgent(object):
 
 if __name__ == '__main__':
     from ccpn.framework.Version import applicationVersion
+    import sys
+    import os
     # applicationVersion = __version__.split()[1]  # ejb - read from the header
     installUpdates(applicationVersion, dryRun=False)
+
+    if sys.platform[:3].lower() == 'win':
+        os._exit(0)

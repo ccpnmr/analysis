@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-03-25 19:06:29 +0000 (Wed, March 25, 2020) $"
+__dateModified__ = "$dateModified: 2020-03-26 12:02:35 +0000 (Thu, March 26, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -389,13 +389,18 @@ GuiTable::item::selected {
 
         self._widgetScrollArea.setFixedHeight(height)  # needed for the correct sizing of the table
 
-    def _initDroppedNotifier(self):
+    def _postInitTableCommonWidgets(self):
         from ccpn.ui.gui.widgets.DropBase import DropBase
         from ccpn.ui.gui.lib.GuiNotifier import GuiNotifier
+        from ccpn.ui.gui.widgets.ScrollBarVisibilityWatcher import ScrollBarVisibilityWatcher
 
+        # add a dropped notifier to all tables
         self.droppedNotifier = GuiNotifier(self,
                                            [GuiNotifier.DROPEVENT], [DropBase.PIDS],
                                            self._processDroppedItems)
+
+        # add a widget handler to give a clean corner widget for the scroll area
+        self._cornerDisplay = ScrollBarVisibilityWatcher(self)
 
         # self.setStyleSheet('''
         #             NmrResidueTable {border-left-width: 1px solid  #a9a9a9;

@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-03-19 17:42:33 +0000 (Thu, March 19, 2020) $"
+__dateModified__ = "$dateModified: 2020-03-26 12:02:35 +0000 (Thu, March 26, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -41,7 +41,8 @@ from ccpn.ui.gui.widgets.DropBase import DropBase
 from ccpn.ui.gui.widgets.CheckBox import CheckBox
 from ccpn.ui.gui.widgets.Menu import Menu
 from ccpn.ui.gui.guiSettings import getColours, CCPNMODULELABEL_BACKGROUND, CCPNMODULELABEL_FOREGROUND, \
-    CCPNMODULELABEL_BACKGROUND_ACTIVE, CCPNMODULELABEL_FOREGROUND_ACTIVE, CCPNMODULELABEL_BORDER, CCPNMODULELABEL_BORDER_ACTIVE
+    CCPNMODULELABEL_BACKGROUND_ACTIVE, CCPNMODULELABEL_FOREGROUND_ACTIVE, CCPNMODULELABEL_BORDER, CCPNMODULELABEL_BORDER_ACTIVE, \
+    BORDERNOFOCUS_COLOUR
 from ccpn.ui.gui.widgets.ColourDialog import ColourDialog
 from ccpn.ui.gui.widgets.DoubleSpinbox import DoubleSpinbox, ScientificDoubleSpinBox
 from ccpn.ui.gui.widgets.LineEdit import LineEdit
@@ -61,7 +62,7 @@ from ccpn.ui.gui.widgets.Icon import Icon
 from ccpn.ui.gui.widgets.Widget import Widget
 from ccpn.ui.gui.widgets.SideBar import SideBar
 from ccpn.ui.gui.widgets.PythonEditor import QCodeEditor
-from ccpn.ui.gui.widgets.Frame import Frame
+from ccpn.ui.gui.widgets.Frame import Frame, ScrollableFrame
 from ccpn.ui.gui.widgets.CompoundWidgets import PulldownListCompoundWidget, CheckBoxCompoundWidget, \
     DoubleSpinBoxCompoundWidget, SelectorWidget, InputPulldown, \
     ColourSelectionWidget, LineEditPopup, ListCompoundWidget
@@ -140,7 +141,7 @@ CommonWidgetsEdits = {
     EntryCompoundWidget.__name__            : (EntryCompoundWidget.getText, EntryCompoundWidget.setText, 'entry.textEdited'),
     NmrChainPulldown.__name__               : (NmrChainPulldown.getText, NmrChainPulldown.select, 'pulldownList.activated'),
     RadioButtonsCompoundWidget.__name__     : (
-    RadioButtonsCompoundWidget.getIndex, RadioButtonsCompoundWidget.setIndex, 'radioButtons.buttonGroup.buttonClicked'),
+        RadioButtonsCompoundWidget.getIndex, RadioButtonsCompoundWidget.setIndex, 'radioButtons.buttonGroup.buttonClicked'),
 
     # ADD TABLES
     # ADD Others
@@ -196,7 +197,7 @@ class CcpnModule(Dock, DropBase, NotifierBase):
 
     # _instances = set()
 
-    def __init__(self, mainWindow, name, closable=True, closeFunc=None, settingsScrollDirections = ('horizontal','vertical'), **kwds):
+    def __init__(self, mainWindow, name, closable=True, closeFunc=None, settingsScrollBarPolicies=('asNeeded', 'asNeeded'), **kwds):
 
         self.maximised = False
         self.maximiseRestoreState = None
@@ -279,11 +280,24 @@ class CcpnModule(Dock, DropBase, NotifierBase):
         # optional settings widget area
         self.settingsWidget = None
         if self.includeSettingsWidget:
-            self._settingsScrollArea = ScrollArea(parent=self.widgetArea, scrollDirections=settingsScrollDirections)
-            self.settingsWidget = Widget(parent=None, acceptDrops=True)
-            self._settingsScrollArea.setWidget(self.settingsWidget)
-            self.settingsWidget.setGridLayout()
-            self._settingsScrollArea.setWidgetResizable(True)
+
+            # self._settingsScrollArea = ScrollArea(parent=self.widgetArea, scrollDirections=settingsScrollDirections)
+            # self.settingsWidget = Widget(parent=None, acceptDrops=True)
+            # self._settingsScrollArea.setWidget(self.settingsWidget)
+            # self.settingsWidget.setGridLayout()
+            # self._settingsScrollArea.setWidgetResizable(True)
+
+            self.settingsWidget = ScrollableFrame(parent=self.widgetArea,
+                                                  showBorder=False, setLayout=True,
+                                                  scrollBarPolicies=settingsScrollBarPolicies)
+            self._settingsScrollArea = self.settingsWidget._scrollArea
+
+            # set the new borders for the settings scroll area - border not needed at the top
+            self._settingsScrollArea.setStyleSheet('ScrollArea { border-left: 1px solid %s;'
+                                                   'border-right: 1px solid %s;'
+                                                   'border-bottom: 1px solid %s;'
+                                                   'background: transparent; }' % (BORDERNOFOCUS_COLOUR, BORDERNOFOCUS_COLOUR, BORDERNOFOCUS_COLOUR))
+            self.settingsWidget.insertCornerWidget()
 
             if self.settingsPosition in settingsWidgetPositions:
                 hSettings, vSettings = settingsWidgetPositions[self.settingsPosition]['settings']
@@ -1065,6 +1079,7 @@ class CcpnModuleLabel(DockLabel):
         self.fixedWidth = True
 
         from ccpn.framework.Application import getApplication
+
         getApp = getApplication()
         if getApp:
             self.setFont(getApp._fontSettings.moduleLabelFont)

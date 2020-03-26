@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-03-25 19:06:29 +0000 (Wed, March 25, 2020) $"
+__dateModified__ = "$dateModified: 2020-03-26 12:02:35 +0000 (Thu, March 26, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -190,8 +190,8 @@ class PeakListTableWidget(GuiTable):
                              grid=(row, gridHPos + 1), gridSpan=(1, 1))
         # self._widgetScrollArea.setFixedHeight(35)  # needed for the correct sizing of the table
 
-        #TODO: this dhould be part of the definitions; extracted from there and paased to the
-        #TODO constructor of the GuiTable module.
+        # TODO: this should be part of the definitions; extracted from there and passed to the
+        #       constructor of the GuiTable module.
         self._hiddenColumns = ['Pid', 'Spectrum', 'PeakList', 'Id', 'HeightError', 'VolumeError']
 
         self.dataFrameObject = None
@@ -228,7 +228,7 @@ class PeakListTableWidget(GuiTable):
                                moduleParent=moduleParent)
 
         # Initialise the notifier for processing dropped items
-        self._initDroppedNotifier()
+        self._postInitTableCommonWidgets()
 
     def _processDroppedItems(self, data):
         """CallBack for Drop events

@@ -57,7 +57,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-03-17 00:13:57 +0000 (Tue, March 17, 2020) $"
+__dateModified__ = "$dateModified: 2020-03-26 12:02:35 +0000 (Thu, March 26, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -71,9 +71,10 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 from PyQt5 import QtGui, QtWidgets, QtCore
 from ccpn.ui.gui.widgets.Base import Base
 from ccpn.ui.gui.widgets.ScrollArea import ScrollArea
+from ccpn.ui.gui.widgets.ScrollBarVisibilityWatcher import ScrollBarVisibilityWatcher
 from ccpn.ui.gui.widgets.Widget import Widget
-# from ccpn.ui.gui.guiSettings import textFontLarge, CCPNGLWIDGET_HEXFOREGROUND, CCPNGLWIDGET_HEXBACKGROUND, CCPNGLWIDGET_HEXHIGHLIGHT, getColours
-from ccpn.ui.gui.guiSettings import CCPNGLWIDGET_HEXFOREGROUND, CCPNGLWIDGET_HEXBACKGROUND, CCPNGLWIDGET_HEXHIGHLIGHT, getColours
+from ccpn.ui.gui.guiSettings import CCPNGLWIDGET_HEXFOREGROUND, CCPNGLWIDGET_HEXBACKGROUND, CCPNGLWIDGET_HEXHIGHLIGHT, \
+    getColours
 
 
 class Frame(QtWidgets.QFrame, Base):
@@ -161,9 +162,9 @@ class ScrollableFrame(Frame):
 
         # initialise the frame
         super().__init__(parent=parent, setLayout=setLayout,
-                       showBorder=showBorder, fShape=fShape, fShadow=fShadow,
-                       **kwds
-                       )
+                         showBorder=showBorder, fShape=fShape, fShadow=fShadow,
+                         **kwds
+                         )
 
         # make a new scrollArea
         self._scrollArea = ScrollArea(parent=parent,
@@ -194,9 +195,13 @@ class ScrollableFrame(Frame):
         """
         return self._scrollArea
 
+    def insertCornerWidget(self):
+        """Insert a corner widget into the target widget with the correct borders
+        """
+        self._cornerDisplay = ScrollBarVisibilityWatcher(self._scrollArea)
+
 
 class OpenGLOverlayFrame(Frame):
-
     AUTOFILLBACKGROUND = False
 
     def __init__(self, parent=None, showBorder=False, fShape=None, fShadow=None,
@@ -258,6 +263,7 @@ class OpenGLOverlayFrame(Frame):
     def _setStyle(self, sl, foregroundColour=CCPNGLWIDGET_HEXFOREGROUND, backgroundColour=CCPNGLWIDGET_HEXBACKGROUND):
 
         from ccpn.framework.Application import getApplication
+
         textFontLarge = getApplication()._fontSettings.textFontLarge
 
         if self._backgroundColour is not None or self.AUTOFILLBACKGROUND:
@@ -295,6 +301,7 @@ class OpenGLOverlayFrame(Frame):
         """Update the background colour when changing colour themes, keeping the same foreground highlighting
         """
         from ccpn.framework.Application import getApplication
+
         textFontLarge = getApplication()._fontSettings.textFontLarge
 
         sl.setStyleSheet('QLabel {'
@@ -325,6 +332,7 @@ class OpenGLOverlayFrame(Frame):
 
                 # just in case I've missed subclassing the above method
                 pass
+
 
 class ScrollOpenGLOverlayFrame(OpenGLOverlayFrame):
     """

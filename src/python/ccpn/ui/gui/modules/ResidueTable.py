@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-03-25 19:06:29 +0000 (Wed, March 25, 2020) $"
+__dateModified__ = "$dateModified: 2020-03-26 12:02:35 +0000 (Thu, March 26, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -239,7 +239,7 @@ class ResidueTable(GuiTable):
                                moduleParent=moduleParent)
 
         # Initialise the notifier for processing dropped items
-        self._initDroppedNotifier()
+        self._postInitTableCommonWidgets()
 
     def _processDroppedItems(self, data):
         """

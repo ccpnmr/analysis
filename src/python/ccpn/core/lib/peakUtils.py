@@ -11,7 +11,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-03-25 10:20:02 +0000 (Wed, March 25, 2020) $"
+__dateModified__ = "$dateModified: 2020-03-27 09:33:28 +0000 (Fri, March 27, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -661,6 +661,21 @@ def snapToExtremum(peak: 'Peak', halfBoxSearchWidth: int = 3, halfBoxFitWidth: i
                 # default to the given parameter value
                 boxWidths.append(halfBoxSearchWidth)
     else:
+
+        # # same as V2
+        # # boxWidth = peakDim.boxWidth
+        # # if not boxWidth:  # if None (or even if 0)
+        # #     boxWidth = getPeakFindBoxwidth(dataDim)
+        # # halfBoxWidth = dataDim.numPoints / 100  # a bit of a hack
+        #
+        # boxWidths = []
+        # axisCodes = peak.axisCodes
+        # for peakDim, axisCode in zip(peakDims, axisCodes):
+        #     boxWidth = peakDim.boxWidth
+        #     if not boxWidth:  # if None (or even if 0)
+        #         boxWidth = getPeakFindBoxwidth(dataDim)
+        #     halfBoxWidth = dataDim.numPoints / 100  # a bit of a hack
+
         boxWidths = halfBoxSearchWidth
 
     # add the new boxWidths array as np.int32 type

@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-03-24 18:57:00 +0000 (Tue, March 24, 2020) $"
+__dateModified__ = "$dateModified: 2020-03-27 10:38:00 +0000 (Fri, March 27, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -636,7 +636,9 @@ class PreferencesPopup(CcpnDialogMainWidget):
                 self.aspectData[aspect].setEnabled(True)
                 self.aspectData[aspect].valueChanged.connect(partial(self._queueSetAspect, aspect))
 
-        self.useSearchBoxWidthsBox.setChecked(self.preferences.general.searchBoxMode)
+        self.useSearchBoxModeBox.setChecked(self.preferences.general.searchBoxMode)
+        self.useSearchBoxDoFitBox.setChecked(self.preferences.general.searchBoxDoFit)
+
         self.searchBox1dLabel = {}
         self.searchBox1dData = {}
         self._removeWidget(self.searchBox1dLabelFrame)
@@ -932,11 +934,18 @@ class PreferencesPopup(CcpnDialogMainWidget):
         self.aspectDataFrame = Frame(parent, setLayout=True, showBorder=False, grid=(row, 1))
 
         row += 1
-        self.useSearchBoxWidthsLabel = Label(parent, text="Use Search Box Widths: ", grid=(row, 0))
-        self.useSearchBoxWidthsBox = CheckBox(parent, grid=(row, 1))  #, checked=self.preferences.searchBoxWidthsSettings.useSearchBoxWidths)
-        self.useSearchBoxWidthsBox.toggled.connect(self._queueSetUseSearchBoxWidths)
-        self.useSearchBoxWidthsLabel.setToolTip('Use defined search box widths (ppm)\nor default to ±4 index points.\nNote, default will depend on resolution of spectrum')
-        self.useSearchBoxWidthsBox.setToolTip('Use defined search box widths (ppm)\nor default to ±4 index points.\nNote, default will depend on resolution of spectrum')
+        self.useSearchBoxModeLabel = Label(parent, text="Use Search Box Widths: ", grid=(row, 0))
+        self.useSearchBoxModeBox = CheckBox(parent, grid=(row, 1))  #, checked=self.preferences.searchBoxWidthsSettings.useSearchBoxMode)
+        self.useSearchBoxModeBox.toggled.connect(self._queueSetUseSearchBoxMode)
+        self.useSearchBoxModeLabel.setToolTip('Use defined search box widths (ppm)\nor default to ±4 index points.\nNote, default will depend on resolution of spectrum')
+        self.useSearchBoxModeBox.setToolTip('Use defined search box widths (ppm)\nor default to ±4 index points.\nNote, default will depend on resolution of spectrum')
+
+        row += 1
+        self.useSearchBoxDoFitLabel = Label(parent, text="Apply Peak Fitting Method\n after Snap To Extrema: ", grid=(row, 0))
+        self.useSearchBoxDoFitBox = CheckBox(parent, grid=(row, 1))  #, checked=self.preferences.searchBoxDoFitSettings.useSearchBoxDoFit)
+        self.useSearchBoxDoFitBox.toggled.connect(self._queueSetUseSearchBoxDoFit)
+        self.useSearchBoxDoFitLabel.setToolTip('Option to apply fitting method after initial snap to extrema')
+        self.useSearchBoxDoFitBox.setToolTip('Option to apply fitting method after initial snap to extrema')
 
         row += 1
         self.defaultSearchBox1dRatioLabel = Label(parent, text="1d Search Box Widths (ppm): ", grid=(row, 0), hAlign='r')
@@ -1704,17 +1713,30 @@ class PreferencesPopup(CcpnDialogMainWidget):
         self.preferences.general.aspectRatios[aspect] = value
 
     @queueStateChange(_verifyPopupApply)
-    def _queueSetUseSearchBoxWidths(self):
-        value = self.useSearchBoxWidthsBox.get()
+    def _queueSetUseSearchBoxMode(self):
+        value = self.useSearchBoxModeBox.get()
         if value != self.preferences.general.searchBoxMode:
-            return partial(self._setUseSearchBoxWidths, value)
+            return partial(self._setUseSearchBoxMode, value)
 
-    def _setUseSearchBoxWidths(self, value):
+    def _setUseSearchBoxMode(self, value):
         # try:
-        #     value = self.useSearchBoxWidthsBox.isChecked()
+        #     value = self.useSearchBoxModeBox.isChecked()
         # except:
         #     return
         self.preferences.general.searchBoxMode = value
+
+    @queueStateChange(_verifyPopupApply)
+    def _queueSetUseSearchBoxDoFit(self):
+        value = self.useSearchBoxDoFitBox.get()
+        if value != self.preferences.general.searchBoxDoFit:
+            return partial(self._setUseSearchBoxDoFit, value)
+
+    def _setUseSearchBoxDoFit(self, value):
+        # try:
+        #     value = self.useSearchBoxDoFitBox.isChecked()
+        # except:
+        #     return
+        self.preferences.general.searchBoxDoFit = value
 
     @queueStateChange(_verifyPopupApply)
     def _queueSetSearchBox1d(self, searchBox1d):

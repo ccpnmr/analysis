@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-03-24 18:56:59 +0000 (Tue, March 24, 2020) $"
+__dateModified__ = "$dateModified: 2020-03-27 10:37:59 +0000 (Fri, March 27, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -629,11 +629,11 @@ class Peak(AbstractWrapperObject):
 
     def snapToExtremum(self, halfBoxSearchWidth: int = 4, halfBoxFitWidth: int = 4,
                        minDropFactor: float = 0.1, fitMethod: str = PARABOLICMETHOD,
-                       searchBoxMode=False):
+                       searchBoxMode=False, searchBoxDoFit=False):
         """Snap the Peak to the closest local extrema, if within range."""
         peakUtilsSnapToExtremum(self, halfBoxSearchWidth=halfBoxSearchWidth, halfBoxFitWidth=halfBoxFitWidth,
                                 minDropFactor=minDropFactor, fitMethod=fitMethod,
-                                searchBoxMode=searchBoxMode)
+                                searchBoxMode=searchBoxMode, searchBoxDoFit=searchBoxDoFit)
 
     # def fitPositionHeightLineWidths(self):
     #     """Set the position, height and lineWidth of the Peak."""

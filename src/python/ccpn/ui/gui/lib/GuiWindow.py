@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-03-25 12:53:16 +0000 (Wed, March 25, 2020) $"
+__dateModified__ = "$dateModified: 2020-03-27 10:38:00 +0000 (Fri, March 27, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -689,6 +689,7 @@ class GuiWindow():
         # get the default from the preferences
         minDropFactor = self.application.preferences.general.peakDropFactor
         searchBoxMode = self.application.preferences.general.searchBoxMode
+        searchBoxDoFit = self.application.preferences.general.searchBoxDoFit
         fitMethod = self.application.preferences.general.peakFittingMethod
 
         with undoBlock():
@@ -696,7 +697,7 @@ class GuiWindow():
 
             if n == 1:
                 peaks[0].snapToExtremum(halfBoxSearchWidth=4, halfBoxFitWidth=4,
-                                        minDropFactor=minDropFactor, searchBoxMode=searchBoxMode, fitMethod=fitMethod)
+                                        minDropFactor=minDropFactor, searchBoxMode=searchBoxMode, searchBoxDoFit=searchBoxDoFit, fitMethod=fitMethod)
             elif n > 1:
                 title = 'Snap Peak%s to extremum' % ('' if n == 1 else 's')
                 msg = 'Snap %sselected peak%s?' % ('' if n == 1 else '%d ' % n, '' if n == 1 else 's')
@@ -704,7 +705,7 @@ class GuiWindow():
                     with progressManager(self, 'Snapping peaks to extrema'):
                         for peak in peaks:
                             peak.snapToExtremum(halfBoxSearchWidth=4, halfBoxFitWidth=4,
-                                                minDropFactor=minDropFactor, searchBoxMode=searchBoxMode, fitMethod=fitMethod)
+                                                minDropFactor=minDropFactor, searchBoxMode=searchBoxMode, searchBoxDoFit=searchBoxDoFit, fitMethod=fitMethod)
             else:
                 getLogger().warning('No selected peak/s. Select a peak first.')
 

@@ -11,7 +11,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-03-27 09:33:28 +0000 (Fri, March 27, 2020) $"
+__dateModified__ = "$dateModified: 2020-03-27 10:38:00 +0000 (Fri, March 27, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -616,7 +616,7 @@ def _fitExpDecayCurve(bindingCurves, aFunc=exponenial_func, xfStep=0.01, xfPerce
 
 def snapToExtremum(peak: 'Peak', halfBoxSearchWidth: int = 3, halfBoxFitWidth: int = 3,
                    minDropFactor: float = 0.1, fitMethod: str = PARABOLICMETHOD,
-                   searchBoxMode=False):
+                   searchBoxMode=False, searchBoxDoFit=False):
     """Snap the position of the peak the nearest extremum.
     Assumes called with an existing peak, will fit within a box ±halfBoxSearchWidth about the current peak position.
     """
@@ -656,27 +656,36 @@ def snapToExtremum(peak: 'Peak', halfBoxSearchWidth: int = 3, halfBoxFitWidth: i
             letterAxisCode = (axisCode[0] if axisCode != 'intensity' else axisCode) if axisCode else None
             if letterAxisCode in searchBoxWidths:
                 newWidth = math.floor(searchBoxWidths[letterAxisCode] / (2.0 * abs(pointToValue(1) - pointToValue(0))))
-                boxWidths.append(newWidth)
+                boxWidths.append(max(1, newWidth))
             else:
                 # default to the given parameter value
-                boxWidths.append(halfBoxSearchWidth)
+                boxWidths.append(max(1, halfBoxSearchWidth or 1))
     else:
 
-        # # same as V2
-        # # boxWidth = peakDim.boxWidth
-        # # if not boxWidth:  # if None (or even if 0)
-        # #     boxWidth = getPeakFindBoxwidth(dataDim)
-        # # halfBoxWidth = dataDim.numPoints / 100  # a bit of a hack
-        #
-        # boxWidths = []
-        # axisCodes = peak.axisCodes
-        # for peakDim, axisCode in zip(peakDims, axisCodes):
-        #     boxWidth = peakDim.boxWidth
-        #     if not boxWidth:  # if None (or even if 0)
-        #         boxWidth = getPeakFindBoxwidth(dataDim)
-        #     halfBoxWidth = dataDim.numPoints / 100  # a bit of a hack
+        boxWidths = []
+        axisCodes = peak.axisCodes
+        for peakDim, axisCode in zip(peakDims, axisCodes):
+            dataDim = peakDim.dataDim
+            if dataDim.className == 'FreqDataDim':
 
-        boxWidths = halfBoxSearchWidth
+                halfBoxWidth = dataDim.numPoints / 100  # a bit of a hack from V2
+                boxWidths.append(max(halfBoxWidth, 1))
+
+                # from V2 - seems to give individual boxWidths per peak
+                # boxWidth = peakDim.boxWidth
+                # if not boxWidth:  # if None (or even if 0)
+                #     boxWidth = getPeakFindBoxwidth(dataDim)
+                # halfBoxWidth = dataDim.numPoints / 100  # a bit of a hack
+                # halfBoxWidth = max(halfBoxWidth, 1, int(boxWidth / 2))
+                # first[i] = max(0, int(math.floor(position[i] - halfBoxWidth)))
+                # last[i] = min(dataDim.numPoints, int(math.ceil(position[i] + 1 + halfBoxWidth)))
+                # buff[i] = buf
+            else:
+                boxWidths.append(max(1, halfBoxSearchWidth or 1))
+
+                # first[i] = max(0, int(math.floor(position[i] + 0.5)))
+                # last[i] = min(dataDim.numPoints, first[i] + 1)
+                # buff[i] = 0
 
     # add the new boxWidths array as np.int32 type
     boxWidths = np.array(boxWidths, dtype=np.int32)
@@ -766,15 +775,19 @@ def snapToExtremum(peak: 'Peak', halfBoxSearchWidth: int = 3, halfBoxFitWidth: i
         peakArray = peakPoint.reshape((1, numDim))
         peakArray = peakArray.astype(np.float32)
 
-        if fitMethod == PARABOLICMETHOD:
-            # parabolic - generate all peaks in one operation
-            result = CPeak.fitParabolicPeaks(dataArray, regionArray, peakArray)
+        if searchBoxDoFit:
+            if fitMethod == PARABOLICMETHOD:
+                # parabolic - generate all peaks in one operation
+                result = CPeak.fitParabolicPeaks(dataArray, regionArray, peakArray)
 
+            else:
+                method = 0 if fitMethod == GAUSSIANMETHOD else 1
+
+                # fit all peaks in one operation
+                result = CPeak.fitPeaks(dataArray, regionArray, peakArray, method)
         else:
-            method = 0 if fitMethod == GAUSSIANMETHOD else 1
-
-            # fit all peaks in one operation
-            result = CPeak.fitPeaks(dataArray, regionArray, peakArray, method)
+            # take the maxima
+            result = ((bestHeight, peakPoint, None),)
 
     except CPeak.error as e:
         # there could be some fitting error
@@ -799,7 +812,8 @@ def snapToExtremum(peak: 'Peak', halfBoxSearchWidth: int = 3, halfBoxFitWidth: i
             dist = abs(newPos - center[i])
             if dist < boxWidths[i]:
                 peakDim.position = center[i] + startPoint[i] + 1.0  # API position starts at 1
-            peakDim.lineWidth = dataDims[i].valuePerPoint * linewidth[i]
+            if linewidth and len(linewidth) > i:
+                peakDim.lineWidth = dataDims[i].valuePerPoint * linewidth[i]
 
         apiPeak.height = dataSource.scale * height
 

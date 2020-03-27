@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-01-10 11:21:55 +0000 (Fri, January 10, 2020) $"
-__version__ = "$Revision: 3.0.0 $"
+__dateModified__ = "$dateModified: 2020-03-27 14:49:41 +0000 (Fri, March 27, 2020) $"
+__version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -36,10 +36,17 @@ from math import floor, log10
 
 DOUBLESPINBOXSTEP = 10
 SCIENTIFICSPINBOXSTEP = 5
+KEYVALIDATELIST = (QtCore.Qt.Key_Return,
+                   QtCore.Qt.Key_Enter,
+                   QtCore.Qt.Key_Tab,
+                   QtCore.Qt.Key_Up,
+                   QtCore.Qt.Key_Down,
+                   QtCore.Qt.Key_Left,
+                   QtCore.Qt.Key_Right)
 
 
 class DoubleSpinbox(QtWidgets.QDoubleSpinBox, Base):
-    # # To be done more rigeriously later
+    # # To be done more rigorously later
     # _styleSheet = """
     # DoubleSpinbox {
     #   background-color: #f7ffff;
@@ -53,8 +60,8 @@ class DoubleSpinbox(QtWidgets.QDoubleSpinBox, Base):
     #   background-color: #e4e15b;
     # }
     # """
-    returnPressed = pyqtSignal(int)
-    wheelChanged = pyqtSignal(int)
+    returnPressed = pyqtSignal(float)
+    wheelChanged = pyqtSignal(float)
 
     defaultMinimumSizes = (0, 20)
 
@@ -69,6 +76,8 @@ class DoubleSpinbox(QtWidgets.QDoubleSpinBox, Base):
 
         The spin box has the given parent.
         """
+        self.validator = QtGui.QDoubleValidator()
+        self.validator.Notation = 1
 
         super().__init__(parent)
         Base._init(self, **kwds)
@@ -118,6 +127,8 @@ class DoubleSpinbox(QtWidgets.QDoubleSpinBox, Base):
         lineEdit.returnPressed.connect(self._keyPressed)
 
         self._internalWheelEvent = True
+        self._keyPressed = False
+
         # change focusPolicy so that spinboxes don't grab focus unless selected
         self.setFocusPolicy(QtCore.Qt.StrongFocus)
 
@@ -171,12 +182,26 @@ class DoubleSpinbox(QtWidgets.QDoubleSpinBox, Base):
     def setCallback(self, callback):
         "Sets callback; disconnects if callback=None"
         if self._callback is not None:
-            # self.disconnect(self, QtCore.SIGNAL('valueChanged(double)'), self._callback)
             self.valueChanged.disconnect()
         if callback:
-            # self.connect(self, QtCore.SIGNAL("valueChanged(double)"), callback)
             self.valueChanged.connect(callback)
         self._callback = callback
+
+    def validate(self, text, position):
+        # activate the validator when
+        if self._keyPressed:
+            return self.validator.Intermediate, text, position
+        else:
+            return self.validator.validate(text, position)
+
+    def keyPressEvent(self, event):
+        # allow the typing of other stuff into the box and validate only when required
+        self._keyPressed = False if event.key() in KEYVALIDATELIST else True
+        super().keyPressEvent(event)
+
+    def keyReleaseEvent(self, event):
+        self._keyPressed = False
+        super().keyReleaseEvent(event)
 
 
 # Regular expression to find floats. Match groups are the whole string, the
@@ -189,36 +214,13 @@ def fexp(f):
     return int(floor(log10(abs(f)))) if f != 0 else 0
 
 
-# def valid_float_string(string):
-#     match = _float_re.search(string)
-#     return match.groups()[0] == string if match else False
-
-# class FloatValidator(QtGui.QValidator):
-#
-#     def validate(self, string, position):
-#         if valid_float_string(string):
-#             return (QtGui.QValidator.Acceptable, string, position)
-#         if string == "" or string[position - 1] in 'e.-+':
-#             return (QtGui.QValidator.Intermediate, string, position)
-#         return (QtGui.QValidator.Invalid, string, position)
-#
-#     def fixup(self, text):
-#         match = _float_re.search(text)
-#         return match.groups()[0] if match else ""
-
-
 class ScientificDoubleSpinBox(DoubleSpinbox):
     """Constructs a spinbox in which the values can be set using Sci notation
     """
 
     def __init__(self, *args, **kwargs):
-        self.validator = QtGui.QDoubleValidator()  #                   FloatValidator()
-        self.validator.Notation = 1
         super(ScientificDoubleSpinBox, self).__init__(*args, **kwargs)
         self.setDecimals(1000)
-
-    def validate(self, text, position):
-        return self.validator.validate(text, position)
 
     def fixup(self, text):
         return self.validator.fixup(text)
@@ -274,12 +276,16 @@ v1 = 0.029
 if __name__ == '__main__':
     from ccpn.ui.gui.widgets.Application import TestApplication
     from ccpn.ui.gui.popups.Dialog import CcpnDialog
+    from ccpn.ui.gui.widgets.Frame import Frame
 
 
     app = TestApplication()
     popup = CcpnDialog()
-    sb = DoubleSpinbox(popup, value=v1, decimals=3, step=0.001, grid=(0, 0))
+    fr = Frame(popup, setLayout=True)
+    sb = DoubleSpinbox(fr, value=v1, decimals=3, step=0.001, grid=(0, 0))
     # print('REAL = ',v, 'SPINBOX =', sb.value())
+
+    sb2 = ScientificDoubleSpinBox(fr, value=v1, decimals=3, grid=(1, 0), min=0.001)
 
     popup.show()
     popup.raise_()

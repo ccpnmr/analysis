@@ -1,7 +1,7 @@
 @echo off
 set ANACONDA3=%CCPNMR_TOP_DIR%\miniconda
 set PYTHONPATH=%CCPNMR_TOP_DIR%\src\python;%CCPNMR_TOP_DIR%\src\c
-REM set QT_PLUGIN_PATH=%QT_PLUGIN_PATH%;%ANACONDA3%\plugins
+set QT_PLUGIN_PATH=%ANACONDA3%\Library\plugins
 set PATH=%ANACONDA3%\lib\site-packages\numpy\.libs;^
 %ANACONDA3%;^
 %ANACONDA3%\Library\mingw-w64\bin;^

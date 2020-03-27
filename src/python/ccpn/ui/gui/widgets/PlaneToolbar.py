@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-03-17 00:13:57 +0000 (Tue, March 17, 2020) $"
+__dateModified__ = "$dateModified: 2020-03-27 11:15:21 +0000 (Fri, March 27, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -319,7 +319,7 @@ class PlaneSelectorWidget(Frame):
         """
         Increases axis ppm position by one plane
         """
-        self.project._buildWithProfile = True
+        # self.project._buildWithProfile = True
         if self.strip:
             self._callbacks[2](*args)
 

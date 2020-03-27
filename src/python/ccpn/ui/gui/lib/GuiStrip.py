@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-02-11 23:09:53 +0000 (Tue, February 11, 2020) $"
+__dateModified__ = "$dateModified: 2020-03-27 19:25:01 +0000 (Fri, March 27, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -704,17 +704,33 @@ class GuiStrip(Frame):
                                 indices = getAxisCodeMatchIndices(strip.axisCodes, currentStrip.axisCodes, allMatches=True)
 
                                 # generate a permutation list of the axis codes that have unique indices
-                                permutationList = [jj for jj in product(*indices) if len(set(jj)) == len(jj)]
+                                # permutationList = [jj for jj in product(*indices) if len(set(jj)) == len(jj)]
+                                permutationList = [jj for jj in product(*(ii if ii else (None,) for ii in indices)) if len(set(jj)) == len(jj)]
 
                                 # permutation list is list of tuples
                                 # each element is list of indices to fetch from currentStrip and map to strip
 
                                 for perm in permutationList:
 
-                                    pos = [position[ii] for ii in perm if ii is not None]   # permute to strip axis codes
-                                    axes = strip.axisCodes                                  # [currentStrip.axisCodes[ii] for ii in perm]
+                                    # pos = [position[ii] for ii in perm if ii is not None]   # permute to strip axis codes
+                                    # axes = strip.axisCodes                                  # [currentStrip.axisCodes[ii] for ii in perm]
+                                    # try:
+                                    #     axes = [axes[jj] for jj, ii in enumerate(perm) if ii is not None]
+                                    # except Exception as es:
+                                    #     pass
 
-                                    item = ', '.join([cc+":"+str(round(x, 3)) for x, cc in zip(pos, axes)])
+                                    pos = []
+                                    axes = []
+                                    for jj, ii in enumerate(perm):
+                                        if ii is not None:
+                                            pos.append(position[ii])
+                                        else:
+                                            pos.append(' - ')
+                                            # axes.append(strip.axisCodes[jj])
+
+                                    # this appears to writing the wrong axis code
+                                    item = ', '.join([cc+":"+str(x if isinstance(x, str) else round(x, 3)) for x, cc in zip(pos, strip.axisCodes)])
+
                                     text = '%s (%s)' % (strip.pid, item)
                                     toolTip = 'Show cursor in strip %s at Cursor position (%s)' % (str(strip.id), item)
                                     if len(list(set(strip.axisCodes) & set(currentStrip.axisCodes))) <= 4:
@@ -724,9 +740,25 @@ class GuiStrip(Frame):
                                                                         toolTip=toolTip)
 
                                 if not permutationList:
-                                    toolTip = 'Show cursor in strip %s at Cursor position %s' % (str(strip.id), str([round(x, 3) for x in position]))
+                                    # ', '.join([cc + ":" + str(round(position[inds[0]], 3)) for ii, (inds, cc) in enumerate(zip(indices, strip.axisCodes)) if inds])
+
+                                    # item = ', '.join([cc + ":" + str(round(position[inds[0]], 3)) for ii, (inds, cc) in enumerate(zip(indices, strip.axisCodes)) is inds is not None and len(inds) > 0])
+                                    pos = []
+                                    for jj, ii in enumerate(indices):
+                                        if ii is not None:
+                                            pos.append(position[ii[0]])
+                                        else:
+                                            pos.append(' - ')
+                                    # item = ', '.join(ii if isinstance(ii, str) else str(round(ii, 3)) for ii in pos)
+
+                                    item = ', '.join([cc + ":" + str(x if isinstance(x, str) else round(x, 3)) for x, cc in zip(pos, strip.axisCodes)])
+
+                                    # item = str([round(x, 3) for x in position])
+
+                                    text = '%s (%s)' % (strip.pid, item)
+                                    toolTip = 'Show cursor in strip %s at Cursor position (%s)' % (str(strip.id), item)
                                     if len(list(set(strip.axisCodes) & set(currentStrip.axisCodes))) <= 4:
-                                        self.navigateCursorMenu.addItem(text=strip.pid,
+                                        self.navigateCursorMenu.addItem(text=text,
                                                                         callback=partial(navigateToPositionInStrip, strip=strip,
                                                                                          positions=position,
                                                                                          axisCodes=currentStrip.axisCodes, ),

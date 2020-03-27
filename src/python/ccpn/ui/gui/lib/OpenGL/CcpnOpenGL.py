@@ -55,7 +55,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-03-24 18:56:59 +0000 (Tue, March 24, 2020) $"
+__dateModified__ = "$dateModified: 2020-03-27 11:17:46 +0000 (Fri, March 27, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -3063,42 +3063,9 @@ class CcpnGLWidget(QOpenGLWidget):
 
     @profile
     def _buildGLWithProfile(self):
-        """Separate the building of the display from the paint event; not sure that this is required
+        """A new test method for profiling the _buildGL
         """
-        # only call if the axes have changed
-        if self._updateAxes:
-            self.buildGrid()
-            self.buildDiagonals()
-            self._updateAxes = False
-
-        self.buildCursors()
-        self.buildSpectra()
-        self.buildBoundingBoxes()
-
-        self._GLPeaks._spectrumSettings = self._spectrumSettings
-        self._GLMultiplets._spectrumSettings = self._spectrumSettings
-        self._GLIntegrals._spectrumSettings = self._spectrumSettings
-
-        if not self._stackingMode:
-            self._GLPeaks.buildSymbols()
-            self._GLMultiplets.buildSymbols()
-            self._GLIntegrals.buildSymbols()
-
-            if self.buildMarks:
-                self._marksList.renderMode = GLRENDERMODE_REBUILD
-                self.buildMarks = False
-            self.buildMarksRulers()
-
-            self.buildRegions()
-
-        if not self._stackingMode:
-            self._GLPeaks.buildLabels()
-            self._GLMultiplets.buildLabels()
-            self._GLIntegrals.buildLabels()
-
-        phasingFrame = self.spectrumDisplay.phasingFrame
-        if phasingFrame.isVisible():
-            self.buildStaticTraces()
+        self._buildGL()
 
     def paintGL(self):
         """Handle the GL painting

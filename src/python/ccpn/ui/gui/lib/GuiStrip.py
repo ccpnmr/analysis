@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-03-27 19:25:01 +0000 (Fri, March 27, 2020) $"
+__dateModified__ = "$dateModified: 2020-03-29 11:56:47 +0100 (Sun, March 29, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -610,164 +610,102 @@ class GuiStrip(Frame):
         """
         pass
 
+    def _createMenuItemForNavigate(self, currentStrip, navigateAxes, navigatePos, showPos, strip, menuFunc, label, includeAxisCodes=True):
+        from ccpn.ui.gui.lib.Strip import navigateToPositionInStrip
+
+        if includeAxisCodes:
+            item = ', '.join([cc + ":" + str(x if isinstance(x, str) else round(x, 3)) for x, cc in zip(showPos, strip.axisCodes)])
+        else:
+            item = ', '.join([str(x if isinstance(x, str) else round(x, 3)) for x in showPos])
+
+        text = '%s (%s)' % (strip.pid, item)
+        toolTip = 'Show cursor in strip %s at %s position (%s)' % (str(strip.id), label, item)
+        if len(list(set(strip.axisCodes) & set(currentStrip.axisCodes))) <= 4:
+            menuFunc.addItem(text=text,
+                                            callback=partial(navigateToPositionInStrip, strip=strip,
+                                                             positions=navigatePos,
+                                                             axisCodes=navigateAxes, ),
+                                            toolTip=toolTip)
+
+    def _addItemsToNavigateMenu(self, position, axisCodes, label, menuFunc, includeAxisCodes=True):
+        """Adds item to navigate to section of context menu.
+        """
+        from ccpn.util.Common import getAxisCodeMatchIndices
+        from itertools import product
+
+        if not menuFunc:
+            return
+
+        menuFunc.clear()
+        currentStrip = self
+
+        if len(self.current.project.spectrumDisplays) > 1:
+            menuFunc.setEnabled(True)
+            for spectrumDisplay in self.current.project.spectrumDisplays:
+                for strip in spectrumDisplay.strips:
+                    if strip != currentStrip:
+
+                        # get a list of all isotope code matches for each axis code in 'strip'
+                        indices = getAxisCodeMatchIndices(strip.axisCodes, axisCodes, allMatches=True)
+
+                        # generate a permutation list of the axis codes that have unique indices
+                        # permutationList = [jj for jj in product(*indices) if len(set(jj)) == len(jj)]
+
+                        permutationList = [jj for jj in product(*(ii if ii else (None,) for ii in indices)) if len(set(jj)) == len(jj)]
+
+                        # permutation list is list of tuples
+                        # each element is list of indices to fetch from currentStrip and map to strip
+
+                        for perm in permutationList:
+                            showPos = []
+                            navigatePos = []
+                            navigateAxes = []
+                            for jj, ii in enumerate(perm):
+                                if ii is not None:
+                                    showPos.append(position[ii])
+                                    navigatePos.append(position[ii])
+                                    navigateAxes.append(strip.axisCodes[jj])
+                                else:
+                                    showPos.append(' - ')
+
+                            self._createMenuItemForNavigate(currentStrip, navigateAxes, navigatePos, showPos, strip, menuFunc, label, includeAxisCodes=includeAxisCodes)
+
+                        if not permutationList:
+                            showPos = []
+                            navigatePos = []
+                            navigateAxes = []
+                            for jj, ii in enumerate(indices):
+                                if ii is not None:
+                                    showPos.append(position[ii[0]])
+                                    navigatePos.append(position[ii[0]])
+                                    navigateAxes.append(strip.axisCodes[jj])
+                                else:
+                                    showPos.append(' - ')
+
+                            self._createMenuItemForNavigate(currentStrip, navigateAxes, navigatePos, showPos, strip, menuFunc, label, includeAxisCodes=includeAxisCodes)
+
+                menuFunc.addSeparator()
+        else:
+            menuFunc.setEnabled(False)
+
     def _addItemsToNavigateToPeakMenu(self, peaks):
         """Adds item to navigate to peak position from context menu.
         """
-        # TODO, merge the two menu (cursor and peak) in one single menu to avoid code duplication. Issues: when tried, only one menu at the time worked!
-        from functools import partial
-        from ccpn.ui.gui.lib.Strip import navigateToPositionInStrip
-        from ccpn.util.Common import getAxisCodeMatchIndices
-        from functools import partial
-        from itertools import product
-        from ccpn.ui.gui.lib.Strip import navigateToPositionInStrip
-
-        if self.navigateToPeakMenu:
-            self.navigateToPeakMenu.clear()
-            currentStrip = self.current.strip
-
-            if currentStrip:
-                if peaks:
-                    if len(self.current.project.spectrumDisplays) > 1:
-                        self.navigateToPeakMenu.setEnabled(True)
-                        for spectrumDisplay in self.current.project.spectrumDisplays:
-                            for strip in spectrumDisplay.strips:
-                                if strip != currentStrip:
-
-                                    # get a list of all isotope code matches for each axis code in 'strip'
-                                    indices = getAxisCodeMatchIndices(strip.axisCodes, peaks[0].axisCodes, allMatches=True)
-
-                                    # generate a permutation list of the axis codes that have unique indices
-                                    permutationList = [jj for jj in product(*indices) if len(set(jj)) == len(jj)]
-
-                                    # permutation list is list of tuples
-                                    # each element is list of indices to fetch from currentStrip and map to strip
-
-                                    for perm in permutationList:
-
-                                        pos = [peaks[0].position[ii] for ii in perm if ii is not None]  # permute to strip axis codes
-                                        axes = strip.axisCodes  # [currentStrip.axisCodes[ii] for ii in perm]
-
-                                        item = ', '.join([cc + ":" + str(round(x, 3)) for x, cc in zip(pos, axes)])
-                                        text = '%s (%s)' % (strip.pid, item)
-                                        toolTip = 'Show cursor in strip %s at Cursor position (%s)' % (str(strip.id), item)
-                                        if len(list(set(strip.axisCodes) & set(currentStrip.axisCodes))) <= 4:
-                                            self.navigateToPeakMenu.addItem(text=text,
-                                                                            callback=partial(navigateToPositionInStrip, strip=strip,
-                                                                                             positions=pos, axisCodes=axes, ),
-                                                                            toolTip=toolTip)
-
-                                    if not permutationList:
-                                        toolTip = 'Show cursor in strip %s at Peak position %s' % (str(strip.id), str([round(x, 3) for x in peaks[0].position]))
-                                        if len(list(set(strip.axisCodes) & set(currentStrip.axisCodes))) <= 4:
-                                            self.navigateToPeakMenu.addItem(text=strip.pid,
-                                                                            callback=partial(navigateToPositionInStrip, strip=strip,
-                                                                                             positions=peaks[0].position,
-                                                                                             axisCodes=peaks[0].axisCodes),
-                                                                            toolTip=toolTip)
-                            self.navigateToPeakMenu.addSeparator()
-                    else:
-                        self.navigateToPeakMenu.setEnabled(False)
+        if peaks and self.navigateToPeakMenu:
+            self._addItemsToNavigateMenu(peaks[0].position, peaks[0].axisCodes, 'Peak', self.navigateToPeakMenu, includeAxisCodes=True)
 
     def _addItemsToNavigateToCursorPosMenu(self):
         """Copied from old viewbox. This function apparently take the current cursorPosition
          and uses to pan a selected display from the list of spectrumViews or the current cursor position.
         """
-        # TODO needs clear documentation
-
-        # NOTE:ED - need to add permutations for matching isotopes codes, tooltip order is incorrect
-        # get count of isotopes for current strip
-
-        from ccpn.util.Common import getAxisCodeMatchIndices
-        from functools import partial
-        from itertools import product
-        from ccpn.ui.gui.lib.Strip import navigateToPositionInStrip
-
         if self.navigateCursorMenu:
-            self.navigateCursorMenu.clear()
-            currentStrip = self.current.strip
-            # position = self.current.cursorPosition
-            # position = [self.current.mouseMovedDict[AXIS_FULLATOMNAME][ax] for ax in self.axisCodes]
             position = [self.current.mouseMovedDict[AXIS_FULLATOMNAME][ax]
                         if ax in self.current.mouseMovedDict[AXIS_FULLATOMNAME] else None
                         for ax in self.axisCodes]
             if None in position:
                 return
 
-            if currentStrip:
-                if len(self.current.project.spectrumDisplays) > 1:
-                    self.navigateCursorMenu.setEnabled(True)
-                    for spectrumDisplay in self.current.project.spectrumDisplays:
-                        for strip in spectrumDisplay.strips:
-                            if strip != currentStrip:
-
-                                # get a list of all isotope code matches for each axis code in 'strip'
-                                indices = getAxisCodeMatchIndices(strip.axisCodes, currentStrip.axisCodes, allMatches=True)
-
-                                # generate a permutation list of the axis codes that have unique indices
-                                # permutationList = [jj for jj in product(*indices) if len(set(jj)) == len(jj)]
-                                permutationList = [jj for jj in product(*(ii if ii else (None,) for ii in indices)) if len(set(jj)) == len(jj)]
-
-                                # permutation list is list of tuples
-                                # each element is list of indices to fetch from currentStrip and map to strip
-
-                                for perm in permutationList:
-
-                                    # pos = [position[ii] for ii in perm if ii is not None]   # permute to strip axis codes
-                                    # axes = strip.axisCodes                                  # [currentStrip.axisCodes[ii] for ii in perm]
-                                    # try:
-                                    #     axes = [axes[jj] for jj, ii in enumerate(perm) if ii is not None]
-                                    # except Exception as es:
-                                    #     pass
-
-                                    pos = []
-                                    axes = []
-                                    for jj, ii in enumerate(perm):
-                                        if ii is not None:
-                                            pos.append(position[ii])
-                                        else:
-                                            pos.append(' - ')
-                                            # axes.append(strip.axisCodes[jj])
-
-                                    # this appears to writing the wrong axis code
-                                    item = ', '.join([cc+":"+str(x if isinstance(x, str) else round(x, 3)) for x, cc in zip(pos, strip.axisCodes)])
-
-                                    text = '%s (%s)' % (strip.pid, item)
-                                    toolTip = 'Show cursor in strip %s at Cursor position (%s)' % (str(strip.id), item)
-                                    if len(list(set(strip.axisCodes) & set(currentStrip.axisCodes))) <= 4:
-                                        self.navigateCursorMenu.addItem(text=text,
-                                                                        callback=partial(navigateToPositionInStrip, strip=strip,
-                                                                                         positions=pos, axisCodes=axes, ),
-                                                                        toolTip=toolTip)
-
-                                if not permutationList:
-                                    # ', '.join([cc + ":" + str(round(position[inds[0]], 3)) for ii, (inds, cc) in enumerate(zip(indices, strip.axisCodes)) if inds])
-
-                                    # item = ', '.join([cc + ":" + str(round(position[inds[0]], 3)) for ii, (inds, cc) in enumerate(zip(indices, strip.axisCodes)) is inds is not None and len(inds) > 0])
-                                    pos = []
-                                    for jj, ii in enumerate(indices):
-                                        if ii is not None:
-                                            pos.append(position[ii[0]])
-                                        else:
-                                            pos.append(' - ')
-                                    # item = ', '.join(ii if isinstance(ii, str) else str(round(ii, 3)) for ii in pos)
-
-                                    item = ', '.join([cc + ":" + str(x if isinstance(x, str) else round(x, 3)) for x, cc in zip(pos, strip.axisCodes)])
-
-                                    # item = str([round(x, 3) for x in position])
-
-                                    text = '%s (%s)' % (strip.pid, item)
-                                    toolTip = 'Show cursor in strip %s at Cursor position (%s)' % (str(strip.id), item)
-                                    if len(list(set(strip.axisCodes) & set(currentStrip.axisCodes))) <= 4:
-                                        self.navigateCursorMenu.addItem(text=text,
-                                                                        callback=partial(navigateToPositionInStrip, strip=strip,
-                                                                                         positions=position,
-                                                                                         axisCodes=currentStrip.axisCodes, ),
-                                                                        toolTip=toolTip)
-
-
-                        self.navigateCursorMenu.addSeparator()
-                else:
-                    self.navigateCursorMenu.setEnabled(False)
+            self._addItemsToNavigateMenu(position, self.axisCodes, 'Cursor', self.navigateCursorMenu, includeAxisCodes=True)
 
     def markAxisIndices(self, indices=None):
         """Mark the X/Y/XY axisCodes by index
@@ -784,61 +722,44 @@ class GuiStrip(Frame):
 
         self._createMarkAtPosition(positions=pos, axisCodes=axes)
 
+    def _addItemsToMenu(self, position, axisCodes, label, menuFunc):
+        """Adds item to mark peak position from context menu.
+        """
+        from functools import partial
+
+        if hasattr(self, 'markIn%sMenu' % label):
+            menuFunc.clear()
+            currentStrip = self
+
+            if currentStrip:
+                if len(self.current.project.spectrumDisplays) > 1:
+                    menuFunc.setEnabled(True)
+                    for spectrumDisplay in self.current.project.spectrumDisplays:
+                        for strip in spectrumDisplay.strips:
+                            if strip != currentStrip:
+                                toolTip = 'Show cursor in strip %s at %s position %s' % (str(strip.id), label, str([round(x, 3) for x in position]))
+                                if len(list(set(strip.axisCodes) & set(currentStrip.axisCodes))) <= 4:
+                                    menuFunc.addItem(text=strip.pid,
+                                                     callback=partial(self._createMarkAtPosition,
+                                                                      positions=position,
+                                                                      axisCodes=axisCodes),
+                                                     toolTip=toolTip)
+                        menuFunc.addSeparator()
+                else:
+                    menuFunc.setEnabled(False)
+
     def _addItemsToMarkInPeakMenu(self, peaks):
         """Adds item to mark peak position from context menu.
         """
-        # TODO, merge the two menu (cursor and peak) in one single menu to avoid code duplication. Issues: when tried, only one menu at the time worked!
-        from functools import partial
-
-        if hasattr(self, 'markInPeakMenu'):
-            self.markInPeakMenu.clear()
-            currentStrip = self.current.strip
-
-            if currentStrip:
-                if peaks:
-                    if len(self.current.project.spectrumDisplays) > 1:
-                        self.markInPeakMenu.setEnabled(True)
-                        for spectrumDisplay in self.current.project.spectrumDisplays:
-                            for strip in spectrumDisplay.strips:
-                                if strip != currentStrip:
-                                    toolTip = 'Show cursor in strip %s at Peak position %s' % (str(strip.id), str([round(x, 3) for x in peaks[0].position]))
-                                    if len(list(set(strip.axisCodes) & set(currentStrip.axisCodes))) <= 4:
-                                        self.markInPeakMenu.addItem(text=strip.pid,
-                                                                    callback=partial(self._createMarkAtPosition,
-                                                                                     positions=peaks[0].position,
-                                                                                     axisCodes=peaks[0].axisCodes),
-                                                                    toolTip=toolTip)
-                            self.markInPeakMenu.addSeparator()
-                    else:
-                        self.markInPeakMenu.setEnabled(False)
+        if peaks and hasattr(self, 'markInPeakMenu'):
+            self._addItemsToMenu(peaks[0].position, peaks[0].axisCodes, 'Peak', self.markInPeakMenu)
 
     def _addItemsToMarkInCursorPosMenu(self):
         """Copied from old viewbox. This function apparently take the current cursorPosition
          and uses to pan a selected display from the list of spectrumViews or the current cursor position.
         """
-        # TODO needs clear documentation
-        from functools import partial
-
         if hasattr(self, 'markInCursorMenu'):
-            self.markInCursorMenu.clear()
-            currentStrip = self.current.strip
-            position = self.current.cursorPosition
-
-            if currentStrip:
-                if len(self.current.project.spectrumDisplays) > 1:
-                    self.markInCursorMenu.setEnabled(True)
-                    for spectrumDisplay in self.current.project.spectrumDisplays:
-                        for strip in spectrumDisplay.strips:
-                            if strip != currentStrip:
-                                toolTip = 'Show cursor in strip %s at Cursor position %s' % (str(strip.id), str([round(x, 3) for x in position]))
-                                if len(list(set(strip.axisCodes) & set(currentStrip.axisCodes))) <= 4:
-                                    self.markInCursorMenu.addItem(text=strip.pid,
-                                                                  callback=partial(self._createMarkAtPosition,
-                                                                                   positions=position, axisCodes=currentStrip.axisCodes, ),
-                                                                  toolTip=toolTip)
-                        self.markInCursorMenu.addSeparator()
-                else:
-                    self.markInCursorMenu.setEnabled(False)
+            self._addItemsToMenu(self.current.cursorPosition, self.axisCodes, 'Cursor', self.markInCursorMenu)
 
     def _markSelectedPeaks(self, axisIndex=None):
         """Mark the positions of all selected peaks
@@ -1424,10 +1345,10 @@ class GuiStrip(Frame):
     def _emitSymbolChanged(self):
         # spawn a redraw of the GL windows
         self._CcpnGLWidget.GLSignals._emitSymbolsChanged(source=None, strip=self,
-                                                         symbolDict={SYMBOLTYPES           : self.symbolType,
-                                                                     ANNOTATIONTYPES       : self.symbolLabelling,
-                                                                     SYMBOLSIZE            : self.symbolSize,
-                                                                     SYMBOLTHICKNESS       : self.symbolThickness,
+                                                         symbolDict={SYMBOLTYPES    : self.symbolType,
+                                                                     ANNOTATIONTYPES: self.symbolLabelling,
+                                                                     SYMBOLSIZE     : self.symbolSize,
+                                                                     SYMBOLTHICKNESS: self.symbolThickness,
                                                                      # GRIDVISIBLE           : self.gridVisible,
                                                                      # CROSSHAIRVISIBLE      : self.crosshairVisible,
                                                                      # DOUBLECROSSHAIRVISIBLE: self.doubleCrosshairVisible,
@@ -2224,7 +2145,7 @@ class GuiStrip(Frame):
             for m, widgStrip in enumerate(_widgets):
 
                 tilePosition = widgStrip.tilePosition
-                if True:            # tilePosition is None:
+                if True:  # tilePosition is None:
                     layout.addWidget(widgStrip, 0, m)
                     widgStrip.tilePosition = (0, m)
                 else:
@@ -2238,7 +2159,7 @@ class GuiStrip(Frame):
             for m, widgStrip in enumerate(_widgets):
 
                 tilePosition = widgStrip.tilePosition
-                if True:            # tilePosition is None:
+                if True:  # tilePosition is None:
                     layout.addWidget(widgStrip, m, 0)
                     widgStrip.tilePosition = (0, m)
                 else:

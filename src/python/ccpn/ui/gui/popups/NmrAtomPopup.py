@@ -27,7 +27,7 @@ __date__ = "$Date: 2017-03-30 11:28:58 +0100 (Thu, March 30, 2017) $"
 
 from ccpn.ui.gui.widgets.MessageDialog import showWarning
 from ccpn.ui.gui.popups.AttributeEditorPopupABC import AttributeEditorPopupABC
-from ccpnmodel.ccpncore.lib.assignment.ChemicalShift import PROTEIN_ATOM_NAMES
+from ccpn.core.lib.AssignmentLib import NEF_ATOM_NAMES
 from ccpn.util.Common import isotopeCode2Nucleus
 from ccpn.core.NmrAtom import NmrAtom
 from ccpn.ui.gui.widgets.CompoundWidgets import EntryCompoundWidget, PulldownListCompoundWidget, CheckBoxCompoundWidget
@@ -43,11 +43,10 @@ class NmrAtomPopup(AttributeEditorPopupABC):
         """Populate the nmrAtom pulldown
         """
         isotopeCode = self.obj.isotopeCode
-        nucleus = isotopeCode2Nucleus(isotopeCode)
-        if nucleus:
-            atomNames = sorted(set([x for y in PROTEIN_ATOM_NAMES.values() for x in y if x.startswith(nucleus)]))
+        if isotopeCode in NEF_ATOM_NAMES:
+            atomNames = list([atomName for atomName in NEF_ATOM_NAMES[isotopeCode]])
         else:
-            atomNames = sorted(set([x for y in PROTEIN_ATOM_NAMES.values() for x in y]))
+            atomNames = sorted(set([x for y in NEF_ATOM_NAMES.values() for x in y]))
 
         if self.obj.name not in atomNames:
             atomNames.insert(0, self.obj.name)

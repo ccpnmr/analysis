@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Search Box</title>
+    <style >.action {color: #803594; font-weight:bold;}</style>
+    <link rel="stylesheet" href="CcpnVideoTutorials.css">
+</head>
+<body>
+<h2>Search Box</h2>
+<p>The search box at the bottom of the left-hand sidebar lets you search for items in the sidebar. As you type a search string, possible matches are shown in a <span class="action">Search Results</span> box above. If you <span class="action">click</span> on a result line, then the sidebar will automatically navigate to that item, expanding the visible data structure where necessary. You can also <span class="action">drag</span> an item from the <span class="action">Search Results</span> box into the drop area. This has the same effect as a normal drag from the sidebar, i.e. chemical shift lists or peak lists are opened as tables and spectra are opened in spectrum display modules. Dropping NmrAtoms and NmrResidues into spectrum display modules will create marks at their respective chemical shift positions, or if dropped onto peaks, the peaks will be assigned to the NmrAtoms/NmrResidues.</p>
+<h3>Search Strings and Examples</h3>
+<p>The search will look for any text matches and is case-insensitive. <span class="action">*</span> can be used as a wildcard.</p>
+<p>Note that every item of data in the sidebar is listed as a so-called <span class="action">Project ID</span>, or <span class="action">PID</span> for short. These PIDs contain a short code to signify the data type (e.g. SP for spectrum - see below for a full list) followed by the name of the data item. Nested items also contain the names of their parents/grandparents, separated by a <span class="action">.</span> , e.g. a peak list is shown as <span class="action">PL:spectrumName.peakListName</span> or an NmrAtom as <span class="action">NA:@3.23.THR.CA</span>.</p>
+<p><span class="action">val</span>
+<br>as a search string would should any Valine NmrAtoms and NmrResidues, while
+<br><span class="action">nr*val</span>
+<br>would show only Valine NmrResidues.</p>
+<p><span class="action">hsqc</span>
+<br>might show you any spectra and their peak lists that contain the string <span class="action">hsqc</span>. whereas
+<br><span class="action">pl*hsqc</span>
+<br>would restrict this to peak lists or
+<br><span class="action">sp*hsqc</span>
+<br>would restrict this to spectra.</p>
+<table>
+ <tr>
+  <th align="left" width="5%"><h3>PID Short Code</h3></th>
+  <th align="left" width="15%"><h3>Data Item</h3></th>
+  <th align="left" width="20%"><h3>Nesting</h3></th>
+  <th align="left" width="60%"><h3>Example</h3></th>
+ </tr>
+ <tr>
+  <td><span class="action">PR</span></td>
+  <td>Project</td>
+  <td>Project</td>
+  <td>PR:GP41fab8066Complex</td>
+ </tr>
+ <tr>
+  <td><span class="action">SP</span></td>
+  <td>Spectrum</td>
+  <td>Spectrum</td>
+  <td>SP:hsqc</td>
+ </tr>
+ <tr>
+  <td><span class="action">PL</span></td>
+  <td>Peak List</td>
+  <td>Spectrum / Peak List</td>
+  <td>PL:hsqc.hsqc1</td>
+ </tr>
+ <tr>
+  <td><span class="action">ML</span></td>
+  <td>Multiplet List</td>
+  <td>Spectrum / Multiplet List</td>
+  <td>ML:hsqc.hsqc1</td>
+ </tr>
+ <tr>
+  <td><span class="action">IL</span></td>
+  <td>Integral List</td>
+  <td>Spectrum / Integral List</td>
+  <td>IL:hsqc.hsqc1</td>
+ </tr>
+ <tr>
+  <td><span class="action">SG</span></td>
+  <td>Spectrum Group</td>
+  <td>Spectrum Group</td>
+  <td>SG:T1 Data</td>
+ </tr>
+ <tr>
+  <td><span class="action">CL</span></td>
+  <td>Chemical Shift List</td>
+  <td>Chemical Shift List</td>
+  <td>CL:default</td>
+ </tr>
+ <tr>
+  <td><span class="action">NC</span></td>
+  <td>NmrChain</td>
+  <td>NmrChain</td>
+  <td>NC:A</td>
+ </tr>
+ <tr>
+  <td><span class="action">NR</span></td>
+  <td>NmrResidue</td>
+  <td>NmrChain / NmrResidue</td>
+  <td>NR:A.23.THR</td>
+ </tr>
+ <tr>
+  <td><span class="action">NA</span></td>
+  <td>NmrAtom</td>
+  <td>NmrChain / NmrResidue / NmrAtom</td>
+  <td>NA:A.23.THR.CA</td>
+ </tr>
+ <tr>
+  <td><span class="action">SA</span></td>
+  <td>Sample</td>
+  <td>Sample</td>
+  <td>SA:complex</td>
+ </tr>
+ <tr>
+  <td><span class="action">SC</span></td>
+  <td>Sample Component</td>
+  <td>Sample / Sample Component</td>
+  <td>SC:complex.GP41</td>
+ </tr>
+ <tr>
+  <td><span class="action">SU</span></td>
+  <td>Substance</td>
+  <td>Substance</td>
+  <td>SU:GP41</td>
+ </tr>
+ <tr>
+  <td><span class="action">MC</span></td>
+  <td>(Molecule) Chain</td>
+  <td>Chain</td>
+  <td>MC:A</td>
+ </tr>
+ <tr>
+  <td><span class="action">MR</span></td>
+  <td>(Molecule) Residue</td>
+  <td>Chain / Residue</td>
+  <td>MR:A.23.THR</td>
+ </tr>
+ <tr>
+  <td><span class="action">MX</span></td>
+  <td>(Molecule) Complex</td>
+  <td>Complex</td>
+  <td>MX:GP41-fab8066</td>
+ </tr>
+ <tr>
+  <td><span class="action">SE</span></td>
+  <td>Structure Ensemble</td>
+  <td>Structure Ensemble</td>
+  <td>SE:4kht</td>
+ </tr>
+ <tr>
+  <td><span class="action">DS</span></td>
+  <td>Data Set</td>
+  <td>Data Set</td>
+  <td>DS:run1</td>
+ </tr>
+ <tr>
+  <td><span class="action">RL</span></td>
+  <td>Restraint List</td>
+  <td>Data Set / Restraint List</td>
+  <td>RL:run1.TALOS restraints</td>
+ </tr>
+ <tr>
+  <td><span class="action">NO</span></td>
+  <td>Note</td>
+  <td>Note</td>
+  <td>NO:note1</td>
+ </tr>
+</table>
+</body>
+</html>

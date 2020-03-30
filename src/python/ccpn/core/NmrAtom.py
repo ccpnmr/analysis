@@ -3,7 +3,7 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -13,8 +13,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2017-09-20 17:23:40 +0100 (Wed, September 20, 2017) $"
-__version__ = "$Revision: 3.0.0 $"
+__dateModified__ = "$dateModified: 2020-03-30 17:15:13 +0100 (Mon, March 30, 2020) $"
+__version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -359,7 +359,7 @@ class NmrAtom(AbstractWrapperObject):
                     if isotopeCode == '?':
                         self._wrappedData.isotopeCode = newIsotopeCode
                     elif newIsotopeCode != isotopeCode:
-                        raise ValueError("Cannot rename %s type NmrAtom to %s" % (isotopeCode, value))
+                        raise ValueError("Cannot rename %s type NmrAtom to %s - invalid isotopeCode" % (isotopeCode, value))
 
                 try:
                     self._wrappedData.name = value
@@ -477,6 +477,21 @@ def _newNmrAtom(self: NmrResidue, name: str = None, isotopeCode: str = None,
         dd['name'] = name
     if comment is None:
         dd['details'] = name
+
+    # # NOTE:ED - check violated name
+    # #           this gets it to work by prepending with the correct isotopeCode, but there should be values in the orderedDict
+    # pseudoName = None
+    # checkIsotopeCode = isotopeCode.upper()
+    # if not name.startswith(checkIsotopeCode):
+    #     from ccpn.util.Constants import isotopeRecords
+    #
+    #     record = isotopeRecords.get(checkIsotopeCode)
+    #     if record:
+    #         isValid = name.startswith(record.symbol)
+    #         if not isValid:
+    #             pseudoName = record.symbol + '_' + name
+    #             if serial is None:
+    #                 dd['name'] = pseudoName
 
     obj = nmrProject.newResonance(**dd)
     result = self._project._data2Obj.get(obj)

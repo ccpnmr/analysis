@@ -72,7 +72,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-03-17 01:55:31 +0000 (Tue, March 17, 2020) $"
+__dateModified__ = "$dateModified: 2020-03-30 15:15:03 +0100 (Mon, March 30, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -1397,7 +1397,7 @@ class ChemicalShiftsMapping(CcpnModule):
         _openItemObject(self.mainWindow, spectra)
         return True
       except:
-        getLogger().warn('Failed to open selected objects')
+        getLogger().warning('Failed to open selected objects')
     return False
 
   def _setupConcentrationsPopup(self):

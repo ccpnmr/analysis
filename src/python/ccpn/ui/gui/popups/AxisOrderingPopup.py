@@ -4,23 +4,23 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
                  "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
-# Last code modification:
+# Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified$"
-__version__ = "$Revision$"
+__dateModified__ = "$dateModified: 2020-03-30 15:15:03 +0100 (Mon, March 30, 2020) $"
+__version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
-# Created:
+# Created
 #=========================================================================================
 __author__ = "$Author: Ed Brooksbank $"
-__date__ = "$Date$"
+__date__ = "$Date: 2019-11-27 12:20:27 +0000 (Wed, November 27, 2019) $"
 #=========================================================================================
 # Start of code
 #=========================================================================================
@@ -31,7 +31,7 @@ from itertools import permutations
 from ccpn.ui.gui.widgets.ButtonList import ButtonList
 from ccpn.ui.gui.widgets.DoubleSpinbox import DoubleSpinbox
 from ccpn.ui.gui.widgets.Label import Label
-from ccpn.ui.gui.popups.Dialog import CcpnDialog
+from ccpn.ui.gui.popups.Dialog import CcpnDialogMainWidget
 from ccpn.util.floatUtils import fRound
 from ccpn.ui.gui.widgets.HLine import HLine
 from ccpn.ui.gui.widgets.CompoundWidgets import PulldownListCompoundWidget
@@ -40,13 +40,13 @@ from ccpn.core.Spectrum import Spectrum
 from ccpn.core.SpectrumGroup import SpectrumGroup
 
 
-class AxisOrderingPopup(CcpnDialog):
+class AxisOrderingPopup(CcpnDialogMainWidget):
     """
     Set the axis ordering for the new spectrumDisplay from a popup
     """
 
     def __init__(self, parent=None, mainWindow=None, spectrum=None, title='Set Spectrum Axis Ordering', label='', **kwds):
-        CcpnDialog.__init__(self, parent, setLayout=True, windowTitle=title, **kwds)
+        super().__init__(parent, setLayout=True, windowTitle=title, **kwds)
 
         self.mainWindow = mainWindow
         self.project = self.mainWindow.project
@@ -57,21 +57,21 @@ class AxisOrderingPopup(CcpnDialog):
         if self.spectrum:
 
             row = 0
-            Label(self, text=title + ': ' + label+' - '+str(spectrum.pid), bold=True, grid=(row, 0), gridSpan=(1,3))
+            Label(self.mainWidget, text=title + ': ' + label+' - '+str(spectrum.pid), bold=True, grid=(row, 0), gridSpan=(1,3))
 
             row += 1
-            self.preferredAxisOrderPulldown = PulldownListCompoundWidget(self, labelText="Select Axis Ordering",
+            self.preferredAxisOrderPulldown = PulldownListCompoundWidget(self.mainWidget, labelText="Select Axis Ordering",
                                                                          grid=(row, 0), gridSpan=(1, 3), vAlign='t',
                                                                          callback=self._setSpectrumOrdering)
             self.preferredAxisOrderPulldown.setPreSelect(self._fillPreferredWidget)
             self._fillPreferredWidget()
 
             row += 1
-            self.buttonBox = ButtonList(self, grid=(row, 2), gridSpan=(1, 1), texts=['Ok'],
+            self.buttonBox = ButtonList(self.mainWidget, grid=(row, 2), gridSpan=(1, 1), texts=['Ok'],
                                         callbacks=[self._accept])
 
             row += 1
-            Spacer(self, 5, 5, QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.MinimumExpanding,
+            Spacer(self.mainWidget, 5, 5, QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.MinimumExpanding,
                    grid=(row, 1), gridSpan=(1, 1))
 
             self.setFixedSize(self.sizeHint())

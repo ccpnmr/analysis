@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-03-25 12:53:16 +0000 (Wed, March 25, 2020) $"
+__dateModified__ = "$dateModified: 2020-03-30 15:15:02 +0100 (Mon, March 30, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -1337,6 +1337,59 @@ class PeakList(PMIListABC):
         aliasRange = tuple((int(mn), int(mx)) for mn, mx in zip(aliasMin, aliasMax))
 
         return aliasRange
+
+    @logCommand(get='self')
+    def reorderPeakListAxes(self, newAxisOrder):
+        """Reorder the peak position according to the newAxisOrder
+        """
+        dims = self.spectrum.dimensionCount
+
+        if not isinstance(newAxisOrder, (list, tuple)):
+            raise TypeError('newAxisOrder must be a list/tuple')
+        if len(newAxisOrder) != dims:
+            raise ValueError('newAxisOrder is the wrong length, must match spectrum dimensions')
+        if len(set(newAxisOrder)) != len(newAxisOrder):
+            raise ValueError('newAxisOrder contains duplicated elements')
+        if not all(isinstance(ii, int) for ii in newAxisOrder):
+            raise ValueError('newAxisOrder must be ints')
+        if not all(0 <= ii < dims for ii in newAxisOrder):
+            raise ValueError('newAxisOrder elements must be in range 0-%i', dims-1)
+
+        with undoBlock():
+            # reorder all peaks in the peakList
+            for peak in self.peaks:
+                pos = peak.position
+                newPos = []
+                for ii in newAxisOrder:
+                    newPos.append(pos[ii])
+                peak.position = newPos
+
+    @logCommand(get='self')
+    def checkReorderPeakListAxesAliased(self, newAxisOrder):
+        """Check whether the reordering of the peak positions will give aliased peak positions
+        """
+        dims = self.spectrum.dimensionCount
+
+        if not isinstance(newAxisOrder, (list, tuple)):
+            raise TypeError('newAxisOrder must be a list/tuple')
+        if len(newAxisOrder) != dims:
+            raise ValueError('newAxisOrder is the wrong length, must match spectrum dimensions')
+        if len(set(newAxisOrder)) != len(newAxisOrder):
+            raise ValueError('newAxisOrder contains duplicated elements')
+        if not all(isinstance(ii, int) for ii in newAxisOrder):
+            raise ValueError('newAxisOrder must be ints')
+        if not all(0 <= ii < dims for ii in newAxisOrder):
+            raise ValueError('newAxisOrder elements must be in range 0-%i', dims - 1)
+
+        with undoBlock():
+            # reorder all peaks in the peakList
+            for peak in self.peaks:
+                pos = peak.position
+                newPos = []
+                for ii in newAxisOrder:
+                    newPos.append(pos[ii])
+
+                # check newPos here
 
     #===========================================================================================
     # new'Object' and other methods

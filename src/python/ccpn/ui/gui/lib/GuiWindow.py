@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-03-27 10:38:00 +0000 (Fri, March 27, 2020) $"
+__dateModified__ = "$dateModified: 2020-03-30 15:15:03 +0100 (Mon, March 30, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -372,6 +372,25 @@ class GuiWindow():
         #     undo.decreaseBlocking()
         #     undo.newItem(self._setPeaksParams, self._setPeaksParams, undoArgs=[peaks, currentParams],
         #                  redoArgs=[peaks, self._getPeaksParams(peaks)])
+
+    def reorderPeakListAxes(self):
+        """Reorder axes of all peaks in peakList of first selected peak by right-mouse menu
+        """
+        current = self.application.current
+        peaks = current.peaks
+        clickedPeaks = current.strip._lastClickedObjects if current.strip else None
+
+        # return if both the lists are empty
+        if not (peaks or clickedPeaks):
+            return
+
+        with undoBlock():
+            if set(clickedPeaks or []):
+
+                from ccpn.ui.gui.popups.ReorderPeakListAxes import ReorderPeakListAxes as ReorderPeakListAxesPopup
+
+                popup = ReorderPeakListAxesPopup(parent=self, mainWindow=self, peakList=clickedPeaks[0].peakList)
+                popup.exec_()
 
     def selectAllPeaks(self):
         '''selects all peaks in the current strip if the spectrum is toggled on'''

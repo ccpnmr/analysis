@@ -5,7 +5,7 @@
 #=========================================================================================
 from ccpn.framework.constants import CCPNMR_PREFIX
 
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -14,9 +14,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: CCPN $"
-__dateModified__ = "$dateModified: 2017-07-07 16:32:31 +0100 (Fri, July 07, 2017) $"
-__version__ = "$Revision: 3.0.0 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2020-03-30 15:15:02 +0100 (Mon, March 30, 2020) $"
+__version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -936,7 +936,7 @@ class AbstractWrapperObject(NotifierBase):
                 try:
                     obj._initializeAll()
                 except Exception as er:
-                    getLogger().warn('Error initialising object %s. %s1' %(obj,er))
+                    getLogger().warning('Error initialising object %s. %s1' %(obj,er))
                 # getLogger().info(str(obj))   # ejb - temp
 
     def _unwrapAll(self):
@@ -1180,7 +1180,7 @@ class AbstractWrapperObject(NotifierBase):
                         if not i.startswith('_'):
                             od[i] = att
             except Exception as e:
-                getLogger().warn('Potential error for the property %s in creating dictionary from object: %s . Error: %s'  % (i, self, e))
+                getLogger().warning('Potential error for the property %s in creating dictionary from object: %s . Error: %s'  % (i, self, e))
         return od
 
     # def _startCommandEchoBlock(self, funcName, *params, values=None, defaults=None, parName=None, propertySetter=False,

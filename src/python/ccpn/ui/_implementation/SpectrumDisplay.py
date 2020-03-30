@@ -4,7 +4,7 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -13,9 +13,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: CCPN $"
-__dateModified__ = "$dateModified: 2017-07-07 16:32:41 +0100 (Fri, July 07, 2017) $"
-__version__ = "$Revision: 3.0.0 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2020-03-30 15:15:02 +0100 (Mon, March 30, 2020) $"
+__version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -98,7 +98,7 @@ class SpectrumDisplay(AbstractWrapperObject):
     # @property
     # def stripDirection(self) -> str:
     #     """Strip axis direction ('X', 'Y', None) - None only for non-strip plots"""
-    #     getLogger().warn('StripDirection is deprecated. Used stripArrangement instead')
+    #     getLogger().warning('StripDirection is deprecated. Used stripArrangement instead')
     #     return self.stripArrangement
     #
     #     # return self._wrappedData.stripDirection
@@ -108,7 +108,7 @@ class SpectrumDisplay(AbstractWrapperObject):
     #     """Set the new strip direction ('X', 'Y', None) - None only for non-strip plots
     #     """
     #     self.stripArrangement(value)
-    #     getLogger().warn('StripDirection is deprecated. Used stripArrangement instead')
+    #     getLogger().warning('StripDirection is deprecated. Used stripArrangement instead')
     #     # raise RuntimeError('deprecated: use stripArrangement') no need of raising an error!
     #
     #     # if not isinstance(value, str):

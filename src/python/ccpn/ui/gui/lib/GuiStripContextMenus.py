@@ -18,8 +18,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-01-10 11:21:55 +0000 (Fri, January 10, 2020) $"
-__version__ = "$Revision: 3.0.0 $"
+__dateModified__ = "$dateModified: 2020-03-30 15:15:02 +0100 (Mon, March 30, 2020) $"
+__version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -334,6 +334,12 @@ def _estimateVolumesItem(strip):
     return _SCMitem(name='Estimate Volume(s)',
                     typeItem=ItemTypes.get(ITEM), toolTip='Estimate peak volume(s)', shortcut='EV',
                     callback=strip.mainWindow.estimateVolumes)
+
+
+def _reorderPeakListAxesItem(strip):
+    return _SCMitem(name='Reorder PeakList Axes...',
+                    typeItem=ItemTypes.get(ITEM), toolTip='Reorder axes for all peaks in peakList containing this peak', shortcut='RL',
+                    callback=strip.mainWindow.reorderPeakListAxes)
 
 
 def _makeStripPlotItem(strip):
@@ -841,6 +847,7 @@ def _getNdPeakMenu(guiStripNd) -> Menu:
         _refitPeakGroupItem(guiStripNd),
         _snapToExtremaItem(guiStripNd),
         _estimateVolumesItem(guiStripNd),
+        _reorderPeakListAxesItem(guiStripNd),
         _separator(),
         _makeStripPlotItem(guiStripNd),
         _calibrateFromPeaks(guiStripNd),

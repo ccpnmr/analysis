@@ -4,50 +4,46 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = ""
-__credits__ = ""
-__licence__ = ("")
-__reference__ = ("")
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
+__credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
+__licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
+__reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
+                 "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
+                 "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
-# Last code modification:
+# Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified$"
-__version__ = "$Revision$"
+__dateModified__ = "$dateModified: 2020-03-30 15:15:03 +0100 (Mon, March 30, 2020) $"
+__version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
-# Created:
+# Created
 #=========================================================================================
 __author__ = "$Author: Ed Brooksbank $"
-__date__ = "$Date$"
+__date__ = "$Date: 2019-11-27 12:20:27 +0000 (Wed, November 27, 2019) $"
 #=========================================================================================
 # Start of code
 #=========================================================================================
 
-from ccpn.ui.gui.popups.AxisOrderingPopup import AxisOrderingPopup, checkSpectraToOpen
-import sys
-from PyQt5 import QtWidgets, QtCore
+from PyQt5 import QtWidgets
 from itertools import permutations
 from ccpn.ui.gui.widgets.ButtonList import ButtonList
-from ccpn.ui.gui.widgets.DoubleSpinbox import DoubleSpinbox
 from ccpn.ui.gui.widgets.Label import Label
-from ccpn.ui.gui.popups.Dialog import CcpnDialog
-from ccpn.util.floatUtils import fRound
-from ccpn.ui.gui.widgets.HLine import HLine
+from ccpn.ui.gui.popups.Dialog import CcpnDialogMainWidget
 from ccpn.ui.gui.widgets.CompoundWidgets import PulldownListCompoundWidget
 from ccpn.ui.gui.widgets.Spacer import Spacer
-from ccpn.core.Spectrum import Spectrum
-from ccpn.core.SpectrumGroup import SpectrumGroup
 from ccpn.core.lib.ContextManagers import undoBlock
 from ccpn.ui.gui.lib.Strip import copyStripPosition
 
 
-class CopyStripFlippedSpectraPopup(AxisOrderingPopup):
+class CopyStripFlippedSpectraPopup(CcpnDialogMainWidget):
     """
     Set the axis ordering for the new spectrumDisplay from a popup
     """
 
     def __init__(self, parent=None, mainWindow=None, strip=None, title='Copy Strip with Axes Flipped', label='', **kwds):
-        CcpnDialog.__init__(self, parent, setLayout=True, windowTitle=title, **kwds)
+        # super().__init__(parent, mainWindow=mainWindow, title=title, **kwds)
+        super().__init__(parent, setLayout=True, windowTitle=title, **kwds)
 
         # make sure there's a strip
         if not strip:
@@ -63,27 +59,30 @@ class CopyStripFlippedSpectraPopup(AxisOrderingPopup):
 
         if strip.axisCodes:
             row = 0
-            Label(self, text=title + ': ' + label + ' - ' + str(self._axisOrdering), bold=True, grid=(row, 0), gridSpan=(1, 3))
+            Label(self.mainWidget, text=label + ' - ' + str(self._axisOrdering), bold=True, grid=(row, 0), gridSpan=(1, 3))
 
             row += 1
-            self.preferredAxisOrderPulldown = PulldownListCompoundWidget(self, labelText="Select Axis Ordering:",
+            self.preferredAxisOrderPulldown = PulldownListCompoundWidget(self.mainWidget, labelText="Select Axis Ordering:",
                                                                          grid=(row, 0), gridSpan=(1, 3), vAlign='t',
                                                                          callback=self._setAxisCodeOrdering)
             self.preferredAxisOrderPulldown.setPreSelect(self._fillPreferredWidget)
-            self._fillPreferredWidget()
 
-            row += 1
-            self.buttonBox = ButtonList(self, grid=(row, 2), gridSpan=(1, 1), texts=['Cancel', 'Ok'],
-                                        callbacks=[self.reject, self._accept])
-            self.setDefaultButton(self.buttonBox.getButton('Cancel'))
+            # enable the buttons
+            self.setOkButton(callback=self._accept)
+            self.setCancelButton(callback=self.reject)
+            self.setDefaultButton(CcpnDialogMainWidget.CANCELBUTTON)
 
-            row += 1
-            Spacer(self, 5, 5, QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.MinimumExpanding,
-                   grid=(row, 1), gridSpan=(1, 1))
+            self._populate()
 
-            self.setFixedSize(self.sizeHint())
+            self.__postInit__()
+            self._okButton = self.getButton(self.OKBUTTON)
+            self._cancelButton = self.getButton(self.CANCELBUTTON)
+
         else:
             self.close()
+
+    def _populate(self):
+        self._fillPreferredWidget()
 
     def _fillPreferredWidget(self):
         """Fill the pullDown with the currently available permutations of the axis codes

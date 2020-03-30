@@ -11,7 +11,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-03-20 18:10:04 +0000 (Fri, March 20, 2020) $"
+__dateModified__ = "$dateModified: 2020-03-30 15:15:02 +0100 (Mon, March 30, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -1245,6 +1245,7 @@ class Framework(NotifierBase):
             ("Copy PeakList...", self.showCopyPeakListPopup, [('shortcut', 'cl')]),
             ("Copy Peaks...", self.showCopyPeaks, [('shortcut', 'cp')]),
             ("Estimate Volumes...", self.showEstimateVolumesPopup, [('shortcut', 'ev')]),
+            ("Reorder PeakList Axes...", self.showReorderPeakListAxesPopup, [('shortcut', 'rl')]),
             (),
             ("Make Strip Plot...", self.makeStripPlotPopup, [('shortcut', 'sp')]),
 
@@ -1304,7 +1305,7 @@ class Framework(NotifierBase):
                          ("Copy with X-Y Axes flipped", self.flipXYAxis, [('shortcut', 'xy')]),
                          ("Copy with X-Z Axes flipped", self.flipXZAxis, [('shortcut', 'xz')]),
                          ("Copy with Y-Z Axes flipped", self.flipYZAxis, [('shortcut', 'yz')]),
-                         ("Copy with Axes Flipped...", self.flipArbitraryAxis, [('shortcut', 'fa')]),
+                         ("Copy with Axes Flipped...", self.showFlipArbitraryAxisPopup, [('shortcut', 'fa')]),
                          )),
             (),
             (SHOWMODULESMENU, ([
@@ -2758,7 +2759,7 @@ class Framework(NotifierBase):
         else:
             getLogger().warning('No strip selected')
 
-    def flipArbitraryAxis(self):
+    def showFlipArbitraryAxisPopup(self):
         if self.current.strip is not None:
 
             if self.current.strip.spectrumDisplay.is1D:
@@ -2773,6 +2774,19 @@ class Framework(NotifierBase):
 
         else:
             getLogger().warning('No strip selected')
+
+    def showReorderPeakListAxesPopup(self):
+        """
+        Displays Reorder PeakList Axes Popup.
+        """
+        if not self.project.peakLists:
+            getLogger().warning('Reorder PeakList Axes: Project has no peakLists.')
+            MessageDialog.showWarning('Reorder PeakList Axes', 'Project has no peakLists.')
+        else:
+            from ccpn.ui.gui.popups.ReorderPeakListAxes import ReorderPeakListAxes
+
+            popup = ReorderPeakListAxes(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow)
+            popup.exec_()
 
     def flipXYAxis(self):
         if self.current.strip is not None:

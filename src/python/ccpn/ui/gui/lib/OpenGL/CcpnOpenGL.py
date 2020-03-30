@@ -55,7 +55,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-03-27 11:17:46 +0000 (Fri, March 27, 2020) $"
+__dateModified__ = "$dateModified: 2020-03-30 15:15:03 +0100 (Mon, March 30, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -967,7 +967,10 @@ class CcpnGLWidget(QOpenGLWidget):
 
     def _getValidAspectRatio(self, axisCode):
         va = [ax for ax in self._aspectRatios.keys() if ax.upper()[0] == axisCode.upper()[0]]
-        return self._aspectRatios[va[0]]
+        if va and len(va) > 0:
+            return self._aspectRatios[va[0]]
+        else:
+            return 1.0
 
     def resizeGL(self, w, h):
         # must be set here to catch the change of screen

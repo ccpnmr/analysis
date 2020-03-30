@@ -52,8 +52,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-02-05 15:54:09 +0000 (Wed, February 05, 2020) $"
-__version__ = "$Revision: 3.0.0 $"
+__dateModified__ = "$dateModified: 2020-03-30 15:15:02 +0100 (Mon, March 30, 2020) $"
+__version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -1450,7 +1450,7 @@ assignmentTolerances
         """
 
         if self.dimensionCount != 1:
-            getLogger().warn('Currently this method only works for 1D spectra')
+            getLogger().warning('Currently this method only works for 1D spectra')
             return np.array([])
 
         if self._intensities is None:
@@ -1474,7 +1474,7 @@ assignmentTolerances
         """ spectral region in ppm as NumPy array for 1D spectra """
 
         if self.dimensionCount != 1:
-            getLogger().warn('Currently this method only works for 1D spectra')
+            getLogger().warning('Currently this method only works for 1D spectra')
             return np.array([])
 
         if self._positions is None:
@@ -1657,7 +1657,7 @@ assignmentTolerances
             self.setParameter(SPECTRUMALIASING, ALIASINGRANGE, values)
         except:
             # FIXME fix this bug
-            getLogger().Warn('Error Setting Aliasing Range')
+            getLogger().warning('Error Setting Aliasing Range')
 
     @property
     def _seriesItems(self):

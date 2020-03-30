@@ -11,7 +11,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-03-27 10:38:00 +0000 (Fri, March 27, 2020) $"
+__dateModified__ = "$dateModified: 2020-03-30 15:15:02 +0100 (Mon, March 30, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -309,7 +309,7 @@ def __filterPeaksBySelectedNmrAtomOption(nmrResidue, nmrAtomsNames, spectra):
     peaks = []
     nmrAtoms = []
 
-    peakLists = [sp.peakLists[-1] if len(sp.peakLists) > 0 else getLogger().warn('No PeakList for %s' % sp)
+    peakLists = [sp.peakLists[-1] if len(sp.peakLists) > 0 else getLogger().warning('No PeakList for %s' % sp)
                  for sp in spectra]  # take only the last peakList if more then 1
     for nmrAtomName in nmrAtomsNames:
         nmrAtom = nmrResidue.getNmrAtom(str(nmrAtomName))
@@ -357,7 +357,7 @@ def getNmrResiduePeakProperty(nmrResidue, nmrAtomsNames, spectra, theProperty='h
     if len(spectra) <= 1:
         return
     if not theProperty in ['height', 'volume']:
-        getLogger().warn('Property not currently available %s' % theProperty)
+        getLogger().warning('Property not currently available %s' % theProperty)
         return
     peaks = __filterPeaksBySelectedNmrAtomOption(nmrResidue, nmrAtomsNames, spectra)
     if len(peaks) > 0:
@@ -375,7 +375,7 @@ def getNmrResiduePeakHeight(nmrResidue, nmrAtomsNames, spectra):
     :param spectra: compare peaks only from given spectra
     :return:
     '''
-    getLogger().warn('Deprecated. Used getNmrResiduePeakProperty with theProperty = "height"')
+    getLogger().warning('Deprecated. Used getNmrResiduePeakProperty with theProperty = "height"')
     return getNmrResiduePeakProperty(nmrResidue, nmrAtomsNames, spectra, theProperty='height')
 
 
@@ -446,7 +446,7 @@ def getNmrResidueDeltas(nmrResidue, nmrAtomsNames, spectra, mode=POSITIONS, atom
                 if mode == VOLUME:
                     if list(peaks)[0] != peak:  # dont' compare to same peak
                         if not peak.volume or not peaks[0].volume or peaks[0].volume == 0:
-                            getLogger().warn('Volume has to be set for peaks: %s, %s' % (peak, peaks[0]))
+                            getLogger().warning('Volume has to be set for peaks: %s, %s' % (peak, peaks[0]))
                             break
 
                         delta1Atoms = (peak.volume / list(peaks)[0].volume)
@@ -455,7 +455,7 @@ def getNmrResidueDeltas(nmrResidue, nmrAtomsNames, spectra, mode=POSITIONS, atom
                 if mode == HEIGHT:
                     if list(peaks)[0] != peak:  # dont' compare to same peak
                         if not peak.height or not peaks[0].height or peaks[0].height == 0:
-                            getLogger().warn('Height has to be set for peaks: %s, %s' % (peak, peaks[0]))
+                            getLogger().warning('Height has to be set for peaks: %s, %s' % (peak, peaks[0]))
                             break
 
                         delta1Atoms = (peak.height / list(peaks)[0].height)
@@ -470,7 +470,7 @@ def getNmrResidueDeltas(nmrResidue, nmrAtomsNames, spectra, mode=POSITIONS, atom
                                     if any(s.startswith(axisCode[0]) for s in nmrAtomsNames):
                                         weight = _getAtomWeight(axisCode, atomWeights)
                                         if not peak.lineWidths[i] or not peaks[0].lineWidths[i]:
-                                            getLogger().warn('lineWidth has to be set for peaks: %s, %s' % (peak, peaks[0]))
+                                            getLogger().warning('lineWidth has to be set for peaks: %s, %s' % (peak, peaks[0]))
                                             break
                                         delta = ((peak.lineWidths[i] - list(peaks)[0].lineWidths[i]) * weight) ** 2
                                         deltaTemp.append(delta)

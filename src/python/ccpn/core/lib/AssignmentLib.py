@@ -54,7 +54,7 @@ NEF_ATOM_NAMES = {'13C': ['C', 'CA', 'CB', 'CG', 'CG1', 'CG2', 'CGx', 'CGy',
                   '1H' : ['H', 'HA', 'HA2', 'HA3', 'HAx', 'HAy', 'HB', 'HB2', 'HB3', 'HBx', 'HBy',
                           'HB%', 'HG', 'HG1', 'HG12', 'HG13', 'HG1x', 'HG1y', 'HG1%', 'HG2', 'HG2%',
                           'HG3', 'HGx', 'HGx%', 'HGy', 'HGy%', 'HD1', 'HD1%', 'HD2', 'HD21', 'HD22',
-                          'HD2x', 'HD2y', 'HD2%', 'HD3', 'HDx', 'HDx%', 'HDy%', 'HE', 'HE1', 'HE2',
+                          'HD2x', 'HD2y', 'HD2%', 'HD3', 'HDx', 'HDx%', 'HDy', 'HDy%', 'HE', 'HE1', 'HE2',
                           'HE21', 'HE22', 'HE2x', 'HE2y', 'HE3', 'HEx', 'HEy', 'HE%', 'HZ', 'HZ2', 'HZ3', 'HZ%',
                           'HH', 'HH11', 'HH12', 'HH1x', 'HH1y', 'HH2', 'HH21', 'HH22', 'HH2x', 'HH2y']}
 

@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-03-29 11:56:47 +0100 (Sun, March 29, 2020) $"
+__dateModified__ = "$dateModified: 2020-03-30 09:47:20 +0100 (Mon, March 30, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -639,8 +639,9 @@ class GuiStrip(Frame):
         menuFunc.clear()
         currentStrip = self
 
-        if len(self.current.project.spectrumDisplays) > 1:
+        if len(self.current.project.spectrumDisplays) > 0:
             menuFunc.setEnabled(True)
+
             for spectrumDisplay in self.current.project.spectrumDisplays:
                 for strip in spectrumDisplay.strips:
                     if strip != currentStrip:
@@ -675,7 +676,7 @@ class GuiStrip(Frame):
                             navigatePos = []
                             navigateAxes = []
                             for jj, ii in enumerate(indices):
-                                if ii is not None:
+                                if ii is not None and len(ii) > 0:
                                     showPos.append(position[ii[0]])
                                     navigatePos.append(position[ii[0]])
                                     navigateAxes.append(strip.axisCodes[jj])

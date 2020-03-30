@@ -4,7 +4,7 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -13,9 +13,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: CCPN $"
-__dateModified__ = "$dateModified: 2017-07-07 16:32:48 +0100 (Fri, July 07, 2017) $"
-__version__ = "$Revision: 3.0.0 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2020-03-30 17:43:01 +0100 (Mon, March 30, 2020) $"
+__version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -25,6 +25,7 @@ __date__ = "$Date: 2017-03-30 11:28:58 +0100 (Thu, March 30, 2017) $"
 # Start of code
 #=========================================================================================
 
+from ccpn.util.OrderedSet import OrderedSet
 from ccpn.ui.gui.widgets.MessageDialog import showWarning
 from ccpn.ui.gui.popups.AttributeEditorPopupABC import AttributeEditorPopupABC
 from ccpn.core.lib.AssignmentLib import NEF_ATOM_NAMES
@@ -46,7 +47,9 @@ class NmrAtomPopup(AttributeEditorPopupABC):
         if isotopeCode in NEF_ATOM_NAMES:
             atomNames = list([atomName for atomName in NEF_ATOM_NAMES[isotopeCode]])
         else:
-            atomNames = sorted(set([x for y in NEF_ATOM_NAMES.values() for x in y]))
+            # atomNames = sorted(set([x for y in NEF_ATOM_NAMES.values() for x in y]))
+            keys = sorted(NEF_ATOM_NAMES.keys(), key=lambda kk: kk.strip('0123456789'))
+            atomNames = list(OrderedSet([atomName for key in keys for atomName in NEF_ATOM_NAMES[key]]))
 
         if self.obj.name not in atomNames:
             atomNames.insert(0, self.obj.name)

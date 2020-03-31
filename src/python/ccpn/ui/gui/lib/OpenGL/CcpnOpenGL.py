@@ -55,7 +55,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-03-30 15:15:03 +0100 (Mon, March 30, 2020) $"
+__dateModified__ = "$dateModified: 2020-03-31 23:20:38 +0100 (Tue, March 31, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -4945,12 +4945,14 @@ class CcpnGLWidget(QOpenGLWidget):
     def drawMouseCoords(self):
         if self.underMouse():  # and self.mouseString:
             self.buildMouseCoords()
-            # draw the mouse coordinates to the screen
-            self.mouseString.drawTextArrayVBO(enableVBO=True)
 
-            # NOTE:ED - moved into mouseString for easier clipping to the window
-            # if self._drawDeltaOffset and self.diffMouseString:
-            #     self.diffMouseString.drawTextArrayVBO(enableVBO=True)
+            if self.mouseString is not None:
+                # draw the mouse coordinates to the screen
+                self.mouseString.drawTextArrayVBO(enableVBO=True)
+
+                # NOTE:ED - moved into mouseString for easier clipping to the window
+                # if self._drawDeltaOffset and self.diffMouseString:
+                #     self.diffMouseString.drawTextArrayVBO(enableVBO=True)
 
     def drawSelectionBox(self):
         # should really use the proper VBOs for this

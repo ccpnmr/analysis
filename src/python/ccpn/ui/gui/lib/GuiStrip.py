@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-03-31 16:07:19 +0100 (Tue, March 31, 2020) $"
+__dateModified__ = "$dateModified: 2020-03-31 23:20:38 +0100 (Tue, March 31, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -697,19 +697,28 @@ class GuiStrip(Frame):
                             self._createCommonMenuItem(currentStrip, includeAxisCodes, label, menuFunc, perm, position, strip)
 
                         if not permutationList:
-                            showPos = []
-                            navigatePos = []
-                            navigateAxes = []
-                            for jj, ii in enumerate(indices):
-                                if ii is not None and len(ii) > 0:
-                                    showPos.append(position[ii[0]])
-                                    navigatePos.append(position[ii[0]])
-                                    navigateAxes.append(strip.axisCodes[jj])
-                                else:
-                                    showPos.append(' - ')
 
-                            self._createMenuItemForNavigate(currentStrip, navigateAxes, navigatePos, showPos, strip, menuFunc, label,
-                                                            includeAxisCodes=includeAxisCodes)
+                            perm = list(getAxisCodeMatchIndices(strip.axisCodes, axisCodes, allMatches=False))
+                            # self._createCommonMenuItem(currentStrip, includeAxisCodes, label, menuFunc, perm, position, strip)
+
+                            # replace doubles/triples with permutations of number/None
+                            from collections import Counter
+                            from itertools import product
+
+                            maxIndexList = Counter(perm).most_common(1)
+                            if maxIndexList:
+                                index, maxCount = maxIndexList[0]
+                                if index is not None:
+
+                                    # iterate through all permutations of index/None
+                                    combiList = [list(i) for i in product([None, index], repeat=maxCount)]
+                                    indices = [ii for ii in range(len(perm)) if perm[ii] == index]
+
+                                    for combi in combiList[1:]:
+                                        for ind, val in zip(indices, combi):
+                                            perm[ind] = val
+
+                                        self._createCommonMenuItem(currentStrip, includeAxisCodes, label, menuFunc, perm, position, strip)
 
                 menuFunc.addSeparator()
         else:

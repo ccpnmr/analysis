@@ -803,7 +803,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
         self.showDoubleCrosshairBox.toggled.connect(partial(self._queueToggleGeneralOptions, 'showDoubleCrosshair'))
 
         row += 1
-        self.showGridLabel = Label(parent, text="Show SpinningRate SideBands: ", grid=(row, 0))
+        self.showGridLabel = Label(parent, text="Show MAS Side Bands: ", grid=(row, 0))
         self.showGridBox = CheckBox(parent, grid=(row, 1))  #, checked=self.preferences.general.showGrid)
         self.showGridBox.toggled.connect(partial(self._queueToggleGeneralOptions, 'showSideBands'))
 
@@ -983,7 +983,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
 
         row += 1
         # numSideBands = self.preferences.general.numSideBands
-        self.showSideBands = Label(parent, text='Number of SpinningRate SideBands:', grid=(row, 0), hAlign='l')
+        self.showSideBands = Label(parent, text='Number of MAS side bands shown:', grid=(row, 0), hAlign='l')
         self.showSideBandsData = DoubleSpinbox(parent, step=1, min=0, max=25, grid=(row, 1), hAlign='l', decimals=0)
         # self.showSideBandsData.setValue(int(numSideBands))
         self.showSideBandsData.setMinimumWidth(LineEditsMinimumWidth)

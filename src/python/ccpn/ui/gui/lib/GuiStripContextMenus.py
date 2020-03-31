@@ -138,8 +138,8 @@ def _gridItem(strip):
 
 
 def _sideBandsItem(strip):
-    return _SCMitem(name='SpinningRate sideBands',
-                    typeItem=ItemTypes.get(ITEM), toolTip='Toggle sideBands On/Off', callback=strip.spectrumDisplay.toggleSideBands,
+    return _SCMitem(name='Show MAS Side Bands',
+                    typeItem=ItemTypes.get(ITEM), toolTip='Toggle MAS Side Bands On/Off', callback=strip.spectrumDisplay.toggleSideBands,
                     checkable=True, checked=True, stripMethodName='sideBandsAction')
 
 

@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-03-30 09:47:20 +0100 (Mon, March 30, 2020) $"
+__dateModified__ = "$dateModified: 2020-03-31 16:07:19 +0100 (Tue, March 31, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -627,6 +627,20 @@ class GuiStrip(Frame):
                                                              axisCodes=navigateAxes, ),
                                             toolTip=toolTip)
 
+    def _createCommonMenuItem(self, currentStrip, includeAxisCodes, label, menuFunc, perm, position, strip):
+        showPos = []
+        navigatePos = []
+        navigateAxes = []
+        for jj, ii in enumerate(perm):
+            if ii is not None:
+                showPos.append(position[ii])
+                navigatePos.append(position[ii])
+                navigateAxes.append(strip.axisCodes[jj])
+            else:
+                showPos.append(' - ')
+        self._createMenuItemForNavigate(currentStrip, navigateAxes, navigatePos, showPos, strip, menuFunc, label,
+                                        includeAxisCodes=includeAxisCodes)
+
     def _addItemsToNavigateMenu(self, position, axisCodes, label, menuFunc, includeAxisCodes=True):
         """Adds item to navigate to section of context menu.
         """
@@ -644,6 +658,28 @@ class GuiStrip(Frame):
 
             for spectrumDisplay in self.current.project.spectrumDisplays:
                 for strip in spectrumDisplay.strips:
+                    if strip == currentStrip:
+
+                        # add the opposite diagonal if first two axes are same isotopeCode
+                        # this shouldn't really be in openGL
+                        if self._CcpnGLWidget._matchingIsotopeCodes:
+
+                            try:
+                                # flip the first two axes, easy to do it here
+                                flipAxisCodes = [strip.axisCodes[1], strip.axisCodes[0]] + list(strip.axisCodes[2:])
+
+                                # get a list of all isotope code matches for each axis code in 'strip' matched to the flipped axes
+                                perm = getAxisCodeMatchIndices(flipAxisCodes, axisCodes, allMatches=False)
+
+                                self._createCommonMenuItem(currentStrip, includeAxisCodes, label, menuFunc, perm, position, strip)
+                                menuFunc.addSeparator()
+
+                            except Exception as es:
+                                # just skip if an error (but there shouldn't be any here)
+                                pass
+
+            for spectrumDisplay in self.current.project.spectrumDisplays:
+                for strip in spectrumDisplay.strips:
                     if strip != currentStrip:
 
                         # get a list of all isotope code matches for each axis code in 'strip'
@@ -658,18 +694,7 @@ class GuiStrip(Frame):
                         # each element is list of indices to fetch from currentStrip and map to strip
 
                         for perm in permutationList:
-                            showPos = []
-                            navigatePos = []
-                            navigateAxes = []
-                            for jj, ii in enumerate(perm):
-                                if ii is not None:
-                                    showPos.append(position[ii])
-                                    navigatePos.append(position[ii])
-                                    navigateAxes.append(strip.axisCodes[jj])
-                                else:
-                                    showPos.append(' - ')
-
-                            self._createMenuItemForNavigate(currentStrip, navigateAxes, navigatePos, showPos, strip, menuFunc, label, includeAxisCodes=includeAxisCodes)
+                            self._createCommonMenuItem(currentStrip, includeAxisCodes, label, menuFunc, perm, position, strip)
 
                         if not permutationList:
                             showPos = []
@@ -683,7 +708,8 @@ class GuiStrip(Frame):
                                 else:
                                     showPos.append(' - ')
 
-                            self._createMenuItemForNavigate(currentStrip, navigateAxes, navigatePos, showPos, strip, menuFunc, label, includeAxisCodes=includeAxisCodes)
+                            self._createMenuItemForNavigate(currentStrip, navigateAxes, navigatePos, showPos, strip, menuFunc, label,
+                                                            includeAxisCodes=includeAxisCodes)
 
                 menuFunc.addSeparator()
         else:

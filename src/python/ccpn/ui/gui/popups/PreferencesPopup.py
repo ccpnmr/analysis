@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-04-01 16:10:34 +0100 (Wed, April 01, 2020) $"
+__dateModified__ = "$dateModified: 2020-04-01 16:35:55 +0100 (Wed, April 01, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -242,23 +242,24 @@ class PreferencesPopup(CcpnDialogMainWidget):
             # check whether the colourScheme needs updating
             _changeColour = self.preferences.general.colourScheme != lastPrefs.general.colourScheme
             _changeUserWorkingPath = self.preferences.general.userWorkingPath != lastPrefs.general.userWorkingPath
-            _lastUserWorkingPathPath = FileDialog._lastUserWorkingPath
-            _newUserWorkingPathPath = self.preferences.general.userWorkingPath
+            _lastUserWorkingPath = FileDialog._lastUserWorkingPath
+            _newUserWorkingPath = self.preferences.general.userWorkingPath
+            print('>>> paths:', _newUserWorkingPath, _lastUserWorkingPath)
 
             # add an undo item to update settings
             with undoStackBlocking() as addUndoItem:
                 addUndoItem(undo=partial(_updateSettings, self, lastPrefs, _changeColour, applyToSDs,
-                                         _lastUserWorkingPathPath if _changeUserWorkingPath else None))
+                                         _lastUserWorkingPath if _changeUserWorkingPath else None))
 
             # remember the new state - between addUndoItems because it may append to the undo stack
             newPrefs = deepcopy(self.preferences)
             _updateSettings(self, newPrefs, _changeColour, applyToSDs,
-                            _newUserWorkingPathPath if _changeUserWorkingPath else None)
+                            _newUserWorkingPath if _changeUserWorkingPath else None)
 
             # add a redo item to update settings
             with undoStackBlocking() as addUndoItem:
                 addUndoItem(redo=partial(_updateSettings, self, newPrefs, _changeColour, applyToSDs,
-                                         _newUserWorkingPathPath if _changeUserWorkingPath else None))
+                                         _newUserWorkingPath if _changeUserWorkingPath else None))
 
             # everything has happened - disable the apply button
             self._applyButton.setEnabled(False)

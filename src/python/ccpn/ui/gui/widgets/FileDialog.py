@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-04-01 16:10:34 +0100 (Wed, April 01, 2020) $"
+__dateModified__ = "$dateModified: 2020-04-01 16:35:55 +0100 (Wed, April 01, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -55,12 +55,14 @@ class FileDialog(QtWidgets.QFileDialog):
         # EJB - added _lastUserWorkingPath to store current directory
         if directory is None:
             # set the current working path if this is the first time the dialog has been opened
-            if not FileDialog._lastUserWorkingPath:
+            if not FileDialog._lastUserWorkingPath and preferences:
                 FileDialog._lastUserWorkingPath = preferences.userWorkingPath
 
             directory = str(aPath(FileDialog._lastUserWorkingPath or '~'))
+            self._setDirectory = False
         else:
             directory = str(aPath(directory))
+            self._setDirectory = True
 
         QtWidgets.QFileDialog.__init__(self, parent, caption=text, directory=directory, **kwds)
 
@@ -140,9 +142,11 @@ class FileDialog(QtWidgets.QFileDialog):
             self.result = self.exec_()
 
     def accept(self):
-        # accept the dialopg and set the current selected folder for next time
-        absPath = self.directory().absolutePath()
-        FileDialog._lastUserWorkingPath = absPath
+        if not self._setDirectory:
+            # accept the dialog and set the current selected folder for next time if directory not originally set
+            absPath = self.directory().absolutePath()
+            FileDialog._lastUserWorkingPath = absPath
+            print('>>> setting file dialog path:', absPath)
         super(FileDialog, self).accept()
 
     def reject(self):

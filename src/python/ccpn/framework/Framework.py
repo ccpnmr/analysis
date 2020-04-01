@@ -11,7 +11,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-03-30 15:15:02 +0100 (Mon, March 30, 2020) $"
+__dateModified__ = "$dateModified: 2020-04-01 16:35:55 +0100 (Wed, April 01, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -1685,10 +1685,12 @@ class Framework(NotifierBase):
                                                                ' Do you want to open all?' % str(len(spectraPaths)))
             if not okToOpenAll:
                 return
-        with undoBlock():
-            with notificationEchoBlocking():
-                for spectrumPath in tqdm(spectraPaths):
-                    self.project.loadData(str(spectrumPath))
+
+        if spectraPaths:
+            with undoBlock():
+                with notificationEchoBlocking():
+                    for spectrumPath in tqdm(spectraPaths):
+                        self.project.loadData(str(spectrumPath))
 
     def loadData(self, paths=None, text=None, filter=None):
         """

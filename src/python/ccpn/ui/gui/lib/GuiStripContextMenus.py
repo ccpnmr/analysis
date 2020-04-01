@@ -18,7 +18,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-03-30 15:15:02 +0100 (Mon, March 30, 2020) $"
+__dateModified__ = "$dateModified: 2020-04-01 17:01:30 +0100 (Wed, April 01, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -138,8 +138,8 @@ def _gridItem(strip):
 
 
 def _sideBandsItem(strip):
-    return _SCMitem(name='SpinningRate sideBands',
-                    typeItem=ItemTypes.get(ITEM), toolTip='Toggle sideBands On/Off', callback=strip.spectrumDisplay.toggleSideBands,
+    return _SCMitem(name='Show MAS Side Bands',
+                    typeItem=ItemTypes.get(ITEM), toolTip='Toggle MAS Side Bands On/Off', callback=strip.spectrumDisplay.toggleSideBands,
                     checkable=True, checked=True, stripMethodName='sideBandsAction')
 
 

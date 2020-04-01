@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-04-01 16:35:55 +0100 (Wed, April 01, 2020) $"
+__dateModified__ = "$dateModified: 2020-04-01 17:01:30 +0100 (Wed, April 01, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -816,7 +816,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
         self.showDoubleCrosshairBox.toggled.connect(partial(self._queueToggleGeneralOptions, 'showDoubleCrosshair'))
 
         row += 1
-        self.showSideBandsLabel = Label(parent, text="Show SpinningRate SideBands: ", grid=(row, 0))
+        self.showSideBandsLabel = Label(parent, text="Show MAS Side Bands: ", grid=(row, 0))
         self.showSideBandsBox = CheckBox(parent, grid=(row, 1))  #, checked=self.preferences.general.showGrid)
         self.showSideBandsBox.toggled.connect(partial(self._queueToggleGeneralOptions, 'showSideBands'))
 
@@ -996,7 +996,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
 
         row += 1
         # numSideBands = self.preferences.general.numSideBands
-        self.showSideBands = Label(parent, text='Number of SpinningRate SideBands:', grid=(row, 0), hAlign='l')
+        self.showSideBands = Label(parent, text='Number of MAS side bands shown:', grid=(row, 0), hAlign='l')
         self.showSideBandsData = DoubleSpinbox(parent, step=1, min=0, max=25, grid=(row, 1), hAlign='l', decimals=0)
         # self.showSideBandsData.setValue(int(numSideBands))
         self.showSideBandsData.setMinimumWidth(LineEditsMinimumWidth)

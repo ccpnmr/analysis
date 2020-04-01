@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-03-31 23:28:25 +0100 (Tue, March 31, 2020) $"
+__dateModified__ = "$dateModified: 2020-04-01 12:30:55 +0100 (Wed, April 01, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -620,12 +620,15 @@ class GuiStrip(Frame):
 
         text = '%s (%s)' % (strip.pid, item)
         toolTip = 'Show cursor in strip %s at %s position (%s)' % (str(strip.id), label, item)
-        if len(list(set(strip.axisCodes) & set(currentStrip.axisCodes))) <= 4:
+        if len(list(set(strip.axisCodes) & set(currentStrip.axisCodes))) > 0:
             menuFunc.addItem(text=text,
-                                            callback=partial(navigateToPositionInStrip, strip=strip,
-                                                             positions=navigatePos,
-                                                             axisCodes=navigateAxes, ),
-                                            toolTip=toolTip)
+                             callback=partial(navigateToPositionInStrip, strip=strip,
+                                              positions=navigatePos,
+                                              axisCodes=navigateAxes, ),
+                             toolTip=toolTip)
+
+        else:
+            print('>>>skip axisCodes', strip.axisCodes, currentStrip.axisCodes)
 
     def _createCommonMenuItem(self, currentStrip, includeAxisCodes, label, menuFunc, perm, position, strip):
         showPos = []
@@ -656,27 +659,42 @@ class GuiStrip(Frame):
         if len(self.current.project.spectrumDisplays) > 0:
             menuFunc.setEnabled(True)
 
+            # matchingItemAdded = False
             for spectrumDisplay in self.current.project.spectrumDisplays:
                 for strip in spectrumDisplay.strips:
+
+                    # add the opposite diagonals for matching axisCodes - always at the top of the list
                     if strip == currentStrip:
 
-                        # add the opposite diagonal if first two axes are same isotopeCode
-                        # this shouldn't really be in openGL
-                        if self._CcpnGLWidget._matchingIsotopeCodes:
+                        indices = getAxisCodeMatchIndices(strip.axisCodes, axisCodes, allMatches=False)
+                        allIndices = getAxisCodeMatchIndices(strip.axisCodes, axisCodes, allMatches=True)
+                        permutationList1 = [jj for jj in product(*(ii if ii else (None,) for ii in allIndices)) if len(set(jj)) == len(strip.axisCodes)]
+                        for perm in permutationList1:
 
-                            try:
-                                # flip the first two axes, easy to do it here
-                                flipAxisCodes = [strip.axisCodes[1], strip.axisCodes[0]] + list(strip.axisCodes[2:])
-
-                                # get a list of all isotope code matches for each axis code in 'strip' matched to the flipped axes
-                                perm = getAxisCodeMatchIndices(flipAxisCodes, axisCodes, allMatches=False)
-
+                            # skip any that match the original indexing
+                            if any(ii != jj for ii, jj in zip(perm, indices)):
                                 self._createCommonMenuItem(currentStrip, includeAxisCodes, label, menuFunc, perm, position, strip)
-                                menuFunc.addSeparator()
+                        menuFunc.addSeparator()
 
-                            except Exception as es:
-                                # just skip if an error (but there shouldn't be any here)
-                                pass
+                        # try:
+                        #     # flip the first two axes, easy to do it here
+                        #     flipAxisCodes = [strip.axisCodes[1], strip.axisCodes[0]] + list(strip.axisCodes[2:])
+                        #
+                        #     # get a list of all isotope code matches for each axis code in 'strip' matched to the flipped axes
+                        #     perm = getAxisCodeMatchIndices(flipAxisCodes, axisCodes, allMatches=False)
+                        #
+                        #     self._createCommonMenuItem(currentStrip, includeAxisCodes, label, menuFunc, perm, position, strip)
+                        #     menuFunc.addSeparator()
+                        #     # matchingItemAdded = True
+                        #
+                        # except Exception as es:
+                        #     # just skip if an error (but there shouldn't be any here)
+                        #     pass
+
+            # if not matchingItemAdded:
+            #     print('>>> skipping menuitem')
+            #     menuFunc.addItem(text='Skip matching isotopeCodes')
+            #     menuFunc.addSeparator()
 
             for spectrumDisplay in self.current.project.spectrumDisplays:
                 for strip in spectrumDisplay.strips:
@@ -686,17 +704,24 @@ class GuiStrip(Frame):
                         indices = getAxisCodeMatchIndices(strip.axisCodes, axisCodes, allMatches=True)
 
                         # generate a permutation list of the axis codes that have unique indices
-                        # permutationList = [jj for jj in product(*indices) if len(set(jj)) == len(jj)]
-
-                        permutationList = [jj for jj in product(*(ii if ii else (None,) for ii in indices)) if len(set(jj)) == len(jj)]
-
                         # permutation list is list of tuples
                         # each element is list of indices to fetch from currentStrip and map to strip
 
-                        for perm in permutationList:
-                            self._createCommonMenuItem(currentStrip, includeAxisCodes, label, menuFunc, perm, position, strip)
+                        # permutationList1 = [jj for jj in product(*(ii if ii else (None,) for ii in indices)) if len(set(jj)) == len(strip.axisCodes)]
+                        permutationList1 = [jj for jj in product(*(ii if ii else (None,) for ii in indices))]   # if len(set(jj)) == len(strip.axisCodes)]
 
-                        if not permutationList:
+                        # print('>>>', strip.pid, indices)
+                        for perm in permutationList1:
+                            perm2 = [pp if pp is not None else -(cc+1) for cc, pp in enumerate(perm)]
+                            # print('>>>    ', perm, perm2)
+
+                            if len(set(perm2)) == len(perm2):       # ignore None's
+                                self._createCommonMenuItem(currentStrip, includeAxisCodes, label, menuFunc, perm, position, strip)
+
+                        # menuFunc.addItem(text=' - ')
+
+                        permutationList2 = [jj for jj in product(*(ii if ii else (None,) for ii in indices)) if len(set(jj)) == len(jj)]
+                        if not permutationList2:
 
                             perm = list(getAxisCodeMatchIndices(strip.axisCodes, axisCodes, allMatches=False))
 
@@ -712,6 +737,7 @@ class GuiStrip(Frame):
                                     combiList = [list(i) for i in product([None, index], repeat=maxCount)]
                                     indices = [ii for ii in range(len(perm)) if perm[ii] == index]
 
+                                    # add all permutations except first (all unset)
                                     for combi in combiList[1:]:
                                         for ind, val in zip(indices, combi):
                                             perm[ind] = val

@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-03-27 14:49:41 +0000 (Fri, March 27, 2020) $"
+__dateModified__ = "$dateModified: 2020-04-01 16:10:34 +0100 (Wed, April 01, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -58,6 +58,7 @@ from ccpn.ui.gui.popups.ValidateSpectraPopup import ValidateSpectraForPreference
 from ccpn.ui.gui.popups.Dialog import CcpnDialogMainWidget
 from ccpn.core.lib.ContextManagers import queueStateChange, undoStackBlocking
 from ccpn.ui.gui.widgets.PlaneToolbar import EMITSOURCE, EMITCLICKED, EMITIGNORESOURCE
+from ccpn.ui.gui.widgets.FileDialog import FileDialog
 
 
 PEAKFITTINGDEFAULTS = [PARABOLICMETHOD, GAUSSIANMETHOD]
@@ -74,12 +75,16 @@ TABMARGINS = (1, 10, 10, 1)  # l, t, r, b
 ZEROMARGINS = (0, 0, 0, 0)  # l, t, r, b
 
 
-def _updateSettings(self, newPrefs, updateColourScheme, updateSpectrumDisplays):
+def _updateSettings(self, newPrefs, updateColourScheme, updateSpectrumDisplays, userWorkingPath=None):
     from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
 
     self.application.preferences = newPrefs
     # application preferences updated so re-save
     self.application._savePreferences()
+
+    # update the current userWorkingPath in the active file dialogs
+    if userWorkingPath:
+        FileDialog._lastUserWorkingPath = userWorkingPath
 
     self._updateDisplay(updateColourScheme, updateSpectrumDisplays)
 
@@ -236,18 +241,24 @@ class PreferencesPopup(CcpnDialogMainWidget):
 
             # check whether the colourScheme needs updating
             _changeColour = self.preferences.general.colourScheme != lastPrefs.general.colourScheme
+            _changeUserWorkingPath = self.preferences.general.userWorkingPath != lastPrefs.general.userWorkingPath
+            _lastUserWorkingPathPath = FileDialog._lastUserWorkingPath
+            _newUserWorkingPathPath = self.preferences.general.userWorkingPath
 
             # add an undo item to update settings
             with undoStackBlocking() as addUndoItem:
-                addUndoItem(undo=partial(_updateSettings, self, lastPrefs, _changeColour, applyToSDs))
+                addUndoItem(undo=partial(_updateSettings, self, lastPrefs, _changeColour, applyToSDs,
+                                         _lastUserWorkingPathPath if _changeUserWorkingPath else None))
 
             # remember the new state - between addUndoItems because it may append to the undo stack
             newPrefs = deepcopy(self.preferences)
-            _updateSettings(self, newPrefs, _changeColour, applyToSDs)
+            _updateSettings(self, newPrefs, _changeColour, applyToSDs,
+                            _newUserWorkingPathPath if _changeUserWorkingPath else None)
 
             # add a redo item to update settings
             with undoStackBlocking() as addUndoItem:
-                addUndoItem(redo=partial(_updateSettings, self, newPrefs, _changeColour, applyToSDs))
+                addUndoItem(redo=partial(_updateSettings, self, newPrefs, _changeColour, applyToSDs,
+                                         _newUserWorkingPathPath if _changeUserWorkingPath else None))
 
             # everything has happened - disable the apply button
             self._applyButton.setEnabled(False)
@@ -598,6 +609,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
         self.showGridBox.setChecked(self.preferences.general.showGrid)
         self.showCrosshairBox.setChecked(self.preferences.general.showCrosshair)
         self.showDoubleCrosshairBox.setChecked(self.preferences.general.showDoubleCrosshair)
+        self.showSideBandsBox.setChecked(self.preferences.general.showSideBands)
         self.showLastAxisOnlyBox.setChecked(self.preferences.general.lastAxisOnly)
         self.matchAxisCode.setIndex(self.preferences.general.matchAxisCode)
         self.axisOrderingOptions.setIndex(self.preferences.general.axisOrderingOptions)
@@ -803,9 +815,9 @@ class PreferencesPopup(CcpnDialogMainWidget):
         self.showDoubleCrosshairBox.toggled.connect(partial(self._queueToggleGeneralOptions, 'showDoubleCrosshair'))
 
         row += 1
-        self.showGridLabel = Label(parent, text="Show SpinningRate SideBands: ", grid=(row, 0))
-        self.showGridBox = CheckBox(parent, grid=(row, 1))  #, checked=self.preferences.general.showGrid)
-        self.showGridBox.toggled.connect(partial(self._queueToggleGeneralOptions, 'showSideBands'))
+        self.showSideBandsLabel = Label(parent, text="Show SpinningRate SideBands: ", grid=(row, 0))
+        self.showSideBandsBox = CheckBox(parent, grid=(row, 1))  #, checked=self.preferences.general.showGrid)
+        self.showSideBandsBox.toggled.connect(partial(self._queueToggleGeneralOptions, 'showSideBands'))
 
         row += 1
         self.showLastAxisOnlyLabel = Label(parent, text="Share Y Axis: ", grid=(row, 0))
@@ -1229,7 +1241,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
                             preferences=self.preferences.general)
         directory = dialog.selectedFiles()
         if directory:
-            self.userWorkingData.setText(directory[0])
+            self.userWorkingPathData.setText(directory[0])
             # self._setUserWorkingPath()
             # self.preferences.general.userWorkingPath = directory[0]
 

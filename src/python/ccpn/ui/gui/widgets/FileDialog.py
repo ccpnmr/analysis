@@ -4,7 +4,7 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2019-12-05 09:40:40 +0000 (Thu, December 05, 2019) $"
-__version__ = "$Revision: 3.0.0 $"
+__dateModified__ = "$dateModified: 2020-04-01 16:10:34 +0100 (Wed, April 01, 2020) $"
+__version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -40,6 +40,8 @@ class FileDialog(QtWidgets.QFileDialog):
     # def __init__(self, parent=None, fileMode=QtWidgets.QFileDialog.AnyFile, text=None,
     #              acceptMode=QtWidgets.QFileDialog.AcceptOpen, preferences=None, **kwds):
 
+    _lastUserWorkingPath = None
+
     def __init__(self, parent=None, fileMode=QtWidgets.QFileDialog.AnyFile, text=None,
                  acceptMode=QtWidgets.QFileDialog.AcceptOpen, preferences=None,
                  selectFile=None, filter=None, directory=None,
@@ -50,8 +52,13 @@ class FileDialog(QtWidgets.QFileDialog):
         #       this is not passed to the super class
 
         # GWV - added default directory and path expansion
+        # EJB - added _lastUserWorkingPath to store current directory
         if directory is None:
-            directory = str(aPath('~'))
+            # set the current working path if this is the first time the dialog has been opened
+            if not FileDialog._lastUserWorkingPath:
+                FileDialog._lastUserWorkingPath = preferences.userWorkingPath
+
+            directory = str(aPath(FileDialog._lastUserWorkingPath or '~'))
         else:
             directory = str(aPath(directory))
 
@@ -131,6 +138,12 @@ class FileDialog(QtWidgets.QFileDialog):
                     self.openBtn[0].clicked.connect(self._openClicked)
 
             self.result = self.exec_()
+
+    def accept(self):
+        # accept the dialopg and set the current selected folder for next time
+        absPath = self.directory().absolutePath()
+        FileDialog._lastUserWorkingPath = absPath
+        super(FileDialog, self).accept()
 
     def reject(self):
         self.selectedFiles = lambda : None # needs to clear the selection when closing

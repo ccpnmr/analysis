@@ -53,12 +53,12 @@
             "intensity" : 10000000
         },
         "_baseAspectRatioAxisCode"             : "H",
-        "searchBoxMode"                        : true,
-        "searchBoxDoFit"                       : true,
+        "searchBoxMode"                        : false,
+        "searchBoxDoFit"                       : false,
         "searchBoxWidthsNd"                    : {
-            "H"         : 0.15,
-            "N"         : 0.6,
-            "C"         : 2.4
+            "H"         : 0.3,
+            "N"         : 0.2,
+            "C"         : 0.5
         },
         "searchBoxWidths1d"                    : {
             "H"         : 0.02,

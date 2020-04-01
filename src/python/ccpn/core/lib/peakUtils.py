@@ -11,7 +11,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-04-01 14:03:21 +0100 (Wed, April 01, 2020) $"
+__dateModified__ = "$dateModified: 2020-04-01 15:01:23 +0100 (Wed, April 01, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -824,7 +824,11 @@ def snapToExtremum(peak: 'Peak', halfBoxSearchWidth: int = 3, halfBoxFitWidth: i
             if linewidth and len(linewidth) > i:
                 peakDim.lineWidth = dataDims[i].valuePerPoint * linewidth[i]
 
-        apiPeak.height = dataSource.scale * height
+        if searchBoxDoFit:
+            apiPeak.height = dataSource.scale * height
+        else:
+            # get the interpolated height
+            peak.height = peak.peakList.spectrum.getHeight(peak.ppmPositions)
 
 
 def getSpectrumData(peak: 'Peak', halfBoxWidth: int = 3):
@@ -952,12 +956,12 @@ def _findPeakHeight(peak):
             # now do a fit at this position
 
 
-def movePeak(peak, position, updateHeight=True):
+def movePeak(peak, ppmPositions, updateHeight=True):
     """Move a peak based on it's delta shift and opionally update to the height at the new position
     """
     with undoBlock():
-        peak.position = position
+        peak.position = ppmPositions
 
         if updateHeight:
             # get the interpolated height at this position
-            peak.height = peak.peakList.spectrum.getHeight(position)
+            peak.height = peak.peakList.spectrum.getHeight(ppmPositions)

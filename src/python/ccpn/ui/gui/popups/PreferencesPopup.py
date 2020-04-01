@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-04-01 17:01:30 +0100 (Wed, April 01, 2020) $"
+__dateModified__ = "$dateModified: 2020-04-01 17:08:08 +0100 (Wed, April 01, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -244,7 +244,6 @@ class PreferencesPopup(CcpnDialogMainWidget):
             _changeUserWorkingPath = self.preferences.general.userWorkingPath != lastPrefs.general.userWorkingPath
             _lastUserWorkingPath = FileDialog._lastUserWorkingPath
             _newUserWorkingPath = self.preferences.general.userWorkingPath
-            print('>>> paths:', _newUserWorkingPath, _lastUserWorkingPath)
 
             # add an undo item to update settings
             with undoStackBlocking() as addUndoItem:
@@ -811,7 +810,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
         self.showCrosshairBox.toggled.connect(partial(self._queueToggleGeneralOptions, 'showCrosshair'))
 
         row += 1
-        self.showDoubleCrosshairLabel = Label(parent, text="    - and Double Crosshairs: ", grid=(row, 0))
+        self.showDoubleCrosshairLabel = Label(parent, text="    and Double Crosshairs: ", grid=(row, 0))
         self.showDoubleCrosshairBox = CheckBox(parent, grid=(row, 1))  #, checked=self.preferences.general.showDoubleCrosshair)
         self.showDoubleCrosshairBox.toggled.connect(partial(self._queueToggleGeneralOptions, 'showDoubleCrosshair'))
 
@@ -819,6 +818,14 @@ class PreferencesPopup(CcpnDialogMainWidget):
         self.showSideBandsLabel = Label(parent, text="Show MAS Side Bands: ", grid=(row, 0))
         self.showSideBandsBox = CheckBox(parent, grid=(row, 1))  #, checked=self.preferences.general.showGrid)
         self.showSideBandsBox.toggled.connect(partial(self._queueToggleGeneralOptions, 'showSideBands'))
+
+        row += 1
+        # numSideBands = self.preferences.general.numSideBands
+        self.showSideBands = Label(parent, text='    number of MAS side bands shown:', grid=(row, 0), hAlign='l')
+        self.showSideBandsData = DoubleSpinbox(parent, step=1, min=0, max=25, grid=(row, 1), hAlign='l', decimals=0)
+        # self.showSideBandsData.setValue(int(numSideBands))
+        self.showSideBandsData.setMinimumWidth(LineEditsMinimumWidth)
+        self.showSideBandsData.valueChanged.connect(self._queueSetNumSideBands)
 
         row += 1
         self.showLastAxisOnlyLabel = Label(parent, text="Share Y Axis: ", grid=(row, 0))
@@ -990,17 +997,6 @@ class PreferencesPopup(CcpnDialogMainWidget):
         #     self.aspectData[aspect].setMinimumWidth(LineEditsMinimumWidth)
         #     self.aspectData[aspect].valueChanged.connect(partial(self._queueSetAspect, aspect))
         #     row += 1
-
-        row += 1
-        HLine(parent, grid=(row, 0), gridSpan=(1, 3), colour=getColours()[DIVIDER], height=15)
-
-        row += 1
-        # numSideBands = self.preferences.general.numSideBands
-        self.showSideBands = Label(parent, text='Number of MAS side bands shown:', grid=(row, 0), hAlign='l')
-        self.showSideBandsData = DoubleSpinbox(parent, step=1, min=0, max=25, grid=(row, 1), hAlign='l', decimals=0)
-        # self.showSideBandsData.setValue(int(numSideBands))
-        self.showSideBandsData.setMinimumWidth(LineEditsMinimumWidth)
-        self.showSideBandsData.valueChanged.connect(self._queueSetNumSideBands)
 
         row += 1
         HLine(parent, grid=(row, 0), gridSpan=(1, 3), colour=getColours()[DIVIDER], height=15)

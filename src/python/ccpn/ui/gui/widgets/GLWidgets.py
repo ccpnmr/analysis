@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-03-24 18:57:00 +0000 (Tue, March 24, 2020) $"
+__dateModified__ = "$dateModified: 2020-04-01 14:03:21 +0100 (Wed, April 01, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -44,7 +44,7 @@ from ccpn.util.Constants import AXIS_FULLATOMNAME, AXIS_MATCHATOMTYPE, AXIS_ACTI
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
 from ccpn.ui.gui.lib.OpenGL import CcpnOpenGLDefs as GLDefs
 from ccpn.util.Logging import getLogger
-
+from ccpn.core.lib.peakUtils import movePeak
 
 try:
     from OpenGL import GL, GLU, GLUT
@@ -261,7 +261,7 @@ class GuiNdWidget(CcpnGLWidget):
             if ind is not None:
                 p0[ind] += deltaPosition[ii]
 
-        peak.position = p0
+        movePeak(peak, p0, updateHeight=True)
 
 
 class Gui1dWidget(CcpnGLWidget):

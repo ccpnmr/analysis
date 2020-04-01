@@ -11,7 +11,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-03-30 15:15:02 +0100 (Mon, March 30, 2020) $"
+__dateModified__ = "$dateModified: 2020-04-01 14:03:21 +0100 (Wed, April 01, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -29,6 +29,7 @@ from collections import OrderedDict
 from scipy.optimize import curve_fit
 from ccpn.core.PeakList import GAUSSIANMETHOD, PARABOLICMETHOD
 from ccpn.util.Common import makeIterableList
+from ccpn.core.lib.ContextManagers import undoBlock
 import pandas as pd
 
 
@@ -668,8 +669,9 @@ def snapToExtremum(peak: 'Peak', halfBoxSearchWidth: int = 3, halfBoxFitWidth: i
             dataDim = peakDim.dataDim
             if dataDim.className == 'FreqDataDim':
 
-                halfBoxWidth = dataDim.numPoints / 100  # a bit of a hack from V2
-                boxWidths.append(max(halfBoxWidth, 1))
+                peakBoxWidth = peakDim.boxWidth or 1
+                halfBoxWidth = dataDim.numPoints / 100  # a bit of a hack copied from V2
+                boxWidths.append(max(halfBoxWidth, 1, int(peakBoxWidth / 2)))
 
                 # from V2 - seems to give individual boxWidths per peak
                 # boxWidth = peakDim.boxWidth
@@ -681,6 +683,8 @@ def snapToExtremum(peak: 'Peak', halfBoxSearchWidth: int = 3, halfBoxFitWidth: i
                 # last[i] = min(dataDim.numPoints, int(math.ceil(position[i] + 1 + halfBoxWidth)))
                 # buff[i] = buf
             else:
+
+                # NOTE:ED - check this with v2
                 boxWidths.append(max(1, halfBoxSearchWidth or 1))
 
                 # first[i] = max(0, int(math.floor(position[i] + 0.5)))
@@ -783,7 +787,12 @@ def snapToExtremum(peak: 'Peak', halfBoxSearchWidth: int = 3, halfBoxFitWidth: i
             else:
                 method = 0 if fitMethod == GAUSSIANMETHOD else 1
 
-                # fit all peaks in one operation
+                # use the halfBoxFitWidth to give a close fit
+                firstArray = np.maximum(peakArray[0] - halfBoxFitWidth, regionArray[0])
+                lastArray = np.minimum(peakArray[0] + halfBoxFitWidth + 1, regionArray[1])
+                regionArray = np.array((firstArray, lastArray), dtype=np.int32)
+
+                # fit the single peak
                 result = CPeak.fitPeaks(dataArray, regionArray, peakArray, method)
         else:
             # take the maxima
@@ -910,3 +919,45 @@ def estimateVolumes(peaks: Sequence[Union[str, 'Peak']], volumeIntegralLimit=2.0
             pp.estimateVolume(volumeIntegralLimit=volumeIntegralLimit)
         else:
             getLogger().warning('Peak %s contains undefined height/lineWidths' % str(pp))
+
+
+def _findPeakHeight(peak):
+    """may need this later
+    """
+    spectrum = peak.peakList.spectrum
+    dataSource = spectrum._apiDataSource
+    numDim = dataSource.numDim
+
+    exclusionBuffer = [1] * numDim
+    valuesPerPoint = spectrum.valuesPerPoint
+    regionToPick = dict((code, (pos-value/2, pos+value/2)) for code, pos, value in zip(spectrum.axisCodes, peak.position, valuesPerPoint))
+
+    foundRegions = spectrum.getRegionData(exclusionBuffer, minimumDimensionSize=0, **regionToPick)
+
+    if not foundRegions:
+        return
+
+    for region in foundRegions:
+        if not region:
+            continue
+
+        dataArray, intRegion, \
+        startPoints, endPoints, \
+        startPointBufferActual, endPointBufferActual, \
+        startPointIntActual, numPointInt, \
+        startPointBuffer, endPointBuffer = region
+
+        if dataArray.size:
+            print('>>> here', regionToPick, dataArray)
+            # now do a fit at this position
+
+
+def movePeak(peak, position, updateHeight=True):
+    """Move a peak based on it's delta shift and opionally update to the height at the new position
+    """
+    with undoBlock():
+        peak.position = position
+
+        if updateHeight:
+            # get the interpolated height at this position
+            peak.height = peak.peakList.spectrum.getHeight(position)

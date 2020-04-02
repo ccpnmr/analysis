@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-03-30 17:15:13 +0100 (Mon, March 30, 2020) $"
+__dateModified__ = "$dateModified: 2020-04-02 13:02:28 +0100 (Thu, April 02, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -478,20 +478,17 @@ def _newNmrAtom(self: NmrResidue, name: str = None, isotopeCode: str = None,
     if comment is None:
         dd['details'] = name
 
-    # # NOTE:ED - check violated name
-    # #           this gets it to work by prepending with the correct isotopeCode, but there should be values in the orderedDict
-    # pseudoName = None
-    # checkIsotopeCode = isotopeCode.upper()
-    # if not name.startswith(checkIsotopeCode):
-    #     from ccpn.util.Constants import isotopeRecords
-    #
-    #     record = isotopeRecords.get(checkIsotopeCode)
-    #     if record:
-    #         isValid = name.startswith(record.symbol)
-    #         if not isValid:
-    #             pseudoName = record.symbol + '_' + name
-    #             if serial is None:
-    #                 dd['name'] = pseudoName
+    # NOTE:ED - check violated name, replaces the isotopeCode with '?' - follows v2 model check
+    checkIsotopeCode = isotopeCode.upper()
+    if not name.startswith(checkIsotopeCode):
+        from ccpn.util.Constants import isotopeRecords
+
+        record = isotopeRecords.get(checkIsotopeCode)
+        if record:
+            isValid = name.startswith(record.symbol)
+            if not isValid:
+                getLogger().warning("Invalid isotopeCode %s for nmrAtom name %s, setting isotopeCode to '?'" % (isotopeCode, name))
+                dd['isotopeCode'] = '?'
 
     obj = nmrProject.newResonance(**dd)
     result = self._project._data2Obj.get(obj)

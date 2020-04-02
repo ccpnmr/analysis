@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-02-06 18:27:16 +0000 (Thu, February 06, 2020) $"
+__dateModified__ = "$dateModified: 2020-04-02 15:46:23 +0100 (Thu, April 02, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -42,7 +42,7 @@ SPECTRUMGROUPSERIES = 'spectrumGroupSeries'
 SPECTRUMGROUPSERIESUNITS = 'spectrumGroupSeriesUnits'
 SPECTRUMGROUPSERIESTYPE = 'spectrumGroupSeriesType'
 
-class SERIESTYPES(Enum):
+class SeriesTypes(Enum):
     # NOTE:ED - could make this a labelledEnum
     FLOAT = 0, 'Float'
     INTEGER = 1, 'Integer'

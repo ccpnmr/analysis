@@ -55,7 +55,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-03-06 16:39:25 +0000 (Fri, March 06, 2020) $"
+__dateModified__ = "$dateModified: 2020-04-02 15:46:23 +0100 (Thu, April 02, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -261,6 +261,7 @@ class CcpnGLWidgetABC(QOpenGLWidget):
         self._axesVisible = True
         self._axisLocked = False
         self._useDefaultAspect = False
+        self._aspectRatioMode = 0
         self._showSpectraOnPhasing = False
         self._xUnits = 0
         self._yUnits = 0

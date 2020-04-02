@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-03-19 17:19:09 +0000 (Thu, March 19, 2020) $"
+__dateModified__ = "$dateModified: 2020-04-02 15:46:23 +0100 (Thu, April 02, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -232,7 +232,8 @@ class GuiSpectrumDisplay(CcpnModule):
                                                                     _baseAspectRatioAxisCode=self.application.preferences.general._baseAspectRatioAxisCode,
                                                                     _aspectRatios=self.application.preferences.general.aspectRatios.copy(),
                                                                     _useLockedAspectRatio=self.application.preferences.general.useLockedAspectRatio,
-                                                                    _useDefaultAspectRatio=self.application.preferences.general.useDefaultAspectRatio)
+                                                                    _useDefaultAspectRatio=self.application.preferences.general.useDefaultAspectRatio,
+                                                                    _aspectRatioMode=self.application.preferences.general.aspectRatioMode)
         else:
             self._spectrumDisplaySettings = SpectrumDisplaySettings(parent=self.settingsWidget,
                                                                     mainWindow=self.mainWindow, spectrumDisplay=self,
@@ -242,7 +243,8 @@ class GuiSpectrumDisplay(CcpnModule):
                                                                     _baseAspectRatioAxisCode=self.application.preferences.general._baseAspectRatioAxisCode,
                                                                     _aspectRatios=self.application.preferences.general.aspectRatios.copy(),
                                                                     _useLockedAspectRatio=self.application.preferences.general.useLockedAspectRatio,
-                                                                    _useDefaultAspectRatio=self.application.preferences.general.useDefaultAspectRatio)
+                                                                    _useDefaultAspectRatio=self.application.preferences.general.useDefaultAspectRatio,
+                                                                    _aspectRatioMode=self.application.preferences.general.aspectRatioMode)
 
         self._spectrumDisplaySettings.settingsChanged.connect(self._settingsChanged)
         self.settingsWidget.setSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum)

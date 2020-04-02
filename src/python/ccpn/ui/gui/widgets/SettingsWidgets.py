@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-02-03 18:23:06 +0000 (Mon, February 03, 2020) $"
-__version__ = "$Revision: 3.0.0 $"
+__dateModified__ = "$dateModified: 2020-04-02 15:46:24 +0100 (Thu, April 02, 2020) $"
+__version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -45,7 +45,7 @@ from ccpn.ui._implementation.SpectrumView import SpectrumView
 from functools import partial
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLNotifier import GLNotifier
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs import AXISXUNITS, AXISYUNITS, AXISLOCKASPECTRATIO, \
-    SYMBOLTYPES, SYMBOLSIZE, SYMBOLTHICKNESS, ANNOTATIONTYPES, AXISUSEDEFAULTASPECTRATIO, AXISASPECTRATIOS
+    SYMBOLTYPES, SYMBOLSIZE, SYMBOLTHICKNESS, ANNOTATIONTYPES, AXISUSEDEFAULTASPECTRATIO, AXISASPECTRATIOS, AXISASPECTRATIOMODE
 from ccpn.ui.gui.widgets.Spinbox import Spinbox
 from ccpn.util.Common import getAxisCodeMatchIndices
 from ccpn.ui.gui.widgets.Base import SignalBlocking
@@ -78,7 +78,7 @@ class SpectrumDisplaySettings(Widget, SignalBlocking):
                  symbolType=0, annotationType=0, symbolSize=9, symbolThickness=2,
                  stripArrangement=0,
                  _baseAspectRatioAxisCode='H', _aspectRatios={},
-                 _useLockedAspectRatio=False, _useDefaultAspectRatio=False,
+                 _useLockedAspectRatio=False, _useDefaultAspectRatio=False, _aspectRatioMode=0,
                  **kwds):
         super().__init__(parent, setLayout=True, **kwds)
 
@@ -144,6 +144,17 @@ class SpectrumDisplaySettings(Widget, SignalBlocking):
         self.useDefaultAspect = Label(parent, text="Use Fixed Aspect Ratio", grid=(row, 0))
         self.useDefaultAspectCheckBox = CheckBox(parent, grid=(row, 1), checked=_useDefaultAspectRatio, objectName='SDS_useDefaultAspect')
         self.useDefaultAspectCheckBox.clicked.connect(self._settingsUseDefaultChanged)
+
+        row += 1
+        self.useAspectRatioModeLabel = Label(parent, text="Aspect Ratio Mode", grid=(row, 0))
+        self.useAspectRatioModeButtons = RadioButtons(parent, texts=['Free', 'Locked', 'Fixed'],
+                                                      objectNames=['armSDS_Free', 'armSDS_Locked', 'armSDS_Fixed'],
+                                                      selectedInd=_aspectRatioMode,
+                                                      callback=self._aspectRatioModeChanged,
+                                                      direction='horizontal',
+                                                      grid=(row, 1), hAlign='l',
+                                                      tipTexts=None,
+                                                      )
 
         row += 1
         self.aspectLabel = {}
@@ -248,6 +259,7 @@ class SpectrumDisplaySettings(Widget, SignalBlocking):
                 AXISYUNITS               : self.yAxisUnitsButtons.getIndex(),
                 AXISLOCKASPECTRATIO      : self.lockAspectCheckBox.isChecked(),
                 AXISUSEDEFAULTASPECTRATIO: self.useDefaultAspectCheckBox.isChecked(),
+                AXISASPECTRATIOMODE      : self.useAspectRatioModeButtons.getIndex(),
                 AXISASPECTRATIOS         : aspectRatios,
                 SYMBOLTYPES              : self.symbol.getIndex() if not self._spectrumDisplay.is1D else 0,
                 ANNOTATIONTYPES          : self.annotationsData.getIndex() if not self._spectrumDisplay.is1D else 0,
@@ -265,6 +277,11 @@ class SpectrumDisplaySettings(Widget, SignalBlocking):
         """If useDefault enabled and lock is disabled then enable lock
         """
         self.lockAspectCheckBox.setChecked(False)
+        self._settingsChanged()
+
+    def _aspectRatioModeChanged(self):
+        """Set the current aspect ratio mode
+        """
         self._settingsChanged()
 
     def _settingsChangeAspect(self, aspect, value):
@@ -285,6 +302,7 @@ class SpectrumDisplaySettings(Widget, SignalBlocking):
         if aDict[GLNotifier.GLSPECTRUMDISPLAY] == self._spectrumDisplay:
             self.lockAspectCheckBox.setChecked(aDict[GLNotifier.GLVALUES][0])
             self.useDefaultAspectCheckBox.setChecked(aDict[GLNotifier.GLVALUES][1])
+            self.useAspectRatioModeButtons.setIndex(aDict[GLNotifier.GLVALUES][2])
 
     @pyqtSlot()
     def _symbolsChanged(self):
@@ -576,6 +594,7 @@ class _commonSettings():
 
 LINKTOPULLDOWNCLASS = 'linkToPulldownClass'
 LINKTOACTIVESTATE = True
+
 
 class StripPlot(Widget, _commonSettings):
 
@@ -1124,6 +1143,7 @@ if __name__ == '__main__':
     import os
     import sys
     from PyQt5 import QtGui, QtWidgets
+
 
     def myCallback(ph0, ph1, pivot, direction):
         print(ph0, ph1, pivot, direction)

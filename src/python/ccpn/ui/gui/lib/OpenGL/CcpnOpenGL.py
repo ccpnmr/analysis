@@ -55,7 +55,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-03-31 23:20:38 +0100 (Tue, March 31, 2020) $"
+__dateModified__ = "$dateModified: 2020-04-02 15:46:23 +0100 (Thu, April 02, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -66,14 +66,11 @@ __date__ = "$Date: 2018-12-20 13:28:13 +0000 (Thu, December 20, 2018) $"
 # Start of code
 #=========================================================================================
 
-import os
 import sys
 import math
-import json
 import re
 import time
 import numpy as np
-from _collections import deque
 from functools import partial
 from contextlib import contextmanager
 # from threading import Thread
@@ -82,6 +79,8 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtCore import QPoint, QSize, Qt, pyqtSlot
 from PyQt5.QtWidgets import QApplication, QOpenGLWidget
 from PyQt5.QtGui import QSurfaceFormat
+
+from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs import PaintModes
 from ccpn.util.Logging import getLogger
 from pyqtgraph import functions as fn
 from ccpn.core.PeakList import PeakList
@@ -93,12 +92,9 @@ from ccpn.ui.gui.lib.mouseEvents import getCurrentMouseMode
 from ccpn.ui.gui.lib.GuiStrip import DefaultMenu, PeakMenu, IntegralMenu, \
     MultipletMenu, PhasingMenu, AxisMenu
 
-from ccpn.core.lib.Cache import cached
-
 # from ccpn.util.Colour import getAutoColourRgbRatio
 from ccpn.ui.gui.guiSettings import CCPNGLWIDGET_BACKGROUND, CCPNGLWIDGET_FOREGROUND, CCPNGLWIDGET_PICKCOLOUR, \
-    CCPNGLWIDGET_GRID, CCPNGLWIDGET_HIGHLIGHT, CCPNGLWIDGET_INTEGRALSHADE, \
-    CCPNGLWIDGET_LABELLING, CCPNGLWIDGET_PHASETRACE, getColours, \
+    CCPNGLWIDGET_GRID, CCPNGLWIDGET_HIGHLIGHT, CCPNGLWIDGET_LABELLING, CCPNGLWIDGET_PHASETRACE, getColours, \
     CCPNGLWIDGET_HEXBACKGROUND, CCPNGLWIDGET_ZOOMAREA, CCPNGLWIDGET_PICKAREA, \
     CCPNGLWIDGET_SELECTAREA, CCPNGLWIDGET_ZOOMLINE, CCPNGLWIDGET_MOUSEMOVELINE, \
     CCPNGLWIDGET_HARDSHADE
@@ -124,12 +120,10 @@ except ImportError:
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLNotifier import GLNotifier
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLGlobal import GLGlobalData
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLFonts import GLString
-from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLSimpleLabels import GLSimpleStrings, GLSimpleLegend
-from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLArrays import GLRENDERMODE_IGNORE, GLRENDERMODE_DRAW, \
+from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLSimpleLabels import GLSimpleStrings
+from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLArrays import GLRENDERMODE_DRAW, \
     GLRENDERMODE_RESCALE, GLRENDERMODE_REBUILD, \
-    GLREFRESHMODE_NEVER, GLREFRESHMODE_ALWAYS, \
-    GLREFRESHMODE_REBUILD, GLVertexArray, \
-    GLSymbolArray, GLLabelArray
+    GLREFRESHMODE_REBUILD, GLVertexArray
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLViewports import GLViewports
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLWidgets import GLExternalRegion, \
     GLRegion, REGION_COLOURS, GLInfiniteLine
@@ -138,7 +132,7 @@ from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLLabelling import GLpeakNdLabelling, GLpeak
     GLmultiplet1dLabelling, GLmultipletNdLabelling
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLExport import GLExporter
 import ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs as GLDefs
-from ccpn.util.Common import getAxisCodeMatch, getAxisCodeMatchIndices
+from ccpn.util.Common import getAxisCodeMatchIndices
 from typing import Tuple
 from ccpn.util.Constants import AXIS_FULLATOMNAME, AXIS_MATCHATOMTYPE, AXIS_ACTIVEAXES, \
     DOUBLEAXIS_ACTIVEAXES, DOUBLEAXIS_FULLATOMNAME, DOUBLEAXIS_MATCHATOMTYPE, MOUSEDICTSTRIP
@@ -146,10 +140,9 @@ from ccpn.util.Constants import AXIS_FULLATOMNAME, AXIS_MATCHATOMTYPE, AXIS_ACTI
 from ccpn.ui.gui.widgets.DropBase import DropBase
 from ccpn.ui.gui.lib.mouseEvents import getMouseEventDict
 from ccpn.core.lib.ContextManagers import undoBlock
-from ccpn.util.decorators import profile
 from ccpn.core.lib.Notifiers import Notifier
 from ccpn.core.lib import Pid
-from ccpn.util import Path
+
 
 UNITS_PPM = 'ppm'
 UNITS_HZ = 'Hz'
@@ -172,15 +165,6 @@ SELECTOBJECTS = [PEAKSELECT, INTEGRALSELECT, MULTIPLETSELECT]
 CURSOR_SOURCE_NONE = None
 CURSOR_SOURCE_SELF = 'self'
 CURSOR_SOURCE_OTHER = 'other'
-
-# NOTE:ED - not used enums before, maybe I should
-from enum import Enum
-
-
-class PAINTMODES(Enum):
-    PAINT_NONE = 0
-    PAINT_ALL = 1
-    PAINT_MOUSEONLY = 2
 
 
 class CcpnGLWidget(QOpenGLWidget):
@@ -515,7 +499,7 @@ class CcpnGLWidget(QOpenGLWidget):
     def threadUpdate(self):
         self.update()
 
-    def update(self, mode=PAINTMODES.PAINT_ALL):
+    def update(self, mode=PaintModes.PAINT_ALL):
         """Update the glWidget with the correct refresh mode
         """
         self._paintMode = mode
@@ -2017,7 +2001,7 @@ class CcpnGLWidget(QOpenGLWidget):
             self.initialiseTraces()
 
         # set the painting mode
-        self._paintMode = PAINTMODES.PAINT_ALL
+        self._paintMode = PaintModes.PAINT_ALL
         self._paintLastFrame = True
         self._leavingWidget = False
 
@@ -2240,10 +2224,10 @@ class CcpnGLWidget(QOpenGLWidget):
         # create a dict and event to update this strip first
         aDict = {GLNotifier.GLSOURCE         : None,
                  GLNotifier.GLSPECTRUMDISPLAY: self.spectrumDisplay,
-                 GLNotifier.GLVALUES         : (self._useLockedAspect, self._useDefaultAspect)
+                 GLNotifier.GLVALUES         : (self._useLockedAspect, self._useDefaultAspect, self._aspectRatioMode)
                  }
         self._glAxisLockChanged(aDict)
-        self.GLSignals._emitAxisLockChanged(source=self, strip=self.strip, lockValues=(self._useLockedAspect, self._useDefaultAspect))
+        self.GLSignals._emitAxisLockChanged(source=self, strip=self.strip, lockValues=(self._useLockedAspect, self._useDefaultAspect, self._aspectRatioMode))
 
     def _toggleUseDefaultAspect(self):
         """Toggle the use fixed aspect button
@@ -2254,15 +2238,15 @@ class CcpnGLWidget(QOpenGLWidget):
         # create a dict and event to update this strip first
         aDict = {GLNotifier.GLSOURCE         : None,
                  GLNotifier.GLSPECTRUMDISPLAY: self.spectrumDisplay,
-                 GLNotifier.GLVALUES         : (self._useLockedAspect, self._useDefaultAspect)
+                 GLNotifier.GLVALUES         : (self._useLockedAspect, self._useDefaultAspect, self._aspectRatioMode)
                  }
         self._glAxisLockChanged(aDict)
-        self.GLSignals._emitAxisLockChanged(source=self, strip=self.strip, lockValues=(self._useLockedAspect, self._useDefaultAspect))
+        self.GLSignals._emitAxisLockChanged(source=self, strip=self.strip, lockValues=(self._useLockedAspect, self._useDefaultAspect, self._aspectRatioMode))
 
     def mousePressInCornerButtons(self, mx, my):
         """Check if the mouse has been pressed in the lock button
         """
-        if self.AXISLOCKEDBUTTON:
+        if self.AXISLOCKEDBUTTON and self.strip == self.strip.spectrumDisplay.strips[0]:
             for button in self._buttonCentres:
                 minDiff = abs(mx - button[0])
                 maxDiff = abs(my - button[1])
@@ -3080,14 +3064,14 @@ class CcpnGLWidget(QOpenGLWidget):
             return
 
         # NOTE:ED - testing, remove later
-        # self._paintMode = PAINTMODES.PAINT_ALL
+        # self._paintMode = PaintModes.PAINT_ALL
 
-        if self._paintMode == PAINTMODES.PAINT_NONE:
+        if self._paintMode == PaintModes.PAINT_NONE:
 
             # do nothing
             pass
 
-        elif self._paintMode == PAINTMODES.PAINT_ALL or self._leavingWidget:
+        elif self._paintMode == PaintModes.PAINT_ALL or self._leavingWidget:
 
             # NOTE:ED - paint all content to the GL widget - need to work on this
             self._clearGLCursorQueue()
@@ -3112,11 +3096,11 @@ class CcpnGLWidget(QOpenGLWidget):
 
             # make all following paint events into mouse only
             # so only paints a single frame from an update event
-            self._paintMode = PAINTMODES.PAINT_MOUSEONLY
+            self._paintMode = PaintModes.PAINT_MOUSEONLY
             self._paintLastFrame = True
             self._leavingWidget = False
 
-        elif self._paintMode == PAINTMODES.PAINT_MOUSEONLY:
+        elif self._paintMode == PaintModes.PAINT_MOUSEONLY:
             self._paintLastFrame = False
             self._leavingWidget = False
 
@@ -3147,7 +3131,7 @@ class CcpnGLWidget(QOpenGLWidget):
         """paintGL event - paint only the mouse in Xor mode
         """
         # reset the paint mode
-        # self._paintMode = PAINTMODES.PAINT_ALL
+        # self._paintMode = PaintModes.PAINT_ALL
 
         currentShader = self.globalGL._shaderProgram1.makeCurrent()
         currentShader.setGLUniformMatrix4fv('mvMatrix', 1, GL.GL_FALSE, self._IMatrix)
@@ -4496,7 +4480,8 @@ class CcpnGLWidget(QOpenGLWidget):
         # # draw the strip ID to the screen
         # self.stripIDString.drawTextArrayVBO(enableVBO=True)
 
-        if self.AXISLOCKEDBUTTON:
+        # only display buttons in the first strip (not required in others)
+        if self.AXISLOCKEDBUTTON and self.strip == self.strip.spectrumDisplay.strips[0]:
             if self._useDefaultAspect:
                 # self._lockStringTrue.setStringOffset((self.axisL, self.axisB))
                 self._useDefaultStringTrue.drawTextArrayVBO(enableVBO=True)
@@ -4725,6 +4710,15 @@ class CcpnGLWidget(QOpenGLWidget):
     @defaultAspect.setter
     def defaultAspect(self, value):
         self._useDefaultAspect = value
+        self._rescaleAllAxes()
+
+    @property
+    def aspectRatioMode(self):
+        return self._aspectRatioMode
+
+    @aspectRatioMode.setter
+    def aspectRatioMode(self, value):
+        self._aspectRatioMode = value
         self._rescaleAllAxes()
 
     @property
@@ -6093,6 +6087,7 @@ class CcpnGLWidget(QOpenGLWidget):
         if aDict[GLNotifier.GLSOURCE] != self and aDict[GLNotifier.GLSPECTRUMDISPLAY] == self.spectrumDisplay:
             self._useLockedAspect = aDict[GLNotifier.GLVALUES][0]
             self._useDefaultAspect = aDict[GLNotifier.GLVALUES][1]
+            self._aspectRatioMode = aDict[GLNotifier.GLVALUES][2]
 
             if (self._useLockedAspect or self._useDefaultAspect):
 
@@ -6137,15 +6132,18 @@ class CcpnGLWidget(QOpenGLWidget):
 
                 aL = aDict[GLNotifier.GLVALUES][GLDefs.AXISLOCKASPECTRATIO]
                 uFA = aDict[GLNotifier.GLVALUES][GLDefs.AXISUSEDEFAULTASPECTRATIO]
-                if self._useLockedAspect != aL or self._useDefaultAspect != uFA:
+                aRM = aDict[GLNotifier.GLVALUES][GLDefs.AXISASPECTRATIOMODE]
+
+                if self._useLockedAspect != aL or self._useDefaultAspect != uFA or self._aspectRatioMode != aRM:
                     # self._xUnits = aDict[GLNotifier.GLVALUES][GLDefs.AXISXUNITS]
                     # self._yUnits = aDict[GLNotifier.GLVALUES][GLDefs.AXISYUNITS]
                     self._useLockedAspect = aL
                     self._useDefaultAspect = uFA
+                    self._aspectRatioMode = aRM
 
                     changeDict = {GLNotifier.GLSOURCE         : None,
                                   GLNotifier.GLSPECTRUMDISPLAY: self.spectrumDisplay,
-                                  GLNotifier.GLVALUES         : (aL, uFA)
+                                  GLNotifier.GLVALUES         : (aL, uFA, aRM)
                                   }
                     self._glAxisLockChanged(changeDict)
 
@@ -6448,8 +6446,8 @@ class CcpnGLWidget(QOpenGLWidget):
                 # self._renderCursorOnly()
 
                 # force a redraw to only paint the cursor
-                # self._paintMode = PAINTMODES.PAINT_MOUSEONLY
-                self.update(mode=PAINTMODES.PAINT_MOUSEONLY)
+                # self._paintMode = PaintModes.PAINT_MOUSEONLY
+                self.update(mode=PaintModes.PAINT_MOUSEONLY)
 
     @pyqtSlot(dict)
     def _glKeyEvent(self, aDict):

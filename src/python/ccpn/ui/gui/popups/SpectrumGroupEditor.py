@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-03-10 02:13:11 +0000 (Tue, March 10, 2020) $"
+__dateModified__ = "$dateModified: 2020-04-02 15:46:24 +0100 (Thu, April 02, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -36,7 +36,7 @@ from ccpn.ui.gui.popups.Dialog import handleDialogApply, _verifyPopupChangesAppl
 from ccpn.core.lib.ContextManagers import undoStackBlocking
 from ccpn.core.lib.ContextManagers import queueStateChange
 from ccpn.core.Spectrum import Spectrum
-from ccpn.core.SpectrumGroup import SpectrumGroup, SERIESTYPES
+from ccpn.core.SpectrumGroup import SpectrumGroup, SeriesTypes
 from ccpn.ui.gui.widgets.Tabs import Tabs
 from ccpn.ui.gui.widgets.Widget import Widget
 from ccpn.ui.gui.widgets.Label import Label
@@ -570,7 +570,7 @@ class SeriesFrame(Frame):
 
         row += 1
         seriesTypeLabel = Label(self, text='Series Type', grid=(row, col), hAlign='l')
-        self.seriesType = RadioButtons(self, texts=[str(val.description) for val in SERIESTYPES],
+        self.seriesType = RadioButtons(self, texts=[str(val.description) for val in SeriesTypes],
                                        grid=(row, col + 1), gridSpan=(1, 2), hAlign='l',
                                        callback=partial(self._queueChangeSeriesType, self.defaultObject))
 
@@ -686,11 +686,11 @@ class SeriesFrame(Frame):
                 ii = self.defaultObject.spectra.index(spec)
 
                 try:
-                    if self.seriesType.getIndex() == SERIESTYPES.FLOAT.value:
+                    if self.seriesType.getIndex() == SeriesTypes.FLOAT.value:
                         seriesValue = float(series[ii])
-                    if self.seriesType.getIndex() == SERIESTYPES.INTEGER.value:
+                    if self.seriesType.getIndex() == SeriesTypes.INTEGER.value:
                         seriesValue = int(series[ii])
-                    elif self.seriesType.getIndex() == SERIESTYPES.STRING.value:
+                    elif self.seriesType.getIndex() == SeriesTypes.STRING.value:
                         seriesValue = str(series[ii])
                     else:
                         seriesValue = repr(series[ii])
@@ -722,11 +722,11 @@ class SeriesFrame(Frame):
         # queue the value if has changed from the original
         value = editor.get()
         try:
-            if self.seriesType.getIndex() == SERIESTYPES.FLOAT.value:
+            if self.seriesType.getIndex() == SeriesTypes.FLOAT.value:
                 seriesValue = float(value)
-            if self.seriesType.getIndex() == SERIESTYPES.INTEGER.value:
+            if self.seriesType.getIndex() == SeriesTypes.INTEGER.value:
                 seriesValue = int(value)
-            elif self.seriesType.getIndex() == SERIESTYPES.STRING.value:
+            elif self.seriesType.getIndex() == SeriesTypes.STRING.value:
                 seriesValue = str(value)
             else:
                 seriesValue = literal_eval(value)
@@ -783,11 +783,11 @@ class SeriesFrame(Frame):
             colour = editor._background
             try:
                 seriesValue = None
-                if self.seriesType.getIndex() == SERIESTYPES.FLOAT.value:
+                if self.seriesType.getIndex() == SeriesTypes.FLOAT.value:
                     seriesValue = float(value)
-                if self.seriesType.getIndex() == SERIESTYPES.INTEGER.value:
+                if self.seriesType.getIndex() == SeriesTypes.INTEGER.value:
                     seriesValue = int(value)
-                elif self.seriesType.getIndex() == SERIESTYPES.STRING.value:
+                elif self.seriesType.getIndex() == SeriesTypes.STRING.value:
                     seriesValue = str(value)
                 else:
                     seriesValue = literal_eval(value)

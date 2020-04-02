@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-04-01 14:03:21 +0100 (Wed, April 01, 2020) $"
+__dateModified__ = "$dateModified: 2020-04-02 15:46:24 +0100 (Thu, April 02, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -36,7 +36,7 @@ from PyQt5 import QtWidgets, QtGui, QtCore
 from PyQt5.QtCore import Qt, pyqtSignal, pyqtSlot
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import CcpnGLWidget, GLVertexArray, GLRENDERMODE_DRAW, \
     GLRENDERMODE_REBUILD, GLRENDERMODE_RESCALE, ZOOMHISTORYSTORE, ZOOMTIMERDELAY
-from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs import YAXISUNITS1D, SPECTRUM_VALUEPERPOINT
+from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs import YAXISUNITS1D, SPECTRUM_VALUEPERPOINT, PaintModes
 import ccpn.util.Phasing as Phasing
 from ccpn.util.Common import getAxisCodeMatchIndices
 from ccpn.util.Constants import AXIS_FULLATOMNAME, AXIS_MATCHATOMTYPE, AXIS_ACTIVEAXES, \
@@ -65,7 +65,7 @@ from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLSimpleLabels import GLSimpleStrings
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLViewports import GLViewports
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLWidgets import GLExternalRegion
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLGlobal import GLGlobalData
-from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import CURSOR_SOURCE_NONE, CURSOR_SOURCE_SELF, CURSOR_SOURCE_OTHER, PAINTMODES
+from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import CURSOR_SOURCE_NONE, CURSOR_SOURCE_SELF, CURSOR_SOURCE_OTHER
 
 
 class GuiNdWidget(CcpnGLWidget):
@@ -731,14 +731,14 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
             return
 
         # NOTE:ED - testing, remove later
-        self._paintMode = PAINTMODES.PAINT_ALL
+        self._paintMode = PaintModes.PAINT_ALL
 
-        if self._paintMode == PAINTMODES.PAINT_NONE:
+        if self._paintMode == PaintModes.PAINT_NONE:
 
             # do nothing
             pass
 
-        elif (self._paintMode == PAINTMODES.PAINT_ALL) or self._leavingWidget:
+        elif (self._paintMode == PaintModes.PAINT_ALL) or self._leavingWidget:
 
             # check whether the visible spectra list needs updating
             if self._visibleSpectrumViewsChange:
@@ -756,11 +756,11 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
 
             # make all following paint events into mouse only
             # so only paints a single frame from an update event
-            self._paintMode = PAINTMODES.PAINT_MOUSEONLY
+            self._paintMode = PaintModes.PAINT_MOUSEONLY
             self._paintLastFrame = True
             self._leavingWidget = False
 
-        elif self._paintMode == PAINTMODES.PAINT_MOUSEONLY:
+        elif self._paintMode == PaintModes.PAINT_MOUSEONLY:
             self._paintLastFrame = False
             self._leavingWidget = False
 
@@ -1419,15 +1419,18 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
 
                 aL = aDict[GLNotifier.GLVALUES][GLDefs.AXISLOCKASPECTRATIO]
                 uFA = aDict[GLNotifier.GLVALUES][GLDefs.AXISUSEDEFAULTASPECTRATIO]
-                if self._axisLocked != aL or self._useDefaultAspect != uFA:
+                aRM = aDict[GLNotifier.GLVALUES][GLDefs.AXISASPECTRATIOMODE]
+
+                if self._axisLocked != aL or self._useDefaultAspect != uFA or self._aspectRatioMode != aRM:
                     # self._xUnits = aDict[GLNotifier.GLVALUES][GLDefs.AXISXUNITS]
                     # self._yUnits = aDict[GLNotifier.GLVALUES][GLDefs.AXISYUNITS]
                     self._axisLocked = aL
                     self._useDefaultAspect = uFA
+                    self._aspectRatioMode = aRM
 
                     aDict = {GLNotifier.GLSOURCE         : None,
                              GLNotifier.GLSPECTRUMDISPLAY: self.spectrumDisplay,
-                             GLNotifier.GLVALUES         : (aL, uFA)
+                             GLNotifier.GLVALUES         : (aL, uFA, aRM)
                              }
                     self._glAxisLockChanged(aDict)
 
@@ -1529,6 +1532,7 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
         self._axesVisible = True
         self._useLockedAspect = False
         self._useDefaultAspect = False
+        self._aspectRatioMode = 0
         self._aspectRatios = {}
 
         self._fixedAspectX = 1.0
@@ -1735,6 +1739,7 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
         if aDict[GLNotifier.GLSOURCE] != self and aDict[GLNotifier.GLSPECTRUMDISPLAY] == self.spectrumDisplay:
             self._useLockedAspect = aDict[GLNotifier.GLVALUES][0]
             self._useDefaultAspect = aDict[GLNotifier.GLVALUES][1]
+            self._aspectRatioMode = aDict[GLNotifier.GLVALUES][2]
 
             if (self._useLockedAspect or self._useDefaultAspect):
 
@@ -1779,15 +1784,18 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
 
                 aL = aDict[GLNotifier.GLVALUES][GLDefs.AXISLOCKASPECTRATIO]
                 uFA = aDict[GLNotifier.GLVALUES][GLDefs.AXISUSEDEFAULTASPECTRATIO]
-                if self._useLockedAspect != aL or self._useDefaultAspect != uFA:
+                aRM = aDict[GLNotifier.GLVALUES][GLDefs.AXISASPECTRATIOMODE]
+
+                if self._useLockedAspect != aL or self._useDefaultAspect != uFA or self._aspectRatioMode != aRM:
                     # self._xUnits = aDict[GLNotifier.GLVALUES][GLDefs.AXISXUNITS]
                     # self._yUnits = aDict[GLNotifier.GLVALUES][GLDefs.AXISYUNITS]
                     self._useLockedAspect = aL
                     self._useDefaultAspect = uFA
+                    self._aspectRatioMode = aRM
 
                     changeDict = {GLNotifier.GLSOURCE         : None,
                                   GLNotifier.GLSPECTRUMDISPLAY: self.spectrumDisplay,
-                                  GLNotifier.GLVALUES         : (aL, uFA)
+                                  GLNotifier.GLVALUES         : (aL, uFA, aRM)
                                   }
                     self._glAxisLockChanged(changeDict)
 
@@ -1976,11 +1984,11 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
                 # self._renderCursorOnly()
 
                 # force a redraw to only paint the cursor
-                # self._paintMode = PAINTMODES.PAINT_MOUSEONLY
-                # self.update(mode=PAINTMODES.PAINT_ALL)
-                self.update(mode=PAINTMODES.PAINT_MOUSEONLY)
+                # self._paintMode = PaintModes.PAINT_MOUSEONLY
+                # self.update(mode=PaintModes.PAINT_ALL)
+                self.update(mode=PaintModes.PAINT_MOUSEONLY)
 
-    def update(self, mode=PAINTMODES.PAINT_ALL):
+    def update(self, mode=PaintModes.PAINT_ALL):
         """Update the glWidget with the correct refresh mode
         """
         self._paintMode = mode
@@ -2048,7 +2056,7 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
         self._attachParentStrip()
 
         # set the painting mode
-        self._paintMode = PAINTMODES.PAINT_ALL
+        self._paintMode = PaintModes.PAINT_ALL
         self._paintLastFrame = True
         self._leavingWidget = False
 

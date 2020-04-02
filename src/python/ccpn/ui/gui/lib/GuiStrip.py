@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-04-01 12:30:55 +0100 (Wed, April 01, 2020) $"
+__dateModified__ = "$dateModified: 2020-04-02 15:46:23 +0100 (Thu, April 02, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -40,7 +40,7 @@ from ccpn.util.Logging import getLogger
 from ccpn.util.Constants import AXIS_MATCHATOMTYPE, AXIS_FULLATOMNAME, DOUBLEAXIS_FULLATOMNAME
 from functools import partial
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs import AXISXUNITS, AXISYUNITS, AXISLOCKASPECTRATIO, \
-    SYMBOLTYPES, ANNOTATIONTYPES, SYMBOLSIZE, SYMBOLTHICKNESS, AXISUSEDEFAULTASPECTRATIO, AXISASPECTRATIOS, \
+    SYMBOLTYPES, ANNOTATIONTYPES, SYMBOLSIZE, SYMBOLTHICKNESS, AXISUSEDEFAULTASPECTRATIO, AXISASPECTRATIOS, AXISASPECTRATIOMODE, \
     GRIDVISIBLE, CROSSHAIRVISIBLE, DOUBLECROSSHAIRVISIBLE, BOTTOMAXIS, RIGHTAXIS, SIDEBANDSVISIBLE
 from ccpn.core.lib.ContextManagers import undoStackBlocking, undoBlock, \
     notificationBlanking, undoBlockWithoutSideBar
@@ -207,6 +207,7 @@ class GuiStrip(Frame):
         self._CcpnGLWidget.yUnits = settings[AXISYUNITS]
         self._CcpnGLWidget.lockedAspect = settings[AXISLOCKASPECTRATIO]
         self._CcpnGLWidget.defaultAspect = settings[AXISUSEDEFAULTASPECTRATIO]
+        self._CcpnGLWidget.aspectRatioMode = settings[AXISASPECTRATIOMODE]
         self._CcpnGLWidget.aspectRatios = settings[AXISASPECTRATIOS]
 
         # self._CcpnGLWidget._doubleCrosshairVisible = self._preferences.showDoubleCrosshair

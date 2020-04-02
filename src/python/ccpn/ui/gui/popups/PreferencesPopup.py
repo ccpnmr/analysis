@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-04-01 17:08:08 +0100 (Wed, April 01, 2020) $"
+__dateModified__ = "$dateModified: 2020-04-02 15:46:23 +0100 (Thu, April 02, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -617,6 +617,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
         self.zoomPercentData.setValue(int(self.preferences.general.zoomPercent))
         self.stripWidthZoomPercentData.setValue(int(self.preferences.general.stripWidthZoomPercent))
         self.defaultAspectRatioBox.setChecked(self.preferences.general.useDefaultAspectRatio)
+        self.aspectRatioModeData.setIndex(self.preferences.general.aspectRatioMode)
 
         self.showZoomXLimitApplyBox.setChecked(self.preferences.general.zoomXLimitApply)
         self.showZoomYLimitApplyBox.setChecked(self.preferences.general.zoomYLimitApply)
@@ -949,6 +950,16 @@ class PreferencesPopup(CcpnDialogMainWidget):
         self.defaultAspectRatioLabel = Label(parent, text="Fixed Aspect Ratios: ", grid=(row, 0))
         self.defaultAspectRatioBox = CheckBox(parent, grid=(row, 1))        #, checked=self.preferences.general.useDefaultAspectRatio)
         self.defaultAspectRatioBox.toggled.connect(partial(self._queueToggleGeneralOptions, 'useDefaultAspectRatio'))
+
+        row += 1
+        self.aspectRatioModeLabel = Label(parent, text="Aspect Ratio Mode", grid=(row, 0))
+        self.aspectRatioModeData = RadioButtons(parent, texts=['Free', 'Locked', 'Fixed'],
+                                            # selectedInd=annType,
+                                            callback=self._queueSetAspectRatioMode,
+                                            direction='horizontal',
+                                            grid=(row, 1), hAlign='l',
+                                            tipTexts=None,
+                                            )
 
         row += 1
         self.aspectLabel = {}
@@ -1559,6 +1570,22 @@ class PreferencesPopup(CcpnDialogMainWidget):
     #
     # def _toggleSpectralOptions(self, preference, checked):
     #     self.preferences.spectra[preference] = str(checked)
+
+    @queueStateChange(_verifyPopupApply)
+    def _queueSetAspectRatioMode(self):
+        value = self.aspectRatioModeData.getIndex()
+        if value != self.preferences.general.aspectRatioMode:
+            return partial(self._setAspectRatioMode, value)
+
+    def _setAspectRatioMode(self, value):
+        """
+        Set the aspectRatioMode
+        """
+        # try:
+        #     aspectRatioMode = self.aspectRatioModeData.getIndex()
+        # except:
+        #     return
+        self.preferences.general.aspectRatioMode = value
 
     @queueStateChange(_verifyPopupApply)
     def _queueSetAnnotations(self):

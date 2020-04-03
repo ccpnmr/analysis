@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-03-10 01:57:06 +0000 (Tue, March 10, 2020) $"
+__dateModified__ = "$dateModified: 2020-04-03 22:11:57 +0100 (Fri, April 03, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -607,7 +607,10 @@ def _verifyPopupChangesApply(self, attributeName, value, *postArgs, **postKwds):
     if not hasattr(self, GETCHANGESDICT):
         raise RuntimeError('Error: widget must have changes defined')
 
-    popup, _changeDict, stateValue = self.getChangesDict()
+    popup, _changeDict, applyState, revertState, applyButton, revertButton = self.getChangesDict()
+
+    _applyButton = applyButton if applyButton else popup.dialogButtons.button(QtWidgets.QDialogButtonBox.Apply)
+    _revertButton = revertButton if revertButton else popup.dialogButtons.button(QtWidgets.QDialogButtonBox.Reset)
 
     # if attributeName is defined use as key to dict to store change functions
     # append postFixes if need to differentiate partial functions
@@ -639,10 +642,9 @@ def _verifyPopupChangesApply(self, attributeName, value, *postArgs, **postKwds):
             # set button state depending on number of changes
             # tabs = tuple(tabWidget.widget(ii) for ii in range(tabWidget.count()))
 
-            allChanges = any(t._changes for t in tabs if t is not None) and stateValue
-            _button = popup.dialogButtons.button(QtWidgets.QDialogButtonBox.Apply)
-            if _button:
-                _button.setEnabled(allChanges)
-            _button = popup.dialogButtons.button(QtWidgets.QDialogButtonBox.Reset)
-            if _button:
-                _button.setEnabled(allChanges or popup._currentNumApplies)
+            applyChanges = any(t._changes for t in tabs if t is not None) and applyState
+            revertChanges = any(t._changes for t in tabs if t is not None) or revertState
+            if _applyButton:
+                _applyButton.setEnabled(applyChanges)
+            if _revertButton:
+                _revertButton.setEnabled(revertChanges or popup._currentNumApplies)

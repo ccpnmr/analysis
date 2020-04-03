@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-04-02 15:46:23 +0100 (Thu, April 02, 2020) $"
+__dateModified__ = "$dateModified: 2020-04-03 22:11:57 +0100 (Fri, April 03, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -231,8 +231,6 @@ class GuiSpectrumDisplay(CcpnModule):
                                                                     xTexts=AXISUNITS, yTexts=AXISUNITS,
                                                                     _baseAspectRatioAxisCode=self.application.preferences.general._baseAspectRatioAxisCode,
                                                                     _aspectRatios=self.application.preferences.general.aspectRatios.copy(),
-                                                                    _useLockedAspectRatio=self.application.preferences.general.useLockedAspectRatio,
-                                                                    _useDefaultAspectRatio=self.application.preferences.general.useDefaultAspectRatio,
                                                                     _aspectRatioMode=self.application.preferences.general.aspectRatioMode)
         else:
             self._spectrumDisplaySettings = SpectrumDisplaySettings(parent=self.settingsWidget,
@@ -242,8 +240,6 @@ class GuiSpectrumDisplay(CcpnModule):
                                                                     showYAxis=False,
                                                                     _baseAspectRatioAxisCode=self.application.preferences.general._baseAspectRatioAxisCode,
                                                                     _aspectRatios=self.application.preferences.general.aspectRatios.copy(),
-                                                                    _useLockedAspectRatio=self.application.preferences.general.useLockedAspectRatio,
-                                                                    _useDefaultAspectRatio=self.application.preferences.general.useDefaultAspectRatio,
                                                                     _aspectRatioMode=self.application.preferences.general.aspectRatioMode)
 
         self._spectrumDisplaySettings.settingsChanged.connect(self._settingsChanged)
@@ -360,7 +356,9 @@ class GuiSpectrumDisplay(CcpnModule):
                 pass
 
             else:
-                self._rightGLAxis = GuiNdWidgetAxis(self._stripFrameScrollArea, spectrumDisplay=self, mainWindow=self.mainWindow)
+                self._rightGLAxis = GuiNdWidgetAxis(self._stripFrameScrollArea, spectrumDisplay=self, mainWindow=self.mainWindow,
+                                                    drawRightAxis=True, drawBottomAxis=False,
+                                                    fullHeightRightAxis=False, fullWidthBottomAxis=False)
 
                 self._rightGLAxis.tilePosition = (0, -1)
                 self._rightGLAxis.setAxisType(1)
@@ -372,7 +370,9 @@ class GuiSpectrumDisplay(CcpnModule):
                 pass
 
             else:
-                self._bottomGLAxis = GuiNdWidgetAxis(self._stripFrameScrollArea, spectrumDisplay=self, mainWindow=self.mainWindow)
+                self._bottomGLAxis = GuiNdWidgetAxis(self._stripFrameScrollArea, spectrumDisplay=self, mainWindow=self.mainWindow,
+                                                    drawRightAxis=False, drawBottomAxis=True,
+                                                    fullHeightRightAxis=False, fullWidthBottomAxis=False)
 
                 self._bottomGLAxis.tilePosition = (-1, 0)
                 self._bottomGLAxis.setAxisType(0)
@@ -1582,6 +1582,11 @@ class GuiSpectrumDisplay(CcpnModule):
 
             # show the required _rightGLAxis/_bottomGLAxis
             self.setVisibleAxes()
+
+        if self._rightGLAxis:
+            self._rightGLAxis.redrawAxes()
+        if self._bottomGLAxis:
+            self._bottomGLAxis.redrawAxes()
 
     def increaseTraceScale(self):
         # self.mainWindow.traceScaleUp(self.mainWindow)

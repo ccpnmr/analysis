@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-04-02 15:46:24 +0100 (Thu, April 02, 2020) $"
+__dateModified__ = "$dateModified: 2020-04-03 22:11:57 +0100 (Fri, April 03, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -30,7 +30,6 @@ from PyQt5 import QtWidgets, QtGui, QtCore
 from ast import literal_eval
 from typing import Tuple, Any
 from collections import OrderedDict, Iterable
-from ccpn.ui.gui.widgets.LineEdit import LineEdit
 from ccpn.ui.gui.widgets.MessageDialog import showWarning
 from ccpn.ui.gui.popups.Dialog import handleDialogApply, _verifyPopupChangesApply
 from ccpn.core.lib.ContextManagers import undoStackBlocking
@@ -38,7 +37,6 @@ from ccpn.core.lib.ContextManagers import queueStateChange
 from ccpn.core.Spectrum import Spectrum
 from ccpn.core.SpectrumGroup import SpectrumGroup, SeriesTypes
 from ccpn.ui.gui.widgets.Tabs import Tabs
-from ccpn.ui.gui.widgets.Widget import Widget
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.Frame import Frame
 from ccpn.ui.gui.widgets.PulldownListsForObjects import SpectrumGroupPulldown
@@ -244,6 +242,10 @@ class SpectrumGroupEditor(_GroupEditorPopupABC):
 
         self.currentSpectra = self._getSpectraFromList()
 
+        # this should be the list when the popup is opened
+        self._defaultSpectra = self.currentSpectra
+        self._defaultName = self._editedObject.name if self._editedObject else ''
+
         # set the labels in the first pass
         for tNum, (tabName, tabFunc) in enumerate(self.TAB_NAMES):
             self._tabWidget.setTabText(tNum, tabName)
@@ -262,6 +264,7 @@ class SpectrumGroupEditor(_GroupEditorPopupABC):
 
     def connectSignals(self):
         # connect to changes in the spectrumGroup
+        self.nameEdit.textChanged.connect(self.seriesTab._queueChangeName)
         self.leftListWidget.model().dataChanged.connect(self._spectraChanged)
         self.leftListWidget.model().rowsRemoved.connect(self._spectraChanged)
         self.leftListWidget.model().rowsInserted.connect(self._spectraChanged)
@@ -292,8 +295,8 @@ class SpectrumGroupEditor(_GroupEditorPopupABC):
 
             if thisSpec.dimensionCount == 1:
                 contoursTab = ColourTab(parent=self, mainWindow=self.mainWindow, spectrum=thisSpec,
-                                          showCopyOptions=True if len(spectra1d) > 1 else False,
-                                          copyToSpectra=spectra1d)
+                                        showCopyOptions=True if len(spectra1d) > 1 else False,
+                                        copyToSpectra=spectra1d)
 
                 self._colourTabs1d.addTab(contoursTab, thisSpec.name)
                 contoursTab.setContentsMargins(*TABMARGINS)
@@ -346,6 +349,12 @@ class SpectrumGroupEditor(_GroupEditorPopupABC):
             for colourTab in (self._colourTabs1d, self._colourTabsNd):
                 for aTab in tuple(colourTab.widget(ii) for ii in range(colourTab.count())):
                     aTab._populateColour()
+
+        self.seriesTab._fillSeriesFrame(self._defaultSpectra)
+        self.seriesTab._populate()
+
+        # NOTE:ED - check that the list widgets are populated correctly - may be called twice
+        super()._populate()
 
     def _tabClicked1d(self, index):
         """Callback for clicking a tab - needed for refilling the checkboxes and populating the pulldown
@@ -431,8 +440,8 @@ class SpectrumGroupEditor(_GroupEditorPopupABC):
             else:
                 if spec.dimensionCount == 1:
                     contoursTab = ColourTab(parent=self, mainWindow=self.mainWindow, spectrum=spec,
-                                              showCopyOptions=True if len(spectra1d) > 1 else False,
-                                              copyToSpectra=spectra1d)
+                                            showCopyOptions=True if len(spectra1d) > 1 else False,
+                                            copyToSpectra=spectra1d)
 
                 self._colourTabs1d.addTab(contoursTab, spec.name)
                 contoursTab.setContentsMargins(*TABMARGINS)
@@ -500,7 +509,7 @@ class SpectrumGroupEditor(_GroupEditorPopupABC):
                 self._tabWidget.removeTab(index)
         else:
             if not (0 <= index < NUMTABS):
-                self._tabWidget.insertTab(self._tabWidget.count()-1, self._generalTabWidgetNd, GENERALTABND_LABEL)
+                self._tabWidget.insertTab(self._tabWidget.count() - 1, self._generalTabWidgetNd, GENERALTABND_LABEL)
 
         self.seriesTab._fillSeriesFrame(self._newSpectra)
 
@@ -511,7 +520,7 @@ class SpectrumGroupEditor(_GroupEditorPopupABC):
         """Copy the contents of tabs to other spectra
         """
         colourTabs = [self._colourTabs1d.widget(ii) for ii in range(self._colourTabs1d.count())] + \
-                    [self._colourTabsNd.widget(ii) for ii in range(self._colourTabsNd.count())]
+                     [self._colourTabsNd.widget(ii) for ii in range(self._colourTabsNd.count())]
         for aTab in colourTabs:
             if aTab.spectrum == fromSpectrum:
                 fromSpectrumTab = aTab
@@ -724,7 +733,7 @@ class SeriesFrame(Frame):
         try:
             if self.seriesType.getIndex() == SeriesTypes.FLOAT.value:
                 seriesValue = float(value)
-            if self.seriesType.getIndex() == SeriesTypes.INTEGER.value:
+            elif self.seriesType.getIndex() == SeriesTypes.INTEGER.value:
                 seriesValue = int(value)
             elif self.seriesType.getIndex() == SeriesTypes.STRING.value:
                 seriesValue = str(value)
@@ -732,7 +741,7 @@ class SeriesFrame(Frame):
                 seriesValue = literal_eval(value)
 
         except Exception as es:
-            pass
+            return partial(self._changeSpectrumSeriesValues, spectrumGroup, spectrum, dim, '<BADVALUE>')
 
         else:
             specValue = spectrum._getSeriesItemsById(spectrumGroup.pid)
@@ -766,9 +775,9 @@ class SeriesFrame(Frame):
                         return False
                 else:
                     return False
-      
+
         return True
-    
+
     def _validateEditors(self):
         """Check that all the editors contain the same type of seriesValues
         """
@@ -785,7 +794,7 @@ class SeriesFrame(Frame):
                 seriesValue = None
                 if self.seriesType.getIndex() == SeriesTypes.FLOAT.value:
                     seriesValue = float(value)
-                if self.seriesType.getIndex() == SeriesTypes.INTEGER.value:
+                elif self.seriesType.getIndex() == SeriesTypes.INTEGER.value:
                     seriesValue = int(value)
                 elif self.seriesType.getIndex() == SeriesTypes.STRING.value:
                     seriesValue = str(value)
@@ -800,7 +809,7 @@ class SeriesFrame(Frame):
                         cmp = self._compareDict(literalDictCompare, seriesValue)
                         if not cmp:
                             errorDict = True
-                        
+
             except Exception as es:
                 # catch exception raised by bad literals
                 colour = INVALIDROWCOLOUR
@@ -864,7 +873,22 @@ class SeriesFrame(Frame):
                 dict containing current changes
                 stateValue, an overriding boolean that needs to be true for all else to be true
         """
-        return self._parent, self._changes, True if self._parent._currentEditorState() else False
+
+        applyState = revertState = False
+        try:
+            editName = self._parent.nameEdit.text()
+            defaultName = self._parent._defaultName
+            pidState = self._parent._groupedObjects
+            pidList = [str(spec.pid) for spec in self._parent._defaultSpectra]
+
+            revertState = (pidState != pidList) or (editName != defaultName)
+            applyState = (True if pidState else False) and (True if editName else False) and revertState
+
+        except Exception as es:
+            pass
+
+        return self._parent, self._changes, applyState, revertState, \
+               self._parent._applyButton, self._parent._revertButton
 
     @queueStateChange(_verifyPopupChangesApply)
     def _queueChangeSeriesType(self, spectrumGroup):
@@ -881,6 +905,22 @@ class SeriesFrame(Frame):
         """set the spectrumGroup seriesType
         """
         self._parent._spectrumGroupSeriesTypeEdited = value
+
+    @queueStateChange(_verifyPopupChangesApply)
+    def _queueChangeName(self):
+        """callback from editing the name
+        """
+        editName = self._parent.nameEdit.text()
+        defaultName = self._parent._defaultName
+
+        if editName != defaultName:
+            return partial(self._changeName, editName)
+
+    def _changeName(self, value):
+        """set the spectrumGroup seriesType
+        """
+        # doesn't need to do anything, just insert an item into the revert _changes dict
+        pass
 
 
 class _SpectrumGroupContainer(AttrDict):

@@ -55,7 +55,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-04-02 15:46:23 +0100 (Thu, April 02, 2020) $"
+__dateModified__ = "$dateModified: 2020-04-03 22:11:57 +0100 (Fri, April 03, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -154,6 +154,7 @@ class CcpnGLWidgetABC(QOpenGLWidget):
     INVERTXAXIS = True
     INVERTYAXIS = True
     AXISLOCKEDBUTTON = True
+    AXISLOCKEDBUTTONALLSTRIPS = True
     SPECTRUMXZOOM = 1.0e1
     SPECTRUMYZOOM = 1.0e1
     SHOWSPECTRUMONPHASING = True
@@ -162,6 +163,10 @@ class CcpnGLWidgetABC(QOpenGLWidget):
     AXIS_MOUSEYOFFSET = AXIS_MARGINBOTTOM + (0 if AXIS_INSIDE else AXIS_LINE)
 
     def __init__(self, parent=None, mainWindow=None, **kwds):
+
+        # add a flag so that scaling cannot be done until the gl attributes are initialised
+        self.glReady = False
+
         super().__init__(parent=parent)
 
         # flag to display paintGL but keep an empty screen
@@ -179,9 +184,6 @@ class CcpnGLWidgetABC(QOpenGLWidget):
 
         self._preferences = self.application.preferences.general
         self.globalGL = None
-
-        # add a flag so that scaling cannot be done until the gl attributes are initialised
-        self.glReady = False
 
         self.setMouseTracking(True)  # generate mouse events when button not pressed
 
@@ -259,8 +261,6 @@ class CcpnGLWidgetABC(QOpenGLWidget):
         self._crosshairVisible = True
         self._spectrumBordersVisible = True
         self._axesVisible = True
-        self._axisLocked = False
-        self._useDefaultAspect = False
         self._aspectRatioMode = 0
         self._showSpectraOnPhasing = False
         self._xUnits = 0
@@ -335,7 +335,6 @@ class CcpnGLWidgetABC(QOpenGLWidget):
 
         self._ordering = []
         self._visibleOrdering = []
-        self.glReady = True
 
     def refreshDevicePixelRatio(self):
         """refresh the devicePixelRatio for the viewports
@@ -507,6 +506,8 @@ class CcpnGLWidgetABC(QOpenGLWidget):
         GL.glBlendFuncSeparate(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA, GL.GL_ONE, GL.GL_ONE)
         self.setBackgroundColour(self.background)
         self.globalGL._shaderProgramTex.setBlendEnabled(0)
+
+        self.glReady = True
 
     def paintGL(self):
         w = self.w

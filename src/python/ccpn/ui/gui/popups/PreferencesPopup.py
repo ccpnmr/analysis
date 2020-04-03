@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-04-02 15:46:23 +0100 (Thu, April 02, 2020) $"
+__dateModified__ = "$dateModified: 2020-04-03 22:11:57 +0100 (Fri, April 03, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -616,7 +616,6 @@ class PreferencesPopup(CcpnDialogMainWidget):
         self.zoomCentre.setIndex(self.preferences.general.zoomCentreType)
         self.zoomPercentData.setValue(int(self.preferences.general.zoomPercent))
         self.stripWidthZoomPercentData.setValue(int(self.preferences.general.stripWidthZoomPercent))
-        self.defaultAspectRatioBox.setChecked(self.preferences.general.useDefaultAspectRatio)
         self.aspectRatioModeData.setIndex(self.preferences.general.aspectRatioMode)
 
         self.showZoomXLimitApplyBox.setChecked(self.preferences.general.zoomXLimitApply)
@@ -945,11 +944,6 @@ class PreferencesPopup(CcpnDialogMainWidget):
 
         row += 1
         HLine(parent, grid=(row, 0), gridSpan=(1, 3), colour=getColours()[DIVIDER], height=15)
-
-        row += 1
-        self.defaultAspectRatioLabel = Label(parent, text="Fixed Aspect Ratios: ", grid=(row, 0))
-        self.defaultAspectRatioBox = CheckBox(parent, grid=(row, 1))        #, checked=self.preferences.general.useDefaultAspectRatio)
-        self.defaultAspectRatioBox.toggled.connect(partial(self._queueToggleGeneralOptions, 'useDefaultAspectRatio'))
 
         row += 1
         self.aspectRatioModeLabel = Label(parent, text="Aspect Ratio Mode", grid=(row, 0))

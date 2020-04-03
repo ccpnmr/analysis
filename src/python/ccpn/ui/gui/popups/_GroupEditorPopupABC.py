@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-03-10 01:57:06 +0000 (Tue, March 10, 2020) $"
+__dateModified__ = "$dateModified: 2020-04-03 22:11:57 +0100 (Fri, April 03, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -452,10 +452,10 @@ class _GroupEditorPopupABC(CcpnDialogMainWidget):
         self.LEFT_EMPTY_TEXT = 'Drag or double click %s to add here' % self.PROJECT_ITEM_ATTRIBUTE
         self.RIGHT_EMPTY_TEXT = "No %s: try 'Filter by' settings" % self.PROJECT_ITEM_ATTRIBUTE
 
-        self._acceptButtonText = 'Save changes to %ss' % self.GROUP_NAME
+        self._acceptButtonText = 'Save changes to %s' % self.PLURAL_GROUPED_NAME
 
         super().__init__(parent=parent, windowTitle=title, setLayout=True, margins=(0, 0, 0, 0),
-                         spacing=(5, 5), size=(900,1600), **kwds)
+                         spacing=(5, 5), size=(900, 1600), **kwds)
 
         self.errorIcon = Icon('icons/exclamation_small')
 
@@ -495,17 +495,33 @@ class _GroupEditorPopupABC(CcpnDialogMainWidget):
 
         # enable the buttons
         self.setOkButton(callback=self._applyAndClose, text=self._acceptButtonText, tipText='Apply according to current settings and close')
-        self.setDiscardButton(callback=self._cancel, text=self.BUTTON_CANCEL, tipText='Cancel the New/Edit operation')
+        self.setCancelButton(callback=self._cancel, text=self.BUTTON_CANCEL, tipText='Cancel the New/Edit operation')
+        self.setRevertButton(callback=self._revertClicked, enabled=False)
+
         self.setDefaultButton(CcpnDialogMainWidget.OKBUTTON)
 
         self.__postInit__()
-        self._actionButton = self.getButton(self.OKBUTTON)
+        self._applyButton = self.getButton(self.OKBUTTON)
         self._cancelButton = self.getButton(self.CANCELBUTTON)
+        self._revertButton = self.getButton(self.RESETBUTTON)
 
         # self._setApplyButtons()
         # self._addWidgetsToLayout()
         self._connectLists()
+        self._populateLists()
 
+        # # one cannot be a copy of the other unless its a deep copy...
+        # # this is easier
+        # self._previousState = self._getPreviousState()
+        # self._updatedState = copy.deepcopy(self._getPreviousState())
+        #
+        # self._previousNames = {key: key for key in self._previousState}
+        # self._updatedNames = dict(self._previousNames)
+        #
+        # self.connectModels()
+        # self._updateStateOnSelection()
+
+    def _populateLists(self):
         # one cannot be a copy of the other unless its a deep copy...
         # this is easier
         self._previousState = self._getPreviousState()
@@ -516,6 +532,9 @@ class _GroupEditorPopupABC(CcpnDialogMainWidget):
 
         self.connectModels()
         self._updateStateOnSelection()
+
+    def _populate(self):
+        self._populateLists()
 
     def _getPreviousState(self):
         result = {}
@@ -588,7 +607,7 @@ class _GroupEditorPopupABC(CcpnDialogMainWidget):
         row = 3
         self.addSpacer(0, 5, grid=(row, 0), gridSpan=(1, 3), parent=self._dialogWidget)
 
-        row+=1
+        row += 1
         self.rightItemsLabel = Label(self._dialogWidget, self.GROUP_NAME, grid=(row, 2))
 
         row += 1
@@ -618,7 +637,7 @@ class _GroupEditorPopupABC(CcpnDialogMainWidget):
         row += 1
         self.addSpacer(0, 5, grid=(row, 0), gridSpan=(1, 3), parent=self._dialogWidget)
 
-        row+=1
+        row += 1
         self.errorFrame = Frame(self._dialogWidget, setLayout=True, grid=(row, 1), gridSpan=(1, 2))
 
         row += 1
@@ -750,10 +769,9 @@ class _GroupEditorPopupABC(CcpnDialogMainWidget):
         return getattr(self.project, self.PROJECT_ITEM_ATTRIBUTE)
 
     def _setAcceptButtonState(self):
-        if self.self.editMode and self._dirty:
+        if self.editMode and self._dirty:
             # self.applyButtons.setButtonEnabled(self._acceptButtonText, True)
-            self._actionButton.setEnabled(True)
-
+            self._applyButton.setEnabled(True)
 
     def _currentEditorState(self):
         result = {}
@@ -771,7 +789,6 @@ class _GroupEditorPopupABC(CcpnDialogMainWidget):
 
     def _updateNameOnEdit(self):
         if self.editMode and self._editedObject != None:
-
             editedObjectName = self._editedObject.name
             newName = self.nameEdit.text()
             self._updatedNames[editedObjectName] = newName
@@ -994,7 +1011,7 @@ class _GroupEditorPopupABC(CcpnDialogMainWidget):
                 self.errors.append(message)
 
         # self.applyButtons.setButtonEnabled(self._acceptButtonText, enabled)
-        self._actionButton.setEnabled(enabled)
+        self._applyButton.setEnabled(enabled)
 
         self._emptyErrorFrame()
 

@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-04-03 22:11:57 +0100 (Fri, April 03, 2020) $"
+__dateModified__ = "$dateModified: 2020-04-05 14:31:47 +0100 (Sun, April 05, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -26,6 +26,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 
 import typing
+from copy import deepcopy
 from PyQt5 import QtWidgets, QtCore, QtGui
 from ccpn.core.Project import Project
 from ccpn.core.Peak import Peak
@@ -197,16 +198,28 @@ class GuiStrip(Frame):
             self._contourThickness = self._preferences.contourThickness
             self._spectrumBordersVisible = self._preferences.showSpectrumBorder
 
+            # NOTE:ED - make this more pythonic
+            _specDisplay = self.spectrumDisplay
+            _specDisplay._rightGLAxis._xUnits = settings[AXISXUNITS]
+            _specDisplay._rightGLAxis._yUnits = settings[AXISYUNITS]
+            _specDisplay._rightGLAxis._aspectRatioMode = settings[AXISASPECTRATIOMODE]
+            _specDisplay._rightGLAxis._aspectRatios = deepcopy(settings[AXISASPECTRATIOS])
+
+            _specDisplay._bottomGLAxis._xUnits = settings[AXISXUNITS]
+            _specDisplay._bottomGLAxis._yUnits = settings[AXISYUNITS]
+            _specDisplay._bottomGLAxis._aspectRatioMode = settings[AXISASPECTRATIOMODE]
+            _specDisplay._bottomGLAxis._aspectRatios = deepcopy(settings[AXISASPECTRATIOS])
+
         self._storedPhasingData = [[0.0, 0.0, 0.0], [0.0, 0.0, 0.0]]
         self.showActivePhaseTrace = True
         self.pivotLine = None
         self._lastClickedObjects = None
 
         # set the axis units from the current settings
-        self._CcpnGLWidget.xUnits = settings[AXISXUNITS]
-        self._CcpnGLWidget.yUnits = settings[AXISYUNITS]
-        self._CcpnGLWidget.aspectRatioMode = settings[AXISASPECTRATIOMODE]
-        self._CcpnGLWidget.aspectRatios = settings[AXISASPECTRATIOS]
+        self._CcpnGLWidget._xUnits = settings[AXISXUNITS]
+        self._CcpnGLWidget._yUnits = settings[AXISYUNITS]
+        self._CcpnGLWidget._aspectRatioMode = settings[AXISASPECTRATIOMODE]
+        self._CcpnGLWidget._aspectRatios = deepcopy(settings[AXISASPECTRATIOS])
 
         # self._CcpnGLWidget._doubleCrosshairVisible = self._preferences.showDoubleCrosshair
 

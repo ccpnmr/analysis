@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-04-03 22:11:57 +0100 (Fri, April 03, 2020) $"
+__dateModified__ = "$dateModified: 2020-04-05 14:31:47 +0100 (Sun, April 05, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -362,6 +362,9 @@ class GuiSpectrumDisplay(CcpnModule):
 
                 self._rightGLAxis.tilePosition = (0, -1)
                 self._rightGLAxis.setAxisType(1)
+                # # I think I am missing a notifier for setting the aspectRatio of the new axes
+                # self._rightGLAxis.aspectRatioMode = self.application.preferences.general.aspectRatioMode
+                # self._rightGLAxis.aspectRatios = self.application.preferences.general.aspectRatios.copy()
                 self._rightGLAxis.show()
 
             # NOTE:ED - testing new axis widget - required actually adding tiling
@@ -376,6 +379,8 @@ class GuiSpectrumDisplay(CcpnModule):
 
                 self._bottomGLAxis.tilePosition = (-1, 0)
                 self._bottomGLAxis.setAxisType(0)
+                # self._bottomGLAxis.aspectRatioMode = self.application.preferences.general.aspectRatioMode
+                # self._bottomGLAxis.aspectRatios = self.application.preferences.general.aspectRatios.copy()
                 self._bottomGLAxis.hide()
 
             # add a small widget to fill the corner between the widgets

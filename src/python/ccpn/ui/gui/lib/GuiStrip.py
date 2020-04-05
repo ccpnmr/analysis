@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-04-05 14:31:47 +0100 (Sun, April 05, 2020) $"
+__dateModified__ = "$dateModified: 2020-04-05 14:36:46 +0100 (Sun, April 05, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -198,17 +198,10 @@ class GuiStrip(Frame):
             self._contourThickness = self._preferences.contourThickness
             self._spectrumBordersVisible = self._preferences.showSpectrumBorder
 
-            # NOTE:ED - make this more pythonic
-            _specDisplay = self.spectrumDisplay
-            _specDisplay._rightGLAxis._xUnits = settings[AXISXUNITS]
-            _specDisplay._rightGLAxis._yUnits = settings[AXISYUNITS]
-            _specDisplay._rightGLAxis._aspectRatioMode = settings[AXISASPECTRATIOMODE]
-            _specDisplay._rightGLAxis._aspectRatios = deepcopy(settings[AXISASPECTRATIOS])
-
-            _specDisplay._bottomGLAxis._xUnits = settings[AXISXUNITS]
-            _specDisplay._bottomGLAxis._yUnits = settings[AXISYUNITS]
-            _specDisplay._bottomGLAxis._aspectRatioMode = settings[AXISASPECTRATIOMODE]
-            _specDisplay._bottomGLAxis._aspectRatios = deepcopy(settings[AXISASPECTRATIOS])
+            self.spectrumDisplay._setFloatingAxes(xUnits=settings[AXISXUNITS],
+                                                  yUnits=settings[AXISYUNITS],
+                                                  aspectRatioMode=settings[AXISASPECTRATIOMODE],
+                                                  aspectRatios=settings[AXISASPECTRATIOS])
 
         self._storedPhasingData = [[0.0, 0.0, 0.0], [0.0, 0.0, 0.0]]
         self.showActivePhaseTrace = True

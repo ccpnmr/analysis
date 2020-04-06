@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-02-12 20:44:58 +0000 (Wed, February 12, 2020) $"
+__dateModified__ = "$dateModified: 2020-04-06 23:41:33 +0100 (Mon, April 06, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -53,7 +53,7 @@ from ccpn.ui.gui.lib.GuiWindow import GuiWindow
 from ccpn.ui.gui.modules.MacroEditor import MacroEditor
 from ccpn.ui.gui.widgets import MessageDialog
 from ccpn.ui.gui.widgets.Action import Action
-from ccpn.ui.gui.widgets.FileDialog import FileDialog
+from ccpn.ui.gui.widgets.FileDialog import FileDialog, USERWORKINGPATH
 from ccpn.ui.gui.widgets.IpythonConsole import IpythonConsole
 from ccpn.ui.gui.widgets.Menu import Menu, MenuBar, SHOWMODULESMENU, CCPNMACROSMENU, TUTORIALSMENU, PLUGINSMENU, CCPNPLUGINSMENU
 from ccpn.ui.gui.widgets.SideBar import SideBar  #,SideBar
@@ -612,7 +612,9 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
         if result:
             if projectDir is None:
                 dialog = FileDialog(self, fileMode=FileDialog.Directory, text="Open Project",
-                                    acceptMode=FileDialog.AcceptOpen, preferences=self.application.preferences.general)
+                                    acceptMode=FileDialog.AcceptOpen, preferences=self.application.preferences.general,
+                                    initialPath=self.application.preferences.general.userWorkingPath,
+                                    pathID=USERWORKINGPATH)
                 projectDir = dialog.selectedFile()
 
             if projectDir:

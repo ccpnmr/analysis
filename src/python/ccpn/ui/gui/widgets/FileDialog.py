@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-04-01 16:35:55 +0100 (Wed, April 01, 2020) $"
+__dateModified__ = "$dateModified: 2020-04-06 23:41:33 +0100 (Mon, April 06, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -25,14 +25,31 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
-from PyQt5 import QtGui, QtWidgets
+from PyQt5 import QtWidgets
 
 import sys
 import os
-from ccpn.ui.gui.widgets.ButtonList import ButtonList
-from ccpn.ui.gui.widgets.Frame import Frame
 from ccpn.util.Path import aPath
 from ccpn.util.Common import makeIterableList
+
+USERDEFAULTPATH = 'userDefaultPath'
+USERWORKINGPATH = 'userWorkingPath'
+USERLAYOUTSPATH = 'userLayoutsPaths'
+USERMACROSPATH = 'userMacrosPath'
+USERNEFPATH = 'userNefPath'
+USERACHIVESPATH = 'userAchivesPath'
+USERPLUGINSPATH = 'userPluginsPath'
+
+
+_initialPaths = {}
+
+def getInitialPath(pathID=USERDEFAULTPATH):
+    if pathID in _initialPaths:
+        return _initialPaths[pathID]
+
+
+def setInitialPath(pathID=USERDEFAULTPATH, initialPath=None):
+    _initialPaths[pathID] = initialPath
 
 
 class FileDialog(QtWidgets.QFileDialog):
@@ -40,29 +57,33 @@ class FileDialog(QtWidgets.QFileDialog):
     # def __init__(self, parent=None, fileMode=QtWidgets.QFileDialog.AnyFile, text=None,
     #              acceptMode=QtWidgets.QFileDialog.AcceptOpen, preferences=None, **kwds):
 
-    _lastUserWorkingPath = None
-
     def __init__(self, parent=None, fileMode=QtWidgets.QFileDialog.AnyFile, text=None,
                  acceptMode=QtWidgets.QFileDialog.AcceptOpen, preferences=None,
                  selectFile=None, filter=None, directory=None,
                  restrictDirToFilter=False, multiSelection=False, useNative=False,
+                 initialPath=None, pathID=USERDEFAULTPATH, updatePathOnReject=True,
                  **kwds):
 
         # ejb - added selectFile to suggest a filename in the file box
         #       this is not passed to the super class
 
         # GWV - added default directory and path expansion
-        # EJB - added _lastUserWorkingPath to store current directory
+        # EJB - added _lastUserWorkingPath to store current directory - removed
+        # EJB - added _initialPaths to store current directories - must be set when calling FileDialog
         if directory is None:
             # set the current working path if this is the first time the dialog has been opened
-            if not FileDialog._lastUserWorkingPath and preferences:
-                FileDialog._lastUserWorkingPath = preferences.userWorkingPath
-
-            directory = str(aPath(FileDialog._lastUserWorkingPath or '~'))
+            if pathID not in _initialPaths and initialPath:
+                _initialPaths[pathID] = initialPath
+            if pathID in _initialPaths:
+                directory = str(aPath(_initialPaths[pathID] or '~'))
+            else:
+                directory = str(aPath('~'))
             self._setDirectory = False
         else:
             directory = str(aPath(directory))
             self._setDirectory = True
+        self._pathID = pathID
+        self._updatePathOnReject = updatePathOnReject
 
         QtWidgets.QFileDialog.__init__(self, parent, caption=text, directory=directory, **kwds)
 
@@ -141,16 +162,26 @@ class FileDialog(QtWidgets.QFileDialog):
 
             self.result = self.exec_()
 
-    def accept(self):
+    def _updateCurrentPath(self):
+        """Update the current path for the current pathID
+        """
         if not self._setDirectory:
             # accept the dialog and set the current selected folder for next time if directory not originally set
             absPath = self.directory().absolutePath()
-            FileDialog._lastUserWorkingPath = absPath
-            print('>>> setting file dialog path:', absPath)
+            _initialPaths[self._pathID] = absPath
+
+    def accept(self):
+        """Update the current path and exit the dialog
+        """
+        self._updateCurrentPath()
         super(FileDialog, self).accept()
 
     def reject(self):
+        """Update the current path (if required) and exit the dialog
+        """
         self.selectedFiles = lambda : None # needs to clear the selection when closing
+        if self._updatePathOnReject:
+            self._updateCurrentPath()
         super(FileDialog, self).reject()
 
     def _predir(self, file: str):
@@ -208,12 +239,28 @@ class NefFileDialog(QtWidgets.QFileDialog):
     _selectPath = os.path.expanduser('~')
 
     def __init__(self, parent=None, fileMode=QtWidgets.QFileDialog.AnyFile, text=None,
-                 acceptMode=QtWidgets.QFileDialog.AcceptOpen, preferences=None, selectFile=None, **kwds):
+                 acceptMode=QtWidgets.QFileDialog.AcceptOpen, preferences=None, selectFile=None,
+                 directory=None, initialPath=None, pathID=USERDEFAULTPATH, updatePathOnReject=True,
+                 **kwds):
 
         # ejb - added selectFile to suggest a filename in the file box
         #       this is not passed to the super class
 
-        QtWidgets.QFileDialog.__init__(self, parent, caption=text, **kwds)
+        if directory is None:
+            if pathID not in _initialPaths and initialPath:
+                _initialPaths[pathID] = initialPath
+            if pathID in _initialPaths:
+                directory = str(aPath(_initialPaths[pathID] or '~'))
+            else:
+                directory = str(aPath('~'))
+            self._setDirectory = False
+        else:
+            directory = str(aPath(directory))
+            self._setDirectory = True
+        self._pathID = pathID
+        self._updatePathOnReject = updatePathOnReject
+
+        QtWidgets.QFileDialog.__init__(self, parent, caption=text, directory=directory, **kwds)
 
         self.staticFunctionDict = {
             (0, 0)                               : 'getOpenFileName',
@@ -288,11 +335,26 @@ class NefFileDialog(QtWidgets.QFileDialog):
         self.acceptFunc = acceptFunc
         self.rejectFunc = rejectFunc
 
+    def _updateCurrentPath(self):
+        """Update the current path for the current pathID
+        """
+        if not self._setDirectory:
+            # accept the dialog and set the current selected folder for next time if directory not originally set
+            absPath = self.directory().absolutePath()
+            _initialPaths[self._pathID] = absPath
+
     def reject(self):
+        """Update the current path (if required) and exit the dialog
+        """
+        if self._updatePathOnReject:
+            self._updateCurrentPath()
         super(NefFileDialog, self).reject()
         # self.rejectFunc()
 
     def accept(self):
+        """Update the current path and exit the dialog
+        """
+        self._updateCurrentPath()
         super(NefFileDialog, self).accept()
         # self.acceptFunc(self.selectedFile())
 

@@ -11,7 +11,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-03-13 16:14:20 +0000 (Fri, March 13, 2020) $"
+__dateModified__ = "$dateModified: 2020-04-06 23:41:33 +0100 (Mon, April 06, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -26,7 +26,7 @@ import datetime
 import os
 from ccpn.ui.gui.modules.CcpnModule import CcpnModule
 from ccpn.ui.gui.widgets.ButtonList import ButtonList
-from ccpn.ui.gui.widgets.FileDialog import FileDialog
+from ccpn.ui.gui.widgets.FileDialog import FileDialog, USERMACROSPATH
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.LineEdit import LineEdit
 from ccpn.ui.gui.widgets.IpythonConsole import IpythonConsole
@@ -196,7 +196,10 @@ class MacroEditor(CcpnModule):
         newText = self.textBox.toPlainText()
         dialog = FileDialog(self, fileMode=FileDialog.AnyFile, text='Save Macro As...',
                             acceptMode=FileDialog.AcceptSave, selectFile=self.nameLineEdit.text(),
-                            directory=self.macroPath, filter='*.py', preferences=self.preferences.general)
+                            # directory=self.macroPath,
+                            filter='*.py', preferences=self.preferences.general,
+                            initialPath=self.macroPath,
+                            pathID=USERMACROSPATH)
         filePath = dialog.selectedFile()
 
         if filePath:
@@ -217,8 +220,12 @@ class MacroEditor(CcpnModule):
         """
 
         dialog = FileDialog(self, text='Open Macro', fileMode=FileDialog.ExistingFile,
-                            acceptMode=FileDialog.AcceptOpen, directory=self.macroPath,
-                            filter='*.py', preferences=self.preferences.general)
+                            acceptMode=FileDialog.AcceptOpen,
+                            # directory=self.macroPath,
+                            filter='*.py', preferences=self.preferences.general,
+                            initialPath=self.macroPath,
+                            pathID=USERMACROSPATH
+                            )
 
         filePath = dialog.selectedFile()
         self._openPath(filePath)

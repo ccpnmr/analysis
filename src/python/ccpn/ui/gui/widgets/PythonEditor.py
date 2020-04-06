@@ -8,7 +8,7 @@ from PyQt5.QtWidgets import QWidget, QPlainTextEdit, QTextEdit
 from PyQt5.QtGui import QColor, QPainter, QTextFormat
 from PyQt5 import QtPrintSupport
 from ccpn.ui.gui.widgets.Base import Base
-from ccpn.ui.gui.widgets.FileDialog import FileDialog
+from ccpn.ui.gui.widgets.FileDialog import FileDialog, USERMACROSPATH
 
 
 VerticalLineCountColour = Qt.lightGray
@@ -286,7 +286,8 @@ class QCodeEditor(QPlainTextEdit,Base):
 
         dialog = FileDialog(self, fileMode=FileDialog.AnyFile, text='Save Macro As...',
                             acceptMode=FileDialog.AcceptSave, selectFile=fileName,
-                            filter='*.pdf')
+                            filter='*.pdf',
+                            pathID=USERMACROSPATH)
         filename = dialog.selectedFile()
         if filename:
             printer = QtPrintSupport.QPrinter(QtPrintSupport.QPrinter.HighResolution)

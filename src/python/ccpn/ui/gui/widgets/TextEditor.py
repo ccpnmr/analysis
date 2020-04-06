@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-03-19 17:42:33 +0000 (Thu, March 19, 2020) $"
+__dateModified__ = "$dateModified: 2020-04-06 23:41:33 +0100 (Mon, April 06, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -28,7 +28,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 import sys
 import os
 from PyQt5 import QtGui, QtWidgets, QtCore, QtPrintSupport
-from ccpn.ui.gui.widgets.FileDialog import FileDialog
+from ccpn.ui.gui.widgets.FileDialog import FileDialog, USERMACROSPATH
 from ccpn.ui.gui.widgets.Base import Base
 from ccpn.ui.gui.widgets.Action import Action
 # from ccpn.ui.gui.guiSettings import fixedWidthFont
@@ -122,7 +122,8 @@ class TextEditor(QtWidgets.QTextEdit, Base):
 
         dialog = FileDialog(self, fileMode=FileDialog.AnyFile, text='Save Macro As...',
                             acceptMode=FileDialog.AcceptSave, selectFile=fileName,
-                            filter='*.pdf')
+                            filter='*.pdf',
+                            pathID=USERMACROSPATH)
         filename = dialog.selectedFile()
         if filename:
             printer = QtPrintSupport.QPrinter(QtPrintSupport.QPrinter.HighResolution)
@@ -275,7 +276,8 @@ class PlainTextEditor(QtWidgets.QPlainTextEdit, Base):
 
         dialog = FileDialog(self, fileMode=FileDialog.AnyFile, text='Save Macro As...',
                             acceptMode=FileDialog.AcceptSave, selectFile=fileName,
-                            filter='*.pdf')
+                            filter='*.pdf',
+                            pathID=USERMACROSPATH)
         filename = dialog.selectedFile()
         if filename:
             printer = QtPrintSupport.QPrinter(QtPrintSupport.QPrinter.HighResolution)

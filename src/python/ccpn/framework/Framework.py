@@ -11,7 +11,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-04-01 16:35:55 +0100 (Wed, April 01, 2020) $"
+__dateModified__ = "$dateModified: 2020-04-06 23:41:32 +0100 (Mon, April 06, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -58,7 +58,9 @@ from ccpn.ui import interfaces, defaultInterface
 from ccpn.ui.gui.modules.CcpnModule import CcpnModule
 from ccpn.ui.gui.modules.MacroEditor import MacroEditor
 from ccpn.ui.gui.widgets import MessageDialog
-from ccpn.ui.gui.widgets.FileDialog import FileDialog
+from ccpn.ui.gui.widgets.FileDialog import FileDialog, USERWORKINGPATH, \
+    USERDEFAULTPATH, USERACHIVESPATH, \
+    USERLAYOUTSPATH, USERMACROSPATH, USERNEFPATH
 from ccpn.ui.gui.lib.GuiSpectrumView import _createdSpectrumView
 from ccpn.util import Logging
 from ccpn.util import Path
@@ -1459,7 +1461,9 @@ class Framework(NotifierBase):
         """
         if not path:
             dialog = FileDialog(parent=self.ui.mainWindow, fileMode=FileDialog.Directory, text='Load Project',
-                                acceptMode=FileDialog.AcceptOpen, preferences=self.preferences.general)
+                                acceptMode=FileDialog.AcceptOpen, preferences=self.preferences.general,
+                                initialPath=self.preferences.general.userWorkingPath,
+                                pathID=USERWORKINGPATH)
             path = dialog.selectedFile()
             if not path:
                 return None
@@ -1557,7 +1561,9 @@ class Framework(NotifierBase):
         if not path:
             text = 'Import NMR-Star File into Project'
             dialog = FileDialog(parent=self.ui.mainWindow, fileMode=FileDialog.AnyFile, text=text,
-                                acceptMode=FileDialog.AcceptOpen, preferences=self.preferences.general)
+                                acceptMode=FileDialog.AcceptOpen, preferences=self.preferences.general,
+                                initialPath=self.preferences.general.userWorkingPath,
+                                pathID=USERWORKINGPATH)
             path = dialog.selectedFile()
             if not path:
                 return
@@ -1666,7 +1672,9 @@ class Framework(NotifierBase):
                 getLogger().info(m)
             dialog = FileDialog(parent=self.ui.mainWindow, fileMode=FileDialog.ExistingFiles, text='Load Spectra',
                                 acceptMode=FileDialog.AcceptOpen, multiSelection=True,
-                                filter=filter, useNative=False)
+                                filter=filter, useNative=False,
+                                initialPath=self.preferences.general.userWorkingPath,
+                                pathID=USERWORKINGPATH)
             paths = dialog._customMultiSelectedFiles
 
         spectraPaths = []
@@ -1705,7 +1713,9 @@ class Framework(NotifierBase):
             # NBNB #FIXME if incorrect
             dialog = FileDialog(parent=self.ui.mainWindow, fileMode=FileDialog.AnyFile, text=text,
                                 acceptMode=FileDialog.AcceptOpen, preferences=self.preferences.general,
-                                filter=filter)
+                                filter=filter,
+                                initialPath=self.preferences.general.userWorkingPath,
+                                pathID=USERWORKINGPATH)
             path = dialog.selectedFile()
             if not path:
                 return
@@ -1807,7 +1817,9 @@ class Framework(NotifierBase):
             filter = '*.nef'
             dialog = FileDialog(parent=self.ui.mainWindow, fileMode=FileDialog.AnyFile, text=text,
                                 acceptMode=FileDialog.AcceptOpen, preferences=self.preferences.general,
-                                filter=filter)
+                                filter=filter,
+                                initialPath=self.preferences.general.userWorkingPath,
+                                pathID=USERNEFPATH)
             path = dialog.selectedFile()
             if not path:
                 return
@@ -2055,7 +2067,10 @@ class Framework(NotifierBase):
             archivesDirectory = os.path.join(self.project.path, Path.CCPN_ARCHIVES_DIRECTORY)
             dialog = FileDialog(self.ui.mainWindow, fileMode=FileDialog.ExistingFile, text="Select Archive",
                                 acceptMode=FileDialog.AcceptOpen, preferences=self.preferences.general,
-                                directory=archivesDirectory, filter='*.tgz')
+                                # directory=archivesDirectory,
+                                filter='*.tgz',
+                                initialPath=archivesDirectory,
+                                pathID=USERACHIVESPATH)
             archivePath = dialog.selectedFile()
 
         if archivePath:
@@ -2115,7 +2130,9 @@ class Framework(NotifierBase):
 
         fType = 'JSON (*.json)'
         dialog = FileDialog(fileMode=FileDialog.AnyFile, text='Open Saved Layout',
-                            acceptMode=FileDialog.AcceptOpen, filter=fType)
+                            acceptMode=FileDialog.AcceptOpen, filter=fType,
+                            initialPath=self.preferences.general.userLayoutsPath,
+                            pathID=USERLAYOUTSPATH)
         path = dialog.selectedFile()
         if not path:
             return
@@ -2126,8 +2143,13 @@ class Framework(NotifierBase):
         """Opens save Layout as dialog box and gets directory specified in the file dialog."""
         jsonType = '.json'
         fType = 'JSON (*.json)'
+
+        # NOTE:ED - need to add a directory identifier, can keep track of different directories then :)
+
         dialog = FileDialog(fileMode=FileDialog.AnyFile, text='Save Layout As',
-                            acceptMode=FileDialog.AcceptSave, filter=fType)
+                            acceptMode=FileDialog.AcceptSave, filter=fType,
+                            initialPath=self.preferences.general.userLayoutsPath,
+                            pathID=USERLAYOUTSPATH)
         newPath = dialog.selectedFile()
         if not newPath:
             return
@@ -2920,7 +2942,10 @@ class Framework(NotifierBase):
         if macroFile is None:
             dialog = FileDialog(self.ui.mainWindow, fileMode=FileDialog.ExistingFile, text="Run Macro",
                                 acceptMode=FileDialog.AcceptOpen, preferences=self.preferences.general,
-                                directory=self.preferences.general.userMacroPath, filter='*.py')
+                                # directory=self.preferences.general.userMacroPath,
+                                filter='*.py',
+                                initialPath=self.preferences.general.userMacroPath,
+                                pathID=USERMACROSPATH)
             macroFile = dialog.selectedFile()
             if not macroFile:
                 return
@@ -3144,7 +3169,9 @@ def getSaveDirectory(parent, preferences=None):
 
     dialog = FileDialog(parent=parent, fileMode=FileDialog.AnyFile, text='Save Project As',
                         acceptMode=FileDialog.AcceptSave, preferences=preferences,
-                        restrictDirToFilter=False)
+                        restrictDirToFilter=False,
+                                initialPath=preferences.general.userWorkingPath,
+                                pathID=USERWORKINGPATH)
     newPath = dialog.selectedFile()
 
     # if not iterable then ignore - dialog may return string or tuple(<path>, <fileOptions>)

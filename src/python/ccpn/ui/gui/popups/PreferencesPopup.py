@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-04-03 22:11:57 +0100 (Fri, April 03, 2020) $"
+__dateModified__ = "$dateModified: 2020-04-06 23:41:33 +0100 (Mon, April 06, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -58,7 +58,7 @@ from ccpn.ui.gui.popups.ValidateSpectraPopup import ValidateSpectraForPreference
 from ccpn.ui.gui.popups.Dialog import CcpnDialogMainWidget
 from ccpn.core.lib.ContextManagers import queueStateChange, undoStackBlocking
 from ccpn.ui.gui.widgets.PlaneToolbar import EMITSOURCE, EMITCLICKED, EMITIGNORESOURCE
-from ccpn.ui.gui.widgets.FileDialog import FileDialog
+from ccpn.ui.gui.widgets.FileDialog import FileDialog, USERWORKINGPATH, getInitialPath, setInitialPath
 
 
 PEAKFITTINGDEFAULTS = [PARABOLICMETHOD, GAUSSIANMETHOD]
@@ -84,8 +84,8 @@ def _updateSettings(self, newPrefs, updateColourScheme, updateSpectrumDisplays, 
 
     # update the current userWorkingPath in the active file dialogs
     if userWorkingPath:
-        FileDialog._lastUserWorkingPath = userWorkingPath
-
+        # FileDialog._lastUserWorkingPath = userWorkingPath
+        setInitialPath(pathID=USERWORKINGPATH, initialPath=userWorkingPath)
     self._updateDisplay(updateColourScheme, updateSpectrumDisplays)
 
     GLSignals = GLNotifier(parent=self)
@@ -242,7 +242,8 @@ class PreferencesPopup(CcpnDialogMainWidget):
             # check whether the colourScheme needs updating
             _changeColour = self.preferences.general.colourScheme != lastPrefs.general.colourScheme
             _changeUserWorkingPath = self.preferences.general.userWorkingPath != lastPrefs.general.userWorkingPath
-            _lastUserWorkingPath = FileDialog._lastUserWorkingPath
+            # _lastUserWorkingPath = FileDialog._lastUserWorkingPath
+            _lastUserWorkingPath = getInitialPath(pathID=USERWORKINGPATH)
             _newUserWorkingPath = self.preferences.general.userWorkingPath
 
             # add an undo item to update settings

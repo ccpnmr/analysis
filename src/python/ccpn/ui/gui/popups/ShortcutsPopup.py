@@ -11,8 +11,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-01-30 09:15:47 +0000 (Thu, January 30, 2020) $"
-__version__ = "$Revision: 3.0.0 $"
+__dateModified__ = "$dateModified: 2020-04-06 23:41:33 +0100 (Mon, April 06, 2020) $"
+__version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -28,7 +28,7 @@ from PyQt5 import QtWidgets
 from ccpn.ui.gui.widgets.Frame import ScrollableFrame, Frame
 from ccpn.ui.gui.widgets.Button import Button
 from ccpn.ui.gui.widgets.ButtonList import ButtonList
-from ccpn.ui.gui.widgets.FileDialog import FileDialog
+from ccpn.ui.gui.widgets.FileDialog import FileDialog, USERWORKINGPATH
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.LineEdit import LineEdit
 from ccpn.ui.gui.widgets.MessageDialog import showWarning
@@ -115,7 +115,9 @@ class ShortcutWidget(Frame):
             currentDirectory = os.path.expanduser(self.preferences.general.userMacroPath)
         dialog = FileDialog(self, text='Select Macro File', directory=currentDirectory,
                             fileMode=1, acceptMode=0,
-                            preferences=self.preferences.general)
+                            preferences=self.preferences.general,
+                            initialPath=self.preferences.general.userWorkingPath,
+                            pathID=USERWORKINGPATH)
         directory = dialog.selectedFiles()
         if len(directory) > 0:
             shortcutLineEdit.setText('runMacro("%s")' % directory[0])

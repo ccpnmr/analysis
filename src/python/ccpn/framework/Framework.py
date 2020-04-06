@@ -11,7 +11,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-04-06 23:41:32 +0100 (Mon, April 06, 2020) $"
+__dateModified__ = "$dateModified: 2020-04-07 00:59:26 +0100 (Tue, April 07, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -60,7 +60,7 @@ from ccpn.ui.gui.modules.MacroEditor import MacroEditor
 from ccpn.ui.gui.widgets import MessageDialog
 from ccpn.ui.gui.widgets.FileDialog import FileDialog, USERWORKINGPATH, \
     USERDEFAULTPATH, USERACHIVESPATH, \
-    USERLAYOUTSPATH, USERMACROSPATH, USERNEFPATH
+    USERLAYOUTSPATH, USERMACROSPATH, USERNEFPATH, setInitialPath
 from ccpn.ui.gui.lib.GuiSpectrumView import _createdSpectrumView
 from ccpn.util import Logging
 from ccpn.util import Path
@@ -1505,6 +1505,11 @@ class Framework(NotifierBase):
                 project._resetUndo(debug=self.level <= Logging.DEBUG2, application=self)
 
             project._validateDataUrlAndFilePaths()
+
+            if self.preferences.general.useProjectPath:
+                getLogger().debug2('application - setting current path %s' % Path.Path(path).parent)
+                setInitialPath(initialPath=Path.Path(path).parent,
+                               pathID=USERWORKINGPATH)
 
             return project
 

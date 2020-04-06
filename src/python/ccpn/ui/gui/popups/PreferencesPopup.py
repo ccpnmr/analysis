@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-04-06 23:41:33 +0100 (Mon, April 06, 2020) $"
+__dateModified__ = "$dateModified: 2020-04-07 00:59:26 +0100 (Tue, April 07, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -460,6 +460,11 @@ class PreferencesPopup(CcpnDialogMainWidget):
         self.pipesPathData.setDisabled(True)
         self.pipesPathDataButton.setDisabled(True)
 
+        row += 1
+        self.useProjectPathLabel = Label(parent, text="Set working path to Project: ", grid=(row, 0))
+        self.useProjectPathBox = CheckBox(parent, grid=(row, 1))  #, checked=self.preferences.general.useProjectPath)
+        self.useProjectPathBox.toggled.connect(partial(self._queueToggleGeneralOptions, 'useProjectPath'))
+
         # row += 1
         # self.annotationsLabel = Label(parent, text="Annotations", grid=(row, 0))
         # try:
@@ -579,6 +584,8 @@ class PreferencesPopup(CcpnDialogMainWidget):
         # TODO enable pipes PathData
         self.pipesPathData.setDisabled(True)
         self.pipesPathDataButton.setDisabled(True)
+
+        self.useProjectPathBox.setChecked(self.preferences.general.useProjectPath)
 
         self.useProxyBox.setChecked(self.preferences.proxySettings.useProxy)
         self.proxyAddressData.setText(str(self.preferences.proxySettings.proxyAddress))

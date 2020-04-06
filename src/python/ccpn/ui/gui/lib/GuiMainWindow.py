@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-04-06 23:41:33 +0100 (Mon, April 06, 2020) $"
+__dateModified__ = "$dateModified: 2020-04-07 00:59:26 +0100 (Tue, April 07, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -53,7 +53,7 @@ from ccpn.ui.gui.lib.GuiWindow import GuiWindow
 from ccpn.ui.gui.modules.MacroEditor import MacroEditor
 from ccpn.ui.gui.widgets import MessageDialog
 from ccpn.ui.gui.widgets.Action import Action
-from ccpn.ui.gui.widgets.FileDialog import FileDialog, USERWORKINGPATH
+from ccpn.ui.gui.widgets.FileDialog import FileDialog, USERWORKINGPATH, setInitialPath
 from ccpn.ui.gui.widgets.IpythonConsole import IpythonConsole
 from ccpn.ui.gui.widgets.Menu import Menu, MenuBar, SHOWMODULESMENU, CCPNMACROSMENU, TUTORIALSMENU, PLUGINSMENU, CCPNPLUGINSMENU
 from ccpn.ui.gui.widgets.SideBar import SideBar  #,SideBar
@@ -62,6 +62,7 @@ from ccpn.ui.gui.widgets.CcpnModuleArea import CcpnModuleArea
 from ccpn.ui.gui.widgets.Splitter import Splitter
 from ccpn.util.Common import uniquify
 from ccpn.util import Logging
+from ccpn.util import Path
 from ccpn.core.lib.ContextManagers import undoBlock, notificationEchoBlocking
 
 from ccpn.core.lib.Notifiers import NotifierBase, Notifier
@@ -621,6 +622,11 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
                 # try and load the new project
                 try:
                     project = self._loadProjectLastValid(projectDir)
+
+                    if self.application.preferences.general.useProjectPath:
+                        Logging.getLogger().debug2('mainWindow - setting current path %s' % Path.Path(projectDir).parent)
+                        setInitialPath(initialPath=Path.Path(projectDir).parent,
+                                       pathID=USERWORKINGPATH)
 
                 except Exception as es:
                     MessageDialog.showError('loadProject', 'Fatal error loading project:\n%s' % str(projectDir))

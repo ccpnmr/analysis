@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-04-05 14:36:46 +0100 (Sun, April 05, 2020) $"
+__dateModified__ = "$dateModified: 2020-04-07 00:59:26 +0100 (Tue, April 07, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -463,15 +463,16 @@ class GuiSpectrumDisplay(CcpnModule):
     def _setFloatingAxes(self, xUnits, yUnits, aspectRatioMode, aspectRatios):
         """Set the aspectRatio and units for the floating axes
         """
-        self._rightGLAxis._xUnits = xUnits
-        self._rightGLAxis._yUnits = yUnits
-        self._rightGLAxis._aspectRatioMode = aspectRatioMode
-        self._rightGLAxis._aspectRatios = deepcopy(aspectRatios)
-
-        self._bottomGLAxis._xUnits = xUnits
-        self._bottomGLAxis._yUnits = yUnits
-        self._bottomGLAxis._aspectRatioMode = aspectRatioMode
-        self._bottomGLAxis._aspectRatios = deepcopy(aspectRatios)
+        if hasattr(self, '_rightGLAxis'):
+            self._rightGLAxis._xUnits = xUnits
+            self._rightGLAxis._yUnits = yUnits
+            self._rightGLAxis._aspectRatioMode = aspectRatioMode
+            self._rightGLAxis._aspectRatios = deepcopy(aspectRatios)
+        if hasattr(self, '_bottomGLAxis'):
+            self._bottomGLAxis._xUnits = xUnits
+            self._bottomGLAxis._yUnits = yUnits
+            self._bottomGLAxis._aspectRatioMode = aspectRatioMode
+            self._bottomGLAxis._aspectRatios = deepcopy(aspectRatios)
 
     def showAllStripHeaders(self, handle=None):
         """Convenience to show headers of all strips
@@ -1601,9 +1602,9 @@ class GuiSpectrumDisplay(CcpnModule):
             # show the required _rightGLAxis/_bottomGLAxis
             self.setVisibleAxes()
 
-        if self._rightGLAxis:
+        if hasattr(self, '_rightGLAxis'):
             self._rightGLAxis.redrawAxes()
-        if self._bottomGLAxis:
+        if hasattr(self, '_bottomGLAxis'):
             self._bottomGLAxis.redrawAxes()
 
     def increaseTraceScale(self):

@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-04-05 14:36:46 +0100 (Sun, April 05, 2020) $"
+__dateModified__ = "$dateModified: 2020-04-07 00:59:26 +0100 (Tue, April 07, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -625,15 +625,14 @@ class GuiStrip(Frame):
 
         text = '%s (%s)' % (strip.pid, item)
         toolTip = 'Show cursor in strip %s at %s position (%s)' % (str(strip.id), label, item)
-        if len(list(set(strip.axisCodes) & set(currentStrip.axisCodes))) > 0:
-            menuFunc.addItem(text=text,
-                             callback=partial(navigateToPositionInStrip, strip=strip,
-                                              positions=navigatePos,
-                                              axisCodes=navigateAxes, ),
-                             toolTip=toolTip)
-
-        else:
-            print('>>>skip axisCodes', strip.axisCodes, currentStrip.axisCodes)
+        # if len(list(set(strip.axisCodes) & set(currentStrip.axisCodes))) > 0:
+        menuFunc.addItem(text=text,
+                         callback=partial(navigateToPositionInStrip, strip=strip,
+                                          positions=navigatePos,
+                                          axisCodes=navigateAxes, ),
+                         toolTip=toolTip)
+        # else:
+        #     print('skipping axisCodes %s %s' % (strip.axisCodes, currentStrip.axisCodes))
 
     def _createCommonMenuItem(self, currentStrip, includeAxisCodes, label, menuFunc, perm, position, strip):
         showPos = []

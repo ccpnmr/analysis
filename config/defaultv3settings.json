@@ -8,6 +8,7 @@
         "userExtensionPath"                    : "~/.ccpn/extensions/",
         "userLayoutsPath"                      : "",
         "userWorkingPath"                      : "~",
+        "useProjectPath"                       : true,
         "language"                             : "English-UK",
         "editor"                               : "default",
         "colourScheme"                         : "dark",

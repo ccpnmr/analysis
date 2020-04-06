@@ -13,8 +13,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-01-14 11:49:07 +0000 (Tue, January 14, 2020) $"
-__version__ = "$Revision: 3.0.0 $"
+__dateModified__ = "$dateModified: 2020-04-06 12:02:50 +0100 (Mon, April 06, 2020) $"
+__version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -84,7 +84,7 @@ maxRandomInt = 2000000000
 # Current NEF versio (as string
 currentNefVersion = '1.1'
 # Lowest version that this reader can reae (may not be teh same, as float:
-minimumNefVersion = 1.1
+minimumNefVersion = 0.9
 
 # TODO These should be consolidated with the same constants in NefIo
 # (and likely those in ExportNefPopup) and likely replaced with a list of classes

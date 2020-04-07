@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-04-07 00:59:26 +0100 (Tue, April 07, 2020) $"
+__dateModified__ = "$dateModified: 2020-04-07 01:04:46 +0100 (Tue, April 07, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -461,9 +461,11 @@ class PreferencesPopup(CcpnDialogMainWidget):
         self.pipesPathDataButton.setDisabled(True)
 
         row += 1
-        self.useProjectPathLabel = Label(parent, text="Set working path to Project: ", grid=(row, 0))
+        self.useProjectPathLabel = Label(parent, text="Set Working Path to Project Path: ", grid=(row, 0))
         self.useProjectPathBox = CheckBox(parent, grid=(row, 1))  #, checked=self.preferences.general.useProjectPath)
         self.useProjectPathBox.toggled.connect(partial(self._queueToggleGeneralOptions, 'useProjectPath'))
+        self.useProjectPathLabel.setToolTip('Set the current user working path to the project folder on loading')
+        self.useProjectPathBox.setToolTip('Set the current user working path to the project folder on loading')
 
         # row += 1
         # self.annotationsLabel = Label(parent, text="Annotations", grid=(row, 0))

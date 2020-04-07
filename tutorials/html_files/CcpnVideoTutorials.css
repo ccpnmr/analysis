@@ -1,6 +1,6 @@
 
 body {
-	background: #F6F6F6 none repeat scroll 0% 0%;
+	background: #ffffff none repeat scroll 0% 0%;
 	color: #333;
 	line-height: 1.4;
 	margin: 30px;
@@ -27,3 +27,48 @@ a:active {
 	text-decoration: underline;
 }
 
+h1 {
+	color: #803594;
+	padding-left: 2px;
+}
+
+div.indexSection {
+	background: #171217;
+	color: #FFF;
+	padding: 14px 17px;
+	font-size: 15px;
+	font-weight: bold;
+}
+
+div.indexSubTitle {
+	background: #803594;
+	color: #FFF;
+	padding: 9px;
+	font-size: 12px;
+	font-weight: bold;
+}
+
+div.indexElement {
+	padding: 13px;
+	font-size: 13px;
+	font-weight: bold;
+	line-height: 1.4;
+}
+
+.indexElementDesc {
+	color: #333;
+	font-size: 12px;
+	font-weight: normal;
+}
+
+div.headerBar {
+	background: #171217;
+	color: #FFF;
+	padding: 14px 17px;
+	font-size: 15px;
+	font-weight: bold;
+}
+
+div.tutorial {
+	padding: 13px;
+}

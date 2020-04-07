@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-03-19 17:48:51 +0000 (Thu, March 19, 2020) $"
+__dateModified__ = "$dateModified: 2020-04-07 16:09:49 +0100 (Tue, April 07, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -26,32 +26,37 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 
 from PyQt5 import QtCore, QtGui, QtWidgets
+import textwrap
+
 
 # from ccpn.ui.gui.guiSettings import messageFont, messageFontBold
 
 def _isDarwin():
     return 'darwin' in QtCore.QSysInfo().kernelType().lower()
 
-Ok            = QtWidgets.QMessageBox.Ok
-Cancel        = QtWidgets.QMessageBox.Cancel
-Yes           = QtWidgets.QMessageBox.Yes
-No            = QtWidgets.QMessageBox.No
-Retry         = QtWidgets.QMessageBox.Retry
-Ignore        = QtWidgets.QMessageBox.Ignore
-Abort         = QtWidgets.QMessageBox.Abort
-Close         = QtWidgets.QMessageBox.Close
-Information   = QtWidgets.QMessageBox.Information
-Warning       = QtWidgets.QMessageBox.Warning
-Question      = QtWidgets.QMessageBox.Question
-Critical      = QtWidgets.QMessageBox.Critical
-Save          = QtWidgets.QMessageBox.Save
-Discard       = QtWidgets.QMessageBox.Discard
 
-default_icons = (Information,Question,Warning,Critical)
+Ok = QtWidgets.QMessageBox.Ok
+Cancel = QtWidgets.QMessageBox.Cancel
+Yes = QtWidgets.QMessageBox.Yes
+No = QtWidgets.QMessageBox.No
+Retry = QtWidgets.QMessageBox.Retry
+Ignore = QtWidgets.QMessageBox.Ignore
+Abort = QtWidgets.QMessageBox.Abort
+Close = QtWidgets.QMessageBox.Close
+Information = QtWidgets.QMessageBox.Information
+Warning = QtWidgets.QMessageBox.Warning
+Question = QtWidgets.QMessageBox.Question
+Critical = QtWidgets.QMessageBox.Critical
+Save = QtWidgets.QMessageBox.Save
+Discard = QtWidgets.QMessageBox.Discard
 
+default_icons = (Information, Question, Warning, Critical)
 
 if _isDarwin():
     Question = Warning
+
+LINELENGTH = 80
+
 
 class MessageDialog(QtWidgets.QMessageBox):
     """
@@ -65,8 +70,14 @@ class MessageDialog(QtWidgets.QMessageBox):
 
         self._parent = parent
         self.setWindowTitle(title)
+
+        # # Don't need this, setting the width below fixes the width
+        # basicText = '\n'.join(textwrap.wrap(basicText, width=LINELENGTH))
+        # message = '\n'.join(textwrap.wrap(message, width=LINELENGTH))
+
         self.setText(basicText)
         self.setInformativeText(message)
+
         self.setIcon(icon)
         self.setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.Expanding)
 
@@ -77,22 +88,29 @@ class MessageDialog(QtWidgets.QMessageBox):
         layout = self.layout()
 
         from ccpn.framework.Application import getApplication
+
+        maxTextWidth = 50
         getApp = getApplication()
-        item = layout.itemAtPosition(0, 2)
+        item = layout.itemAtPosition(0, 2)          # grid position of basic text item
         if item:
             widget = item.widget()
-            # GWV: setting font of basicText widget
             if getApp:
                 widget.setFont(getApp._fontSettings.messageFontBold)
-            # GWV: setting font and width of message
 
-        item = layout.itemAtPosition(1, 2)
+            # get the bounding rectangle for the first line of basicText
+            tWidth = QtGui.QFontMetrics(widget.font()).boundingRect(basicText[:LINELENGTH]).width()
+            maxTextWidth = max(maxTextWidth, tWidth)
+
+        item = layout.itemAtPosition(1, 2)          # grid position of informative text item
         if item:
             widget = item.widget()
-            # GWV: Estimating minimumwidth
-            widget.setMinimumWidth(max(len(message) * 7, 200))
             if getApp:
                 widget.setFont(getApp._fontSettings.messageFont)
+
+            # get the bounding rectangle for the first line of informativeText
+            tWidth = QtGui.QFontMetrics(widget.font()).boundingRect(message[:LINELENGTH]).width()
+            maxTextWidth = max(maxTextWidth, tWidth)
+            widget.setFixedWidth(maxTextWidth)
 
         # textEdit = self.findChild(QtGui.QTextEdit)
         # textEdit.setFont(messageFont)
@@ -236,7 +254,6 @@ def showMulti(title, message, texts, objects=None, parent=None, iconPath=None, o
     for text in texts:
         lower_text = text.strip().lower()
 
-
         if checkbox and (lower_text in checkbox or checkbox in lower_text):
             raise Exception('Checkboxes and buttons cannot have the same name!')
         else:
@@ -270,7 +287,6 @@ def showMulti(title, message, texts, objects=None, parent=None, iconPath=None, o
 
     dialog.raise_()
     index = dialog.exec_()
-
 
     result = ''
     if dialog.clickedButton() != None:
@@ -358,6 +374,7 @@ class progressPopup(CcpnDialog):
         self.label = Label(self, title, grid=(0, 0))
 
         from ccpn.framework.Application import getApplication
+
         getApp = getApplication()
         if getApp:
             self.label.setFont(getApp._fontSettings.messageFont)
@@ -523,9 +540,11 @@ if __name__ == '__main__':
         print(showMulti('Test', 'Multi Choice', ['Apples', 'Bananas', 'Pears']))
         print(showError('Test', 'This is a test error message'))
         print(showYesNo('Test', 'Yes or No message'))
-        print(showOkCancel('Test', 'Ok or Cancel message'))
-        print(showRetryIgnoreCancel('Test', 'Some message'))
-        print(showWarning('Test', 'Warning message'))
+        # print(showOkCancel('Test', 'Ok or Cancel message'))
+        # print(showRetryIgnoreCancel('Test', 'Some message'))
+        # print(showWarning('Test', 'Warning message'))
+        print(showWarning('Test for a basic popup with a long line of text as the basic text and a path:\n/Users/ejb66/PycharmProjects/Git/AnalysisV3/internal/scripts/something/filename.txt', 'Warning message'))
+        print(showWarning('Another Warning', 'Test for a basic popup with a long line of text as the basic text and a path:\n/Users/ejb66/PycharmProjects/Git/AnalysisV3/internal/scripts/something/filename.txt'))
 
 
     # app = TestApplication()

@@ -7,11 +7,15 @@
     <link rel="stylesheet" href="CcpnVideoTutorials.css">
 </head>
 <body>
+<div><img src="CCPN.png" alt="CCPN Logo" height="50"></div>
+<br>
+<div class="headerBar">Peak Picking</div>
+<div class="tutorial">
 <iframe width=80% height="315" src="https://www.youtube.com/embed/g5FFKCElTLs" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
 <p></p>
 <h2>Peak Picking</h2>
 <h3>Peak pick selected area</h3>
-<p>To pick the peaks in a particular area, hold down <span class="action">Shift</span> and <span class="action">Ctrl</span> (<span class="action">Cmd</span> on a Mac) while <span class="action">left-dragging</span> the mouse. A blue box will be drawn and peaks will be picked at all visible extrema (maxima and minima) in that area. If you find you are picking too many or too few peaks, adjust your contour levels and remember to show/hide positive/negative contours depending on which you would like to have picked. For more information on adjusting contour levels, go to <a href="https://www.ccpn.ac.uk/forums/misc.php?action=help&hid=28">Customise Spectrum Display</a>.</p>
+<p>To pick the peaks in a particular area, hold down <span class="action">Shift</span> and <span class="action">Ctrl</span> (<span class="action">Cmd</span> on a Mac) while <span class="action">left-dragging</span> the mouse. A blue box will be drawn and peaks will be picked at all visible extrema (maxima and minima) in that area. If you find you are picking too many or too few peaks, adjust your contour levels and remember to show/hide positive/negative contours depending on which you would like to have picked. For more information on adjusting contour levels, go to <a href="CustomiseSpectrumDisplay.html">Customise Spectrum Display</a>.</p>
 <p>Alternatively you can type <span class="action">PP</span> or go to <span class="action">Spectrum / Pick Peaks / Pick ND Peaks...</span>. A pop-up will appear in which you can select the area in which you would like to pick peaks (by default the whole spectrum area is included). Choose whether to pick positive or negative peaks or both and click on <span class="action">Find Peaks</span> to pick your peaks.</p>
 <h3>Manual peak pick</h3>
 <p>Press <span class="action">Shift</span> and <span class="action">Ctrl/Cmd</span> while <span class="action">left-clicking</span> the mouse where you would like to place your peak.</p>
@@ -22,5 +26,6 @@
 <p>It is also possible to peak pick a 3D spectrum based on its 2D root spectrum. This will be described elsewhere.</p>
 <h3>Peak picking parameters</h3>
 <p>In the Project Preferences (go to <span class="action">Project / Preferences</span> or type <span class="action">Ctrl/Cmd + ,</span>) in the <span class="action">Spectrum</span> tab you will find the <span class="action">Peak Picking Drop</span> parameter. This is the percentage by which a peak must drop off from its maximum in all directions (or rise from its minimum) in order to be recognised as a peak. The higher this value, the less likely you are to pick partially overlapped peaks or peaks with shoulders on them.</p>
+</div>
 </body>
 </html>

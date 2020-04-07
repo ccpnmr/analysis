@@ -7,6 +7,10 @@
     <link rel="stylesheet" href="CcpnVideoTutorials.css">
 </head>
 <body>
+<div><img src="CCPN.png" alt="CCPN Logo" height="50"></div>
+<br>
+<div class="headerBar">NmrResidues</div>
+<div class="tutorial">
 <iframe width=80% height="315" src="https://www.youtube.com/embed/DS9IZzNsBbQ" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
 <h2>NmrAtoms, NmrResidues and NmrChains</h2>
 <p>If you add a protein chain to your Analysis project, it will be described as a <span class="action">Chain</span>, which contains <span class="action">Residues</span>, which are of a particular <span class="action">Residue Type</span> and in turn contain <span class="action">Atoms</span>. So equally, looking at it the other way up, you can say that each Atom, is seen as belonging to a particular, Residue, Residue Type and Chain.
@@ -37,5 +41,6 @@ which in turn is associated with one particular atom. So in a 2D HSQC, for examp
 Of course, the HSQC spectrum is such that we know that those two atoms have to be bonded to one another and belong to the same residue. Therefore, the NmrChain and NmrResidue numbers are the same for both dimensions, and only the NmrAtom names differ.
 Analysis would typically abbreviate the peak label for such a peak to <span class="action">@2.@72..H, N</span> to save space. Now we may have a second spectrum (e.g. a 2D Noesy spectrum). And there we may have a peak, one of whose dimensions is associated with the same real atom as our HSQC peak, so it is then given the same NmrAtom label.</p>
 <p>If several peaks are assigned to the same NmrAtom, then the chemical shifts from these peaks are averaged, to give an average chemical shift for that NmrAtom or once it is assigned, for that atom.</p>
+</div>
 </body>
 </html>

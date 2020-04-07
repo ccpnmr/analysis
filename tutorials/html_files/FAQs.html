@@ -6,13 +6,17 @@
     <style >.action {color: #803594; font-weight:bold;}</style>
     <link rel="stylesheet" href="CcpnVideoTutorials.css">
 </head>
-<p>
+<body>
+<div><img src="CCPN.png" alt="CCPN Logo" height="50"></div>
+<br>
+<div class="headerBar">FAQs</div>
+<div class="tutorial">
 <h2>FAQs</h2>
 <p><a href="#V2Feat">What has happened to my favourite V2 features?</a>
 <br><a href="#ChemBuildMol">How can I get a molecule from ChemBuild into CcpNmr Analysis V3?</a>
 <br><a href="#ChemBuildXml">How can I save a molecule created in ChemBuild as a ChemComp .xml file?</a>
 <h3><a name="V2Feat"></a>What has happened to my favourite V2 features?</h3></p>
-<p>Have a look at our <a href="https://www.ccpn.ac.uk/forums/misc.php?action=help&hid=64">Popular V2 Features in V3</a> page for a list of V2 features and how they have been implemented in V3. You may also be interested in our <a href="https://www.ccpn.ac.uk/forums/misc.php?action=help&hid=62">V2 to V3 translation</a> page which gives a direct translation of V2 mouse and keyboard commands to the new V3 commands.</p>
+<p>Have a look at our <a href="PopularV2FeaturesInV3.html">Popular V2 Features in V3</a> page for a list of V2 features and how they have been implemented in V3. You may also be interested in our <a href="V2ToV3Translation.html">V2 to V3 translation</a> page which gives a direct translation of V2 mouse and keyboard commands to the new V3 commands.</p>
 <h3><a name="ChemBuildMol"></a>How can I get a molecule from ChemBuild into CcpNmr Analysis V3?</h3>
 <p>As yet, ChemBuild and Analysis V3 are not properly integrated and it may still take us a little while to get this done properly. There are one or two workarounds. Which one you should use (and indeed whether you should bother importing a molecule at all!)  depends on what your ultimate aim is (why are you trying to import what).</p>
 <p>Analysis V3 is currently able to read pdb files and SMILES, but not the CCPN ChemComp .xml files and not mol2 files.
@@ -30,5 +34,6 @@
 </p>
 <h3><a name="ChemBuildXml"></a>How can I save a molecule created in ChemBuild as a ChemComp .xml file?</h3>
 <p>Unfortunately, this needs a slightly odd work-around at the moment. Go to the <span class="action">Compound Info</span> tab on the right hand side. Make sure you enter a <span class="action">Name</span> and a <span class="action">CCPN Code</span>. Now create a folder in your computer's file browser where you want to save the ChemComp file - this has to have the same name as your compound's <span class="action">Name</span>. Then go to the <span class="action">Export</span> menu and select <span class="action">CCPN ChemComp XML File</span>. Navigate not to the folder you have just created, but the folder one higher, enter the compound's name under <span class="action">Save As</span> and click <span class="action">Save</span>. If asked, select to replace the folder and then your ChemComp .xml file should be saved.</p>
+</div>
 </body>
 </html>

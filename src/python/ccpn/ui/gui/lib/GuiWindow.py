@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-04-08 14:14:12 +0100 (Wed, April 08, 2020) $"
+__dateModified__ = "$dateModified: 2020-04-08 14:19:36 +0100 (Wed, April 08, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -138,8 +138,8 @@ class GuiWindow():
         # addShortCut("Space, Space", self, self.toggleConsole, context=context) # this is not needed here, already set on Menus!!
         addShortCut("CTRL+a", self, self.selectAllPeaks, context=context)
 
-        addShortCut("q, q", self, self.contourLevelDown, context=context)
-        addShortCut("w, w", self, self.contourLevelUp, context=context)
+        addShortCut("q, q", self, self.contourLevelUp, context=context)
+        addShortCut("w, w", self, self.contourLevelDown, context=context)
         addShortCut("z, z", self, self.previousZPlane, context=context)
         addShortCut("x, x", self, self.nextZPlane, context=context)
 

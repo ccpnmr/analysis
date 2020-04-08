@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-03-27 11:15:21 +0000 (Fri, March 27, 2020) $"
+__dateModified__ = "$dateModified: 2020-04-08 14:14:12 +0100 (Wed, April 08, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -670,10 +670,6 @@ class PlaneAxisWidget(_OpenGLFrameABC):
         """
         if self.strip:
             self.strip.changeZPlane(self.axis, planeCount=-1)  # -1 because ppm units are backwards
-            self.strip.refresh()
-
-            self.strip.pythonConsole.writeConsoleCommand("strip.nextZPlane()", strip=self.strip)
-            getLogger().info("application.getByGid(%r).nextZPlane()" % self.strip.pid)
 
     def _previousPlane(self, *args):
         """
@@ -681,10 +677,6 @@ class PlaneAxisWidget(_OpenGLFrameABC):
         """
         if self.strip:
             self.strip.changeZPlane(self.axis, planeCount=1)
-            self.strip.refresh()
-
-            self.strip.pythonConsole.writeConsoleCommand("strip.prevZPlane()", strip=self.strip)
-            getLogger().info("application.getByGid(%r).prevZPlane()" % self.strip.pid)
 
     def _spinBoxChanged(self, *args):
         """
@@ -696,7 +688,6 @@ class PlaneAxisWidget(_OpenGLFrameABC):
 
             if planeLabel.minimum() <= value <= planeLabel.maximum():
                 self.strip.changeZPlane(self.axis, position=value)
-                self.strip.refresh()
 
     def _wheelEvent(self, event):
         if event.angleDelta().y() > 0:

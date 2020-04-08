@@ -23,7 +23,7 @@ showStripLabel(doShow:bool):  show/hide the stripLabel
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -32,9 +32,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: CCPN $"
-__dateModified__ = "$dateModified: 2017-07-07 16:32:45 +0100 (Fri, July 07, 2017) $"
-__version__ = "$Revision: 3.0.0 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2020-04-08 14:14:12 +0100 (Wed, April 08, 2020) $"
+__version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -576,12 +576,21 @@ class GuiStripNd(GuiStrip):
 
         self.haveSetupZWidgets = True
 
-    def changeZPlane(self, n: int = 0, planeCount: int = None, position: float = None):
+    @logCommand(get='self')
+    def changeZPlane(self, n: int = None, planeCount: int = None, position: float = None):
         """
         Changes the position of the z axis of the strip by number of planes or a ppm position, depending
         on which is specified.
         """
         if self.isDeleted:
+            return
+
+        if not (self.planeAxisBars and self.activePlaneAxis is not None):
+            return
+
+        n = (n if isinstance(n, int) else self.activePlaneAxis)
+        if not (0 <= (n - 2) < len(self.planeAxisBars)):
+            getLogger().warning('planeIndex out of range %s' % str(n))
             return
 
         zAxis = self.orderedAxes[n]  # was + 2
@@ -610,14 +619,13 @@ class GuiStripNd(GuiStrip):
             else:
                 zAxis.position = position
             self.axisRegionChanged(zAxis)
+            self.refresh()
 
         elif position is not None:  # should always be the case
             if planeMin <= position <= planeMax:
                 zAxis.position = position
-                self.pythonConsole.writeConsoleCommand("strip.changeZPlane(position=%f)" % position, strip=self)
-                getLogger().info("strip = application.getByGid('%s')\nstrip.changeZPlane(position=%f)" % (self.pid, position))
-                #planeLabel.setValue(zAxis.position)
                 self.axisRegionChanged(zAxis)
+                self.refresh()
 
             # else:
             #   print('position is outside spectrum bounds')
@@ -663,7 +671,6 @@ class GuiStripNd(GuiStrip):
 
         if planeLabel.minimum() <= value <= planeLabel.maximum():
             self.changeZPlane(n, position=value)
-            self.refresh()
 
     # def setPlaneCount(self, n:int=0, value:int=1):
     #   """

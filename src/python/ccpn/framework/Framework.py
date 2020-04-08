@@ -11,7 +11,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-04-07 00:59:26 +0100 (Tue, April 07, 2020) $"
+__dateModified__ = "$dateModified: 2020-04-08 14:14:11 +0100 (Wed, April 08, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -1933,7 +1933,7 @@ class Framework(NotifierBase):
     def saveProjectAs(self):
         """Opens save Project as dialog box and saves project to path specified in the file dialog."""
         oldPath = self.project.path
-        newPath = getSaveDirectory(self.ui.mainWindow, self.preferences.general)
+        newPath = getSaveDirectory(self.ui.mainWindow, self.preferences)
 
         if newPath:
             # Next line unnecessary, but does not hurt
@@ -3173,7 +3173,7 @@ def getSaveDirectory(parent, preferences=None):
     """Opens save Project as dialog box and gets directory specified in the file dialog."""
 
     dialog = FileDialog(parent=parent, fileMode=FileDialog.AnyFile, text='Save Project As',
-                        acceptMode=FileDialog.AcceptSave, preferences=preferences,
+                        acceptMode=FileDialog.AcceptSave, preferences=preferences.general,
                         restrictDirToFilter=False,
                                 initialPath=preferences.general.userWorkingPath,
                                 pathID=USERWORKINGPATH)

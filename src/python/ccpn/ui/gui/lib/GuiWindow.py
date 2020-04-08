@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-03-30 15:15:03 +0100 (Mon, March 30, 2020) $"
+__dateModified__ = "$dateModified: 2020-04-08 14:14:12 +0100 (Wed, April 08, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -137,6 +137,11 @@ class GuiWindow():
         addShortCut("p, s", self, self.cyclePeakSymbols, context=context)
         # addShortCut("Space, Space", self, self.toggleConsole, context=context) # this is not needed here, already set on Menus!!
         addShortCut("CTRL+a", self, self.selectAllPeaks, context=context)
+
+        addShortCut("q, q", self, self.contourLevelDown, context=context)
+        addShortCut("w, w", self, self.contourLevelUp, context=context)
+        addShortCut("z, z", self, self.previousZPlane, context=context)
+        addShortCut("x, x", self, self.nextZPlane, context=context)
 
     #     addShortCut("q, w, p, l", self, self.testLongShortcut, context=context)
     #
@@ -885,3 +890,39 @@ class GuiWindow():
 
         else:  # just close it!
             self.pythonConsoleModule._closeModule()
+
+    def contourLevelDown(self):
+        """
+        lower the contour level for the currently selected strip
+        """
+        if self.current.strip:
+            self.current.strip.spectrumDisplay.lowerContourBase()
+        else:
+            getLogger().warning('No current strip. Select a strip first.')
+
+    def contourLevelUp(self):
+        """
+        increase the contour level for the currently selected strip
+        """
+        if self.current.strip:
+            self.current.strip.spectrumDisplay.raiseContourBase()
+        else:
+            getLogger().warning('No current strip. Select a strip first.')
+
+    def previousZPlane(self):
+        """
+        navigate to the previous Z plane for the currently selected strip
+        """
+        if self.current.strip:
+            self.current.strip.changeZPlane(None, planeCount=+1)
+        else:
+            getLogger().warning('No current strip. Select a strip first.')
+
+    def nextZPlane(self):
+        """
+        navigate to the next Z plane for the currently selected strip
+        """
+        if self.current.strip:
+            self.current.strip.changeZPlane(None, planeCount=-1)
+        else:
+            getLogger().warning('No current strip. Select a strip first.')

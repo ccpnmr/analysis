@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-04-07 16:09:49 +0100 (Tue, April 07, 2020) $"
+__dateModified__ = "$dateModified: 2020-04-08 14:14:12 +0100 (Wed, April 08, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -530,6 +530,77 @@ if __name__ == '__main__':
 
 
     app = QtWidgets.QApplication(sys.argv)
+
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    from subprocess import Popen, PIPE
+
+
+    def runGitCommand(command):
+        """
+        Generate a Git command line
+        """
+        gitCommand = ['git', ] + command.split()
+        gitQuery = Popen(gitCommand, stdout=PIPE, stderr=PIPE)
+        gitStatus, error = gitQuery.communicate()
+        if gitQuery.poll() == 0:
+            return gitStatus.decode("utf-8").strip()
+
+
+    def gitRoot():
+        """
+        Returns the absolute path of the repository root
+        """
+        try:
+            return runGitCommand('rev-parse --show-toplevel')
+        except:
+            raise IOError('Current working directory is not a git repository')
+
+
+    def loadModuleFromFile(module_name, module_path):
+        """Loads a python module from the path of the corresponding file.
+
+        :param module_name (str): namespace where the python module will be loaded,
+                                e.g. 'foo.bar'
+        :param module_path (str): path of the python file containing the module
+        :return: A valid module object or None if an error occurs
+        """
+        import sys
+
+        module = None
+        try:
+            if sys.version_info[0] == 3 and sys.version_info[1] >= 5:
+                import importlib.util
+
+                spec = importlib.util.spec_from_file_location(module_name, module_path)
+                module = importlib.util.module_from_spec(spec)
+                spec.loader.exec_module(module)
+            elif sys.version_info[0] == 3 and sys.version_info[1] < 5:
+                import importlib.machinery
+
+                loader = importlib.machinery.SourceFileLoader(module_name, module_path)
+                module = loader.load_module()
+            elif sys.version_info[0] == 2:
+                import imp
+
+                module = imp.load_source(module_name, module_path)
+            return module
+
+        except Exception as es:
+            pass
+
+    fileName = gitRoot() + '/.git/hooks/CheckHeader.py'
+    loaded = loadModuleFromFile('.', fileName)
+
+    if loaded:
+        print('>>>', loaded.ccpnCreditList)
+        [print('>>>', dd) for dd in loaded.__dict__.keys()]
+        print('>>>', 'ProcessFileHeader', hasattr(loaded, 'ProcessFileHeader'))
+    else:
+        print('>>> ERROR - no module loaded')
+
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 
 
     # for i in _stoppableProgressBar([1]*10000):

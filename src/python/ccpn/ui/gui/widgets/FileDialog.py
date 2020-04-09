@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-04-06 23:41:33 +0100 (Mon, April 06, 2020) $"
+__dateModified__ = "$dateModified: 2020-04-09 10:06:00 +0100 (Thu, April 09, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -39,6 +39,13 @@ USERMACROSPATH = 'userMacrosPath'
 USERNEFPATH = 'userNefPath'
 USERACHIVESPATH = 'userAchivesPath'
 USERPLUGINSPATH = 'userPluginsPath'
+USERPREFERENCESPATH = 'userPreferencesPath'
+USERSPECTRUMPATH = 'userSpectrumPath'
+USERTABLESPATH = 'userTablesPath'
+USERBACKUPSPATH = 'userBackupsPath'
+USERAUXILIARYPATH = 'userAuxiliaryPath'
+USERPIPESPATH = 'userPipesPath'
+USEROTHERPATH = 'userOtherPath'
 
 
 _initialPaths = {}

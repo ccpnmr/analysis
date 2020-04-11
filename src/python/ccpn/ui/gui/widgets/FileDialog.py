@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-04-09 10:06:00 +0100 (Thu, April 09, 2020) $"
+__dateModified__ = "$dateModified: 2020-04-11 13:23:06 +0100 (Sat, April 11, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -25,15 +25,16 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
-from PyQt5 import QtWidgets
-
 import sys
 import os
+from PyQt5 import QtWidgets
 from ccpn.util.Path import aPath
 from ccpn.util.Common import makeIterableList
+from ccpn.util.AttrDict import AttrDict
 
 USERDEFAULTPATH = 'userDefaultPath'
 USERWORKINGPATH = 'userWorkingPath'
+USERDATAPATH = 'userDataPath'
 USERLAYOUTSPATH = 'userLayoutsPaths'
 USERMACROSPATH = 'userMacrosPath'
 USERNEFPATH = 'userNefPath'
@@ -45,8 +46,11 @@ USERTABLESPATH = 'userTablesPath'
 USERBACKUPSPATH = 'userBackupsPath'
 USERAUXILIARYPATH = 'userAuxiliaryPath'
 USERPIPESPATH = 'userPipesPath'
+USERNMRSTARPATH = 'userNmrStarPath'
 USEROTHERPATH = 'userOtherPath'
-
+USERSAVEPROJECTPATH = 'userSaveProjectPath'
+USEREXPORTPDFPATH = 'userExportPdfPath'
+USEREXPORTPATH = 'userExportPath'
 
 _initialPaths = {}
 
@@ -65,7 +69,8 @@ class FileDialog(QtWidgets.QFileDialog):
     #              acceptMode=QtWidgets.QFileDialog.AcceptOpen, preferences=None, **kwds):
 
     def __init__(self, parent=None, fileMode=QtWidgets.QFileDialog.AnyFile, text=None,
-                 acceptMode=QtWidgets.QFileDialog.AcceptOpen, preferences=None,
+                 acceptMode=QtWidgets.QFileDialog.AcceptOpen,
+                 preferences=None,
                  selectFile=None, filter=None, directory=None,
                  restrictDirToFilter=False, multiSelection=False, useNative=False,
                  initialPath=None, pathID=USERDEFAULTPATH, updatePathOnReject=True,
@@ -73,6 +78,13 @@ class FileDialog(QtWidgets.QFileDialog):
 
         # ejb - added selectFile to suggest a filename in the file box
         #       this is not passed to the super class
+
+        self._preferences = None
+        if preferences is not None:
+            if isinstance(preferences, AttrDict) and hasattr(preferences, 'general'):
+                self._preferences = preferences
+            else:
+                raise TypeError("Error: preferences incorrectly defined")
 
         # GWV - added default directory and path expansion
         # EJB - added _lastUserWorkingPath to store current directory - removed
@@ -125,13 +137,10 @@ class FileDialog(QtWidgets.QFileDialog):
         if selectFile is not None:  # ejb - populates fileDialog with a suggested filename
             self.selectFile(selectFile)
 
-        if preferences is not None and preferences.useNative:
+        if self._preferences is not None and self._preferences.general.useNative:
             self.useNative = True
         else:
-            if useNative:
-                self.useNative = True
-            else:
-                self.useNative = False
+            self.useNative = True if useNative else False
 
         # need to do this before setting DontUseNativeDialog
         if restrictDirToFilter == True:
@@ -252,6 +261,12 @@ class NefFileDialog(QtWidgets.QFileDialog):
 
         # ejb - added selectFile to suggest a filename in the file box
         #       this is not passed to the super class
+        self._preferences = None
+        if preferences is not None:
+            if isinstance(preferences, AttrDict) and hasattr(preferences, 'general'):
+                self._preferences = preferences
+            else:
+                raise TypeError("Error: preferences incorrectly defined")
 
         if directory is None:
             if pathID not in _initialPaths and initialPath:
@@ -301,20 +316,18 @@ class NefFileDialog(QtWidgets.QFileDialog):
         if selectFile is not None:  # ejb - populates fileDialog with a suggested filename
             self.selectFile(selectFile)
 
-        if preferences is None:
-            self.useNative = False
+        self.useNative = self._preferences.general.useNative if self._preferences else False
 
-        if preferences:
-            self.useNative = preferences.useNative
-            # if preferences.colourScheme == 'dark':
-            #     self.setStyleSheet("""
-            #                QFileDialog QWidget {
-            #                                    background-color: #2a3358;
-            #                                    color: #f7ffff;
-            #                                    }
-            #               """)
-            # elif preferences.colourScheme == 'light':
-            #     self.setStyleSheet("QFileDialog QWidget {color: #464e76; }")
+        # if self._preferences:
+        #     if self._preferences.general.colourScheme == 'dark':
+        #         self.setStyleSheet("""
+        #                    QFileDialog QWidget {
+        #                                        background-color: #2a3358;
+        #                                        color: #f7ffff;
+        #                                        }
+        #                   """)
+        #     elif self._preferences.general.colourScheme == 'light':
+        #         self.setStyleSheet("QFileDialog QWidget {color: #464e76; }")
 
     def selectedFiles(self):
         # if self.useNative:

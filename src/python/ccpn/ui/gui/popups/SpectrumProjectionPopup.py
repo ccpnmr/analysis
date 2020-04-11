@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-04-06 23:41:33 +0100 (Mon, April 06, 2020) $"
+__dateModified__ = "$dateModified: 2020-04-11 13:23:06 +0100 (Sat, April 11, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -28,7 +28,7 @@ __date__ = "$Date: 2017-03-30 11:28:58 +0100 (Thu, March 30, 2017) $"
 from ccpn.ui.gui.widgets.Button import Button
 from ccpn.ui.gui.widgets.ButtonList import ButtonList
 from ccpn.ui.gui.widgets.CheckBox import CheckBox
-from ccpn.ui.gui.widgets.FileDialog import FileDialog, USERWORKINGPATH
+from ccpn.ui.gui.widgets.FileDialog import FileDialog, USERDATAPATH, USERSPECTRUMPATH
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.LineEdit import LineEdit
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
@@ -161,9 +161,9 @@ class SpectrumProjectionPopup(CcpnDialog):
             currentSpectrumDirectory = os.path.expanduser('~')
         dialog = FileDialog(self, text='Select Projection File', directory=currentSpectrumDirectory,
                             fileMode=0, acceptMode=1,
-                            preferences=self.application.preferences.general,
-                            initialPath=self.application.preferences.general.userWorkingPath,
-                            pathID=USERWORKINGPATH)
+                            preferences=self.application.preferences,
+                            initialPath=currentSpectrumDirectory,
+                            pathID=USERSPECTRUMPATH)
         directory = dialog.selectedFiles()
         if len(directory) > 0:
             self.filePathLineEdit.setText(directory[0])

@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-04-06 23:41:33 +0100 (Mon, April 06, 2020) $"
+__dateModified__ = "$dateModified: 2020-04-11 13:23:06 +0100 (Sat, April 11, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -86,9 +86,11 @@ class SubmitMacroPopup(CcpnDialog):
 
     def _selectMacro(self):
 
-        dialog = FileDialog(parent=self.getParent(), fileMode=FileDialog.ExistingFile, text='Select Macro',
-                            preferences=self.getParent().application.preferences.general,
-                            initialPath=self.getParent().application.preferences.general.userMacroPath,
+        parent = self.getParent()
+        preferences = parent.application.preferences
+        dialog = FileDialog(parent=parent, fileMode=FileDialog.ExistingFile, text='Select Macro',
+                            preferences=preferences,
+                            initialPath=preferences.general.userMacroPath,
                             pathID=USERMACROSPATH)
         path = dialog.selectedFile()
         if path:

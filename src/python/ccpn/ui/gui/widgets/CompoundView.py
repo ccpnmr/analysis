@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-04-06 23:41:33 +0100 (Mon, April 06, 2020) $"
+__dateModified__ = "$dateModified: 2020-04-11 13:23:06 +0100 (Sat, April 11, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -36,7 +36,7 @@ QPointF = QtCore.QPointF
 QRectF = QtCore.QRectF
 from math import atan2, sin, cos, sqrt, degrees, radians, hypot, pi
 from ccpn.ui.gui.widgets.Base import Base
-from ccpn.ui.gui.widgets.FileDialog import FileDialog, USERWORKINGPATH
+from ccpn.ui.gui.widgets.FileDialog import FileDialog, USEREXPORTPDFPATH
 
 
 class CompoundView(QGraphicsView, Base):
@@ -476,9 +476,10 @@ class CompoundView(QGraphicsView, Base):
             printer.setResolution(newRes)
 
             fType = 'PDF (*.pdf)'
-            dialog = FileDialog(self, acceptMode=1, fileMode=0, filter=fType, preferences=self.preferences,
+            dialog = FileDialog(self, acceptMode=1, fileMode=0, filter=fType,
+                                preferences=self.preferences,
                                 initialPath=self.preferences.general.userWorkingPath,
-                                pathID=USERWORKINGPATH
+                                pathID=USEREXPORTPDFPATH
                                 )
             filePaths = dialog.selectedFiles()
             if len(filePaths) > 0:

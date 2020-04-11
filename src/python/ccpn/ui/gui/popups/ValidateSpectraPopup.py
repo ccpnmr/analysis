@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-04-06 23:41:33 +0100 (Mon, April 06, 2020) $"
+__dateModified__ = "$dateModified: 2020-04-11 13:23:06 +0100 (Sat, April 11, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -32,7 +32,7 @@ from PyQt5 import QtWidgets, QtGui, QtCore
 from ccpn.core.lib import Util as ccpnUtil
 from ccpn.ui.gui.widgets.Button import Button
 from ccpn.ui.gui.widgets.ButtonList import ButtonList
-from ccpn.ui.gui.widgets.FileDialog import FileDialog, USERWORKINGPATH
+from ccpn.ui.gui.widgets.FileDialog import FileDialog, USERSPECTRUMPATH
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.LineEdit import LineEdit
 from ccpn.ui.gui.widgets.ScrollArea import ScrollArea
@@ -694,7 +694,7 @@ class ValidateSpectraFrameABC(Frame):
         """
         if dataUrl and dataUrl in self.dataUrlData:
 
-            print('>>>>dataurlget', str(dataUrl))
+            # print('>>>>dataurlget', str(dataUrl))
 
             urlData, urlButton, urlLabel = self.dataUrlData[dataUrl]
             urlNum = list(self.dataUrlData.keys()).index(dataUrl)
@@ -703,9 +703,9 @@ class ValidateSpectraFrameABC(Frame):
 
             dialog = FileDialog(self, text='Select DataUrl File', directory=newUrl,
                                 fileMode=FileDialog.Directory, acceptMode=0,
-                                preferences=self.application.preferences.general,
+                                preferences=self.application.preferences,
                                 initialPath=self.application.preferences.general.userWorkingPath,
-                                pathID=USERWORKINGPATH
+                                pathID=USERSPECTRUMPATH
                                 )
             directory = dialog.selectedFiles()
             if directory and len(directory) > 0:
@@ -815,9 +815,9 @@ class ValidateSpectraFrameABC(Frame):
 
             dialog = FileDialog(self, text='Select Spectrum File', directory=filePath,
                                 fileMode=1, acceptMode=0,
-                                preferences=self.application.preferences.general,
+                                preferences=self.application.preferences,
                                 initialPath=self.application.preferences.general.userWorkingPath,
-                                pathID=USERWORKINGPATH
+                                pathID=USERSPECTRUMPATH
                                 )
             directory = dialog.selectedFiles()
             if directory and len(directory) > 0:

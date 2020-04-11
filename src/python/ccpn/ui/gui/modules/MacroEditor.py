@@ -11,7 +11,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-04-06 23:41:33 +0100 (Mon, April 06, 2020) $"
+__dateModified__ = "$dateModified: 2020-04-11 13:23:06 +0100 (Sat, April 11, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -197,7 +197,8 @@ class MacroEditor(CcpnModule):
         dialog = FileDialog(self, fileMode=FileDialog.AnyFile, text='Save Macro As...',
                             acceptMode=FileDialog.AcceptSave, selectFile=self.nameLineEdit.text(),
                             # directory=self.macroPath,
-                            filter='*.py', preferences=self.preferences.general,
+                            filter='*.py',
+                            preferences=self.preferences,
                             initialPath=self.macroPath,
                             pathID=USERMACROSPATH)
         filePath = dialog.selectedFile()
@@ -222,7 +223,8 @@ class MacroEditor(CcpnModule):
         dialog = FileDialog(self, text='Open Macro', fileMode=FileDialog.ExistingFile,
                             acceptMode=FileDialog.AcceptOpen,
                             # directory=self.macroPath,
-                            filter='*.py', preferences=self.preferences.general,
+                            filter='*.py',
+                            preferences=self.preferences,
                             initialPath=self.macroPath,
                             pathID=USERMACROSPATH
                             )

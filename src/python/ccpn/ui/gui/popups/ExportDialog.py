@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-04-06 23:41:33 +0100 (Mon, April 06, 2020) $"
+__dateModified__ = "$dateModified: 2020-04-11 13:23:06 +0100 (Sat, April 11, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -29,7 +29,7 @@ import os
 from ccpn.ui.gui.widgets.ButtonList import ButtonList
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.popups.Dialog import CcpnDialog
-from ccpn.ui.gui.widgets.FileDialog import FileDialog, NefFileDialog, USERNEFPATH
+from ccpn.ui.gui.widgets.FileDialog import FileDialog, NefFileDialog, USEREXPORTPATH
 from ccpn.ui.gui.widgets.Frame import Frame
 from ccpn.ui.gui.widgets.LineEdit import LineEdit
 from ccpn.ui.gui.widgets.Icon import Icon
@@ -160,8 +160,8 @@ class ExportDialog(CcpnDialog):
                                             preferences=self._dialogPreferences,
                                             selectFile=self._dialogSelectFile,
                                             filter=self._dialogFilter,
-                                            initialPath=self.preferences.userWorkingPath,
-                                            pathID=USERNEFPATH
+                                            initialPath=self._dialogPreferences.general.userWorkingPath,
+                                            pathID=USEREXPORTPATH
                                             )
 
     def initialise(self, userFrame):

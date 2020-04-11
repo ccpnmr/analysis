@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-04-07 01:04:46 +0100 (Tue, April 07, 2020) $"
+__dateModified__ = "$dateModified: 2020-04-11 13:23:06 +0100 (Sat, April 11, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -25,15 +25,13 @@ __date__ = "$Date: 2017-03-30 11:28:58 +0100 (Thu, March 30, 2017) $"
 # Start of code
 #=========================================================================================
 
-from PyQt5 import QtWidgets, QtCore, QtGui
-
 import os
+from PyQt5 import QtWidgets, QtCore, QtGui
 from functools import partial
 from copy import deepcopy
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.Frame import Frame, ScrollableFrame
 from ccpn.ui.gui.widgets.Button import Button
-from ccpn.ui.gui.widgets.FileDialog import FileDialog
 from ccpn.ui.gui.widgets.LineEdit import LineEdit, PasswordEdit
 from ccpn.ui.gui.widgets.DoubleSpinbox import DoubleSpinbox, ScientificDoubleSpinBox
 from ccpn.ui.gui.widgets.Spinbox import Spinbox
@@ -57,8 +55,9 @@ from ccpn.ui.gui.lib.GuiPath import PathEdit
 from ccpn.ui.gui.popups.ValidateSpectraPopup import ValidateSpectraForPreferences
 from ccpn.ui.gui.popups.Dialog import CcpnDialogMainWidget
 from ccpn.core.lib.ContextManagers import queueStateChange, undoStackBlocking
-from ccpn.ui.gui.widgets.PlaneToolbar import EMITSOURCE, EMITCLICKED, EMITIGNORESOURCE
-from ccpn.ui.gui.widgets.FileDialog import FileDialog, USERWORKINGPATH, getInitialPath, setInitialPath
+from ccpn.ui.gui.widgets.FileDialog import FileDialog, USERWORKINGPATH, USERAUXILIARYPATH, \
+    USERMACROSPATH, USERPLUGINSPATH, USERLAYOUTSPATH, USERPIPESPATH, USERDATAPATH, \
+    USEROTHERPATH, getInitialPath, setInitialPath
 
 
 PEAKFITTINGDEFAULTS = [PARABOLICMETHOD, GAUSSIANMETHOD]
@@ -1227,7 +1226,8 @@ class PreferencesPopup(CcpnDialogMainWidget):
         else:
             currentDataPath = os.path.expanduser('~')
         dialog = FileDialog(self, text='Select User Working File', directory=currentDataPath, fileMode=2, acceptMode=0,
-                            preferences=self.preferences.general)
+                            preferences=self.preferences,
+                            pathID=USERDATAPATH)
         directory = dialog.selectedFiles()
         if directory:
             self.userDataPathText.setText(directory[0])
@@ -1250,7 +1250,8 @@ class PreferencesPopup(CcpnDialogMainWidget):
         else:
             currentDataPath = os.path.expanduser('~')
         dialog = FileDialog(self, text='Select Data File', directory=currentDataPath, fileMode=2, acceptMode=0,
-                            preferences=self.preferences.general)
+                            preferences=self.preferences,
+                            pathID=USERWORKINGPATH)
         directory = dialog.selectedFiles()
         if directory:
             self.userWorkingPathData.setText(directory[0])
@@ -1273,7 +1274,8 @@ class PreferencesPopup(CcpnDialogMainWidget):
         else:
             currentDataPath = os.path.expanduser('~')
         dialog = FileDialog(self, text='Select Data File', directory=currentDataPath, fileMode=2, acceptMode=0,
-                            preferences=self.preferences.general)
+                            preferences=self.preferences,
+                            pathID=USERAUXILIARYPATH)
         directory = dialog.selectedFiles()
         if directory:
             self.auxiliaryFilesData.setText(directory[0])
@@ -1324,7 +1326,8 @@ class PreferencesPopup(CcpnDialogMainWidget):
         else:
             currentDataPath = os.path.expanduser('~')
         dialog = FileDialog(self, text='Select Data File', directory=currentDataPath, fileMode=2, acceptMode=0,
-                            preferences=self.preferences.general)
+                            preferences=self.preferences,
+                            pathID=USERLAYOUTSPATH)
         directory = dialog.selectedFiles()
         if directory and len(directory) > 0:
             self.userLayoutsLe.setText(directory[0])
@@ -1347,7 +1350,8 @@ class PreferencesPopup(CcpnDialogMainWidget):
         else:
             currentDataPath = os.path.expanduser('~')
         dialog = FileDialog(self, text='Select Data File', directory=currentDataPath, fileMode=2, acceptMode=0,
-                            preferences=self.preferences.general)
+                            preferences=self.preferences,
+                            pathID=USERMACROSPATH)
         directory = dialog.selectedFiles()
         if directory and len(directory) > 0:
             self.macroPathData.setText(directory[0])
@@ -1370,7 +1374,8 @@ class PreferencesPopup(CcpnDialogMainWidget):
         else:
             currentDataPath = os.path.expanduser('~')
         dialog = FileDialog(self, text='Select Data File', directory=currentDataPath, fileMode=2, acceptMode=0,
-                            preferences=self.preferences.general)
+                            preferences=self.preferences,
+                            pathID=USERPLUGINSPATH)
         directory = dialog.selectedFiles()
         if directory and len(directory) > 0:
             self.pluginPathData.setText(directory[0])
@@ -1393,7 +1398,8 @@ class PreferencesPopup(CcpnDialogMainWidget):
         else:
             currentDataPath = os.path.expanduser('~')
         dialog = FileDialog(self, text='Select Data File', directory=currentDataPath, fileMode=2, acceptMode=0,
-                            preferences=self.preferences.general)
+                            preferences=self.preferences,
+                            pathID=USERPIPESPATH)
         directory = dialog.selectedFiles()
         if directory and len(directory) > 0:
             self.pipesPathData.setText(directory[0])
@@ -1457,7 +1463,9 @@ class PreferencesPopup(CcpnDialogMainWidget):
         # self.testPymolPathButton.setText('test')
 
     def _getPymolPath(self):
-        dialog = FileDialog(self, text='Select File', preferences=self.preferences.general)
+        dialog = FileDialog(self, text='Select File',
+                            preferences=self.preferences,
+                            pathID=USEROTHERPATH)
         file = dialog.selectedFile()
         if file:
             self.pymolPath.setText(file)

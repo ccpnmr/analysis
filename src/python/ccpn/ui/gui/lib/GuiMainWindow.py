@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-04-07 00:59:26 +0100 (Tue, April 07, 2020) $"
+__dateModified__ = "$dateModified: 2020-04-11 13:23:06 +0100 (Sat, April 11, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -613,7 +613,8 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
         if result:
             if projectDir is None:
                 dialog = FileDialog(self, fileMode=FileDialog.Directory, text="Open Project",
-                                    acceptMode=FileDialog.AcceptOpen, preferences=self.application.preferences.general,
+                                    acceptMode=FileDialog.AcceptOpen,
+                                    preferences=self.application.preferences,
                                     initialPath=self.application.preferences.general.userWorkingPath,
                                     pathID=USERWORKINGPATH)
                 projectDir = dialog.selectedFile()

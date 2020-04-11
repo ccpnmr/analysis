@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-04-08 14:14:12 +0100 (Wed, April 08, 2020) $"
+__dateModified__ = "$dateModified: 2020-04-11 13:23:06 +0100 (Sat, April 11, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -56,6 +56,45 @@ if _isDarwin():
     Question = Warning
 
 LINELENGTH = 80
+WRAPBORDER = 5
+WRAPSCALE = 1.01
+
+
+def _wrapString(text, lineLength=LINELENGTH):
+    """Wrap a line of text to the desired width of the dialog
+    Returns list of individual lines and the concatenated string for dialog
+    """
+    wrapped = textwrap.wrap(text, width=lineLength, replace_whitespace=False, break_long_words=False)
+
+    newWrapped = []
+    for mm in wrapped:
+        if len(mm) > LINELENGTH:
+            for chPos in range(0, len(mm), lineLength):
+                newWrapped.append(mm[chPos:chPos + lineLength])
+        else:
+            newWrapped.append(mm)
+
+    # merge lines that have now been created by splitting longer lines (if no newlines in first line)
+    newWrapped2 = []
+    if len(newWrapped) > 1:
+        lineNum = 0
+        while lineNum < len(newWrapped)-1:
+            l1 = newWrapped[lineNum]
+            l2 = newWrapped[lineNum+1]
+
+            if (len(l1) + len(l2) < LINELENGTH) and '\n' not in l1:
+                newWrapped2.append(l1 + ' ' + l2)
+                lineNum += 1
+            else:
+                newWrapped2.append(l1)
+                if lineNum == len(newWrapped)-2:
+                    newWrapped2.append(l2)
+
+            lineNum += 1
+    else:
+        newWrapped2 = newWrapped
+
+    return newWrapped2, '\n'.join(newWrapped2)
 
 
 class MessageDialog(QtWidgets.QMessageBox):
@@ -71,9 +110,8 @@ class MessageDialog(QtWidgets.QMessageBox):
         self._parent = parent
         self.setWindowTitle(title)
 
-        # # Don't need this, setting the width below fixes the width
-        # basicText = '\n'.join(textwrap.wrap(basicText, width=LINELENGTH))
-        # message = '\n'.join(textwrap.wrap(message, width=LINELENGTH))
+        basicTextWrap, basicText = _wrapString(basicText)
+        messageWrap, message = _wrapString(message)
 
         self.setText(basicText)
         self.setInformativeText(message)
@@ -89,28 +127,36 @@ class MessageDialog(QtWidgets.QMessageBox):
 
         from ccpn.framework.Application import getApplication
 
-        maxTextWidth = 50
         getApp = getApplication()
-        item = layout.itemAtPosition(0, 2)          # grid position of basic text item
+        widgetBasic = widgetMessage = None
+
+        maxTextWidth = 50
+        item = layout.itemAtPosition(0, 2)  # grid position of basic text item
         if item:
-            widget = item.widget()
+            widgetBasic = item.widget()
             if getApp:
-                widget.setFont(getApp._fontSettings.messageFontBold)
+                widgetBasic.setFont(getApp._fontSettings.messageFontBold)
 
-            # get the bounding rectangle for the first line of basicText
-            tWidth = QtGui.QFontMetrics(widget.font()).boundingRect(basicText[:LINELENGTH]).width()
-            maxTextWidth = max(maxTextWidth, tWidth)
+            # get the bounding rectangle for each line of basicText
+            for wrapLine in basicTextWrap:
+                tWidth = int((QtGui.QFontMetrics(widgetBasic.font()).boundingRect(wrapLine).width() + WRAPBORDER) * WRAPSCALE)
+                maxTextWidth = max(maxTextWidth, tWidth)
 
-        item = layout.itemAtPosition(1, 2)          # grid position of informative text item
+        item = layout.itemAtPosition(1, 2)  # grid position of informative text item
         if item:
-            widget = item.widget()
+            widgetMessage = item.widget()
             if getApp:
-                widget.setFont(getApp._fontSettings.messageFont)
+                widgetMessage.setFont(getApp._fontSettings.messageFont)
 
-            # get the bounding rectangle for the first line of informativeText
-            tWidth = QtGui.QFontMetrics(widget.font()).boundingRect(message[:LINELENGTH]).width()
-            maxTextWidth = max(maxTextWidth, tWidth)
-            widget.setFixedWidth(maxTextWidth)
+            # get the bounding rectangle for each line of informativeText
+            for wrapLine in messageWrap:
+                tWidth = int((QtGui.QFontMetrics(widgetMessage.font()).boundingRect(wrapLine).width() + WRAPBORDER) * WRAPSCALE)
+                maxTextWidth = max(maxTextWidth, tWidth)
+
+        if widgetBasic:
+            widgetBasic.setFixedWidth(maxTextWidth)
+        if widgetMessage:
+            widgetMessage.setFixedWidth(maxTextWidth)
 
         # textEdit = self.findChild(QtGui.QTextEdit)
         # textEdit.setFont(messageFont)
@@ -531,92 +577,32 @@ if __name__ == '__main__':
 
     app = QtWidgets.QApplication(sys.argv)
 
-    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-    from subprocess import Popen, PIPE
-
-
-    def runGitCommand(command):
-        """
-        Generate a Git command line
-        """
-        gitCommand = ['git', ] + command.split()
-        gitQuery = Popen(gitCommand, stdout=PIPE, stderr=PIPE)
-        gitStatus, error = gitQuery.communicate()
-        if gitQuery.poll() == 0:
-            return gitStatus.decode("utf-8").strip()
-
-
-    def gitRoot():
-        """
-        Returns the absolute path of the repository root
-        """
-        try:
-            return runGitCommand('rev-parse --show-toplevel')
-        except:
-            raise IOError('Current working directory is not a git repository')
-
-
-    def loadModuleFromFile(module_name, module_path):
-        """Loads a python module from the path of the corresponding file.
-
-        :param module_name (str): namespace where the python module will be loaded,
-                                e.g. 'foo.bar'
-        :param module_path (str): path of the python file containing the module
-        :return: A valid module object or None if an error occurs
-        """
-        import sys
-
-        module = None
-        try:
-            if sys.version_info[0] == 3 and sys.version_info[1] >= 5:
-                import importlib.util
-
-                spec = importlib.util.spec_from_file_location(module_name, module_path)
-                module = importlib.util.module_from_spec(spec)
-                spec.loader.exec_module(module)
-            elif sys.version_info[0] == 3 and sys.version_info[1] < 5:
-                import importlib.machinery
-
-                loader = importlib.machinery.SourceFileLoader(module_name, module_path)
-                module = loader.load_module()
-            elif sys.version_info[0] == 2:
-                import imp
-
-                module = imp.load_source(module_name, module_path)
-            return module
-
-        except Exception as es:
-            pass
-
-    fileName = gitRoot() + '/.git/hooks/CheckHeader.py'
-    loaded = loadModuleFromFile('.', fileName)
-
-    if loaded:
-        print('>>>', loaded.ccpnCreditList)
-        [print('>>>', dd) for dd in loaded.__dict__.keys()]
-        print('>>>', 'ProcessFileHeader', hasattr(loaded, 'ProcessFileHeader'))
-    else:
-        print('>>> ERROR - no module loaded')
-
-    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-
 
     # for i in _stoppableProgressBar([1]*10000):
     #     time.sleep(0.2)
 
     def callback():
-        print(showInfo('My info window', 'test info'))
-        print(showMulti('Test', 'Multi Choice', ['Apples', 'Bananas', 'Pears']))
-        print(showError('Test', 'This is a test error message'))
-        print(showYesNo('Test', 'Yes or No message'))
-        # print(showOkCancel('Test', 'Ok or Cancel message'))
-        # print(showRetryIgnoreCancel('Test', 'Some message'))
-        # print(showWarning('Test', 'Warning message'))
-        print(showWarning('Test for a basic popup with a long line of text as the basic text and a path:\n/Users/ejb66/PycharmProjects/Git/AnalysisV3/internal/scripts/something/filename.txt', 'Warning message'))
-        print(showWarning('Another Warning', 'Test for a basic popup with a long line of text as the basic text and a path:\n/Users/ejb66/PycharmProjects/Git/AnalysisV3/internal/scripts/something/filename.txt'))
+        # print(showInfo('My info window', 'test info'))
+        # print(showMulti('Test', 'Multi Choice', ['Apples', 'Bananas', 'Pears']))
+        # print(showError('Test', 'This is a test error message'))
+        # print(showYesNo('Test', 'Yes or No message'))
+        # # print(showOkCancel('Test', 'Ok or Cancel message'))
+        # # print(showRetryIgnoreCancel('Test', 'Some message'))
+        # # print(showWarning('Test', 'Warning message'))
+        # print(showWarning(
+        #     'Test for a basic popup with a long line of text as the basic text and a path: /Users/ejb66/PycharmProjects/Git/AnalysisV3/internal/scripts/something/filename.txt',
+        #     'Warning message'))
 
+        print(showWarning('Another Warning',
+                          'Test for a basic popup with a long line of text as the basic text and a path:\n/Users/ejb66/PycharmProjects/Git/AnalysisV3/internal/scripts/something/filename.txt'))
+
+        print(showWarning('Another Warning and Test for a basic popup with a long line of text as the basic text',
+                          'Test for a basic popup with a long line of text as the basic text and a path\n/Users/ejb66/PycharmProjects/Git/AnalysisV3/internal/scripts/something/filename.txt '
+                          'and text with no spaces qwertyuiopasdfghjklzxcvbnm0123456789_qwertyuiopasdfghjklzxcvbnm0123456789_qwertyuiopasdfghjklzxcvbnm0123456789_qwertyuiopasdfghjklzxcvbnm0123456789'))
+
+        print(showWarning('Another Warning and Test qwertyuiopasdfghjklzxcvbnm0123456789_qwertyuiopasdfghjklzxcvbnm0123456789_qwertyuiopasdfghjklzxcvbnm0123456789_qwertyuiopasdfghjklzxcvbnm0123456789\n for a basic popup with a long line of text as the basic text',
+                          'Test for a basic popup with a long line of text as the basic text and a path\n/Users/ejb66/PycharmProjects/Git/AnalysisV3/internal/scripts/something/filename.txt '
+                          'and text with no spaces qwertyuiopasdfghjklzxcvbnm0123456789_qwertyuiopasdfghjklzxcvbnm0123456789_qwertyuiopasdfghjklzxcvbnm0123456789_qwertyuiopasdfghjklzxcvbnm0123456789 something\n else'))
 
     # app = TestApplication()
     # # popup = BasePopup(title='Test MessageReporter')

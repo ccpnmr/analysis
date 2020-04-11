@@ -120,7 +120,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-04-06 23:41:33 +0100 (Mon, April 06, 2020) $"
+__dateModified__ = "$dateModified: 2020-04-11 13:23:07 +0100 (Sat, April 11, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -132,10 +132,11 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 
 import re
-
+import os
 from PyQt5 import QtGui, QtWidgets, QtCore
 import pandas as pd
-import os
+from functools import partial
+from collections import OrderedDict
 from ccpn.core.lib.CcpnSorting import universalSortKey
 from ccpn.ui.gui.widgets.Base import Base
 from ccpn.ui.gui.widgets import MessageDialog
@@ -143,16 +144,12 @@ from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
 from ccpn.ui.gui.widgets.Splitter import Splitter
 from ccpn.ui.gui.widgets.TableModel import ObjectTableModel
-from ccpn.ui.gui.widgets.FileDialog import FileDialog, USERWORKINGPATH
+from ccpn.ui.gui.widgets.FileDialog import FileDialog, USERTABLESPATH
 from ccpn.ui.gui.widgets.LineEdit import LineEdit
 from ccpn.ui.gui.widgets.ButtonList import ButtonList
 from ccpn.ui.gui.widgets.Widget import Widget
 from ccpn.ui.gui.popups.Dialog import CcpnDialog
 from ccpn.ui.gui.widgets.CheckBox import CheckBox
-from ccpn.ui.gui.widgets.Frame import Frame
-from functools import partial
-
-from collections import OrderedDict
 from ccpn.util.Logging import getLogger
 from ccpn.core.lib.ContextManagers import undoBlock
 
@@ -703,7 +700,7 @@ class ObjectTable(QtWidgets.QTableView, Base):
                                      text='Save as ',
                                      acceptMode=FileDialog.AcceptSave,
                                      preferences=None,
-                                     pathID=USERWORKINGPATH)
+                                     pathID=USERTABLESPATH)
         path = self.saveDialog.selectedFile()
         if path:
             self.findExportFormats(path)

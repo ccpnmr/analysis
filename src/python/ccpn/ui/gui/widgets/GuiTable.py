@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-04-15 18:53:56 +0100 (Wed, April 15, 2020) $"
+__dateModified__ = "$dateModified: 2020-04-15 19:02:12 +0100 (Wed, April 15, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -1537,13 +1537,21 @@ GuiTable::item::selected {
             self._exportTableDialog(self._dataFrameObject.dataFrame, rowList=rowList, colList=colList)
 
     def _exportTableDialog(self, dataFrame, rowList=None, colList=None):
+
+        if self.application and self.application.preferences:
+            preferences = self.application.preferences
+            workingPath = preferences.general.userWorkingPath
+        else:
+            preferences = None
+            workingPath = self.project.path
+
         self.saveDialog = FileDialog(selectFile='ccpnTable.xlsx',  # default saving name
                                      fileMode=FileDialog.AnyFile,
                                      filter=".xlsx;; .csv;; .tsv;; .json ",
                                      text='Save as ',
                                      acceptMode=FileDialog.AcceptSave,
-                                     initialPath=self.project.path,
-                                     preferences=None,
+                                     initialPath=workingPath,
+                                     preferences=preferences,
                                      pathID=USERTABLESPATH)
         path = self.saveDialog.selectedFile()
         sheet_name = 'Table'

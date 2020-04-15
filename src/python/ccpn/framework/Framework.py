@@ -11,7 +11,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-04-15 14:22:45 +0100 (Wed, April 15, 2020) $"
+__dateModified__ = "$dateModified: 2020-04-15 18:33:49 +0100 (Wed, April 15, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -1494,7 +1494,7 @@ class Framework(NotifierBase):
                 project = coreIo.loadProject(path, useFileLogger=self.useFileLogger, level=self.level)
                 project._resetUndo(debug=self.level <= Logging.DEBUG2, application=self)
                 self._initialiseProject(project)
-                project._undo.clear()
+
             elif subType == ioFormats.NEF:
                 sys.stderr.write('==> Loading %s NEF project "%s"\n' % (subType, path))
                 project = self._loadNefFile(path, makeNewProject=True)  # RHF - new by default
@@ -1517,6 +1517,7 @@ class Framework(NotifierBase):
                 setInitialPath(initialPath=Path.Path(path).parent,
                                pathID=USERWORKINGPATH)
 
+            project._undo.clear()
             return project
 
         # elif dataType == 'NefFile' and subType in (ioFormats.NEF):
@@ -1534,6 +1535,8 @@ class Framework(NotifierBase):
             sys.stderr.write('==> Could not recognise "%s" as a project; loading into default project\n' % path)
             self.project = self.newProject()
             self.loadData(paths=[path])
+
+            project._undo.clear()
             return self.project
 
     def _loadNefFile(self, path: str, makeNewProject=True) -> Project:

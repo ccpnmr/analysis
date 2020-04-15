@@ -11,7 +11,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-04-15 13:19:17 +0100 (Wed, April 15, 2020) $"
+__dateModified__ = "$dateModified: 2020-04-15 14:22:45 +0100 (Wed, April 15, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -605,7 +605,7 @@ class Framework(NotifierBase):
         if jsonFilePath is None:
             #asks with a dialog
             jsonFilePath = self.getSavedLayoutPath()
-            if not os.path.exists(jsonFilePath):
+            if jsonFilePath and not os.path.exists(jsonFilePath):
                 again = MessageDialog.showOkCancelWarning(title='File Does not exist', message='Try again?')
                 if again:
                     self.restoreLayoutFromFile()

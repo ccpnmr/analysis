@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-04-11 13:23:06 +0100 (Sat, April 11, 2020) $"
+__dateModified__ = "$dateModified: 2020-04-15 14:22:45 +0100 (Wed, April 15, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -120,9 +120,6 @@ def dataFrameToTsv(dataFrame, path, *args):
 def dataFrameToJson(dataFrame, path, *args):
     dataFrame.to_json(path, orient='split', default_handler=str)
 
-
-# def tableToDataFrame(self):
-#     return self._dataFrameObject.dataFrame[self._dataFrameObject.visibleColumnHeadings]
 
 def findExportFormats(path, dataFrame, sheet_name='Table', filterType=None, columns=None):
     formatTypes = OrderedDict([
@@ -1452,6 +1449,58 @@ GuiTable::item::selected {
         except:
             return pd.DataFrame()
 
+    def tableToDataFrame(self, exportAll=True):
+        """Extract the table as a dataframe for later printing
+        The actual data values are exported, not the visible items which may be rounded due to the table settings
+
+        :param exportAll: True/False - True implies export whole table - but in visible order
+                                    False, export only the visible table
+        """
+        if not (self._dataFrameObject and self._dataFrameObject.dataFrame is not None):
+            if self._rawData:
+                return self.rawDataToDF()
+            else:
+                showWarning('Table to dataFrame', 'Table does not contain a dataFrame')
+
+        else:
+            rowList = None
+            if exportAll:
+                colList = self._dataFrameObject.userHeadings
+                rowList = list(self._dataFrameObject.dataFrame.index)
+
+            else:
+                colList = self._dataFrameObject.visibleColumnHeadings
+
+                # export contents of dataFrame based on the visible rows and columns
+                # if self.searchWidget and self.searchWidget._listRows and self.columnCount():
+                #
+                #     # retrieve the correct item, checking that it is in the bounds of the table
+                #     count = min(len(self.searchWidget._listRows), self.rowCount())
+                #     rowList = [list(self.searchWidget._listRows)[self.item(row, 0).index] for row in range(count)]
+                # else:
+
+                if self.rowCount() and self.columnCount():
+                    rowList = [self.item(row, 0).index for row in range(self.rowCount())]
+
+            return self._tableToDataFrame(self._dataFrameObject.dataFrame, rowList=rowList, colList=colList)
+
+    def _tableToDataFrame(self, dataFrame, rowList=None, colList=None):
+        if dataFrame is not None:
+
+            if colList:
+                dataFrame = dataFrame[colList]  # returns a new dataFrame
+            if rowList:
+                dataFrame = dataFrame[:].iloc[rowList]
+
+            return dataFrame
+
+        else:
+            if self._rawData is not None:
+                try:
+                    return pd.DataFrame(self._rawData).transpose()
+                except Exception as e:
+                    getLogger().warning(e)
+
     def exportTableDialog(self, exportAll=True):
         """export the contents of the table to a file
         The actual data values are exported, not the visible items which may be rounded due to the table settings
@@ -1462,10 +1511,8 @@ GuiTable::item::selected {
         if not (self._dataFrameObject and self._dataFrameObject.dataFrame is not None):
             if self._rawData:
                 self._exportTableDialog(self.rawDataToDF())
-                return
             else:
                 showWarning('Export Table to File', 'Table does not contain a dataFrame')
-                return
 
         else:
             rowList = None
@@ -1515,6 +1562,7 @@ GuiTable::item::selected {
                     try:
                         df = pd.DataFrame(self._rawData).transpose()
                         findExportFormats(path, df, sheet_name=sheet_name)
+
                         # df.to_excel(path, sheet_name=sheet_name)
                     except Exception as e:
                         getLogger().warning(e)

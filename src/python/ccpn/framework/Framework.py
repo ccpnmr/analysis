@@ -11,7 +11,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-04-11 13:23:06 +0100 (Sat, April 11, 2020) $"
+__dateModified__ = "$dateModified: 2020-04-15 13:19:17 +0100 (Wed, April 15, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -3074,8 +3074,7 @@ class Framework(NotifierBase):
 
         # check valid internet connection first
         if Url.checkInternetConnection():
-            if not self.updatePopup:
-                self.updatePopup = UpdatePopup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow)
+            self.updatePopup = UpdatePopup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow)
             self.updatePopup.show()
             self.updatePopup.exec_()
 

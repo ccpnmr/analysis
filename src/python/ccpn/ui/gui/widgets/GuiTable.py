@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-04-15 14:22:45 +0100 (Wed, April 15, 2020) $"
+__dateModified__ = "$dateModified: 2020-04-15 18:53:56 +0100 (Wed, April 15, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -149,12 +149,13 @@ def exportTableDialog(dataFrame, columns=None, path='~/table.xlsx'):
 
     path = aPath(path)
 
-    saveDialog = FileDialog(directory=str(path.parent), selectFile=str(path),  # default saving name
+    saveDialog = FileDialog(selectFile=str(path),  # default saving name    #directory=str(path.parent),
                             fileMode=FileDialog.AnyFile,
                             filter=".xlsx;; .csv;; .tsv;; .json ",
                             text='Save as ',
                             acceptMode=FileDialog.AcceptSave,
                             preferences=None,
+                            initialPath=path,
                             pathID=USERTABLESPATH)
     path = saveDialog.selectedFile()
     filterType = saveDialog.selectedNameFilter()
@@ -1536,11 +1537,12 @@ GuiTable::item::selected {
             self._exportTableDialog(self._dataFrameObject.dataFrame, rowList=rowList, colList=colList)
 
     def _exportTableDialog(self, dataFrame, rowList=None, colList=None):
-        self.saveDialog = FileDialog(directory='ccpn_Table.xlsx',  #default saving name
+        self.saveDialog = FileDialog(selectFile='ccpnTable.xlsx',  # default saving name
                                      fileMode=FileDialog.AnyFile,
                                      filter=".xlsx;; .csv;; .tsv;; .json ",
                                      text='Save as ',
                                      acceptMode=FileDialog.AcceptSave,
+                                     initialPath=self.project.path,
                                      preferences=None,
                                      pathID=USERTABLESPATH)
         path = self.saveDialog.selectedFile()

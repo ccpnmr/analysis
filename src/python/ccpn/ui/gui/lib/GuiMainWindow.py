@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-04-11 13:23:06 +0100 (Sat, April 11, 2020) $"
+__dateModified__ = "$dateModified: 2020-04-15 17:02:50 +0100 (Wed, April 15, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -202,7 +202,6 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
             self.setWindowIcon(self.disabledFileIcon)
         else:
             self.setWindowIcon(self.fileIcon)
-
 
     @pyqtSlot()
     def _screenChangedEvent(self, *args):
@@ -391,7 +390,7 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
         self._sidebarSplitter.insertWidget(1, self.searchResultsContainer)
 
         # GST resizing the splitter by hand causes problems so currently disable it!
-        for i in range( self._sidebarSplitter.count()):
+        for i in range(self._sidebarSplitter.count()):
             self._sidebarSplitter.handle(i).setEnabled(False)
 
         # create a splitter to put the sidebar on the left
@@ -537,7 +536,7 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
                 for spectrum in project.spectra:
                     valid = False
                     try:
-                        valid = spectrum.isValidPath        # can raise error if None
+                        valid = spectrum.isValidPath  # can raise error if None
                     except:
                         pass
                     finally:
@@ -563,7 +562,7 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
                 showWarning('Load Project', 'Error loading project')
 
         except Exception as es:
-            raise ValueError("Error loading project: %s" %  str(es))
+            raise ValueError("Error loading project: %s" % str(es))
 
     def _loadProjectLastValid(self, projectDir):
         """Try and load a new project, if error try and load the last valid project.
@@ -1012,16 +1011,20 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
         QUIT = 'Quit Program'
         MESSAGE = QUIT
         CANCEL = 'Cancel'
-        QUIT_WITHOUT_SAVING =  'Quit without saving'
+        QUIT_WITHOUT_SAVING = 'Quit without saving'
         SAVE_DATA = 'Save changes'
         DETAIL = "Do you want to save changes before quitting?"
 
         if disableCancel:
-            reply = MessageDialog.showMulti(MESSAGE, DETAIL, [QUIT],checkbox=SAVE_DATA,okText=QUIT,
-                                            checked=True)
+            if undos.isDirty():
+                reply = MessageDialog.showMulti(MESSAGE, DETAIL, [QUIT], checkbox=SAVE_DATA, okText=QUIT,
+                                                checked=True)
+            else:
+                reply = QUIT_WITHOUT_SAVING
+
         else:
             if undos.isDirty():
-                reply = MessageDialog.showMulti(MESSAGE, DETAIL, [QUIT,CANCEL], checkbox=SAVE_DATA,okText=QUIT,
+                reply = MessageDialog.showMulti(MESSAGE, DETAIL, [QUIT, CANCEL], checkbox=SAVE_DATA, okText=QUIT,
                                                 checked=True)
             else:
                 reply = QUIT_WITHOUT_SAVING

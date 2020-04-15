@@ -52,7 +52,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-03-30 15:15:02 +0100 (Mon, March 30, 2020) $"
+__dateModified__ = "$dateModified: 2020-04-15 16:34:23 +0100 (Wed, April 15, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -1597,21 +1597,27 @@ assignmentTolerances
         where min/max are integer in the range -3 -> +3
 
             e.g. visibleAliasingRange = ((0, 0), (-1, 1), ...)
+
+        visibleAliasingRange is clipped to ±3
         """
+        tupleError = 'Visible aliasing values must be tuple(tuple(min:int, max:int), tuple(min:int, max:int), ...)'
 
         # error checking that the tuples are correctly defined
         if len(values) != self.dimensionCount:
-            raise ValueError("Length of %s does not match number of dimensions." % str(values))
+            raise ValueError("Length of {} does not match number of dimensions ({})".format(values, self.dimensionCount))
         if not all(isinstance(dimVal, Tuple) and len(dimVal) == 2 for dimVal in values):
-            raise ValueError("Visible aliasing values must be tuple(min, max).")
+            raise ValueError(tupleError)
+        if not all(isinstance(dimVal[0], int) and isinstance(dimVal[1], int) for dimVal in values):
+            raise ValueError(tupleError)
+        if not all(dimVal[0] <= dimVal[1] for dimVal in values):
+            raise ValueError(tupleError)
 
+        clippedRange = ()
         for alias in values:
-            if not (isinstance(alias[0], int) and isinstance(alias[1], int)
-                    and alias[0] >= -MAXALIASINGRANGE and alias[1] <= MAXALIASINGRANGE and alias[0] <= alias[1]):
-                raise ValueError("Visible aliasing values must be tuple(min >= -%i, max <= %i) of integer." % \
-                                 (MAXALIASINGRANGE, MAXALIASINGRANGE))
+            clippedRange += ((max(-MAXALIASINGRANGE, alias[0]),
+                              min(MAXALIASINGRANGE, alias[1])),)
 
-        self.setParameter(SPECTRUMALIASING, VISIBLEALIASINGRANGE, values)
+        self.setParameter(SPECTRUMALIASING, VISIBLEALIASINGRANGE, clippedRange)
 
     @property
     @_includeInDimensionalCopy
@@ -1637,27 +1643,22 @@ assignmentTolerances
         """Set the currentAliasingRange for each of the spectrum dimensions
         Must be a tuple matching the number of dimension.
         Each element is a tuple of the form (min, max)
-        where min/max are integer in the range -3 -> +3
 
             e.g. aliasingRange = ((0, 0), (-1, 1), ...)
         """
-        try:
-            # error checking that the tuples are correctly defined
-            if len(values) != self.dimensionCount:
-                raise ValueError("Length of %s does not match number of dimensions." % str(values))
-            if not all(isinstance(dimVal, Tuple) and len(dimVal) == 2 for dimVal in values):
-                raise ValueError("Aliasing values must be tuple(min, max).")
+        tupleError = 'Aliasing values must be tuple(tuple(min:int, max:int), tuple(min:int, max:int), ...)'
 
-            for alias in values:
-                if not (isinstance(alias[0], int) and isinstance(alias[1], int)
-                        and alias[0] >= -MAXALIASINGRANGE and alias[1] <= MAXALIASINGRANGE and alias[0] <= alias[1]):
-                    raise ValueError("Aliasing values must be tuple(min >= -%i, max <= %i) of integer." % \
-                                     (MAXALIASINGRANGE, MAXALIASINGRANGE))
+        # error checking that the tuples are correctly defined
+        if len(values) != self.dimensionCount:
+            raise ValueError("Length of {} does not match number of dimensions ({})".format(values, self.dimensionCount))
+        if not all(isinstance(dimVal, Tuple) and len(dimVal) == 2 for dimVal in values):
+            raise ValueError(tupleError)
+        if not all(isinstance(dimVal[0], int) and isinstance(dimVal[1], int) for dimVal in values):
+            raise ValueError(tupleError)
+        if not all(dimVal[0] <= dimVal[1] for dimVal in values):
+            raise ValueError(tupleError)
 
-            self.setParameter(SPECTRUMALIASING, ALIASINGRANGE, values)
-        except:
-            # FIXME fix this bug
-            getLogger().warning('Error Setting Aliasing Range')
+        self.setParameter(SPECTRUMALIASING, ALIASINGRANGE, values)
 
     @property
     def _seriesItems(self):

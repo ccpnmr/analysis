@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-01-28 16:27:17 +0000 (Tue, January 28, 2020) $"
-__version__ = "$Revision: 3.0.0 $"
+__dateModified__ = "$dateModified: 2020-04-15 16:34:23 +0100 (Wed, April 15, 2020) $"
+__version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -1413,7 +1413,7 @@ class DimensionsTab(Widget):
     @queueStateChange(_verifyPopupTabApply)
     def _queueSetMinAliasing(self, spectrum, valueGetter, dim):
         minValue = int(valueGetter())
-        if minValue != spectrum.visibleAliasingRange[dim][1]:
+        if minValue != spectrum.visibleAliasingRange[dim][0]:
             returnVal = partial(self._setMinAliasing, self.spectrum, dim, minValue)
             maxValue = self.maxAliasingPullDowns[dim].get()
             if isinstance(maxValue, int) and isinstance(minValue, int) and minValue > maxValue:
@@ -1433,7 +1433,7 @@ class DimensionsTab(Widget):
     @queueStateChange(_verifyPopupTabApply)
     def _queueSetMaxAliasing(self, spectrum, valueGetter, dim):
         maxValue = int(valueGetter())
-        if maxValue != spectrum.visibleAliasingRange[dim][0]:
+        if maxValue != spectrum.visibleAliasingRange[dim][1]:
             returnVal = partial(self._setMaxAliasing, spectrum, dim, maxValue)
             minValue = self.minAliasingPullDowns[dim].get()
             if isinstance(maxValue, int) and isinstance(minValue, int) and maxValue < minValue:

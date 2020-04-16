@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-04-11 13:23:06 +0100 (Sat, April 11, 2020) $"
+__dateModified__ = "$dateModified: 2020-04-16 18:06:39 +0100 (Thu, April 16, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -1228,8 +1228,9 @@ class PreferencesPopup(CcpnDialogMainWidget):
         dialog = FileDialog(self, text='Select User Working File', directory=currentDataPath, fileMode=2, acceptMode=0,
                             preferences=self.preferences,
                             pathID=USERDATAPATH)
+        dialog._show()
         directory = dialog.selectedFiles()
-        if directory:
+        if directory and len(directory) > 0:
             self.userDataPathText.setText(directory[0])
             # self._setUserDataPath()
             # self.preferences.general.dataPath = directory[0]
@@ -1252,8 +1253,9 @@ class PreferencesPopup(CcpnDialogMainWidget):
         dialog = FileDialog(self, text='Select Data File', directory=currentDataPath, fileMode=2, acceptMode=0,
                             preferences=self.preferences,
                             pathID=USERWORKINGPATH)
+        dialog._show()
         directory = dialog.selectedFiles()
-        if directory:
+        if directory and len(directory) > 0:
             self.userWorkingPathData.setText(directory[0])
             # self._setUserWorkingPath()
             # self.preferences.general.userWorkingPath = directory[0]
@@ -1276,8 +1278,9 @@ class PreferencesPopup(CcpnDialogMainWidget):
         dialog = FileDialog(self, text='Select Data File', directory=currentDataPath, fileMode=2, acceptMode=0,
                             preferences=self.preferences,
                             pathID=USERAUXILIARYPATH)
+        dialog._show()
         directory = dialog.selectedFiles()
-        if directory:
+        if directory and len(directory) > 0:
             self.auxiliaryFilesData.setText(directory[0])
             # self._setAuxiliaryFilesPath()
             # self.preferences.general.auxiliaryFilesPath = directory[0]
@@ -1328,6 +1331,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
         dialog = FileDialog(self, text='Select Data File', directory=currentDataPath, fileMode=2, acceptMode=0,
                             preferences=self.preferences,
                             pathID=USERLAYOUTSPATH)
+        dialog._show()
         directory = dialog.selectedFiles()
         if directory and len(directory) > 0:
             self.userLayoutsLe.setText(directory[0])
@@ -1352,6 +1356,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
         dialog = FileDialog(self, text='Select Data File', directory=currentDataPath, fileMode=2, acceptMode=0,
                             preferences=self.preferences,
                             pathID=USERMACROSPATH)
+        dialog._show()
         directory = dialog.selectedFiles()
         if directory and len(directory) > 0:
             self.macroPathData.setText(directory[0])
@@ -1376,6 +1381,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
         dialog = FileDialog(self, text='Select Data File', directory=currentDataPath, fileMode=2, acceptMode=0,
                             preferences=self.preferences,
                             pathID=USERPLUGINSPATH)
+        dialog._show()
         directory = dialog.selectedFiles()
         if directory and len(directory) > 0:
             self.pluginPathData.setText(directory[0])
@@ -1400,6 +1406,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
         dialog = FileDialog(self, text='Select Data File', directory=currentDataPath, fileMode=2, acceptMode=0,
                             preferences=self.preferences,
                             pathID=USERPIPESPATH)
+        dialog._show()
         directory = dialog.selectedFiles()
         if directory and len(directory) > 0:
             self.pipesPathData.setText(directory[0])
@@ -1466,6 +1473,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
         dialog = FileDialog(self, text='Select File',
                             preferences=self.preferences,
                             pathID=USEROTHERPATH)
+        dialog._show()
         file = dialog.selectedFile()
         if file:
             self.pymolPath.setText(file)

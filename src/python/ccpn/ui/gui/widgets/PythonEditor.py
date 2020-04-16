@@ -288,6 +288,7 @@ class QCodeEditor(QPlainTextEdit,Base):
                             acceptMode=FileDialog.AcceptSave, selectFile=fileName,
                             filter='*.pdf',
                             pathID=USERMACROSPATH)
+        dialog._show()
         filename = dialog.selectedFile()
         if filename:
             printer = QtPrintSupport.QPrinter(QtPrintSupport.QPrinter.HighResolution)

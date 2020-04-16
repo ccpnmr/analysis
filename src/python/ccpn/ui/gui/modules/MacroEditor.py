@@ -11,7 +11,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-04-11 13:23:06 +0100 (Sat, April 11, 2020) $"
+__dateModified__ = "$dateModified: 2020-04-16 18:06:38 +0100 (Thu, April 16, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -201,6 +201,7 @@ class MacroEditor(CcpnModule):
                             preferences=self.preferences,
                             initialPath=self.macroPath,
                             pathID=USERMACROSPATH)
+        dialog._show()
         filePath = dialog.selectedFile()
 
         if filePath:
@@ -226,9 +227,8 @@ class MacroEditor(CcpnModule):
                             filter='*.py',
                             preferences=self.preferences,
                             initialPath=self.macroPath,
-                            pathID=USERMACROSPATH
-                            )
-
+                            pathID=USERMACROSPATH)
+        dialog._show()
         filePath = dialog.selectedFile()
         self._openPath(filePath)
         self._setFileName(filePath)

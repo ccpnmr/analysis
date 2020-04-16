@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-04-16 09:56:56 +0100 (Thu, April 16, 2020) $"
+__dateModified__ = "$dateModified: 2020-04-16 18:06:39 +0100 (Thu, April 16, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -709,8 +709,8 @@ class ValidateSpectraFrameABC(Frame):
                                 fileMode=FileDialog.Directory, acceptMode=0,
                                 preferences=self.application.preferences,
                                 initialPath=self.application.preferences.general.userWorkingPath,
-                                pathID=USERSPECTRUMPATH
-                                )
+                                pathID=USERSPECTRUMPATH)
+            dialog._show()
             directory = dialog.selectedFiles()
             if directory and len(directory) > 0:
                 newUrl = directory[0]
@@ -821,8 +821,8 @@ class ValidateSpectraFrameABC(Frame):
                                 fileMode=1, acceptMode=0,
                                 preferences=self.application.preferences,
                                 initialPath=self.application.preferences.general.userWorkingPath,
-                                pathID=USERSPECTRUMPATH
-                                )
+                                pathID=USERSPECTRUMPATH)
+            dialog._show()
             directory = dialog.selectedFiles()
             if directory and len(directory) > 0:
                 newFilePath = directory[0]

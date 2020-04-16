@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-04-11 13:23:06 +0100 (Sat, April 11, 2020) $"
+__dateModified__ = "$dateModified: 2020-04-16 18:06:39 +0100 (Thu, April 16, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -27,7 +27,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 
 import sys
 import os
-from PyQt5 import QtWidgets
+from PyQt5 import QtWidgets, QtCore
 from ccpn.util.Path import aPath
 from ccpn.util.Common import makeIterableList
 from ccpn.util.AttrDict import AttrDict
@@ -106,7 +106,7 @@ class FileDialog(QtWidgets.QFileDialog):
 
         QtWidgets.QFileDialog.__init__(self, parent, caption=text, directory=directory, **kwds)
 
-        staticFunctionDict = {
+        self.staticFunctionDict = {
             (0, 0)                               : 'getOpenFileName',
             (0, 1)                               : 'getOpenFileName',
             (0, 2)                               : 'getExistingDirectory',
@@ -124,6 +124,12 @@ class FileDialog(QtWidgets.QFileDialog):
             (self.AcceptSave, self.Directory)    : 'getSaveFileName',
             (self.AcceptSave, self.ExistingFiles): 'getSaveFileName',
             }
+
+        self._fileMode = fileMode
+        self._acceptMode = acceptMode
+        self._kwds = kwds
+        self._text = text
+        self._selectFile = selectFile
 
         self.setFileMode(fileMode)
         self._customMultiSelectedFiles = []  #used to multiselect directories and files at the same time. Available only on Non Native
@@ -151,11 +157,13 @@ class FileDialog(QtWidgets.QFileDialog):
         # self.result is '' (first case) or 0 (second case) if Cancel button selected
         if self.useNative and not sys.platform.lower() == 'linux':
 
-            # get the function name from the dict above
-            funcName = staticFunctionDict[(acceptMode, fileMode)]
-            self.result = getattr(self, funcName)(caption=text, **kwds)
-            if isinstance(self.result, tuple):
-                self.result = self.result[0]
+            pass
+
+            # # get the function name from the dict above
+            # funcName = self.staticFunctionDict[(acceptMode, fileMode)]
+            # self.result = getattr(self, funcName)(caption=text, **kwds)
+            # if isinstance(self.result, tuple):
+            #     self.result = self.result[0]
         else:
             self.setOption(QtWidgets.QFileDialog.DontUseNativeDialog)
 
@@ -171,11 +179,25 @@ class FileDialog(QtWidgets.QFileDialog):
 
             btns = self.findChildren(QtWidgets.QPushButton)
             if btns:
+                # search for the open button
                 self.openBtn = [x for x in btns if 'open' in str(x.text()).lower()]
                 if self.openBtn:
                     self.openBtn[0].clicked.disconnect()
                     self.openBtn[0].clicked.connect(self._openClicked)
 
+            # self.result = self.exec_()
+
+    def _show(self):
+        """Separated from the _init__ to stop threading issues with Windows 10
+        Must be called after creating a FileDialog object
+        """
+        if self.useNative and not sys.platform.lower() == 'linux':
+            funcName = self.staticFunctionDict[(self._acceptMode, self._fileMode)]
+            self.result = getattr(self, funcName)(caption=self._text, directory=self._selectFile, **self._kwds)
+            if isinstance(self.result, tuple):
+                self.result = self.result[0]
+        else:
+            self.setOption(QtWidgets.QFileDialog.DontUseNativeDialog)
             self.result = self.exec_()
 
     def _updateCurrentPath(self):
@@ -211,8 +233,7 @@ class FileDialog(QtWidgets.QFileDialog):
         return True
 
     def _openClicked(self):
-        """
-        Custom action to multiselect files and dir at the same time or just Dirs or just Files. Needed to open a top dir
+        """Custom action to multiselect files and dir at the same time or just Dirs or just Files. Needed to open a top dir
         containing the spectra. Eg 10 Brukers at once
         """
         self.tree = self.findChild(QtWidgets.QTreeView)

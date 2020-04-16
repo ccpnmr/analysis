@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-04-06 23:41:33 +0100 (Mon, April 06, 2020) $"
+__dateModified__ = "$dateModified: 2020-04-16 18:06:39 +0100 (Thu, April 16, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -124,6 +124,7 @@ class TextEditor(QtWidgets.QTextEdit, Base):
                             acceptMode=FileDialog.AcceptSave, selectFile=fileName,
                             filter='*.pdf',
                             pathID=USERMACROSPATH)
+        dialog._show()
         filename = dialog.selectedFile()
         if filename:
             printer = QtPrintSupport.QPrinter(QtPrintSupport.QPrinter.HighResolution)
@@ -278,6 +279,7 @@ class PlainTextEditor(QtWidgets.QPlainTextEdit, Base):
                             acceptMode=FileDialog.AcceptSave, selectFile=fileName,
                             filter='*.pdf',
                             pathID=USERMACROSPATH)
+        dialog._show()
         filename = dialog.selectedFile()
         if filename:
             printer = QtPrintSupport.QPrinter(QtPrintSupport.QPrinter.HighResolution)

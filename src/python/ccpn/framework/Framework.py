@@ -11,7 +11,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-04-15 18:33:49 +0100 (Wed, April 15, 2020) $"
+__dateModified__ = "$dateModified: 2020-04-16 18:06:38 +0100 (Thu, April 16, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -1470,6 +1470,7 @@ class Framework(NotifierBase):
                                 preferences=self.preferences,
                                 initialPath=self.preferences.general.userWorkingPath,
                                 pathID=USERWORKINGPATH)
+            dialog._show()
             path = dialog.selectedFile()
             if not path:
                 return None
@@ -1579,6 +1580,7 @@ class Framework(NotifierBase):
                                 preferences=self.preferences,
                                 initialPath=self.preferences.general.userWorkingPath,
                                 pathID=USERNMRSTARPATH)
+            dialog._show()
             path = dialog.selectedFile()
             if not path:
                 return
@@ -1681,17 +1683,21 @@ class Framework(NotifierBase):
         from tqdm import tqdm
 
         if paths is None:
-            if self.preferences.general.useNative:
-                m = 'Native dialog not available on multiple selections. ' \
-                    'For loading a single file (not Dir) through a native dialog please use: Project > Load Data...'
-                getLogger().info(m)
+            # if self.preferences.general.useNative:
+            #     m = 'Native dialog not available on multiple selections. ' \
+            #         'For loading a single file (not Dir) through a native dialog please use: Project > Load Data...'
+            #     getLogger().info(m)
             dialog = FileDialog(parent=self.ui.mainWindow, fileMode=FileDialog.ExistingFiles, text='Load Spectra',
                                 acceptMode=FileDialog.AcceptOpen, multiSelection=True,
                                 filter=filter, useNative=False,
                                 preferences=self.preferences,
                                 initialPath=self.preferences.general.userWorkingPath,
                                 pathID=USERSPECTRUMPATH)
-            paths = dialog._customMultiSelectedFiles
+            dialog._show()
+            paths = dialog.selectedFiles()
+
+        if not paths:
+            return
 
         spectraPaths = []
         for path in paths:
@@ -1733,6 +1739,7 @@ class Framework(NotifierBase):
                                 preferences=self.preferences,
                                 initialPath=self.preferences.general.userWorkingPath,
                                 pathID=USERDATAPATH)
+            dialog._show()
             path = dialog.selectedFile()
             if not path:
                 return
@@ -1838,6 +1845,7 @@ class Framework(NotifierBase):
                                 preferences = self.preferences,
                                 initialPath=self.preferences.general.userWorkingPath,
                                 pathID=USERNEFPATH)
+            dialog._show()
             path = dialog.selectedFile()
             if not path:
                 return
@@ -2090,6 +2098,7 @@ class Framework(NotifierBase):
                                 preferences=self.preferences,
                                 initialPath=archivesDirectory,
                                 pathID=USERACHIVESPATH)
+            dialog._show()
             archivePath = dialog.selectedFile()
 
         if archivePath:
@@ -2152,6 +2161,7 @@ class Framework(NotifierBase):
                             acceptMode=FileDialog.AcceptOpen, filter=fType,
                             initialPath=self.preferences.general.userLayoutsPath,
                             pathID=USERLAYOUTSPATH)
+        dialog._show()
         path = dialog.selectedFile()
         if not path:
             return
@@ -2169,6 +2179,7 @@ class Framework(NotifierBase):
                             acceptMode=FileDialog.AcceptSave, filter=fType,
                             initialPath=self.preferences.general.userLayoutsPath,
                             pathID=USERLAYOUTSPATH)
+        dialog._show()
         newPath = dialog.selectedFile()
         if not newPath:
             return
@@ -2966,6 +2977,7 @@ class Framework(NotifierBase):
                                 preferences=self.preferences,
                                 initialPath=self.preferences.general.userMacroPath,
                                 pathID=USERMACROSPATH)
+            dialog._show()
             macroFile = dialog.selectedFile()
             if not macroFile:
                 return
@@ -3193,6 +3205,7 @@ def getSaveDirectory(parent, preferences=None):
                         preferences=preferences,
                         initialPath=preferences.general.userWorkingPath,
                         pathID=USERSAVEPROJECTPATH)
+    dialog._show()
     newPath = dialog.selectedFile()
 
     # if not iterable then ignore - dialog may return string or tuple(<path>, <fileOptions>)

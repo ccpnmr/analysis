@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-04-15 19:02:32 +0100 (Wed, April 15, 2020) $"
+__dateModified__ = "$dateModified: 2020-04-16 18:06:39 +0100 (Thu, April 16, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -157,6 +157,7 @@ def exportTableDialog(dataFrame, columns=None, path='~/table.xlsx'):
                             preferences=None,
                             initialPath=path,
                             pathID=USERTABLESPATH)
+    saveDialog._show()
     path = saveDialog.selectedFile()
     filterType = saveDialog.selectedNameFilter()
     if path:
@@ -1553,9 +1554,10 @@ GuiTable::item::selected {
                                      preferences=preferences,
                                      initialPath=workingPath,
                                      pathID=USERTABLESPATH)
+        self.saveDialog._show()
         path = self.saveDialog.selectedFile()
-        sheet_name = 'Table'
         if path:
+            sheet_name = 'Table'
             if dataFrame is not None:
 
                 if colList:

@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-04-11 13:23:06 +0100 (Sat, April 11, 2020) $"
+__dateModified__ = "$dateModified: 2020-04-16 09:56:56 +0100 (Thu, April 16, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -70,10 +70,14 @@ def _checkStoreName(name):
 
 def _expandFilePath(project, spectrum, filePath: str) -> str:
     # filePath = filePath.strip()
-    storeName = spectrum._wrappedData.dataStore.dataUrl.name
-    # storeName = _checkStoreName(storeName)
+    apiDataStore = spectrum._apiDataSource.dataStore
+    if not apiDataStore:
+        return filePath
+
+    storeName = apiDataStore.dataUrl.name
+
     if filePath.startswith(storeName):
-        filePath = spectrum._wrappedData.dataStore.fullPath
+        filePath = apiDataStore.fullPath
 
     return filePath
 
@@ -893,7 +897,8 @@ class ValidateSpectraFrameABC(Frame):
         else:
             pathData.setText(apiDataStore.fullPath)
 
-        pathUrlLabel.set('['+apiDataStore.dataUrl.name+']')
+        pathLabel = ('['+apiDataStore.dataUrl.name+']') if apiDataStore else ''
+        pathUrlLabel.set(pathLabel)
         pathData.validator().resetCheck()
 
     def _populatePathData(self, spectrum):

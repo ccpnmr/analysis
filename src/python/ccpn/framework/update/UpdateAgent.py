@@ -4,7 +4,7 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -13,9 +13,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: CCPN $"
-__dateModified__ = "$dateModified: 2017-07-07 16:32:47 +0100 (Fri, July 07, 2017) $"
-__version__ = "$Revision: 3.0.0 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2020-04-16 18:59:07 +0100 (Thu, April 16, 2020) $"
+__version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -469,6 +469,7 @@ class UpdateAgent(object):
 
         if self.haveWriteAccess():
             n = 0
+            updateFilesInstalled = []
 
             # check that the last file to be updated is the Version.py
             _allowVersionUpdate = True if (len(updateFiles) == 1 and updateFiles[0].filePath == 'src/python/ccpn/framework/Version.py') else False
@@ -482,25 +483,33 @@ class UpdateAgent(object):
                 try:
                     if not self._dryRun:
                         if updateFile.fileHashCode == DELETEHASHCODE:
-                            print('Install Updates: Removing %s' % (updateFile.fullFilePath))
+                            self.showInfo('Install Updates', 'Removing %s' % (updateFile.fullFilePath))
                             updateFile.installDeleteUpdate()
+
                         else:
-                            print('Install Updates: Installing %s' % (updateFile.fullFilePath))
+                            self.showInfo('Install Updates', 'Installing %s' % (updateFile.fullFilePath))
                             updateFile.installUpdate()
                     else:
                         if updateFile.fileHashCode == DELETEHASHCODE:
-                            print('Install Updates: dry-run Removing %s' % (updateFile.fullFilePath))
+                            self.showInfo('Install Updates', 'dry-run Removing %s' % (updateFile.fullFilePath))
                         else:
-                            print('Install Updates: dry-run Installing %s' % (updateFile.fullFilePath))
+                            self.showInfo('Install Updates', 'dry-run Installing %s' % (updateFile.fullFilePath))
 
                     n += 1
-
+                    updateFilesInstalled.append(updateFile)
                 except Exception as e:
-                    print('Could not install %s: %s' % (updateFile.fullFilePath, e))
+                    self.showError('Install Error', 'Could not install %s: %s' % (updateFile.fullFilePath, e))
 
             ss = n != 1 and 's' or ''
             if n != len(updateFiles):
-                self.showError('Update problem', '%d update%s installed, %d not installed, see console for error messages' % (n, ss, len(updateFiles) - n))
+                notInstalled = list(set(updateFilesInstalled) ^ set(updateFiles))
+
+                if notInstalled and len(notInstalled) == 1 and notInstalled[0].filePath == 'src/python/ccpn/framework/Version.py':
+                    # not an error, just need to run again for version update
+                    self.showInfo('Update%s installed' % ss, '%d update%s installed successfully\nPlease run again for version update' % (n, ss))
+
+                else:
+                    self.showError('Update problem', '%d update%s installed, %d not installed, see console for error messages' % (n, ss, len(updateFiles) - n))
             else:
                 self.showInfo('Update%s installed' % ss, '%d update%s installed successfully' % (n, ss))
         else:

@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-04-03 22:11:58 +0100 (Fri, April 03, 2020) $"
+__dateModified__ = "$dateModified: 2020-04-16 17:01:59 +0100 (Thu, April 16, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -38,19 +38,45 @@ class LabelledEnum(Enum):
         STRING = 2, 'String'
     """
 
-    def __new__(cls, *args, **kwds):
+    def __new__(cls, value, description):
         obj = object.__new__(cls)
-        obj._value_ = args[0]
+        obj._value_ = value
+        obj._description_ = description
         return obj
 
-    # ignore the first param since it's already set by __new__
-    def __init__(self, _: str, description: str = None):
-        self._description_ = description
-
     def __str__(self):
-        return self.value
+        return str(self.value)
 
     # this makes sure that the description is read-only
     @property
     def description(self):
         return self._description_
+
+    def prev(self):
+        cls = self.__class__
+        members = list(cls)
+        index = members.index(self) - 1
+        return members[index % len(members)]
+
+    def next(self):
+        cls = self.__class__
+        members = list(cls)
+        index = members.index(self) + 1
+        return members[index % len(members)]
+
+
+if __name__ == '__main__':
+    class Test(LabelledEnum):
+        FLOAT = 0, 'Float'
+        INTEGER = 1, 'Integer'
+        STRING = 2, 'String'
+
+
+    test = Test(1)
+
+    print(test)
+    print(test.name)
+    print(test.value)
+    print(test.description)
+    print(test.prev())
+    print(test.next())

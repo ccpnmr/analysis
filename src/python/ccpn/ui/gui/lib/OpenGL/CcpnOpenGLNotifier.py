@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-02-07 15:10:49 +0000 (Fri, February 07, 2020) $"
+__dateModified__ = "$dateModified: 2020-04-16 17:01:59 +0100 (Thu, April 16, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -104,6 +104,9 @@ class GLNotifier(QtWidgets.QWidget):
         super(GLNotifier, self).__init__()
         self._parent = parent
         self._strip = strip
+
+        # set a global flag for the mouse in any strip
+        self._mouseInGLWidget = False
 
     def emitPaintEvent(self, source=None):
         if source:

@@ -55,7 +55,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-04-03 22:11:57 +0100 (Fri, April 03, 2020) $"
+__dateModified__ = "$dateModified: 2020-04-16 17:01:59 +0100 (Thu, April 16, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -484,6 +484,7 @@ class CcpnGLWidget(QOpenGLWidget):
 
         self.viewports = None
 
+        self._cursorFrameCounter = GLDefs.CursorFrameCounterModes.CURSOR_DEFAULT
         self._glClientIndex = 0
         self._menuActive = False
 
@@ -2585,6 +2586,8 @@ class CcpnGLWidget(QOpenGLWidget):
         # self._clearAfterRelease(ev)
 
     def enterEvent(self, ev: QtCore.QEvent):
+        self.GLSignals._mouseInGLWidget = True
+
         if self.strip and not self.strip.isDeleted:
             if self._preferences.currentStripFollowsMouse and self.current.strip != self.strip:
                 self.current.strip = self.strip
@@ -2609,6 +2612,8 @@ class CcpnGLWidget(QOpenGLWidget):
     def leaveEvent(self, ev: QtCore.QEvent):
         # set a flag for leaving this widget
         self._leavingWidget = True
+        self._cursorFrameCounter = GLDefs.CursorFrameCounterModes.CURSOR_DRAWLAST
+        self.GLSignals._mouseInGLWidget = False
 
         super().leaveEvent(ev)
         self._clearAndUpdate()

@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-04-16 18:06:39 +0100 (Thu, April 16, 2020) $"
+__dateModified__ = "$dateModified: 2020-04-16 18:18:23 +0100 (Thu, April 16, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -97,7 +97,7 @@ def _refreshGLItems():
 
 class PreferencesPopup(CcpnDialogMainWidget):
     FIXEDHEIGHT = False
-    FIXEDWIDTH = True
+    FIXEDWIDTH = False
 
     def __init__(self, parent=None, mainWindow=None, preferences=None, title='Preferences', **kwds):
         super().__init__(parent, setLayout=True, windowTitle=title, size=None, **kwds)
@@ -140,6 +140,8 @@ class PreferencesPopup(CcpnDialogMainWidget):
         w = max(tab.sizeHint().width() for tab in tabs) + 20
         h = max(tab.sizeHint().height() for tab in tabs)
         self._size = QtCore.QSize(w, h)
+        self.setMinimumWidth(w)
+        self.setMaximumWidth(w * 1.5)
 
         self.__postInit__()
         self._applyButton = self.getButton(self.APPLYBUTTON)

@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-03-26 12:02:35 +0000 (Thu, March 26, 2020) $"
+__dateModified__ = "$dateModified: 2020-04-16 10:38:39 +0100 (Thu, April 16, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -331,11 +331,14 @@ class CcpnModule(Dock, DropBase, NotifierBase):
                 self._splitter.addWidget(self._settingsScrollArea)
 
             self.addWidget(self._splitter)
-            self._splitter.setStretchFactor(1, 5)
+            # self._splitter.setStretchFactor(1, 5)
 
         else:
             self.settingsWidget = None
             self.addWidget(self.mainWidget, 0, 0)
+
+        # set the flag so that the gearbox settings widget expands to the required size on the first click
+        self.setExpandSettingsFlag(True)
 
         # add an event filter to check when the dock has been floated - it needs to have a callback
         # that fires when the window has been maximised
@@ -726,7 +729,7 @@ class CcpnModule(Dock, DropBase, NotifierBase):
                 self.mainWidget.show()
                 # self.settingsWidget._sequenceGraphScrollArea.hide()
                 self._settingsScrollArea.show()
-                self._setSettingsWidgetHeight()
+                self._setSettingsWidgetSize()
             elif self.settingsState == 2:
                 # self.settingsWidget._sequenceGraphScrollArea.hide()
                 self._settingsScrollArea.hide()
@@ -734,15 +737,42 @@ class CcpnModule(Dock, DropBase, NotifierBase):
         else:
             RuntimeError('Settings widget inclusion is false, please set includeSettingsWidget boolean to True at class level ')
 
-    def _setSettingsWidgetHeight(self):
-        sizes = self._splitter.sizes()
-        sizes[0] = self._settingsScrollArea.minimumSize().height()
-        sizes[1] = sizes[1] - self._settingsScrollArea.minimumSize().height()
-        self._splitter.setSizes(sizes)
+    def setExpandSettingsFlag(self, value):
+        """Set the expand flag to the True/False
+        """
+        self._expandSettingsFlag = value
+
+    def _setSettingsWidgetSize(self):
+        """Set the size of the gearbox settings to the sizeHint if the flag is True
+        Size is stored for next open/close unless flag is reset to True
+        """
+        if self._expandSettingsFlag:
+            self._expandSettingsFlag = False
+
+            sizes = self._splitter.sizes()
+            total = sizes[0] + sizes[1]
+
+            if self.settingsPosition == 'left':
+                settingsSize = self._settingsScrollArea.sizeHint().width()
+                sizes[0] = settingsSize
+                sizes[1] = total - settingsSize
+            elif self.settingsPosition == 'right':
+                settingsSize = self._settingsScrollArea.sizeHint().width()
+                sizes[0] = total - settingsSize
+                sizes[1] = settingsSize
+            elif self.settingsPosition == 'top':
+                settingsSize = self._settingsScrollArea.sizeHint().height()
+                sizes[0] = settingsSize
+                sizes[1] = total - settingsSize
+            elif self.settingsPosition == 'bottom':
+                settingsSize = self._settingsScrollArea.sizeHint().height()
+                sizes[0] = total - settingsSize
+                sizes[1] = settingsSize
+
+            self._splitter.setSizes(sizes)
 
     def _closeModule(self):
-        """
-        Close the module
+        """Close the module
         """
         try:
             if self.closeFunc:

@@ -1518,7 +1518,8 @@ class Framework(NotifierBase):
                 setInitialPath(initialPath=Path.Path(path).parent,
                                pathID=USERWORKINGPATH)
 
-            project._undo.clear()
+            if project and project._undo:
+                project._undo.clear()
             return project
 
         # elif dataType == 'NefFile' and subType in (ioFormats.NEF):
@@ -1537,7 +1538,8 @@ class Framework(NotifierBase):
             self.project = self.newProject()
             self.loadData(paths=[path])
 
-            project._undo.clear()
+            if project and project._undo:
+                project._undo.clear()
             return self.project
 
     def _loadNefFile(self, path: str, makeNewProject=True) -> Project:

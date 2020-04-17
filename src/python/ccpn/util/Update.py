@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-04-17 14:27:50 +0100 (Fri, April 17, 2020) $"
+__dateModified__ = "$dateModified: 2020-04-17 14:35:22 +0100 (Fri, April 17, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -269,7 +269,8 @@ class UpdateFile:
                     _hashCodeCacheFolder = os.path.abspath(os.path.join(self.installLocation, '.cache'))
                     _hashCodeCache = os.path.join(_hashCodeCacheFolder, '_hashCodeCache.json')
                     if not os.path.exists(_hashCodeCache):
-                        os.makedirs(_hashCodeCacheFolder)
+                        if not os.path.exists(_hashCodeCacheFolder):
+                            os.makedirs(_hashCodeCacheFolder)
                         data = {}
                     else:
                         with open(_hashCodeCache) as fp:

@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-04-03 22:11:57 +0100 (Fri, April 03, 2020) $"
+__dateModified__ = "$dateModified: 2020-04-17 16:48:35 +0100 (Fri, April 17, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -667,7 +667,7 @@ class SeriesFrame(Frame):
             seriesLabel.setFixedHeight(30)
 
             editorFrame = Frame(self._seriesFrame, setLayout=True, grid=(sRow, 1), vAlign='t')
-            seriesEditor = PlainTextEditor(editorFrame, grid=(0, 0), vAlign='t')
+            seriesEditor = PlainTextEditor(editorFrame, grid=(0, 0), fitToContents=True)
             seriesEditor.textChanged.connect(partial(self._queueChangeSpectrumSeriesValues,
                                                      seriesEditor, self.defaultObject,
                                                      spec, sRow))

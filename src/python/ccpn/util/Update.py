@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-04-17 14:35:22 +0100 (Fri, April 17, 2020) $"
+__dateModified__ = "$dateModified: 2020-04-17 16:48:35 +0100 (Fri, April 17, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -313,6 +313,7 @@ class UpdateAgent(object):
     def __init__(self, version, showError=None, showInfo=None, askPassword=None,
                  serverUser=None, server=SERVER, serverDbRoot=SERVER_DB_ROOT, serverDbFile=SERVER_DB_FILE,
                  serverDownloadScript=SERVER_DOWNLOAD_SCRIPT, serverUploadScript=SERVER_UPLOAD_SCRIPT,
+                 _updateProgressHandler=None,
                  dryRun=True):
 
         if not showError:
@@ -344,6 +345,8 @@ class UpdateAgent(object):
         self.updateFiles = []
         self.updateFileDict = {}
         self._found = None
+
+        self._updateProgressHandler = _updateProgressHandler
         self._dryRun = dryRun
 
     def checkNumberUpdates(self):
@@ -562,6 +565,9 @@ class UpdateAgent(object):
 
             # go through the list is updates and apply each
             for updateFile in updateFiles:
+
+                if self._updateProgressHandler:
+                    self._updateProgressHandler()
 
                 # skip the version update file
                 if updateFile.filePath == VERSION_UPDATE_FILE:

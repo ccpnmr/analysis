@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-04-16 18:06:39 +0100 (Thu, April 16, 2020) $"
+__dateModified__ = "$dateModified: 2020-04-17 16:48:35 +0100 (Fri, April 17, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -37,9 +37,15 @@ from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.guiSettings import getColours, BORDERFOCUS, BORDERNOFOCUS
 
 
+ATTRIBUTE_CHECK_LIST = ('_mouseStart', '_minimumWidth', '_widthStart', '_minimumHeight', '_heightStart')
+ATTRIBUTE_HEIGHT_LIST = ('_minimumHeight')
+
+
 class TextEditor(QtWidgets.QTextEdit, Base):
     editingFinished = QtCore.pyqtSignal()
     receivedFocus = QtCore.pyqtSignal()
+
+    _minimumHeight = 25
 
     def __init__(self, parent=None, filename=None, **kwds):
         super().__init__(parent)
@@ -48,6 +54,7 @@ class TextEditor(QtWidgets.QTextEdit, Base):
         self.filename = filename
 
         from ccpn.framework.Application import getApplication
+
         getApp = getApplication()
         if getApp:
             self.setFont(getApp._fontSettings.fixedWidthFont)
@@ -61,6 +68,24 @@ class TextEditor(QtWidgets.QTextEdit, Base):
 
         palette = self.viewport().palette()
         self._background = palette.color(self.viewport().backgroundRole())
+
+        self._setFocusColour()
+
+    def _setFocusColour(self, focusColour=None, noFocusColour=None):
+        """Set the focus/noFocus colours for the widget
+        """
+        focusColour = getColours()[BORDERFOCUS]
+        noFocusColour = getColours()[BORDERNOFOCUS]
+        styleSheet = "QTextEdit { " \
+                     "border: 1px solid;" \
+                     "border-radius: 2px;" \
+                     "border-color: %s;" \
+                     "} " \
+                     "QTextEdit:focus { " \
+                     "border: 1px solid %s; " \
+                     "border-radius: 2px; " \
+                     "}" % (noFocusColour, focusColour)
+        self.setStyleSheet(styleSheet)
 
     def _addGrip(self):
         # an idea to add a grip handle - can't thing of any other way
@@ -153,7 +178,7 @@ class TextEditor(QtWidgets.QTextEdit, Base):
         """Update widget size as the grip is dragged
         """
         super().mouseMoveEvent(event)
-        if self._resizing and hasattr(self, '_minimumWidth') and hasattr(self, '_minimumHeight'):
+        if self._resizing and all(hasattr(self, att) for att in ATTRIBUTE_CHECK_LIST):
             delta = event.globalPos() - self._mouseStart
             width = max(self._minimumWidth, self._widthStart + delta.x())
             height = max(self._minimumHeight, self._heightStart + delta.y())
@@ -165,28 +190,23 @@ class TextEditor(QtWidgets.QTextEdit, Base):
     def minimumSizeHint(self) -> QtCore.QSize:
         return QtCore.QSize(200, 20)
 
-    # def sizeHint(self) -> QtCore.QSize:
-    #     rowHeight = QtGui.QFontMetrics(self.document().defaultFont()).height()
-    #     lineCount = self.document().lineCount()
-    #
-    #     minHeight = (rowHeight + 1) * (lineCount + 1)
-    #     height = max(self._minimumHeight, minHeight)
-    #
-    #     return QtCore.QSize(height, self.width())
-
 
 class PlainTextEditor(QtWidgets.QPlainTextEdit, Base):
     editingFinished = QtCore.pyqtSignal()
     receivedFocus = QtCore.pyqtSignal()
 
-    def __init__(self, parent=None, filename=None, **kwds):
+    _minimumHeight = 25
+
+    def __init__(self, parent=None, filename=None, fitToContents=False, **kwds):
 
         super().__init__(parent)
         Base._init(self, **kwds)
 
         self.filename = filename
+        self._fitToContents = fitToContents
 
         from ccpn.framework.Application import getApplication
+
         getApp = getApplication()
         if getApp:
             self.setFont(getApp._fontSettings.fixedWidthFont)
@@ -202,6 +222,8 @@ class PlainTextEditor(QtWidgets.QPlainTextEdit, Base):
         self._background = palette.color(self.viewport().backgroundRole())
 
         self._setFocusColour()
+
+        self._maxWidth = 0
         self._maxHeight = 0
 
     def _setFocusColour(self, focusColour=None, noFocusColour=None):
@@ -308,7 +330,7 @@ class PlainTextEditor(QtWidgets.QPlainTextEdit, Base):
         """Update widget size as the grip is dragged
         """
         super().mouseMoveEvent(event)
-        if self._resizing and hasattr(self, '_minimumWidth') and hasattr(self, '_minimumHeight'):
+        if self._resizing and all(hasattr(self, att) for att in ATTRIBUTE_CHECK_LIST) and self._fitToContents:
             delta = event.globalPos() - self._mouseStart
             _size = self.document().size().toSize()
             width = max(self._minimumWidth, self._widthStart + delta.x(), _size.width())
@@ -323,12 +345,13 @@ class PlainTextEditor(QtWidgets.QPlainTextEdit, Base):
 
     def _updateheight(self):
         # Override the resize event to fit to contents
-        rowHeight = QtGui.QFontMetrics(self.document().defaultFont()).height()
-        lineCount = self.document().lineCount()
+        if self._fitToContents:
+            rowHeight = QtGui.QFontMetrics(self.document().defaultFont()).height()
+            lineCount = self.document().lineCount()
 
-        minHeight = (rowHeight + 1) * (lineCount + 1)
-        self._maxHeight = max(self._minimumHeight, minHeight)
-        self.setMaximumHeight(self._maxHeight)
+            minHeight = (rowHeight + 1) * (lineCount + 1)
+            self._maxHeight = max(self._minimumHeight, minHeight)
+            self.setMaximumHeight(self._maxHeight)
 
 
 if __name__ == '__main__':

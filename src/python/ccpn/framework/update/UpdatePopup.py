@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-04-15 17:02:50 +0100 (Wed, April 15, 2020) $"
+__dateModified__ = "$dateModified: 2020-04-17 16:48:35 +0100 (Fri, April 17, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -29,8 +29,10 @@ from PyQt5 import QtCore, QtWidgets
 from ccpn.ui.gui.widgets.Button import Button
 from ccpn.ui.gui.widgets.ButtonList import ButtonList
 from ccpn.ui.gui.widgets.Label import Label
-from ccpn.ui.gui.popups.Dialog import CcpnDialog
+from ccpn.ui.gui.widgets.TextEditor import TextEditor
+from ccpn.ui.gui.popups.Dialog import CcpnDialogMainWidget
 from ccpn.util.Update import UpdateAgent
+
 
 REFRESHBUTTONTEXT = 'Refresh Updates Information'
 DOWNLOADBUTTONTEXT = 'Download and Install Updates'
@@ -39,9 +41,9 @@ UPDATELICENCEKEYTEXT = 'Update LicenceKey'
 CLOSEEXITBUTTONTEXT = 'Close and Exit'
 
 
-class UpdatePopup(CcpnDialog, UpdateAgent):
+class UpdatePopup(CcpnDialogMainWidget, UpdateAgent):
     def __init__(self, parent=None, mainWindow=None, title='Update CCPN code', **kwds):
-        CcpnDialog.__init__(self, parent, setLayout=True, windowTitle=title, **kwds)
+        CcpnDialogMainWidget.__init__(self, parent, setLayout=True, windowTitle=title, **kwds)
 
         # keep focus on this window
         self.setModal(True)
@@ -49,7 +51,9 @@ class UpdatePopup(CcpnDialog, UpdateAgent):
         self.mainWindow = mainWindow
 
         version = QtCore.QCoreApplication.applicationVersion()
-        UpdateAgent.__init__(self, version, dryRun=False)
+        UpdateAgent.__init__(self, version, dryRun=False,
+                             showInfo=self._showInfo, showError=self._showError,
+                             _updateProgressHandler=self._refreshQT)
 
         self.setWindowTitle(title)
 
@@ -59,23 +63,26 @@ class UpdatePopup(CcpnDialog, UpdateAgent):
         #label = Label(self, self.server, grid=(row, 1))
         #row += 1
 
-        label = Label(self, 'Installation location:', grid=(row, 0), gridSpan=(1,2))
-        label = Label(self, text=self.installLocation, grid=(row, 2))
+        # align all widgets to the top
+        self.mainWidget.getLayout().setAlignment(QtCore.Qt.AlignTop)
+
+        label = Label(self.mainWidget, 'Installation location:', grid=(row, 0), gridSpan=(1, 2))
+        label = Label(self.mainWidget, text=self.installLocation, grid=(row, 2))
         row += 1
 
-        label = Label(self, 'Version:', grid=(row, 0), gridSpan=(1,2))
-        label = Label(self, text=version, grid=(row, 2))
+        label = Label(self.mainWidget, 'Version:', grid=(row, 0), gridSpan=(1, 2))
+        label = Label(self.mainWidget, text=version, grid=(row, 2))
         row += 1
 
-        label = Label(self, 'Number of updates:', grid=(row, 0), gridSpan=(1,2))
-        self.updatesLabel = Label(self, text='TBD', grid=(row, 2))
+        label = Label(self.mainWidget, 'Number of updates:', grid=(row, 0), gridSpan=(1, 2))
+        self.updatesLabel = Label(self.mainWidget, text='TBD', grid=(row, 2))
         row += 1
 
-        label = Label(self, 'Installing updates will require a restart of the program.', grid=(row, 0), gridSpan=(1,3))
+        label = Label(self.mainWidget, 'Installing updates will require a restart of the program.', grid=(row, 0), gridSpan=(1, 3))
         row += 1
 
-        self._updateButton = Button(self, text=UPDATELICENCEKEYTEXT, tipText='Update LicenceKey from the server',
-                                        callback=self._doUpdate, icon='icons/Filetype-Docs-icon.png', grid=(row, 0))
+        self._updateButton = Button(self.mainWidget, text=UPDATELICENCEKEYTEXT, tipText='Update LicenceKey from the server',
+                                    callback=self._doUpdate, icon='icons/Filetype-Docs-icon.png', grid=(row, 0))
 
         row += 1
         texts = (REFRESHBUTTONTEXT, DOWNLOADBUTTONTEXT, self.CLOSEBUTTONTEXT)
@@ -84,10 +91,15 @@ class UpdatePopup(CcpnDialog, UpdateAgent):
                     'Install the updates from the server',
                     'Close update dialog')
         icons = ('icons/redo.png', 'icons/dialog-apply.png', 'icons/window-close.png')
-        self.buttonList = ButtonList(self, texts=texts, tipTexts=tipTexts, callbacks=callbacks, icons=icons, grid=(row, 0), gridSpan=(1, 3))
+        self.buttonList = ButtonList(self.mainWidget, texts=texts, tipTexts=tipTexts, callbacks=callbacks, icons=icons, grid=(row, 0), gridSpan=(1, 3))
         row += 1
 
-        self.setFixedSize(750, 150)
+        self.infoBox = TextEditor(self.mainWidget, grid=(row, 0), gridSpan=(1, 3))  # NOTE:ED - do not set valign here
+        # self.infoBox.setVisible(False)
+
+        # self.setFixedSize(750, 450)
+        self.setFixedWidth(750)
+        self._hideInfoBox()
 
         # initialise the popup
         self.resetFromServer()
@@ -106,6 +118,13 @@ class UpdatePopup(CcpnDialog, UpdateAgent):
     def _install(self):
         """The update button has been clicked. Install updates and flag that files have been changed
         """
+        self._showInfoBox()
+        self._handleUpdates()
+
+        # # not very nice but refreshes the popup first
+        # QtCore.QTimer.singleShot(0, self._handleUpdates)
+
+    def _handleUpdates(self):
         updateFilesInstalled = self.installUpdates()
         if updateFilesInstalled:
             self._numUpdatesInstalled += len(updateFilesInstalled)
@@ -147,10 +166,35 @@ class UpdatePopup(CcpnDialog, UpdateAgent):
     def closeEvent(self, event) -> None:
         self.reject()
 
+    def _showInfoBox(self):
+        self.setMinimumHeight(300)
+        self.setMaximumHeight(600)
+        self.infoBox.show()
+        self._refreshQT()
+
+    def _hideInfoBox(self):
+        self.setFixedHeight(160)
+        self.infoBox.hide()
+        self._refreshQT()
+
+    def _showInfo(self, *args):
+        for arg in args:
+            self.infoBox.append(arg)
+
+    def _showError(self, *args):
+        for arg in args:
+            self.infoBox.append(arg)
+
+    def _refreshQT(self):
+        # force a refresh of the popup - makes the updating look a little cleaner
+        self.repaint()
+        QtWidgets.QApplication.processEvents()
+
 
 if __name__ == '__main__':
     import sys
     import os
+
 
     qtApp = QtWidgets.QApplication(['Update'])
 

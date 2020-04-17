@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-04-17 14:25:19 +0100 (Fri, April 17, 2020) $"
+__dateModified__ = "$dateModified: 2020-04-17 14:27:50 +0100 (Fri, April 17, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -603,12 +603,12 @@ class UpdateAgent(object):
                 if updateFile.fileHashCode == DELETEHASHCODE:
                     self.showInfo('Install Updates', 'Removing %s' % (updateFile.fullFilePath))
                     if not updateFile.installDeleteUpdate():
-                        raise
+                        raise RuntimeError("error deleting original file")
 
                 else:
                     self.showInfo('Install Updates', 'Installing %s' % (updateFile.fullFilePath))
                     if not updateFile.installUpdate():
-                        raise
+                        raise RuntimeError("error installing update")
 
             else:
                 if updateFile.fileHashCode == DELETEHASHCODE:

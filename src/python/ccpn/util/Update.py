@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-04-17 14:10:34 +0100 (Fri, April 17, 2020) $"
+__dateModified__ = "$dateModified: 2020-04-17 14:25:19 +0100 (Fri, April 17, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -252,41 +252,39 @@ class UpdateFile:
                 # always write binary files
                 with open(fullFilePath, 'wb') as fp:
                     fp.write(data)
+
             else:
                 # backwards compatible check for half-updated - file contains DELETEHASHCODE as text
                 if data and data.startswith(DELETEHASHCODE):
-                    try:
-                        os.remove(fullFilePath)
-                    except OSError:
-                        pass
+                    os.remove(fullFilePath)
+
                 else:
                     lastHashCode = calcHashCode(fullFilePath) if os.path.isfile(fullFilePath) else '<None>'
                     with open(fullFilePath, 'w', encoding='utf-8') as fp:
                         fp.write(data)
 
-                    try:
-                        # generate the hashcode for the new file here
-                        currentHashCode = calcHashCode(fullFilePath)
-                        serverHashCode = self.fileHashCode
-                        _hashCodeCacheFolder = os.path.abspath(os.path.join(self.installLocation, '.cache'))
-                        _hashCodeCache = os.path.join(_hashCodeCacheFolder, '_hashCodeCache.json')
-                        if not os.path.exists(_hashCodeCache):
-                            os.makedirs(_hashCodeCacheFolder)
-                            data = {}
-                        else:
-                            with open(_hashCodeCache) as fp:
-                                data = json.load(fp)
-                        if currentHashCode != serverHashCode:
-                            # should only store for windows
-                            if lastHashCode in data and lastHashCode != currentHashCode:
-                                del data[lastHashCode]
-                            data[currentHashCode] = serverHashCode
-                        with open(_hashCodeCache, 'w') as fp:
-                            json.dump(data, fp, indent=4)
+                    # generate the hashcode for the new file here
+                    currentHashCode = calcHashCode(fullFilePath)
+                    serverHashCode = self.fileHashCode
+                    _hashCodeCacheFolder = os.path.abspath(os.path.join(self.installLocation, '.cache'))
+                    _hashCodeCache = os.path.join(_hashCodeCacheFolder, '_hashCodeCache.json')
+                    if not os.path.exists(_hashCodeCache):
+                        os.makedirs(_hashCodeCacheFolder)
+                        data = {}
+                    else:
+                        with open(_hashCodeCache) as fp:
+                            data = json.load(fp)
 
-                    except Exception as es:
-                        # NOTE:ED - ignore for now
-                        pass
+                    if currentHashCode != serverHashCode:
+                        # should only store for windows
+                        if lastHashCode in data and lastHashCode != currentHashCode:
+                            del data[lastHashCode]
+                        data[currentHashCode] = serverHashCode
+
+                    with open(_hashCodeCache, 'w') as fp:
+                        json.dump(data, fp, indent=4)
+
+            return True
 
         except Exception as es:
             pass
@@ -297,6 +295,8 @@ class UpdateFile:
         fullFilePath = self.fullFilePath
         try:
             os.remove(fullFilePath)
+            return True
+
         except OSError:
             pass
 
@@ -602,11 +602,14 @@ class UpdateAgent(object):
             if not self._dryRun:
                 if updateFile.fileHashCode == DELETEHASHCODE:
                     self.showInfo('Install Updates', 'Removing %s' % (updateFile.fullFilePath))
-                    updateFile.installDeleteUpdate()
+                    if not updateFile.installDeleteUpdate():
+                        raise
 
                 else:
                     self.showInfo('Install Updates', 'Installing %s' % (updateFile.fullFilePath))
-                    updateFile.installUpdate()
+                    if not updateFile.installUpdate():
+                        raise
+
             else:
                 if updateFile.fileHashCode == DELETEHASHCODE:
                     self.showInfo('Install Updates', 'dry-run Removing %s' % (updateFile.fullFilePath))

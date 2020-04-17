@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-04-17 14:01:19 +0100 (Fri, April 17, 2020) $"
+__dateModified__ = "$dateModified: 2020-04-17 14:10:34 +0100 (Fri, April 17, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -60,6 +60,8 @@ WHITESPACE_AND_NULL = {'\x00', '\t', '\n', '\r', '\x0b', '\x0c'}
 BAD_DOWNLOAD = 'Exception: '
 DELETEHASHCODE = '<DELETE>'
 TERMSANDCONDITIONS = 'termsConditions'
+
+VERSION_UPDATE_FILE = 'src/python/ccpn/framework/Version.py'
 
 
 def lastModifiedTime(filePath):
@@ -554,26 +556,30 @@ class UpdateAgent(object):
         updateFilesInstalled = []
         if self.haveWriteAccess():
 
-            # check that the last file to be updated is the Version.py
-            _allowVersionUpdate = True if (len(updateFiles) == 1 and updateFiles[0].filePath == 'src/python/ccpn/framework/Version.py') else False
+            # # check that the last file to be updated is the Version.py
+            # _allowVersionUpdate = True if (len(updateFiles) == 1 and updateFiles[0].filePath == VERSION_UPDATE_FILE) else False
 
+            # go through the list is updates and apply each
             for updateFile in updateFiles:
 
-                # double-check that it is the last file
-                if not _allowVersionUpdate and updateFile.filePath == 'src/python/ccpn/framework/Version.py':
+                # skip the version update file
+                if updateFile.filePath == VERSION_UPDATE_FILE:
                     continue
 
+                # apply the update
                 n = self._updateSingleFile(n, updateFile, updateFilesInstalled)
 
+            # check how many have been updated correctly
             ss = n != 1 and 's' or ''
             if n != len(updateFiles):
+
                 notInstalled = list(set(updateFilesInstalled) ^ set(updateFiles))
+                # check if only the version update file remains
+                if notInstalled and len(notInstalled) == 1 and notInstalled[0].filePath == VERSION_UPDATE_FILE:
 
-                if notInstalled and len(notInstalled) == 1 and notInstalled[0].filePath == 'src/python/ccpn/framework/Version.py':
-
-                    # can install the version.py here
                     n = self._updateSingleFile(n, notInstalled[0], updateFilesInstalled)
 
+                    # check whether the version update file installed correctly
                     ss = n != 1 and 's' or ''
                     if n == len(updateFiles):
                         self.showInfo('Update%s installed' % ss, '%d update%s installed successfully' % (n, ss))

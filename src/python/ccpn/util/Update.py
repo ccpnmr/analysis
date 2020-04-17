@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-04-16 18:59:08 +0100 (Thu, April 16, 2020) $"
+__dateModified__ = "$dateModified: 2020-04-17 14:01:19 +0100 (Fri, April 17, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -32,6 +32,7 @@ import shutil
 import sys
 from datetime import datetime
 import json
+
 
 ccpn2Url = 'http://www.ccpn.ac.uk'
 
@@ -378,7 +379,6 @@ class UpdateAgent(object):
                     if fileHashCode == DELETEHASHCODE:
                         # delete file
                         if os.path.exists(os.path.join(self.installLocation, filePath)):
-
                             # if still exists then need to add to update list
                             updateFile = UpdateFile(self.installLocation, self.serverDbRoot, filePath, fileTime,
                                                     fileStoredAs, fileHashCode, serverDownloadScript=serverDownloadScript,
@@ -550,9 +550,9 @@ class UpdateAgent(object):
             self.showError('No updates', 'No updates for installation')
             return
 
+        n = 0
+        updateFilesInstalled = []
         if self.haveWriteAccess():
-            n = 0
-            updateFilesInstalled = []
 
             # check that the last file to be updated is the Version.py
             _allowVersionUpdate = True if (len(updateFiles) == 1 and updateFiles[0].filePath == 'src/python/ccpn/framework/Version.py') else False
@@ -563,34 +563,23 @@ class UpdateAgent(object):
                 if not _allowVersionUpdate and updateFile.filePath == 'src/python/ccpn/framework/Version.py':
                     continue
 
-                try:
-                    if not self._dryRun:
-                        if updateFile.fileHashCode == DELETEHASHCODE:
-                            self.showInfo('Install Updates', 'Removing %s' % (updateFile.fullFilePath))
-                            updateFile.installDeleteUpdate()
-
-                        else:
-                            self.showInfo('Install Updates', 'Installing %s' % (updateFile.fullFilePath))
-                            updateFile.installUpdate()
-                    else:
-                        if updateFile.fileHashCode == DELETEHASHCODE:
-                            self.showInfo('Install Updates', 'dry-run Removing %s' % (updateFile.fullFilePath))
-                        else:
-                            self.showInfo('Install Updates', 'dry-run Installing %s' % (updateFile.fullFilePath))
-
-                    n += 1
-                    updateFilesInstalled.append(updateFile)
-                except Exception as e:
-                    self.showError('Install Error', 'Could not install %s: %s' % (updateFile.fullFilePath, e))
+                n = self._updateSingleFile(n, updateFile, updateFilesInstalled)
 
             ss = n != 1 and 's' or ''
             if n != len(updateFiles):
                 notInstalled = list(set(updateFilesInstalled) ^ set(updateFiles))
 
                 if notInstalled and len(notInstalled) == 1 and notInstalled[0].filePath == 'src/python/ccpn/framework/Version.py':
-                    # not an error, just need to run again for version update
-                    self.showInfo('Update%s installed' % ss, '%d update%s installed successfully\nPlease run again for version update' % (n, ss))
 
+                    # can install the version.py here
+                    n = self._updateSingleFile(n, notInstalled[0], updateFilesInstalled)
+
+                    ss = n != 1 and 's' or ''
+                    if n == len(updateFiles):
+                        self.showInfo('Update%s installed' % ss, '%d update%s installed successfully' % (n, ss))
+
+                    else:
+                        self.showError('Update problem', '%d update%s installed, %d not installed, see console for error messages' % (n, ss, len(updateFiles) - n))
                 else:
                     self.showError('Update problem', '%d update%s installed, %d not installed, see console for error messages' % (n, ss, len(updateFiles) - n))
             else:
@@ -601,6 +590,29 @@ class UpdateAgent(object):
         self.resetFromServer()
 
         return updateFilesInstalled
+
+    def _updateSingleFile(self, n, updateFile, updateFilesInstalled):
+        try:
+            if not self._dryRun:
+                if updateFile.fileHashCode == DELETEHASHCODE:
+                    self.showInfo('Install Updates', 'Removing %s' % (updateFile.fullFilePath))
+                    updateFile.installDeleteUpdate()
+
+                else:
+                    self.showInfo('Install Updates', 'Installing %s' % (updateFile.fullFilePath))
+                    updateFile.installUpdate()
+            else:
+                if updateFile.fileHashCode == DELETEHASHCODE:
+                    self.showInfo('Install Updates', 'dry-run Removing %s' % (updateFile.fullFilePath))
+                else:
+                    self.showInfo('Install Updates', 'dry-run Installing %s' % (updateFile.fullFilePath))
+
+            n += 1
+            updateFilesInstalled.append(updateFile)
+        except Exception as e:
+            self.showError('Install Error', 'Could not install %s: %s' % (updateFile.fullFilePath, e))
+
+        return n
 
     def installUpdates(self):
 
@@ -646,6 +658,8 @@ if __name__ == '__main__':
     from ccpn.framework.Version import applicationVersion
     import sys
     import os
+
+
     # applicationVersion = __version__.split()[1]  # ejb - read from the header
     installUpdates(applicationVersion, dryRun=False)
 

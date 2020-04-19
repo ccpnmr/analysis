@@ -1,6 +1,5 @@
-from ccpn.core.lib.SpectrumLib import arPLS_Implementation, als, WhittakerSmooth, arPLS, airPLS, polynomialFit
+from ccpn.core.lib.SpectrumLib import arPLS_Implementation, als, WhittakerSmooth, arPLS, airPLS, polynomialFit, nmrGlueBaselineCorrector
 import numpy as np
-
 
 '''
 
@@ -63,9 +62,23 @@ def runExample_airPLS(spectrum, lambda_=100, porder=1, itermax=15):
     return spectrum
 
 
-def runExample_polynomialFit(spectrum, order=3):
+def runExample_polynomialFit(spectrum, order=1):
     xOriginal, yOriginal, spectrumName = spectrum.positions, spectrum.intensities, spectrum.name
     p = polynomialFit(xOriginal, yOriginal, order)
     yNew = yOriginal - p
     spectrum.intensities = yNew
     return spectrum
+
+def runExample_polynomialFit2(spectrum):
+    runExample_polynomialFit(spectrum, order=2)
+    return spectrum
+
+def runExample_polynomialFit3(spectrum):
+    runExample_polynomialFit(spectrum, order=3)
+    return spectrum
+
+def runExample_Bdc(spectrum) :
+    y = nmrGlueBaselineCorrector(spectrum.intensities)
+    spectrum.intensities = y
+    return spectrum
+

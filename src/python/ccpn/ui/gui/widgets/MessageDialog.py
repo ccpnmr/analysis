@@ -483,6 +483,8 @@ def _stoppableProgressBar(data, title='Calculating...', buttonText='Cancel'):
     for i in _stoppableProgressBar(range(10), title, buttonText):
         # do stuff
         pass
+    for use in a zip loop, wrap with 'list':
+    eg for (cs, ts) in _stoppableProgressBar(list(zip(controlSpectra, targetSpectra)))
     '''
 
     widget = QtWidgets.QProgressDialog(title, buttonText, 0, len(data))  # starts = 0, ends = len(data)

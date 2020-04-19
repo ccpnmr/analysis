@@ -58,7 +58,7 @@ Bruker_expNo_SubDirectory = '1' # Default Take the first experiment if multiple
 Bruker_pdata_SubDirectory = '1' # Default Take the first processing file if multiple
 
 outputPath = '/Users/luca/Desktop/DFCI/cpmg_development/4A_data'
-outputName = 'lookupFile.xls'
+outputName = 'lookupFile_test.xls'
 
 '''
 # Divide spectra experiment types by filename pattern

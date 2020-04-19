@@ -656,39 +656,39 @@ class PeakList(PMIListABC):
         from ccpn.core.lib.ContextManagers import undoBlock, undoBlockWithoutSideBar, notificationEchoBlocking
         from ccpn.core.lib.SpectrumLib import _estimate1DSpectrumSNR
         peaks = []
-        with undoBlockWithoutSideBar():
-            with notificationEchoBlocking():
-                spectrum = self.spectrum
+        # with undoBlockWithoutSideBar():
+        #     with notificationEchoBlocking():
+        spectrum = self.spectrum
 
-                x, y = spectrum.positions, spectrum.intensities
-                masked = _filtered1DArray(np.array([x, y]), ignoredRegions)
-                filteredX, filteredY = masked[0].compressed(), masked[1].compressed()
-                if maxNoiseLevel is None or minNoiseLevel is None:
-                    maxNoiseLevel, minNoiseLevel = estimateNoiseLevel1D(y, f=useXRange, stdFactor=eNoiseThresholdFactor)
-                    spectrum.noiseLevel = float(maxNoiseLevel)
-                    spectrum.negativeNoiseLevel = float(minNoiseLevel)
-                deltaAdjustment = percentage(deltaPercent, maxNoiseLevel)
-                maxValues, minValues = simple1DPeakPicker(y=filteredY, x=filteredX, delta=maxNoiseLevel + deltaAdjustment, negDelta=minNoiseLevel + deltaAdjustment, negative=negativePeaks)
-                spectrum.noiseLevel = float(maxNoiseLevel)
-                spectrum.negativeNoiseLevel = float(minNoiseLevel)
-                snr_ratios = []
+        x, y = spectrum.positions, spectrum.intensities
+        masked = _filtered1DArray(np.array([x, y]), ignoredRegions)
+        filteredX, filteredY = masked[0].compressed(), masked[1].compressed()
+        if maxNoiseLevel is None or minNoiseLevel is None:
+            maxNoiseLevel, minNoiseLevel = estimateNoiseLevel1D(y, f=useXRange, stdFactor=eNoiseThresholdFactor)
+            spectrum.noiseLevel = float(maxNoiseLevel)
+            spectrum.negativeNoiseLevel = float(minNoiseLevel)
+        deltaAdjustment = percentage(deltaPercent, maxNoiseLevel)
+        maxValues, minValues = simple1DPeakPicker(y=filteredY, x=filteredX, delta=maxNoiseLevel + deltaAdjustment, negDelta=minNoiseLevel + deltaAdjustment, negative=negativePeaks)
+        spectrum.noiseLevel = float(maxNoiseLevel)
+        spectrum.negativeNoiseLevel = float(minNoiseLevel)
+        snr_ratios = []
 
-                for position, height in maxValues:
-                    peak = self.newPeak(ppmPositions=[position], height=height)
-                    snr = peak._getSNRatio()
-                    snr_ratios.append(snr)
-                    peaks.append(peak)
-                if negativePeaks:
-                    for position, height in minValues:
-                        peak = self.newPeak(ppmPositions=[position], height=height)
-                        snr = peak._getSNRatio()
-                        snr_ratios.append(snr)
-                        peaks.append(peak)
-                if recalculateSNR:
-                    spectrum._snr = np.mean(snr_ratios)
-                    if math.isnan(spectrum._snr):  #estimate from the std of all y points
-                        print("SNR from Peaks is None. Using the STD of spectrum intensities" )
-                        spectrum._snr = _estimate1DSpectrumSNR(spectrum)
+        for position, height in maxValues:
+            peak = self.newPeak(ppmPositions=[position], height=height)
+            snr = peak._getSNRatio()
+            snr_ratios.append(snr)
+            peaks.append(peak)
+        if negativePeaks:
+            for position, height in minValues:
+                peak = self.newPeak(ppmPositions=[position], height=height)
+                snr = peak._getSNRatio()
+                snr_ratios.append(snr)
+                peaks.append(peak)
+        if recalculateSNR:
+            spectrum._snr = np.mean(snr_ratios)
+            if math.isnan(spectrum._snr):  #estimate from the std of all y points
+                print("SNR from Peaks is None. Using the STD of spectrum intensities" )
+                spectrum._snr = _estimate1DSpectrumSNR(spectrum)
         return peaks
 
 

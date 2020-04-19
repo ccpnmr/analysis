@@ -85,7 +85,8 @@ class ConcentrationWidget(ScrollableFrame):
                 editor.setValue(value)
 
     def setUnit(self, unit):
-        self.concentrationUnitsEditor.set(unit)
+        if unit is not None:
+            self.concentrationUnitsEditor.set(unit)
 
     def getValues(self):
         values = []

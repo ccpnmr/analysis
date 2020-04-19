@@ -48,6 +48,7 @@ SUBSTANCE_NAME = 'substanceName'
 # added from beta6
 SPECTRUM_NAME = 'spectrumName'
 SPECTRUMGROUP = 'SpectrumGroup'
+SERIES = 'series'
 
 
 ### Substance properties: # do not change these names
@@ -191,17 +192,21 @@ class ExcelReader(object):
         self.sheets = self._getSheets(self.pandasFile)
         self.dataframes = self._getDataFrameFromSheets(self.sheets)
 
-        with undoBlockWithoutSideBar():
-            getLogger().info('Loading Excel File...')
-            with notificationEchoBlocking():
-                self.substancesDicts = self._createSubstancesDataFrames(self.dataframes)
-                self.samplesDicts = self._createSamplesDataDicts(self.dataframes)
-                self.spectrumGroups = self._createSpectrumGroups(self.dataframes)
+        self._project.blankNotification()
+        getLogger().info('Loading Excel File...')
 
-                self._dispatchAttrsToObjs(self.substancesDicts)
-                self._loadSpectraForSheet(self.substancesDicts)
-                self._dispatchAttrsToObjs(self.samplesDicts)
-                self._loadSpectraForSheet(self.samplesDicts)
+        # with undoBlockWithoutSideBar():
+        #     getLogger().info('Loading Excel File...')
+        #     with notificationEchoBlocking():
+        self.substancesDicts = self._createSubstancesDataFrames(self.dataframes)
+        self.samplesDicts = self._createSamplesDataDicts(self.dataframes)
+        self.spectrumGroups = self._createSpectrumGroups(self.dataframes)
+
+        self._dispatchAttrsToObjs(self.substancesDicts)
+        self._loadSpectraForSheet(self.substancesDicts)
+        self._dispatchAttrsToObjs(self.samplesDicts)
+        self._loadSpectraForSheet(self.samplesDicts)
+        self._project.unblankNotification()
 
     ######################################################################################################################
     ######################                  PARSE EXCEL                     ##############################################
@@ -317,7 +322,7 @@ class ExcelReader(object):
 
     def _createNewSpectrumGroup(self, name):
         if self._project:
-            if not self._project.getByPid('SG:' + name):
+            if not self._project.getByPid('SG:' + str(name)):
                 return self._project.newSpectrumGroup(name=str(name))
             else:
                 getLogger().warning('Impossible to create the spectrumGroup %s. A spectrumGroup with the same name already '
@@ -369,8 +374,8 @@ class ExcelReader(object):
                                         getLogger().warning(e)
 
     def _addSpectrum(self, filePath, dct, obj):
+        from ccpn.core.Spectrum import SPECTRUMSERIES, SPECTRUMSERIESITEMS
         '''
-
         :param filePath: spectrum full file path
         :param dct:  dict with information for the spectrum. eg EXP type
         :obj: obj to link the spectrum to. E.g. Sample or Substance,
@@ -379,7 +384,7 @@ class ExcelReader(object):
         if not name:
             name = obj.name
         if filePath.endswith('1r'): # a try to make a loader faster down the model, skipping the loops
-            data = self._project.loadSpectrum(filePath, 'Bruker',name )
+            data = self._project.loadSpectrum(filePath, 'Bruker',str(name) )
         else:
             data = self._project.loadData(filePath)
         if data is not None:
@@ -411,6 +416,8 @@ class ExcelReader(object):
                 spectrumGroup = self._project.getByPid('SG:' + str(value))
                 if spectrumGroup is not None:
                     spectrumGroup.spectra += (spectrum,)
+                if SERIES in dct:
+                    spectrum._setSeriesItem(spectrumGroup,dct[SERIES])
 
     ######################################################################################################################
     ######################            DISPATCH ATTRIBUTES TO RELATIVE OBJECTS         ####################################

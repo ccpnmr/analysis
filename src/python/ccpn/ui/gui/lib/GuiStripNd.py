@@ -33,7 +33,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-04-08 14:14:12 +0100 (Wed, April 08, 2020) $"
+__dateModified__ = "$dateModified: 2020-04-20 16:05:25 +0100 (Mon, April 20, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -275,7 +275,7 @@ class GuiStripNd(GuiStrip):
         self.exportPdf = ExportDialog(parent=self.mainWindow,
                                       mainWindow=self.mainWindow,
                                       strips=self.spectrumDisplay.strips,
-                                      preferences=self.mainWindow.application.preferences.general)
+                                      preferences=self.mainWindow.application.preferences)
         self.exportPdf.exec_()
 
     @logCommand(get='self')

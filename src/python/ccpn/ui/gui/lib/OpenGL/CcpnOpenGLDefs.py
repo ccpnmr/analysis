@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-04-16 17:01:59 +0100 (Thu, April 16, 2020) $"
+__dateModified__ = "$dateModified: 2020-04-20 16:05:25 +0100 (Mon, April 20, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -150,6 +150,8 @@ GLCONTOURTHICKNESS = 'Contour Thickness'
 GLSTRIPDIRECTION = 'Strip Direction'
 GLSTRIPPADDING = 'Strip Padding'
 GLEXPORTDPI = 'Image dpi'
+
+AXISDRAWOFFSET = 0.001
 
 GLFULLLIST = (GLPEAKSYMBOLS,
               GLPEAKLABELS,

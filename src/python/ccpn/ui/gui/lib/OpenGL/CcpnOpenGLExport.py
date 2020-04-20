@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-02-11 15:11:09 +0000 (Tue, February 11, 2020) $"
+__dateModified__ = "$dateModified: 2020-04-20 16:05:25 +0100 (Mon, April 20, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -167,30 +167,37 @@ class GLExporter():
             self.numStrips = len(spectrumDisplay.strips)
             for strNum, strip in enumerate(spectrumDisplay.orderedStrips):
                 self.stripNumber = strNum
+                self._createStrip(strip, singleStrip=False, axesOnly=False)
 
-                # point to the correct strip
-                self.strip = strip
-                self._parent = strip._CcpnGLWidget
+            # build strip for the floating axis
+            self.stripNumber = self.numStrips
 
-                self._buildPage(singleStrip=False)
-                self._buildStrip()
-                self._addDrawingToStory()
+            # self._parent still points to the last strip - check not to double up the last axis
+            if self.params[GLSTRIPDIRECTION] == 'Y':
+                if self._parent and not self._parent._drawRightAxis:
+                    self._createStrip(spectrumDisplay.orderedStrips[0], spectrumDisplay._rightGLAxis, singleStrip=False, axesOnly=True)
+            else:
+                if self._parent and not self._parent._drawBottomAxis:
+                    self._createStrip(spectrumDisplay.orderedStrips[0], spectrumDisplay._bottomGLAxis, singleStrip=False, axesOnly=True)
+
         else:
             self.numStrips = 1
             self.stripNumber = 0
-
-            # point to the correct strip
-            self.strip = self.params[GLSTRIP]
-            self._parent = self.strip._CcpnGLWidget
-
-            self._buildPage(singleStrip=True)
-            self._buildStrip()
-            self._addDrawingToStory()
+            self._createStrip(self.params[GLSTRIP], singleStrip=True, axesOnly=False)
 
         self._addTableToStory()
 
         # this generates the buffer to write to the file
         self._report.buildDocument()
+
+    def _createStrip(self, strip, _parent=None, singleStrip=False, axesOnly=False):
+        # point to the correct strip
+        self.strip = strip
+        self._parent = self.strip._CcpnGLWidget if _parent == None else _parent
+
+        self._buildPage(singleStrip=singleStrip)
+        self._buildStrip(axesOnly=axesOnly)
+        self._addDrawingToStory()
 
     def _importFonts(self):
         import os
@@ -270,8 +277,12 @@ class GLExporter():
         elif self.rAxis and not self.bAxis:
             # right axis visible
             self.mainView = viewportDimensions(*getView(MAINVIEWFULLHEIGHT, _parentW, _parentH))
-            self.rAxisMarkView = viewportDimensions(*getView(FULLRIGHTAXIS, _parentW, _parentH))
-            self.rAxisBarView = viewportDimensions(*getView(FULLRIGHTAXISBAR, _parentW, _parentH))
+            if self._parent._fullHeightRightAxis:
+                self.rAxisMarkView = viewportDimensions(*getView(FULLRIGHTAXIS, _parentW, _parentH))
+                self.rAxisBarView = viewportDimensions(*getView(FULLRIGHTAXISBAR, _parentW, _parentH))
+            else:
+                self.rAxisMarkView = viewportDimensions(*getView(RIGHTAXIS, _parentW, _parentH))
+                self.rAxisBarView = viewportDimensions(*getView(RIGHTAXISBAR, _parentW, _parentH))
             self.bAxisMarkView = viewportDimensions(*getView(BLANKVIEW, _parentW, _parentH))
             self.bAxisBarView = viewportDimensions(*getView(BLANKVIEW, _parentW, _parentH))
 
@@ -280,8 +291,12 @@ class GLExporter():
             self.mainView = viewportDimensions(*getView(MAINVIEWFULLWIDTH, _parentW, _parentH))
             self.rAxisMarkView = viewportDimensions(*getView(BLANKVIEW, _parentW, _parentH))
             self.rAxisBarView = viewportDimensions(*getView(BLANKVIEW, _parentW, _parentH))
-            self.bAxisMarkView = viewportDimensions(*getView(FULLBOTTOMAXIS, _parentW, _parentH))
-            self.bAxisBarView = viewportDimensions(*getView(FULLBOTTOMAXISBAR, _parentW, _parentH))
+            if self._parent._fullWidthBottomAxis:
+                self.bAxisMarkView = viewportDimensions(*getView(FULLBOTTOMAXIS, _parentW, _parentH))
+                self.bAxisBarView = viewportDimensions(*getView(FULLBOTTOMAXISBAR, _parentW, _parentH))
+            else:
+                self.bAxisMarkView = viewportDimensions(*getView(BOTTOMAXIS, _parentW, _parentH))
+                self.bAxisBarView = viewportDimensions(*getView(BOTTOMAXISBAR, _parentW, _parentH))
 
         else:
             # both axes visible
@@ -407,11 +422,11 @@ class GLExporter():
         gr = Group()
         ll = [self.displayScale * self.mainView.left, self.displayScale * self.mainView.bottom,
               self.displayScale * self.mainView.left, self.pixHeight,
-              self.displayScale * self.mainView.width, self.pixHeight, ]
-        # self.displayScale * self.mainView.width, self.displayScale * self.mainView.bottom,
-        # self.displayScale * self.mainView.left, self.displayScale * self.mainView.bottom]
+              self.displayScale * self.mainView.width, self.pixHeight,
+              self.displayScale * self.mainView.width, self.displayScale * self.mainView.bottom,
+              self.displayScale * self.mainView.left, self.displayScale * self.mainView.bottom]
 
-        if ll and self.params[GLPLOTBORDER]:
+        if ll:
             pl = Path(fillColor=None,
                       strokeColor=self.foregroundColour if self.params[GLPLOTBORDER] else self.backgroundColour,
                       strokeWidth=0.5 * self.baseThickness)
@@ -419,9 +434,10 @@ class GLExporter():
             for vv in range(2, len(ll), 2):
                 pl.lineTo(ll[vv], ll[vv + 1])
             gr.add(pl)
+
         thisPlot.add(gr, name='mainPlotBox')
 
-    def _buildStrip(self):
+    def _buildStrip(self, axesOnly=False):
         # create an object that can be added to a report
         self._mainPlot = Drawing(self.pixWidth, self.pixHeight)
         self._addBackgroundBox(self._mainPlot)
@@ -431,47 +447,52 @@ class GLExporter():
 
         # print the grid objects
         if self.params[GLGRIDLINES]: self._addGridLines()
-        if self.params[GLDIAGONALLINE]: self._addDiagonalLine()
-        if self.params[GLDIAGONALSIDEBANDS]: self._addDiagonalSideBands()
 
-        # check parameters to decide what to print
+        if not axesOnly:
+            if self.params[GLDIAGONALLINE]: self._addDiagonalLine()
+            if self.params[GLDIAGONALSIDEBANDS]: self._addDiagonalSideBands()
 
-        if not self._parent.spectrumDisplay.is1D or \
-                not self._parent.spectrumDisplay.phasingFrame.isVisible() or \
-                self.params[GLSHOWSPECTRAONPHASE]:
+            # check parameters to decide what to print
 
-            if self.params[GLSPECTRUMCONTOURS]: self._addSpectrumContours()
-            if self.params[GLSPECTRUMBORDERS]: self._addSpectrumBoundaries()
+            if not self._parent.spectrumDisplay.is1D or \
+                    not self._parent.spectrumDisplay.phasingFrame.isVisible() or \
+                    self.params[GLSHOWSPECTRAONPHASE]:
 
-        if not self._parent._stackingMode:
-            if self.params[GLINTEGRALSYMBOLS]: self._addIntegralAreas()
-            if self.params[GLINTEGRALSYMBOLS]: self._addIntegralLines()
-            if self.params[GLPEAKSYMBOLS]: self._addPeakSymbols()
-            if self.params[GLMULTIPLETSYMBOLS]: self._addMultipletSymbols()
-            if self.params[GLMARKLINES]: self._addMarkLines()
-            if self.params[GLREGIONS]: self._addRegions()
-            if self.params[GLPEAKLABELS]: self._addPeakLabels()
-            if self.params[GLINTEGRALLABELS]: self._addIntegralLabels()
-            if self.params[GLMULTIPLETLABELS]: self._addMultipletLabels()
-            if self.params[GLMARKLABELS]: self._addMarkLabels()
-        else:
-            # currently only in stacking mode
-            if self.params[GLSPECTRUMLABELS]: self._addSpectrumLabels()
+                if self.params[GLSPECTRUMCONTOURS]: self._addSpectrumContours()
+                if self.params[GLSPECTRUMBORDERS]: self._addSpectrumBoundaries()
 
-        if self.params[GLTRACES]: self._addTraces()
-        if self.params[GLACTIVETRACES]: self._addLiveTraces()
+            if not self._parent._stackingMode:
+                if self.params[GLINTEGRALSYMBOLS]: self._addIntegralAreas()
+                if self.params[GLINTEGRALSYMBOLS]: self._addIntegralLines()
+                if self.params[GLPEAKSYMBOLS]: self._addPeakSymbols()
+                if self.params[GLMULTIPLETSYMBOLS]: self._addMultipletSymbols()
+                if self.params[GLMARKLINES]: self._addMarkLines()
+                if self.params[GLREGIONS]: self._addRegions()
+                if self.params[GLPEAKLABELS]: self._addPeakLabels()
+                if self.params[GLINTEGRALLABELS]: self._addIntegralLabels()
+                if self.params[GLMULTIPLETLABELS]: self._addMultipletLabels()
+                if self.params[GLMARKLABELS]: self._addMarkLabels()
+            else:
+                # currently only in stacking mode
+                if self.params[GLSPECTRUMLABELS]: self._addSpectrumLabels()
 
-        if not self._parent._stackingMode:
-            if self.params[GLOTHERLINES]: self._addInfiniteLines()
-        if self.params[GLSTRIPLABELLING]: self._addOverlayText()
+            if self.params[GLTRACES]: self._addTraces()
+            if self.params[GLACTIVETRACES]: self._addLiveTraces()
 
-        # frame the top-left of the main plot area - after other plotting
-        self._addPlotBorders(self._mainPlot)
+            if not self._parent._stackingMode:
+                if self.params[GLOTHERLINES]: self._addInfiniteLines()
+            if self.params[GLSTRIPLABELLING]: self._addOverlayText()
 
-        # add the axis labels which requires a mask to clean the edges
-        # self._addAxisMask()
+            # frame the top-left of the main plot area - after other plotting
+            self._addPlotBorders(self._mainPlot)
+
+            # add the axis labels which requires a mask to clean the edges
+            self._addAxisMask()
+
         self._addGridTickMarks()
-        if self.params[GLCURSORS]: self._addCursors()
+
+        if not axesOnly:
+            if self.params[GLCURSORS]: self._addCursors()
 
         if self.params[GLAXISLABELS] or self.params[GLAXISUNITS] or self.params[GLAXISTITLES]: self._addGridLabels()
 
@@ -479,7 +500,7 @@ class GLExporter():
         """
         Add grid lines to the main drawing area.
         """
-        if self.strip.gridVisible and self._parent.gridList[0]:
+        if self._parent._gridVisible and self._parent.gridList[0]:
             colourGroups = OrderedDict()
             self._appendIndexLineGroup(indArray=self._parent.gridList[0],
                                        colourGroups=colourGroups,
@@ -496,7 +517,7 @@ class GLExporter():
         """
         Add the diagonal sideBand lines to the main drawing area.
         """
-        if self._parent.diagonalGLList:
+        if self._parent.diagonalSideBandsGLList and self._parent._matchingIsotopeCodes:
             colourGroups = OrderedDict()
             self._appendIndexLineGroup(indArray=self._parent.diagonalSideBandsGLList,
                                        colourGroups=colourGroups,
@@ -513,7 +534,7 @@ class GLExporter():
         """
         Add the diagonal line to the main drawing area.
         """
-        if self._parent.diagonalGLList:
+        if self._parent.diagonalGLList and self._parent._matchingIsotopeCodes:
             colourGroups = OrderedDict()
             self._appendIndexLineGroup(indArray=self._parent.diagonalGLList,
                                        colourGroups=colourGroups,
@@ -582,11 +603,11 @@ class GLExporter():
                             colour = colors.Color(*thisSpec.colors[ii0 * 4:ii0 * 4 + 3], alpha=alphaClip(thisSpec.colors[ii0 * 4 + 3]))
                             colourPath = 'spectrumViewContours%s%s%s%s%s' % (spectrumView.pid, colour.red, colour.green, colour.blue, colour.alpha)
 
-                            newLine = self._parent.lineVisible(newLine,
-                                                               x=self.displayScale * self.mainView.left,
-                                                               y=self.displayScale * self.mainView.bottom,
-                                                               width=self.displayScale * self.mainView.width,
-                                                               height=self.displayScale * self.mainView.height)
+                            newLine = self.lineVisible(self._parent, newLine,
+                                                       x=self.displayScale * self.mainView.left,
+                                                       y=self.displayScale * self.mainView.bottom,
+                                                       width=self.displayScale * self.mainView.width,
+                                                       height=self.displayScale * self.mainView.height)
                             if newLine:
                                 if colourPath not in colourGroups:
                                     colourGroups[colourPath] = {PDFLINES      : [],
@@ -657,11 +678,11 @@ class GLExporter():
                 for ii in range(0, len(newLine) - 2, 2):
                     thisLine = newLine[ii:ii + 4]
 
-                    thisLine = self._parent.lineVisible(thisLine,
-                                                        x=self.displayScale * self.mainView.left,
-                                                        y=self.displayScale * self.mainView.bottom,
-                                                        width=self.displayScale * self.mainView.width,
-                                                        height=self.displayScale * self.mainView.height)
+                    thisLine = self.lineVisible(self._parent, newLine,
+                                                x=self.displayScale * self.mainView.left,
+                                                y=self.displayScale * self.mainView.bottom,
+                                                width=self.displayScale * self.mainView.width,
+                                                height=self.displayScale * self.mainView.height)
                     if thisLine:
                         if colourPath not in colourGroups:
                             colourGroups[colourPath] = {PDFLINES        : [],
@@ -795,11 +816,11 @@ class GLExporter():
                             colourPath = 'spectrumViewIntegralFill%s%s%s%s%s' % (
                                 spectrumView.pid, colour.red, colour.green, colour.blue, colour.alpha)
 
-                            newLine = self._parent.lineVisible(newLine,
-                                                               x=self.displayScale * self.mainView.left,
-                                                               y=self.displayScale * self.mainView.bottom,
-                                                               width=self.displayScale * self.mainView.width,
-                                                               height=self.displayScale * self.mainView.height)
+                            newLine = self.lineVisible(self._parent, newLine,
+                                                       x=self.displayScale * self.mainView.left,
+                                                       y=self.displayScale * self.mainView.bottom,
+                                                       width=self.displayScale * self.mainView.width,
+                                                       height=self.displayScale * self.mainView.height)
                             if newLine:
                                 if colourPath not in colourGroups:
                                     colourGroups[colourPath] = {PDFLINES: [], PDFFILLCOLOR: colour, PDFSTROKE: None, PDFSTROKECOLOR: None}
@@ -851,11 +872,11 @@ class GLExporter():
                         spectrumView.pid, colour.red, colour.green, colour.blue, colour.alpha)
 
                     newLine = [drawString.attribs[0], drawString.attribs[1]]
-                    if self._parent.pointVisible(newLine,
-                                                 x=self.displayScale * self.mainView.left,
-                                                 y=self.displayScale * self.mainView.bottom,
-                                                 width=self.displayScale * self.mainView.width,
-                                                 height=self.displayScale * self.mainView.height):
+                    if self.pointVisible(self._parent, newLine,
+                                         x=self.displayScale * self.mainView.left,
+                                         y=self.displayScale * self.mainView.bottom,
+                                         width=self.displayScale * self.mainView.width,
+                                         height=self.displayScale * self.mainView.height):
                         if colourPath not in colourGroups:
                             colourGroups[colourPath] = Group()
                         textGroup = drawString.text.split('\n')
@@ -900,11 +921,11 @@ class GLExporter():
                         spectrumView.pid, colour.red, colour.green, colour.blue, colour.alpha)
 
                     newLine = [drawString.attribs[0], drawString.attribs[1]]
-                    if self._parent.pointVisible(newLine,
-                                                 x=self.displayScale * self.mainView.left,
-                                                 y=self.displayScale * self.mainView.bottom,
-                                                 width=self.displayScale * self.mainView.width,
-                                                 height=self.displayScale * self.mainView.height):
+                    if self.pointVisible(self._parent, newLine,
+                                         x=self.displayScale * self.mainView.left,
+                                         y=self.displayScale * self.mainView.bottom,
+                                         width=self.displayScale * self.mainView.width,
+                                         height=self.displayScale * self.mainView.height):
                         if colourPath not in colourGroups:
                             colourGroups[colourPath] = Group()
                         textGroup = drawString.text.split('\n')
@@ -949,11 +970,11 @@ class GLExporter():
                         spectrumView.pid, colour.red, colour.green, colour.blue, colour.alpha)
 
                     newLine = [drawString.attribs[0], drawString.attribs[1]]
-                    if self._parent.pointVisible(newLine,
-                                                 x=self.displayScale * self.mainView.left,
-                                                 y=self.displayScale * self.mainView.bottom,
-                                                 width=self.displayScale * self.mainView.width,
-                                                 height=self.displayScale * self.mainView.height):
+                    if self.pointVisible(self._parent, newLine,
+                                         x=self.displayScale * self.mainView.left,
+                                         y=self.displayScale * self.mainView.bottom,
+                                         width=self.displayScale * self.mainView.width,
+                                         height=self.displayScale * self.mainView.height):
                         if colourPath not in colourGroups:
                             colourGroups[colourPath] = Group()
                         textGroup = drawString.text.split('\n')
@@ -986,11 +1007,11 @@ class GLExporter():
             colourPath = 'projectMarks%s%s%s%s' % (colour.red, colour.green, colour.blue, colour.alpha)
 
             newLine = [drawString.attribs[0], drawString.attribs[1]]
-            if self._parent.pointVisible(newLine,
-                                         x=self.displayScale * self.mainView.left,
-                                         y=self.displayScale * self.mainView.bottom,
-                                         width=self.displayScale * self.mainView.width,
-                                         height=self.displayScale * self.mainView.height):
+            if self.pointVisible(self._parent, newLine,
+                                 x=self.displayScale * self.mainView.left,
+                                 y=self.displayScale * self.mainView.bottom,
+                                 width=self.displayScale * self.mainView.width,
+                                 height=self.displayScale * self.mainView.height):
                 if colourPath not in colourGroups:
                     colourGroups[colourPath] = Group()
                 self._addString(colourGroups, colourPath, drawString, newLine, colour, boxed=False)
@@ -1019,11 +1040,11 @@ class GLExporter():
             colourPath = 'projectSpectrumLabels%s%s%s%s' % (colour.red, colour.green, colour.blue, colour.alpha)
 
             newLine = [drawString.attribs[0], drawString.attribs[1]]
-            if self._parent.pointVisible(newLine,
-                                         x=self.displayScale * self.mainView.left,
-                                         y=self.displayScale * self.mainView.bottom,
-                                         width=self.displayScale * self.mainView.width,
-                                         height=self.displayScale * self.mainView.height):
+            if self.pointVisible(self._parent, newLine,
+                                 x=self.displayScale * self.mainView.left,
+                                 y=self.displayScale * self.mainView.bottom,
+                                 width=self.displayScale * self.mainView.width,
+                                 height=self.displayScale * self.mainView.height):
                 if colourPath not in colourGroups:
                     colourGroups[colourPath] = Group()
                 self._addString(colourGroups, colourPath, drawString, newLine, colour, boxed=True)
@@ -1094,11 +1115,11 @@ class GLExporter():
                 else:
                     newLine = [infLine.values, self._parent.axisT, infLine.values, self._parent.axisB]
 
-                newLine = self._parent.lineVisible(newLine,
-                                                   x=self.displayScale * self.mainView.left,
-                                                   y=self.displayScale * self.mainView.bottom,
-                                                   width=self.displayScale * self.mainView.width,
-                                                   height=self.displayScale * self.mainView.height)
+                newLine = self.lineVisible(self._parent, newLine,
+                                           x=self.displayScale * self.mainView.left,
+                                           y=self.displayScale * self.mainView.bottom,
+                                           width=self.displayScale * self.mainView.width,
+                                           height=self.displayScale * self.mainView.height)
                 if newLine:
                     if colourPath not in colourGroups:
                         colourGroups[colourPath] = {PDFLINES          : [],
@@ -1130,11 +1151,11 @@ class GLExporter():
         newLine = self._scaleRatioToWindow([drawString.attribs[0] + (self.fontXOffset * self._parent.deltaX),
                                             drawString.attribs[1] + (self.fontYOffset * self._parent.deltaY)])
 
-        if self._parent.pointVisible(newLine,
-                                     x=self.displayScale * self.mainView.left,
-                                     y=self.displayScale * self.mainView.bottom,
-                                     width=self.displayScale * self.mainView.width,
-                                     height=self.displayScale * self.mainView.height):
+        if self.pointVisible(self._parent, newLine,
+                             x=self.displayScale * self.mainView.left,
+                             y=self.displayScale * self.mainView.bottom,
+                             width=self.displayScale * self.mainView.width,
+                             height=self.displayScale * self.mainView.height):
             pass
 
         if colourPath not in colourGroups:
@@ -1327,11 +1348,11 @@ class GLExporter():
                     newLine = self._scaleRatioToWindow([(self.fontXOffset + attribPos[0]) / self._parent.AXIS_MARGINRIGHT,
                                                         attribPos[1] + (self.fontYOffset * self._parent.deltaY)])
 
-                    if self._parent.pointVisible(newLine,
-                                                 x=self.displayScale * self.rAxisBarView.left,
-                                                 y=self.displayScale * self.rAxisBarView.bottom,
-                                                 width=self.displayScale * self.rAxisBarView.width,
-                                                 height=self.displayScale * self.rAxisBarView.height):
+                    if self.pointVisible(self._parent, newLine,
+                                         x=self.displayScale * self.rAxisBarView.left,
+                                         y=self.displayScale * self.rAxisBarView.bottom,
+                                         width=self.displayScale * self.rAxisBarView.width,
+                                         height=self.displayScale * self.rAxisBarView.height):
                         if colourPath not in colourGroups:
                             colourGroups[colourPath] = Group()
 
@@ -1372,11 +1393,11 @@ class GLExporter():
                     newLine = self._scaleRatioToWindow([attribPos[0] + (self.fontXOffset * self._parent.deltaX),
                                                         (self.fontYOffset + attribPos[1]) / self._parent.AXIS_MARGINBOTTOM])
 
-                    if self._parent.pointVisible(newLine,
-                                                 x=self.displayScale * self.bAxisBarView.left,
-                                                 y=self.displayScale * self.bAxisBarView.bottom,
-                                                 width=self.displayScale * self.bAxisBarView.width,
-                                                 height=self.displayScale * self.bAxisBarView.height):
+                    if self.pointVisible(self._parent, newLine,
+                                         x=self.displayScale * self.bAxisBarView.left,
+                                         y=self.displayScale * self.bAxisBarView.bottom,
+                                         width=self.displayScale * self.bAxisBarView.width,
+                                         height=self.displayScale * self.bAxisBarView.height):
                         if colourPath not in colourGroups:
                             colourGroups[colourPath] = Group()
 
@@ -1439,7 +1460,7 @@ class GLExporter():
                 self.stripHeights.append(report.height)
 
         else:
-            if self.stripNumber > 0:
+            if 0 < self.stripNumber < self.numStrips:
                 self.stripWidths.append(report.width + self.stripSpacing)
                 self.stripHeights.append(report.height + self.stripSpacing)
             else:
@@ -1517,11 +1538,11 @@ class GLExporter():
                     cc[PDFSTROKE] = None
                     cc[PDFSTROKECOLOR] = None
 
-            newLine = self._parent.lineVisible(newLine,
-                                               x=plotDim[PLOTLEFT],
-                                               y=plotDim[PLOTBOTTOM],
-                                               width=plotDim[PLOTWIDTH],
-                                               height=plotDim[PLOTHEIGHT])
+            newLine = self.lineVisible(self._parent, newLine,
+                                       x=plotDim[PLOTLEFT],
+                                       y=plotDim[PLOTBOTTOM],
+                                       width=plotDim[PLOTWIDTH],
+                                       height=plotDim[PLOTHEIGHT])
             if newLine:
                 colourGroups[colourPath][PDFLINES].append(newLine)
 
@@ -1578,11 +1599,11 @@ class GLExporter():
                     cc[PDFSTROKE] = None
                     cc[PDFSTROKECOLOR] = None
 
-            newLine = self._parent.lineVisible(newLine,
-                                               x=plotDim[PLOTLEFT],
-                                               y=plotDim[PLOTBOTTOM],
-                                               width=plotDim[PLOTWIDTH],
-                                               height=plotDim[PLOTHEIGHT])
+            newLine = self.lineVisible(self._parent, newLine,
+                                       x=plotDim[PLOTLEFT],
+                                       y=plotDim[PLOTBOTTOM],
+                                       width=plotDim[PLOTWIDTH],
+                                       height=plotDim[PLOTHEIGHT])
             if newLine:
                 colourGroups[colourPath][PDFLINES].append(newLine)
 
@@ -1656,6 +1677,172 @@ class GLExporter():
                         pl.closePath()
             gr.add(pl)
         drawing.add(gr, name=name)
+
+    def between(self, val, l, r):
+        return (l - val) * (r - val) <= 0
+
+    def pointVisible(self, _parent, lineList, x=0.0, y=0.0, width=0.0, height=0.0):
+        """return true if the line has visible endpoints
+        """
+        axisL, axisR, axisT, axisB = self._parent.axisL, self._parent.axisR, self._parent.axisT, self._parent.axisB
+
+        if (self.between(lineList[0], axisL, axisR) and
+                (self.between(lineList[1], axisT, axisB))):
+            lineList[0] = x + width * (lineList[0] - axisL) / (axisR - axisL)
+            lineList[1] = y + height * (lineList[1] - axisB) / (axisT - axisB)
+            return True
+
+    def lineVisible(self, _parent, lineList, x=0.0, y=0.0, width=0.0, height=0.0, checkIntegral=False):
+        """return the list of visible lines
+        """
+        # make into a list of tuples
+        newList = []
+        newLine = [[lineList[ll], lineList[ll + 1]] for ll in range(0, len(lineList), 2)]
+        if len(newLine) > 2:
+            newList = self.clipPoly(_parent, newLine)
+        elif len(newLine) == 2:
+            newList = self.clipLine(_parent, newLine)
+
+        try:
+            if newList:
+                axisL, axisR, axisT, axisB = self._parent.axisL, self._parent.axisR, self._parent.axisT, self._parent.axisB
+
+                newList = [pp for outPoint in newList for pp in (x + width * (outPoint[0] - axisL) / (axisR - axisL),
+                                                                 y + height * (outPoint[1] - axisB) / (axisT - axisB))]
+        except Exception as es:
+            pass
+
+        return newList
+
+    def clipPoly(self, _parent, subjectPolygon):
+        """Apply Sutherland-Hodgman algorithm for clipping polygons
+        """
+        axisL, axisR, axisT, axisB = self._parent.axisL, self._parent.axisR, self._parent.axisT, self._parent.axisB
+
+        if self._parent.INVERTXAXIS != self._parent.INVERTYAXIS:
+            clipPolygon = [[axisL, axisB],
+                           [axisL, axisT],
+                           [axisR, axisT],
+                           [axisR, axisB]]
+        else:
+            clipPolygon = [[axisL, axisB],
+                           [axisR, axisB],
+                           [axisR, axisT],
+                           [axisL, axisT]]
+
+        def inside(p):
+            return (cp2[0] - cp1[0]) * (p[1] - cp1[1]) > (cp2[1] - cp1[1]) * (p[0] - cp1[0])
+
+        def get_intersect():
+            """Returns the point of intersection of the lines passing through a2,a1 and b2,b1.
+            """
+            pp = np.vstack([s, e, cp1, cp2])  # s for stacked
+
+            h = np.hstack((pp, np.ones((4, 1))))  # h for homogeneous
+            l1 = np.cross(h[0], h[1])  # get first line
+            l2 = np.cross(h[2], h[3])  # get second line
+            x, y, z = np.cross(l1, l2)  # point of intersection
+            if z == 0:  # lines are parallel
+                return (float('inf'), float('inf'))
+            return (x / z, y / z)
+
+        outputList = subjectPolygon
+        cLen = len(clipPolygon)
+        cp1 = clipPolygon[cLen - 1]
+
+        for clipVertex in clipPolygon:
+            cp2 = clipVertex
+            inputList = outputList
+            outputList = []
+            if not inputList:
+                break
+
+            ilLen = len(inputList)
+            s = inputList[ilLen - 1]
+
+            for e in inputList:
+                if inside(e):
+                    if not inside(s):
+                        outputList.append(get_intersect())
+                    outputList.append(e)
+                elif inside(s):
+                    outputList.append(get_intersect())
+                s = e
+            cp1 = cp2
+        return outputList
+
+    def clipLine(self, _parent, subjectPolygon):
+        """Apply Sutherland-Hodgman algorithm for clipping polygons
+        """
+        axisL, axisR, axisT, axisB = self._parent.axisL, self._parent.axisR, self._parent.axisT, self._parent.axisB
+
+        if self._parent.INVERTXAXIS != self._parent.INVERTYAXIS:
+            clipPolygon = [[axisL, axisB],
+                           [axisL, axisT],
+                           [axisR, axisT],
+                           [axisR, axisB]]
+        else:
+            clipPolygon = [[axisL, axisB],
+                           [axisR, axisB],
+                           [axisR, axisT],
+                           [axisL, axisT]]
+
+        def inside(p):
+            return (cp2[0] - cp1[0]) * (p[1] - cp1[1]) > (cp2[1] - cp1[1]) * (p[0] - cp1[0])
+
+        def get_intersect():
+            """Returns the point of intersection of the lines passing through a2,a1 and b2,b1.
+            """
+            pp = np.vstack([s, e, cp1, cp2])  # s for stacked
+
+            h = np.hstack((pp, np.ones((4, 1))))  # h for homogeneous
+            l1 = np.cross(h[0], h[1])  # get first line
+            l2 = np.cross(h[2], h[3])  # get second line
+            x, y, z = np.cross(l1, l2)  # point of intersection
+            if z == 0:  # lines are parallel
+                return (float('inf'), float('inf'))
+            return (x / z, y / z)
+
+        outputList = subjectPolygon
+        cLen = len(clipPolygon)
+        cp1 = clipPolygon[cLen - 1]
+
+        for clipVertex in clipPolygon:
+            cp2 = clipVertex
+            inputList = outputList
+            outputList = []
+            if not inputList:
+                break
+
+            ilLen = len(inputList)
+            s = inputList[ilLen - 1]
+
+            for e in inputList:
+                if inside(e):
+                    if not inside(s):
+                        outputList.append(get_intersect())
+                    outputList.append(e)
+                elif inside(s):
+                    outputList.append(get_intersect())
+                s = e
+            cp1 = cp2
+        return outputList
+
+    def lineFit(self, _parent, lineList, x=0.0, y=0.0, width=0.0, height=0.0, checkIntegral=False):
+        axisL, axisR, axisT, axisB = self._parent.axisL, self._parent.axisR, self._parent.axisT, self._parent.axisB
+
+        for pp in range(0, len(lineList), 2):
+            if (self.between(lineList[pp], axisL, axisR) and
+                    (self.between(lineList[pp + 1], axisT, axisB) or checkIntegral)):
+                fit = True
+                break
+        else:
+            fit = False
+
+        for pp in range(0, len(lineList), 2):
+            lineList[pp] = x + width * (lineList[pp] - axisL) / (axisR - axisL)
+            lineList[pp + 1] = y + height * (lineList[pp + 1] - axisB) / (axisT - axisB)
+        return fit
 
 
 class Clipped_Flowable(Flowable):

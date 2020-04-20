@@ -11,7 +11,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-04-16 18:06:38 +0100 (Thu, April 16, 2020) $"
+__dateModified__ = "$dateModified: 2020-04-20 16:05:25 +0100 (Mon, April 20, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -2776,7 +2776,7 @@ class Framework(NotifierBase):
             exportDialog = ExportStripToFilePopup(parent=self.ui.mainWindow,
                                                   mainWindow=self.ui.mainWindow,
                                                   strips=self.project.strips,
-                                                  preferences=self.ui.mainWindow.application.preferences.general)
+                                                  preferences=self.ui.mainWindow.application.preferences)
             exportDialog.exec_()
 
     def toggleToolbar(self):

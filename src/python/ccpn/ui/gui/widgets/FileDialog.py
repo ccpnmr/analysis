@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-04-16 18:06:39 +0100 (Thu, April 16, 2020) $"
+__dateModified__ = "$dateModified: 2020-04-20 16:05:26 +0100 (Mon, April 20, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -187,6 +187,10 @@ class FileDialog(QtWidgets.QFileDialog):
 
             # self.result = self.exec_()
 
+    def getCurrentWorkingPath(self):
+        if self._pathID in _initialPaths:
+            return _initialPaths[self._pathID]
+
     def _show(self):
         """Separated from the _init__ to stop threading issues with Windows 10
         Must be called after creating a FileDialog object
@@ -199,6 +203,10 @@ class FileDialog(QtWidgets.QFileDialog):
         else:
             self.setOption(QtWidgets.QFileDialog.DontUseNativeDialog)
             self.result = self.exec_()
+
+        if self.selectedFiles():
+            # empty assumes that the dialog has been rejected
+            self._updateCurrentPath()
 
     def _updateCurrentPath(self):
         """Update the current path for the current pathID
@@ -350,6 +358,10 @@ class NefFileDialog(QtWidgets.QFileDialog):
         #     elif self._preferences.general.colourScheme == 'light':
         #         self.setStyleSheet("QFileDialog QWidget {color: #464e76; }")
 
+    def getCurrentWorkingPath(self):
+        if self._pathID in _initialPaths:
+            return _initialPaths[self._pathID]
+
     def selectedFiles(self):
         # if self.useNative:
         #     # return empty list if the native dialog
@@ -416,6 +428,10 @@ class NefFileDialog(QtWidgets.QFileDialog):
         else:
             self.setOption(QtWidgets.QFileDialog.DontUseNativeDialog)
             self.result = self.exec_()
+
+        if self.selectedFiles():
+            # empty assumes that the dialog has been rejected
+            self._updateCurrentPath()
 
 
 from ccpn.ui.gui.widgets.Base import Base

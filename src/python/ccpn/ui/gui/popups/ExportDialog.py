@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-04-16 18:06:38 +0100 (Thu, April 16, 2020) $"
+__dateModified__ = "$dateModified: 2020-04-20 16:05:25 +0100 (Mon, April 20, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -40,6 +40,7 @@ from PyQt5 import QtWidgets
 from ccpn.ui.gui.widgets.MessageDialog import showYesNoWarning, showWarning
 from ccpn.ui.gui.guiSettings import COLOUR_SCHEMES, getColours, DIVIDER
 from ccpn.ui.gui.widgets.HLine import HLine
+from ccpn.util.AttrDict import AttrDict
 
 
 class ExportDialog(CcpnDialog):
@@ -52,6 +53,7 @@ class ExportDialog(CcpnDialog):
                  acceptMode=FileDialog.AcceptSave,
                  preferences=None,
                  selectFile=None,
+                 pathID=None,
                  filter='*',
                  **kwds):
         """
@@ -68,13 +70,22 @@ class ExportDialog(CcpnDialog):
         self._dialogPreferences = preferences
         self._dialogSelectFile = selectFile
         self._dialogFilter = filter
+        self._dialogPathID = pathID
         self.params = {}
         self.preferences = preferences
         self.title = title
 
+        if preferences is not None:
+            if isinstance(preferences, AttrDict) and hasattr(preferences, 'general'):
+                self._dialogPreferences = preferences
+                self._dialogPath = preferences.general.userWorkingPath
+            else:
+                raise TypeError("Error: preferences incorrectly defined")
+
         # set the last path
         if self._dialogSelectFile:
             self._dialogSelectFile = self.setPathHistory(self._dialogSelectFile)
+            self._dialogPath = os.path.basename(self._dialogSelectFile)
 
         # B = {'fileMode': None,
         #      'text': None,
@@ -160,8 +171,8 @@ class ExportDialog(CcpnDialog):
                                             preferences=self._dialogPreferences,
                                             selectFile=self._dialogSelectFile,
                                             filter=self._dialogFilter,
-                                            initialPath=self._dialogPreferences.general.userWorkingPath,
-                                            pathID=USEREXPORTPATH)
+                                            initialPath=self._dialogPath,       # self._dialogPreferences.general.userWorkingPath,
+                                            pathID=self._dialogPathID)          # USEREXPORTPATH)
 
     def initialise(self, userFrame):
         """Initialise the frame containing the user widgets
@@ -293,6 +304,7 @@ class ExportDialog(CcpnDialog):
                 ExportDialog._pathHistory[self.title] = ''
 
         return filename
+
 
 if __name__ == '__main__':
     from sandbox.Geerten.Refactored.framework import Framework

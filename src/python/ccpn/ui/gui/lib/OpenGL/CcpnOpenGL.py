@@ -55,7 +55,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-04-16 17:01:59 +0100 (Thu, April 16, 2020) $"
+__dateModified__ = "$dateModified: 2020-04-20 16:05:25 +0100 (Mon, April 20, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -399,6 +399,8 @@ class CcpnGLWidget(QOpenGLWidget):
         if self.is1D:
             self._drawRightAxis = True
             self._drawBottomAxis = True
+            self._fullHeightRightAxis = True
+            self._fullWidthBottomAxis = True
 
             self._GLPeaks = GLpeak1dLabelling(parent=self, strip=self.strip,
                                               name='peaks', resizeGL=True)
@@ -409,6 +411,8 @@ class CcpnGLWidget(QOpenGLWidget):
         else:
             self._drawRightAxis = True
             self._drawBottomAxis = True
+            self._fullHeightRightAxis = True
+            self._fullWidthBottomAxis = True
 
             self._GLPeaks = GLpeakNdLabelling(parent=self, strip=self.strip,
                                               name='peaks', resizeGL=True)
@@ -4534,6 +4538,11 @@ class CcpnGLWidget(QOpenGLWidget):
         """Set the visibility of the right axis
         """
         self._drawRightAxis = axisVisible
+        if self._drawRightAxis and self._drawBottomAxis:
+            self._fullHeightRightAxis = self._fullWidthBottomAxis = False
+        else:
+            self._fullHeightRightAxis = self._fullWidthBottomAxis = True
+
         self.rescale(rescaleStaticHTraces=False)
         self.update()
 
@@ -4541,6 +4550,11 @@ class CcpnGLWidget(QOpenGLWidget):
         """Set the visibility of the bottom axis
         """
         self._drawBottomAxis = axisVisible
+        if self._drawRightAxis and self._drawBottomAxis:
+            self._fullHeightRightAxis = self._fullWidthBottomAxis = False
+        else:
+            self._fullHeightRightAxis = self._fullWidthBottomAxis = True
+
         self.rescale(rescaleStaticVTraces=False)
         self.update()
 
@@ -5916,7 +5930,7 @@ class CcpnGLWidget(QOpenGLWidget):
                 if _includeAxis:
                     for ax in axisList:
 
-                        offset = 0.1 if self.AXIS_INSIDE else 0.9
+                        offset = GLDefs.AXISDRAWOFFSET if self.AXIS_INSIDE else (1 - GLDefs.AXISDRAWOFFSET)
                         if ax == 0:
                             # add the x axis line
                             indexList += (index, index + 1)
@@ -7180,158 +7194,158 @@ class CcpnGLWidget(QOpenGLWidget):
     #
     #     return [x0, y0, x1, y1]
 
-    def pointVisible(self, lineList, x=0.0, y=0.0, width=0.0, height=0.0):
-        """return true if the line has visible endpoints
-        """
-        if (self.between(lineList[0], self.axisL, self.axisR) and
-                (self.between(lineList[1], self.axisT, self.axisB))):
-            lineList[0] = x + width * (lineList[0] - self.axisL) / (self.axisR - self.axisL)
-            lineList[1] = y + height * (lineList[1] - self.axisB) / (self.axisT - self.axisB)
-            return True
-
-    def lineVisible(self, lineList, x=0.0, y=0.0, width=0.0, height=0.0, checkIntegral=False):
-        """return the list of visible lines
-        """
-        # make into a listof tuples
-        newList = []
-        newLine = [[lineList[ll], lineList[ll + 1]] for ll in range(0, len(lineList), 2)]
-        if len(newLine) > 2:
-            newList = self.clipPoly(newLine)
-        elif len(newLine) == 2:
-            newList = self.clipLine(newLine)
-
-        try:
-            if newList:
-                newList = [pp for outPoint in newList for pp in (x + width * (outPoint[0] - self.axisL) / (self.axisR - self.axisL),
-                                                                 y + height * (outPoint[1] - self.axisB) / (self.axisT - self.axisB))]
-        except Exception as es:
-            pass
-
-        return newList
-
-    def clipPoly(self, subjectPolygon):
-        """Apply Sutherland-Hodgman algorithm for clipping polygons
-        """
-        if self.INVERTXAXIS != self.INVERTYAXIS:
-            clipPolygon = [[self.axisL, self.axisB],
-                           [self.axisL, self.axisT],
-                           [self.axisR, self.axisT],
-                           [self.axisR, self.axisB]]
-        else:
-            clipPolygon = [[self.axisL, self.axisB],
-                           [self.axisR, self.axisB],
-                           [self.axisR, self.axisT],
-                           [self.axisL, self.axisT]]
-
-        def inside(p):
-            return (cp2[0] - cp1[0]) * (p[1] - cp1[1]) > (cp2[1] - cp1[1]) * (p[0] - cp1[0])
-
-        def get_intersect():
-            """Returns the point of intersection of the lines passing through a2,a1 and b2,b1.
-            """
-            pp = np.vstack([s, e, cp1, cp2])  # s for stacked
-
-            h = np.hstack((pp, np.ones((4, 1))))  # h for homogeneous
-            l1 = np.cross(h[0], h[1])  # get first line
-            l2 = np.cross(h[2], h[3])  # get second line
-            x, y, z = np.cross(l1, l2)  # point of intersection
-            if z == 0:  # lines are parallel
-                return (float('inf'), float('inf'))
-            return (x / z, y / z)
-
-        outputList = subjectPolygon
-        cLen = len(clipPolygon)
-        cp1 = clipPolygon[cLen - 1]
-
-        for clipVertex in clipPolygon:
-            cp2 = clipVertex
-            inputList = outputList
-            outputList = []
-            if not inputList:
-                break
-
-            ilLen = len(inputList)
-            s = inputList[ilLen - 1]
-
-            for e in inputList:
-                if inside(e):
-                    if not inside(s):
-                        outputList.append(get_intersect())
-                    outputList.append(e)
-                elif inside(s):
-                    outputList.append(get_intersect())
-                s = e
-            cp1 = cp2
-        return outputList
-
-    def clipLine(self, subjectPolygon):
-        """Apply Sutherland-Hodgman algorithm for clipping polygons
-        """
-        if self.INVERTXAXIS != self.INVERTYAXIS:
-            clipPolygon = [[self.axisL, self.axisB],
-                           [self.axisL, self.axisT],
-                           [self.axisR, self.axisT],
-                           [self.axisR, self.axisB]]
-        else:
-            clipPolygon = [[self.axisL, self.axisB],
-                           [self.axisR, self.axisB],
-                           [self.axisR, self.axisT],
-                           [self.axisL, self.axisT]]
-
-        def inside(p):
-            return (cp2[0] - cp1[0]) * (p[1] - cp1[1]) > (cp2[1] - cp1[1]) * (p[0] - cp1[0])
-
-        def get_intersect():
-            """Returns the point of intersection of the lines passing through a2,a1 and b2,b1.
-            """
-            pp = np.vstack([s, e, cp1, cp2])  # s for stacked
-
-            h = np.hstack((pp, np.ones((4, 1))))  # h for homogeneous
-            l1 = np.cross(h[0], h[1])  # get first line
-            l2 = np.cross(h[2], h[3])  # get second line
-            x, y, z = np.cross(l1, l2)  # point of intersection
-            if z == 0:  # lines are parallel
-                return (float('inf'), float('inf'))
-            return (x / z, y / z)
-
-        outputList = subjectPolygon
-        cLen = len(clipPolygon)
-        cp1 = clipPolygon[cLen - 1]
-
-        for clipVertex in clipPolygon:
-            cp2 = clipVertex
-            inputList = outputList
-            outputList = []
-            if not inputList:
-                break
-
-            ilLen = len(inputList)
-            s = inputList[ilLen - 1]
-
-            for e in inputList:
-                if inside(e):
-                    if not inside(s):
-                        outputList.append(get_intersect())
-                    outputList.append(e)
-                elif inside(s):
-                    outputList.append(get_intersect())
-                s = e
-            cp1 = cp2
-        return outputList
-
-    def lineFit(self, lineList, x=0.0, y=0.0, width=0.0, height=0.0, checkIntegral=False):
-        for pp in range(0, len(lineList), 2):
-            if (self.between(lineList[pp], self.axisL, self.axisR) and
-                    (self.between(lineList[pp + 1], self.axisT, self.axisB) or checkIntegral)):
-                fit = True
-                break
-        else:
-            fit = False
-
-        for pp in range(0, len(lineList), 2):
-            lineList[pp] = x + width * (lineList[pp] - self.axisL) / (self.axisR - self.axisL)
-            lineList[pp + 1] = y + height * (lineList[pp + 1] - self.axisB) / (self.axisT - self.axisB)
-        return fit
+    # def pointVisible(self, lineList, x=0.0, y=0.0, width=0.0, height=0.0):
+    #     """return true if the line has visible endpoints
+    #     """
+    #     if (self.between(lineList[0], self.axisL, self.axisR) and
+    #             (self.between(lineList[1], self.axisT, self.axisB))):
+    #         lineList[0] = x + width * (lineList[0] - self.axisL) / (self.axisR - self.axisL)
+    #         lineList[1] = y + height * (lineList[1] - self.axisB) / (self.axisT - self.axisB)
+    #         return True
+    #
+    # def lineVisible(self, lineList, x=0.0, y=0.0, width=0.0, height=0.0, checkIntegral=False):
+    #     """return the list of visible lines
+    #     """
+    #     # make into a list of tuples
+    #     newList = []
+    #     newLine = [[lineList[ll], lineList[ll + 1]] for ll in range(0, len(lineList), 2)]
+    #     if len(newLine) > 2:
+    #         newList = self.clipPoly(newLine)
+    #     elif len(newLine) == 2:
+    #         newList = self.clipLine(newLine)
+    #
+    #     try:
+    #         if newList:
+    #             newList = [pp for outPoint in newList for pp in (x + width * (outPoint[0] - self.axisL) / (self.axisR - self.axisL),
+    #                                                              y + height * (outPoint[1] - self.axisB) / (self.axisT - self.axisB))]
+    #     except Exception as es:
+    #         pass
+    #
+    #     return newList
+    #
+    # def clipPoly(self, subjectPolygon):
+    #     """Apply Sutherland-Hodgman algorithm for clipping polygons
+    #     """
+    #     if self.INVERTXAXIS != self.INVERTYAXIS:
+    #         clipPolygon = [[self.axisL, self.axisB],
+    #                        [self.axisL, self.axisT],
+    #                        [self.axisR, self.axisT],
+    #                        [self.axisR, self.axisB]]
+    #     else:
+    #         clipPolygon = [[self.axisL, self.axisB],
+    #                        [self.axisR, self.axisB],
+    #                        [self.axisR, self.axisT],
+    #                        [self.axisL, self.axisT]]
+    #
+    #     def inside(p):
+    #         return (cp2[0] - cp1[0]) * (p[1] - cp1[1]) > (cp2[1] - cp1[1]) * (p[0] - cp1[0])
+    #
+    #     def get_intersect():
+    #         """Returns the point of intersection of the lines passing through a2,a1 and b2,b1.
+    #         """
+    #         pp = np.vstack([s, e, cp1, cp2])  # s for stacked
+    #
+    #         h = np.hstack((pp, np.ones((4, 1))))  # h for homogeneous
+    #         l1 = np.cross(h[0], h[1])  # get first line
+    #         l2 = np.cross(h[2], h[3])  # get second line
+    #         x, y, z = np.cross(l1, l2)  # point of intersection
+    #         if z == 0:  # lines are parallel
+    #             return (float('inf'), float('inf'))
+    #         return (x / z, y / z)
+    #
+    #     outputList = subjectPolygon
+    #     cLen = len(clipPolygon)
+    #     cp1 = clipPolygon[cLen - 1]
+    #
+    #     for clipVertex in clipPolygon:
+    #         cp2 = clipVertex
+    #         inputList = outputList
+    #         outputList = []
+    #         if not inputList:
+    #             break
+    #
+    #         ilLen = len(inputList)
+    #         s = inputList[ilLen - 1]
+    #
+    #         for e in inputList:
+    #             if inside(e):
+    #                 if not inside(s):
+    #                     outputList.append(get_intersect())
+    #                 outputList.append(e)
+    #             elif inside(s):
+    #                 outputList.append(get_intersect())
+    #             s = e
+    #         cp1 = cp2
+    #     return outputList
+    #
+    # def clipLine(self, subjectPolygon):
+    #     """Apply Sutherland-Hodgman algorithm for clipping polygons
+    #     """
+    #     if self.INVERTXAXIS != self.INVERTYAXIS:
+    #         clipPolygon = [[self.axisL, self.axisB],
+    #                        [self.axisL, self.axisT],
+    #                        [self.axisR, self.axisT],
+    #                        [self.axisR, self.axisB]]
+    #     else:
+    #         clipPolygon = [[self.axisL, self.axisB],
+    #                        [self.axisR, self.axisB],
+    #                        [self.axisR, self.axisT],
+    #                        [self.axisL, self.axisT]]
+    #
+    #     def inside(p):
+    #         return (cp2[0] - cp1[0]) * (p[1] - cp1[1]) > (cp2[1] - cp1[1]) * (p[0] - cp1[0])
+    #
+    #     def get_intersect():
+    #         """Returns the point of intersection of the lines passing through a2,a1 and b2,b1.
+    #         """
+    #         pp = np.vstack([s, e, cp1, cp2])  # s for stacked
+    #
+    #         h = np.hstack((pp, np.ones((4, 1))))  # h for homogeneous
+    #         l1 = np.cross(h[0], h[1])  # get first line
+    #         l2 = np.cross(h[2], h[3])  # get second line
+    #         x, y, z = np.cross(l1, l2)  # point of intersection
+    #         if z == 0:  # lines are parallel
+    #             return (float('inf'), float('inf'))
+    #         return (x / z, y / z)
+    #
+    #     outputList = subjectPolygon
+    #     cLen = len(clipPolygon)
+    #     cp1 = clipPolygon[cLen - 1]
+    #
+    #     for clipVertex in clipPolygon:
+    #         cp2 = clipVertex
+    #         inputList = outputList
+    #         outputList = []
+    #         if not inputList:
+    #             break
+    #
+    #         ilLen = len(inputList)
+    #         s = inputList[ilLen - 1]
+    #
+    #         for e in inputList:
+    #             if inside(e):
+    #                 if not inside(s):
+    #                     outputList.append(get_intersect())
+    #                 outputList.append(e)
+    #             elif inside(s):
+    #                 outputList.append(get_intersect())
+    #             s = e
+    #         cp1 = cp2
+    #     return outputList
+    #
+    # def lineFit(self, lineList, x=0.0, y=0.0, width=0.0, height=0.0, checkIntegral=False):
+    #     for pp in range(0, len(lineList), 2):
+    #         if (self.between(lineList[pp], self.axisL, self.axisR) and
+    #                 (self.between(lineList[pp + 1], self.axisT, self.axisB) or checkIntegral)):
+    #             fit = True
+    #             break
+    #     else:
+    #         fit = False
+    #
+    #     for pp in range(0, len(lineList), 2):
+    #         lineList[pp] = x + width * (lineList[pp] - self.axisL) / (self.axisR - self.axisL)
+    #         lineList[pp + 1] = y + height * (lineList[pp + 1] - self.axisB) / (self.axisT - self.axisB)
+    #     return fit
 
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

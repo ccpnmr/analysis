@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-04-15 14:22:45 +0100 (Wed, April 15, 2020) $"
+__dateModified__ = "$dateModified: 2020-04-20 16:05:26 +0100 (Mon, April 20, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -280,7 +280,7 @@ class ProjectSummaryPopup(CcpnDialog):
                               (self.peakListTable, 'peakList'),
                               (self.chainTable, 'chain')):
             dataFrame = table.tableToDataFrame()
-            if dataFrame:
+            if not dataFrame.empty:
                 dataFrame.to_excel(writer, sheet_name=name, index=False)
 
             # table.findExportFormats(path, sheet_name=name)

@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-02-11 14:59:20 +0000 (Tue, February 11, 2020) $"
+__dateModified__ = "$dateModified: 2020-04-20 16:05:26 +0100 (Mon, April 20, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -27,7 +27,7 @@ __date__ = "$Date: 2017-07-06 15:51:11 +0000 (Thu, July 06, 2017) $"
 
 import os
 from collections import OrderedDict as OD
-from ccpn.ui.gui.widgets.FileDialog import FileDialog
+from ccpn.ui.gui.widgets.FileDialog import FileDialog, USEREXPORTPATH
 from ccpn.ui.gui.widgets.Spacer import Spacer
 from PyQt5 import QtGui, QtWidgets, QtCore
 from ccpn.ui.gui.widgets.CheckBox import CheckBox
@@ -113,7 +113,8 @@ class ExportStripToFilePopup(ExportDialog):
         super().__init__(parent=parent, mainWindow=mainWindow, title=title,
                          fileMode=fileMode, text=text, acceptMode=acceptMode,
                          preferences=preferences, selectFile=selectFile,
-                         filter=filter, **kwds)
+                         filter=filter, pathID=USEREXPORTPATH,
+                         **kwds)
 
         if not strips:
             showWarning(str(self.windowTitle()), 'No strips selected')
@@ -272,7 +273,8 @@ class ExportStripToFilePopup(ExportDialog):
         else:
             raise ValueError('bad export type')
 
-        currentPath = os.path.expanduser(self.project.path)
+        # currentPath = os.path.expanduser(self.project.path)
+        currentPath = self.fileSaveDialog.getCurrentWorkingPath()
         self.updateFilename(os.path.join(currentPath, self.objectPulldown.getText() + exportExtension))
 
         self.setFixedWidth(self.sizeHint().width())
@@ -456,7 +458,9 @@ class ExportStripToFilePopup(ExportDialog):
                           GLSPECTRUMCONTOURS  : QtCore.Qt.Checked,
                           GLCURSORS           : QtCore.Qt.Unchecked,
                           GLGRIDLINES         : QtCore.Qt.Checked if self.strip.gridVisible else QtCore.Qt.Unchecked,
-                          GLDIAGONALSIDEBANDS : QtCore.Qt.Checked if self.strip.sideBandsVisible else QtCore.Qt.Unchecked,
+                          GLDIAGONALLINE      : QtCore.Qt.Checked if self.strip._CcpnGLWidget._matchingIsotopeCodes else QtCore.Qt.Unchecked,
+                          GLDIAGONALSIDEBANDS : QtCore.Qt.Checked if (self.strip._CcpnGLWidget._sideBandsVisible and self.strip._CcpnGLWidget._matchingIsotopeCodes)
+                                                                      else QtCore.Qt.Unchecked,
                           GLSHOWSPECTRAONPHASE: QtCore.Qt.Checked if self.strip._CcpnGLWidget._showSpectraOnPhasing else QtCore.Qt.Unchecked
                           }
         self.printList = []
@@ -603,7 +607,7 @@ class ExportStripToFilePopup(ExportDialog):
 
     def actionButtons(self):
         self.buttonFrame.addSpacer(0, 10, grid=(0, 1))
-        self.buttons = ButtonList(self.buttonFrame, ['Close', 'Save', 'Save and Close'], [self._rejectDialog, self._saveDialog, self._acceptDialog],
+        self.buttons = ButtonList(self.buttonFrame, ['Close', 'Save', 'Save and Close'], [self._rejectDialog, self._saveDialog, self._saveAndCloseDialog],
                                   tipTexts=['Close the export dialog',
                                             'Export the strip to a file, dialog will remain open',
                                             'Export the strip and close the dialog'],
@@ -642,6 +646,25 @@ class ExportStripToFilePopup(ExportDialog):
                 else:
                     self._exportToFile()
 
+    def _saveAndCloseDialog(self, exitSaveFilename=None):
+        """save and Close button has been clicked
+        """
+        # self.exitFilename = self.saveText.text().strip()  # strip the trailing whitespace
+
+        selected = self.exportType.get()
+        lastPath = self.saveText.text().strip()
+        if selected == EXPORTPDF:
+            if not lastPath.endswith(EXPORTPDFEXTENSION):
+                lastPath += EXPORTPDFEXTENSION
+        elif selected == EXPORTSVG:
+            if not lastPath.endswith(EXPORTSVGEXTENSION):
+                lastPath += EXPORTSVGEXTENSION
+
+        self.saveText.setText(lastPath)
+        self.exitFilename = lastPath
+
+        self._acceptDialog()
+
 
 if __name__ == '__main__':
     from sandbox.Geerten.Refactored.framework import Framework
@@ -672,5 +695,5 @@ if __name__ == '__main__':
     dialog = ExportStripToFilePopup(parent=application.mainWindow,
                                     mainWindow=application.mainWindow,
                                     strips=[],
-                                    preferences=application.preferences.general)
+                                    preferences=application.preferences)
     result = dialog.exec_()

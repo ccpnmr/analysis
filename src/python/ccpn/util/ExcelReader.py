@@ -192,7 +192,7 @@ class ExcelReader(object):
         self.sheets = self._getSheets(self.pandasFile)
         self.dataframes = self._getDataFrameFromSheets(self.sheets)
 
-        self._project.blankNotification()
+        # self._project.blankNotification()
         getLogger().info('Loading Excel File...')
 
         # with undoBlockWithoutSideBar():
@@ -206,7 +206,7 @@ class ExcelReader(object):
         self._loadSpectraForSheet(self.substancesDicts)
         self._dispatchAttrsToObjs(self.samplesDicts)
         self._loadSpectraForSheet(self.samplesDicts)
-        self._project.unblankNotification()
+        # self._project.unblankNotification()
 
     ######################################################################################################################
     ######################                  PARSE EXCEL                     ##############################################

@@ -43,7 +43,7 @@ from tqdm import tqdm
 ###   Used in setting the dictionary keys on _kwargs either in GuiPipe and Pipe
 ########################################################################################################################
 
-PipeName = 'STD Peak Detector 1D (experimental)'
+PipeName = 'Peak Detector 1D (experimental)'
 ExcludeRegions = 'Exclude_Regions'
 
 DefaultExcludeRegions = [[0.0, 0.0], [0.0, 0.0]]

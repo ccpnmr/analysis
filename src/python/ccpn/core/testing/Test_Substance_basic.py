@@ -11,7 +11,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-04-22 14:48:54 +0100 (Wed, April 22, 2020) $"
+__dateModified__ = "$dateModified: 2020-04-22 14:49:57 +0100 (Wed, April 22, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -130,7 +130,7 @@ class TestSubstanceCreation(WrapperTesting):
 
         self.assertEqual(len(self.project.substances), 1)
         self.assertIs(self.project.substances[0], s)
-        self.assertEqual(s.pid, 'SU:test substance .')
+        self.assertEqual(s.pid, 'SU:test substance.')
 
         with self.assertRaisesRegexp(ValueError, 'already exists'):
             s2 = self.project.newSubstance('test substance')
@@ -140,7 +140,7 @@ class TestSubstanceCreation(WrapperTesting):
         Test that creating a new Substance with leading/trailing whitespace raises ValueError.
         """
         with self.assertRaisesRegexp(ValueError, 'name contains leading/trailing whitespace'):
-            self.project.newSubstance('newName', 'whitespaceLabel')
+            self.project.newSubstance('newName', ' whitespaceLabel ')
         self.assertEqual(len(self.project.substances), 0)
 
 

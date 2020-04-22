@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-04-02 13:02:28 +0100 (Thu, April 02, 2020) $"
+__dateModified__ = "$dateModified: 2020-04-22 11:35:30 +0100 (Wed, April 22, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -349,29 +349,29 @@ class NmrAtom(AbstractWrapperObject):
         with renameObjectContextManager(self) as addUndoItem:
             oldName = self.name
 
-            if value is None:
-                self.deassign()
+            isotopeChanged = False
+            isotopeCode = self._wrappedData.isotopeCode
+            newIsotopeCode = name2IsotopeCode(value)            # this could be None for undefined
+            if newIsotopeCode is not None:
+                if isotopeCode == '?':
+                    self._wrappedData.isotopeCode = newIsotopeCode
+                    isotopeChanged = True
+                elif newIsotopeCode != isotopeCode:
+                    raise ValueError("Cannot rename %s type NmrAtom to %s - invalid isotopeCode" % (isotopeCode, value))
 
-            else:
-                isotopeCode = self._wrappedData.isotopeCode
-                newIsotopeCode = name2IsotopeCode(value)            # this could be None for undefined
-                if newIsotopeCode is not None:
-                    if isotopeCode == '?':
-                        self._wrappedData.isotopeCode = newIsotopeCode
-                    elif newIsotopeCode != isotopeCode:
-                        raise ValueError("Cannot rename %s type NmrAtom to %s - invalid isotopeCode" % (isotopeCode, value))
+            try:
+                self._wrappedData.name = value
+            except Exception as es:
+                raise ValueError("Cannot rename %s type NmrAtom to %s" % (isotopeCode, value))
 
-                try:
-                    self._wrappedData.name = value
-                except Exception as es:
-                    raise ValueError("Cannot rename %s type NmrAtom to %s" % (isotopeCode, value))
-
-            addUndoItem(redo=partial(self._setIsotopeCode, newIsotopeCode))
+            if isotopeChanged:
+                addUndoItem(redo=partial(self._setIsotopeCode, newIsotopeCode))
 
             addUndoItem(undo=partial(self.rename, oldName),
                         redo=partial(self.rename, value))
 
-            addUndoItem(undo=partial(self._setIsotopeCode, isotopeCode))
+            if isotopeChanged:
+                addUndoItem(undo=partial(self._setIsotopeCode, isotopeCode))
 
     #=========================================================================================
     # CCPN functions
@@ -430,6 +430,11 @@ def _newNmrAtom(self: NmrResidue, name: str = None, isotopeCode: str = None,
     nmrProject = self._project._wrappedData
     resonanceGroup = self._wrappedData
 
+    if not isinstance(name, (str, type(None))):
+        raise TypeError('Name {} must be of type string (or None)'.format(name))
+    if not isinstance(isotopeCode, (str, type(None))):
+        raise TypeError('isotopeCode {} must be of type string (or None)'.format(isotopeCode))
+
     # Set isotopeCode if empty
     if not isotopeCode:
         if name:
@@ -480,7 +485,7 @@ def _newNmrAtom(self: NmrResidue, name: str = None, isotopeCode: str = None,
 
     # NOTE:ED - check violated name, replaces the isotopeCode with '?' - follows v2 model check
     checkIsotopeCode = isotopeCode.upper()
-    if not name.startswith(checkIsotopeCode):
+    if name and not name.startswith(checkIsotopeCode):
         from ccpn.util.Constants import isotopeRecords
 
         record = isotopeRecords.get(checkIsotopeCode)

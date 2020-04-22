@@ -11,7 +11,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-04-20 16:05:25 +0100 (Mon, April 20, 2020) $"
+__dateModified__ = "$dateModified: 2020-04-22 15:30:27 +0100 (Wed, April 22, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -1876,7 +1876,7 @@ class Framework(NotifierBase):
                                 text="Export to Nef File",
                                 acceptMode=FileDialog.AcceptSave,
                                 preferences=self.preferences,
-                                selectFile=self.project.name + '.nef',  # new flag to populate dialog,
+                                selectFile=os.path.join(self.preferences.general.userWorkingPath or '~', self.project.name + '.nef'),  # new flag to populate dialog,
                                 filter='*.nef')
 
         # an exclusion list comes out of the dialog as it

@@ -11,5 +11,11 @@ FILENAME=${FILENAME##*/};FILENAME=${FILENAME%.*}
 STAMP="$(date +%Y%m%d_%H%M%S)"
 
 # execute nosetests and redirect all output to file 'TESTOUT_<timestamp>.txt'
-"${NOSETESTS}" -vs $* > TESTOUT_${STAMP}.txt 2>&1
+"${NOSETESTS}" -vs $* > "TESTOUT_${STAMP}.txt" 2>&1
 
+## write out any lines that contain the fail code
+#while read -r p; do
+#    if [[ ${p} == *"FAIL:"* ]]; then
+#        echo "$p"
+#    fi
+#done < "TESTOUT_${STAMP}.txt" - this loop not really necessary as errors should be collated at the bottom

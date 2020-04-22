@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-03-25 12:53:16 +0000 (Wed, March 25, 2020) $"
+__dateModified__ = "$dateModified: 2020-04-22 14:48:54 +0100 (Wed, April 22, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -33,8 +33,7 @@ CCP_CODES = ('Ala', 'Cys', 'Asp', 'Glu', 'Phe', 'Gly', 'His', 'Ile', 'Lys', 'Leu
 CCP_CODES_SORTED = ('ALA', 'ARG', 'ASN', 'ASP', 'CYS', 'GLN', 'GLU', 'GLY', 'HIS', 'ILE', 'LEU',
                     'LYS', 'MET', 'PHE', 'PRO', 'SER', 'THR', 'TRP', 'TYR', 'VAL')
 
-ATOM_NAMES = {'13C': ['C', 'CA', 'HB3', 'HD*', 'HD1', 'HD1*', 'HD2', 'HD2*', 'HD3', 'HE', 'HE*', 'HE1',
-                      'HE22', 'HE3', 'HG', 'CD1', 'CD2', 'CE', 'CE*', 'CE1', 'CE2', 'CE3',
+ATOM_NAMES = {'13C': ['C', 'CA', 'CB', 'CD', 'CD*', 'CD1', 'CD2', 'CE', 'CE*', 'CE1', 'CE2', 'CE3',
                       'CG', 'CG1', 'CG2', 'CH2', 'CZ', 'CZ2', 'CZ3'
                       ],
 

@@ -21,8 +21,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-01-10 11:21:56 +0000 (Fri, January 10, 2020) $"
-__version__ = "$Revision: 3.0.0 $"
+__dateModified__ = "$dateModified: 2020-04-22 14:48:54 +0100 (Wed, April 22, 2020) $"
+__version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -545,7 +545,8 @@ def stringifier(*fields, **options):
     formatString = '<{_obj.pid!s}| ' + ', '.join(fieldFormats) + '>'
 
     def formatter(x):
-        return localFormatter.format(format_string=formatString, _obj=x)
+        # return localFormatter.format(format_string=formatString, _obj=x)
+        return localFormatter.format(formatString, _obj=x)
 
     return formatter
 

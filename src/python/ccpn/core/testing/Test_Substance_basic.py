@@ -1,7 +1,7 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -10,9 +10,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: CCPN $"
-__dateModified__ = "$dateModified: 2017-07-07 16:32:35 +0100 (Fri, July 07, 2017) $"
-__version__ = "$Revision: 3.0.0 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2020-04-22 14:48:54 +0100 (Wed, April 22, 2020) $"
+__version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -37,43 +37,6 @@ class TestSubstanceCreation(WrapperTesting):
     # test_newSubstance        valid names
     #=========================================================================================
 
-    def test_newSubstance_WithoutName(self):
-        """
-        Test that creating a new Substance with no parameter raises TypeError.
-        """
-        with self.assertRaisesRegexp(TypeError, 'name must be a string'):
-            self.project.newSubstance()
-        self.assertEqual(len(self.project.substances), 0)
-
-    def test_newSubstance_None(self):
-        """
-        Test that creating a new Substance with None raises ValueError.
-        """
-        with self.assertRaisesRegexp(TypeError, 'name must be a string'):
-            self.project.newSubstance(None)
-        self.assertEqual(len(self.project.substances), 0)
-
-    def test_newSubstance_EmptyName(self):
-        """
-        Test that creating a new Substance with '' raises ValueError.
-        """
-        with self.assertRaisesRegexp(ValueError, 'name must be set'):
-            self.project.newSubstance('')
-        self.assertEqual(len(self.project.substances), 0)
-
-    def test_newSubstance_name(self):
-        """
-        Test that creating a new Substance with name 'test substance' creates a valid Substance.
-        """
-        s = self.project.newSubstance('test substance')
-
-        self.assertEqual(len(self.project.substances), 1)
-        self.assertIs(self.project.substances[0], s)
-        self.assertEqual(s.pid, 'SU:test substance.')
-
-        with self.assertRaisesRegexp(ValueError, 'already exists'):
-            s2 = self.project.newSubstance('test substance')
-
     def test_newSubstance_WithFields(self):
         """
         Test that creating a new Substance with parameters creates a valid Substance.
@@ -88,6 +51,24 @@ class TestSubstanceCreation(WrapperTesting):
         self.assertEqual(s.userCode, 'test_userCode')
         self.assertEqual(s.smiles, ';-)')
 
+    def test_newSubstance_Int42(self):
+        """
+        Test that creating a new Substance with 42 (non-string) creates a substance with the name '42'
+        """
+        s = self.project.newSubstance(42)
+        self.assertEqual(len(self.project.substances), 1)
+        self.assertIs(self.project.substances[0], s)
+        self.assertEqual(s.pid, 'SU:42.')
+
+    def test_newSubstance_Int0(self):
+        """
+        Test that creating a new Substance with 42 (non-string) creates a substance with the name '42'
+        """
+        s = self.project.newSubstance(0)
+        self.assertEqual(len(self.project.substances), 1)
+        self.assertIs(self.project.substances[0], s)
+        self.assertEqual(s.pid, 'SU:0.')
+
     #=========================================================================================
     # test_newSubstance_bad_name        invalid names
     #=========================================================================================
@@ -101,15 +82,65 @@ class TestSubstanceCreation(WrapperTesting):
             self.project.newSubstance('^Badname')
         self.assertEqual(len(self.project.substances), 0)
 
-    def test_newSubstance_Int(self):
+    def test_newSubstance_Float(self):
         """
-        Test that creating a new Substance with 42 (non-string) raises an error.
+        Test that creating a new Substance with 42.0 (non-string) raises TypeError
         """
-        # with self.assertRaisesRegexp(TypeError, 'argument of type'):
-        #   self.project.newSubstance(42)
-        #
         with self.assertRaisesRegexp(TypeError, 'name must be a string'):
-            self.project.newSubstance(42)
+            s = self.project.newSubstance(42.0)
+        self.assertEqual(len(self.project.substances), 0)
+
+    def test_newSubstance_WithoutName(self):
+        """
+        Test that creating a new Substance with no parameter raises TypeError.
+        """
+        with self.assertRaisesRegexp(ValueError, 'name must be set'):
+            self.project.newSubstance()
+        self.assertEqual(len(self.project.substances), 0)
+
+    def test_newSubstance_None(self):
+        """
+        Test that creating a new Substance with None raises ValueError.
+        """
+        with self.assertRaisesRegexp(ValueError, 'name must be set'):
+            self.project.newSubstance(None)
+        self.assertEqual(len(self.project.substances), 0)
+
+    def test_newSubstance_EmptyName(self):
+        """
+        Test that creating a new Substance with '' raises ValueError.
+        """
+        with self.assertRaisesRegexp(ValueError, 'name must be set'):
+            self.project.newSubstance('')
+        self.assertEqual(len(self.project.substances), 0)
+
+    def test_newSubstance_WhitespaceName(self):
+        """
+        Test that creating a new Substance with leading/trailing whitespace raises ValueError.
+        """
+        with self.assertRaisesRegexp(ValueError, 'name contains leading/trailing whitespace'):
+            self.project.newSubstance(' newName ')
+        self.assertEqual(len(self.project.substances), 0)
+
+    def test_newSubstance_name(self):
+        """
+        Test that creating a new Substance with name 'test substance' creates a valid Substance.
+        """
+        s = self.project.newSubstance('test substance')
+
+        self.assertEqual(len(self.project.substances), 1)
+        self.assertIs(self.project.substances[0], s)
+        self.assertEqual(s.pid, 'SU:test substance .')
+
+        with self.assertRaisesRegexp(ValueError, 'already exists'):
+            s2 = self.project.newSubstance('test substance')
+
+    def test_newSubstance_WhitespaceLabelling(self):
+        """
+        Test that creating a new Substance with leading/trailing whitespace raises ValueError.
+        """
+        with self.assertRaisesRegexp(ValueError, 'name contains leading/trailing whitespace'):
+            self.project.newSubstance('newName', 'whitespaceLabel')
         self.assertEqual(len(self.project.substances), 0)
 
 
@@ -730,6 +761,18 @@ class Test_PolymerSubstance(WrapperTesting):
                                                     name='test polymer substance',
                                                     molType='protein',
                                                     labelling='^Badname')
+        self.assertEqual(len(self.project.substances), 0)
+
+    def test_PolymerSubstanceWithLabellingProperties_WhitespaceName(self):
+        """
+        Test that the labelling property of Substance can be set.
+        """
+        # with self.assertRaisesRegexp(ValueError, 'not allowed in ccpn.Substance'):
+        with self.assertRaisesRegexp(ValueError, 'name contains leading/trailing whitespace'):
+            s = self.project.createPolymerSubstance('acd',
+                                                    name='test polymer substance',
+                                                    molType='protein',
+                                                    labelling=' whitespaceName ')
         self.assertEqual(len(self.project.substances), 0)
 
     def test_PolymerSubstanceWithLabellingProperties_Int(self):

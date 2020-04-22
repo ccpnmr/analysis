@@ -3,7 +3,7 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -12,9 +12,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: CCPN $"
-__dateModified__ = "$dateModified: 2017-07-07 16:32:31 +0100 (Fri, July 07, 2017) $"
-__version__ = "$Revision: 3.0.0 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2020-04-22 14:48:54 +0100 (Wed, April 22, 2020) $"
+__version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -696,11 +696,14 @@ def _newSubstance(self: Project, name: str = None, labelling: str = None, substa
     else:
         apiLabeling = labelling
 
-    if not isinstance(name, str):
+    if isinstance(name, int):
         name = str(name)
-        # raise TypeError("ccpn.Substance name must be a string")
+    if not isinstance(name, (str, type(None))):
+        raise TypeError("ccpn.Substance name must be a string")
     elif not name:
         raise ValueError("ccpn.Substance name must be set")
+    elif name != name.strip():
+        raise ValueError("ccpn.Substance name contains leading/trailing whitespace")
     elif Pid.altCharacter in name:
         raise ValueError("Character %s not allowed in ccpn.Substance id: %s.%s" %
                          (Pid.altCharacter, name, labelling))
@@ -710,6 +713,8 @@ def _newSubstance(self: Project, name: str = None, labelling: str = None, substa
             raise TypeError("ccpn.Substance 'labelling' name must be a string")
         elif not labelling:
             raise ValueError("ccpn.Substance 'labelling' name must be set")
+        elif labelling != labelling.strip():
+            raise ValueError("ccpn.Substance 'labelling' name contains leading/trailing whitespace")
         elif Pid.altCharacter in labelling:
             raise ValueError("Character %s not allowed in ccpn.Substance labelling, id: %s.%s" %
                              (Pid.altCharacter, name, labelling))
@@ -864,6 +869,8 @@ def _createPolymerSubstance(self: Project, sequence: typing.Sequence[str], name:
             raise TypeError("ccpn.Substance 'labelling' name must be a string")
         elif not labelling:
             raise ValueError("ccpn.Substance 'labelling' name must be set")
+        elif labelling != labelling.strip():
+            raise ValueError("ccpn.Substance 'labelling' name contains leading/trailing whitespace")
         elif Pid.altCharacter in labelling:
             raise ValueError("Character %s not allowed in ccpn.Substance labelling, id: %s.%s" %
                              (Pid.altCharacter, name, labelling))

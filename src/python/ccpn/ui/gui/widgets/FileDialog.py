@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-04-20 16:05:26 +0100 (Mon, April 20, 2020) $"
+__dateModified__ = "$dateModified: 2020-04-22 17:06:31 +0100 (Wed, April 22, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -129,7 +129,7 @@ class FileDialog(QtWidgets.QFileDialog):
         self._acceptMode = acceptMode
         self._kwds = kwds
         self._text = text
-        self._selectFile = selectFile
+        self._selectFile = os.path.basename(selectFile) if selectFile else None
 
         self.setFileMode(fileMode)
         self._customMultiSelectedFiles = []  #used to multiselect directories and files at the same time. Available only on Non Native
@@ -308,6 +308,9 @@ class NefFileDialog(QtWidgets.QFileDialog):
         else:
             directory = str(aPath(directory))
             self._setDirectory = True
+
+        selectFile = os.path.basename(selectFile) if selectFile else None
+
         self._pathID = pathID
         self._updatePathOnReject = updatePathOnReject
 
@@ -361,6 +364,30 @@ class NefFileDialog(QtWidgets.QFileDialog):
     def getCurrentWorkingPath(self):
         if self._pathID in _initialPaths:
             return _initialPaths[self._pathID]
+
+    def setInitialFile(self, initialFile):
+        initialPath = os.path.dirname(initialFile)
+        if self._pathID not in _initialPaths and initialPath:
+            _initialPaths[self._pathID] = initialPath
+        if self._pathID in _initialPaths:
+            directory = str(aPath(_initialPaths[self._pathID] or '~'))
+        else:
+            directory = str(aPath('~'))
+
+        self.setDirectory(directory)
+        self.selectFile(initialFile)
+        self._setDirectory = False
+
+    def setInitialPath(self, initialPath):
+        if self._pathID not in _initialPaths and initialPath:
+            _initialPaths[self._pathID] = initialPath
+        if self._pathID in _initialPaths:
+            directory = str(aPath(_initialPaths[self._pathID] or '~'))
+        else:
+            directory = str(aPath('~'))
+
+        self.setDirectory(directory)
+        self._setDirectory = False
 
     def selectedFiles(self):
         # if self.useNative:

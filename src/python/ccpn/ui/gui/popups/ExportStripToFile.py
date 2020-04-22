@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-04-20 16:05:26 +0100 (Mon, April 20, 2020) $"
+__dateModified__ = "$dateModified: 2020-04-22 17:06:31 +0100 (Wed, April 22, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -273,9 +273,7 @@ class ExportStripToFilePopup(ExportDialog):
         else:
             raise ValueError('bad export type')
 
-        # currentPath = os.path.expanduser(self.project.path)
-        currentPath = self.fileSaveDialog.getCurrentWorkingPath()
-        self.updateFilename(os.path.join(currentPath, self.objectPulldown.getText() + exportExtension))
+        self.setSave(self.objectPulldown.getText() + exportExtension)
 
         self.setFixedWidth(self.sizeHint().width())
         self.setMinimumHeight(self.sizeHint().height())

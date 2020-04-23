@@ -1899,6 +1899,23 @@ class Project(AbstractWrapperObject):
         return _fetchNefSubstance(self, sequence=sequence, name=name, **kwds)
 
     @logCommand('project.')
+    def getNefSubstance(self, sequence: typing.Sequence[dict], name: str = None, **kwds):
+        """Get existing Substance that matches sequence of NEF rows and/or name
+
+        See the Substance class for details.
+
+        Optional keyword arguments can be passed in; see Substance._fetchNefSubstance for details.
+
+        :param self:
+        :param sequence:
+        :param name:
+        :return: a new Nef Substance instance.
+        """
+        from ccpn.core.Substance import _getNefSubstance
+
+        return _getNefSubstance(self, sequence=sequence, name=name, **kwds)
+
+    @logCommand('project.')
     def createPolymerSubstance(self, sequence: typing.Sequence[str], name: str,
                                labelling: str = None, userCode: str = None, smiles: str = None,
                                synonyms: typing.Sequence[str] = (), comment: str = None,

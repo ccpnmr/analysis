@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-04-17 16:48:35 +0100 (Fri, April 17, 2020) $"
+__dateModified__ = "$dateModified: 2020-04-23 18:45:24 +0100 (Thu, April 23, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -78,12 +78,12 @@ class TextEditor(QtWidgets.QTextEdit, Base):
         noFocusColour = getColours()[BORDERNOFOCUS]
         styleSheet = "QTextEdit { " \
                      "border: 1px solid;" \
-                     "border-radius: 2px;" \
+                     "border-radius: 1px;" \
                      "border-color: %s;" \
                      "} " \
                      "QTextEdit:focus { " \
                      "border: 1px solid %s; " \
-                     "border-radius: 2px; " \
+                     "border-radius: 1px; " \
                      "}" % (noFocusColour, focusColour)
         self.setStyleSheet(styleSheet)
 
@@ -233,12 +233,12 @@ class PlainTextEditor(QtWidgets.QPlainTextEdit, Base):
         noFocusColour = getColours()[BORDERNOFOCUS]
         styleSheet = "QPlainTextEdit { " \
                      "border: 1px solid;" \
-                     "border-radius: 2px;" \
+                     "border-radius: 1px;" \
                      "border-color: %s;" \
                      "} " \
                      "QPlainTextEdit:focus { " \
                      "border: 1px solid %s; " \
-                     "border-radius: 2px; " \
+                     "border-radius: 1px; " \
                      "}" % (noFocusColour, focusColour)
         self.setStyleSheet(styleSheet)
 

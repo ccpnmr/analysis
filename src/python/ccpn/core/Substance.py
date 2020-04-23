@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-04-22 14:48:54 +0100 (Wed, April 22, 2020) $"
+__dateModified__ = "$dateModified: 2020-04-23 18:45:24 +0100 (Thu, April 23, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -649,6 +649,24 @@ class Substance(AbstractWrapperObject):
 
         return _createChainFromSubstance(self, shortName=shortName, role=role, comment=comment, **kwds)
 
+    @logCommand('project.')
+    def getChain(self, shortName: str = None, role: str = None,
+                    comment: str = None, **kwds):
+        """Get existing Chain that matches Substance
+
+        See the Chain class for details.
+
+        Optional keyword arguments can be passed in; see Chain._createChainFromSubstance for details.
+
+        :param shortName:
+        :param role:
+        :param comment: optional comment string
+        :return: a new Chain instance.
+        """
+        from ccpn.core.Chain import _getChainFromSubstance
+
+        return _getChainFromSubstance(self, shortName=shortName, role=role, comment=comment, **kwds)
+
 
 #=========================================================================================
 # Connections to parents:
@@ -815,6 +833,27 @@ def _fetchNefSubstance(self: Project, sequence: typing.Sequence[dict], name: str
             getLogger().warning("Could not reset serial of %s to %s - keeping original value"
                                 % (result, serial))
     return result
+
+
+def _getNefSubstance(self: Project, sequence: typing.Sequence[dict], name: str = None, serial: int = None):
+    """Get existing Substance that matches sequence of NEF rows and/or name
+
+    :param self:
+    :param sequence:
+    :param name:
+    :return: an existing Nef Substance instance or None.
+    """
+
+    apiNmrProject = self._wrappedData
+
+    name = name or 'Molecule_1'
+    apiMolecule = apiNmrProject.root.findFirstMolecule(name=name)
+    if apiMolecule:
+        apiMolComponent = apiNmrProject.sampleStore.refSampleComponentStore.getMolComponent(apiMolecule)
+        if apiMolComponent in self._data2Obj:
+            return self._data2Obj[apiMolComponent]
+        else:
+            raise RuntimeError('Error getting Nef Substance {}'.format(name))
 
 
 #EJB 20181206: moved to Project

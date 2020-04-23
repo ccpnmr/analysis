@@ -1564,14 +1564,10 @@ class Framework(NotifierBase):
         with undoBlock():
             with notificationEchoBlocking():
                 with catchExceptions(application=self, errorStringTemplate='Error loading Nef file: %s'):
+
+                    # need datablock selector here, with subset selection dependent on datablock type
+
                     self.nefReader.importNewProject(self.project, dataBlock)
-                # try:
-                #     self.nefReader.importNewProject(self.project, dataBlock)
-                # except Exception as es:
-                #     getLogger().warning('Error loading Nef file: %s' % str(es))
-                #     if self._isInDebugMode:
-                #         raise es
-                # # finally:
 
         self.project._wrappedData.shiftAveraging = True
 
@@ -3293,20 +3289,16 @@ def getPreferences(skipUserPreferences=False, defaultPath=None, userPath=None):
 
 if __name__ == '__main__':
 
+    from ccpn.framework.Framework import Framework
+    from ccpn.framework.Framework import Arguments
     # from sandbox.Geerten.Refactored.framework import Framework
     # from sandbox.Geerten.Refactored.programArguments import Arguments
 
-    from ccpn.framework.Framework import Framework
-    from ccpn.framework.Framework import Arguments
-
-
     _makeMainWindowVisible = False
-
 
     class MyProgramme(Framework):
         "My first app"
         pass
-
 
     myArgs = Arguments()
     myArgs.noGui = False
@@ -3314,7 +3306,7 @@ if __name__ == '__main__':
 
     application = MyProgramme('MyProgramme', '3.0.1', args=myArgs)
     ui = application.ui
-    ui.initialize(ui.mainWindow)  # ui.mainWindow not needed for refactored?
+    ui.initialize(ui.mainWindow)                    # ui.mainWindow not needed for refactored?
 
     if _makeMainWindowVisible:
         ui.mainWindow._updateMainWindow(newProject=True)
@@ -3324,71 +3316,68 @@ if __name__ == '__main__':
     # register the programme
     from ccpn.framework.Application import ApplicationContainer
 
-
     container = ApplicationContainer()
     container.register(application)
     application.useFileLogger = True
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    from xml.etree import ElementTree
-    from ccpn.util.Path import aPath
-    from ccpn.util.SafeFilename import getSafeFilename
+    TESTNEF = '/Users/ejb66/Documents/CcpNmrData/NefTestData_1_1/CCPN_Commented_Example.nef'
+    VALIDATEDICT = '/Users/ejb66/PycharmProjects/Git/NEF/specification/mmcif_nef.dic'
+    DEFAULTNAME  ='default'
 
-    # active parser to include comments in import/export
-    parser = ElementTree.XMLParser(target=ElementTree.TreeBuilder(insert_comments=True))
+    from ccpn.util.nef import NefImporter as Nef
 
-    # read in the file
-    filePath = aPath('/Users/ejb66/Documents/CcpNmrData/sh3_tutorial_LabPtn.ccpn/ccpnv3/ccp/nmr/Nmr/sh3_tutorial+sh3_tutorial_vicky_2009-04-16-10-58-30-845_00001.xml')
-    tree = ElementTree.parse(filePath, parser)
 
-    # list of elements to remove from file
-    includeElems = ['LMOL.LabeledMolecule', 'LMOL.LabeledMixture.name', 'NMR.Experiment.labeledMixtures', 'LMOL.exo-LabeledMixture', 'NMR.Experiment.refExperiment']
+    # load the file and the validate dict
+    _loader = Nef.NefImporter(errorLogging=Nef.el.NEF_STANDARD, hidePrefix=True)
+    _loader.loadFile(TESTNEF)
+    _loader.loadValidateDictionary(VALIDATEDICT)
 
-    indent = 0
-    def printRecur(parent):
-        """Recursively prints the tree
-        """
-        global indent
+    # validate
+    validCheck = _loader.isValid
 
-        if parent.tag in includeElems:
-            print('_' * indent + '{}'.format(parent.tag.title().strip()))
+    print(_loader.name)
 
-        indent += 4
-        for lm in list(parent):
-            printRecur(lm)
-        indent -= 4
+    # simple test print of saveframes
+    print(validCheck)
+    names = _loader.getSaveFrameNames(returnType=Nef.NEF_RETURNALL)
+    for name in names:
+        print(name)
+        saveFrame = _loader.getSaveFrame(name)
+        print(saveFrame)
 
-    def deleteRecur(parent):
-        """Recursively deletes elements in the tree
-        """
-        for lm in list(parent):
-            deleteRecur(lm)
+    # create a list of which saveframes to load, with a parameters dict for each
+    loadDict = {'nef_molecular_system'      : {},
+                'nef_nmr_spectrum_cnoesy1'  : {},
+                'nef_chemical_shift_list_1' : {},
+                }
 
-        for lm in list(parent):
-            if lm.tag in includeElems:
-                parent.remove(lm)
-                print('_' * indent + 'DELETE {}'.format(lm.tag.title().strip()))
+    # need a project
+    name = _loader.getName()
+    project = application.newProject(name or DEFAULTNAME)
 
-    # print the tree
-    root = tree.getroot()
-    printRecur(root)
+    project._wrappedData.shiftAveraging = False
+    # with suspendSideBarNotifications(project=self.project):
 
-    # delete tags
-    deleteRecur(root)
+    from ccpn.core.lib import CcpnNefIo
 
-    # print again to test
-    printRecur(root)
+    nefReader = CcpnNefIo.CcpnNefReader(application)
+    _loader._attachVerifier(nefReader.verifyProject)
+    _loader._attachReader(nefReader.importExistingProject)
 
-    # NOTE:ED - needs swapping round when working
-    fileName = filePath.basename
-    renameFileName = fileName+'_OLD'
-    renameFilePath =  (filePath.parent / renameFileName).assureSuffix('.xml')
+    from ccpn.core.lib.ContextManagers import undoBlock, notificationEchoBlocking
 
-    # write out the modified file
-    safeName = aPath(getSafeFilename(renameFilePath))
-    tree.write(safeName, encoding='UTF-8', xml_declaration=True)
+    with notificationEchoBlocking():
+        with catchExceptions(application=application, errorStringTemplate='Error loading Nef file: %s'):
+            # need datablock selector here, with subset selection dependent on datablock type
 
-    # with open(renameFilePath, "a+") as fp:
-    #     # added for completeness
-    #     fp.write('\n<!--End of Memops Data-->')
+            _loader._importNef(project, _loader._nefDict, selection=None)
+            warnings, errors = _loader._verifyNef(project, _loader._nefDict, selection=None)
+            if not (warnings or errors):
+                _loader._importNef(project, _loader._nefDict, selection=None)
+            else:
+                for msg in warnings or ():
+                    print('  >>', msg)
+                for msg in errors or ():
+                    print('  >>', msg)

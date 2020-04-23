@@ -331,6 +331,13 @@ def _newApiChain(self: Project, apiMolecule, shortName, role, comment):
     return result
 
 
+def _getChain(self: Project, sequence: Union[str, Sequence[str]], compoundName: str = None,
+                 startNumber: int = 1, molType: str = None, isCyclic: bool = False,
+                 shortName: str = None, role: str = None, comment: str = None,
+                 serial: int = None) -> Chain:
+    pass
+
+
 # @newObject(Chain)
 @undoBlock()
 def _createChain(self: Project, sequence: Union[str, Sequence[str]], compoundName: str = None,
@@ -509,6 +516,33 @@ def _createChainFromSubstance(self: Substance, shortName: str = None, role: str 
         residue.resetVariantToDefault()
 
     return result
+
+
+def _getChainFromSubstance(self: Substance, shortName: str = None, role: str = None,
+                              comment: str = None, serial: int = None) -> Chain:
+    """Get existing Chain that matches Substance
+
+    :param shortName:
+    :param role:
+    :param comment: optional comment string
+    :param serial: optional serial number.
+    :return: a new Chain instance.
+    """
+
+    if self.substanceType != 'Molecule':
+        raise ValueError("Only Molecule Substances can be used to create chains")
+
+    apiMolecule = self._apiSubstance.molecule
+    if apiMolecule is None:
+        raise ValueError("API MolComponent must have attached ApiMolecule in order to create chains")
+
+    apiMolSystem = self._project._apiNmrProject.molSystem
+    if shortName is None:
+        shortName = apiMolSystem.nextChainCode()
+
+    # get the chain if it exists
+    previous = self._project.getChain(shortName.translate(Pid.remapSeparators))
+    return previous
 
 
 #EJB 20181206: moved to Substance

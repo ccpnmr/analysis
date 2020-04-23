@@ -1,7 +1,7 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -10,9 +10,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2017-07-07 16:32:26 +0100 (Fri, July 07, 2017) $"
-__version__ = "$Revision: 3.0.0 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2020-04-23 18:45:24 +0100 (Thu, April 23, 2020) $"
+__version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -39,6 +39,7 @@ from ccpn.core.DataSet import DataSet
 from ccpn.core.Complex import Complex
 from ccpn.core.SpectrumGroup import SpectrumGroup
 from ccpn.core.Note import Note
+from ccpn.ui.gui.guiSettings import getColours, BORDERFOCUS, BORDERNOFOCUS
 
 
 # TODO These should maybe be consolidated with the same constants in CcpnNefIo
@@ -137,6 +138,24 @@ class ProjectTreeCheckBoxes(QtWidgets.QTreeWidget, Base):
                         item.setCheckState(0, QtCore.Qt.Checked)
 
         self.itemClicked.connect(self._clicked)
+
+        self._setFocusColour()
+
+    def _setFocusColour(self, focusColour=None, noFocusColour=None):
+        """Set the focus/noFocus colours for the widget
+        """
+        focusColour = getColours()[BORDERFOCUS]
+        noFocusColour = getColours()[BORDERNOFOCUS]
+        styleSheet = "QTreeWidget { " \
+                     "border: 1px solid;" \
+                     "border-radius: 1px;" \
+                     "border-color: %s;" \
+                     "} " \
+                     "QTreeWidget:focus { " \
+                     "border: 1px solid %s; " \
+                     "border-radius: 1px; " \
+                     "}" % (noFocusColour, focusColour)
+        self.setStyleSheet(styleSheet)
 
     def getSelectedObjects(self, includeRoot=False):
         """Get selected objects from the check boxes

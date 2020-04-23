@@ -2671,7 +2671,23 @@ class CcpnNefReader:
 
     def verify_nef_nmr_meta_data(self, project: Project, saveFrame: StarIo.NmrSaveFrame):
         """verify nef_nmr_meta_data saveFrame"""
-        pass
+        self.mainDataSetSerial = saveFrame.get('ccpn_dataset_serial')
+
+        formatName = saveFrame.get('format_name')
+        formatVersion = saveFrame.get('format_version')
+        if formatName == 'nmr_exchange_format':
+            if formatVersion:
+                try:
+                    version = float(formatVersion)
+                except ValueError:
+                    self.error('Illegal version string {} for nmr_exchange_format'.format(formatVersion), saveFrame, None)
+                else:
+                    if version < minimumNefVersion:
+                        self.error('Unsupported nef file version {}; minimum version is {}'.format(formatVersion, minimumNefVersion), saveFrame, None)
+            else:
+                self.warning('file format version missing: Reading may fail')
+        else:
+            self.warning("NEF file format name '{}', not recognised. Reading may fail.".format(formatName))
 
     verifiers['nef_nmr_meta_data'] = verify_nef_nmr_meta_data
 
@@ -2960,6 +2976,9 @@ class CcpnNefReader:
     def verify_preloadAssignmentData(self, dataBlock: StarIo.NmrDataBlock):
         """Set up NmrChains and NmrResidues with reserved names to ensure the serials are OK
         and create NmrResidues in connected nmrChains in order"""
+
+        # NOTE:ED - need to check and validate this bit
+
         project = self.project
 
         for saveFrameName, saveFrame in dataBlock.items():
@@ -2989,7 +3008,7 @@ class CcpnNefReader:
     def load_nef_chemical_shift_list(self, project: Project, saveFrame: StarIo.NmrSaveFrame):
         """load nef_chemical_shift_list saveFrame"""
 
-        # Get ccpn-to-nef mappping for saveframe
+        # Get ccpn-to-nef mapping for saveframe
         category = saveFrame['sf_category']
         framecode = saveFrame['sf_framecode']
         mapping = nef2CcpnMap[category]
@@ -3029,7 +3048,20 @@ class CcpnNefReader:
 
     def verify_nef_chemical_shift_list(self, project: Project, saveFrame: StarIo.NmrSaveFrame):
         """verify nef_chemical_shift_list saveFrame"""
-        pass
+        category = saveFrame['sf_category']
+        framecode = saveFrame['sf_framecode']
+        mapping = nef2CcpnMap[category]
+
+        parameters, loopNames = self._parametersFromSaveFrame(saveFrame, mapping)
+
+        # parameters['name'] = framecode[len(category) + 1:]
+        name = framecode[len(category) + 1:]
+
+        # Make main object
+        result = project.getChemicalShiftList(name, **parameters)
+        if result is not None:
+            self.error('nef_chemical_shift_list - ChemicalShiftList {} already exists'.format(result), saveFrame, (result,))
+
 
     verifiers['nef_chemical_shift_list'] = verify_nef_chemical_shift_list
 
@@ -3282,7 +3314,7 @@ class CcpnNefReader:
 
         dimensionTransferTags = ('dimension_1', 'dimension_2', 'transfer_type', 'is_indirect')
 
-        # Get ccpn-to-nef mappping for saveframe
+        # Get ccpn-to-nef mapping for saveframe
         category = saveFrame['sf_category']
         framecode = saveFrame['sf_framecode']
         mapping = nef2CcpnMap[category]
@@ -3970,7 +4002,7 @@ class CcpnNefReader:
 
     def load_ccpn_spectrum_group(self, project: Project, saveFrame: StarIo.NmrSaveFrame):
 
-        # Get ccpn-to-nef mappping for saveframe
+        # Get ccpn-to-nef mapping for saveframe
         category = saveFrame['sf_category']
         framecode = saveFrame['sf_framecode']
         mapping = nef2CcpnMap[category]
@@ -4024,7 +4056,7 @@ class CcpnNefReader:
 
     def load_ccpn_complex(self, project: Project, saveFrame: StarIo.NmrSaveFrame):
 
-        # Get ccpn-to-nef mappping for saveframe
+        # Get ccpn-to-nef mapping for saveframe
         category = saveFrame['sf_category']
         framecode = saveFrame['sf_framecode']
         mapping = nef2CcpnMap[category]
@@ -4080,7 +4112,7 @@ class CcpnNefReader:
 
         # NBNB TODO add crosslinks to spectrum (also for components)
 
-        # Get ccpn-to-nef mappping for saveframe
+        # Get ccpn-to-nef mapping for saveframe
         category = saveFrame['sf_category']
         framecode = saveFrame['sf_framecode']
         mapping = nef2CcpnMap[category]
@@ -4141,7 +4173,7 @@ class CcpnNefReader:
 
     def load_ccpn_substance(self, project: Project, saveFrame: StarIo.NmrSaveFrame):
 
-        # Get ccpn-to-nef mappping for saveframe
+        # Get ccpn-to-nef mapping for saveframe
         category = saveFrame['sf_category']
         framecode = saveFrame['sf_framecode']
         mapping = nef2CcpnMap[category]
@@ -4438,7 +4470,7 @@ class CcpnNefReader:
 
         print("ccpn_dataset reading is not implemented yet")
 
-        # Get ccpn-to-nef mappping for saveframe
+        # Get ccpn-to-nef mapping for saveframe
         category = saveFrame['sf_category']
         framecode = saveFrame['sf_framecode']
         mapping = nef2CcpnMap[category]

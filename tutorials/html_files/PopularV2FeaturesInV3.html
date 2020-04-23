@@ -54,6 +54,10 @@
 <p>These features are grouped under the AnalysisStructure programme which is still under development. It is possible to read in pdb files and restraint data from NEF files, but otherwise few structure-related features are implemented as yet.</p>
 <h3>Isotope Labelling</h3>
 <p>At the moment we have no plans to include this in V3, as it does not appear to be used much. If you think this is important, then please do contact us to discuss this.</p>
+<h3>Format Converter</h3>
+<p>Version 3 doesn't have a format converter the way that V2 does. This is because all major NMR programme developers and deposition databases have now committed to using the new NMR Exchange format (NEF). This format will make sure that important information, e.g. on stereospecific assignments etc., is not lost (as is currently the case).
+<br>V3 can export any part of the project as NMR Exchange Format (NEF) files. Both the PDB and BMRB will accept NEF files when you deposit your data. Several structure calculation and validation programmes (e.g. CYANA, YASARA and XPLOR-NIH, PDBStat) are also starting read and write NEF files and others (ARIA, AMBER, PSVS) will be implementing this soon.
+<br>A temporary alternative to export data to other programmes will be to use our new V2.5 (to be released in the coming weeks) to read in a NEF file and then you can use the FormatConverter from there.</p>
 </div>
 </body>
 </html>

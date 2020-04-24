@@ -3435,5 +3435,6 @@ if __name__ == '__main__':
 
     options = AttrDict()
     options.ignoreCase = False
+    options.identical = True
     result = Nef.compareDataBlocks(_loader._nefDict, localNefDict, options)
     Nef.printCompareList(result, 'LOADED', 'local')

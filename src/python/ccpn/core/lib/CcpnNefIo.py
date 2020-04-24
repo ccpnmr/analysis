@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-04-06 12:02:50 +0100 (Mon, April 06, 2020) $"
+__dateModified__ = "$dateModified: 2020-04-24 11:59:25 +0100 (Fri, April 24, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -3722,14 +3722,14 @@ class CcpnNefReader:
 
         spectra = []
         for row in loop.data:
-            peakList = self.frameCode2Object.get(row.get('nmr_spectrum_id'))
-            if peakList is None:
+            spectrum = self.project.getSpectrum(row.get('nmr_spectrum_id'))
+            if spectrum is None:
                 self.warning(
                         "No Spectrum saveframe found with framecode %s. Skipping Spectrum from SpectrumGroup"
                         % row.get('nmr_spectrum_id')
                         )
             else:
-                spectra.append(peakList.spectrum)
+                spectra.append(spectrum)
         #
         parent.spectra = spectra
 

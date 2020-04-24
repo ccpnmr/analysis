@@ -3322,7 +3322,8 @@ if __name__ == '__main__':
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    TESTNEF = '/Users/ejb66/Documents/CcpNmrData/NefTestData_1_1/CCPN_Commented_Example.nef'
+    # TESTNEF = '/Users/ejb66/Documents/CcpNmrData/NefTestData_1_1/CCPN_Commented_Example.nef'
+    TESTNEF = '/Users/ejb66/Documents/CcpNmrData/nefTestProject.nef'
     VALIDATEDICT = '/Users/ejb66/PycharmProjects/Git/NEF/specification/mmcif_nef.dic'
     DEFAULTNAME  ='default'
 
@@ -3381,3 +3382,58 @@ if __name__ == '__main__':
                     print('  >>', msg)
                 for msg in errors or ():
                     print('  >>', msg)
+
+
+    print('>>~~~~~~~~~~~~~~~~~~~')
+
+    import ccpn.util.nef.nef as Nef
+
+    # NOTE:ED - by default pidList=None selects everything in the project
+    # from ccpn.core.Chain import Chain
+    # from ccpn.core.ChemicalShiftList import ChemicalShiftList
+    # from ccpn.core.RestraintList import RestraintList
+    # from ccpn.core.PeakList import PeakList
+    # from ccpn.core.IntegralList import IntegralList
+    # from ccpn.core.MultipletList import MultipletList
+    # from ccpn.core.PeakCluster import PeakCluster
+    # from ccpn.core.Sample import Sample
+    # from ccpn.core.Substance import Substance
+    # from ccpn.core.NmrChain import NmrChain
+    # from ccpn.core.DataSet import DataSet
+    # from ccpn.core.Complex import Complex
+    # from ccpn.core.SpectrumGroup import SpectrumGroup
+    # from ccpn.core.Note import Note
+    #
+    # # set the items in the project that can be exported
+    # checkList = [
+    #     Chain._pluralLinkName,
+    #     ChemicalShiftList._pluralLinkName,
+    #     RestraintList._pluralLinkName,
+    #     PeakList._pluralLinkName,
+    #     IntegralList._pluralLinkName,
+    #     MultipletList._pluralLinkName,
+    #     Sample._pluralLinkName,
+    #     Substance._pluralLinkName,
+    #     NmrChain._pluralLinkName,
+    #     DataSet._pluralLinkName,
+    #     Complex._pluralLinkName,
+    #     SpectrumGroup._pluralLinkName,
+    #     Note._pluralLinkName,
+    #     PeakCluster._pluralLinkName,
+    #     ]
+    # # build a complete list of items to grab from the project
+    # pidList = []
+    # for name in checkList:
+    #     if hasattr(project, name):
+    #         for obj in getattr(project, name):
+    #             pidList.append(obj.pid)
+
+    nefWriter = CcpnNefIo.CcpnNefWriter(project)
+    localNefDict = nefWriter.exportProject(expandSelection=True, pidList=None)
+
+    from ccpn.util.AttrDict import AttrDict
+
+    options = AttrDict()
+    options.ignoreCase = False
+    result = Nef.compareDataBlocks(_loader._nefDict, localNefDict, options)
+    Nef.printCompareList(result, 'LOADED', 'local')

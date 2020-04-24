@@ -1995,7 +1995,7 @@ class Project(AbstractWrapperObject):
         return _newChemicalShiftList(self, name=name, spectra=spectra, **kwds)
 
     @logCommand('project.')
-    def getChemicalShiftList(self, name: str = None, spectra=(), **kwds):
+    def getChemicalShiftList(self, name: str = None, **kwds):
         """Get existing ChemicalShiftList.
 
         See the ChemicalShiftList class for details.
@@ -2006,4 +2006,4 @@ class Project(AbstractWrapperObject):
         """
         from ccpn.core.ChemicalShiftList import _getChemicalShiftList
 
-        return _getChemicalShiftList(self, name=name, spectra=spectra, **kwds)
+        return _getChemicalShiftList(self, name=name, **kwds)

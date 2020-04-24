@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-04-24 11:59:25 +0100 (Fri, April 24, 2020) $"
+__dateModified__ = "$dateModified: 2020-04-24 18:09:45 +0100 (Fri, April 24, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -1294,8 +1294,8 @@ class CcpnNefWriter:
     def exportProject(self, expandSelection: bool = False,
                       pidList: list = None) -> typing.Optional[StarIo.NmrDataBlock]:
         """
-    Get project and all contents as NEF object tree for export
-    """
+        Get project and all contents as NEF object tree for export
+        """
         project = self.project
 
         # ejb - added items to be removed from the list
@@ -3058,7 +3058,7 @@ class CcpnNefReader:
         name = framecode[len(category) + 1:]
 
         # Make main object
-        result = project.getChemicalShiftList(name, **parameters)
+        result = project.getChemicalShiftList(name)
         if result is not None:
             self.error('nef_chemical_shift_list - ChemicalShiftList {} already exists'.format(result), saveFrame, (result,))
 
@@ -4247,7 +4247,7 @@ class CcpnNefReader:
 
         else:
             # find existing substance
-            result = project.getSubstance(name, labelling)
+            result = project.getSubstance(name)
             if result is not None:
                 self.error('ccpn_substance - Substance {} already exists'.format(result), saveFrame, (result,))
 
@@ -4429,7 +4429,8 @@ class CcpnNefReader:
         map2 = dict(item for item in mapping.items() if item[1] and '.' not in item[1])
         for row in loop.data:
             parameters = self._parametersFromLoopRow(row, map2)
-            result = creatorFunc(**parameters)
+            name = parameters['name']
+            result = creatorFunc(name)
             if result:
                 self.error('ccpn_notes - Note {} already exists'.format(result), saveFrame, (result,))
 

@@ -25,12 +25,19 @@ __date__ = "$Date: 2017-05-28 10:28:42 +0000 (Sun, May 28, 2017) $"
 
 #### GUI IMPORTS
 from ccpn.ui.gui.widgets.PipelineWidgets import GuiPipe, _getWidgetByAtt
+from ccpn.ui.gui.widgets.PulldownList import PulldownList
+from ccpn.ui.gui.widgets.Label import Label
+from ccpn.ui.gui.widgets.DoubleSpinbox import ScientificDoubleSpinBox, DoubleSpinbox
+from ccpn.ui.gui.widgets.GLLinearRegionsPlot import GLTargetButtonSpinBoxes
 
 #### NON GUI IMPORTS
 from ccpn.framework.lib.Pipe import SpectraPipe
 import numpy as np
 from ccpn.util.Logging import getLogger, _debug3
-from ccpn.pipes.lib.Scale1Dspectra import scaleSpectraByStd
+from ccpn.pipes.lib.Scale1Dspectra import scaleSpectraByStd, scaleSpectraByRegion
+from scipy import stats
+from ccpn.util.Logging import getLogger, _debug3
+from collections import OrderedDict
 
 ########################################################################################################################
 ###   Attributes:
@@ -38,6 +45,18 @@ from ccpn.pipes.lib.Scale1Dspectra import scaleSpectraByStd
 ########################################################################################################################
 
 PipeName = 'Scale spectra'
+ReferenceRegion = 'Reference_Region'
+DefaultReferenceRegion = (0.5, -0.5)
+EnginesVar = 'Engines'
+
+Min = 'min'
+Max = 'max'
+Mean = 'mean'
+Engines = [Mean, Min, Max]
+
+DefaultEngine = 'mean'
+NotAvailable = 'Not Available'
+
 
 ########################################################################################################################
 ##########################################      ALGORITHM       ########################################################
@@ -58,6 +77,18 @@ class Scale1DGuiPipe(GuiPipe):
         GuiPipe.__init__(self, parent=parent, name=name, project=project, **kw)
         self.parent = parent
 
+        row = 0
+        # target region
+        self.tregionLabel = Label(self.pipeFrame, text=ReferenceRegion, grid=(row, 0))
+        setattr(self, ReferenceRegion, GLTargetButtonSpinBoxes(self.pipeFrame, application=self.application,
+                                                               values=DefaultReferenceRegion, orientation='v',
+                                                               grid=(row, 1)))
+
+        row += 1
+        #  Engines
+        self.enginesLabel = Label(self.pipeFrame, EnginesVar, grid=(row, 0))
+        setattr(self, EnginesVar, PulldownList(self.pipeFrame, texts=Engines, grid=(row, 1)))
+
 
 
 ########################################################################################################################
@@ -74,7 +105,8 @@ class  Scale1DPipe(SpectraPipe):
     pipeName = PipeName
 
     _kwargs = {
-
+        ReferenceRegion: DefaultReferenceRegion,
+        EnginesVar: DefaultEngine
         }
 
     def runPipe(self, spectra):
@@ -82,10 +114,13 @@ class  Scale1DPipe(SpectraPipe):
         :param spectra: inputData
         :return: scaled spectra
         '''
+        referenceRegion = self._kwargs[ReferenceRegion]
+        engine = self._kwargs[EnginesVar]
 
         if self.project is not None:
             if spectra:
-                scaleSpectraByStd(spectra)
+                # scaleSpectraByStd(spectra)
+                scaleSpectraByRegion(spectra, referenceRegion, engine,)
                 getLogger().info('Scale 1D completed')
 
                 return spectra

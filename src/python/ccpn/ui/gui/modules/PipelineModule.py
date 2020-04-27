@@ -677,7 +677,7 @@ class GuiPipeline(CcpnModule, Pipeline):
         # self.settingsWidgets.append(self.selectDisplay)
 
         #
-        self.addBoxLabel = Label(self, 'Add Method On')
+        self.addBoxLabel = Label(self, 'Add Pipes')
         self.settingsWidgets.append(self.addBoxLabel)
         self.addBoxPosition = RadioButtons(self, texts=['top', 'bottom'], selectedInd=0, direction='h')
         self.addBoxPosition.setMaximumHeight(20)
@@ -690,7 +690,7 @@ class GuiPipeline(CcpnModule, Pipeline):
         self.settingsWidgets.append(self.autoActiveCheckBox)
 
         #
-        self.filter = Label(self, 'Methods filter')
+        self.filter = Label(self, 'Pipes filter')
         self.settingsWidgets.append(self.filter)
         self.filterButton = Button(self, icon=self.filterIcon, callback=self.filterMethodPopup)
         self.filterButton.setStyleSheet(transparentStyle)

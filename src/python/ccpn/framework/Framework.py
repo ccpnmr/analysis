@@ -3448,6 +3448,7 @@ if __name__ == '__main__':
     result = Nef.compareDataBlocks(_loader._nefDict, localNefDict, options)
     Nef.printCompareList(result, 'LOADED', 'local')
 
+    # set up a test dict
     testDict1 = {
         "includePositiveContours": True,
         "includeNegativeContours": True,
@@ -3505,3 +3506,4 @@ if __name__ == '__main__':
         }
 
     print(Nef._compareObjects(testDict1, testDict2, options))
+    print(Nef._compareObjects('testing a string', 'Testing a string', options))

@@ -3457,8 +3457,17 @@ if __name__ == '__main__':
                                       [0, 1000000],
                                       ['Another string', 0]],
             "aliasingRange"        : [[0, 0],
-                                      [0, 0],
-                                      [0, (1, 2, 3, 4, 5, 6)]]
+                                      [0, 1 + 2j],
+                                      [0, (1, 2, 3, 4, 5, 6), {
+                                          "aliasingRangeInner"        : [[0, 0],
+                                                                         [0, 1 + 2.00000001j],
+                                                                         [0, (1, 2, 3, 4, 5, 6)]],
+                                          "visibleAliasingRangeInner" : [[0, {1, 2, 3, 4, 5, 'more INNER strings'}],
+                                                                         [0, 1000000.0],
+                                                                         ['Another inner string', 0.0]],
+                                          "displayFoldedContoursInner": 'this is a inner string',
+                                          }
+                                       ]]
             },
         "spectrumSeries"         : {
             "spectrumSeriesItems": {
@@ -3470,13 +3479,22 @@ if __name__ == '__main__':
     testDict2 = {
         "includeNegativeContours": True,
         "spectrumAliasing"       : {
-            "visibleAliasingRange" : [[0, {1, 2, 3, 4, 5.0000001, 'more strings'}],
-                                      [0, 1000000.1],
+            "visibleAliasingRange" : [[0, {1, 2, 3, 4, 5.00000000001, 'more strings'}],
+                                      [0, 1000000.0],
                                       ['Another string', 0.0]],
             "displayFoldedContours": 'this is a string',
             "aliasingRange"        : [[0, 0],
-                                      [0, 0],
-                                      [0, (1, 2, 3, 4, 5, 6)]]
+                                      [0, 1 + 2.00000001j],
+                                      [0, (1, 2, 3, 4, 5, 6), {
+                                          "visibleAliasingRangeInner" : [[0, {1, 2, 3, 4, 5.00000001, 'more inner strings'}],
+                                                                         [0, 1000000.0],
+                                                                         ['Another inner string', 0.0]],
+                                          "displayFoldedContoursInner": 'this is a inner string',
+                                          "aliasingRangeInner"        : [[0, 0],
+                                                                         [0, 1 + 2.00000001j],
+                                                                         [0, (1, 2, 3, 4, 5, 6)]]
+                                          }
+                                       ]]
             },
         "spectrumSeries"         : {
             "spectrumSeriesItems": {

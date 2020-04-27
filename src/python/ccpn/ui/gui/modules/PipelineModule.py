@@ -365,7 +365,7 @@ class GuiPipeline(CcpnModule, Pipeline):
         # self.goButton.setStyleSheet(transparentStyle)
         self.goAreaLayout.addWidget(self.goButton, )
         self.goAreaLayout.addStretch(1)
-        self.goButton.setEnabled(False)
+        # self.goButton.setEnabled(False)
 
     def _addPipelineDropArea(self):
         self.pipelineArea = PipelineDropArea()
@@ -434,12 +434,14 @@ class GuiPipeline(CcpnModule, Pipeline):
                     else:
                         guiPipe.pipe.isActive = False
             self.runPipeline()
-
+        else:
+            self.project._logger.info('Pipeline: No input data.')
+            showWarning('Pipeline', 'No input data')
         if self.updateInputData:
             self._updateGuiInputData()
 
         self.project._logger.info('Pipeline: Finished.')
-        showInfo('Pipeline','Finished')
+        # showInfo('Pipeline','Finished')
 
 
     def _openAllPipes(self):
@@ -606,7 +608,7 @@ class GuiPipeline(CcpnModule, Pipeline):
                QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding,
                grid=(rows, cols), gridSpan=(1, 1))
 
-        self._setSettingsParams()
+        # self._setSettingsParams()
 
     def _createSettingsGroupBox(self):
         self.settingFrame = Frame(self, setLayout=False)
@@ -629,7 +631,7 @@ class GuiPipeline(CcpnModule, Pipeline):
     def _inputDataContextMenu(self):
         contextMenu = Menu('', self, isFloatWidget=True)
         contextMenu.addItem("Add data", callback=self._addSpectraPopup)
-        contextMenu.addItem("Remove selected", callback=self.inputDataList.removeItem)
+        contextMenu.addItem("Remove selected", callback=self._removeSelectedInputData)
         contextMenu.addSeparator()
         contextMenu.addItem("Clear all", callback=self._clearInputData)
 
@@ -681,13 +683,13 @@ class GuiPipeline(CcpnModule, Pipeline):
         #
         self.addBoxLabel = Label(self, 'Add Pipes')
         self.settingsWidgets.append(self.addBoxLabel)
-        self.addBoxPosition = RadioButtons(self, texts=['top', 'bottom'], selectedInd=0, direction='h')
+        self.addBoxPosition = RadioButtons(self, texts=['top', 'bottom'], callback=self._addPipeDirectionCallback, selectedInd=0, direction='h')
         self.addBoxPosition.setMaximumHeight(20)
         self.settingsWidgets.append(self.addBoxPosition)
         #
         self.autoActiveLabel = Label(self, 'Auto active')
         self.settingsWidgets.append(self.autoActiveLabel)
-        self.autoActiveCheckBox = CheckBox(self, )
+        self.autoActiveCheckBox = CheckBox(self, callback=self._autoActiveCallback)
         self.autoActiveCheckBox.setChecked(True)
         self.settingsWidgets.append(self.autoActiveCheckBox)
 
@@ -702,9 +704,9 @@ class GuiPipeline(CcpnModule, Pipeline):
         self.spacerLabel = Label(self, '')
         self.spacerLabel.setMaximumHeight(1)
         self.settingsWidgets.append(self.spacerLabel)
-        self.applyCancelsettingButtons = ButtonList(self, texts=['Cancel', 'Apply'], callbacks=[self._cancelSettingsCallBack, self._applySettingsCallBack],
-                                                    direction='H', hAlign='c')
-        self.settingsWidgets.append(self.applyCancelsettingButtons)
+        # self.applyCancelsettingButtons = ButtonList(self, texts=['Cancel', 'Apply'], callbacks=[self._cancelSettingsCallBack, self._applySettingsCallBack],
+        #                                             direction='H', hAlign='c')
+        # self.settingsWidgets.append(self.applyCancelsettingButtons)
 
     def _itemsDropped(self):
         self.setDataSelection()
@@ -717,9 +719,14 @@ class GuiPipeline(CcpnModule, Pipeline):
         self.setDataSelection()
         w.parent().reject()
 
+    def _removeSelectedInputData(self):
+        self.inputDataList.removeItem()
+        self.setDataSelection()
+
     def _clearInputData(self):
         self.inputDataList.clear()
         self.inputDataList.addItem(self._getInputDataHeaderLabel())
+        self.setDataSelection()
 
     def _addSpectraPopup(self):
         popup = CcpnDialog(parent=self.mainWindow, setLayout=True)
@@ -787,6 +794,14 @@ class GuiPipeline(CcpnModule, Pipeline):
         self.pipelineSettingsParams['name'] = self.pipelineName
         self.pipelineSettingsParams['rename'] = self.pipelineName
 
+    def _addPipeDirectionCallback(self):
+        value = self.addBoxPosition.getSelectedText()
+        self.pipelineSettingsParams['addPosit'] = value
+
+    def _autoActiveCallback(self):
+        value = self.autoActiveCheckBox.get()
+        self.pipelineSettingsParams['autoActive'] = value
+
     def _cancelSettingsCallBack(self):
         self._setSettingsParams()
         self._settingsScrollArea.hide()
@@ -829,7 +844,7 @@ class GuiPipeline(CcpnModule, Pipeline):
         self.inputData = set(self.inputData)
         if self.project is not None:
             if len(dataTexts) == 0:
-                self.goButton.setEnabled(False)
+                # self.goButton.setEnabled(False)
                 self.inputDataList.addItem(self._getInputDataHeaderLabel())
                 return
             for text in dataTexts:

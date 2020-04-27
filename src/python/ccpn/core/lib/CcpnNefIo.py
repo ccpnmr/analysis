@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-04-24 18:09:45 +0100 (Fri, April 24, 2020) $"
+__dateModified__ = "$dateModified: 2020-04-27 19:41:26 +0100 (Mon, April 27, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -81,9 +81,9 @@ from ccpn.util.Logging import getLogger
 # Max value used for random integer. Set to be expressible as a signed 32-bit integer.
 maxRandomInt = 2000000000
 
-# Current NEF versio (as string
-currentNefVersion = '1.1'
-# Lowest version that this reader can reae (may not be teh same, as float:
+# Current NEF version (as float)
+currentNefVersion = 1.1
+# Lowest version that this reader can read (may not be the same), as float:
 minimumNefVersion = 0.9
 
 # TODO These should be consolidated with the same constants in NefIo

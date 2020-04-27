@@ -1564,7 +1564,6 @@ class Framework(NotifierBase):
         with undoBlock():
             with notificationEchoBlocking():
                 with catchExceptions(application=self, errorStringTemplate='Error loading Nef file: %s'):
-
                     # need datablock selector here, with subset selection dependent on datablock type
 
                     self.nefReader.importNewProject(self.project, dataBlock)
@@ -1844,7 +1843,7 @@ class Framework(NotifierBase):
             dialog = FileDialog(parent=self.ui.mainWindow, fileMode=FileDialog.AnyFile, text=text,
                                 acceptMode=FileDialog.AcceptOpen,
                                 filter=filter,
-                                preferences = self.preferences,
+                                preferences=self.preferences,
                                 initialPath=self.preferences.general.userWorkingPath,
                                 pathID=USERNEFPATH)
             dialog._show()
@@ -1876,7 +1875,8 @@ class Framework(NotifierBase):
                                 text="Export to Nef File",
                                 acceptMode=FileDialog.AcceptSave,
                                 preferences=self.preferences,
-                                selectFile=os.path.join(self.preferences.general.userWorkingPath or '~', self.project.name + '.nef'),  # new flag to populate dialog,
+                                selectFile=os.path.join(self.preferences.general.userWorkingPath or '~', self.project.name + '.nef'),
+                                # new flag to populate dialog,
                                 filter='*.nef')
 
         # an exclusion list comes out of the dialog as it
@@ -3291,14 +3291,18 @@ if __name__ == '__main__':
 
     from ccpn.framework.Framework import Framework
     from ccpn.framework.Framework import Arguments
+
+
     # from sandbox.Geerten.Refactored.framework import Framework
     # from sandbox.Geerten.Refactored.programArguments import Arguments
 
     _makeMainWindowVisible = False
 
+
     class MyProgramme(Framework):
         "My first app"
         pass
+
 
     myArgs = Arguments()
     myArgs.noGui = False
@@ -3306,7 +3310,7 @@ if __name__ == '__main__':
 
     application = MyProgramme('MyProgramme', '3.0.1', args=myArgs)
     ui = application.ui
-    ui.initialize(ui.mainWindow)                    # ui.mainWindow not needed for refactored?
+    ui.initialize(ui.mainWindow)  # ui.mainWindow not needed for refactored?
 
     if _makeMainWindowVisible:
         ui.mainWindow._updateMainWindow(newProject=True)
@@ -3315,6 +3319,7 @@ if __name__ == '__main__':
 
     # register the programme
     from ccpn.framework.Application import ApplicationContainer
+
 
     container = ApplicationContainer()
     container.register(application)
@@ -3325,7 +3330,7 @@ if __name__ == '__main__':
     # TESTNEF = '/Users/ejb66/Documents/CcpNmrData/NefTestData_1_1/CCPN_Commented_Example.nef'
     TESTNEF = '/Users/ejb66/Documents/CcpNmrData/nefTestProject.nef'
     VALIDATEDICT = '/Users/ejb66/PycharmProjects/Git/NEF/specification/mmcif_nef.dic'
-    DEFAULTNAME  ='default'
+    DEFAULTNAME = 'default'
 
     from ccpn.util.nef import NefImporter as Nef
 
@@ -3349,9 +3354,9 @@ if __name__ == '__main__':
         print(saveFrame)
 
     # create a list of which saveframes to load, with a parameters dict for each
-    loadDict = {'nef_molecular_system'      : {},
-                'nef_nmr_spectrum_cnoesy1'  : {},
-                'nef_chemical_shift_list_1' : {},
+    loadDict = {'nef_molecular_system'     : {},
+                'nef_nmr_spectrum_cnoesy1' : {},
+                'nef_chemical_shift_list_1': {},
                 }
 
     # need a project
@@ -3363,11 +3368,13 @@ if __name__ == '__main__':
 
     from ccpn.core.lib import CcpnNefIo
 
+
     nefReader = CcpnNefIo.CcpnNefReader(application)
     _loader._attachVerifier(nefReader.verifyProject)
     _loader._attachReader(nefReader.importExistingProject)
 
     from ccpn.core.lib.ContextManagers import undoBlock, notificationEchoBlocking
+
 
     with notificationEchoBlocking():
         with catchExceptions(application=application, errorStringTemplate='Error loading Nef file: %s'):
@@ -3383,10 +3390,10 @@ if __name__ == '__main__':
                 for msg in errors or ():
                     print('  >>', msg)
 
-
     print('>>~~~~~~~~~~~~~~~~~~~')
 
     import ccpn.util.nef.nef as Nef
+
 
     # NOTE:ED - by default pidList=None selects everything in the project
     # from ccpn.core.Chain import Chain
@@ -3433,8 +3440,50 @@ if __name__ == '__main__':
 
     from ccpn.util.AttrDict import AttrDict
 
+
     options = AttrDict()
-    options.ignoreCase = False
+    options.ignoreCase = True
     options.identical = False
+    options.places = 8
     result = Nef.compareDataBlocks(_loader._nefDict, localNefDict, options)
     Nef.printCompareList(result, 'LOADED', 'local')
+
+    testDict1 = {
+        "includePositiveContours": True,
+        "includeNegativeContours": True,
+        "spectrumAliasing"       : {
+            "displayFoldedContours": 'This is a string',
+            "visibleAliasingRange" : [[0, {1, 2, 3, 4, 5.00, 'More strings'}],
+                                      [0, 1000000],
+                                      ['Another string', 0]],
+            "aliasingRange"        : [[0, 0],
+                                      [0, 0],
+                                      [0, (1, 2, 3, 4, 5, 6)]]
+            },
+        "spectrumSeries"         : {
+            "spectrumSeriesItems": {
+                "SG:testGroup": 1.23
+                }
+            }
+        }
+
+    testDict2 = {
+        "includeNegativeContours": True,
+        "spectrumAliasing"       : {
+            "visibleAliasingRange" : [[0, {1, 2, 3, 4, 5.0000001, 'more strings'}],
+                                      [0, 1000000.1],
+                                      ['Another string', 0.0]],
+            "displayFoldedContours": 'this is a string',
+            "aliasingRange"        : [[0, 0],
+                                      [0, 0],
+                                      [0, (1, 2, 3, 4, 5, 6)]]
+            },
+        "spectrumSeries"         : {
+            "spectrumSeriesItems": {
+                "SG:testGroup": 1.23000001
+                }
+            },
+        "includePositiveContours": True,
+        }
+
+    print(Nef._compareObjects(testDict1, testDict2, options))

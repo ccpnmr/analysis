@@ -63,7 +63,7 @@ from ccpn.ui.gui.widgets.MessageDialog import showInfo, showWarning
 
 Qt = QtCore.Qt
 Qkeys = QtGui.QKeySequence
-DropHereLabel = 'Drop here SP or SG'
+DropHereLabel = 'Drop SP or SG here'
 # styleSheets
 transparentStyle = "background-color: transparent; border: 0px solid transparent"
 selectPipeLabel = '< Select Pipe >'
@@ -629,7 +629,10 @@ class GuiPipeline(CcpnModule, Pipeline):
     def _inputDataContextMenu(self):
         contextMenu = Menu('', self, isFloatWidget=True)
         contextMenu.addItem("Add data", callback=self._addSpectraPopup)
-        contextMenu.addItem("Clear", callback=self.inputDataList.clear)
+        contextMenu.addItem("Remove selected", callback=self.inputDataList.removeItem)
+        contextMenu.addSeparator()
+        contextMenu.addItem("Clear all", callback=self._clearInputData)
+
         return contextMenu
 
     def _createAllSettingWidgets(self):
@@ -713,6 +716,10 @@ class GuiPipeline(CcpnModule, Pipeline):
         self.inputDataList.setTexts(pids)
         self.setDataSelection()
         w.parent().reject()
+
+    def _clearInputData(self):
+        self.inputDataList.clear()
+        self.inputDataList.addItem(self._getInputDataHeaderLabel())
 
     def _addSpectraPopup(self):
         popup = CcpnDialog(parent=self.mainWindow, setLayout=True)

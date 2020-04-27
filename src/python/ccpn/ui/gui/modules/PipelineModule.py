@@ -640,6 +640,7 @@ class GuiPipeline(CcpnModule, Pipeline):
         self.pipelineReNameLabel = Label(self, 'Name')
         self.settingsWidgets.append(self.pipelineReNameLabel)
         self.pipelineReNameTextEdit = LineEdit(self, str(self.pipelineNameLabel.text()))
+        self.pipelineReNameTextEdit.editingFinished.connect(self._renamePipelineCallback)
         self.settingsWidgets.append(self.pipelineReNameTextEdit)
         #
         self.inputDataLabel = Label(self, 'Input Data')
@@ -705,10 +706,8 @@ class GuiPipeline(CcpnModule, Pipeline):
         self.settingsWidgets.append(self.applyCancelsettingButtons)
 
     def _itemsDropped(self):
-        if len(self.inputDataList.getTexts()) == 1:
-            if DropHereLabel in self.inputDataList.getTexts():
-                self.inputDataList.clear()
-                self.goButton.setEnabled(True)
+        self.setDataSelection()
+
 
     def _popupInputCallback(self, w):
         selected = w.getSelections()
@@ -780,6 +779,12 @@ class GuiPipeline(CcpnModule, Pipeline):
         self.setDataSelection()
         self._updateInputDataWidgets()
         self.pipelineName = self.pipelineNameLabel.text()
+
+    def _renamePipelineCallback(self,):
+        self.pipelineName = self.pipelineReNameTextEdit.get()
+        self.pipelineNameLabel = self.pipelineName
+        self.pipelineSettingsParams['name'] = self.pipelineName
+        self.pipelineSettingsParams['rename'] = self.pipelineName
 
     def _cancelSettingsCallBack(self):
         self._setSettingsParams()

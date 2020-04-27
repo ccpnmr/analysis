@@ -659,7 +659,8 @@ class GuiPipeline(CcpnModule, Pipeline):
         #
         self.autoLabel = Label(self, 'Auto Run')
         self.settingsWidgets.append(self.autoLabel)
-        self.autoCheckBox = CheckBox(self, )
+        self.autoCheckBox = CheckBox(self, callback=self._displayStopButton)
+        self.autoCheckBox.setEnabled(False)
         self.settingsWidgets.append(self.autoCheckBox)
         #
         self.savePipelineLabel = Label(self, 'Save in: directory path', tipText='Select path where to save your Pipeline file')
@@ -782,7 +783,7 @@ class GuiPipeline(CcpnModule, Pipeline):
 
     def _renamePipelineCallback(self,):
         self.pipelineName = self.pipelineReNameTextEdit.get()
-        self.pipelineNameLabel = self.pipelineName
+        self.pipelineNameLabel.set(self.pipelineName)
         self.pipelineSettingsParams['name'] = self.pipelineName
         self.pipelineSettingsParams['rename'] = self.pipelineName
 

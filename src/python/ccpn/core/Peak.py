@@ -699,10 +699,10 @@ class Peak(AbstractWrapperObject):
         negativeNoiseLevel = spectrum.negativeNoiseLevel
         if noiseLevel is None:
             m = 'Spectrum noise level not defined for %s' % spectrum.pid
-            getLogger()._debug1(m)
+            getLogger().debug1(m)
             return None
         if negativeNoiseLevel is None:
-            getLogger()._debug1('Spectrum negative noise level not defined %s' % spectrum.pid)
+            getLogger().debug1('Spectrum negative noise level not defined %s' % spectrum.pid)
             return None
         if self.height is None:
             # print('Peak height not defined %s' % self.pid)

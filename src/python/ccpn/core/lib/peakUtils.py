@@ -179,7 +179,7 @@ def simple1DPeakPicker(y, x, delta, negDelta=None, negative=False):
     mn, mx = Inf, -Inf
     mnpos, mxpos = NaN, NaN
     lookformax = True
-    if negDelta: negDelta = 0
+    if not negDelta: negDelta = 0
 
     for i in arange(len(y)):
         this = y[i]

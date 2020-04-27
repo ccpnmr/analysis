@@ -40,7 +40,7 @@ from ccpn.util.Logging import getLogger, _debug3
 ###   Used in setting the dictionary keys on _kwargs either in GuiPipe and Pipe
 ########################################################################################################################
 
-PipeName = 'Calculate Integrals'
+PipeName = 'Calculate Integrals 1D (experimental)'
 IntegralListIndex = 'Add_To_Integral'
 NoiseThreshold = 'Noise_Threshold'
 MinimalLineWidth = 'Minimal_LineWidth'
@@ -120,12 +120,12 @@ class CalculateAreaPipe(SpectraPipe):
 
             if len(spectrum.integralLists) > 0:
                 spectrum.integralLists[DefaultIntegralListIndex].automaticIntegral1D(minimalLineWidth=float(minimalLineWidth),
-                                                                                     noiseThreshold=positiveNoiseThreshold,
+                                                                                     noiseThreshold=float(positiveNoiseThreshold),
                                                                                      findPeak=findPeak)
 
             else:
                 integralList = spectrum.newIntegralList()
-                integralList.automaticIntegral1D(minimalLineWidth=float(minimalLineWidth), noiseThreshold=positiveNoiseThreshold,
+                integralList.automaticIntegral1D(minimalLineWidth=float(minimalLineWidth), noiseThreshold=float(positiveNoiseThreshold),
                                                  findPeak=findPeak)
 
         return spectra

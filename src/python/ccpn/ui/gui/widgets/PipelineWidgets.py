@@ -443,8 +443,19 @@ class GuiPipe(Dock, DockDrop):
             for widgetVariable in widgetVariables:
                 selected = _getWidgetByAtt(self, widgetVariable).get()
                 # getLogger().debug(selected)
+
+
                 _getWidgetByAtt(self, widgetVariable).setData(texts=[sg.pid for sg in spectrumGroups], objects=spectrumGroups,
                                                               headerText=headerText, headerEnabled=headerEnabled, headerIcon=headerIcon)
+                # Below a mechanism to autoselect spectrumGroups Pulldown based on the pid. Eg autoselect the Control SG pulldown if in the inputData there is a SG with the name Control in its pid.
+                if selected == self._pulldownSGHeaderText:
+                    texts = [sg.pid for sg in spectrumGroups]
+                    for text in texts:
+                        if len(widgetVariable.split('_'))>0:
+                            for subText in widgetVariable.split('_'):
+                                if subText in text:
+                                    selected = text
+                                    continue
                 _getWidgetByAtt(self, widgetVariable).select(selected)
 
         else:

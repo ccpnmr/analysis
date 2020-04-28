@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-04-07 00:59:26 +0100 (Tue, April 07, 2020) $"
+__dateModified__ = "$dateModified: 2020-04-28 17:19:12 +0100 (Tue, April 28, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -213,6 +213,8 @@ class GuiStrip(Frame):
         self._CcpnGLWidget._yUnits = settings[AXISYUNITS]
         self._CcpnGLWidget._aspectRatioMode = settings[AXISASPECTRATIOMODE]
         self._CcpnGLWidget._aspectRatios = deepcopy(settings[AXISASPECTRATIOS])
+        self._CcpnGLWidget._applyXLimit = self._preferences.zoomXLimitApply
+        self._CcpnGLWidget._applyYLimit = self._preferences.zoomYLimitApply
 
         # self._CcpnGLWidget._doubleCrosshairVisible = self._preferences.showDoubleCrosshair
 

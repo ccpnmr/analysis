@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-04-27 19:41:26 +0100 (Mon, April 27, 2020) $"
+__dateModified__ = "$dateModified: 2020-04-28 18:35:15 +0100 (Tue, April 28, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -4378,7 +4378,8 @@ class CcpnNefReader:
             if parameters['shortName'] == coreConstants.defaultNmrChainCode:
                 result = project.getNmrChain(coreConstants.defaultNmrChainCode)
             else:
-                result = creatorFunc(**parameters)
+                name = parameters['shortName']
+                result = creatorFunc(name)
                 # shortName.translate(Pid.remapSeparators))
             if result:
                 # warning as already exists

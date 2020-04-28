@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-03-26 12:02:35 +0000 (Thu, March 26, 2020) $"
+__dateModified__ = "$dateModified: 2020-04-28 17:00:32 +0100 (Tue, April 28, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -281,7 +281,7 @@ class GuiTableStructure(GuiTable):
     def __init__(self, *args, **kwargs):
         super(GuiTableStructure, self).__init__(*args, **kwargs)
 
-    def _selectionTableCallback(self, itemSelection):
+    def _selectionTableCallback(self, itemSelection, mouseDrag=True):
         with self._tableBlockSignals('_selectionTableCallback'):
 
             rowList = self.getSelectedRows()

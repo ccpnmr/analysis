@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-03-16 17:52:18 +0000 (Mon, March 16, 2020) $"
+__dateModified__ = "$dateModified: 2020-04-28 17:00:32 +0100 (Tue, April 28, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -1394,7 +1394,7 @@ def pdb2df(filename: str) -> pd.DataFrame:
             dfs = df
         else:
             dfs = dfs.append(df)
-    dfs['idx'] = pd.np.arange(dfs.shape[0]) + 1
+    dfs['idx'] = numpy.arange(dfs.shape[0]) + 1
     dfs.set_index('idx', inplace=True)
     return dfs
 

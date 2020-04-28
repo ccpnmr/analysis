@@ -3447,7 +3447,7 @@ if __name__ == '__main__':
     options.almostEqual = True
     options.places = 8
     result = Nef.compareDataBlocks(_loader._nefDict, localNefDict, options)
-    Nef.printCompareList(result, 'LOADED', 'local')
+    Nef.printCompareList(result, 'LOADED', 'local', options)
 
     # set up a test dict
     testDict1 = {

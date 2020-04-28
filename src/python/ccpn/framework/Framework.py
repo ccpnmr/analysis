@@ -3445,7 +3445,7 @@ if __name__ == '__main__':
     options.identical = False
     options.ignoreCase = True
     options.almostEqual = True
-    options.maxRows = 0
+    options.maxRows = 5
     options.places = 8
     result = Nef.compareDataBlocks(_loader._nefDict, localNefDict, options)
     Nef.printCompareList(result, 'LOADED', 'local', options)

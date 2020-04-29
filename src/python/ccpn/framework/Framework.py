@@ -3509,3 +3509,11 @@ if __name__ == '__main__':
 
     print(Nef._compareObjects(testDict1, testDict2, options))
     print(Nef._compareObjects('testing a string', 'Testing a string', options))
+
+    print('{} {}'.format(testDict1, testDict2))
+
+    import re
+
+    pos = re.search('[<>]', str(testDict2), re.MULTILINE)
+    if pos:
+        print("Error: data cannot contain xml tags '{}' at pos {}".format(pos.group(), pos.span()))

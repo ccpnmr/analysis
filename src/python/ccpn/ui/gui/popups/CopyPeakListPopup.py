@@ -76,6 +76,7 @@ class CopyPeakListPopup(CcpnDialogMainWidget):
     def _copyPeakListToSpectrum(self):
         if self.sourcePeakList is not None:
             try:
+                self.project.blankNotification()
                 if self.targetSpectrum is not None:
                     self.sourcePeakList.copyTo(self.targetSpectrum)
 
@@ -84,6 +85,8 @@ class CopyPeakListPopup(CcpnDialogMainWidget):
                 showWarning(str(self.windowTitle()), str(es))
                 if self.application._isInDebugMode:
                     raise es
+            finally:
+                self.project.unblankNotification()
 
     def _populateSourcePeakListPullDown(self):
         """Populate the pulldown with the list of spectra in the project
@@ -119,13 +122,18 @@ class CopyPeakListPopup(CcpnDialogMainWidget):
             # print('Selected defaultPeakList: "current.peak.peakList" ',defaultPeakList) #Testing statement to be deleted
             return
         if self.application.current.strip is not None and not self.application.current.strip.isDeleted:
-            defaultPeakList = self.application.current.strip.spectra[0].peakLists[-1]
+            if len(self.application.current.strip.spectra[0].peakLists)>0:
+                defaultPeakList = self.application.current.strip.spectra[0].peakLists[-1]
+            else:
+                defaultPeakList = self.application.current.strip.spectra[0].newPeakList()
             self.sourcePeakListPullDown.select(defaultPeakList.pid)
             # print('Selected defaultPeakList: "current.strip.spectra[0].peakLists[-1]" ', defaultPeakList)  #Testing statement to be deleted
             return
         else:
-            defaultPeakList = self.project.spectra[0].peakLists[-1]
-            self.sourcePeakListPullDown.select(defaultPeakList.pid)
+            # why this else!
+            if len(self.project.peakLists)>0:
+                defaultPeakList = self.project.peakLists[0]
+                self.sourcePeakListPullDown.select(defaultPeakList.pid)
             # print('Selected defaultPeakList: "self.project.spectra[0].peakLists[-1]" ', defaultPeakList) #Testing statement to be deleted
             return
 

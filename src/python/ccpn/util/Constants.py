@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-02-05 15:54:09 +0000 (Wed, February 05, 2020) $"
-__version__ = "$Revision: 3.0.0 $"
+__dateModified__ = "$dateModified: 2020-04-29 15:21:46 +0100 (Wed, April 29, 2020) $"
+__version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -30,6 +30,7 @@ import re
 from collections import namedtuple
 from collections import OrderedDict
 
+ERRORSTRING = 'BADVALUE'
 MOUSEDICTSTRIP = 'strip'
 AXIS_MATCHATOMTYPE = 0
 AXIS_FULLATOMNAME = 1

@@ -52,7 +52,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-04-15 16:34:23 +0100 (Wed, April 15, 2020) $"
+__dateModified__ = "$dateModified: 2020-04-29 15:21:46 +0100 (Wed, April 29, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -1738,8 +1738,6 @@ assignmentTolerances
 
         seriesItems = self.getParameter(SPECTRUMSERIES, SPECTRUMSERIESITEMS)
 
-        # clear the original value because updating a dict doesn't register a change in the api
-        self.setParameter(SPECTRUMSERIES, SPECTRUMSERIESITEMS, None)
         if seriesItems:
             seriesItems[spectrumGroup.pid] = item
         else:

@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-04-17 16:48:35 +0100 (Fri, April 17, 2020) $"
+__dateModified__ = "$dateModified: 2020-04-29 15:21:46 +0100 (Wed, April 29, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -48,8 +48,7 @@ from ccpn.ui.gui.widgets.Icon import Icon
 from ccpn.ui.gui.popups._GroupEditorPopupABC import _GroupEditorPopupABC
 from ccpn.ui.gui.popups.SpectrumPropertiesPopup import ColourTab, ContoursTab
 from ccpn.util.AttrDict import AttrDict
-from ccpn.util.Constants import ALL_UNITS
-
+from ccpn.util.Constants import ALL_UNITS, ERRORSTRING
 
 DEFAULTSPACING = (3, 3)
 TABMARGINS = (1, 10, 1, 5)  # l, t, r, b
@@ -134,7 +133,8 @@ class SpectrumGroupEditor(_GroupEditorPopupABC):
                 addUndoItem(undo=partial(self._updateGl, spectrumList))
 
             # call the _groupEditor _applyChanges method which sets the group items
-            super()._applyChanges()
+            if not super()._applyChanges():
+                error.errorValue = True
 
             # add a redo item to redraw these spectra
             with undoStackBlocking() as addUndoItem:
@@ -187,6 +187,12 @@ class SpectrumGroupEditor(_GroupEditorPopupABC):
         if self.seriesTab._changes:
             self._applyAllChanges(self.seriesTab._changes)
 
+        if self._spectrumGroupSeriesUnitsEdited is not None:
+            self.obj.seriesUnits = self._spectrumGroupSeriesUnitsEdited
+
+        if self._spectrumGroupSeriesTypeEdited is not None:
+            self.obj.seriesType = self._spectrumGroupSeriesTypeEdited
+
         specList = self._currentEditorState()[self.obj.id]
         for dim, specPid in enumerate(specList):
             spec = self.project.getByPid(specPid)
@@ -196,15 +202,27 @@ class SpectrumGroupEditor(_GroupEditorPopupABC):
                 self._spectrumGroupSeriesValues[dim] = self._spectrumGroupSeriesEdited[dim]
         if self._spectrumGroupSeriesEdited:
             try:
-                self.obj.series = tuple(self._spectrumGroupSeriesValues)
+
+                for ii, val in enumerate(self._spectrumGroupSeriesValues):
+                    try:
+                        tp = self.seriesTab.seriesType.getIndex()
+                        if tp == SeriesTypes.FLOAT.value:
+                            val = float(val)
+                        elif tp == SeriesTypes.INTEGER.value:
+                            val = int(val)
+                        elif tp == SeriesTypes.STRING.value:
+                            val = str(val)
+                        else:
+                            val = repr(val)
+                    except Exception as es:
+                        break
+                    else:
+                        self._spectrumGroupSeriesValues[ii] = val
+                else:
+                    self.obj.series = tuple(self._spectrumGroupSeriesValues)
+
             except Exception as es:
-                showWarning('Error settings seriesValues', str(es))
-
-        if self._spectrumGroupSeriesUnitsEdited is not None:
-            self.obj.seriesUnits = self._spectrumGroupSeriesUnitsEdited
-
-        if self._spectrumGroupSeriesTypeEdited is not None:
-            self.obj.seriesType = self._spectrumGroupSeriesTypeEdited
+                raise es
 
     GROUPEDITOR_INIT_METHOD = _groupInit
 
@@ -741,7 +759,8 @@ class SeriesFrame(Frame):
                 seriesValue = literal_eval(value)
 
         except Exception as es:
-            return partial(self._changeSpectrumSeriesValues, spectrumGroup, spectrum, dim, '<BADVALUE>')
+            # return partial(self._changeSpectrumSeriesValues, spectrumGroup, spectrum, dim, ERRORSTRING)
+            pass
 
         else:
             specValue = spectrum._getSeriesItemsById(spectrumGroup.pid)
@@ -806,9 +825,11 @@ class SeriesFrame(Frame):
                     if not literalDictCompare:
                         literalDictCompare = seriesValue
                     else:
-                        cmp = self._compareDict(literalDictCompare, seriesValue)
-                        if not cmp:
-                            errorDict = True
+                        if isinstance(literalDictCompare, dict) and isinstance(seriesValue, dict):
+                            cmp = self._compareDict(literalDictCompare, seriesValue)
+                            if not cmp:
+                                colour = INVALIDROWCOLOUR
+                                errorDict = True
 
             except Exception as es:
                 # catch exception raised by bad literals
@@ -817,6 +838,7 @@ class SeriesFrame(Frame):
 
             finally:
                 if literalTypes and len(literalTypes) > 1:
+                    colour = INVALIDROWCOLOUR
                     errorState = True
 
                 palette.setColor(editor.viewport().backgroundRole(), colour)
@@ -882,7 +904,7 @@ class SeriesFrame(Frame):
             pidList = [str(spec.pid) for spec in self._parent._defaultSpectra]
 
             revertState = (pidState != pidList) or (editName != defaultName)
-            applyState = (True if pidState else False) and (True if editName else False) and revertState
+            applyState = (True if pidState else False) and (True if editName else False) # and revertState
 
         except Exception as es:
             pass

@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-03-30 15:15:02 +0100 (Mon, March 30, 2020) $"
+__dateModified__ = "$dateModified: 2020-04-29 15:21:46 +0100 (Wed, April 29, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -30,6 +30,7 @@ import functools
 import itertools
 import operator
 import typing
+import re
 from collections import OrderedDict
 from copy import deepcopy
 from ccpn.core import _importOrder
@@ -341,6 +342,10 @@ class AbstractWrapperObject(NotifierBase):
         # self._wrappedData.__dict__['isModfied'] = True
         # self._ccpnInternalData = {}
         # self._ccpnInternalData.update(data)
+        checkXml = str(data)
+        pos = re.search('[<>]', str(checkXml), re.MULTILINE)
+        if pos:
+            raise RuntimeError("data cannot contain xml tags '{}' at pos {}".format(pos.group(), pos.span()))
         self._wrappedData.ccpnInternalData = data
 
     def getParameter(self, namespace:str, parameterName:str):
@@ -349,7 +354,7 @@ class AbstractWrapperObject(NotifierBase):
         space = data.get(namespace)
         if space is None:
             return None
-        return space.get(parameterName)
+        return deepcopy(space.get(parameterName))
 
     def hasParameter(self, namespace:str, parameterName:str):
         """Returns true if parameterName for namespace exists"""

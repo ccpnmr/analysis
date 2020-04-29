@@ -3391,11 +3391,12 @@ if __name__ == '__main__':
                 for msg in errors or ():
                     print('  >>', msg)
 
+            # NOTE:ED - need to work on this
             content = _loader._contentNef(project, _loader._nefDict, selection=None)
             if content:
                 print('Contents')
                 for k, val in content.items():
-                    print(k, val)
+                    print(k, val[1])
 
     import ccpn.util.nef.nef as Nef
 

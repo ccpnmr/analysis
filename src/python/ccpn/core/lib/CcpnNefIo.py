@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-04-29 19:40:12 +0100 (Wed, April 29, 2020) $"
+__dateModified__ = "$dateModified: 2020-04-29 20:24:58 +0100 (Wed, April 29, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -2361,6 +2361,8 @@ class CcpnNefReader:
         self.saveFrameName = None
         self.warnings = []
         self.errors = []
+        self.ccpnContent = {}       # can change this name later
+
         self.testing = testing
 
         # Map for resolving crosslinks in NEF file
@@ -2524,7 +2526,7 @@ class CcpnNefReader:
                 else:
                     result[self.saveFrameName] = content(self, project, saveFrame)
 
-        return result
+        return self.ccpnContent
 
     def importExistingProject(self, project: Project, dataBlock: StarIo.NmrDataBlock,
                          projectIsEmpty: bool = True,
@@ -2751,6 +2753,7 @@ class CcpnNefReader:
 
     def content_nef_nmr_meta_data(self, project: Project, saveFrame: StarIo.NmrSaveFrame):
         """get the contents for nef_nmr_meta_data saveFrame"""
+        self.storeContent(saveFrame, None)
         return None
 
     contents['nef_nmr_meta_data'] = content_nef_nmr_meta_data
@@ -2795,6 +2798,7 @@ class CcpnNefReader:
                     content = self.contents[tag]
                     result[tag] = content(self, project, loop)
 
+        self.storeContent(saveFrame, result)
         return result
 
     contents['nef_molecular_system'] = content_nef_molecular_system
@@ -2967,7 +2971,7 @@ class CcpnNefReader:
             chains.add(chainCode)
             residues.add((chainCode, sequenceCode, residue))
 
-        # NOTE:ED - need somewhere to put these
+        self.storeContent(loop, None)
         return (chains, residues)
 
     contents['nef_sequence'] = content_nef_sequence
@@ -3014,6 +3018,7 @@ class CcpnNefReader:
                                                   'residue_name_2', 'atom_name_2',)))
             covalentLinks.add((id1, id2))
 
+        self.storeContent(loop, None)
         return covalentLinks
 
     contents['nef_covalent_links'] = content_nef_covalent_links
@@ -3177,6 +3182,7 @@ class CcpnNefReader:
 
     def content_nef_chemical_shift_list(self, project: Project, saveFrame: StarIo.NmrSaveFrame):
         """get the contents for nef_chemical_shift_list saveFrame"""
+        self.storeContent(saveFrame, None)
         return None
 
     contents['nef_chemical_shift_list'] = content_nef_chemical_shift_list
@@ -3245,6 +3251,7 @@ class CcpnNefReader:
             nmrAtoms.add(tt)
 
         # NOTE:ED - need somewhere to put these
+        self.storeContent(loop, (nmrChains, nmrResidues, nmrAtoms))
         return (nmrChains, nmrResidues, nmrAtoms)
 
     contents['nef_chemical_shift'] = content_nef_chemical_shift
@@ -3347,6 +3354,7 @@ class CcpnNefReader:
     def content_nef_restraint_list(self, project: Project, saveFrame: StarIo.NmrSaveFrame):
         """Get the contents for nef_distance_restraint_list, nef_dihedral_restraint_list,
         nef_rdc_restraint_list and ccpn_restraint_list"""
+        self.storeContent(saveFrame, None)
         return None
 
     contents['nef_distance_restraint_list'] = content_nef_restraint_list
@@ -3461,6 +3469,7 @@ class CcpnNefReader:
                            itemLength: int = None):
         """Get the contents for nef_distance_restraint, nef_dihedral_restraint,
         nef_rdc_restraint and ccpn_restraint loops"""
+        self.storeContent(loop, None)
         return None
 
     contents['nef_distance_restraint'] = content_nef_restraint
@@ -3587,6 +3596,7 @@ class CcpnNefReader:
     verifiers['nef_nmr_spectrum'] = verify_nef_nmr_spectrum
 
     def content_nef_nmr_spectrum(self, project: Project, saveFrame: StarIo.NmrSaveFrame):
+        self.storeContent(saveFrame, None)
         return None
 
     contents['nef_nmr_spectrum'] = content_nef_nmr_spectrum
@@ -3720,6 +3730,7 @@ class CcpnNefReader:
 
     def content_ccpn_spectrum_dimension(self, spectrum: Spectrum, loop: StarIo.NmrLoop) -> dict:
         """Get the contents for ccpn_spectrum_dimension loop"""
+        self.storeContent(loop, None)
         return None
 
     contents['ccpn_spectrum_dimension'] = content_ccpn_spectrum_dimension
@@ -3798,6 +3809,7 @@ class CcpnNefReader:
 
     def content_ccpn_integral_list(self, spectrum: Spectrum,
                                 loop: StarIo.NmrLoop) -> List[IntegralList]:
+        self.storeContent(loop, None)
         return None
 
     contents['ccpn_integral_list'] = content_ccpn_integral_list
@@ -3830,6 +3842,7 @@ class CcpnNefReader:
 
     def content_ccpn_multiplet_list(self, spectrum: Spectrum,
                                  loop: StarIo.NmrLoop) -> List[MultipletList]:
+        self.storeContent(loop, None)
         return None
 
     contents['ccpn_multiplet_list'] = content_ccpn_multiplet_list
@@ -3892,6 +3905,7 @@ class CcpnNefReader:
 
     def content_ccpn_integral(self, spectrum: Spectrum,
                            loop: StarIo.NmrLoop) -> List[Integral]:
+        self.storeContent(loop, None)
         return None
 
     contents['ccpn_integral'] = content_ccpn_integral
@@ -3933,6 +3947,7 @@ class CcpnNefReader:
 
     def content_ccpn_multiplet(self, spectrum: Spectrum,
                             loop: StarIo.NmrLoop) -> List[Multiplet]:
+        self.storeContent(loop, None)
         return None
 
     contents['ccpn_multiplet'] = content_ccpn_multiplet
@@ -3970,6 +3985,7 @@ class CcpnNefReader:
 
     def content_ccpn_multiplet_peaks(self, spectrum: Spectrum,
                                   loop: StarIo.NmrLoop) -> List[Multiplet]:
+        self.storeContent(loop, None)
         return None
 
     contents['ccpn_multiplet_peaks'] = content_ccpn_multiplet_peaks
@@ -4016,6 +4032,7 @@ class CcpnNefReader:
     verifiers['ccpn_peak_cluster_list'] = verify_ccpn_peak_cluster_list
 
     def content_ccpn_peak_cluster_list(self, project: Project, saveFrame: StarIo.NmrSaveFrame):
+        self.storeContent(saveFrame, None)
         return None
 
     contents['ccpn_peak_cluster_list'] = content_ccpn_peak_cluster_list
@@ -4143,6 +4160,7 @@ class CcpnNefReader:
 
     def content_nef_peak_restraint_links(self, project: Project, saveFrame: StarIo.NmrSaveFrame):
         """Get the contents of nef_peak_restraint_links saveFrame"""
+        self.storeContent(saveFrame, None)
         return None
 
     contents['nef_peak_restraint_links'] = content_nef_peak_restraint_links
@@ -4211,7 +4229,8 @@ class CcpnNefReader:
     verifiers['nef_peak_restraint_link'] = verify_nef_peak_restraint_link
 
     def content_nef_peak_restraint_link(self, project: Project, loop: StarIo.NmrLoop):
-        """Get teh contents of nef_peak_restraint_link loop"""
+        """Get the contents of nef_peak_restraint_link loop"""
+        self.storeContent(loop, None)
         return None
 
     contents['nef_peak_restraint_link'] = content_nef_peak_restraint_link
@@ -4246,6 +4265,7 @@ class CcpnNefReader:
     verifiers['ccpn_spectrum_group'] = verify_ccpn_spectrum_group
 
     def content_ccpn_spectrum_group(self, project: Project, saveFrame: StarIo.NmrSaveFrame):
+        self.storeContent(saveFrame, None)
         return None
 
     contents['ccpn_spectrum_group'] = content_ccpn_spectrum_group
@@ -4277,6 +4297,7 @@ class CcpnNefReader:
 
     def content_ccpn_group_spectrum(self, parent: SpectrumGroup, loop: StarIo.NmrLoop):
         """Get the contents of ccpn_group_spectrum loop"""
+        self.storeContent(loop, None)
         return None
 
     contents['ccpn_group_spectrum'] = content_ccpn_group_spectrum
@@ -4311,6 +4332,7 @@ class CcpnNefReader:
     verifiers['ccpn_complex'] = verify_ccpn_complex
 
     def content_ccpn_complex(self, project: Project, saveFrame: StarIo.NmrSaveFrame):
+        self.storeContent(saveFrame, None)
         return None
 
     contents['ccpn_complex'] = content_ccpn_complex
@@ -4342,6 +4364,7 @@ class CcpnNefReader:
 
     def content_ccpn_complex_chain(self, parent: Complex, loop: StarIo.NmrLoop):
         """Get the contents of ccpn_complex_chain loop"""
+        self.storeContent(loop, None)
         return None
 
     contents['ccpn_complex_chain'] = content_ccpn_complex_chain
@@ -4378,6 +4401,7 @@ class CcpnNefReader:
     verifiers['ccpn_sample'] = verify_ccpn_sample
 
     def content_ccpn_sample(self, project: Project, saveFrame: StarIo.NmrSaveFrame):
+        self.storeContent(saveFrame, None)
         return None
 
     contents['ccpn_sample'] = content_ccpn_sample
@@ -4416,6 +4440,7 @@ class CcpnNefReader:
 
     def content_ccpn_sample_component(self, parent: Sample, loop: StarIo.NmrLoop):
         """Get the contents of ccpn_sample_component loop"""
+        self.storeContent(loop, None)
         return None
 
     contents['ccpn_sample_component'] = content_ccpn_sample_component
@@ -4505,6 +4530,7 @@ class CcpnNefReader:
     verifiers['ccpn_substance'] = verify_ccpn_substance
 
     def content_ccpn_substance(self, project: Project, saveFrame: StarIo.NmrSaveFrame):
+        self.storeContent(saveFrame, None)
         return None
 
     contents['ccpn_substance'] = content_ccpn_substance
@@ -4527,7 +4553,8 @@ class CcpnNefReader:
     verifiers['ccpn_substance_synonym'] = verify_ccpn_substance_synonym
 
     def content_ccpn_substance_synonym(self, parent: Substance, loop: StarIo.NmrLoop):
-        """Get teh contents of ccpn_substance_synonym loop"""
+        """Get the contents of ccpn_substance_synonym loop"""
+        self.storeContent(loop, None)
         return None
 
     contents['ccpn_substance_synonym'] = content_ccpn_substance_synonym
@@ -4689,6 +4716,7 @@ class CcpnNefReader:
             nmrAtoms.add((chainCode, sequenceCode, tempResidueDict.get((chainCode, sequenceCode)), name))
 
         # NOTE:ED - need somewhere to put these
+        self.storeContent(saveFrame, None)
         return (nmrChains, nmrResidues, nmrAtoms)
 
     contents['ccpn_assignment'] = content_ccpn_assignment
@@ -4744,6 +4772,7 @@ class CcpnNefReader:
     verifiers['ccpn_notes'] = verify_ccpn_notes
 
     def content_ccpn_notes(self, project: Project, saveFrame: StarIo.NmrSaveFrame):
+        self.storeContent(saveFrame, None)
         return None
 
     contents['ccpn_notes'] = content_ccpn_notes
@@ -4780,6 +4809,7 @@ class CcpnNefReader:
     verifiers['ccpn_additional_data'] = verify_ccpn_additional_data
 
     def content_ccpn_additional_data(self, project: Project, saveFrame: StarIo.NmrSaveFrame):
+        self.storeContent(saveFrame, None)
         return None
 
     contents['ccpn_additional_data'] = content_ccpn_additional_data
@@ -4803,6 +4833,7 @@ class CcpnNefReader:
     verifiers['ccpn_dataset'] = verify_ccpn_dataset
 
     def content_ccpn_dataset(self, project: Project, saveFrame: StarIo.NmrSaveFrame):
+        self.storeContent(saveFrame, None)
         return None
 
     contents['ccpn_dataset'] = content_ccpn_dataset
@@ -4856,6 +4887,16 @@ class CcpnNefReader:
     def warning(self, message: str):
         template = "WARNING in saveFrame%s\n%s"
         self.warnings.append(template % (self.saveFrameName, message))
+
+    def storeContent(self, source, objects: Optional[tuple] = None):
+        """Update the ccpnContent log with the contents of the saveFrames/loops
+        """
+        # # MUST BE SUBCLASSED
+        # raise NotImplementedError("Code error: function not implemented")
+        if source.name in self.ccpnContent:
+            self.error('Source {} already exists in content'.format(source.name), source, None)
+        else:
+            self.ccpnContent[source.name] = (source, objects)
 
     def _parametersFromLoopRow(self, row, mapping):
         parameters = {}

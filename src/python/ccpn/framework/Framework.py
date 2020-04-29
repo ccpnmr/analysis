@@ -3372,6 +3372,7 @@ if __name__ == '__main__':
     nefReader = CcpnNefIo.CcpnNefReader(application)
     _loader._attachVerifier(nefReader.verifyProject)
     _loader._attachReader(nefReader.importExistingProject)
+    _loader._attachContent(nefReader.contentNef)
 
     from ccpn.core.lib.ContextManagers import undoBlock, notificationEchoBlocking
 
@@ -3390,7 +3391,11 @@ if __name__ == '__main__':
                 for msg in errors or ():
                     print('  >>', msg)
 
-    print('>>~~~~~~~~~~~~~~~~~~~')
+            content = _loader._contentNef(project, _loader._nefDict, selection=None)
+            if content:
+                print('Contents')
+                for k, val in content.items():
+                    print(k, val)
 
     import ccpn.util.nef.nef as Nef
 
@@ -3448,31 +3453,56 @@ if __name__ == '__main__':
     options.maxRows = 5
     options.places = 8
     result = Nef.compareDataBlocks(_loader._nefDict, localNefDict, options)
-    Nef.printCompareList(result, 'LOADED', 'local', options)
+    # Nef.printCompareList(result, 'LOADED', 'local', options)
+
+    # NOTE:ED - extract information from the saveframes as sets and dicts
+    frame = _loader.getSaveFrame('ccpn_assignment')
+    if frame is not None:
+        nmrChains, nmrResidues, nmrAtoms = nefReader.content_ccpn_assignment(project, frame._nefFrame)
+        print('nmrChains: ')
+        for val in nmrChains:
+            print(val)
+        print('nmrResidues: ')
+        for val in list(nmrResidues)[:4]:
+            print(val)
+        print('nmrAtoms: ')
+        for val in list(nmrAtoms)[:4]:
+            print(val)
+
+    frame = _loader.getSaveFrame('nef_molecular_system')
+    if frame is not None:
+        data = nefReader.content_nef_molecular_system(project, frame._nefFrame)
+        chains, residues = data['nef_sequence']
+        print('chains: ')
+        for val in chains:
+            print(val)
+        print('residues: ')
+        for val in list(residues)[:4]:
+            print(val)
 
     # set up a test dict
     testDict1 = {
-        "Boolean1": True,
-        "Boolean2": True,
-        "DictOuter"       : {
-            "String1": 'This is a string',
-            "ListSet" : [[0, {1, 2, 3, 4, 5.00, 'More strings'}],
-                                      [0, 1000000],
-                                      ['Another string', 0]],
-            "nestedLists"        : [[0, 0],
-                                      [0, 1 + 2j],
-                                      [0, (1, 2, 3, 4, 5, 6), {
-                                          "nestedListsInner"        : [[0, 0],
-                                                                         [0, 1 + 2.00000001j],
-                                                                         [0, (1, 2, 3, 4, 5, 6)]],
-                                          "ListSetInner" : [[0, {1, 2, 3, 4, 5, 'more INNER strings'}],
-                                                                         [0, 1000000.0],
-                                                                         ['Another inner string', 0.0]],
-                                          "String1Inner": 'this is a inner string',
-                                          }
-                                       ]]
+        "Boolean1"  : True,
+        "Boolean2"  : True,
+        "DictOuter" : {
+            "String1"    : 'This is a string',
+            "ListSet"    : [[0, {1, 2, 3, 4, 5.00, 'More strings'}],
+                            [0, 1000000],
+                            ['Another string', 0]],
+            "nestedLists": [[0, 0],
+                            [0, 1 + 2j],
+                            [0, (1, 2, 3, 4, 5, 6), {
+                                "nestedListsInner": [[0, 0],
+                                                     [0, 1 + 2.00000001j],
+                                                     [0, (1, 2, 3, 4, 5, 6)]],
+                                "ListSetInner"    : [[0, {1, 2, 3, 4, 5, 'more INNER strings'}],
+                                                     [0, 1000000.0],
+                                                     ['Another inner string', 0.0]],
+                                "String1Inner"    : 'this is a inner string',
+                                }
+                             ]]
             },
-        "nestedDict"         : {
+        "nestedDict": {
             "nestedDictItems": {
                 "floatItem": 1.23
                 }
@@ -3480,39 +3510,39 @@ if __name__ == '__main__':
         }
 
     testDict2 = {
-        "Boolean2": True,
-        "DictOuter"       : {
-            "ListSet" : [[0, {1, 2, 3, 4, 5.00000000001, 'more strings'}],
-                                      [0, 1000000.0],
-                                      ['Another string', 0.0]],
-            "String1": 'this is a string',
-            "nestedLists"        : [[0, 0],
-                                      [0, 1 + 2.00000001j],
-                                      [0, (1, 2, 3, 4, 5, 6), {
-                                          "ListSetInner" : [[0, {1, 2, 3, 4, 5.00000001, 'more inner strings'}],
-                                                                         [0, 1000000.0],
-                                                                         ['Another inner string', 0.0]],
-                                          "String1Inner": 'this is a inner string',
-                                          "nestedListsInner"        : [[0, 0],
-                                                                         [0, 1 + 2.00000001j],
-                                                                         [0, (1, 2, 3, 4, 5, 6)]]
-                                          }
-                                       ]]
+        "Boolean2"  : True,
+        "DictOuter" : {
+            "ListSet"    : [[0, {1, 2, 3, 4, 5.00000000001, 'more strings'}],
+                            [0, 1000000.0],
+                            ['Another string', 0.0]],
+            "String1"    : 'this is a string',
+            "nestedLists": [[0, 0],
+                            [0, 1 + 2.00000001j],
+                            [0, (1, 2, 3, 4, 5, 6), {
+                                "ListSetInner"    : [[0, {1, 2, 3, 4, 5.00000001, 'more inner strings'}],
+                                                     [0, 1000000.0],
+                                                     ['Another inner string', 0.0]],
+                                "String1Inner"    : 'this is a inner string',
+                                "nestedListsInner": [[0, 0],
+                                                     [0, 1 + 2.00000001j],
+                                                     [0, (1, 2, 3, 4, 5, 6)]]
+                                }
+                             ]]
             },
-        "nestedDict"         : {
+        "nestedDict": {
             "nestedDictItems": {
                 "floatItem": 1.23000001
                 }
             },
-        "Boolean1": True,
+        "Boolean1"  : True,
         }
 
     print(Nef._compareObjects(testDict1, testDict2, options))
-    print(Nef._compareObjects('testing a string', 'Testing a string', options))
 
     print('{} {}'.format(testDict1, testDict2))
 
     import re
+
 
     pos = re.search('[<>]', str(testDict2), re.MULTILINE)
     if pos:

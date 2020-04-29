@@ -667,7 +667,7 @@ class PeakList(PMIListABC):
             maxNoiseLevel, minNoiseLevel = estimateNoiseLevel1D(y, f=useXRange, stdFactor=eNoiseThresholdFactor)
             spectrum.noiseLevel = float(maxNoiseLevel)
             spectrum.negativeNoiseLevel = float(minNoiseLevel)
-        deltaAdjustment = percentage(deltaPercent, maxNoiseLevel)
+        deltaAdjustment = percentage(deltaPercent, maxNoiseLevel) # add to GUI pipe
         maxValues, minValues = simple1DPeakPicker(y=filteredY, x=filteredX, delta=maxNoiseLevel + deltaAdjustment, negDelta=minNoiseLevel + deltaAdjustment, negative=negativePeaks)
         spectrum.noiseLevel = float(maxNoiseLevel)
         spectrum.negativeNoiseLevel = float(minNoiseLevel)
@@ -684,7 +684,7 @@ class PeakList(PMIListABC):
                 snr = peak._getSNRatio()
                 snr_ratios.append(snr)
                 peaks.append(peak)
-        if recalculateSNR:
+        if recalculateSNR: # TODO remove this
             spectrum._snr = np.mean(snr_ratios)
             if math.isnan(spectrum._snr):  #estimate from the std of all y points
                 print("SNR from Peaks is None. Using the STD of spectrum intensities" )

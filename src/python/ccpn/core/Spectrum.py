@@ -636,11 +636,12 @@ assignmentTolerances
             # # need to save the file
             # from ccpn.util.Hdf5 import convertDataToHdf5
             # convertDataToHdf5(self, value)
-
-            raise ValueError("Spectrum is not stored, cannot change file path")
+            getLogger().warning("Spectrum is not stored, cannot change file path")
+            # raise ValueError("Spectrum is not stored, cannot change file path")
 
         elif not value:
-            raise ValueError("Spectrum file path cannot be set to None")
+            getLogger().warning("Spectrum file path cannot be set to None")
+            # raise ValueError("Spectrum file path cannot be set to None")
 
         else:
             oldName = apiDataStore.dataUrl.name
@@ -678,7 +679,9 @@ assignmentTolerances
         """return a Path instance defining the absolute path of filePath
         """
         if self.filePath is None:
-            raise RuntimeError('filePath is not defined')
+            # why do we need to raise a Runtime Error! path can be None. What about simulated spectra?
+            # raise RuntimeError('filePath is not defined')
+            self.filePath = ''
         return aPath(self.filePath)
 
     @property

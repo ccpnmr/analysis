@@ -560,7 +560,7 @@ def _createSpectrumDisplay(window: Window, spectrum: Spectrum, displayAxisCodes:
 
     # Add intensity dimension for 1D if necessary
     if dataSource.numDim == 1 and len(displayAxisCodes) == 1:
-        displayAxisCodes.append('intensity')
+        displayAxisCodes+=('intensity',)
         dimensionOrdering.append(0)
 
     if dataSource.findFirstDataDim(className='SampledDataDim') is not None:

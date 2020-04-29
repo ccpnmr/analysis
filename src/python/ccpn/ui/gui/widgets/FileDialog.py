@@ -496,7 +496,7 @@ class LineEditButtonDialog(Widget):
         tipText = 'Click the icon to select'
         self.lineEdit = LineEdit(self, text=self.textLineEdit, textAlignment='l', hAlign='l', minimumWidth=100,
                                  tipText=tipText, grid=(0, 0))
-        self.lineEdit.setEnabled(False)
+        self.lineEdit.setEnabled(True)
         self.lineEdit.setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding,
                                     QtWidgets.QSizePolicy.Minimum)
         button = Button(self, text='', icon=self.openPathIcon, callback=self._openFileDialog, grid=(0, 1), hAlign='c')

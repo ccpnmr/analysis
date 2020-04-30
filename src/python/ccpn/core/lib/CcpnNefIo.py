@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-04-30 17:31:27 +0100 (Thu, April 30, 2020) $"
+__dateModified__ = "$dateModified: 2020-04-30 17:33:11 +0100 (Thu, April 30, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -3447,12 +3447,6 @@ class CcpnNefReader:
     verifiers['nef_rdc_restraint_list'] = verify_nef_restraint_list
     verifiers['ccpn_restraint_list'] = verify_nef_restraint_list
 
-    # def content_nef_restraint_list(self, project: Project, saveFrame: StarIo.NmrSaveFrame) -> dict:
-    #     """Get the contents for nef_distance_restraint_list, nef_dihedral_restraint_list,
-    #     nef_rdc_restraint_list and ccpn_restraint_list"""
-    #     self.storeContent(saveFrame, None)
-    #     return None
-
     contents['nef_distance_restraint_list'] = _contentLoops
     contents['nef_dihedral_restraint_list'] = _contentLoops
     contents['nef_rdc_restraint_list'] = _contentLoops
@@ -3550,12 +3544,6 @@ class CcpnNefReader:
     importers['nef_rdc_restraint'] = load_nef_restraint
     importers['ccpn_restraint'] = load_nef_restraint
 
-    # def verify_nef_restraint(self, restraintList: RestraintList, loop: StarIo.NmrLoop,
-    #                          itemLength: int = None):
-    #     """Serves to verify nef_distance_restraint, nef_dihedral_restraint,
-    #     nef_rdc_restraint and ccpn_restraint loops"""
-    #     pass
-
     verifiers['nef_distance_restraint'] = _noLoopVerify
     verifiers['nef_dihedral_restraint'] = _noLoopVerify
     verifiers['nef_rdc_restraint'] = _noLoopVerify
@@ -3583,13 +3571,10 @@ class CcpnNefReader:
         for row in loop.data:
             ll = [list(row.get(x) for x in y) for y in multipleAttributes.values()]
 
-            idStrings = []
             for item in zip(*ll):
                 if defaultChainCode is not None and item[0] is None:
                     # ChainCode missing - replace with default chain code
                     item = (defaultChainCode,) + item[1:]
-
-                # pid = Pid.IDSEP.join(('' if x is None else str(x)) for x in item)
 
                 result.add(item)
 

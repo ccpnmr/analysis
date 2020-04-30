@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-04-30 17:33:11 +0100 (Thu, April 30, 2020) $"
+__dateModified__ = "$dateModified: 2020-04-30 19:09:42 +0100 (Thu, April 30, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -611,7 +611,7 @@ nef2CcpnMap = {
         )),
 
     'ccpn_integral_list'             : OD((
-        ('serial', None),
+        ('serial', 'serial'),
         ('name', 'title'),
         ('symbol_colour', 'symbolColour'),
         ('text_colour', 'textColour'),
@@ -620,7 +620,7 @@ nef2CcpnMap = {
 
     'ccpn_integral'                  : OD((
         ('integral_list_serial', 'integralList.serial'),
-        ('integral_serial', None),
+        ('integral_serial', 'serial'),
 
         ('value', 'value'),
         ('value_uncertainty', 'valueError'),
@@ -642,7 +642,7 @@ nef2CcpnMap = {
         )),
 
     'ccpn_multiplet_list'            : OD((
-        ('serial', None),
+        ('serial', 'serial'),
         ('name', 'title'),
         ('symbol_colour', 'symbolColour'),
         ('text_colour', 'textColour'),
@@ -651,7 +651,7 @@ nef2CcpnMap = {
 
     'ccpn_multiplet'                 : OD((
         ('multiplet_list_serial', 'multipletList.serial'),
-        ('multiplet_serial', None),
+        ('multiplet_serial', 'serial'),
         ('height', 'height'),
         ('height_uncertainty', 'heightError'),
         ('volume', 'volume'),
@@ -3700,17 +3700,49 @@ class CcpnNefReader:
     #
     importers['nef_nmr_spectrum'] = load_nef_nmr_spectrum
 
-    # def verify_nef_nmr_spectrum(self, project: Project, saveFrame: StarIo.NmrSaveFrame):
-    #     pass
-    #
-    # verifiers['nef_nmr_spectrum'] = verify_nef_nmr_spectrum
+    def verify_nef_nmr_spectrum(self, project: Project, saveFrame: StarIo.NmrSaveFrame):
+        dimensionTransferTags = ('dimension_1', 'dimension_2', 'transfer_type', 'is_indirect')
 
-    verifiers['nef_nmr_spectrum'] = partial(_verifyLoops, addLoopAttribs=['num_dimensions'])
+        # Get ccpn-to-nef mapping for saveframe
+        category = saveFrame['sf_category']
+        framecode = saveFrame['sf_framecode']
+        mapping = nef2CcpnMap[category]
 
-    # def content_nef_nmr_spectrum(self, project: Project, saveFrame: StarIo.NmrSaveFrame) -> Optional[dict]:
-    #     self.storeContent(saveFrame, None)
-    #     return None
+        # Get peakList parameters and make peakList
+        peakListParameters, dummy = self._parametersFromSaveFrame(saveFrame, mapping)
 
+        # Get spectrum parameters
+        spectrumParameters, loopNames = self._parametersFromSaveFrame(saveFrame, mapping,
+                                                                      ccpnPrefix='spectrum')
+
+        # Get name from spectrum parameters, or from the framecode
+        spectrumName = framecode[len(category) + 1:]
+        if spectrumName.endswith('`'):
+            peakListSerial = peakListParameters.get('serial')
+            if peakListSerial:
+                ss = '`%s`' % peakListSerial
+                # Remove peakList serial suffix (which was added for disambiguation)
+                # So that multiple peakLists all go to one Spectrum
+                if spectrumName.endswith(ss):
+                    spectrumName = spectrumName[:-len(ss)]
+            else:
+                ll = spectrumName.rsplit('`', 2)
+                if len(ll) == 3:
+                    # name is of form abc`xyz`
+                    try:
+                        peakListParameters['serial'] = int(ll[1])
+                    except ValueError:
+                        pass
+                    else:
+                        spectrumName = ll[0]
+
+        spectrum = project.getSpectrum(spectrumName)
+        if spectrum is not None:
+            self.error('nef_nmr_spectrum - Spectrum {} already exists'.format(spectrum), saveFrame, (spectrum,))
+
+        self._verifyLoops(project, saveFrame, num_dimensions=saveFrame['num_dimensions'])
+
+    verifiers['nef_nmr_spectrum'] = verify_nef_nmr_spectrum
     contents['nef_nmr_spectrum'] = partial(_contentLoops, addLoopAttribs=['num_dimensions'])
 
     def read_nef_spectrum_dimension_transfer(self, loop: StarIo.NmrLoop):
@@ -3912,7 +3944,7 @@ class CcpnNefReader:
         for row in loop.data:
             parameters = self._parametersFromLoopRow(row, map2)
             integralList = creatorFunc(**parameters)
-            integralList.resetSerial(row['serial'])
+            # integralList.resetSerial(row['serial'])
             # NB former call was BROKEN!
             # modelUtil.resetSerial(integralList, row['serial'], 'integralLists')
             result.append(integralList)
@@ -3940,7 +3972,7 @@ class CcpnNefReader:
         for row in loop.data:
             parameters = self._parametersFromLoopRow(row, map2)
             multipletList = creatorFunc(**parameters)
-            multipletList.resetSerial(row['serial'])
+            # multipletList.resetSerial(row['serial'])
             # NB former call was BROKEN!
             # modelUtil.resetSerial(multipletList, row['serial'], 'multipletLists')
             result.append(multipletList)
@@ -3993,7 +4025,7 @@ class CcpnNefReader:
             if row['point_limits']:
                 integral.pointLimits = eval(row['point_limits'])
 
-            integral.resetSerial(row['integral_serial'])
+            # integral.resetSerial(row['integral_serial'])
             # NB former call was BROKEN!
             # modelUtil.resetSerial(integral, row['integral_serial'], 'integrals')
             mPeak = row['ccpn_linked_peak']
@@ -4032,7 +4064,7 @@ class CcpnNefReader:
         map2 = dict(item for item in mapping.items() if item[1] and '.' not in item[1])
         for row in loop.data:
             parameters = self._parametersFromLoopRow(row, map2)
-            multiplet = serial2creatorFunc[row['multiplet_list_serial']](**parameters)
+            multiplet = serial2creatorFunc[row['multiplet_list_serial']]()      #**parameters)
 
             if row['slopes']:
                 multiplet.slopes = eval(row['slopes'])
@@ -4041,7 +4073,7 @@ class CcpnNefReader:
             if row['point_limits']:
                 multiplet.pointLimits = eval(row['point_limits'])
 
-            multiplet.resetSerial(row['multiplet_serial'])
+            # multiplet.resetSerial(row['multiplet_serial'])
             result.append(multiplet)
 
         return result
@@ -4081,7 +4113,9 @@ class CcpnNefReader:
             mlList = [ml for ml in spectrum.multipletLists if ml.serial == mList]
             mlts = [mt for ml in mlList for mt in ml.multiplets if mt.serial == mSerial]
             peak = spectrum.project.getByPid(mPeak)
-            if mlts and peak:
+
+            # NOTE:ED - there is a problem with cross-spectra peaks
+            if mlts and peak and peak not in mlts[0].peaks:
                 mlts[0].addPeaks(peak)
 
     importers['ccpn_multiplet_peaks'] = load_ccpn_multiplet_peaks
@@ -4276,7 +4310,9 @@ class CcpnNefReader:
 
                 # pid = Pid.IDSEP.join(('' if x is None else str(x)) for x in item)
 
-                result.add(item)
+                if any(x is not None for x in item):
+                    # ignore peaks that ar not defined
+                    result.add(item)
 
         return result
 

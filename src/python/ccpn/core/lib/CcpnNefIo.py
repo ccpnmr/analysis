@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-04-30 17:04:08 +0100 (Thu, April 30, 2020) $"
+__dateModified__ = "$dateModified: 2020-04-30 17:06:19 +0100 (Thu, April 30, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -3217,7 +3217,7 @@ class CcpnNefReader:
 
         # store the name of the chemicalShiftList
         name = framecode[len(category) + 1:]
-        result = {category: {name}}
+        result = {category: OrderedSet([name])}
 
         self._contentLoops(project, saveFrame)
         self.updateContent(saveFrame, result)

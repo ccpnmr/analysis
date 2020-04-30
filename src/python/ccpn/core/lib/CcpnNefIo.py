@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-04-30 17:06:19 +0100 (Thu, April 30, 2020) $"
+__dateModified__ = "$dateModified: 2020-04-30 17:31:27 +0100 (Thu, April 30, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -3391,15 +3391,61 @@ class CcpnNefReader:
     importers['nef_rdc_restraint_list'] = load_nef_restraint_list
     importers['ccpn_restraint_list'] = load_nef_restraint_list
 
-    # def verify_nef_restraint_list(self, project: Project, saveFrame: StarIo.NmrSaveFrame):
-    #     """Serves to verify nef_distance_restraint_list, nef_dihedral_restraint_list,
-    #     nef_rdc_restraint_list and ccpn_restraint_list"""
-    #     pass
+    def verify_nef_restraint_list(self, project: Project, saveFrame: StarIo.NmrSaveFrame):
+        """Serves to verify nef_distance_restraint_list, nef_dihedral_restraint_list,
+        nef_rdc_restraint_list and ccpn_restraint_list"""
+        # Get ccpn-to-nef mapping for saveframe
+        category = saveFrame['sf_category']
+        framecode = saveFrame['sf_framecode']
+        mapping = nef2CcpnMap[category]
 
-    verifiers['nef_distance_restraint_list'] = _verifyLoops
-    verifiers['nef_dihedral_restraint_list'] = _verifyLoops
-    verifiers['nef_rdc_restraint_list'] = _verifyLoops
-    verifiers['ccpn_restraint_list'] = _verifyLoops
+        parameters, loopNames = self._parametersFromSaveFrame(saveFrame, mapping)
+
+        if category == 'nef_distance_restraint_list':
+            restraintType = 'Distance'
+        elif category == 'nef_dihedral_restraint_list':
+            restraintType = 'Dihedral'
+        elif category == 'nef_rdc_restraint_list':
+            restraintType = 'Rdc'
+        else:
+            restraintType = saveFrame.get('restraint_type')
+            if not restraintType:
+                self.warning("Missing restraint_type for saveFrame %s - value was %s" %
+                             (framecode, restraintType))
+                return
+        parameters['restraintType'] = restraintType
+        namePrefix = restraintType[:3].capitalize() + '-'
+
+        # Get name from framecode, add type disambiguation, and correct for ccpn dataSetSerial addition
+        name = framecode[len(category) + 1:]
+        dataSetSerial = saveFrame.get('ccpn_dataset_serial')
+        if dataSetSerial is not None:
+            ss = '`%s`' % dataSetSerial
+            if name.startswith(ss):
+                name = name[len(ss):]
+
+        # ejb - need to remove the rogue `n` at the beginning of the name if it exists
+        #       as it is passed into the namespace and gets added iteratively every save
+        #       next three lines remove all occurrences of `n` from name
+        import re
+
+        regex = u'\`\d*`+?'
+        name = re.sub(regex, '', name)  # substitute with ''
+
+        # Make main object
+        dataSet = self.getDataSet(dataSetSerial)
+        if dataSet is not None:
+            # find the restraintList
+            restraint = dataSet.getRestraintList(name)
+            if restraint is not None:
+                self.error('nef_restraint_list - RestraintList {} already exists'.format(restraint), saveFrame, (restraint,))
+
+        self._verifyLoops(project, saveFrame, name=name)
+
+    verifiers['nef_distance_restraint_list'] = verify_nef_restraint_list
+    verifiers['nef_dihedral_restraint_list'] = verify_nef_restraint_list
+    verifiers['nef_rdc_restraint_list'] = verify_nef_restraint_list
+    verifiers['ccpn_restraint_list'] = verify_nef_restraint_list
 
     # def content_nef_restraint_list(self, project: Project, saveFrame: StarIo.NmrSaveFrame) -> dict:
     #     """Get the contents for nef_distance_restraint_list, nef_dihedral_restraint_list,
@@ -5279,6 +5325,18 @@ class CcpnNefReader:
                 self._dataSet2ItemMap[dataSet] = dataSet._getTempItemMap()
         #
         return dataSet
+
+    def getDataSet(self, serial: int = None):
+        """Get the required DataSet with given serial.
+        If input is None, use self.defaultDataSetSerial
+        If that too is None, create a new DataSet and use its serial as the default
+
+        NB when reading, all DataSets with known serials should be instantiated BEFORE calling
+        with input None"""
+
+        if serial is None:
+            serial = self.defaultDataSetSerial or 1
+        return self.project.getDataSet('dataset_{}'.format(serial))
 
 
 def createSpectrum(project: Project, spectrumName: str, spectrumParameters: dict,

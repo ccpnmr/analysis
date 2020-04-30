@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-04-30 16:41:39 +0100 (Thu, April 30, 2020) $"
+__dateModified__ = "$dateModified: 2020-04-30 17:04:08 +0100 (Thu, April 30, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -2825,7 +2825,27 @@ class CcpnNefReader:
     #
     importers['nef_molecular_system'] = load_nef_molecular_system
     verifiers['nef_molecular_system'] = _verifyLoops
-    contents['nef_molecular_system'] = _contentLoops
+
+    def content_nef_molecular_system(self, project: Project, saveFrame: StarIo.NmrSaveFrame):
+        """Get the contents nef_molecular_system saveFrame"""
+        # read nmr_sequence loop
+        chainCode = 'chain_code'
+        compoundName = 'ccpn_compound_name'
+        nefSequence = 'nef_sequence'
+
+        results = {chainCode : OrderedSet(),
+                   compoundName: OrderedSet()}
+
+        mapping = nef2CcpnMap[nefSequence]
+        map2 = dict(item for item in mapping.items() if item[1] and '.' not in item[1])
+        for row in saveFrame[nefSequence].data:
+            results[chainCode].add(row[chainCode])
+            results[compoundName].add(row[compoundName])
+
+        self._contentLoops(project, saveFrame)
+        self.updateContent(saveFrame, results)
+
+    contents['nef_molecular_system'] = content_nef_molecular_system
 
     def load_nef_sequence(self, project: Project, loop: StarIo.NmrLoop):
         """Load nef_sequence loop"""
@@ -2990,7 +3010,8 @@ class CcpnNefReader:
             chainCode = row['chain_code']
             sequenceCode = row['sequence_code']
             residue = row['residue_name']
-            residues.add((chainCode, sequenceCode, residue))
+            compoundName = row['ccpn_compound_name']
+            residues.add((chainCode, sequenceCode, residue, compoundName))
 
         return residues
 

@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-04-30 19:09:42 +0100 (Thu, April 30, 2020) $"
+__dateModified__ = "$dateModified: 2020-04-30 19:09:51 +0100 (Thu, April 30, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -4311,7 +4311,7 @@ class CcpnNefReader:
                 # pid = Pid.IDSEP.join(('' if x is None else str(x)) for x in item)
 
                 if any(x is not None for x in item):
-                    # ignore peaks that ar not defined
+                    # ignore peaks that are not defined
                     result.add(item)
 
         return result

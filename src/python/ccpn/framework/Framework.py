@@ -3386,18 +3386,29 @@ if __name__ == '__main__':
             if not (warnings or errors):
                 _loader._importNef(project, _loader._nefDict, selection=None)
             else:
-                for msg in warnings or ():
-                    print('  >>', msg)
-                for msg in errors or ():
-                    print('  >>', msg)
+                # for msg in warnings or ('','',''):
+                #     print('  >>', msg)
+                for msg in errors or ('', '', ''):
+                    print(msg[0])
 
             # NOTE:ED - need to work on this
-            content = _loader._contentNef(project, _loader._nefDict, selection=None)
+            content, result = _loader._contentNef(project, _loader._nefDict, selection=None)
             if content:
-                print('Contents')
-                for k, val in content.items():
-                    print(k, val[1])
-
+                for k, (frame, val) in content.items():
+                    leader = k + ':' + frame.category + ' - '
+                    leaderSpace = ' ' * len(leader)
+                    items = val.items() or [('NODICT', set())]
+                    for name, thisSet in items:
+                        leaderName = name + ' - '
+                        leaderNameSpace = ' ' * len(leaderName)
+                        viewList = list(thisSet or ['empty'])
+                        CMAX = 8
+                        for cCount, v in enumerate(viewList[:CMAX]):
+                            print('{}{}{}'.format(leader, leaderName,
+                                                  v if cCount < (CMAX - 1) else
+                                                  '... {} more'.format(len(viewList) - CMAX - 1)))
+                            leader = leaderSpace
+                            leaderName = leaderNameSpace
     import ccpn.util.nef.nef as Nef
 
 
@@ -3456,30 +3467,30 @@ if __name__ == '__main__':
     result = Nef.compareDataBlocks(_loader._nefDict, localNefDict, options)
     # Nef.printCompareList(result, 'LOADED', 'local', options)
 
-    # NOTE:ED - extract information from the saveframes as sets and dicts
-    frame = _loader.getSaveFrame('ccpn_assignment')
-    if frame is not None:
-        nmrChains, nmrResidues, nmrAtoms = nefReader.content_ccpn_assignment(project, frame._nefFrame)
-        print('nmrChains: ')
-        for val in nmrChains:
-            print(val)
-        print('nmrResidues: ')
-        for val in list(nmrResidues)[:4]:
-            print(val)
-        print('nmrAtoms: ')
-        for val in list(nmrAtoms)[:4]:
-            print(val)
-
-    frame = _loader.getSaveFrame('nef_molecular_system')
-    if frame is not None:
-        data = nefReader.content_nef_molecular_system(project, frame._nefFrame)
-        chains, residues = data['nef_sequence']
-        print('chains: ')
-        for val in chains:
-            print(val)
-        print('residues: ')
-        for val in list(residues)[:4]:
-            print(val)
+    # # NOTE:ED - extract information from the saveframes as sets and dicts
+    # frame = _loader.getSaveFrame('ccpn_assignment')
+    # if frame is not None:
+    #     nmrChains, nmrResidues, nmrAtoms = nefReader.content_ccpn_assignment(project, frame._nefFrame)
+    #     print('nmrChains: ')
+    #     for val in nmrChains:
+    #         print(val)
+    #     print('nmrResidues: ')
+    #     for val in list(nmrResidues)[:4]:
+    #         print(val)
+    #     print('nmrAtoms: ')
+    #     for val in list(nmrAtoms)[:4]:
+    #         print(val)
+    #
+    # frame = _loader.getSaveFrame('nef_molecular_system')
+    # if frame is not None:
+    #     data = nefReader.content_nef_molecular_system(project, frame._nefFrame)
+    #     chains, residues = data['nef_sequence']
+    #     print('chains: ')
+    #     for val in chains:
+    #         print(val)
+    #     print('residues: ')
+    #     for val in list(residues)[:4]:
+    #         print(val)
 
     # set up a test dict
     testDict1 = {

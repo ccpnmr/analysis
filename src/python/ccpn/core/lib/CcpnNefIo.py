@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-05-01 22:41:43 +0100 (Fri, May 01, 2020) $"
+__dateModified__ = "$dateModified: 2020-05-01 23:33:40 +0100 (Fri, May 01, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -4452,19 +4452,7 @@ class CcpnNefReader:
 
     #
     importers['nef_peak_restraint_links'] = load_nef_peak_restraint_links
-
-    # def verify_nef_peak_restraint_links(self, project: Project, saveFrame: StarIo.NmrSaveFrame):
-    #     """verify nef_peak_restraint_links saveFrame"""
-    #     pass
-    #
-    # verifiers['nef_peak_restraint_links'] = verify_nef_peak_restraint_links
     verifiers['nef_peak_restraint_links'] = _verifyLoops
-
-    # def content_nef_peak_restraint_links(self, project: Project, saveFrame: StarIo.NmrSaveFrame):
-    #     """Get the contents of nef_peak_restraint_links saveFrame"""
-    #     self.storeContent(saveFrame, None)
-    #     return None
-
     contents['nef_peak_restraint_links'] = _contentLoops
 
     def load_nef_peak_restraint_link(self, project: Project, loop: StarIo.NmrLoop):
@@ -4523,18 +4511,7 @@ class CcpnNefReader:
 
     #
     importers['nef_peak_restraint_link'] = load_nef_peak_restraint_link
-
-    # def verify_nef_peak_restraint_link(self, project: Project, loop: StarIo.NmrLoop):
-    #     """verify nef_peak_restraint_link loop"""
-    #     pass
-
     verifiers['nef_peak_restraint_link'] = _noLoopVerify
-
-    # def content_nef_peak_restraint_link(self, project: Project, loop: StarIo.NmrLoop):
-    #     """Get the contents of nef_peak_restraint_link loop"""
-    #     self.storeContent(loop, None)
-    #     return None
-
     contents['nef_peak_restraint_link'] = _noLoopContent
 
     def load_ccpn_spectrum_group(self, project: Project, saveFrame: StarIo.NmrSaveFrame):
@@ -4561,17 +4538,36 @@ class CcpnNefReader:
     #
     importers['ccpn_spectrum_group'] = load_ccpn_spectrum_group
 
-    # def verify_ccpn_spectrum_group(self, project: Project, saveFrame: StarIo.NmrSaveFrame):
-    #     pass
-    #
-    # verifiers['ccpn_spectrum_group'] = verify_ccpn_spectrum_group
-    verifiers['ccpn_spectrum_group'] = _verifyLoops
+    def verify_ccpn_spectrum_group(self, project: Project, saveFrame: StarIo.NmrSaveFrame):
+        # Get ccpn-to-nef mapping for saveframe
+        category = saveFrame['sf_category']
+        framecode = saveFrame['sf_framecode']
+        mapping = nef2CcpnMap[category]
 
-    # def content_ccpn_spectrum_group(self, project: Project, saveFrame: StarIo.NmrSaveFrame):
-    #     self.storeContent(saveFrame, None)
-    #     return None
+        parameters, loopNames = self._parametersFromSaveFrame(saveFrame, mapping)
 
-    contents['ccpn_spectrum_group'] = _contentLoops
+        # Make main object
+        result = project.getSpectrumGroup(parameters['name'])
+        if result is not None:
+            self.error('ccpn_spectrum_group - SpectrumGroup {} already exists'.format(result), saveFrame, (result,))
+
+            self._verifyLoops(result, saveFrame)
+
+    verifiers['ccpn_spectrum_group'] = verify_ccpn_spectrum_group
+
+    def content_ccpn_spectrum_group(self, project: Project, saveFrame: StarIo.NmrSaveFrame):
+        """Get the contents of ccpn_spectrum_group saveFrame"""
+        category = saveFrame['sf_category']
+        framecode = saveFrame['sf_framecode']
+
+        # store the name of the chemicalShiftList
+        name = framecode[len(category) + 1:]
+        result = {category: OrderedSet([name])}
+
+        self._contentLoops(project, saveFrame)
+        self.updateContent(saveFrame, result)
+
+    contents['ccpn_spectrum_group'] = content_ccpn_spectrum_group
 
     def load_ccpn_group_spectrum(self, parent: SpectrumGroup, loop: StarIo.NmrLoop):
         """load ccpn_group_spectrum loop"""
@@ -4592,18 +4588,25 @@ class CcpnNefReader:
     #
     importers['ccpn_group_spectrum'] = load_ccpn_group_spectrum
 
-    # def verify_ccpn_group_spectrum(self, parent: SpectrumGroup, loop: StarIo.NmrLoop):
-    #     """verify ccpn_group_spectrum loop"""
-    #     pass
+    def verify_ccpn_group_spectrum(self, parent: SpectrumGroup, loop: StarIo.NmrLoop):
+        """verify ccpn_group_spectrum loop"""
+        for row in loop.data:
+            spectrum = self.project.getSpectrum(row.get('nmr_spectrum_id'))
+            if spectrum is not None:
+                self.error('ccpn_group_spectrum - SpectrumGroup contains {}'.format(spectrum), loop, (spectrum,))
 
-    verifiers['ccpn_group_spectrum'] = _noLoopVerify
+    verifiers['ccpn_group_spectrum'] = verify_ccpn_group_spectrum
 
-    # def content_ccpn_group_spectrum(self, parent: SpectrumGroup, loop: StarIo.NmrLoop):
-    #     """Get the contents of ccpn_group_spectrum loop"""
-    #     self.storeContent(loop, None)
-    #     return None
+    def content_ccpn_group_spectrum(self, parent: SpectrumGroup, loop: StarIo.NmrLoop):
+        """Get the contents of ccpn_group_spectrum loop"""
+        spectra = OrderedSet()
 
-    contents['ccpn_group_spectrum'] = _noLoopContent
+        for row in loop.data:
+            spectra.add(row.get('nmr_spectrum_id'))
+
+        return spectra
+
+    contents['ccpn_group_spectrum'] = content_ccpn_group_spectrum
 
     def load_ccpn_complex(self, project: Project, saveFrame: StarIo.NmrSaveFrame):
 

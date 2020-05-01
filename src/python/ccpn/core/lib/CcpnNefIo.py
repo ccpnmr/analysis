@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-05-02 00:18:30 +0100 (Sat, May 02, 2020) $"
+__dateModified__ = "$dateModified: 2020-05-02 00:22:42 +0100 (Sat, May 02, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -4897,11 +4897,19 @@ class CcpnNefReader:
 
     verifiers['ccpn_substance'] = verify_ccpn_substance
 
-    # def content_ccpn_substance(self, project: Project, saveFrame: StarIo.NmrSaveFrame):
-    #     self.storeContent(saveFrame, None)
-    #     return None
+    def content_ccpn_substance(self, project: Project, saveFrame: StarIo.NmrSaveFrame):
+        """Get the contents of ccpn_substance saveFrame"""
+        category = saveFrame['sf_category']
+        framecode = saveFrame['sf_framecode']
+        mapping = nef2CcpnMap[category]
+        parameters, loopNames = self._parametersFromSaveFrame(saveFrame, mapping)
 
-    contents['ccpn_substance'] = _contentLoops
+        result = {category: OrderedSet([parameters['name']])}
+
+        self._contentLoops(project, saveFrame)
+        self.updateContent(saveFrame, result)
+
+    contents['ccpn_substance'] = content_ccpn_substance
 
     def load_ccpn_substance_synonym(self, parent: Substance, loop: StarIo.NmrLoop):
         """load ccpn_substance_synonym loop"""

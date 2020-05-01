@@ -166,7 +166,7 @@ from numpy import NaN, Inf, arange
 from numba import jit
 
 
-@jit(nopython=True, nogil=True)
+# @jit(nopython=True, nogil=True)
 def simple1DPeakPicker(y, x, delta, negDelta=None, negative=False):
     """
     from https://gist.github.com/endolith/250860#file-readme-md which was translated from
@@ -640,6 +640,10 @@ def snapToExtremum(peak: 'Peak', halfBoxSearchWidth: int = 3, halfBoxFitWidth: i
     numDim = dataSource.numDim
     peakDims = apiPeak.sortedPeakDims()
 
+    if numDim == 1: # testing
+        _snap1DPeakToClosestExtremum(peak, maximumLimit=1)
+        return
+
     if searchBoxMode and dataSource.numDim > 1:
         # NOTE:ED get the peakDim axisCode here and define the new half boxwidths based on the ValuePerPoint
         searchBoxWidths = getApp.preferences.general.searchBoxWidthsNd
@@ -965,3 +969,119 @@ def movePeak(peak, ppmPositions, updateHeight=True):
         if updateHeight:
             # get the interpolated height at this position
             peak.height = peak.peakList.spectrum.getHeight(ppmPositions)
+
+
+# added for pipelines
+
+
+def _1Dregions(x,y, value, lim=0.01):
+    # centre of position, peak position
+    # lim in ppm where to look left and right
+    referenceRegion = [value - lim, value + lim]
+    point1, point2 = np.max(referenceRegion), np.min(referenceRegion)
+    x_filtered = np.where((x <= point1) & (x >= point2))  # only the region of interest for the reference spectrum
+    y_filtered = y[x_filtered]
+    x_filtered = x[x_filtered]
+    return x_filtered, y_filtered
+
+def _1DregionsFromLimits(x,y, limits):
+    # centre of position, peak position
+    # lim in ppm where to look left and right
+
+    point1, point2 = np.max(limits), np.min(limits)
+    x_filtered = np.where((x <= point1) & (x >= point2))  # only the region of interest for the reference spectrum
+    y_filtered = y[x_filtered]
+    x_filtered = x[x_filtered]
+    return x_filtered, y_filtered
+
+def _snap1DPeaksToExtremaSimple(peaks, limit=0.003):
+
+    for peak in peaks: # peaks can be from diff peakLists
+        if peak is not None:
+            x = peak.peakList.spectrum.positions
+            y = peak.peakList.spectrum.intensities
+            x_filtered, y_filtered = _1Dregions(x,y, peak.position[0], lim=limit)
+            if len(y_filtered)>0:
+                idx = y_filtered.argmax()
+                peakHeight = y_filtered[idx]
+                peakPos = x[x_filtered[0][idx]] # ppm positions
+                peak.height = float(peakHeight)
+                peak.position = [float(peakPos),]
+
+def find_nearest(array, value):
+    array = np.asarray(array)
+    idx = (np.abs(array - value)).argmin()
+    return array[idx]
+
+
+def snap1DPeaksToExtrema(peaks, maximumLimit=1):
+    from ccpn.core.lib.ContextManagers import newObject, undoBlock, undoBlockWithoutSideBar, notificationEchoBlocking
+    with undoBlockWithoutSideBar():
+        with notificationEchoBlocking():
+            if len(peaks) > 0:
+                peaks[0].project.blankNotification()
+                for peak in peaks:  # peaks can be from diff peakLists
+                    if peak is not None:
+                        _snap1DPeakToClosestExtremum(peak, maximumLimit=maximumLimit)
+                peaks[0].project.unblankNotification()
+
+
+
+def _getAdjacentPeakPositions1D(peak):
+    positions = [p.position[0] for p in peak.peakList.peaks]
+    positions.sort()
+    queryPos = peak.position[0]
+    tot = len(positions)
+    idx = positions.index(queryPos)
+    previous, next = True, True
+    previousPeakPosition, nextPeakPosition = None, None
+    if idx == 0:
+        previous = False
+    if idx == tot-1:
+        next = False
+    if previous:
+        previousPeakPosition = positions[positions.index(queryPos) - 1]
+    if next:
+        nextPeakPosition = positions[positions.index(queryPos) + 1]
+    return previousPeakPosition, nextPeakPosition
+
+
+def _snap1DPeakToClosestExtremum(peak, maximumLimit=1):
+    '''
+    It snaps a peak to its closest extremum, that can be considered as a peak.
+    it uses adjacent peak positions as boundaries. However if no adjacent peaks then uses the maximumlimits.
+    Uses peak
+    :param peak: obj peak
+    :param maximumLimit: maximum tolerance left or right from the peak position (ppm)
+    '''
+    from ccpn.core.PeakList import estimateNoiseLevel1D
+    from ccpn.util.Logging import getLogger
+
+    x = peak.peakList.spectrum.positions
+    y = peak.peakList.spectrum.intensities
+    a,b = _getAdjacentPeakPositions1D(peak)
+    if not a:
+        a = peak.position[0] - maximumLimit
+    if not b:
+        b = peak.position[0] + maximumLimit
+
+    # refind maxima
+    noiseLevel = peak.peakList.spectrum.noiseLevel
+    if not noiseLevel: #estimate as you can from the spectrum
+        noiseLevel, minNoiseLevel = estimateNoiseLevel1D(y)
+
+    x_filtered, y_filtered = _1DregionsFromLimits(x,y, [a,b])
+    maxValues, minValues = simple1DPeakPicker(y_filtered, x_filtered, noiseLevel, negDelta=0, negative=False)
+    if len(maxValues)>0:
+        maxValues =np.array(maxValues)
+        positions = maxValues[:,0]
+        heights = maxValues[:,1]
+        nearestPosition = find_nearest(positions, peak.position[0])
+        nearestHeight = heights[positions == nearestPosition]
+        peak.position = [nearestPosition,]
+        peak.height = nearestHeight[0]
+    else:
+        peak.height = float(0.0)
+        if peak.comment: peak.comment = peak.comment + '.' + ' Orphan'
+        else: peak.comment = 'Orphan'
+        getLogger().info('No maxima found within tollerances for %s. Kept original positions %s' %(peak.pid, str(round(peak.position[0],3))))

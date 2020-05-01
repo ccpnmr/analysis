@@ -764,8 +764,8 @@ class PreferencesPopup(CcpnDialogMainWidget):
         self.dropFactorData.valueChanged.connect(self._queueSetDropFactor)
 
         row += 1
-        self.dropFactorLabel = Label(parent, text="1D Peak Picking Factor",tipText='Increase to filter out more', grid=(row, 0))
-        self.peakFactor1D = DoubleSpinbox(parent, grid=(row, 1), hAlign='l', decimals=1, step=0.1, min=0, max=100)
+        self.dropFactorLabel = Label(parent, text="1D Peak Picking Drop (%)",tipText='Increase to filter out more', grid=(row, 0))
+        self.peakFactor1D = DoubleSpinbox(parent, grid=(row, 1), hAlign='l', decimals=1, step=0.1, min=-100, max=100)
         self.peakFactor1D.setMinimumWidth(LineEditsMinimumWidth)
         self.peakFactor1D.valueChanged.connect(self._queueSetDropFactor1D)
 

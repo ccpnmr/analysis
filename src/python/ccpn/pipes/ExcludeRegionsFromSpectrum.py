@@ -24,13 +24,10 @@ __date__ = "$Date: 2017-05-28 10:28:42 +0000 (Sun, May 28, 2017) $"
 
 
 #### GUI IMPORTS
-from ccpn.ui.gui.widgets.PipelineWidgets import GuiPipe, commonWidgets, _getWidgetByAtt
-from ccpn.ui.gui.widgets.CheckBox import CheckBox
+from ccpn.ui.gui.widgets.PipelineWidgets import GuiPipe, _getWidgetByAtt
 from ccpn.ui.gui.widgets.ButtonList import ButtonList
-from ccpn.ui.gui.widgets.LinearRegionsPlot import TargetButtonSpinBoxes
 from ccpn.ui.gui.widgets.GLLinearRegionsPlot import GLTargetButtonSpinBoxes
 from ccpn.ui.gui.widgets.Spinbox import Spinbox
-from ccpn.ui.gui.widgets.PulldownList import PulldownList
 from ccpn.ui.gui.widgets.Icon import Icon
 from ccpn.ui.gui.widgets.Label import Label
 

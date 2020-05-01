@@ -25,7 +25,6 @@ __date__ = "$Date: 2017-05-28 10:28:42 +0000 (Sun, May 28, 2017) $"
 
 #### GUI IMPORTS
 from ccpn.ui.gui.widgets.PipelineWidgets import GuiPipe
-from ccpn.ui.gui.widgets.Button import Button
 from ccpn.ui.gui.popups.PickPeaks1DPopup import ExcludeRegions as ER
 
 #### NON GUI IMPORTS

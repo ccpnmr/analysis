@@ -24,18 +24,13 @@ __date__ = "$Date: 2017-05-28 10:28:42 +0000 (Sun, May 28, 2017) $"
 
 
 #### GUI IMPORTS
-from ccpn.ui.gui.widgets.PipelineWidgets import GuiPipe, _getWidgetByAtt
-from ccpn.ui.gui.widgets.PulldownList import PulldownList
+from ccpn.ui.gui.widgets.PipelineWidgets import GuiPipe
 from ccpn.ui.gui.widgets.Label import Label
-from ccpn.ui.gui.widgets.DoubleSpinbox import ScientificDoubleSpinBox, DoubleSpinbox
-from ccpn.ui.gui.widgets.GLLinearRegionsPlot import GLTargetButtonSpinBoxes
+from ccpn.ui.gui.widgets.DoubleSpinbox import DoubleSpinbox
 
 #### NON GUI IMPORTS
 from ccpn.framework.lib.Pipe import SpectraPipe
-from scipy import signal
-import numpy as np
-from scipy import stats
-from ccpn.util.Logging import getLogger, _debug3
+from ccpn.util.Logging import getLogger
 
 
 ########################################################################################################################

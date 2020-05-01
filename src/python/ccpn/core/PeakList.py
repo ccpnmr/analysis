@@ -375,7 +375,6 @@ class PeakList(PMIListABC):
                 currentPositions = [p.position[0] for p in self.peaks]  # don't add peaks if already there
                 pdd = percentage(peakFactor1D, noiseLevel)
                 ndd = percentage(peakFactor1D, negativeNoiseLevel)
-                print('RRRRR',peakFactor1D, noiseLevel, pdd)
                 maxValues, minValues = simple1DPeakPicker(yR,xR, noiseLevel+pdd, negDelta=negativeNoiseLevel+ndd, negative=True)
                 for position, height in maxValues+minValues:
                     if minIrange < height < maxIrange:

@@ -32,7 +32,7 @@ from ccpn.ui.gui.widgets.DoubleSpinbox import DoubleSpinbox
 from ccpn.framework.lib.Pipe import SpectraPipe
 from ccpn.pipes.lib._getNoiseLevel import _getNoiseLevelForPipe
 from ccpn.pipes.lib.AreaCalculation import _addAreaValuesToPeaks
-from ccpn.util.Logging import getLogger, _debug3
+from ccpn.util.Logging import getLogger
 
 
 ########################################################################################################################

@@ -32,6 +32,16 @@ from typing import List
 import numpy as np
 import pandas as pd
 
+def loadPipes(path):
+    '''
+    dynamic pipe importer. When called on the __init__ file inside a directory containing registered pipes,
+    they will appear inside the pipeline
+    '''
+    import pkgutil as _pkgutil
+    for loader, name, isPpkg in _pkgutil.walk_packages(path):
+        found = loader.find_module(name)
+        if found:
+            module = found.load_module(name)
 
 class Pipe(ABC):
     """

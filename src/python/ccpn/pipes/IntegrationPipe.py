@@ -32,7 +32,6 @@ from ccpn.ui.gui.widgets.CheckBox import CheckBox
 #### NON GUI IMPORTS
 from ccpn.framework.lib.Pipe import SpectraPipe
 from ccpn.pipes.lib._getNoiseLevel import _getNoiseLevelForPipe
-from ccpn.util.Logging import getLogger, _debug3
 
 
 ########################################################################################################################

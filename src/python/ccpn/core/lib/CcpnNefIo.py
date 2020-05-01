@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-05-01 21:57:28 +0100 (Fri, May 01, 2020) $"
+__dateModified__ = "$dateModified: 2020-05-01 22:41:43 +0100 (Fri, May 01, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -2757,12 +2757,13 @@ class CcpnNefReader:
             print('====> ', msg)
         self.project = None
 
-    def _verifyLoops(self, project: Project, saveFrame: StarIo.NmrSaveFrame, addLoopAttribs=None, **kwds):
+    def _verifyLoops(self, project: Project, saveFrame: StarIo.NmrSaveFrame, addLoopAttribs=None,
+                     excludeList=(), **kwds):
         """Iterate over the loops in a saveFrame, and verify contents
         """
         mapping = nef2CcpnMap[saveFrame.category]
         for tag, ccpnTag in mapping.items():
-            if ccpnTag == _isALoop:
+            if tag not in excludeList and ccpnTag == _isALoop:
                 loop = saveFrame.get(tag)
                 if loop:
                     verify = self.verifiers[tag]
@@ -3535,7 +3536,7 @@ class CcpnNefReader:
         self._contentLoops(project, saveFrame)
         self.updateContent(saveFrame, result)
 
-    contents['nef_distance_restraint_list'] = content_nef_restraint_list        # could be _contentLoops
+    contents['nef_distance_restraint_list'] = content_nef_restraint_list  # could be _contentLoops
     contents['nef_dihedral_restraint_list'] = content_nef_restraint_list
     contents['nef_rdc_restraint_list'] = content_nef_restraint_list
     contents['ccpn_restraint_list'] = content_nef_restraint_list
@@ -3834,7 +3835,10 @@ class CcpnNefReader:
             if peakList is not None:
                 self.error('nef_nmr_spectrum - PeakList {} already exists'.format(peakList), saveFrame, (peakList,))
 
-                self._verifyLoops(peakList, saveFrame, dimensionCount=saveFrame['num_dimensions'])
+                self.verify_nef_peak(peakList, saveFrame.get('nef_peak'))
+                self._verifyLoops(spectrum, saveFrame, dimensionCount=saveFrame['num_dimensions'],
+                                  excludeList=('nef_spectrum_dimension', 'ccpn_spectrum_dimension', 'nef_peak',
+                                               'nef_spectrum_dimension_transfer'))
 
     verifiers['nef_nmr_spectrum'] = verify_nef_nmr_spectrum
 
@@ -4067,7 +4071,7 @@ class CcpnNefReader:
 
     importers['ccpn_integral_list'] = load_ccpn_integral_list
 
-    def verify_ccpn_integral_list(self, spectrum: Spectrum, loop: StarIo.NmrLoop, **kwds):
+    def verify_ccpn_integral_list(self, spectrum: Spectrum, loop: StarIo.NmrLoop, peakList=None, **kwds):
         mapping = nef2CcpnMap[loop.name]
         map2 = dict(item for item in mapping.items() if item[1] and '.' not in item[1])
         creatorFunc = spectrum.getIntegralList
@@ -4100,7 +4104,7 @@ class CcpnNefReader:
 
     importers['ccpn_multiplet_list'] = load_ccpn_multiplet_list
 
-    def verify_ccpn_multiplet_list(self, spectrum: Spectrum, loop: StarIo.NmrLoop, **kwds):
+    def verify_ccpn_multiplet_list(self, spectrum: Spectrum, loop: StarIo.NmrLoop, peakList=None, **kwds):
         mapping = nef2CcpnMap[loop.name]
         map2 = dict(item for item in mapping.items() if item[1] and '.' not in item[1])
         creatorFunc = spectrum.getMultipletList

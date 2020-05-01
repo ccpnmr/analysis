@@ -30,7 +30,8 @@ from pyqtgraph.dockarea.DockArea import DockArea
 from pyqtgraph.dockarea.DockDrop import DockDrop
 from pyqtgraph.dockarea.Dock import DockLabel, Dock, VerticalLabel
 from pyqtgraph.dockarea.Container import SplitContainer
-
+from ccpn.ui.gui.widgets.Menu import Menu
+from ccpn.ui.gui.widgets.ListWidget import ListWidget
 from ccpn.ui.gui.lib.GuiGenerator import generateWidget
 from ccpn.ui.gui.widgets.Frame import Frame
 from ccpn.ui.gui.widgets.Button import Button
@@ -150,7 +151,7 @@ class _PipelineDropAreaOverlay(Widget):
             prgn = self.getParent().rect()
             rgn = QtCore.QRect(prgn)
             w = min(10, prgn.width() / 3.)
-            h = min(10, prgn.height() / 3.)
+            h = min(30, prgn.height() / 3.)
 
             if self.dropArea == 'top':
                 rgn.setHeight(h)
@@ -184,6 +185,7 @@ class PipelineDropArea(DockArea):
                           QSplitter::handle:vertical {background-color: transparent;height: 1px;}""")
 
         self.inputData = None
+        self.overlay = _PipelineDropAreaOverlay(self)
 
     @property
     def currentGuiPipes(self) -> list:
@@ -223,13 +225,60 @@ class PipelineDropArea(DockArea):
 
     def dragEnterEvent(self, ev):
         src = ev.source()
-        ev.ignore()
+
+        if isinstance(src, ListWidget) and hasattr(src, 'pipes'):
+            print('hey in the pipeline area', src.getSelectedTexts())
+            ev.accept()
+        else:
+            ev.ignore()
+
+
+
+    def dragMoveEvent(self, ev):
+        # print "drag move"
+
+        ld = ev.pos().x()
+        rd = self.width() - ld
+        td = ev.pos().y()
+        bd = self.height() - td
+
+        mn = min(ld, rd, td, bd)
+        if (ld == mn or td == mn) and mn > self.height() / 3.:
+            self.dropArea = "top"
+            # self.dropArea = "center"
+        elif (rd == mn or ld == mn) and mn > self.width() / 3.:
+            self.dropArea = "bottom"
+        elif rd == mn and td > bd:
+            self.dropArea = "bottom"
+        elif rd == mn and td < bd:
+            self.dropArea = "top"
+        elif ld == mn and td > bd:
+            self.dropArea = "bottom"
+        elif ld == mn and td < bd:
+            self.dropArea = "top"
+        elif ld == mn:
+            self.dropArea = "left"
+        elif td == mn:
+            self.dropArea = "top"
+        elif bd == mn:
+            self.dropArea = "bottom"
+
+        if ev.source() is self and self.dropArea == 'center':
+            self.dropArea = None
+            ev.ignore()
+        elif self.dropArea not in self.allowedAreas:
+            self.dropArea = None
+            ev.ignore()
+        else:
+            # print "  ok"
+            ev.accept()
+        self.overlay.setDropArea(self.dropArea)
 
     def addBox(self, box=None, position='bottom', relativeTo=None, **kwds):
         """With these settings the user can close all the boxes from the label 'close box' or pop up and
          when re-add a new box it makes sure there is a container available.
         """
-
+        print('ADDING')
         if box is None:
             box = GuiPipe(name='New GuiPipe', **kwds)
 
@@ -296,8 +345,16 @@ class PipelineDropArea(DockArea):
         for guiPipe in self.currentGuiPipes:
             guiPipe.close()
 
+class GuiPipeDrop(DockDrop):
+    """Provides dock-dropping methods"""
+    def __init__(self, allowedAreas=None):
+        DockDrop.__init__(self)
 
-class GuiPipe(Dock, DockDrop):
+    def dropEvent(self, ev):
+        print(ev, '@@@')
+        super(DockDrop, self).dropEvent(ev)
+
+class GuiPipe(Dock, GuiPipeDrop):
     preferredPipe = True
     applicationSpecificPipe = False
     pipeName = ''
@@ -423,18 +480,18 @@ class GuiPipe(Dock, DockDrop):
     def _updateLabel(self, name):
         self.label.deleteLater()  # delete original Label
         self.label = PipelineBoxLabel(name.upper(), self)
-        self.label.closeButton.clicked.connect(self._closeBox)
+        self.label.closeButton.clicked.connect(self._closePipe)
         # self.label.arrowDownButton.clicked.connect(self.moveBoxDown)
         # self.label.arrowUpButton.clicked.connect(self.moveBoxUp)
         self.moveLabel = True
         self.orientation = 'horizontal'
 
-    def closeBox(self):
+    def closePipe(self):
         self.setParent(None)
         self.label.setParent(None)
 
-    def _closeBox(self):
-        self.closeBox()
+    def _closePipe(self):
+        self.closePipe()
 
     def _setSpectrumGroupPullDowns(self, widgetVariables, headerText='', headerEnabled=False, headerIcon=None):
         ''' Used to set the spectrum groups pid in the pulldowns. Called from various guiPipes'''
@@ -509,6 +566,10 @@ class GuiPipe(Dock, DockDrop):
         self.drag = QtGui.QDrag(self)
         mime = QtCore.QMimeData()
         self.drag.setMimeData(mime)
+        dragPixmap = self.grab()
+        self.drag.setPixmap(
+            dragPixmap.scaledToWidth(128) if dragPixmap.width() < dragPixmap.height() else dragPixmap.scaledToHeight(
+                128))
         self.widgetArea.setStyleSheet(self.dragStyle)
         self.update()
         action = self.drag.exec_()
@@ -518,6 +579,10 @@ class GuiPipe(Dock, DockDrop):
         src = ev.source()
         if hasattr(src, 'implements') and src.implements('GuiPipe'):
             ev.accept()
+        elif isinstance(src, ListWidget) and hasattr(src, 'pipes'):
+            print('hey', src.getSelectedTexts())
+
+            # ev.accept()
         else:
             ev.ignore()
 
@@ -528,6 +593,7 @@ class GuiPipe(Dock, DockDrop):
         DockDrop.dragLeaveEvent(self, *args)
 
     def dropEvent(self, *args):
+        print(args, self)
         DockDrop.dropEvent(self, *args)
 
     def setActive(self, state):
@@ -640,6 +706,12 @@ class PipelineBoxLabel(DockLabel, VerticalLabel):
             self.startedDrag = False
             ev.accept()
 
+        if ev.button() == QtCore.Qt.RightButton:
+            menu = self._createContextMenu()
+            if menu:
+                menu.move(ev.globalPos().x(), ev.globalPos().y() + 10)
+                menu.exec()
+
     def mouseDoubleClickEvent(self, ev):
         if ev.button() == QtCore.Qt.LeftButton:
             pass
@@ -673,6 +745,15 @@ class PipelineBoxLabel(DockLabel, VerticalLabel):
         self.setMaximumHeight(self.hint.height())
         self.setMinimumHeight(15)
         self.setMaximumWidth(16777215)
+
+    def _createContextMenu(self):
+        contextMenu = Menu('', self, isFloatWidget=True)
+        print(self._parent)
+        contextMenu.addAction('Close', self._parent.closePipe)
+        # if len(self.module.mainWindow.moduleArea.ccpnModules) > 1:
+        #     contextMenu.addAction('Close Others', partial(self.module.mainWindow.moduleArea._closeOthers, self.module))
+        #     contextMenu.addAction('Close All', self.module.mainWindow.moduleArea._closeAll)
+        return contextMenu
 
 
 def testGuiPipe(GuiPipe):

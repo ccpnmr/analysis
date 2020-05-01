@@ -120,8 +120,10 @@ class CcpnModuleArea(ModuleArea, DropBase):
         # self.setAcceptDrops(True) GWV not needed; handled by DropBase init
 
         self.textLabel = DropAreaLabel
-        # self.fontLabel = Font('Helvetica', 36, bold=False)
-        self.fontLabel = self.mainWindow.application._fontSettings.helveticaBold36
+        if self.mainWindow:
+            self.fontLabel = self.mainWindow.application._fontSettings.helveticaBold36
+        else: #can be None. for example for testing when developing new GUI modules. Cannot crash just for a font label!
+            self.fontLabel = Font('Helvetica', 36, bold=False)
 
         colours = getColours()
         self.colourLabel = hexToRgb(colours[LABEL_FOREGROUND])

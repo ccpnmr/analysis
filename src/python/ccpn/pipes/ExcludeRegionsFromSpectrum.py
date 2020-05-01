@@ -142,11 +142,11 @@ class ExcludeRegionsGuiPipe(GuiPipe):
         #         self.count -= 1
         # getattr(self, _STORE).set(self.count)
 
-    def _closeBox(self):
+    def _closePipe(self):
         """remove the lines from plotwidget if any"""
         for row in range(self.count):
             self._deleteRegions()
-        self.closeBox()
+        self.closePipe()
 
     def restoreWidgetsState(self, **widgetsState):
         """Restore the gui params.

@@ -69,7 +69,7 @@ transparentStyle = "background-color: transparent; border: 0px solid transparent
 selectPipeLabel = '< Select Pipe >'
 preferredPipeLabel = '-- Preferred Pipes --'
 applicationPipeLabel = '-- Application Pipes --'
-otherPipeLabel = '-- Other Pipes --'
+otherPipeLabel = '-- General Pipes --'
 PipelineName = 'NewPipeline'
 PipelinePath = 'PipelinePath'
 
@@ -113,7 +113,7 @@ class GuiPipeline(CcpnModule, Pipeline):
         # this guarantees to open the module as Gui testing
         self.project = None
         self.application = None
-        self.savingDataPath = os.path.expanduser("~") + '/'
+        self.savingDataPath = ''
 
         # set project related variables
         if mainWindow is not None:
@@ -142,7 +142,7 @@ class GuiPipeline(CcpnModule, Pipeline):
         self.pipelineSettingsParams = OrderedDict([('name', 'NewPipeline'),
                                                    ('rename', 'NewPipeline'),
                                                    ('inputData', []),
-                                                   ('savePath', self.application.pipelinePath),
+                                                   ('savePath', ''),
                                                    ('autoRun', False), ('addPosit', 'bottom'),
                                                    ('autoActive', True), ])
 
@@ -274,8 +274,8 @@ class GuiPipeline(CcpnModule, Pipeline):
         self.mainLayout.addLayout(self.goAreaLayout)
         self.mainLayout.addLayout(self.pipelineAreaLayout)
         self._createSettingButtonGroup()
-        self._createPipelineWidgets()
         self._createSettingWidgets()
+        self._createPipelineWidgets()
 
     def _createSettingButtonGroup(self):
         self.nameLabel = Label(self, 'Pipeline Name:')
@@ -318,7 +318,7 @@ class GuiPipeline(CcpnModule, Pipeline):
 
     def _setDataPipesPulldown(self):
         '''Sets all the GuiPipes names on the Pulldown Pipe. Orderes by flag '''
-        self.pipePulldownData = [selectPipeLabel, ]
+        self._listPipesAsStr = [selectPipeLabel, ]
         preferredGuiPipes = [preferredPipeLabel, ]
         applicationPipes = [applicationPipeLabel, ]
         otherGuiPipes = [otherPipeLabel, ]
@@ -331,14 +331,21 @@ class GuiPipeline(CcpnModule, Pipeline):
                     applicationPipes.append(guiPipe.pipe.pipeName)
                 else:
                     otherGuiPipes.append(guiPipe.pipe.pipeName)
+        preferredGuiPipes.sort()
+        applicationPipes.sort()
+        otherGuiPipes.sort()
+        self._listPipesAsStr.extend(preferredGuiPipes)
+        self._listPipesAsStr.extend(otherGuiPipes)
+        self._listPipesAsStr.extend(applicationPipes)
 
-        self.pipePulldownData.extend(preferredGuiPipes)
-        self.pipePulldownData.extend(applicationPipes)
-        self.pipePulldownData.extend(otherGuiPipes)
-
-        self.pipePulldown.setData(self.pipePulldownData)
+        self.pipePulldown.setData(self._listPipesAsStr)
         self.pipePulldown.disableLabelsOnPullDown([preferredPipeLabel, applicationPipeLabel, otherPipeLabel], colour='red')
         self.pipePulldown.activated[str].connect(self._selectPipe)
+
+        self.pipesListWidget.addItems(self._listPipesAsStr)
+        self.pipesListWidget._disableLabels([preferredPipeLabel, applicationPipeLabel, otherPipeLabel])
+        self.pipesListWidget.pipes = [preferredGuiPipes,otherGuiPipes,applicationPipes]
+
 
     def _updatePipePulldown(self):
         if len(self.guiPipes) != len(self.pipes):
@@ -369,6 +376,7 @@ class GuiPipeline(CcpnModule, Pipeline):
 
     def _addPipelineDropArea(self):
         self.pipelineArea = PipelineDropArea()
+        self.pipelineArea.dropEvent = self._pipelineDropEvent
         scroll = ScrollArea(self)
         scroll.setWidget(self.pipelineArea)
         scroll.setWidgetResizable(True)
@@ -378,7 +386,7 @@ class GuiPipeline(CcpnModule, Pipeline):
         guiPipes = self.pipelineArea.currentGuiPipes
         if len(guiPipes) > 0:
             for guiPipe in guiPipes:
-                guiPipe._closeBox()
+                guiPipe._closePipe()
 
     def keyPressEvent(self, KeyEvent):
         ''' Run the pipeline by pressing the enter key '''
@@ -391,9 +399,26 @@ class GuiPipeline(CcpnModule, Pipeline):
         if count == 0:
             self.currentGuiPipesNames = []
         counter = collections.Counter(self.currentGuiPipesNames)
-        # return str(guiPipeName) + '-' + str(counter[str(guiPipeName)])
+        return str(guiPipeName) + '-' + str(counter[str(guiPipeName)])
 
         return str(guiPipeName)
+
+    def _pipelineDropEvent(self, ev):
+        '''
+        needed to drop from listWidget
+        '''
+
+        src = ev.source()
+        if isinstance(src, ListWidget) and hasattr(src, 'pipes'):
+            selectedList = src.getSelectedTexts()
+            for sel in selectedList:
+                guiPipeName = self._getSerialName(str(sel))
+                self._addGuiPipe(guiPipeName, sel, position=self.pipelineArea.dropArea)
+            ev.accept()
+        self.pipelineArea.dropArea = None
+        self.pipelineArea.overlay.setDropArea(self.dropArea)
+
+
 
     ####################################_________ GUI CallBacks ____________###########################################
 
@@ -403,15 +428,15 @@ class GuiPipeline(CcpnModule, Pipeline):
         self._addGuiPipe(guiPipeName, selected)
         self.pipePulldown.setIndex(0)
 
-    def _addGuiPipe(self, name, selected):
+    def _addGuiPipe(self, name, selected, position=None):
         for guiPipe in self.guiPipes:
             if guiPipe.pipeName == selected:
                 if guiPipe._alreadyOpened:
                     getLogger().warning('GuiPipe already opened. Impossible to open this pipe more then once.')
                     return
-
                 else:
-                    position = self.pipelineSettingsParams['addPosit']
+                    if not position:
+                        position = self.pipelineSettingsParams['addPosit']
                     newGuiPipe = guiPipe(parent=self, application=self.application, name=name, project=self.project)
                     self.pipelineArea.addDock(newGuiPipe, position=position)
                     autoActive = self.pipelineSettingsParams['autoActive']
@@ -602,11 +627,11 @@ class GuiPipeline(CcpnModule, Pipeline):
         self._addWidgetsToLayout(self.settingsWidgets, self.settingWidgetsLayout)
 
         # add a spacer in the bottom-right corner to stop everything moving
-        rows = self.settingsWidget.layout().rowCount()
-        cols = self.settingsWidget.layout().columnCount()
-        Spacer(self.settingsWidget, 5, 5,
-               QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding,
-               grid=(rows, cols), gridSpan=(1, 1))
+        # rows = self.settingsWidget.layout().rowCount()
+        # cols = self.settingsWidget.layout().columnCount()
+        # Spacer(self.settingsWidget, 5, 5,
+        #        QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding,
+        #        grid=(rows, cols), gridSpan=(1, 1))
 
         # self._setSettingsParams()
 
@@ -618,8 +643,8 @@ class GuiPipeline(CcpnModule, Pipeline):
         self.settingsWidget.getLayout().setAlignment(self.settingFrame, QtCore.Qt.AlignLeft)
         self.settingsWidget.getLayout().setContentsMargins(1, 1, 1, 1)
         self.settingWidgetsLayout.setContentsMargins(10, 15, 10, 10)
-        self.settingFrame.setMaximumWidth(300)
-        self._settingsScrollArea.setMaximumWidth(320)
+        self.settingFrame.setMaximumWidth(410)
+        self._settingsScrollArea.setMaximumWidth(420)
 
     def _getInputDataHeaderLabel(self):
         # color = QtGui.QColor('green')
@@ -634,6 +659,15 @@ class GuiPipeline(CcpnModule, Pipeline):
         contextMenu.addItem("Remove selected", callback=self._removeSelectedInputData)
         contextMenu.addSeparator()
         contextMenu.addItem("Clear all", callback=self._clearInputData)
+        return contextMenu
+
+    def _pipeSelectionContextMenu(self):
+        contextMenu = Menu('', self, isFloatWidget=True)
+        contextMenu.addItem("Remove selected", callback=None)
+        contextMenu.addItem("Clear all selected", callback=None)
+        contextMenu.addSeparator()
+        contextMenu.addItem("Add to pipeline ", callback=None)
+        contextMenu.addItem("Clear pipeline", callback=None)
 
         return contextMenu
 
@@ -650,15 +684,29 @@ class GuiPipeline(CcpnModule, Pipeline):
         self.inputDataList = ListWidget(self, acceptDrops=True, )
         contextMenu = self._inputDataContextMenu
         self.inputDataList.setContextMenu(contextMenu)
-
-        self.inputDataList.setMaximumHeight(200)
+        self.inputDataList.setMaximumHeight(100)
         self.inputDataList.setAcceptDrops(True)
-
         self.inputDataList.addItem(self._getInputDataHeaderLabel())
         self.settingsWidgets.append(self.inputDataList)
         # self.connect(self.inputDataList, QtCore.SIGNAL("dropped"), self._itemsDropped)
         self.inputDataList.dropped.connect(self._itemsDropped)
         #
+        # PIPES SELECTION:
+        self.pipesLabel = Label(self, 'Pipes')
+        self.pipesListWidget = ListWidget(self, acceptDrops=False, multiSelect=True, callback=self._openPipe)
+        pipesContextMenu = self._pipeSelectionContextMenu
+        self.pipesListWidget.setContextMenu(pipesContextMenu)
+        self.pipesListWidget.pipes = []
+        self.pipesListWidget.setSelectionMode(QtWidgets.QAbstractItemView.ExtendedSelection)
+        self.settingsWidgets.append(self.pipesLabel)
+        self.settingsWidgets.append(self.pipesListWidget)
+
+        self.clickToAddLabel = Label(self, 'Click to add pipe')
+        self.settingsWidgets.append(self.clickToAddLabel)
+        self.clickToAddCheckBox = CheckBox(self, callback=self._clickToAddCheckBoxCallback)
+        self.settingsWidgets.append(self.clickToAddCheckBox)
+        #
+
         self.autoLabel = Label(self, 'Auto Run')
         self.settingsWidgets.append(self.autoLabel)
         self.autoCheckBox = CheckBox(self, callback=self._displayStopButton)
@@ -711,6 +759,19 @@ class GuiPipeline(CcpnModule, Pipeline):
     def _itemsDropped(self):
         self.setDataSelection()
 
+    def _openPipe(self):
+        if self.clickToAddCheckBox.get():
+            for p in self.pipesListWidget.getSelectedTexts():
+                self._selectPipe(p)
+        # ss = self.pipesListWidget.getSelectedTexts()
+        # guiPipeName = self._getSerialName(str(ss[0]))
+        # self._addGuiPipe(guiPipeName, ss[0])
+
+    def _clickToAddCheckBoxCallback(self):
+        if self.clickToAddCheckBox.get():
+            self.pipesListWidget.setSelectionMode(QtWidgets.QAbstractItemView.SingleSelection)
+        else:
+            self.pipesListWidget.setSelectionMode(QtWidgets.QAbstractItemView.ExtendedSelection)
 
     def _popupInputCallback(self, w):
         selected = w.getSelections()

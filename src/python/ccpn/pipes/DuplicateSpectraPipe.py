@@ -83,10 +83,10 @@ class DuplicateSpectrumGuiPipe(GuiPipe):
     def _updateWidgets(self):
         pass
 
-    def _closeBox(self):
+    def _closePipe(self):
         'reset alreadyOpened flag '
         DuplicateSpectrumGuiPipe._alreadyOpened = False
-        self.closeBox()
+        self.closePipe()
 
 
 ########################################################################################################################

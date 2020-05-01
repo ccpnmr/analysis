@@ -1113,8 +1113,9 @@ class CcpnModuleLabel(DockLabel):
         getApp = getApplication()
         if getApp:
             self.setFont(getApp._fontSettings.moduleLabelFont)
-        self.labelSize = QtGui.QFontMetrics(getApp._fontSettings.moduleLabelFont).height() + 4
-
+            self.labelSize = QtGui.QFontMetrics(getApp._fontSettings.moduleLabelFont).height() + 4
+        else:
+            self.labelSize = 16
         self.setAlignment(QtCore.Qt.AlignVCenter | QtCore.Qt.AlignHCenter)
         self.closeButton.setStyleSheet('''border: 0px solid #a9a9a9;
                                           border-radius: 1px;

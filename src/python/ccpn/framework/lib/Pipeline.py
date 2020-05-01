@@ -45,12 +45,12 @@ class Pipeline(object):
         self.updateInputData = False
 
         self.application = application
-        self.current = self.application.current
-        self.preferences = self.application.preferences
-        self.ui = self.application.ui
-        self.project = self.application.project
-
-        self.mainWindow = self.ui.mainWindow
+        if self.application:
+            self.current = self.application.current
+            self.preferences = self.application.preferences
+            self.ui = self.application.ui
+            self.project = self.application.project
+            self.mainWindow = self.ui.mainWindow
 
         if pipes is not None:
             self.pipes = [cls(application=application) for cls in pipes]

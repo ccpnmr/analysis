@@ -424,6 +424,13 @@ class ListWidget(QtWidgets.QListWidget, Base):
         removeDuplicates = [self.model().removeRow(self.row(i)) for i in self.getItems() if i not in uniq]
 
 
+    def _disableLabels(self, labels):
+        items = self.getItems()
+        for item in items:
+            if item.text() in labels:
+                item.setFlags(QtCore.Qt.NoItemFlags)
+
+
 from ccpn.ui.gui.widgets.Frame import Frame
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.Icon import Icon

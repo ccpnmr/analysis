@@ -120,11 +120,11 @@ class NoiseThresholdGuiPipe(GuiPipe):
             calibrRegion.setDisabled(True)
             addStd.setDisabled(True)
 
-    def _closeBox(self):
+    def _closePipe(self):
         'remove the lines from plotwidget if any'
         _getWidgetByAtt(self, NoiseThreshold)._turnOffPositionPicking()
         _getWidgetByAtt(self, UseRegion)._turnOffPositionPicking()
-        self.closeBox()
+        self.closePipe()
 
 
 ########################################################################################################################

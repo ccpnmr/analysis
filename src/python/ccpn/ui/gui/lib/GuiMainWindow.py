@@ -1019,14 +1019,14 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
         if disableCancel:
             if undos.isDirty():
                 reply = MessageDialog.showMulti(MESSAGE, DETAIL, [QUIT], checkbox=SAVE_DATA, okText=QUIT,
-                                                checked=True)
+                                                checked=False)
             else:
                 reply = QUIT_WITHOUT_SAVING
 
         else:
             if undos.isDirty():
                 reply = MessageDialog.showMulti(MESSAGE, DETAIL, [QUIT, CANCEL], checkbox=SAVE_DATA, okText=QUIT,
-                                                checked=True)
+                                                checked=False)
             else:
                 reply = QUIT_WITHOUT_SAVING
 

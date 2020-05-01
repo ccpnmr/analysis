@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-05-01 10:49:52 +0100 (Fri, May 01, 2020) $"
+__dateModified__ = "$dateModified: 2020-05-01 18:30:06 +0100 (Fri, May 01, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -1253,8 +1253,6 @@ class CcpnNefWriter:
         # NOTE:ED - need to make an active list of spectra and export from there with the required
         #           PeakLists/IntegralLists/MultipletLists
 
-        _spectra = OrderedSet()
-
         # Spectra/PeakLists/IntegralLists/MultipletLists
         # NOTE:ED - this is a stupid hack for more than one peakList per spectrum
         _exportedSpectra = set()
@@ -2037,7 +2035,7 @@ class CcpnNefWriter:
             for tag in loop.columns:
                 if any(tag.endswith(x) for x in removeNameEndings):
                     loop.removeColumn(tag)
-            for integral in sorted([integral for integral in spectrum.integrals if integral.integralList in spectrumIntegralLists]):
+            for integral in sorted([intgrl for intgrl in spectrum.integrals if intgrl.integralList in spectrumIntegralLists]):
                 row = loop.newRow(self._loopRowData(loopName, integral))
                 row['integral_serial'] = integral.serial
                 # values = integral.slopes
@@ -2072,7 +2070,7 @@ class CcpnNefWriter:
             for tag in loop.columns:
                 if any(tag.endswith(x) for x in removeNameEndings):
                     loop.removeColumn(tag)
-            for multiplet in sorted([multiplet for multiplet in spectrum.multiplet if multiplet.multipletList in spectrumMultipletLists]):
+            for multiplet in sorted([mltpt for mltpt in spectrum.multiplets if mltpt.multipletList in spectrumMultipletLists]):
                 row = loop.newRow(self._loopRowData(loopName, multiplet))
                 row['multiplet_serial'] = multiplet.serial
                 # values = multiplet.slopes
@@ -2086,26 +2084,41 @@ class CcpnNefWriter:
                 # for ii, tag in enumerate(multipleAttributes['upperLimits']):
                 #   row[tag] = None if upperLimits is None else upperLimits[ii]
 
+            # loopName = 'ccpn_multiplet_peaks'
+            # loop = result[loopName]
+            # for tag in loop.columns:
+            #     if any(tag.endswith(x) for x in removeNameEndings):
+            #         loop.removeColumn(tag)
+            # for multiplet in sorted(spectrum.multiplets):
+            #     for peak in multiplet.peaks:
+            #         row = loop.newRow(self._loopRowData(loopName, peak))
+            #         row['multiplet_list_serial'] = multiplet.multipletList.serial
+            #         row['multiplet_serial'] = multiplet.serial
+            #         row['multiplet_peak'] = peak.pid
+
+        else:
+            del result['ccpn_multiplet_list']
+            del result['ccpn_multiplet']
+            # del result['ccpn_multiplet_peaks']
+
+            # NB do more later (e.g. SpectrumReference)
+
+        # NOTE:ED - needs to be in all spectra to deal with cross-spectrum multiplets
+        if spectrumMultipletLists:
             loopName = 'ccpn_multiplet_peaks'
             loop = result[loopName]
             for tag in loop.columns:
                 if any(tag.endswith(x) for x in removeNameEndings):
                     loop.removeColumn(tag)
-            for multiplet in sorted(spectrum.multiplets):
+            for multiplet in sorted([mltpt for mltpt in spectrum.multiplets if mltpt.multipletList in spectrumMultipletLists]):
                 for peak in multiplet.peaks:
                     row = loop.newRow(self._loopRowData(loopName, peak))
                     row['multiplet_list_serial'] = multiplet.multipletList.serial
                     row['multiplet_serial'] = multiplet.serial
                     row['multiplet_peak'] = peak.pid
-
         else:
-            del result['ccpn_multiplet_list']
-            del result['ccpn_multiplet']
             del result['ccpn_multiplet_peaks']
 
-            # NB do more later (e.g. SpectrumReference)
-
-        #
         return result
 
     def peakRestraintLinks2Nef(self, restraintLists: Sequence[RestraintList]) -> StarIo.NmrSaveFrame:
@@ -3496,10 +3509,36 @@ class CcpnNefReader:
     verifiers['nef_rdc_restraint_list'] = verify_nef_restraint_list
     verifiers['ccpn_restraint_list'] = verify_nef_restraint_list
 
-    contents['nef_distance_restraint_list'] = _contentLoops
-    contents['nef_dihedral_restraint_list'] = _contentLoops
-    contents['nef_rdc_restraint_list'] = _contentLoops
-    contents['ccpn_restraint_list'] = _contentLoops
+    def content_nef_restraint_list(self, project: Project, saveFrame: StarIo.NmrSaveFrame):
+        """Get the contents of nef_restraint_list saveFrame"""
+        category = saveFrame['sf_category']
+        framecode = saveFrame['sf_framecode']
+
+        # Get name from framecode, add type disambiguation, and correct for ccpn dataSetSerial addition
+        name = framecode[len(category) + 1:]
+        dataSetSerial = saveFrame.get('ccpn_dataset_serial')
+        if dataSetSerial is not None:
+            ss = '`%s`' % dataSetSerial
+            if name.startswith(ss):
+                name = name[len(ss):]
+
+        # ejb - need to remove the rogue `n` at the beginning of the name if it exists
+        #       as it is passed into the namespace and gets added iteratively every save
+        #       next three lines remove all occurrences of `n` from name
+        import re
+
+        regex = u'\`\d*`+?'
+        name = re.sub(regex, '', name)  # substitute with ''
+
+        result = {category: OrderedSet([name])}
+
+        self._contentLoops(project, saveFrame)
+        self.updateContent(saveFrame, result)
+
+    contents['nef_distance_restraint_list'] = content_nef_restraint_list        # could be _contentLoops
+    contents['nef_dihedral_restraint_list'] = content_nef_restraint_list
+    contents['nef_rdc_restraint_list'] = content_nef_restraint_list
+    contents['ccpn_restraint_list'] = content_nef_restraint_list
 
     def load_nef_restraint(self, restraintList: RestraintList, loop: StarIo.NmrLoop,
                            itemLength: int = None):

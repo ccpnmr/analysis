@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-05-01 23:43:58 +0100 (Fri, May 01, 2020) $"
+__dateModified__ = "$dateModified: 2020-05-02 00:18:30 +0100 (Sat, May 02, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -4738,7 +4738,22 @@ class CcpnNefReader:
         self._verifyLoops(project, saveFrame, addLoopAttribs=['name'])
 
     verifiers['ccpn_sample'] = verify_ccpn_sample
-    contents['ccpn_sample'] = partial(_contentLoops, addLoopAttribs=['name'])
+
+    def content_ccpn_sample(self, project: Project, saveFrame: StarIo.NmrSaveFrame):
+        # Get the contents of ccpn_sample
+        # ccpn-to-nef mapping for saveframe
+        category = saveFrame['sf_category']
+        framecode = saveFrame['sf_framecode']
+        mapping = nef2CcpnMap[category]
+
+        parameters, loopNames = self._parametersFromSaveFrame(saveFrame, mapping)
+        result = {category: OrderedSet([parameters['name']])}
+
+        self._contentLoops(project, saveFrame, addLoopAttribs=['name'])
+        self.updateContent(saveFrame, result)
+
+    # contents['ccpn_sample'] = partial(_contentLoops, addLoopAttribs=['name'])
+    contents['ccpn_sample'] = content_ccpn_sample
 
     def load_ccpn_sample_component(self, parent: Sample, loop: StarIo.NmrLoop):
         """load ccpn_sample_component loop"""
@@ -4752,10 +4767,9 @@ class CcpnNefReader:
         for row in loop.data:
             parameters = self._parametersFromLoopRow(row, map2)
             result.append(creatorFunc(**parameters))
-        #
+
         return result
 
-    #
     importers['ccpn_sample_component'] = load_ccpn_sample_component
 
     def verify_ccpn_sample_component(self, parent: Sample, loop: StarIo.NmrLoop,

@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-04-16 18:06:38 +0100 (Thu, April 16, 2020) $"
+__dateModified__ = "$dateModified: 2020-05-01 17:08:42 +0100 (Fri, May 01, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -952,34 +952,3 @@ class FilterMethods(CcpnDialog):
         self._parent._setDataPipesPulldown()
         self.accept()
 
-
-#################################### _________ RUN GUI TESTING ____________ ####################################
-
-
-if __name__ == '__main__':
-    from ccpn.ui.gui.widgets.Application import TestApplication
-    from ccpn.ui.gui.widgets.CcpnModuleArea import CcpnModuleArea
-    from ccpn.pipes.examples import pipeExamples
-
-    # analysis specific
-    from ccpn.pipes import loadedPipes
-    from ccpn.AnalysisScreen.pipes import _loadScreenPipes
-
-
-    _loadScreenPipes()
-
-    app = TestApplication()
-    win = QtWidgets.QMainWindow()
-
-    moduleArea = CcpnModuleArea(mainWindow=None, )
-    pipeline = GuiPipeline(mainWindow=None, pipes=loadedPipes)
-    # pipeline = GuiPipeline(mainWindow=None, pipes=pipeExamples)
-    moduleArea.addModule(pipeline)
-    # pipeline._openAllPipes()
-
-    win.setCentralWidget(moduleArea)
-    win.resize(1000, 500)
-    win.setWindowTitle('Testing %s' % pipeline.moduleName)
-    win.show()
-
-    app.start()

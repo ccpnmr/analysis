@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-05-01 21:06:35 +0100 (Fri, May 01, 2020) $"
+__dateModified__ = "$dateModified: 2020-05-01 21:09:19 +0100 (Fri, May 01, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -4154,21 +4154,11 @@ class CcpnNefReader:
                 integral.peak = peak
 
             result.append(integral)
-        #
+
         return result
 
     importers['ccpn_integral'] = load_ccpn_integral
-
-    # def verify_ccpn_integral(self, spectrum: Spectrum,
-    #                          loop: StarIo.NmrLoop) -> List[Integral]:
-    #     pass
-
     verifiers['ccpn_integral'] = _noLoopVerify
-
-    # def content_ccpn_integral(self, spectrum: Spectrum, loop: StarIo.NmrLoop) -> Optional[dict]:
-    #     self.storeContent(loop, None)
-    #     return None
-
     contents['ccpn_integral'] = _noLoopContent
 
     def load_ccpn_multiplet(self, spectrum: Spectrum,
@@ -4199,18 +4189,7 @@ class CcpnNefReader:
         return result
 
     importers['ccpn_multiplet'] = load_ccpn_multiplet
-
-    # def verify_ccpn_multiplet(self, spectrum: Spectrum,
-    #                           loop: StarIo.NmrLoop) -> List[Multiplet]:
-    #     pass
-
     verifiers['ccpn_multiplet'] = _noLoopVerify
-
-    # def content_ccpn_multiplet(self, spectrum: Spectrum,
-    #                         loop: StarIo.NmrLoop) -> List[Multiplet]:
-    #     self.storeContent(loop, None)
-    #     return None
-
     contents['ccpn_multiplet'] = _noLoopContent
 
     def load_ccpn_multiplet_peaks(self, spectrum: Spectrum,

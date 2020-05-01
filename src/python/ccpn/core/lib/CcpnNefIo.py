@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-05-01 23:33:40 +0100 (Fri, May 01, 2020) $"
+__dateModified__ = "$dateModified: 2020-05-01 23:43:58 +0100 (Fri, May 01, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -4541,12 +4541,11 @@ class CcpnNefReader:
     def verify_ccpn_spectrum_group(self, project: Project, saveFrame: StarIo.NmrSaveFrame):
         # Get ccpn-to-nef mapping for saveframe
         category = saveFrame['sf_category']
-        framecode = saveFrame['sf_framecode']
         mapping = nef2CcpnMap[category]
 
         parameters, loopNames = self._parametersFromSaveFrame(saveFrame, mapping)
 
-        # Make main object
+        # Get main object
         result = project.getSpectrumGroup(parameters['name'])
         if result is not None:
             self.error('ccpn_spectrum_group - SpectrumGroup {} already exists'.format(result), saveFrame, (result,))
@@ -4600,7 +4599,6 @@ class CcpnNefReader:
     def content_ccpn_group_spectrum(self, parent: SpectrumGroup, loop: StarIo.NmrLoop):
         """Get the contents of ccpn_group_spectrum loop"""
         spectra = OrderedSet()
-
         for row in loop.data:
             spectra.add(row.get('nmr_spectrum_id'))
 
@@ -4612,7 +4610,6 @@ class CcpnNefReader:
 
         # Get ccpn-to-nef mapping for saveframe
         category = saveFrame['sf_category']
-        framecode = saveFrame['sf_framecode']
         mapping = nef2CcpnMap[category]
 
         parameters, loopNames = self._parametersFromSaveFrame(saveFrame, mapping)
@@ -4632,16 +4629,34 @@ class CcpnNefReader:
     #
     importers['ccpn_complex'] = load_ccpn_complex
 
-    # def verify_ccpn_complex(self, project: Project, saveFrame: StarIo.NmrSaveFrame):
-    #     pass
+    def verify_ccpn_complex(self, project: Project, saveFrame: StarIo.NmrSaveFrame):
+        # Get ccpn-to-nef mapping for saveframe
+        category = saveFrame['sf_category']
+        mapping = nef2CcpnMap[category]
+        parameters, loopNames = self._parametersFromSaveFrame(saveFrame, mapping)
 
-    verifiers['ccpn_complex'] = _verifyLoops
+        # Get main object
+        result = project.getComplex(parameters['name'])
+        if result is not None:
+            self.error('ccpn_complex - Complex {} already exists'.format(result), saveFrame, (result,))
 
-    # def content_ccpn_complex(self, project: Project, saveFrame: StarIo.NmrSaveFrame):
-    #     self.storeContent(saveFrame, None)
-    #     return None
+            self._verifyLoops(result, saveFrame)
 
-    contents['ccpn_complex'] = _contentLoops
+    verifiers['ccpn_complex'] = verify_ccpn_complex
+
+    def content_ccpn_complex(self, project: Project, saveFrame: StarIo.NmrSaveFrame):
+        """Get the contents of ccpn_complex saveFrame"""
+        category = saveFrame['sf_category']
+        framecode = saveFrame['sf_framecode']
+    
+        # store the name of the chemicalShiftList
+        name = framecode[len(category) + 1:]
+        result = {category: OrderedSet([name])}
+    
+        self._contentLoops(project, saveFrame)
+        self.updateContent(saveFrame, result)
+
+    contents['ccpn_complex'] = content_ccpn_complex
 
     def load_ccpn_complex_chain(self, parent: Complex, loop: StarIo.NmrLoop):
         """load ccpn_complex_chain loop"""
@@ -4662,18 +4677,24 @@ class CcpnNefReader:
     #
     importers['ccpn_complex_chain'] = load_ccpn_complex_chain
 
-    # def verify_ccpn_complex_chain(self, parent: Complex, loop: StarIo.NmrLoop):
-    #     """verify ccpn_complex_chain loop"""
-    #     pass
+    def verify_ccpn_complex_chain(self, parent: Complex, loop: StarIo.NmrLoop):
+        """verify ccpn_complex_chain loop"""
+        for row in loop.data:
+            chain = self.project.getChain(row.get('complex_chain_code'))
+            if chain is not None:
+                self.error('ccpn_complex_chain - Complex contains {}'.format(chain), loop, (chain,))
 
-    verifiers['ccpn_complex_chain'] = _noLoopVerify
+    verifiers['ccpn_complex_chain'] = verify_ccpn_complex_chain
 
-    # def content_ccpn_complex_chain(self, parent: Complex, loop: StarIo.NmrLoop):
-    #     """Get the contents of ccpn_complex_chain loop"""
-    #     self.storeContent(loop, None)
-    #     return None
+    def content_ccpn_complex_chain(self, parent: Complex, loop: StarIo.NmrLoop):
+        """Get the contents of ccpn_complex_chain loop"""
+        chains = OrderedSet()
+        for row in loop.data:
+            chains.add(row.get('complex_chain_code'))
 
-    contents['ccpn_complex_chain'] = _noLoopContent
+        return chains
+
+    contents['ccpn_complex_chain'] = content_ccpn_complex_chain
 
     def load_ccpn_sample(self, project: Project, saveFrame: StarIo.NmrSaveFrame):
 

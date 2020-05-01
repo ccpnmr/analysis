@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-04-30 19:09:51 +0100 (Thu, April 30, 2020) $"
+__dateModified__ = "$dateModified: 2020-05-01 10:49:52 +0100 (Fri, May 01, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -186,15 +186,18 @@ nef2CcpnMap = {
         ('nef_program_script', _isALoop),
         ('nef_run_history', _isALoop),
         )),
+
     'nef_related_entries'            : OD((
         ('database_name', None),
         ('database_accession_code', None),
         )),
+
     'nef_program_script'             : OD((
         ('program_name', None),
         ('script_name', None),
         ('script', None),
         )),
+
     'nef_run_history'                : OD((
         ('run_number', 'serial'),
         ('program_name', 'programName'),
@@ -209,6 +212,7 @@ nef2CcpnMap = {
         ('nef_sequence', _isALoop),
         ('nef_covalent_links', _isALoop),
         )),
+
     'nef_sequence'                   : OD((
         ('index', None),
         ('chain_code', 'chain.shortName'),
@@ -222,6 +226,7 @@ nef2CcpnMap = {
         ('ccpn_compound_name', 'chain.compoundName'),
         ('ccpn_chain_comment', 'chain.comment'),
         )),
+
     'nef_covalent_links'             : OD((
         ('chain_code_1', None),
         ('sequence_code_1', None),
@@ -240,6 +245,7 @@ nef2CcpnMap = {
         ('ccpn_comment', 'comment'),
         ('nef_chemical_shift', _isALoop),
         )),
+
     'nef_chemical_shift'             : OD((
         ('chain_code', None),
         ('sequence_code', None),
@@ -268,6 +274,7 @@ nef2CcpnMap = {
         ('ccpn_comment', 'comment'),
         ('nef_distance_restraint', _isALoop),
         )),
+
     'nef_distance_restraint'         : OD((
         ('index', None),
         ('restraint_id', 'restraint.serial'),
@@ -306,6 +313,7 @@ nef2CcpnMap = {
         ('ccpn_comment', 'comment'),
         ('nef_dihedral_restraint', _isALoop),
         )),
+
     'nef_dihedral_restraint'         : OD((
         ('index', None),
         ('restraint_id', 'restraint.serial'),
@@ -353,6 +361,7 @@ nef2CcpnMap = {
         ('ccpn_comment', 'comment'),
         ('nef_rdc_restraint', _isALoop),
         )),
+
     'nef_rdc_restraint'              : OD((
         ('index', None),
         ('restraint_id', 'restraint.serial'),
@@ -459,14 +468,29 @@ nef2CcpnMap = {
         ('dimension_is_complex', '_wrappedData.dataStore.isComplex'),
         ('dimension_block_size', '_wrappedData.dataStore.blockSizes'),
         )),
+
     'nef_spectrum_dimension_transfer': OD((
         ('dimension_1', None),
         ('dimension_2', None),
         ('transfer_type', None),
         ('is_indirect', None),
         )),
+
+    'ccpn_peak_list'                 : OD((
+        ('ccpn_peaklist_serial', 'serial'),
+        ('ccpn_peaklist_comment', 'comment'),
+        ('ccpn_peaklist_name', 'title'),
+        ('ccpn_peaklist_is_simulated', 'isSimulated'),
+        ('ccpn_peaklist_symbol_colour', 'symbolColour'),
+        ('ccpn_peaklist_symbol_style', 'symbolStyle'),
+        ('ccpn_peaklist_text_colour', 'textColour'),
+        )),
+
     # NBNB: boxWidths and lineWidths are NOT included.
     'nef_peak'                       : OD((
+        # # NOTE:ED - testing multiple peak lists per spectrum
+        # ('peak_list_serial', 'peakList.serial'),
+
         ('index', None),
         ('peak_id', 'serial'),
         ('volume', 'volume'),
@@ -568,6 +592,7 @@ nef2CcpnMap = {
         ('ccpn_annotation', 'annotation'),
         ('ccpn_comment', 'comment'),
         )),
+
     # NB SpectrumHit crosslink to sample and sampleComponent are derived
     # And need not be stored here.
     'ccpn_spectrum_hit'              : OD((
@@ -587,6 +612,7 @@ nef2CcpnMap = {
     'nef_peak_restraint_links'       : OD((
         ('nef_peak_restraint_link', _isALoop),
         )),
+
     'nef_peak_restraint_link'        : OD((
         ('nmr_spectrum_id', None),
         ('peak_id', None),
@@ -598,6 +624,7 @@ nef2CcpnMap = {
         ('name', 'name'),
         ('ccpn_complex_chain', _isALoop),
         )),
+
     'ccpn_complex_chain'             : OD((
         ('complex_chain_code', None),
         )),
@@ -606,6 +633,7 @@ nef2CcpnMap = {
         ('name', 'name'),
         ('ccpn_group_spectrum', _isALoop),
         )),
+
     'ccpn_group_spectrum'            : OD((
         ('nmr_spectrum_id', None),
         )),
@@ -621,7 +649,6 @@ nef2CcpnMap = {
     'ccpn_integral'                  : OD((
         ('integral_list_serial', 'integralList.serial'),
         ('integral_serial', 'serial'),
-
         ('value', 'value'),
         ('value_uncertainty', 'valueError'),
         # ('volume', 'volume'),
@@ -680,12 +707,14 @@ nef2CcpnMap = {
         ('ccpn_peak_clusters', _isALoop),
         ('ccpn_peak_cluster_peaks', _isALoop),
         )),
+
     'ccpn_peak_clusters'             : OD((
         ('serial', None),
         ('annotation', 'annotation'),
         # ('peak', None),
         # ('ccpn_peak_cluster',_isALoop),
         )),
+
     'ccpn_peak_cluster_peaks'        : OD((
         ('serial', None),
         ('peak', None),
@@ -710,6 +739,7 @@ nef2CcpnMap = {
         ('comment', 'comment'),
         ('ccpn_sample_component', _isALoop),
         )),
+
     'ccpn_sample_component'          : OD((
         ('name', 'name'),
         ('labelling', 'labelling'),
@@ -745,6 +775,7 @@ nef2CcpnMap = {
         ('comment', 'comment'),
         ('ccpn_substance_synonym', _isALoop),
         )),
+
     'ccpn_substance_synonym'         : OD((
         ('synonym', None),
         )),
@@ -831,6 +862,7 @@ nef2CcpnMap = {
         ('comment', 'comment'),
         ('ccpn_restraint', _isALoop),
         )),
+
     'ccpn_restraint'                 : OD((
         ('index', None),
         ('restraint_id', 'restraint.serial'),
@@ -863,13 +895,14 @@ nef2CcpnMap = {
         ('name', None),
         ('vector_length', 'restraint.vectorLength'),
         ('figure_of_merit', 'restraint.figureOfMerit'),
-        # NB This tag has 'ccpn' prefix to match corresponding nef restraitn lists
+        # NB This tag has 'ccpn' prefix to match corresponding nef restraint lists
         ('ccpn_comment', 'restraint.comment'),
         )),
 
     'ccpn_notes'                     : OD((
         ('ccpn_note', _isALoop),
         )),
+
     'ccpn_note'                      : OD((
         ('serial', None),
         ('name', 'name'),
@@ -881,6 +914,7 @@ nef2CcpnMap = {
     'ccpn_additional_data'           : OD((
         ('ccpn_internal_data', _isALoop),
         )),
+
     'ccpn_internal_data'             : OD((
         ('ccpn_object_pid', None),
         ('internal_data_string', None)
@@ -1216,9 +1250,17 @@ class CcpnNefWriter:
         for obj in restraintLists:
             saveFrames.append(self.restraintList2Nef(obj, singleDataSet=singleDataSet))
 
-        # PeakLists/Spectra
+        # NOTE:ED - need to make an active list of spectra and export from there with the required
+        #           PeakLists/IntegralLists/MultipletLists
+
+        _spectra = OrderedSet()
+
+        # Spectra/PeakLists/IntegralLists/MultipletLists
+        # NOTE:ED - this is a stupid hack for more than one peakList per spectrum
+        _exportedSpectra = set()
         for obj in sorted(peakLists):
-            saveFrames.append(self.peakList2Nef(obj))
+            saveFrames.append(self.peakList2Nef(obj, integralLists, multipletLists, obj.spectrum not in _exportedSpectra))
+            _exportedSpectra.add(obj.spectrum)
 
         # restraint-peak links
         saveFrame = self.peakRestraintLinks2Nef(restraintLists)
@@ -1772,23 +1814,27 @@ class CcpnNefWriter:
         #
         return result
 
-    def spectrum2Nef(self, spectrum: Spectrum) -> StarIo.NmrSaveFrame:
-        """Convert spectrum to NEF saveframes - one per peaklist
+    # def spectrum2Nef(self, spectrum: Spectrum) -> StarIo.NmrSaveFrame:
+    #     """Convert spectrum to NEF saveframes - one per peaklist
+    #
+    #     Will create a peakList if none are present"""
+    #
+    #     result = []
+    #
+    #     peakLists = sorted(spectrum.peakLists)
+    #     if not peakLists:
+    #         peakLists = [spectrum.newPeakList()]
+    #
+    #     # NOTE:ED - this is a stupid hack for more than one peakList per spectrum
+    #     first = True
+    #     for peakList in peakLists:
+    #         result.append(self.peakList2Nef(peakList, exportCompleteSpectrum=first))
+    #         first = False
+    #     #
+    #     return result
 
-        Will create a peakList if none are present"""
-
-        result = []
-
-        peakLists = sorted(spectrum.peakLists)
-        if not peakLists:
-            peakLists = [spectrum.newPeakList()]
-
-        for peakList in peakLists:
-            result.append(self.peakList2Nef(peakList))
-        #
-        return result
-
-    def peakList2Nef(self, peakList: PeakList, exportCompleteSpectrum: bool = True
+    def peakList2Nef(self, peakList: PeakList, integralLists, multipletLists,
+                     exportCompleteSpectrum: bool = True
                      ) -> StarIo.NmrSaveFrame:
         """Convert PeakList to CCPN NEF saveframe.
         Used for all spectrum export, as there is one frame per PeakList
@@ -1974,14 +2020,15 @@ class CcpnNefWriter:
         else:
             del result['ccpn_spectrum_hit']
 
-        if exportCompleteSpectrum and spectrum.integralLists:
+        spectrumIntegralLists = set(spectrum.integralLists) & set(integralLists)
+        if exportCompleteSpectrum and spectrumIntegralLists:
             loopName = 'ccpn_integral_list'
 
             loop = result[loopName]
             for tag in loop.columns:
                 if any(tag.endswith(x) for x in removeNameEndings):
                     loop.removeColumn(tag)
-            for integralList in sorted(spectrum.integralLists):
+            for integralList in sorted(spectrumIntegralLists):
                 row = loop.newRow(self._loopRowData(loopName, integralList))
                 row['serial'] = integralList.serial
 
@@ -1990,7 +2037,7 @@ class CcpnNefWriter:
             for tag in loop.columns:
                 if any(tag.endswith(x) for x in removeNameEndings):
                     loop.removeColumn(tag)
-            for integral in sorted(spectrum.integrals):
+            for integral in sorted([integral for integral in spectrum.integrals if integral.integralList in spectrumIntegralLists]):
                 row = loop.newRow(self._loopRowData(loopName, integral))
                 row['integral_serial'] = integral.serial
                 # values = integral.slopes
@@ -2008,14 +2055,15 @@ class CcpnNefWriter:
             del result['ccpn_integral_list']
             del result['ccpn_integral']
 
-        if exportCompleteSpectrum and spectrum.multipletLists:
+        spectrumMultipletLists = set(spectrum.multipletLists) & set(multipletLists)
+        if exportCompleteSpectrum and spectrumMultipletLists:
             loopName = 'ccpn_multiplet_list'
 
             loop = result[loopName]
             for tag in loop.columns:
                 if any(tag.endswith(x) for x in removeNameEndings):
                     loop.removeColumn(tag)
-            for multipletList in sorted(spectrum.multipletLists):
+            for multipletList in sorted(spectrumMultipletLists):
                 row = loop.newRow(self._loopRowData(loopName, multipletList))
                 row['serial'] = multipletList.serial
 
@@ -2024,7 +2072,7 @@ class CcpnNefWriter:
             for tag in loop.columns:
                 if any(tag.endswith(x) for x in removeNameEndings):
                     loop.removeColumn(tag)
-            for multiplet in sorted(spectrum.multiplets):
+            for multiplet in sorted([multiplet for multiplet in spectrum.multiplet if multiplet.multipletList in spectrumMultipletLists]):
                 row = loop.newRow(self._loopRowData(loopName, multiplet))
                 row['multiplet_serial'] = multiplet.serial
                 # values = multiplet.slopes
@@ -2053,6 +2101,7 @@ class CcpnNefWriter:
         else:
             del result['ccpn_multiplet_list']
             del result['ccpn_multiplet']
+            del result['ccpn_multiplet_peaks']
 
             # NB do more later (e.g. SpectrumReference)
 
@@ -2833,7 +2882,7 @@ class CcpnNefReader:
         compoundName = 'ccpn_compound_name'
         nefSequence = 'nef_sequence'
 
-        results = {chainCode : OrderedSet(),
+        results = {chainCode   : OrderedSet(),
                    compoundName: OrderedSet()}
 
         mapping = nef2CcpnMap[nefSequence]
@@ -4064,7 +4113,7 @@ class CcpnNefReader:
         map2 = dict(item for item in mapping.items() if item[1] and '.' not in item[1])
         for row in loop.data:
             parameters = self._parametersFromLoopRow(row, map2)
-            multiplet = serial2creatorFunc[row['multiplet_list_serial']]()      #**parameters)
+            multiplet = serial2creatorFunc[row['multiplet_list_serial']]()  #**parameters)
 
             if row['slopes']:
                 multiplet.slopes = eval(row['slopes'])

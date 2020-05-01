@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-05-01 18:36:21 +0100 (Fri, May 01, 2020) $"
+__dateModified__ = "$dateModified: 2020-05-01 20:55:34 +0100 (Fri, May 01, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -3830,10 +3830,46 @@ class CcpnNefReader:
         if spectrum is not None:
             self.error('nef_nmr_spectrum - Spectrum {} already exists'.format(spectrum), saveFrame, (spectrum,))
 
-        self._verifyLoops(project, saveFrame, num_dimensions=saveFrame['num_dimensions'])
+            self._verifyLoops(spectrum, saveFrame, num_dimensions=saveFrame['num_dimensions'])
 
     verifiers['nef_nmr_spectrum'] = verify_nef_nmr_spectrum
-    contents['nef_nmr_spectrum'] = partial(_contentLoops, addLoopAttribs=['num_dimensions'])
+
+    def content_nef_nmr_spectrum(self, project: Project, saveFrame: StarIo.NmrSaveFrame):
+        # Get ccpn-to-nef mapping for saveframe
+        category = saveFrame['sf_category']
+        framecode = saveFrame['sf_framecode']
+        mapping = nef2CcpnMap[category]
+
+        # Get peakList parameters and make peakList
+        peakListParameters, dummy = self._parametersFromSaveFrame(saveFrame, mapping)
+
+        # Get name from spectrum parameters, or from the framecode
+        spectrumName = framecode[len(category) + 1:]
+        if spectrumName.endswith('`'):
+            peakListSerial = peakListParameters.get('serial')
+            if peakListSerial:
+                ss = '`%s`' % peakListSerial
+                # Remove peakList serial suffix (which was added for disambiguation)
+                # So that multiple peakLists all go to one Spectrum
+                if spectrumName.endswith(ss):
+                    spectrumName = spectrumName[:-len(ss)]
+            else:
+                ll = spectrumName.rsplit('`', 2)
+                if len(ll) == 3:
+                    # name is of form abc`xyz`
+                    try:
+                        peakListParameters['serial'] = int(ll[1])
+                    except ValueError:
+                        pass
+                    else:
+                        spectrumName = ll[0]
+        result = {category: OrderedSet([spectrumName])}
+
+        self._contentLoops(project, saveFrame, addLoopAttribs=['num_dimensions'])
+        self.updateContent(saveFrame, result)
+
+    # contents['nef_nmr_spectrum'] = partial(_contentLoops, addLoopAttribs=['num_dimensions'])
+    contents['nef_nmr_spectrum'] = content_nef_nmr_spectrum
 
     def read_nef_spectrum_dimension_transfer(self, loop: StarIo.NmrLoop):
 
@@ -3895,7 +3931,6 @@ class CcpnNefReader:
                 self.warning("Duplicate nef_spectrum_dimension_transfer: %s" % (ll,))
 
     verifiers['nef_spectrum_dimension_transfer'] = _noLoopVerify
-
     contents['nef_spectrum_dimension_transfer'] = _noLoopContent
 
     def load_ccpn_spectrum_dimension(self, spectrum: Spectrum, loop: StarIo.NmrLoop) -> dict:
@@ -3956,21 +3991,8 @@ class CcpnNefReader:
         higherLimits = extras.get('higher_aliasing_limit', defaultLimits)
         spectrum.aliasingLimits = list(zip(lowerLimits, higherLimits))
 
-    #
     importers['ccpn_spectrum_dimension'] = load_ccpn_spectrum_dimension
-
-    # def verify_ccpn_spectrum_dimension(self, spectrum: Spectrum, loop: StarIo.NmrLoop) -> dict:
-    #     """Read ccpn_spectrum_dimension loop, set the relevant values,
-    #         and return the spectrum and other parameters for further processing"""
-    #     pass
-
     verifiers['ccpn_spectrum_dimension'] = _noLoopVerify
-
-    # def content_ccpn_spectrum_dimension(self, spectrum: Spectrum, loop: StarIo.NmrLoop) -> Optional[dict]:
-    #     """Get the contents for ccpn_spectrum_dimension loop"""
-    #     self.storeContent(loop, None)
-    #     return None
-
     contents['ccpn_spectrum_dimension'] = _noLoopContent
 
     # def adjustAxisCodes(self, spectrum, dimensionData):
@@ -4020,7 +4042,6 @@ class CcpnNefReader:
         return result
 
     verifiers['nef_spectrum_dimension'] = _noLoopVerify
-
     contents['nef_spectrum_dimension'] = _noLoopContent
 
     def load_ccpn_integral_list(self, spectrum: Spectrum,
@@ -4043,12 +4064,17 @@ class CcpnNefReader:
 
     importers['ccpn_integral_list'] = load_ccpn_integral_list
 
-    # def verify_ccpn_integral_list(self, spectrum: Spectrum,
-    #                               loop: StarIo.NmrLoop) -> List[IntegralList]:
-    #     pass
+    def verify_ccpn_integral_list(self, spectrum: Spectrum, loop: StarIo.NmrLoop, **kwds):
+        mapping = nef2CcpnMap[loop.name]
+        map2 = dict(item for item in mapping.items() if item[1] and '.' not in item[1])
+        creatorFunc = spectrum.getIntegralList
+        for row in loop.data:
+            parameters = self._parametersFromLoopRow(row, map2)
+            integralList = creatorFunc(parameters['serial'])
+            if integralList is not None:
+                self.error('ccpn_integral_list - IntegralList {} already exists'.format(integralList), loop, (integralList,))
 
-    verifiers['ccpn_integral_list'] = _noLoopVerify
-
+    verifiers['ccpn_integral_list'] = verify_ccpn_integral_list
     contents['ccpn_integral_list'] = _noLoopContent
 
     def load_ccpn_multiplet_list(self, spectrum: Spectrum,
@@ -4071,12 +4097,17 @@ class CcpnNefReader:
 
     importers['ccpn_multiplet_list'] = load_ccpn_multiplet_list
 
-    # def verify_ccpn_multiplet_list(self, spectrum: Spectrum,
-    #                                loop: StarIo.NmrLoop) -> List[MultipletList]:
-    #     pass
+    def verify_ccpn_multiplet_list(self, spectrum: Spectrum, loop: StarIo.NmrLoop, **kwds):
+        mapping = nef2CcpnMap[loop.name]
+        map2 = dict(item for item in mapping.items() if item[1] and '.' not in item[1])
+        creatorFunc = spectrum.getMultipletList
+        for row in loop.data:
+            parameters = self._parametersFromLoopRow(row, map2)
+            multipletList = creatorFunc(parameters['serial'])
+            if multipletList is not None:
+                self.error('ccpn_multiplet_list - MultipletList {} already exists'.format(multipletList), loop, (multipletList,))
 
-    verifiers['ccpn_multiplet_list'] = _noLoopVerify
-
+    verifiers['ccpn_multiplet_list'] = verify_ccpn_multiplet_list
     contents['ccpn_multiplet_list'] = _noLoopContent
 
     def load_ccpn_integral(self, spectrum: Spectrum,

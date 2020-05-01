@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-05-01 18:30:06 +0100 (Fri, May 01, 2020) $"
+__dateModified__ = "$dateModified: 2020-05-01 18:36:21 +0100 (Fri, May 01, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -3631,6 +3631,8 @@ class CcpnNefReader:
     importers['nef_dihedral_restraint'] = load_nef_restraint
     importers['nef_rdc_restraint'] = load_nef_restraint
     importers['ccpn_restraint'] = load_nef_restraint
+
+    # NOTE:ED - do restraint contributions need verifying?
 
     verifiers['nef_distance_restraint'] = _noLoopVerify
     verifiers['nef_dihedral_restraint'] = _noLoopVerify

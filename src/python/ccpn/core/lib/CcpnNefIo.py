@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-05-01 20:55:34 +0100 (Fri, May 01, 2020) $"
+__dateModified__ = "$dateModified: 2020-05-01 21:06:35 +0100 (Fri, May 01, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -2780,7 +2780,7 @@ class CcpnNefReader:
         """
         pass
 
-    def _contentLoops(self, project: Project, saveFrame: StarIo.NmrSaveFrame, addLoopAttribs=None):
+    def _contentLoops(self, project: Project, saveFrame: StarIo.NmrSaveFrame, addLoopAttribs=None, **kwds):
         """Iterate over the loops in a saveFrame, and add to results"""
         result = {}
         mapping = nef2CcpnMap[saveFrame.category]
@@ -2793,9 +2793,9 @@ class CcpnNefReader:
                         dd = []
                         for name in addLoopAttribs:
                             dd.append(saveFrame.get(name))
-                        result[tag] = content(self, project, loop, *dd)
+                        result[tag] = content(self, project, loop, *dd, **kwds)
                     else:
-                        result[tag] = content(self, project, loop)
+                        result[tag] = content(self, project, loop, **kwds)
 
         self.storeContent(saveFrame, result)
 
@@ -3865,10 +3865,9 @@ class CcpnNefReader:
                         spectrumName = ll[0]
         result = {category: OrderedSet([spectrumName])}
 
-        self._contentLoops(project, saveFrame, addLoopAttribs=['num_dimensions'])
+        self._contentLoops(project, saveFrame, name=spectrumName, itemLength=saveFrame['num_dimensions'])
         self.updateContent(saveFrame, result)
 
-    # contents['nef_nmr_spectrum'] = partial(_contentLoops, addLoopAttribs=['num_dimensions'])
     contents['nef_nmr_spectrum'] = content_nef_nmr_spectrum
 
     def read_nef_spectrum_dimension_transfer(self, loop: StarIo.NmrLoop):
@@ -4402,7 +4401,7 @@ class CcpnNefReader:
 
     verifiers['nef_peak'] = _noLoopVerify
 
-    def content_nef_peak(self, peakList: PeakList, loop: StarIo.NmrLoop, itemLength: int = None) -> typing.Optional[OrderedSet]:
+    def content_nef_peak(self, peakList: PeakList, loop: StarIo.NmrLoop, name=None, itemLength: int = None) -> typing.Optional[OrderedSet]:
         """Get the contents of nef_peak loop"""
         result = OrderedSet()
 

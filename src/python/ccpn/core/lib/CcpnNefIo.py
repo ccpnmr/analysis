@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-05-02 00:22:42 +0100 (Sat, May 02, 2020) $"
+__dateModified__ = "$dateModified: 2020-05-02 00:48:12 +0100 (Sat, May 02, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -4921,18 +4921,7 @@ class CcpnNefReader:
 
     #
     importers['ccpn_substance_synonym'] = load_ccpn_substance_synonym
-
-    # def verify_ccpn_substance_synonym(self, parent: Substance, loop: StarIo.NmrLoop):
-    #     """verify ccpn_substance_synonym loop"""
-    #     pass
-
     verifiers['ccpn_substance_synonym'] = _noLoopVerify
-
-    # def content_ccpn_substance_synonym(self, parent: Substance, loop: StarIo.NmrLoop):
-    #     """Get the contents of ccpn_substance_synonym loop"""
-    #     print('??????>> contents synonym')
-    #     return None
-
     contents['ccpn_substance_synonym'] = _noLoopContent
 
     def load_ccpn_assignment(self, project: Project, saveFrame: StarIo.NmrSaveFrame):
@@ -5020,7 +5009,6 @@ class CcpnNefReader:
             # NB former call was BROKEN!
             # modelUtil.resetSerial(nmrAtom, row['serial'], 'nmrAtoms')
 
-    #
     importers['ccpn_assignment'] = load_ccpn_assignment
 
     def verify_ccpn_assignment(self, project: Project, saveFrame: StarIo.NmrSaveFrame):
@@ -5047,6 +5035,32 @@ class CcpnNefReader:
             if result:
                 # warning as already exists
                 self.error('ccpn_assignment - Chain {} already exists'.format(result), saveFrame, (result,))
+
+        nmrResidues = {}
+        for row in saveFrame[nmrResidueLoopName].data:
+            # parameters = self._parametersFromLoopRow(row, map2)
+            # parameters['residueType'] = row.get('residue_name')
+            # NB chainCode None is not possible here (for ccpn data)
+            chainCode = row['chain_code']
+            nmrChain = project.getNmrChain(chainCode)
+            if nmrChain is not None:
+                name = Pid.IDSEP.join(('' if x is None else str(x)) for x in (row.get('sequence_code'), row.get('residue_name')))
+                result = nmrChain.getNmrResidue(name)
+                if result is not None:
+                    self.error('ccpn_assignment - Residue {} already exists'.format(result), saveFrame, (result,))
+                    nmrResidues[(chainCode, row.get('sequence_code'))] = result
+
+        # read nmr_atom loop
+        mapping = nef2CcpnMap[nmrAtomLoopName]
+        map2 = dict(item for item in mapping.items() if item[1] and '.' not in item[1])
+        for row in saveFrame[nmrAtomLoopName].data:
+            parameters = self._parametersFromLoopRow(row, map2)
+            chainCode = row['chain_code']
+            sequenceCode = row['sequence_code']
+            nmrResidue = nmrResidues[(chainCode, sequenceCode)]
+            nmrAtom = nmrResidue.getNmrAtom(row.get('name'))
+            if result is not None:
+                self.error('ccpn_assignment - NmrAtom {} already exists'.format(result), saveFrame, (result,))
 
     verifiers['ccpn_assignment'] = verify_ccpn_assignment
     verifiers['nmr_chain'] = _noLoopVerify

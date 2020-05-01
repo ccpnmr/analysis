@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-05-01 21:09:19 +0100 (Fri, May 01, 2020) $"
+__dateModified__ = "$dateModified: 2020-05-01 21:19:25 +0100 (Fri, May 01, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -4158,7 +4158,20 @@ class CcpnNefReader:
         return result
 
     importers['ccpn_integral'] = load_ccpn_integral
-    verifiers['ccpn_integral'] = _noLoopVerify
+
+    def verify_ccpn_integral(self, spectrum: Spectrum, loop: StarIo.NmrLoop, **kwds):
+
+        serial2creatorFunc = dict((x.serial, x.getIntegral) for x in spectrum.integralLists)
+
+        mapping = nef2CcpnMap[loop.name]
+        map2 = dict(item for item in mapping.items() if item[1] and '.' not in item[1])
+        for row in loop.data:
+            parameters = self._parametersFromLoopRow(row, map2)
+            integral = serial2creatorFunc[row['integral_list_serial']](parameters['serial'])
+            if integral is not None:
+                self.error('ccpn_integral - Integral {} already exists'.format(integral), loop, (integral,))
+
+    verifiers['ccpn_integral'] = verify_ccpn_integral
     contents['ccpn_integral'] = _noLoopContent
 
     def load_ccpn_multiplet(self, spectrum: Spectrum,
@@ -4189,7 +4202,20 @@ class CcpnNefReader:
         return result
 
     importers['ccpn_multiplet'] = load_ccpn_multiplet
-    verifiers['ccpn_multiplet'] = _noLoopVerify
+
+    def verify_ccpn_multiplet(self, spectrum: Spectrum, loop: StarIo.NmrLoop, **kwds):
+
+        serial2creatorFunc = dict((x.serial, x.getMultiplet) for x in spectrum.multipletLists)
+
+        mapping = nef2CcpnMap[loop.name]
+        map2 = dict(item for item in mapping.items() if item[1] and '.' not in item[1])
+        for row in loop.data:
+            parameters = self._parametersFromLoopRow(row, map2)
+            multiplet = serial2creatorFunc[row['multiplet_list_serial']](parameters['serial'])
+            if multiplet is not None:
+                self.error('ccpn_multiplet - Multiplet {} already exists'.format(multiplet), loop, (multiplet,))
+
+    verifiers['ccpn_multiplet'] = verify_ccpn_multiplet
     contents['ccpn_multiplet'] = _noLoopContent
 
     def load_ccpn_multiplet_peaks(self, spectrum: Spectrum,

@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-05-02 01:27:01 +0100 (Sat, May 02, 2020) $"
+__dateModified__ = "$dateModified: 2020-05-02 01:54:58 +0100 (Sat, May 02, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -2781,12 +2781,13 @@ class CcpnNefReader:
         """
         pass
 
-    def _contentLoops(self, project: Project, saveFrame: StarIo.NmrSaveFrame, addLoopAttribs=None, **kwds):
+    def _contentLoops(self, project: Project, saveFrame: StarIo.NmrSaveFrame, addLoopAttribs=None,
+                     excludeList=(), **kwds):
         """Iterate over the loops in a saveFrame, and add to results"""
         result = {}
         mapping = nef2CcpnMap[saveFrame.category]
         for tag, ccpnTag in mapping.items():
-            if ccpnTag == _isALoop:
+            if tag not in excludeList and ccpnTag == _isALoop:
                 loop = saveFrame.get(tag)
                 if loop:
                     content = self.contents[tag]
@@ -3873,7 +3874,9 @@ class CcpnNefReader:
                         spectrumName = ll[0]
         result = {category: OrderedSet([spectrumName])}
 
-        self._contentLoops(project, saveFrame, name=spectrumName, itemLength=saveFrame['num_dimensions'])
+        self._contentLoops(project, saveFrame, name=spectrumName, itemLength=saveFrame['num_dimensions'],
+                           excludeList=('nef_spectrum_dimension', 'ccpn_spectrum_dimension', 'nef_peak',
+                                               'nef_spectrum_dimension_transfer'))
         self.updateContent(saveFrame, result)
 
     contents['nef_nmr_spectrum'] = content_nef_nmr_spectrum
@@ -4071,7 +4074,7 @@ class CcpnNefReader:
 
     importers['ccpn_integral_list'] = load_ccpn_integral_list
 
-    def verify_ccpn_integral_list(self, spectrum: Spectrum, loop: StarIo.NmrLoop, peakList=None, **kwds):
+    def verify_ccpn_integral_list(self, spectrum: Spectrum, loop: StarIo.NmrLoop, **kwds):
         mapping = nef2CcpnMap[loop.name]
         map2 = dict(item for item in mapping.items() if item[1] and '.' not in item[1])
         creatorFunc = spectrum.getIntegralList
@@ -4082,7 +4085,20 @@ class CcpnNefReader:
                 self.error('ccpn_integral_list - IntegralList {} already exists'.format(integralList), loop, (integralList,))
 
     verifiers['ccpn_integral_list'] = verify_ccpn_integral_list
-    contents['ccpn_integral_list'] = _noLoopContent
+
+    def content_ccpn_integral_list(self, project: Project, loop: StarIo.NmrLoop, name=None, itemLength=None):
+        integralLists = OrderedSet()
+
+        mapping = nef2CcpnMap[loop.name]
+        map2 = dict(item for item in mapping.items() if item[1] and '.' not in item[1])
+        for row in loop.data:
+            parameters = self._parametersFromLoopRow(row, map2)
+            listName = Pid.IDSEP.join(('' if x is None else str(x)) for x in (name, parameters['serial']))
+            integralLists.add(listName)
+
+        return integralLists
+
+    contents['ccpn_integral_list'] = content_ccpn_integral_list
 
     def load_ccpn_multiplet_list(self, spectrum: Spectrum,
                                  loop: StarIo.NmrLoop) -> List[MultipletList]:
@@ -4104,7 +4120,7 @@ class CcpnNefReader:
 
     importers['ccpn_multiplet_list'] = load_ccpn_multiplet_list
 
-    def verify_ccpn_multiplet_list(self, spectrum: Spectrum, loop: StarIo.NmrLoop, peakList=None, **kwds):
+    def verify_ccpn_multiplet_list(self, spectrum: Spectrum, loop: StarIo.NmrLoop, **kwds):
         mapping = nef2CcpnMap[loop.name]
         map2 = dict(item for item in mapping.items() if item[1] and '.' not in item[1])
         creatorFunc = spectrum.getMultipletList
@@ -4115,7 +4131,20 @@ class CcpnNefReader:
                 self.error('ccpn_multiplet_list - MultipletList {} already exists'.format(multipletList), loop, (multipletList,))
 
     verifiers['ccpn_multiplet_list'] = verify_ccpn_multiplet_list
-    contents['ccpn_multiplet_list'] = _noLoopContent
+
+    def content_ccpn_multiplet_list(self, project: Project, loop: StarIo.NmrLoop, name=None, itemLength=None):
+        multipletLists = OrderedSet()
+
+        mapping = nef2CcpnMap[loop.name]
+        map2 = dict(item for item in mapping.items() if item[1] and '.' not in item[1])
+        for row in loop.data:
+            parameters = self._parametersFromLoopRow(row, map2)
+            listName = Pid.IDSEP.join(('' if x is None else str(x)) for x in (name, parameters['serial']))
+            multipletLists.add(listName)
+
+        return multipletLists
+
+    contents['ccpn_multiplet_list'] = content_ccpn_multiplet_list
 
     def load_ccpn_integral(self, spectrum: Spectrum,
                            loop: StarIo.NmrLoop) -> List[Integral]:

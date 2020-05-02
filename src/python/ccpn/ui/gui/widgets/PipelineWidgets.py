@@ -351,12 +351,11 @@ class GuiPipeDrop(DockDrop):
         DockDrop.__init__(self)
 
     def dropEvent(self, ev):
-        print(ev, '@@@')
+        print(ev, '@@@ dropEvent:GuiPipeDrop ')
         super(DockDrop, self).dropEvent(ev)
 
 class GuiPipe(Dock, GuiPipeDrop):
     preferredPipe = True
-    applicationSpecificPipe = False
     pipeName = ''
     pipe = None
     info = "Pipe details not available yet."  #This will appear as toolTip when hovering the GuiPipe Label.

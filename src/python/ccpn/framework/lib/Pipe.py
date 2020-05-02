@@ -32,6 +32,16 @@ from typing import List
 import numpy as np
 import pandas as pd
 
+PIPE_ANALYSIS = 'Analysis'
+PIPE_APPLICATION = 'Application'
+PIPE_PROCESSING = 'Processing'
+PIPE_POSTPROCESSING = 'Post-Processing'
+PIPE_GENERIC = 'Generic'
+PIPE_OUTPUTS = 'Outputs'
+PIPE_USER = 'User'
+
+PIPE_CATEGORIES = [PIPE_ANALYSIS, PIPE_APPLICATION, PIPE_PROCESSING, PIPE_POSTPROCESSING, PIPE_GENERIC, PIPE_OUTPUTS, PIPE_USER ]
+
 def loadPipes(path):
     '''
     dynamic pipe importer. When called on the __init__ file inside a directory containing registered pipes,
@@ -53,6 +63,7 @@ class Pipe(ABC):
     autoGuiParams = None
     pipeName = ''
     isActive = False
+    category = PIPE_GENERIC
 
     @classmethod
     def register(cls):

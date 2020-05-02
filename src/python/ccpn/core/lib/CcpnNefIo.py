@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-05-02 01:54:58 +0100 (Sat, May 02, 2020) $"
+__dateModified__ = "$dateModified: 2020-05-02 02:21:45 +0100 (Sat, May 02, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -4093,8 +4093,9 @@ class CcpnNefReader:
         map2 = dict(item for item in mapping.items() if item[1] and '.' not in item[1])
         for row in loop.data:
             parameters = self._parametersFromLoopRow(row, map2)
-            listName = Pid.IDSEP.join(('' if x is None else str(x)) for x in (name, parameters['serial']))
-            integralLists.add(listName)
+            result = (name, parameters['serial'])
+            # listName = Pid.IDSEP.join(('' if x is None else str(x)) for x in result)
+            integralLists.add(result)
 
         return integralLists
 
@@ -4139,8 +4140,9 @@ class CcpnNefReader:
         map2 = dict(item for item in mapping.items() if item[1] and '.' not in item[1])
         for row in loop.data:
             parameters = self._parametersFromLoopRow(row, map2)
-            listName = Pid.IDSEP.join(('' if x is None else str(x)) for x in (name, parameters['serial']))
-            multipletLists.add(listName)
+            result = (name, parameters['serial'])
+            # listName = Pid.IDSEP.join(('' if x is None else str(x)) for x in result)
+            multipletLists.add(result)
 
         return multipletLists
 
@@ -4209,7 +4211,23 @@ class CcpnNefReader:
                 self.error('ccpn_integral - Integral {} already exists'.format(integral), loop, (integral,))
 
     verifiers['ccpn_integral'] = verify_ccpn_integral
-    contents['ccpn_integral'] = _noLoopContent
+
+    def content_ccpn_integral(self, project: Project, loop: StarIo.NmrLoop, name=None, itemLength=None):
+        integrals = OrderedSet()
+
+        # mapping = nef2CcpnMap[loop.name]
+        # map2 = dict(item for item in mapping.items() if item[1] and '.' not in item[1])
+        for row in loop.data:
+            # parameters = self._parametersFromLoopRow(row, map2)
+            integralListSerial = row.get('integral_list_serial')
+            integralSerial = row.get('integral_serial')
+            result = (name, integralListSerial, integralSerial)
+            # listName = Pid.IDSEP.join(('' if x is None else str(x)) for x in result)
+            integrals.add(result)
+
+        return integrals
+
+    contents['ccpn_integral'] = content_ccpn_integral
 
     def load_ccpn_multiplet(self, spectrum: Spectrum,
                             loop: StarIo.NmrLoop) -> List[Multiplet]:
@@ -4253,6 +4271,22 @@ class CcpnNefReader:
                 self.error('ccpn_multiplet - Multiplet {} already exists'.format(multiplet), loop, (multiplet,))
 
     verifiers['ccpn_multiplet'] = verify_ccpn_multiplet
+
+    def content_ccpn_multiplet(self, project: Project, loop: StarIo.NmrLoop, name=None, itemLength=None):
+        multiplets = OrderedSet()
+
+        # mapping = nef2CcpnMap[loop.name]
+        # map2 = dict(item for item in mapping.items() if item[1] and '.' not in item[1])
+        for row in loop.data:
+            # parameters = self._parametersFromLoopRow(row, map2)
+            multipletListSerial = row.get('multiplet_list_serial')
+            multipletSerial = row.get('multiplet_serial')
+            result = (name, multipletListSerial, multipletSerial)
+            # listName = Pid.IDSEP.join(('' if x is None else str(x)) for x in result)
+            multiplets.add(result)
+
+        return multiplets
+
     contents['ccpn_multiplet'] = _noLoopContent
 
     def load_ccpn_multiplet_peaks(self, spectrum: Spectrum,
@@ -4824,7 +4858,7 @@ class CcpnNefReader:
 
     def content_ccpn_sample_component(self, parent: Sample, loop: StarIo.NmrLoop, sampleName: str = None) -> Optional[OrderedSet]:
         """Get the contents for ccpn_sample_component loop"""
-        result = OrderedSet()
+        components = OrderedSet()
 
         if sampleName is None:
             self.error('Undefined sampleName', loop, None)
@@ -4836,9 +4870,11 @@ class CcpnNefReader:
             parameters = self._parametersFromLoopRow(row, map2)
 
             # NOTE:ED - need to check if 'labelling' removed from pid (which is should be)
-            result.add('.'.join([sampleName, parameters['name'], parameters['labelling']]))
+            result = (sampleName, parameters['name'], parameters['labelling'])
+            # componentName = Pid.IDSEP.join(('' if x is None else str(x)) for x in result)
+            components.add(result)
 
-        return result
+        return components
 
     contents['ccpn_sample_component'] = content_ccpn_sample_component
 

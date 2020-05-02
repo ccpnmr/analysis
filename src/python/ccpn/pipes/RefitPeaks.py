@@ -11,13 +11,13 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2017-07-07 16:32:39 +0100 (Fri, July 07, 2017) $"
+__dateModified__ = "$dateModified: 2017-07-07 16:32:38 +0100 (Fri, July 07, 2017) $"
 __version__ = "$Revision: 3.0.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
 __author__ = "$Author: Luca Mureddu $"
-__date__ = "$Date: 2017-05-20 10:28:42 +0000 (Sun, May 28, 2017) $"
+__date__ = "$Date: 2017-05-28 10:28:42 +0000 (Sun, May 28, 2017) $"
 #=========================================================================================
 # Start of code
 #=========================================================================================
@@ -25,109 +25,91 @@ __date__ = "$Date: 2017-05-20 10:28:42 +0000 (Sun, May 28, 2017) $"
 
 #### GUI IMPORTS
 from ccpn.ui.gui.widgets.PipelineWidgets import GuiPipe
-from ccpn.ui.gui.widgets.PulldownList import PulldownList
 from ccpn.ui.gui.widgets.Label import Label
-from ccpn.ui.gui.widgets.DoubleSpinbox import DoubleSpinbox
-from ccpn.ui.gui.widgets.Widget import Widget
+from ccpn.ui.gui.widgets.CheckBox import CheckBox
 
 #### NON GUI IMPORTS
-from ccpn.framework.lib.Pipe import SpectraPipe, PIPE_APPLICATION
-from ccpn.util.Logging import getLogger
-
+from ccpn.framework.lib.Pipe import SpectraPipe, PIPE_ANALYSIS
+from ccpn.core.lib.AssignmentLib import refitPeaks
+from ccpn.core.lib.peakUtils import estimateVolumes
 
 ########################################################################################################################
 ###   Attributes:
 ###   Used in setting the dictionary keys on _kwargs either in GuiPipe and Pipe
 ########################################################################################################################
 
-PipeName = 'Automated Assignment'
+PipeName = 'Refit Peaks'
+PeakListIndice = 'PeakList_Indice'
+DefaultPeakListIndice = -1
+EstimateVolume = 'Estimate_Volume'
+DefaultEstimateVolumes = True
 
-Mode = 'Mode'
-ToleranceMatches = 'Tolerances'
-HToleranceMatches = 'H'
-CToleranceMatches = 'C'
-NToleranceMatches = 'N'
-Backbone = 'Backbone'
-SideChain = 'Sidechain'
-Iterations = 'Iterations'
-MinAccuracy = 'MinAccuracy'
-
-DefaultMode = Backbone
-DefaultHToleranceMatches = 0.01
-DefaultCToleranceMatches = 0.1
-DefaultNToleranceMatches = 0.1
-DefaultOthersToleranceMatches = 1.0
-
-Tolerances = {HToleranceMatches: DefaultHToleranceMatches,
-              NToleranceMatches: DefaultNToleranceMatches,
-              CToleranceMatches: DefaultCToleranceMatches}
-
-DefaultMinAccuracy = 10
-DefaultIterations = 15000
-DefaultEngine = 'CCPN 1'
 
 
 ########################################################################################################################
 ##########################################      ALGORITHM       ########################################################
 ########################################################################################################################
 
-# This Pipe has not been implemented yet. Gui Mock type only
 
 ########################################################################################################################
 ##########################################     GUI PIPE    #############################################################
 ########################################################################################################################
 
-# This Pipe has not been implemented yet. Gui Mock type only
 
-
-class AutomatedAssignmentGuiPipe(GuiPipe):
-
+class RefitPeaksGuiPipe(GuiPipe):
     pipeName = PipeName
 
-    def __init__(self, name=pipeName, parent=None, project=None, **kwds):
-        super(AutomatedAssignmentGuiPipe, self)
-        GuiPipe.__init__(self, parent=parent, name=name, project=project, **kwds)
-        self._parent = parent
+    def __init__(self, name=pipeName, parent=None, project=None, **kw):
+        super(RefitPeaksGuiPipe, self)
+        GuiPipe.__init__(self, parent=parent, name=name, project=project, **kw)
+        self.parent = parent
 
         row = 0
-        modeLabel = Label(self.pipeFrame, text=Mode, grid=(row, 0))
-        setattr(self, Mode, PulldownList(self.pipeFrame, texts=[Backbone, SideChain], grid=(row, 1)))
+
+        self.indPeakListsLabel = Label(self.pipeFrame, PeakListIndice, grid=(row, 0))
+        setattr(self, PeakListIndice, Label(self.pipeFrame, 'Last created (Default)', grid=(row, 1)))
 
         row += 1
-        tolerancesLabel = Label(self.pipeFrame, text=ToleranceMatches, grid=(row, 0), vAlign='t')
-        holder = Widget(self.pipeFrame, grid=(row, 1), setLayout=True, vAlign='t')
-        for i, (key, value) in enumerate(Tolerances.items()):
-            setattr(self, ToleranceMatches, DoubleSpinbox(holder, prefix=key, value=value, grid=(i, 1)))
+        self.volumesLabel = Label(self.pipeFrame, EstimateVolume, grid=(row, 0))
+        setattr(self, EstimateVolume, CheckBox(self.pipeFrame, checked=DefaultEstimateVolumes, callback=None, grid=(row, 1)))
 
-        row += 1
-        accuracyLabel = Label(self.pipeFrame, text=MinAccuracy, grid=(row, 0))
-        setattr(self, ToleranceMatches, DoubleSpinbox(self.pipeFrame, value=DefaultMinAccuracy, grid=(row, 1)))
 
-        row += 1
-        iterationsLabel = Label(self.pipeFrame, text=Iterations, grid=(row, 0))
-        setattr(self, Iterations, DoubleSpinbox(self.pipeFrame, value=DefaultIterations, grid=(row, 1)))
+
 
 
 ########################################################################################################################
 ##########################################       PIPE      #############################################################
 ########################################################################################################################
 
-# This Pipe has not been implemented yet. Gui Mock type only
 
+class  RefitPeaksPipe(SpectraPipe):
+    """
+    Apply  phasing to all the spectra in the pipeline
+    """
 
-class AutomatedAssignmentPipe(SpectraPipe):
-    guiPipe = AutomatedAssignmentGuiPipe
+    guiPipe = RefitPeaksGuiPipe
     pipeName = PipeName
-    category = PIPE_APPLICATION
+    category = PIPE_ANALYSIS
+
+    _kwargs = {
+                EstimateVolume: DefaultEstimateVolumes,
+                PeakListIndice: DefaultPeakListIndice,
+               }
 
     def runPipe(self, spectra):
-        getLogger().warning('%s Has Not Been Implemented Yet' % PipeName)
+        '''
+        :param spectra: inputData
+        :return: spectra
+        '''
 
-        return spectra
+        if self.project is not None:
+            for spectrum in spectra:
+                if len(spectrum.peakLists)>0:
+                    peakList = spectrum.peakLists[DefaultPeakListIndice]
+                    refitPeaks(peakList.peaks)
+                    if self._kwargs[EstimateVolume]:
+                        estimateVolumes(peakList.peaks)
+            return spectra
 
-# AutomatedAssignmentPipe.register() # Registers the pipe in the pipeline
-#
-#
-# if __name__ == '__main__': # Gui Test
-#   from ccpn.ui.gui.widgets.PipelineWidgets import testGuiPipe
-#   testGuiPipe(AutomatedAssignmentGuiPipe)
+
+RefitPeaksPipe.register()  # Registers the pipe in the pipeline

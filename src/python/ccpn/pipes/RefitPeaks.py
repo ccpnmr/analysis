@@ -89,7 +89,7 @@ class  RefitPeaksPipe(SpectraPipe):
 
     guiPipe = RefitPeaksGuiPipe
     pipeName = PipeName
-    category = PIPE_ANALYSIS
+    pipeCategory = PIPE_ANALYSIS
 
     _kwargs = {
                 EstimateVolume: DefaultEstimateVolumes,

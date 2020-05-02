@@ -167,7 +167,7 @@ class ExcludeRegionsGuiPipe(GuiPipe):
 class ExcludeRegionsPipe(SpectraPipe):
     guiPipe = ExcludeRegionsGuiPipe
     pipeName = PipeName
-    category = PIPE_GENERIC
+    pipeCategory = PIPE_GENERIC
 
     _kwargs = {
         ExcludeRegions: [[], []]

@@ -90,7 +90,7 @@ class PeakFilterNdGuiPipe(GuiPipe):
 class PeakFilterNdPipe(SpectraPipe):
     guiPipe = PeakFilterNdGuiPipe
     pipeName = PipeName
-    category = PIPE_ANALYSIS
+    pipeCategory = PIPE_ANALYSIS
 
 
     _kwargs = {

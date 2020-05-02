@@ -130,7 +130,7 @@ class OutputPipelineGuiPipe(GuiPipe):
 class OutputSpectraPipe(SpectraPipe):
     guiPipe = OutputPipelineGuiPipe
     pipeName = PipeName
-    category = PIPE_OUTPUTS
+    pipeCategory = PIPE_OUTPUTS
 
     _kwargs = {
         SavePath      : DefaultPath,

@@ -89,7 +89,7 @@ class CalculateAreaGuiPipe(GuiPipe):
 class CalculateAreaPipe(SpectraPipe):
     guiPipe = CalculateAreaGuiPipe
     pipeName = PipeName
-    category = PIPE_ANALYSIS
+    pipeCategory = PIPE_ANALYSIS
 
 
     _kwargs = {

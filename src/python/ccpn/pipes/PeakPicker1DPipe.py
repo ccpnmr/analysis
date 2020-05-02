@@ -103,7 +103,7 @@ class PeakPicker1DGuiPipe(GuiPipe):
 class PeakPicker1DPipe(SpectraPipe):
     guiPipe = PeakPicker1DGuiPipe
     pipeName = PipeName
-    category = PIPE_ANALYSIS
+    pipeCategory = PIPE_ANALYSIS
 
     _kwargs = {
         ExcludeRegions        : DefaultExcludeRegions,

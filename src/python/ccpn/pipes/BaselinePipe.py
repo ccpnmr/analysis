@@ -79,7 +79,7 @@ class BaselineCorrection1DPipe(SpectraPipe):
 
     guiPipe = BaselineCorrectionGuiPipe
     pipeName = PipeName
-    category = PIPE_POSTPROCESSING
+    pipeCategory = PIPE_POSTPROCESSING
 
     _kwargs = {
 

@@ -63,7 +63,7 @@ class Pipe(ABC):
     autoGuiParams = None
     pipeName = ''
     isActive = False
-    category = PIPE_GENERIC
+    pipeCategory = PIPE_GENERIC
 
     @classmethod
     def register(cls):

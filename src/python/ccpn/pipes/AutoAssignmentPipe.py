@@ -118,7 +118,7 @@ class AutomatedAssignmentGuiPipe(GuiPipe):
 class AutomatedAssignmentPipe(SpectraPipe):
     guiPipe = AutomatedAssignmentGuiPipe
     pipeName = PipeName
-    category = PIPE_APPLICATION
+    pipeCategory = PIPE_APPLICATION
 
     def runPipe(self, spectra):
         getLogger().warning('%s Has Not Been Implemented Yet' % PipeName)

@@ -224,7 +224,7 @@ class AlignSpectraGuiPipe(GuiPipe):
 class AlignSpectra(SpectraPipe):
     guiPipe = AlignSpectraGuiPipe
     pipeName = PipeName
-    category = PIPE_POSTPROCESSING
+    pipeCategory = PIPE_POSTPROCESSING
 
     _kwargs = {
         ReferenceSpectrum: 'spectrum.pid',

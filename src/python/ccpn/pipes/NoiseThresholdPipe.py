@@ -133,7 +133,7 @@ class NoiseThresholdGuiPipe(GuiPipe):
 class NoiseThresholdPipe(SpectraPipe):
     guiPipe = NoiseThresholdGuiPipe
     pipeName = PipeName
-    category = PIPE_GENERIC
+    pipeCategory = PIPE_GENERIC
 
 
     _kwargs = {

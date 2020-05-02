@@ -124,7 +124,7 @@ class Phasing1DPipe(SpectraPipe):
 
     guiPipe = PhasingSpectraGuiPipe
     pipeName = PipeName
-    category = PIPE_POSTPROCESSING
+    pipeCategory = PIPE_POSTPROCESSING
 
     _kwargs = {
         Ph0  : DefaultPh0,

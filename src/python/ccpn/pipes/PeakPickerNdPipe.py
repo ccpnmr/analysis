@@ -89,7 +89,7 @@ class PeakPickerNdGuiPipe(GuiPipe):
 class PeakPickerNdPipe(SpectraPipe):
     guiPipe = PeakPickerNdGuiPipe
     pipeName = PipeName
-    category = PIPE_ANALYSIS
+    pipeCategory = PIPE_ANALYSIS
 
     _kwargs = {
         DropFactor   : DefaultDropFactor,

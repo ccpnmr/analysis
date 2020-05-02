@@ -98,7 +98,7 @@ class  Scale1DPipe(SpectraPipe):
 
     guiPipe = Scale1DGuiPipe
     pipeName = PipeName
-    category = PIPE_POSTPROCESSING
+    pipeCategory = PIPE_POSTPROCESSING
 
 
     _kwargs = {

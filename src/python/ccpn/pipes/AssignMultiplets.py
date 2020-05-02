@@ -94,7 +94,7 @@ class FindMultipletsGuiPipe(GuiPipe):
 class FindMultipletsPipe(SpectraPipe):
     guiPipe = FindMultipletsGuiPipe
     pipeName = PipeName
-    category = PIPE_ANALYSIS
+    pipeCategory = PIPE_ANALYSIS
 
     _kwargs = {
 

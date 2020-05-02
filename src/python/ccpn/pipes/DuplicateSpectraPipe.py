@@ -93,7 +93,7 @@ class DuplicateSpectrumGuiPipe(GuiPipe):
 class DuplicateSpectrumPipe(SpectraPipe):
     guiPipe = DuplicateSpectrumGuiPipe
     pipeName = PipeName
-    category = PIPE_GENERIC
+    pipeCategory = PIPE_GENERIC
 
     _kwargs = {
         ReplaceInputData: DefaultReplaceInputData

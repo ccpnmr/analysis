@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-05-02 00:48:12 +0100 (Sat, May 02, 2020) $"
+__dateModified__ = "$dateModified: 2020-05-02 01:27:01 +0100 (Sat, May 02, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -5034,7 +5034,7 @@ class CcpnNefReader:
                 # shortName.translate(Pid.remapSeparators))
             if result:
                 # warning as already exists
-                self.error('ccpn_assignment - Chain {} already exists'.format(result), saveFrame, (result,))
+                self.error('ccpn_assignment - NmrChain {} already exists'.format(result), saveFrame, (result,))
 
         nmrResidues = {}
         for row in saveFrame[nmrResidueLoopName].data:
@@ -5047,7 +5047,7 @@ class CcpnNefReader:
                 name = Pid.IDSEP.join(('' if x is None else str(x)) for x in (row.get('sequence_code'), row.get('residue_name')))
                 result = nmrChain.getNmrResidue(name)
                 if result is not None:
-                    self.error('ccpn_assignment - Residue {} already exists'.format(result), saveFrame, (result,))
+                    self.error('ccpn_assignment - NmrResidue {} already exists'.format(result), saveFrame, (result,))
                     nmrResidues[(chainCode, row.get('sequence_code'))] = result
 
         # read nmr_atom loop
@@ -5058,9 +5058,10 @@ class CcpnNefReader:
             chainCode = row['chain_code']
             sequenceCode = row['sequence_code']
             nmrResidue = nmrResidues[(chainCode, sequenceCode)]
-            nmrAtom = nmrResidue.getNmrAtom(row.get('name'))
-            if result is not None:
-                self.error('ccpn_assignment - NmrAtom {} already exists'.format(result), saveFrame, (result,))
+            if nmrResidue:
+                nmrAtom = nmrResidue.getNmrAtom(row.get('name'))
+                if nmrAtom is not None:
+                    self.error('ccpn_assignment - NmrAtom {} already exists'.format(nmrAtom), saveFrame, (nmrAtom,))
 
     verifiers['ccpn_assignment'] = verify_ccpn_assignment
     verifiers['nmr_chain'] = _noLoopVerify
@@ -5166,15 +5167,25 @@ class CcpnNefReader:
                 self.error('ccpn_notes - Note {} already exists'.format(result), saveFrame, (result,))
 
     verifiers['ccpn_notes'] = verify_ccpn_notes
-
     verifiers['ccpn_note'] = _noLoopVerify
 
-    # def content_ccpn_notes(self, project: Project, saveFrame: StarIo.NmrSaveFrame):
-    #     self.storeContent(saveFrame, None)
-    #     return None
+    def content_ccpn_notes(self, project: Project, saveFrame: StarIo.NmrSaveFrame):
+        notes = OrderedSet()
 
-    contents['ccpn_notes'] = _contentLoops
+        loopName = 'ccpn_note'
+        loop = saveFrame[loopName]
+        mapping = nef2CcpnMap[loopName]
+        map2 = dict(item for item in mapping.items() if item[1] and '.' not in item[1])
+        for row in loop.data:
+            parameters = self._parametersFromLoopRow(row, map2)
+            notes.add(parameters['name'])
 
+        result = {loopName: notes}
+
+        self._contentLoops(project, saveFrame)
+        self.updateContent(saveFrame, result)
+
+    contents['ccpn_notes'] = content_ccpn_notes
     contents['ccpn_note'] = _noLoopContent
 
     def load_ccpn_additional_data(self, project: Project, saveFrame: StarIo.NmrSaveFrame):
@@ -5207,15 +5218,9 @@ class CcpnNefReader:
                     self.error('ccpn_additional_data - Object {} contains internal data'.format(obj), saveFrame, (obj,))
 
     verifiers['ccpn_additional_data'] = verify_ccpn_additional_data
-
     verifiers['ccpn_internal_data'] = _noLoopVerify
 
-    # def content_ccpn_additional_data(self, project: Project, saveFrame: StarIo.NmrSaveFrame):
-    #     self.storeContent(saveFrame, None)
-    #     return None
-
     contents['ccpn_additional_data'] = _contentLoops
-
     contents['ccpn_internal_data'] = _noLoopContent
 
     def load_ccpn_dataset(self, project: Project, saveFrame: StarIo.NmrSaveFrame):
@@ -5227,24 +5232,13 @@ class CcpnNefReader:
         framecode = saveFrame['sf_framecode']
         mapping = nef2CcpnMap[category]
 
-    #
     importers['ccpn_dataset'] = load_ccpn_dataset
 
-    # def verify_ccpn_dataset(self, project: Project, saveFrame: StarIo.NmrSaveFrame):
-    #     # nothing required
-    #     pass
-
     verifiers['ccpn_dataset'] = _verifyLoops
-
     verifiers['ccpn_calculation_step'] = _noLoopVerify
     verifiers['ccpn_calculation_data'] = _noLoopVerify
 
-    # def content_ccpn_dataset(self, project: Project, saveFrame: StarIo.NmrSaveFrame):
-    #     self.storeContent(saveFrame, None)
-    #     return None
-
     contents['ccpn_dataset'] = _contentLoops
-
     contents['ccpn_calculation_step'] = _noLoopContent
     contents['ccpn_calculation_data'] = _noLoopContent
 

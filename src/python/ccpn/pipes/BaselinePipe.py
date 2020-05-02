@@ -27,7 +27,7 @@ __date__ = "$Date: 2017-05-28 10:28:42 +0000 (Sun, May 28, 2017) $"
 from ccpn.ui.gui.widgets.PipelineWidgets import GuiPipe, _getWidgetByAtt
 
 #### NON GUI IMPORTS
-from ccpn.framework.lib.Pipe import SpectraPipe
+from ccpn.framework.lib.Pipe import SpectraPipe, PIPE_POSTPROCESSING
 import numpy as np
 from ccpn.util.Logging import getLogger, _debug3
 from ccpn.core.lib.SpectrumLib import nmrGlueBaselineCorrector
@@ -79,6 +79,7 @@ class BaselineCorrection1DPipe(SpectraPipe):
 
     guiPipe = BaselineCorrectionGuiPipe
     pipeName = PipeName
+    category = PIPE_POSTPROCESSING
 
     _kwargs = {
 

@@ -31,7 +31,7 @@ from ccpn.ui.gui.widgets.CheckBox import CheckBox
 from ccpn.ui.gui.widgets.DoubleSpinbox import DoubleSpinbox
 
 #### NON GUI IMPORTS
-from ccpn.framework.lib.Pipe import SpectraPipe
+from ccpn.framework.lib.Pipe import SpectraPipe, PIPE_GENERIC
 from ccpn.core.PeakList import _filterROI1Darray, estimateNoiseLevel1D
 
 
@@ -133,6 +133,8 @@ class NoiseThresholdGuiPipe(GuiPipe):
 class NoiseThresholdPipe(SpectraPipe):
     guiPipe = NoiseThresholdGuiPipe
     pipeName = PipeName
+    category = PIPE_GENERIC
+
 
     _kwargs = {
         EstimateNoiseThreshold: DefaultEstimateNoiseThreshold,

@@ -28,7 +28,7 @@ from ccpn.ui.gui.widgets.PipelineWidgets import GuiPipe
 from ccpn.ui.gui.popups.PickPeaks1DPopup import ExcludeRegions as ER
 
 #### NON GUI IMPORTS
-from ccpn.framework.lib.Pipe import SpectraPipe
+from ccpn.framework.lib.Pipe import SpectraPipe, PIPE_GENERIC
 
 
 ########################################################################################################################
@@ -70,6 +70,8 @@ class ExcludeRegionsGuiPipe(GuiPipe):
 class ExcludeRegionsPipe(SpectraPipe):
     guiPipe = ExcludeRegionsGuiPipe
     pipeName = PipeName
+    category = PIPE_GENERIC
+
     _kwargs = {
         ExcludeRegions: [[], []]
         }

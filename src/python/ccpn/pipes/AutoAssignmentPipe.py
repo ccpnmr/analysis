@@ -31,7 +31,7 @@ from ccpn.ui.gui.widgets.DoubleSpinbox import DoubleSpinbox
 from ccpn.ui.gui.widgets.Widget import Widget
 
 #### NON GUI IMPORTS
-from ccpn.framework.lib.Pipe import SpectraPipe
+from ccpn.framework.lib.Pipe import SpectraPipe, PIPE_ANALYSIS
 from ccpn.util.Logging import getLogger
 
 
@@ -118,6 +118,7 @@ class AutomatedAssignmentGuiPipe(GuiPipe):
 class AutomatedAssignmentPipe(SpectraPipe):
     guiPipe = AutomatedAssignmentGuiPipe
     pipeName = PipeName
+    category = PIPE_ANALYSIS
 
     def runPipe(self, spectra):
         getLogger().warning('%s Has Not Been Implemented Yet' % PipeName)

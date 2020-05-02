@@ -30,7 +30,7 @@ from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.DoubleSpinbox import DoubleSpinbox
 
 #### NON GUI IMPORTS
-from ccpn.framework.lib.Pipe import SpectraPipe
+from ccpn.framework.lib.Pipe import SpectraPipe, PIPE_POSTPROCESSING
 import numpy as np
 from ccpn.util.Logging import getLogger
 from ccpn.util import Phasing
@@ -124,6 +124,7 @@ class Phasing1DPipe(SpectraPipe):
 
     guiPipe = PhasingSpectraGuiPipe
     pipeName = PipeName
+    category = PIPE_POSTPROCESSING
 
     _kwargs = {
         Ph0  : DefaultPh0,

@@ -32,7 +32,7 @@ from ccpn.ui.gui.widgets.FileDialog import LineEditButtonDialog
 from ccpn.ui.gui.widgets.RadioButtons import RadioButtons
 
 #### NON GUI IMPORTS
-from ccpn.framework.lib.Pipe import SpectraPipe
+from ccpn.framework.lib.Pipe import SpectraPipe, PIPE_OUTPUTS
 from ccpn.util.Hdf5 import convertDataToHdf5
 import pandas as pd
 import os
@@ -130,6 +130,8 @@ class OutputPipelineGuiPipe(GuiPipe):
 class OutputSpectraPipe(SpectraPipe):
     guiPipe = OutputPipelineGuiPipe
     pipeName = PipeName
+    category = PIPE_OUTPUTS
+
     _kwargs = {
         SavePath      : DefaultPath,
         SaveHDF5      : False,

@@ -30,7 +30,7 @@ from ccpn.ui.gui.widgets.DoubleSpinbox import DoubleSpinbox
 from ccpn.ui.gui.widgets.CheckBox import CheckBox
 
 #### NON GUI IMPORTS
-from ccpn.framework.lib.Pipe import SpectraPipe
+from ccpn.framework.lib.Pipe import SpectraPipe, PIPE_ANALYSIS
 from ccpn.pipes.lib._getNoiseLevel import _getNoiseLevelForPipe
 
 
@@ -89,6 +89,8 @@ class CalculateAreaGuiPipe(GuiPipe):
 class CalculateAreaPipe(SpectraPipe):
     guiPipe = CalculateAreaGuiPipe
     pipeName = PipeName
+    category = PIPE_ANALYSIS
+
 
     _kwargs = {
         NoiseThreshold        : DefaultNoiseThreshold,

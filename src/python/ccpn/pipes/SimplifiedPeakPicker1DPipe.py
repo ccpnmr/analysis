@@ -27,7 +27,7 @@ __date__ = "$Date: 2017-05-20 10:28:42 +0000 (Sun, May 28, 2017) $"
 from ccpn.ui.gui.widgets.PipelineWidgets import GuiPipe
 
 #### NON GUI IMPORTS
-from ccpn.framework.lib.Pipe import SpectraPipe
+from ccpn.framework.lib.Pipe import SpectraPipe, PIPE_ANALYSIS
 from ccpn.util.Logging import getLogger
 from tqdm import tqdm
 
@@ -37,7 +37,7 @@ from tqdm import tqdm
 ###   Used in setting the dictionary keys on _kwargs either in GuiPipe and Pipe
 ########################################################################################################################
 
-PipeName = 'Peak Detector 1D (experimental)'
+PipeName = 'Peak Detector 1D'
 ExcludeRegions = 'Exclude_Regions'
 
 DefaultExcludeRegions = [[0.0, 0.0], [0.0, 0.0]]
@@ -77,6 +77,7 @@ class PeakDetector1DGuiPipe(GuiPipe):
 class PeakPicker1DPipe(SpectraPipe):
     guiPipe = PeakDetector1DGuiPipe
     pipeName = PipeName
+    category = PIPE_ANALYSIS
 
     _kwargs = {
                ExcludeRegions  : DefaultExcludeRegions,

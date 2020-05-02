@@ -29,7 +29,7 @@ from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.DoubleSpinbox import DoubleSpinbox
 
 #### NON GUI IMPORTS
-from ccpn.framework.lib.Pipe import SpectraPipe
+from ccpn.framework.lib.Pipe import SpectraPipe, PIPE_ANALYSIS
 from ccpn.pipes.lib._getNoiseLevel import _getNoiseLevelForPipe
 from ccpn.pipes.lib.AreaCalculation import _addAreaValuesToPeaks
 from ccpn.util.Logging import getLogger
@@ -94,6 +94,7 @@ class FindMultipletsGuiPipe(GuiPipe):
 class FindMultipletsPipe(SpectraPipe):
     guiPipe = FindMultipletsGuiPipe
     pipeName = PipeName
+    category = PIPE_ANALYSIS
 
     _kwargs = {
 

@@ -29,7 +29,7 @@ from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.CheckBox import CheckBox
 
 #### NON GUI IMPORTS
-from ccpn.framework.lib.Pipe import SpectraPipe
+from ccpn.framework.lib.Pipe import SpectraPipe, PIPE_GENERIC
 
 
 ########################################################################################################################
@@ -93,6 +93,7 @@ class DuplicateSpectrumGuiPipe(GuiPipe):
 class DuplicateSpectrumPipe(SpectraPipe):
     guiPipe = DuplicateSpectrumGuiPipe
     pipeName = PipeName
+    category = PIPE_GENERIC
 
     _kwargs = {
         ReplaceInputData: DefaultReplaceInputData

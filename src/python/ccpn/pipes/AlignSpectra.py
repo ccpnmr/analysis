@@ -30,7 +30,7 @@ from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.GLLinearRegionsPlot import GLTargetButtonSpinBoxes
 
 #### NON GUI IMPORTS
-from ccpn.framework.lib.Pipe import SpectraPipe
+from ccpn.framework.lib.Pipe import SpectraPipe, PIPE_POSTPROCESSING
 from scipy import signal
 import numpy as np
 from scipy import stats
@@ -155,7 +155,6 @@ def addShiftToSpectra(spectra, shift):
 
 
 class AlignSpectraGuiPipe(GuiPipe):
-    preferredPipe = True
     pipeName = PipeName
 
     def __init__(self, name=pipeName, parent=None, project=None, **kwds):
@@ -225,6 +224,7 @@ class AlignSpectraGuiPipe(GuiPipe):
 class AlignSpectra(SpectraPipe):
     guiPipe = AlignSpectraGuiPipe
     pipeName = PipeName
+    category = PIPE_POSTPROCESSING
 
     _kwargs = {
         ReferenceSpectrum: 'spectrum.pid',

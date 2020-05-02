@@ -30,7 +30,7 @@ from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.GLLinearRegionsPlot import GLTargetButtonSpinBoxes
 
 #### NON GUI IMPORTS
-from ccpn.framework.lib.Pipe import SpectraPipe
+from ccpn.framework.lib.Pipe import SpectraPipe, PIPE_POSTPROCESSING
 from ccpn.pipes.lib.Scale1Dspectra import scaleSpectraByRegion
 from ccpn.util.Logging import getLogger
 
@@ -98,6 +98,8 @@ class  Scale1DPipe(SpectraPipe):
 
     guiPipe = Scale1DGuiPipe
     pipeName = PipeName
+    category = PIPE_POSTPROCESSING
+
 
     _kwargs = {
         ReferenceRegion: DefaultReferenceRegion,

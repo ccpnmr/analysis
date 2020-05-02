@@ -29,7 +29,7 @@ from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.DoubleSpinbox import DoubleSpinbox
 
 #### NON GUI IMPORTS
-from ccpn.framework.lib.Pipe import SpectraPipe
+from ccpn.framework.lib.Pipe import SpectraPipe, PIPE_POSTPROCESSING
 from ccpn.util.Logging import getLogger
 
 
@@ -96,6 +96,8 @@ class ReferencingSpectra(SpectraPipe):
 
     guiPipe = ReferencingSpectraGuiPipe
     pipeName = PipeName
+    category = PIPE_POSTPROCESSING
+
 
     _kwargs = {
         Origin: DefaultOrigin,

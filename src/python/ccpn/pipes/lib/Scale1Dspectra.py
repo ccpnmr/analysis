@@ -56,7 +56,7 @@ def scaleSpectraByRegion(spectra, limits, engine = 'mean', resetScale=True):
 
     maxs = []
     for y in ys:
-            y0_m = np.max(y)
+            y0_m = np.max(abs(y)) #so will work also for negative regions
             maxs.append(y0_m)
 
     targetValue = getattr(np, engine)(maxs)

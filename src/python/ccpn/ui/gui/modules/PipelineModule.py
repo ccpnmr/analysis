@@ -326,6 +326,7 @@ class GuiPipeline(CcpnModule, Pipeline):
                     pipeItem.setSelected(True)
                     if pipeItem.parent():
                         pipeItem.parent().setExpanded(True)
+                        self.pipeTreeWidget.scrollToItem(pipeItem)
 
 
     def _addGoButtonWidget(self):

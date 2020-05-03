@@ -31,16 +31,30 @@ from abc import abstractmethod
 from typing import List
 import numpy as np
 import pandas as pd
+from ccpn.framework.Framework import AnalysisScreen, AnalysisAssign, AnalysisMetabolomics, AnalysisStructure
 
 PIPE_ANALYSIS = 'Analysis'
-PIPE_APPLICATION = 'Application'
+PIPE_ASSIGN = AnalysisAssign
+PIPE_SCREEN = AnalysisScreen
+PIPE_METABOLOMICS = AnalysisMetabolomics
+PIPE_STRUCTURE = AnalysisStructure
+
 PIPE_PROCESSING = 'Processing'
 PIPE_POSTPROCESSING = 'Post-Processing'
 PIPE_GENERIC = 'Generic'
 PIPE_OUTPUTS = 'Outputs'
 PIPE_USER = 'User'
 
-PIPE_CATEGORIES = [PIPE_ANALYSIS, PIPE_APPLICATION, PIPE_PROCESSING, PIPE_POSTPROCESSING, PIPE_GENERIC, PIPE_OUTPUTS, PIPE_USER ]
+PIPE_CATEGORIES = [PIPE_ANALYSIS,
+                   PIPE_ASSIGN,
+                   PIPE_SCREEN,
+                   PIPE_METABOLOMICS,
+                   PIPE_STRUCTURE,
+                   PIPE_PROCESSING,
+                   PIPE_POSTPROCESSING,
+                   PIPE_GENERIC,
+                   PIPE_OUTPUTS,
+                   PIPE_USER]
 
 def loadPipes(path):
     '''

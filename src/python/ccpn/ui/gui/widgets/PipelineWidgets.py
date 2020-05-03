@@ -50,11 +50,13 @@ from ccpn.ui.gui.widgets.FileDialog import LineEditButtonDialog
 from ccpn.ui.gui.widgets.Widget import Widget
 from ccpn.ui.gui.popups.PickPeaks1DPopup import ExcludeRegions
 from ccpn.ui.gui.widgets.Icon import Icon
-
+from ccpn.ui.gui.widgets.Base import Base
+from collections import OrderedDict
 from ccpn.framework.lib.Pipeline import Pipeline
 from ccpn.ui.gui.widgets.GLLinearRegionsPlot import GLTargetButtonSpinBoxes
 from ccpn.util.Logging import getLogger
-
+from ccpn.framework.lib.Pipe import PIPE_CATEGORIES
+from functools import partial
 
 commonWidgets = {
     CheckBox.__name__               : ('get', 'setChecked'),
@@ -226,8 +228,7 @@ class PipelineDropArea(DockArea):
     def dragEnterEvent(self, ev):
         src = ev.source()
 
-        if isinstance(src, ListWidget) and hasattr(src, 'pipes'):
-            print('hey in the pipeline area', src.getSelectedTexts())
+        if isinstance(src, PipesTree):
             ev.accept()
         else:
             ev.ignore()
@@ -753,6 +754,74 @@ class PipelineBoxLabel(DockLabel, VerticalLabel):
         #     contextMenu.addAction('Close Others', partial(self.module.mainWindow.moduleArea._closeOthers, self.module))
         #     contextMenu.addAction('Close All', self.module.mainWindow.moduleArea._closeAll)
         return contextMenu
+
+class pipeTreeItem(QtWidgets.QTreeWidgetItem):
+    def __init__(self, parent, name, isPipeCategory=False, draggable=False, expanded=True, **kwds):
+        super().__init__(parent)
+        self.pipeName = name
+        self.isPipeCategory = isPipeCategory
+        self.setText(0, name)
+        if draggable:
+            self.setFlags(self.flags() | QtCore.Qt.ItemIsDragEnabled)
+        else:
+            self.setFlags(self.flags() ^ QtCore.Qt.ItemIsDragEnabled)
+        self.setExpanded(expanded)
+
+class PipesTree(QtWidgets.QTreeWidget, Base):
+    def __init__(self, parent=None, **kwds):
+        super().__init__(parent)
+        Base._init(self, acceptDrops=False, **kwds)
+        self.setSelectionMode(QtWidgets.QAbstractItemView.ExtendedSelection)
+        self.setDragEnabled(True)
+        self.itemDoubleClicked.connect(self._itemDoubleClickCallback)
+        self.parent = self.guiPipeline = parent
+
+    def _addPipesToTree(self):
+
+        from collections import defaultdict
+        allPipes = [(p.pipeCategory, p.pipeName) for p in self.guiPipeline.pipes]
+        d = defaultdict(list)
+        for k, v in allPipes:
+            d[k].append(v)
+        dd = OrderedDict([(el, d[el]) for el in PIPE_CATEGORIES])
+        self.buildTree(dd)
+
+
+    def buildTree(self, dd):
+        for categoryName, pipeNames in dd.items():
+            if isinstance(pipeNames, list):
+                if len(pipeNames)>0:
+                    categoryItem = pipeTreeItem(self, categoryName, isPipeCategory=True)
+                    for pipeName in sorted(pipeNames):
+                        pipeItem = pipeTreeItem(categoryItem, pipeName, draggable=True)
+
+
+    def mouseReleaseEvent(self, event):
+        """Re-implementation of the mouse press event so right click can be used to delete items from the
+        sidebar.
+        """
+        if event.button() == QtCore.Qt.RightButton:
+            for item in self.selectedItems():
+                if item is not None:
+                    if not item.isPipeCategory:
+                        self._raiseContextMenu(event, item)
+                        event.accept()
+        else:
+            super().mouseReleaseEvent(event)
+
+    def _itemDoubleClickCallback(self, item):
+        if not item.isPipeCategory:
+            self.guiPipeline.addPipe(item.pipeName)
+
+    def _raiseContextMenu(self, event, item):
+        print('Context Menu. Testing')
+        contextMenu = Menu('', self, isFloatWidget=True)
+        contextMenu.addItem("Add to pipeline ", callback=partial(self.guiPipeline.addPipe, item.pipeName))
+        contextMenu.addItem("Clear pipeline", callback=self.guiPipeline._closeAllGuiPipes)
+        contextMenu.addSeparator()
+        contextMenu.addItem("Info", callback=None)
+        contextMenu.move(event.globalPos().x(), event.globalPos().y() + 10)
+        contextMenu.exec_()
 
 
 def testGuiPipe(GuiPipe):

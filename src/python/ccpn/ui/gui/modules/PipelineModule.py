@@ -304,60 +304,30 @@ class GuiPipeline(CcpnModule, Pipeline):
         openButton.setMenu(menu)
 
     def _createPipelineWidgets(self):
-        self._addPipesPullDownWidget()
+        self._addPipesSearchWidget()
         self._addGoButtonWidget()
         self._addPipelineDropArea()
         self.pipeTreeWidget._addPipesToTree()
 
-    def _addPipesPullDownWidget(self):
-        self.pipePulldown = PulldownList(self, )
-        self.pipePulldown.setMinimumWidth(200)
-        self.goAreaLayout.addWidget(self.pipePulldown)
-        self._setDataPipesPulldown()
-        self.pipePulldown.installEventFilter(self)
+    def _addPipesSearchWidget(self):
+        self._searchWidget = LineEdit(self, backgroundText='Search', grid=(0, 0))
+        self._searchWidget.textChanged.connect(self._searchWidgetCallback)
+        self._searchWidget.setMinimumWidth(200)
+        self.goAreaLayout.addWidget(self._searchWidget)
 
-    def _setDataPipesPulldown(self):
-        '''Sets all the GuiPipes names on the Pulldown Pipe. Orderes by flag '''
-        return
-        self._listPipesAsStr = [selectPipeLabel, ]
-        preferredGuiPipes = [preferredPipeLabel, ]
-        applicationPipes = [applicationPipeLabel, ]
-        otherGuiPipes = [otherPipeLabel, ]
+    def _searchWidgetCallback(self):
+        self.pipeTreeWidget.clearSelection()
+        text = self._searchWidget.get()
+        if text != '':
+            items = (self.pipeTreeWidget.findItems(text, Qt.MatchStartsWith | Qt.MatchRecursive))
+            print(items)
+            if items:
+                pipeItems = [i for i in items if not i.isPipeCategory]
+                for pipeItem in pipeItems:
+                    pipeItem.setSelected(True)
+                    if pipeItem.parent():
+                        pipeItem.parent().setExpanded(True)
 
-        for guiPipe in self.guiPipes:
-            if guiPipe is not None:
-                # if guiPipe.preferredPipe:
-                #     preferredGuiPipes.append(guiPipe.pipe.pipeName)
-                # elif guiPipe.applicationSpecificPipe and not guiPipe.preferredPipe:
-                #     applicationPipes.append(guiPipe.pipe.pipeName)
-                # else:
-                    otherGuiPipes.append(guiPipe.pipe.pipeName)
-        preferredGuiPipes.sort()
-        applicationPipes.sort()
-        otherGuiPipes.sort()
-        self._listPipesAsStr.extend(preferredGuiPipes)
-        self._listPipesAsStr.extend(otherGuiPipes)
-        self._listPipesAsStr.extend(applicationPipes)
-
-        self.pipePulldown.setData(self._listPipesAsStr)
-        self.pipePulldown.disableLabelsOnPullDown([preferredPipeLabel, applicationPipeLabel, otherPipeLabel], colour='red')
-        self.pipePulldown.activated[str].connect(self._selectPipe)
-
-        self.pipesListWidget.addItems(self._listPipesAsStr)
-        self.pipesListWidget._disableLabels([preferredPipeLabel, applicationPipeLabel, otherPipeLabel])
-        self.pipesListWidget.pipes = [preferredGuiPipes,otherGuiPipes,applicationPipes]
-
-
-    def _updatePipePulldown(self):
-        if len(self.guiPipes) != len(self.pipes):
-            self.guiPipes = self._getGuiFromPipes(self.pipes)
-        self._setDataPipesPulldown()
-
-    def eventFilter(self, source, event):
-        '''Filter to disable the wheel event in the guiPipes pulldown. Otherwise each scroll would add a guiPipe!'''
-        if event.type() == QtCore.QEvent.Wheel:
-            return True
-        return False
 
     def _addGoButtonWidget(self):
         '''
@@ -427,7 +397,6 @@ class GuiPipeline(CcpnModule, Pipeline):
 
         guiPipeName = self._getSerialName(str(selected))
         self._addGuiPipe(guiPipeName, selected)
-        self.pipePulldown.setIndex(0)
 
     def addPipe(self, pipeName):
         guiPipeName = self._getSerialName(str(pipeName))
@@ -479,10 +448,6 @@ class GuiPipeline(CcpnModule, Pipeline):
         # showInfo('Pipeline','Finished')
 
 
-    def _openAllPipes(self):
-        'Testing Only. Opens all the pipe in once with default name'
-        for guiPipeName in self.pipePulldown.texts:
-            self._addGuiPipe(guiPipeName, guiPipeName)
 
     def _closeModule(self):
         """Re-implementation of closeModule function from CcpnModule to unregister notification """
@@ -738,15 +703,6 @@ class GuiPipeline(CcpnModule, Pipeline):
 
     def _itemsDropped(self):
         self.setDataSelection()
-
-    def _openPipe(self):
-        if self.clickToAddCheckBox.get():
-            for p in self.pipesListWidget.getSelectedTexts():
-                self._selectPipe(p)
-        # ss = self.pipesListWidget.getSelectedTexts()
-        # guiPipeName = self._getSerialName(str(ss[0]))
-        # self._addGuiPipe(guiPipeName, ss[0])
-
 
     def _popupInputCallback(self, w):
         selected = w.getSelections()

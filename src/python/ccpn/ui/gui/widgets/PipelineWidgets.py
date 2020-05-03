@@ -57,6 +57,9 @@ from ccpn.ui.gui.widgets.GLLinearRegionsPlot import GLTargetButtonSpinBoxes
 from ccpn.util.Logging import getLogger
 from ccpn.framework.lib.Pipe import PIPE_CATEGORIES
 from functools import partial
+from ccpn.ui.gui.widgets.Font import Font
+from ccpn.ui.gui.guiSettings import getColours, LABEL_FOREGROUND
+from ccpn.util.Colour import hexToRgb
 
 commonWidgets = {
     CheckBox.__name__               : ('get', 'setChecked'),
@@ -180,6 +183,7 @@ class _PipelineDropAreaOverlay(Widget):
         p.drawRect(rgn)
 
 
+
 class PipelineDropArea(DockArea):
     def __init__(self, **kwds):
         super().__init__()
@@ -188,6 +192,10 @@ class PipelineDropArea(DockArea):
 
         self.inputData = None
         self.overlay = _PipelineDropAreaOverlay(self)
+        self.textLabel = 'Drop Pipes'
+        self.fontLabel = Font('Helvetica', 20, bold=False)
+        colours = getColours()
+        self.colourLabel = hexToRgb(colours[LABEL_FOREGROUND])
 
     @property
     def currentGuiPipes(self) -> list:
@@ -232,6 +240,28 @@ class PipelineDropArea(DockArea):
             ev.accept()
         else:
             ev.ignore()
+
+    def _paint(self, ev):
+        p = QtGui.QPainter(self)
+        # set font
+        p.setFont(self.fontLabel)
+        # set colour
+        p.setPen(QtGui.QColor(*self.colourLabel))
+
+        # set size
+        rgn = self.contentsRect()
+        rgn = QtCore.QRect(rgn.left(), rgn.top(), rgn.width(), rgn.height())
+        align = QtCore.Qt.AlignVCenter | QtCore.Qt.AlignHCenter
+        self.hint = p.drawText(rgn, align, self.textLabel)
+        p.end()
+
+    def paintEvent(self, ev):
+        """
+        Draws central label
+        """
+        if not self.currentPipesNames:
+            self._paint(ev)
+
 
 
 
@@ -775,6 +805,7 @@ class PipesTree(QtWidgets.QTreeWidget, Base):
         self.setDragEnabled(True)
         self.itemDoubleClicked.connect(self._itemDoubleClickCallback)
         self.parent = self.guiPipeline = parent
+        self.setHeaderLabel('Double click or drag&drop ->')
 
     def _addPipesToTree(self):
 

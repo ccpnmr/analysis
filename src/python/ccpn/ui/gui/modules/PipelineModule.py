@@ -310,7 +310,7 @@ class GuiPipeline(CcpnModule, Pipeline):
         self.pipeTreeWidget._addPipesToTree()
 
     def _addPipesSearchWidget(self):
-        self._searchWidget = LineEdit(self, backgroundText='Search', grid=(0, 0))
+        self._searchWidget = LineEdit(self, backgroundText='Search Pipe', grid=(0, 0))
         self._searchWidget.textChanged.connect(self._searchWidgetCallback)
         self._searchWidget.setMinimumWidth(200)
         self.goAreaLayout.addWidget(self._searchWidget)
@@ -319,8 +319,7 @@ class GuiPipeline(CcpnModule, Pipeline):
         self.pipeTreeWidget.clearSelection()
         text = self._searchWidget.get()
         if text != '':
-            items = (self.pipeTreeWidget.findItems(text, Qt.MatchStartsWith | Qt.MatchRecursive))
-            print(items)
+            items = (self.pipeTreeWidget.findItems(text, Qt.MatchContains | Qt.MatchRecursive))
             if items:
                 pipeItems = [i for i in items if not i.isPipeCategory]
                 for pipeItem in pipeItems:

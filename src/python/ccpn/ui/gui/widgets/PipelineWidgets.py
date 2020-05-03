@@ -844,13 +844,17 @@ class PipesTree(QtWidgets.QTreeWidget, Base):
         if not item.isPipeCategory:
             self.guiPipeline.addPipe(item.pipeName)
 
+    def _infoCallback(self, pipeName):
+        from ccpn.ui.gui.widgets.MessageDialog import showInfo
+        pipe = self.guiPipeline.getPipeFromName(pipeName)
+        showInfo(pipeName, 'Not implemented yet')
+
     def _raiseContextMenu(self, event, item):
-        print('Context Menu. Testing')
         contextMenu = Menu('', self, isFloatWidget=True)
         contextMenu.addItem("Add to pipeline ", callback=partial(self.guiPipeline.addPipe, item.pipeName))
         contextMenu.addItem("Clear pipeline", callback=self.guiPipeline._closeAllGuiPipes)
         contextMenu.addSeparator()
-        contextMenu.addItem("Info", callback=None)
+        contextMenu.addItem("Info", callback=partial(self._infoCallback, item.pipeName))
         contextMenu.move(event.globalPos().x(), event.globalPos().y() + 10)
         contextMenu.exec_()
 

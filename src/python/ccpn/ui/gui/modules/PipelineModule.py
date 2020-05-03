@@ -310,11 +310,11 @@ class GuiPipeline(CcpnModule, Pipeline):
         self.pipeTreeWidget._addPipesToTree()
 
     def _addPipesSearchWidget(self):
-        self._searchWidget = LineEdit(self, backgroundText='Search Pipe', grid=(0, 0))
+        self._searchWidget = LineEdit(self, backgroundText='Search Pipe. Return to add selected', grid=(0, 0))
         self._searchWidget.textChanged.connect(self._searchWidgetCallback)
 
         self._searchWidget.keyPressEvent = self._pipeSearchkeyPressEvent
-        self._searchWidget.setMinimumWidth(200)
+        self._searchWidget.setMinimumWidth(300)
         self.goAreaLayout.addWidget(self._searchWidget)
 
     def _searchWidgetCallback(self):
@@ -371,6 +371,8 @@ class GuiPipeline(CcpnModule, Pipeline):
                 names = [i.pipeName for i in selectedList]
                 for name in names:
                     self.addPipe(name)
+                self._searchWidget.clear()
+                self.pipeTreeWidget.clearSelection()
         elif keyEvent.key() == Qt.Key_Escape or keyEvent.key() == Qt.Key_Delete:
             self._searchWidget.clear()
             self.pipeTreeWidget.clearSelection()

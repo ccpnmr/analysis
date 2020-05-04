@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-05-04 10:13:25 +0100 (Mon, May 04, 2020) $"
+__dateModified__ = "$dateModified: 2020-05-04 10:43:54 +0100 (Mon, May 04, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -2535,6 +2535,15 @@ class CcpnNefReader:
 
         return (tuple(self.warnings or ()), tuple(self.errors or ()))
 
+    def _getContents(self, project, saveFrame):
+        sf_category = saveFrame['sf_category']
+
+        content = self.contents.get(sf_category)
+        if content is None:
+            print("    unknown saveframe category", sf_category, saveFrame.name)
+        else:
+            return content(self, project, saveFrame)
+
     def contentNef(self, project: Project, dataBlock: StarIo.NmrDataBlock,
                    projectIsEmpty: bool = True,
                    selection: typing.Optional[dict] = None):
@@ -2546,9 +2555,11 @@ class CcpnNefReader:
         if not hasattr(self, '_nmrResidueMap') or projectIsEmpty:
             self._nmrResidueMap = {}
 
-        result = {}
+        # result = {}
         self.project = project
         self.defaultChainCode = None
+
+        return self._traverse(project, dataBlock, traverseFunc=self._getContents)
 
         saveframeOrderedDict = self._getSaveFramesInOrder(dataBlock)
 
@@ -2616,7 +2627,7 @@ class CcpnNefReader:
                   traverseFunc=None):
         """Print the contents of the nef dict - results generated with _contentNef
         """
-        self._traverse(project, dataBlock, True, selection=None, traverseFunc=self._printFunc)
+        return self._traverse(project, dataBlock, True, selection=None, traverseFunc=self._printFunc)
 
 
     def _traverse(self, project: Project, dataBlock: StarIo.NmrDataBlock,
@@ -2631,13 +2642,13 @@ class CcpnNefReader:
         # Load metadata and molecular system first
         metaDataFrame = dataBlock['nef_nmr_meta_data']
         self.saveFrameName = 'nef_nmr_meta_data'
-        traverseFunc(project, metaDataFrame)
+        result[self.saveFrameName] = traverseFunc(project, metaDataFrame)
         del saveframeOrderedDict['nef_nmr_meta_data']
 
         saveFrame = dataBlock.get('nef_molecular_system')
         if saveFrame:
             self.saveFrameName = 'nef_molecular_system'
-            traverseFunc(project, saveFrame)
+            result[self.saveFrameName] = traverseFunc(project, saveFrame)
         del saveframeOrderedDict['nef_molecular_system']
 
         # Load assignments, or preload from shiftlists
@@ -3949,10 +3960,11 @@ class CcpnNefReader:
                         pass
                     else:
                         spectrumName = ll[0]
+
         result = {category: OrderedSet([spectrumName])}
 
         self._contentLoops(project, saveFrame, name=spectrumName, itemLength=saveFrame['num_dimensions'],
-                           excludeList=('nef_spectrum_dimension', 'ccpn_spectrum_dimension', 'nef_peak',
+                           excludeList=('nef_spectrum_dimension', 'ccpn_spectrum_dimension', #'nef_peak',
                                         'nef_spectrum_dimension_transfer'))
         self.updateContent(saveFrame, result)
 
@@ -4549,10 +4561,22 @@ class CcpnNefReader:
         """Get the contents of nef_peak loop"""
         result = OrderedSet()
 
+        # NOTE:ED - not correct yet, need 2 lists
+
+        # get the list of peaks
+        mapping = nef2CcpnMap[loop.name]
+        map2 = dict(item for item in mapping.items() if item[1] and '.' not in item[1])
+        for row in loop.data:
+            parameters = self._parametersFromLoopRow(row, map2)
+
+            serial = parameters['serial']
+            result.add((name, serial))
+
         if itemLength is None:
             self.error('Undefined peak item length', loop, None)
             return None
 
+        # get the list of assigned nmrAtoms
         mapping = nef2CcpnMap[loop.name]
         max = itemLength + 1
         multipleAttributes = OD((

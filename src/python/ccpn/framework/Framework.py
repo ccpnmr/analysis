@@ -3391,8 +3391,9 @@ if __name__ == '__main__':
                 for msg in errors or ('', '', ''):
                     print(msg[0])
 
-            content, result = _loader._contentNef(project, _loader._nefDict, selection=None)
+            result = _loader._contentNef(project, _loader._nefDict, selection=None)
 
+            # content not returned any more
             # if content:
             #     for k, (frame, val) in content.items():
             #         leader = k + ':' + frame.category + ' - '

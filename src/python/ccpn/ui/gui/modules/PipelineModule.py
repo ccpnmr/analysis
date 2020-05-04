@@ -371,7 +371,7 @@ class GuiPipeline(CcpnModule, Pipeline):
         # self.goButton.setEnabled(False)
 
     def _addPipelineDropArea(self):
-        self.pipelineArea = PipelineDropArea(self, self.mainWindow)
+        self.pipelineArea = PipelineDropArea(self, guiPipeline=self,  mainWindow=self.mainWindow)
         # self.pipelineArea.dropEvent = self._pipelineDropEvent
         scroll = ScrollArea(self)
         scroll.setWidget(self.pipelineArea)

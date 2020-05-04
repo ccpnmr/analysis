@@ -185,18 +185,27 @@ class _PipelineDropAreaOverlay(Widget):
 
 
 class PipelineDropArea(DockArea):
-    def __init__(self, parent, mainWindow=None,  **kwds):
+    def __init__(self, parent, guiPipeline, mainWindow=None,  **kwds):
         super().__init__()
         self.setStyleSheet("""QSplitter{background-color: transparent;}
                           QSplitter::handle:vertical {background-color: transparent;height: 1px;}""")
 
-        self.parent = self.pipelineModule = parent
+        self.parent = parent
+        self.guiPipeline =  guiPipeline
+        self.mainWindow = mainWindow
+
         self.inputData = None
         self.overlay = _PipelineDropAreaOverlay(self)
         self.textLabel = 'Drop Pipes'
-        self.fontLabel = Font('Helvetica', 20, bold=False)
+
         colours = getColours()
+
+        if self.mainWindow:
+            self.fontLabel = self.mainWindow.application._fontSettings.helveticaBold20
+        else:
+            self.fontLabel = Font('Helvetica', 20, bold=False)
         self.colourLabel = hexToRgb(colours[LABEL_FOREGROUND])
+
 
     @property
     def currentGuiPipes(self) -> list:
@@ -250,7 +259,6 @@ class PipelineDropArea(DockArea):
         # set font
         painter.setFont(self.fontLabel)
         painter.setPen(QtGui.QColor(*self.colourLabel))
-        # set size
         rgn = self.contentsRect()
         rgn = QtCore.QRect(rgn.left(), rgn.top(), rgn.width(), rgn.height())
         align = QtCore.Qt.AlignVCenter | QtCore.Qt.AlignHCenter
@@ -259,10 +267,7 @@ class PipelineDropArea(DockArea):
         rectPath = QtGui.QPainterPath()
         height = self.height() - 2
         rectPath.addRoundedRect(QtCore.QRectF(1, 1, self.width() - 2, height), 1, 1)
-
         painter.drawPath(rectPath)
-
-
         painter.end()
 
     def paintEvent(self, ev):
@@ -279,8 +284,8 @@ class PipelineDropArea(DockArea):
             selectedList = src.selectedItems()
             names = [i.pipeName for i in selectedList]
             for sel in names:
-                guiPipeName = self.pipelineModule._getSerialName(str(sel))
-                self.pipelineModule._addGuiPipe(guiPipeName, sel, position=self.dropArea)
+                guiPipeName = self.guiPipeline._getSerialName(str(sel))
+                self.guiPipeline._addGuiPipe(guiPipeName, sel, position=self.dropArea)
             ev.accept()
         self.dropArea = None
         self.overlay.setDropArea(self.dropArea)
@@ -401,7 +406,6 @@ class GuiPipeDrop(DockDrop):
         DockDrop.__init__(self)
 
     def dropEvent(self, ev):
-        print(ev, '@@@ dropEvent:GuiPipeDrop ')
         super(DockDrop, self).dropEvent(ev)
 
 class GuiPipe(Dock, GuiPipeDrop):
@@ -852,11 +856,8 @@ class PipelineBoxLabel(DockLabel, VerticalLabel):
 
     def _createContextMenu(self):
         contextMenu = Menu('', self, isFloatWidget=True)
-        print(self._parent)
         contextMenu.addAction('Close', self._parent.closePipe)
-        # if len(self.module.mainWindow.moduleArea.ccpnModules) > 1:
-        #     contextMenu.addAction('Close Others', partial(self.module.mainWindow.moduleArea._closeOthers, self.module))
-        #     contextMenu.addAction('Close All', self.module.mainWindow.moduleArea._closeAll)
+        contextMenu.addAction('Close All', self._parent._parent._closeAllGuiPipes)
         return contextMenu
 
 class pipeTreeItem(QtWidgets.QTreeWidgetItem):

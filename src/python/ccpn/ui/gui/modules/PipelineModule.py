@@ -435,10 +435,10 @@ class GuiPipeline(CcpnModule, Pipeline):
                     return
                 else:
                     if not position:
-                        position = 'bottom' #take from setting
+                        position =  self.addBoxPosition.get()
                     newGuiPipe = guiPipe(parent=self, application=self.application, name=serialName, project=self.project)
                     self.pipelineArea.addDock(newGuiPipe, position=position, relativeTo=relativeTo)
-                    autoActive = True #take from setting
+                    autoActive = self.autoActiveCheckBox.get()
                     newGuiPipe.label.checkBox.setChecked(autoActive)
                     return
 
@@ -537,8 +537,6 @@ class GuiPipeline(CcpnModule, Pipeline):
             path = self._getPathFromDialogBox()
         state, guiPipesState = self._openJsonFile(path)
         self._closeAllGuiPipes()
-
-
 
         for item in guiPipesState:
             guiPipeClassName, guiPipeName, widgetsState, isActive = item

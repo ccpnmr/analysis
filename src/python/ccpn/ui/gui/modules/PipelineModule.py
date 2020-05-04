@@ -625,15 +625,6 @@ class GuiPipeline(CcpnModule, Pipeline):
         contextMenu.addItem("Clear all", callback=self._clearInputData)
         return contextMenu
 
-    def _pipeSelectionContextMenu(self):
-        contextMenu = Menu('', self, isFloatWidget=True)
-        contextMenu.addItem("Remove selected", callback=None)
-        contextMenu.addItem("Clear all selected", callback=None)
-        contextMenu.addSeparator()
-        contextMenu.addItem("Add to pipeline ", callback=None)
-        contextMenu.addItem("Clear pipeline", callback=None)
-
-        return contextMenu
 
     def _createSettingsWidgets(self):
 

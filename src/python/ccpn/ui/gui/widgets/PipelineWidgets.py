@@ -929,12 +929,19 @@ class PipesTree(QtWidgets.QTreeWidget, Base):
 
     def _raiseContextMenu(self, event, item):
         contextMenu = Menu('', self, isFloatWidget=True)
-        contextMenu.addItem("Add to pipeline ", callback=partial(self.guiPipeline.addPipe, item.pipeName))
+        contextMenu.addItem("Add to pipeline ", callback=self._addToPipelineCallback)
         contextMenu.addItem("Clear pipeline", callback=self.guiPipeline._closeAllGuiPipes)
         contextMenu.addSeparator()
         contextMenu.addItem("Info", callback=partial(self._infoCallback, item.pipeName))
         contextMenu.move(event.globalPos().x(), event.globalPos().y() + 10)
         contextMenu.exec_()
+
+    def _addToPipelineCallback(self):
+        selectedItems = self.selectedItems()
+        names = [i.pipeName for i in selectedItems if not i.isPipeCategory]
+        for name in names:
+            guiPipeName = self.guiPipeline._getSerialName(str(name))
+            self.guiPipeline._addGuiPipe(guiPipeName, name)
 
 
 def testGuiPipe(GuiPipe):

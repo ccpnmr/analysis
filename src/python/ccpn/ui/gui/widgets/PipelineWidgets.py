@@ -190,7 +190,6 @@ class PipelineDropArea(DockArea):
         self.setStyleSheet("""QSplitter{background-color: transparent;}
                           QSplitter::handle:vertical {background-color: transparent;height: 1px;}""")
 
-
         self.parent = self.pipelineModule = parent
         self.inputData = None
         self.overlay = _PipelineDropAreaOverlay(self)
@@ -243,19 +242,28 @@ class PipelineDropArea(DockArea):
         else:
             ev.ignore()
 
-    def _paint(self, ev):
-        p = QtGui.QPainter(self)
-        # set font
-        p.setFont(self.fontLabel)
-        # set colour
-        p.setPen(QtGui.QColor(*self.colourLabel))
+    from PyQt5.QtGui import QPainter, QPen, QColor, QBrush, QPainterPath
 
+    def _paint(self, ev):
+        QPainter = QtGui.QPainter
+        painter = QPainter(self)
+        # set font
+        painter.setFont(self.fontLabel)
+        painter.setPen(QtGui.QColor(*self.colourLabel))
         # set size
         rgn = self.contentsRect()
         rgn = QtCore.QRect(rgn.left(), rgn.top(), rgn.width(), rgn.height())
         align = QtCore.Qt.AlignVCenter | QtCore.Qt.AlignHCenter
-        self.hint = p.drawText(rgn, align, self.textLabel)
-        p.end()
+        self.hint = painter.drawText(rgn, align, self.textLabel)
+        painter.setRenderHint(QPainter.Antialiasing)
+        rectPath = QtGui.QPainterPath()
+        height = self.height() - 2
+        rectPath.addRoundedRect(QtCore.QRectF(1, 1, self.width() - 2, height), 1, 1)
+
+        painter.drawPath(rectPath)
+
+
+        painter.end()
 
     def paintEvent(self, ev):
         """

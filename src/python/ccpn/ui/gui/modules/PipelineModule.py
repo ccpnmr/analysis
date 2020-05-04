@@ -649,7 +649,7 @@ class GuiPipeline(CcpnModule, Pipeline):
         row += 1
         self.addBoxLabel = Label(self.settingsWidget, 'Add Pipes',  grid=(row,0))
         self.addBoxPosition = RadioButtons(self.settingsWidget, texts=['top', 'bottom'],
-                                           callback=self._addPipeDirectionCallback, selectedInd=0, direction='h',
+                                           callback=self._addPipeDirectionCallback, selectedInd=1, direction='h',
                                            grid=(row,1))
         self.addBoxPosition.setMaximumHeight(20)
         row += 1

@@ -3289,12 +3289,12 @@ def getPreferences(skipUserPreferences=False, defaultPath=None, userPath=None):
 
 if __name__ == '__main__':
 
+    # from sandbox.Geerten.Refactored.framework import Framework
+    # from sandbox.Geerten.Refactored.programArguments import Arguments
+
     from ccpn.framework.Framework import Framework
     from ccpn.framework.Framework import Arguments
 
-
-    # from sandbox.Geerten.Refactored.framework import Framework
-    # from sandbox.Geerten.Refactored.programArguments import Arguments
 
     _makeMainWindowVisible = False
 

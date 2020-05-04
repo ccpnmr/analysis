@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-04-20 16:05:26 +0100 (Mon, April 20, 2020) $"
+__dateModified__ = "$dateModified: 2020-05-04 18:45:05 +0100 (Mon, May 04, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -101,9 +101,11 @@ class ExportNefPopup(ExportDialog):
 
 
 if __name__ == '__main__':
-    from sandbox.Geerten.Refactored.framework import Framework
-    from sandbox.Geerten.Refactored.programArguments import Arguments
+    # from sandbox.Geerten.Refactored.framework import Framework
+    # from sandbox.Geerten.Refactored.programArguments import Arguments
 
+    from ccpn.framework.Framework import Framework
+    from ccpn.framework.Framework import Arguments
 
     _makeMainWindowVisible = False
 
@@ -114,17 +116,30 @@ if __name__ == '__main__':
 
 
     myArgs = Arguments()
-    myArgs.noGui = False
+    myArgs.interface = 'NoUi'
     myArgs.debug = True
+    myArgs.darkColourScheme = False
+    myArgs.lightColourScheme = True
 
-    application = MyProgramme('MyProgramme', '3.0.0-beta3', args=myArgs)
+    application = MyProgramme('MyProgramme', '3.0.1', args=myArgs)
     ui = application.ui
-    ui.initialize()
+    ui.initialize(ui.mainWindow)  # ui.mainWindow not needed for refactored?
 
     if _makeMainWindowVisible:
         ui.mainWindow._updateMainWindow(newProject=True)
         ui.mainWindow.show()
         QtWidgets.QApplication.setActiveWindow(ui.mainWindow)
 
-    dialog = ExportNefPopup(parent=application.mainWindow, mainWindow=application.mainWindow)
+    # register the programme
+    from ccpn.framework.Application import ApplicationContainer
+
+
+    container = ApplicationContainer()
+    container.register(application)
+    application.useFileLogger = True
+
+    app = QtWidgets.QApplication(['testApp'])
+    # run the dialog
+    dialog = ExportNefPopup(parent=ui.mainWindow, mainWindow=ui.mainWindow)
     result = dialog.exec_()
+

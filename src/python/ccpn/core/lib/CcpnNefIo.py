@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-05-02 02:21:45 +0100 (Sat, May 02, 2020) $"
+__dateModified__ = "$dateModified: 2020-05-04 10:13:25 +0100 (Mon, May 04, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -2581,7 +2581,7 @@ class CcpnNefReader:
                 if selection and saveFrameName not in selection:
                     getLogger().debug('>>>   -- skip saveframe {}'.format(saveFrameName))
                     continue
-                getLogger().debug('>>> verifying saveframe {}'.format(saveFrameName))
+                getLogger().debug('>>> get contents saveframe {}'.format(saveFrameName))
 
                 content = self.contents.get(sf_category)
                 if content is None:
@@ -2590,6 +2590,82 @@ class CcpnNefReader:
                     result[self.saveFrameName] = content(self, project, saveFrame)
 
         return self.ccpnContent, result
+
+    def _printFunc(self, project, saveFrame):
+        """Print the contents of a saveFrame/dataBlock - results generated with _contentNef
+        Loops are included in the saveFrame
+        """
+        if hasattr(saveFrame, '_content'):                 # may occasionally be a dataBlock
+            leader = saveFrame.name + ':' + saveFrame.category + ' - '
+            leaderSpace = ' ' * len(leader)
+            for name, thisSet in saveFrame._content.items():
+                leaderName = name + ' - '
+                leaderNameSpace = ' ' * len(leaderName)
+                viewList = list(thisSet or ['empty'])
+                CMAX = 8
+                for cCount, v in enumerate(viewList[:CMAX]):
+                    print('{}{}{}'.format(leader, leaderName,
+                                          v if cCount < (CMAX - 1) else
+                                          '... {} more'.format(len(viewList) - CMAX - 1)))
+                    leader = leaderSpace
+                    leaderName = leaderNameSpace
+
+    def testPrint(self, project: Project, dataBlock: StarIo.NmrDataBlock,
+                  projectIsEmpty: bool = True,
+                  selection: typing.Optional[dict] = None,
+                  traverseFunc=None):
+        """Print the contents of the nef dict - results generated with _contentNef
+        """
+        self._traverse(project, dataBlock, True, selection=None, traverseFunc=self._printFunc)
+
+
+    def _traverse(self, project: Project, dataBlock: StarIo.NmrDataBlock,
+                  projectIsEmpty: bool = True,
+                  selection: typing.Optional[dict] = None,
+                  traverseFunc=None):
+        """Traverse the saveFrames in the correct order
+        """
+        result = OD()
+        saveframeOrderedDict = self._getSaveFramesInOrder(dataBlock)
+
+        # Load metadata and molecular system first
+        metaDataFrame = dataBlock['nef_nmr_meta_data']
+        self.saveFrameName = 'nef_nmr_meta_data'
+        traverseFunc(project, metaDataFrame)
+        del saveframeOrderedDict['nef_nmr_meta_data']
+
+        saveFrame = dataBlock.get('nef_molecular_system')
+        if saveFrame:
+            self.saveFrameName = 'nef_molecular_system'
+            traverseFunc(project, saveFrame)
+        del saveframeOrderedDict['nef_molecular_system']
+
+        # Load assignments, or preload from shiftlists
+        # to make sure '@' and '#' identifiers match the right serials
+        saveFrame = dataBlock.get('ccpn_assignment')
+        if saveFrame:
+            self.saveFrameName = 'ccpn_assignment'
+            result[self.saveFrameName] = traverseFunc(project, saveFrame)
+            del saveframeOrderedDict['ccpn_assignment']
+
+        for sf_category, saveFrames in saveframeOrderedDict.items():
+            for saveFrame in saveFrames:
+                saveFrameName = self.saveFrameName = saveFrame.name
+
+                if selection and saveFrameName not in selection:
+                    getLogger().debug('>>>   -- skip saveframe {}'.format(saveFrameName))
+                    continue
+                getLogger().debug('>>> _traverse saveframe {}'.format(saveFrameName))
+
+                result[self.saveFrameName] = traverseFunc(project, saveFrame)
+
+                # content = self.contents.get(sf_category)
+                # if content is None:
+                #     print("    unknown saveframe category", sf_category, saveFrameName)
+                # else:
+                #     result[self.saveFrameName] = content(self, project, saveFrame)
+
+        return result
 
     def importExistingProject(self, project: Project, dataBlock: StarIo.NmrDataBlock,
                               projectIsEmpty: bool = True,
@@ -2782,7 +2858,7 @@ class CcpnNefReader:
         pass
 
     def _contentLoops(self, project: Project, saveFrame: StarIo.NmrSaveFrame, addLoopAttribs=None,
-                     excludeList=(), **kwds):
+                      excludeList=(), **kwds):
         """Iterate over the loops in a saveFrame, and add to results"""
         result = {}
         mapping = nef2CcpnMap[saveFrame.category]
@@ -2795,9 +2871,9 @@ class CcpnNefReader:
                         dd = []
                         for name in addLoopAttribs:
                             dd.append(saveFrame.get(name))
-                        result[tag] = content(self, project, loop, *dd, **kwds)
+                        result[tag] = content(self, project, loop, saveFrame, *dd, **kwds)
                     else:
-                        result[tag] = content(self, project, loop, **kwds)
+                        result[tag] = content(self, project, loop, saveFrame, **kwds)
 
         self.storeContent(saveFrame, result)
 
@@ -3066,7 +3142,7 @@ class CcpnNefReader:
 
     verifiers['nef_sequence'] = verify_nef_sequence
 
-    def content_nef_sequence(self, project: Project, loop: StarIo.NmrLoop) -> OrderedSet:
+    def content_nef_sequence(self, project: Project, loop: StarIo.NmrLoop, _parentFrame: StarIo.NmrSaveFrame) -> OrderedSet:
         """get contents of the nef_sequence loop"""
         residues = OrderedSet()
 
@@ -3107,7 +3183,7 @@ class CcpnNefReader:
     importers['nef_covalent_links'] = load_nef_covalent_links
     verifiers['nef_covalent_links'] = _noLoopVerify
 
-    def content_nef_covalent_links(self, project: Project, loop: StarIo.NmrLoop) -> OrderedSet:
+    def content_nef_covalent_links(self, project: Project, loop: StarIo.NmrLoop, _parentFrame: StarIo.NmrSaveFrame) -> OrderedSet:
         """get the contents of nef_covalent_links loop"""
         covalentLinks = OrderedSet()
 
@@ -3354,7 +3430,7 @@ class CcpnNefReader:
 
     verifiers['nef_chemical_shift'] = verify_nef_chemical_shift
 
-    def content_nef_chemical_shift(self, parent: ChemicalShiftList, loop: StarIo.NmrLoop) -> OrderedSet:
+    def content_nef_chemical_shift(self, parent: ChemicalShiftList, loop: StarIo.NmrLoop, _parentFrame: StarIo.NmrSaveFrame) -> OrderedSet:
         """Get the contents of nef_chemical_shift loop"""
         nmrAtoms = OrderedSet()
 
@@ -3641,7 +3717,8 @@ class CcpnNefReader:
     verifiers['nef_rdc_restraint'] = _noLoopVerify
     verifiers['ccpn_restraint'] = _noLoopVerify
 
-    def content_nef_restraint(self, restraintList: RestraintList, loop: StarIo.NmrLoop, itemLength: int = None) -> Optional[OrderedSet]:
+    def content_nef_restraint(self, restraintList: RestraintList, loop: StarIo.NmrLoop, _parentFrame: StarIo.NmrSaveFrame,
+                              itemLength: int = None) -> Optional[OrderedSet]:
         """Get the contents for nef_distance_restraint, nef_dihedral_restraint,
         nef_rdc_restraint and ccpn_restraint loops"""
         result = OrderedSet()
@@ -3876,7 +3953,7 @@ class CcpnNefReader:
 
         self._contentLoops(project, saveFrame, name=spectrumName, itemLength=saveFrame['num_dimensions'],
                            excludeList=('nef_spectrum_dimension', 'ccpn_spectrum_dimension', 'nef_peak',
-                                               'nef_spectrum_dimension_transfer'))
+                                        'nef_spectrum_dimension_transfer'))
         self.updateContent(saveFrame, result)
 
     contents['nef_nmr_spectrum'] = content_nef_nmr_spectrum
@@ -4086,7 +4163,8 @@ class CcpnNefReader:
 
     verifiers['ccpn_integral_list'] = verify_ccpn_integral_list
 
-    def content_ccpn_integral_list(self, project: Project, loop: StarIo.NmrLoop, name=None, itemLength=None):
+    def content_ccpn_integral_list(self, project: Project, loop: StarIo.NmrLoop, _parentFrame: StarIo.NmrSaveFrame,
+                                   name=None, itemLength=None):
         integralLists = OrderedSet()
 
         mapping = nef2CcpnMap[loop.name]
@@ -4133,7 +4211,8 @@ class CcpnNefReader:
 
     verifiers['ccpn_multiplet_list'] = verify_ccpn_multiplet_list
 
-    def content_ccpn_multiplet_list(self, project: Project, loop: StarIo.NmrLoop, name=None, itemLength=None):
+    def content_ccpn_multiplet_list(self, project: Project, loop: StarIo.NmrLoop, _parentFrame: StarIo.NmrSaveFrame,
+                                    name=None, itemLength=None):
         multipletLists = OrderedSet()
 
         mapping = nef2CcpnMap[loop.name]
@@ -4212,7 +4291,8 @@ class CcpnNefReader:
 
     verifiers['ccpn_integral'] = verify_ccpn_integral
 
-    def content_ccpn_integral(self, project: Project, loop: StarIo.NmrLoop, name=None, itemLength=None):
+    def content_ccpn_integral(self, project: Project, loop: StarIo.NmrLoop, _parentFrame: StarIo.NmrSaveFrame,
+                              name=None, itemLength=None):
         integrals = OrderedSet()
 
         # mapping = nef2CcpnMap[loop.name]
@@ -4272,7 +4352,8 @@ class CcpnNefReader:
 
     verifiers['ccpn_multiplet'] = verify_ccpn_multiplet
 
-    def content_ccpn_multiplet(self, project: Project, loop: StarIo.NmrLoop, name=None, itemLength=None):
+    def content_ccpn_multiplet(self, project: Project, loop: StarIo.NmrLoop, _parentFrame: StarIo.NmrSaveFrame,
+                               name=None, itemLength=None):
         multiplets = OrderedSet()
 
         # mapping = nef2CcpnMap[loop.name]
@@ -4463,7 +4544,8 @@ class CcpnNefReader:
 
     verifiers['nef_peak'] = verify_nef_peak
 
-    def content_nef_peak(self, peakList: PeakList, loop: StarIo.NmrLoop, name=None, itemLength: int = None):
+    def content_nef_peak(self, peakList: PeakList, loop: StarIo.NmrLoop, _parentFrame: StarIo.NmrSaveFrame,
+                         name=None, itemLength: int = None):
         """Get the contents of nef_peak loop"""
         result = OrderedSet()
 
@@ -4659,7 +4741,7 @@ class CcpnNefReader:
 
     verifiers['ccpn_group_spectrum'] = verify_ccpn_group_spectrum
 
-    def content_ccpn_group_spectrum(self, parent: SpectrumGroup, loop: StarIo.NmrLoop):
+    def content_ccpn_group_spectrum(self, parent: SpectrumGroup, loop: StarIo.NmrLoop, _parentFrame: StarIo.NmrSaveFrame):
         """Get the contents of ccpn_group_spectrum loop"""
         spectra = OrderedSet()
         for row in loop.data:
@@ -4711,11 +4793,11 @@ class CcpnNefReader:
         """Get the contents of ccpn_complex saveFrame"""
         category = saveFrame['sf_category']
         framecode = saveFrame['sf_framecode']
-    
+
         # store the name of the chemicalShiftList
         name = framecode[len(category) + 1:]
         result = {category: OrderedSet([name])}
-    
+
         self._contentLoops(project, saveFrame)
         self.updateContent(saveFrame, result)
 
@@ -4749,7 +4831,7 @@ class CcpnNefReader:
 
     verifiers['ccpn_complex_chain'] = verify_ccpn_complex_chain
 
-    def content_ccpn_complex_chain(self, parent: Complex, loop: StarIo.NmrLoop):
+    def content_ccpn_complex_chain(self, parent: Complex, loop: StarIo.NmrLoop, _parentFrame: StarIo.NmrSaveFrame):
         """Get the contents of ccpn_complex_chain loop"""
         chains = OrderedSet()
         for row in loop.data:
@@ -4856,7 +4938,8 @@ class CcpnNefReader:
 
     verifiers['ccpn_sample_component'] = verify_ccpn_sample_component
 
-    def content_ccpn_sample_component(self, parent: Sample, loop: StarIo.NmrLoop, sampleName: str = None) -> Optional[OrderedSet]:
+    def content_ccpn_sample_component(self, parent: Sample, loop: StarIo.NmrLoop, _parentFrame: StarIo.NmrSaveFrame,
+                                      sampleName: str = None) -> Optional[OrderedSet]:
         """Get the contents for ccpn_sample_component loop"""
         components = OrderedSet()
 
@@ -5366,6 +5449,7 @@ class CcpnNefReader:
             self.error('Source {} already exists in content'.format(source.name), source, None)
         else:
             self.ccpnContent[source.name] = (source, objects)
+            source._content = objects
 
     def updateContent(self, source, objects: Optional[dict] = None):
         """Update the ccpnContent log with the contents of the saveFrames/loops
@@ -5376,10 +5460,12 @@ class CcpnNefReader:
             try:
                 _, dd = self.ccpnContent[source.name]
                 dd.update(objects)
+                source._content.update(objects)  # double up for the minute
             except:
                 raise RuntimeError('Error updating dict')
         else:
             self.ccpnContent[source.name] = (source, objects)
+            source._content = objects
 
     def _parametersFromLoopRow(self, row, mapping):
         parameters = {}

@@ -3393,26 +3393,9 @@ if __name__ == '__main__':
 
             result = _loader._contentNef(project, _loader._nefDict, selection=None)
 
-            # content not returned any more
-            # if content:
-            #     for k, (frame, val) in content.items():
-            #         leader = k + ':' + frame.category + ' - '
-            #         leaderSpace = ' ' * len(leader)
-            #         items = val.items() or [('NODICT', set())]
-            #         for name, thisSet in items:
-            #             leaderName = name + ' - '
-            #             leaderNameSpace = ' ' * len(leaderName)
-            #             viewList = list(thisSet or ['empty'])
-            #             CMAX = 8
-            #             for cCount, v in enumerate(viewList[:CMAX+1]):
-            #                 print('{}{}{}'.format(leader, leaderName,
-            #                                       v if cCount < CMAX else
-            #                                       '... {} more'.format(len(viewList) - CMAX)))
-            #                 leader = leaderSpace
-            #                 leaderName = leaderNameSpace
-
-
     nefReader.testPrint(project, _loader._nefDict, selection=None)
+    nefReader.testErrors(project, _loader._nefDict, selection=None)
+
     import ccpn.util.nef.nef as Nef
 
 

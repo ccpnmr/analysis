@@ -864,13 +864,14 @@ class pipeTreeItem(QtWidgets.QTreeWidgetItem):
         self.setExpanded(expanded)
 
 class PipesTree(QtWidgets.QTreeWidget, Base):
-    def __init__(self, parent=None, **kwds):
+    def __init__(self, parent, guiPipeline, **kwds):
         super().__init__(parent)
         Base._init(self, acceptDrops=False, **kwds)
         self.setSelectionMode(QtWidgets.QAbstractItemView.ExtendedSelection)
         self.setDragEnabled(True)
         self.itemDoubleClicked.connect(self._itemDoubleClickCallback)
-        self.parent = self.guiPipeline = parent
+        self.parent =  parent
+        self.guiPipeline = guiPipeline
         self.setHeaderLabel('Double click or drag&drop ->')
 
     def _addPipesToTree(self):

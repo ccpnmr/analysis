@@ -897,10 +897,12 @@ class PipesTree(QtWidgets.QTreeWidget, Base):
     def buildTree(self, dd):
         for categoryName, pipeNames in dd.items():
             if isinstance(pipeNames, list):
-                if len(pipeNames)>0:
+                if len(pipeNames)>0: # add a branch only if there are available pipes for that category
                     categoryItem = pipeTreeItem(self, categoryName, isPipeCategory=True)
                     for pipeName in sorted(pipeNames):
                         pipeItem = pipeTreeItem(categoryItem, pipeName, draggable=True)
+                        pipeItem.setIcon(0, Icon('icons/mario-pipe'))
+
 
 
     def mouseReleaseEvent(self, event):

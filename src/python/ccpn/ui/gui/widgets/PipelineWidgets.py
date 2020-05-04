@@ -185,11 +185,13 @@ class _PipelineDropAreaOverlay(Widget):
 
 
 class PipelineDropArea(DockArea):
-    def __init__(self, **kwds):
+    def __init__(self, parent, mainWindow=None,  **kwds):
         super().__init__()
         self.setStyleSheet("""QSplitter{background-color: transparent;}
                           QSplitter::handle:vertical {background-color: transparent;height: 1px;}""")
 
+
+        self.parent = self.pipelineModule = parent
         self.inputData = None
         self.overlay = _PipelineDropAreaOverlay(self)
         self.textLabel = 'Drop Pipes'
@@ -262,8 +264,18 @@ class PipelineDropArea(DockArea):
         if not self.currentPipesNames:
             self._paint(ev)
 
+    def dropEvent(self, ev):
 
-
+        src = ev.source()
+        if isinstance(src, PipesTree):
+            selectedList = src.selectedItems()
+            names = [i.pipeName for i in selectedList]
+            for sel in names:
+                guiPipeName = self.pipelineModule._getSerialName(str(sel))
+                self.pipelineModule._addGuiPipe(guiPipeName, sel, position=self.dropArea)
+            ev.accept()
+        self.dropArea = None
+        self.overlay.setDropArea(self.dropArea)
 
     def dragMoveEvent(self, ev):
         # print "drag move"
@@ -309,7 +321,6 @@ class PipelineDropArea(DockArea):
         """With these settings the user can close all the boxes from the label 'close box' or pop up and
          when re-add a new box it makes sure there is a container available.
         """
-        print('ADDING')
         if box is None:
             box = GuiPipe(name='New GuiPipe', **kwds)
 
@@ -609,22 +620,77 @@ class GuiPipe(Dock, GuiPipeDrop):
         src = ev.source()
         if hasattr(src, 'implements') and src.implements('GuiPipe'):
             ev.accept()
-        elif isinstance(src, ListWidget) and hasattr(src, 'pipes'):
-            print('hey', src.getSelectedTexts())
-
-            # ev.accept()
+        elif isinstance(src, PipesTree):
+            ev.accept()
         else:
             ev.ignore()
 
-    def dragMoveEvent(self, *args):
-        DockDrop.dragMoveEvent(self, *args)
+    # def dragMoveEvent(self, *args):
+    #     DockDrop.dragMoveEvent(self, *args)
+
+    def dragMoveEvent(self, ev):
+        # print "drag move"
+
+        ld = ev.pos().x()
+        rd = self.width() - ld
+        td = ev.pos().y()
+        bd = self.height() - td
+
+        mn = min(ld, rd, td, bd)
+        if (ld == mn or td == mn) and mn > self.height() / 3.:
+            self.dropArea = "top"
+            # self.dropArea = "center"
+        elif (rd == mn or ld == mn) and mn > self.width() / 3.:
+            self.dropArea = "bottom"
+        elif rd == mn and td > bd:
+            self.dropArea = "bottom"
+        elif rd == mn and td < bd:
+            self.dropArea = "top"
+        elif ld == mn and td > bd:
+            self.dropArea = "bottom"
+        elif ld == mn and td < bd:
+            self.dropArea = "top"
+        elif ld == mn:
+            self.dropArea = "left"
+        elif td == mn:
+            self.dropArea = "top"
+        elif bd == mn:
+            self.dropArea = "bottom"
+
+        # DockDrop.dragMoveEvent(self, *args)
+
+        if ev.source() is self and self.dropArea == 'center':
+            self.dropArea = None
+            ev.ignore()
+        elif self.dropArea not in self.allowedAreas:
+            self.dropArea = None
+            ev.ignore()
+        else:
+            # print "  ok"
+            ev.accept()
+        self.overlay.setDropArea(self.dropArea)
 
     def dragLeaveEvent(self, *args):
         DockDrop.dragLeaveEvent(self, *args)
 
     def dropEvent(self, *args):
-        print(args, self)
-        DockDrop.dropEvent(self, *args)
+        if len(args)>0:
+            ev = args[0]
+            src = ev.source()
+
+            src = ev.source()
+            if isinstance(src, PipesTree):
+                selectedList = src.selectedItems()
+                names = [i.pipeName for i in selectedList]
+                for name in names:
+                    position = self.dropArea
+                    guiPipeName = self._parent._getSerialName(str(name))
+                    self._parent._addGuiPipe(guiPipeName, name, position=position, relativeTo=self)
+                self.dropArea = None
+                self.overlay.setDropArea(self.dropArea)
+                ev.accept()
+            else:
+                DockDrop.dropEvent(self, *args)
 
     def setActive(self, state):
         self.label.checkBox.setChecked(state)
@@ -871,7 +937,7 @@ def testGuiPipe(GuiPipe):
     app = TestApplication()
     win = QtWidgets.QMainWindow()
 
-    pipeline = PipelineDropArea()
+    pipeline = PipelineDropArea(win)
     demoGuiPipe = GuiPipe(parent=pipeline)
     pipeline.addDock(demoGuiPipe)
 

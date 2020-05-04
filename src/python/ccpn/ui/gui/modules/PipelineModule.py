@@ -348,8 +348,8 @@ class GuiPipeline(CcpnModule, Pipeline):
         # self.goButton.setEnabled(False)
 
     def _addPipelineDropArea(self):
-        self.pipelineArea = PipelineDropArea()
-        self.pipelineArea.dropEvent = self._pipelineDropEvent
+        self.pipelineArea = PipelineDropArea(self, self.mainWindow)
+        # self.pipelineArea.dropEvent = self._pipelineDropEvent
         scroll = ScrollArea(self)
         scroll.setWidget(self.pipelineArea)
         scroll.setWidgetResizable(True)
@@ -387,21 +387,21 @@ class GuiPipeline(CcpnModule, Pipeline):
 
         # return str(guiPipeName)
 
-    def _pipelineDropEvent(self, ev):
-        '''
-        needed to drop from listWidget
-        '''
-
-        src = ev.source()
-        if isinstance(src, PipesTree):
-            selectedList = src.selectedItems()
-            names = [i.pipeName for i in selectedList]
-            for sel in names:
-                guiPipeName = self._getSerialName(str(sel))
-                self._addGuiPipe(guiPipeName, sel, position=self.pipelineArea.dropArea)
-            ev.accept()
-        self.pipelineArea.dropArea = None
-        self.pipelineArea.overlay.setDropArea(self.dropArea)
+    # def _pipelineDropEvent(self, ev):
+    #     '''
+    #     needed to drop from listWidget
+    #     '''
+    #
+    #     src = ev.source()
+    #     if isinstance(src, PipesTree):
+    #         selectedList = src.selectedItems()
+    #         names = [i.pipeName for i in selectedList]
+    #         for sel in names:
+    #             guiPipeName = self._getSerialName(str(sel))
+    #             self._addGuiPipe(guiPipeName, sel, position=self.pipelineArea.dropArea)
+    #         ev.accept()
+    #     self.pipelineArea.dropArea = None
+    #     self.pipelineArea.overlay.setDropArea(self.dropArea)
 
 
 
@@ -421,7 +421,7 @@ class GuiPipeline(CcpnModule, Pipeline):
             if pipe.pipeName == pipeName:
                 return pipe
 
-    def _addGuiPipe(self, serialName, pipeName, position=None):
+    def _addGuiPipe(self, serialName, pipeName, position=None, relativeTo=None):
         for guiPipe in self.guiPipes:
             if guiPipe.pipeName == pipeName:
                 if guiPipe._alreadyOpened:
@@ -431,7 +431,7 @@ class GuiPipeline(CcpnModule, Pipeline):
                     if not position:
                         position = self.pipelineSettingsParams['addPosit']
                     newGuiPipe = guiPipe(parent=self, application=self.application, name=serialName, project=self.project)
-                    self.pipelineArea.addDock(newGuiPipe, position=position)
+                    self.pipelineArea.addDock(newGuiPipe, position=position, relativeTo=relativeTo)
                     autoActive = self.pipelineSettingsParams['autoActive']
                     newGuiPipe.label.checkBox.setChecked(autoActive)
                     return

@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-05-04 10:43:54 +0100 (Mon, May 04, 2020) $"
+__dateModified__ = "$dateModified: 2020-05-04 11:05:32 +0100 (Mon, May 04, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -2613,11 +2613,11 @@ class CcpnNefReader:
                 leaderName = name + ' - '
                 leaderNameSpace = ' ' * len(leaderName)
                 viewList = list(thisSet or ['empty'])
-                CMAX = 8
-                for cCount, v in enumerate(viewList[:CMAX]):
+                CMAX = 7
+                for cCount, v in enumerate(viewList[:CMAX+1]):
                     print('{}{}{}'.format(leader, leaderName,
-                                          v if cCount < (CMAX - 1) else
-                                          '... {} more'.format(len(viewList) - CMAX - 1)))
+                                          v if cCount < CMAX else
+                                          '... {} more'.format(len(viewList) - CMAX)))
                     leader = leaderSpace
                     leaderName = leaderNameSpace
 

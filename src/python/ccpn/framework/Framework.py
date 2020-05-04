@@ -3404,10 +3404,10 @@ if __name__ == '__main__':
             #             leaderNameSpace = ' ' * len(leaderName)
             #             viewList = list(thisSet or ['empty'])
             #             CMAX = 8
-            #             for cCount, v in enumerate(viewList[:CMAX]):
+            #             for cCount, v in enumerate(viewList[:CMAX+1]):
             #                 print('{}{}{}'.format(leader, leaderName,
-            #                                       v if cCount < (CMAX - 1) else
-            #                                       '... {} more'.format(len(viewList) - CMAX - 1)))
+            #                                       v if cCount < CMAX else
+            #                                       '... {} more'.format(len(viewList) - CMAX)))
             #                 leader = leaderSpace
             #                 leaderName = leaderNameSpace
 

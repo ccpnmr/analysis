@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-05-04 11:05:32 +0100 (Mon, May 04, 2020) $"
+__dateModified__ = "$dateModified: 2020-05-04 12:57:19 +0100 (Mon, May 04, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -1934,38 +1934,74 @@ class CcpnNefWriter:
         else:
             del result[loopName]
 
-        loopName = 'nef_peak'
-        loop = result[loopName]
-
         # Remove superfluous tags
         removeNameEndings = ('_1', '_2', '_3', '_4', '_5', '_6', '_7', '_8', '_9',
                              '_10', '_11', '_12', '_13', '_14', '_15',)[spectrum.dimensionCount:]
-        for tag in loop.columns:
-            if any(tag.endswith(x) for x in removeNameEndings):
-                loop.removeColumn(tag)
+        if peakList.peaks:
+            loopName = 'nef_peak'
+            loop = result[loopName]
 
-        # Get name map for per-dimension attributes
-        max = spectrum.dimensionCount + 1
-        multipleAttributes = {
-            'position'     : tuple('position_%s' % ii for ii in range(1, max)),
-            'positionError': tuple('position_uncertainty_%s' % ii for ii in range(1, max)),
-            'chainCodes'   : tuple('chain_code_%s' % ii for ii in range(1, max)),
-            'sequenceCodes': tuple('sequence_code_%s' % ii for ii in range(1, max)),
-            'residueTypes' : tuple('residue_name_%s' % ii for ii in range(1, max)),
-            'atomNames'    : tuple('atom_name_%s' % ii for ii in range(1, max)),
-            'slopes'       : tuple('slopes_%s' % ii for ii in range(1, max)),
-            'lowerLimits'  : tuple('lower_limits_%s' % ii for ii in range(1, max)),
-            'upperLimits'  : tuple('upper_limits_%s' % ii for ii in range(1, max)),
-            }
+            # # Remove superfluous tags
+            # removeNameEndings = ('_1', '_2', '_3', '_4', '_5', '_6', '_7', '_8', '_9',
+            #                      '_10', '_11', '_12', '_13', '_14', '_15',)[spectrum.dimensionCount:]
 
-        index = 0
-        for peak in sorted(peakList.peaks):
-            rowdata = self._loopRowData(loopName, peak)
+            for tag in loop.columns:
+                if any(tag.endswith(x) for x in removeNameEndings):
+                    loop.removeColumn(tag)
 
-            assignments = peak.assignedNmrAtoms
-            if assignments:
-                for tt in sorted(assignments):
-                    # Make one row per assignment
+            # Get name map for per-dimension attributes
+            max = spectrum.dimensionCount + 1
+            multipleAttributes = {
+                'position'     : tuple('position_%s' % ii for ii in range(1, max)),
+                'positionError': tuple('position_uncertainty_%s' % ii for ii in range(1, max)),
+                'chainCodes'   : tuple('chain_code_%s' % ii for ii in range(1, max)),
+                'sequenceCodes': tuple('sequence_code_%s' % ii for ii in range(1, max)),
+                'residueTypes' : tuple('residue_name_%s' % ii for ii in range(1, max)),
+                'atomNames'    : tuple('atom_name_%s' % ii for ii in range(1, max)),
+                'slopes'       : tuple('slopes_%s' % ii for ii in range(1, max)),
+                'lowerLimits'  : tuple('lower_limits_%s' % ii for ii in range(1, max)),
+                'upperLimits'  : tuple('upper_limits_%s' % ii for ii in range(1, max)),
+                }
+
+            index = 0
+
+            for peak in sorted(peakList.peaks):
+                rowdata = self._loopRowData(loopName, peak)
+
+                assignments = peak.assignedNmrAtoms
+                if assignments:
+                    for tt in sorted(assignments):
+                        # Make one row per assignment
+                        row = loop.newRow(rowdata)
+                        index += 1
+                        row['index'] = index
+                        values = peak.position
+                        for ii, tag in enumerate(multipleAttributes['position']):
+                            row[tag] = values[ii]
+                        values = peak.positionError
+                        for ii, tag in enumerate(multipleAttributes['positionError']):
+                            row[tag] = values[ii]
+                        # NB the row._set function will set position_1, position_2 etc.
+                        # row._set('position', peak.position)
+                        # row._set('position_uncertainty', peak.positionError)
+
+                        # Add the assignments
+                        ll = list(x if x is None else x._idTuple for x in tt)
+                        for ii, attrName in enumerate(
+                                ('chainCodes', 'sequenceCodes', 'residueTypes', 'atomNames')
+                                ):
+                            tags = multipleAttributes[attrName]
+                            for jj, val in enumerate(ll):
+                                row[tags[jj]] = None if val is None else val[ii]
+                        # # Add the assignments
+                        # ll =list(zip(*(x._idTuple if x else (None, None, None, None) for x in tt)))
+                        # row._set('chain_code', ll[0])
+                        # row._set('sequence_code', ll[1])
+                        # row._set('residue_name', ll[2])
+                        # row._set('atom_name', ll[3])
+
+                else:
+                    # No assignments - just make one unassigned row
                     row = loop.newRow(rowdata)
                     index += 1
                     row['index'] = index
@@ -1975,40 +2011,12 @@ class CcpnNefWriter:
                     values = peak.positionError
                     for ii, tag in enumerate(multipleAttributes['positionError']):
                         row[tag] = values[ii]
-                    # NB the row._set function will set position_1, position_2 etc.
+                    # # NB the row._set function will set position_1, position_2 etc.
                     # row._set('position', peak.position)
                     # row._set('position_uncertainty', peak.positionError)
-
-                    # Add the assignments
-                    ll = list(x if x is None else x._idTuple for x in tt)
-                    for ii, attrName in enumerate(
-                            ('chainCodes', 'sequenceCodes', 'residueTypes', 'atomNames')
-                            ):
-                        tags = multipleAttributes[attrName]
-                        for jj, val in enumerate(ll):
-                            row[tags[jj]] = None if val is None else val[ii]
-                    # # Add the assignments
-                    # ll =list(zip(*(x._idTuple if x else (None, None, None, None) for x in tt)))
-                    # row._set('chain_code', ll[0])
-                    # row._set('sequence_code', ll[1])
-                    # row._set('residue_name', ll[2])
-                    # row._set('atom_name', ll[3])
-
-            else:
-                # No assignments - just make one unassigned row
-                row = loop.newRow(rowdata)
-                index += 1
-                row['index'] = index
-                values = peak.position
-                for ii, tag in enumerate(multipleAttributes['position']):
-                    row[tag] = values[ii]
-                values = peak.positionError
-                for ii, tag in enumerate(multipleAttributes['positionError']):
-                    row[tag] = values[ii]
-                # # NB the row._set function will set position_1, position_2 etc.
-                # row._set('position', peak.position)
-                # row._set('position_uncertainty', peak.positionError)
-            row['ccpn_linked_integral'] = None if peak.integral is None else peak.integral.pid
+                row['ccpn_linked_integral'] = None if peak.integral is None else peak.integral.pid
+        else:
+            del result['nef_peak']
 
         if exportCompleteSpectrum and spectrum.spectrumHits:
             loopName = 'ccpn_spectrum_hit'
@@ -2035,20 +2043,25 @@ class CcpnNefWriter:
             for tag in loop.columns:
                 if any(tag.endswith(x) for x in removeNameEndings):
                     loop.removeColumn(tag)
-            for integral in sorted([intgrl for intgrl in spectrum.integrals if intgrl.integralList in spectrumIntegralLists]):
-                row = loop.newRow(self._loopRowData(loopName, integral))
-                row['integral_serial'] = integral.serial
-                # values = integral.slopes
-                # for ii, tag in enumerate(multipleAttributes['slopes']):
-                #   row[tag] = None if values is None else values[ii]
-                # # lowerlimits,upperLimits = zip(integral.limits)
-                # lowerlimits = integral.limits
-                # upperLimits = integral.limits
-                # for ii, tag in enumerate(multipleAttributes['lowerLimits']):
-                #   row[tag] = None if lowerlimits is None else lowerlimits[ii]
-                # for ii, tag in enumerate(multipleAttributes['upperLimits']):
-                #   row[tag] = None if upperLimits is None else upperLimits[ii]
-                row['ccpn_linked_peak'] = None if integral.peak is None else integral.peak.pid
+
+            intgrls = sorted([intgrl for intgrl in spectrum.integrals if intgrl.integralList in spectrumIntegralLists])
+            if intgrls:
+                for integral in intgrls:
+                    row = loop.newRow(self._loopRowData(loopName, integral))
+                    row['integral_serial'] = integral.serial
+                    # values = integral.slopes
+                    # for ii, tag in enumerate(multipleAttributes['slopes']):
+                    #   row[tag] = None if values is None else values[ii]
+                    # # lowerlimits,upperLimits = zip(integral.limits)
+                    # lowerlimits = integral.limits
+                    # upperLimits = integral.limits
+                    # for ii, tag in enumerate(multipleAttributes['lowerLimits']):
+                    #   row[tag] = None if lowerlimits is None else lowerlimits[ii]
+                    # for ii, tag in enumerate(multipleAttributes['upperLimits']):
+                    #   row[tag] = None if upperLimits is None else upperLimits[ii]
+                    row['ccpn_linked_peak'] = None if integral.peak is None else integral.peak.pid
+            else:
+                del result['ccpn_integral']
         else:
             del result['ccpn_integral_list']
             del result['ccpn_integral']
@@ -2070,19 +2083,24 @@ class CcpnNefWriter:
             for tag in loop.columns:
                 if any(tag.endswith(x) for x in removeNameEndings):
                     loop.removeColumn(tag)
-            for multiplet in sorted([mltpt for mltpt in spectrum.multiplets if mltpt.multipletList in spectrumMultipletLists]):
-                row = loop.newRow(self._loopRowData(loopName, multiplet))
-                row['multiplet_serial'] = multiplet.serial
-                # values = multiplet.slopes
-                # for ii, tag in enumerate(multipleAttributes['slopes']):
-                #   row[tag] = None if values is None else values[ii]
-                # # lowerlimits,upperLimits = zip(multiplet.limits)
-                # lowerlimits = multiplet.limits
-                # upperLimits = multiplet.limits
-                # for ii, tag in enumerate(multipleAttributes['lowerLimits']):
-                #   row[tag] = None if lowerlimits is None else lowerlimits[ii]
-                # for ii, tag in enumerate(multipleAttributes['upperLimits']):
-                #   row[tag] = None if upperLimits is None else upperLimits[ii]
+
+            mltplts = sorted([mltplt for mltplt in spectrum.multiplets if mltplt.multipletList in spectrumMultipletLists])
+            if mltplts:
+                for multiplet in mltplts:
+                    row = loop.newRow(self._loopRowData(loopName, multiplet))
+                    row['multiplet_serial'] = multiplet.serial
+                    # values = multiplet.slopes
+                    # for ii, tag in enumerate(multipleAttributes['slopes']):
+                    #   row[tag] = None if values is None else values[ii]
+                    # # lowerlimits,upperLimits = zip(multiplet.limits)
+                    # lowerlimits = multiplet.limits
+                    # upperLimits = multiplet.limits
+                    # for ii, tag in enumerate(multipleAttributes['lowerLimits']):
+                    #   row[tag] = None if lowerlimits is None else lowerlimits[ii]
+                    # for ii, tag in enumerate(multipleAttributes['upperLimits']):
+                    #   row[tag] = None if upperLimits is None else upperLimits[ii]
+            else:
+                del result['ccpn_multiplet']
 
             # loopName = 'ccpn_multiplet_peaks'
             # loop = result[loopName]
@@ -2110,12 +2128,24 @@ class CcpnNefWriter:
             for tag in loop.columns:
                 if any(tag.endswith(x) for x in removeNameEndings):
                     loop.removeColumn(tag)
-            for multiplet in sorted([mltpt for mltpt in spectrum.multiplets if mltpt.multipletList in spectrumMultipletLists]):
-                for peak in multiplet.peaks:
+
+            # mltplts = sorted([mltplt for mltplt in spectrum.multiplets if mltplt.multipletList in spectrumMultipletLists])
+            # for multiplet in mltplts:
+            #     for peak in multiplet.peaks:
+            #         row = loop.newRow(self._loopRowData(loopName, peak))
+            #         row['multiplet_list_serial'] = multiplet.multipletList.serial
+            #         row['multiplet_serial'] = multiplet.serial
+            #         row['multiplet_peak'] = peak.pid
+
+            mltpks = sorted([(mltplt, pk) for mltplt in spectrum.multiplets if mltplt.multipletList in spectrumMultipletLists for pk in mltplt.peaks])
+            if mltpks:
+                for multiplet, peak in mltpks:
                     row = loop.newRow(self._loopRowData(loopName, peak))
                     row['multiplet_list_serial'] = multiplet.multipletList.serial
                     row['multiplet_serial'] = multiplet.serial
                     row['multiplet_peak'] = peak.pid
+            else:
+                del result['ccpn_multiplet_peaks']
         else:
             del result['ccpn_multiplet_peaks']
 
@@ -3862,8 +3892,10 @@ class CcpnNefReader:
         # Make PeakList
         peakList = spectrum.newPeakList(**peakListParameters)
 
-        # Load peaks
-        self.load_nef_peak(peakList, saveFrame.get('nef_peak'))
+        # Load peaks (if exist)
+        loop = saveFrame.get('nef_peak')
+        if loop:
+            self.load_nef_peak(peakList, loop)
 
         # Load remaining loops, with spectrum as parent
         for loopName in loopNames:
@@ -3924,7 +3956,9 @@ class CcpnNefReader:
             if peakList is not None:
                 self.error('nef_nmr_spectrum - PeakList {} already exists'.format(peakList), saveFrame, (peakList,))
 
-                self.verify_nef_peak(peakList, saveFrame.get('nef_peak'))
+                loop = saveFrame.get('nef_peak')
+                if loop:
+                    self.verify_nef_peak(peakList, loop)
                 self._verifyLoops(spectrum, saveFrame, dimensionCount=saveFrame['num_dimensions'],
                                   excludeList=('nef_spectrum_dimension', 'ccpn_spectrum_dimension', 'nef_peak',
                                                'nef_spectrum_dimension_transfer'))
@@ -4572,6 +4606,13 @@ class CcpnNefReader:
             serial = parameters['serial']
             result.add((name, serial))
 
+        return result
+
+    def content_nef_peak_assignments(self, peakList: PeakList, loop: StarIo.NmrLoop, _parentFrame: StarIo.NmrSaveFrame,
+                         name=None, itemLength: int = None):
+        """Get the contents of nef_peak_assignments from nef_peak loop"""
+        result = OrderedSet()
+
         if itemLength is None:
             self.error('Undefined peak item length', loop, None)
             return None
@@ -4605,6 +4646,7 @@ class CcpnNefReader:
         return result
 
     contents['nef_peak'] = content_nef_peak
+    contents['nef_peak_assignments'] = content_nef_peak_assignments
 
     def load_nef_peak_restraint_links(self, project: Project, saveFrame: StarIo.NmrSaveFrame):
         """load nef_peak_restraint_links saveFrame"""

@@ -369,10 +369,11 @@ class GuiPipeline(CcpnModule, Pipeline):
             if self._searchWidget.get():
                 selectedList = self.pipeTreeWidget.selectedItems()
                 names = [i.pipeName for i in selectedList]
-                for name in names:
-                    self.addPipe(name)
-                self._searchWidget.clear()
-                self.pipeTreeWidget.clearSelection()
+                if len(names)>0:
+                    for name in names:
+                        self.addPipe(name)
+                    self._searchWidget.clear()
+                    self.pipeTreeWidget.clearSelection()
         elif keyEvent.key() == Qt.Key_Escape or keyEvent.key() == Qt.Key_Delete:
             self._searchWidget.clear()
             self.pipeTreeWidget.clearSelection()

@@ -3337,7 +3337,7 @@ if __name__ == '__main__':
 
 
     # load the file and the validate dict
-    _loader = Nef.NefImporter(errorLogging=Nef.el.NEF_STANDARD, hidePrefix=True)
+    _loader = Nef.NefImporter(errorLogging=Nef.el.NEF_STRICT, hidePrefix=True)
     _loader.loadFile(TESTNEF)
     _loader.loadValidateDictionary(VALIDATEDICT)
 
@@ -3403,7 +3403,7 @@ if __name__ == '__main__':
     app = QtWidgets.QApplication(['testApp'])
     # run the dialog
     dialog = ImportNefPopup(parent=ui.mainWindow, mainWindow=ui.mainWindow,
-                            nefObjects=(project, _loader))
+                            nefObjects=(_loader,))
 
     dialog._initialiseProject(ui.mainWindow, application, project)
     dialog.fillPopup()

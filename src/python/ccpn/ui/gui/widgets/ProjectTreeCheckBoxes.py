@@ -11,7 +11,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-05-06 13:20:43 +0100 (Wed, May 06, 2020) $"
+__dateModified__ = "$dateModified: 2020-05-06 20:06:53 +0100 (Wed, May 06, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -325,6 +325,9 @@ class ImportTreeCheckBoxes(ProjectTreeCheckBoxes):
     contents = {}
 
     def _populateTreeView(self, project=None):
+        # clear old items - needed for testing without mainWindow
+        self.clear()
+
         if project:
             # set the new project if required
             self.project = project
@@ -414,7 +417,7 @@ class ImportTreeCheckBoxes(ProjectTreeCheckBoxes):
         pass
 
     def content_nef_restraint_list(self, project: Project, saveFrame: StarIo.NmrSaveFrame):
-        print(saveFrame.name)
+        pass
 
     def content_nef_restraint(self, restraintList: RestraintList, loop: StarIo.NmrLoop, parentFrame: StarIo.NmrSaveFrame,
                               itemLength: int = None) -> Optional[OrderedSet]:

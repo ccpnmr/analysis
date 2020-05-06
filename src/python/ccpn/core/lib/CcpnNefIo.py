@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-05-06 13:20:43 +0100 (Wed, May 06, 2020) $"
+__dateModified__ = "$dateModified: 2020-05-06 20:06:52 +0100 (Wed, May 06, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -78,6 +78,7 @@ from ccpn.core.lib import RestraintLib
 from ccpnmodel.ccpncore.lib.Io import Formats as ioFormats
 from ccpn.util.Logging import getLogger
 from ccpn.util.OrderedSet import OrderedSet
+from ccpn.util.AttrDict import AttrDict
 
 
 # Max value used for random integer. Set to be expressible as a signed 32-bit integer.
@@ -441,43 +442,47 @@ nef2CcpnMap = {
         )),
 
     'nef_nmr_spectrum'               : OD((
-        ('num_dimensions', 'spectrum.dimensionCount'),
+        ('num_dimensions', 'dimensionCount'),  # NOTE:ED - testing; removed 'spectrum.' prefix from all that are not None
         ('chemical_shift_list', None),
-        ('experiment_classification', 'spectrum.experimentType'),
-        ('experiment_type', 'spectrum.experimentName'),
-        ('ccpn_positive_contour_count', 'spectrum.positiveContourCount'),
-        ('ccpn_positive_contour_base', 'spectrum.positiveContourBase'),
-        ('ccpn_positive_contour_factor', 'spectrum.positiveContourFactor'),
-        ('ccpn_positive_contour_colour', 'spectrum.positiveContourColour'),
-        ('ccpn_negative_contour_count', 'spectrum.negativeContourCount'),
-        ('ccpn_negative_contour_base', 'spectrum.negativeContourBase'),
-        ('ccpn_negative_contour_factor', 'spectrum.negativeContourFactor'),
-        ('ccpn_negative_contour_colour', 'spectrum.negativeContourColour'),
-        ('ccpn_slice_colour', 'spectrum.sliceColour'),
-        ('ccpn_spectrum_scale', 'spectrum.scale'),
-        ('ccpn_spinning_rate', 'spectrum.spinningRate'),
-        ('ccpn_spectrum_comment', 'spectrum.comment'),
+        ('experiment_classification', 'experimentType'),
+        ('experiment_type', 'experimentName'),
+        ('ccpn_positive_contour_count', 'positiveContourCount'),
+        ('ccpn_positive_contour_base', 'positiveContourBase'),
+        ('ccpn_positive_contour_factor', 'positiveContourFactor'),
+        ('ccpn_positive_contour_colour', 'positiveContourColour'),
+        ('ccpn_negative_contour_count', 'negativeContourCount'),
+        ('ccpn_negative_contour_base', 'negativeContourBase'),
+        ('ccpn_negative_contour_factor', 'negativeContourFactor'),
+        ('ccpn_negative_contour_colour', 'negativeContourColour'),
+        ('ccpn_slice_colour', 'sliceColour'),
+        ('ccpn_spectrum_scale', 'scale'),
+        ('ccpn_spinning_rate', 'spinningRate'),
+        ('ccpn_spectrum_comment', 'comment'),
         ('ccpn_spectrum_file_path', None),
         ('ccpn_sample', None),
-        ('ccpn_file_header_size', 'spectrum._wrappedData.dataStore.headerSize'),
-        ('ccpn_file_number_type', 'spectrum._wrappedData.dataStore.numberType'),
-        ('ccpn_file_complex_stored_by', 'spectrum._wrappedData.dataStore.complexStoredBy'),
-        ('ccpn_file_scale_factor', 'spectrum._wrappedData.dataStore.scaleFactor'),
-        ('ccpn_file_is_big_endian', 'spectrum._wrappedData.dataStore.isBigEndian'),
-        ('ccpn_file_byte_number', 'spectrum._wrappedData.dataStore.nByte'),
-        ('ccpn_file_has_block_padding', 'spectrum._wrappedData.dataStore.hasBlockPadding'),
-        ('ccpn_file_block_header_size', 'spectrum._wrappedData.dataStore.blockHeaderSize'),
-        ('ccpn_file_type', 'spectrum._wrappedData.dataStore.fileType'),
-        ('ccpn_peaklist_serial', 'serial'),
-        ('ccpn_peaklist_comment', 'comment'),
-        ('ccpn_peaklist_name', 'title'),
-        ('ccpn_peaklist_is_simulated', 'isSimulated'),
-        ('ccpn_peaklist_symbol_colour', 'symbolColour'),
-        ('ccpn_peaklist_symbol_style', 'symbolStyle'),
-        ('ccpn_peaklist_text_colour', 'textColour'),
+        ('ccpn_file_header_size', '_wrappedData.dataStore.headerSize'),
+        ('ccpn_file_number_type', '_wrappedData.dataStore.numberType'),
+        ('ccpn_file_complex_stored_by', '_wrappedData.dataStore.complexStoredBy'),
+        ('ccpn_file_scale_factor', '_wrappedData.dataStore.scaleFactor'),
+        ('ccpn_file_is_big_endian', '_wrappedData.dataStore.isBigEndian'),
+        ('ccpn_file_byte_number', '_wrappedData.dataStore.nByte'),
+        ('ccpn_file_has_block_padding', '_wrappedData.dataStore.hasBlockPadding'),
+        ('ccpn_file_block_header_size', '_wrappedData.dataStore.blockHeaderSize'),
+        ('ccpn_file_type', '_wrappedData.dataStore.fileType'),
+
+        # # NOTE:ED - moved to ccpn_peak_list for testing
+        # ('ccpn_peaklist_serial', 'serial'),
+        # ('ccpn_peaklist_comment', 'comment'),
+        # ('ccpn_peaklist_name', 'title'),
+        # ('ccpn_peaklist_is_simulated', 'isSimulated'),
+        # ('ccpn_peaklist_symbol_colour', 'symbolColour'),
+        # ('ccpn_peaklist_symbol_style', 'symbolStyle'),
+        # ('ccpn_peaklist_text_colour', 'textColour'),
+
         ('nef_spectrum_dimension', _isALoop),
         ('ccpn_spectrum_dimension', _isALoop),
         ('nef_spectrum_dimension_transfer', _isALoop),
+        ('ccpn_peak_list', _isALoop),
         ('nef_peak', _isALoop),
         ('ccpn_integral_list', _isALoop),
         ('ccpn_integral', _isALoop),
@@ -528,21 +533,19 @@ nef2CcpnMap = {
         ('is_indirect', None),
         )),
 
-    # 'ccpn_peak_list'                 : OD((
-    #     ('ccpn_peaklist_serial', 'serial'),
-    #     ('ccpn_peaklist_comment', 'comment'),
-    #     ('ccpn_peaklist_name', 'title'),
-    #     ('ccpn_peaklist_is_simulated', 'isSimulated'),
-    #     ('ccpn_peaklist_symbol_colour', 'symbolColour'),
-    #     ('ccpn_peaklist_symbol_style', 'symbolStyle'),
-    #     ('ccpn_peaklist_text_colour', 'textColour'),
-    #     )),
+    # NOTE:ED - testing peakList per spectrum
+    'ccpn_peak_list'                 : OD((
+        ('serial', 'serial'),
+        ('comment', 'comment'),
+        ('name', 'title'),
+        ('is_simulated', 'isSimulated'),
+        ('symbol_colour', 'symbolColour'),
+        ('symbol_style', 'symbolStyle'),
+        ('text_colour', 'textColour'),
+        )),
 
     # NBNB: boxWidths and lineWidths are NOT included.
     'nef_peak'                       : OD((
-        # # NOTE:ED - testing multiple peak lists per spectrum
-        # ('peak_list_serial', 'peakList.serial'),
-
         ('index', None),
         ('peak_id', 'serial'),
         ('volume', 'volume'),
@@ -643,6 +646,9 @@ nef2CcpnMap = {
         ('ccpn_linked_integral', None),
         ('ccpn_annotation', 'annotation'),
         ('ccpn_comment', 'comment'),
+
+        # NOTE:ED - testing multiple peakLists per spectrum
+        ('peak_list_serial', 'peakList.serial'),
         )),
 
     # NB SpectrumHit crosslink to sample and sampleComponent are derived
@@ -1307,10 +1313,19 @@ class CcpnNefWriter:
 
         # Spectra/PeakLists/IntegralLists/MultipletLists
         # NOTE:ED - this is a stupid hack for more than one peakList per spectrum
-        _exportedSpectra = set()
-        for obj in sorted(peakLists):
-            saveFrames.append(self.peakList2Nef(obj, integralLists, multipletLists, obj.spectrum not in _exportedSpectra))
+        _exportedSpectra = OrderedSet()
+        for obj in sorted(peakLists + integralLists + multipletLists):
             _exportedSpectra.add(obj.spectrum)
+
+        for spectrum in _exportedSpectra:
+            saveFrames.append(self.peakList2Nef(spectrum, peakLists, integralLists, multipletLists, True))
+
+        # # Spectra/PeakLists/IntegralLists/MultipletLists
+        # # NOTE:ED - this is a stupid hack for more than one peakList per spectrum
+        # _exportedSpectra = OrderedSet()
+        # for obj in sorted(peakLists):
+        #     saveFrames.append(self.peakList2Nef(obj, peakLists, integralLists, multipletLists, obj.spectrum not in _exportedSpectra))
+        #     _exportedSpectra.add(obj.spectrum)
 
         # restraint-peak links
         saveFrame = self.peakRestraintLinks2Nef(restraintLists)
@@ -1885,14 +1900,14 @@ class CcpnNefWriter:
     #     #
     #     return result
 
-    def peakList2Nef(self, peakList: PeakList, integralLists, multipletLists,
+    def peakList2Nef(self, spectrum: Spectrum, peakLists, integralLists, multipletLists,
                      exportCompleteSpectrum: bool = True
                      ) -> StarIo.NmrSaveFrame:
         """Convert PeakList to CCPN NEF saveframe.
         Used for all spectrum export, as there is one frame per PeakList
         """
 
-        spectrum = peakList.spectrum
+        # spectrum = peakList.spectrum
 
         # framecode for saveFrame that holds spectrum adn first peaklist.
         # If not None, the peakList will be read into that specttum
@@ -1906,29 +1921,30 @@ class CcpnNefWriter:
                     )
 
         # Get unique frame name
+        obj = spectrum
         name = spectrum.name
         if spectrumAlreadySaved:
             # not the first time this spectrum appears.
-            name = '%s`%s`' % (name, peakList.serial)
+            name = '%s`%s`' % (name, obj.serial)  # NOTE:ED - was peakList
             while spectrum.project.getSpectrum(name):
                 # Realistically this should never happen,
                 # but it is a further (if imperfect) guard against clashes
                 # This name is taken - modify it
-                name = '%s`%s`' % (name, peakList.serial)
+                name = '%s`%s`' % (name, obj.serial)  # NOTE:ED - was peakList
 
         # Set up frame
         category = 'nef_nmr_spectrum'
-        result = self._newNefSaveFrame(peakList, category, name)
+        result = self._newNefSaveFrame(obj, category, name)  # NOTE:ED - was peakList
 
         path = spectrum.filePath
         if path:
             result['ccpn_spectrum_file_path'] = path
 
-        self.ccpn2SaveFrameName[peakList] = result['sf_framecode']
+        self.ccpn2SaveFrameName[obj] = result['sf_framecode']  # NOTE:ED - was peakList
         if not spectrumAlreadySaved:
             self.ccpn2SaveFrameName[spectrum] = result['sf_framecode']
 
-        result['chemical_shift_list'] = self.ccpn2SaveFrameName.get(peakList.chemicalShiftList)
+        result['chemical_shift_list'] = self.ccpn2SaveFrameName.get(obj.chemicalShiftList)  # NOTE:ED - was peakList
         result['ccpn_sample'] = self.ccpn2SaveFrameName.get(spectrum.sample)
 
         # Will give wrong values for Hz or pointNumber units, and
@@ -1991,6 +2007,25 @@ class CcpnNefWriter:
         # Remove superfluous tags
         removeNameEndings = ('_1', '_2', '_3', '_4', '_5', '_6', '_7', '_8', '_9',
                              '_10', '_11', '_12', '_13', '_14', '_15',)[spectrum.dimensionCount:]
+
+        # NOTE:ED - new for ccpn_peak_lists
+        spectrumPeakLists = set(spectrum.peakLists) & set(peakLists)
+        if exportCompleteSpectrum and spectrumPeakLists:
+            loopName = 'ccpn_peak_list'
+
+            loop = result[loopName]
+            for tag in loop.columns:
+                if any(tag.endswith(x) for x in removeNameEndings):
+                    loop.removeColumn(tag)
+            for peakList in sorted(spectrumPeakLists):
+                row = loop.newRow(self._loopRowData(loopName, peakList))
+                row['serial'] = peakList.serial
+        else:
+            del result['ccpn_peak_list']
+            # del result['ccpn_peak']
+
+        peakList = AttrDict()  # NOTE:ED - make a temporary peak object
+        peakList.peaks = [pk for pkList in spectrumPeakLists for pk in pkList.peaks]
         if peakList.peaks:
             loopName = 'nef_peak'
             loop = result[loopName]
@@ -3963,6 +3998,8 @@ class CcpnNefReader:
         # Get name from spectrum parameters, or from the framecode
         spectrumName = framecode[len(category) + 1:]
         if spectrumName.endswith('`'):
+
+            # NOTE:ED - shouldn't get here for the minute
             peakListSerial = peakListParameters.get('serial')
             if peakListSerial:
                 ss = '`%s`' % peakListSerial
@@ -4024,7 +4061,9 @@ class CcpnNefReader:
             filePath = saveFrame.get('ccpn_spectrum_file_path')
             if filePath:
                 storageParameters, loopNames = self._parametersFromSaveFrame(saveFrame, mapping,
-                                                                             ccpnPrefix='spectrum._wrappedData.dataStore'
+                                                                             # ccpnPrefix='spectrum._wrappedData.dataStore'
+                                                                             # NOTE:ED - testing; removed 'spectrum.' prefix
+                                                                             ccpnPrefix='_wrappedData.dataStore'
                                                                              )
                 storageParameters['numPoints'] = spectrum.pointCounts
                 spectrum._wrappedData.addDataStore(filePath, **storageParameters)
@@ -4037,16 +4076,17 @@ class CcpnNefReader:
                 self.load_ccpn_spectrum_dimension(spectrum, loop)
 
         # Make PeakList
-        peakList = spectrum.newPeakList(**peakListParameters)
+        # peakList = spectrum.newPeakList(**peakListParameters)
+        peakList = spectrum.newPeakList()
 
-        # Load peaks (if exist)
-        loop = saveFrame.get('nef_peak')
-        if loop:
-            self.load_nef_peak(peakList, loop)
+        # # Load peaks (if exist)
+        # loop = saveFrame.get('nef_peak')
+        # if loop:
+        #     self.load_nef_peak(peakList, loop)
 
         # Load remaining loops, with spectrum as parent
         for loopName in loopNames:
-            if loopName not in ('nef_spectrum_dimension', 'ccpn_spectrum_dimension', 'nef_peak',
+            if loopName not in ('nef_spectrum_dimension', 'ccpn_spectrum_dimension', #'nef_peak',
                                 'nef_spectrum_dimension_transfer'):
                 # Those are treated elsewhere
                 loop = saveFrame.get(loopName)
@@ -4061,7 +4101,7 @@ class CcpnNefReader:
 
     def verify_nef_nmr_spectrum(self, project: Project, saveFrame: StarIo.NmrSaveFrame):
         _rowSpectrumErrors = saveFrame._rowErrors[saveFrame.name] = OrderedSet()
-        _rowPeakErrors = saveFrame._rowErrors['nef_peak_list'] = OrderedSet()
+        # _rowPeakErrors = saveFrame._rowErrors['nef_peak_list'] = OrderedSet()
 
         dimensionTransferTags = ('dimension_1', 'dimension_2', 'transfer_type', 'is_indirect')
 
@@ -4103,17 +4143,17 @@ class CcpnNefReader:
             self.error('nef_nmr_spectrum - Spectrum {} already exists'.format(spectrum), saveFrame, (spectrum,))
             _rowSpectrumErrors.add(spectrumName)
 
-            peakList = spectrum.getPeakList(peakListParameters['serial'])
-            if peakList is not None:
-                self.error('nef_nmr_spectrum - PeakList {} already exists'.format(peakList), saveFrame, (peakList,))
-                _rowPeakErrors.add(peakList.serial)
-
-                loop = saveFrame.get('nef_peak')
-                if loop:
-                    self.verify_nef_peak(peakList, loop, saveFrame)
-                self._verifyLoops(spectrum, saveFrame, dimensionCount=saveFrame['num_dimensions'],
-                                  excludeList=('nef_spectrum_dimension', 'ccpn_spectrum_dimension', 'nef_peak',
-                                               'nef_spectrum_dimension_transfer'))
+            # peakList = spectrum.getPeakList(peakListParameters['serial'])
+            # if peakList is not None:
+            #     self.error('nef_nmr_spectrum - PeakList {} already exists'.format(peakList), saveFrame, (peakList,))
+            #     _rowPeakErrors.add(peakList.serial)
+            #
+            #     loop = saveFrame.get('nef_peak')
+            #     if loop:
+            #         self.verify_nef_peak(peakList, loop, saveFrame)
+            self._verifyLoops(spectrum, saveFrame, dimensionCount=saveFrame['num_dimensions'],
+                              excludeList=('nef_spectrum_dimension', 'ccpn_spectrum_dimension', #'nef_peak',
+                                           'nef_spectrum_dimension_transfer'))
 
     verifiers['nef_nmr_spectrum'] = verify_nef_nmr_spectrum
 
@@ -4147,18 +4187,18 @@ class CcpnNefReader:
                     else:
                         spectrumName = ll[0]
 
-        result = {category: OrderedSet([spectrumName]),}
-                  # 'nef_peak_list': OrderedSet([peakListParameters['serial']])}
+        result = {category: OrderedSet([spectrumName]), }
+        # 'nef_peak_list': OrderedSet([peakListParameters['serial']])}
 
-        # NOTE:ED - this is a hack to get the peakLists into a list
-        if saveFrame.get('nef_peak'):
-            content = self.contents['nef_peak']
-            result['nef_peak'] = content(self, project, saveFrame.get('nef_peak'), saveFrame, name=spectrumName)
-            content = self.contents['nef_peaks']
-            result['nef_peaks'] = content(self, project, saveFrame.get('nef_peak'), saveFrame, name=spectrumName)
+        # # NOTE:ED - this is a hack to get the peakLists into a list
+        # if saveFrame.get('nef_peak'):
+        #     content = self.contents['nef_peak']
+        #     result['nef_peak'] = content(self, project, saveFrame.get('nef_peak'), saveFrame, name=spectrumName)
+        #     content = self.contents['nef_peaks']
+        #     result['nef_peaks'] = content(self, project, saveFrame.get('nef_peak'), saveFrame, name=spectrumName)
 
         self._contentLoops(project, saveFrame, name=spectrumName, itemLength=saveFrame['num_dimensions'],
-                           excludeList=('nef_spectrum_dimension', 'ccpn_spectrum_dimension',  'nef_peak',
+                           excludeList=('nef_spectrum_dimension', 'ccpn_spectrum_dimension',  #'nef_peak',
                                         'nef_spectrum_dimension_transfer'))
         self.updateContent(saveFrame, result)
 
@@ -4336,6 +4376,57 @@ class CcpnNefReader:
 
     verifiers['nef_spectrum_dimension'] = _noLoopVerify
     contents['nef_spectrum_dimension'] = _noLoopContent
+
+    def load_ccpn_peak_list(self, spectrum: Spectrum,
+                            loop: StarIo.NmrLoop) -> List[PeakList]:
+
+        result = []
+
+        mapping = nef2CcpnMap[loop.name]
+        map2 = dict(item for item in mapping.items() if item[1] and '.' not in item[1])
+        creatorFunc = spectrum.newPeakList
+        for row in loop.data:
+            parameters = self._parametersFromLoopRow(row, map2)
+            peakList = creatorFunc(**parameters)
+            # peakList.resetSerial(row['serial'])
+            # NB former call was BROKEN!
+            # modelUtil.resetSerial(peakList, row['serial'], 'peakLists')
+            result.append(peakList)
+        #
+        return result
+
+    importers['ccpn_peak_list'] = load_ccpn_peak_list
+
+    def verify_ccpn_peak_list(self, spectrum: Spectrum, loop: StarIo.NmrLoop, parentFrame: StarIo.NmrSaveFrame, **kwds):
+        _rowErrors = parentFrame._rowErrors[loop.name] = OrderedSet()
+
+        mapping = nef2CcpnMap[loop.name]
+        map2 = dict(item for item in mapping.items() if item[1] and '.' not in item[1])
+        creatorFunc = spectrum.getPeakList
+        for row in loop.data:
+            parameters = self._parametersFromLoopRow(row, map2)
+            peakList = creatorFunc(parameters['serial'])
+            if peakList is not None:
+                self.error('ccpn_peak_list - PeakList {} already exists'.format(peakList), loop, (peakList,))
+                _rowErrors.add(loop.data.index(row))
+
+    verifiers['ccpn_peak_list'] = verify_ccpn_peak_list
+
+    def content_ccpn_peak_list(self, project: Project, loop: StarIo.NmrLoop, parentFrame: StarIo.NmrSaveFrame,
+                               name=None, itemLength=None):
+        peakLists = OrderedSet()
+
+        mapping = nef2CcpnMap[loop.name]
+        map2 = dict(item for item in mapping.items() if item[1] and '.' not in item[1])
+        for row in loop.data:
+            parameters = self._parametersFromLoopRow(row, map2)
+            result = (name, parameters['serial'])
+            # listName = Pid.IDSEP.join(('' if x is None else str(x)) for x in result)
+            peakLists.add(result)
+
+        return peakLists
+
+    contents['ccpn_peak_list'] = content_ccpn_peak_list
 
     def load_ccpn_integral_list(self, spectrum: Spectrum,
                                 loop: StarIo.NmrLoop) -> List[IntegralList]:
@@ -4767,12 +4858,14 @@ class CcpnNefReader:
 
     contents['ccpn_peak_cluster_peaks'] = content_ccpn_peak_cluster_peaks
 
-    def load_nef_peak(self, peakList: PeakList, loop: StarIo.NmrLoop) -> List[Peak]:
+    # def load_nef_peak(self, peakList: PeakList, loop: StarIo.NmrLoop) -> List[Peak]:
+    def load_nef_peak(self, spectrum: Spectrum, loop: StarIo.NmrLoop) -> List[Peak]:            # NOTE:ED - new calling parameter
         """Serves to load nef_peak loop"""
 
         result = []
 
-        dimensionCount = peakList.spectrum.dimensionCount
+        # dimensionCount = peakList.spectrum.dimensionCount
+        dimensionCount = spectrum.dimensionCount
 
         mapping = nef2CcpnMap[loop.name]
         map2 = dict(item for item in mapping.items() if item[1] and '.' not in item[1])
@@ -4797,7 +4890,9 @@ class CcpnNefReader:
 
             # get or make peak
             serial = parameters['serial']
-            peak = peaks.get(serial)
+            peakListSerial = row.get('peak_list_serial')
+            peakLabel = Pid.IDSEP.join(('' if x is None else str(x)) for x in (peakListSerial, serial))
+            peak = peaks.get(peakLabel)
             # TODO check if peak parameters are the same for all rows, and do something about it
             # For now we simply use the first row that appears
             if peak is None:
@@ -4814,8 +4909,13 @@ class CcpnNefReader:
                 parameters['ppmPositions'] = tuple(row.get(x) for x in multipleAttributes['position'])
                 parameters['positionError'] = tuple(row.get(x) for x in multipleAttributes['positionError'])
                 # parameters['positionError'] = row._get('position_uncertainty')[:dimensionCount]
+
+                peakList = spectrum.getPeakList(row.get('peak_list_serial'))
+                if not peakList:
+                    continue
+
                 peak = peakList.newPeak(**parameters)
-                peaks[serial] = peak
+                peaks[peakLabel] = peak
                 result.append(peak)
 
             # Add assignment
@@ -4844,7 +4944,8 @@ class CcpnNefReader:
                 else:
                     # partial and unusable assignment
                     self.warning("Uninterpretable Peak assignment for peak %s: %s. Set to None"
-                                 % (peak.serial, tt))
+                                 # % (peak.serial, tt))
+                                 % (peakLabel, tt))
                     nmrAtoms.append(None)
             if foundAssignment:
                 assignedNmrAtoms.append(nmrAtoms)
@@ -4883,7 +4984,8 @@ class CcpnNefReader:
         result = OrderedSet()
 
         # NOTE:ED - not correct yet, need 2 lists
-        peakListSerial = parentFrame['ccpn_peaklist_serial']
+        # peakListSerial = parentFrame['ccpn_peaklist_serial']
+        peakListSerial = parentFrame.get('ccpn_peaklist_serial') or 1
         # get the list of peaks
         mapping = nef2CcpnMap[loop.name]
         map2 = dict(item for item in mapping.items() if item[1] and '.' not in item[1])
@@ -4897,7 +4999,7 @@ class CcpnNefReader:
         return result
 
     def content_nef_peaks(self, peakList: PeakList, loop: StarIo.NmrLoop, parentFrame: StarIo.NmrSaveFrame,
-                         name=None, itemLength: int = None):
+                          name=None, itemLength: int = None):
         """Get the contents of nef_peak loop"""
         result = OrderedSet()
 

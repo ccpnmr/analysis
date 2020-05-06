@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-05-06 20:29:38 +0100 (Wed, May 06, 2020) $"
+__dateModified__ = "$dateModified: 2020-05-06 21:33:48 +0100 (Wed, May 06, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -479,6 +479,14 @@ nef2CcpnMap = {
         # ('ccpn_peaklist_symbol_style', 'symbolStyle'),
         # ('ccpn_peaklist_text_colour', 'textColour'),
 
+        ('ccpn_peaklist_serial', None),
+        ('ccpn_peaklist_comment', None),
+        ('ccpn_peaklist_name', None),
+        ('ccpn_peaklist_is_simulated', None),
+        ('ccpn_peaklist_symbol_colour', None),
+        ('ccpn_peaklist_symbol_style', None),
+        ('ccpn_peaklist_text_colour', None),
+
         ('nef_spectrum_dimension', _isALoop),
         ('ccpn_spectrum_dimension', _isALoop),
         ('nef_spectrum_dimension_transfer', _isALoop),
@@ -542,6 +550,15 @@ nef2CcpnMap = {
         ('symbol_colour', 'symbolColour'),
         ('symbol_style', 'symbolStyle'),
         ('text_colour', 'textColour'),
+        )),
+    'ccpn_no_peaklist'                 : OD((
+        ('ccpn_peaklist_serial', 'serial'),
+        ('ccpn_peaklist_comment', 'comment'),
+        ('ccpn_peaklist_name', 'title'),
+        ('ccpn_peaklist_is_simulated', 'isSimulated'),
+        ('ccpn_peaklist_symbol_colour', 'symbolColour'),
+        ('ccpn_peaklist_symbol_style', 'symbolStyle'),
+        ('ccpn_peaklist_text_colour', 'textColour'),
         )),
 
     # NBNB: boxWidths and lineWidths are NOT included.
@@ -3987,19 +4004,22 @@ class CcpnNefReader:
         category = saveFrame['sf_category']
         framecode = saveFrame['sf_framecode']
         mapping = nef2CcpnMap[category]
+        mappingNoPeakList = nef2CcpnMap['ccpn_no_peaklist']
 
         # Get peakList parameters and make peakList
-        peakListParameters, dummy = self._parametersFromSaveFrame(saveFrame, mapping)
+        # peakListParameters, dummy = self._parametersFromSaveFrame(saveFrame, mapping)
+        peakListParameters, dummy = self._parametersFromSaveFrame(saveFrame, mappingNoPeakList)
 
         # Get spectrum parameters
-        spectrumParameters, loopNames = self._parametersFromSaveFrame(saveFrame, mapping,
-                                                                      ccpnPrefix='spectrum')
+        spectrumParameters, loopNames = self._parametersFromSaveFrame(saveFrame, mapping,)
+                                                                      # ccpnPrefix='spectrum')
 
         # Get name from spectrum parameters, or from the framecode
         spectrumName = framecode[len(category) + 1:]
+        oldSerial = 1
         if spectrumName.endswith('`'):
 
-            # NOTE:ED - shouldn't get here for the minute
+            # NOTE:ED - should only get here for old nef
             peakListSerial = peakListParameters.get('serial')
             if peakListSerial:
                 ss = '`%s`' % peakListSerial
@@ -4017,6 +4037,7 @@ class CcpnNefReader:
                         pass
                     else:
                         spectrumName = ll[0]
+            oldSerial = peakListParameters['serial']
 
         spectrum = project.getSpectrum(spectrumName)
         if spectrum is None:
@@ -4075,9 +4096,9 @@ class CcpnNefReader:
             if loop:
                 self.load_ccpn_spectrum_dimension(spectrum, loop)
 
-        # Make PeakList
-        # peakList = spectrum.newPeakList(**peakListParameters)
-        peakList = spectrum.newPeakList()
+        # Make PeakList if old nef parameters exist
+        if len(peakListParameters):
+            peakList = spectrum.newPeakList(**peakListParameters)
 
         # # Load peaks (if exist)
         # loop = saveFrame.get('nef_peak')
@@ -4092,9 +4113,10 @@ class CcpnNefReader:
                 loop = saveFrame.get(loopName)
                 if loop:
                     importer = self.importers[loopName]
-                    importer(self, spectrum, loop)
+                    importer(self, spectrum, loop, peakListId=oldSerial)
         #
-        return peakList
+        if len(peakListParameters):
+            return peakList
 
     #
     importers['nef_nmr_spectrum'] = load_nef_nmr_spectrum
@@ -4378,7 +4400,7 @@ class CcpnNefReader:
     contents['nef_spectrum_dimension'] = _noLoopContent
 
     def load_ccpn_peak_list(self, spectrum: Spectrum,
-                            loop: StarIo.NmrLoop) -> List[PeakList]:
+                            loop: StarIo.NmrLoop, peakListId=None) -> List[PeakList]:
 
         result = []
 
@@ -4429,7 +4451,7 @@ class CcpnNefReader:
     contents['ccpn_peak_list'] = content_ccpn_peak_list
 
     def load_ccpn_integral_list(self, spectrum: Spectrum,
-                                loop: StarIo.NmrLoop) -> List[IntegralList]:
+                                loop: StarIo.NmrLoop, peakListId=None) -> List[IntegralList]:
 
         result = []
 
@@ -4480,7 +4502,7 @@ class CcpnNefReader:
     contents['ccpn_integral_list'] = content_ccpn_integral_list
 
     def load_ccpn_multiplet_list(self, spectrum: Spectrum,
-                                 loop: StarIo.NmrLoop) -> List[MultipletList]:
+                                 loop: StarIo.NmrLoop, peakListId=None) -> List[MultipletList]:
 
         result = []
 
@@ -4531,7 +4553,7 @@ class CcpnNefReader:
     contents['ccpn_multiplet_list'] = content_ccpn_multiplet_list
 
     def load_ccpn_integral(self, spectrum: Spectrum,
-                           loop: StarIo.NmrLoop) -> List[Integral]:
+                           loop: StarIo.NmrLoop, peakListId=None) -> List[Integral]:
 
         result = []
 
@@ -4615,7 +4637,7 @@ class CcpnNefReader:
     contents['ccpn_integral'] = content_ccpn_integral
 
     def load_ccpn_multiplet(self, spectrum: Spectrum,
-                            loop: StarIo.NmrLoop) -> List[Multiplet]:
+                            loop: StarIo.NmrLoop, peakListId=None) -> List[Multiplet]:
 
         result = []
 
@@ -4678,7 +4700,7 @@ class CcpnNefReader:
     contents['ccpn_multiplet'] = content_ccpn_multiplet
 
     def load_ccpn_multiplet_peaks(self, spectrum: Spectrum,
-                                  loop: StarIo.NmrLoop) -> List[Multiplet]:
+                                  loop: StarIo.NmrLoop, peakListId=None) -> List[Multiplet]:
 
         result = []
 
@@ -4859,7 +4881,7 @@ class CcpnNefReader:
     contents['ccpn_peak_cluster_peaks'] = content_ccpn_peak_cluster_peaks
 
     # def load_nef_peak(self, peakList: PeakList, loop: StarIo.NmrLoop) -> List[Peak]:
-    def load_nef_peak(self, spectrum: Spectrum, loop: StarIo.NmrLoop) -> List[Peak]:            # NOTE:ED - new calling parameter
+    def load_nef_peak(self, spectrum: Spectrum, loop: StarIo.NmrLoop, peakListId=None) -> List[Peak]:            # NOTE:ED - new calling parameter
         """Serves to load nef_peak loop"""
 
         result = []
@@ -4890,7 +4912,7 @@ class CcpnNefReader:
 
             # get or make peak
             serial = parameters['serial']
-            peakListSerial = row.get('peak_list_serial')
+            peakListSerial = row.get('peak_list_serial') or peakListId or 1
             peakLabel = Pid.IDSEP.join(('' if x is None else str(x)) for x in (peakListSerial, serial))
             peak = peaks.get(peakLabel)
             # TODO check if peak parameters are the same for all rows, and do something about it
@@ -4910,9 +4932,9 @@ class CcpnNefReader:
                 parameters['positionError'] = tuple(row.get(x) for x in multipleAttributes['positionError'])
                 # parameters['positionError'] = row._get('position_uncertainty')[:dimensionCount]
 
-                peakList = spectrum.getPeakList(row.get('peak_list_serial'))
+                peakList = spectrum.getPeakList(peakListSerial)
                 if not peakList:
-                    continue
+                    peakList = spectrum.newPeakList(str(peakListSerial))
 
                 peak = peakList.newPeak(**parameters)
                 peaks[peakLabel] = peak

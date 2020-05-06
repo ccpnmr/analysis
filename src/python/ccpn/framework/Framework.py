@@ -3403,8 +3403,11 @@ if __name__ == '__main__':
     app = QtWidgets.QApplication(['testApp'])
     # run the dialog
     dialog = ImportNefPopup(parent=ui.mainWindow, mainWindow=ui.mainWindow,
-                            project=project, importNef=_loader._nefDict)
-    result = dialog.exec_()
+                            nefObjects=(project, _loader))
+
+    dialog._initialiseProject(ui.mainWindow, application, project)
+    dialog.fillPopup()
+    dialog.exec_()
 
     import ccpn.util.nef.nef as Nef
 
@@ -3556,4 +3559,3 @@ if __name__ == '__main__':
     pos = re.search('[<>]', str(testDict2), re.MULTILINE)
     if pos:
         print("Error: data cannot contain xml tags '{}' at pos {}".format(pos.group(), pos.span()))
-

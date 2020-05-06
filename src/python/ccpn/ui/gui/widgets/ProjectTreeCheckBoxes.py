@@ -11,7 +11,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-05-05 02:32:29 +0100 (Tue, May 05, 2020) $"
+__dateModified__ = "$dateModified: 2020-05-06 13:20:43 +0100 (Wed, May 06, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -123,7 +123,11 @@ class ProjectTreeCheckBoxes(QtWidgets.QTreeWidget, Base):
 
         self._setFocusColour()
 
-    def _populateTreeView(self):
+    def _populateTreeView(self, project=None):
+        if project:
+            # set the new project if required
+            self.project = project
+
         if self.includeProject:
             # add the project as the top of the tree - allows to un/select all
             self.projectItem = QtWidgets.QTreeWidgetItem(self.invisibleRootItem())
@@ -320,7 +324,11 @@ class ImportTreeCheckBoxes(ProjectTreeCheckBoxes):
 
     contents = {}
 
-    def _populateTreeView(self):
+    def _populateTreeView(self, project=None):
+        if project:
+            # set the new project if required
+            self.project = project
+
         if self.includeProject:
             # add the project as the top of the tree - allows to un/select all
             self.projectItem = QtWidgets.QTreeWidgetItem(self.invisibleRootItem())
@@ -364,30 +372,24 @@ class ImportTreeCheckBoxes(ProjectTreeCheckBoxes):
         pass
 
     def content_list(self, project: Project, saveFrame: StarIo.NmrSaveFrame, saveFrameTag):
-        print(saveFrame.name)
         try:
             category = saveFrameTag     #saveFrame['sf_category']
         except Exception as es:
             pass
 
-        thisList = saveFrame._content[category]
-        treeItem = self.nefMapping[category]
-        found = self.findItems(treeItem, QtCore.Qt.MatchExactly | QtCore.Qt.MatchRecursive)
-        if found:
-            if len(found) == 1:
-                # add to the tree
-                for listItem in thisList:
-                    child = QtWidgets.QTreeWidgetItem(found[0])
-                    child.setFlags(child.flags() | QtCore.Qt.ItemIsUserCheckable)
-                    child.setData(1, 0, saveFrame)
-                    child.setText(0, str(listItem))
-                    child.setCheckState(0, QtCore.Qt.Unchecked)
-
-            else:
-                print('TOO MANY ERROR')
-        else:
-            print('NOT FOUND ERROR')
-            # obj = item.data(1, 0)
+        if hasattr(saveFrame, '_content') and category in saveFrame._content:
+            thisList = saveFrame._content[category]
+            treeItem = self.nefMapping[category]
+            found = self.findItems(treeItem, QtCore.Qt.MatchExactly | QtCore.Qt.MatchRecursive)
+            if found:
+                if len(found) == 1:
+                    # add to the tree
+                    for listItem in thisList:
+                        child = QtWidgets.QTreeWidgetItem(found[0])
+                        child.setFlags(child.flags() | QtCore.Qt.ItemIsUserCheckable)
+                        child.setData(1, 0, saveFrame)
+                        child.setText(0, str(listItem))
+                        child.setCheckState(0, QtCore.Qt.Unchecked)
 
     def _contentLoops(self, project: Project, saveFrame: StarIo.NmrSaveFrame, saveFrameTag=None,
                       addLoopAttribs=None, excludeList=(), **kwds):

@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-05-05 02:32:29 +0100 (Tue, May 05, 2020) $"
+__dateModified__ = "$dateModified: 2020-05-06 13:20:43 +0100 (Wed, May 06, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -528,15 +528,15 @@ nef2CcpnMap = {
         ('is_indirect', None),
         )),
 
-    'ccpn_peak_list'                 : OD((
-        ('ccpn_peaklist_serial', 'serial'),
-        ('ccpn_peaklist_comment', 'comment'),
-        ('ccpn_peaklist_name', 'title'),
-        ('ccpn_peaklist_is_simulated', 'isSimulated'),
-        ('ccpn_peaklist_symbol_colour', 'symbolColour'),
-        ('ccpn_peaklist_symbol_style', 'symbolStyle'),
-        ('ccpn_peaklist_text_colour', 'textColour'),
-        )),
+    # 'ccpn_peak_list'                 : OD((
+    #     ('ccpn_peaklist_serial', 'serial'),
+    #     ('ccpn_peaklist_comment', 'comment'),
+    #     ('ccpn_peaklist_name', 'title'),
+    #     ('ccpn_peaklist_is_simulated', 'isSimulated'),
+    #     ('ccpn_peaklist_symbol_colour', 'symbolColour'),
+    #     ('ccpn_peaklist_symbol_style', 'symbolStyle'),
+    #     ('ccpn_peaklist_text_colour', 'textColour'),
+    #     )),
 
     # NBNB: boxWidths and lineWidths are NOT included.
     'nef_peak'                       : OD((
@@ -2508,7 +2508,7 @@ class CcpnNefReader:
         self.saveFrameName = None
         self.warnings = []
         self.errors = []
-        self.ccpnContent = {}  # can change this name later
+        # self.ccpnContent = {}  # can change this name later
 
         self.testing = testing
 
@@ -2685,7 +2685,7 @@ class CcpnNefReader:
                 else:
                     result[self.saveFrameName] = content(self, project, saveFrame)
 
-        return self.ccpnContent, result
+        return result
 
     def _getErrors(self, project, saveFrame):
         """Print the errors in a saveFrame/dataBlock - results generated with _verifyNef
@@ -2984,6 +2984,19 @@ class CcpnNefReader:
         This is a loop that requires no verification
         """
         pass
+
+    def _getLoops(self, project: Project, saveFrame: StarIo.NmrSaveFrame, excludeList=(), **kwds):
+        """Iterate over the loops in a saveFrame, and add to a list"""
+        result = ()
+        mapping = nef2CcpnMap[saveFrame.category]
+        for tag, ccpnTag in mapping.items():
+            if tag not in excludeList and ccpnTag == _isALoop:
+                loop = saveFrame.get(tag)
+                if loop:
+                    content = self.contents[tag]
+                    result += (loop,)
+
+        return result
 
     def _contentLoops(self, project: Project, saveFrame: StarIo.NmrSaveFrame, addLoopAttribs=None,
                       excludeList=(), **kwds):
@@ -5822,10 +5835,9 @@ class CcpnNefReader:
         """
         # # MUST BE SUBCLASSED
         # raise NotImplementedError("Code error: function not implemented")
-        if source.name in self.ccpnContent:
+        if hasattr(source, '_content'):
             self.error('Source {} already exists in content'.format(source.name), source, None)
         else:
-            self.ccpnContent[source.name] = (source, objects)
             source._content = objects
 
     def updateContent(self, source, objects: Optional[dict] = None):
@@ -5833,15 +5845,12 @@ class CcpnNefReader:
         """
         # # MUST BE SUBCLASSED
         # raise NotImplementedError("Code error: function not implemented")
-        if source.name in self.ccpnContent:
+        if hasattr(source, '_content'):
             try:
-                _, dd = self.ccpnContent[source.name]
-                dd.update(objects)
                 source._content.update(objects)  # double up for the minute
-            except:
-                raise RuntimeError('Error updating dict')
+            except Exception as es:
+                raise RuntimeError('Error updating dict {} ({})'.format(es, source))
         else:
-            self.ccpnContent[source.name] = (source, objects)
             source._content = objects
 
     def _parametersFromLoopRow(self, row, mapping):

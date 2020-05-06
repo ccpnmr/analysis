@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-05-06 20:06:52 +0100 (Wed, May 06, 2020) $"
+__dateModified__ = "$dateModified: 2020-05-06 20:29:38 +0100 (Wed, May 06, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -4961,7 +4961,8 @@ class CcpnNefReader:
     #
     importers['nef_peak'] = load_nef_peak
 
-    def verify_nef_peak(self, peakList: PeakList, loop: StarIo.NmrLoop, parentFrame: StarIo.NmrSaveFrame, dimensionCount: int = None):
+    # def verify_nef_peak(self, peakList: PeakList, loop: StarIo.NmrLoop, parentFrame: StarIo.NmrSaveFrame, dimensionCount: int = None):
+    def verify_nef_peak(self, spectrum: Spectrum, loop: StarIo.NmrLoop, parentFrame: StarIo.NmrSaveFrame, dimensionCount: int = None):
         """Serves to verify nef_peak loop"""
         _rowErrors = parentFrame._rowErrors[loop.name] = OrderedSet()
 
@@ -4971,10 +4972,16 @@ class CcpnNefReader:
             parameters = self._parametersFromLoopRow(row, map2)
 
             serial = parameters['serial']
-            peak = peakList.getPeak(serial)
-            if peak is not None:
-                self.error('nef_peak - Peak {} already exists'.format(peak), loop, (peak,))
-                _rowErrors.add(loop.data.index(row))
+            peakListSerial = row.get('peak_list_serial') or 1
+            peakLabel = Pid.IDSEP.join(('' if x is None else str(x)) for x in (peakListSerial, serial))
+
+            peakList = spectrum.getPeakList(peakListSerial)
+            if peakList is not None:
+                peak = peakList.getPeak(serial)
+
+                if peak is not None:
+                    self.error('nef_peak - Peak {} already exists'.format(peak), loop, (peak,))
+                    _rowErrors.add(loop.data.index(row))
 
     verifiers['nef_peak'] = verify_nef_peak
 

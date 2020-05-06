@@ -267,12 +267,12 @@ class PulldownList(QtWidgets.QComboBox, Base):
     def addItem(self, text, object=NULL, icon=None, ):
 
         if icon:
-            QtWidgets.QComboBox.addItem(self, Icon(icon), text)
+            QtWidgets.QComboBox.addItem(self, Icon(icon), str(text))
         else:
-            QtWidgets.QComboBox.addItem(self, text)
+            QtWidgets.QComboBox.addItem(self, str(text))
 
         if object is NULL:
-            object = text
+            object = str(text)
 
         self.texts.append(text)
         self.objects.append(object)

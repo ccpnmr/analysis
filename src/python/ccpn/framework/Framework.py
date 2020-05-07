@@ -3328,6 +3328,7 @@ if __name__ == '__main__':
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     # TESTNEF = '/Users/ejb66/Documents/CcpNmrData/NefTestData_1_1/CCPN_Commented_Example.nef'
+    # TESTNEF = '/Users/ejb66/Documents/nefTestProject.nef'
     TESTNEF = '/Users/ejb66/Documents/CcpNmrData/nefTestProject.nef'
     # VALIDATEDICT = '/Users/ejb66/PycharmProjects/Git/NEF/specification/mmcif_nef.dic'
     VALIDATEDICT = '/Users/ejb66/Desktop/mmcif_nef_v1_1.dic'

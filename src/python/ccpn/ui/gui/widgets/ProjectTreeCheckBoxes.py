@@ -11,7 +11,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-05-06 20:06:53 +0100 (Wed, May 06, 2020) $"
+__dateModified__ = "$dateModified: 2020-05-07 10:44:11 +0100 (Thu, May 07, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -49,6 +49,7 @@ from ccpn.util.nef import StarIo
 from ccpn.util.OrderedSet import OrderedSet
 from ccpnmodel.ccpncore.lib import Constants as coreConstants
 from ccpn.core.lib.CcpnNefIo import _traverse, nef2CcpnMap, _isALoop
+
 
 # TODO These should maybe be consolidated with the same constants in CcpnNefIo
 # (and likely those in Project)
@@ -299,27 +300,49 @@ class ImportTreeCheckBoxes(ProjectTreeCheckBoxes):
     lockedItems = {
         }
 
-    nefMapping = {
+    nefToTreeViewMapping = {
         # 'nef_sequence': Chain._pluralLinkName,
-        'chain_code': Chain._pluralLinkName,
-        'nef_chemical_shift_list': ChemicalShiftList._pluralLinkName,
+        'chain_code'                 : Chain._pluralLinkName,
+        'nef_chemical_shift_list'    : ChemicalShiftList._pluralLinkName,
         'nef_distance_restraint_list': RestraintList._pluralLinkName,
         'nef_dihedral_restraint_list': RestraintList._pluralLinkName,
-        'nef_rdc_restraint_list': RestraintList._pluralLinkName,
-        'ccpn_restraint_list': RestraintList._pluralLinkName,
+        'nef_rdc_restraint_list'     : RestraintList._pluralLinkName,
+        'ccpn_restraint_list'        : RestraintList._pluralLinkName,
         # 'nef_nmr_spectrum': PeakList._pluralLinkName,
-        'nef_peak': PeakList._pluralLinkName,
-        'ccpn_integral_list': IntegralList._pluralLinkName,
-        'ccpn_multiplet_list': MultipletList._pluralLinkName,
-        'ccpn_sample': Sample._pluralLinkName,
-        'ccpn_substance': Substance._pluralLinkName,
+        'nef_peak'                   : PeakList._pluralLinkName,
+        'ccpn_integral_list'         : IntegralList._pluralLinkName,
+        'ccpn_multiplet_list'        : MultipletList._pluralLinkName,
+        'ccpn_sample'                : Sample._pluralLinkName,
+        'ccpn_substance'             : Substance._pluralLinkName,
         # 'ccpn_assignment': NmrChain._pluralLinkName,
-        'nmr_chain': NmrChain._pluralLinkName,
-        'ccpn_dataset': DataSet._pluralLinkName,
-        'ccpn_complex': Complex._pluralLinkName,
-        'ccpn_spectrum_group': SpectrumGroup._pluralLinkName,
-        'ccpn_notes': Note._pluralLinkName,
-        'ccpn_peak_cluster': PeakCluster._pluralLinkName,
+        'nmr_chain'                  : NmrChain._pluralLinkName,
+        'ccpn_dataset'               : DataSet._pluralLinkName,
+        'ccpn_complex'               : Complex._pluralLinkName,
+        'ccpn_spectrum_group'        : SpectrumGroup._pluralLinkName,
+        'ccpn_notes'                 : Note._pluralLinkName,
+        'ccpn_peak_cluster'          : PeakCluster._pluralLinkName,
+        }
+
+    nefProjectToSaveFramesMapping = {
+        # Chain._pluralLinkName : [],
+        Chain._pluralLinkName            : ['ccpn_chain', 'nef_sequence'],
+        ChemicalShiftList._pluralLinkName: ['nef_chemical_shift_list', 'nef_chemical_shift'],
+        RestraintList._pluralLinkName    : ['nef_distance_restraint_list', 'nef_distance_restraint',
+                                            'nef_dihedral_restraint_list', 'nef_dihedral_restraint',
+                                            'nef_rdc_restraint_list', 'nef_rdc_restraint',
+                                            'ccpn_restraint_list', 'ccpn_restraint'],
+        PeakList._pluralLinkName         : ['ccpn_peak_list', 'nef_peak'],
+        IntegralList._pluralLinkName     : ['ccpn_integral_list', 'ccpn_integral'],
+        MultipletList._pluralLinkName    : ['ccpn_multiplet_list', 'ccpn_multiplet', 'ccpn_multiplet_peaks'],
+        Sample._pluralLinkName           : ['ccpn_sample', 'ccpn_sample_component'],
+        Substance._pluralLinkName        : ['ccpn_substance'],
+        NmrChain._pluralLinkName         : ['nmr_chain', 'nmr_residue', 'nmr_atom'],
+        # TODO:ED - not done yet
+        DataSet._pluralLinkName          : [],
+        Complex._pluralLinkName          : ['ccpn_complex', 'ccpn_complex_chain'],
+        SpectrumGroup._pluralLinkName    : ['ccpn_spectrum_group', 'ccpn_group_spectrum'],
+        Note._pluralLinkName             : ['ccpn_note'],
+        PeakCluster._pluralLinkName      : ['ccpn_peak_cluster_list', 'ccpn_peak_cluster', 'ccpn_peak_cluster_peaks'],
         }
 
     contents = {}
@@ -376,13 +399,13 @@ class ImportTreeCheckBoxes(ProjectTreeCheckBoxes):
 
     def content_list(self, project: Project, saveFrame: StarIo.NmrSaveFrame, saveFrameTag):
         try:
-            category = saveFrameTag     #saveFrame['sf_category']
+            category = saveFrameTag  #saveFrame['sf_category']
         except Exception as es:
             pass
 
         if hasattr(saveFrame, '_content') and category in saveFrame._content:
             thisList = saveFrame._content[category]
-            treeItem = self.nefMapping[category]
+            treeItem = self.nefToTreeViewMapping[category]
             found = self.findItems(treeItem, QtCore.Qt.MatchExactly | QtCore.Qt.MatchRecursive)
             if found:
                 if len(found) == 1:
@@ -424,7 +447,7 @@ class ImportTreeCheckBoxes(ProjectTreeCheckBoxes):
         pass
 
     def content_nef_nmr_spectrum(self, project: Project, saveFrame: StarIo.NmrSaveFrame, saveFrameTag):
-        self._contentLoops(project, saveFrame, saveFrameTag, #name=spectrumName, itemLength=saveFrame['num_dimensions'],
+        self._contentLoops(project, saveFrame, saveFrameTag,  #name=spectrumName, itemLength=saveFrame['num_dimensions'],
                            )
 
     def content_ccpn_integral_list(self, project: Project, loop: StarIo.NmrLoop, parentFrame: StarIo.NmrSaveFrame,
@@ -473,40 +496,40 @@ class ImportTreeCheckBoxes(ProjectTreeCheckBoxes):
 
     contents['nef_molecular_system'] = content_nef_molecular_system
     # contents['nef_sequence'] = content_nef_sequence
-    contents['chain_code'] = content_list                       # content_nef_sequence
+    contents['chain_code'] = content_list  # content_nef_sequence
     # contents['nef_covalent_links'] = content_nef_covalent_links
-    contents['nef_chemical_shift_list'] = content_list                       # content_nef_chemical_shift_list
+    contents['nef_chemical_shift_list'] = content_list  # content_nef_chemical_shift_list
     # contents['nef_chemical_shift'] = content_nef_chemical_shift
 
-    contents['nef_distance_restraint_list'] = content_list                       # content_nef_restraint_list  # could be _contentLoops
-    contents['nef_dihedral_restraint_list'] = content_list                       # content_nef_restraint_list
-    contents['nef_rdc_restraint_list'] = content_list                       # content_nef_restraint_list
-    contents['ccpn_restraint_list'] = content_list                       # content_nef_restraint_list
+    contents['nef_distance_restraint_list'] = content_list  # content_nef_restraint_list  # could be _contentLoops
+    contents['nef_dihedral_restraint_list'] = content_list  # content_nef_restraint_list
+    contents['nef_rdc_restraint_list'] = content_list  # content_nef_restraint_list
+    contents['ccpn_restraint_list'] = content_list  # content_nef_restraint_list
 
     # contents['nef_distance_restraint'] = partial(content_nef_restraint, itemLength=coreConstants.constraintListType2ItemLength.get('Distance'))
     # contents['nef_dihedral_restraint'] = partial(content_nef_restraint, itemLength=coreConstants.constraintListType2ItemLength.get('Dihedral'))
     # contents['nef_rdc_restraint'] = partial(content_nef_restraint, itemLength=coreConstants.constraintListType2ItemLength.get('Rdc'))
     # contents['ccpn_restraint'] = partial(content_nef_restraint, itemLength=coreConstants.constraintListType2ItemLength.get('Distance'))
 
-    contents['nef_nmr_spectrum'] = content_ccpn_notes                       # content_nef_nmr_spectrum
+    contents['nef_nmr_spectrum'] = content_ccpn_notes  # content_nef_nmr_spectrum
     contents['nef_peak'] = content_list
 
-    contents['ccpn_integral_list'] = content_list                       # content_ccpn_integral_list
-    contents['ccpn_multiplet_list'] = content_list                       # content_ccpn_multiplet_list
+    contents['ccpn_integral_list'] = content_list  # content_ccpn_integral_list
+    contents['ccpn_multiplet_list'] = content_list  # content_ccpn_multiplet_list
     # contents['ccpn_integral'] = content_ccpn_integral
     # contents['ccpn_multiplet'] = content_ccpn_multiplet
     contents['ccpn_peak_cluster_list'] = content_ccpn_peak_cluster_list
     contents['ccpn_peak_cluster'] = content_list
 
-    contents['ccpn_spectrum_group'] = content_list                       # content_ccpn_spectrum_group
-    contents['ccpn_complex'] = content_list                       # content_ccpn_complex
-    contents['ccpn_sample'] = content_list                       # content_ccpn_sample
-    contents['ccpn_substance'] = content_list                       # content_ccpn_substance
+    contents['ccpn_spectrum_group'] = content_list  # content_ccpn_spectrum_group
+    contents['ccpn_complex'] = content_list  # content_ccpn_complex
+    contents['ccpn_sample'] = content_list  # content_ccpn_sample
+    contents['ccpn_substance'] = content_list  # content_ccpn_substance
 
     contents['ccpn_assignment'] = content_ccpn_notes
     contents['nmr_chain'] = content_list
 
-    contents['ccpn_notes'] = content_list                       # content_ccpn_notes
+    contents['ccpn_notes'] = content_list  # content_ccpn_notes
 
     def _fillFunc(self, project, saveFrame, *args, **kwds):
         saveFrameName = saveFrame['sf_category']

@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-05-06 21:33:48 +0100 (Wed, May 06, 2020) $"
+__dateModified__ = "$dateModified: 2020-05-07 18:44:04 +0100 (Thu, May 07, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -551,7 +551,7 @@ nef2CcpnMap = {
         ('symbol_style', 'symbolStyle'),
         ('text_colour', 'textColour'),
         )),
-    'ccpn_no_peaklist'                 : OD((
+    'ccpn_no_peaklist'               : OD((
         ('ccpn_peaklist_serial', 'serial'),
         ('ccpn_peaklist_comment', 'comment'),
         ('ccpn_peaklist_name', 'title'),
@@ -3162,7 +3162,7 @@ class CcpnNefReader:
     def content_nef_molecular_system(self, project: Project, saveFrame: StarIo.NmrSaveFrame):
         """Get the contents nef_molecular_system saveFrame"""
         # read nmr_sequence loop
-        chainCode = 'chain_code'
+        chainCode = 'nef_sequence_chain_code'
         compoundName = 'ccpn_compound_name'
         nefSequence = 'nef_sequence'
 
@@ -3172,7 +3172,7 @@ class CcpnNefReader:
         mapping = nef2CcpnMap[nefSequence]
         map2 = dict(item for item in mapping.items() if item[1] and '.' not in item[1])
         for row in saveFrame[nefSequence].data:
-            results[chainCode].add(row[chainCode])
+            results[chainCode].add(row['chain_code'])
             results[compoundName].add(row[compoundName])
 
         self._contentLoops(project, saveFrame)
@@ -3292,8 +3292,9 @@ class CcpnNefReader:
 
     def verify_nef_sequence(self, project: Project, loop: StarIo.NmrLoop, parentFrame: StarIo.NmrSaveFrame):
         """verify nef_sequence loop"""
-        chainData = {}
+        chainData = OD()
         _rowErrors = parentFrame._rowErrors[loop.name] = OrderedSet()
+        _chainErrors = parentFrame._rowErrors[loop.name + '_chain_code'] = OrderedSet()
 
         for row in loop.data:
             chainCode = row['chain_code']
@@ -3330,14 +3331,19 @@ class CcpnNefReader:
                 newSubstance = project.getNefSubstance(sequence=rows, name=compoundName)
                 if newSubstance is not None:
                     self.error('nef_sequence - Substance {} already exists'.format(newSubstance), loop, (newSubstance,))
-                    _rowErrors.add(loop.data.index(row))
+
+                    # add the row to all errors, and add to specific chain error
+                    for code, sRows in chainData.items():
+                        if row in sRows:
+                            for thisRow in sRows:
+                                _rowErrors.add(loop.data.index(thisRow))
+                            # add to errors for this chain
+                            parentFrame._rowErrors['_'.join([loop.name, chainCode])] = OrderedSet([loop.data.index(tRow) for tRow in sRows])
 
                 result = project.getChain(chainCode)
                 if result is not None:
                     self.error('nef_sequence - Chain {} already exists'.format(result), loop, (result,))
-
-                    # NOTE:ED - this is not right yet
-                    _rowErrors.add(loop.data.index(row))
+                    _chainErrors.add(chainCode)
 
     verifiers['nef_sequence'] = verify_nef_sequence
 
@@ -3375,7 +3381,7 @@ class CcpnNefReader:
                 if row.get('linking') == 'dummy':
                     row['residue_name'] = 'dummy.' + row['residue_name']
 
-                residues.add((chainCode, row.get('sequence_code'), row.get('residue_name'), row.get('ccpn_compound_name')))
+                residues.add((chainCode, row.get('sequence_code'), row.get('residue_name')))  #, row.get('ccpn_compound_name')))
 
         # for row in loop.data:
         #     chainCode = row['chain_code']
@@ -3573,13 +3579,12 @@ class CcpnNefReader:
         category = saveFrame['sf_category']
         framecode = saveFrame['sf_framecode']
         name = framecode[len(category) + 1:]
-        _rowErrors = saveFrame._rowErrors[category] = OrderedSet()
 
         # Verify main object
         result = project.getChemicalShiftList(name)
         if result is not None:
             self.error('nef_chemical_shift_list - ChemicalShiftList {} already exists'.format(result), saveFrame, (result,))
-            _rowErrors.add(name)
+            saveFrame._rowErrors[category] = (name,)
 
         self._verifyLoops(project, saveFrame, name=name)
 
@@ -3592,7 +3597,7 @@ class CcpnNefReader:
 
         # store the name of the chemicalShiftList
         name = framecode[len(category) + 1:]
-        result = {category: OrderedSet([name])}
+        result = {category: (name,)}
 
         self._contentLoops(project, saveFrame)
         self.updateContent(saveFrame, result)
@@ -4011,8 +4016,8 @@ class CcpnNefReader:
         peakListParameters, dummy = self._parametersFromSaveFrame(saveFrame, mappingNoPeakList)
 
         # Get spectrum parameters
-        spectrumParameters, loopNames = self._parametersFromSaveFrame(saveFrame, mapping,)
-                                                                      # ccpnPrefix='spectrum')
+        spectrumParameters, loopNames = self._parametersFromSaveFrame(saveFrame, mapping, )
+        # ccpnPrefix='spectrum')
 
         # Get name from spectrum parameters, or from the framecode
         spectrumName = framecode[len(category) + 1:]
@@ -4107,7 +4112,7 @@ class CcpnNefReader:
 
         # Load remaining loops, with spectrum as parent
         for loopName in loopNames:
-            if loopName not in ('nef_spectrum_dimension', 'ccpn_spectrum_dimension', #'nef_peak',
+            if loopName not in ('nef_spectrum_dimension', 'ccpn_spectrum_dimension',  #'nef_peak',
                                 'nef_spectrum_dimension_transfer'):
                 # Those are treated elsewhere
                 loop = saveFrame.get(loopName)
@@ -4174,7 +4179,7 @@ class CcpnNefReader:
             #     if loop:
             #         self.verify_nef_peak(peakList, loop, saveFrame)
             self._verifyLoops(spectrum, saveFrame, dimensionCount=saveFrame['num_dimensions'],
-                              excludeList=('nef_spectrum_dimension', 'ccpn_spectrum_dimension', #'nef_peak',
+                              excludeList=('nef_spectrum_dimension', 'ccpn_spectrum_dimension',  #'nef_peak',
                                            'nef_spectrum_dimension_transfer'))
 
     verifiers['nef_nmr_spectrum'] = verify_nef_nmr_spectrum
@@ -4881,7 +4886,7 @@ class CcpnNefReader:
     contents['ccpn_peak_cluster_peaks'] = content_ccpn_peak_cluster_peaks
 
     # def load_nef_peak(self, peakList: PeakList, loop: StarIo.NmrLoop) -> List[Peak]:
-    def load_nef_peak(self, spectrum: Spectrum, loop: StarIo.NmrLoop, peakListId=None) -> List[Peak]:            # NOTE:ED - new calling parameter
+    def load_nef_peak(self, spectrum: Spectrum, loop: StarIo.NmrLoop, peakListId=None) -> List[Peak]:  # NOTE:ED - new calling parameter
         """Serves to load nef_peak loop"""
 
         result = []
@@ -5189,17 +5194,16 @@ class CcpnNefReader:
 
     def verify_ccpn_spectrum_group(self, project: Project, saveFrame: StarIo.NmrSaveFrame):
         # Get ccpn-to-nef mapping for saveframe
-        _rowErrors = saveFrame._rowErrors[saveFrame.name] = OrderedSet()
         category = saveFrame['sf_category']
         mapping = nef2CcpnMap[category]
-
         parameters, loopNames = self._parametersFromSaveFrame(saveFrame, mapping)
+        name = parameters['name']
 
         # Get main object
-        result = project.getSpectrumGroup(parameters['name'])
+        result = project.getSpectrumGroup(name)
         if result is not None:
             self.error('ccpn_spectrum_group - SpectrumGroup {} already exists'.format(result), saveFrame, (result,))
-            _rowErrors.add(parameters['name'])
+            saveFrame._rowErrors[category] = (name,)
 
             self._verifyLoops(result, saveFrame)
 
@@ -5208,11 +5212,11 @@ class CcpnNefReader:
     def content_ccpn_spectrum_group(self, project: Project, saveFrame: StarIo.NmrSaveFrame):
         """Get the contents of ccpn_spectrum_group saveFrame"""
         category = saveFrame['sf_category']
-        framecode = saveFrame['sf_framecode']
+        mapping = nef2CcpnMap[category]
+        parameters, loopNames = self._parametersFromSaveFrame(saveFrame, mapping)
+        name = parameters['name']
 
-        # store the name of the chemicalShiftList
-        name = framecode[len(category) + 1:]
-        result = {category: OrderedSet([name])}
+        result = {category: (name,)}
 
         self._contentLoops(project, saveFrame)
         self.updateContent(saveFrame, result)
@@ -5288,11 +5292,13 @@ class CcpnNefReader:
         category = saveFrame['sf_category']
         mapping = nef2CcpnMap[category]
         parameters, loopNames = self._parametersFromSaveFrame(saveFrame, mapping)
+        name = parameters['name']
 
         # Get main object
-        result = project.getComplex(parameters['name'])
+        result = project.getComplex(name)
         if result is not None:
             self.error('ccpn_complex - Complex {} already exists'.format(result), saveFrame, (result,))
+            saveFrame._rowErrors[category] = (name,)
 
             self._verifyLoops(result, saveFrame)
 
@@ -5301,11 +5307,11 @@ class CcpnNefReader:
     def content_ccpn_complex(self, project: Project, saveFrame: StarIo.NmrSaveFrame):
         """Get the contents of ccpn_complex saveFrame"""
         category = saveFrame['sf_category']
-        framecode = saveFrame['sf_framecode']
+        mapping = nef2CcpnMap[category]
+        parameters, loopNames = self._parametersFromSaveFrame(saveFrame, mapping)
 
-        # store the name of the chemicalShiftList
-        name = framecode[len(category) + 1:]
-        result = {category: OrderedSet([name])}
+        name = parameters['name']
+        result = {category: (name,)}
 
         self._contentLoops(project, saveFrame)
         self.updateContent(saveFrame, result)
@@ -5383,14 +5389,16 @@ class CcpnNefReader:
         # Get ccpn-to-nef mapping for saveframe
         category = saveFrame['sf_category']
         framecode = saveFrame['sf_framecode']
-        mapping = nef2CcpnMap[category]
+        # mapping = nef2CcpnMap[category]
+        name = framecode[len(category) + 1:]
 
-        parameters, loopNames = self._parametersFromSaveFrame(saveFrame, mapping)
+        # parameters, loopNames = self._parametersFromSaveFrame(saveFrame, mapping)
 
         # Verify main object
-        result = project.getSample(parameters['name'])
+        result = project.getSample(name)
         if result is not None:
             self.error('ccpn_sample - Sample {} already exists'.format(result), saveFrame, (result,))
+            saveFrame._rowErrors[category] = (name,)
 
         self._verifyLoops(project, saveFrame, addLoopAttribs=['name'])
 
@@ -5401,10 +5409,11 @@ class CcpnNefReader:
         # ccpn-to-nef mapping for saveframe
         category = saveFrame['sf_category']
         framecode = saveFrame['sf_framecode']
-        mapping = nef2CcpnMap[category]
+        # mapping = nef2CcpnMap[category]
 
-        parameters, loopNames = self._parametersFromSaveFrame(saveFrame, mapping)
-        result = {category: OrderedSet([parameters['name']])}
+        name = framecode[len(category) + 1:]
+        # parameters, loopNames = self._parametersFromSaveFrame(saveFrame, mapping)
+        result = {category: (name,)}
 
         self._contentLoops(project, saveFrame, addLoopAttribs=['name'])
         self.updateContent(saveFrame, result)
@@ -5817,6 +5826,7 @@ class CcpnNefReader:
         loopName = 'ccpn_note'
         loop = saveFrame[loopName]
         _rowErrors = saveFrame._rowErrors[loopName] = OrderedSet()
+        saveFrame._rowErrors['ccpn_notes'] = OrderedSet()
         creatorFunc = project.getNote
 
         result = []
@@ -5829,6 +5839,8 @@ class CcpnNefReader:
             if result:
                 self.error('ccpn_notes - Note {} already exists'.format(result), saveFrame, (result,))
                 _rowErrors.add(loop.data.index(row))
+                saveFrame._rowErrors['ccpn_notes'].add(name)
+                saveFrame._rowErrors['ccpn_note_'+name] = (loop.data.index(row),)
 
     verifiers['ccpn_notes'] = verify_ccpn_notes
     verifiers['ccpn_note'] = _noLoopVerify

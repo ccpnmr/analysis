@@ -3404,7 +3404,8 @@ if __name__ == '__main__':
     app = QtWidgets.QApplication(['testApp'])
     # run the dialog
     dialog = ImportNefPopup(parent=ui.mainWindow, mainWindow=ui.mainWindow,
-                            nefObjects=(project, _loader,))
+                            nefObjects=(_loader,))
+                            # nefObjects=(project, _loader,))
 
     dialog._initialiseProject(ui.mainWindow, application, project)
     dialog.fillPopup()

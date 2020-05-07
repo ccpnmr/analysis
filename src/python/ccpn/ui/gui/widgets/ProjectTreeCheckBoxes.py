@@ -11,7 +11,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-05-07 10:44:11 +0100 (Thu, May 07, 2020) $"
+__dateModified__ = "$dateModified: 2020-05-07 18:44:04 +0100 (Thu, May 07, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -123,6 +123,22 @@ class ProjectTreeCheckBoxes(QtWidgets.QTreeWidget, Base):
         self.itemClicked.connect(self._clicked)
 
         self._setFocusColour()
+        self._backgroundColour = self.invisibleRootItem().background(0)
+        self._foregroundColour = self.invisibleRootItem().foreground(0)
+
+    def setBackgroundForRow(self, item, colour):
+        """Set the background colour for all items in the row
+        """
+        # NOTE:ED - this works for most of the row, not the left-hand side yet
+        for col in range(self.columnCount()):
+            item.setBackground(col, colour)
+
+    def setForegroundForRow(self, item, colour):
+        """Set the foreground colour for all items in the row
+        """
+        # NOTE:ED - this works for most of the row, not the left-hand side yet
+        for col in range(self.columnCount()):
+            item.setForeground(col, colour)
 
     def _populateTreeView(self, project=None):
         if project:
@@ -302,30 +318,30 @@ class ImportTreeCheckBoxes(ProjectTreeCheckBoxes):
 
     nefToTreeViewMapping = {
         # 'nef_sequence': Chain._pluralLinkName,
-        'chain_code'                 : Chain._pluralLinkName,
-        'nef_chemical_shift_list'    : ChemicalShiftList._pluralLinkName,
-        'nef_distance_restraint_list': RestraintList._pluralLinkName,
-        'nef_dihedral_restraint_list': RestraintList._pluralLinkName,
-        'nef_rdc_restraint_list'     : RestraintList._pluralLinkName,
-        'ccpn_restraint_list'        : RestraintList._pluralLinkName,
-        # 'nef_nmr_spectrum': PeakList._pluralLinkName,
-        'nef_peak'                   : PeakList._pluralLinkName,
-        'ccpn_integral_list'         : IntegralList._pluralLinkName,
-        'ccpn_multiplet_list'        : MultipletList._pluralLinkName,
-        'ccpn_sample'                : Sample._pluralLinkName,
-        'ccpn_substance'             : Substance._pluralLinkName,
-        # 'ccpn_assignment': NmrChain._pluralLinkName,
-        'nmr_chain'                  : NmrChain._pluralLinkName,
-        'ccpn_dataset'               : DataSet._pluralLinkName,
-        'ccpn_complex'               : Complex._pluralLinkName,
-        'ccpn_spectrum_group'        : SpectrumGroup._pluralLinkName,
-        'ccpn_notes'                 : Note._pluralLinkName,
-        'ccpn_peak_cluster'          : PeakCluster._pluralLinkName,
+        'nef_sequence_chain_code'    : (Chain._pluralLinkName, Chain.className),
+        'nef_chemical_shift_list'    : (ChemicalShiftList._pluralLinkName, ChemicalShiftList.className),
+        'nef_distance_restraint_list': (RestraintList._pluralLinkName, RestraintList.className),
+        'nef_dihedral_restraint_list': (RestraintList._pluralLinkName, RestraintList.className),
+        'nef_rdc_restraint_list'     : (RestraintList._pluralLinkName, RestraintList.className),
+        'ccpn_restraint_list'        : (RestraintList._pluralLinkName, RestraintList.className),
+        # 'nef_nmr_spectrum': PeakList._pluralLinkName,XXXXX.className),
+        'nef_peak'                   : (PeakList._pluralLinkName, PeakList.className),
+        'ccpn_integral_list'         : (IntegralList._pluralLinkName, IntegralList.className),
+        'ccpn_multiplet_list'        : (MultipletList._pluralLinkName, MultipletList.className),
+        'ccpn_sample'                : (Sample._pluralLinkName, Sample.className),
+        'ccpn_substance'             : (Substance._pluralLinkName, Substance.className),
+        # 'ccpn_assignment': NmrChain._pluralLinkName,XXXXX.className),
+        'nmr_chain'                  : (NmrChain._pluralLinkName, NmrChain.className),
+        'ccpn_dataset'               : (DataSet._pluralLinkName, DataSet.className),
+        'ccpn_complex'               : (Complex._pluralLinkName, Complex.className),
+        'ccpn_spectrum_group'        : (SpectrumGroup._pluralLinkName, SpectrumGroup.className),
+        'ccpn_notes'                 : (Note._pluralLinkName, Note.className),
+        'ccpn_peak_cluster'          : (PeakCluster._pluralLinkName, PeakCluster.className),
         }
 
     nefProjectToSaveFramesMapping = {
         # Chain._pluralLinkName : [],
-        Chain._pluralLinkName            : ['ccpn_chain', 'nef_sequence'],
+        Chain._pluralLinkName            : ['nef_sequence'],
         ChemicalShiftList._pluralLinkName: ['nef_chemical_shift_list', 'nef_chemical_shift'],
         RestraintList._pluralLinkName    : ['nef_distance_restraint_list', 'nef_distance_restraint',
                                             'nef_dihedral_restraint_list', 'nef_dihedral_restraint',
@@ -387,7 +403,7 @@ class ImportTreeCheckBoxes(ProjectTreeCheckBoxes):
     def content_nef_molecular_system(self, project: Project, saveFrame: StarIo.NmrSaveFrame, saveFrameTag):
         self._contentLoops(project, saveFrame, saveFrameTag,  #name=spectrumName, itemLength=saveFrame['num_dimensions'],
                            )
-        tag = 'chain_code'
+        tag = 'nef_sequence_chain_code'
         content = self.contents[tag]
         content(self, project, saveFrame, tag)
 
@@ -405,11 +421,14 @@ class ImportTreeCheckBoxes(ProjectTreeCheckBoxes):
 
         if hasattr(saveFrame, '_content') and category in saveFrame._content:
             thisList = saveFrame._content[category]
-            treeItem = self.nefToTreeViewMapping[category]
+            treeItem, _ = self.nefToTreeViewMapping[category]
             found = self.findItems(treeItem, QtCore.Qt.MatchExactly | QtCore.Qt.MatchRecursive)
             if found:
                 if len(found) == 1:
                     # add to the tree
+
+                    # NOTE:ED - this defines the list of items that are added to each plural group in the tree
+                    #           i.e. Chains = saveFrame._content['chain_code'] from nefToTreeViewMapping
                     for listItem in thisList:
                         child = QtWidgets.QTreeWidgetItem(found[0])
                         child.setFlags(child.flags() | QtCore.Qt.ItemIsUserCheckable)
@@ -496,7 +515,7 @@ class ImportTreeCheckBoxes(ProjectTreeCheckBoxes):
 
     contents['nef_molecular_system'] = content_nef_molecular_system
     # contents['nef_sequence'] = content_nef_sequence
-    contents['chain_code'] = content_list  # content_nef_sequence
+    contents['nef_sequence_chain_code'] = content_list  # content_nef_sequence
     # contents['nef_covalent_links'] = content_nef_covalent_links
     contents['nef_chemical_shift_list'] = content_list  # content_nef_chemical_shift_list
     # contents['nef_chemical_shift'] = content_nef_chemical_shift
@@ -539,6 +558,14 @@ class ImportTreeCheckBoxes(ProjectTreeCheckBoxes):
 
     def fillTreeView(self, nefDict):
         _traverse(self.project, nefDict, traverseFunc=self._fillFunc)
+
+    def findSection(self, value):
+        """Find the required section in the tree
+        """
+        found = self.findItems(value, QtCore.Qt.MatchExactly | QtCore.Qt.MatchRecursive)
+        if found:
+            if len(found) == 1:
+                return found[0]
 
 
 class PrintTreeCheckBoxes(ProjectTreeCheckBoxes):

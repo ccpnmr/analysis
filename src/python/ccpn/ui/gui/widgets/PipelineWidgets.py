@@ -884,7 +884,9 @@ class PipesTree(QtWidgets.QTreeWidget, Base):
         self.setHeaderLabel('Double click or drag&drop ->')
 
     def _addPipesToTree(self):
-
+        '''
+        Add the pipes to the tree based on the category.
+        '''
         from collections import defaultdict
         allPipes = [(p.pipeCategory, p.pipeName) for p in self.guiPipeline.pipes]
         d = defaultdict(list)
@@ -940,9 +942,7 @@ class PipesTree(QtWidgets.QTreeWidget, Base):
         selectedItems = self.selectedItems()
         names = [i.pipeName for i in selectedItems if not i.isPipeCategory]
         for name in names:
-            guiPipeName = self.guiPipeline._getSerialName(str(name))
-            self.guiPipeline._addGuiPipe(guiPipeName, name)
-
+            self.guiPipeline.addPipe(name)
 
 def testGuiPipe(GuiPipe):
     '''

@@ -40,6 +40,7 @@ from ccpn.framework.lib.Pipeline import Pipeline
 import pandas as pd
 from PyQt5 import QtCore, QtGui, QtWidgets
 from ccpn.ui.gui.lib.GuiNotifier import GuiNotifier
+from ccpn.ui.gui.widgets.ListView import ListView
 from ccpn.ui.gui.modules.CcpnModule import CcpnModule
 from ccpn.ui.gui.widgets.Button import Button
 from ccpn.ui.gui.widgets.ButtonList import ButtonList
@@ -291,6 +292,16 @@ class GuiPipeline(CcpnModule, Pipeline):
         self.pipesLabel = Label(self.inputFrame, 'Pipes', grid=(row,0))
         self.pipeTreeWidget = PipesTree(self.inputFrame, guiPipeline=self, grid=(row,1))
         self.pipeTreeWidget._addPipesToTree()
+        # search widget
+        row += 1
+        self._resultWidget = ListWidget(self.inputFrame, contextMenu=False, callback=self.callbackResultWidget, grid=(row,1))
+        self._resultWidget.hide()
+        self._resultWidget.setDragEnabled(False) # not sure if also this widget should be
+        # self._resultWidget.setContentsMargins(10, 11, 10, 10)
+        # self._resultWidget.setStyleSheet('QListWidget {border: 1px;}')
+        row += 1
+        self._addPipesSearchWidget(row)
+
 
     def _createSaveOpenButtonGroup(self):
         self.nameLabel = Label(self, 'Pipeline Name:')
@@ -320,38 +331,46 @@ class GuiPipeline(CcpnModule, Pipeline):
         openButton.setMenu(menu)
 
     def _createPipelineWidgets(self):
-        self._addPipesSearchWidget()
         self._addGoButtonWidget()
         self._addPipelineDropArea()
 
 
-    def _addPipesSearchWidget(self):
-        self._searchWidget = LineEdit(self, backgroundText='Search Pipe. Return to add selected', grid=(0, 0))
+    def _addPipesSearchWidget(self, row):
+        bText = 'Search Pipe. Return to add selected'
+
+        self._searchWidget = LineEdit(self.inputFrame, backgroundText=bText, grid=(row, 1),)
         self._searchWidget.textChanged.connect(self._searchWidgetCallback)
-        # self._searchWidgetCompleter = QtWidgets.QCompleter()
-        # self._searchWidgetCompleter.setCaseSensitivity(QtCore.Qt.CaseInsensitive)
-        # self._searchWidget.setCompleter(self._searchWidgetCompleter)
-        # self._searchWidgetCompleterModel = QtCore.QStringListModel()
-        # self._searchWidgetCompleter.setModel(self._searchWidgetCompleterModel)
         self._searchWidget.keyPressEvent = self._pipeSearchkeyPressEvent
         self._searchWidget.setMinimumWidth(300)
-        self.goAreaLayout.addWidget(self._searchWidget)
 
     def _searchWidgetCallback(self):
         self.pipeTreeWidget.clearSelection()
+        self._resultWidget.clear()
         text = self._searchWidget.get()
         if text != '':
             items = (self.pipeTreeWidget.findItems(text, Qt.MatchContains | Qt.MatchRecursive))
             if items:
+                self._resultWidget.show()
                 pipeItems = [i for i in items if not i.isPipeCategory]
                 pipeNames = [i.pipeName for i in pipeItems]
-                # self._searchWidgetCompleterModel.setStringList(pipeNames)
 
+                self._resultWidget.addItems(pipeNames)
+                # b = self._resultWidget.sizeHintForRow(0) * self._resultWidget.count() + 2 * self._resultWidget.frameWidth()
+                # self._resultWidget.setMaximumHeight(b) #this make the search of dynamic sizes
+                self._resultWidget.setMaximumHeight(abs(self._resultWidget.sizeHintForRow(0)) * 4) # fix height by num of rows
                 for pipeItem in pipeItems:
                     pipeItem.setSelected(True)
                     if pipeItem.parent():
                         pipeItem.parent().setExpanded(True)
                         self.pipeTreeWidget.scrollToItem(pipeItem)
+            else:
+                self._resultWidget.hide()
+        else:
+            self._resultWidget.hide()
+
+    def callbackResultWidget(self):
+        selectedTreeItems = self.pipeTreeWidget.selectedItems()
+        self.pipeTreeWidget.selectItems(self._resultWidget.getSelectedTexts())
 
 
     def _addGoButtonWidget(self):

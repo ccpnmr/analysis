@@ -255,7 +255,7 @@ class PipelineDropArea(DockArea):
 
     from PyQt5.QtGui import QPainter, QPen, QColor, QBrush, QPainterPath
 
-    def _paint(self, ev):
+    def _paint(self, ev, paintLabel=True):
         QPainter = QtGui.QPainter
         painter = QPainter(self)
         # set font
@@ -264,7 +264,8 @@ class PipelineDropArea(DockArea):
         rgn = self.contentsRect()
         rgn = QtCore.QRect(rgn.left(), rgn.top(), rgn.width(), rgn.height())
         align = QtCore.Qt.AlignVCenter | QtCore.Qt.AlignHCenter
-        self.hint = painter.drawText(rgn, align, self.textLabel)
+        if paintLabel:
+            self.hint = painter.drawText(rgn, align, self.textLabel)
         painter.setRenderHint(QPainter.Antialiasing)
         rectPath = QtGui.QPainterPath()
         height = self.height() - 2
@@ -278,6 +279,8 @@ class PipelineDropArea(DockArea):
         """
         if not self.currentPipesNames:
             self._paint(ev)
+        else:
+            self._paint(ev, paintLabel=False)
 
     def dropEvent(self, ev):
 
@@ -945,6 +948,20 @@ class PipesTree(QtWidgets.QTreeWidget, Base):
         names = [i.pipeName for i in selectedItems if not i.isPipeCategory]
         for name in names:
             self.guiPipeline.addPipe(name)
+
+    def selectItems(self, names):
+        items = []
+        for name in names:
+            found = self.findItems(name, QtCore.Qt.MatchExactly | QtCore.Qt.MatchRecursive)
+            items.extend(found)
+        if items:
+            self.clearSelection()
+            for item in items:
+                item.setSelected(True)
+                if item.parent():
+                    item.parent().setExpanded(True)
+                    self.scrollToItem(item)
+
 
 def testGuiPipe(GuiPipe):
     '''

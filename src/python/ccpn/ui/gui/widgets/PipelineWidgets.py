@@ -241,7 +241,6 @@ class PipelineDropArea(DockArea):
     def guiPipesState(self):
         d = []
         for pipeName, guiPipe in self.findAll()[1].items():
-            # print()
             d.append((guiPipe.__class__.__name__, pipeName, guiPipe.widgetsState, guiPipe.isActive))
         return d
 
@@ -856,8 +855,8 @@ class PipelineBoxLabel(DockLabel, VerticalLabel):
         p.end()
 
         self.setMaximumHeight(self.hint.height())
-        self.setMinimumHeight(15)
-        self.setMaximumWidth(16777215)
+        # self.setMinimumHeight(15)
+        # self.setMaximumWidth(16777215)
 
     def _createContextMenu(self):
         contextMenu = Menu('', self, isFloatWidget=True)

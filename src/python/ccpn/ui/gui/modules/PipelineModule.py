@@ -304,17 +304,17 @@ class GuiPipeline(CcpnModule, Pipeline):
 
 
     def _createSaveOpenButtonGroup(self):
-        self.nameLabel = Label(self, 'Pipeline Name:')
         self.pipelineNameLabel = Label(self, PipelineName)
         self.saveOpenButtons = ButtonList(self, texts=['', ''],
                                           callbacks=[self._openSavedPipeline, self._savePipeline],
                                           icons=[self.openRecentIcon, self.saveIcon],
                                           tipTexts=['', ''], direction='H')
-        self.saveOpenFrameLayout.addWidget(self.nameLabel)
         self.saveOpenFrameLayout.addWidget(self.pipelineNameLabel)
 
+        self.goButton = Button(self, text='', icon=self.goIcon, callback=self._runPipeline)
         self._addMenuToOpenButton()
         self.saveOpenButtons.setStyleSheet(transparentStyle)
+        self.saveOpenFrameLayout.addWidget(self.goButton)
         self.saveOpenFrameLayout.addStretch(1)
         self.saveOpenFrameLayout.addWidget(self.saveOpenButtons)
 
@@ -379,15 +379,16 @@ class GuiPipeline(CcpnModule, Pipeline):
         NB the stop callback needs to be a lambda call
 
         '''
-        self.goButton = ButtonList(self, texts=['', '', ''], icons=[self.stopIcon, self.goIcon, self.goIcon, ],
-                                   callbacks=[lambda: self.pipelineWorker.stop(), self.pipelineWorker.task, self._runPipeline],
-                                   hAlign='c')
-        self.goButton.buttons[0].hide()
-        self.goButton.buttons[1].hide()
-        # self.goButton.setStyleSheet(transparentStyle)
-        self.goAreaLayout.addWidget(self.goButton, )
-        self.goAreaLayout.addStretch(1)
-        # self.goButton.setEnabled(False)
+        # self.threadButtons = ButtonList(self, texts=['', '', ''], icons=[self.stopIcon, self.goIcon, self.goIcon, ],
+        #                                 callbacks=[lambda: self.pipelineWorker.stop(), self.pipelineWorker.task, self._runPipeline],
+        #                                 hAlign='c')
+
+        # self.threadButtons.buttons[0].hide()
+        # self.threadButtons.buttons[1].hide()
+        # self.threadButtons.setStyleSheet(transparentStyle)
+        # self.goAreaLayout.addWidget(self.threadButtons, )
+        # self.goAreaLayout.addStretch(1)
+        # self.threadButtons.setEnabled(False)
 
     def _addPipelineDropArea(self):
         self.pipelineArea = PipelineDropArea(self, guiPipeline=self,  mainWindow=self.mainWindow)
@@ -718,13 +719,13 @@ class GuiPipeline(CcpnModule, Pipeline):
 
     def _displayStopButton(self):
         if self.autoCheckBox.isChecked():
-            self.goButton.buttons[0].show()
-            self.goButton.buttons[1].show()
-            self.goButton.buttons[2].hide()
+            self.threadButtons.buttons[0].show()
+            self.threadButtons.buttons[1].show()
+            self.threadButtons.buttons[2].hide()
         else:
-            self.goButton.buttons[0].hide()
-            self.goButton.buttons[1].hide()
-            self.goButton.buttons[2].show()
+            self.threadButtons.buttons[0].hide()
+            self.threadButtons.buttons[1].hide()
+            self.threadButtons.buttons[2].show()
 
 
     def _addWidgetsToLayout(self, widgets, layout):
@@ -742,7 +743,7 @@ class GuiPipeline(CcpnModule, Pipeline):
         self.inputData = set(self.inputData)
         if self.project is not None:
             if len(dataTexts) == 0:
-                # self.goButton.setEnabled(False)
+                # self.threadButtons.setEnabled(False)
                 self.inputDataList.addItem(self._getInputDataHeaderLabel())
                 return
             for text in dataTexts:

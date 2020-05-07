@@ -437,6 +437,7 @@ class GuiPipeline(CcpnModule, Pipeline):
                     if not position:
                         position =  self.addBoxPosition.get()
                     newGuiPipe = guiPipe(parent=self, application=self.application, name=serialName, project=self.project)
+                    newGuiPipe.setMaximumHeight(newGuiPipe.sizeHint().height())
                     self.pipelineArea.addDock(newGuiPipe, position=position, relativeTo=relativeTo)
                     autoActive = self.autoActiveCheckBox.get()
                     newGuiPipe.label.checkBox.setChecked(autoActive)

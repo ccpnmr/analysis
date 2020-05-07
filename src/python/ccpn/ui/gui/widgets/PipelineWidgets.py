@@ -205,6 +205,8 @@ class PipelineDropArea(DockArea):
         else:
             self.fontLabel = Font('Helvetica', 20, bold=False)
         self.colourLabel = hexToRgb(colours[LABEL_FOREGROUND])
+        self.setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.MinimumExpanding)
+        self.layout.setAlignment(QtCore.Qt.AlignTop)
 
 
     @property

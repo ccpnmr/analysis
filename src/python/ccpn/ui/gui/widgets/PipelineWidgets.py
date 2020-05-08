@@ -891,6 +891,7 @@ class PipesTree(QtWidgets.QTreeWidget, Base):
         '''
         Add the pipes to the tree based on the category.
         '''
+        self.clear()
         from collections import defaultdict
         allPipes = [(p.pipeCategory, p.pipeName) for p in self.guiPipeline.pipes]
         d = defaultdict(list)

@@ -56,16 +56,6 @@ PIPE_CATEGORIES = [PIPE_ANALYSIS,
                    PIPE_OUTPUTS,
                    PIPE_USER]
 
-def loadPipes(path):
-    '''
-    dynamic pipe importer. When called on the __init__ file inside a directory containing registered pipes,
-    they will appear inside the pipeline
-    '''
-    import pkgutil as _pkgutil
-    for loader, name, isPpkg in _pkgutil.walk_packages(path):
-        found = loader.find_module(name)
-        if found:
-            module = found.load_module(name)
 
 class Pipe(ABC):
     """
@@ -85,7 +75,6 @@ class Pipe(ABC):
         method to register the pipe in the loaded pipes to appear in the pipeline
         """
         from ccpn.pipes import loadedPipes
-
         loadedPipes.append(cls)
 
     def __init__(self, application=None):

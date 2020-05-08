@@ -1397,6 +1397,7 @@ class SideBar(QtWidgets.QTreeWidget, SideBarStructure, Base, NotifierBase):
         else:
             cutoff = min(len(lower_text), 3)
             lower_category = '%s*' % lower_text[:cutoff]
+            print(lower_category, 'oo')
 
         for key in result[SEARCH_LIST]:
             if fnmatch.fnmatch(key, lower_category):

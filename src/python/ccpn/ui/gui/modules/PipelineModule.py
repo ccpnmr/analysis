@@ -353,17 +353,28 @@ class GuiPipeline(CcpnModule, Pipeline):
         self._searchWidget.keyPressEvent = self._pipeSearchkeyPressEvent
         self._searchWidget.setMinimumWidth(300)
 
+    def _searchNameInList(self, ll, searchText):
+        import fnmatch
+        found = set()
+        if not searchText.endswith('*'):
+            searchText = searchText+'*'
+        for ln, nn in zip([x.lower() for x in ll], ll):
+            if fnmatch.fnmatch(ln, searchText):
+                found.add(nn)
+            elif fnmatch.fnmatch(ln, searchText.lower()):
+                found.add(nn)
+        return list(found)
+
     def _searchWidgetCallback(self):
         self.pipeTreeWidget.clearSelection()
         self._resultWidget.clear()
         text = self._searchWidget.get()
         if text != '':
-            items = (self.pipeTreeWidget.findItems(text, Qt.MatchContains | Qt.MatchRecursive))
-            if items:
-                self._resultWidget.show()
-                pipeItems = [i for i in items if not i.isPipeCategory]
-                pipeNames = [i.pipeName for i in pipeItems]
 
+            pipeNames = self._searchNameInList(self.pipeTreeWidget._availablePipeNames, text)
+            # items = (self.pipeTreeWidget.findItems(text, Qt.MatchContains | Qt.MatchRecursive))
+            if pipeNames:
+                self._resultWidget.show()
                 self._resultWidget.addItems(pipeNames)
                 # b = self._resultWidget.sizeHintForRow(0) * self._resultWidget.count() + 2 * self._resultWidget.frameWidth() #this make the search of dynamic sizes
                 # self._resultWidget.setMaximumHeight(b)

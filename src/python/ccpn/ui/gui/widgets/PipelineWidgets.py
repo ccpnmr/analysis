@@ -887,6 +887,8 @@ class PipesTree(QtWidgets.QTreeWidget, Base):
         self.parent =  parent
         self.guiPipeline = guiPipeline
         self.setHeaderLabel('Double click or drag&drop ->')
+        self._selectableItems = []
+        self._availablePipeNames = []
 
     def _addPipesToTree(self):
         '''
@@ -910,6 +912,8 @@ class PipesTree(QtWidgets.QTreeWidget, Base):
                     for pipeName in sorted(pipeNames):
                         pipeItem = pipeTreeItem(categoryItem, pipeName, draggable=True)
                         pipeItem.setIcon(0, Icon('icons/mario-pipe'))
+                        self._selectableItems.append(pipeItem)
+                        self._availablePipeNames.append(pipeName)
 
 
 

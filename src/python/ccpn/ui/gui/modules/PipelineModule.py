@@ -305,8 +305,8 @@ class GuiPipeline(CcpnModule, Pipeline):
         # search widget
         row += 1
         self._resultWidget = ListWidget(self.inputFrame, contextMenu=False, callback=self.callbackResultWidget, grid=(row,1))
+        self._resultWidget.itemDoubleClicked.connect(self._resultItemDoubleClickCallback)
         self._resultWidget.hide()
-        self._resultWidget.setDragEnabled(False) # not sure if also this widget should be
         # self._resultWidget.setContentsMargins(10, 11, 10, 10)
         # self._resultWidget.setStyleSheet('QListWidget {border: 1px;}')
         row += 1
@@ -365,18 +365,20 @@ class GuiPipeline(CcpnModule, Pipeline):
                 pipeNames = [i.pipeName for i in pipeItems]
 
                 self._resultWidget.addItems(pipeNames)
-                # b = self._resultWidget.sizeHintForRow(0) * self._resultWidget.count() + 2 * self._resultWidget.frameWidth()
-                # self._resultWidget.setMaximumHeight(b) #this make the search of dynamic sizes
+                # b = self._resultWidget.sizeHintForRow(0) * self._resultWidget.count() + 2 * self._resultWidget.frameWidth() #this make the search of dynamic sizes
+                # self._resultWidget.setMaximumHeight(b)
                 self._resultWidget.setMaximumHeight(abs(self._resultWidget.sizeHintForRow(0)) * 4) # fix height by num of rows
-                for pipeItem in pipeItems:
-                    pipeItem.setSelected(True)
-                    if pipeItem.parent():
-                        pipeItem.parent().setExpanded(True)
-                        self.pipeTreeWidget.scrollToItem(pipeItem)
+                self._searchWidget.setClearButtonEnabled(True)
+
             else:
                 self._resultWidget.hide()
         else:
             self._resultWidget.hide()
+
+    def _resultItemDoubleClickCallback(self):
+        if len(self._resultWidget.getSelectedTexts())==1:
+            self.addPipe(self._resultWidget.getSelectedTexts()[-1])
+
 
     def callbackResultWidget(self):
         selectedTreeItems = self.pipeTreeWidget.selectedItems()
@@ -430,6 +432,12 @@ class GuiPipeline(CcpnModule, Pipeline):
         elif keyEvent.key() == Qt.Key_Escape or keyEvent.key() == Qt.Key_Delete:
             self._searchWidget.clear()
             self.pipeTreeWidget.clearSelection()
+
+        elif keyEvent.key() == Qt.Key_Up:
+            if len(self._resultWidget.getTexts())>0:
+                self._resultWidget.selectItems(self._resultWidget.getTexts()[:1])
+                self._resultWidget.setFocus()
+
         else:
             LineEdit.keyPressEvent(self._searchWidget, keyEvent)
             # self._runPipeline()

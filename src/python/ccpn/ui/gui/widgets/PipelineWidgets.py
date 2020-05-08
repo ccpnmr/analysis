@@ -50,6 +50,7 @@ from ccpn.ui.gui.widgets.Widget import Widget
 from ccpn.ui.gui.popups.PickPeaks1DPopup import ExcludeRegions
 from ccpn.ui.gui.widgets.Icon import Icon
 from ccpn.ui.gui.widgets.Base import Base
+from ccpn.ui.gui.widgets.ListWidget import ListWidget
 from collections import OrderedDict
 from ccpn.framework.lib.pipeline.PipelineBase import Pipeline
 from ccpn.ui.gui.widgets.GLLinearRegionsPlot import GLTargetButtonSpinBoxes
@@ -246,7 +247,7 @@ class PipelineDropArea(DockArea):
     def dragEnterEvent(self, ev):
         src = ev.source()
 
-        if isinstance(src, PipesTree):
+        if isinstance(src, PipesTree) or isinstance(src, ListWidget):
             ev.accept()
         else:
             ev.ignore()
@@ -281,9 +282,9 @@ class PipelineDropArea(DockArea):
     def dropEvent(self, ev):
 
         src = ev.source()
-        if isinstance(src, PipesTree):
+        if isinstance(src, PipesTree) or isinstance(src, ListWidget):
             selectedList = src.selectedItems()
-            names = [i.pipeName for i in selectedList]
+            names = [i.text() for i in selectedList]
             for sel in names:
                 guiPipeName = self.guiPipeline._getSerialName(str(sel))
                 self.guiPipeline._addGuiPipe(guiPipeName, sel, position=self.dropArea)
@@ -633,7 +634,7 @@ class GuiPipe(Dock, GuiPipeDrop):
         src = ev.source()
         if hasattr(src, 'implements') and src.implements('GuiPipe'):
             ev.accept()
-        elif isinstance(src, PipesTree):
+        elif isinstance(src, PipesTree) or isinstance(src, ListWidget):
             ev.accept()
         else:
             ev.ignore()
@@ -692,9 +693,9 @@ class GuiPipe(Dock, GuiPipeDrop):
             src = ev.source()
 
             src = ev.source()
-            if isinstance(src, PipesTree):
+            if isinstance(src, PipesTree) or isinstance(src, ListWidget):
                 selectedList = src.selectedItems()
-                names = [i.pipeName for i in selectedList]
+                names = [i.text() for i in selectedList]
                 for name in names:
                     position = self.dropArea
                     guiPipeName = self._parent._getSerialName(str(name))
@@ -872,6 +873,9 @@ class pipeTreeItem(QtWidgets.QTreeWidgetItem):
         else:
             self.setFlags(self.flags() ^ QtCore.Qt.ItemIsDragEnabled)
         self.setExpanded(expanded)
+
+    def text(self):
+        return self.pipeName
 
 class PipesTree(QtWidgets.QTreeWidget, Base):
     def __init__(self, parent, guiPipeline, **kwds):

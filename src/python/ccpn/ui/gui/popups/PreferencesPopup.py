@@ -58,6 +58,7 @@ from ccpn.core.lib.ContextManagers import queueStateChange, undoStackBlocking
 from ccpn.ui.gui.widgets.FileDialog import FileDialog, USERWORKINGPATH, USERAUXILIARYPATH, \
     USERMACROSPATH, USERPLUGINSPATH, USERLAYOUTSPATH, USERPIPESPATH, USERDATAPATH, \
     USEROTHERPATH, getInitialPath, setInitialPath
+from ccpn.framework.lib.PipesLoader import _fetchUserPipesPath
 
 
 PEAKFITTINGDEFAULTS = [PARABOLICMETHOD, GAUSSIANMETHOD]
@@ -451,15 +452,13 @@ class PreferencesPopup(CcpnDialogMainWidget):
 
         row += 1
         self.pipesPathLabel = Label(parent, text="Pipes Path", grid=(row, 0), )
-        self.pipesPathData = PathEdit(parent, grid=(row, 1), vAlign='t', tipText=NotImplementedTipText)
-        self.pipesPathData.setMinimumWidth(LineEditsMinimumWidth)
-        # self.pipesPathData.setText(self.preferences.general.userExtensionPath)
-        self.pipesPathDataButton = Button(parent, grid=(row, 2), callback=self._getExtensionFilesPath,
+        self.userPipesPath = PathEdit(parent, grid=(row, 1), vAlign='t', tipText='')
+        self.userPipesPath.setMinimumWidth(LineEditsMinimumWidth)
+        self.pipesPathDataButton = Button(parent, grid=(row, 2), callback=self._getUserPipesPath,
                                           icon='icons/directory', hPolicy='fixed')
-        self.pipesPathData.textChanged.connect(self._queueSetPipesFilesPath)
-        # TODO enable pipes PathData
-        self.pipesPathData.setDisabled(True)
-        self.pipesPathDataButton.setDisabled(True)
+        self.userPipesPath.textChanged.connect(self._queueSetPipesFilesPath)
+        # self.userPipesPath.setEnabled(False)
+        # self.pipesPathDataButton.setEnabled(False)
 
         row += 1
         self.useProjectPathLabel = Label(parent, text="Set Working Path to Project Path: ", grid=(row, 0))
@@ -581,12 +580,8 @@ class PreferencesPopup(CcpnDialogMainWidget):
         # # TODO enable plugin PathData
         # self.pluginPathData.setDisabled(True)
         # self.pluginPathDataButton.setDisabled(True)
-
-        self.pipesPathData.setText(self.preferences.general.userExtensionPath)
-
-        # TODO enable pipes PathData
-        self.pipesPathData.setDisabled(True)
-        self.pipesPathDataButton.setDisabled(True)
+        userPipesPath = _fetchUserPipesPath(self.application) # gets from preferences or creates the default dir
+        self.userPipesPath.setText(str(userPipesPath))
 
         self.useProjectPathBox.setChecked(self.preferences.general.useProjectPath)
 
@@ -1392,28 +1387,29 @@ class PreferencesPopup(CcpnDialogMainWidget):
 
     @queueStateChange(_verifyPopupApply)
     def _queueSetPipesFilesPath(self):
-        value = self.pipesPathData.get()
-        if value != self.preferences.general.userExtensionPath:
+        value = self.userPipesPath.get()
+        if value != self.preferences.general.userPipesPath:
             return partial(self._setPipesFilesPath, value)
 
     def _setPipesFilesPath(self, value):
-        # newPath = self.pipesPathData.text()
-        self.preferences.general.userExtensionPath = value
+        # newPath = self.userPipesPath.text()
+        self.preferences.general.userPipesPath = value
 
-    def _getExtensionFilesPath(self):
-        if os.path.exists(os.path.expanduser(self.pipesPathData.text())):
-            currentDataPath = os.path.expanduser(self.pipesPathData.text())
+    def _getUserPipesPath(self):
+        # TODO ADD OPTION TO CHANGE
+        if os.path.exists(os.path.expanduser(self.userPipesPath.text())):
+            currentDataPath = os.path.expanduser(self.userPipesPath.text())
         else:
-            currentDataPath = os.path.expanduser('~')
+            currentDataPath = _fetchUserPipesPath(self.application)
+            # currentDataPath = os.path.expanduser('~')
         dialog = FileDialog(self, text='Select Data File', directory=currentDataPath, fileMode=2, acceptMode=0,
                             preferences=self.preferences,
                             pathID=USERPIPESPATH)
         dialog._show()
         directory = dialog.selectedFiles()
         if directory and len(directory) > 0:
-            self.pipesPathData.setText(directory[0])
-            # self._setPipesFilesPath()
-            # self.preferences.general.userExtensionPath = directory[0]
+            self.userPipesPath.setText(directory[0])
+            self._setPipesFilesPath(directory[0])
 
     @queueStateChange(_verifyPopupApply)
     def _queueChangeLanguage(self, value):

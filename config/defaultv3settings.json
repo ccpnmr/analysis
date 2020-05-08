@@ -5,7 +5,7 @@
         "auxiliaryFilesPath"                   : "~/.ccpn",
         "userMacroPath"                        : "~/.ccpn/macros/",
         "userPluginPath"                       : "~/.ccpn/plugins/",
-        "userExtensionPath"                    : "~/.ccpn/extensions/",
+        "userPipesPath"                       : "~/.ccpn/pipes/",
         "userLayoutsPath"                      : "",
         "userWorkingPath"                      : "~",
         "useProjectPath"                       : false,

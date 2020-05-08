@@ -24,12 +24,12 @@ __date__ = "$Date: 2017-05-28 10:28:42 +0000 (Sun, May 28, 2017) $"
 
 
 #### GUI IMPORTS
-from ccpn.ui.gui.widgets.PipelineWidgets import GuiPipe, PipelineDropArea
+from ccpn.ui.gui.widgets.PipelineWidgets import GuiPipe
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
 from ccpn.ui.gui.widgets.Label import Label
 
 #### NON GUI IMPORTS
-from ccpn.framework.lib.Pipe import Pipe
+from ccpn.framework.lib.pipeline.PipeBase import Pipe
 
 
 ########################################################################################################################

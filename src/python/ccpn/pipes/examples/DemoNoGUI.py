@@ -25,7 +25,7 @@ __date__ = "$Date: 2017-05-28 10:28:42 +0000 (Sun, May 28, 2017) $"
 
 #### NON GUI IMPORTS
 
-from ccpn.framework.lib.Pipe import PandasPipe
+from ccpn.framework.lib.pipeline.PipeBase import PandasPipe
 import pandas as pd
 
 

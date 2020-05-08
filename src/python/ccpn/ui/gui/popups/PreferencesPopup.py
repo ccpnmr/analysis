@@ -58,7 +58,7 @@ from ccpn.core.lib.ContextManagers import queueStateChange, undoStackBlocking
 from ccpn.ui.gui.widgets.FileDialog import FileDialog, USERWORKINGPATH, USERAUXILIARYPATH, \
     USERMACROSPATH, USERPLUGINSPATH, USERLAYOUTSPATH, USERPIPESPATH, USERDATAPATH, \
     USEROTHERPATH, getInitialPath, setInitialPath
-from ccpn.framework.lib.PipesLoader import _fetchUserPipesPath
+from ccpn.framework.lib.pipeline.PipesLoader import _fetchUserPipesPath
 
 
 PEAKFITTINGDEFAULTS = [PARABOLICMETHOD, GAUSSIANMETHOD]

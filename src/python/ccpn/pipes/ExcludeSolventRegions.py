@@ -28,7 +28,7 @@ from ccpn.ui.gui.widgets.PipelineWidgets import GuiPipe
 from ccpn.ui.gui.popups.PickPeaks1DPopup import ExcludeRegions as ER
 
 #### NON GUI IMPORTS
-from ccpn.framework.lib.Pipe import SpectraPipe, PIPE_GENERIC
+from ccpn.framework.lib.pipeline.PipeBase import SpectraPipe, PIPE_GENERIC
 
 
 ########################################################################################################################

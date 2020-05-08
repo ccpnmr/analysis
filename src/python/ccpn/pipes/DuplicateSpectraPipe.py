@@ -29,7 +29,7 @@ from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.CheckBox import CheckBox
 
 #### NON GUI IMPORTS
-from ccpn.framework.lib.Pipe import SpectraPipe, PIPE_GENERIC
+from ccpn.framework.lib.pipeline.PipeBase import SpectraPipe, PIPE_GENERIC
 
 
 ########################################################################################################################

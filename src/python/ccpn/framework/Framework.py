@@ -51,7 +51,7 @@ from ccpn.core.lib.Notifiers import NotifierBase, Notifier
 from ccpn.core.lib.Pid import Pid
 from ccpn.framework import Version
 from ccpn.framework.Current import Current
-from ccpn.framework.lib.Pipeline import Pipeline
+from ccpn.framework.lib.pipeline.PipelineBase import Pipeline
 from ccpn.framework.Translation import languages, defaultLanguage
 from ccpn.framework.Translation import translator
 from ccpn.framework.PathsAndUrls import userPreferencesPath
@@ -61,9 +61,8 @@ from ccpn.ui.gui.modules.CcpnModule import CcpnModule
 from ccpn.ui.gui.modules.MacroEditor import MacroEditor
 from ccpn.ui.gui.widgets import MessageDialog
 from ccpn.ui.gui.widgets.FileDialog import FileDialog, USERWORKINGPATH, \
-    USERDEFAULTPATH, USERACHIVESPATH, USERDATAPATH, USERAUXILIARYPATH, USERBACKUPSPATH, \
-    USERNMRSTARPATH, USEROTHERPATH, USERPIPESPATH, USERPLUGINSPATH, USERPREFERENCESPATH, USERSPECTRUMPATH, \
-    USERLAYOUTSPATH, USERMACROSPATH, USERNEFPATH, USERTABLESPATH, USERSAVEPROJECTPATH, setInitialPath
+    USERACHIVESPATH, USERDATAPATH, USERNMRSTARPATH, USERSPECTRUMPATH, \
+    USERLAYOUTSPATH, USERMACROSPATH, USERNEFPATH, USERSAVEPROJECTPATH, setInitialPath
 from ccpn.ui.gui.lib.GuiSpectrumView import _createdSpectrumView
 from ccpn.util import Logging
 from ccpn.util import Path
@@ -78,7 +77,7 @@ from ccpnmodel.ccpncore.lib.Io import Formats as ioFormats
 from ccpnmodel.ccpncore.memops.metamodel import Util as metaUtil
 from ccpn.util.decorators import logCommand
 from ccpn.core.lib.ContextManagers import catchExceptions
-from ccpn.ui.gui.widgets.Menu import SHOWMODULESMENU, CCPNMACROSMENU, TUTORIALSMENU, PLUGINSMENU, CCPNPLUGINSMENU
+from ccpn.ui.gui.widgets.Menu import SHOWMODULESMENU, CCPNMACROSMENU, TUTORIALSMENU, CCPNPLUGINSMENU
 
 import faulthandler
 
@@ -2505,7 +2504,6 @@ class Framework(NotifierBase):
 
     def toggleSequenceModule(self):
         """Toggles whether Sequence Module is displayed or not"""
-        from ccpn.ui.gui.modules.SequenceModule import SequenceModule
 
         # openList = [m for m in SequenceModule.getInstances()]
         # if openList:

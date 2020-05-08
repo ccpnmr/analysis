@@ -29,10 +29,8 @@ from ccpn.ui.gui.widgets.Spinbox import Spinbox
 from ccpn.ui.gui.widgets.Label import Label
 
 #### NON GUI IMPORTS
-from ccpn.framework.lib.Pipe import SpectraPipe, PIPE_PROCESSING
+from ccpn.framework.lib.pipeline.PipeBase import SpectraPipe, PIPE_PROCESSING
 from ccpn.util.Logging import getLogger
-import nmrglue as ng
-
 
 ########################################################################################################################
 ###   Attributes:

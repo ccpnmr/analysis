@@ -31,7 +31,7 @@ from ccpn.ui.gui.widgets.CheckBox import CheckBox
 from ccpn.ui.gui.widgets.DoubleSpinbox import DoubleSpinbox
 
 #### NON GUI IMPORTS
-from ccpn.framework.lib.Pipe import SpectraPipe, PIPE_GENERIC
+from ccpn.framework.lib.pipeline.PipeBase import SpectraPipe, PIPE_GENERIC
 from ccpn.core.PeakList import _filterROI1Darray, estimateNoiseLevel1D
 
 

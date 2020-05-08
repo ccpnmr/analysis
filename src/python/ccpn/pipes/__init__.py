@@ -22,7 +22,7 @@ __date__ = "$Date: 2017-04-07 10:28:42 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
-from ccpn.framework.lib.PipesLoader import loadPipeSysModules
+from ccpn.framework.lib.pipeline.PipesLoader import loadPipeSysModules
 
 loadedPipes = []
 loadPipeSysModules(__path__)

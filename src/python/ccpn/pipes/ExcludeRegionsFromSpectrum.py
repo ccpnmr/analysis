@@ -32,9 +32,7 @@ from ccpn.ui.gui.widgets.Icon import Icon
 from ccpn.ui.gui.widgets.Label import Label
 
 #### NON GUI IMPORTS
-from ccpn.framework.lib.Pipe import SpectraPipe, PIPE_GENERIC
-from ccpn.util.Logging import getLogger
-
+from ccpn.framework.lib.pipeline.PipeBase import SpectraPipe, PIPE_GENERIC
 
 ########################################################################################################################
 ###   Attributes:

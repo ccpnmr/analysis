@@ -31,7 +31,7 @@ from ccpn.ui.gui.widgets.DoubleSpinbox import DoubleSpinbox
 from ccpn.ui.gui.widgets.Widget import Widget
 
 #### NON GUI IMPORTS
-from ccpn.framework.lib.Pipe import SpectraPipe, PIPE_ASSIGN
+from ccpn.framework.lib.pipeline.PipeBase import SpectraPipe, PIPE_ASSIGN
 from ccpn.util.Logging import getLogger
 
 

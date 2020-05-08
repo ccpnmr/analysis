@@ -24,12 +24,11 @@ __date__ = "$Date: 2017-05-28 10:28:42 +0000 (Sun, May 28, 2017) $"
 
 
 #### GUI IMPORTS
-from ccpn.ui.gui.widgets.PipelineWidgets import GuiPipe, _getWidgetByAtt
+from ccpn.ui.gui.widgets.PipelineWidgets import GuiPipe
 
 #### NON GUI IMPORTS
-from ccpn.framework.lib.Pipe import SpectraPipe, PIPE_POSTPROCESSING
-import numpy as np
-from ccpn.util.Logging import getLogger, _debug3
+from ccpn.framework.lib.pipeline.PipeBase import SpectraPipe, PIPE_POSTPROCESSING
+from ccpn.util.Logging import getLogger
 from ccpn.core.lib.SpectrumLib import nmrGlueBaselineCorrector
 
 

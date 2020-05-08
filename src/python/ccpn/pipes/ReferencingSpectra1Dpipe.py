@@ -29,7 +29,7 @@ from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.DoubleSpinbox import DoubleSpinbox
 
 #### NON GUI IMPORTS
-from ccpn.framework.lib.Pipe import SpectraPipe, PIPE_POSTPROCESSING
+from ccpn.framework.lib.pipeline.PipeBase import SpectraPipe, PIPE_POSTPROCESSING
 from ccpn.util.Logging import getLogger
 
 

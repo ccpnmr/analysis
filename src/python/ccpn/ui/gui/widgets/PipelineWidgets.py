@@ -31,7 +31,6 @@ from pyqtgraph.dockarea.DockDrop import DockDrop
 from pyqtgraph.dockarea.Dock import DockLabel, Dock, VerticalLabel
 from pyqtgraph.dockarea.Container import SplitContainer
 from ccpn.ui.gui.widgets.Menu import Menu
-from ccpn.ui.gui.widgets.ListWidget import ListWidget
 from ccpn.ui.gui.lib.GuiGenerator import generateWidget
 from ccpn.ui.gui.widgets.Frame import Frame
 from ccpn.ui.gui.widgets.Button import Button
@@ -52,10 +51,10 @@ from ccpn.ui.gui.popups.PickPeaks1DPopup import ExcludeRegions
 from ccpn.ui.gui.widgets.Icon import Icon
 from ccpn.ui.gui.widgets.Base import Base
 from collections import OrderedDict
-from ccpn.framework.lib.Pipeline import Pipeline
+from ccpn.framework.lib.pipeline.PipelineBase import Pipeline
 from ccpn.ui.gui.widgets.GLLinearRegionsPlot import GLTargetButtonSpinBoxes
 from ccpn.util.Logging import getLogger
-from ccpn.framework.lib.Pipe import PIPE_CATEGORIES
+from ccpn.framework.lib.pipeline.PipeBase import PIPE_CATEGORIES
 from functools import partial
 from ccpn.ui.gui.widgets.Font import Font
 from ccpn.ui.gui.guiSettings import getColours, LABEL_FOREGROUND
@@ -251,8 +250,6 @@ class PipelineDropArea(DockArea):
             ev.accept()
         else:
             ev.ignore()
-
-    from PyQt5.QtGui import QPainter, QPen, QColor, QBrush, QPainterPath
 
     def _paint(self, ev, paintLabel=True):
         QPainter = QtGui.QPainter
@@ -969,7 +966,7 @@ def testGuiPipe(GuiPipe):
     :param GuiPipe:
     :return:  Open the Gui pipe in a mock Gui pipeline
     '''
-    from PyQt5 import QtGui, QtWidgets
+    from PyQt5 import QtWidgets
     from ccpn.ui.gui.widgets.Application import TestApplication
 
     app = TestApplication()

@@ -29,7 +29,7 @@ from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.CheckBox import CheckBox
 
 #### NON GUI IMPORTS
-from ccpn.framework.lib.Pipe import SpectraPipe, PIPE_ANALYSIS
+from ccpn.framework.lib.pipeline.PipeBase import SpectraPipe, PIPE_ANALYSIS
 from ccpn.core.lib.AssignmentLib import refitPeaks
 from ccpn.core.lib.peakUtils import estimateVolumes
 

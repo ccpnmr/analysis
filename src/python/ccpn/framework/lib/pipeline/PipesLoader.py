@@ -55,13 +55,18 @@ def _fetchUserPipesPath(application=None):
         return path
 
 
-def _fetchDemoPipe(path):
+def _fetchDemoPipe():
     '''
-    create the __init__.py required in the pipe directory
+    copy template pipes from pipeline dir to a user dir
 
     '''
     from ccpn.framework.PathsAndUrls import pipeTemplates
     from shutil import copyfile
+    destDir = _fetchUserPipesPath()
+    if os.path.exists(pipeTemplates):
+        for templateFile in  os.listdir(pipeTemplates):
+            src = os.path.join(pipeTemplates, templateFile)
+            dstFile = os.path.join(destDir, templateFile)
+            if not os.path.isfile(dstFile):
+                copyfile(src, dstFile)
 
-    dest = _fetchUserPipesPath()
-    pass

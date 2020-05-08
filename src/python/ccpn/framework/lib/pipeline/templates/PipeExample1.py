@@ -5,7 +5,7 @@ from ccpn.ui.gui.widgets.PulldownList import PulldownList
 from ccpn.ui.gui.widgets.Label import Label
 
 #### NON GUI IMPORTS
-from ccpn.framework.lib.pipeline.PipeBase import SpectraPipe
+from ccpn.framework.lib.pipeline.PipeBase import SpectraPipe, PIPE_USER
 
 
 ########################################################################################################################
@@ -55,15 +55,15 @@ class DemoGuiPipe(GuiPipe):
 class DemoPipe1(SpectraPipe):
     guiPipe = DemoGuiPipe
     pipeName = PipeName
+    pipeCategory = PIPE_USER
 
     _kwargs = {
         ReferenceSpectrum: 'spectrum2'
         }
 
-    def runPipe(self, data):
-        output = myAlgorithm(data)
-        return output
+    def runPipe(self, spectra):
+        output = myAlgorithm(spectra)
+        return spectra
 
 
-DemoPipe1.register()
-# the clss pipe needs to be registered. This will enable the GuiPipeline to load it into the GuiModule.
+DemoPipe1.register() # comment-out this line to remove the pipe from the Gui Pipeline

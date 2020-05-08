@@ -127,7 +127,7 @@ class GuiPipeline(CcpnModule, Pipeline):
 
             pipes = LP
 
-        self.ccpnPipes = pipes
+        self.rebuildTemplates = True
         self.userPipes = self._loadUserPipes()
 
         # init the CcpnModule
@@ -220,10 +220,13 @@ class GuiPipeline(CcpnModule, Pipeline):
     def _loadUserPipes(self):
 
         from ccpn.framework.lib.pipeline.PipesLoader import _fetchUserPipesPath, loadPipeSysModules
+        from ccpn.framework.lib.pipeline.PipesLoader import _fetchDemoPipe
 
         userPipesPath = _fetchUserPipesPath(self.application)
         if userPipesPath:
             getLogger().info('Loading user Pipes from: %s' % userPipesPath)
+            if self.rebuildTemplates:
+                _fetchDemoPipe()
             modules = loadPipeSysModules([userPipesPath])
 
 

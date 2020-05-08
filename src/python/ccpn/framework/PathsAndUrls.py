@@ -51,7 +51,7 @@ analysisMetabolomicsPath        = os.path.join(ccpnPythonPath, 'AnalysisMetabolo
 macroPath                       = os.path.join(ccpnPythonPath, 'macros')
 pluginPath                      = os.path.join(ccpnPythonPath, 'plugins')
 pipePath                        = os.path.join(ccpnPythonPath, 'pipes')
-pipeTemplates                   = os.path.join(ccpnPythonPath, 'framework', 'pipeline', 'templates')
+pipeTemplates                   = os.path.join(ccpnPythonPath, 'framework', 'lib', 'pipeline', 'templates')
 fontsPath                       = os.path.join(ccpnPythonPath, 'ui', 'gui', 'widgets', 'fonts')
 
 # Program tutorials and documentation

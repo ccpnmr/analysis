@@ -358,6 +358,8 @@ class GuiPipeline(CcpnModule, Pipeline):
         found = set()
         if not searchText.endswith('*'):
             searchText = searchText+'*'
+        if not searchText.startswith('*'):
+            searchText = '*'+searchText
         for ln, nn in zip([x.lower() for x in ll], ll):
             if fnmatch.fnmatch(ln, searchText):
                 found.add(nn)

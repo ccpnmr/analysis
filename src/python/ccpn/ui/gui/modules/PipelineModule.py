@@ -306,6 +306,7 @@ class GuiPipeline(CcpnModule, Pipeline):
         row += 1
         self._resultWidget = ListWidget(self.inputFrame, contextMenu=False, callback=self.callbackResultWidget, grid=(row,1))
         self._resultWidget.itemDoubleClicked.connect(self._resultItemDoubleClickCallback)
+        self._resultWidget.keyPressEvent = self._pipesResultskeyPressEvent
         self._resultWidget.hide()
         # self._resultWidget.setContentsMargins(10, 11, 10, 10)
         # self._resultWidget.setStyleSheet('QListWidget {border: 1px;}')
@@ -453,7 +454,20 @@ class GuiPipeline(CcpnModule, Pipeline):
 
         else:
             LineEdit.keyPressEvent(self._searchWidget, keyEvent)
-            # self._runPipeline()
+
+    def _pipesResultskeyPressEvent(self, keyEvent):
+        ''' Run the pipeline by pressing the enter key '''
+        if keyEvent.key() == Qt.Key_Enter or keyEvent.key() == Qt.Key_Return:
+            if self._searchWidget.get():
+                names = self._resultWidget.getSelectedTexts()
+                if len(names)>0:
+                    for name in names:
+                        self.addPipe(name)
+        elif keyEvent.key() == Qt.Key_Escape or keyEvent.key() == Qt.Key_Delete:
+            self._resultWidget.clearSelection()
+
+        else:
+            ListWidget.keyPressEvent(self._resultWidget, keyEvent)
 
     def _getSerialName(self, guiPipeName):
         self.currentGuiPipesNames.append(guiPipeName)

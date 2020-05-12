@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-05-07 18:44:04 +0100 (Thu, May 07, 2020) $"
+__dateModified__ = "$dateModified: 2020-05-12 09:52:29 +0100 (Tue, May 12, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -551,6 +551,7 @@ nef2CcpnMap = {
         ('symbol_style', 'symbolStyle'),
         ('text_colour', 'textColour'),
         )),
+    # NOTE:ED - added for older nef when no peakList information in the spectrum saveFrame
     'ccpn_no_peaklist'               : OD((
         ('ccpn_peaklist_serial', 'serial'),
         ('ccpn_peaklist_comment', 'comment'),
@@ -3777,7 +3778,7 @@ class CcpnNefReader:
         """Serves to verify nef_distance_restraint_list, nef_dihedral_restraint_list,
         nef_rdc_restraint_list and ccpn_restraint_list"""
         # Get ccpn-to-nef mapping for saveframe
-        _rowErrors = saveFrame._rowErrors[saveFrame.name] = OrderedSet()
+        # _rowErrors = saveFrame._rowErrors[saveFrame.name] = OrderedSet()
 
         category = saveFrame['sf_category']
         framecode = saveFrame['sf_framecode']
@@ -3823,7 +3824,8 @@ class CcpnNefReader:
             restraint = dataSet.getRestraintList(name)
             if restraint is not None:
                 self.error('nef_restraint_list - RestraintList {} already exists'.format(restraint), saveFrame, (restraint,))
-                _rowErrors.add(name)
+                # _rowErrors.add(name)
+                saveFrame._rowErrors[category] = (name,)
 
         self._verifyLoops(project, saveFrame, name=name)
 
@@ -3853,7 +3855,7 @@ class CcpnNefReader:
         regex = u'\`\d*`+?'
         name = re.sub(regex, '', name)  # substitute with ''
 
-        result = {category: OrderedSet([name])}
+        result = {category: (name,)}
 
         self._contentLoops(project, saveFrame)
         self.updateContent(saveFrame, result)
@@ -4425,6 +4427,10 @@ class CcpnNefReader:
     importers['ccpn_peak_list'] = load_ccpn_peak_list
 
     def verify_ccpn_peak_list(self, spectrum: Spectrum, loop: StarIo.NmrLoop, parentFrame: StarIo.NmrSaveFrame, **kwds):
+        """Verify the peakLists"""
+        _ID = 'ccpn_peak_list'
+        _serialName = '{}_serial'.format(_ID)
+        _serialErrors = parentFrame._rowErrors[_serialName] = OrderedSet()
         _rowErrors = parentFrame._rowErrors[loop.name] = OrderedSet()
 
         mapping = nef2CcpnMap[loop.name]
@@ -4434,8 +4440,11 @@ class CcpnNefReader:
             parameters = self._parametersFromLoopRow(row, map2)
             peakList = creatorFunc(parameters['serial'])
             if peakList is not None:
-                self.error('ccpn_peak_list - PeakList {} already exists'.format(peakList), loop, (peakList,))
+                self.error('{} - PeakList {} already exists'.format(_ID, peakList), loop, (peakList,))
                 _rowErrors.add(loop.data.index(row))
+                listName = Pid.IDSEP.join(('' if x is None else str(x)) for x in [spectrum.name, parameters['serial']])
+                _serialErrors.add(listName)
+                parentFrame._rowErrors['_'.join([_ID, listName])] = OrderedSet([loop.data.index(row)])
 
     verifiers['ccpn_peak_list'] = verify_ccpn_peak_list
 
@@ -4448,8 +4457,8 @@ class CcpnNefReader:
         for row in loop.data:
             parameters = self._parametersFromLoopRow(row, map2)
             result = (name, parameters['serial'])
-            # listName = Pid.IDSEP.join(('' if x is None else str(x)) for x in result)
-            peakLists.add(result)
+            listName = Pid.IDSEP.join(('' if x is None else str(x)) for x in result)
+            peakLists.add(listName)
 
         return peakLists
 
@@ -4476,6 +4485,10 @@ class CcpnNefReader:
     importers['ccpn_integral_list'] = load_ccpn_integral_list
 
     def verify_ccpn_integral_list(self, spectrum: Spectrum, loop: StarIo.NmrLoop, parentFrame: StarIo.NmrSaveFrame, **kwds):
+        """Verify the integralLists"""
+        _ID = 'ccpn_integral_list'
+        _serialName = '{}_serial'.format(_ID)
+        _serialErrors = parentFrame._rowErrors[_serialName] = OrderedSet()
         _rowErrors = parentFrame._rowErrors[loop.name] = OrderedSet()
 
         mapping = nef2CcpnMap[loop.name]
@@ -4485,8 +4498,11 @@ class CcpnNefReader:
             parameters = self._parametersFromLoopRow(row, map2)
             integralList = creatorFunc(parameters['serial'])
             if integralList is not None:
-                self.error('ccpn_integral_list - IntegralList {} already exists'.format(integralList), loop, (integralList,))
+                self.error('{} - IntegralList {} already exists'.format(_ID, integralList), loop, (integralList,))
                 _rowErrors.add(loop.data.index(row))
+                listName = Pid.IDSEP.join(('' if x is None else str(x)) for x in [spectrum.name, parameters['serial']])
+                _serialErrors.add(listName)
+                parentFrame._rowErrors['_'.join([_ID, listName])] = OrderedSet([loop.data.index(row)])
 
     verifiers['ccpn_integral_list'] = verify_ccpn_integral_list
 
@@ -4499,8 +4515,8 @@ class CcpnNefReader:
         for row in loop.data:
             parameters = self._parametersFromLoopRow(row, map2)
             result = (name, parameters['serial'])
-            # listName = Pid.IDSEP.join(('' if x is None else str(x)) for x in result)
-            integralLists.add(result)
+            listName = Pid.IDSEP.join(('' if x is None else str(x)) for x in result)
+            integralLists.add(listName)
 
         return integralLists
 
@@ -4527,6 +4543,10 @@ class CcpnNefReader:
     importers['ccpn_multiplet_list'] = load_ccpn_multiplet_list
 
     def verify_ccpn_multiplet_list(self, spectrum: Spectrum, loop: StarIo.NmrLoop, parentFrame: StarIo.NmrSaveFrame, **kwds):
+        """Verify the multipletLists"""
+        _ID = 'ccpn_multiplet_list'
+        _serialName = '{}_serial'.format(_ID)
+        _serialErrors = parentFrame._rowErrors[_serialName] = OrderedSet()
         _rowErrors = parentFrame._rowErrors[loop.name] = OrderedSet()
 
         mapping = nef2CcpnMap[loop.name]
@@ -4536,8 +4556,11 @@ class CcpnNefReader:
             parameters = self._parametersFromLoopRow(row, map2)
             multipletList = creatorFunc(parameters['serial'])
             if multipletList is not None:
-                self.error('ccpn_multiplet_list - MultipletList {} already exists'.format(multipletList), loop, (multipletList,))
+                self.error('{} - MultipletList {} already exists'.format(_ID, multipletList), loop, (multipletList,))
                 _rowErrors.add(loop.data.index(row))
+                listName = Pid.IDSEP.join(('' if x is None else str(x)) for x in [spectrum.name, parameters['serial']])
+                _serialErrors.add(listName)
+                parentFrame._rowErrors['_'.join([_ID, listName])] = OrderedSet([loop.data.index(row)])
 
     verifiers['ccpn_multiplet_list'] = verify_ccpn_multiplet_list
 
@@ -4550,8 +4573,8 @@ class CcpnNefReader:
         for row in loop.data:
             parameters = self._parametersFromLoopRow(row, map2)
             result = (name, parameters['serial'])
-            # listName = Pid.IDSEP.join(('' if x is None else str(x)) for x in result)
-            multipletLists.add(result)
+            listName = Pid.IDSEP.join(('' if x is None else str(x)) for x in result)
+            multipletLists.add(listName)
 
         return multipletLists
 
@@ -4608,6 +4631,7 @@ class CcpnNefReader:
     importers['ccpn_integral'] = load_ccpn_integral
 
     def verify_ccpn_integral(self, spectrum: Spectrum, loop: StarIo.NmrLoop, parentFrame: StarIo.NmrSaveFrame, **kwds):
+        _ID = 'ccpn_integral'
         _rowErrors = parentFrame._rowErrors[loop.name] = OrderedSet()
 
         serial2creatorFunc = dict((x.serial, x.getIntegral) for x in spectrum.integralLists)
@@ -4616,10 +4640,18 @@ class CcpnNefReader:
         map2 = dict(item for item in mapping.items() if item[1] and '.' not in item[1])
         for row in loop.data:
             parameters = self._parametersFromLoopRow(row, map2)
+            listName = Pid.IDSEP.join(('' if x is None else str(x)) for x in [spectrum.name, row['integral_list_serial']])
+            integralID = '_'.join([_ID, listName])
+
             integral = serial2creatorFunc[row['integral_list_serial']](parameters['serial'])
             if integral is not None:
-                self.error('ccpn_integral - Integral {} already exists'.format(integral), loop, (integral,))
+                self.error('{} - Integral {} already exists'.format(_ID, integral), loop, (integral,))
                 _rowErrors.add(loop.data.index(row))
+
+                if integralID not in parentFrame._rowErrors:
+                    parentFrame._rowErrors[integralID] = OrderedSet([loop.data.index(row)])
+                else:
+                    parentFrame._rowErrors[integralID].add(loop.data.index(row))
 
     verifiers['ccpn_integral'] = verify_ccpn_integral
 
@@ -4671,6 +4703,7 @@ class CcpnNefReader:
     importers['ccpn_multiplet'] = load_ccpn_multiplet
 
     def verify_ccpn_multiplet(self, spectrum: Spectrum, loop: StarIo.NmrLoop, parentFrame: StarIo.NmrSaveFrame, **kwds):
+        _ID = 'ccpn_multiplet'
         _rowErrors = parentFrame._rowErrors[loop.name] = OrderedSet()
 
         serial2creatorFunc = dict((x.serial, x.getMultiplet) for x in spectrum.multipletLists)
@@ -4679,10 +4712,18 @@ class CcpnNefReader:
         map2 = dict(item for item in mapping.items() if item[1] and '.' not in item[1])
         for row in loop.data:
             parameters = self._parametersFromLoopRow(row, map2)
+            listName = Pid.IDSEP.join(('' if x is None else str(x)) for x in [spectrum.name, row['multiplet_list_serial']])
+            multipletID = '_'.join([_ID, listName])
+
             multiplet = serial2creatorFunc[row['multiplet_list_serial']](parameters['serial'])
             if multiplet is not None:
                 self.error('ccpn_multiplet - Multiplet {} already exists'.format(multiplet), loop, (multiplet,))
                 _rowErrors.add(loop.data.index(row))
+
+                if multipletID not in parentFrame._rowErrors:
+                    parentFrame._rowErrors[multipletID] = OrderedSet([loop.data.index(row)])
+                else:
+                    parentFrame._rowErrors[multipletID].add(loop.data.index(row))
 
     verifiers['ccpn_multiplet'] = verify_ccpn_multiplet
 
@@ -4810,10 +4851,15 @@ class CcpnNefReader:
         """Verify the peakClusters"""
         self._verifyLoops(project, saveFrame)
 
+        # TODO:ED - get serials from peak_cluster, put into ccpn_peak_cluster_list error
+
     verifiers['ccpn_peak_cluster_list'] = verify_ccpn_peak_cluster_list
 
     def verify_ccpn_peak_cluster(self, project: Project, loop: StarIo.NmrLoop, parentFrame: StarIo.NmrSaveFrame, **kwds):
-        """Verify the peaks in the peakClusters"""
+        """Verify the peakClusters"""
+        _ID = 'ccpn_peak_cluster'
+        _serialName = 'ccpn_peak_cluster_serial'
+        _serialErrors = parentFrame._rowErrors[_serialName] = OrderedSet()
         _rowErrors = parentFrame._rowErrors[loop.name] = OrderedSet()
 
         mapping = nef2CcpnMap[loop.name]
@@ -4823,13 +4869,17 @@ class CcpnNefReader:
             parameters = self._parametersFromLoopRow(row, map2)
             peakCluster = creatorFunc(parameters['serial'])
             if peakCluster is not None:
-                self.error('ccpn_peak_cluster - PeakCluster {} already exists'.format(peakCluster), loop, (peakCluster,))
+                self.error('{} - PeakCluster {} already exists'.format(_ID, peakCluster), loop, (peakCluster,))
                 _rowErrors.add(loop.data.index(row))
+                listName = Pid.IDSEP.join(('' if x is None else str(x)) for x in [parameters['serial']])
+                _serialErrors.add(listName)
+                parentFrame._rowErrors['_'.join([_ID, listName])] = OrderedSet([loop.data.index(row)])
 
     verifiers['ccpn_peak_cluster'] = verify_ccpn_peak_cluster
 
     def verify_ccpn_peak_cluster_peaks(self, project: Project, loop: StarIo.NmrLoop, parentFrame: StarIo.NmrSaveFrame):
         """verify ccpn_peak_cluster_peaks loop"""
+        _ID = 'ccpn_peak_cluster_peaks'
         _rowErrors = parentFrame._rowErrors[loop.name] = OrderedSet()
 
         mapping = nef2CcpnMap[loop.name]
@@ -4838,6 +4888,8 @@ class CcpnNefReader:
             parameters = self._parametersFromLoopRow(row, map2)
             parameters['peak_list_serial'] = row.get('peak_list_serial')
             parameters['peak_spectrum'] = row.get('peak_spectrum')
+            listName = Pid.IDSEP.join(('' if x is None else str(x)) for x in [row['peak_cluster_serial']])
+            clusterID = '_'.join([_ID, listName])
 
             tt = [parameters[col] for col in ('peak_spectrum', 'peak_list_serial', 'serial')]
             peakName = Pid.IDSEP.join(('' if x is None else str(x)) for x in tt)
@@ -4847,21 +4899,40 @@ class CcpnNefReader:
                 self.error('ccpn_peak_cluster_peaks - PeakCluster contains {}'.format(peak), loop, (peak,))
                 _rowErrors.add(loop.data.index(row))
 
+                if clusterID not in parentFrame._rowErrors:
+                    parentFrame._rowErrors[clusterID] = OrderedSet([loop.data.index(row)])
+                else:
+                    parentFrame._rowErrors[clusterID].add(loop.data.index(row))
+
     verifiers['ccpn_peak_cluster_peaks'] = verify_ccpn_peak_cluster_peaks
 
+    # def content_ccpn_peak_cluster_list(self, project: Project, saveFrame: StarIo.NmrSaveFrame):
+    #     """Get the contents ccpn_peak_cluster_list saveFrame"""
+    #     serialList = 'ccpn_peak_cluster_serial'
+    #     results = {serialList   : OrderedSet()}
+    #
+    #     self._contentLoops(project, saveFrame)
+    #
+    #
+    #     self.updateContent(saveFrame, results)
+
     contents['ccpn_peak_cluster_list'] = _contentLoops
+    # contents['ccpn_peak_cluster_list'] = content_ccpn_peak_cluster_list
 
     def content_ccpn_peak_cluster(self, project: Project, loop: StarIo.NmrLoop, parentFrame: StarIo.NmrSaveFrame,
                                   name=None, itemLength=None):
         peakClusters = OrderedSet()
+        _serialName = 'ccpn_peak_cluster_serial'
+        # _serialErrors = parentFrame._contents[_serialName] = OrderedSet()
 
         mapping = nef2CcpnMap[loop.name]
         map2 = dict(item for item in mapping.items() if item[1] and '.' not in item[1])
         for row in loop.data:
             parameters = self._parametersFromLoopRow(row, map2)
-            result = parameters['serial']
-            # listName = Pid.IDSEP.join(('' if x is None else str(x)) for x in result)
-            peakClusters.add(result)
+            result = (parameters['serial'],)
+            listName = Pid.IDSEP.join(('' if x is None else str(x)) for x in result)
+            peakClusters.add(listName)
+            # _serialErrors.add(str(parameters['serial']))  # add the serial list name - hack for the minute
 
         return peakClusters
 
@@ -4991,16 +5062,19 @@ class CcpnNefReader:
     # def verify_nef_peak(self, peakList: PeakList, loop: StarIo.NmrLoop, parentFrame: StarIo.NmrSaveFrame, dimensionCount: int = None):
     def verify_nef_peak(self, spectrum: Spectrum, loop: StarIo.NmrLoop, parentFrame: StarIo.NmrSaveFrame, dimensionCount: int = None):
         """Serves to verify nef_peak loop"""
+        _ID = 'nef_peak'
         _rowErrors = parentFrame._rowErrors[loop.name] = OrderedSet()
 
         mapping = nef2CcpnMap[loop.name]
         map2 = dict(item for item in mapping.items() if item[1] and '.' not in item[1])
         for row in loop.data:
             parameters = self._parametersFromLoopRow(row, map2)
-
             serial = parameters['serial']
             peakListSerial = row.get('peak_list_serial') or 1
             peakLabel = Pid.IDSEP.join(('' if x is None else str(x)) for x in (peakListSerial, serial))
+
+            listName = Pid.IDSEP.join(('' if x is None else str(x)) for x in [spectrum.name, peakListSerial])
+            peakID = '_'.join([_ID, listName])
 
             peakList = spectrum.getPeakList(peakListSerial)
             if peakList is not None:
@@ -5009,6 +5083,11 @@ class CcpnNefReader:
                 if peak is not None:
                     self.error('nef_peak - Peak {} already exists'.format(peak), loop, (peak,))
                     _rowErrors.add(loop.data.index(row))
+
+                    if peakID not in parentFrame._rowErrors:
+                        parentFrame._rowErrors[peakID] = OrderedSet([loop.data.index(row)])
+                    else:
+                        parentFrame._rowErrors[peakID].add(loop.data.index(row))
 
     verifiers['nef_peak'] = verify_nef_peak
 
@@ -5019,16 +5098,19 @@ class CcpnNefReader:
 
         # NOTE:ED - not correct yet, need 2 lists
         # peakListSerial = parentFrame['ccpn_peaklist_serial']
-        peakListSerial = parentFrame.get('ccpn_peaklist_serial') or 1
+        # peakListSerial = parentFrame.get('ccpn_peaklist_serial') or 1
         # get the list of peaks
         mapping = nef2CcpnMap[loop.name]
         map2 = dict(item for item in mapping.items() if item[1] and '.' not in item[1])
         for row in loop.data:
             parameters = self._parametersFromLoopRow(row, map2)
-
-            serial = parameters['serial']
+            peakListSerial = parentFrame.get('ccpn_peaklist_serial') or row.get('peak_list_serial') or 1       # may not be defined in the list
+            # serial = parameters['serial']
             # result.add((name, peakListSerial, serial))
-            result.add((name, peakListSerial))
+
+            # NOTE:ED - this is actually putting the peak list name into the list NOT the peak - nef_peak
+            listName = Pid.IDSEP.join(('' if x is None else str(x)) for x in [name, peakListSerial])
+            result.add(listName)
 
         return result
 
@@ -5038,7 +5120,7 @@ class CcpnNefReader:
         result = OrderedSet()
 
         # NOTE:ED - not correct yet, need 2 lists
-        peakListSerial = parentFrame['ccpn_peaklist_serial']
+        # peakListSerial = parentFrame['ccpn_peaklist_serial']
         # get the list of peaks
         mapping = nef2CcpnMap[loop.name]
         map2 = dict(item for item in mapping.items() if item[1] and '.' not in item[1])
@@ -5046,7 +5128,11 @@ class CcpnNefReader:
             parameters = self._parametersFromLoopRow(row, map2)
 
             serial = parameters['serial']
-            result.add((name, peakListSerial, serial))
+            peakListSerial = parentFrame['ccpn_peaklist_serial'] or row.get('peak_list_serial') or 1       # may not be defined in the list
+            # result.add((name, peakListSerial, serial))
+
+            listName = Pid.IDSEP.join(('' if x is None else str(x)) for x in [name, peakListSerial, serial])
+            result.add(listName)
 
         return result
 
@@ -5563,6 +5649,7 @@ class CcpnNefReader:
             result = project.getSubstance(name)
             if result is not None:
                 self.error('ccpn_substance - Substance {} already exists'.format(result), saveFrame, (result,))
+                saveFrame._rowErrors[category] = (name,)
 
             # shouldn't need to verify loopNames
 
@@ -5575,7 +5662,7 @@ class CcpnNefReader:
         mapping = nef2CcpnMap[category]
         parameters, loopNames = self._parametersFromSaveFrame(saveFrame, mapping)
 
-        result = {category: OrderedSet([parameters['name']])}
+        result = {category: (parameters['name'],)}
 
         self._contentLoops(project, saveFrame)
         self.updateContent(saveFrame, result)
@@ -5684,18 +5771,24 @@ class CcpnNefReader:
 
     def verify_ccpn_assignment(self, project: Project, saveFrame: StarIo.NmrSaveFrame):
         # the saveframe contains nothing but three loops:
+        _ID = 'ccpn_assignment'
         nmrChainLoopName = 'nmr_chain'
         nmrResidueLoopName = 'nmr_residue'
         nmrAtomLoopName = 'nmr_atom'
 
-        nmrChains = {}
-        nmrResidues = {}
+        nmrChainLoopSerial = 'nmr_chain_serial'
+        saveFrame._rowErrors = {}
+        _nmrChainErrors = saveFrame._rowErrors[nmrChainLoopName] = OrderedSet()
+        _nmrChainSerial = saveFrame._rowErrors[nmrChainLoopSerial] = OrderedSet()
+        _nmrResidueErrors = saveFrame._rowErrors[nmrResidueLoopName] = OrderedSet()
+        _nmrAtomErrors = saveFrame._rowErrors[nmrAtomLoopName] = OrderedSet()
 
         # read nmr_chain loop
         mapping = nef2CcpnMap[nmrChainLoopName]
         map2 = dict(item for item in mapping.items() if item[1] and '.' not in item[1])
         creatorFunc = project.getNmrChain
-        for row in saveFrame[nmrChainLoopName].data:
+        loop = saveFrame[nmrChainLoopName]
+        for row in loop.data:
             parameters = self._parametersFromLoopRow(row, map2)
             if parameters['shortName'] == coreConstants.defaultNmrChainCode:
                 result = project.getNmrChain(coreConstants.defaultNmrChainCode)
@@ -5705,10 +5798,19 @@ class CcpnNefReader:
                 # shortName.translate(Pid.remapSeparators))
             if result:
                 # warning as already exists
-                self.error('ccpn_assignment - NmrChain {} already exists'.format(result), saveFrame, (result,))
+                self.error('{} - NmrChain {} already exists'.format(_ID, result), saveFrame, (result,))
+                _nmrChainErrors.add(loop.data.index(row))
+                _nmrChainSerial.add(result.name)
+
+                itemID = '_'.join([nmrChainLoopName, result.name])
+                if itemID not in saveFrame._rowErrors:
+                    saveFrame._rowErrors[itemID] = OrderedSet([loop.data.index(row)])
+                else:
+                    saveFrame._rowErrors[itemID].add(loop.data.index(row))
 
         nmrResidues = {}
-        for row in saveFrame[nmrResidueLoopName].data:
+        loop = saveFrame[nmrResidueLoopName]
+        for row in loop.data:
             # parameters = self._parametersFromLoopRow(row, map2)
             # parameters['residueType'] = row.get('residue_name')
             # NB chainCode None is not possible here (for ccpn data)
@@ -5718,13 +5820,21 @@ class CcpnNefReader:
                 name = Pid.IDSEP.join(('' if x is None else str(x)) for x in (row.get('sequence_code'), row.get('residue_name')))
                 result = nmrChain.getNmrResidue(name)
                 if result is not None:
-                    self.error('ccpn_assignment - NmrResidue {} already exists'.format(result), saveFrame, (result,))
+                    self.error('{} - NmrResidue {} already exists'.format(_ID, result), saveFrame, (result,))
                     nmrResidues[(chainCode, row.get('sequence_code'))] = result
+                    _nmrResidueErrors.add(loop.data.index(row))
+
+                    itemID = '_'.join([nmrResidueLoopName, chainCode])
+                    if itemID not in saveFrame._rowErrors:
+                        saveFrame._rowErrors[itemID] = OrderedSet([loop.data.index(row)])
+                    else:
+                        saveFrame._rowErrors[itemID].add(loop.data.index(row))
 
         # read nmr_atom loop
         mapping = nef2CcpnMap[nmrAtomLoopName]
         map2 = dict(item for item in mapping.items() if item[1] and '.' not in item[1])
-        for row in saveFrame[nmrAtomLoopName].data:
+        loop = saveFrame[nmrAtomLoopName]
+        for row in loop.data:
             parameters = self._parametersFromLoopRow(row, map2)
             chainCode = row['chain_code']
             sequenceCode = row['sequence_code']
@@ -5732,7 +5842,14 @@ class CcpnNefReader:
             if nmrResidue:
                 nmrAtom = nmrResidue.getNmrAtom(row.get('name'))
                 if nmrAtom is not None:
-                    self.error('ccpn_assignment - NmrAtom {} already exists'.format(nmrAtom), saveFrame, (nmrAtom,))
+                    self.error('{} - NmrAtom {} already exists'.format(_ID, nmrAtom), saveFrame, (nmrAtom,))
+                    _nmrAtomErrors.add(loop.data.index(row))
+
+                    itemID = '_'.join([nmrAtomLoopName, chainCode])
+                    if itemID not in saveFrame._rowErrors:
+                        saveFrame._rowErrors[itemID] = OrderedSet([loop.data.index(row)])
+                    else:
+                        saveFrame._rowErrors[itemID].add(loop.data.index(row))
 
     verifiers['ccpn_assignment'] = verify_ccpn_assignment
     verifiers['nmr_chain'] = _noLoopVerify

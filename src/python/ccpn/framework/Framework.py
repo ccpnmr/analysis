@@ -3404,11 +3404,13 @@ if __name__ == '__main__':
     app = QtWidgets.QApplication(['testApp'])
     # run the dialog
     dialog = ImportNefPopup(parent=ui.mainWindow, mainWindow=ui.mainWindow,
-                            nefObjects=(_loader,))
-                            # nefObjects=(project, _loader,))
+                            # nefObjects=(_loader,))
+                            nefObjects=(project, _loader,))
 
     dialog._initialiseProject(ui.mainWindow, application, project)
     dialog.fillPopup()
+
+    # NOTE:ED - add routines here to set up the mapping between the different nef file loaded
     dialog.exec_()
 
     import ccpn.util.nef.nef as Nef

@@ -11,7 +11,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-05-07 18:44:04 +0100 (Thu, May 07, 2020) $"
+__dateModified__ = "$dateModified: 2020-05-12 09:52:30 +0100 (Tue, May 12, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -337,6 +337,7 @@ class ImportTreeCheckBoxes(ProjectTreeCheckBoxes):
         'ccpn_spectrum_group'        : (SpectrumGroup._pluralLinkName, SpectrumGroup.className),
         'ccpn_notes'                 : (Note._pluralLinkName, Note.className),
         'ccpn_peak_cluster'          : (PeakCluster._pluralLinkName, PeakCluster.className),
+        # 'ccpn_peak_cluster_serial'          : (PeakCluster._pluralLinkName, PeakCluster.className),
         }
 
     nefProjectToSaveFramesMapping = {
@@ -359,6 +360,25 @@ class ImportTreeCheckBoxes(ProjectTreeCheckBoxes):
         SpectrumGroup._pluralLinkName    : ['ccpn_spectrum_group', 'ccpn_group_spectrum'],
         Note._pluralLinkName             : ['ccpn_note'],
         PeakCluster._pluralLinkName      : ['ccpn_peak_cluster_list', 'ccpn_peak_cluster', 'ccpn_peak_cluster_peaks'],
+        }
+
+    nefProjectToHandlerMapping = {
+        # Chain._pluralLinkName : [],
+        Chain._pluralLinkName            : 'nef_sequence',
+        ChemicalShiftList._pluralLinkName: None,
+        RestraintList._pluralLinkName    : None,
+        PeakList._pluralLinkName         : 'ccpn_peak_list',
+        IntegralList._pluralLinkName     : 'ccpn_integral_list',
+        MultipletList._pluralLinkName    : 'ccpn_multiplet_list',
+        Sample._pluralLinkName           : None,
+        Substance._pluralLinkName        : None,
+        NmrChain._pluralLinkName         : 'nmr_chain',
+        # TODO:ED - not done yet
+        DataSet._pluralLinkName          : None,
+        Complex._pluralLinkName          : None,
+        SpectrumGroup._pluralLinkName    : None,
+        Note._pluralLinkName             : 'ccpn_note',
+        PeakCluster._pluralLinkName      : None,
         }
 
     contents = {}
@@ -515,6 +535,7 @@ class ImportTreeCheckBoxes(ProjectTreeCheckBoxes):
 
     contents['nef_molecular_system'] = content_nef_molecular_system
     # contents['nef_sequence'] = content_nef_sequence
+    # NOTE:ED - to match nefmapping
     contents['nef_sequence_chain_code'] = content_list  # content_nef_sequence
     # contents['nef_covalent_links'] = content_nef_covalent_links
     contents['nef_chemical_shift_list'] = content_list  # content_nef_chemical_shift_list
@@ -539,6 +560,8 @@ class ImportTreeCheckBoxes(ProjectTreeCheckBoxes):
     # contents['ccpn_multiplet'] = content_ccpn_multiplet
     contents['ccpn_peak_cluster_list'] = content_ccpn_peak_cluster_list
     contents['ccpn_peak_cluster'] = content_list
+    # NOTE:ED - to match nefmapping
+    # contents['ccpn_peak_cluster_serial'] = content_list
 
     contents['ccpn_spectrum_group'] = content_list  # content_ccpn_spectrum_group
     contents['ccpn_complex'] = content_list  # content_ccpn_complex

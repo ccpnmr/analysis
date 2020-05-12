@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-05-12 09:52:29 +0100 (Tue, May 12, 2020) $"
+__dateModified__ = "$dateModified: 2020-05-12 18:51:55 +0100 (Tue, May 12, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -34,10 +34,6 @@ VALIDROWCOLOUR = QtGui.QColor('palegreen')
 ACCEPTROWCOLOUR = QtGui.QColor('darkseagreen')
 REJECTROWCOLOUR = QtGui.QColor('orange')
 INVALIDROWCOLOUR = QtGui.QColor('lightpink')
-INVALIDDARKROWCOLOUR = QtGui.QColor('tomato')
-INVALIDTEXTROWCOLOUR = QtGui.QColor('crimson')
-INVALIDTABLEFILLCOLOUR = QtGui.QColor('lightpink')
-INVALIDTABLEFILLSELECTCOLOUR = QtGui.QColor('tomato')
 
 VALIDFILE ='File'
 VALIDPATH = 'Path'

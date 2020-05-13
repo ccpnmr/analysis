@@ -269,7 +269,7 @@ for (memops.api.Implementation.TopObject topObj: _topObjects.values()) {
 }
 save();</item>
       <item tag="python"># NB must be done by direct access
-for topObj in self.__dict__['topObjects'].values():
+for topObj in list(self.__dict__['topObjects'].values()):
   if topObj.isDeleted:
     for repository in topObj.activeRepositories:
       topObj.removeFrom(repository)
@@ -301,7 +301,7 @@ for (memops.api.Implementation.TopObject topObj: _topObjects.values()) {
 if (getIsModified())
   save();</item>
       <item tag="python"># NB must be done by direct access
-for topObj in self.__dict__['topObjects'].values():
+for topObj in list(self.__dict__['topObjects'].values()):
   if topObj.isDeleted:
     for repository in topObj.activeRepositories:
       topObj.removeFrom(repository)

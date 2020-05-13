@@ -911,7 +911,7 @@ class PipesTree(QtWidgets.QTreeWidget, Base):
                     categoryItem = pipeTreeItem(self, categoryName, isPipeCategory=True)
                     for pipeName in sorted(pipeNames):
                         pipeItem = pipeTreeItem(categoryItem, pipeName, draggable=True)
-                        pipeItem.setIcon(0, Icon('icons/mario-pipe'))
+                        # pipeItem.setIcon(0, Icon('icons/mario-pipe'))
                         self._selectableItems.append(pipeItem)
                         self._availablePipeNames.append(pipeName)
 

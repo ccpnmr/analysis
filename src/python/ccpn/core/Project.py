@@ -13,8 +13,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-01-28 10:04:26 +0000 (Tue, January 28, 2020) $"
-__version__ = "$Revision: 3.0.0 $"
+__dateModified__ = "$dateModified: 2020-05-13 20:25:46 +0100 (Wed, May 13, 2020) $"
+__version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -826,12 +826,14 @@ class Project(AbstractWrapperObject):
         if not target:
             pass
         elif hasattr(target, '_metaclass'):
-            # Hack. This is an API object
-            getDataObj(target)._finaliseAction(action)
+            if not target.isDeleted:
+                # Hack. This is an API object - only if exists
+                getDataObj(target)._finaliseAction(action)
         else:
             # This must be an iterable
             for obj in target:
-                getDataObj(obj)._finaliseAction(action)
+                if not obj.isDeleted:
+                    getDataObj(obj)._finaliseAction(action)
 
     def _finaliseApiRename(self, wrappedData):
         """Reset Finalise rename - called from APi object (for API notifiers)

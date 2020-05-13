@@ -94,4 +94,4 @@ class APSPipe(SpectraPipe):
                 return spectra
 
 
-APSPipe.register()  # Registers the pipe in the pipeline
+# APSPipe.register()  # Registers the pipe in the pipeline

@@ -100,4 +100,4 @@ class ZFPipe(SpectraPipe):
                 return spectra
 
 
-ZFPipe.register()  # Registers the pipe in the pipeline
+# ZFPipe.register()  # Registers the pipe in the pipeline

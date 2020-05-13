@@ -94,4 +94,4 @@ class RevPipe(SpectraPipe):
                 return spectra
 
 
-RevPipe.register()  # Registers the pipe in the pipeline
+# RevPipe.register()  # Registers the pipe in the pipeline

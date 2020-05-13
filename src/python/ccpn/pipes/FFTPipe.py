@@ -95,4 +95,4 @@ class FFT1DPipe(SpectraPipe):
                 return spectra
 
 
-FFT1DPipe.register()  # Registers the pipe in the pipeline
+# FFT1DPipe.register()  # Registers the pipe in the pipeline

@@ -94,4 +94,4 @@ class DIPipe(SpectraPipe):
                 return spectra
 
 
-DIPipe.register()  # Registers the pipe in the pipeline
+# DIPipe.register()  # Registers the pipe in the pipeline

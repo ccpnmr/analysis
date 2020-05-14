@@ -3327,9 +3327,15 @@ if __name__ == '__main__':
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    # TESTNEF = '/Users/ejb66/Documents/CcpNmrData/NefTestData_1_1/CCPN_Commented_Example.nef'
-    TESTNEF = '/Users/ejb66/Documents/nefTestProject.nef'
+    # TESTNEF = '/Users/ejb66/Documents/nefTestProject.nef'
+    # TESTNEF2 = '/Users/ejb66/Documents/nefTestProject.nef'
+
     # TESTNEF = '/Users/ejb66/Documents/CcpNmrData/nefTestProject.nef'
+    # TESTNEF2 = '/Users/ejb66/Documents/CcpNmrData/nefTestProject.nef'
+
+    TESTNEF = '/Users/ejb66/Desktop/Ccpn_v2_testNef_a1.nef'
+    TESTNEF2 = '/Users/ejb66/Desktop/Ccpn_v2_testNef_a1.nef'
+
     # VALIDATEDICT = '/Users/ejb66/PycharmProjects/Git/NEF/specification/mmcif_nef.dic'
     VALIDATEDICT = '/Users/ejb66/Desktop/mmcif_nef_v1_1.dic'
     DEFAULTNAME = 'default'
@@ -3341,6 +3347,11 @@ if __name__ == '__main__':
     _loader = Nef.NefImporter(errorLogging=Nef.el.NEF_STRICT, hidePrefix=True)
     _loader.loadFile(TESTNEF)
     _loader.loadValidateDictionary(VALIDATEDICT)
+
+    # load the file and the validate dict
+    _loader2 = Nef.NefImporter(errorLogging=Nef.el.NEF_STRICT, hidePrefix=True)
+    _loader2.loadFile(TESTNEF2)
+    _loader2.loadValidateDictionary(VALIDATEDICT)
 
     # validate
     validCheck = _loader.isValid
@@ -3384,16 +3395,16 @@ if __name__ == '__main__':
             # need datablock selector here, with subset selection dependent on datablock type
 
             _loader._importNef(project, _loader._nefDict, selection=None)
-            warnings, errors = _loader._verifyNef(project, _loader._nefDict, selection=None)
+            warnings, errors = _loader._verifyNef(project, _loader2._nefDict, selection=None)
             if not (warnings or errors):
-                _loader._importNef(project, _loader._nefDict, selection=None)
+                _loader._importNef(project, _loader2._nefDict, selection=None)
             else:
                 # for msg in warnings or ('','',''):
                 #     print('  >>', msg)
                 for msg in errors or ('', '', ''):
                     print(msg[0])
 
-            result = _loader._contentNef(project, _loader._nefDict, selection=None)
+            result = _loader._contentNef(project, _loader2._nefDict, selection=None)
 
     nefReader.testPrint(project, _loader._nefDict, selection=None)
     nefReader.testErrors(project, _loader._nefDict, selection=None)
@@ -3405,7 +3416,7 @@ if __name__ == '__main__':
     # run the dialog
     dialog = ImportNefPopup(parent=ui.mainWindow, mainWindow=ui.mainWindow,
                             # nefObjects=(_loader,))
-                            nefObjects=(project, _loader,))
+                            nefObjects=(project, _loader2,))
 
     dialog._initialiseProject(ui.mainWindow, application, project)
     dialog.fillPopup()
@@ -3468,7 +3479,10 @@ if __name__ == '__main__':
     options.almostEqual = True
     options.maxRows = 5
     options.places = 8
-    result = Nef.compareDataBlocks(_loader._nefDict, localNefDict, options)
+
+    # sys.setrecursionlimit(10000)
+    # result = Nef.compareDataBlocks(_loader._nefDict, localNefDict, options)
+
     # Nef.printCompareList(result, 'LOADED', 'local', options)
 
     # # NOTE:ED - extract information from the saveframes as sets and dicts

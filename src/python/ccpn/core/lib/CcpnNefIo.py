@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-05-12 18:51:55 +0100 (Tue, May 12, 2020) $"
+__dateModified__ = "$dateModified: 2020-05-14 18:52:21 +0100 (Thu, May 14, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -4212,7 +4212,7 @@ class CcpnNefReader:
                 loop = saveFrame.get(loopName)
                 if loop:
                     importer = self.importers[loopName]
-                    importer(self, spectrum, loop, peakListId=None)
+                    importer(self, spectrum, loop, peakListId=peakList.serial)
                     # importer(self, spectrum, loop, peakListId=oldSerial)
         #
         # if len(peakListParameters):
@@ -5936,7 +5936,7 @@ class CcpnNefReader:
             parameters = self._parametersFromLoopRow(row, map2)
             chainCode = row['chain_code']
             sequenceCode = row['sequence_code']
-            nmrResidue = nmrResidues[(chainCode, sequenceCode)]
+            nmrResidue = nmrResidues.get((chainCode, sequenceCode))
             if nmrResidue:
                 nmrAtom = nmrResidue.getNmrAtom(row.get('name'))
                 if nmrAtom is not None:

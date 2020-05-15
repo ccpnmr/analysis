@@ -1,4 +1,4 @@
-"""Ordered Set
+"""Based on Ordered Set
 By Raymond Hettinger, http://code.activestate.com/recipes/576694/
 
 """
@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-05-15 13:11:18 +0100 (Fri, May 15, 2020) $"
+__dateModified__ = "$dateModified: 2020-05-15 14:29:16 +0100 (Fri, May 15, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -87,7 +87,7 @@ class OrderedSet(collections.abc.MutableSet):
         return '%s(%r)' % (self.__class__.__name__, list(self))
 
     def __eq__(self, other):
-        if isinstance(other, OrderedSet):
+        if isinstance(other, (OrderedSet, FrozenOrderedSet)):
             return len(self) == len(other) and list(self) == list(other)
         return set(self) == set(other)
 
@@ -156,7 +156,7 @@ class FrozenOrderedSet(collections.abc.MutableSet):
         return '%s(%r)' % (self.__class__.__name__, list(self))
 
     def __eq__(self, other):
-        if isinstance(other, OrderedSet):
+        if isinstance(other, (OrderedSet, FrozenOrderedSet)):
             return len(self) == len(other) and list(self) == list(other)
         return set(self) == set(other)
 
@@ -167,6 +167,7 @@ if __name__ == '__main__':
     print('OR - {}'.format(s | t))
     print('AND - {}'.format(s & t))
     print('MINUS - {}'.format(s - t))
+    print('SAME - {}'.format(s==t))
 
     print('SET s - {}'.format(s))
     s.pop()
@@ -190,3 +191,7 @@ if __name__ == '__main__':
     except Exception as es:
         print(str(es))
     print('SET t - {}'.format(s))
+    print('SAME - {}'.format(s==t))
+    t = FrozenOrderedSet('abrac')
+    print('SAME - {}'.format(s==t))
+    print('SAME - {}'.format(t==s))

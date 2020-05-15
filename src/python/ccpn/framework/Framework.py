@@ -3328,7 +3328,7 @@ if __name__ == '__main__':
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     TESTNEF = '/Users/ejb66/Documents/nefTestProject.nef'
-    TESTNEF2 = '/Users/ejb66/Documents/nefTestProject.nef'
+    TESTNEF2 = '/Users/ejb66/Documents/nefTestProject0.nef'
 
     # TESTNEF = '/Users/ejb66/Documents/CcpNmrData/nefTestProject.nef'
     # TESTNEF2 = '/Users/ejb66/Documents/CcpNmrData/nefTestProject.nef'
@@ -3422,7 +3422,7 @@ if __name__ == '__main__':
     dialog.fillPopup()
 
     # NOTE:ED - add routines here to set up the mapping between the different nef file loaded
-    # dialog.exec_()
+    dialog.exec_()
 
     import ccpn.util.nef.nef as Nef
 

@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-05-15 17:54:27 +0100 (Fri, May 15, 2020) $"
+__dateModified__ = "$dateModified: 2020-05-15 19:12:44 +0100 (Fri, May 15, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -3916,13 +3916,13 @@ class CcpnNefReader:
         dataSet = self.getDataSet(dataSetSerial)
         if dataSet is not None:
             # find the restraintList
-            restraint = dataSet.getRestraintList(name)
-            if restraint is not None:
-                self.error('nef_restraint_list - RestraintList {} already exists'.format(restraint), saveFrame, (restraint,))
+            restraintList = dataSet.getRestraintList(name)
+            if restraintList is not None:
+                self.error('nef_restraint_list - RestraintList {} already exists'.format(restraintList), saveFrame, (restraintList,))
                 # _rowErrors.add(name)
                 saveFrame._rowErrors[category] = (name,)
 
-        self._verifyLoops(project, saveFrame, name=name)
+                self._verifyLoops(restraintList, saveFrame, name=name)
 
     verifiers['nef_distance_restraint_list'] = verify_nef_restraint_list
     verifiers['nef_dihedral_restraint_list'] = verify_nef_restraint_list
@@ -4052,12 +4052,46 @@ class CcpnNefReader:
     importers['nef_rdc_restraint'] = load_nef_restraint
     importers['ccpn_restraint'] = load_nef_restraint
 
-    # NOTE:ED - do restraint contributions need verifying?
+    def verify_nef_restraint(self, restraintList: RestraintList, loop: StarIo.NmrLoop, parentFrame: StarIo.NmrSaveFrame,
+                             name=None, itemLength: int = None):
+        """Verify the contents of nef_distance_restraint, nef_dihedral_restraint,
+        nef_rdc_restraint and ccpn_restraint loops"""
+        _rowErrors = parentFrame._rowErrors[loop.name] = OrderedSet()
 
-    verifiers['nef_distance_restraint'] = _noLoopVerify
-    verifiers['nef_dihedral_restraint'] = _noLoopVerify
-    verifiers['nef_rdc_restraint'] = _noLoopVerify
-    verifiers['ccpn_restraint'] = _noLoopVerify
+        # string2ItemMap = self._dataSet2ItemMap[restraintList.dataSet]
+        #
+        # # set itemLength if not passed in:
+        # if not itemLength:
+        #     itemLength = coreConstants.constraintListType2ItemLength.get(restraintList.restraintType)
+        #
+        # mapping = nef2CcpnMap[loop.name]
+        # map2 = dict(item for item in mapping.items() if item[1] and '.' not in item[1])
+        # contributionTags = sorted(map2.values())
+        # restraints = {}
+        # # assignTags = ('chain_code', 'sequence_code', 'residue_name', 'atom_name')
+        #
+        # max = itemLength + 1
+        # multipleAttributes = OD((
+        #     ('chainCodes', tuple('chain_code_%s' % ii for ii in range(1, max))),
+        #     ('sequenceCodes', tuple('sequence_code_%s' % ii for ii in range(1, max))),
+        #     ('residueTypes', tuple('residue_name_%s' % ii for ii in range(1, max))),
+        #     ('atomNames', tuple('atom_name_%s' % ii for ii in range(1, max))),
+        #     ))
+        #
+        # parametersFromLoopRow = self._parametersFromLoopRow
+        # defaultChainCode = self.defaultChainCode
+        for row in loop.data:
+            # get restraint
+            serial = row.get('restraint_id')
+            restraint = restraintList.getRestraint(serial)
+            if restraint is not None:
+                self.error('nef_restraint - Restraint {} already exists'.format(restraint), loop, (restraint,))
+                _rowErrors.add(loop.data.index(row))
+
+    verifiers['nef_distance_restraint'] = verify_nef_restraint
+    verifiers['nef_dihedral_restraint'] = verify_nef_restraint
+    verifiers['nef_rdc_restraint'] = verify_nef_restraint
+    verifiers['ccpn_restraint'] = verify_nef_restraint
 
     def content_nef_restraint(self, restraintList: RestraintList, loop: StarIo.NmrLoop, parentFrame: StarIo.NmrSaveFrame,
                               itemLength: int = None) -> Optional[OrderedSet]:
@@ -4080,14 +4114,18 @@ class CcpnNefReader:
 
         defaultChainCode = self.defaultChainCode
         for row in loop.data:
-            ll = [list(row.get(x) for x in y) for y in multipleAttributes.values()]
+            serial = row.get('restraint_id')
 
-            for item in zip(*ll):
-                if defaultChainCode is not None and item[0] is None:
-                    # ChainCode missing - replace with default chain code
-                    item = (defaultChainCode,) + item[1:]
+            result.add(serial)
 
-                result.add(item)
+            # ll = [list(row.get(x) for x in y) for y in multipleAttributes.values()]
+            #
+            # for item in zip(*ll):
+            #     if defaultChainCode is not None and item[0] is None:
+            #         # ChainCode missing - replace with default chain code
+            #         item = (defaultChainCode,) + item[1:]
+            #
+            #     result.add(item)
 
         return result
 

@@ -3327,14 +3327,14 @@ if __name__ == '__main__':
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    # TESTNEF = '/Users/ejb66/Documents/nefTestProject.nef'
-    # TESTNEF2 = '/Users/ejb66/Documents/nefTestProject.nef'
+    TESTNEF = '/Users/ejb66/Documents/nefTestProject.nef'
+    TESTNEF2 = '/Users/ejb66/Documents/nefTestProject.nef'
 
     # TESTNEF = '/Users/ejb66/Documents/CcpNmrData/nefTestProject.nef'
     # TESTNEF2 = '/Users/ejb66/Documents/CcpNmrData/nefTestProject.nef'
 
-    TESTNEF = '/Users/ejb66/Desktop/Ccpn_v2_testNef_a1.nef'
-    TESTNEF2 = '/Users/ejb66/Desktop/Ccpn_v2_testNef_a1.nef'
+    # TESTNEF = '/Users/ejb66/Desktop/Ccpn_v2_testNef_a1.nef'
+    # TESTNEF2 = '/Users/ejb66/Desktop/Ccpn_v2_testNef_a1.nef'
 
     # VALIDATEDICT = '/Users/ejb66/PycharmProjects/Git/NEF/specification/mmcif_nef.dic'
     VALIDATEDICT = '/Users/ejb66/Desktop/mmcif_nef_v1_1.dic'
@@ -3422,7 +3422,7 @@ if __name__ == '__main__':
     dialog.fillPopup()
 
     # NOTE:ED - add routines here to set up the mapping between the different nef file loaded
-    dialog.exec_()
+    # dialog.exec_()
 
     import ccpn.util.nef.nef as Nef
 
@@ -3481,9 +3481,8 @@ if __name__ == '__main__':
     options.places = 8
 
     # sys.setrecursionlimit(10000)
-    # result = Nef.compareDataBlocks(_loader._nefDict, localNefDict, options)
-
-    # Nef.printCompareList(result, 'LOADED', 'local', options)
+    result = Nef.compareDataBlocks(_loader._nefDict, localNefDict, options)
+    Nef.printCompareList(result, 'LOADED', 'local', options)
 
     # # NOTE:ED - extract information from the saveframes as sets and dicts
     # frame = _loader.getSaveFrame('ccpn_assignment')
@@ -3567,8 +3566,12 @@ if __name__ == '__main__':
         "Boolean1"  : True,
         }
 
+    options.identical = False
+    options.ignoreCase = True
+    options.almostEqual = True
+    options.maxRows = 5
+    options.places = 8
     print(Nef._compareObjects(testDict1, testDict2, options))
-
     print('{} {}'.format(testDict1, testDict2))
 
     import re

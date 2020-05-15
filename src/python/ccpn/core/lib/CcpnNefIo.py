@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-05-14 18:52:21 +0100 (Thu, May 14, 2020) $"
+__dateModified__ = "$dateModified: 2020-05-15 17:54:27 +0100 (Fri, May 15, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -3422,18 +3422,24 @@ class CcpnNefReader:
                 if newSubstance is not None:
                     self.error('nef_sequence - Substance {} already exists'.format(newSubstance), loop, (newSubstance,))
 
-                    # add the row to all errors, and add to specific chain error
-                    for code, sRows in chainData.items():
-                        if row in sRows:
-                            for thisRow in sRows:
-                                _rowErrors.add(loop.data.index(thisRow))
-                            # add to errors for this chain
-                            parentFrame._rowErrors['_'.join([loop.name, chainCode])] = OrderedSet([loop.data.index(tRow) for tRow in sRows])
+                    # # add the row to all errors, and add to specific chain error
+                    # for code, sRows in chainData.items():
+                    #     if row in sRows:
+                    #         for thisRow in sRows:
+                    #             _rowErrors.add(loop.data.index(thisRow))
+                    #         # add to errors for this chain
+                    #         parentFrame._rowErrors['_'.join([loop.name, chainCode])] = OrderedSet([loop.data.index(tRow) for tRow in sRows])
 
                 result = project.getChain(chainCode)
                 if result is not None:
                     self.error('nef_sequence - Chain {} already exists'.format(result), loop, (result,))
                     _chainErrors.add(chainCode)
+
+                    # add the row to all errors, and add to specific chain error
+                    for thisRow in rows:
+                        _rowErrors.add(loop.data.index(thisRow))
+                    # add to errors for this chain
+                    parentFrame._rowErrors['_'.join([loop.name, chainCode])] = OrderedSet([loop.data.index(tRow) for tRow in rows])
 
     verifiers['nef_sequence'] = verify_nef_sequence
 
@@ -5737,19 +5743,22 @@ class CcpnNefReader:
             labelling = parameters.pop('labelling')
         else:
             labelling = None
-        previous = [x for x in project.substances if x.name == name]
-        sequence = saveFrame.get('sequence_string')
-        if sequence and not previous:
-            pass
 
-        else:
-            # find existing substance
-            result = project.getSubstance(name)
-            if result is not None:
-                self.error('ccpn_substance - Substance {} already exists'.format(result), saveFrame, (result,))
-                saveFrame._rowErrors[category] = (name,)
+        # previous = [x for x in project.substances if x.name == name]
+        # sequence = saveFrame.get('sequence_string')
+        # if sequence and not previous:
+        #     pass
+        #
+        # else:
 
-            # shouldn't need to verify loopNames
+        # find existing substance
+        substanceId = Pid.IDSEP.join(('' if x is None else str(x)) for x in (name, labelling))
+        result = project.getSubstance(substanceId)
+        if result is not None:
+            self.error('ccpn_substance - Substance {} already exists'.format(result), saveFrame, (result,))
+            saveFrame._rowErrors[category] = (substanceId,)
+
+        # shouldn't need to verify loopNames
 
     verifiers['ccpn_substance'] = verify_ccpn_substance
 
@@ -5760,7 +5769,8 @@ class CcpnNefReader:
         mapping = nef2CcpnMap[category]
         parameters, loopNames = self._parametersFromSaveFrame(saveFrame, mapping)
 
-        result = {category: (parameters['name'],)}
+        substanceId = Pid.IDSEP.join(('' if x is None else str(x)) for x in (parameters['name'], parameters.get('labelling')))
+        result = {category: (substanceId,)}
 
         self._contentLoops(project, saveFrame)
         self.updateContent(saveFrame, result)

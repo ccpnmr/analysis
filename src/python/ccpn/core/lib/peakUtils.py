@@ -1019,11 +1019,9 @@ def snap1DPeaksToExtrema(peaks, maximumLimit=1):
     with undoBlockWithoutSideBar():
         with notificationEchoBlocking():
             if len(peaks) > 0:
-                peaks[0].project.blankNotification()
                 for peak in peaks:  # peaks can be from diff peakLists
                     if peak is not None:
                         _snap1DPeakToClosestExtremum(peak, maximumLimit=maximumLimit)
-                peaks[0].project.unblankNotification()
 
 
 

@@ -170,6 +170,28 @@ class SignalBlocking():
                 widget.setParent(None)
                 del widget
 
+    def _setMinimumWidgetSize(self, widget):
+        """Set the minimum widget size of content widgets
+        """
+
+        def _setWidgetSize(layout):
+            if layout is not None:
+                for count in range(layout.count()):
+                    item = layout.itemAt(count)
+                    widget = item.widget()
+                    if widget is not None:
+                        hint = widget.sizeHint()
+                        if hint.isValid():
+                            widget.setMinimumSize(hint)
+                            # widget.setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.Minimum)
+
+        if widget and hasattr(widget, 'getLayout'):
+            _setWidgetSize(widget.getLayout())
+            hint = widget.sizeHint()
+            if hint.isValid():
+                widget.setMinimumSize(hint)
+                # widget.setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.Minimum)
+
 
 class Base(DropBase, SignalBlocking):
 

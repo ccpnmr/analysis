@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-05-15 19:12:44 +0100 (Fri, May 15, 2020) $"
+__dateModified__ = "$dateModified: 2020-05-18 18:56:31 +0100 (Mon, May 18, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -2642,6 +2642,7 @@ class CcpnNefReader:
     importers = {}
     verifiers = {}
     contents = {}
+    renames = {}
 
     def __init__(self, application: str, specificationFile: str = None, mode: str = 'standard',
                  testing: bool = False):
@@ -3699,6 +3700,83 @@ class CcpnNefReader:
         self.updateContent(saveFrame, result)
 
     contents['nef_chemical_shift_list'] = content_nef_chemical_shift_list
+
+    def _ordered_dict_prepend(self, dct, key, value, dict_setitem=dict.__setitem__):
+        """Prepend an item to an OrderedDict
+        """
+        # NOTE:ED - this may be needed if the ordering of datablock is important
+        #           may be okay as use _getSaveFramesInOrder...
+        root = dct._OrderedDict__root
+        first = root[1]
+
+        if key in dct:
+            link = dct._OrderedDict__map[key]
+            link_prev, link_next, _ = link
+            link_prev[1] = link_next
+            link_next[0] = link_prev
+            link[0] = root
+            link[1] = first
+            root[1] = first[0] = link
+        else:
+            root[1] = first[0] = dct._OrderedDict__map[key] = [root, first, key]
+            dict_setitem(dct, key, value)
+
+    def rename_nef_chemical_shift_list(self, project: Project, dataBlock: StarIo.NmrDataBlock, saveFrame: StarIo.NmrSaveFrame,
+                                       itemName=None, newName=None):
+        """Rename a nef_chemical_shift_list saveFrame
+        :param itemName: name of the item to rename - dependent on saveFrame type
+        :param newName: new item name or None to autorename to next available name
+        """
+        category = saveFrame['sf_category']
+        framecode = saveFrame['sf_framecode']
+        print('>>> name {}'.format(newName))
+        if not itemName:
+            return
+
+        if not newName:
+            # iterate through the names to find the first that is not taken yet
+            newSaveFrameName = '_'.join([category, itemName])
+            newName = itemName
+            frames = self._getSaveFramesInOrder(dataBlock)
+            frameList = frames.get(category) or []
+            frameNames = [frame.name for frame in frameList]
+            while newSaveFrameName in frameNames:
+                newSaveFrameName = commonUtil.incrementName(newSaveFrameName)
+                newName = commonUtil.incrementName(newName)
+
+        if newName is not None:
+            oldName = saveFrame.name
+            # oldName = framecode[len(category) + 1:]            #saveFrame.name
+            newSaveFrameName = '_'.join([category, newName])
+            frames = self._getSaveFramesInOrder(dataBlock)
+            frameList = frames.get(category)
+            if frameList:
+                if newSaveFrameName in [frame.name for frame in frameList]:
+                    raise ValueError("{} name '{}' already exists".format(category, newName))
+                else:
+                    # NOTE:ED - rename here
+                    if saveFrame not in frameList:
+                        raise RuntimeError('saveFrame {} no in list'.format(saveFrame.name))
+
+                    saveFrame.name = newSaveFrameName
+
+                    # NOTE:ED - now do saveFrame specific search and replace in other saveFrames
+
+                    # remove the old saveFrame in the dataBlock and replace with the new
+                    saveFrame['sf_framecode'] = newSaveFrameName
+                    del dataBlock[oldName]
+                    dataBlock[newSaveFrameName] = saveFrame
+
+                    return newName
+
+    renames['nef_chemical_shift_list'] = rename_nef_chemical_shift_list
+    renames['nef_distance_restraint_list'] = rename_nef_chemical_shift_list
+    renames['nef_dihedral_restraint_list'] = rename_nef_chemical_shift_list
+    renames['nef_rdc_restraint_list'] = rename_nef_chemical_shift_list
+    renames['ccpn_restraint_list'] = rename_nef_chemical_shift_list
+    renames['ccpn_sample'] = rename_nef_chemical_shift_list
+    renames['ccpn_complex'] = rename_nef_chemical_shift_list
+    renames['ccpn_spectrum_group'] = rename_nef_chemical_shift_list
 
     def load_nef_chemical_shift(self, parent: ChemicalShiftList, loop: StarIo.NmrLoop):
         """load nef_chemical_shift loop"""
@@ -5423,9 +5501,10 @@ class CcpnNefReader:
     def verify_ccpn_spectrum_group(self, project: Project, saveFrame: StarIo.NmrSaveFrame):
         # Get ccpn-to-nef mapping for saveframe
         category = saveFrame['sf_category']
+        framecode = saveFrame['sf_framecode']
         mapping = nef2CcpnMap[category]
         parameters, loopNames = self._parametersFromSaveFrame(saveFrame, mapping)
-        name = parameters['name']
+        name = framecode[len(category) + 1:]        #parameters['name']
 
         # Get main object
         result = project.getSpectrumGroup(name)
@@ -5440,9 +5519,10 @@ class CcpnNefReader:
     def content_ccpn_spectrum_group(self, project: Project, saveFrame: StarIo.NmrSaveFrame):
         """Get the contents of ccpn_spectrum_group saveFrame"""
         category = saveFrame['sf_category']
+        framecode = saveFrame['sf_framecode']
         mapping = nef2CcpnMap[category]
         parameters, loopNames = self._parametersFromSaveFrame(saveFrame, mapping)
-        name = parameters['name']
+        name = framecode[len(category) + 1:]        #parameters['name']
 
         result = {category: (name,)}
 
@@ -5518,9 +5598,10 @@ class CcpnNefReader:
     def verify_ccpn_complex(self, project: Project, saveFrame: StarIo.NmrSaveFrame):
         # Get ccpn-to-nef mapping for saveframe
         category = saveFrame['sf_category']
+        framecode = saveFrame['sf_framecode']
         mapping = nef2CcpnMap[category]
         parameters, loopNames = self._parametersFromSaveFrame(saveFrame, mapping)
-        name = parameters['name']
+        name = framecode[len(category) + 1:]        #parameters['name']
 
         # Get main object
         result = project.getComplex(name)
@@ -5535,10 +5616,11 @@ class CcpnNefReader:
     def content_ccpn_complex(self, project: Project, saveFrame: StarIo.NmrSaveFrame):
         """Get the contents of ccpn_complex saveFrame"""
         category = saveFrame['sf_category']
+        framecode = saveFrame['sf_framecode']
         mapping = nef2CcpnMap[category]
         parameters, loopNames = self._parametersFromSaveFrame(saveFrame, mapping)
 
-        name = parameters['name']
+        name = framecode[len(category) + 1:]        #parameters['name']
         result = {category: (name,)}
 
         self._contentLoops(project, saveFrame)

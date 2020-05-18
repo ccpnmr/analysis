@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-04-11 13:23:06 +0100 (Sat, April 11, 2020) $"
+__dateModified__ = "$dateModified: 2020-05-18 18:56:31 +0100 (Mon, May 18, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -134,7 +134,7 @@ class MessageDialog(QtWidgets.QMessageBox):
         item = layout.itemAtPosition(0, 2)  # grid position of basic text item
         if item:
             widgetBasic = item.widget()
-            if getApp:
+            if getApp and hasattr(getApp, '_fontSettings'):
                 widgetBasic.setFont(getApp._fontSettings.messageFontBold)
 
             # get the bounding rectangle for each line of basicText
@@ -145,7 +145,7 @@ class MessageDialog(QtWidgets.QMessageBox):
         item = layout.itemAtPosition(1, 2)  # grid position of informative text item
         if item:
             widgetMessage = item.widget()
-            if getApp:
+            if getApp and hasattr(getApp, '_fontSettings'):
                 widgetMessage.setFont(getApp._fontSettings.messageFont)
 
             # get the bounding rectangle for each line of informativeText
@@ -422,7 +422,7 @@ class progressPopup(CcpnDialog):
         from ccpn.framework.Application import getApplication
 
         getApp = getApplication()
-        if getApp:
+        if getApp and hasattr(getApp, '_fontSettings'):
             self.label.setFont(getApp._fontSettings.messageFont)
 
         # self.layout().addWidget(self.progressbar)

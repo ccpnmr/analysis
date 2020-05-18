@@ -11,7 +11,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-05-12 09:52:30 +0100 (Tue, May 12, 2020) $"
+__dateModified__ = "$dateModified: 2020-05-18 18:56:31 +0100 (Mon, May 18, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -433,6 +433,20 @@ class ImportTreeCheckBoxes(ProjectTreeCheckBoxes):
     def content_nef_covalent_links(self, project: Project, loop: StarIo.NmrLoop, parentFrame: StarIo.NmrSaveFrame) -> OrderedSet:
         pass
 
+    def _contentParent(self, project: Project, saveFrame: StarIo.NmrSaveFrame, saveFrameTag):
+        try:
+            category = saveFrameTag  #saveFrame['sf_category']
+        except Exception as es:
+            pass
+
+        if hasattr(saveFrame, '_content') and category in saveFrame._content:
+            thisList = saveFrame._content[category]
+            treeItem, _ = self.nefToTreeViewMapping[category]
+            found = self.findItems(treeItem, QtCore.Qt.MatchExactly | QtCore.Qt.MatchRecursive)
+            if found:
+                if len(found) == 1:
+                    return found[0]
+
     def content_list(self, project: Project, saveFrame: StarIo.NmrSaveFrame, saveFrameTag):
         try:
             category = saveFrameTag  #saveFrame['sf_category']
@@ -582,13 +596,14 @@ class ImportTreeCheckBoxes(ProjectTreeCheckBoxes):
     def fillTreeView(self, nefDict):
         _traverse(self.project, nefDict, traverseFunc=self._fillFunc)
 
-    def findSection(self, value):
+    def findSection(self, value, _parent=None):
         """Find the required section in the tree
         """
         found = self.findItems(value, QtCore.Qt.MatchExactly | QtCore.Qt.MatchRecursive)
-        if found:
-            if len(found) == 1:
-                return found[0]
+        if _parent:
+            found = [item for item in found if item.parent() == _parent]
+        if found and len(found) == 1:
+            return found[0]
 
 
 class PrintTreeCheckBoxes(ProjectTreeCheckBoxes):

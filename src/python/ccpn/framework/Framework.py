@@ -3395,16 +3395,16 @@ if __name__ == '__main__':
             # need datablock selector here, with subset selection dependent on datablock type
 
             _loader._importNef(project, _loader._nefDict, selection=None)
-            warnings, errors = _loader._verifyNef(project, _loader2._nefDict, selection=None)
-            if not (warnings or errors):
-                _loader._importNef(project, _loader2._nefDict, selection=None)
-            else:
-                # for msg in warnings or ('','',''):
-                #     print('  >>', msg)
-                for msg in errors or ('', '', ''):
-                    print(msg[0])
-
-            result = _loader._contentNef(project, _loader2._nefDict, selection=None)
+            # warnings, errors = _loader._verifyNef(project, _loader2._nefDict, selection=None)
+            # if not (warnings or errors):
+            #     _loader._importNef(project, _loader2._nefDict, selection=None)
+            # else:
+            #     # for msg in warnings or ('','',''):
+            #     #     print('  >>', msg)
+            #     for msg in errors or ('', '', ''):
+            #         print(msg[0])
+            #
+            # result = _loader._contentNef(project, _loader2._nefDict, selection=None)
 
     nefReader.testPrint(project, _loader._nefDict, selection=None)
     nefReader.testErrors(project, _loader._nefDict, selection=None)

@@ -54,7 +54,6 @@ VERTICAL = 'vertical'
 ORIENTATIONLIST = (HORIZONTAL, VERTICAL)
 DEFAULTSPACING = 3
 # DEFAULTMARGINS = (24, 8, 24, 18)
-DEFAULTMARGINS = (14, 14, 14, 14)
 GETCHANGESTATE = '_getChangeState'
 
 
@@ -86,6 +85,7 @@ class CcpnDialogMainWidget(QtWidgets.QDialog, Base):
     ENABLEICONS = False
 
     EDITMODE = True
+    DEFAULTMARGINS = (14, 14, 14, 14)
 
     def __init__(self, parent=None, windowTitle='', setLayout=False,
                  orientation=HORIZONTAL, size=None, **kwds):
@@ -97,7 +97,7 @@ class CcpnDialogMainWidget(QtWidgets.QDialog, Base):
             raise TypeError('orientation not in {}'.format(ORIENTATIONLIST))
 
         self.setWindowTitle(windowTitle)
-        self.setContentsMargins(*DEFAULTMARGINS)
+        self.setContentsMargins(*self.DEFAULTMARGINS)
         self.getLayout().setSpacing(0)
 
         self._orientation = orientation

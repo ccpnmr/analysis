@@ -166,7 +166,7 @@ from numpy import NaN, Inf, arange
 from numba import jit
 
 
-# @jit(nopython=True, nogil=True)
+@jit(nopython=True, nogil=True)
 def simple1DPeakPicker(y, x, delta, negDelta=None, negative=False):
     """
     from https://gist.github.com/endolith/250860#file-readme-md which was translated from

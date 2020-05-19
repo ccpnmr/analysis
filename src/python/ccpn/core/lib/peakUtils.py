@@ -166,7 +166,7 @@ from numpy import NaN, Inf, arange
 from numba import jit
 
 
-# @jit(nopython=True, nogil=True)
+@jit(nopython=True, nogil=True)
 def simple1DPeakPicker(y, x, delta, negDelta=None, negative=False):
     """
     from https://gist.github.com/endolith/250860#file-readme-md which was translated from
@@ -1019,11 +1019,9 @@ def snap1DPeaksToExtrema(peaks, maximumLimit=1):
     with undoBlockWithoutSideBar():
         with notificationEchoBlocking():
             if len(peaks) > 0:
-                peaks[0].project.blankNotification()
                 for peak in peaks:  # peaks can be from diff peakLists
                     if peak is not None:
                         _snap1DPeakToClosestExtremum(peak, maximumLimit=maximumLimit)
-                peaks[0].project.unblankNotification()
 
 
 

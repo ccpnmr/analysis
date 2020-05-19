@@ -161,4 +161,4 @@ class PeakPicker1DPipe(SpectraPipe):
         getLogger().info(self._finishedInfo)
         return spectra
 
-PeakPicker1DPipe.register() # Registers the pipe in the pipeline
+# PeakPicker1DPipe.register() # Registers the pipe in the pipeline

@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-05-19 18:11:14 +0100 (Tue, May 19, 2020) $"
+__dateModified__ = "$dateModified: 2020-05-19 18:30:21 +0100 (Tue, May 19, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -3785,7 +3785,7 @@ class CcpnNefReader:
         """
         category = saveFrame['sf_category']
         framecode = saveFrame['sf_framecode']
-        if not itemName:
+        if not itemName or newName == itemName:
             return
 
         _frameID = _saveFrameNameFromCategory(saveFrame)
@@ -3820,6 +3820,44 @@ class CcpnNefReader:
 
             return newName
 
+    def rename_nef_sequence(self, project: Project, dataBlock: StarIo.NmrDataBlock, saveFrame: StarIo.NmrSaveFrame,
+                         itemName=None, newName=None):
+        """Rename a chain in a nef_sequence
+        :param itemName: name of the item to rename - dependent on saveFrame type
+        :param newName: new item name or None to autorename to next available name
+        """
+        category = saveFrame['sf_category']
+        framecode = saveFrame['sf_framecode']
+        if not itemName or newName == itemName:
+            return
+
+        # _frameID = _saveFrameNameFromCategory(saveFrame)
+        # _, frameName, subName, prefix, postfix, preSerial, postSerial = _frameID
+        # frames = self._getSaveFramesInOrder(dataBlock)
+        # frameList = frames.get(category) or []
+        # frameNames = [_saveFrameNameFromCategory(frame).framecode for frame in frameList]
+
+        _content = getattr(saveFrame, '_content', [])
+
+        if not _content:
+            raise RuntimeError('_content not defined')
+
+        # itemName is the chain name at this point
+        currentChains = _content.get('nef_sequence_chain_code') or []
+
+        if newName:
+            # check not in the chain list
+            if newName in currentChains:
+                raise ValueError("Chain {} already exists".format(newName))
+        else:
+            # iterate through the names to find the first that is not taken yet
+            newName = itemName
+            while newName in currentChains:
+                newName = commonUtil.incrementName(newName)
+
+        print('>> HERE')
+
+
     renames['nef_chemical_shift_list'] = rename_saveframe
     renames['nef_distance_restraint_list'] = rename_saveframe
     renames['nef_dihedral_restraint_list'] = rename_saveframe
@@ -3828,6 +3866,7 @@ class CcpnNefReader:
     renames['ccpn_sample'] = rename_saveframe
     renames['ccpn_complex'] = rename_saveframe
     renames['ccpn_spectrum_group'] = rename_saveframe
+    renames['nef_molecular_system'] = rename_nef_sequence
 
     def load_nef_chemical_shift(self, parent: ChemicalShiftList, loop: StarIo.NmrLoop):
         """load nef_chemical_shift loop"""

@@ -1682,6 +1682,14 @@ GuiTable::item::selected {
                         selectionModel.select(self.model().index(row, 0),
                                               selectionModel.Select | selectionModel.Rows)
 
+    def selectIndex(self, idx, doCallback=True):
+        model = self.model()
+        rowIndex = model.index(idx, 0)
+        self.setCurrentIndex(rowIndex)
+        if doCallback:
+            self._selectionTableCallback(None)
+
+
     def _highLightObjs(self, selection, scrollToSelection=True):
 
         # skip if the table is empty

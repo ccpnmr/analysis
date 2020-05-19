@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-05-19 18:30:21 +0100 (Tue, May 19, 2020) $"
+__dateModified__ = "$dateModified: 2020-05-19 20:40:56 +0100 (Tue, May 19, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -179,9 +179,9 @@ def _traverse(project: Project, dataBlock: StarIo.NmrDataBlock,
             saveFrameName = saveFrame.name
 
             if selection and saveFrameName not in selection:
-                getLogger().debug('>>>   -- skip saveframe {}'.format(saveFrameName))
+                getLogger().debug2('>>>   -- skip saveframe {}'.format(saveFrameName))
                 continue
-            getLogger().debug('>>> _traverse saveframe {}'.format(saveFrameName))
+            getLogger().debug2('>>> _traverse saveframe {}'.format(saveFrameName))
 
             result[saveFrameName] = traverseFunc(project, saveFrame)
 
@@ -2788,9 +2788,9 @@ class CcpnNefReader:
                 saveFrame._rowErrors = {}
 
                 if selection and saveFrameName not in selection:
-                    getLogger().debug('>>>   -- skip saveframe {}'.format(saveFrameName))
+                    getLogger().debug2('>>>   -- skip saveframe {}'.format(saveFrameName))
                     continue
-                getLogger().debug('>>> verifying saveframe {}'.format(saveFrameName))
+                getLogger().debug2('>>> verifying saveframe {}'.format(saveFrameName))
 
                 verifier = self.verifiers.get(sf_category)
                 if verifier is None:
@@ -2856,7 +2856,7 @@ class CcpnNefReader:
 
     def _searchReplaceLoop(self, project, loop: StarIo.NmrLoop,
                            searchFrameCode=None, replaceFrameCode=None, replace=False,
-                           categorySearchList=None, rowSearchList=None):
+                           rowSearchList=None):
         """Search the loop for occurrences of searchFrameCode and replace if required
         """
         if not loop:
@@ -2874,7 +2874,7 @@ class CcpnNefReader:
 
     def _searchReplaceFrame(self, project, saveFrame: StarIo.NmrSaveFrame,
                             searchFrameCode=None, replaceFrameCode=None, replace=False,
-                            categorySearchList=None, rowSearchList=None):
+                            categorySearchList=None, loopSearchList=None, rowSearchList=None):
         """Search the saveFrame for occurrences of searchFrameCode and replace if required
         """
         if not saveFrame:
@@ -2896,23 +2896,23 @@ class CcpnNefReader:
         for tag, ccpnTag in mapping.items():
             if ccpnTag == _isALoop:
                 loop = saveFrame.get(tag)
-                if loop:
+                if loop and not (loopSearchList and loop.name not in loopSearchList):
                     self._searchReplaceLoop(project, loop, searchFrameCode=searchFrameCode,
                                             replaceFrameCode=replaceFrameCode, replace=replace,
-                                            categorySearchList=categorySearchList, rowSearchList=rowSearchList)
+                                            rowSearchList=rowSearchList)
 
     def searchReplace(self, project: Project, dataBlock: StarIo.NmrDataBlock,
                       projectIsEmpty: bool = True,
                       selection: typing.Optional[dict] = None,
                       searchFrameCode=None, replaceFrameCode=None, replace=False,
-                      categorySearchList=None, rowSearchList=None):
+                      categorySearchList=None, loopSearchList=None, rowSearchList=None):
         """Search the saveframes for references to findFrameCode
         """
         if searchFrameCode:
             return self._traverse(project, dataBlock, True, selection=None,
                                   traverseFunc=partial(self._searchReplaceFrame,
                                                        searchFrameCode=searchFrameCode, replaceFrameCode=replaceFrameCode, replace=replace,
-                                                       categorySearchList=categorySearchList, rowSearchList=rowSearchList))
+                                                       categorySearchList=categorySearchList, loopSearchList=loopSearchList, rowSearchList=rowSearchList))
 
     def _printFunc(self, project, saveFrame):
         """Print the contents of a saveFrame/dataBlock - results generated with _contentNef
@@ -2940,6 +2940,22 @@ class CcpnNefReader:
         """Print the contents of the nef dict - results generated with _contentNef
         """
         return self._traverse(project, dataBlock, True, selection=None, traverseFunc=self._printFunc)
+
+    def _clearSaveFrame(self, project, saveFrame):
+        """Clear the contents of a saveFrame/dataBlock - results generated with _contentNef
+        """
+        if hasattr(saveFrame, '_content'):
+            del saveFrame._content
+        if hasattr(saveFrame, '_rowErrors'):
+            del saveFrame._rowErrors
+
+    def clearSaveFrames(self, project: Project, dataBlock: StarIo.NmrDataBlock,
+                  projectIsEmpty: bool = True,
+                  selection: typing.Optional[dict] = None,
+                  traverseFunc=None):
+        """Print the contents of the nef dict - results generated with _contentNef
+        """
+        return self._traverse(project, dataBlock, True, selection=None, traverseFunc=self._clearSaveFrame)
 
     def _traverse(self, project: Project, dataBlock: StarIo.NmrDataBlock,
                   projectIsEmpty: bool = True,
@@ -2975,9 +2991,9 @@ class CcpnNefReader:
                 saveFrameName = self.saveFrameName = saveFrame.name
 
                 if selection and saveFrameName not in selection:
-                    getLogger().debug('>>>   -- skip saveframe {}'.format(saveFrameName))
+                    getLogger().debug2('>>>   -- skip saveframe {}'.format(saveFrameName))
                     continue
-                getLogger().debug('>>> _traverse saveframe {}'.format(saveFrameName))
+                getLogger().debug2('>>> _traverse saveframe {}'.format(saveFrameName))
 
                 result[self.saveFrameName] = traverseFunc(project, saveFrame)
 
@@ -3045,9 +3061,9 @@ class CcpnNefReader:
                 saveFrameName = self.saveFrameName = saveFrame.name
 
                 if selection and saveFrameName not in selection:
-                    getLogger().debug('>>>  -- skip saveframe {}'.format(saveFrameName))
+                    getLogger().debug2('>>>  -- skip saveframe {}'.format(saveFrameName))
                     continue
-                getLogger().debug('>>> loading saveframe {}'.format(saveFrameName))
+                getLogger().debug2('>>> loading saveframe {}'.format(saveFrameName))
 
                 importer = self.importers.get(sf_category)
                 if importer is None:
@@ -3820,8 +3836,8 @@ class CcpnNefReader:
 
             return newName
 
-    def rename_nef_sequence(self, project: Project, dataBlock: StarIo.NmrDataBlock, saveFrame: StarIo.NmrSaveFrame,
-                         itemName=None, newName=None):
+    def rename_nef_molecular_system(self, project: Project, dataBlock: StarIo.NmrDataBlock, saveFrame: StarIo.NmrSaveFrame,
+                                    itemName=None, newName=None):
         """Rename a chain in a nef_sequence
         :param itemName: name of the item to rename - dependent on saveFrame type
         :param newName: new item name or None to autorename to next available name
@@ -3830,12 +3846,6 @@ class CcpnNefReader:
         framecode = saveFrame['sf_framecode']
         if not itemName or newName == itemName:
             return
-
-        # _frameID = _saveFrameNameFromCategory(saveFrame)
-        # _, frameName, subName, prefix, postfix, preSerial, postSerial = _frameID
-        # frames = self._getSaveFramesInOrder(dataBlock)
-        # frameList = frames.get(category) or []
-        # frameNames = [_saveFrameNameFromCategory(frame).framecode for frame in frameList]
 
         _content = getattr(saveFrame, '_content', [])
 
@@ -3855,8 +3865,57 @@ class CcpnNefReader:
             while newName in currentChains:
                 newName = commonUtil.incrementName(newName)
 
-        print('>> HERE')
+        # NOTE:ED - check which are chains and which are nmr_chains
+        replaceList = ('chain_code', 'complex_chain_code',
+                       'chain_code_1', 'chain_code_2', 'chain_code_3', 'chain_code_4', 'chain_code_5',
+                       'chain_code_6', 'chain_code_7', 'chain_code_8', 'chain_code_9', 'chain_code_10',
+                       'chain_code_11', 'chain_code_12', 'chain_code_13', 'chain_code_14', 'chain_code_15',
+                       'ccpn_tensor_chain_code', 'tensor_chain_code')
+        self.searchReplace(project, dataBlock, True, None, itemName, newName, replace=True,
+                           categorySearchList=None, rowSearchList=replaceList)
 
+        return newName
+
+    def rename_ccpn_assignment(self, project: Project, dataBlock: StarIo.NmrDataBlock, saveFrame: StarIo.NmrSaveFrame,
+                               itemName=None, newName=None):
+        """Rename an nmr_chain in a ccpn_assignment
+        :param itemName: name of the item to rename - dependent on saveFrame type
+        :param newName: new item name or None to autorename to next available name
+        """
+        category = saveFrame['sf_category']
+        framecode = saveFrame['sf_framecode']
+        if not itemName or newName == itemName:
+            return
+
+        _content = getattr(saveFrame, '_content', [])
+
+        if not _content:
+            raise RuntimeError('_content not defined')
+
+        # itemName is the chain name at this point
+        currentChains = _content.get('nmr_chain') or []
+
+        if newName:
+            # check not in the chain list
+            if newName in currentChains:
+                raise ValueError("Chain {} already exists".format(newName))
+        else:
+            # iterate through the names to find the first that is not taken yet
+            newName = itemName
+            while newName in currentChains:
+                newName = commonUtil.incrementName(newName)
+
+        # NOTE:ED - check which are chains and which are nmr_chains
+        loopList = ('nmr_chain', 'nmr_residue', 'nmr_atom')
+        replaceList = ('chain_code', 'complex_chain_code',
+                       'chain_code_1', 'chain_code_2', 'chain_code_3', 'chain_code_4', 'chain_code_5',
+                       'chain_code_6', 'chain_code_7', 'chain_code_8', 'chain_code_9', 'chain_code_10',
+                       'chain_code_11', 'chain_code_12', 'chain_code_13', 'chain_code_14', 'chain_code_15',
+                       'ccpn_tensor_chain_code', 'tensor_chain_code', 'short_name')
+        self.searchReplace(project, dataBlock, True, None, itemName, newName, replace=True,
+                           loopSearchList=loopList, rowSearchList=replaceList)
+
+        return newName
 
     renames['nef_chemical_shift_list'] = rename_saveframe
     renames['nef_distance_restraint_list'] = rename_saveframe
@@ -3866,7 +3925,8 @@ class CcpnNefReader:
     renames['ccpn_sample'] = rename_saveframe
     renames['ccpn_complex'] = rename_saveframe
     renames['ccpn_spectrum_group'] = rename_saveframe
-    renames['nef_molecular_system'] = rename_nef_sequence
+    renames['nef_molecular_system'] = rename_nef_molecular_system
+    renames['ccpn_assignment'] = rename_ccpn_assignment
 
     def load_nef_chemical_shift(self, parent: ChemicalShiftList, loop: StarIo.NmrLoop):
         """load nef_chemical_shift loop"""

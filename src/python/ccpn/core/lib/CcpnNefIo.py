@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-05-18 18:56:31 +0100 (Mon, May 18, 2020) $"
+__dateModified__ = "$dateModified: 2020-05-19 12:15:18 +0100 (Tue, May 19, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -3264,7 +3264,8 @@ class CcpnNefReader:
         map2 = dict(item for item in mapping.items() if item[1] and '.' not in item[1])
         for row in saveFrame[nefSequence].data:
             results[chainCode].add(row['chain_code'])
-            results[compoundName].add(row[compoundName])
+            if row.get(compoundName):
+                results[compoundName].add(row.get(compoundName))
 
         self._contentLoops(project, saveFrame)
         self.updateContent(saveFrame, results)

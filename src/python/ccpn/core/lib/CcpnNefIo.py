@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-05-19 12:15:18 +0100 (Tue, May 19, 2020) $"
+__dateModified__ = "$dateModified: 2020-05-19 18:11:14 +0100 (Tue, May 19, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -31,9 +31,11 @@ import time
 import typing
 import itertools
 import errno
+import re
+from contextlib import contextmanager
 from functools import partial
 from datetime import datetime
-from collections import OrderedDict as OD
+from collections import OrderedDict as OD, namedtuple
 # from collections import Counter
 from operator import attrgetter, itemgetter
 from typing import List, Union, Optional, Sequence, Tuple
@@ -1135,6 +1137,41 @@ def convertToCcpnDataBlock(project: Project, skipPrefixes: typing.Sequence = (),
                                     val.removeColumn(looptag, removeData=True)
 
     return dataBlock
+
+
+def _saveFrameNameFromCategory(saveFrame: StarIo.NmrSaveFrame):
+    """Parse the saveframe name to extract pre- and post- numbering
+    necessary for restraint and spectrum saveframe names
+    """
+    _nameFromCategory = namedtuple('_nameFromCategory', ('framecode', 'frameName', 'subname', 'prefix', 'postfix', 'precode', 'postcode'))
+
+    def _tryNumber(value):
+        code = None
+        if value:
+            ll = value.rsplit('`', 2)
+            if len(ll) == 3:
+                try:
+                    return int(ll[1])
+                except ValueError:
+                    pass
+
+    category = saveFrame['sf_category']
+    framecode = saveFrame['sf_framecode']
+    frameName = framecode[len(category) + 1:]
+
+    # check for any occurrences of `n` in the saveframe name and keep for later reference
+    regex = u'\`\d*`+?'
+    names = re.split(regex, frameName)
+    if 0 <= len(names) > 3:
+        raise TypeError('bad splitting of saveframe name {}'.format(framecode))
+    subName = re.sub(regex, '', frameName)
+    matches = [mm for mm in re.finditer(regex, frameName)]
+    prefix = matches[0].group() if matches and matches[0] and matches[0].span()[0] == 0 else ''
+    preSerial = _tryNumber(prefix)
+    postfix = matches[-1].group() if matches and matches[-1] and matches[-1].span()[1] == len(frameName) else ''
+    postSerial = _tryNumber(postfix)
+
+    return _nameFromCategory(framecode, frameName, subName, prefix, postfix, preSerial, postSerial)
 
 
 class CcpnNefWriter:
@@ -2789,47 +2826,6 @@ class CcpnNefReader:
 
         return self._traverse(project, dataBlock, traverseFunc=self._getContents)
 
-        saveframeOrderedDict = self._getSaveFramesInOrder(dataBlock)
-
-        # Load metadata and molecular system first
-        metaDataFrame = dataBlock['nef_nmr_meta_data']
-        self.saveFrameName = 'nef_nmr_meta_data'
-        self.contents['nef_nmr_meta_data'](self, project, metaDataFrame)
-        del saveframeOrderedDict['nef_nmr_meta_data']
-
-        saveFrame = dataBlock.get('nef_molecular_system')
-        if saveFrame:
-            self.saveFrameName = 'nef_molecular_system'
-            self.contents['nef_molecular_system'](self, project, saveFrame)
-        del saveframeOrderedDict['nef_molecular_system']
-
-        # Load assignments, or preload from shiftlists
-        # to make sure '@' and '#' identifiers match the right serials
-        saveFrame = dataBlock.get('ccpn_assignment')
-        if saveFrame:
-            self.saveFrameName = 'ccpn_assignment'
-            result[self.saveFrameName] = self.content_ccpn_assignment(project, saveFrame)
-            del saveframeOrderedDict['ccpn_assignment']
-        # else:
-        #     self.verify_preloadAssignmentData(dataBlock)
-
-        for sf_category, saveFrames in saveframeOrderedDict.items():
-            for saveFrame in saveFrames:
-                saveFrameName = self.saveFrameName = saveFrame.name
-
-                if selection and saveFrameName not in selection:
-                    getLogger().debug('>>>   -- skip saveframe {}'.format(saveFrameName))
-                    continue
-                getLogger().debug('>>> get contents saveframe {}'.format(saveFrameName))
-
-                content = self.contents.get(sf_category)
-                if content is None:
-                    print("    unknown saveframe category", sf_category, saveFrameName)
-                else:
-                    result[self.saveFrameName] = content(self, project, saveFrame)
-
-        return result
-
     def _getErrors(self, project, saveFrame):
         """Print the errors in a saveFrame/dataBlock - results generated with _verifyNef
         Loops are included in the saveFrame
@@ -2853,11 +2849,70 @@ class CcpnNefReader:
 
     def testErrors(self, project: Project, dataBlock: StarIo.NmrDataBlock,
                    projectIsEmpty: bool = True,
-                   selection: typing.Optional[dict] = None,
-                   traverseFunc=None):
+                   selection: typing.Optional[dict] = None):
         """Print the errors in the nef dict - results generated with _contentNef
         """
         return self._traverse(project, dataBlock, True, selection=None, traverseFunc=self._getErrors)
+
+    def _searchReplaceLoop(self, project, loop: StarIo.NmrLoop,
+                           searchFrameCode=None, replaceFrameCode=None, replace=False,
+                           categorySearchList=None, rowSearchList=None):
+        """Search the loop for occurrences of searchFrameCode and replace if required
+        """
+        if not loop:
+            return
+
+        for row in loop.data:
+            for rowNum, (k, val) in enumerate(row.items()):
+                if rowSearchList and k not in rowSearchList:
+                    continue
+
+                if val == searchFrameCode:
+                    getLogger().debug('found {} {} --> {}'.format(rowNum, k, val))
+                    if replace:
+                        row[k] = replaceFrameCode
+
+    def _searchReplaceFrame(self, project, saveFrame: StarIo.NmrSaveFrame,
+                            searchFrameCode=None, replaceFrameCode=None, replace=False,
+                            categorySearchList=None, rowSearchList=None):
+        """Search the saveFrame for occurrences of searchFrameCode and replace if required
+        """
+        if not saveFrame:
+            return
+
+        category = saveFrame['sf_category']
+        framecode = saveFrame['sf_framecode']
+        if categorySearchList and framecode not in categorySearchList:
+            return
+
+        for k, val in saveFrame.items():
+            if val == searchFrameCode:
+                getLogger().debug('found {} {} --> {}'.format(saveFrame, k, val))
+                if replace:
+                    saveFrame[k] = replaceFrameCode
+
+        # search loops as well
+        mapping = nef2CcpnMap[saveFrame.category]
+        for tag, ccpnTag in mapping.items():
+            if ccpnTag == _isALoop:
+                loop = saveFrame.get(tag)
+                if loop:
+                    self._searchReplaceLoop(project, loop, searchFrameCode=searchFrameCode,
+                                            replaceFrameCode=replaceFrameCode, replace=replace,
+                                            categorySearchList=categorySearchList, rowSearchList=rowSearchList)
+
+    def searchReplace(self, project: Project, dataBlock: StarIo.NmrDataBlock,
+                      projectIsEmpty: bool = True,
+                      selection: typing.Optional[dict] = None,
+                      searchFrameCode=None, replaceFrameCode=None, replace=False,
+                      categorySearchList=None, rowSearchList=None):
+        """Search the saveframes for references to findFrameCode
+        """
+        if searchFrameCode:
+            return self._traverse(project, dataBlock, True, selection=None,
+                                  traverseFunc=partial(self._searchReplaceFrame,
+                                                       searchFrameCode=searchFrameCode, replaceFrameCode=replaceFrameCode, replace=replace,
+                                                       categorySearchList=categorySearchList, rowSearchList=rowSearchList))
 
     def _printFunc(self, project, saveFrame):
         """Print the contents of a saveFrame/dataBlock - results generated with _contentNef
@@ -3722,62 +3777,57 @@ class CcpnNefReader:
             root[1] = first[0] = dct._OrderedDict__map[key] = [root, first, key]
             dict_setitem(dct, key, value)
 
-    def rename_nef_chemical_shift_list(self, project: Project, dataBlock: StarIo.NmrDataBlock, saveFrame: StarIo.NmrSaveFrame,
-                                       itemName=None, newName=None):
-        """Rename a nef_chemical_shift_list saveFrame
+    def rename_saveframe(self, project: Project, dataBlock: StarIo.NmrDataBlock, saveFrame: StarIo.NmrSaveFrame,
+                         itemName=None, newName=None):
+        """Rename a saveFrame
         :param itemName: name of the item to rename - dependent on saveFrame type
         :param newName: new item name or None to autorename to next available name
         """
         category = saveFrame['sf_category']
         framecode = saveFrame['sf_framecode']
-        print('>>> name {}'.format(newName))
         if not itemName:
             return
 
-        if not newName:
+        _frameID = _saveFrameNameFromCategory(saveFrame)
+        _, frameName, subName, prefix, postfix, preSerial, postSerial = _frameID
+        frames = self._getSaveFramesInOrder(dataBlock)
+        frameList = frames.get(category) or []
+        frameNames = [_saveFrameNameFromCategory(frame).framecode for frame in frameList]
+
+        if newName:
+            newSaveFrameName = '_'.join([category, prefix + newName + postfix])
+            if newSaveFrameName in frameNames:
+                raise ValueError("{} name '{}' already exists".format(category, newName))
+        else:
             # iterate through the names to find the first that is not taken yet
-            newSaveFrameName = '_'.join([category, itemName])
+            newSaveFrameName = '_'.join([category, prefix + itemName + postfix])
             newName = itemName
-            frames = self._getSaveFramesInOrder(dataBlock)
-            frameList = frames.get(category) or []
-            frameNames = [frame.name for frame in frameList]
             while newSaveFrameName in frameNames:
                 newSaveFrameName = commonUtil.incrementName(newSaveFrameName)
                 newName = commonUtil.incrementName(newName)
 
         if newName is not None:
-            oldName = saveFrame.name
-            # oldName = framecode[len(category) + 1:]            #saveFrame.name
-            newSaveFrameName = '_'.join([category, newName])
-            frames = self._getSaveFramesInOrder(dataBlock)
-            frameList = frames.get(category)
-            if frameList:
-                if newSaveFrameName in [frame.name for frame in frameList]:
-                    raise ValueError("{} name '{}' already exists".format(category, newName))
-                else:
-                    # NOTE:ED - rename here
-                    if saveFrame not in frameList:
-                        raise RuntimeError('saveFrame {} no in list'.format(saveFrame.name))
+            oldName = framecode
+            saveFrame.name = newSaveFrameName
 
-                    saveFrame.name = newSaveFrameName
+            # replace all occurrences of the saveframe name in the datablock
+            self.searchReplace(project, dataBlock, True, None, oldName, newSaveFrameName, replace=True)
 
-                    # NOTE:ED - now do saveFrame specific search and replace in other saveFrames
+            # remove the old saveFrame in the dataBlock and replace with the new
+            # NOTE:ED - may need to check dict ordering here
+            del dataBlock[oldName]
+            dataBlock[newSaveFrameName] = saveFrame
 
-                    # remove the old saveFrame in the dataBlock and replace with the new
-                    saveFrame['sf_framecode'] = newSaveFrameName
-                    del dataBlock[oldName]
-                    dataBlock[newSaveFrameName] = saveFrame
+            return newName
 
-                    return newName
-
-    renames['nef_chemical_shift_list'] = rename_nef_chemical_shift_list
-    renames['nef_distance_restraint_list'] = rename_nef_chemical_shift_list
-    renames['nef_dihedral_restraint_list'] = rename_nef_chemical_shift_list
-    renames['nef_rdc_restraint_list'] = rename_nef_chemical_shift_list
-    renames['ccpn_restraint_list'] = rename_nef_chemical_shift_list
-    renames['ccpn_sample'] = rename_nef_chemical_shift_list
-    renames['ccpn_complex'] = rename_nef_chemical_shift_list
-    renames['ccpn_spectrum_group'] = rename_nef_chemical_shift_list
+    renames['nef_chemical_shift_list'] = rename_saveframe
+    renames['nef_distance_restraint_list'] = rename_saveframe
+    renames['nef_dihedral_restraint_list'] = rename_saveframe
+    renames['nef_rdc_restraint_list'] = rename_saveframe
+    renames['ccpn_restraint_list'] = rename_saveframe
+    renames['ccpn_sample'] = rename_saveframe
+    renames['ccpn_complex'] = rename_saveframe
+    renames['ccpn_spectrum_group'] = rename_saveframe
 
     def load_nef_chemical_shift(self, parent: ChemicalShiftList, loop: StarIo.NmrLoop):
         """load nef_chemical_shift loop"""
@@ -4396,9 +4446,9 @@ class CcpnNefReader:
             #     self.error('nef_nmr_spectrum - PeakList {} already exists'.format(peakList), saveFrame, (peakList,))
             #     _rowPeakErrors.add(peakList.serial)
 
-                # loop = saveFrame.get('nef_peak')
-                # if loop:
-                #     self.verify_nef_peak(peakList, loop, saveFrame)
+            # loop = saveFrame.get('nef_peak')
+            # if loop:
+            #     self.verify_nef_peak(peakList, loop, saveFrame)
 
             self._verifyLoops(spectrum, saveFrame, dimensionCount=saveFrame['num_dimensions'],
                               excludeList=('nef_spectrum_dimension', 'ccpn_spectrum_dimension',  #'nef_peak',
@@ -4436,8 +4486,8 @@ class CcpnNefReader:
                     else:
                         spectrumName = ll[0]
 
-        result = {category      : OrderedSet([spectrumName]),}
-                  # 'nef_peak_list': OrderedSet([peakListParameters['serial']])}
+        result = {category: OrderedSet([spectrumName]), }
+        # 'nef_peak_list': OrderedSet([peakListParameters['serial']])}
 
         # NOTE:ED - this is a hack to get the peakLists into a list
         if saveFrame.get('nef_peak'):
@@ -5505,7 +5555,7 @@ class CcpnNefReader:
         framecode = saveFrame['sf_framecode']
         mapping = nef2CcpnMap[category]
         parameters, loopNames = self._parametersFromSaveFrame(saveFrame, mapping)
-        name = framecode[len(category) + 1:]        #parameters['name']
+        name = framecode[len(category) + 1:]  #parameters['name']
 
         # Get main object
         result = project.getSpectrumGroup(name)
@@ -5523,7 +5573,7 @@ class CcpnNefReader:
         framecode = saveFrame['sf_framecode']
         mapping = nef2CcpnMap[category]
         parameters, loopNames = self._parametersFromSaveFrame(saveFrame, mapping)
-        name = framecode[len(category) + 1:]        #parameters['name']
+        name = framecode[len(category) + 1:]  #parameters['name']
 
         result = {category: (name,)}
 
@@ -5602,7 +5652,7 @@ class CcpnNefReader:
         framecode = saveFrame['sf_framecode']
         mapping = nef2CcpnMap[category]
         parameters, loopNames = self._parametersFromSaveFrame(saveFrame, mapping)
-        name = framecode[len(category) + 1:]        #parameters['name']
+        name = framecode[len(category) + 1:]  #parameters['name']
 
         # Get main object
         result = project.getComplex(name)
@@ -5621,7 +5671,7 @@ class CcpnNefReader:
         mapping = nef2CcpnMap[category]
         parameters, loopNames = self._parametersFromSaveFrame(saveFrame, mapping)
 
-        name = framecode[len(category) + 1:]        #parameters['name']
+        name = framecode[len(category) + 1:]  #parameters['name']
         result = {category: (name,)}
 
         self._contentLoops(project, saveFrame)
@@ -6275,7 +6325,7 @@ class CcpnNefReader:
 
     The mapping gives the map from NEF tags to ccpn tags.
     If the ccpn tag is of the form <ccpnPrefix.tag> it is ignored unless
-    the first part of teh tag matches the passed-in ccpnPrefix
+    the first part of the tag matches the passed-in ccpnPrefix
     (NB the ccpnPrefix may contain '.')."""
 
         # Get attributes that have a simple tag mapping, and make a separate loop list
